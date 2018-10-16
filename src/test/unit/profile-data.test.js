@@ -1012,11 +1012,11 @@ describe('getTimingsForPath for an inverted tree', function() {
 describe('getSamplesSelectedStates', function() {
   const {
     profile,
-    funcNamesDictPerThread: [{ A, B, C, D, E, F, G }],
+    funcNamesDictPerThread: [{ A, B, D, E, F }],
   } = getProfileFromTextSamples(`
      A  A  A  A  A
-     B  B  E  E  E
-     C  D  F  G
+     B  D  B  D  D
+     C  E  F  G
   `);
   const thread = profile.threads[0];
   const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
@@ -1029,56 +1029,59 @@ describe('getSamplesSelectedStates', function() {
     thread.samples,
     stackIndexToCallNodeIndex
   );
-  it('has test data where function indexes that match the call node indexes', function() {
-    // Assert that the function indexes match the call node indexes. This is true only
-    // because of the way the fixture data was constructed, but it is useful to have
-    // the call node indexes match the func indexes.
-    expect(getCallNodeIndexFromPath([A], callNodeTable)).toBe(A);
-    expect(getCallNodeIndexFromPath([A, B], callNodeTable)).toBe(B);
-    expect(getCallNodeIndexFromPath([A, B, C], callNodeTable)).toBe(C);
-    expect(getCallNodeIndexFromPath([A, E], callNodeTable)).toBe(E);
-    expect(getCallNodeIndexFromPath([A, E, F], callNodeTable)).toBe(F);
-    expect(getCallNodeIndexFromPath([A, E, G], callNodeTable)).toBe(G);
-  });
+
+  const A_B = getCallNodeIndexFromPath([A, B], callNodeTable);
+  const A_B_F = getCallNodeIndexFromPath([A, B, F], callNodeTable);
+  const A_D = getCallNodeIndexFromPath([A, D], callNodeTable);
+  const A_D_E = getCallNodeIndexFromPath([A, D, E], callNodeTable);
 
   it('determines the selection status of all the samples', function() {
-    expect(getSamplesSelectedStates(callNodeTable, sampleCallNodes, B)).toEqual(
-      [
-        'SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-      ]
-    );
-    expect(getSamplesSelectedStates(callNodeTable, sampleCallNodes, E)).toEqual(
-      [
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'SELECTED',
-        'SELECTED',
-      ]
-    );
-    expect(getSamplesSelectedStates(callNodeTable, sampleCallNodes, D)).toEqual(
-      [
-        'UNSELECTED_ORDERED_BEFORE_SELECTED',
-        'SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-        'UNSELECTED_ORDERED_AFTER_SELECTED',
-      ]
-    );
+    expect(
+      getSamplesSelectedStates(callNodeTable, sampleCallNodes, A_B)
+    ).toEqual([
+      'SELECTED',
+      'UNSELECTED_ORDERED_AFTER_SELECTED',
+      'SELECTED',
+      'UNSELECTED_ORDERED_AFTER_SELECTED',
+      'UNSELECTED_ORDERED_AFTER_SELECTED',
+    ]);
+    expect(
+      getSamplesSelectedStates(callNodeTable, sampleCallNodes, A_D)
+    ).toEqual([
+      'UNSELECTED_ORDERED_BEFORE_SELECTED',
+      'SELECTED',
+      'UNSELECTED_ORDERED_BEFORE_SELECTED',
+      'SELECTED',
+      'SELECTED',
+    ]);
+    expect(
+      getSamplesSelectedStates(callNodeTable, sampleCallNodes, A_B_F)
+    ).toEqual([
+      'UNSELECTED_ORDERED_BEFORE_SELECTED',
+      'UNSELECTED_ORDERED_AFTER_SELECTED',
+      'SELECTED',
+      'UNSELECTED_ORDERED_AFTER_SELECTED',
+      'UNSELECTED_ORDERED_AFTER_SELECTED',
+    ]);
+    expect(
+      getSamplesSelectedStates(callNodeTable, sampleCallNodes, A_D_E)
+    ).toEqual([
+      'UNSELECTED_ORDERED_BEFORE_SELECTED',
+      'SELECTED',
+      'UNSELECTED_ORDERED_BEFORE_SELECTED',
+      'UNSELECTED_ORDERED_AFTER_SELECTED',
+      'UNSELECTED_ORDERED_BEFORE_SELECTED',
+    ]);
   });
   it('can sort the samples based on their selection status', function() {
     const comparator = getTreeOrderComparator(callNodeTable, sampleCallNodes);
-    const samples = [4, 2, 3, 0, 1]; // some random order
+    const samples = [4, 1, 3, 0, 2]; // some random order
     samples.sort(comparator);
-    expect(samples).toEqual([0, 1, 4, 2, 3]);
+    expect(samples).toEqual([0, 2, 4, 1, 3]);
     expect(comparator(0, 0)).toBe(0);
-    expect(comparator(2, 2)).toBe(0);
+    expect(comparator(1, 1)).toBe(0);
     expect(comparator(4, 4)).toBe(0);
-    expect(comparator(0, 1)).toBe(-1);
-    expect(comparator(1, 0)).toBe(1);
+    expect(comparator(0, 2)).toBeLessThan(0);
+    expect(comparator(2, 0)).toBeGreaterThan(0);
   });
 });

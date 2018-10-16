@@ -380,7 +380,10 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const { globalTrackOrder, globalTracks } = this.props;
 
     return (
-      <ContextMenu id="TimelineTrackContextMenu">
+      <ContextMenu
+        id="TimelineTrackContextMenu"
+        className="timeline-context-menu"
+      >
         {
           // The menu items header items to isolate tracks may or may not be
           // visible depending on the current state.

@@ -189,13 +189,20 @@ class TreeViewRowScrolledColumns<
    * In this mousedown handler, we use event delegation so we have to use
    * `target` instead of `currentTarget`.
    */
-  _onClick = (event: { target: Element } & SyntheticMouseEvent<Element>) => {
-    const { nodeId, isExpanded, onToggle, onClick } = this.props;
-    if (event.target.classList.contains('treeRowToggleButton')) {
-      onToggle(nodeId, !isExpanded, event.altKey === true);
-    } else {
+  _onMouseDown = (
+    event: { target: Element } & SyntheticMouseEvent<Element>
+  ) => {
+    const { nodeId, onClick } = this.props;
+    if (!event.target.classList.contains('treeRowToggleButton')) {
       onClick(nodeId, event);
     }
+  };
+
+  _onToggleClick = (
+    event: { target: Element } & SyntheticMouseEvent<Element>
+  ) => {
+    const { nodeId, isExpanded, onToggle } = this.props;
+    onToggle(nodeId, !isExpanded, event.altKey === true);
   };
 
   render() {
@@ -221,7 +228,7 @@ class TreeViewRowScrolledColumns<
           selected ? 'selected' : ''
         } ${displayData.dim ? 'dim' : ''}`}
         style={rowHeightStyle}
-        onMouseDown={this._onClick}
+        onMouseDown={this._onMouseDown}
       >
         <span
           className="treeRowIndentSpacer"
@@ -231,6 +238,7 @@ class TreeViewRowScrolledColumns<
           className={`treeRowToggleButton ${
             isExpanded ? 'expanded' : 'collapsed'
           } ${canBeExpanded ? 'canBeExpanded' : 'leaf'}`}
+          onClick={this._onToggleClick}
         />
         <span
           className={`treeViewRowColumn treeViewMainColumn ${
