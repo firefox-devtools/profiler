@@ -38,8 +38,6 @@ import type {
   TransformStack,
 } from '../types/transforms';
 
-
-
 /**
  * This file contains the functions and logic for working with and applying transforms
  * to profile data.
@@ -1426,4 +1424,3 @@ export function funcHasRecursiveCall(
   }
   return false;
 }
-
