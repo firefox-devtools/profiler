@@ -69,7 +69,15 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
   render() {
     return (
       <div>
-        <input type="file" ref={this._takeInputRef} onChange={this._upload} />
+        <label className="homeSectionButton">
+          <input
+            className="homeSectionUploadInput"
+            type="file"
+            ref={this._takeInputRef}
+            onChange={this._upload}
+          />
+          Select a profile to open
+        </label>
       </div>
     );
   }
@@ -345,6 +353,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <a
               className="homeTitleGithubIcon"
               href="https://github.com/devtools-html/perf.html"
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <svg
                 width="22"

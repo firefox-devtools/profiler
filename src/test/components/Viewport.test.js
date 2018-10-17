@@ -12,6 +12,9 @@ import {
   getCommittedRange,
   getPreviewSelection,
 } from '../../reducers/profile-view';
+
+import { changeSidebarOpenState } from '../../actions/app';
+
 import explicitConnect from '../../utils/connect';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
@@ -469,7 +472,71 @@ describe('Viewport', function() {
       expect(getChartViewport().viewportRight).toBe(1);
     });
   });
+
+  it('reacts to changes to the panel layout generation', function() {
+    const {
+      dispatch,
+      setBoundingBoxMock,
+      getChartViewport,
+      flushRafCalls,
+      view,
+    } = setup();
+
+    expect(getChartViewport()).toMatchObject({
+      containerWidth: BOUNDING_BOX_WIDTH,
+      containerHeight: BOUNDING_BOX_HEIGHT,
+      viewportLeft: 0,
+      viewportRight: 1,
+      viewportTop: 0,
+      viewportBottom: BOUNDING_BOX_HEIGHT,
+    });
+
+    const boundingWidthDiff = 15;
+    setBoundingBoxMock({ width: BOUNDING_BOX_WIDTH - boundingWidthDiff });
+    dispatch(changeSidebarOpenState('calltree', true));
+    flushRafCalls();
+    view.update();
+
+    expect(getChartViewport()).toMatchObject({
+      containerWidth: BOUNDING_BOX_WIDTH - boundingWidthDiff,
+      containerHeight: BOUNDING_BOX_HEIGHT,
+      viewportLeft: 0,
+      viewportRight: 1,
+      viewportTop: 0,
+      viewportBottom: BOUNDING_BOX_HEIGHT,
+    });
+  });
 });
+
+type BoundingBoxOverride = {
+  width: number,
+  height: number,
+  offsetX: number,
+  offsetY: number,
+};
+
+function getBoundingBoxForViewport(override: $Shape<BoundingBoxOverride> = {}) {
+  const values: BoundingBoxOverride = Object.assign(
+    {
+      width: BOUNDING_BOX_WIDTH,
+      height: BOUNDING_BOX_HEIGHT,
+      offsetX: BOUNDING_BOX_LEFT,
+      offsetY: BOUNDING_BOX_TOP,
+    },
+    override
+  );
+
+  const rect = getBoundingBox(values.width, values.height);
+  // Add some arbitrary offset to the bounding box to ensure that we
+  // are doing the correct thing when doing sizing calculations.
+  rect.left += values.offsetX;
+  rect.right += values.offsetX;
+  rect.x += values.offsetX;
+  rect.y += values.offsetY;
+  rect.top += values.offsetY;
+  rect.bottom += values.offsetY;
+  return rect;
+}
 
 function setup(profileOverrides: Object = {}) {
   const flushRafCalls = mockRaf();
@@ -481,18 +548,7 @@ function setup(profileOverrides: Object = {}) {
 
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => {
-      const rect = getBoundingBox(BOUNDING_BOX_WIDTH, BOUNDING_BOX_HEIGHT);
-      // Add some arbitrary offset to the bounding box to ensure that we
-      // are doing the correct thing when doing sizing calculations.
-      rect.left += BOUNDING_BOX_LEFT;
-      rect.right += BOUNDING_BOX_LEFT;
-      rect.x += BOUNDING_BOX_LEFT;
-      rect.y += BOUNDING_BOX_TOP;
-      rect.top += BOUNDING_BOX_TOP;
-      rect.bottom += BOUNDING_BOX_TOP;
-      return rect;
-    });
+    .mockImplementation(() => getBoundingBoxForViewport());
 
   // Hook up a dummy chart with a viewport.
   const DummyChart = () => <div id="dummy-chart" />;
@@ -532,8 +588,9 @@ function setup(profileOverrides: Object = {}) {
     ),
   });
 
+  const store = storeWithProfile(getProfileFromTextSamples('A').profile);
   const view = mount(
-    <Provider store={storeWithProfile(getProfileFromTextSamples('A').profile)}>
+    <Provider store={store}>
       <ConnectedChartWithViewport />
     </Provider>
   );
@@ -591,6 +648,12 @@ function setup(profileOverrides: Object = {}) {
     view.update();
   }
 
+  function setBoundingBoxMock(override: $Shape<BoundingBoxOverride>): void {
+    HTMLElement.prototype.getBoundingClientRect.mockImplementation(() =>
+      getBoundingBoxForViewport(override)
+    );
+  }
+
   return {
     view,
     moveMouseAndGetLeft,
@@ -599,5 +662,7 @@ function setup(profileOverrides: Object = {}) {
     scrollAndGetViewport,
     scroll,
     clickAndDrag,
+    setBoundingBoxMock,
+    dispatch: store.dispatch,
   };
 }
