@@ -528,6 +528,28 @@ export function getNetworkMarker(startTime: number, id: number) {
   return ['Network', startTime, payload];
 }
 
+export function getNetworkStartEndMarker(
+  startTime: number,
+  id: number,
+  status: string,
+  name: string
+) {
+  const payload: NetworkPayload = {
+    type: 'Network',
+    id,
+    pri: 0,
+    status,
+    startTime,
+    endTime: startTime + 1,
+    URI: 'https://mozilla.org',
+    RedirectURI: 'https://mozilla.org',
+    dur: 0.2345,
+    name,
+    title: '',
+  };
+  return ['Network', startTime, payload];
+}
+
 /**
  * This function computes a profile with network markers, which will in turn generate
  * a profile that contains a main thread track, and a network track.

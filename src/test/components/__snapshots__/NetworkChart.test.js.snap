@@ -34,6 +34,196 @@ exports[`EmptyReasons shows a reason when a profile's network markers have been 
 </div>
 `;
 
+exports[`NetworkChart merges NetworkMarkers correctly 1`] = `
+<div
+  className="networkChart"
+>
+  <div
+    className="markerSettings"
+  >
+    <div
+      className="markerSettingsSpacer"
+    />
+    <div
+      className="markerSettingsSearchbar"
+    >
+      <label
+        className="markerSettingsSearchbarLabel"
+      >
+        Filter Markers: 
+        <form
+          className="idleSearchField markerSettingsSearchField"
+          onSubmit={[Function]}
+        >
+          <input
+            className="idleSearchFieldInput"
+            name="search"
+            onBlur={[Function]}
+            onChange={[Function]}
+            onFocus={[Function]}
+            required="required"
+            title="Only display markers that match a certain name"
+            type="search"
+            value=""
+          />
+          <input
+            className="idleSearchFieldButton"
+            onClick={[Function]}
+            onFocus={[Function]}
+            type="reset"
+          />
+        </form>
+      </label>
+    </div>
+  </div>
+  <div
+    className="treeViewBody"
+    onKeyDown={[Function]}
+    tabIndex={0}
+  >
+    <div
+      className="treeViewBodyInnerWrapper"
+    >
+      <div
+        className="treeViewBodyInner treeViewBodyInner0"
+        style={
+          Object {
+            "height": "80px",
+            "width": undefined,
+          }
+        }
+      >
+        <div
+          className="treeViewBodyInner treeViewBodyInner0TopSpacer"
+          key="-1"
+          style={
+            Object {
+              "height": "0px",
+            }
+          }
+        />
+        <div
+          className="treeViewBodyInner treeViewBodyInner0InnerChunk"
+        >
+          <section
+            className="even networkChartRowItem STATUS_STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="odd networkChartRowItem STATUS_STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="even networkChartRowItem STATUS_STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="odd networkChartRowItem STATUS_STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="even networkChartRowItem STATUS_STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`NetworkChart merges NetworkMarkers correctly 2`] = `Array []`;
+
 exports[`NetworkChart renders NetworkChart correctly 1`] = `
 <div
   className="networkChart"

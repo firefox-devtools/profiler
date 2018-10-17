@@ -360,6 +360,7 @@ export function mergeStartAndEndNetworkMarker(
     // In the merged marker, we want to represent the entire duration, from channel-creation
     // until OnStopRequest.
     if (markerNext !== undefined && marker.name === markerNext.name) {
+      console.log(marker.name, markerNext.name);
       if (
         marker.data &&
         marker.data.type === 'Network' &&

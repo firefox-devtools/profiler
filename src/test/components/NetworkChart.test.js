@@ -17,6 +17,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithMarkers,
   getNetworkMarker,
+  getNetworkStartEndMarker,
 } from '../fixtures/profiles/make-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
@@ -24,6 +25,25 @@ import mockRaf from '../fixtures/mocks/request-animation-frame';
 const NETWORK_MARKERS = Array(10)
   .fill()
   .map((_, i) => getNetworkMarker(3 + 0.1 * i, i));
+
+const things: any = [
+  { name: 'Load121', status: 'STATUS_START' },
+  { name: 'Load122', status: 'STATUS_STOP' },
+  { name: 'Load123', status: 'STATUS_START' },
+  { name: 'Load123', status: 'STATUS_STOP' },
+  { name: 'Load122', status: 'STATUS_STOP' },
+  { name: 'Load122', status: 'STATUS_START' },
+  { name: 'Load124', status: 'STATUS_START' },
+  { name: 'Load124', status: 'STATUS_START' },
+  { name: 'Load125', status: 'STATUS_STOP' },
+  { name: 'Load125', status: 'STATUS_STOP' },
+];
+
+const NETWORK_START_END_MARKERS = Array(10)
+  .fill()
+  .map((_, i) =>
+    getNetworkStartEndMarker(3 + 0.1 * i, i, things[i].status, things[i].name)
+  );
 
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
@@ -60,6 +80,28 @@ describe('NetworkChart', function() {
     window.devicePixelRatio = 1;
 
     const profile = getProfileWithMarkers([...NETWORK_MARKERS]);
+    const {
+      flushRafCalls,
+      dispatch,
+      networkChart,
+      flushDrawLog,
+    } = setupWithProfile(profile);
+
+    dispatch(changeSelectedTab('network-chart'));
+    networkChart.update();
+    flushRafCalls();
+
+    const drawCalls = flushDrawLog();
+    expect(networkChart).toMatchSnapshot();
+    expect(drawCalls).toMatchSnapshot();
+
+    delete window.devicePixelRatio;
+  });
+
+  it('merges NetworkMarkers correctly', () => {
+    window.devicePixelRatio = 1;
+
+    const profile = getProfileWithMarkers([...NETWORK_START_END_MARKERS]);
     const {
       flushRafCalls,
       dispatch,
