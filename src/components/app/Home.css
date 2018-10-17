@@ -221,11 +221,20 @@
   }
 }
 
-@media (max-width: 767px) {
+@media (min-width: 500px) and (max-width: 767px) {
   .homeSection {
-    width: 80%;
+    width: 90%;
+    max-width: 90%;
+    padding-left: 2em;
+    padding-right: 2em;
+  }
+}
+
+@media (max-width: 499px) {
+  .homeSection {
+    width: 95%;
+    max-width: 95%;
     padding-left: 1em;
     padding-right: 1em;
   }
-
 }
