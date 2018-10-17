@@ -347,8 +347,8 @@ export function mergeStartAndEndNetworkMarker(
     return 0;
   });
   for (let i = 0; i < sortedMarkers.length; i++) {
-    const marker = Object.assign({}, sortedMarkers[i]);
-    const markerNext = Object.assign({}, sortedMarkers[i + 1]);
+    const marker = sortedMarkers[i];
+    const markerNext = sortedMarkers[i + 1];
 
     if (!marker.data || marker.data.type !== 'Network') {
       continue;
@@ -366,17 +366,28 @@ export function mergeStartAndEndNetworkMarker(
         markerNext.data &&
         markerNext.data.type === 'Network'
       ) {
-        if (marker.data.status === 'STATUS_START') {
+        // Markers have either status STATUS_START or (STATUS_STOP || STATUS_REDIRECT || STATUS_READ). STATUS_START is reliable and the only not likely to change.
+        if (
+          (marker.data.status === 'STATUS_START' &&
+            markerNext.data.status !== 'STATUS_START') ||
+          (markerNext.data.status === 'STATUS_START' &&
+            marker.data.status !== 'STATUS_START')
+        ) {
           // As we discard the start marker, but want the whole duration we override the
           // start of the end marker with the start time of the start marker
-          markerNext.start = marker.start;
-        }
-        // Cheking of order of matching markers might be reversed as the sort might not be stable
-        if (markerNext.data.status === 'STATUS_START') {
-          // As we discard the start marker, but want the whole duration we override the
-          // start of the end marker with the start time of the start marker
-          marker.start = markerNext.start;
-          filteredMarkers.push(marker);
+          const [startMarker, endMarker] =
+            marker.data.status === 'STATUS_START'
+              ? [marker, markerNext]
+              : [markerNext, marker];
+          const mergedMarker = {
+            data: endMarker.data,
+            dur: endMarker.dur,
+            name: endMarker.name,
+            title: endMarker.title,
+            start: startMarker.start,
+          };
+          filteredMarkers.push(mergedMarker);
+          i++;
         }
         continue;
       }
