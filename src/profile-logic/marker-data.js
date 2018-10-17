@@ -347,8 +347,8 @@ export function mergeStartAndEndNetworkMarker(
     return 0;
   });
   for (let i = 0; i < sortedMarkers.length; i++) {
-    const marker = sortedMarkers[i];
-    const markerNext = sortedMarkers[i + 1];
+    const marker = Object.assign({}, sortedMarkers[i]);
+    const markerNext = Object.assign({}, sortedMarkers[i + 1]);
 
     if (!marker.data || marker.data.type !== 'Network') {
       continue;
