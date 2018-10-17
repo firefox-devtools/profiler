@@ -134,6 +134,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
           {additionalMessage ? (
             <div className="rootMessageAdditional">
               {toParagraphs(additionalMessage)}
+              <a href="/">Back to home</a>
             </div>
           ) : null}
           {showLoader ? (
@@ -158,12 +159,11 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
   render() {
     const { view, dataSource, hasZipFile } = this.props;
     const phase = view.phase;
+    if (dataSource === 'none') {
+      return <Home />;
+    }
     switch (phase) {
       case 'INITIALIZING': {
-        if (dataSource === 'none') {
-          return <Home />;
-        }
-
         const loadingMessage = LOADING_MESSAGES[dataSource];
         const message = loadingMessage ? loadingMessage : 'View not found';
         const showLoader = Boolean(loadingMessage);
