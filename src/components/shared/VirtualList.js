@@ -129,7 +129,7 @@ class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
         className={className}
         ref={this._takeContainerRef}
         style={{
-          height: `${items.length * itemHeight}px`,
+          height: `${items.length * itemHeight + 20 }px`,
           width: columnIndex === 1 ? containerWidth : undefined,
         }}
       >
