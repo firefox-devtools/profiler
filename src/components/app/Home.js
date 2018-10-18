@@ -199,7 +199,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
-              <img className="homeSectionScreenshot" alt="Perf.html screanshot" src={PerfScreenshot} />
+              <img className="homeSectionScreenshot" src={PerfScreenshot} alt="Perf.html screanshot"/>
             </div>
           </div>
           <div className="homeInstructionsRight">
@@ -233,7 +233,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
             <p>
-              <img className="homeSectionScreenshot" alt="Gecko Profiler button" src={AddonScreenshot} />
+              <img className="homeSectionScreenshot" src={AddonScreenshot} alt="Gecko Profiler button"/>
             </p>
           </div>
           <div className="homeInstructionsRight">
@@ -262,7 +262,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
-              <img className="homeSectionScreenshot" alt="Perf.html screanshot" src={PerfScreenshot} />
+              <img className="homeSectionScreenshot" src={PerfScreenshot} alt="Perf.html screanshot"/>
             </div>
           </div>
           <div className="homeInstructionsRight">
@@ -295,7 +295,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions" key={0}>
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
-              <img className="homeSectionScreenshot" alt="Perf.html screanshot" src={PerfScreenshot} />
+              <img className="homeSectionScreenshot" src={PerfScreenshot} alt="Perf.html screanshot"/>
             </div>
           </div>
           <div className="homeInstructionsRight">
@@ -355,7 +355,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               href="https://github.com/devtools-html/perf.html"
               target="_blank"
               rel="noopener noreferrer"
-              title= "Go to our git repository"
+              title="Go to our git repository"
             >
               <svg
                 width="22"
