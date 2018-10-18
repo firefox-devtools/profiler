@@ -109,7 +109,7 @@ if (process.env.NODE_ENV === 'production') {
       },
       /* Exclude the files used but not served by netlify. When trying to fetch
        * them we get a 404, and so the SW registration fails. */
-      excludes: ['_headers', '_redirects', '.htaccess'],
+      excludes: ['_headers', '_redirects', '.htaccess', 'docs/**'],
       cacheMaps: [
         {
           requestTypes: ['navigate'],
