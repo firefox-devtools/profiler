@@ -59,7 +59,7 @@ const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
-const MARKER_LABEL_MAX_LENGTH = 150;
+const MARKER_LABEL_MAX_LENGTH = 250;
 
 class NetworkChartCanvas extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
@@ -247,7 +247,7 @@ class NetworkChartCanvas extends React.PureComponent<Props, State> {
     }
 
     // Fill in behind text
-    const gradient = ctx.createLinearGradient(0, 0, 150, 0);
+    const gradient = ctx.createLinearGradient(0, 0, 250, 0);
     gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
     gradient.addColorStop(1, 'rgba(255, 255, 255, 0.0)');
     ctx.fillStyle = gradient;
@@ -255,7 +255,7 @@ class NetworkChartCanvas extends React.PureComponent<Props, State> {
       // Get the timing information for a row of stack frames.
       const y = rowIndex * rowHeight - viewportTop;
       // `-1` because we only want to cover the row's inner surface.
-      ctx.fillRect(0, y, 150, rowHeight - 1);
+      ctx.fillRect(0, y, 250, rowHeight - 1);
     }
 
     // Draw the text

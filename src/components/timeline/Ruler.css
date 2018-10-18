@@ -13,7 +13,7 @@
   content: '';
   position: absolute;
   top: 20px;
-  left: -150px;
+  left: -250px;
   right: calc(0px - var(--vertical-scrollbar-reserved-width));
   height: 1px;
   background: var(--grey-30);

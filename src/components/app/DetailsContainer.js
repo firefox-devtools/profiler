@@ -43,12 +43,12 @@ function DetailsContainer({
   return (
     <SplitterLayout
       customClassName="DetailsContainer"
-      percentage
-      secondaryInitialSize={20}
+      primaryIndex={1}
+      secondaryInitialSize={250}
       onDragEnd={invalidatePanelLayout}
     >
-      <Details />
       {Sidebar && <Sidebar />}
+      <Details />
     </SplitterLayout>
   );
 }

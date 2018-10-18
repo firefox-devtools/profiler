@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
-import DetailsContainer from './DetailsContainer';
+import Details from './Details';
 import ProfileFilterNavigator from './ProfileFilterNavigator';
 import MenuButtons from './MenuButtons';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
@@ -54,7 +54,7 @@ class ProfileViewer extends PureComponent<Props> {
           <MenuButtons />
         </div>
         <Timeline />
-        <DetailsContainer />
+        <Details />
         <SymbolicationStatusOverlay />
       </div>
     );

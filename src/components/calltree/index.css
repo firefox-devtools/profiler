@@ -1,0 +1,18 @@
+.callTreeSplitter {
+  position: relative;
+}
+
+.callTreeSplitterPrimaryContainer {
+  display: flex;
+  flex-flow: column nowrap;
+  flex: 1;
+}
+
+.callTreeSplitter > .layout-pane-primary {
+  display: flex;
+}
+
+.selectedThreadActivityGraphViewport {
+  border-top: 1px solid var(--grey-30);
+  margin-right: 15px;
+}

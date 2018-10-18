@@ -25,8 +25,8 @@
 .timelineToggle {
   position: absolute;
   top: 0;
-  left: -150px;
-  width: 150px;
+  left: -250px;
+  width: 250px;
   height: 22px;
   display: flex;
   font-size: 9px;

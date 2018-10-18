@@ -33,7 +33,7 @@
 }
 
 .timelineTrackLabel {
-  width: 150px;
+  width: 250px;
   box-sizing: border-box;
   padding-left: 14px;
   border-right: 1px solid var(--grey-30);
@@ -89,6 +89,6 @@
 }
 
 .timelineTrackLocalLabel {
-  width: 135px;
+  width: 235px;
   border-left: 1px solid var(--grey-30);
 }
