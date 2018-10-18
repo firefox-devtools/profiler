@@ -3,17 +3,28 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+
+// We want to test these components in isolation and tightly control the actions
+// dispatched and avoid any side-effects.  That's why we mock this module and
+// return dummy actions.
+jest.mock('../../actions/receive-profile', () => ({
+  retrieveProfileFromAddon: () => ({ type: 'DUMMY_ACTION' }),
+  retrieveProfileFromStore: () => ({ type: 'DUMMY_ACTION' }),
+}));
+
 import * as React from 'react';
 
 import { ProfileViewWhenReady } from '../../components/app/Root';
 import { updateUrlState } from '../../actions/app';
-import {
+// Because this module is mocked but we want the real actions in the test, we
+// use `jest.requireActual` here.
+const {
   fatalError,
   temporaryError,
   viewProfile,
   waitingForProfileFromAddon,
   waitingForProfileFromStore,
-} from '../../actions/receive-profile';
+} = jest.requireActual('../../actions/receive-profile');
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { TemporaryError } from '../../utils/errors';
 
@@ -91,7 +102,7 @@ function setup() {
 
   function navigateToStoreLoadingPage() {
     const newUrlState = stateFromLocation({
-      pathname: '/public/404ff08ee5f412f355264601f12e5feff0ebaee6/calltree',
+      pathname: '/public/ThisIsAFakeHash/calltree',
       search: '',
       hash: '',
     });
