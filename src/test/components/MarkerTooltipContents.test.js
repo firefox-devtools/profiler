@@ -3,6 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import type { NetworkPayload } from '../../types/markers';
+
 import React, { Fragment } from 'react';
 import { Provider } from 'react-redux';
 import MarkersTooltipContents from '../../components/shared/MarkerTooltipContents';
@@ -308,7 +310,9 @@ describe('MarkerTooltipContents', function() {
       [
         'Load 31: http://wikia.com/',
         18670.5141769375,
-        {
+        // Coerce all of the Network payload objects to the NetworkPayload type to help
+        // surface helpful Flow error messages.
+        ({
           type: 'Network',
           startTime: 18670.5141769375,
           endTime: 18736.9210449375,
@@ -319,12 +323,15 @@ describe('MarkerTooltipContents', function() {
           URI: 'http://www.wikia.com/',
           RedirectURI:
             'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
-        },
+          dur: 10.5,
+          name: '',
+          title: '',
+        }: NetworkPayload),
       ],
       [
         'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
         111.0,
-        {
+        ({
           type: 'Network',
           startTime: 13382.453655062502,
           endTime: 13587.6919060625,
@@ -337,12 +344,16 @@ describe('MarkerTooltipContents', function() {
           requestStart: 11143.294456,
           responseStart: 11172.047379,
           responseEnd: 11175.561877,
-        },
+          RedirectURI: '',
+          dur: 10.5,
+          name: '',
+          title: '',
+        }: NetworkPayload),
       ],
       [
         'Load 31: http://wikia.com/',
         10.5,
-        {
+        ({
           type: 'Network',
           startTime: 10.5,
           endTime: 111.0,
@@ -350,19 +361,28 @@ describe('MarkerTooltipContents', function() {
           pri: 8,
           status: 'STATUS_START',
           URI: 'http://wikia.com/',
-        },
+          RedirectURI: '',
+          dur: 10.5,
+          name: '',
+          title: '',
+        }: NetworkPayload),
       ],
       [
         'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
         111.0,
-        {
+        ({
           type: 'Network',
           startTime: 111.0,
           endTime: 121.5,
           id: 1234,
           pri: 8,
           status: 'STATUS_READING',
-        },
+          RedirectURI: '',
+          URI: '',
+          dur: 10.5,
+          name: '',
+          title: '',
+        }: NetworkPayload),
       ],
       [
         'ConstructRootFrame',

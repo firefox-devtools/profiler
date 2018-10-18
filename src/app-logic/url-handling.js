@@ -51,6 +51,7 @@ type BaseQuery = {|
   file?: string, // Path into a zip file.
   react_perf?: null, // Flag to activate react's UserTimings profiler.
   transforms?: string,
+  timelineType?: string,
   // The following values are legacy, and will be converted to track-based values. These
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
@@ -133,6 +134,12 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     // Only add to the query string if something was actually hidden.
     // Also, slice off the last '~'.
     query.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
+  }
+
+  if (urlState.profileSpecific.timelineType === 'stack') {
+    // The default is the category view, so only add it to the URL if it's the
+    // stack view.
+    query.timelineType = 'stack';
   }
 
   query.localTrackOrderByPid = '';
@@ -286,6 +293,7 @@ export function stateFromLocation(location: Location): UrlState {
         : new Map(),
       markersSearchString: query.markerSearch || '',
       transforms,
+      timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
       legacyThreadOrder: query.threadOrder
         ? query.threadOrder.split('-').map(index => Number(index))
         : null,
