@@ -26,7 +26,7 @@ const NETWORK_MARKERS = Array(10)
   .fill()
   .map((_, i) => getNetworkMarker(3 + 0.1 * i, i));
 
-const things: any = [
+const dataSet: any = [
   { name: 'Load121', status: 'STATUS_START' },
   { name: 'Load122', status: 'STATUS_STOP' },
   { name: 'Load123', status: 'STATUS_START' },
@@ -42,7 +42,7 @@ const things: any = [
 const NETWORK_START_END_MARKERS = Array(10)
   .fill()
   .map((_, i) =>
-    getNetworkStartEndMarker(3 + 0.1 * i, i, things[i].status, things[i].name)
+    getNetworkStartEndMarker(3 + 0.1 * i, i, dataSet[i].status, dataSet[i].name)
   );
 
 function setupWithProfile(profile) {

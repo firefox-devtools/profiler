@@ -88,7 +88,7 @@ exports[`NetworkChart merges NetworkMarkers correctly 1`] = `
         className="treeViewBodyInner treeViewBodyInner0"
         style={
           Object {
-            "height": "80px",
+            "height": "128px",
             "width": undefined,
           }
         }
@@ -106,12 +106,12 @@ exports[`NetworkChart merges NetworkMarkers correctly 1`] = `
           className="treeViewBodyInner treeViewBodyInner0InnerChunk"
         >
           <section
-            className="even networkChartRowItem STATUS_STOP"
+            className="even networkChartRowItem STATUS_START"
           >
             <div
               className="networkChartRowItemLabel"
             >
-              Network
+              Load121
             </div>
             <div
               className="networkChartRowItemBar"
@@ -133,7 +133,7 @@ exports[`NetworkChart merges NetworkMarkers correctly 1`] = `
             <div
               className="networkChartRowItemLabel"
             >
-              Network
+              Load122
             </div>
             <div
               className="networkChartRowItemBar"
@@ -155,7 +155,7 @@ exports[`NetworkChart merges NetworkMarkers correctly 1`] = `
             <div
               className="networkChartRowItemLabel"
             >
-              Network
+              Load123
             </div>
             <div
               className="networkChartRowItemBar"
@@ -177,7 +177,51 @@ exports[`NetworkChart merges NetworkMarkers correctly 1`] = `
             <div
               className="networkChartRowItemLabel"
             >
-              Network
+              Load122
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="even networkChartRowItem STATUS_START"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Load124
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="odd networkChartRowItem STATUS_START"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Load124
             </div>
             <div
               className="networkChartRowItemBar"
@@ -199,7 +243,29 @@ exports[`NetworkChart merges NetworkMarkers correctly 1`] = `
             <div
               className="networkChartRowItemLabel"
             >
-              Network
+              Load125
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="odd networkChartRowItem STATUS_STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Load125
             </div>
             <div
               className="networkChartRowItemBar"
@@ -278,7 +344,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
         className="treeViewBodyInner treeViewBodyInner0"
         style={
           Object {
-            "height": "16px",
+            "height": "160px",
             "width": undefined,
           }
         }
@@ -297,6 +363,204 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
         >
           <section
             className="even networkChartRowItem STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="odd networkChartRowItem STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="even networkChartRowItem STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="odd networkChartRowItem STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="even networkChartRowItem STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="odd networkChartRowItem STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="even networkChartRowItem STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="odd networkChartRowItem STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="even networkChartRowItem STOP"
+          >
+            <div
+              className="networkChartRowItemLabel"
+            >
+              Network
+            </div>
+            <div
+              className="networkChartRowItemBar"
+              onMouseEnter={[Function]}
+              onMouseLeave={[Function]}
+              style={
+                Object {
+                  "left": 0,
+                  "width": 2,
+                }
+              }
+            >
+               
+            </div>
+          </section>
+          <section
+            className="odd networkChartRowItem STOP"
           >
             <div
               className="networkChartRowItemLabel"

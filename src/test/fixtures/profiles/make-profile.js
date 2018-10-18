@@ -511,6 +511,7 @@ function _buildThreadFromTextOnlyStacks(
   return thread;
 }
 
+// Basic set of network markers
 export function getNetworkMarker(startTime: number, id: number) {
   const payload: NetworkPayload = {
     type: 'Network',
@@ -528,6 +529,7 @@ export function getNetworkMarker(startTime: number, id: number) {
   return ['Network', startTime, payload];
 }
 
+// advanced set of network markers
 export function getNetworkStartEndMarker(
   startTime: number,
   id: number,
@@ -547,7 +549,7 @@ export function getNetworkStartEndMarker(
     name,
     title: '',
   };
-  return ['Network', startTime, payload];
+  return [name, startTime, payload];
 }
 
 /**
