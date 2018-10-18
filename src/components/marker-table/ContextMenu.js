@@ -39,7 +39,7 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkersContextMenu extends PureComponent<Props> {
-  setStartRange() {
+  setStartRange = () => {
     const {
       selectedMarker,
       markers,
@@ -58,9 +58,9 @@ class MarkersContextMenu extends PureComponent<Props> {
       selectionStart: markers[selectedMarker].start,
       selectionEnd,
     });
-  }
+  };
 
-  setEndRange() {
+  setEndRange = () => {
     const {
       selectedMarker,
       markers,
@@ -82,44 +82,33 @@ class MarkersContextMenu extends PureComponent<Props> {
       // the end to make sure the selected marker doesn't disappear from view.
       selectionEnd: marker.start + (marker.dur || 0.0001),
     });
-  }
+  };
 
-  copyMarkerJSON() {
+  copyMarkerJSON = () => {
     const { selectedMarker, markers } = this.props;
     copy(JSON.stringify(markers[selectedMarker]));
-  }
+  };
 
-  handleClick = (
-    event: SyntheticEvent<>,
-    data: { type: 'setStartRange' | 'setEndRange' | 'copyMarkerJSON' }
-  ): void => {
-    switch (data.type) {
-      case 'setStartRange':
-        this.setStartRange();
-        break;
-      case 'setEndRange':
-        this.setEndRange();
-        break;
-      case 'copyMarkerJSON':
-        this.copyMarkerJSON();
-        break;
-      default:
-        throw new Error(`Unknown type ${data.type}`);
+  copyMarkerName = () => {
+    const { selectedMarker, markers } = this.props;
+    const markerName = markers[selectedMarker] && markers[selectedMarker].name;
+
+    if (markerName) {
+      copy(markerName);
     }
   };
 
   render() {
     return (
       <ContextMenu id="MarkersContextMenu">
-        <MenuItem onClick={this.handleClick} data={{ type: 'setStartRange' }}>
+        <MenuItem onClick={this.setStartRange}>
           Set selection start time here
         </MenuItem>
-        <MenuItem onClick={this.handleClick} data={{ type: 'setEndRange' }}>
+        <MenuItem onClick={this.setEndRange}>
           Set selection end time here
         </MenuItem>
-        <MenuItem onClick={this.handleClick} data={{ type: 'copyMarkerJSON' }}>
-          Copy marker JSON
-        </MenuItem>
+        <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
+        <MenuItem onClick={this.copyMarkerName}>Copy marker name</MenuItem>
       </ContextMenu>
     );
   }
