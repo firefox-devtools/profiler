@@ -4,7 +4,7 @@
 
 // @flow
 
-import * as React from 'react'
+import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/img/png/gecko-profiler-screenshot-2018-01-18.png';
