@@ -199,7 +199,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
-              <img className="homeSectionScreenshot" src={PerfScreenshot} alt="Perf.html screanshot"/>
+              <img
+                className="homeSectionScreenshot"
+                src={PerfScreenshot}
+                alt="Perf.html screanshot"
+              />
             </div>
           </div>
           <div className="homeInstructionsRight">
@@ -233,7 +237,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
             <p>
-              <img className="homeSectionScreenshot" src={AddonScreenshot} alt="Gecko Profiler button"/>
+              <img
+                className="homeSectionScreenshot"
+                src={AddonScreenshot}
+                alt="Gecko Profiler button"
+              />
             </p>
           </div>
           <div className="homeInstructionsRight">
@@ -262,7 +270,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
-              <img className="homeSectionScreenshot" src={PerfScreenshot} alt="Perf.html screanshot"/>
+              <img
+                className="homeSectionScreenshot"
+                src={PerfScreenshot}
+                alt="Perf.html screanshot"
+              />
             </div>
           </div>
           <div className="homeInstructionsRight">
@@ -295,7 +307,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions" key={0}>
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
-              <img className="homeSectionScreenshot" src={PerfScreenshot} alt="Perf.html screanshot"/>
+              <img
+                className="homeSectionScreenshot"
+                src={PerfScreenshot}
+                alt="Perf.html screanshot"
+              />
             </div>
           </div>
           <div className="homeInstructionsRight">
