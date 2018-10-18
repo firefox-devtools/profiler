@@ -190,6 +190,9 @@ body,
   background-color: var(--grey-30);
   color: black;
 }
+.treeViewRow.rightClicked:not(.selected) {
+  background-color: var(--blue-50-a30);
+}
 .treeViewRow.dim > .treeViewMainColumn {
   opacity: 0.7;
 }

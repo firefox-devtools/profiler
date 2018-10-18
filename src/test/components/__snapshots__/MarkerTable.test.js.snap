@@ -87,7 +87,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -110,7 +110,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -146,7 +146,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
               class="treeViewBodyInner treeViewBodyInner1InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -163,7 +163,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span

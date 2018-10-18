@@ -44,27 +44,27 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                 class="treeViewBodyInner treeViewBodyInner0InnerChunk"
               >
                 <div
-                  class="treeViewRow treeViewRowFixedColumns even "
+                  class="treeViewRow treeViewRowFixedColumns even"
                   style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  class="treeViewRow treeViewRowFixedColumns odd "
+                  class="treeViewRow treeViewRowFixedColumns odd"
                   style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  class="treeViewRow treeViewRowFixedColumns even "
+                  class="treeViewRow treeViewRowFixedColumns even"
                   style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  class="treeViewRow treeViewRowFixedColumns odd "
+                  class="treeViewRow treeViewRowFixedColumns odd"
                   style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  class="treeViewRow treeViewRowFixedColumns even "
+                  class="treeViewRow treeViewRowFixedColumns even"
                   style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  class="treeViewRow treeViewRowFixedColumns odd "
+                  class="treeViewRow treeViewRowFixedColumns odd"
                   style="height: 30px; line-height: 30px;"
                 />
               </div>
@@ -81,7 +81,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                 class="treeViewBodyInner treeViewBodyInner1InnerChunk"
               >
                 <div
-                  class="treeViewRow treeViewRowScrolledColumns even  "
+                  class="treeViewRow treeViewRowScrolledColumns even"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
@@ -98,7 +98,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
-                  class="treeViewRow treeViewRowScrolledColumns odd  "
+                  class="treeViewRow treeViewRowScrolledColumns odd"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
@@ -115,7 +115,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
-                  class="treeViewRow treeViewRowScrolledColumns even  "
+                  class="treeViewRow treeViewRowScrolledColumns even"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
@@ -136,7 +136,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
-                  class="treeViewRow treeViewRowScrolledColumns odd  "
+                  class="treeViewRow treeViewRowScrolledColumns odd"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
@@ -157,7 +157,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
-                  class="treeViewRow treeViewRowScrolledColumns even  "
+                  class="treeViewRow treeViewRowScrolledColumns even"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
@@ -174,7 +174,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
-                  class="treeViewRow treeViewRowScrolledColumns odd  "
+                  class="treeViewRow treeViewRowScrolledColumns odd"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
