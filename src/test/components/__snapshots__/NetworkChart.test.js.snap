@@ -88,7 +88,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
         className="treeViewBodyInner treeViewBodyInner0"
         style={
           Object {
-            "height": "160px",
+            "height": "180px",
             "width": undefined,
           }
         }

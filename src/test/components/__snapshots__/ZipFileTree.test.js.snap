@@ -43,7 +43,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
               className="treeViewBodyInner treeViewBodyInner0"
               style={
                 Object {
-                  "height": "180px",
+                  "height": "200px",
                   "width": undefined,
                 }
               }
@@ -126,7 +126,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
               className="treeViewBodyInner treeViewBodyInner1"
               style={
                 Object {
-                  "height": "180px",
+                  "height": "200px",
                   "width": 3000,
                 }
               }

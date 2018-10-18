@@ -538,7 +538,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
             className="treeViewBodyInner treeViewBodyInner0"
             style={
               Object {
-                "height": "304px",
+                "height": "324px",
                 "width": undefined,
               }
             }
@@ -1344,7 +1344,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
             className="treeViewBodyInner treeViewBodyInner1"
             style={
               Object {
-                "height": "304px",
+                "height": "324px",
                 "width": 3130,
               }
             }
@@ -2199,7 +2199,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             className="treeViewBodyInner treeViewBodyInner0"
             style={
               Object {
-                "height": "112px",
+                "height": "132px",
                 "width": undefined,
               }
             }
@@ -2509,7 +2509,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             className="treeViewBodyInner treeViewBodyInner1"
             style={
               Object {
-                "height": "112px",
+                "height": "132px",
                 "width": 3000,
               }
             }
@@ -2940,7 +2940,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
             className="treeViewBodyInner treeViewBodyInner0"
             style={
               Object {
-                "height": "112px",
+                "height": "132px",
                 "width": undefined,
               }
             }
@@ -3250,7 +3250,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
             className="treeViewBodyInner treeViewBodyInner1"
             style={
               Object {
-                "height": "112px",
+                "height": "132px",
                 "width": 3000,
               }
             }
@@ -3681,7 +3681,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner0"
             style={
               Object {
-                "height": "112px",
+                "height": "132px",
                 "width": undefined,
               }
             }
@@ -3991,7 +3991,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner1"
             style={
               Object {
-                "height": "112px",
+                "height": "132px",
                 "width": 3000,
               }
             }
@@ -4422,7 +4422,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner0"
             style={
               Object {
-                "height": "96px",
+                "height": "116px",
                 "width": undefined,
               }
             }
@@ -4691,7 +4691,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner1"
             style={
               Object {
-                "height": "96px",
+                "height": "116px",
                 "width": 3000,
               }
             }
@@ -5092,7 +5092,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner0"
             style={
               Object {
-                "height": "96px",
+                "height": "116px",
                 "width": undefined,
               }
             }
@@ -5361,7 +5361,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner1"
             style={
               Object {
-                "height": "96px",
+                "height": "116px",
                 "width": 3000,
               }
             }
@@ -5762,7 +5762,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner0"
             style={
               Object {
-                "height": "64px",
+                "height": "84px",
                 "width": undefined,
               }
             }
@@ -5949,7 +5949,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner1"
             style={
               Object {
-                "height": "64px",
+                "height": "84px",
                 "width": 3000,
               }
             }
@@ -6285,7 +6285,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner0"
             style={
               Object {
-                "height": "64px",
+                "height": "84px",
                 "width": undefined,
               }
             }
@@ -6472,7 +6472,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner1"
             style={
               Object {
-                "height": "64px",
+                "height": "84px",
                 "width": 3000,
               }
             }
@@ -6808,7 +6808,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner0"
             style={
               Object {
-                "height": "96px",
+                "height": "116px",
                 "width": undefined,
               }
             }
@@ -7077,7 +7077,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             className="treeViewBodyInner treeViewBodyInner1"
             style={
               Object {
-                "height": "96px",
+                "height": "116px",
                 "width": 3000,
               }
             }
