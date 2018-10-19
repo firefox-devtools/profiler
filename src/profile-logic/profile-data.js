@@ -749,6 +749,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
       length: funcTable.length,
       name: funcTable.name.slice(),
       resource: funcTable.resource.slice(),
+      relevantForJS: funcTable.relevantForJS.slice(),
       address: funcTable.address.slice(),
       isJS: funcTable.isJS.slice(),
       fileName: funcTable.fileName.slice(),
