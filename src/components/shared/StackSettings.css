@@ -43,8 +43,15 @@
 .stackSettingsFilter {
   border-right: 1px solid var(--grey-20);
   padding-right: 10px;
+  white-space: nowrap;
 }
 
 .stackSettingsFilterLabel {
+  display: inline-flex;
+  align-items: center;
   padding-right: 5px;
+}
+
+.stackSettingsFilterInput {
+  margin: 0 4px;
 }

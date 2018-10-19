@@ -50,6 +50,7 @@ class StackSettings extends PureComponent<Props> {
       <label className="stackSettingsFilterLabel">
         <input
           type="radio"
+          className="stackSettingsFilterInput"
           value={implementationFilter}
           name="stack-settings-filter"
           title="Filter stack frames to a type."
@@ -67,12 +68,10 @@ class StackSettings extends PureComponent<Props> {
     return (
       <div className="stackSettings">
         <ul className="stackSettingsList">
-          <li className="stackSettingsListItem">
-            <div className="stackSettingsFilter">
-              {this._renderRadioButton('All stacks', 'combined')}
-              {this._renderRadioButton('JavaScript', 'js')}
-              {this._renderRadioButton('Native', 'cpp')}
-            </div>
+          <li className="stackSettingsListItem stackSettingsFilter">
+            {this._renderRadioButton('All stacks', 'combined')}
+            {this._renderRadioButton('JavaScript', 'js')}
+            {this._renderRadioButton('Native', 'cpp')}
           </li>
           {hideInvertCallstack ? null : (
             <li className="stackSettingsListItem">
