@@ -201,7 +201,6 @@ export class CallTree {
       const categoryIndex = this._callNodeTable.category[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
-      const isJS = this._funcTable.isJS[funcIndex];
       const libName = this._getOriginAnnotation(funcIndex);
 
       let icon = null;
@@ -225,8 +224,7 @@ export class CallTree {
         totalTimePercent: `${(100 * totalTimeRelative).toFixed(1)}%`,
         name: funcName,
         lib: libName,
-        // Dim platform pseudo-stacks.
-        dim: !isJS && this._jsOnly,
+        dim: false,
         categoryName: this._categories[categoryIndex].name,
         categoryColor: this._categories[categoryIndex].color,
         icon,

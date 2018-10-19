@@ -403,9 +403,10 @@ export function getTimingsForPath(
     timings.value += interval;
 
     // Step 2: find the implementation value for this stack
-    const implementation = funcTable.isJS[funcIndex]
-      ? getJsImplementationForStack(stackIndex, thread)
-      : 'native';
+    const implementation =
+      funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]
+        ? getJsImplementationForStack(stackIndex, thread)
+        : 'native';
 
     // Step 3: increment the right value in the implementation breakdown
     if (timings.breakdownByImplementation === null) {
@@ -630,7 +631,8 @@ export function filterThreadByImplementation(
     case 'js':
       return _filterThreadByFunc(
         thread,
-        funcIndex => funcTable.isJS[funcIndex],
+        funcIndex =>
+          funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex],
         defaultCategory
       );
     default:
