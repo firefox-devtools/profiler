@@ -795,6 +795,7 @@ export type SelectorsForThread = {
   getIsMarkerChartEmptyInFullRange: State => boolean,
   getMarkerChartTiming: State => MarkerTimingRows,
   getNetworkChartTiming: State => MarkerTimingRows,
+  getMergedNetworkChartTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
   getNetworkTracingMarkers: State => TracingMarker[],
@@ -1067,6 +1068,10 @@ export const selectorsForThread = (
       getSearchFilteredTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker)
     );
+    const getMergedNetworkChartTracingMarkers = createSelector(
+      getNetworkChartTracingMarkers,
+      MarkerData.mergeStartAndEndNetworkMarker
+    );
     const getIsMarkerChartEmptyInFullRange = createSelector(
       getTracingMarkers,
       markers => MarkerData.filterForMarkerChart(markers).length === 0
@@ -1085,10 +1090,7 @@ export const selectorsForThread = (
     );
     const getNetworkTracingMarkers = createSelector(
       getCommittedRangeFilteredTracingMarkers,
-      tracingMarkers =>
-        tracingMarkers.filter(
-          marker => marker.data && marker.data.type === 'Network'
-        )
+      tracingMarkers => tracingMarkers.filter(MarkerData.isNetworkMarker)
     );
     const getNetworkTrackTiming = createSelector(
       getNetworkTracingMarkers,
@@ -1264,6 +1266,7 @@ export const selectorsForThread = (
       getCommittedRangeFilteredTracingMarkersForHeader,
       getNetworkTracingMarkers,
       getNetworkTrackTiming,
+      getMergedNetworkChartTracingMarkers,
       getRangeFilteredScreenshotsById,
       getFilteredThread,
       getPreviewFilteredThread,
