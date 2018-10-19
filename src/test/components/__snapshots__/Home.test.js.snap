@@ -29,7 +29,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
         href="https://github.com/devtools-html/perf.html"
         rel="noopener noreferrer"
         target="_blank"
-        title="Go to our git repository"
+        title="Go to our git repository (this opens in a new window)"
       >
         <svg
           aria-label="github"
@@ -71,7 +71,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             }
           >
             <img
-              alt="Perf.html screanshot"
+              alt="screenshot of perf.html"
               className="homeSectionScreenshot"
               src="test-file-stub"
             />
@@ -159,7 +159,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
         href="https://github.com/devtools-html/perf.html"
         rel="noopener noreferrer"
         target="_blank"
-        title="Go to our git repository"
+        title="Go to our git repository (this opens in a new window)"
       >
         <svg
           aria-label="github"
@@ -201,7 +201,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
             }
           >
             <img
-              alt="Perf.html screanshot"
+              alt="screenshot of perf.html"
               className="homeSectionScreenshot"
               src="test-file-stub"
             />
@@ -294,7 +294,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
         href="https://github.com/devtools-html/perf.html"
         rel="noopener noreferrer"
         target="_blank"
-        title="Go to our git repository"
+        title="Go to our git repository (this opens in a new window)"
       >
         <svg
           aria-label="github"
@@ -336,7 +336,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
             }
           >
             <img
-              alt="Perf.html screanshot"
+              alt="screenshot of perf.html"
               className="homeSectionScreenshot"
               src="test-file-stub"
             />
@@ -462,7 +462,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
         href="https://github.com/devtools-html/perf.html"
         rel="noopener noreferrer"
         target="_blank"
-        title="Go to our git repository"
+        title="Go to our git repository (this opens in a new window)"
       >
         <svg
           aria-label="github"
@@ -498,7 +498,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
         >
           <p>
             <img
-              alt="Gecko Profiler button"
+              alt="Screenshot of the Gecko Profiler addon settings"
               className="homeSectionScreenshot"
               src="test-file-stub"
             />

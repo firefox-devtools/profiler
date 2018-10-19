@@ -202,7 +202,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <img
                 className="homeSectionScreenshot"
                 src={PerfScreenshot}
-                alt="Perf.html screanshot"
+                alt="screenshot of perf.html"
               />
             </div>
           </div>
@@ -240,7 +240,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <img
                 className="homeSectionScreenshot"
                 src={AddonScreenshot}
-                alt="Gecko Profiler button"
+                alt="Screenshot of the Gecko Profiler addon settings"
               />
             </p>
           </div>
@@ -273,7 +273,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <img
                 className="homeSectionScreenshot"
                 src={PerfScreenshot}
-                alt="Perf.html screanshot"
+                alt="screenshot of perf.html"
               />
             </div>
           </div>
@@ -310,7 +310,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <img
                 className="homeSectionScreenshot"
                 src={PerfScreenshot}
-                alt="Perf.html screanshot"
+                alt="screenshot of perf.html"
               />
             </div>
           </div>
@@ -371,7 +371,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               href="https://github.com/devtools-html/perf.html"
               target="_blank"
               rel="noopener noreferrer"
-              title="Go to our git repository"
+              title="Go to our git repository (this opens in a new window)"
             >
               <svg
                 width="22"
