@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 16; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 17; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -779,6 +779,27 @@ const _upgraders = {
         }
       }
       thread.markers.data = newDataArray;
+    }
+  },
+  [17]: profile => {
+    // Profiles now have a relevantForJS property in the funcTable.
+    const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
+    for (const thread of profile.threads) {
+      const { funcTable, stringArray } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      funcTable.relevantForJS = new Array(funcTable.length);
+      for (let i = 0; i < funcTable.length; i++) {
+        const location = stringTable.getString(funcTable.name[i]);
+        if (location.startsWith('AutoEntryScript ')) {
+          funcTable.name[i] = stringTable.indexForString(
+            location.substring('AutoEntryScript '.length)
+          );
+          funcTable.relevantForJS[i] = true;
+        } else {
+          funcTable.relevantForJS[i] = domCallRegex.test(location);
+        }
+      }
+      thread.stringArray = stringTable.serializeToArray();
     }
   },
 };

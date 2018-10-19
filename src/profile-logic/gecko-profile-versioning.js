@@ -17,7 +17,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 13; // The current version of the Gecko profile format.
+export const CURRENT_VERSION = 14; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -484,6 +484,43 @@ const _upgraders = {
       }
     }
     convertToVersionThirteenRecursive(profile);
+  },
+  [14]: profile => {
+    // XXX document
+    const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
+    function convertToVersionFourteenRecursive(p) {
+      for (const thread of p.threads) {
+        thread.frameTable.schema = {
+          location: 0,
+          relevantForJS: 1,
+          implementation: 2,
+          optimizations: 3,
+          line: 4,
+          column: 5,
+          category: 6,
+        };
+        const locationIndex = 0;
+        const stringTable = new UniqueStringArray(thread.stringTable);
+        for (let i = 0; i < thread.frameTable.data.length; i++) {
+          const frameData = thread.frameTable.data[i];
+          const location = stringTable.getString(frameData[locationIndex]);
+          if (location.startsWith('AutoEntryScript ')) {
+            const betterLocation = stringTable.indexForString(
+              location.substring('AutoEntryScript '.length)
+            );
+            frameData.splice(0, 1, betterLocation, true);
+          } else {
+            const relevantForJS = domCallRegex.test(location);
+            frameData.splice(1, 0, relevantForJS);
+          }
+        }
+        thread.stringTable = stringTable.serializeToArray();
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionFourteenRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionFourteenRecursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */
