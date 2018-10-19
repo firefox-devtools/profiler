@@ -210,6 +210,7 @@ async function processTracingEvents(
           funcId = funcTable.length++;
           funcTable.address.push(0);
           funcTable.isJS.push(true);
+          funcTable.relevantForJS.push(false);
           funcTable.name.push(stringTable.indexForString(functionName));
           funcTable.resource.push(-1);
           funcTable.fileName.push(

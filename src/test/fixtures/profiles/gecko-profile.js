@@ -171,18 +171,19 @@ function _createGeckoThread(): GeckoThread {
     frameTable: {
       schema: {
         location: 0,
-        implementation: 1,
-        optimizations: 2,
-        line: 3,
-        column: 4,
-        category: 5,
+        relevantForJS: 1,
+        implementation: 2,
+        optimizations: 3,
+        line: 4,
+        column: 5,
+        category: 6,
       },
       data: [
-        [0, null, null, null, null], // (root)
-        [1, null, null, null, null], // 0x100000f84
-        [2, null, null, null, null], // 0x100001a45
-        [3, null, null, 4391, 0], // Startup::XRE_Main, line 4391, category Other
-        [7, 6, null, 34, null], // frobnicate, implementation 'baseline', line 34
+        [0, false, null, null, null, null], // (root)
+        [1, false, null, null, null, null], // 0x100000f84
+        [2, false, null, null, null, null], // 0x100001a45
+        [3, false, null, null, 4391, 0], // Startup::XRE_Main, line 4391, category Other
+        [7, false, 6, null, 34, null], // frobnicate, implementation 'baseline', line 34
       ],
     },
     markers: {
