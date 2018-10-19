@@ -91,14 +91,7 @@ class MarkersContextMenu extends PureComponent<Props> {
 
   copyMarkerName = () => {
     const { selectedMarker, markers } = this.props;
-    const markerName =
-      markers[selectedMarker] &&
-      markers[selectedMarker].data &&
-      markers[selectedMarker].data.name;
-
-    if (markerName) {
-      copy(markerName);
-    }
+    copy(markers[selectedMarker].name);
   };
 
   render() {
