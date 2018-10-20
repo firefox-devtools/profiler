@@ -125,7 +125,7 @@ export function formatValueTotal(
 
 export function formatNumberToString(
   number: number,
-  isIntegerInterval: isIntegerInterval
+  isIntegerInterval: boolean
 ): string {
   const LOCALE_WITH_DECIMAL_POINT = {
     minimumFractionDigits: 1,
