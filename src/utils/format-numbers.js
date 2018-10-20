@@ -122,3 +122,17 @@ export function formatValueTotal(
 
   return value_total + percent;
 }
+
+export function formatNumberToString(
+  number: number,
+  isIntegerInterval: isIntegerInterval
+): string {
+  const LOCALE_WITH_DECIMAL_POINT = {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  };
+  if (isIntegerInterval) {
+    return number.toLocaleString();
+  }
+  return number.toLocaleString(undefined, LOCALE_WITH_DECIMAL_POINT);
+}

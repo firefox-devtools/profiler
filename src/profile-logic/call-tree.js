@@ -26,6 +26,7 @@ import type {
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
+import { formatNumberToString } from '../utils/format-numbers';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
@@ -203,12 +204,15 @@ export class CallTree {
         icon = ExtensionIcon;
       }
 
-      const formatNumber = this._isIntegerInterval
-        ? _formatIntegerNumber
-        : _formatDecimalNumber;
+      const formattedTotalTime = formatNumberToString(
+        totalTime,
+        this._isIntegerInterval
+      );
+      const formattedSelfTime = formatNumberToString(
+        selfTime,
+        this._isIntegerInterval
+      );
 
-      const formattedTotalTime = formatNumber(totalTime);
-      const formattedSelfTime = formatNumber(selfTime);
       displayData = {
         totalTime: formattedTotalTime,
         totalTimeWithUnit: formattedTotalTime + 'ms',
@@ -425,16 +429,4 @@ export function getCallTree(
       isIntegerInterval
     );
   });
-}
-
-const LOCALE_WITH_DECIMAL_POINT = {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-};
-function _formatDecimalNumber(number: number): string {
-  return number.toLocaleString(undefined, LOCALE_WITH_DECIMAL_POINT);
-}
-
-function _formatIntegerNumber(number: number): string {
-  return number.toLocaleString();
 }
