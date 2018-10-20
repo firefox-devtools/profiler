@@ -103,6 +103,12 @@
   vertical-align: middle;
 }
 
+.homeSubtitle,
+.homeInstructionsText {
+  font-weight: normal;
+  font-size: 100%;
+}
+
 .homeSectionItems {
   margin: 1em 0;
 }
