@@ -95,7 +95,7 @@ const config = {
   optimization: {
     // Workaround for https://github.com/webpack/webpack/issues/7760
     usedExports: false,
-    minimizer: [ new OptimizeCSSAssetsPlugin({}) ],
+    minimizer: [new OptimizeCSSAssetsPlugin({})],
   },
 };
 
