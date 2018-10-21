@@ -53,6 +53,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
     </div>
     <h2
       className="homeSubtitle"
+      tabIndex="0"
     >
       Capture a performance profile. Analyze it. Share it. Make the web faster.
     </h2>
@@ -185,6 +186,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
     </div>
     <h2
       className="homeSubtitle"
+      tabIndex="0"
     >
       Capture a performance profile. Analyze it. Share it. Make the web faster.
     </h2>
@@ -237,11 +239,13 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           </a>
           <h3
             className="homeInstructionsText"
+            tabIndex="0"
           >
             Install the Gecko Profiler Add-on to start recording a performance profile in Firefox, then analyze it and share it with perf.html.
           </h3>
           <h3
             className="homeInstructionsText"
+            tabIndex="0"
           >
             You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
           </h3>
@@ -326,6 +330,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
     </div>
     <h2
       className="homeSubtitle"
+      tabIndex="0"
     >
       Capture a performance profile. Analyze it. Share it. Make the web faster.
     </h2>
@@ -496,6 +501,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
     </div>
     <h2
       className="homeSubtitle"
+      tabIndex="0"
     >
       Capture a performance profile. Analyze it. Share it. Make the web faster.
     </h2>
