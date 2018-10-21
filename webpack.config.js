@@ -81,8 +81,8 @@ const config = {
       { from: 'res/analytics.js' },
     ]),
     new MiniCssExtractPlugin({
-        filename: '[name].css',
-        chunkFilename: '[id].css'
+      filename: '[name].css',
+      chunkFilename: '[id].css',
     }),
   ],
   entry: ['./src/index'],
@@ -95,9 +95,7 @@ const config = {
   optimization: {
     // Workaround for https://github.com/webpack/webpack/issues/7760
     usedExports: false,
-    minimizer: [
-        new OptimizeCSSAssetsPlugin({})
-    ],
+    minimizer: [ new OptimizeCSSAssetsPlugin({}) ],
   },
 };
 
