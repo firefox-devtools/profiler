@@ -5,8 +5,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OfflinePlugin = require('@mstange/offline-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 const es6modules = ['pretty-bytes'];
 const es6modulePaths = es6modules.map(module => {
@@ -40,11 +40,11 @@ const config = {
         include: includes.concat(
           path.join(__dirname, 'node_modules', 'photon-colors')
         ),
-          use: [
-              "style-loader",
-              MiniCssExtractPlugin.loader,
-              "css-loader?minimize",
-          ],
+        use: [
+          "style-loader",
+          MiniCssExtractPlugin.loader,
+          'css-loader?minimize',
+        ],
       },
       {
         test: /\.jpg$/,
@@ -80,10 +80,10 @@ const config = {
       { from: 'res/zee-worker.js' },
       { from: 'res/analytics.js' },
     ]),
-      new MiniCssExtractPlugin({
-          filename: "[name].css",
-          chunkFilename: "[id].css"
-      }),
+    new MiniCssExtractPlugin({
+       filename: '[name].css',
+       chunkFilename: '[id].css'
+   }),
   ],
   entry: ['./src/index'],
   output: {
@@ -95,8 +95,8 @@ const config = {
   optimization: {
     // Workaround for https://github.com/webpack/webpack/issues/7760
     usedExports: false,
-      minimizer: [
-          new OptimizeCSSAssetsPlugin({})
+    minimizer: [
+        new OptimizeCSSAssetsPlugin({})
       ],
   },
 };
