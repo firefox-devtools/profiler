@@ -5,6 +5,7 @@
 
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
+import debounce from 'lodash.debounce';
 import type { CssPixels } from '../../types/units';
 import { requestIdleCallbackPolyfill } from '../../utils/request-idle-callback';
 
@@ -14,20 +15,6 @@ type State = {|
 |};
 
 export type SizeProps = $ReadOnly<State>;
-
-const debounce = function(func, wait, scope, ...args) {
-  let timer = null;
-
-  return function() {
-    if (timer) {
-      clearTimeout(timer);
-    }
-    timer = setTimeout(function() {
-      timer = null;
-      func.apply(scope, args);
-    }, wait);
-  };
-};
 
 /**
  * Wraps a React component and makes 'width' and 'height' available in the
@@ -61,14 +48,11 @@ export function withSize<
         throw new Error('Unable to find the DOMNode');
       }
       this._resizeListener = () => {
-        debounce(
-          requestIdleCallbackPolyfill(() => {
-            this._updateWidth(container);
-          }, this._requestIdleTimeout),
-          2000
-        );
+        requestIdleCallbackPolyfill(() => {
+          this._updateWidth(container);
+        }, this._requestIdleTimeout);
       };
-      window.addEventListener('resize', this._resizeListener);
+      window.addEventListener('resize', debounce(this._resizeListener, 1000));
 
       // Wrapping the first update in a requestAnimationFrame to defer the
       // calculation until the full render is done.
