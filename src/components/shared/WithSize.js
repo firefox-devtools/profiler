@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
 import type { CssPixels } from '../../types/units';
+import { requestIdleCallbackPolyfill } from '../../utils/request-idle-callback';
 
 type State = {|
   width: CssPixels,
@@ -37,6 +38,8 @@ export function withSize<
 > {
   return class WithSizeWrapper extends React.PureComponent<*, State> {
     _resizeListener: () => void;
+    _idleCallbackId = null;
+    _requestIdleTimeout = { timeout: 1000 };
     state = { width: 0, height: 0 };
 
     componentDidMount() {
@@ -45,7 +48,12 @@ export function withSize<
         throw new Error('Unable to find the DOMNode');
       }
       this._resizeListener = () => {
-        this._updateWidth(container);
+        if (this._idleCallbackId === null) {
+          this._idleCallbackId = requestIdleCallbackPolyfill(() => {
+            this._idleCallbackId = null;
+            this._updateWidth(container);
+          }, this._requestIdleTimeout);
+        }
       };
       window.addEventListener('resize', this._resizeListener);
 
@@ -64,6 +72,8 @@ export function withSize<
       }
       const { width, height } = container.getBoundingClientRect();
       this.setState({ width, height });
+      const style = 'color: green; font-weight: bold;';
+      console.log(`[updateWidth]  %c"${width}, ${height}"`, style);
     }
 
     render() {

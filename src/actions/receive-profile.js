@@ -13,6 +13,7 @@ import { symbolicateProfile } from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
+import { requestIdleCallbackPolyfill } from '../utils/request-idle-callback';
 import JSZip from 'jszip';
 import {
   getDataSource,
@@ -190,20 +191,6 @@ export function coalescedFunctionsUpdate(
     type: 'COALESCED_FUNCTIONS_UPDATE',
     functionsUpdatePerThread,
   };
-}
-
-let requestIdleCallbackPolyfill: (
-  callback: () => void,
-  _opts?: { timeout: number }
-) => mixed;
-
-if (typeof window === 'object' && window.requestIdleCallback) {
-  requestIdleCallbackPolyfill = window.requestIdleCallback;
-} else if (typeof process === 'object' && process.nextTick) {
-  // Node environment
-  requestIdleCallbackPolyfill = process.nextTick;
-} else {
-  requestIdleCallbackPolyfill = callback => setTimeout(callback, 0);
 }
 
 class ColascedFunctionsUpdateDispatcher {
