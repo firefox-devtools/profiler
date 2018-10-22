@@ -15,6 +15,20 @@ type State = {|
 
 export type SizeProps = $ReadOnly<State>;
 
+const debounce = function(func, wait, scope, ...args) {
+  let timer = null;
+
+  return function() {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    timer = setTimeout(function() {
+      timer = null;
+      func.apply(scope, args);
+    }, wait);
+  };
+};
+
 /**
  * Wraps a React component and makes 'width' and 'height' available in the
  * wrapped component's props. These props start out at zero and are updated to
@@ -38,7 +52,6 @@ export function withSize<
 > {
   return class WithSizeWrapper extends React.PureComponent<*, State> {
     _resizeListener: () => void;
-    _idleCallbackId = null;
     _requestIdleTimeout = { timeout: 1000 };
     state = { width: 0, height: 0 };
 
@@ -48,12 +61,12 @@ export function withSize<
         throw new Error('Unable to find the DOMNode');
       }
       this._resizeListener = () => {
-        if (this._idleCallbackId === null) {
-          this._idleCallbackId = requestIdleCallbackPolyfill(() => {
-            this._idleCallbackId = null;
+        debounce(
+          requestIdleCallbackPolyfill(() => {
             this._updateWidth(container);
-          }, this._requestIdleTimeout);
-        }
+          }, this._requestIdleTimeout),
+          2000
+        );
       };
       window.addEventListener('resize', this._resizeListener);
 
