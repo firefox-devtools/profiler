@@ -9,9 +9,9 @@ import { Provider } from 'react-redux';
 
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import NetworkChart from '../../components/network-chart';
-import EmptyReasons from '../../components/shared/EmptyReasons';
 import { changeSelectedTab } from '../../actions/app';
 
+import EmptyReasons from '../../components/shared/EmptyReasons';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -55,26 +55,28 @@ function setupWithProfile(profile) {
   };
 }
 
-it('renders NetworkChart correctly', () => {
-  window.devicePixelRatio = 1;
+describe('NetworkChart', function() {
+  it('renders NetworkChart correctly', () => {
+    window.devicePixelRatio = 1;
 
-  const profile = getProfileWithMarkers([...NETWORK_MARKERS]);
-  const {
-    flushRafCalls,
-    dispatch,
-    networkChart,
-    flushDrawLog,
-  } = setupWithProfile(profile);
+    const profile = getProfileWithMarkers([...NETWORK_MARKERS]);
+    const {
+      flushRafCalls,
+      dispatch,
+      networkChart,
+      flushDrawLog,
+    } = setupWithProfile(profile);
 
-  dispatch(changeSelectedTab('network-chart'));
-  networkChart.update();
-  flushRafCalls();
+    dispatch(changeSelectedTab('network-chart'));
+    networkChart.update();
+    flushRafCalls();
 
-  const drawCalls = flushDrawLog();
-  expect(networkChart).toMatchSnapshot();
-  expect(drawCalls).toMatchSnapshot();
+    const drawCalls = flushDrawLog();
+    expect(networkChart).toMatchSnapshot();
+    expect(drawCalls).toMatchSnapshot();
 
-  delete window.devicePixelRatio;
+    delete window.devicePixelRatio;
+  });
 });
 
 describe('EmptyReasons', () => {

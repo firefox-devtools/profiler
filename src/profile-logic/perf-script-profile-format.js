@@ -125,8 +125,8 @@ export function convertPerfScriptProfile(profile: string): Object {
     thread.addSample(threadName, stack, timeStamp);
   }
 
-  // Parse the format. The two regular expressions and some of the comments
-  // below were taken from Brendan Gregg's stackcollapse-perf.pl.
+  // Parse the format. Some of the regular expressions and comments below were
+  // taken from Brendan Gregg's stackcollapse-perf.pl.
   const lines = profile.split('\n');
 
   let lineIndex = 0;
@@ -141,63 +141,83 @@ export function convertPerfScriptProfile(profile: string): Object {
     // eg, "java 12688/12764 6544038.708352: cpu-clock:"
     // eg, "V8 WorkerThread 24636/25607 [000] 94564.109216: cycles:"
     // other combinations possible
-    // pattern: thread-name-with-optional-spaces tid time: NNN cycles:XXXX:
-    // alternate pattern: thread-name-with-optional-spaces pid/tid time: NNN cycles:XXXX:
+    // pattern: thread-name-with-optional-spaces-and-numbers tid time: NNN cycles:XXXX:
+    // alternate pattern: thread-name-with-optional-spaces-and-numbers pid/tid time: NNN cycles:XXXX:
+    // eg, "FS Broker 5858  5791/5860  30171.917889:    4612247 cycles:ppp: "
     // eg, "java 25607/25608 4794564.109216: 33 cycles:uppp"
     //   (generate with "perf script -F +pid")
-    //
-    // Regexes are evil, and need descriptions (and if really in a string, would need lots of extra escapes).
-    // Match a threadname, with optional spaces, by requiring it to be followed by either a numeric tid or tid/pid
-    // '/^' + '(S.*?)(?=(?:s+(?:(?:d+)/*(?:d+)*s)))s+' +
-    // Match a numeric tid, or a numeric tid/pid
-    // '(d+)/*(d+)*s+([d.]+)' + '/';
-    const sampleStartMatch = /^(\S.*?)(?=(?:\s+(?:(?:\d+)\/*(?:\d+)*\s)))\s+(\d+)\/*(\d+)*\s+([\d.]+)/.exec(
-      sampleStartLine
+
+    // First, get the sample's time stamp and whatever comes before the timeStamp:
+    const sampleStartMatch = /^(.*) ([\d.]+):/.exec(sampleStartLine);
+    if (!sampleStartMatch) {
+      console.log(
+        'Could not parse line as the start of a sample in the "perf script" profile format:',
+        sampleStartLine
+      );
+      continue;
+    }
+
+    const beforeTimeStamp = sampleStartMatch[1];
+    const timeStamp = parseFloat(sampleStartMatch[2]) * 1000;
+
+    // Now try to find the tid within `beforeTimeStamp`, possibly with a pid/ in
+    // front of it. Treat everything before that as the thread name.
+    //                                  +- threadName
+    //                                  |        +- pid/ (optional)
+    //                                  |        |        +- tid
+    //                                  |        |        |   +- space or end of string
+    //                                 vvvv vvvvvvvvvvv vvvvv v
+    const threadNamePidAndTidMatch = /^(.*) (?:(\d+)\/)?(\d+)\b/.exec(
+      beforeTimeStamp
     );
-    if (sampleStartMatch) {
-      const threadName = sampleStartMatch[1];
-      const tid = sampleStartMatch[3] || sampleStartMatch[2];
-      const pid = sampleStartMatch[3] ? Number(sampleStartMatch[2]) : 0;
-      const timeStamp = parseFloat(sampleStartMatch[4]) * 1000;
-      // Assume start time is the time of the first sample
-      if (startTime === 0) {
-        startTime = timeStamp;
+    if (!threadNamePidAndTidMatch) {
+      console.log(
+        'Could not parse line as the start of a sample in the "perf script" profile format:',
+        sampleStartLine
+      );
+      continue;
+    }
+
+    const threadName = threadNamePidAndTidMatch[1].trim();
+    const pid = Number(threadNamePidAndTidMatch[2] || 0);
+    const tid = threadNamePidAndTidMatch[3];
+
+    // Assume start time is the time of the first sample
+    if (startTime === 0) {
+      startTime = timeStamp;
+    }
+    // Parse the stack frames of the current sample in a nested loop.
+    const stack = [];
+    while (lineIndex < lines.length) {
+      const stackFrameLine = lines[lineIndex++];
+      if (stackFrameLine.trim() === '') {
+        // Sample ends.
+        break;
       }
-      // Parse the stack frames of the current sample in a nested loop.
-      const stack = [];
-      while (lineIndex < lines.length) {
-        const stackFrameLine = lines[lineIndex++];
-        if (stackFrameLine.trim() === '') {
-          // Sample ends.
-          break;
+
+      // 	         23fe921 _ZN7mozilla3ipc14MessageChannel11MessageTask3RunEv (/home/mstange/Desktop/firefox/libxul.so)
+      const stackFrameMatch = /^\s*(\w+)\s*(.+) \((\S*)\)/.exec(stackFrameLine);
+      if (stackFrameMatch) {
+        // const pc = stackFrameMatch[1];
+        let rawFunc = stackFrameMatch[2];
+        // const mod = stackFrameMatch[3];
+
+        // Linux 4.8 included symbol offsets in perf script output by default, eg:
+        // 7fffb84c9afc cpu_startup_entry+0x800047c022ec ([kernel.kallsyms])
+        // strip these off:
+        rawFunc = rawFunc.replace(/\+0x[\da-f]+$/, '');
+
+        if (rawFunc.startsWith('(')) {
+          continue; // skip process names
         }
 
-        // 	         23fe921 _ZN7mozilla3ipc14MessageChannel11MessageTask3RunEv (/home/mstange/Desktop/firefox/libxul.so)
-        const stackFrameMatch = /^\s*(\w+)\s*(.+) \((\S*)\)/.exec(
-          stackFrameLine
-        );
-        if (stackFrameMatch) {
-          // const pc = stackFrameMatch[1];
-          let rawFunc = stackFrameMatch[2];
-          // const mod = stackFrameMatch[3];
-
-          // Linux 4.8 included symbol offsets in perf script output by default, eg:
-          // 7fffb84c9afc cpu_startup_entry+0x800047c022ec ([kernel.kallsyms])
-          // strip these off:
-          rawFunc = rawFunc.replace(/\+0x[\da-f]+$/, '');
-
-          if (rawFunc.startsWith('(')) {
-            continue; // skip process names
-          }
-
-          stack.push(rawFunc);
-        }
+        stack.push(rawFunc);
       }
+    }
 
-      if (stack.length !== 0) {
-        stack.reverse();
-        _addThreadSample(pid, tid, threadName, timeStamp, stack);
-      }
+    if (stack.length !== 0) {
+      stack.reverse();
+      _addThreadSample(pid, tid, threadName, timeStamp, stack);
     }
   }
 

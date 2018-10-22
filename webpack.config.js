@@ -70,6 +70,9 @@ const config = {
       { from: 'res/_headers' },
       { from: 'res/_redirects' },
       { from: 'docs-user', to: 'docs' },
+      { from: 'res/.htaccess' },
+      { from: 'res/zee-worker.js' },
+      { from: 'res/analytics.js' },
     ]),
   ],
   entry: ['./src/index'],
@@ -104,10 +107,9 @@ if (process.env.NODE_ENV === 'production') {
         scope: '/',
         events: true,
       },
-      externals: ['/zee-worker.js', '/analytics.js'],
       /* Exclude the files used but not served by netlify. When trying to fetch
        * them we get a 404, and so the SW registration fails. */
-      excludes: ['_headers', '_redirects'],
+      excludes: ['_headers', '_redirects', '.htaccess', 'docs/**'],
       cacheMaps: [
         {
           requestTypes: ['navigate'],

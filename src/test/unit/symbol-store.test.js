@@ -47,6 +47,10 @@ describe('SymbolStore', function() {
   });
 
   it('should only request symbols from the symbol provider once per library', async function() {
+    // Because of the promise rejection below, our code outputs logs for easier
+    // debugging. This mock silences these logs, but we'll check some
+    // expectations about these logs at the end.
+    jest.spyOn(console, 'log').mockImplementation(() => {});
     symbolProvider = {
       requestSymbolsFromServer: jest.fn(requests =>
         requests.map(request => {
@@ -115,9 +119,11 @@ describe('SymbolStore', function() {
     );
     expect(symbolProvider.requestSymbolsFromServer).toHaveBeenCalledTimes(2);
     expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(2);
+    expect(console.log).toHaveBeenCalledTimes(2); // Once for each uncached call
   });
 
   it('should persist in DB', async function() {
+    jest.spyOn(console, 'log').mockImplementation(() => {});
     symbolProvider = {
       requestSymbolsFromServer: jest.fn(requests =>
         requests.map(() =>
@@ -150,6 +156,7 @@ describe('SymbolStore', function() {
     );
 
     expect(symbolProvider.requestSymbolTableFromAddon).toHaveBeenCalledTimes(1);
+    expect(console.log).toHaveBeenCalledTimes(1);
   });
 
   it('should call requestSymbolsFromServer first', async function() {

@@ -15,6 +15,7 @@ import {
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { changeSelectedMarker } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
+import { formatSeconds } from '../../utils/format-numbers';
 
 import './index.css';
 
@@ -132,12 +133,7 @@ class MarkerTree {
 }
 
 function _formatStart(start: number, zeroAt) {
-  return (
-    ((start - zeroAt) / 1000).toLocaleString(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 3,
-    }) + 's'
-  );
+  return formatSeconds(start - zeroAt);
 }
 
 function _formatDuration(duration: number): string {

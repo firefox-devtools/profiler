@@ -92,6 +92,16 @@ export function formatMilliseconds(
   return formatNumber(time, significantDigits, maxFractionalDigits) + 'ms';
 }
 
+export function formatSeconds(
+  time: Milliseconds,
+  significantDigits: number = 5,
+  maxFractionalDigits: number = 3
+) {
+  return (
+    formatNumber(time / 1000, significantDigits, maxFractionalDigits) + 's'
+  );
+}
+
 /*
  * Format a value and a total to the form "v/t (p%)".  For example this can
  * be used to print "7MB/10MB (70%)"  fornatNum is a function to format the

@@ -44,6 +44,11 @@ export type PaintProfilerMarkerTracing = {
   interval: 'start' | 'end',
 };
 
+export type ArbitraryEventTracing = {|
+  +type: 'tracing',
+  +category: string,
+|};
+
 export type PhaseTimes<Unit> = { [phase: string]: Unit };
 
 type GCSliceData_Shared = {
@@ -282,13 +287,15 @@ export type InvalidationPayload = {
  * be included depending on what states happen during the load.  Also note
  * that redirects are logged as well.
  */
-export type NetworkPayload = {
+
+export type NetworkPayload = {|
   type: 'Network',
-  URI?: string,
-  RedirectURI?: string,
+  URI: string,
+  RedirectURI: string,
   id: number,
   pri: number, // priority of the load; always included as it can change
   count?: number, // Total size of transfer, if any
+  dur: number,
   status: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
@@ -301,7 +308,9 @@ export type NetworkPayload = {
   requestStart?: Milliseconds,
   responseStart?: Milliseconds,
   responseEnd?: Milliseconds,
-};
+  title: string,
+  name: string,
+|};
 
 /**
  * The payload for the UserTimings API. These are added through performance.measure()
@@ -426,4 +435,5 @@ export type MarkerPayload_Gecko =
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
+  | ArbitraryEventTracing
   | null;

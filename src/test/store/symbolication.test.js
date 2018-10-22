@@ -42,6 +42,11 @@ describe('doSymbolicateProfile', function() {
 
   // Initialize a store, an unsymbolicated profile, and helper functions.
   function init() {
+    // The rejection in `requestSymbolsFromServer` outputs an error log, let's
+    // silence it here. The fact that we call it is tested in
+    // symbol-store.test.js.
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+
     const profile = _createUnsymbolicatedProfile();
     const store = storeWithProfile(profile);
 

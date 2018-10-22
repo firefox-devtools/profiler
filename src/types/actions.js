@@ -35,6 +35,7 @@ export type DataSource =
   | 'local'
   | 'public'
   | 'from-url';
+export type TimelineType = 'stack' | 'category';
 export type PreviewSelection =
   | {| +hasSelection: false, +isModifying: false |}
   | {|
@@ -80,6 +81,7 @@ type ProfileAction =
       +type: 'CHANGE_SELECTED_CALL_NODE',
       +threadIndex: ThreadIndex,
       +selectedCallNodePath: CallNodePath,
+      +optionalExpandedToCallNodePath: ?CallNodePath,
     |}
   | {|
       +type: 'FOCUS_CALL_TREE',
@@ -183,37 +185,17 @@ type ReceiveProfileAction =
       +type: 'DONE_SYMBOLICATING',
     |}
   | {|
-      +type: 'ERROR_RECEIVING_PROFILE_FROM_FILE',
-      +error: Error,
-    |}
-  | {|
-      +type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_ADDON',
+      +type: 'TEMPORARY_ERROR',
       +error: TemporaryError,
     |}
   | {|
-      +type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_ADDON',
-      +error: Error,
-    |}
-  | {|
-      +type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_STORE',
-      +error: TemporaryError,
-    |}
-  | {|
-      +type: 'TEMPORARY_ERROR_RECEIVING_PROFILE_FROM_URL',
-      +error: TemporaryError,
-    |}
-  | {|
-      +type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_STORE',
-      +error: Error,
-    |}
-  | {|
-      +type: 'FATAL_ERROR_RECEIVING_PROFILE_FROM_URL',
+      +type: 'FATAL_ERROR',
       +error: Error,
     |}
   | {|
       +type: 'VIEW_PROFILE',
       +profile: Profile,
-      +selectedThreadIndex: ThreadIndex | null,
+      +selectedThreadIndex: ThreadIndex,
       +globalTracks: GlobalTrack[],
       +globalTrackOrder: TrackIndex[],
       +hiddenGlobalTracks: Set<TrackIndex>,
@@ -269,6 +251,10 @@ type UrlStateAction =
       +type: 'POP_TRANSFORMS_FROM_STACK',
       +threadIndex: ThreadIndex,
       +firstPoppedFilterIndex: number,
+    |}
+  | {|
+      +type: 'CHANGE_TIMELINE_TYPE',
+      +timelineType: TimelineType,
     |}
   | {|
       +type: 'CHANGE_IMPLEMENTATION_FILTER',
