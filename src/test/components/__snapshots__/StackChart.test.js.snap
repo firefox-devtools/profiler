@@ -11,33 +11,49 @@ exports[`StackChart matches the snapshot 1`] = `
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
