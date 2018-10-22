@@ -221,7 +221,7 @@
   }
 }
 
-@media (min-width: 500px) and (max-width: 767px) {
+@media (max-width: 767px) {
   .homeSection {
     width: 90%;
     max-width: 90%;
