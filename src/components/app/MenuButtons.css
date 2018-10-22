@@ -150,3 +150,8 @@
   position: relative;
   bottom: 1px;
 }
+
+.menuButtonsOpenMetainfo {
+  width: 150px;
+  border-left: 1px solid var(--grey-30);
+}

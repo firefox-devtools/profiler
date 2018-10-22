@@ -589,6 +589,72 @@ const MenuButtons = ({
   predictUrl,
 }: MenuButtonsProps) => (
   <div className="menuButtons">
+    <ButtonWithPanel
+      className="menuButtonsOpenMetainfo"
+      label="Profile info"
+      panel={
+        <ArrowPanel className="arrowPanelOpenMetainfo">
+          <h2 className="arrowPanelSubTitle">Timing</h2>
+          <p>
+            <span>
+              <span className="metainfolabel">startTime: </span>
+              {profile.meta.startTime}
+            </span>
+            <br />
+            <span>
+              <span className="metainfolabel">Interval:</span>{' '}
+              {profile.meta.interval}s
+            </span>
+            <br />
+            <span>
+              <span className="metainfolabel">Profile Version:</span>{' '}
+              {profile.meta.preprocessedProfileVersion}
+            </span>
+          </p>
+          <h2 className="arrowPanelSubTitle">Application</h2>
+          <p>
+            <span>
+              <span className="metainfolabel">Name:</span>{' '}
+              {profile.meta.product}
+            </span>
+            <br />
+            <span>
+              <span className="metainfolabel">Version:</span>{' '}
+              {profile.meta.version}
+            </span>
+            <br />
+            <span>
+              <span className="metainfolabel">Update Channel:</span>{' '}
+              {profile.meta.misc}
+            </span>
+            <br />
+            <span>
+              <span className="metainfolabel">Build ID:</span>{' '}
+              {profile.meta.appBuildID}
+            </span>
+            <br />
+            {profile.meta.extensions ? (
+              <span>
+                <span className="metainfolabel">extensions:</span>{' '}
+                {profile.meta.extensions.name}
+              </span>
+            ) : null}
+          </p>
+          <h2 className="arrowPanelSubTitle">Plattform</h2>
+          <p>
+            <span>
+              <span className="metainfolabel">Platform:</span>{' '}
+              {profile.meta.platform}
+            </span>
+            <br />
+            <span>
+              <span className="metainfolabel">OS:</span> {profile.meta.oscpu}
+            </span>
+            <br />
+          </p>
+        </ArrowPanel>
+      }
+    />
     <ProfileSharingCompositeButton
       profile={profile}
       dataSource={dataSource}

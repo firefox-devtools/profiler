@@ -5,6 +5,153 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
   className="menuButtons"
 >
   <div
+    className="buttonWithPanel menuButtonsOpenMetainfo"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Profile info"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel arrowPanelOpenMetainfo"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <div
+          className="arrowPanelContent"
+        >
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Timing
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                startTime: 
+              </span>
+              1460221352723.438
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Interval:
+              </span>
+               
+              1
+              s
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Profile Version:
+              </span>
+               
+              16
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Application
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Name:
+              </span>
+               
+              Firefox
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Version:
+              </span>
+               
+              13
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Update Channel:
+              </span>
+               
+              rv:48.0
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Build ID:
+              </span>
+               
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                extensions:
+              </span>
+               
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Plattform
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Platform:
+              </span>
+               
+              Macintosh
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                OS:
+              </span>
+               
+              Intel Mac OS X 10.11
+            </span>
+            <br />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
     className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
     <div
@@ -348,6 +495,153 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
 <div
   className="menuButtons"
 >
+  <div
+    className="buttonWithPanel menuButtonsOpenMetainfo"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Profile info"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel arrowPanelOpenMetainfo"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <div
+          className="arrowPanelContent"
+        >
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Timing
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                startTime: 
+              </span>
+              1460221352723.438
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Interval:
+              </span>
+               
+              1
+              s
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Profile Version:
+              </span>
+               
+              16
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Application
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Name:
+              </span>
+               
+              Firefox
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Version:
+              </span>
+               
+              13
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Update Channel:
+              </span>
+               
+              rv:48.0
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Build ID:
+              </span>
+               
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                extensions:
+              </span>
+               
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Plattform
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Platform:
+              </span>
+               
+              Macintosh
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                OS:
+              </span>
+               
+              Intel Mac OS X 10.11
+            </span>
+            <br />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
   <div
     className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
@@ -693,6 +987,153 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
   className="menuButtons"
 >
   <div
+    className="buttonWithPanel menuButtonsOpenMetainfo"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Profile info"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel arrowPanelOpenMetainfo"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <div
+          className="arrowPanelContent"
+        >
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Timing
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                startTime: 
+              </span>
+              1460221352723.438
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Interval:
+              </span>
+               
+              1
+              s
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Profile Version:
+              </span>
+               
+              16
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Application
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Name:
+              </span>
+               
+              Firefox
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Version:
+              </span>
+               
+              13
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Update Channel:
+              </span>
+               
+              rv:48.0
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Build ID:
+              </span>
+               
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                extensions:
+              </span>
+               
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Plattform
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Platform:
+              </span>
+               
+              Macintosh
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                OS:
+              </span>
+               
+              Intel Mac OS X 10.11
+            </span>
+            <br />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
     className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
     <div
@@ -1036,6 +1477,153 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
 <div
   className="menuButtons"
 >
+  <div
+    className="buttonWithPanel menuButtonsOpenMetainfo"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Profile info"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel arrowPanelOpenMetainfo"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <div
+          className="arrowPanelContent"
+        >
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Timing
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                startTime: 
+              </span>
+              1460221352723.438
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Interval:
+              </span>
+               
+              1
+              s
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Profile Version:
+              </span>
+               
+              16
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Application
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Name:
+              </span>
+               
+              Firefox
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Version:
+              </span>
+               
+              13
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Update Channel:
+              </span>
+               
+              rv:48.0
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Build ID:
+              </span>
+               
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                extensions:
+              </span>
+               
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Plattform
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Platform:
+              </span>
+               
+              Macintosh
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                OS:
+              </span>
+               
+              Intel Mac OS X 10.11
+            </span>
+            <br />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
   <div
     className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
@@ -1381,6 +1969,153 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
   className="menuButtons"
 >
   <div
+    className="buttonWithPanel menuButtonsOpenMetainfo"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Profile info"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel arrowPanelOpenMetainfo"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <div
+          className="arrowPanelContent"
+        >
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Timing
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                startTime: 
+              </span>
+              1460221352723.438
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Interval:
+              </span>
+               
+              1
+              s
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Profile Version:
+              </span>
+               
+              16
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Application
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Name:
+              </span>
+               
+              Firefox
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Version:
+              </span>
+               
+              13
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Update Channel:
+              </span>
+               
+              rv:48.0
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Build ID:
+              </span>
+               
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                extensions:
+              </span>
+               
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Plattform
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Platform:
+              </span>
+               
+              Macintosh
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                OS:
+              </span>
+               
+              Intel Mac OS X 10.11
+            </span>
+            <br />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
     className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
     <div
@@ -1724,6 +2459,153 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
 <div
   className="menuButtons"
 >
+  <div
+    className="buttonWithPanel menuButtonsOpenMetainfo"
+  >
+    <div
+      className="buttonWithPanelButtonWrapper"
+    >
+      <input
+        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+        value="Profile info"
+      />
+    </div>
+    <div
+      className="arrowPanelAnchor"
+    >
+      <div
+        className="arrowPanel arrowPanelOpenMetainfo"
+      >
+        <div
+          className="arrowPanelArrow"
+        />
+        <div
+          className="arrowPanelContent"
+        >
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Timing
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                startTime: 
+              </span>
+              1460221352723.438
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Interval:
+              </span>
+               
+              1
+              s
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Profile Version:
+              </span>
+               
+              16
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Application
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Name:
+              </span>
+               
+              Firefox
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Version:
+              </span>
+               
+              13
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Update Channel:
+              </span>
+               
+              rv:48.0
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Build ID:
+              </span>
+               
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                extensions:
+              </span>
+               
+            </span>
+          </p>
+          <h2
+            className="arrowPanelSubTitle"
+          >
+            Plattform
+          </h2>
+          <p>
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                Platform:
+              </span>
+               
+              Macintosh
+            </span>
+            <br />
+            <span>
+              <span
+                className="metainfolabel"
+              >
+                OS:
+              </span>
+               
+              Intel Mac OS X 10.11
+            </span>
+            <br />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
   <div
     className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
   >
