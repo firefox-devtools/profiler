@@ -54,8 +54,10 @@ describe('upgrading old cleopatra profiles', function() {
 
   // Executing this only for oldCleopatraProfile because
   // ancientCleopatraProfile doesn't have any causes for markers.
-  it('should be able to convert causes from old cleopatra profiles', function() {
-    const profile = unserializeProfileOfArbitraryFormat(oldCleopatraProfile);
+  it('should be able to convert causes from old cleopatra profiles', async function() {
+    const profile = await unserializeProfileOfArbitraryFormat(
+      oldCleopatraProfile
+    );
 
     const [thread] = profile.threads;
     const { markers } = thread;
@@ -121,131 +123,131 @@ describe('upgrading processed profiles', function() {
     CURRENT_PROCESSED_VERSION
   );
 
-  it('should upgrade version 0', function() {
+  it('should upgrade version 0', async function() {
     const serializedOldProcessedProfile0 = require('../fixtures/upgrades/processed-0.json');
-    const upgradedProfile0 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile0 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile0
     );
-    compareProcessedProfiles(upgradedProfile0, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile0, await afterUpgradeReference);
   });
-  it('should upgrade version 1', function() {
+  it('should upgrade version 1', async function() {
     const serializedOldProcessedProfile1 = require('../fixtures/upgrades/processed-1.json');
-    const upgradedProfile1 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile1 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile1
     );
-    compareProcessedProfiles(upgradedProfile1, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile1, await afterUpgradeReference);
   });
-  it('should upgrade version 2', function() {
+  it('should upgrade version 2', async function() {
     const serializedOldProcessedProfile2 = require('../fixtures/upgrades/processed-2.json');
-    const upgradedProfile2 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile2 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile2
     );
-    compareProcessedProfiles(upgradedProfile2, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile2, await afterUpgradeReference);
   });
-  it('should upgrade version 3', function() {
+  it('should upgrade version 3', async function() {
     const serializedOldProcessedProfile3 = require('../fixtures/upgrades/processed-3.json');
-    const upgradedProfile3 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile3 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile3
     );
-    compareProcessedProfiles(upgradedProfile3, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile3, await afterUpgradeReference);
   });
-  it('should upgrade version 4', function() {
+  it('should upgrade version 4', async function() {
     const serializedOldProcessedProfile4 = require('../fixtures/upgrades/processed-4.json');
-    const upgradedProfile4 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile4 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile4
     );
-    compareProcessedProfiles(upgradedProfile4, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile4, await afterUpgradeReference);
   });
-  it('should upgrade version 5', function() {
+  it('should upgrade version 5', async function() {
     const serializedOldProcessedProfile5 = require('../fixtures/upgrades/processed-5.json');
-    const upgradedProfile5 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile5 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile5
     );
-    compareProcessedProfiles(upgradedProfile5, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile5, await afterUpgradeReference);
   });
-  it('should upgrade version 6', function() {
+  it('should upgrade version 6', async function() {
     const serializedOldProcessedProfile6 = require('../fixtures/upgrades/processed-6.json');
-    const upgradedProfile6 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile6 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile6
     );
-    compareProcessedProfiles(upgradedProfile6, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile6, await afterUpgradeReference);
   });
-  it('should upgrade version 7', function() {
+  it('should upgrade version 7', async function() {
     const serializedOldProcessedProfile7 = require('../fixtures/upgrades/processed-7.json');
-    const upgradedProfile7 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile7 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile7
     );
-    compareProcessedProfiles(upgradedProfile7, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile7, await afterUpgradeReference);
   });
-  it('should upgrade version 8', function() {
+  it('should upgrade version 8', async function() {
     // processed-7a to processed-8a is testing that we properly
     // upgrade the DOMEventMarkerPayload.timeStamp field.
     const serializedOldProcessedProfile7a = require('../fixtures/upgrades/processed-7a.json');
-    const afterUpgradeReference8a = unserializeProfileOfArbitraryFormat(
+    const afterUpgradeReference8a = await unserializeProfileOfArbitraryFormat(
       require('../fixtures/upgrades/processed-8a.json')
     );
-    const upgradedProfile7a = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile7a = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile7a
     );
-    compareProcessedProfiles(upgradedProfile7a, afterUpgradeReference8a);
+    compareProcessedProfiles(upgradedProfile7a, await afterUpgradeReference8a);
   });
-  it('should upgrade version 9', function() {
+  it('should upgrade version 9', async function() {
     const serializedOldProcessedProfile8 = require('../fixtures/upgrades/processed-8.json');
-    const upgradedProfile8 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile8 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile8
     );
-    compareProcessedProfiles(upgradedProfile8, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile8, await afterUpgradeReference);
   });
-  it('should upgrade version 10', function() {
+  it('should upgrade version 10', async function() {
     const serializedOldProcessedProfile9 = require('../fixtures/upgrades/processed-9.json');
-    const upgradedProfile9 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile9 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile9
     );
-    compareProcessedProfiles(upgradedProfile9, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile9, await afterUpgradeReference);
   });
-  it('should upgrade version 11', function() {
+  it('should upgrade version 11', async function() {
     const serializedOldProcessedProfile11 = require('../fixtures/upgrades/processed-11.json');
-    const upgradedProfile11 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile11 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile11
     );
-    compareProcessedProfiles(upgradedProfile11, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile11, await afterUpgradeReference);
   });
-  it('should upgrade version 12', function() {
+  it('should upgrade version 12', async function() {
     const serializedOldProcessedProfile12 = require('../fixtures/upgrades/processed-12.json');
-    const upgradedProfile12 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile12 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile12
     );
-    compareProcessedProfiles(upgradedProfile12, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile12, await afterUpgradeReference);
   });
-  it('should upgrade version 13', function() {
+  it('should upgrade version 13', async function() {
     // This last test is to make sure we properly upgrade the json
     // file to same version
     const serializedOldProcessedProfile13 = require('../fixtures/upgrades/processed-13.json');
-    const upgradedProfile13 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile13 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile13
     );
-    compareProcessedProfiles(upgradedProfile13, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile13, await afterUpgradeReference);
   });
-  it('should upgrade version 14', function() {
+  it('should upgrade version 14', async function() {
     const serializedOldProcessedProfile14 = require('../fixtures/upgrades/processed-14.json');
-    const upgradedProfile14 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile14 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile14
     );
-    compareProcessedProfiles(upgradedProfile14, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile14, await afterUpgradeReference);
   });
-  it('should upgrade version 15', function() {
+  it('should upgrade version 15', async function() {
     const serializedOldProcessedProfile15 = require('../fixtures/upgrades/processed-15.json');
-    const upgradedProfile15 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile15 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile15
     );
-    compareProcessedProfiles(upgradedProfile15, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile15, await afterUpgradeReference);
   });
-  it('should still process a profile of the current version with no issues', function() {
+  it('should still process a profile of the current version with no issues', async function() {
     const serializedOldProcessedProfile16 = require('../fixtures/upgrades/processed-16.json');
-    const upgradedProfile16 = unserializeProfileOfArbitraryFormat(
+    const upgradedProfile16 = await unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile16
     );
-    compareProcessedProfiles(upgradedProfile16, afterUpgradeReference);
+    compareProcessedProfiles(upgradedProfile16, await afterUpgradeReference);
   });
 });
 
@@ -320,7 +322,7 @@ describe('upgrading gecko profiles', function() {
 });
 
 describe('importing perf profile', function() {
-  it('should import a perf profile', function() {
+  it('should import a perf profile', async function() {
     let version = -1;
     try {
       const fs = require('fs');
@@ -328,7 +330,7 @@ describe('importing perf profile', function() {
       const buffer = fs.readFileSync('src/test/fixtures/upgrades/test.perf.gz');
       const decompressedArrayBuffer = zlib.gunzipSync(buffer);
       const text = decompressedArrayBuffer.toString('utf8');
-      const profile = unserializeProfileOfArbitraryFormat(text);
+      const profile = await unserializeProfileOfArbitraryFormat(text);
       if (profile === undefined) {
         throw new Error('Unable to parse the profile.');
       }

@@ -939,9 +939,9 @@ function _unserializeProfile(profile: Object): Profile {
  * Take some arbitrary profile file from some data source, and turn it into
  * the processed profile format.
  */
-export function unserializeProfileOfArbitraryFormat(
+export async function unserializeProfileOfArbitraryFormat(
   stringOrObject: string | Object
-): Profile {
+): Promise<Profile> {
   try {
     let profile = null;
     if (typeof stringOrObject === 'string') {
