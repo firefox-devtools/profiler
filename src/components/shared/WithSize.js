@@ -37,6 +37,8 @@ export function withSize<
 > {
   return class WithSizeWrapper extends React.PureComponent<*, State> {
     _resizeListener: () => void;
+    _visibilitychangeListener: () => void;
+    _isSizeInfoDirty: boolean = false;
     state = { width: 0, height: 0 };
 
     componentDidMount() {
@@ -44,10 +46,25 @@ export function withSize<
       if (!container) {
         throw new Error('Unable to find the DOMNode');
       }
+
       this._resizeListener = () => {
-        this._updateWidth(container);
+        if (!document.hidden) {
+          this._updateWidth(container);
+        } else {
+          this._isSizeInfoDirty = true;
+        }
+      };
+      this._visibilitychangeListener = () => {
+        if (!document.hidden && this._isSizeInfoDirty) {
+          this._updateWidth(container);
+          this._isSizeInfoDirty = false;
+        }
       };
       window.addEventListener('resize', this._resizeListener);
+      window.addEventListener(
+        'visibilitychange',
+        this._visibilitychangeListener
+      );
 
       // Wrapping the first update in a requestAnimationFrame to defer the
       // calculation until the full render is done.
@@ -56,6 +73,10 @@ export function withSize<
 
     componentWillUnmount() {
       window.removeEventListener('resize', this._resizeListener);
+      window.removeEventListener(
+        'visibilitychange',
+        this._visibilitychangeListener
+      );
     }
 
     _updateWidth(container: Element | Text) {
@@ -64,6 +85,8 @@ export function withSize<
       }
       const { width, height } = container.getBoundingClientRect();
       this.setState({ width, height });
+      const style = 'color: green; font-weight: bold;';
+      console.log(`[updateWidth]  %c"${width}, ${height}"`, style);
     }
 
     render() {
