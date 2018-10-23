@@ -47,12 +47,12 @@ export function withSize<
       if (!container) {
         throw new Error('Unable to find the DOMNode');
       }
-      this._resizeListener = () => {
+      this._resizeListener = debounce(() => {
         requestIdleCallbackPolyfill(() => {
           this._updateWidth(container);
         }, this._requestIdleTimeout);
-      };
-      window.addEventListener('resize', debounce(this._resizeListener, 1000));
+      }, 1000);
+      window.addEventListener('resize', this._resizeListener);
 
       // Wrapping the first update in a requestAnimationFrame to defer the
       // calculation until the full render is done.
