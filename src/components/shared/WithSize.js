@@ -47,11 +47,18 @@ export function withSize<
       if (!container) {
         throw new Error('Unable to find the DOMNode');
       }
-      this._resizeListener = debounce(() => {
+      const debouncedUpdateWidth = debounce(() => {
         requestIdleCallbackPolyfill(() => {
           this._updateWidth(container);
         }, this._requestIdleTimeout);
       }, 1000);
+      this._resizeListener = () => {
+        if (!document.hidden) {
+          this._updateWidth(container);
+        } else {
+          debouncedUpdateWidth();
+        }
+      };
       window.addEventListener('resize', this._resizeListener);
 
       // Wrapping the first update in a requestAnimationFrame to defer the
