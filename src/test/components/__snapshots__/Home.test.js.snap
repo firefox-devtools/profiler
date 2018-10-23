@@ -112,6 +112,21 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
               Select a profile to open
             </label>
           </div>
+          <p>
+            Or write a profile URL below.
+          </p>
+          <div>
+            <input
+              className="homeSectionUploadFromUrlInput"
+              type="url"
+            />
+            <label
+              className="homeSectionButton"
+              onClick={[Function]}
+            >
+              Load profile from this URL
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -243,6 +258,21 @@ exports[`app/Home renders the install screen for the extension 1`] = `
                 type="file"
               />
               Select a profile to open
+            </label>
+          </div>
+          <p>
+            Or write a profile URL below.
+          </p>
+          <div>
+            <input
+              className="homeSectionUploadFromUrlInput"
+              type="url"
+            />
+            <label
+              className="homeSectionButton"
+              onClick={[Function]}
+            >
+              Load profile from this URL
             </label>
           </div>
         </div>
@@ -411,6 +441,21 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
               Select a profile to open
             </label>
           </div>
+          <p>
+            Or write a profile URL below.
+          </p>
+          <div>
+            <input
+              className="homeSectionUploadFromUrlInput"
+              type="url"
+            />
+            <label
+              className="homeSectionButton"
+              onClick={[Function]}
+            >
+              Load profile from this URL
+            </label>
+          </div>
         </div>
       </div>
     </div>
@@ -560,6 +605,21 @@ exports[`app/Home renders the usage instructions for pages with the extension in
                 type="file"
               />
               Select a profile to open
+            </label>
+          </div>
+          <p>
+            Or write a profile URL below.
+          </p>
+          <div>
+            <input
+              className="homeSectionUploadFromUrlInput"
+              type="url"
+            />
+            <label
+              className="homeSectionButton"
+              onClick={[Function]}
+            >
+              Load profile from this URL
             </label>
           </div>
         </div>

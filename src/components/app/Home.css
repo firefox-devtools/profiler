@@ -200,6 +200,16 @@
   z-index: -1;
 }
 
+.homeSectionUploadFromUrlInput {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
 label.homeSectionButton:focus-within {
   outline: 1px dotted black;
   /* This is a trick to display the default outline in webkit- and blink-based browsers */

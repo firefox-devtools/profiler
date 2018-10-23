@@ -35,6 +35,8 @@ function dataSource(state: DataSource = 'none', action: Action) {
       return 'from-file';
     case 'PROFILE_PUBLISHED':
       return 'public';
+    case 'TRIGGER_LOADING_FROM_URL':
+      return 'from-url';
     default:
       return state;
   }
@@ -51,6 +53,8 @@ function hash(state: string = '', action: Action) {
 
 function profileUrl(state: string = '', action: Action) {
   switch (action.type) {
+    case 'TRIGGER_LOADING_FROM_URL':
+      return action.profileUrl;
     default:
       return state;
   }

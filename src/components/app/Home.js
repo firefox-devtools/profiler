@@ -9,7 +9,10 @@ import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/img/png/gecko-profiler-screenshot-2018-01-18.png';
 import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2017-09-08.jpg';
-import { retrieveProfileFromFile } from '../../actions/receive-profile';
+import {
+  retrieveProfileFromFile,
+  triggerLoadingFromUrl,
+} from '../../actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import type {
   ExplicitConnectOptions,
@@ -53,6 +56,10 @@ type UploadButtonProps = {
   retrieveProfileFromFile: typeof retrieveProfileFromFile,
 };
 
+type UploadFromUrlButtonProps = {
+  triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+};
+
 class UploadButton extends React.PureComponent<UploadButtonProps> {
   _input: HTMLInputElement | null;
 
@@ -77,6 +84,36 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
             onChange={this._upload}
           />
           Select a profile to open
+        </label>
+      </div>
+    );
+  }
+}
+
+class UploadFromUrlButton extends React.PureComponent<
+  UploadFromUrlButtonProps
+> {
+  _input: HTMLInputElement | null;
+
+  _takeInputRef = input => {
+    this._input = input;
+  };
+
+  _upload = () => {
+    if (this._input) {
+      this.props.triggerLoadingFromUrl(this._input.value);
+    }
+  };
+  render() {
+    return (
+      <div>
+        <input
+          className="homeSectionUploadFromUrlInput"
+          type="url"
+          ref={this._takeInputRef}
+        />
+        <label className="homeSectionButton" onClick={this._upload}>
+          Load profile from this URL
         </label>
       </div>
     );
@@ -120,6 +157,7 @@ type OwnHomeProps = {|
 
 type DispatchHomeProps = {|
   +retrieveProfileFromFile: typeof retrieveProfileFromFile,
+  +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
 |};
 
 type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
@@ -221,6 +259,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               dropping it here or selecting it using the button below.
             </p>
             <UploadButton {...this.props} />
+            <p>Or write a profile URL below.</p>
+            <UploadFromUrlButton {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -250,6 +290,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               dropping it here or selecting it using the button below.
             </p>
             <UploadButton {...this.props} />
+            <p>Or write a profile URL below.</p>
+            <UploadFromUrlButton {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -283,6 +325,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               dropping it here or selecting it using the button below.
             </p>
             <UploadButton {...this.props} />
+            <p>Or write a profile URL below.</p>
+            <UploadFromUrlButton {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -310,6 +354,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               below.
             </p>
             <UploadButton {...this.props} />
+            <p>Or write a profile URL below.</p>
+            <UploadFromUrlButton {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -407,7 +453,7 @@ function _isFirefox(): boolean {
 }
 
 const options: ExplicitConnectOptions<OwnHomeProps, {||}, DispatchHomeProps> = {
-  mapDispatchToProps: { retrieveProfileFromFile },
+  mapDispatchToProps: { retrieveProfileFromFile, triggerLoadingFromUrl },
   component: Home,
 };
 export default explicitConnect(options);
