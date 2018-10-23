@@ -6,10 +6,10 @@
 
 // We want to test these components in isolation and tightly control the actions
 // dispatched and avoid any side-effects.  That's why we mock this module and
-// return dummy actions.
+// return dummy thunk actions that return a Promise.
 jest.mock('../../actions/receive-profile', () => ({
-  retrieveProfileFromAddon: () => ({ type: 'DUMMY_ACTION' }),
-  retrieveProfileFromStore: () => ({ type: 'DUMMY_ACTION' }),
+  retrieveProfileFromAddon: () => async () => {},
+  retrieveProfileFromStore: () => async () => {},
 }));
 
 import * as React from 'react';
