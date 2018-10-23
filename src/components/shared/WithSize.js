@@ -5,6 +5,7 @@
 
 import * as React from 'react';
 import { findDOMNode } from 'react-dom';
+import debounce from 'lodash.debounce';
 import type { CssPixels } from '../../types/units';
 
 type State = {|
@@ -44,9 +45,9 @@ export function withSize<
       if (!container) {
         throw new Error('Unable to find the DOMNode');
       }
-      this._resizeListener = () => {
+      this._resizeListener = debounce(() => {
         this._updateWidth(container);
-      };
+      }, 400);
       window.addEventListener('resize', this._resizeListener);
 
       // Wrapping the first update in a requestAnimationFrame to defer the
@@ -64,6 +65,8 @@ export function withSize<
       }
       const { width, height } = container.getBoundingClientRect();
       this.setState({ width, height });
+      const style = 'color: green; font-weight: bold;';
+      console.log(`[updateWidth]  %c"${width}, ${height}"`, style);
     }
 
     render() {

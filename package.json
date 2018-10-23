@@ -51,6 +51,7 @@
     "escape-string-regexp": "^1.0.5",
     "gecko-profiler-demangle": "^0.1.0",
     "jszip": "^3.1.5",
+    "lodash.debounce": "^4.0.8",
     "memoize-immutable": "^3.0.0",
     "mixedtuplemap": "^1.0.0",
     "photon-colors": "2.0.1",
