@@ -41,6 +41,7 @@ export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: IndexIntoRawMarkerTable | -1,
+  +rightClickedCallNodePath: CallNodePath | null,
 |};
 
 export type ProfileSharingStatus = {|

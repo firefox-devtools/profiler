@@ -3100,6 +3100,7 @@ Object {
       ],
     },
   },
+  "rightClickedCallNodePath": null,
   "selectedCallNodePath": Array [
     0,
     1,

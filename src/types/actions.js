@@ -91,6 +91,11 @@ type ProfileAction =
       +optionalExpandedToCallNodePath: ?CallNodePath,
     |}
   | {|
+      +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      +threadIndex: ThreadIndex,
+      +callNodePath: CallNodePath | null,
+    |}
+  | {|
       +type: 'FOCUS_CALL_TREE',
     |}
   | {|
@@ -170,6 +175,7 @@ type ProfileAction =
   | {|
       +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
+      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'SET_PROFILE_SHARING_STATUS',

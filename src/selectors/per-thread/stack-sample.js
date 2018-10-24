@@ -97,6 +97,21 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
+  const getRightClickedCallNodePath: Selector<CallNodePath | null> = state =>
+    threadSelectors.getViewOptions(state).rightClickedCallNodePath;
+
+  const getRightClickedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> = createSelector(
+    getCallNodeInfo,
+    getRightClickedCallNodePath,
+    ({ callNodeTable }, callNodePath): IndexIntoCallNodeTable | null => {
+      if (callNodePath === null) {
+        return null;
+      }
+
+      return ProfileData.getCallNodeIndexFromPath(callNodePath, callNodeTable);
+    }
+  );
+
   const getExpandedCallNodePaths: Selector<PathSet> = createSelector(
     threadSelectors.getViewOptions,
     threadViewOptions => threadViewOptions.expandedCallNodePaths
@@ -202,6 +217,8 @@ export function getStackAndSampleSelectorsPerThread(
     getCallNodeMaxDepth,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
+    getRightClickedCallNodePath,
+    getRightClickedCallNodeIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSamplesSelectedStatesInFilteredThread,

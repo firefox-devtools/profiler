@@ -98,6 +98,22 @@ export function changeSelectedCallNode(
 }
 
 /**
+ * This action is used when the user right clicks on a call node (in panels such
+ * as the call tree, the flame chart, or the stack chart). It's especially used
+ * to display the context menu.
+ */
+export function changeRightClickedCallNode(
+  threadIndex: ThreadIndex,
+  callNodePath: CallNodePath | null
+) {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+    threadIndex,
+    callNodePath,
+  };
+}
+
+/**
  * Given a threadIndex and a sampleIndex, select the call node at the top ("leaf")
  * of that sample's stack.
  */
@@ -313,10 +329,16 @@ export function changeRightClickedTrack(
   };
 }
 
-export function setCallNodeContextMenuVisibility(isVisible: boolean): Action {
-  return {
-    type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
-    isVisible,
+export function setCallNodeContextMenuVisibility(
+  isVisible: boolean
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const selectedThreadIndex = getSelectedThreadIndex(getState());
+    dispatch({
+      type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
+      threadIndex: selectedThreadIndex,
+      isVisible,
+    });
   };
 }
 
