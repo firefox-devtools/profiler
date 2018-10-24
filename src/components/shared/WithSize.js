@@ -36,46 +36,58 @@ export function withSize<
   $ReadOnly<$Diff<Props, SizeProps>>
 > {
   return class WithSizeWrapper extends React.PureComponent<*, State> {
-    _resizeListener: () => void;
-    _visibilitychangeListener: () => void;
     _isSizeInfoDirty: boolean = false;
     state = { width: 0, height: 0 };
+    _container: ?(Element | Text);
 
     componentDidMount() {
       const container = findDOMNode(this); // eslint-disable-line react/no-find-dom-node
       if (!container) {
         throw new Error('Unable to find the DOMNode');
       }
-
-      this._resizeListener = () => {
-        if (!document.hidden) {
-          this._updateWidth(container);
-        } else {
-          this._isSizeInfoDirty = true;
-        }
-      };
-      this._visibilitychangeListener = () => {
-        if (!document.hidden && this._isSizeInfoDirty) {
-          this._updateWidth(container);
-          this._isSizeInfoDirty = false;
-        }
-      };
+      this._container = container;
       window.addEventListener('resize', this._resizeListener);
       window.addEventListener(
         'visibilitychange',
-        this._visibilitychangeListener
+        this._visibilityChangeListener
       );
 
       // Wrapping the first update in a requestAnimationFrame to defer the
       // calculation until the full render is done.
       requestAnimationFrame(() => this._updateWidth(container));
     }
+    // The size is only updated when the document is visible
+    // in other cases resizing is registered in _isSizeInfoDirty
+    _resizeListener = () => {
+      const container = this._container;
+      if (!container) {
+        return;
+      }
+      if (document.hidden) {
+        this._isSizeInfoDirty = true;
+      } else {
+        this._updateWidth(container);
+      }
+    };
+
+    // If resizing was registered when the document wasn't visible
+    // // the size will be updated when the document becomes visible
+    _visibilityChangeListener = () => {
+      const container = this._container;
+      if (!container) {
+        return;
+      }
+      if (!document.hidden && this._isSizeInfoDirty) {
+        this._updateWidth(container);
+        this._isSizeInfoDirty = false;
+      }
+    };
 
     componentWillUnmount() {
       window.removeEventListener('resize', this._resizeListener);
       window.removeEventListener(
         'visibilitychange',
-        this._visibilitychangeListener
+        this._visibilityChangeListener
       );
     }
 
@@ -85,8 +97,6 @@ export function withSize<
       }
       const { width, height } = container.getBoundingClientRect();
       this.setState({ width, height });
-      const style = 'color: green; font-weight: bold;';
-      console.log(`[updateWidth]  %c"${width}, ${height}"`, style);
     }
 
     render() {
