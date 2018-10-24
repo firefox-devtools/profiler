@@ -39,20 +39,21 @@ export function withSize<
   return class WithSizeWrapper extends React.PureComponent<*, State> {
     _resizeListener: () => void;
     _idleCallbackId = null;
-    _requestIdleTimeout = { timeout: 1000 };
+    _requestIdleTimeout: { timeout: number };
     state = { width: 0, height: 0 };
+    _container: ?(Element | Text);
 
     componentDidMount() {
       const container = findDOMNode(this); // eslint-disable-line react/no-find-dom-node
       if (!container) {
         throw new Error('Unable to find the DOMNode');
       }
+      this._container = container;
       this._resizeListener = () => {
-        if (this._idleCallbackId === null) {
-          this._idleCallbackId = requestIdleCallbackPolyfill(() => {
-            this._idleCallbackId = null;
-            this._updateWidth(container);
-          }, this._requestIdleTimeout);
+        if (document.hidden) {
+          this._ricUpdateWidth();
+        } else {
+          this._updateWidth(container);
         }
       };
       window.addEventListener('resize', this._resizeListener);
@@ -75,6 +76,22 @@ export function withSize<
       const style = 'color: green; font-weight: bold;';
       console.log(`[updateWidth]  %c"${width}, ${height}"`, style);
     }
+
+    // Set the id that requestIdleCallback returns to a local variable, reset it in the callback,
+    // and check if it's set before calling requestIdleCallback again.
+    _ricUpdateWidth = () => {
+      const container = this._container;
+      if (!container) {
+        return;
+      }
+      this._requestIdleTimeout = { timeout: 1000 };
+      if (this._idleCallbackId === null) {
+        this._idleCallbackId = requestIdleCallbackPolyfill(() => {
+          this._idleCallbackId = null;
+          this._updateWidth(container);
+        }, this._requestIdleTimeout);
+      }
+    };
 
     render() {
       return <Wrapped {...this.props} {...this.state} />;
