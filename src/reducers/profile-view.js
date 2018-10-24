@@ -171,6 +171,7 @@ function viewOptionsPerThread(
           return newFunc === undefined ? oldFunc : newFunc;
         };
         return {
+          ...threadViewOptions,
           selectedCallNodePath: threadViewOptions.selectedCallNodePath.map(
             mapOldFuncToNewFunc
           ),
@@ -179,7 +180,6 @@ function viewOptionsPerThread(
               oldPath.map(mapOldFuncToNewFunc)
             )
           ),
-          selectedMarker: threadViewOptions.selectedMarker,
         };
       });
     }
