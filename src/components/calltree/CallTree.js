@@ -24,6 +24,7 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getIconsWithClassNames } from '../../selectors/icons';
 import {
   changeSelectedCallNode,
+  changeRightClickedCallNode,
   changeExpandedCallNodes,
   addTransformToStack,
 } from '../../actions/profile-view';
@@ -50,6 +51,7 @@ type StateProps = {|
   +tree: CallTree,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +expandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>,
   +searchStringsRegExp: RegExp | null,
   +disableOverscan: boolean,
@@ -61,6 +63,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
+  +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +changeExpandedCallNodes: typeof changeExpandedCallNodes,
   +addTransformToStack: typeof addTransformToStack,
 |};
@@ -119,6 +122,18 @@ class CallTreeComponent extends PureComponent<Props> {
     );
   };
 
+  _onRightClickSelection = (newSelectedCallNode: IndexIntoCallNodeTable) => {
+    const {
+      callNodeInfo,
+      threadIndex,
+      changeRightClickedCallNode,
+    } = this.props;
+    changeRightClickedCallNode(
+      threadIndex,
+      getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
+    );
+  };
+
   _onExpandedCallNodesChange = (
     newExpandedCallNodeIndexes: Array<IndexIntoCallNodeTable | null>
   ) => {
@@ -159,6 +174,7 @@ class CallTreeComponent extends PureComponent<Props> {
     const {
       tree,
       selectedCallNodeIndex,
+      rightClickedCallNodeIndex,
       expandedCallNodeIndexes,
       searchStringsRegExp,
       disableOverscan,
@@ -174,8 +190,10 @@ class CallTreeComponent extends PureComponent<Props> {
         mainColumn={this._mainColumn}
         appendageColumn={this._appendageColumn}
         onSelectionChange={this._onSelectedCallNodeChange}
+        onRightClickSelection={this._onRightClickSelection}
         onExpandedNodesChange={this._onExpandedCallNodesChange}
         selectedNodeId={selectedCallNodeIndex}
+        rightClickedNodeId={rightClickedCallNodeIndex}
         expandedNodeIds={expandedCallNodeIndexes}
         highlightRegExp={searchStringsRegExp}
         disableOverscan={disableOverscan}
@@ -200,6 +218,9 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
       state
     ),
+    rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
+      state
+    ),
     expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
       state
     ),
@@ -212,6 +233,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,
+    changeRightClickedCallNode,
     changeExpandedCallNodes,
     addTransformToStack,
   },

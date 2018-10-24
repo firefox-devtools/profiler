@@ -38,6 +38,7 @@ export type OwnProps = {|
   +stackFrameHeight: CssPixels,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
+  +onRightClick: (IndexIntoCallNodeTable | null) => void,
   +disableTooltips: boolean,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
@@ -265,17 +266,32 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     );
   };
 
+  getCallNodeIndexFromHoveredItem(
+    hoveredItem: HoveredStackTiming | null
+  ): IndexIntoCallNodeTable | null {
+    if (hoveredItem === null) {
+      return null;
+    }
+
+    const { depth, flameGraphTimingIndex } = hoveredItem;
+    const { flameGraphTiming } = this.props;
+    const stackTiming = flameGraphTiming[depth];
+    const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
+    return callNodeIndex;
+  }
+
   _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
-    let callNodeIndex = null;
-    if (hoveredItem !== null) {
-      const { depth, flameGraphTimingIndex } = hoveredItem;
-      const { flameGraphTiming } = this.props;
-      const stackTiming = flameGraphTiming[depth];
-      callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
-    }
+    const callNodeIndex = this.getCallNodeIndexFromHoveredItem(hoveredItem);
     this.props.onSelectionChange(callNodeIndex);
+  };
+
+  _onRightClick = (hoveredItem: HoveredStackTiming | null) => {
+    // Change our selection to the hovered item, or deselect (with
+    // null) if there's nothing hovered.
+    const callNodeIndex = this.getCallNodeIndexFromHoveredItem(hoveredItem);
+    this.props.onRightClick(callNodeIndex);
   };
 
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
@@ -320,6 +336,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
         onSelectItem={this._onSelectItem}
+        onRightClick={this._onRightClick}
       />
     );
   }
