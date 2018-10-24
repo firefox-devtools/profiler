@@ -39,16 +39,16 @@ import type { PathSet } from '../utils/path.js';
 export type Reducer<T> = (T | void, Action) => T;
 
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
-export type ThreadViewOptions = {
-  selectedCallNodePath: CallNodePath,
-  expandedCallNodePaths: PathSet,
-  selectedMarker: IndexIntoMarkersTable | -1,
-};
+export type ThreadViewOptions = {|
+  +selectedCallNodePath: CallNodePath,
+  +expandedCallNodePaths: PathSet,
+  +selectedMarker: IndexIntoMarkersTable | -1,
+|};
 
-export type ProfileSharingStatus = {
-  sharedWithUrls: boolean,
-  sharedWithoutUrls: boolean,
-};
+export type ProfileSharingStatus = {|
+  +sharedWithUrls: boolean,
+  +sharedWithoutUrls: boolean,
+|};
 
 export type ProfileViewState = {
   viewOptions: {
