@@ -313,7 +313,9 @@ const wrapReducerInResetter = (
         // A new URL came in because of a browser action, discard the current UrlState
         // and use the new one, which was probably serialized from the URL, or stored
         // in the history API.
-        return action.newUrlState;
+        return action.newUrlState
+          ? action.newUrlState
+          : regularUrlStateReducer(undefined, action);
       case 'RETURN_TO_ZIP_FILE_LIST':
         // Invalidate all information that would be specific to an individual profile.
         return {
