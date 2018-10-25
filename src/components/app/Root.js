@@ -100,7 +100,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
     } = this.props;
     switch (dataSource) {
       case 'from-addon':
-        retrieveProfileFromAddon();
+        retrieveProfileFromAddon().catch(e => console.error(e));
         break;
       case 'from-file':
         // retrieveProfileFromFile should already have been called
@@ -108,10 +108,10 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       case 'local':
         break;
       case 'public':
-        retrieveProfileFromStore(hash);
+        retrieveProfileFromStore(hash).catch(e => console.error(e));
         break;
       case 'from-url':
-        retrieveProfileOrZipFromUrl(profileUrl);
+        retrieveProfileOrZipFromUrl(profileUrl).catch(e => console.error(e));
         break;
       case 'none':
         // nothing to do
@@ -134,6 +134,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
           {additionalMessage ? (
             <div className="rootMessageAdditional">
               {toParagraphs(additionalMessage)}
+              <a href="/">Back to home</a>
             </div>
           ) : null}
           {showLoader ? (
@@ -158,12 +159,11 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
   render() {
     const { view, dataSource, hasZipFile } = this.props;
     const phase = view.phase;
+    if (dataSource === 'none') {
+      return <Home />;
+    }
     switch (phase) {
       case 'INITIALIZING': {
-        if (dataSource === 'none') {
-          return <Home />;
-        }
-
         const loadingMessage = LOADING_MESSAGES[dataSource];
         const message = loadingMessage ? loadingMessage : 'View not found';
         const showLoader = Boolean(loadingMessage);
@@ -233,7 +233,7 @@ const options: ExplicitConnectOptions<
   },
   component: ProfileViewWhenReadyImpl,
 };
-const ProfileViewWhenReady = explicitConnect(options);
+export const ProfileViewWhenReady = explicitConnect(options);
 
 type RootProps = {
   store: Store,

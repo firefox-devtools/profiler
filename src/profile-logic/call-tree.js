@@ -40,12 +40,20 @@ type CallTreeCountsAndTimings = {
 };
 
 function extractFaviconFromLibname(libname: string): string | null {
-  const url = new URL('/favicon.ico', libname);
-  if (url.protocol === 'http:') {
-    // Upgrade http requests.
-    url.protocol = 'https:';
+  try {
+    const url = new URL('/favicon.ico', libname);
+    if (url.protocol === 'http:') {
+      // Upgrade http requests.
+      url.protocol = 'https:';
+    }
+    return url.href;
+  } catch (e) {
+    console.error(
+      'Error while extracing the favicon from the libname',
+      libname
+    );
+    return null;
   }
-  return url.href;
 }
 
 export class CallTree {
