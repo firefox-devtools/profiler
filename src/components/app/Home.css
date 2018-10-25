@@ -120,18 +120,19 @@
   padding: 0.5em;
   margin: 15px 0;
   display: block;
-  border: 2px solid var(--blue-50);
-  color: var(--blue-50);
+  border: 2px solid var(--blue-60);
+  color: var(--blue-60);
   text-decoration: none;
   transition: background-color 300ms;
   font-weight: bold;
   font-size: 16px;
   text-align: center;
+  cursor: pointer;
 }
 
 .homeSectionButton:hover {
   color: #fff;
-  background-color: var(--blue-50);
+  background-color: var(--blue-60);
 }
 
 .homeSectionPlus {
@@ -193,6 +194,23 @@
   opacity: 1;
   transform: translateX(0);
   transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+/* This code comes from https://tympanus.net/codrops/2015/09/15/styling-customizing-file-inputs-smart-way/ */
+
+.homeSectionUploadInput {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+label.homeSectionButton:focus-within {
+  outline: 1px dotted black;
+  /* This is a trick to display the default outline in webkit- and blink-based browsers */
+  outline: -webkit-focus-ring-color auto 5px;
 }
 
 @media (max-width: 1300px) {

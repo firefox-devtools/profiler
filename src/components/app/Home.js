@@ -69,7 +69,15 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
   render() {
     return (
       <div>
-        <input type="file" ref={this._takeInputRef} onChange={this._upload} />
+        <label className="homeSectionButton">
+          <input
+            className="homeSectionUploadInput"
+            type="file"
+            ref={this._takeInputRef}
+            onChange={this._upload}
+          />
+          Select a profile to open
+        </label>
       </div>
     );
   }
@@ -191,7 +199,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
-              <img className="homeSectionScreenshot" src={PerfScreenshot} />
+              <img
+                className="homeSectionScreenshot"
+                src={PerfScreenshot}
+                alt="screenshot of perf.html"
+              />
             </div>
           </div>
           <div className="homeInstructionsRight">
@@ -225,7 +237,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
             <p>
-              <img className="homeSectionScreenshot" src={AddonScreenshot} />
+              <img
+                className="homeSectionScreenshot"
+                src={AddonScreenshot}
+                alt="Screenshot of the Gecko Profiler addon settings"
+              />
             </p>
           </div>
           <div className="homeInstructionsRight">
@@ -254,7 +270,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions">
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
-              <img className="homeSectionScreenshot" src={PerfScreenshot} />
+              <img
+                className="homeSectionScreenshot"
+                src={PerfScreenshot}
+                alt="screenshot of perf.html"
+              />
             </div>
           </div>
           <div className="homeInstructionsRight">
@@ -287,7 +307,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         <div className="homeInstructions" key={0}>
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
-              <img className="homeSectionScreenshot" src={PerfScreenshot} />
+              <img
+                className="homeSectionScreenshot"
+                src={PerfScreenshot}
+                alt="screenshot of perf.html"
+              />
             </div>
           </div>
           <div className="homeInstructionsRight">
@@ -347,6 +371,9 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <a
               className="homeTitleGithubIcon"
               href="https://github.com/devtools-html/perf.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Go to our git repository (this opens in a new window)"
             >
               <svg
                 width="22"
@@ -354,7 +381,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
                 className="octicon octicon-mark-github"
                 viewBox="0 0 16 16"
                 version="1.1"
-                aria-hidden="true"
+                aria-label="github"
               >
                 <path
                   fillRule="evenodd"

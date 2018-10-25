@@ -206,7 +206,7 @@ export function getTracingMarkers(
         data: null,
       };
       tracingMarkers.push(marker);
-    } else if (data.type === 'tracing') {
+    } else if (data.type === 'tracing' && data.interval) {
       // Tracing markers are created from two distinct markers that are created at
       // the start and end of whatever code that is running that we care about.
       // This is implemented by AutoProfilerTracing in Gecko.
@@ -328,8 +328,76 @@ export function filterForNetworkChart(markers: TracingMarker[]) {
 export function filterForMarkerChart(markers: TracingMarker[]) {
   return markers.filter(marker => !isNetworkMarker(marker));
 }
+// Firefox emits separate start and end markers for each load. It does this so that,
+// if a profile is collected while a request is in progress, the profile will still contain
+// a start marker for that request. So by looking at start markers we can get
+// information about requests that were in progress at profile collection time.
+// For requests that have finished, we want to merge the request's start and end
+// markers into one marker.
+export function mergeStartAndEndNetworkMarker(
+  markers: TracingMarker[]
+): TracingMarker[] {
+  const sortedMarkers: TracingMarker[] = markers.slice(0);
+  const filteredMarkers: TracingMarker[] = [];
 
-// TODO: add function to merge start and end markers
+  // Sort markers, alphabetized by name to filter for markers with the same name
+  sortedMarkers.sort((a, b) => {
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+  });
+  for (let i = 0; i < sortedMarkers.length; i++) {
+    const marker = sortedMarkers[i];
+    const markerNext = sortedMarkers[i + 1];
+
+    if (!marker.data || marker.data.type !== 'Network') {
+      continue;
+    }
+    // The timestamps on the start and end markers describe two non-overlapping parts
+    // of the same load. The start marker has a duration from channel-creation until Start
+    // (i.e. AsyncOpen()). The End marker has a duration from AsyncOpen time until
+    // OnStopRequest.
+    // In the merged marker, we want to represent the entire duration, from channel-creation
+    // until OnStopRequest.
+    if (markerNext !== undefined && marker.name === markerNext.name) {
+      if (
+        marker.data &&
+        marker.data.type === 'Network' &&
+        markerNext.data &&
+        markerNext.data.type === 'Network'
+      ) {
+        // Markers have either status STATUS_START or (STATUS_STOP || STATUS_REDIRECT || STATUS_READ). STATUS_START is reliable and the only not likely to change.
+        if (
+          (marker.data.status === 'STATUS_START' &&
+            markerNext.data.status !== 'STATUS_START') ||
+          (markerNext.data.status === 'STATUS_START' &&
+            marker.data.status !== 'STATUS_START')
+        ) {
+          // As we discard the start marker, but want the whole duration we override the
+          // start of the end marker with the start time of the start marker
+          const [startMarker, endMarker] =
+            marker.data.status === 'STATUS_START'
+              ? [marker, markerNext]
+              : [markerNext, marker];
+          const mergedMarker = {
+            data: endMarker.data,
+            dur: endMarker.dur,
+            name: endMarker.name,
+            title: endMarker.title,
+            start: startMarker.start,
+          };
+          filteredMarkers.push(mergedMarker);
+          i++;
+        }
+        continue;
+      }
+    }
+    filteredMarkers.push(marker);
+  }
+  // Sort markers by startTime to display in the right order in the network panel waterfall
+  filteredMarkers.sort((a, b) => a.start - b.start);
+  return filteredMarkers;
+}
 
 export function extractScreenshotsById(
   markers: MarkersTable,
