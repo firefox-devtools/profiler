@@ -490,8 +490,9 @@ export function getVisibleThreads(
         localTrackIndex < tracks.length;
         localTrackIndex++
       ) {
-        if (tracks[localTrackIndex].type === 'thread') {
-          const { threadIndex } = tracks[localTrackIndex];
+        const track = tracks[localTrackIndex];
+        if (track.type === 'thread') {
+          const { threadIndex } = track;
           if (!hiddenTracks.has(localTrackIndex)) {
             visibleThreads.push(threadIndex);
           }
