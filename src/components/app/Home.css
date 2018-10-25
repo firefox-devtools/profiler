@@ -113,8 +113,8 @@
   padding: 0.5em;
   margin: 15px 0;
   display: block;
-  border: 2px solid var(--blue-50);
-  color: var(--blue-50);
+  border: 2px solid var(--blue-60);
+  color: var(--blue-60);
   text-decoration: none;
   transition: background-color 300ms;
   font-weight: bold;
@@ -125,7 +125,7 @@
 
 .homeSectionButton:hover {
   color: #fff;
-  background-color: var(--blue-50);
+  background-color: var(--blue-60);
 }
 
 .homeSectionPlus {

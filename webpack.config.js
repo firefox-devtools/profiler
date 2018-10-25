@@ -130,7 +130,12 @@ if (process.env.NODE_ENV === 'production') {
               // your browser and see the actual service worker script
               return null;
             }
-            // 2. It's a URL like /from-addon/, or /public/.../?... .
+            if (url.pathname.startsWith('/docs/')) {
+              // 2. We exclude the /docs from being cached, but we still want
+              // the user to be able to access them.
+              return null;
+            }
+            // 3. It's a URL like /from-addon/, or /public/.../?... .
             // For those URLs we want to respond with index.html, which is
             // cached as the "/" URL.
             return url.origin + '/';
