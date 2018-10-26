@@ -5,7 +5,7 @@
   * [UI Tour](./guide-ui-tour.md)
   * [Stack samples and call trees](./guide-stack-samples-and-call-trees.md)
   * [Filtering call trees](./guide-filtering-call-trees.md)
-  * [Startup](./guide-startup.md)
+  * [Profiling Firefox Startup](./guide-startup.md)
   * [Remote profiling on Android](./guide-remote-profiling.md)
 * [Video Tutorials](./videos.md)
   * [perf.html intro](./videos-intro.md)
