@@ -100,9 +100,12 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             </a>
             . However, existing profiles can be viewed in any modern browser. To view a profile, either follow a link to a public profile, drag a saved local profile onto this screen or select it using the button below.
           </p>
-          <div>
+          <div
+            className="homeSectionUploadButtons"
+          >
             <label
               className="homeSectionButton"
+              id="LoadFromFileButton"
             >
               <input
                 className="homeSectionUploadInput"
@@ -111,20 +114,12 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
               />
               Select a profile to open
             </label>
-          </div>
-          <p>
-            Or write a profile URL below.
-          </p>
-          <div>
-            <input
-              className="homeSectionUploadFromUrlInput"
-              type="url"
-            />
             <label
               className="homeSectionButton"
+              id="LoadFromUrlButton"
               onClick={[Function]}
             >
-              Load profile from this URL
+              Load profile from an URL
             </label>
           </div>
         </div>
@@ -248,9 +243,12 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           <p>
             You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
           </p>
-          <div>
+          <div
+            className="homeSectionUploadButtons"
+          >
             <label
               className="homeSectionButton"
+              id="LoadFromFileButton"
             >
               <input
                 className="homeSectionUploadInput"
@@ -259,20 +257,12 @@ exports[`app/Home renders the install screen for the extension 1`] = `
               />
               Select a profile to open
             </label>
-          </div>
-          <p>
-            Or write a profile URL below.
-          </p>
-          <div>
-            <input
-              className="homeSectionUploadFromUrlInput"
-              type="url"
-            />
             <label
               className="homeSectionButton"
+              id="LoadFromUrlButton"
               onClick={[Function]}
             >
-              Load profile from this URL
+              Load profile from an URL
             </label>
           </div>
         </div>
@@ -429,9 +419,12 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
           <p>
             You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
           </p>
-          <div>
+          <div
+            className="homeSectionUploadButtons"
+          >
             <label
               className="homeSectionButton"
+              id="LoadFromFileButton"
             >
               <input
                 className="homeSectionUploadInput"
@@ -440,20 +433,12 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
               />
               Select a profile to open
             </label>
-          </div>
-          <p>
-            Or write a profile URL below.
-          </p>
-          <div>
-            <input
-              className="homeSectionUploadFromUrlInput"
-              type="url"
-            />
             <label
               className="homeSectionButton"
+              id="LoadFromUrlButton"
               onClick={[Function]}
             >
-              Load profile from this URL
+              Load profile from an URL
             </label>
           </div>
         </div>
@@ -595,9 +580,12 @@ exports[`app/Home renders the usage instructions for pages with the extension in
           <p>
             You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
           </p>
-          <div>
+          <div
+            className="homeSectionUploadButtons"
+          >
             <label
               className="homeSectionButton"
+              id="LoadFromFileButton"
             >
               <input
                 className="homeSectionUploadInput"
@@ -606,20 +594,12 @@ exports[`app/Home renders the usage instructions for pages with the extension in
               />
               Select a profile to open
             </label>
-          </div>
-          <p>
-            Or write a profile URL below.
-          </p>
-          <div>
-            <input
-              className="homeSectionUploadFromUrlInput"
-              type="url"
-            />
             <label
               className="homeSectionButton"
+              id="LoadFromUrlButton"
               onClick={[Function]}
             >
-              Load profile from this URL
+              Load profile from an URL
             </label>
           </div>
         </div>

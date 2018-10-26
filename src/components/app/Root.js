@@ -89,7 +89,7 @@ type ProfileViewProps = ConnectedProps<
 >;
 
 class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
-  componentDidMount() {
+  _retrieveProfileFromDataSource = () => {
     const {
       dataSource,
       hash,
@@ -118,6 +118,16 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
         break;
       default:
         throw new Error(`Unknown datasource ${dataSource}`);
+    }
+  };
+
+  componentDidMount() {
+    this._retrieveProfileFromDataSource();
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.dataSource !== this.props.dataSource) {
+      this._retrieveProfileFromDataSource();
     }
   }
 

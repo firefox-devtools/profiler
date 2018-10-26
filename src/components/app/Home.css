@@ -123,6 +123,21 @@
   cursor: pointer;
 }
 
+.homeSectionUploadButtons .homeSectionButton {
+  width: 27%;
+  display: inline-block;
+  font-size: 13px;
+}
+
+#LoadFromFileButton , #LoadFromUrlButton {
+  margin-right: 5px;
+}
+
+.homeSectionUploadFromUrl .homeSectionButton {
+  width: 17%;
+  margin-left: 5px;
+}
+
 .homeSectionButton:hover {
   color: #fff;
   background-color: var(--blue-50);
@@ -201,7 +216,6 @@
 }
 
 .homeSectionUploadFromUrlInput {
-    width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
     display: inline-block;

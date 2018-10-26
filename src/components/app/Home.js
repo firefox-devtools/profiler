@@ -52,16 +52,28 @@ class InstallButton extends React.PureComponent<InstallButtonProps> {
   }
 }
 
-type UploadButtonProps = {
+type UploadButtonsProps = {
   retrieveProfileFromFile: typeof retrieveProfileFromFile,
-};
-
-type UploadFromUrlButtonProps = {
   triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
 };
 
-class UploadButton extends React.PureComponent<UploadButtonProps> {
+type UploadButtonsState = {
+  isLoadFromUrlPressed: boolean,
+};
+
+type UploadFromUrlProps = {
+  triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+};
+
+class UploadButtons extends React.PureComponent<
+  UploadButtonsProps,
+  UploadButtonsState
+> {
   _input: HTMLInputElement | null;
+
+  state = {
+    isLoadFromUrlPressed: false,
+  };
 
   _takeInputRef = input => {
     this._input = input;
@@ -73,10 +85,15 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
     }
   };
 
+  _loadFromUrlPressed = (event: Event) => {
+    event.preventDefault();
+    this.setState({ isLoadFromUrlPressed: true });
+  };
+
   render() {
     return (
-      <div>
-        <label className="homeSectionButton">
+      <div className="homeSectionUploadButtons">
+        <label id="LoadFromFileButton" className="homeSectionButton">
           <input
             className="homeSectionUploadInput"
             type="file"
@@ -85,14 +102,22 @@ class UploadButton extends React.PureComponent<UploadButtonProps> {
           />
           Select a profile to open
         </label>
+        <label
+          id="LoadFromUrlButton"
+          className="homeSectionButton"
+          onClick={this._loadFromUrlPressed}
+        >
+          Load profile from an URL
+        </label>
+        {this.state.isLoadFromUrlPressed ? (
+          <UploadFromUrl {...this.props} />
+        ) : null}
       </div>
     );
   }
 }
 
-class UploadFromUrlButton extends React.PureComponent<
-  UploadFromUrlButtonProps
-> {
+class UploadFromUrl extends React.PureComponent<UploadFromUrlProps> {
   _input: HTMLInputElement | null;
 
   _takeInputRef = input => {
@@ -106,14 +131,14 @@ class UploadFromUrlButton extends React.PureComponent<
   };
   render() {
     return (
-      <div>
+      <div className="homeSectionUploadFromUrl">
         <input
           className="homeSectionUploadFromUrlInput"
           type="url"
           ref={this._takeInputRef}
         />
         <label className="homeSectionButton" onClick={this._upload}>
-          Load profile from this URL
+          Load
         </label>
       </div>
     );
@@ -258,9 +283,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               You can also analyze a local profile by either dragging and
               dropping it here or selecting it using the button below.
             </p>
-            <UploadButton {...this.props} />
-            <p>Or write a profile URL below.</p>
-            <UploadFromUrlButton {...this.props} />
+            <UploadButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -289,9 +312,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               You can also analyze a local profile by either dragging and
               dropping it here or selecting it using the button below.
             </p>
-            <UploadButton {...this.props} />
-            <p>Or write a profile URL below.</p>
-            <UploadFromUrlButton {...this.props} />
+            <UploadButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -324,9 +345,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               You can also analyze a local profile by either dragging and
               dropping it here or selecting it using the button below.
             </p>
-            <UploadButton {...this.props} />
-            <p>Or write a profile URL below.</p>
-            <UploadFromUrlButton {...this.props} />
+            <UploadButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -353,9 +372,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               saved local profile onto this screen or select it using the button
               below.
             </p>
-            <UploadButton {...this.props} />
-            <p>Or write a profile URL below.</p>
-            <UploadFromUrlButton {...this.props} />
+            <UploadButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
