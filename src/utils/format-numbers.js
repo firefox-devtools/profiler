@@ -27,19 +27,10 @@ export function formatNumber(
   significantDigits: number = 2,
   maxFractionalDigits: number = 3
 ): string {
-  /*
-   * Note that numDigitsOnLeft can be negative when the first non-zero digit
-   * is on the right of the decimal point.  0.01 = -1
-   */
-  const numDigitsOnLeft = Math.floor(Math.log10(Math.abs(value))) + 1;
-  let places = significantDigits - numDigitsOnLeft;
-  if (places < 0) {
-    places = 0;
-  } else if (places > maxFractionalDigits) {
-    places = maxFractionalDigits;
-  }
-
-  return value.toFixed(places);
+  return value.toLocaleString(undefined, {
+    maximumSignificantDigits: significantDigits,
+    maximumFractionDigits: maxFractionalDigits,
+  });
 }
 
 export function formatPercent(value: number): string {

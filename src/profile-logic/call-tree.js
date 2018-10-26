@@ -26,7 +26,7 @@ import type {
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
-import { formatNumberToString } from '../utils/format-numbers';
+import { formatNumber } from '../utils/format-numbers';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
@@ -204,14 +204,8 @@ export class CallTree {
         icon = ExtensionIcon;
       }
 
-      const formattedTotalTime = formatNumberToString(
-        totalTime,
-        this._isIntegerInterval
-      );
-      const formattedSelfTime = formatNumberToString(
-        selfTime,
-        this._isIntegerInterval
-      );
+      const formattedTotalTime = formatNumber(totalTime, 2, 1);
+      const formattedSelfTime = formatNumber(selfTime, 2, 1);
 
       displayData = {
         totalTime: formattedTotalTime,
