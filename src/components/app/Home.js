@@ -216,11 +216,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               Install add-on
             </InstallButton>
             <DocsButton />
-            <p className="homeInstructionsText">
+            <p>
               Install the Gecko Profiler Add-on to start recording a performance
               profile in Firefox, then analyze it and share it with perf.html.
             </p>
-            <p className="homeInstructionsText">
+            <p>
               You can also analyze a local profile by either dragging and
               dropping it here or selecting it using the button below.
             </p>
