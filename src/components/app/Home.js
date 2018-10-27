@@ -52,22 +52,27 @@ class InstallButton extends React.PureComponent<InstallButtonProps> {
   }
 }
 
-type UploadButtonsProps = {
+type ActionButtonsProps = {
   retrieveProfileFromFile: typeof retrieveProfileFromFile,
   triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
 };
 
-type UploadButtonsState = {
+type ActionButtonsState = {
   isLoadFromUrlPressed: boolean,
 };
 
-type UploadFromUrlProps = {
+type LoadFromUrlProps = {
   triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
 };
 
-class UploadButtons extends React.PureComponent<
-  UploadButtonsProps,
-  UploadButtonsState
+type LoadFromUrlState = {
+  isLoadButtonPressed: boolean,
+  value: string,
+};
+
+class ActionButtons extends React.PureComponent<
+ ActionButtonsProps,
+  ActionButtonsState
 > {
   _input: HTMLInputElement | null;
 
@@ -87,60 +92,68 @@ class UploadButtons extends React.PureComponent<
 
   _loadFromUrlPressed = (event: Event) => {
     event.preventDefault();
-    this.setState({ isLoadFromUrlPressed: true });
+    this.setState({ isLoadFromUrlPressed: !this.state.isLoadFromUrlPressed });
   };
 
   render() {
+    const _class = this.state.isLoadFromUrlPressed ? "homeSectionButtonPressed" : "homeSectionButton" ; 
     return (
-      <div className="homeSectionUploadButtons">
-        <label id="LoadFromFileButton" className="homeSectionButton">
+    <div>
+      <div className="homeSectionActionButtons">
+        <label className="homeSectionButton">
           <input
-            className="homeSectionUploadInput"
+            className="homeSectionUploadFromFileInput"
             type="file"
             ref={this._takeInputRef}
             onChange={this._upload}
           />
-          Select a profile to open
+          Load a profile from file
         </label>
-        <label
-          id="LoadFromUrlButton"
-          className="homeSectionButton"
+        <button
+          className={_class}
           onClick={this._loadFromUrlPressed}
         >
-          Load profile from an URL
-        </label>
+          Load a profile from an URL
+        </button>
+     </div>
         {this.state.isLoadFromUrlPressed ? (
-          <UploadFromUrl {...this.props} />
+          <LoadFromUrl {...this.props} />
         ) : null}
       </div>
     );
   }
 }
 
-class UploadFromUrl extends React.PureComponent<UploadFromUrlProps> {
-  _input: HTMLInputElement | null;
+class LoadFromUrl extends React.PureComponent<LoadFromUrlProps ,LoadFromUrlState> {
+ 
+  state = {
+    isLoadButtonPressed: false,
+    value: "",
+  };
 
-  _takeInputRef = input => {
-    this._input = input;
+  handleChange = (event: Event) => {
+    event.preventDefault();
+    this.setState({ isLoadButtonPressed: true , value: event.target.value});
   };
 
   _upload = () => {
-    if (this._input) {
-      this.props.triggerLoadingFromUrl(this._input.value);
+    if (this.state.value) {
+      this.props.triggerLoadingFromUrl(this.state.value);
     }
   };
+
   render() {
     return (
-      <div className="homeSectionUploadFromUrl">
+      <form className="homeSectionLoadFromUrl" onSubmit={this._upload}>
         <input
-          className="homeSectionUploadFromUrlInput"
+          className="homeSectionLoadFromUrlInput"
           type="url"
-          ref={this._takeInputRef}
+          placeholder="https://"
+          value={this.state.value}
+          onChange={this.handleChange}
         />
-        <label className="homeSectionButton" onClick={this._upload}>
-          Load
-        </label>
-      </div>
+        <input type="submit" className="homeSectionButton" value="Load" disabled={!this.state.isLoadButtonPressed}/>
+      </form>
     );
   }
 }
@@ -279,11 +292,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               Install the Gecko Profiler Add-on to start recording a performance
               profile in Firefox, then analyze it and share it with perf.html.
             </p>
-            <p>
-              You can also analyze a local profile by either dragging and
-              dropping it here or selecting it using the button below.
-            </p>
-            <UploadButtons {...this.props} />
+            <ActionButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -308,11 +317,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <kbd>Capture Profile</kbd> to load the data into perf.html.
             </p>
             {this._renderShortcuts()}
-            <p>
-              You can also analyze a local profile by either dragging and
-              dropping it here or selecting it using the button below.
-            </p>
-            <UploadButtons {...this.props} />
+            <ActionButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -341,11 +346,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               to load the data into perf.html.
             </p>
             {this._renderShortcuts()}
-            <p>
-              You can also analyze a local profile by either dragging and
-              dropping it here or selecting it using the button below.
-            </p>
-            <UploadButtons {...this.props} />
+            <ActionButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -367,12 +368,9 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <p>
               Recording performance profiles requires{' '}
               <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
-              However, existing profiles can be viewed in any modern browser. To
-              view a profile, either follow a link to a public profile, drag a
-              saved local profile onto this screen or select it using the button
-              below.
+              However, existing profiles can be viewed in any modern browser. 
             </p>
-            <UploadButtons {...this.props} />
+            <ActionButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>

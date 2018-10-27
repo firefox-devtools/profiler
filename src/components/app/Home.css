@@ -121,21 +121,40 @@
   font-size: 16px;
   text-align: center;
   cursor: pointer;
+  background-color: #fff;
 }
 
-.homeSectionUploadButtons .homeSectionButton {
-  width: 27%;
-  display: inline-block;
+.homeSectionButtonPressed {
+  padding: 0.5em;
+  margin: 15px 0;
+  display: block;
+  border: 2px solid var(--blue-50);
+  text-decoration: none;
+  transition: background-color 300ms;
+  font-weight: bold;
   font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+  background-color: var(--blue-50);
+  color: #fff;
+
 }
 
-#LoadFromFileButton , #LoadFromUrlButton {
-  margin-right: 5px;
+.homeSectionActionButtons {
+  display: flex;
+  justify-content: space-between;
 }
 
-.homeSectionUploadFromUrl .homeSectionButton {
-  width: 17%;
-  margin-left: 5px;
+.homeSectionLoadFromUrl {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.homeSectionActionButtons .homeSectionButton , .homeSectionLoadFromUrl .homeSectionButton {
+  font-size: 14px;
+  padding: 0.3em;
 }
 
 .homeSectionButton:hover {
@@ -206,7 +225,7 @@
 
 /* This code comes from https://tympanus.net/codrops/2015/09/15/styling-customizing-file-inputs-smart-way/ */
 
-.homeSectionUploadInput {
+.homeSectionUploadFromFileInput {
   width: 0.1px;
   height: 0.1px;
   opacity: 0;
@@ -215,8 +234,9 @@
   z-index: -1;
 }
 
-.homeSectionUploadFromUrlInput {
-    padding: 12px 20px;
+.homeSectionLoadFromUrlInput {
+    width: 85%;
+    padding: 8px 20px;
     margin: 8px 0;
     display: inline-block;
     border: 1px solid #ccc;
