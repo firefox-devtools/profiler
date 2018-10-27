@@ -138,7 +138,7 @@ class LoadFromUrl extends React.PureComponent<
     value: '',
   };
 
-  handleChange = (event: Event) => {
+  handleChange = event => {
     event.preventDefault();
     this.setState({ isLoadButtonPressed: true, value: event.target.value });
   };
