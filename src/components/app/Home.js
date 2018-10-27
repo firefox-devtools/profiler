@@ -71,7 +71,7 @@ type LoadFromUrlState = {
 };
 
 class ActionButtons extends React.PureComponent<
- ActionButtonsProps,
+  ActionButtonsProps,
   ActionButtonsState
 > {
   _input: HTMLInputElement | null;
@@ -92,30 +92,35 @@ class ActionButtons extends React.PureComponent<
 
   _loadFromUrlPressed = (event: Event) => {
     event.preventDefault();
-    this.setState({ isLoadFromUrlPressed: !this.state.isLoadFromUrlPressed });
+    this.setState(prevState => {
+      return { isLoadFromUrlPressed: !prevState.isLoadFromUrlPressed };
+    });
   };
 
   render() {
-    const _class = this.state.isLoadFromUrlPressed ? "homeSectionButtonPressed" : "homeSectionButton" ; 
+    const _class = this.state.isLoadFromUrlPressed
+      ? 'homeSectionButtonPressed'
+      : 'homeSectionButton';
     return (
-    <div>
-      <div className="homeSectionActionButtons">
-        <label className="homeSectionButton">
-          <input
-            className="homeSectionUploadFromFileInput"
-            type="file"
-            ref={this._takeInputRef}
-            onChange={this._upload}
-          />
-          Load a profile from file
-        </label>
-        <button
-          className={_class}
-          onClick={this._loadFromUrlPressed}
-        >
-          Load a profile from an URL
-        </button>
-     </div>
+      <div>
+        <div className="homeSectionActionButtons">
+          <label className="homeSectionButton">
+            <input
+              className="homeSectionUploadFromFileInput"
+              type="file"
+              ref={this._takeInputRef}
+              onChange={this._upload}
+            />
+            Load a profile from file
+          </label>
+          <button
+            type="button"
+            className={_class}
+            onClick={this._loadFromUrlPressed}
+          >
+            Load a profile from an URL
+          </button>
+        </div>
         {this.state.isLoadFromUrlPressed ? (
           <LoadFromUrl {...this.props} />
         ) : null}
@@ -124,16 +129,18 @@ class ActionButtons extends React.PureComponent<
   }
 }
 
-class LoadFromUrl extends React.PureComponent<LoadFromUrlProps ,LoadFromUrlState> {
- 
+class LoadFromUrl extends React.PureComponent<
+  LoadFromUrlProps,
+  LoadFromUrlState
+> {
   state = {
     isLoadButtonPressed: false,
-    value: "",
+    value: '',
   };
 
   handleChange = (event: Event) => {
     event.preventDefault();
-    this.setState({ isLoadButtonPressed: true , value: event.target.value});
+    this.setState({ isLoadButtonPressed: true, value: event.target.value });
   };
 
   _upload = () => {
@@ -152,7 +159,12 @@ class LoadFromUrl extends React.PureComponent<LoadFromUrlProps ,LoadFromUrlState
           value={this.state.value}
           onChange={this.handleChange}
         />
-        <input type="submit" className="homeSectionButton" value="Load" disabled={!this.state.isLoadButtonPressed}/>
+        <input
+          type="submit"
+          className="homeSectionButton"
+          value="Load"
+          disabled={!this.state.isLoadButtonPressed}
+        />
       </form>
     );
   }
@@ -368,7 +380,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <p>
               Recording performance profiles requires{' '}
               <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
-              However, existing profiles can be viewed in any modern browser. 
+              However, existing profiles can be viewed in any modern browser.
             </p>
             <ActionButtons {...this.props} />
           </div>
