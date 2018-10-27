@@ -270,6 +270,8 @@ function pathInZipFile(
       return action.pathInZipFile ? action.pathInZipFile : null;
     case 'RETURN_TO_ZIP_FILE_LIST':
       return null;
+    case 'PROFILE_PUBLISHED':
+      return null;
     default:
       return state;
   }
