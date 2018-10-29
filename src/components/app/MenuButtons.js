@@ -578,6 +578,21 @@ type MenuButtonsProps = ConnectedProps<
   MenuButtonsDispatchProps
 >;
 
+function _mapMetaInfoExtensionNames(data: any) {
+  const extensionData = data;
+  const extensionList = extensionData.map(d => (
+    <li className="metainfoListItem" key={d}>
+      {d}
+    </li>
+  ));
+  return extensionList;
+}
+
+function _formatDate(timestamp: number): string {
+  const timestampDate = new Date(timestamp).toString();
+  return timestampDate;
+}
+
 const MenuButtons = ({
   profile,
   rootRange,
@@ -598,7 +613,7 @@ const MenuButtons = ({
           <p>
             <span>
               <span className="metainfolabel">startTime: </span>
-              {profile.meta.startTime}
+              {_formatDate(profile.meta.startTime)}
             </span>
             <br />
             <span>
@@ -635,8 +650,10 @@ const MenuButtons = ({
             <br />
             {profile.meta.extensions ? (
               <span>
-                <span className="metainfolabel">extensions:</span>{' '}
-                {profile.meta.extensions.name}
+                <span className="metainfolabel">Extensions:</span>{' '}
+                <ul className="metainfoList">
+                  {_mapMetaInfoExtensionNames(profile.meta.extensions.name)}
+                </ul>
               </span>
             ) : null}
           </p>

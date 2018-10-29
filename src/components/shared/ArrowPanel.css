@@ -174,3 +174,11 @@
   display: inline-block;
 }
 
+.metainfoList {
+  margin-top: -19px;
+}
+
+.metainfoList .metainfoListItem {
+  margin-left: 110px;
+  list-style: circle;
+}

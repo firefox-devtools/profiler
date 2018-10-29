@@ -42,7 +42,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
               >
                 startTime: 
               </span>
-              1460221352723.438
+              Sat Apr 09 2016 19:02:32 GMT+0200 (CEST)
             </span>
             <br />
             <span>
@@ -115,9 +115,12 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
               <span
                 className="metainfolabel"
               >
-                extensions:
+                Extensions:
               </span>
                
+              <ul
+                className="metainfoList"
+              />
             </span>
           </p>
           <h2
@@ -533,7 +536,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
               >
                 startTime: 
               </span>
-              1460221352723.438
+              Sat Apr 09 2016 19:02:32 GMT+0200 (CEST)
             </span>
             <br />
             <span>
@@ -606,9 +609,12 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
               <span
                 className="metainfolabel"
               >
-                extensions:
+                Extensions:
               </span>
                
+              <ul
+                className="metainfoList"
+              />
             </span>
           </p>
           <h2
@@ -1024,7 +1030,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               >
                 startTime: 
               </span>
-              1460221352723.438
+              Sat Apr 09 2016 19:02:32 GMT+0200 (CEST)
             </span>
             <br />
             <span>
@@ -1097,9 +1103,12 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               <span
                 className="metainfolabel"
               >
-                extensions:
+                Extensions:
               </span>
                
+              <ul
+                className="metainfoList"
+              />
             </span>
           </p>
           <h2
@@ -1515,7 +1524,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               >
                 startTime: 
               </span>
-              1460221352723.438
+              Sat Apr 09 2016 19:02:32 GMT+0200 (CEST)
             </span>
             <br />
             <span>
@@ -1588,9 +1597,12 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               <span
                 className="metainfolabel"
               >
-                extensions:
+                Extensions:
               </span>
                
+              <ul
+                className="metainfoList"
+              />
             </span>
           </p>
           <h2
@@ -2006,7 +2018,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               >
                 startTime: 
               </span>
-              1460221352723.438
+              Sat Apr 09 2016 19:02:32 GMT+0200 (CEST)
             </span>
             <br />
             <span>
@@ -2079,9 +2091,12 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               <span
                 className="metainfolabel"
               >
-                extensions:
+                Extensions:
               </span>
                
+              <ul
+                className="metainfoList"
+              />
             </span>
           </p>
           <h2
@@ -2497,7 +2512,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               >
                 startTime: 
               </span>
-              1460221352723.438
+              Sat Apr 09 2016 19:02:32 GMT+0200 (CEST)
             </span>
             <br />
             <span>
@@ -2570,9 +2585,12 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               <span
                 className="metainfolabel"
               >
-                extensions:
+                Extensions:
               </span>
                
+              <ul
+                className="metainfoList"
+              />
             </span>
           </p>
           <h2
