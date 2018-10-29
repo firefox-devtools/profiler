@@ -25,8 +25,8 @@ describe('extract functions and resource from location strings', function() {
     // Extension locations
     'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:1:0',
     'moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:1:0',
-    'backgroundFunction (moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:2:1)',
-    'contentfunction (moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:2:1)',
+    'backgroundFunction (moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:2:0)',
+    'contentfunction (moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:2:0)',
 
     // Something unknown
     'mysterious location',

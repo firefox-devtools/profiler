@@ -176,10 +176,10 @@ Array [
     },
   ],
   Array [
-    "backgroundFunction (moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:2:1)",
+    "backgroundFunction (moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:2:0)",
     Object {
       "address": -1,
-      "columnNumber": 1,
+      "columnNumber": 0,
       "fileName": "moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js",
       "funcName": "backgroundFunction",
       "host": "geckoprofiler@mozilla.com",
@@ -193,10 +193,10 @@ Array [
     },
   ],
   Array [
-    "contentfunction (moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:2:1)",
+    "contentfunction (moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:2:0)",
     Object {
       "address": -1,
-      "columnNumber": 1,
+      "columnNumber": 0,
       "fileName": "moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js",
       "funcName": "contentfunction",
       "host": "geckoprofiler@mozilla.com",
