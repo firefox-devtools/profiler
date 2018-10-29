@@ -28,9 +28,9 @@ export function formatNumber(
   maxFractionalDigits: number = 3
 ): string {
   /*
-   * Note that numDigitsOnLeft can be negative when the first non-zero digit
-   * is on the right of the decimal point.  0.01 = -1
-   */
+    * Note that numDigitsOnLeft can be negative when the first non-zero digit
+    * is on the right of the decimal point.  0.01 = -1
+    */
   const numDigitsOnLeft = Math.floor(Math.log10(Math.abs(value))) + 1;
   let places = significantDigits - numDigitsOnLeft;
   if (places < 0) {
@@ -39,7 +39,10 @@ export function formatNumber(
     places = maxFractionalDigits;
   }
 
-  return value.toFixed(places);
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: places,
+    maximumFractionDigits: places,
+  });
 }
 
 export function formatPercent(value: number): string {
@@ -121,18 +124,4 @@ export function formatValueTotal(
   }
 
   return value_total + percent;
-}
-
-export function formatNumberToString(
-  number: number,
-  isIntegerInterval: boolean
-): string {
-  const LOCALE_WITH_DECIMAL_POINT = {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 1,
-  };
-  if (isIntegerInterval) {
-    return number.toLocaleString();
-  }
-  return number.toLocaleString(undefined, LOCALE_WITH_DECIMAL_POINT);
 }
