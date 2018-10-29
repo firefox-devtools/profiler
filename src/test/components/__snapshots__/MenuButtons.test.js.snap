@@ -35,7 +35,9 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
           >
             Timing
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -65,13 +67,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                
               16
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Application
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -122,13 +126,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 className="metainfoList"
               />
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Plattform
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -149,7 +155,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
               Intel Mac OS X 10.11
             </span>
             <br />
-          </p>
+          </div>
         </div>
       </div>
     </div>
@@ -529,7 +535,9 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
           >
             Timing
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -559,13 +567,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                
               16
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Application
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -616,13 +626,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 className="metainfoList"
               />
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Plattform
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -643,7 +655,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
               Intel Mac OS X 10.11
             </span>
             <br />
-          </p>
+          </div>
         </div>
       </div>
     </div>
@@ -1023,7 +1035,9 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             Timing
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -1053,13 +1067,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                
               16
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Application
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -1110,13 +1126,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 className="metainfoList"
               />
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Plattform
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -1137,7 +1155,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               Intel Mac OS X 10.11
             </span>
             <br />
-          </p>
+          </div>
         </div>
       </div>
     </div>
@@ -1517,7 +1535,9 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             Timing
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -1547,13 +1567,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                
               16
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Application
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -1604,13 +1626,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 className="metainfoList"
               />
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Plattform
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -1631,7 +1655,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               Intel Mac OS X 10.11
             </span>
             <br />
-          </p>
+          </div>
         </div>
       </div>
     </div>
@@ -2011,7 +2035,9 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             Timing
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -2041,13 +2067,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                
               16
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Application
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -2098,13 +2126,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 className="metainfoList"
               />
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Plattform
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -2125,7 +2155,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               Intel Mac OS X 10.11
             </span>
             <br />
-          </p>
+          </div>
         </div>
       </div>
     </div>
@@ -2505,7 +2535,9 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             Timing
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -2535,13 +2567,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                
               16
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Application
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -2592,13 +2626,15 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 className="metainfoList"
               />
             </span>
-          </p>
+          </div>
           <h2
             className="arrowPanelSubTitle"
           >
             Plattform
           </h2>
-          <p>
+          <div
+            className="arrowPanelSection"
+          >
             <span>
               <span
                 className="metainfolabel"
@@ -2619,7 +2655,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
               Intel Mac OS X 10.11
             </span>
             <br />
-          </p>
+          </div>
         </div>
       </div>
     </div>

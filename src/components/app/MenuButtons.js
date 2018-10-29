@@ -610,7 +610,7 @@ const MenuButtons = ({
       panel={
         <ArrowPanel className="arrowPanelOpenMetainfo">
           <h2 className="arrowPanelSubTitle">Timing</h2>
-          <p>
+          <div className="arrowPanelSection">
             <span>
               <span className="metainfolabel">startTime: </span>
               {_formatDate(profile.meta.startTime)}
@@ -625,9 +625,9 @@ const MenuButtons = ({
               <span className="metainfolabel">Profile Version:</span>{' '}
               {profile.meta.preprocessedProfileVersion}
             </span>
-          </p>
+          </div>
           <h2 className="arrowPanelSubTitle">Application</h2>
-          <p>
+          <div className="arrowPanelSection">
             <span>
               <span className="metainfolabel">Name:</span>{' '}
               {profile.meta.product}
@@ -656,9 +656,9 @@ const MenuButtons = ({
                 </ul>
               </span>
             ) : null}
-          </p>
+          </div>
           <h2 className="arrowPanelSubTitle">Plattform</h2>
-          <p>
+          <div className="arrowPanelSection">
             <span>
               <span className="metainfolabel">Platform:</span>{' '}
               {profile.meta.platform}
@@ -668,7 +668,7 @@ const MenuButtons = ({
               <span className="metainfolabel">OS:</span> {profile.meta.oscpu}
             </span>
             <br />
-          </p>
+          </div>
         </ArrowPanel>
       }
     />

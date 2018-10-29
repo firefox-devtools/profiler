@@ -168,6 +168,11 @@
   background-color: white;
 }
 
+.arrowPanelSection {
+  margin-top: 7px;
+  margin-bottom: 12px;
+}
+
 .metainfolabel {
   width: 120px;
   color: var(--grey-40);
