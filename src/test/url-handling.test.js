@@ -191,6 +191,7 @@ describe('url handling tracks', function() {
       ]);
     });
 
+    // This is a test for issue https://github.com/devtools-html/perf.html/issues/1389
     it('can select a local track without mixing track and thread indexes', function() {
       // We're building a very specific profile, where local track indexes and
       // thread indexes could be confused. This is easier if we have local
@@ -212,9 +213,11 @@ describe('url handling tracks', function() {
 
       const { getState } = _getStoreWithURL(
         // In this search query, we want to hide the second local track of the
-        // process with PID 111, that is the "Style" thread, and select the
-        // second thread, that is the "DOM Worker" thread. This ensures that we
-        // don't confuse local track and thread indexes.
+        // process with PID 111 (`111-1`), that is the "Style" thread, and
+        // select the second thread (`thread=1`), that is the "DOM Worker"
+        // thread, which is the local track `111-0`.
+        // This ensures that we don't confuse local track and thread indexes
+        // when selecting threads (see issue #1389).
         { search: '?hiddenLocalTracksByPid=111-1&thread=1' },
         profile
       );
