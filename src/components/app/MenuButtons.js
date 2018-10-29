@@ -589,7 +589,7 @@ function _mapMetaInfoExtensionNames(data: any) {
 }
 
 function _formatDate(timestamp: number): string {
-  const timestampDate = new Date(timestamp).toString();
+  const timestampDate = new Date(timestamp).toUTCString();
   return timestampDate;
 }
 
