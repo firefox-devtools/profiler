@@ -148,6 +148,7 @@ export type FuncTable = {
   resource: Array<IndexIntoResourceTable | -1>,
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
+  columnNumber: Array<number | null>,
 };
 
 /**

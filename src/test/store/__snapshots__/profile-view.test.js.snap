@@ -31,7 +31,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 16,
+    "preprocessedProfileVersion": 17,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -134,6 +134,7 @@ Object {
           0,
           0,
         ],
+        "columnNumber": Array [],
         "fileName": Array [
           null,
           null,
@@ -394,6 +395,7 @@ Object {
       },
       "funcTable": Object {
         "address": Array [],
+        "columnNumber": Array [],
         "fileName": Array [],
         "isJS": Array [],
         "length": 0,
@@ -640,6 +642,7 @@ Array [
         0,
         0,
       ],
+      "columnNumber": Array [],
       "fileName": Array [
         null,
         null,
@@ -900,6 +903,7 @@ Array [
     },
     "funcTable": Object {
       "address": Array [],
+      "columnNumber": Array [],
       "fileName": Array [],
       "isJS": Array [],
       "length": 0,
@@ -1243,6 +1247,7 @@ CallTree {
       0,
       0,
     ],
+    "columnNumber": Array [],
     "fileName": Array [
       null,
       null,
@@ -1505,6 +1510,7 @@ Object {
       0,
       0,
     ],
+    "columnNumber": Array [],
     "fileName": Array [
       null,
       null,
@@ -1947,6 +1953,7 @@ Object {
       0,
       0,
     ],
+    "columnNumber": Array [],
     "fileName": Array [
       null,
       null,
@@ -2270,6 +2277,7 @@ Object {
       0,
       0,
     ],
+    "columnNumber": Array [],
     "fileName": Array [
       null,
       null,
@@ -2561,6 +2569,7 @@ Object {
       0,
       0,
     ],
+    "columnNumber": Array [],
     "fileName": Array [
       null,
       null,

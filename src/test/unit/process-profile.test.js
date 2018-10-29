@@ -19,14 +19,14 @@ describe('extract functions and resource from location strings', function() {
     'cppFunction3 (in c++ resource name2)',
 
     // Extract JS functions URL information
-    'jsFunction1 (http://script.com/one.js:456)',
-    'http://script.com/one.js:456',
+    'jsFunction1 (http://script.com/one.js:456:1)',
+    'http://script.com/one.js:456:1',
 
     // Extension locations
-    'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:1',
-    'moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:1',
-    'backgroundFunction (moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:2)',
-    'contentfunction (moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:2)',
+    'moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:1:0',
+    'moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:1:0',
+    'backgroundFunction (moz-extension://bf3bb73c-919c-4fef-95c4-070a19fdaf85/background.js:2:1)',
+    'contentfunction (moz-extension://fa2edf9c-c45f-4445-b819-c09e3f2d58d5/content.js:2:1)',
 
     // Something unknown
     'mysterious location',
@@ -96,7 +96,7 @@ describe('extract functions and resource from location strings', function() {
         const fileName =
           fileNameIndex === null ? null : stringTable.getString(fileNameIndex);
         const lineNumber = funcTable.lineNumber[funcIndex];
-
+        const columnNumber = funcTable.columnNumber[funcIndex];
         let libIndex, resourceName, host, resourceType;
         if (resourceIndex === -1) {
           resourceName = null;
@@ -128,6 +128,7 @@ describe('extract functions and resource from location strings', function() {
             address,
             fileName,
             lineNumber,
+            columnNumber,
             libIndex,
             resourceName,
             host,
