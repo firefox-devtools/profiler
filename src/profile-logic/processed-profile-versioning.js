@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 16; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 17; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -779,6 +779,39 @@ const _upgraders = {
         }
       }
       thread.markers.data = newDataArray;
+    }
+  },
+  [17]: profile => {
+    // funcTable gains a new field: columnNumber.
+    for (const thread of profile.threads) {
+      const { funcTable, stringArray } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      funcTable.columnNumber = [];
+      for (
+        let funcIndex = 0;
+        funcIndex < thread.funcTable.length;
+        funcIndex++
+      ) {
+        if (funcTable.lineNumber[funcIndex] !== null) {
+          funcTable.columnNumber[funcIndex] = funcTable.lineNumber[funcIndex];
+          const fileNameIndex = funcTable.fileName[funcIndex];
+          let fileName;
+          if (fileNameIndex !== null) {
+            fileName = stringTable.getString(fileNameIndex);
+            const match = /^(.*):([0-9]+)$/.exec(fileName);
+            if (match) {
+              const scriptURI = _getRealScriptURI(match[1]);
+              funcTable.fileName[funcIndex] = stringTable.indexForString(
+                scriptURI
+              );
+              funcTable.lineNumber[funcIndex] = match[2];
+            }
+          }
+        } else {
+          funcTable.columnNumber[funcIndex] = null;
+        }
+      }
+      thread.stringArray = stringTable.serializeToArray();
     }
   },
 };

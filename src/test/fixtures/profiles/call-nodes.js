@@ -51,6 +51,7 @@ export default function getProfile(): Profile {
     resource: Array(funcNames.length).fill(-1),
     fileName: Array(funcNames.length).fill(''),
     lineNumber: Array(funcNames.length).fill(null),
+    columnNumber: Array(funcNames.length).fill(null),
     length: funcNames.length,
   };
 
