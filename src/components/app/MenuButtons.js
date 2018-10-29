@@ -635,11 +635,6 @@ const MenuButtons = ({
             <br />
             <span>
               <span className="metainfolabel">Version:</span>{' '}
-              {profile.meta.version}
-            </span>
-            <br />
-            <span>
-              <span className="metainfolabel">Update Channel:</span>{' '}
               {profile.meta.misc}
             </span>
             <br />

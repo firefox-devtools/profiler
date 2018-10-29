@@ -93,16 +93,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 Version:
               </span>
                
-              13
-            </span>
-            <br />
-            <span>
-              <span
-                className="metainfolabel"
-              >
-                Update Channel:
-              </span>
-               
               rv:48.0
             </span>
             <br />
@@ -591,16 +581,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 className="metainfolabel"
               >
                 Version:
-              </span>
-               
-              13
-            </span>
-            <br />
-            <span>
-              <span
-                className="metainfolabel"
-              >
-                Update Channel:
               </span>
                
               rv:48.0
@@ -1093,16 +1073,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 Version:
               </span>
                
-              13
-            </span>
-            <br />
-            <span>
-              <span
-                className="metainfolabel"
-              >
-                Update Channel:
-              </span>
-               
               rv:48.0
             </span>
             <br />
@@ -1591,16 +1561,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 className="metainfolabel"
               >
                 Version:
-              </span>
-               
-              13
-            </span>
-            <br />
-            <span>
-              <span
-                className="metainfolabel"
-              >
-                Update Channel:
               </span>
                
               rv:48.0
@@ -2093,16 +2053,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 Version:
               </span>
                
-              13
-            </span>
-            <br />
-            <span>
-              <span
-                className="metainfolabel"
-              >
-                Update Channel:
-              </span>
-               
               rv:48.0
             </span>
             <br />
@@ -2591,16 +2541,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 className="metainfolabel"
               >
                 Version:
-              </span>
-               
-              13
-            </span>
-            <br />
-            <span>
-              <span
-                className="metainfolabel"
-              >
-                Update Channel:
               </span>
                
               rv:48.0
