@@ -316,9 +316,10 @@ const wrapReducerInResetter = (
         return action.newUrlState;
       case 'RETURN_TO_ZIP_FILE_LIST':
         // Invalidate all information that would be specific to an individual profile.
-        return Object.assign(regularUrlStateReducer(state, action), {
+        return {
+          ...regularUrlStateReducer(state, action),
           profileSpecific: profileSpecific(undefined, state),
-        });
+        };
       default:
         return regularUrlStateReducer(state, action);
     }

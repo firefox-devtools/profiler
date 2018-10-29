@@ -361,10 +361,12 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
       >
         <section className="homeSection">
           <h1 className="homeTitle">
-            <span className="homeTitleText">perf.html</span>
-            <span className="homeTitleSubtext">
-              {' '}
-              &mdash; Web app for Firefox performance analysis
+            <span className="homeTitleSlogan">
+              <span className="homeTitleText">perf.html</span>
+              <span className="homeTitleSubtext">
+                {' '}
+                &mdash; Web app for Firefox performance analysis
+              </span>
             </span>
             <a
               className="homeTitleGithubIcon"
