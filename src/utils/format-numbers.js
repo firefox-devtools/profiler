@@ -28,9 +28,9 @@ export function formatNumber(
   maxFractionalDigits: number = 3
 ): string {
   /*
-    * Note that numDigitsOnLeft can be negative when the first non-zero digit
-    * is on the right of the decimal point.  0.01 = -1
-    */
+  * Note that numDigitsOnLeft can be negative when the first non-zero digit
+  * is on the right of the decimal point.  0.01 = -1
+  */
   const numDigitsOnLeft = Math.floor(Math.log10(Math.abs(value))) + 1;
   let places = significantDigits - numDigitsOnLeft;
   if (places < 0) {
@@ -45,14 +45,14 @@ export function formatNumber(
   });
 }
 
-export function formatPercent(value: number): string {
-  return (
-    formatNumber(
-      value * 100,
-      /* significantDigits */ 2,
-      /* maxFractionalDigits */ 1
-    ) + '%'
-  );
+export function formatPercent(
+  value: number,
+  minFractionalDigits: number
+): string {
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: minFractionalDigits,
+    style: 'percent',
+  });
 }
 
 export function formatBytes(bytes: number): string {

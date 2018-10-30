@@ -26,7 +26,7 @@ import type {
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
-import { formatNumber } from '../utils/format-numbers';
+import { formatNumber, formatPercent } from '../utils/format-numbers';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
@@ -219,7 +219,7 @@ export class CallTree {
         totalTimeWithUnit: formattedTotalTime + 'ms',
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
         selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
-        totalTimePercent: `${(100 * totalTimeRelative).toFixed(1)}%`,
+        totalTimePercent: `${formatPercent(totalTimeRelative, 1)}`,
         name: funcName,
         lib: libName,
         // Dim platform pseudo-stacks.
