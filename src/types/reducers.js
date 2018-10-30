@@ -139,6 +139,7 @@ export type UrlState = {|
   dataSource: DataSource,
   hash: string,
   profileUrl: string,
+  text: string,
   selectedTab: TabSlug,
   pathInZipFile: string | null,
   profileSpecific: {|

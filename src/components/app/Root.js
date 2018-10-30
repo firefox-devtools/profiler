@@ -11,6 +11,7 @@ import {
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
+  retrieveProfileFromString,
 } from '../../actions/receive-profile';
 import ProfileViewer from './ProfileViewer';
 import ZipFileViewer from './ZipFileViewer';
@@ -21,6 +22,7 @@ import {
   getDataSource,
   getHash,
   getProfileUrl,
+  getText,
 } from '../../reducers/url-state';
 import UrlManager from './UrlManager';
 import FooterLinks from './FooterLinks';
@@ -38,17 +40,17 @@ require('./Root.css');
 const LOADING_MESSAGES: { [string]: string } = Object.freeze({
   'from-addon': 'Grabbing the profile from the Gecko Profiler Addon...',
   'from-file': 'Reading the file and processing the profile...',
-  local: 'Not implemented yet.',
   public: 'Downloading and processing the profile...',
   'from-url': 'Downloading and processing the profile...',
+  'from-string': 'Processing the profile...',
 });
 
 const ERROR_MESSAGES: { [string]: string } = Object.freeze({
   'from-addon': "Couldn't retrieve the profile from the Gecko Profiler Addon.",
   'from-file': "Couldn't read the file or parse the profile in it.",
-  local: 'Not implemented yet.',
-  public: 'Could not download the profile.',
+  'public': 'Could not download the profile.',
   'from-url': 'Could not download the profile.',
+  'from-string': "Could not parse the profile.",
 });
 
 // TODO Switch to a proper i18n library
@@ -80,6 +82,7 @@ type ProfileViewDispatchProps = {|
   +retrieveProfileFromAddon: typeof retrieveProfileFromAddon,
   +retrieveProfileFromStore: typeof retrieveProfileFromStore,
   +retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
+  +retrieveProfileFromString: typeof retrieveProfileFromString,
 |};
 
 type ProfileViewProps = ConnectedProps<
@@ -94,9 +97,11 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       dataSource,
       hash,
       profileUrl,
+      text,
       retrieveProfileFromAddon,
       retrieveProfileFromStore,
       retrieveProfileOrZipFromUrl,
+      retrieveProfileFromString,
     } = this.props;
     switch (dataSource) {
       case 'from-addon':
@@ -105,7 +110,8 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       case 'from-file':
         // retrieveProfileFromFile should already have been called
         break;
-      case 'local':
+      case 'from-string':
+        retrieveProfileFromString(text);
         break;
       case 'public':
         retrieveProfileFromStore(hash);
@@ -233,6 +239,7 @@ const options: ExplicitConnectOptions<
     view: getView(state),
     dataSource: getDataSource(state),
     hash: getHash(state),
+    text: getText(state),
     profileUrl: getProfileUrl(state),
     hasZipFile: getHasZipFile(state),
   }),
@@ -240,6 +247,7 @@ const options: ExplicitConnectOptions<
     retrieveProfileFromStore,
     retrieveProfileOrZipFromUrl,
     retrieveProfileFromAddon,
+    retrieveProfileFromString,
   },
   component: ProfileViewWhenReadyImpl,
 };

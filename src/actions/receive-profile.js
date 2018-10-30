@@ -52,10 +52,10 @@ import type {
  * client and getting it into the processed format.
  */
 
-export function triggerLoadingFromUrl(profileUrl: string): Action {
+export function triggerLoadingFromString(text: string): Action {
   return {
-    type: 'TRIGGER_LOADING_FROM_URL',
-    profileUrl,
+    type: 'TRIGGER_LOADING_FROM_STRING',
+    text,
   };
 }
 
@@ -448,6 +448,12 @@ export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
   };
 }
 
+export function waitingForProfileFromString(): Action {
+  return {
+    type: 'WAITING_FOR_PROFILE_FROM_String',
+  };
+}
+
 export function waitingForProfileFromStore(): Action {
   return {
     type: 'WAITING_FOR_PROFILE_FROM_STORE',
@@ -794,6 +800,25 @@ export function retrieveProfileFromFile(
 
           dispatch(viewProfile(profile));
         }
+      }
+    } catch (error) {
+      dispatch(fatalError(error));
+    }
+  };
+}
+
+export function retrieveProfileFromString(
+  text: string
+): ThunkAction<Promise<void>> {
+  return async function(dispatch) {
+    dispatch(waitingForProfileFromString());
+    try {
+      if (text) {
+        const profile = unserializeProfileOfArbitraryFormat(text);
+        if (profile === undefined) {
+          throw new Error('Unable to parse the profile.');
+        }
+         dispatch(viewProfile(profile));
       }
     } catch (error) {
       dispatch(fatalError(error));

@@ -119,7 +119,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
                 onClick={[Function]}
                 type="button"
               >
-                Load a profile from an URL
+                Load a profile data
               </button>
             </div>
           </div>
@@ -260,7 +260,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
                 onClick={[Function]}
                 type="button"
               >
-                Load a profile from an URL
+                Load a profile data
               </button>
             </div>
           </div>
@@ -434,7 +434,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
                 onClick={[Function]}
                 type="button"
               >
-                Load a profile from an URL
+                Load a profile data
               </button>
             </div>
           </div>
@@ -593,7 +593,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
                 onClick={[Function]}
                 type="button"
               >
-                Load a profile from an URL
+                Load a profile data
               </button>
             </div>
           </div>

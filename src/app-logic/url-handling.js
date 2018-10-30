@@ -215,6 +215,7 @@ function getDataSourceFromPathParts(pathParts: string[]): DataSource {
     case 'local':
     case 'public':
     case 'from-url':
+    case 'from-string':
       return str;
     default:
       throw new Error(`Unexpected data source ${str}`);

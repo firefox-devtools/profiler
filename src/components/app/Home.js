@@ -11,7 +11,7 @@ import AddonScreenshot from '../../../res/img/png/gecko-profiler-screenshot-2018
 import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2017-09-08.jpg';
 import {
   retrieveProfileFromFile,
-  triggerLoadingFromUrl,
+  triggerLoadingFromString,
 } from '../../actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import type {
@@ -54,18 +54,18 @@ class InstallButton extends React.PureComponent<InstallButtonProps> {
 
 type ActionButtonsProps = {
   retrieveProfileFromFile: typeof retrieveProfileFromFile,
-  triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+  triggerLoadingFromString: typeof triggerLoadingFromString,
 };
 
 type ActionButtonsState = {
-  isLoadFromUrlPressed: boolean,
+  isLoadProfileDataPressed: boolean,
 };
 
-type LoadFromUrlProps = {
-  triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+type LoadProfileDataProps = {
+  triggerLoadingFromString: typeof triggerLoadingFromString,
 };
 
-type LoadFromUrlState = {
+type LoadProfileDataState = {
   isLoadButtonPressed: boolean,
   value: string,
 };
@@ -77,7 +77,7 @@ class ActionButtons extends React.PureComponent<
   _input: HTMLInputElement | null;
 
   state = {
-    isLoadFromUrlPressed: false,
+    isLoadProfileDataPressed: false,
   };
 
   _takeInputRef = input => {
@@ -90,15 +90,15 @@ class ActionButtons extends React.PureComponent<
     }
   };
 
-  _loadFromUrlPressed = (event: Event) => {
+  _loadProfileDataPressed = (event: Event) => {
     event.preventDefault();
     this.setState(prevState => {
-      return { isLoadFromUrlPressed: !prevState.isLoadFromUrlPressed };
+      return { isLoadProfileDataPressed: !prevState.isLoadProfileDataPressed };
     });
   };
 
   render() {
-    const _class = this.state.isLoadFromUrlPressed
+    const _class = this.state.isLoadProfileDataPressed
       ? 'homeSectionButtonPressed'
       : 'homeSectionButton';
     return (
@@ -116,22 +116,22 @@ class ActionButtons extends React.PureComponent<
           <button
             type="button"
             className={_class}
-            onClick={this._loadFromUrlPressed}
+            onClick={this._loadProfileDataPressed}
           >
-            Load a profile from an URL
+            Load a profile data
           </button>
         </div>
-        {this.state.isLoadFromUrlPressed ? (
-          <LoadFromUrl {...this.props} />
+        {this.state.isLoadProfileDataPressed ? (
+          <LoadProfileData {...this.props} />
         ) : null}
       </div>
     );
   }
 }
 
-class LoadFromUrl extends React.PureComponent<
-  LoadFromUrlProps,
-  LoadFromUrlState
+class LoadProfileData extends React.PureComponent<
+  LoadProfileDataProps,
+  LoadProfileDataState
 > {
   state = {
     isLoadButtonPressed: false,
@@ -145,7 +145,7 @@ class LoadFromUrl extends React.PureComponent<
 
   _upload = () => {
     if (this.state.value) {
-      this.props.triggerLoadingFromUrl(this.state.value);
+      this.props.triggerLoadingFromString(this.state.value);
     }
   };
 
@@ -154,8 +154,7 @@ class LoadFromUrl extends React.PureComponent<
       <form className="homeSectionLoadFromUrl" onSubmit={this._upload}>
         <input
           className="homeSectionLoadFromUrlInput"
-          type="url"
-          placeholder="https://"
+          type="text"
           value={this.state.value}
           onChange={this.handleChange}
         />
@@ -207,7 +206,7 @@ type OwnHomeProps = {|
 
 type DispatchHomeProps = {|
   +retrieveProfileFromFile: typeof retrieveProfileFromFile,
-  +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+  +triggerLoadingFromString: typeof triggerLoadingFromString,
 |};
 
 type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
@@ -480,7 +479,7 @@ function _isFirefox(): boolean {
 }
 
 const options: ExplicitConnectOptions<OwnHomeProps, {||}, DispatchHomeProps> = {
-  mapDispatchToProps: { retrieveProfileFromFile, triggerLoadingFromUrl },
+  mapDispatchToProps: { retrieveProfileFromFile, triggerLoadingFromString },
   component: Home,
 };
 export default explicitConnect(options);

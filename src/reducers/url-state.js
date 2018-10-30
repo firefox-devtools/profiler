@@ -35,8 +35,8 @@ function dataSource(state: DataSource = 'none', action: Action) {
       return 'from-file';
     case 'PROFILE_PUBLISHED':
       return 'public';
-    case 'TRIGGER_LOADING_FROM_URL':
-      return 'from-url';
+    case 'TRIGGER_LOADING_FROM_STRING':
+      return 'from-string';
     default:
       return state;
   }
@@ -53,8 +53,15 @@ function hash(state: string = '', action: Action) {
 
 function profileUrl(state: string = '', action: Action) {
   switch (action.type) {
-    case 'TRIGGER_LOADING_FROM_URL':
-      return action.profileUrl;
+    default:
+      return state;
+  }
+}
+
+function text(state: string = '', action: Action) {
+  switch (action.type) {
+    case 'TRIGGER_LOADING_FROM_STRING':
+      return action.text;
     default:
       return state;
   }
@@ -334,6 +341,7 @@ const urlStateReducer = wrapReducerInResetter(
     dataSource,
     hash,
     profileUrl,
+    text,
     selectedTab,
     pathInZipFile,
     profileSpecific,
@@ -349,6 +357,7 @@ export const getProfileSpecificState = (state: State) =>
 export const getDataSource = (state: State) => getUrlState(state).dataSource;
 export const getHash = (state: State) => getUrlState(state).hash;
 export const getProfileUrl = (state: State) => getUrlState(state).profileUrl;
+export const getText = (state: State) => getUrlState(state).text;
 export const getAllCommittedRanges = (state: State) =>
   getProfileSpecificState(state).committedRanges;
 export const getImplementationFilter = (state: State) =>
