@@ -32,11 +32,14 @@
   position: absolute;
   pointer-events: none;
   z-index: 4; /* Ensure this is higher than any other timeline element. */
+
+  /* The left edge of the element will be absolutely positioned at the mouse
+   * position. So we want to move the element so that its center is actually
+   * at the mouse position. */
+  transform: translate(-50%);
 }
 
 .timelineTrackScreenshotHoverImg {
-  position: relative;
-  left: -50%;
   border-radius: 5px;
   padding: 0.5px;
   border: 0.5px solid rgba(0,0,0,.2);
