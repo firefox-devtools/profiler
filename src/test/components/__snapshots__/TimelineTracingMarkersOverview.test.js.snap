@@ -29,8 +29,48 @@ Array [
     1,
   ],
   Array [
+    "createLinearGradient",
+    0,
+    0,
+    200,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#000000",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "#ffffff",
+  ],
+  Array [
     "set fillStyle",
-    "black",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#000000",
+          ],
+          Array [
+            1,
+            "#ffffff",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
   ],
   Array [
     "fillRect",
@@ -54,8 +94,48 @@ Array [
     1,
   ],
   Array [
+    "createLinearGradient",
+    0,
+    0,
+    200,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#000000",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "#ffffff",
+  ],
+  Array [
     "set fillStyle",
-    "black",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#000000",
+          ],
+          Array [
+            1,
+            "#ffffff",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
   ],
   Array [
     "fillRect",
@@ -79,8 +159,48 @@ Array [
     1,
   ],
   Array [
+    "createLinearGradient",
+    0,
+    0,
+    200,
+    0,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#000000",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "#ffffff",
+  ],
+  Array [
     "set fillStyle",
-    "black",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#000000",
+          ],
+          Array [
+            1,
+            "#ffffff",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
   ],
   Array [
     "fillRect",
