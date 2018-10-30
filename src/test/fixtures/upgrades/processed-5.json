@@ -336,7 +336,8 @@
           "debugPath": "",
           "debugName": "firefox-webcontent",
           "name": "firefox-webcontent",
-          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
+          "path":
+            "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
           "start": 4294967296,
           "end": 4294977296
         },

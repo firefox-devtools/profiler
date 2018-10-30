@@ -12,7 +12,8 @@
     "toolkit": "cocoa",
     "version": 3
   },
-  "libs": "[{\"breakpadId\":\"F1D957D30B413D55A539BBA06F90DD8F0\",\"name\":\"/Applications/FirefoxNightly.app/Contents/MacOS/firefox\",\"start\":4294967296,\"end\":4294977296},{\"pdbName\":\"examplebinary2.pdb\",\"pdbSignature\":\"{10000000-0000-0000-0000-0000000000a2}\",\"pdbAge\":7,\"name\":\"C:\\\\examplebinary2\",\"start\":8589934612,\"end\":8589934632},{\"breakpadId\":\"1000000000000000000000000000000A1\",\"name\":\"/tmp/examplebinary\",\"start\":8589934592,\"end\":8589934612}]",
+  "libs":
+    "[{\"breakpadId\":\"F1D957D30B413D55A539BBA06F90DD8F0\",\"name\":\"/Applications/FirefoxNightly.app/Contents/MacOS/firefox\",\"start\":4294967296,\"end\":4294977296},{\"pdbName\":\"examplebinary2.pdb\",\"pdbSignature\":\"{10000000-0000-0000-0000-0000000000a2}\",\"pdbAge\":7,\"name\":\"C:\\\\examplebinary2\",\"start\":8589934612,\"end\":8589934632},{\"breakpadId\":\"1000000000000000000000000000000A1\",\"name\":\"/tmp/examplebinary\",\"start\":8589934592,\"end\":8589934612}]",
   "threads": [
     {
       "name": "GeckoMain",

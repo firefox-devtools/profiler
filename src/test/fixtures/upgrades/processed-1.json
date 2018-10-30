@@ -312,7 +312,8 @@
       "libs": [
         {
           "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
-          "name": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
+          "name":
+            "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
           "start": 4294967296,
           "end": 4294977296,
           "pdbName": "firefox-webcontent"
