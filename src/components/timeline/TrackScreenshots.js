@@ -177,9 +177,9 @@ class Screenshots extends PureComponent<Props, State> {
     const left =
       offsetX + hoverWidth * 0.5 > width
         ? // Stick the hover image on to the right side of the container.
-          pageX - offsetX + width - hoverWidth * 0.5
+          pageX - offsetX + width - hoverWidth
         : // Center the hover image around the mouse.
-          pageX;
+          pageX - hoverWidth * 0.5;
 
     return createPortal(
       <div className="timelineTrackScreenshotHover" style={{ left, top }}>
