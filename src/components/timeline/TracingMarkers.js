@@ -288,7 +288,14 @@ class TimelineTracingMarkersImplementation extends React.PureComponent<
         ? dur / (rangeEnd - rangeStart) * width
         : Number.MAX_SAFE_INTEGER;
       const style = name in styles ? styles[name] : styles.default;
-      ctx.fillStyle = style.background;
+      const gradient = ctx.createLinearGradient(0, 0, width, 0);
+      gradient.addColorStop(0, '#000000');
+      gradient.addColorStop(1, '#ffffff');
+      if (name in styles) {
+        ctx.fillStyle = style.background;
+      } else {
+        ctx.fillStyle = gradient;
+      }
       if (style.squareCorners) {
         ctx.fillRect(pos, style.top, itemWidth, style.height);
       } else {
