@@ -47,7 +47,7 @@ export function formatNumber(
 
 export function formatPercent(
   value: number,
-  minFractionalDigits: number
+  minFractionalDigits: number = 1
 ): string {
   return value.toLocaleString(undefined, {
     minimumFractionDigits: minFractionalDigits,
@@ -120,7 +120,7 @@ export function formatValueTotal(
   const value_total = formatNum(a) + ' / ' + formatNum(b);
   let percent = '';
   if (includePercent) {
-    percent = ' (' + formatPercent(a / b) + ')';
+    percent = ' (' + formatPercent(a / b, 0) + ')';
   }
 
   return value_total + percent;
