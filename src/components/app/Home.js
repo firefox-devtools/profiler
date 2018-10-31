@@ -67,7 +67,8 @@ type LoadProfileDataProps = {
 
 type LoadProfileDataState = {
   isLoadButtonPressed: boolean,
-  value: string,
+  textareaValue: string,
+  loadButtonValue: string,
 };
 
 class ActionButtons extends React.PureComponent<
@@ -98,11 +99,11 @@ class ActionButtons extends React.PureComponent<
   };
 
   render() {
-    const _class = this.state.isLoadProfileDataPressed
-      ? 'homeSectionButtonPressed'
+    const loadProfileDataButtonClassName = this.state.isLoadProfileDataPressed
+      ? ['homeSectionButtonPressed', 'homeSectionButton'].join(' ')
       : 'homeSectionButton';
     return (
-      <div>
+      <div className="homeSectionLoadProfile">
         <div className="homeSectionActionButtons">
           <label className="homeSectionButton">
             <input
@@ -115,7 +116,7 @@ class ActionButtons extends React.PureComponent<
           </label>
           <button
             type="button"
-            className={_class}
+            className={loadProfileDataButtonClassName}
             onClick={this._loadProfileDataPressed}
           >
             Load a profile data
@@ -135,33 +136,37 @@ class LoadProfileData extends React.PureComponent<
 > {
   state = {
     isLoadButtonPressed: false,
-    value: '',
+    textareaValue: '',
+    loadButtonValue: 'Paste some profile data to enable this button',
   };
 
-  handleChange = event => {
+  handlePaste = event => {
     event.preventDefault();
-    this.setState({ isLoadButtonPressed: true, value: event.target.value });
+    this.setState({
+      isLoadButtonPressed: true,
+      textareaValue: event.clipboardData.getData('text'),
+      loadButtonValue: 'Load the pasted profile data',
+    });
   };
 
   _upload = () => {
-    if (this.state.value) {
-      this.props.triggerLoadingFromString(this.state.value);
+    if (this.state.textareaValue) {
+      this.props.triggerLoadingFromString(this.state.textareaValue);
     }
   };
 
   render() {
     return (
-      <form className="homeSectionLoadFromUrl" onSubmit={this._upload}>
-        <input
-          className="homeSectionLoadFromUrlInput"
-          type="text"
-          value={this.state.value}
-          onChange={this.handleChange}
+      <form className="homeSectionLoadProfileData" onSubmit={this._upload}>
+        <textarea
+          className="homeSectionLoadProfileDataTextarea"
+          value={this.state.textareaValue}
+          onPaste={this.handlePaste}
         />
         <input
           type="submit"
           className="homeSectionButton"
-          value="Load"
+          value={this.state.loadButtonValue}
           disabled={!this.state.isLoadButtonPressed}
         />
       </form>

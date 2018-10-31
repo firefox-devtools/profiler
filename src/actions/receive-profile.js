@@ -818,7 +818,7 @@ export function retrieveProfileFromString(
         if (profile === undefined) {
           throw new Error('Unable to parse the profile.');
         }
-         dispatch(viewProfile(profile));
+        dispatch(viewProfile(profile));
       }
     } catch (error) {
       dispatch(fatalError(error));

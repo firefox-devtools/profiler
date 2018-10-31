@@ -48,9 +48,9 @@ const LOADING_MESSAGES: { [string]: string } = Object.freeze({
 const ERROR_MESSAGES: { [string]: string } = Object.freeze({
   'from-addon': "Couldn't retrieve the profile from the Gecko Profiler Addon.",
   'from-file': "Couldn't read the file or parse the profile in it.",
-  'public': 'Could not download the profile.',
+  public: 'Could not download the profile.',
   'from-url': 'Could not download the profile.',
-  'from-string': "Could not parse the profile.",
+  'from-string': 'Could not parse the profile.',
 });
 
 // TODO Switch to a proper i18n library

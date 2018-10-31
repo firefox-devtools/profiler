@@ -124,40 +124,31 @@
   background-color: #fff;
 }
 
-.homeSectionButtonPressed {
-  padding: 0.5em;
-  margin: 15px 0;
-  display: block;
-  border: 2px solid var(--blue-50);
-  text-decoration: none;
-  transition: background-color 300ms;
-  font-weight: bold;
-  font-size: 13px;
-  text-align: center;
-  cursor: pointer;
-  background-color: var(--blue-50);
-  color: #fff;
-
-}
+.homeSectionLoadProfile {
+  position: relative
+} 
 
 .homeSectionActionButtons {
   display: flex;
   justify-content: space-between;
 }
 
-.homeSectionLoadFromUrl {
+.homeSectionLoadProfileData {
   width: 100%;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: space-between;
+  position: absolute;
 }
 
-.homeSectionActionButtons .homeSectionButton , .homeSectionLoadFromUrl .homeSectionButton {
+.homeSectionActionButtons .homeSectionButton ,
+.homeSectionLoadProfileData .homeSectionButton {
   font-size: 13px;
   padding: 0.3em;
+  margin: 8px 0;
 }
 
-.homeSectionButton:hover {
+.homeSectionButton:hover , .homeSectionButtonPressed {
   color: #fff;
   background-color: var(--blue-50);
 }
@@ -234,14 +225,14 @@
   z-index: -1;
 }
 
-.homeSectionLoadFromUrlInput {
-    width: 85%;
-    padding: 8px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.homeSectionLoadProfileDataTextarea {
+    width: 100%;
+    height: 70px;
+    padding: 12px 20px;
     box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    background-color: #f8f8f8;
 }
 
 label.homeSectionButton:focus-within {

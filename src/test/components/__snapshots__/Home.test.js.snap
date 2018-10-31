@@ -100,7 +100,9 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             </a>
             . However, existing profiles can be viewed in any modern browser.
           </p>
-          <div>
+          <div
+            className="homeSectionLoadProfile"
+          >
             <div
               className="homeSectionActionButtons"
             >
@@ -241,7 +243,9 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           <p>
             Install the Gecko Profiler Add-on to start recording a performance profile in Firefox, then analyze it and share it with perf.html.
           </p>
-          <div>
+          <div
+            className="homeSectionLoadProfile"
+          >
             <div
               className="homeSectionActionButtons"
             >
@@ -415,7 +419,9 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
               </p>
             </div>
           </p>
-          <div>
+          <div
+            className="homeSectionLoadProfile"
+          >
             <div
               className="homeSectionActionButtons"
             >
@@ -574,7 +580,9 @@ exports[`app/Home renders the usage instructions for pages with the extension in
               </p>
             </div>
           </p>
-          <div>
+          <div
+            className="homeSectionLoadProfile"
+          >
             <div
               className="homeSectionActionButtons"
             >
