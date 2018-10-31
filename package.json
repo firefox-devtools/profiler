@@ -28,7 +28,11 @@
     "start-examples": "ws -d examples/ -s index.html -p 4242",
     "start-docs": "docsify serve ./docs-user",
     "test": "cross-env NODE_ENV=test jest",
-    "test-all": "run-p flow license-check lint test"
+    "test-all": "run-p flow license-check lint test",
+    "test-build-coverage": "jest --coverage --coverageReporters=html",
+    "test-serve-coverage": "ws -d coverage/ -p 4343",
+    "test-coverage": "run-s test-build-coverage test-serve-coverage"
+
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",
