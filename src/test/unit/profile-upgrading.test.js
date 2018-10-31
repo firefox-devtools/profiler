@@ -108,7 +108,7 @@ describe('upgrading processed profiles', function() {
     expect(serializedLhsAsObject).toEqual(serializedRhsAsObject);
   }
 
-  const latestProcessedProfile = require('../fixtures/upgrades/processed-16.json');
+  const latestProcessedProfile = require('../fixtures/upgrades/processed-17.json');
   const afterUpgradeReference = unserializeProfileOfArbitraryFormat(
     latestProcessedProfile
   );
@@ -240,12 +240,31 @@ describe('upgrading processed profiles', function() {
     );
     compareProcessedProfiles(upgradedProfile15, afterUpgradeReference);
   });
-  it('should still process a profile of the current version with no issues', function() {
+  it('should upgrade version 16', function() {
     const serializedOldProcessedProfile16 = require('../fixtures/upgrades/processed-16.json');
     const upgradedProfile16 = unserializeProfileOfArbitraryFormat(
       serializedOldProcessedProfile16
     );
     compareProcessedProfiles(upgradedProfile16, afterUpgradeReference);
+  });
+  it('should upgrade version 16a to vesion 17a', function() {
+    //test if the coloumn number will be upgraded right
+    // when the URL has an additional column field.
+    const serializedOldProcessedProfile16a = require('../fixtures/upgrades/processed-16a.json');
+    const afterUpgradeReference17a = unserializeProfileOfArbitraryFormat(
+      require('../fixtures/upgrades/processed-17a.json')
+    );
+    const upgradedProfile16a = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile16a
+    );
+    compareProcessedProfiles(upgradedProfile16a, afterUpgradeReference17a);
+  });
+  it('should still process a profile of the current version with no issues', function() {
+    const serializedOldProcessedProfile17 = require('../fixtures/upgrades/processed-17.json');
+    const upgradedProfile17 = unserializeProfileOfArbitraryFormat(
+      serializedOldProcessedProfile17
+    );
+    compareProcessedProfiles(upgradedProfile17, afterUpgradeReference);
   });
 });
 

@@ -786,25 +786,27 @@ const _upgraders = {
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
       const stringTable = new UniqueStringArray(stringArray);
+
       funcTable.columnNumber = [];
       for (
         let funcIndex = 0;
         funcIndex < thread.funcTable.length;
         funcIndex++
       ) {
-        if (funcTable.lineNumber[funcIndex] !== null) {
-          funcTable.columnNumber[funcIndex] = funcTable.lineNumber[funcIndex];
+        if (funcTable.isJS[funcIndex]) {
           const fileNameIndex = funcTable.fileName[funcIndex];
           let fileName;
           if (fileNameIndex !== null) {
             fileName = stringTable.getString(fileNameIndex);
             const match = /^(.*):([0-9]+)$/.exec(fileName);
             if (match) {
-              const scriptURI = _getRealScriptURI(match[1]);
-              funcTable.fileName[funcIndex] = stringTable.indexForString(
-                scriptURI
-              );
-              funcTable.lineNumber[funcIndex] = match[2];
+              funcTable.columnNumber[funcIndex] =
+                funcTable.lineNumber[funcIndex];
+              stringTable.changeString(fileNameIndex, match[1]);
+
+              funcTable.lineNumber[funcIndex] = parseInt(match[2], 10);
+            } else {
+              funcTable.columnNumber[funcIndex] = null;
             }
           }
         } else {

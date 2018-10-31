@@ -389,6 +389,7 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.fileName.push(null);
     funcTable.isJS.push(funcName.endsWith('js'));
     funcTable.lineNumber.push(null);
+    funcTable.columnNumber.push(null);
     // Ignore resources for now, this way funcNames have really nice string indexes.
     // The resource column will be filled in the loop below.
     funcTable.length++;
