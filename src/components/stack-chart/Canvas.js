@@ -71,25 +71,11 @@ const ROW_CSS_PIXEL_HEIGHT = 16;
 const TEXT_CSS_PIXEL_OFFSET_START = 3;
 const TEXT_CSS_PIXEL_OFFSET_TOP = 11;
 const FONT_SIZE = 10;
+const BORDER_OPACITY = 0.4;
 
 class StackChartCanvas extends React.PureComponent<Props> {
   _leftMarginGradient: null | CanvasGradient = null;
   _rightMarginGradient: null | CanvasGradient = null;
-  _previousFillColor: null | string = null;
-
-  /**
-   * Most of the draw calls are tiny tiny boxes, so it takes too long to split up the
-   * draw calls into multiple passes. It turns out that we are mostly drawing the same
-   * color boxes over and over. This method makes sure we only set the fillStyle once
-   * we actually change the value. This saves a lot of processing time on computing the
-   * CSS color in the CanvasRenderingContext2D.
-   */
-  _setFillStyle(ctx: CanvasRenderingContext2D, fillStyle: string) {
-    if (fillStyle !== this._previousFillColor) {
-      ctx.fillStyle = fillStyle;
-      this._previousFillColor = fillStyle;
-    }
-  }
 
   componentDidUpdate(prevProps) {
     // We want to scroll the selection into view when this component
@@ -167,9 +153,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
       },
     } = this.props;
     const fastFillStyle = new FastFillStyle(ctx);
-    this._previousFillColor = null;
 
     const { devicePixelRatio } = window;
+
     // Set the font size before creating a text measurer.
     ctx.font = `${FONT_SIZE * devicePixelRatio}px sans-serif`;
     const textMeasurement = new TextMeasurement(ctx);
@@ -195,8 +181,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
-    ): CssPixels =>
+    ): DevicePixels =>
       devicePixelRatio *
+      // The right hand side of this formula is all in device pixels.
       (TIMELINE_MARGIN_LEFT +
         (viewportPosition - viewportLeft) *
           innerContainerWidth /
@@ -243,21 +230,68 @@ class StackChartCanvas extends React.PureComponent<Props> {
           stackTiming.end[i] > timeAtStart &&
           stackTiming.start[i] < timeAtEnd
         ) {
+          // Draw a box, but increase the size by a small portion in order to draw
+          // a single pixel at the end with a slight opacity.
+          //
+          // Legend:
+          // |======|  A stack frame's timing.
+          // |O|       A single fully opaque pixel.
+          // |.|       A slightly transparent pixel.
+          // | |       A fully transparent pixel.
+          //
+          // Drawing strategy:
+          //
+          // Frame timing   |=====||========|    |=====|    |=|     |=|=|=|=|
+          // Device Pixels  |O|O|.|O|O|O|O|.| | |O|O|O|.| | |O|.| | |O|.|O|.|
+          // CSS Pixels     |   |   |   |   |   |   |   |   |   |   |   |   |
+
+          // First compute the left and right sides of the box.
           const viewportAtStartTime: UnitIntervalOfProfileRange =
             (stackTiming.start[i] - rangeStart) / rangeLength;
           const viewportAtEndTime: UnitIntervalOfProfileRange =
             (stackTiming.end[i] - rangeStart) / rangeLength;
-
-          let x: DevicePixels = pixelAtViewportPosition(viewportAtStartTime);
-          const y: DevicePixels =
-            depth * rowDevicePixelHeight - viewportDevicePixelsTop;
-          let w: DevicePixels =
+          const floatX = pixelAtViewportPosition(viewportAtStartTime);
+          const floatW: DevicePixels =
             (viewportAtEndTime - viewportAtStartTime) *
-            innerDevicePixelWidth /
-            viewportLength;
-          const h: DevicePixels =
-            rowDevicePixelHeight - oneCssPixelInDevicePixels;
+              innerDevicePixelWidth /
+              viewportLength -
+            1;
 
+          // Determine if there is enough pixel space to draw this box, and snap the
+          // box to the pixels.
+          let snappedFloatX = floatX;
+          let snappedFloatW = floatW;
+          let skipDraw = true;
+          if (floatX >= lastDrawnPixelX) {
+            // The x value is past the last lastDrawnPixelX, so it can be drawn.
+            skipDraw = false;
+          } else if (floatX + floatW > lastDrawnPixelX) {
+            // The left side of the box is before the lastDrawnPixelX value, but the
+            // right hand side is within a range to be drawn. Truncate the box a little
+            // bit in order to draw it to the screen in the free space.
+            snappedFloatW = floatW - (lastDrawnPixelX - snappedFloatX);
+            snappedFloatX = lastDrawnPixelX;
+            skipDraw = false;
+          }
+
+          if (skipDraw) {
+            // This box didn't satisfy the constraints in the above if checks, so skip it.
+            continue;
+          }
+
+          // Convert or compute all of the integer values for drawing the box.
+          // Note, this should all be Math.round instead of floor and ceil, but some
+          // off by one errors appear to be creating gaps where there shouldn't be any.
+          const intX = Math.floor(snappedFloatX);
+          const intY = Math.round(
+            depth * rowDevicePixelHeight - viewportDevicePixelsTop
+          );
+          const intW = Math.ceil(Math.max(1, snappedFloatW));
+          const intH = Math.round(
+            rowDevicePixelHeight - oneCssPixelInDevicePixels
+          );
+
+          // Look up information about this stack frame.
           const stackIndex = stackTiming.stack[i];
           const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
           const frameIndex = thread.stackTable.frame[stackIndex];
@@ -269,38 +303,40 @@ class StackChartCanvas extends React.PureComponent<Props> {
             i === hoveredItem.stackTableIndex;
           const isSelected = selectedCallNodeIndex === callNodeIndex;
 
-          ctx.fillStyle =
-            isHovered || isSelected ? 'Highlight' : category.color;
+          // Draw the box.
+          fastFillStyle.set(
+            isHovered || isSelected ? 'Highlight' : category.color
+          );
+          ctx.fillRect(
+            intX,
+            intY,
+            // Add on a bit of BORDER_OPACITY to the end of the width, to draw a partial
+            // pixel. This will effectively draw a transparent version of the fill color
+            // without having to change the fill color. At the time of this writing it
+            // was the same performance cost as only providing integer values here.
+            intW + BORDER_OPACITY,
+            intH
+          );
+          lastDrawnPixelX =
+            intX +
+            intW +
+            // The border on the right is 1 device pixel wide.
+            1;
 
-          // Determine if there is enough pixel space to draw this box.
-          let skipDraw = true;
-          if (x > lastDrawnPixelX + 1) {
-            skipDraw = false;
-          } else if (w > 1) {
-            w = w - (lastDrawnPixelX + 1 - x);
-            x = lastDrawnPixelX + 1;
-            skipDraw = false;
-          }
-
-          if (skipDraw) {
-            continue;
-          }
-
-          ctx.fillRect(x, y, w, h);
-          lastDrawnPixelX = x + w;
-
-          // TODO - L10N RTL.
-          // Constrain the x coordinate to the leftmost area.
+          // Draw the text label if it fits. Use the original float values here so that
+          // the text doesn't snap around when moving. Only the boxes should snap.
           const textX: DevicePixels =
-            Math.max(x, 0) + textDevicePixelOffsetStart;
-          const textW: DevicePixels = Math.max(0, w - (textX - x));
+            // Constrain the x coordinate to the leftmost area.
+            Math.max(floatX, 0) + textDevicePixelOffsetStart;
+          const textW: DevicePixels = Math.max(0, floatW - (textX - floatX));
 
           if (textW > textMeasurement.minWidth) {
             const fittedText = textMeasurement.getFittedText(text, textW);
             if (fittedText) {
-              ctx.fillStyle =
-                isHovered || isSelected ? 'HighlightText' : '#000000';
-              ctx.fillText(fittedText, textX, y + textDevicePixelOffsetTop);
+              fastFillStyle.set(
+                isHovered || isSelected ? 'HighlightText' : '#000000'
+              );
+              ctx.fillText(fittedText, textX, intY + textDevicePixelOffsetTop);
             }
           }
         }
@@ -313,13 +349,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
       pixelAtViewportPosition(0),
       0,
       oneCssPixelInDevicePixels,
-      containerHeight
+      devicePixelsHeight
     );
     ctx.fillRect(
       pixelAtViewportPosition(1),
       0,
       oneCssPixelInDevicePixels,
-      containerHeight
+      devicePixelsHeight
     );
   };
 
