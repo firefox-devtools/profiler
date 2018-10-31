@@ -56,8 +56,8 @@ export function withSize<
       // calculation until the full render is done.
       requestAnimationFrame(() => this._updateWidth(container));
     }
-    // The size is only updated when the document is visible
-    // in other cases resizing is registered in _isSizeInfoDirty
+    // The size is only updated when the document is visible.
+    // In other cases resizing is registered in _isSizeInfoDirty.
     _resizeListener = () => {
       const container = this._container;
       if (!container) {
@@ -70,8 +70,8 @@ export function withSize<
       }
     };
 
-    // If resizing was registered when the document wasn't visible
-    // // the size will be updated when the document becomes visible
+    // If resizing was registered when the document wasn't visible,
+    // the size will be updated when the document becomes visible
     _visibilityChangeListener = () => {
       const container = this._container;
       if (!container) {
