@@ -19,8 +19,6 @@ export class FastFillStyle {
 
   set(fillStyle: string) {
     if (fillStyle !== this._previousFillColor) {
-      // This could throw if setCtx wasn't set before calling it. Don't provide an
-      // extra check here since this code is so hot.
       this._ctx.fillStyle = fillStyle;
       this._previousFillColor = fillStyle;
     }
