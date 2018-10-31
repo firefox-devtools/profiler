@@ -10,13 +10,11 @@
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 3,
-    "preprocessedProfileVersion": 1
+    "version": 3
   },
   "threads": [
     {
       "name": "GeckoMain",
-      "processType": "default",
       "libs": [
         {
           "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
@@ -73,8 +71,8 @@
       },
       "markers": {
         "length": 7,
-        "name": [4, 5, 10, 10, 5, 8, 9],
-        "time": [0, 2, 4, 5, 8, 9, 11],
+        "name": [4, 5, 10, 10, 5, 9, 8],
+        "time": [0, 2, 4, 5, 8, 11, 9],
         "data": [
           {
             "category": "VsyncTimestamp",
@@ -124,25 +122,16 @@
             "type": "tracing"
           },
           {
+            "startTime": 11,
+            "endTime": 12
+          },
+          {
             "startTime": 9,
             "endTime": 10,
             "type": "mouseout",
             "phase": 3
-          },
-          {
-            "startTime": 11,
-            "endTime": 12
           }
         ]
-      },
-      "samples": {
-        "length": 7,
-        "stack": [1, 2, 2, 3, 0, 1, 4],
-        "time": [0, 1, 2, 3, 4, 5, 6],
-        "responsiveness": [0, 0, 0, 0, 0, 0, 0],
-        "rss": [null, null, null, null, null, null, null],
-        "uss": [null, null, null, null, null, null, null],
-        "frameNumber": [null, null, null, null, null, null, null]
       },
       "stringArray": [
         "(root)",
@@ -158,11 +147,19 @@
         "Rasterize",
         "firefox",
         "chrome://blargh"
-      ]
+      ],
+      "samples": {
+        "length": 7,
+        "stack": [1, 2, 2, 3, 0, 1, 4],
+        "time": [0, 1, 2, 3, 4, 5, 6],
+        "responsiveness": [0, 0, 0, 0, 0, 0, 0],
+        "rss": [null, null, null, null, null, null, null],
+        "uss": [null, null, null, null, null, null, null],
+        "frameNumber": [null, null, null, null, null, null, null]
+      }
     },
     {
       "name": "Compositor",
-      "processType": "default",
       "libs": [
         {
           "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
@@ -219,8 +216,8 @@
       },
       "markers": {
         "length": 7,
-        "name": [4, 5, 10, 10, 5, 8, 9],
-        "time": [0, 2, 4, 5, 8, 9, 11],
+        "name": [4, 5, 10, 10, 5, 9, 8],
+        "time": [0, 2, 4, 5, 8, 11, 9],
         "data": [
           {
             "category": "VsyncTimestamp",
@@ -270,25 +267,16 @@
             "type": "tracing"
           },
           {
+            "startTime": 11,
+            "endTime": 12
+          },
+          {
             "startTime": 9,
             "endTime": 10,
             "type": "mouseout",
             "phase": 3
-          },
-          {
-            "startTime": 11,
-            "endTime": 12
           }
         ]
-      },
-      "samples": {
-        "length": 7,
-        "stack": [1, 2, 2, 3, 0, 1, 4],
-        "time": [0, 1, 2, 3, 4, 5, 6],
-        "responsiveness": [0, 0, 0, 0, 0, 0, 0],
-        "rss": [null, null, null, null, null, null, null],
-        "uss": [null, null, null, null, null, null, null],
-        "frameNumber": [null, null, null, null, null, null, null]
       },
       "stringArray": [
         "(root)",
@@ -304,11 +292,19 @@
         "Rasterize",
         "firefox",
         "chrome://blargh"
-      ]
+      ],
+      "samples": {
+        "length": 7,
+        "stack": [1, 2, 2, 3, 0, 1, 4],
+        "time": [0, 1, 2, 3, 4, 5, 6],
+        "responsiveness": [0, 0, 0, 0, 0, 0, 0],
+        "rss": [null, null, null, null, null, null, null],
+        "uss": [null, null, null, null, null, null, null],
+        "frameNumber": [null, null, null, null, null, null, null]
+      }
     },
     {
-      "name": "GeckoMain",
-      "processType": "tab",
+      "name": "Content",
       "libs": [
         {
           "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
@@ -366,8 +362,8 @@
       },
       "markers": {
         "length": 7,
-        "name": [4, 5, 10, 10, 5, 8, 9],
-        "time": [1000, 1002, 1004, 1005, 1008, 1009, 1011],
+        "name": [4, 5, 10, 10, 5, 9, 8],
+        "time": [1000, 1002, 1004, 1005, 1008, 1011, 1009],
         "data": [
           {
             "category": "VsyncTimestamp",
@@ -417,25 +413,16 @@
             "type": "tracing"
           },
           {
+            "startTime": 1011,
+            "endTime": 1012
+          },
+          {
             "startTime": 1009,
             "endTime": 1010,
             "type": "mouseout",
             "phase": 3
-          },
-          {
-            "startTime": 1011,
-            "endTime": 1012
           }
         ]
-      },
-      "samples": {
-        "length": 7,
-        "stack": [1, 2, 2, 3, 0, 1, 4],
-        "time": [1000, 1001, 1002, 1003, 1004, 1005, 1006],
-        "responsiveness": [0, 0, 0, 0, 0, 0, 0],
-        "rss": [null, null, null, null, null, null, null],
-        "uss": [null, null, null, null, null, null, null],
-        "frameNumber": [null, null, null, null, null, null, null]
       },
       "stringArray": [
         "(root)",
@@ -451,7 +438,16 @@
         "Rasterize",
         "firefox-webcontent",
         "chrome://blargh"
-      ]
+      ],
+      "samples": {
+        "length": 7,
+        "stack": [1, 2, 2, 3, 0, 1, 4],
+        "time": [1000, 1001, 1002, 1003, 1004, 1005, 1006],
+        "responsiveness": [0, 0, 0, 0, 0, 0, 0],
+        "rss": [null, null, null, null, null, null, null],
+        "uss": [null, null, null, null, null, null, null],
+        "frameNumber": [null, null, null, null, null, null, null]
+      }
     }
   ],
   "tasktracer": {
@@ -470,6 +466,7 @@
       "address": []
     },
     "tasksIdToTaskIndexMap": [],
+    "stringArray": [],
     "addressTable": {
       "length": 0,
       "address": [],
@@ -483,7 +480,6 @@
       "name": [],
       "start": []
     },
-    "tidToThreadIndexMap": [],
-    "stringArray": []
+    "tidToThreadIndexMap": []
   }
 }

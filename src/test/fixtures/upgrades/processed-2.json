@@ -11,16 +11,22 @@
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
     "version": 4,
-    "preprocessedProfileVersion": 2
+    "preprocessedProfileVersion": 7
   },
   "threads": [
     {
       "name": "GeckoMain",
       "processType": "default",
+      "pausedRanges": [],
+      "processStartupTime": 0,
+      "processShutdownTime": null,
+      "registerTime": 0,
+      "unregisterTime": null,
       "libs": [
         {
           "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
           "arch": "x86_64",
+          "debugPath": "",
           "debugName": "firefox",
           "name": "firefox",
           "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
@@ -30,6 +36,7 @@
         {
           "breakpadId": "1000000000000000000000000000000A1",
           "arch": "x86_64",
+          "debugPath": "",
           "debugName": "examplebinary",
           "name": "examplebinary",
           "path": "/tmp/examplebinary",
@@ -39,6 +46,7 @@
         {
           "breakpadId": "100000000000000000000000000000A27",
           "arch": "x86_64",
+          "debugPath": "",
           "debugName": "examplebinary2.pdb",
           "name": "examplebinary2",
           "path": "C:\\examplebinary2",
@@ -57,10 +65,12 @@
       },
       "funcTable": {
         "length": 5,
-        "name": [0, 1, 2, 3, 7],
+        "name": [0, 1, 2, 3, 13],
         "resource": [-1, 0, 0, -1, 1],
         "address": [-1, 3972, 6725, -1, -1],
-        "isJS": [false, false, false, false, true]
+        "isJS": [false, false, false, false, true],
+        "fileName": [null, null, null, null, 12],
+        "lineNumber": [null, null, null, null, 34]
       },
       "resourceTable": {
         "length": 2,
@@ -68,7 +78,8 @@
         "name": [11, 12],
         "lib": [0],
         "icon": [],
-        "addonId": []
+        "addonId": [],
+        "host": []
       },
       "stackTable": {
         "length": 5,
@@ -128,9 +139,10 @@
             "type": "tracing"
           },
           {
+            "type": "DOMEvent",
             "startTime": 9,
             "endTime": 10,
-            "type": "mouseout",
+            "eventType": "mouseout",
             "phase": 3
           },
           {
@@ -145,8 +157,7 @@
         "time": [0, 1, 2, 3, 4, 5, 6],
         "responsiveness": [0, 0, 0, 0, 0, 0, 0],
         "rss": [null, null, null, null, null, null, null],
-        "uss": [null, null, null, null, null, null, null],
-        "frameNumber": [null, null, null, null, null, null, null]
+        "uss": [null, null, null, null, null, null, null]
       },
       "stringArray": [
         "(root)",
@@ -161,16 +172,23 @@
         "MinorGC",
         "Rasterize",
         "firefox",
-        "chrome://blargh"
+        "chrome://blargh",
+        "frobnicate"
       ]
     },
     {
       "name": "Compositor",
       "processType": "default",
+      "pausedRanges": [],
+      "processStartupTime": 0,
+      "processShutdownTime": null,
+      "registerTime": 0,
+      "unregisterTime": null,
       "libs": [
         {
           "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
           "arch": "x86_64",
+          "debugPath": "",
           "debugName": "firefox",
           "name": "firefox",
           "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
@@ -180,6 +198,7 @@
         {
           "breakpadId": "1000000000000000000000000000000A1",
           "arch": "x86_64",
+          "debugPath": "",
           "debugName": "examplebinary",
           "name": "examplebinary",
           "path": "/tmp/examplebinary",
@@ -189,6 +208,7 @@
         {
           "breakpadId": "100000000000000000000000000000A27",
           "arch": "x86_64",
+          "debugPath": "",
           "debugName": "examplebinary2.pdb",
           "name": "examplebinary2",
           "path": "C:\\examplebinary2",
@@ -207,10 +227,12 @@
       },
       "funcTable": {
         "length": 5,
-        "name": [0, 1, 2, 3, 7],
+        "name": [0, 1, 2, 3, 13],
         "resource": [-1, 0, 0, -1, 1],
         "address": [-1, 3972, 6725, -1, -1],
-        "isJS": [false, false, false, false, true]
+        "isJS": [false, false, false, false, true],
+        "fileName": [null, null, null, null, 12],
+        "lineNumber": [null, null, null, null, 34]
       },
       "resourceTable": {
         "length": 2,
@@ -218,7 +240,8 @@
         "name": [11, 12],
         "lib": [0],
         "icon": [],
-        "addonId": []
+        "addonId": [],
+        "host": []
       },
       "stackTable": {
         "length": 5,
@@ -278,9 +301,10 @@
             "type": "tracing"
           },
           {
+            "type": "DOMEvent",
             "startTime": 9,
             "endTime": 10,
-            "type": "mouseout",
+            "eventType": "mouseout",
             "phase": 3
           },
           {
@@ -295,8 +319,7 @@
         "time": [0, 1, 2, 3, 4, 5, 6],
         "responsiveness": [0, 0, 0, 0, 0, 0, 0],
         "rss": [null, null, null, null, null, null, null],
-        "uss": [null, null, null, null, null, null, null],
-        "frameNumber": [null, null, null, null, null, null, null]
+        "uss": [null, null, null, null, null, null, null]
       },
       "stringArray": [
         "(root)",
@@ -311,16 +334,23 @@
         "MinorGC",
         "Rasterize",
         "firefox",
-        "chrome://blargh"
+        "chrome://blargh",
+        "frobnicate"
       ]
     },
     {
       "name": "GeckoMain",
       "processType": "tab",
+      "pausedRanges": [],
+      "processStartupTime": 1000,
+      "processShutdownTime": null,
+      "registerTime": 1000,
+      "unregisterTime": null,
       "libs": [
         {
           "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
           "arch": "x86_64",
+          "debugPath": "",
           "debugName": "firefox-webcontent",
           "name": "firefox-webcontent",
           "path":
@@ -331,6 +361,7 @@
         {
           "breakpadId": "1000000000000000000000000000000A1",
           "arch": "x86_64",
+          "debugPath": "",
           "debugName": "examplebinary",
           "name": "examplebinary",
           "path": "/tmp/examplebinary",
@@ -340,6 +371,7 @@
         {
           "breakpadId": "100000000000000000000000000000A27",
           "arch": "x86_64",
+          "debugPath": "",
           "debugName": "examplebinary2.pdb",
           "name": "examplebinary2",
           "path": "C:\\examplebinary2",
@@ -358,10 +390,12 @@
       },
       "funcTable": {
         "length": 5,
-        "name": [0, 1, 2, 3, 7],
+        "name": [0, 1, 2, 3, 13],
         "resource": [-1, 0, 0, -1, 1],
         "address": [-1, 3972, 6725, -1, -1],
-        "isJS": [false, false, false, false, true]
+        "isJS": [false, false, false, false, true],
+        "fileName": [null, null, null, null, 12],
+        "lineNumber": [null, null, null, null, 34]
       },
       "resourceTable": {
         "length": 2,
@@ -369,7 +403,8 @@
         "name": [11, 12],
         "lib": [0],
         "icon": [],
-        "addonId": []
+        "addonId": [],
+        "host": []
       },
       "stackTable": {
         "length": 5,
@@ -429,9 +464,11 @@
             "type": "tracing"
           },
           {
+            "type": "DOMEvent",
             "startTime": 1009,
             "endTime": 1010,
-            "type": "mouseout",
+            "timeStamp": 1,
+            "eventType": "mouseout",
             "phase": 3
           },
           {
@@ -446,8 +483,7 @@
         "time": [1000, 1001, 1002, 1003, 1004, 1005, 1006],
         "responsiveness": [0, 0, 0, 0, 0, 0, 0],
         "rss": [null, null, null, null, null, null, null],
-        "uss": [null, null, null, null, null, null, null],
-        "frameNumber": [null, null, null, null, null, null, null]
+        "uss": [null, null, null, null, null, null, null]
       },
       "stringArray": [
         "(root)",
@@ -462,7 +498,8 @@
         "MinorGC",
         "Rasterize",
         "firefox-webcontent",
-        "chrome://blargh"
+        "chrome://blargh",
+        "frobnicate"
       ]
     }
   ],
