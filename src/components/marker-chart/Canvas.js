@@ -20,7 +20,7 @@ import type {
   CssPixels,
   UnitIntervalOfProfileRange,
 } from '../../types/units';
-import type { ThreadIndex } from '../../types/profile';
+import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
   TracingMarker,
   MarkerTimingRows,
@@ -38,6 +38,7 @@ type MarkerDrawingInformation = {
 };
 
 type OwnProps = {|
+  +thread: Thread,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +markerTimingRows: MarkerTimingRows,
@@ -150,6 +151,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     endRow: number
   ) {
     const {
+      thread,
       rangeStart,
       rangeEnd,
       markerTimingRows,
@@ -192,8 +194,15 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
           markerTiming.end[i] > timeAtViewportLeft &&
           markerTiming.start[i] < timeAtViewportRightPlusMargin
         ) {
+          let markerTimingStart = markerTiming.start[i];
+          if (markerTimingStart < 0 && thread.samples.time[0]) {
+            markerTimingStart = Math.min(
+              thread.samples.time[0],
+              markerTiming.end[i]
+            );
+          }
           const startTime: UnitIntervalOfProfileRange =
-            (markerTiming.start[i] - rangeStart) / rangeLength;
+            (markerTimingStart - rangeStart) / rangeLength;
           const endTime: UnitIntervalOfProfileRange =
             (markerTiming.end[i] - rangeStart) / rangeLength;
 
@@ -294,6 +303,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
   hitTest = (x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null => {
     const {
+      thread,
       rangeStart,
       rangeEnd,
       markerTimingRows,
@@ -325,7 +335,10 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     }
 
     for (let i = 0; i < markerTiming.length; i++) {
-      const start = markerTiming.start[i];
+      let start = markerTiming.start[i];
+      if (start < 0 && thread.samples.time[0]) {
+        start = Math.min(thread.samples.time[0], markerTiming.end[i]);
+      }
       // Ensure that really small markers are hoverable with a minDuration.
       const end = Math.max(start + minDuration, markerTiming.end[i]);
       if (start < time && end > time) {

@@ -22,6 +22,7 @@ import {
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
+import type { Thread } from '../../types/profile';
 import type {
   TracingMarker,
   MarkerTimingRows,
@@ -45,6 +46,7 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
+  +thread: Thread,
   +markers: TracingMarker[],
   +markerTimingRows: MarkerTimingRows,
   +maxMarkerRows: number,
@@ -72,6 +74,7 @@ class MarkerChart extends React.PureComponent<Props> {
       threadIndex,
       markerTimingRows,
       markers,
+      thread,
       previewSelection,
       updatePreviewSelection,
     } = this.props;
@@ -98,6 +101,7 @@ class MarkerChart extends React.PureComponent<Props> {
               marginRight: TIMELINE_MARGIN_RIGHT,
             }}
             chartProps={{
+              thread,
               markerTimingRows,
               markers,
               updatePreviewSelection,
@@ -129,6 +133,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       state
     );
     return {
+      thread: selectedThreadSelectors.getThread(state),
       markers: selectedThreadSelectors.getMarkerChartTracingMarkers(state),
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
