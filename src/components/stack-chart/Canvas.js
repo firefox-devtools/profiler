@@ -27,6 +27,7 @@ import type {
 import type {
   Milliseconds,
   CssPixels,
+  DevicePixels,
   UnitIntervalOfProfileRange,
 } from '../../types/units';
 import type {
@@ -66,12 +67,12 @@ type HoveredStackTiming = {|
 
 require('./Canvas.css');
 
-const ROW_HEIGHT = 16;
-const TEXT_OFFSET_START = 3;
-const TEXT_OFFSET_TOP = 11;
+const ROW_CSS_PIXEL_HEIGHT = 16;
+const TEXT_CSS_PIXEL_OFFSET_START = 3;
+const TEXT_CSS_PIXEL_OFFSET_TOP = 11;
+const FONT_SIZE = 10;
 
 class StackChartCanvas extends React.PureComponent<Props> {
-  _textMeasurement: null | TextMeasurement = null;
   _leftMarginGradient: null | CanvasGradient = null;
   _rightMarginGradient: null | CanvasGradient = null;
   _previousFillColor: null | string = null;
@@ -121,14 +122,14 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
 
     const depth = callNodeTable.depth[selectedCallNodeIndex];
-    const y = depth * ROW_HEIGHT;
+    const y = depth * ROW_CSS_PIXEL_HEIGHT;
 
     if (y < this.props.viewport.viewportTop) {
       this.props.viewport.moveViewport(0, this.props.viewport.viewportTop - y);
-    } else if (y + ROW_HEIGHT > this.props.viewport.viewportBottom) {
+    } else if (y + ROW_CSS_PIXEL_HEIGHT > this.props.viewport.viewportBottom) {
       this.props.viewport.moveViewport(
         0,
-        this.props.viewport.viewportBottom - (y + ROW_HEIGHT)
+        this.props.viewport.viewportBottom - (y + ROW_CSS_PIXEL_HEIGHT)
       );
     }
   };
@@ -168,19 +169,21 @@ class StackChartCanvas extends React.PureComponent<Props> {
     const fastFillStyle = new FastFillStyle(ctx);
     this._previousFillColor = null;
 
-    // Ensure the text measurement tool is created, since this is the first time
-    // this class has access to a ctx.
-    if (!this._textMeasurement) {
-      this._textMeasurement = new TextMeasurement(ctx);
-    }
-    const textMeasurement = this._textMeasurement;
+    const { devicePixelRatio } = window;
+    // Set the font size before creating a text measurer.
+    ctx.font = `${FONT_SIZE * devicePixelRatio}px sans-serif`;
+    const textMeasurement = new TextMeasurement(ctx);
+
+    const devicePixelsWidth = containerWidth * devicePixelRatio;
+    const devicePixelsHeight = containerHeight * devicePixelRatio;
 
     fastFillStyle.set('#ffffff');
-    ctx.fillRect(0, 0, containerWidth, containerHeight);
+    ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
+    const viewportDevicePixelsTop = viewportTop * devicePixelRatio;
 
     // Convert CssPixels to Stack Depth
     const startDepth = Math.floor(viewportTop / stackFrameHeight);
@@ -188,12 +191,24 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
     const innerContainerWidth =
       containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+    const innerDevicePixelWidth = innerContainerWidth * devicePixelRatio;
 
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
     ): CssPixels =>
-      TIMELINE_MARGIN_LEFT +
-      (viewportPosition - viewportLeft) * innerContainerWidth / viewportLength;
+      devicePixelRatio *
+      (TIMELINE_MARGIN_LEFT +
+        (viewportPosition - viewportLeft) *
+          innerContainerWidth /
+          viewportLength);
+
+    // Apply the device pixel ratio to various CssPixel constants.
+    const rowDevicePixelHeight = ROW_CSS_PIXEL_HEIGHT * devicePixelRatio;
+    const oneCssPixelInDevicePixels = 1 * devicePixelRatio;
+    const textDevicePixelOffsetStart =
+      TEXT_CSS_PIXEL_OFFSET_START * devicePixelRatio;
+    const textDevicePixelOffsetTop =
+      TEXT_CSS_PIXEL_OFFSET_TOP * devicePixelRatio;
 
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
@@ -211,7 +226,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
        * const endSampleIndex = binarySearch(stackTiming.end, rangeStart + rangeLength * viewportRight);
        */
 
-      const pixelsInViewport = viewportLength * innerContainerWidth;
+      const pixelsInViewport = viewportLength * innerDevicePixelWidth;
       const timePerPixel = rangeLength / pixelsInViewport;
 
       // Decide which samples to actually draw
@@ -233,13 +248,15 @@ class StackChartCanvas extends React.PureComponent<Props> {
           const viewportAtEndTime: UnitIntervalOfProfileRange =
             (stackTiming.end[i] - rangeStart) / rangeLength;
 
-          let x: CssPixels = pixelAtViewportPosition(viewportAtStartTime);
-          const y: CssPixels = depth * ROW_HEIGHT - viewportTop;
-          let w: CssPixels =
+          let x: DevicePixels = pixelAtViewportPosition(viewportAtStartTime);
+          const y: DevicePixels =
+            depth * rowDevicePixelHeight - viewportDevicePixelsTop;
+          let w: DevicePixels =
             (viewportAtEndTime - viewportAtStartTime) *
-            innerContainerWidth /
+            innerDevicePixelWidth /
             viewportLength;
-          const h: CssPixels = ROW_HEIGHT - 1;
+          const h: DevicePixels =
+            rowDevicePixelHeight - oneCssPixelInDevicePixels;
 
           const stackIndex = stackTiming.stack[i];
           const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
@@ -274,15 +291,16 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
           // TODO - L10N RTL.
           // Constrain the x coordinate to the leftmost area.
-          const textX: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
-          const textW: CssPixels = Math.max(0, w - (textX - x));
+          const textX: DevicePixels =
+            Math.max(x, 0) + textDevicePixelOffsetStart;
+          const textW: DevicePixels = Math.max(0, w - (textX - x));
 
           if (textW > textMeasurement.minWidth) {
             const fittedText = textMeasurement.getFittedText(text, textW);
             if (fittedText) {
               ctx.fillStyle =
                 isHovered || isSelected ? 'HighlightText' : '#000000';
-              ctx.fillText(fittedText, textX, y + TEXT_OFFSET_TOP);
+              ctx.fillText(fittedText, textX, y + textDevicePixelOffsetTop);
             }
           }
         }
@@ -291,8 +309,18 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
     // Draw the borders on the left and right.
     fastFillStyle.set(GREY_30);
-    ctx.fillRect(pixelAtViewportPosition(0), 0, 1, containerHeight);
-    ctx.fillRect(pixelAtViewportPosition(1), 0, 1, containerHeight);
+    ctx.fillRect(
+      pixelAtViewportPosition(0),
+      0,
+      oneCssPixelInDevicePixels,
+      containerHeight
+    );
+    ctx.fillRect(
+      pixelAtViewportPosition(1),
+      0,
+      oneCssPixelInDevicePixels,
+      containerHeight
+    );
   };
 
   _getHoveredStackInfo = ({
@@ -399,16 +427,16 @@ class StackChartCanvas extends React.PureComponent<Props> {
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
 
-    const innerContainerWidth =
+    const innerDevicePixelWidth =
       containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange =
       viewportLeft +
-      viewportLength * ((x - TIMELINE_MARGIN_LEFT) / innerContainerWidth);
+      viewportLength * ((x - TIMELINE_MARGIN_LEFT) / innerDevicePixelWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
-    const depth = Math.floor((y + viewportTop) / ROW_HEIGHT);
+    const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXEL_HEIGHT);
     const stackTiming = stackTimingByDepth[depth];
 
     if (!stackTiming) {
@@ -431,6 +459,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
     return (
       <ChartCanvas
+        scaleCtxToCssPixels={false}
         className="stackChartCanvas"
         containerWidth={containerWidth}
         containerHeight={containerHeight}
