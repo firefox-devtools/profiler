@@ -14,6 +14,7 @@ import {
   type WithChartViewport,
 } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
+import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatNumber } from '../../utils/format-numbers';
 import { updatePreviewSelection } from '../../actions/profile-view';
@@ -73,6 +74,21 @@ class StackChartCanvas extends React.PureComponent<Props> {
   _textMeasurement: null | TextMeasurement = null;
   _leftMarginGradient: null | CanvasGradient = null;
   _rightMarginGradient: null | CanvasGradient = null;
+  _previousFillColor: null | string = null;
+
+  /**
+   * Most of the draw calls are tiny tiny boxes, so it takes too long to split up the
+   * draw calls into multiple passes. It turns out that we are mostly drawing the same
+   * color boxes over and over. This method makes sure we only set the fillStyle once
+   * we actually change the value. This saves a lot of processing time on computing the
+   * CSS color in the CanvasRenderingContext2D.
+   */
+  _setFillStyle(ctx: CanvasRenderingContext2D, fillStyle: string) {
+    if (fillStyle !== this._previousFillColor) {
+      ctx.fillStyle = fillStyle;
+      this._previousFillColor = fillStyle;
+    }
+  }
 
   componentDidUpdate(prevProps) {
     // We want to scroll the selection into view when this component
@@ -149,6 +165,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
         viewportBottom,
       },
     } = this.props;
+    const fastFillStyle = new FastFillStyle(ctx);
+    this._previousFillColor = null;
 
     // Ensure the text measurement tool is created, since this is the first time
     // this class has access to a ctx.
@@ -157,7 +175,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
     const textMeasurement = this._textMeasurement;
 
-    ctx.fillStyle = '#ffffff';
+    fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, containerWidth, containerHeight);
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
@@ -203,6 +221,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         timePerPixel * TIMELINE_MARGIN_LEFT;
       const timeAtEnd: Milliseconds = rangeStart + rangeLength * viewportRight;
 
+      let lastDrawnPixelX = 0;
       for (let i = 0; i < stackTiming.length; i++) {
         // Only draw samples that are in bounds.
         if (
@@ -214,18 +233,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
           const viewportAtEndTime: UnitIntervalOfProfileRange =
             (stackTiming.end[i] - rangeStart) / rangeLength;
 
-          const x: CssPixels = pixelAtViewportPosition(viewportAtStartTime);
+          let x: CssPixels = pixelAtViewportPosition(viewportAtStartTime);
           const y: CssPixels = depth * ROW_HEIGHT - viewportTop;
-          const w: CssPixels =
+          let w: CssPixels =
             (viewportAtEndTime - viewportAtStartTime) *
             innerContainerWidth /
             viewportLength;
           const h: CssPixels = ROW_HEIGHT - 1;
-
-          if (w < 2) {
-            // Skip sending draw calls for sufficiently small boxes.
-            continue;
-          }
 
           const stackIndex = stackTiming.stack[i];
           const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
@@ -240,23 +254,35 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
           ctx.fillStyle =
             isHovered || isSelected ? 'Highlight' : category.color;
-          ctx.fillRect(x, y, w, h);
 
-          // Ensure spacing between blocks.
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(x, y, 1, h);
+          // Determine if there is enough pixel space to draw this box.
+          let skipDraw = true;
+          if (x > lastDrawnPixelX + 1) {
+            skipDraw = false;
+          } else if (w > 1) {
+            w = w - (lastDrawnPixelX + 1 - x);
+            x = lastDrawnPixelX + 1;
+            skipDraw = false;
+          }
+
+          if (skipDraw) {
+            continue;
+          }
+
+          ctx.fillRect(x, y, w, h);
+          lastDrawnPixelX = x + w;
 
           // TODO - L10N RTL.
           // Constrain the x coordinate to the leftmost area.
-          const x2: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
-          const w2: CssPixels = Math.max(0, w - (x2 - x));
+          const textX: CssPixels = Math.max(x, 0) + TEXT_OFFSET_START;
+          const textW: CssPixels = Math.max(0, w - (textX - x));
 
-          if (w2 > textMeasurement.minWidth) {
-            const fittedText = textMeasurement.getFittedText(text, w2);
+          if (textW > textMeasurement.minWidth) {
+            const fittedText = textMeasurement.getFittedText(text, textW);
             if (fittedText) {
               ctx.fillStyle =
                 isHovered || isSelected ? 'HighlightText' : '#000000';
-              ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
+              ctx.fillText(fittedText, textX, y + TEXT_OFFSET_TOP);
             }
           }
         }
@@ -264,7 +290,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
 
     // Draw the borders on the left and right.
-    ctx.fillStyle = GREY_30;
+    fastFillStyle.set(GREY_30);
     ctx.fillRect(pixelAtViewportPosition(0), 0, 1, containerHeight);
     ctx.fillRect(pixelAtViewportPosition(1), 0, 1, containerHeight);
   };
