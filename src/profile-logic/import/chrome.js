@@ -22,6 +22,8 @@ type TracingEventUnion = ProfileChunkEvent | ThreadNameEvent;
 type TracingEvent<Event> = {|
   cat: string,
   id: string,
+  // List out all known phase values, but then also allow strings. This will get
+  // overwritten by the `...Event` line, which will put in the exact phase.
   ph: string, // Phase
   pid: number, // Process ID
   tid: number, // Thread ID
@@ -50,7 +52,7 @@ type ProfileChunkEvent = TracingEvent<{|
       timeDeltas: number[],
     },
   },
-  phase: 'P',
+  ph: 'P',
 |}>;
 
 type ThreadNameEvent = TracingEvent<{|
@@ -116,11 +118,11 @@ type ThreadInfo = {
   lastSampledTime: number,
 };
 
-function getThreadInfo(
+function getThreadInfo<T: Object>(
   threadInfoByTid: Map<number, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
-  chunk
+  chunk: TracingEvent<T>
 ): ThreadInfo {
   const cachedThreadInfo = threadInfoByTid.get(chunk.tid);
   if (cachedThreadInfo) {
@@ -284,24 +286,37 @@ async function processTracingEvents(
     assertStackOrdering(thread.stackTable);
   }
 
-  await extractScreenshots(profile, (eventsByName.get('Screenshot'): any));
+  await extractScreenshots(
+    threadInfoByTid,
+    eventsByName,
+    profile,
+    (eventsByName.get('Screenshot'): any)
+  );
 
   return profile;
 }
 
 async function extractScreenshots(
+  threadInfoByTid: Map<number, ThreadInfo>,
+  eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   screenshots: ?(ScreenshotEvent[])
 ): Promise<void> {
   if (!screenshots) {
     return;
   }
-  const thread = profile.threads[0];
-  if (!thread) {
-    throw new Error('Expected to find a thread to attach the screenshots to.');
-  }
 
-  const imageElement = new Image();
+  if (!screenshots || screenshots.length === 0) {
+    // No screenshots were found, exit early.
+    return;
+  }
+  const { thread } = getThreadInfo(
+    threadInfoByTid,
+    eventsByName,
+    profile,
+    screenshots[0]
+  );
+
   for (const screenshot of screenshots) {
     const urlString = 'data:image/jpg;base64,' + screenshot.args.snapshot;
     const size = await getImageSize(urlString);
@@ -313,8 +328,8 @@ async function extractScreenshots(
       type: 'CompositorScreenshot',
       url: thread.stringTable.indexForString(urlString),
       windowID: 'id',
-      windowWidth: imageElement.width,
-      windowHeight: imageElement.height,
+      windowWidth: size.width,
+      windowHeight: size.height,
     });
     thread.markers.name.push(
       thread.stringTable.indexForString('CompositorScreenshot')
