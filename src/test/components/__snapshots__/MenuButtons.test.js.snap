@@ -15,7 +15,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
         disabled={false}
         onClick={[Function]}
         type="button"
-        value="Profile info"
+        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
       />
     </div>
     <div
@@ -40,27 +40,27 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
-                startTime: 
+                Recording started: 
               </span>
               Sat, 09 Apr 2016 17:02:32 GMT
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Interval:
               </span>
                
               1
-              s
+              ms
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Profile Version:
               </span>
@@ -78,7 +78,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Name:
               </span>
@@ -88,7 +88,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Version:
               </span>
@@ -98,36 +98,39 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Build ID:
               </span>
                
+              <a
+                target="_blank"
+              />
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Extensions:
               </span>
                
               <ul
-                className="metainfoList"
+                className="metaInfoList"
               />
             </span>
           </div>
           <h2
             className="arrowPanelSubTitle"
           >
-            Plattform
+            Platform
           </h2>
           <div
             className="arrowPanelSection"
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Platform:
               </span>
@@ -137,7 +140,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 OS:
               </span>
@@ -505,7 +508,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
         disabled={false}
         onClick={[Function]}
         type="button"
-        value="Profile info"
+        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
       />
     </div>
     <div
@@ -530,27 +533,27 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
-                startTime: 
+                Recording started: 
               </span>
               Sat, 09 Apr 2016 17:02:32 GMT
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Interval:
               </span>
                
               1
-              s
+              ms
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Profile Version:
               </span>
@@ -568,7 +571,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Name:
               </span>
@@ -578,7 +581,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Version:
               </span>
@@ -588,36 +591,39 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Build ID:
               </span>
                
+              <a
+                target="_blank"
+              />
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Extensions:
               </span>
                
               <ul
-                className="metainfoList"
+                className="metaInfoList"
               />
             </span>
           </div>
           <h2
             className="arrowPanelSubTitle"
           >
-            Plattform
+            Platform
           </h2>
           <div
             className="arrowPanelSection"
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Platform:
               </span>
@@ -627,7 +633,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 OS:
               </span>
@@ -995,7 +1001,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
         disabled={false}
         onClick={[Function]}
         type="button"
-        value="Profile info"
+        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
       />
     </div>
     <div
@@ -1020,27 +1026,27 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
-                startTime: 
+                Recording started: 
               </span>
               Sat, 09 Apr 2016 17:02:32 GMT
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Interval:
               </span>
                
               1
-              s
+              ms
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Profile Version:
               </span>
@@ -1058,7 +1064,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Name:
               </span>
@@ -1068,7 +1074,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Version:
               </span>
@@ -1078,36 +1084,39 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Build ID:
               </span>
                
+              <a
+                target="_blank"
+              />
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Extensions:
               </span>
                
               <ul
-                className="metainfoList"
+                className="metaInfoList"
               />
             </span>
           </div>
           <h2
             className="arrowPanelSubTitle"
           >
-            Plattform
+            Platform
           </h2>
           <div
             className="arrowPanelSection"
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Platform:
               </span>
@@ -1117,7 +1126,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 OS:
               </span>
@@ -1485,7 +1494,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
         disabled={false}
         onClick={[Function]}
         type="button"
-        value="Profile info"
+        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
       />
     </div>
     <div
@@ -1510,27 +1519,27 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
-                startTime: 
+                Recording started: 
               </span>
               Sat, 09 Apr 2016 17:02:32 GMT
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Interval:
               </span>
                
               1
-              s
+              ms
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Profile Version:
               </span>
@@ -1548,7 +1557,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Name:
               </span>
@@ -1558,7 +1567,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Version:
               </span>
@@ -1568,36 +1577,39 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Build ID:
               </span>
                
+              <a
+                target="_blank"
+              />
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Extensions:
               </span>
                
               <ul
-                className="metainfoList"
+                className="metaInfoList"
               />
             </span>
           </div>
           <h2
             className="arrowPanelSubTitle"
           >
-            Plattform
+            Platform
           </h2>
           <div
             className="arrowPanelSection"
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Platform:
               </span>
@@ -1607,7 +1619,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 OS:
               </span>
@@ -1975,7 +1987,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
         disabled={false}
         onClick={[Function]}
         type="button"
-        value="Profile info"
+        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
       />
     </div>
     <div
@@ -2000,27 +2012,27 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
-                startTime: 
+                Recording started: 
               </span>
               Sat, 09 Apr 2016 17:02:32 GMT
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Interval:
               </span>
                
               1
-              s
+              ms
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Profile Version:
               </span>
@@ -2038,7 +2050,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Name:
               </span>
@@ -2048,7 +2060,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Version:
               </span>
@@ -2058,36 +2070,39 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Build ID:
               </span>
                
+              <a
+                target="_blank"
+              />
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Extensions:
               </span>
                
               <ul
-                className="metainfoList"
+                className="metaInfoList"
               />
             </span>
           </div>
           <h2
             className="arrowPanelSubTitle"
           >
-            Plattform
+            Platform
           </h2>
           <div
             className="arrowPanelSection"
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Platform:
               </span>
@@ -2097,7 +2112,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 OS:
               </span>
@@ -2465,7 +2480,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
         disabled={false}
         onClick={[Function]}
         type="button"
-        value="Profile info"
+        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
       />
     </div>
     <div
@@ -2490,27 +2505,27 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
-                startTime: 
+                Recording started: 
               </span>
               Sat, 09 Apr 2016 17:02:32 GMT
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Interval:
               </span>
                
               1
-              s
+              ms
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Profile Version:
               </span>
@@ -2528,7 +2543,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Name:
               </span>
@@ -2538,7 +2553,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Version:
               </span>
@@ -2548,36 +2563,39 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Build ID:
               </span>
                
+              <a
+                target="_blank"
+              />
             </span>
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Extensions:
               </span>
                
               <ul
-                className="metainfoList"
+                className="metaInfoList"
               />
             </span>
           </div>
           <h2
             className="arrowPanelSubTitle"
           >
-            Plattform
+            Platform
           </h2>
           <div
             className="arrowPanelSection"
           >
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 Platform:
               </span>
@@ -2587,7 +2605,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <br />
             <span>
               <span
-                className="metainfolabel"
+                className="metaInfoLabel"
               >
                 OS:
               </span>

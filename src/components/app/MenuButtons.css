@@ -151,7 +151,8 @@
   bottom: 1px;
 }
 
-.menuButtonsOpenMetainfo {
-  width: 150px;
-  border-left: 1px solid var(--grey-30);
+.menuButtonsMetaInfoButtonButton {
+  padding: 0 10px;
+  height: 100%;
+  font-size: 100%;
 }

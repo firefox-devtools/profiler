@@ -128,6 +128,10 @@ const ProfileSharingButton = ({
   />
 );
 
+type ProfileMetaInfoButtonProps = {
+  profile: Profile,
+};
+
 type ProfileSharingCompositeButtonProps = {
   profile: Profile,
   dataSource: DataSource,
@@ -146,6 +150,108 @@ type ProfileSharingCompositeButtonState = {
   shortUrl: string,
   shareNetworkUrls: boolean,
 };
+
+function _mapMetaInfoExtensionNames(data: any) {
+  const extensionList = data.map(d => (
+    <li className="metaInfoListItem" key={d}>
+      {d}
+    </li>
+  ));
+  return extensionList;
+}
+
+function _formatDate(timestamp: number): string {
+  const timestampDate = new Date(timestamp).toUTCString();
+  return timestampDate;
+}
+
+function _formatLabel(meta: Object): string {
+  const labelTitle = meta.product + ' / ' + meta.oscpu + ' / ' + meta.misc;
+  return labelTitle;
+}
+
+class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
+  render() {
+    const { profile } = this.props;
+    const meta = profile.meta;
+
+    if (meta !== undefined && meta !== null) {
+      return (
+        <ButtonWithPanel
+          className="menuButtonsOpenMetainfo"
+          label={_formatLabel(meta)}
+          panel={
+            <ArrowPanel className="arrowPanelOpenMetainfo">
+              <h2 className="arrowPanelSubTitle">Timing</h2>
+              <div className="arrowPanelSection">
+                <span>
+                  <span className="metaInfoLabel">Recording started: </span>
+                  {_formatDate(profile.meta.startTime)}
+                </span>
+                <br />
+                <span>
+                  <span className="metaInfoLabel">Interval:</span>{' '}
+                  {profile.meta.interval}ms
+                </span>
+                <br />
+                <span>
+                  <span className="metaInfoLabel">Profile Version:</span>{' '}
+                  {profile.meta.preprocessedProfileVersion}
+                </span>
+              </div>
+              <h2 className="arrowPanelSubTitle">Application</h2>
+              <div className="arrowPanelSection">
+                <span>
+                  <span className="metaInfoLabel">Name:</span>{' '}
+                  {profile.meta.product}
+                </span>
+                <br />
+                <span>
+                  <span className="metaInfoLabel">Version:</span>{' '}
+                  {profile.meta.misc}
+                </span>
+                <br />
+                <span>
+                  <span className="metaInfoLabel">Build ID:</span>{' '}
+                  <a
+                    href={profile.meta.sourceURL}
+                    title={profile.meta.sourceURL}
+                    target="_blank"
+                  >
+                    {profile.meta.appBuildID}
+                  </a>
+                </span>
+                <br />
+                {profile.meta.extensions ? (
+                  <span>
+                    <span className="metaInfoLabel">Extensions:</span>{' '}
+                    <ul className="metaInfoList">
+                      {_mapMetaInfoExtensionNames(profile.meta.extensions.name)}
+                    </ul>
+                  </span>
+                ) : null}
+              </div>
+              <h2 className="arrowPanelSubTitle">Platform</h2>
+              <div className="arrowPanelSection">
+                <span>
+                  <span className="metaInfoLabel">Platform:</span>{' '}
+                  {profile.meta.platform}
+                </span>
+                <br />
+                <span>
+                  <span className="metaInfoLabel">OS:</span>{' '}
+                  {profile.meta.oscpu}
+                </span>
+                <br />
+              </div>
+            </ArrowPanel>
+          }
+        />
+      );
+    }
+    return null;
+  }
+}
 
 class ProfileSharingCompositeButton extends PureComponent<
   ProfileSharingCompositeButtonProps,
@@ -578,21 +684,6 @@ type MenuButtonsProps = ConnectedProps<
   MenuButtonsDispatchProps
 >;
 
-function _mapMetaInfoExtensionNames(data: any) {
-  const extensionData = data;
-  const extensionList = extensionData.map(d => (
-    <li className="metainfoListItem" key={d}>
-      {d}
-    </li>
-  ));
-  return extensionList;
-}
-
-function _formatDate(timestamp: number): string {
-  const timestampDate = new Date(timestamp).toUTCString();
-  return timestampDate;
-}
-
 const MenuButtons = ({
   profile,
   rootRange,
@@ -604,69 +695,7 @@ const MenuButtons = ({
   predictUrl,
 }: MenuButtonsProps) => (
   <div className="menuButtons">
-    <ButtonWithPanel
-      className="menuButtonsOpenMetainfo"
-      label="Profile info"
-      panel={
-        <ArrowPanel className="arrowPanelOpenMetainfo">
-          <h2 className="arrowPanelSubTitle">Timing</h2>
-          <div className="arrowPanelSection">
-            <span>
-              <span className="metainfolabel">startTime: </span>
-              {_formatDate(profile.meta.startTime)}
-            </span>
-            <br />
-            <span>
-              <span className="metainfolabel">Interval:</span>{' '}
-              {profile.meta.interval}s
-            </span>
-            <br />
-            <span>
-              <span className="metainfolabel">Profile Version:</span>{' '}
-              {profile.meta.preprocessedProfileVersion}
-            </span>
-          </div>
-          <h2 className="arrowPanelSubTitle">Application</h2>
-          <div className="arrowPanelSection">
-            <span>
-              <span className="metainfolabel">Name:</span>{' '}
-              {profile.meta.product}
-            </span>
-            <br />
-            <span>
-              <span className="metainfolabel">Version:</span>{' '}
-              {profile.meta.misc}
-            </span>
-            <br />
-            <span>
-              <span className="metainfolabel">Build ID:</span>{' '}
-              {profile.meta.appBuildID}
-            </span>
-            <br />
-            {profile.meta.extensions ? (
-              <span>
-                <span className="metainfolabel">Extensions:</span>{' '}
-                <ul className="metainfoList">
-                  {_mapMetaInfoExtensionNames(profile.meta.extensions.name)}
-                </ul>
-              </span>
-            ) : null}
-          </div>
-          <h2 className="arrowPanelSubTitle">Plattform</h2>
-          <div className="arrowPanelSection">
-            <span>
-              <span className="metainfolabel">Platform:</span>{' '}
-              {profile.meta.platform}
-            </span>
-            <br />
-            <span>
-              <span className="metainfolabel">OS:</span> {profile.meta.oscpu}
-            </span>
-            <br />
-          </div>
-        </ArrowPanel>
-      }
-    />
+    <ProfileMetaInfoButton profile={profile} />
     <ProfileSharingCompositeButton
       profile={profile}
       dataSource={dataSource}

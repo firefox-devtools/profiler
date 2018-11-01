@@ -161,6 +161,7 @@
   width: 350px;
   font-size: 12px;
   line-height: 20px;
+  padding-top: 5px;
 }
 
 .arrowPanelOpenMetainfo,
@@ -173,17 +174,17 @@
   margin-bottom: 12px;
 }
 
-.metainfolabel {
+.metaInfoLabel {
   width: 120px;
   color: var(--grey-40);
   display: inline-block;
 }
 
-.metainfoList {
+.metaInfoList {
   margin-top: -19px;
 }
 
-.metainfoList .metainfoListItem {
+.metaInfoList .metaInfoListItem {
   margin-left: 110px;
   list-style: circle;
 }
