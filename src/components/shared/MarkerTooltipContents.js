@@ -569,11 +569,17 @@ function getMarkerDetails(
                   timings.allocated_bytes,
                   formatBytes
                 )}
-                {_markerDetail('gcmmu20ms', 'MMU 20ms', timings.mmu_20ms, x =>
-                  formatPercent(x, 1)
+                {_markerDetail(
+                  'gcmmu20ms',
+                  'MMU 20ms',
+                  timings.mmu_20ms,
+                  formatPercent
                 )}
-                {_markerDetail('gcmmu50ms', 'MMU 50ms', timings.mmu_50ms, x =>
-                  formatPercent(x, 1)
+                {_markerDetail(
+                  'gcmmu50ms',
+                  'MMU 50ms',
+                  timings.mmu_50ms,
+                  formatPercent
                 )}
                 {_markerDetail('gcnumminors', 'Minor GCs', timings.minor_gcs)}
                 {_markerDetail('gcnumslices', 'Slices', timings.slices)}

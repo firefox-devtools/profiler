@@ -25,7 +25,8 @@ import type { Microseconds, Milliseconds } from '../types/units';
 export function formatNumber(
   value: number,
   significantDigits: number = 2,
-  maxFractionalDigits: number = 3
+  maxFractionalDigits: number = 3,
+  style: string = 'decimal'
 ): string {
   /*
   * Note that numDigitsOnLeft can be negative when the first non-zero digit
@@ -42,17 +43,17 @@ export function formatNumber(
   return value.toLocaleString(undefined, {
     minimumFractionDigits: places,
     maximumFractionDigits: places,
+    style: style,
   });
 }
 
-export function formatPercent(
-  value: number,
-  minFractionalDigits: number = 1
-): string {
-  return value.toLocaleString(undefined, {
-    minimumFractionDigits: minFractionalDigits,
-    style: 'percent',
-  });
+export function formatPercent(value: number): string {
+  return formatNumber(
+    value,
+    /* significantDigits */ 2,
+    /* maxFractionalDigits */ 1,
+    'percent'
+  );
 }
 
 export function formatBytes(bytes: number): string {
@@ -120,7 +121,7 @@ export function formatValueTotal(
   const value_total = formatNum(a) + ' / ' + formatNum(b);
   let percent = '';
   if (includePercent) {
-    percent = ' (' + formatPercent(a / b, 0) + ')';
+    percent = ' (' + formatPercent(a / b) + ')';
   }
 
   return value_total + percent;

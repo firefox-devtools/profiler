@@ -208,18 +208,18 @@ export class CallTree {
 
       const formattedTotalTime = formatNumber(
         totalTime,
-        2,
+        3,
         maxFractionalDigits
       );
 
-      const formattedSelfTime = formatNumber(selfTime, 2, maxFractionalDigits);
+      const formattedSelfTime = formatNumber(selfTime, 3, maxFractionalDigits);
 
       displayData = {
         totalTime: formattedTotalTime,
         totalTimeWithUnit: formattedTotalTime + 'ms',
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
         selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
-        totalTimePercent: `${formatPercent(totalTimeRelative, 1)}`,
+        totalTimePercent: `${formatPercent(totalTimeRelative)}`,
         name: funcName,
         lib: libName,
         // Dim platform pseudo-stacks.
