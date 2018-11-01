@@ -12,6 +12,7 @@ import type {
   IndexIntoMarkersTable,
   IndexIntoFuncTable,
   Pid,
+  IndexIntoStackTable,
 } from './profile';
 import type {
   CallNodePath,
@@ -19,6 +20,7 @@ import type {
   GlobalTrack,
   LocalTrack,
   TrackIndex,
+  IndexIntoTracingMarkers,
 } from './profile-derived';
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
@@ -27,6 +29,7 @@ import type { Transform } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { ProfileSharingStatus, UrlState } from '../types/reducers';
+import type { CssPixels } from './units';
 
 export type DataSource =
   | 'none'
@@ -52,6 +55,24 @@ export type FunctionsUpdatePerThread = {
     funcNames: string[],
   |},
 };
+export type TooltipReference =
+  | {|
+      +type: 'tracing-marker',
+      +threadIndex: ThreadIndex,
+      +tracingMarkerIndex: IndexIntoTracingMarkers,
+    |}
+  | {|
+      +type: 'call-node',
+      +threadIndex: ThreadIndex,
+      +callNodeIndex: IndexIntoTracingMarkers,
+    |}
+  | {|
+      +type: 'stack',
+      +threadIndex: ThreadIndex,
+      +stackIndex: IndexIntoStackTable,
+    |};
+
+export type MousePosition = {| +mouseX: CssPixels, +mouseY: CssPixels |};
 
 /**
  * A TrackReference uniquely identifies a track.
@@ -66,6 +87,26 @@ export type RequestedLib = {|
   +breakpadId: string,
 |};
 export type ImplementationFilter = 'combined' | 'js' | 'cpp';
+
+type AppAction =
+  | {|
+      +type: 'VIEW_TOOLTIP',
+      +tooltipReference: TooltipReference,
+      +mouse: MousePosition,
+    |}
+  | {|
+      +type: 'DISMISS_TOOLTIP',
+    |}
+  | {|
+      +type: 'MOVE_TOOLTIP',
+      +mouse: MousePosition,
+    |}
+  | {|
+      +type: 'DISABLE_TOOLTIPS',
+    |}
+  | {|
+      +type: 'ENABLE_TOOLTIPS',
+    |};
 
 type ProfileAction =
   | {|
@@ -284,6 +325,7 @@ type SidebarAction = {|
 |};
 
 export type Action =
+  | AppAction
   | ProfileAction
   | ReceiveProfileAction
   | SidebarAction

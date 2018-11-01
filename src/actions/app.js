@@ -3,11 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+import { getAreTooltipsEnabled } from '../reducers/app';
 import { getSelectedTab, getDataSource } from '../reducers/url-state';
 import { sendAnalytics } from '../utils/analytics';
 import type { Action, ThunkAction } from '../types/store';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { ProfileSharingStatus, UrlState } from '../types/reducers';
+import type { TooltipReference, MousePosition } from '../types/actions';
+import type { CssPixels } from '../types/units';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -86,4 +89,60 @@ export function invalidatePanelLayout(): Action {
  */
 export function updateUrlState(newUrlState: UrlState): Action {
   return { type: 'UPDATE_URL_STATE', newUrlState };
+}
+
+/**
+ * Tooltips are created from global Redux state. This action causes one to show
+ * up in the UI. The action is ignored if tooltips are currently disabled.
+ */
+export function viewTooltip(
+  mouseX: CssPixels,
+  mouseY: CssPixels,
+  tooltipReference: TooltipReference
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (getAreTooltipsEnabled(getState())) {
+      dispatch({
+        type: 'VIEW_TOOLTIP',
+        tooltipReference,
+        mouse: { mouseX, mouseY },
+      });
+    }
+  };
+}
+
+/**
+ * Hide the current tooltip.
+ */
+export function dismissTooltip(): Action {
+  return { type: 'DISMISS_TOOLTIP' };
+}
+
+/**
+ * Re-position the tooltip.
+ */
+export function moveTooltip(mouse: MousePosition): Action {
+  return {
+    type: 'MOVE_TOOLTIP',
+    mouse,
+  };
+}
+
+/**
+ * Temporarily disable tooltips from showing. This is useful for stopping tooltips
+ * from interfering with mouse actions like draggin.
+ */
+export function disableTooltips(): Action {
+  return {
+    type: 'DISABLE_TOOLTIPS',
+  };
+}
+
+/**
+ * Re-enable a tooltip after disabling it.
+ */
+export function enableTooltips(): Action {
+  return {
+    type: 'ENABLE_TOOLTIPS',
+  };
 }

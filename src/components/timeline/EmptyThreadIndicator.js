@@ -46,6 +46,7 @@ class EmptyThreadIndicator extends PureComponent<Props> {
             style={style.startup}
             className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
             tooltip="This thread hasn't started yet"
+            tooltipKey={0}
           />
         ) : null}
         {style.shutdown ? (
@@ -53,6 +54,7 @@ class EmptyThreadIndicator extends PureComponent<Props> {
             style={style.shutdown}
             className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
             tooltip="This thread has shut down here"
+            tooltipKey={1}
           />
         ) : null}
         {style.emptyBufferStart ? (
@@ -68,6 +70,7 @@ class EmptyThreadIndicator extends PureComponent<Props> {
                   `}
               </span>
             }
+            tooltipKey={2}
           />
         ) : null}
       </div>

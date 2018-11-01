@@ -15,10 +15,9 @@ import {
 } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
-import { formatNumber } from '../../utils/format-numbers';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
-import type { Thread } from '../../types/profile';
+import type { Thread, ThreadIndex } from '../../types/profile';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -36,9 +35,11 @@ import type {
 import type { GetCategory } from '../../profile-logic/color-categories';
 import type { GetLabel } from '../../profile-logic/labeling-strategies';
 import type { Viewport } from '../shared/chart/Viewport';
+import { typeof dismissTooltip, typeof viewTooltip } from '../../actions/app';
 
 type OwnProps = {|
   +thread: Thread,
+  +threadIndex: ThreadIndex,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -51,6 +52,8 @@ type OwnProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
   +scrollToSelectionGeneration: number,
+  dismissTooltip: dismissTooltip,
+  viewTooltip: viewTooltip,
 |};
 
 type Props = $ReadOnly<{|
@@ -60,7 +63,7 @@ type Props = $ReadOnly<{|
 
 type HoveredStackTiming = {|
   +depth: StackTimingDepth,
-  +stackTableIndex: IndexIntoStackTiming,
+  +stackTimingIndex: IndexIntoStackTiming,
 |};
 
 require('./Canvas.css');
@@ -235,7 +238,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
           const isHovered =
             hoveredItem &&
             depth === hoveredItem.depth &&
-            i === hoveredItem.stackTableIndex;
+            i === hoveredItem.stackTimingIndex;
           const isSelected = selectedCallNodeIndex === callNodeIndex;
 
           ctx.fillStyle =
@@ -269,85 +272,17 @@ class StackChartCanvas extends React.PureComponent<Props> {
     ctx.fillRect(pixelAtViewportPosition(1), 0, 1, containerHeight);
   };
 
-  _getHoveredStackInfo = ({
-    depth,
-    stackTableIndex,
-  }: HoveredStackTiming): React.Node => {
-    const { thread, getLabel, getCategory, stackTimingByDepth } = this.props;
-    const stackTiming = stackTimingByDepth[depth];
-
-    const duration =
-      stackTiming.end[stackTableIndex] - stackTiming.start[stackTableIndex];
-
-    const stackIndex = stackTiming.stack[stackTableIndex];
-    const frameIndex = thread.stackTable.frame[stackIndex];
-    const label = getLabel(thread, stackIndex);
-    const category = getCategory(thread, frameIndex);
-    const funcIndex = thread.frameTable.func[frameIndex];
-
-    let resourceOrFileName = null;
-    // Only JavaScript functions have a filename.
-    const fileNameIndex = thread.funcTable.fileName[funcIndex];
-    if (fileNameIndex !== null) {
-      // Because of our use of Grid Layout, all our elements need to be direct
-      // children of the grid parent. That's why we use arrays here, to add
-      // the elements as direct children.
-      resourceOrFileName = [
-        <div className="tooltipLabel" key="file">
-          File:
-        </div>,
-        thread.stringTable.getString(fileNameIndex),
-      ];
-    } else {
-      const resourceIndex = thread.funcTable.resource[funcIndex];
-      if (resourceIndex !== -1) {
-        const resourceNameIndex = thread.resourceTable.name[resourceIndex];
-        if (resourceNameIndex !== -1) {
-          // Because of our use of Grid Layout, all our elements need to be direct
-          // children of the grid parent. That's why we use arrays here, to add
-          // the elements as direct children.
-          resourceOrFileName = [
-            <div className="tooltipLabel" key="resource">
-              Resource:
-            </div>,
-            thread.stringTable.getString(resourceNameIndex),
-          ];
-        }
-      }
-    }
-
-    return (
-      <div className="stackChartCanvasTooltip">
-        <div className="tooltipOneLine tooltipHeader">
-          <div className="tooltipTiming">{formatNumber(duration)}ms</div>
-          <div className="tooltipTitle">{label}</div>
-        </div>
-        <div className="tooltipDetails">
-          <div className="tooltipLabel">Category:</div>
-          <div>
-            <div
-              className="tooltipSwatch"
-              style={{ backgroundColor: category.color }}
-            />
-            {category.name}
-          </div>
-          {resourceOrFileName}
-        </div>
-      </div>
-    );
-  };
-
   _onDoubleClickStack = (hoveredItem: HoveredStackTiming | null) => {
     if (hoveredItem === null) {
       return;
     }
-    const { depth, stackTableIndex } = hoveredItem;
+    const { depth, stackTimingIndex } = hoveredItem;
     const { stackTimingByDepth, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: stackTimingByDepth[depth].start[stackTableIndex],
-      selectionEnd: stackTimingByDepth[depth].end[stackTableIndex],
+      selectionStart: stackTimingByDepth[depth].start[stackTimingIndex],
+      selectionEnd: stackTimingByDepth[depth].end[stackTimingIndex],
     });
   };
 
@@ -356,9 +291,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
     // null) if there's nothing hovered.
     let callNodeIndex = null;
     if (hoveredItem !== null) {
-      const { depth, stackTableIndex } = hoveredItem;
+      const { depth, stackTimingIndex } = hoveredItem;
       const { stackTimingByDepth } = this.props;
-      const stackIndex = stackTimingByDepth[depth].stack[stackTableIndex];
+      const stackIndex = stackTimingByDepth[depth].stack[stackTimingIndex];
       const { stackIndexToCallNodeIndex } = this.props.callNodeInfo;
       callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
     }
@@ -393,11 +328,31 @@ class StackChartCanvas extends React.PureComponent<Props> {
       const start = stackTiming.start[i];
       const end = stackTiming.end[i];
       if (start < time && end > time) {
-        return { depth, stackTableIndex: i };
+        return { depth, stackTimingIndex: i };
       }
     }
 
     return null;
+  };
+
+  _onHoverChange = (
+    x: CssPixels,
+    y: CssPixels,
+    hoveredItem: HoveredStackTiming | null
+  ): void => {
+    const { dismissTooltip, viewTooltip, threadIndex } = this.props;
+    if (hoveredItem === null) {
+      dismissTooltip();
+    } else {
+      const { depth, stackTimingIndex } = hoveredItem;
+      const { stackTimingByDepth } = this.props;
+      const stackTiming = stackTimingByDepth[depth];
+      viewTooltip(x, y, {
+        type: 'stack',
+        threadIndex,
+        stackIndex: stackTiming.stack[stackTimingIndex],
+      });
+    }
   };
 
   render() {
@@ -410,7 +365,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         containerHeight={containerHeight}
         isDragging={isDragging}
         onDoubleClickItem={this._onDoubleClickStack}
-        getHoveredItemInfo={this._getHoveredStackInfo}
+        onHoverChange={this._onHoverChange}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
         onSelectItem={this._onSelectItem}

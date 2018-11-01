@@ -10,7 +10,6 @@ import {
   type WithChartViewport,
 } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { BLUE_40 } from '../../utils/colors';
@@ -25,8 +24,10 @@ import type {
   TracingMarker,
   MarkerTimingRows,
   IndexIntoMarkerTiming,
+  IndexIntoTracingMarkers,
 } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
+import { typeof viewTooltip, typeof dismissTooltip } from '../../actions/app';
 
 type MarkerDrawingInformation = {
   x: CssPixels,
@@ -38,6 +39,8 @@ type MarkerDrawingInformation = {
 };
 
 type OwnProps = {|
+  +dismissTooltip: dismissTooltip,
+  +viewTooltip: viewTooltip,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +markerTimingRows: MarkerTimingRows,
@@ -365,15 +368,27 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo = (hoveredItem: IndexIntoMarkerTiming): React.Node => {
-    const marker = this.props.markers[hoveredItem];
-    return (
-      <MarkerTooltipContents
-        marker={marker}
-        threadIndex={this.props.threadIndex}
-      />
-    );
+  _onHoverChange = (
+    x: CssPixels,
+    y: CssPixels,
+    tracingMarkerIndex: IndexIntoTracingMarkers | null
+  ): void => {
+    const { dismissTooltip, viewTooltip, threadIndex } = this.props;
+    if (tracingMarkerIndex === null) {
+      dismissTooltip();
+    } else {
+      viewTooltip(x, y, {
+        type: 'tracing-marker',
+        threadIndex,
+        tracingMarkerIndex,
+      });
+    }
   };
+
+  /**
+   * The hovered item is a marker index, which can be used to uniquely identify the
+   * hovered item, which is used as a React node's key for the tooltip.
+   */
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
@@ -384,8 +399,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         containerWidth={containerWidth}
         containerHeight={containerHeight}
         isDragging={isDragging}
+        onHoverChange={this._onHoverChange}
         onDoubleClickItem={this.onDoubleClickMarker}
-        getHoveredItemInfo={this.getHoveredMarkerInfo}
         drawCanvas={this.drawCanvas}
         hitTest={this.hitTest}
       />

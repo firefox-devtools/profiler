@@ -27,6 +27,7 @@ import {
   updatePreviewSelection,
   changeSelectedCallNode,
 } from '../../actions/profile-view';
+import { viewTooltip, dismissTooltip } from '../../actions/app';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import type { Thread } from '../../types/profile';
@@ -69,6 +70,8 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +viewTooltip: typeof viewTooltip,
+  +dismissTooltip: typeof dismissTooltip,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -95,6 +98,7 @@ class StackChartGraph extends React.PureComponent<Props> {
   render() {
     const {
       thread,
+      threadIndex,
       maxStackDepth,
       stackTimingByDepth,
       timeRange,
@@ -106,6 +110,8 @@ class StackChartGraph extends React.PureComponent<Props> {
       callNodeInfo,
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
+      viewTooltip,
+      dismissTooltip,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -138,6 +144,9 @@ class StackChartGraph extends React.PureComponent<Props> {
               selectedCallNodeIndex,
               onSelectionChange: this._onSelectedCallNodeChange,
               scrollToSelectionGeneration,
+              threadIndex,
+              viewTooltip,
+              dismissTooltip,
             }}
           />
         </div>
@@ -172,6 +181,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapDispatchToProps: {
     changeSelectedCallNode,
     updatePreviewSelection,
+    viewTooltip,
+    dismissTooltip,
   },
   component: StackChartGraph,
 };

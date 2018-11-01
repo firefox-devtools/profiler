@@ -23,7 +23,10 @@ import Backtrace from './Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 import type { Microseconds } from '../../types/units';
-import type { TracingMarker } from '../../types/profile-derived';
+import type {
+  TracingMarker,
+  IndexIntoTracingMarkers,
+} from '../../types/profile-derived';
 import type { NotVoidOrNull } from '../../types/utils';
 import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex } from '../../types/profile';
@@ -770,12 +773,13 @@ function getMarkerDetails(
 }
 
 type OwnProps = {|
-  +marker: TracingMarker,
+  +tracingMarkerIndex: IndexIntoTracingMarkers,
   +threadIndex: ThreadIndex,
   +className?: string,
 |};
 
 type StateProps = {|
+  +marker: TracingMarker,
   +threadName?: string,
   +thread: Thread,
   +implementationFilter: ImplementationFilter,
@@ -821,12 +825,13 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 
 const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   mapStateToProps: (state, props) => {
-    const { threadIndex } = props;
+    const { threadIndex, tracingMarkerIndex } = props;
     const selectors = selectorsForThread(threadIndex);
     const threadName = selectors.getFriendlyThreadName(state);
     const thread = selectors.getThread(state);
     const implementationFilter = getImplementationFilter(state);
     return {
+      marker: selectors.getTracingMarkers(state)[tracingMarkerIndex],
       threadName,
       thread,
       implementationFilter,

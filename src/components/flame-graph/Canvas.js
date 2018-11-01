@@ -9,12 +9,11 @@ import {
   withChartViewport,
   type WithChartViewport,
 } from '../shared/chart/Viewport';
-import NodeIcon from '../shared/NodeIcon';
 import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { getStackType } from '../../profile-logic/transforms';
 
-import type { Thread } from '../../types/profile';
+import type { Thread, ThreadIndex } from '../../types/profile';
 import type { CssPixels } from '../../types/units';
 import type {
   FlameGraphTiming,
@@ -29,6 +28,7 @@ import type {
 } from '../../types/profile-derived';
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { Viewport } from '../shared/chart/Viewport';
+import { typeof dismissTooltip, typeof viewTooltip } from '../../actions/app';
 
 export type OwnProps = {|
   +thread: Thread,
@@ -41,6 +41,9 @@ export type OwnProps = {|
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
   +disableTooltips: boolean,
   +scrollToSelectionGeneration: number,
+  +dismissTooltip: dismissTooltip,
+  +viewTooltip: viewTooltip,
+  +threadIndex: ThreadIndex,
 |};
 
 type Props = {|
@@ -375,85 +378,6 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     }
   };
 
-  _getHoveredStackInfo = ({
-    depth,
-    flameGraphTimingIndex,
-  }: HoveredStackTiming): React.Node => {
-    const {
-      thread,
-      flameGraphTiming,
-      callTree,
-      callNodeInfo: { callNodeTable },
-      disableTooltips,
-    } = this.props;
-
-    if (disableTooltips) {
-      return null;
-    }
-
-    const stackTiming = flameGraphTiming[depth];
-
-    const duration =
-      stackTiming.end[flameGraphTimingIndex] -
-      stackTiming.start[flameGraphTimingIndex];
-
-    const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
-    const funcIndex = callNodeTable.func[callNodeIndex];
-    const funcName = thread.stringTable.getString(
-      thread.funcTable.name[funcIndex]
-    );
-
-    const stackType = getStackType(thread, funcIndex);
-    const background = getBackgroundColor(
-      stackType,
-      stackTiming.selfTimeRelative[flameGraphTimingIndex]
-    );
-
-    let stackTypeLabel;
-    switch (stackType) {
-      case 'native':
-        stackTypeLabel = 'Native';
-        break;
-      case 'js':
-        stackTypeLabel = 'JavaScript';
-        break;
-      case 'unsymbolicated':
-        stackTypeLabel = 'Unsymbolicated Native';
-        break;
-      default:
-        throw new Error(`Unknown stack type case "${stackType}".`);
-    }
-
-    const displayData = callTree.getDisplayData(callNodeIndex);
-
-    return (
-      <div className="flameGraphCanvasTooltip">
-        <div className="tooltipHeader">
-          <div className="tooltipTiming">{(100 * duration).toFixed(2)}%</div>
-          <div className="tooltipTitle">{funcName}</div>
-          <div className="tooltipIcon">
-            {displayData.icon ? <NodeIcon displayData={displayData} /> : null}
-          </div>
-          <div className="tooltipLib">{displayData.lib}</div>
-        </div>
-        <div className="tooltipDetails">
-          <div className="tooltipLabel">Stack Type:</div>
-          <div>
-            <div
-              className="tooltipSwatch"
-              style={{ backgroundColor: background }}
-            />
-            {stackTypeLabel}
-          </div>
-          <div className="tooltipLabel">Running Time:</div>
-          <div>{displayData.totalTimeWithUnit}</div>
-          <div className="tooltipLabel">Self Time:</div>
-          <div>{displayData.selfTimeWithUnit}</div>
-        </div>
-      </div>
-    );
-  };
-
   _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
@@ -494,6 +418,26 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
 
   _noOp = () => {};
 
+  _onHoverChange = (
+    x: CssPixels,
+    y: CssPixels,
+    hoveredItem: HoveredStackTiming | null
+  ): void => {
+    const { dismissTooltip, viewTooltip, threadIndex } = this.props;
+    if (hoveredItem === null) {
+      dismissTooltip();
+    } else {
+      const { depth, flameGraphTimingIndex } = hoveredItem;
+      const { flameGraphTiming } = this.props;
+      const stackTiming = flameGraphTiming[depth];
+      viewTooltip(x, y, {
+        type: 'call-node',
+        threadIndex,
+        callNodeIndex: stackTiming.callNode[flameGraphTimingIndex],
+      });
+    }
+  };
+
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
 
@@ -504,7 +448,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         containerHeight={containerHeight}
         isDragging={isDragging}
         onDoubleClickItem={this._noOp}
-        getHoveredItemInfo={this._getHoveredStackInfo}
+        onHoverChange={this._onHoverChange}
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
         onSelectItem={this._onSelectItem}

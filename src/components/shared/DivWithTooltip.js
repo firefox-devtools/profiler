@@ -4,11 +4,12 @@
 
 // @flow
 import * as React from 'react';
-import Tooltip from './Tooltip';
+// import Tooltip from './Tooltip';
 import type { CssPixels } from '../../types/units';
 
 type Props = {
   +tooltip: React.Node,
+  +tooltipKey: number | string,
   +children?: React.Node,
 };
 
@@ -17,6 +18,9 @@ type State = {|
   mouseX: CssPixels,
   mouseY: CssPixels,
 |};
+
+// TODO - Remove this.
+/* eslint-disable */
 
 /**
  * This component provides a way to automatically insert a tooltip when mousing over
@@ -51,9 +55,12 @@ export default class DivWithTooltip extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { mouseX, mouseY, isMouseOver } = this.state;
-    const { children, tooltip } = this.props;
-    const shouldShowTooltip = isMouseOver;
+    // const { mouseX, mouseY, isMouseOver } = this.state;
+    const {
+      children,
+      //tooltip, tooltipKey
+    } = this.props;
+    // const shouldShowTooltip = isMouseOver;
 
     // Pass through the props without the tooltip property.
     const containerProps = Object.assign({}, this.props);
@@ -66,11 +73,13 @@ export default class DivWithTooltip extends React.PureComponent<Props, State> {
         {...containerProps}
       >
         {children}
-        {shouldShowTooltip && tooltip ? (
-          <Tooltip mouseX={mouseX} mouseY={mouseY}>
+        {/*
+          TODO - Reviewer remind me.
+          {shouldShowTooltip && tooltip ? (
+          <Tooltip mouseX={mouseX} mouseY={mouseY} tooltipKey={tooltipKey}>
             {tooltip}
           </Tooltip>
-        ) : null}
+        ) : null} */}
       </div>
     );
   }

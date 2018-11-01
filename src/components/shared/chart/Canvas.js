@@ -6,28 +6,29 @@
 import * as React from 'react';
 import { timeCode } from '../../../utils/time-code';
 import classNames from 'classnames';
-import Tooltip from '../Tooltip';
 
 import type { CssPixels, DevicePixels } from '../../../types/units';
 
-type Props<HoveredItem> = {
-  containerWidth: CssPixels,
-  containerHeight: CssPixels,
-  className: string,
-  onSelectItem?: (HoveredItem | null) => void,
-  onDoubleClickItem: (HoveredItem | null) => void,
-  getHoveredItemInfo: HoveredItem => React.Node,
-  drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
-  isDragging: boolean,
-  hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
-};
+type Props<HoveredItem> = {|
+  +containerWidth: CssPixels,
+  +containerHeight: CssPixels,
+  +className: string,
+  +onSelectItem?: (HoveredItem | null) => void,
+  +onDoubleClickItem: (HoveredItem | null) => void,
+  +drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
+  +isDragging: boolean,
+  +hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
+  +onHoverChange: (
+    x: CssPixels,
+    y: CssPixels,
+    hoveredItem: HoveredItem | null
+  ) => void,
+|};
 
 // The naming of the X and Y coordinates here correspond to the ones
 // found on the MouseEvent interface.
 type State<HoveredItem> = {
   hoveredItem: HoveredItem | null,
-  pageX: CssPixels,
-  pageY: CssPixels,
 };
 
 require('./Canvas.css');
@@ -68,8 +69,6 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
 
   state: State<HoveredItem> = {
     hoveredItem: null,
-    pageX: 0,
-    pageY: 0,
   };
 
   _scheduleDraw() {
@@ -141,10 +140,21 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     if (!this._canvas) {
       return;
     }
+    const { isDragging, hitTest, onHoverChange } = this.props;
+
+    if (isDragging) {
+      if (this.state.hoveredItem !== null) {
+        // When dragging, hide the hover.
+        onHoverChange(event.pageX, event.pageY, null);
+        this.setState({ hoveredItem: null });
+      }
+      // Do not hover over anything when dragging.
+      return;
+    }
 
     this._offsetX = event.nativeEvent.offsetX;
     this._offsetY = event.nativeEvent.offsetY;
-    const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
+    const maybeHoveredItem = hitTest(this._offsetX, this._offsetY);
 
     // If the mouse moves too far while a button down, flag this as
     // drag event only. Then it won't select anything when the button
@@ -161,15 +171,18 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
 
     if (maybeHoveredItem !== null) {
-      this.setState({
-        hoveredItem: maybeHoveredItem,
-        pageX: event.pageX,
-        pageY: event.pageY,
-      });
+      const previousHoveredItem = this.state.hoveredItem;
+      const hoveredItem = maybeHoveredItem;
+      if (
+        previousHoveredItem === null ||
+        !hoveredItemsAreEqual(previousHoveredItem, hoveredItem)
+      ) {
+        onHoverChange(event.pageX, event.pageY, hoveredItem);
+        this.setState({ hoveredItem });
+      }
     } else if (this.state.hoveredItem !== null) {
-      this.setState({
-        hoveredItem: null,
-      });
+      onHoverChange(event.pageX, event.pageY, null);
+      this.setState({ hoveredItem: null });
     }
   };
 
@@ -181,14 +194,6 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
 
   _onDoubleClick = () => {
     this.props.onDoubleClickItem(this.state.hoveredItem);
-  };
-
-  _getHoveredItemInfo = (): React.Node => {
-    const { hoveredItem } = this.state;
-    if (hoveredItem === null) {
-      return null;
-    }
-    return this.props.getHoveredItemInfo(hoveredItem);
   };
 
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) => {
@@ -224,8 +229,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   }
 
   render() {
-    const { isDragging } = this.props;
-    const { hoveredItem, pageX, pageY } = this.state;
+    const { hoveredItem } = this.state;
 
     const className = classNames({
       chartCanvas: true,
@@ -233,9 +237,8 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       hover: hoveredItem !== null,
     });
 
-    const tooltipContents = this._getHoveredItemInfo();
-
     return (
+      // TODO - Hey reviewer, remind me to delete this div.
       <div>
         <canvas
           className={className}
@@ -246,11 +249,6 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
           onMouseOut={this._onMouseOut}
           onDoubleClick={this._onDoubleClick}
         />
-        {!isDragging && tooltipContents ? (
-          <Tooltip mouseX={pageX} mouseY={pageY}>
-            {tooltipContents}
-          </Tooltip>
-        ) : null}
       </div>
     );
   }

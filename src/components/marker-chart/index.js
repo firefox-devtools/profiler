@@ -21,6 +21,7 @@ import {
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
+import { viewTooltip, dismissTooltip } from '../../actions/app';
 
 import type {
   TracingMarker,
@@ -42,6 +43,8 @@ const ROW_HEIGHT = 16;
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +viewTooltip: typeof viewTooltip,
+  +dismissTooltip: typeof dismissTooltip,
 |};
 
 type StateProps = {|
@@ -74,6 +77,8 @@ class MarkerChart extends React.PureComponent<Props> {
       markers,
       previewSelection,
       updatePreviewSelection,
+      viewTooltip,
+      dismissTooltip,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -107,6 +112,8 @@ class MarkerChart extends React.PureComponent<Props> {
               threadIndex,
               marginLeft: TIMELINE_MARGIN_LEFT,
               marginRight: TIMELINE_MARGIN_RIGHT,
+              viewTooltip,
+              dismissTooltip,
             }}
           />
         )}
@@ -138,7 +145,11 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       previewSelection: getPreviewSelection(state),
     };
   },
-  mapDispatchToProps: { updatePreviewSelection },
+  mapDispatchToProps: {
+    updatePreviewSelection,
+    viewTooltip,
+    dismissTooltip,
+  },
   component: MarkerChart,
 };
 export default explicitConnect(options);

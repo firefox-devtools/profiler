@@ -12,6 +12,8 @@ import type {
   RequestedLib,
   TrackReference,
   TimelineType,
+  MousePosition,
+  TooltipReference,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Milliseconds, StartEndRange } from './units';
@@ -124,6 +126,9 @@ export type AppState = {|
   +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
   +panelLayoutGeneration: number,
   +lastVisibleThreadTabSlug: TabSlug,
+  +tooltipReference: TooltipReference | null,
+  +tooltipPosition: MousePosition,
+  +tooltipDisabled: boolean,
 |};
 
 export type ZippedProfilesState = {

@@ -17,10 +17,11 @@ import { getSelectedThreadIndex } from '../../reducers/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import { changeSelectedCallNode } from '../../actions/profile-view';
+import { dismissTooltip, viewTooltip } from '../../actions/app';
 import { getIconsWithClassNames } from '../../reducers/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
-import type { Thread } from '../../types/profile';
+import type { Thread, ThreadIndex } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
 import type { PreviewSelection } from '../../types/actions';
@@ -42,6 +43,7 @@ const STACK_FRAME_HEIGHT = 16;
 
 type StateProps = {|
   +thread: Thread,
+  +threadIndex: ThreadIndex,
   +maxStackDepth: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +previewSelection: PreviewSelection,
@@ -56,6 +58,8 @@ type StateProps = {|
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
+  +dismissTooltip: typeof dismissTooltip,
+  +viewTooltip: typeof viewTooltip,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -84,6 +88,8 @@ class FlameGraph extends React.PureComponent<Props> {
       isCallNodeContextMenuVisible,
       scrollToSelectionGeneration,
       icons,
+      dismissTooltip,
+      viewTooltip,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -129,6 +135,9 @@ class FlameGraph extends React.PureComponent<Props> {
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
               disableTooltips: isCallNodeContextMenuVisible,
+              threadIndex,
+              dismissTooltip,
+              viewTooltip,
             }}
           />
         </ContextMenuTrigger>
@@ -169,6 +178,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   },
   mapDispatchToProps: {
     changeSelectedCallNode,
+    dismissTooltip,
+    viewTooltip,
   },
   component: FlameGraph,
 };

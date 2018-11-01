@@ -24,6 +24,7 @@ import {
 } from '../../reducers/url-state';
 import UrlManager from './UrlManager';
 import FooterLinks from './FooterLinks';
+import Tooltips from '../tooltips';
 
 import type { Store } from '../../types/store';
 import type { AppViewState, State } from '../../types/reducers';
@@ -247,6 +248,7 @@ export default class Root extends PureComponent<RootProps> {
         <UrlManager>
           <ProfileViewWhenReady />
           <FooterLinks />
+          <Tooltips />
         </UrlManager>
       </Provider>
     );

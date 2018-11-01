@@ -7,6 +7,8 @@ import { combineReducers } from 'redux';
 
 import { getSelectedTab } from './url-state';
 import { tabSlugs } from '../app-logic/tabs-handling';
+import { assertExhaustiveCheck } from '../utils/flow';
+import { createSelector } from 'reselect';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { Action } from '../types/store';
@@ -17,6 +19,7 @@ import type {
   IsSidebarOpenPerPanelState,
   Reducer,
 } from '../types/reducers';
+import type { MousePosition, TooltipReference } from '../types/actions';
 
 function view(
   state: AppViewState = { phase: 'INITIALIZING' },
@@ -147,6 +150,56 @@ function lastVisibleThreadTabSlug(
   }
 }
 
+/**
+ * Tooltips can be created from any panel or from the header's timeline by
+ * storing a reference here. The reference should be the minimal set of
+ * information to refer to some part of a profile.
+ */
+function tooltipReference(
+  state: TooltipReference | null = null,
+  action: Action
+): TooltipReference | null {
+  switch (action.type) {
+    case 'DISABLE_TOOLTIPS':
+    case 'DISMISS_TOOLTIP':
+      return null;
+    case 'UPDATE_PREVIEW_SELECTION':
+      return action.previewSelection.isModifying ? null : state;
+    case 'VIEW_TOOLTIP':
+      return action.tooltipReference;
+    default:
+      return state;
+  }
+}
+
+function tooltipPosition(
+  state: MousePosition = { mouseX: 0, mouseY: 0 },
+  action: Action
+): MousePosition {
+  switch (action.type) {
+    case 'MOVE_TOOLTIP':
+    case 'VIEW_TOOLTIP':
+      return action.mouse;
+    default:
+      return state;
+  }
+}
+
+/**
+ * Tooltips can be temporarily disabled to stop them from showing when performing
+ * certain actions like dragging.
+ */
+function tooltipDisabled(state: boolean = false, action: Action): boolean {
+  switch (action.type) {
+    case 'ENABLE_TOOLTIPS':
+      return false;
+    case 'DISABLE_TOOLTIPS':
+      return true;
+    default:
+      return state;
+  }
+}
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   isUrlSetupDone,
@@ -154,6 +207,9 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   isSidebarOpenPerPanel,
   panelLayoutGeneration,
   lastVisibleThreadTabSlug,
+  tooltipReference,
+  tooltipPosition,
+  tooltipDisabled,
 });
 
 export default appStateReducer;
@@ -171,3 +227,43 @@ export const getPanelLayoutGeneration = (state: State) =>
   getApp(state).panelLayoutGeneration;
 export const getLastVisibleThreadTabSlug = (state: State) =>
   getApp(state).lastVisibleThreadTabSlug;
+
+export const getTooltipReference = (state: State) =>
+  getApp(state).tooltipReference;
+export const getTooltipPosition = (state: State) =>
+  getApp(state).tooltipPosition;
+export const getAreTooltipsEnabled = (state: State) =>
+  !getApp(state).tooltipDisabled;
+export const getAreTooltipsDisabled = (state: State) =>
+  getApp(state).tooltipDisabled;
+
+/**
+ * This function takes a tooltip reference and generates a unique React key.
+ */
+export const getTooltipReferenceReactKey = createSelector(
+  getTooltipReference,
+  (tooltipReference): string | number => {
+    if (tooltipReference === null) {
+      return '';
+    }
+    switch (tooltipReference.type) {
+      case 'tracing-marker': {
+        const { threadIndex, tracingMarkerIndex } = tooltipReference;
+        return `tracing-marker-${threadIndex}-${tracingMarkerIndex}`;
+      }
+      case 'call-node': {
+        const { threadIndex, callNodeIndex } = tooltipReference;
+        return `call-node-${threadIndex}-${callNodeIndex}`;
+      }
+      case 'stack': {
+        const { threadIndex, stackIndex } = tooltipReference;
+        return `stack-${threadIndex}-${stackIndex}`;
+      }
+      default:
+        throw assertExhaustiveCheck(
+          tooltipReference,
+          'Unhandled tooltip reference'
+        );
+    }
+  }
+);

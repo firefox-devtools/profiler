@@ -193,7 +193,7 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
         `
       );
       return {
-        index: markerIndex,
+        markerIndex,
         marker,
         threadIndex,
         networkPayload: null,
@@ -211,7 +211,7 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
     }
 
     return {
-      index: markerIndex,
+      markerIndex,
       marker,
       networkPayload,
       threadIndex,

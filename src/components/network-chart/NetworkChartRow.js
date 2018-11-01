@@ -4,16 +4,18 @@
 // @flow
 
 import React from 'react';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
-import Tooltip from '../shared/Tooltip';
+// import Tooltip from '../shared/Tooltip';
 
 import type { CssPixels } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
-import type { TracingMarker } from '../../types/profile-derived';
+import type {
+  TracingMarker,
+  IndexIntoTracingMarkers,
+} from '../../types/profile-derived';
 import type { NetworkPayload } from '../../types/markers';
 
 export type NetworkChartRowProps = {
-  +index: number,
+  +markerIndex: IndexIntoTracingMarkers,
   +marker: TracingMarker,
   // Pass the payload in as well, since our types can't express a TracingMarker with
   // a specific payload.
@@ -24,12 +26,14 @@ export type NetworkChartRowProps = {
   +threadIndex: ThreadIndex,
 };
 
-type State = {
+type State = {|
   pageX: CssPixels,
   pageY: CssPixels,
   hovered: ?boolean,
-};
+|};
 
+// TODO - Reviewer please stop me.
+/* eslint-disable */
 class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   state = {
     pageX: 0,
@@ -55,9 +59,9 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   };
 
   render() {
-    const { index, marker, markerStyle, networkPayload } = this.props;
+    const { markerIndex, marker, markerStyle, networkPayload } = this.props;
 
-    const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
+    const evenOddClassName = markerIndex % 2 === 0 ? 'even' : 'odd';
 
     if (networkPayload === null) {
       return null;
@@ -76,14 +80,18 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
         >
           &nbsp;
         </div>
-        {this.state.hovered ? (
-          <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY}>
+        {/* {this.state.hovered ? (
+          <Tooltip
+            mouseX={this.state.pageX}
+            mouseY={this.state.pageY}
+            tooltipKey={markerIndex}
+          >
             <MarkerTooltipContents
               marker={marker}
               threadIndex={this.props.threadIndex}
             />
           </Tooltip>
-        ) : null}
+        ) : null} */}
       </section>
     );
   }
