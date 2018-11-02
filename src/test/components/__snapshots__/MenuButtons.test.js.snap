@@ -46,7 +46,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -55,8 +55,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                   Recording started: 
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -67,8 +67,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                  
                 1
                 ms
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -78,7 +78,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 </span>
                  
                 16
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -88,7 +88,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -98,8 +98,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 </span>
                  
                 Firefox
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -109,8 +109,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 </span>
                  
                 48.0
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -122,7 +122,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 <ul
                   className="metaInfoList"
                 />
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -132,7 +132,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -142,8 +142,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 </span>
                  
                 Macintosh
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -153,7 +153,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 </span>
                  
                 Intel Mac OS X 10.11
-              </span>
+              </div>
             </div>
           </div>
         </div>
@@ -546,7 +546,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -555,8 +555,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                   Recording started: 
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -567,8 +567,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                  
                 1
                 ms
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -578,7 +578,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 </span>
                  
                 16
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -588,7 +588,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -598,8 +598,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 </span>
                  
                 Firefox
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -609,8 +609,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 </span>
                  
                 48.0
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -622,7 +622,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 <ul
                   className="metaInfoList"
                 />
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -632,7 +632,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -642,8 +642,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 </span>
                  
                 Macintosh
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -653,7 +653,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 </span>
                  
                 Intel Mac OS X 10.11
-              </span>
+              </div>
             </div>
           </div>
         </div>
@@ -1046,7 +1046,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1055,8 +1055,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                   Recording started: 
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1067,8 +1067,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                  
                 1
                 ms
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1078,7 +1078,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 16
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -1088,7 +1088,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1098,8 +1098,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Firefox
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1109,8 +1109,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 48.0
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1122,7 +1122,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 <ul
                   className="metaInfoList"
                 />
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -1132,7 +1132,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1142,8 +1142,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Macintosh
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1153,7 +1153,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Intel Mac OS X 10.11
-              </span>
+              </div>
             </div>
           </div>
         </div>
@@ -1546,7 +1546,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1555,8 +1555,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                   Recording started: 
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1567,8 +1567,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                  
                 1
                 ms
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1578,7 +1578,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 16
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -1588,7 +1588,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1598,8 +1598,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Firefox
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1609,8 +1609,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 48.0
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1622,7 +1622,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 <ul
                   className="metaInfoList"
                 />
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -1632,7 +1632,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1642,8 +1642,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Macintosh
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -1653,7 +1653,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Intel Mac OS X 10.11
-              </span>
+              </div>
             </div>
           </div>
         </div>
@@ -2046,7 +2046,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2055,8 +2055,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                   Recording started: 
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2067,8 +2067,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                  
                 1
                 ms
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2078,7 +2078,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 16
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -2088,7 +2088,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2098,8 +2098,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Firefox
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2109,8 +2109,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 48.0
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2122,7 +2122,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 <ul
                   className="metaInfoList"
                 />
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -2132,7 +2132,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2142,8 +2142,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Macintosh
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2153,7 +2153,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Intel Mac OS X 10.11
-              </span>
+              </div>
             </div>
           </div>
         </div>
@@ -2546,7 +2546,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2555,8 +2555,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                   Recording started: 
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2567,8 +2567,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                  
                 1
                 ms
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2578,7 +2578,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 16
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -2588,7 +2588,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2598,8 +2598,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Firefox
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2609,8 +2609,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 48.0
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2622,7 +2622,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 <ul
                   className="metaInfoList"
                 />
-              </span>
+              </div>
             </div>
             <h2
               className="arrowPanelSubTitle"
@@ -2632,7 +2632,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
             <div
               className="arrowPanelSection"
             >
-              <span
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2642,8 +2642,8 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Macintosh
-              </span>
-              <span
+              </div>
+              <div
                 className="metaInfoRow"
               >
                 <span
@@ -2653,7 +2653,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 </span>
                  
                 Intel Mac OS X 10.11
-              </span>
+              </div>
             </div>
           </div>
         </div>
