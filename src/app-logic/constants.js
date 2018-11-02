@@ -12,4 +12,4 @@ export const TIMELINE_MARGIN_RIGHT = 15;
 export const TIMELINE_MARGIN_LEFT = 150;
 
 // How long do we wait until we show a tooltip?
-export const TOOLTIP_TIMEOUT: Milliseconds = 250;
+export const TOOLTIP_TIMEOUT: Milliseconds = 300;

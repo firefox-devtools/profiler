@@ -14,6 +14,9 @@
   max-width: 100%;
   box-sizing: border-box;
   display: inline-block;
+}
+
+.tooltipBackground {
   padding: 5px;
   border: 1px solid #ccc;
   background-color: var(--grey-10);
@@ -22,7 +25,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   transition: opacity 250ms;
-  box-sizing: border-box;
 }
 
 .tooltipTiming {

@@ -160,6 +160,7 @@ function tooltipReference(
   action: Action
 ): TooltipReference | null {
   switch (action.type) {
+    case 'CHANGE_SELECTED_TAB':
     case 'DISABLE_TOOLTIPS':
     case 'DISMISS_TOOLTIP':
       return null;

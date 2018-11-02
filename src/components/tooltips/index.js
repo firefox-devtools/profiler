@@ -11,6 +11,7 @@ import {
   getTooltipReferenceReactKey,
 } from '../../reducers/app';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
+import { dismissTooltip } from '../../actions/app';
 
 import type { TooltipReference, MousePosition } from '../../types/actions';
 import type {
@@ -20,7 +21,8 @@ import type {
 
 require('./index.css');
 
-const MOUSE_OFFSET = 21;
+const MOUSE_OFFSET_X = 30;
+const MOUSE_OFFSET_Y = 21;
 const TIMEOUT_TIME = 250;
 
 type StateProps = {|
@@ -29,7 +31,11 @@ type StateProps = {|
   tooltipKey: string | number,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type DispatchProps = {|
+  dismissTooltip: typeof dismissTooltip,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 type State = {|
   isTimeoutOver: boolean,
@@ -92,6 +98,10 @@ class Tooltip extends React.PureComponent<Props, State> {
     });
   }
 
+  _onMouseLeave = () => {
+    this.props.dismissTooltip();
+  };
+
   render() {
     const {
       tooltipReference,
@@ -108,20 +118,25 @@ class Tooltip extends React.PureComponent<Props, State> {
       : 0;
 
     let offsetY = 0;
+    let paddingTop = 0;
+    let paddingBottom = 0;
     if (interiorElement) {
       if (
-        mouseY + interiorElement.offsetHeight + MOUSE_OFFSET >
+        mouseY + interiorElement.offsetHeight + MOUSE_OFFSET_Y >
         window.innerHeight
       ) {
-        offsetY = interiorElement.offsetHeight + MOUSE_OFFSET;
+        offsetY = interiorElement.offsetHeight;
+        paddingBottom = MOUSE_OFFSET_Y;
       } else {
-        offsetY = -MOUSE_OFFSET;
+        paddingTop = MOUSE_OFFSET_Y;
       }
     }
 
     const style = {
-      left: mouseX - offsetX,
+      left: mouseX - offsetX - MOUSE_OFFSET_X,
       top: mouseY - offsetY,
+      paddingTop,
+      paddingBottom,
     };
 
     let contents;
@@ -153,8 +168,9 @@ class Tooltip extends React.PureComponent<Props, State> {
             className="tooltip"
             style={style}
             ref={this._takeInteriorElementRef}
+            onMouseLeave={this._onMouseLeave}
           >
-            {contents}
+            <div className="tooltipBackground">{contents}</div>
           </div>
         ) : null}
       </div>
@@ -162,12 +178,15 @@ class Tooltip extends React.PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: (state): StateProps => ({
     tooltipReference: getTooltipReference(state),
     tooltipPosition: getTooltipPosition(state),
     tooltipKey: getTooltipReferenceReactKey(state),
   }),
+  mapDispatchToProps: {
+    dismissTooltip,
+  },
   component: Tooltip,
 };
 

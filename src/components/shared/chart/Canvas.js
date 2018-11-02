@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { timeCode } from '../../../utils/time-code';
 import classNames from 'classnames';
+import { TOOLTIP_TIMEOUT } from '../../../app-logic/constants';
 
 import type { CssPixels, DevicePixels } from '../../../types/units';
 
@@ -21,14 +22,17 @@ type Props<HoveredItem> = {|
   +onHoverChange: (
     x: CssPixels,
     y: CssPixels,
-    hoveredItem: HoveredItem | null
+    mouseOverItem: HoveredItem | null
   ) => void,
 |};
 
 // The naming of the X and Y coordinates here correspond to the ones
 // found on the MouseEvent interface.
 type State<HoveredItem> = {
-  hoveredItem: HoveredItem | null,
+  mouseOverItem: HoveredItem | null,
+  // There is a timeout to display a timeout. The displayed value is what's being
+  // currently displayed.
+  hoveredItemWithTooltip: HoveredItem | null,
 };
 
 require('./Canvas.css');
@@ -66,9 +70,15 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   _ctx: CanvasRenderingContext2D;
   _canvas: HTMLCanvasElement | null = null;
   _isDrawScheduled: boolean = false;
+  // Hover happens on a timeout. Ensure that the current hover is the last one
+  // by incrementing this value.
+  _hoverGeneration: number = 0;
 
   state: State<HoveredItem> = {
-    hoveredItem: null,
+    // The mouse is over an item, but the tooltip may or may not be displayed.
+    mouseOverItem: null,
+    // The mouse is over and a tooltip is showing.
+    hoveredItemWithTooltip: null,
   };
 
   _scheduleDraw() {
@@ -82,7 +92,11 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       if (this._canvas) {
         timeCode(`${className} render`, () => {
           this._prepCanvas();
-          drawCanvas(this._ctx, this.state.hoveredItem);
+          console.log(
+            '!!! this.state.mouseOverItem',
+            this.state.hoveredItemWithTooltip
+          );
+          drawCanvas(this._ctx, this.state.mouseOverItem);
         });
       }
     });
@@ -130,7 +144,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
 
   _onMouseUp = () => {
     if (!this._mouseMovedWhileClicked && this.props.onSelectItem) {
-      this.props.onSelectItem(this.state.hoveredItem);
+      this.props.onSelectItem(this.state.mouseOverItem);
     }
   };
 
@@ -143,10 +157,16 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     const { isDragging, hitTest, onHoverChange } = this.props;
 
     if (isDragging) {
-      if (this.state.hoveredItem !== null) {
+      if (this.state.mouseOverItem !== null) {
         // When dragging, hide the hover.
-        onHoverChange(event.pageX, event.pageY, null);
-        this.setState({ hoveredItem: null });
+        this._hoverGeneration++;
+        if (this.state.hoveredItemWithTooltip !== null) {
+          onHoverChange(event.pageX, event.pageY, null);
+        }
+        this.setState({
+          mouseOverItem: null,
+          hoveredItemWithTooltip: null,
+        });
       }
       // Do not hover over anything when dragging.
       return;
@@ -171,29 +191,51 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
 
     if (maybeHoveredItem !== null) {
-      const previousHoveredItem = this.state.hoveredItem;
-      const hoveredItem = maybeHoveredItem;
+      const previousHoveredItem = this.state.hoveredItemWithTooltip;
+      const mouseOverItem = maybeHoveredItem;
       if (
         previousHoveredItem === null ||
-        !hoveredItemsAreEqual(previousHoveredItem, hoveredItem)
+        !hoveredItemsAreEqual(previousHoveredItem, mouseOverItem)
       ) {
-        onHoverChange(event.pageX, event.pageY, hoveredItem);
-        this.setState({ hoveredItem });
-      }
-    } else if (this.state.hoveredItem !== null) {
-      onHoverChange(event.pageX, event.pageY, null);
-      this.setState({ hoveredItem: null });
-    }
-  };
+        this._hoverGeneration++;
+        const thisHoverGeneration = this._hoverGeneration;
+        const { pageX, pageY } = event;
 
-  _onMouseOut = () => {
-    if (this.state.hoveredItem !== null) {
-      this.setState({ hoveredItem: null });
+        // Set a timeout to actually display the tooltip. However, observe that the
+        // generation of the hovered item matches so multiple calls work correctly.
+        setTimeout(() => {
+          if (this._hoverGeneration === thisHoverGeneration) {
+            // Ensure that the hover hasn't changed.
+            onHoverChange(pageX, pageY, mouseOverItem);
+            this.setState({ hoveredItemWithTooltip: mouseOverItem });
+          }
+        }, TOOLTIP_TIMEOUT);
+
+        // If there is a previously displayed item, now is the time to remove it.
+        if (previousHoveredItem !== null) {
+          onHoverChange(event.pageX, event.pageY, null);
+        }
+
+        // Immediately remember that there is a hovered item.
+        this.setState({ mouseOverItem, hoveredItemWithTooltip: null });
+      }
+    } else if (this.state.hoveredItemWithTooltip !== null) {
+      // Invalidate any pending hovers from the setTimeout.
+      this._hoverGeneration++;
+
+      if (this.state.hoveredItemWithTooltip !== null) {
+        onHoverChange(event.pageX, event.pageY, null);
+      }
+
+      this.setState({
+        mouseOverItem: null,
+        hoveredItemWithTooltip: null,
+      });
     }
   };
 
   _onDoubleClick = () => {
-    this.props.onDoubleClickItem(this.state.hoveredItem);
+    this.props.onDoubleClickItem(this.state.mouseOverItem);
   };
 
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) => {
@@ -203,16 +245,16 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   componentWillReceiveProps() {
     // It is possible that the data backing the chart has been
     // changed, for instance after symbolication. Clear the
-    // hoveredItem if the mouse no longer hovers over it.
-    const { hoveredItem } = this.state;
+    // mouseOverItem if the mouse no longer hovers over it.
+    const { mouseOverItem } = this.state;
     if (
-      hoveredItem !== null &&
+      mouseOverItem !== null &&
       !hoveredItemsAreEqual(
         this.props.hitTest(this._offsetX, this._offsetY),
-        hoveredItem
+        mouseOverItem
       )
     ) {
-      this.setState({ hoveredItem: null });
+      this.setState({ mouseOverItem: null });
     }
   }
 
@@ -222,34 +264,31 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
   ) {
     if (
       prevProps !== this.props ||
-      !hoveredItemsAreEqual(prevState.hoveredItem, this.state.hoveredItem)
+      !hoveredItemsAreEqual(prevState.mouseOverItem, this.state.mouseOverItem)
     ) {
       this._scheduleDraw();
     }
   }
 
   render() {
-    const { hoveredItem } = this.state;
+    const { mouseOverItem } = this.state;
 
     const className = classNames({
       chartCanvas: true,
       [this.props.className]: true,
-      hover: hoveredItem !== null,
+      hover: mouseOverItem !== null,
     });
 
     return (
-      // TODO - Hey reviewer, remind me to delete this div.
-      <div>
-        <canvas
-          className={className}
-          ref={this._takeCanvasRef}
-          onMouseDown={this._onMouseDown}
-          onMouseUp={this._onMouseUp}
-          onMouseMove={this._onMouseMove}
-          onMouseOut={this._onMouseOut}
-          onDoubleClick={this._onDoubleClick}
-        />
-      </div>
+      <canvas
+        className={className}
+        ref={this._takeCanvasRef}
+        onMouseDown={this._onMouseDown}
+        onMouseUp={this._onMouseUp}
+        onMouseMove={this._onMouseMove}
+        onMouseOut={this._onMouseOut}
+        onDoubleClick={this._onDoubleClick}
+      />
     );
   }
 }
