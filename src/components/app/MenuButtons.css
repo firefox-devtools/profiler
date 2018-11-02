@@ -151,8 +151,29 @@
   bottom: 1px;
 }
 
-.menuButtonsMetaInfoButtonButton {
-  padding: 0 10px;
+.menuButtonsOpenMetainfoButtonBox,
+.menuButtonsOpenMetainfoButtonLabel,
+.menuButtonsOpenMetainfoButtonButton {
   height: 100%;
   font-size: 100%;
+}
+
+.menuButtonsOpenMetainfoButtonBox {
+  display: flex;
+  padding: 0;
+}
+
+.menuButtonsOpenMetainfoButtonLabel {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+  position: relative;
+  padding: 5px 10px 10px;
+}
+
+.menuButtonsOpenMetainfoButtonBox .buttonWithPanelButton,
+.menuButtonsOpenMetainfoButtonBox .buttonWithPanel:hover,
+.menuButtonsOpenMetainfoButtonBox .buttonWithPanel.open {
+  background: url(../../../res/img/svg/meatball.svg) 50% 50% no-repeat;
+  width: 40px;
 }

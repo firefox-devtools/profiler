@@ -164,9 +164,30 @@ function _formatDate(timestamp: number): string {
   const timestampDate = new Date(timestamp).toUTCString();
   return timestampDate;
 }
+function _formatVersionNumber(version: string) {
+  const regex = /[0-9]+.+[0-9]/g;
+  let match;
 
-function _formatLabel(meta: Object): string {
-  const labelTitle = meta.product + ' / ' + meta.oscpu + ' / ' + meta.misc;
+  while ((match = regex.exec(version)) !== null) {
+    // This is necessary to avoid infinite loops with zero-width matches
+    if (match.index === regex.lastIndex) {
+      regex.lastIndex++;
+    }
+    return match;
+  }
+  return null;
+}
+
+function _formatLabel(meta: Object): string | null {
+  const product = meta.product || '';
+  const version = _formatVersionNumber(meta.misc) || '';
+  const os = meta.oscpu || '';
+
+  const labelTitle = product + ' (' + version + ') ' + os;
+
+  if (labelTitle.length < 5) {
+    return null;
+  }
   return labelTitle;
 }
 
@@ -177,76 +198,93 @@ class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
 
     if (meta !== undefined && meta !== null) {
       return (
-        <ButtonWithPanel
-          className="menuButtonsOpenMetainfo"
-          label={_formatLabel(meta)}
-          panel={
-            <ArrowPanel className="arrowPanelOpenMetainfo">
-              <h2 className="arrowPanelSubTitle">Timing</h2>
-              <div className="arrowPanelSection">
-                <span>
-                  <span className="metaInfoLabel">Recording started: </span>
-                  {_formatDate(profile.meta.startTime)}
-                </span>
-                <br />
-                <span>
-                  <span className="metaInfoLabel">Interval:</span>{' '}
-                  {profile.meta.interval}ms
-                </span>
-                <br />
-                <span>
-                  <span className="metaInfoLabel">Profile Version:</span>{' '}
-                  {profile.meta.preprocessedProfileVersion}
-                </span>
-              </div>
-              <h2 className="arrowPanelSubTitle">Application</h2>
-              <div className="arrowPanelSection">
-                <span>
-                  <span className="metaInfoLabel">Name:</span>{' '}
-                  {profile.meta.product}
-                </span>
-                <br />
-                <span>
-                  <span className="metaInfoLabel">Version:</span>{' '}
-                  {profile.meta.misc}
-                </span>
-                <br />
-                <span>
-                  <span className="metaInfoLabel">Build ID:</span>{' '}
-                  <a
-                    href={profile.meta.sourceURL}
-                    title={profile.meta.sourceURL}
-                    target="_blank"
-                  >
-                    {profile.meta.appBuildID}
-                  </a>
-                </span>
-                <br />
-                {profile.meta.extensions ? (
-                  <span>
-                    <span className="metaInfoLabel">Extensions:</span>{' '}
-                    <ul className="metaInfoList">
-                      {_mapMetaInfoExtensionNames(profile.meta.extensions.name)}
-                    </ul>
-                  </span>
-                ) : null}
-              </div>
-              <h2 className="arrowPanelSubTitle">Platform</h2>
-              <div className="arrowPanelSection">
-                <span>
-                  <span className="metaInfoLabel">Platform:</span>{' '}
-                  {profile.meta.platform}
-                </span>
-                <br />
-                <span>
-                  <span className="metaInfoLabel">OS:</span>{' '}
-                  {profile.meta.oscpu}
-                </span>
-                <br />
-              </div>
-            </ArrowPanel>
-          }
-        />
+        <div className="menuButtonsOpenMetainfoButtonBox">
+          <div className="menuButtonsOpenMetainfoButtonLabel">
+            {_formatLabel(meta)}
+          </div>
+          <ButtonWithPanel
+            className="menuButtonsOpenMetainfoButtonButton"
+            label="&nbsp;"
+            panel={
+              <ArrowPanel className="arrowPanelOpenMetainfo">
+                <h2 className="arrowPanelSubTitle">Timing</h2>
+                <div className="arrowPanelSection">
+                  {meta.startTime ? (
+                    <span className="metaInfoRow">
+                      <span className="metaInfoLabel">Recording started: </span>
+                      {_formatDate(meta.startTime)}
+                    </span>
+                  ) : null}
+                  {meta.interval ? (
+                    <span className="metaInfoRow">
+                      <span className="metaInfoLabel">Interval:</span>{' '}
+                      {meta.interval}ms
+                    </span>
+                  ) : null}
+                  {meta.preprocessedProfileVersion ? (
+                    <span className="metaInfoRow">
+                      <span className="metaInfoLabel">Profile Version:</span>{' '}
+                      {meta.preprocessedProfileVersion}
+                    </span>
+                  ) : null}
+                </div>
+                <h2 className="arrowPanelSubTitle">Application</h2>
+                <div className="arrowPanelSection">
+                  {meta.product ? (
+                    <span className="metaInfoRow">
+                      <span className="metaInfoLabel">Name:</span>{' '}
+                      {meta.product}
+                    </span>
+                  ) : null}
+                  {meta.misc ? (
+                    <span className="metaInfoRow">
+                      <span className="metaInfoLabel">Version:</span>{' '}
+                      {_formatVersionNumber(meta.misc)}
+                    </span>
+                  ) : null}
+                  {meta.appBuildID ? (
+                    <span className="metaInfoRow">
+                      <span className="metaInfoLabel">Build ID:</span>{' '}
+                      {meta.sourceURL ? (
+                        <a
+                          href={meta.sourceURL}
+                          title={meta.sourceURL}
+                          target="_blank"
+                        >
+                          {meta.appBuildID}
+                        </a>
+                      ) : (
+                        meta.appBuildID
+                      )}
+                    </span>
+                  ) : null}
+                  {meta.extensions ? (
+                    <span className="metaInfoRow">
+                      <span className="metaInfoLabel">Extensions:</span>{' '}
+                      <ul className="metaInfoList">
+                        {_mapMetaInfoExtensionNames(meta.extensions.name)}
+                      </ul>
+                    </span>
+                  ) : null}
+                </div>
+                <h2 className="arrowPanelSubTitle">Platform</h2>
+                <div className="arrowPanelSection">
+                  {meta.platform ? (
+                    <span className="metaInfoRow">
+                      <span className="metaInfoLabel">Platform:</span>{' '}
+                      {meta.platform}
+                    </span>
+                  ) : null}
+                  {meta.oscpu ? (
+                    <span className="metaInfoRow">
+                      <span className="metaInfoLabel">OS:</span> {meta.oscpu}
+                    </span>
+                  ) : null}
+                </div>
+              </ArrowPanel>
+            }
+          />
+        </div>
       );
     }
     return null;

@@ -5,149 +5,156 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
   className="menuButtons"
 >
   <div
-    className="buttonWithPanel menuButtonsOpenMetainfo"
+    className="menuButtonsOpenMetainfoButtonBox"
   >
     <div
-      className="buttonWithPanelButtonWrapper"
+      className="menuButtonsOpenMetainfoButtonLabel"
     >
-      <input
-        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
-        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
-      />
+      Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="arrowPanelAnchor"
+      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
     >
       <div
-        className="arrowPanel arrowPanelOpenMetainfo"
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value=" "
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanelArrow"
-        />
-        <div
-          className="arrowPanelContent"
+          className="arrowPanel arrowPanelOpenMetainfo"
         >
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Timing
-          </h2>
           <div
-            className="arrowPanelSection"
-          >
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Recording started: 
-              </span>
-              Sat, 09 Apr 2016 17:02:32 GMT
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Interval:
-              </span>
-               
-              1
-              ms
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Profile Version:
-              </span>
-               
-              16
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Application
-          </h2>
+            className="arrowPanelArrow"
+          />
           <div
-            className="arrowPanelSection"
+            className="arrowPanelContent"
           >
-            <span>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Timing
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Name:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Recording started: 
+                </span>
+                Sat, 09 Apr 2016 17:02:32 GMT
               </span>
-               
-              Firefox
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Version:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Interval:
+                </span>
+                 
+                1
+                ms
               </span>
-               
-              rv:48.0
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Build ID:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Profile Version:
+                </span>
+                 
+                16
               </span>
-               
-              <a
-                target="_blank"
-              />
-            </span>
-            <br />
-            <span>
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Application
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Extensions:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Name:
+                </span>
+                 
+                Firefox
               </span>
-               
-              <ul
-                className="metaInfoList"
-              />
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Platform
-          </h2>
-          <div
-            className="arrowPanelSection"
-          >
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Platform:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Version:
+                </span>
+                 
+                48.0
               </span>
-               
-              Macintosh
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                OS:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Extensions:
+                </span>
+                 
+                <ul
+                  className="metaInfoList"
+                />
               </span>
-               
-              Intel Mac OS X 10.11
-            </span>
-            <br />
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Platform
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  Platform:
+                </span>
+                 
+                Macintosh
+              </span>
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  OS:
+                </span>
+                 
+                Intel Mac OS X 10.11
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -498,149 +505,156 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
   className="menuButtons"
 >
   <div
-    className="buttonWithPanel menuButtonsOpenMetainfo"
+    className="menuButtonsOpenMetainfoButtonBox"
   >
     <div
-      className="buttonWithPanelButtonWrapper"
+      className="menuButtonsOpenMetainfoButtonLabel"
     >
-      <input
-        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
-        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
-      />
+      Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="arrowPanelAnchor"
+      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
     >
       <div
-        className="arrowPanel arrowPanelOpenMetainfo"
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value=" "
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanelArrow"
-        />
-        <div
-          className="arrowPanelContent"
+          className="arrowPanel arrowPanelOpenMetainfo"
         >
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Timing
-          </h2>
           <div
-            className="arrowPanelSection"
-          >
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Recording started: 
-              </span>
-              Sat, 09 Apr 2016 17:02:32 GMT
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Interval:
-              </span>
-               
-              1
-              ms
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Profile Version:
-              </span>
-               
-              16
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Application
-          </h2>
+            className="arrowPanelArrow"
+          />
           <div
-            className="arrowPanelSection"
+            className="arrowPanelContent"
           >
-            <span>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Timing
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Name:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Recording started: 
+                </span>
+                Sat, 09 Apr 2016 17:02:32 GMT
               </span>
-               
-              Firefox
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Version:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Interval:
+                </span>
+                 
+                1
+                ms
               </span>
-               
-              rv:48.0
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Build ID:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Profile Version:
+                </span>
+                 
+                16
               </span>
-               
-              <a
-                target="_blank"
-              />
-            </span>
-            <br />
-            <span>
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Application
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Extensions:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Name:
+                </span>
+                 
+                Firefox
               </span>
-               
-              <ul
-                className="metaInfoList"
-              />
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Platform
-          </h2>
-          <div
-            className="arrowPanelSection"
-          >
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Platform:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Version:
+                </span>
+                 
+                48.0
               </span>
-               
-              Macintosh
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                OS:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Extensions:
+                </span>
+                 
+                <ul
+                  className="metaInfoList"
+                />
               </span>
-               
-              Intel Mac OS X 10.11
-            </span>
-            <br />
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Platform
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  Platform:
+                </span>
+                 
+                Macintosh
+              </span>
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  OS:
+                </span>
+                 
+                Intel Mac OS X 10.11
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -991,149 +1005,156 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
   className="menuButtons"
 >
   <div
-    className="buttonWithPanel menuButtonsOpenMetainfo"
+    className="menuButtonsOpenMetainfoButtonBox"
   >
     <div
-      className="buttonWithPanelButtonWrapper"
+      className="menuButtonsOpenMetainfoButtonLabel"
     >
-      <input
-        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
-        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
-      />
+      Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="arrowPanelAnchor"
+      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
     >
       <div
-        className="arrowPanel arrowPanelOpenMetainfo"
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value=" "
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanelArrow"
-        />
-        <div
-          className="arrowPanelContent"
+          className="arrowPanel arrowPanelOpenMetainfo"
         >
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Timing
-          </h2>
           <div
-            className="arrowPanelSection"
-          >
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Recording started: 
-              </span>
-              Sat, 09 Apr 2016 17:02:32 GMT
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Interval:
-              </span>
-               
-              1
-              ms
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Profile Version:
-              </span>
-               
-              16
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Application
-          </h2>
+            className="arrowPanelArrow"
+          />
           <div
-            className="arrowPanelSection"
+            className="arrowPanelContent"
           >
-            <span>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Timing
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Name:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Recording started: 
+                </span>
+                Sat, 09 Apr 2016 17:02:32 GMT
               </span>
-               
-              Firefox
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Version:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Interval:
+                </span>
+                 
+                1
+                ms
               </span>
-               
-              rv:48.0
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Build ID:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Profile Version:
+                </span>
+                 
+                16
               </span>
-               
-              <a
-                target="_blank"
-              />
-            </span>
-            <br />
-            <span>
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Application
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Extensions:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Name:
+                </span>
+                 
+                Firefox
               </span>
-               
-              <ul
-                className="metaInfoList"
-              />
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Platform
-          </h2>
-          <div
-            className="arrowPanelSection"
-          >
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Platform:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Version:
+                </span>
+                 
+                48.0
               </span>
-               
-              Macintosh
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                OS:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Extensions:
+                </span>
+                 
+                <ul
+                  className="metaInfoList"
+                />
               </span>
-               
-              Intel Mac OS X 10.11
-            </span>
-            <br />
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Platform
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  Platform:
+                </span>
+                 
+                Macintosh
+              </span>
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  OS:
+                </span>
+                 
+                Intel Mac OS X 10.11
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -1484,149 +1505,156 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
   className="menuButtons"
 >
   <div
-    className="buttonWithPanel menuButtonsOpenMetainfo"
+    className="menuButtonsOpenMetainfoButtonBox"
   >
     <div
-      className="buttonWithPanelButtonWrapper"
+      className="menuButtonsOpenMetainfoButtonLabel"
     >
-      <input
-        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
-        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
-      />
+      Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="arrowPanelAnchor"
+      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
     >
       <div
-        className="arrowPanel arrowPanelOpenMetainfo"
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value=" "
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanelArrow"
-        />
-        <div
-          className="arrowPanelContent"
+          className="arrowPanel arrowPanelOpenMetainfo"
         >
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Timing
-          </h2>
           <div
-            className="arrowPanelSection"
-          >
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Recording started: 
-              </span>
-              Sat, 09 Apr 2016 17:02:32 GMT
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Interval:
-              </span>
-               
-              1
-              ms
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Profile Version:
-              </span>
-               
-              16
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Application
-          </h2>
+            className="arrowPanelArrow"
+          />
           <div
-            className="arrowPanelSection"
+            className="arrowPanelContent"
           >
-            <span>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Timing
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Name:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Recording started: 
+                </span>
+                Sat, 09 Apr 2016 17:02:32 GMT
               </span>
-               
-              Firefox
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Version:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Interval:
+                </span>
+                 
+                1
+                ms
               </span>
-               
-              rv:48.0
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Build ID:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Profile Version:
+                </span>
+                 
+                16
               </span>
-               
-              <a
-                target="_blank"
-              />
-            </span>
-            <br />
-            <span>
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Application
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Extensions:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Name:
+                </span>
+                 
+                Firefox
               </span>
-               
-              <ul
-                className="metaInfoList"
-              />
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Platform
-          </h2>
-          <div
-            className="arrowPanelSection"
-          >
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Platform:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Version:
+                </span>
+                 
+                48.0
               </span>
-               
-              Macintosh
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                OS:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Extensions:
+                </span>
+                 
+                <ul
+                  className="metaInfoList"
+                />
               </span>
-               
-              Intel Mac OS X 10.11
-            </span>
-            <br />
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Platform
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  Platform:
+                </span>
+                 
+                Macintosh
+              </span>
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  OS:
+                </span>
+                 
+                Intel Mac OS X 10.11
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -1977,149 +2005,156 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
   className="menuButtons"
 >
   <div
-    className="buttonWithPanel menuButtonsOpenMetainfo"
+    className="menuButtonsOpenMetainfoButtonBox"
   >
     <div
-      className="buttonWithPanelButtonWrapper"
+      className="menuButtonsOpenMetainfoButtonLabel"
     >
-      <input
-        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
-        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
-      />
+      Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="arrowPanelAnchor"
+      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
     >
       <div
-        className="arrowPanel arrowPanelOpenMetainfo"
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value=" "
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanelArrow"
-        />
-        <div
-          className="arrowPanelContent"
+          className="arrowPanel arrowPanelOpenMetainfo"
         >
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Timing
-          </h2>
           <div
-            className="arrowPanelSection"
-          >
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Recording started: 
-              </span>
-              Sat, 09 Apr 2016 17:02:32 GMT
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Interval:
-              </span>
-               
-              1
-              ms
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Profile Version:
-              </span>
-               
-              16
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Application
-          </h2>
+            className="arrowPanelArrow"
+          />
           <div
-            className="arrowPanelSection"
+            className="arrowPanelContent"
           >
-            <span>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Timing
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Name:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Recording started: 
+                </span>
+                Sat, 09 Apr 2016 17:02:32 GMT
               </span>
-               
-              Firefox
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Version:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Interval:
+                </span>
+                 
+                1
+                ms
               </span>
-               
-              rv:48.0
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Build ID:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Profile Version:
+                </span>
+                 
+                16
               </span>
-               
-              <a
-                target="_blank"
-              />
-            </span>
-            <br />
-            <span>
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Application
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Extensions:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Name:
+                </span>
+                 
+                Firefox
               </span>
-               
-              <ul
-                className="metaInfoList"
-              />
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Platform
-          </h2>
-          <div
-            className="arrowPanelSection"
-          >
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Platform:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Version:
+                </span>
+                 
+                48.0
               </span>
-               
-              Macintosh
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                OS:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Extensions:
+                </span>
+                 
+                <ul
+                  className="metaInfoList"
+                />
               </span>
-               
-              Intel Mac OS X 10.11
-            </span>
-            <br />
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Platform
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  Platform:
+                </span>
+                 
+                Macintosh
+              </span>
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  OS:
+                </span>
+                 
+                Intel Mac OS X 10.11
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -2470,149 +2505,156 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
   className="menuButtons"
 >
   <div
-    className="buttonWithPanel menuButtonsOpenMetainfo"
+    className="menuButtonsOpenMetainfoButtonBox"
   >
     <div
-      className="buttonWithPanelButtonWrapper"
+      className="menuButtonsOpenMetainfoButtonLabel"
     >
-      <input
-        className="buttonWithPanelButton menuButtonsOpenMetainfoButton"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
-        value="Firefox / Intel Mac OS X 10.11 / rv:48.0"
-      />
+      Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="arrowPanelAnchor"
+      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
     >
       <div
-        className="arrowPanel arrowPanelOpenMetainfo"
+        className="buttonWithPanelButtonWrapper"
+      >
+        <input
+          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          disabled={false}
+          onClick={[Function]}
+          type="button"
+          value=" "
+        />
+      </div>
+      <div
+        className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanelArrow"
-        />
-        <div
-          className="arrowPanelContent"
+          className="arrowPanel arrowPanelOpenMetainfo"
         >
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Timing
-          </h2>
           <div
-            className="arrowPanelSection"
-          >
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Recording started: 
-              </span>
-              Sat, 09 Apr 2016 17:02:32 GMT
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Interval:
-              </span>
-               
-              1
-              ms
-            </span>
-            <br />
-            <span>
-              <span
-                className="metaInfoLabel"
-              >
-                Profile Version:
-              </span>
-               
-              16
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Application
-          </h2>
+            className="arrowPanelArrow"
+          />
           <div
-            className="arrowPanelSection"
+            className="arrowPanelContent"
           >
-            <span>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Timing
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Name:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Recording started: 
+                </span>
+                Sat, 09 Apr 2016 17:02:32 GMT
               </span>
-               
-              Firefox
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Version:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Interval:
+                </span>
+                 
+                1
+                ms
               </span>
-               
-              rv:48.0
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Build ID:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Profile Version:
+                </span>
+                 
+                16
               </span>
-               
-              <a
-                target="_blank"
-              />
-            </span>
-            <br />
-            <span>
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Application
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Extensions:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Name:
+                </span>
+                 
+                Firefox
               </span>
-               
-              <ul
-                className="metaInfoList"
-              />
-            </span>
-          </div>
-          <h2
-            className="arrowPanelSubTitle"
-          >
-            Platform
-          </h2>
-          <div
-            className="arrowPanelSection"
-          >
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                Platform:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Version:
+                </span>
+                 
+                48.0
               </span>
-               
-              Macintosh
-            </span>
-            <br />
-            <span>
               <span
-                className="metaInfoLabel"
+                className="metaInfoRow"
               >
-                OS:
+                <span
+                  className="metaInfoLabel"
+                >
+                  Extensions:
+                </span>
+                 
+                <ul
+                  className="metaInfoList"
+                />
               </span>
-               
-              Intel Mac OS X 10.11
-            </span>
-            <br />
+            </div>
+            <h2
+              className="arrowPanelSubTitle"
+            >
+              Platform
+            </h2>
+            <div
+              className="arrowPanelSection"
+            >
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  Platform:
+                </span>
+                 
+                Macintosh
+              </span>
+              <span
+                className="metaInfoRow"
+              >
+                <span
+                  className="metaInfoLabel"
+                >
+                  OS:
+                </span>
+                 
+                Intel Mac OS X 10.11
+              </span>
+            </div>
           </div>
         </div>
       </div>
