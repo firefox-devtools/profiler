@@ -67,9 +67,9 @@ type HoveredStackTiming = {|
 
 require('./Canvas.css');
 
-const ROW_CSS_PIXEL_HEIGHT = 16;
-const TEXT_CSS_PIXEL_OFFSET_START = 3;
-const TEXT_CSS_PIXEL_OFFSET_TOP = 11;
+const ROW_CSS_PIXELS_HEIGHT = 16;
+const TEXT_CSS_PIXELS_OFFSET_START = 3;
+const TEXT_CSS_PIXELS_OFFSET_TOP = 11;
 const FONT_SIZE = 10;
 const BORDER_OPACITY = 0.4;
 
@@ -108,14 +108,14 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
 
     const depth = callNodeTable.depth[selectedCallNodeIndex];
-    const y = depth * ROW_CSS_PIXEL_HEIGHT;
+    const y = depth * ROW_CSS_PIXELS_HEIGHT;
 
     if (y < this.props.viewport.viewportTop) {
       this.props.viewport.moveViewport(0, this.props.viewport.viewportTop - y);
-    } else if (y + ROW_CSS_PIXEL_HEIGHT > this.props.viewport.viewportBottom) {
+    } else if (y + ROW_CSS_PIXELS_HEIGHT > this.props.viewport.viewportBottom) {
       this.props.viewport.moveViewport(
         0,
-        this.props.viewport.viewportBottom - (y + ROW_CSS_PIXEL_HEIGHT)
+        this.props.viewport.viewportBottom - (y + ROW_CSS_PIXELS_HEIGHT)
       );
     }
   };
@@ -177,25 +177,25 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
     const innerContainerWidth =
       containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
-    const innerDevicePixelWidth = innerContainerWidth * devicePixelRatio;
+    const innerDevicePixelsWidth = innerContainerWidth * devicePixelRatio;
 
     const pixelAtViewportPosition = (
       viewportPosition: UnitIntervalOfProfileRange
     ): DevicePixels =>
       devicePixelRatio *
-      // The right hand side of this formula is all in device pixels.
+      // The right hand side of this formula is all in CSS pixels.
       (TIMELINE_MARGIN_LEFT +
         (viewportPosition - viewportLeft) *
           innerContainerWidth /
           viewportLength);
 
     // Apply the device pixel ratio to various CssPixel constants.
-    const rowDevicePixelHeight = ROW_CSS_PIXEL_HEIGHT * devicePixelRatio;
+    const rowDevicePixelsHeight = ROW_CSS_PIXELS_HEIGHT * devicePixelRatio;
     const oneCssPixelInDevicePixels = 1 * devicePixelRatio;
-    const textDevicePixelOffsetStart =
-      TEXT_CSS_PIXEL_OFFSET_START * devicePixelRatio;
-    const textDevicePixelOffsetTop =
-      TEXT_CSS_PIXEL_OFFSET_TOP * devicePixelRatio;
+    const textDevicePixelsOffsetStart =
+      TEXT_CSS_PIXELS_OFFSET_START * devicePixelRatio;
+    const textDevicePixelsOffsetTop =
+      TEXT_CSS_PIXELS_OFFSET_TOP * devicePixelRatio;
 
     // Only draw the stack frames that are vertically within view.
     for (let depth = startDepth; depth < endDepth; depth++) {
@@ -213,7 +213,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
        * const endSampleIndex = binarySearch(stackTiming.end, rangeStart + rangeLength * viewportRight);
        */
 
-      const pixelsInViewport = viewportLength * innerDevicePixelWidth;
+      const pixelsInViewport = viewportLength * innerDevicePixelsWidth;
       const timePerPixel = rangeLength / pixelsInViewport;
 
       // Decide which samples to actually draw
@@ -253,7 +253,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
           const floatX = pixelAtViewportPosition(viewportAtStartTime);
           const floatW: DevicePixels =
             (viewportAtEndTime - viewportAtStartTime) *
-              innerDevicePixelWidth /
+              innerDevicePixelsWidth /
               viewportLength -
             1;
 
@@ -269,7 +269,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
             // The left side of the box is before the lastDrawnPixelX value, but the
             // right hand side is within a range to be drawn. Truncate the box a little
             // bit in order to draw it to the screen in the free space.
-            snappedFloatW = floatW - (lastDrawnPixelX - snappedFloatX);
+            snappedFloatW = floatW - (lastDrawnPixelX - floatX);
             snappedFloatX = lastDrawnPixelX;
             skipDraw = false;
           }
@@ -284,11 +284,11 @@ class StackChartCanvas extends React.PureComponent<Props> {
           // off by one errors appear to be creating gaps where there shouldn't be any.
           const intX = Math.floor(snappedFloatX);
           const intY = Math.round(
-            depth * rowDevicePixelHeight - viewportDevicePixelsTop
+            depth * rowDevicePixelsHeight - viewportDevicePixelsTop
           );
           const intW = Math.ceil(Math.max(1, snappedFloatW));
           const intH = Math.round(
-            rowDevicePixelHeight - oneCssPixelInDevicePixels
+            rowDevicePixelsHeight - oneCssPixelInDevicePixels
           );
 
           // Look up information about this stack frame.
@@ -327,7 +327,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
           // the text doesn't snap around when moving. Only the boxes should snap.
           const textX: DevicePixels =
             // Constrain the x coordinate to the leftmost area.
-            Math.max(floatX, 0) + textDevicePixelOffsetStart;
+            Math.max(floatX, 0) + textDevicePixelsOffsetStart;
           const textW: DevicePixels = Math.max(0, floatW - (textX - floatX));
 
           if (textW > textMeasurement.minWidth) {
@@ -336,7 +336,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
               fastFillStyle.set(
                 isHovered || isSelected ? 'HighlightText' : '#000000'
               );
-              ctx.fillText(fittedText, textX, intY + textDevicePixelOffsetTop);
+              ctx.fillText(fittedText, textX, intY + textDevicePixelsOffsetTop);
             }
           }
         }
@@ -463,16 +463,16 @@ class StackChartCanvas extends React.PureComponent<Props> {
       viewport: { viewportLeft, viewportRight, viewportTop, containerWidth },
     } = this.props;
 
-    const innerDevicePixelWidth =
+    const innerDevicePixelsWidth =
       containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
     const viewportLength: UnitIntervalOfProfileRange =
       viewportRight - viewportLeft;
     const unitIntervalTime: UnitIntervalOfProfileRange =
       viewportLeft +
-      viewportLength * ((x - TIMELINE_MARGIN_LEFT) / innerDevicePixelWidth);
+      viewportLength * ((x - TIMELINE_MARGIN_LEFT) / innerDevicePixelsWidth);
     const time: Milliseconds = rangeStart + unitIntervalTime * rangeLength;
-    const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXEL_HEIGHT);
+    const depth = Math.floor((y + viewportTop) / ROW_CSS_PIXELS_HEIGHT);
     const stackTiming = stackTimingByDepth[depth];
 
     if (!stackTiming) {
