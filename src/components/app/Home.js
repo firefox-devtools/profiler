@@ -74,19 +74,19 @@ class ActionButtons extends React.PureComponent<
   ActionButtonsProps,
   ActionButtonsState
 > {
-  _input: HTMLInputElement | null;
+  _fileInput: HTMLInputElement | null;
 
   state = {
     isLoadFromUrlPressed: false,
   };
 
   _takeInputRef = input => {
-    this._input = input;
+    this._fileInput = input;
   };
 
-  _upload = () => {
-    if (this._input) {
-      this.props.retrieveProfileFromFile(this._input.files[0]);
+  _uploadProfileFromFile = () => {
+    if (this._fileInput) {
+      this.props.retrieveProfileFromFile(this._fileInput.files[0]);
     }
   };
 
@@ -98,24 +98,25 @@ class ActionButtons extends React.PureComponent<
   };
 
   render() {
-    const _class = this.state.isLoadFromUrlPressed
-      ? 'homeSectionButtonPressed'
+    const loadFromUrlButtonClassName = this.state.isLoadFromUrlPressed
+      ? ['homeSectionButtonPressed', 'homeSectionButton'].join(' ')
       : 'homeSectionButton';
+
     return (
-      <div>
+     <div className="homeSectionLoadProfile">
         <div className="homeSectionActionButtons">
           <label className="homeSectionButton">
             <input
               className="homeSectionUploadFromFileInput"
               type="file"
               ref={this._takeInputRef}
-              onChange={this._upload}
+              onChange={this._uploadProfileFromFile}
             />
             Load a profile from file
           </label>
           <button
             type="button"
-            className={_class}
+            className={loadFromUrlButtonClassName}
             onClick={this._loadFromUrlPressed}
           >
             Load a profile from an URL

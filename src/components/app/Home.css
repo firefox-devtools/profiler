@@ -131,40 +131,38 @@
   background-color: #fff;
 }
 
-.homeSectionButtonPressed {
-  padding: 0.5em;
-  margin: 15px 0;
-  display: block;
-  border: 2px solid var(--blue-50);
-  text-decoration: none;
-  transition: background-color 300ms;
-  font-weight: bold;
-  font-size: 13px;
-  text-align: center;
-  cursor: pointer;
-  background-color: var(--blue-50);
-  color: #fff;
-
+.homeSectionLoadProfile {
+  position: relative;
 }
 
 .homeSectionActionButtons {
   display: flex;
-  justify-content: space-between;
+}
+
+.homeSectionActionButtons .homeSectionButton {
+  flex: 1;
+  margin: 5px 0;
+}
+
+.homeSectionActionButtons button {
+  border-left: none; 
 }
 
 .homeSectionLoadFromUrl {
   width: 100%;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  position: absolute;
 }
 
-.homeSectionActionButtons .homeSectionButton , .homeSectionLoadFromUrl .homeSectionButton {
+.homeSectionActionButtons .homeSectionButton ,
+.homeSectionLoadFromUrl .homeSectionButton {
   font-size: 13px;
   padding: 0.3em;
-}
+} 
 
-.homeSectionButton:hover {
+.homeSectionButton:hover , 
+.homeSectionButtonPressed{
   color: #fff;
   background-color: var(--blue-60);
 }
