@@ -382,6 +382,13 @@ export type BHRMarkerPayload = {
   endTime: Milliseconds,
 };
 
+export type LongTaskMarkerPayload = {
+  type: 'MainThreadLongTask',
+  category: 'LongTask',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+};
+
 /*
  * The payload for Frame Construction.
  */
@@ -415,6 +422,7 @@ export type MarkerPayload =
   | GCSliceMarkerPayload
   | StyleMarkerPayload
   | BHRMarkerPayload
+  | LongTaskMarkerPayload
   | VsyncTimestampPayload
   | ScreenshotPayload
   | FrameConstructionMarkerPayload
