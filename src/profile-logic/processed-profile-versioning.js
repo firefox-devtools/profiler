@@ -742,6 +742,9 @@ const _upgraders = {
     // The type field on some markers were missing. Renamed category field of
     // VsyncTimestamp and LayerTranslation marker payloads to type and added
     // a type field to Screenshot marker payload.
+    // In addition to that, we removed the `vsync` field from VsyncTimestamp
+    // since we don't use that field and have a timestamp for them already.
+    // Old profiles might still have this property.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
       const stringTable = new UniqueStringArray(stringArray);
