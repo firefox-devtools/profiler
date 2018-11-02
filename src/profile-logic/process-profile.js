@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import { isChromeProfile, convertChromeProfile } from './import/chrome';
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes, emptyExtensions } from './profile-data';
@@ -20,7 +21,7 @@ import {
 import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
-} from './perf-script-profile-format';
+} from './import/linux-perf';
 import { convertPhaseTimes } from './convert-markers';
 import type {
   Profile,
@@ -939,9 +940,9 @@ function _unserializeProfile(profile: Object): Profile {
  * Take some arbitrary profile file from some data source, and turn it into
  * the processed profile format.
  */
-export function unserializeProfileOfArbitraryFormat(
+export async function unserializeProfileOfArbitraryFormat(
   stringOrObject: string | Object
-): Profile {
+): Promise<Profile> {
   try {
     let profile = null;
     if (typeof stringOrObject === 'string') {
@@ -965,6 +966,9 @@ export function unserializeProfileOfArbitraryFormat(
     if (isProcessedProfile(profile)) {
       upgradeProcessedProfileToCurrentVersion(profile);
       return _unserializeProfile(profile);
+    }
+    if (isChromeProfile(profile)) {
+      return convertChromeProfile(profile);
     }
     // Else: Treat it as a Gecko profile and just attempt to process it.
     return processProfile(profile);
