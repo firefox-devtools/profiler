@@ -80,6 +80,7 @@ export default function getProfile(): Profile {
     func: frameFuncs.map(stringIndex => funcTable.name.indexOf(stringIndex)),
     address: Array(frameFuncs.length).fill(-1),
     category: Array(frameFuncs.length).fill(null),
+    subcategory: Array(frameFuncs.length).fill(null),
     implementation: Array(frameFuncs.length).fill(null),
     line: Array(frameFuncs.length).fill(null),
     column: Array(frameFuncs.length).fill(null),
@@ -90,16 +91,18 @@ export default function getProfile(): Profile {
   const stackTable: StackTable = {
     frame: [],
     category: [],
+    subcategory: [],
     prefix: [],
     length: 0,
     depth: [], // ??? depth?
   };
 
   // Provide a utility function for readability.
-  function addToStackTable(frame, prefix, category) {
+  function addToStackTable(frame, prefix, category, subcategory = null) {
     stackTable.frame.push(frame);
     stackTable.prefix.push(prefix);
     stackTable.category.push(category);
+    stackTable.subcategory.push(subcategory);
     stackTable.length++;
   }
   // Shared root stacks.

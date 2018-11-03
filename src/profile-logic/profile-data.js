@@ -59,14 +59,14 @@ export const emptyExtensions: ExtensionTable = Object.freeze({
 });
 
 export const defaultCategories: CategoryList = Object.freeze([
-  { name: 'Idle', color: 'transparent' },
-  { name: 'Other', color: 'grey' },
-  { name: 'Layout', color: 'purple' },
-  { name: 'JavaScript', color: 'yellow' },
-  { name: 'GC / CC', color: 'orange' },
-  { name: 'Network', color: 'lightblue' },
-  { name: 'Graphics', color: 'green' },
-  { name: 'DOM', color: 'blue' },
+  { name: 'Idle', color: 'transparent', subcategories: [] },
+  { name: 'Other', color: 'grey', subcategories: [] },
+  { name: 'Layout', color: 'purple', subcategories: [] },
+  { name: 'JavaScript', color: 'yellow', subcategories: [] },
+  { name: 'GC / CC', color: 'orange', subcategories: [] },
+  { name: 'Network', color: 'lightblue', subcategories: [] },
+  { name: 'Graphics', color: 'green', subcategories: [] },
+  { name: 'DOM', color: 'blue', subcategories: [] },
 ]);
 
 /**
@@ -656,6 +656,7 @@ function _filterThreadByFunc(
       frame: [],
       prefix: [],
       category: [],
+      subcategory: [],
     };
 
     const oldStackToNewStack = new Map();
@@ -681,11 +682,20 @@ function _filterThreadByFunc(
             newStackTable.prefix[newStack] = prefixNewStack;
             newStackTable.frame[newStack] = frameIndex;
             newStackTable.category[newStack] = stackTable.category[stackIndex];
+            newStackTable.subcategory[newStack] =
+              stackTable.subcategory[stackIndex];
           } else if (
             newStackTable.category[newStack] !== stackTable.category[stackIndex]
           ) {
             // Conflicting origin stack categories -> default category.
             newStackTable.category[newStack] = defaultCategory;
+            newStackTable.subcategory[newStack] = null;
+          } else if (
+            newStackTable.subcategory[newStack] !==
+            stackTable.subcategory[stackIndex]
+          ) {
+            // Conflicting origin stack subcategories -> null subcategory.
+            newStackTable.subcategory[newStack] = null;
           }
           oldStackToNewStack.set(stackIndex, newStack);
           prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
@@ -733,6 +743,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
       length: 0,
       frame: [],
       category: [],
+      subcategory: [],
       prefix: [],
     };
     const newFrameTable: FrameTable = {
@@ -742,6 +753,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
       line: frameTable.line.slice(),
       column: frameTable.column.slice(),
       category: frameTable.category.slice(),
+      subcategory: frameTable.subcategory.slice(),
       func: frameTable.func.slice(),
       address: frameTable.address.slice(),
     };
@@ -798,6 +810,8 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
             newStack = newStackTable.length++;
             newStackTable.prefix[newStack] = newStackPrefix;
             newStackTable.category[newStack] = stackTable.category[oldStack];
+            newStackTable.subcategory[newStack] =
+              stackTable.subcategory[oldStack];
             if (oldStackIsPlatform) {
               // Create a new platform frame
               const newFuncIndex = newFuncTable.length++;
@@ -821,6 +835,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
               newFrameTable.line.push(null);
               newFrameTable.column.push(null);
               newFrameTable.category.push(null);
+              newFrameTable.subcategory.push(null);
               newFrameTable.func.push(newFuncIndex);
               newFrameTable.address.push(-1);
 
@@ -1236,6 +1251,7 @@ export function invertCallstack(
       length: 0,
       frame: [],
       category: [],
+      subcategory: [],
       prefix: [],
     };
     // Create a Map that keys off of two values, both the prefix and frame combination
@@ -1246,7 +1262,7 @@ export function invertCallstack(
     // Returns the stackIndex for a specific frame (that is, a function and its
     // context), and a specific prefix. If it doesn't exist yet it will create
     // a new stack entry and return its index.
-    function stackFor(prefix, frame, category) {
+    function stackFor(prefix, frame, category, subcategory) {
       const prefixAndFrameIndex =
         (prefix === null ? -1 : prefix) * frameCount + frame;
       let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);
@@ -1255,6 +1271,7 @@ export function invertCallstack(
         newStackTable.prefix[stackIndex] = prefix;
         newStackTable.frame[stackIndex] = frame;
         newStackTable.category[stackIndex] = category;
+        newStackTable.subcategory[stackIndex] = subcategory;
         prefixAndFrameToStack.set(prefixAndFrameIndex, stackIndex);
       } else if (newStackTable.category[stackIndex] !== category) {
         // If two stack nodes from the non-inverted stack tree with different
@@ -1262,6 +1279,12 @@ export function invertCallstack(
         // inverted tree, discard their category and set the category to the
         // default category.
         newStackTable.category[stackIndex] = defaultCategory;
+        newStackTable.subcategory[stackIndex] = null;
+      } else if (newStackTable.subcategory[stackIndex] !== subcategory) {
+        // If two stack nodes from the non-inverted stack tree with different
+        // subcategories happen to collapse into the same stack node in the
+        // inverted tree, discard their subcategory and set it to null.
+        newStackTable.subcategory[stackIndex] = null;
       }
       return stackIndex;
     }
@@ -1287,7 +1310,8 @@ export function invertCallstack(
           newStack = stackFor(
             newStack,
             stackTable.frame[currentStack],
-            stackTable.category[currentStack]
+            stackTable.category[currentStack],
+            stackTable.subcategory[currentStack]
           );
         }
         oldStackToNewStack.set(stackIndex, newStack);

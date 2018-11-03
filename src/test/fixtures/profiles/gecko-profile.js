@@ -87,6 +87,7 @@ export default function createGeckoProfile(): GeckoProfile {
       {
         name: 'Other',
         color: 'grey',
+        subcategories: [],
       },
     ],
   };
@@ -179,6 +180,7 @@ function _createGeckoThread(): GeckoThread {
         line: 4,
         column: 5,
         category: 6,
+        subcategory: 7,
       },
       data: [
         [0, false, null, null, null, null], // (root)

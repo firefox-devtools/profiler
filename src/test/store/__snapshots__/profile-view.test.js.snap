@@ -9,34 +9,42 @@ Object {
       Object {
         "color": "transparent",
         "name": "Idle",
+        "subcategories": Array [],
       },
       Object {
         "color": "grey",
         "name": "Other",
+        "subcategories": Array [],
       },
       Object {
         "color": "purple",
         "name": "Layout",
+        "subcategories": Array [],
       },
       Object {
         "color": "yellow",
         "name": "JavaScript",
+        "subcategories": Array [],
       },
       Object {
         "color": "orange",
         "name": "GC / CC",
+        "subcategories": Array [],
       },
       Object {
         "color": "lightblue",
         "name": "Network",
+        "subcategories": Array [],
       },
       Object {
         "color": "green",
         "name": "Graphics",
+        "subcategories": Array [],
       },
       Object {
         "color": "blue",
         "name": "DOM",
+        "subcategories": Array [],
       },
     ],
     "extensions": Object {
@@ -51,14 +59,14 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 19,
+    "preprocessedProfileVersion": 20,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
     "stackwalk": 0,
     "startTime": 0,
     "toolkit": "",
-    "version": 14,
+    "version": 15,
   },
   "pages": Array [],
   "threads": Array [
@@ -132,6 +140,17 @@ Object {
           null,
         ],
         "optimizations": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        "subcategory": Array [
           null,
           null,
           null,
@@ -391,6 +410,17 @@ Object {
           1,
           7,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -428,6 +458,7 @@ Object {
         "length": 0,
         "line": Array [],
         "optimizations": Array [],
+        "subcategory": Array [],
       },
       "funcTable": Object {
         "address": Array [],
@@ -551,6 +582,7 @@ Object {
         "frame": Array [],
         "length": 0,
         "prefix": Array [],
+        "subcategory": Array [],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -650,6 +682,17 @@ Array [
         null,
       ],
       "optimizations": Array [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+      "subcategory": Array [
         null,
         null,
         null,
@@ -909,6 +952,17 @@ Array [
         1,
         7,
       ],
+      "subcategory": Array [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
     },
     "stringTable": UniqueStringArray {
       "_array": Array [
@@ -946,6 +1000,7 @@ Array [
       "length": 0,
       "line": Array [],
       "optimizations": Array [],
+      "subcategory": Array [],
     },
     "funcTable": Object {
       "address": Array [],
@@ -1069,6 +1124,7 @@ Array [
       "frame": Array [],
       "length": 0,
       "prefix": Array [],
+      "subcategory": Array [],
     },
     "stringTable": UniqueStringArray {
       "_array": Array [
@@ -1264,34 +1320,42 @@ CallTree {
     Object {
       "color": "transparent",
       "name": "Idle",
+      "subcategories": Array [],
     },
     Object {
       "color": "grey",
       "name": "Other",
+      "subcategories": Array [],
     },
     Object {
       "color": "purple",
       "name": "Layout",
+      "subcategories": Array [],
     },
     Object {
       "color": "yellow",
       "name": "JavaScript",
+      "subcategories": Array [],
     },
     Object {
       "color": "orange",
       "name": "GC / CC",
+      "subcategories": Array [],
     },
     Object {
       "color": "lightblue",
       "name": "Network",
+      "subcategories": Array [],
     },
     Object {
       "color": "green",
       "name": "Graphics",
+      "subcategories": Array [],
     },
     Object {
       "color": "blue",
       "name": "DOM",
+      "subcategories": Array [],
     },
   ],
   "_children": Array [],
@@ -1576,6 +1640,17 @@ Object {
       null,
       null,
     ],
+    "subcategory": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
   },
   "funcTable": Object {
     "address": Array [
@@ -1775,6 +1850,16 @@ Object {
       4,
       1,
       6,
+    ],
+    "subcategory": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     ],
   },
   "stringTable": UniqueStringArray {
@@ -2037,6 +2122,17 @@ Object {
       null,
       null,
     ],
+    "subcategory": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
   },
   "funcTable": Object {
     "address": Array [
@@ -2211,6 +2307,16 @@ Object {
       4,
       1,
       6,
+    ],
+    "subcategory": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     ],
   },
   "stringTable": UniqueStringArray {
@@ -2376,6 +2482,17 @@ Object {
       null,
       null,
     ],
+    "subcategory": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
   },
   "funcTable": Object {
     "address": Array [
@@ -2576,6 +2693,16 @@ Object {
       1,
       6,
     ],
+    "subcategory": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
   },
   "stringTable": UniqueStringArray {
     "_array": Array [
@@ -2676,6 +2803,17 @@ Object {
       null,
     ],
     "optimizations": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
+    "subcategory": Array [
       null,
       null,
       null,
@@ -2888,6 +3026,17 @@ Object {
       5,
       1,
       7,
+    ],
+    "subcategory": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     ],
   },
   "stringTable": UniqueStringArray {

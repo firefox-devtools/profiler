@@ -137,11 +137,13 @@ export function getEmptyThread(overrides: ?Object): Thread {
         frame: [],
         prefix: [],
         category: [],
+        subcategory: [],
         length: 0,
       },
       frameTable: {
         address: [],
         category: [],
+        subcategory: [],
         func: [],
         implementation: [],
         line: [],
@@ -459,14 +461,18 @@ function _buildThreadFromTextOnlyStacks(
         categories
       );
 
-      // Attempt to find a frame that satisfies the given funcIndex, jit type
-      // and category..
+      // TODO: Maybe allow specifying subcategories in the funcName.
+      const subcategory = null;
+
+      // Attempt to find a frame that satisfies the given funcIndex, jit type,
+      // category and subcategory.
       let frameIndex;
       for (let i = 0; i < frameTable.length; i++) {
         if (
           funcIndex === frameTable.func[i] &&
           jitTypeIndex === frameTable.implementation[i] &&
-          category === frameTable.category[i]
+          category === frameTable.category[i] &&
+          subcategory === frameTable.subcategory[i]
         ) {
           frameIndex = i;
           break;
@@ -477,6 +483,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.func.push(funcIndex);
         frameTable.address.push(0);
         frameTable.category.push(category);
+        frameTable.subcategory.push(subcategory);
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(null);
         frameTable.column.push(null);
@@ -499,14 +506,20 @@ function _buildThreadFromTextOnlyStacks(
       // If we couldn't find a stack, go ahead and create it.
       if (stackIndex === undefined) {
         const frameCategory = frameTable.category[frameIndex];
+        const frameSubcategory = frameTable.subcategory[frameIndex];
         const prefixCategory =
           prefix === null ? categoryOther : stackTable.category[prefix];
-        const stackCategory =
-          frameCategory === null ? prefixCategory : frameCategory;
+        const prefixSubcategory =
+          prefix === null ? null : stackTable.subcategory[prefix];
+        const [stackCategory, stackSubcategory] =
+          frameCategory === null
+            ? [prefixCategory, prefixSubcategory]
+            : [frameCategory, frameSubcategory];
 
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
         stackTable.category.push(stackCategory);
+        stackTable.subcategory.push(stackSubcategory);
         stackIndex = stackTable.length++;
       }
 

@@ -124,6 +124,7 @@ export type GeckoFrameStruct = {
   line: Array<null | number>,
   column: Array<null | number>,
   category: Array<null | number>,
+  subcategory: Array<null | number>,
   length: number,
 };
 

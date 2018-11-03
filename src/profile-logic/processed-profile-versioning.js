@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 19; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 20; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -898,6 +898,25 @@ const _upgraders = {
           }
         }
       }
+    }
+  },
+  [20]: profile => {
+    // profile.meta.categories now has a subcategories property on each element,
+    // with an array of subcategories for that category, with at least one
+    // subcategory per category.
+    // And the frameTable and stackTable have another column, subcategory, which
+    // is non-null whenever the category column is non-null.
+    for (const category of profile.meta.categories) {
+      category.subcategories = ['Other'];
+    }
+    for (const thread of profile.threads) {
+      const { frameTable, stackTable } = thread;
+      frameTable.subcategory = frameTable.category.map(
+        c => (c === null ? null : 0)
+      );
+      stackTable.subcategory = stackTable.category.map(
+        c => (c === null ? null : 0)
+      );
     }
   },
 };

@@ -98,7 +98,11 @@ describe('actions/receive-profile', function() {
 
       const [idleThread, workThread] = profile.threads;
       const idleCategoryIndex = profile.meta.categories.length;
-      profile.meta.categories.push({ name: 'Idle', color: '#fff' });
+      profile.meta.categories.push({
+        name: 'Idle',
+        color: '#fff',
+        subcategories: [],
+      });
       workThread.name = 'Work Thread';
       idleThread.name = 'Idle Thread';
       idleThread.stackTable.category = idleThread.stackTable.category.map(

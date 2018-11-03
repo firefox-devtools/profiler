@@ -17,7 +17,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 14; // The current version of the Gecko profile format.
+export const CURRENT_VERSION = 15; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -536,6 +536,23 @@ const _upgraders = {
       }
     }
     convertToVersionFourteenRecursive(profile);
+  },
+  [15]: profile => {
+    // profile.meta.categories now has a subcategories property on each element,
+    // with an array of subcategories for that category.
+    // And the frameTable has another column, subcategory.
+    function convertToVersionFifteenRecursive(p) {
+      for (const category of p.meta.categories) {
+        category.subcategories = [];
+      }
+      for (const thread of p.threads) {
+        thread.frameTable.schema.subcategory = 7;
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionFifteenRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionFifteenRecursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */
