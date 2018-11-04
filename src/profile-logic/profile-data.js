@@ -15,6 +15,7 @@ import type {
   MarkersTable,
   ResourceTable,
   IndexIntoCategoryList,
+  IndexIntoSubcategoryListForCategory,
   IndexIntoFuncTable,
   IndexIntoSamplesTable,
   IndexIntoMarkersTable,
@@ -95,18 +96,21 @@ export function getCallNodeInfo(
     const prefix: Array<IndexIntoCallNodeTable> = [];
     const func: Array<IndexIntoFuncTable> = [];
     const category: Array<IndexIntoCategoryList> = [];
+    const subcategory: Array<IndexIntoSubcategoryListForCategory | null> = [];
     const depth: Array<number> = [];
     let length = 0;
 
     function addCallNode(
       prefixIndex: IndexIntoCallNodeTable,
       funcIndex: IndexIntoFuncTable,
-      categoryIndex: IndexIntoCategoryList
+      categoryIndex: IndexIntoCategoryList,
+      subcategoryIndex: IndexIntoSubcategoryListForCategory | null
     ) {
       const index = length++;
       prefix[index] = prefixIndex;
       func[index] = funcIndex;
       category[index] = categoryIndex;
+      subcategory[index] = subcategoryIndex;
       if (prefixIndex === -1) {
         depth[index] = 0;
       } else {
@@ -124,6 +128,7 @@ export function getCallNodeInfo(
         prefixStack === null ? -1 : stackIndexToCallNodeIndex[prefixStack];
       const frameIndex = stackTable.frame[stackIndex];
       const categoryIndex = stackTable.category[stackIndex];
+      const subcategoryIndex = stackTable.subcategory[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
       const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
       let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
@@ -131,7 +136,7 @@ export function getCallNodeInfo(
       );
       if (callNodeIndex === undefined) {
         callNodeIndex = length;
-        addCallNode(prefixCallNode, funcIndex, categoryIndex);
+        addCallNode(prefixCallNode, funcIndex, categoryIndex, subcategoryIndex);
         prefixCallNodeAndFuncToCallNodeMap.set(
           prefixCallNodeAndFuncIndex,
           callNodeIndex
@@ -139,6 +144,9 @@ export function getCallNodeInfo(
       } else if (category[callNodeIndex] !== categoryIndex) {
         // Conflicting origin stack categories -> default category.
         category[callNodeIndex] = defaultCategory;
+        subcategory[callNodeIndex] = null;
+      } else if (category[callNodeIndex] !== categoryIndex) {
+        subcategory[callNodeIndex] = null;
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
@@ -147,6 +155,7 @@ export function getCallNodeInfo(
       prefix: new Int32Array(prefix),
       func: new Int32Array(func),
       category: new Int32Array(category),
+      subcategory,
       depth,
       length,
     };

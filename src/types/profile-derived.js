@@ -8,8 +8,9 @@ import type { MarkerPayload } from './markers';
 import type {
   IndexIntoFuncTable,
   ThreadIndex,
-  Pid,
   IndexIntoJsTracerEvents,
+  IndexIntoSubcategoryListForCategory,
+  Pid,
 } from './profile';
 export type IndexIntoCallNodeTable = number;
 
@@ -42,6 +43,7 @@ export type CallNodeTable = {
   prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
+  subcategory: Array<IndexIntoSubcategoryListForCategory | null>, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory | null
   depth: number[],
   length: number,
 };

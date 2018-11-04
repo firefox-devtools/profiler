@@ -1225,6 +1225,16 @@ Object {
       1,
       6,
     ],
+    "subcategory": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+    ],
   },
   "stackIndexToCallNodeIndex": Uint32Array [
     0,
@@ -1292,6 +1302,16 @@ CallTree {
       4,
       1,
       6,
+    ],
+    "subcategory": Array [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
     ],
   },
   "_callNodeTimes": Object {

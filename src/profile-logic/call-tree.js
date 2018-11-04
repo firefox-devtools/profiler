@@ -200,6 +200,7 @@ export class CallTree {
       } = this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const categoryIndex = this._callNodeTable.category[callNodeIndex];
+      const subcategoryIndex = this._callNodeTable.subcategory[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
@@ -222,6 +223,15 @@ export class CallTree {
 
       const formattedSelfTime = formatNumber(selfTime, 3, maxFractionalDigits);
 
+      const category = this._categories[categoryIndex];
+      let categoryName = category.name;
+      if (subcategoryIndex !== null && category.subcategories.length > 1) {
+        const subcategoryName = this._categories[categoryIndex].subcategories[
+          subcategoryIndex
+        ];
+        categoryName = `${categoryName}: ${subcategoryName}`;
+      }
+
       displayData = {
         totalTime: formattedTotalTime,
         totalTimeWithUnit: formattedTotalTime + 'ms',
@@ -232,7 +242,7 @@ export class CallTree {
         lib: libName,
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
-        categoryName: this._categories[categoryIndex].name,
+        categoryName,
         categoryColor: this._categories[categoryIndex].color,
         icon,
       };
