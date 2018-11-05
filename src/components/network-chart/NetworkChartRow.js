@@ -56,7 +56,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   };
 
   _cropNameToUrl = (name: string) => {
-    const url = name.slice(name.indexOf(':') + 1);
+    const url = name.slice(name.indexOf(':') + 2);
     return url;
   };
 
@@ -64,9 +64,40 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   _onDoubleClick = (_event: SyntheticEvent<>): void => {
     // strip marker name to url
     const uri = this._cropNameToUrl(this.props.marker.name);
-
     // copy url to clipboard
     copy(uri);
+  };
+
+  _shortenURI = (name: string) => {
+    const loadIdIndex = name.indexOf(':') + 2; // Look for loadId
+    const loadId = name.slice(0, loadIdIndex); // Load 123:
+
+    try {
+      const uri = new URL(name.slice(loadIdIndex)); // Strip loadId from name to get URI
+      const uriProtocol = uri.protocol; // https:// || http://
+      const uriDomain = uri.hostname; // abc.domain.xyz
+      const uriPath = uri.pathname; // /folder1/folder2/
+      const uriFilename = uri.pathname.slice(uri.pathname.lastIndexOf('/')); // filename.xy
+      const uriParams = uri.search; // ?param=123
+      const uriHash = uri.hash; // #hash
+
+      return (
+        <span>
+          <span className="uriReq">{loadId}</span>
+          <span className="uriOpt">{uriProtocol}</span>
+          <span className="uriReq">{uriDomain}</span>
+          {uriPath !== uriFilename ? (
+            <span className="uriOpt">{uriPath}</span>
+          ) : null}
+          <span className="uriReq">{uriFilename}</span>
+          {uriParams ? <span className="uriOpt">{uriParams}</span> : null}
+          {uriHash ? <span className="uriOpt">{uriHash}</span> : null}
+        </span>
+      );
+    } catch (e) {
+      console.error('The network marker has no valid URL.');
+    }
+    return name;
   };
 
   render() {
@@ -86,7 +117,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           className="networkChartRowItemLabel"
           onDoubleClick={this._onDoubleClick}
         >
-          {marker.name}
+          {this._shortenURI(marker.name)}
         </div>
         <div
           className="networkChartRowItemBar"

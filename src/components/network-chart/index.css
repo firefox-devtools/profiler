@@ -74,3 +74,21 @@
   background-color: var(--teal-70);
   opacity: 0.4;
 }
+
+.uriOpt {
+  color: var(--grey-40);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+  display: inline-block;
+}
+
+.uriReq {
+  display: inline-block;
+  overflow: hidden;
+}
+
+.uriReq:nth-child(1) {
+  padding-right: 8px;
+}
