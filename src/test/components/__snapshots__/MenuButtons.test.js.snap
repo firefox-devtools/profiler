@@ -52,7 +52,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 <span
                   className="metaInfoLabel"
                 >
-                  Recording started: 
+                  Recording started:
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
               </div>
@@ -64,7 +64,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 >
                   Interval:
                 </span>
-                 
                 1
                 ms
               </div>
@@ -76,7 +75,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 >
                   Profile Version:
                 </span>
-                 
                 16
               </div>
             </div>
@@ -96,7 +94,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 >
                   Name:
                 </span>
-                 
                 Firefox
               </div>
               <div
@@ -107,7 +104,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 >
                   Version:
                 </span>
-                 
                 48.0
               </div>
               <div
@@ -118,7 +114,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 >
                   Extensions:
                 </span>
-                 
                 <ul
                   className="metaInfoList"
                 />
@@ -140,7 +135,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 >
                   Platform:
                 </span>
-                 
                 Macintosh
               </div>
               <div
@@ -151,7 +145,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 >
                   OS:
                 </span>
-                 
                 Intel Mac OS X 10.11
               </div>
             </div>
@@ -552,7 +545,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 <span
                   className="metaInfoLabel"
                 >
-                  Recording started: 
+                  Recording started:
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
               </div>
@@ -564,7 +557,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 >
                   Interval:
                 </span>
-                 
                 1
                 ms
               </div>
@@ -576,7 +568,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 >
                   Profile Version:
                 </span>
-                 
                 16
               </div>
             </div>
@@ -596,7 +587,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 >
                   Name:
                 </span>
-                 
                 Firefox
               </div>
               <div
@@ -607,7 +597,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 >
                   Version:
                 </span>
-                 
                 48.0
               </div>
               <div
@@ -618,7 +607,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 >
                   Extensions:
                 </span>
-                 
                 <ul
                   className="metaInfoList"
                 />
@@ -640,7 +628,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 >
                   Platform:
                 </span>
-                 
                 Macintosh
               </div>
               <div
@@ -651,7 +638,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 >
                   OS:
                 </span>
-                 
                 Intel Mac OS X 10.11
               </div>
             </div>
@@ -1052,7 +1038,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 <span
                   className="metaInfoLabel"
                 >
-                  Recording started: 
+                  Recording started:
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
               </div>
@@ -1064,7 +1050,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Interval:
                 </span>
-                 
                 1
                 ms
               </div>
@@ -1076,7 +1061,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                 
                 16
               </div>
             </div>
@@ -1096,7 +1080,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Name:
                 </span>
-                 
                 Firefox
               </div>
               <div
@@ -1107,7 +1090,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Version:
                 </span>
-                 
                 48.0
               </div>
               <div
@@ -1118,7 +1100,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Extensions:
                 </span>
-                 
                 <ul
                   className="metaInfoList"
                 />
@@ -1140,7 +1121,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Platform:
                 </span>
-                 
                 Macintosh
               </div>
               <div
@@ -1151,7 +1131,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   OS:
                 </span>
-                 
                 Intel Mac OS X 10.11
               </div>
             </div>
@@ -1552,7 +1531,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 <span
                   className="metaInfoLabel"
                 >
-                  Recording started: 
+                  Recording started:
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
               </div>
@@ -1564,7 +1543,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Interval:
                 </span>
-                 
                 1
                 ms
               </div>
@@ -1576,7 +1554,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                 
                 16
               </div>
             </div>
@@ -1596,7 +1573,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Name:
                 </span>
-                 
                 Firefox
               </div>
               <div
@@ -1607,7 +1583,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Version:
                 </span>
-                 
                 48.0
               </div>
               <div
@@ -1618,7 +1593,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Extensions:
                 </span>
-                 
                 <ul
                   className="metaInfoList"
                 />
@@ -1640,7 +1614,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Platform:
                 </span>
-                 
                 Macintosh
               </div>
               <div
@@ -1651,7 +1624,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   OS:
                 </span>
-                 
                 Intel Mac OS X 10.11
               </div>
             </div>
@@ -2052,7 +2024,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 <span
                   className="metaInfoLabel"
                 >
-                  Recording started: 
+                  Recording started:
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
               </div>
@@ -2064,7 +2036,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Interval:
                 </span>
-                 
                 1
                 ms
               </div>
@@ -2076,7 +2047,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                 
                 16
               </div>
             </div>
@@ -2096,7 +2066,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Name:
                 </span>
-                 
                 Firefox
               </div>
               <div
@@ -2107,7 +2076,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Version:
                 </span>
-                 
                 48.0
               </div>
               <div
@@ -2118,7 +2086,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Extensions:
                 </span>
-                 
                 <ul
                   className="metaInfoList"
                 />
@@ -2140,7 +2107,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Platform:
                 </span>
-                 
                 Macintosh
               </div>
               <div
@@ -2151,7 +2117,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   OS:
                 </span>
-                 
                 Intel Mac OS X 10.11
               </div>
             </div>
@@ -2552,7 +2517,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 <span
                   className="metaInfoLabel"
                 >
-                  Recording started: 
+                  Recording started:
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
               </div>
@@ -2564,7 +2529,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Interval:
                 </span>
-                 
                 1
                 ms
               </div>
@@ -2576,7 +2540,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                 
                 16
               </div>
             </div>
@@ -2596,7 +2559,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Name:
                 </span>
-                 
                 Firefox
               </div>
               <div
@@ -2607,7 +2569,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Version:
                 </span>
-                 
                 48.0
               </div>
               <div
@@ -2618,7 +2579,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Extensions:
                 </span>
-                 
                 <ul
                   className="metaInfoList"
                 />
@@ -2640,7 +2600,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Platform:
                 </span>
-                 
                 Macintosh
               </div>
               <div
@@ -2651,7 +2610,6 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   OS:
                 </span>
-                 
                 Intel Mac OS X 10.11
               </div>
             </div>

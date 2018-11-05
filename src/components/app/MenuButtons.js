@@ -211,19 +211,19 @@ class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
                 <div className="arrowPanelSection">
                   {meta.startTime ? (
                     <div className="metaInfoRow">
-                      <span className="metaInfoLabel">Recording started: </span>
+                      <span className="metaInfoLabel">Recording started:</span>
                       {_formatDate(meta.startTime)}
                     </div>
                   ) : null}
                   {meta.interval ? (
                     <div className="metaInfoRow">
-                      <span className="metaInfoLabel">Interval:</span>{' '}
+                      <span className="metaInfoLabel">Interval:</span>
                       {meta.interval}ms
                     </div>
                   ) : null}
                   {meta.preprocessedProfileVersion ? (
                     <div className="metaInfoRow">
-                      <span className="metaInfoLabel">Profile Version:</span>{' '}
+                      <span className="metaInfoLabel">Profile Version:</span>
                       {meta.preprocessedProfileVersion}
                     </div>
                   ) : null}
@@ -232,19 +232,19 @@ class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
                 <div className="arrowPanelSection">
                   {meta.product ? (
                     <div className="metaInfoRow">
-                      <span className="metaInfoLabel">Name:</span>{' '}
+                      <span className="metaInfoLabel">Name:</span>
                       {meta.product}
                     </div>
                   ) : null}
                   {meta.misc ? (
                     <div className="metaInfoRow">
-                      <span className="metaInfoLabel">Version:</span>{' '}
+                      <span className="metaInfoLabel">Version:</span>
                       {_formatVersionNumber(meta.misc)}
                     </div>
                   ) : null}
                   {meta.appBuildID ? (
                     <div className="metaInfoRow">
-                      <span className="metaInfoLabel">Build ID:</span>{' '}
+                      <span className="metaInfoLabel">Build ID:</span>
                       {meta.sourceURL ? (
                         <a
                           href={meta.sourceURL}
@@ -260,7 +260,7 @@ class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
                   ) : null}
                   {meta.extensions ? (
                     <div className="metaInfoRow">
-                      <span className="metaInfoLabel">Extensions:</span>{' '}
+                      <span className="metaInfoLabel">Extensions:</span>
                       <ul className="metaInfoList">
                         {_mapMetaInfoExtensionNames(meta.extensions.name)}
                       </ul>
@@ -271,13 +271,14 @@ class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
                 <div className="arrowPanelSection">
                   {meta.platform ? (
                     <div className="metaInfoRow">
-                      <span className="metaInfoLabel">Platform:</span>{' '}
+                      <span className="metaInfoLabel">Platform:</span>
                       {meta.platform}
                     </div>
                   ) : null}
                   {meta.oscpu ? (
                     <div className="metaInfoRow">
-                      <span className="metaInfoLabel">OS:</span> {meta.oscpu}
+                      <span className="metaInfoLabel">OS:</span>
+                      {meta.oscpu}
                     </div>
                   ) : null}
                 </div>
