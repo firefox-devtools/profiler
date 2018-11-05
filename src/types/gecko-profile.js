@@ -68,9 +68,9 @@ export type GeckoSamples = {
 export type GeckoSampleStruct = {
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
-  responsiveness: Milliseconds[],
-  rss: any[],
-  uss: any[],
+  responsiveness: Array<?Milliseconds>,
+  rss: Array<null | Milliseconds>,
+  uss: Array<null | Milliseconds>,
   length: number,
 };
 

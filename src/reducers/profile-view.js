@@ -1043,6 +1043,8 @@ export const selectorsForThread = (
           tm =>
             tm.name !== 'GCMajor' &&
             tm.name !== 'BHR-detected hang' &&
+            tm.name !== 'LongTask' &&
+            tm.name !== 'LongIdleTask' &&
             !MarkerData.isNetworkMarker(tm)
         )
     );

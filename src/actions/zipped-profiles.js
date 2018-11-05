@@ -54,7 +54,7 @@ export function viewProfileFromZip(
 
     try {
       // Attempt to unserialize the profile.
-      const profile = unserializeProfileOfArbitraryFormat(
+      const profile = await unserializeProfileOfArbitraryFormat(
         await file.async('string')
       );
 
