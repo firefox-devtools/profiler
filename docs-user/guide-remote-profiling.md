@@ -1,6 +1,6 @@
 # Remote profiling on Android
 
-You can use perf.html to investigate performance issues on Android, not just Windows, macOS and Linux. To profile Firefox for Android (or a remote Firefox instance on a different machine) you currently have to make a configuration change to the Firefox Developer Tools.
+You can use perf.html to investigate performance issues on Android, not just Windows, macOS and Linux. To profile Firefox for Android (or a remote Firefox instance on a different machine), you currently have to make a configuration change to the Firefox Developer Tools.
 
 # Setup
 
