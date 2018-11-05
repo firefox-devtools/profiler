@@ -110,6 +110,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
           >
             <div
               className="networkChartRowItemLabel"
+              onDoubleClick={[Function]}
             >
               Network
             </div>

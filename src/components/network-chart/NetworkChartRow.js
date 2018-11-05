@@ -6,6 +6,7 @@
 import React from 'react';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import Tooltip from '../shared/Tooltip';
+import copy from 'copy-to-clipboard';
 
 import type { CssPixels } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
@@ -54,6 +55,20 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     });
   };
 
+  _cropNameToUrl = (name: string) => {
+    const url = name.slice(name.indexOf(':') + 1);
+    return url;
+  };
+
+  // copy URI
+  _onDoubleClick = (_event: SyntheticEvent<>): void => {
+    // strip marker name to url
+    const uri = this._cropNameToUrl(this.props.marker.name);
+
+    // copy url to clipboard
+    copy(uri);
+  };
+
   render() {
     const { index, marker, markerStyle, networkPayload } = this.props;
 
@@ -67,7 +82,12 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
     return (
       <section className={itemClassName}>
-        <div className="networkChartRowItemLabel">{marker.name}</div>
+        <div
+          className="networkChartRowItemLabel"
+          onDoubleClick={this._onDoubleClick}
+        >
+          {marker.name}
+        </div>
         <div
           className="networkChartRowItemBar"
           style={markerStyle}
