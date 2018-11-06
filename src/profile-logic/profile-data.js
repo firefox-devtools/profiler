@@ -59,7 +59,12 @@ export const emptyExtensions: ExtensionTable = Object.freeze({
 });
 
 export const defaultCategories: CategoryList = Object.freeze([
+  { name: 'Idle', color: 'transparent' },
   { name: 'Other', color: 'grey' },
+  { name: 'Layout', color: 'purple' },
+  { name: 'JavaScript', color: 'yellow' },
+  { name: 'GC / CC', color: 'orange' },
+  { name: 'Network', color: 'lightblue' },
   { name: 'Graphics', color: 'green' },
   { name: 'DOM', color: 'blue' },
 ]);
@@ -744,6 +749,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
       length: funcTable.length,
       name: funcTable.name.slice(),
       resource: funcTable.resource.slice(),
+      relevantForJS: funcTable.relevantForJS.slice(),
       address: funcTable.address.slice(),
       isJS: funcTable.isJS.slice(),
       fileName: funcTable.fileName.slice(),

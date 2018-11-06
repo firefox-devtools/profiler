@@ -384,6 +384,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         containerWidth={containerWidth}
         containerHeight={containerHeight}
         isDragging={isDragging}
+        scaleCtxToCssPixels={true}
         onDoubleClickItem={this.onDoubleClickMarker}
         getHoveredItemInfo={this.getHoveredMarkerInfo}
         drawCanvas={this.drawCanvas}
