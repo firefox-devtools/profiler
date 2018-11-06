@@ -736,6 +736,7 @@ function _processThread(
   return {
     name: thread.name,
     processType: thread.processType,
+    processName: thread.processName,
     processStartupTime: 0,
     processShutdownTime: shutdownTime,
     registerTime: thread.registerTime,

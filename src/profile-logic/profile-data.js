@@ -1332,34 +1332,53 @@ export function getFriendlyThreadName(
   thread: Thread
 ): string {
   let label;
+
   switch (thread.name) {
-    case 'GeckoMain':
-      switch (thread.processType) {
-        case 'default':
-          label = 'Parent Process';
-          break;
-        case 'gpu':
-          label = 'GPU Process';
-          break;
-        case 'tab': {
-          const contentThreads = threads.filter(thread => {
-            return thread.name === 'GeckoMain' && thread.processType === 'tab';
-          });
-          if (contentThreads.length > 1) {
-            const index = 1 + contentThreads.indexOf(thread);
-            label = `Content Process (${index}/${contentThreads.length})`;
-          } else {
-            label = 'Content Process';
-          }
-          break;
+    case 'GeckoMain': {
+      if (thread.hasOwnProperty('processName') && thread.processName) {
+        label = thread.processName;
+        const homonymThreads = threads.filter(thread => {
+          return (
+            thread.name === 'GeckoMain' &&
+            thread.hasOwnProperty('processName') &&
+            thread.processName === label
+          );
+        });
+        if (homonymThreads.length > 1) {
+          const index = 1 + homonymThreads.indexOf(thread);
+          label += ` (${index}/${homonymThreads.length})`;
         }
-        case 'plugin':
-          label = 'Plugin Process';
-          break;
-        default:
-        // should we throw here ?
+      } else {
+        switch (thread.processType) {
+          case 'default':
+            label = 'Parent Process';
+            break;
+          case 'gpu':
+            label = 'GPU Process';
+            break;
+          case 'tab': {
+            const contentThreads = threads.filter(thread => {
+              return (
+                thread.name === 'GeckoMain' && thread.processType === 'tab'
+              );
+            });
+            if (contentThreads.length > 1) {
+              const index = 1 + contentThreads.indexOf(thread);
+              label = `Content Process (${index}/${contentThreads.length})`;
+            } else {
+              label = 'Content Process';
+            }
+            break;
+          }
+          case 'plugin':
+            label = 'Plugin Process';
+            break;
+          default:
+          // should we throw here ?
+        }
       }
       break;
+    }
     default:
   }
 
