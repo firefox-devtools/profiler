@@ -100,7 +100,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
     } = this.props;
     switch (dataSource) {
       case 'from-addon':
-        retrieveProfileFromAddon();
+        retrieveProfileFromAddon().catch(e => console.error(e));
         break;
       case 'from-file':
         // retrieveProfileFromFile should already have been called
@@ -108,10 +108,10 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       case 'local':
         break;
       case 'public':
-        retrieveProfileFromStore(hash);
+        retrieveProfileFromStore(hash).catch(e => console.error(e));
         break;
       case 'from-url':
-        retrieveProfileOrZipFromUrl(profileUrl);
+        retrieveProfileOrZipFromUrl(profileUrl).catch(e => console.error(e));
         break;
       case 'none':
         // nothing to do
@@ -233,7 +233,7 @@ const options: ExplicitConnectOptions<
   },
   component: ProfileViewWhenReadyImpl,
 };
-const ProfileViewWhenReady = explicitConnect(options);
+export const ProfileViewWhenReady = explicitConnect(options);
 
 type RootProps = {
   store: Store,

@@ -7,8 +7,28 @@ Object {
     "appBuildID": "",
     "categories": Array [
       Object {
+        "color": "transparent",
+        "name": "Idle",
+      },
+      Object {
         "color": "grey",
         "name": "Other",
+      },
+      Object {
+        "color": "purple",
+        "name": "Layout",
+      },
+      Object {
+        "color": "yellow",
+        "name": "JavaScript",
+      },
+      Object {
+        "color": "orange",
+        "name": "GC / CC",
+      },
+      Object {
+        "color": "lightblue",
+        "name": "Network",
       },
       Object {
         "color": "green",
@@ -321,15 +341,15 @@ Object {
       },
       "stackTable": Object {
         "category": Array [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
+          1,
         ],
         "frame": Array [
           0,
@@ -827,15 +847,15 @@ Array [
     },
     "stackTable": Object {
       "category": Array [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
       ],
       "frame": Array [
         0,
@@ -1084,14 +1104,14 @@ exports[`snapshots of selectors/profile-view matches the last stored run of sele
 Object {
   "callNodeTable": Object {
     "category": Int32Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
     ],
     "depth": Array [
       0,
@@ -1152,14 +1172,14 @@ CallTree {
   ],
   "_callNodeTable": Object {
     "category": Int32Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
     ],
     "depth": Array [
       0,
@@ -1217,8 +1237,28 @@ CallTree {
   },
   "_categories": Array [
     Object {
+      "color": "transparent",
+      "name": "Idle",
+    },
+    Object {
       "color": "grey",
       "name": "Other",
+    },
+    Object {
+      "color": "purple",
+      "name": "Layout",
+    },
+    Object {
+      "color": "yellow",
+      "name": "JavaScript",
+    },
+    Object {
+      "color": "orange",
+      "name": "GC / CC",
+    },
+    Object {
+      "color": "lightblue",
+      "name": "Network",
     },
     Object {
       "color": "green",
@@ -1643,14 +1683,14 @@ Object {
   },
   "stackTable": Object {
     "category": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
     ],
     "frame": Array [
       0,
@@ -2057,14 +2097,14 @@ Object {
   },
   "stackTable": Object {
     "category": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
     ],
     "frame": Array [
       0,
@@ -2408,14 +2448,14 @@ Object {
   },
   "stackTable": Object {
     "category": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
     ],
     "frame": Array [
       0,
@@ -2699,15 +2739,15 @@ Object {
   },
   "stackTable": Object {
     "category": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
+      1,
     ],
     "frame": Array [
       0,

@@ -485,10 +485,15 @@ export function getVisibleThreads(
         hiddenTracksByPid.get(pid),
         'Hidden tracks were expected to exists for the given pid.'
       );
-      for (const track of tracks) {
+      for (
+        let localTrackIndex = 0;
+        localTrackIndex < tracks.length;
+        localTrackIndex++
+      ) {
+        const track = tracks[localTrackIndex];
         if (track.type === 'thread') {
           const { threadIndex } = track;
-          if (!hiddenTracks.has(threadIndex)) {
+          if (!hiddenTracks.has(localTrackIndex)) {
             visibleThreads.push(threadIndex);
           }
         }

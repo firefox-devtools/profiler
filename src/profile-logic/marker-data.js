@@ -32,6 +32,9 @@ export function getJankInstances(
   const jankInstances = [];
   for (let i = 0; i < samples.length; i++) {
     const currentResponsiveness = samples.responsiveness[i];
+    if (currentResponsiveness === null || currentResponsiveness === undefined) {
+      return [];
+    }
     if (currentResponsiveness < lastResponsiveness) {
       if (lastResponsiveness >= thresholdInMs) {
         addTracingMarker();

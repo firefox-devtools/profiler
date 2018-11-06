@@ -16,7 +16,7 @@
 .timelineSelectionHoverLine {
   position: absolute;
   pointer-events: none;
-  visibility: hidden;
+  display: none;
   top: 0;
   bottom: 0;
   width: 1px;
@@ -25,7 +25,7 @@
 }
 
 .timelineSelection:hover > .timelineSelectionHoverLine {
-  visibility: visible;
+  display: block;
 }
 
 .timelineSelectionOverlay {
