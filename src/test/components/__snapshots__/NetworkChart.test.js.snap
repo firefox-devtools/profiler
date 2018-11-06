@@ -106,7 +106,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
           className="treeViewBodyInner treeViewBodyInner0InnerChunk"
         >
           <section
-            className="even networkChartRowItem STOP"
+            className="even networkChartRowItem "
           >
             <div
               className="networkChartRowItemLabel"

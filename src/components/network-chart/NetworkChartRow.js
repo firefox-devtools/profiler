@@ -55,11 +55,6 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     });
   };
 
-  _cropNameToUrl = (name: string) => {
-    const url = name.slice(name.indexOf(':') + 2);
-    return url;
-  };
-
   // copy URI
   _onDoubleClick = (_event: SyntheticEvent<>): void => {
     // strip marker name to url
@@ -68,36 +63,78 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     copy(uri);
   };
 
-  _shortenURI = (name: string) => {
-    const loadIdIndex = name.indexOf(':') + 2; // Look for loadId
-    const loadId = name.slice(0, loadIdIndex); // Load 123:
+  // Remove `Load 123: ` from markers.name
+  _cropNameToUrl = (name: string) => {
+    const url = name.slice(name.indexOf(':') + 2);
+    return url;
+  };
 
+  _extractURI = (url: string) => {
     try {
-      const uri = new URL(name.slice(loadIdIndex)); // Strip loadId from name to get URI
-      const uriProtocol = uri.protocol; // https:// || http://
-      const uriDomain = uri.hostname; // abc.domain.xyz
-      const uriPath = uri.pathname; // /folder1/folder2/
+      const uri = new URL(this._cropNameToUrl(url));
+      return uri;
+    } catch (e) {
+      console.error('The network marker has no valid URL.');
+      return null;
+    }
+  };
+
+  // split markers.name in loadID and parts of URL to highlight domain and filename, shorten the rest if needed
+  _shortenURI = (name: string) => {
+    // Extract loadId from markers.name, e.g. `Load 123:`
+    const loadId = name.slice(0, name.indexOf(':') + 2);
+    // Extract URI from markers.name
+    const uri = this._extractURI(name);
+    if (uri !== null) {
+      // Extract filename from pathname
       const uriFilename = uri.pathname.slice(uri.pathname.lastIndexOf('/')); // filename.xy
-      const uriParams = uri.search; // ?param=123
-      const uriHash = uri.hash; // #hash
+      // Remove filename from pathname
+      const uriPath = uri.pathname.replace(uriFilename, '');
 
       return (
         <span>
           <span className="uriReq">{loadId}</span>
-          <span className="uriOpt">{uriProtocol}</span>
-          <span className="uriReq">{uriDomain}</span>
-          {uriPath !== uriFilename ? (
+          <span className="uriOpt">{uri.protocol + '//'}</span>
+          <span className="uriReq">{uri.hostname}</span>
+          {uriPath !== uriFilename && uriPath.length > 0 ? (
             <span className="uriOpt">{uriPath}</span>
           ) : null}
           <span className="uriReq">{uriFilename}</span>
-          {uriParams ? <span className="uriOpt">{uriParams}</span> : null}
-          {uriHash ? <span className="uriOpt">{uriHash}</span> : null}
+          {uri.search ? <span className="uriOpt">{uri.search}</span> : null}
+          {uri.hash ? <span className="uriOpt">{uri.hash}</span> : null}
         </span>
       );
-    } catch (e) {
-      console.error('The network marker has no valid URL.');
     }
     return name;
+  };
+
+  // identifies mime type of request
+  // this is a workaround until we have mime types passed with network markers
+  _identifyType = (name: string) => {
+    const uri = this._extractURI(name);
+    if (uri === null) {
+      return '';
+    }
+    // Extract the fileName from the path
+    const fileName = uri.pathname;
+    const fileExt = fileName.slice(fileName.lastIndexOf('.'));
+
+    switch (fileExt) {
+      case '.js':
+        return 'js';
+      case '.css':
+        return 'css';
+      case '.gif':
+      case '.png':
+      case '.jpg':
+      case '.jpeg':
+      case '.svg':
+        return 'img';
+      case '.html':
+        return 'html';
+      default:
+        return '';
+    }
   };
 
   render() {
@@ -109,7 +146,9 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
       return null;
     }
     const itemClassName =
-      evenOddClassName + ' networkChartRowItem ' + networkPayload.status;
+      evenOddClassName +
+      ' networkChartRowItem ' +
+      this._identifyType(marker.name);
 
     return (
       <section className={itemClassName}>

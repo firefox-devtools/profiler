@@ -38,7 +38,7 @@
 }
 
 .networkChartRowItem:hover .networkChartRowItemLabel{
-  opacity: .2;
+  opacity: .1;
 }
 
 .networkChartRowItemLabel {
@@ -54,7 +54,7 @@
 }
 
 .networkChartRowItemBar {
-  background-color: var(--blue-50);
+  background-color: var(--grey-40);
   display: inline-block;
   z-index: 3;
   border-radius: 2px;
@@ -62,17 +62,27 @@
   flex-grow: 1;
   position: absolute;
   margin-top: 2px;
+  opacity: 0.7;
+}
+
+.css .networkChartRowItemBar {
+  background-color: var(--purple-50);
   opacity: 0.6;
 }
 
-.STATUS_START .networkChartRowItemBar {
-  background-color: var(--magenta-50);
-  opacity: 0.2;
+.js .networkChartRowItemBar {
+  background-color: var(--yellow-50);
+  opacity: 0.6;
 }
 
-.STATUS_REDIRECT .networkChartRowItemBar {
-  background-color: var(--teal-70);
-  opacity: 0.4;
+.html .networkChartRowItemBar {
+  background-color: var(--blue-60);
+  opacity: 0.6;
+}
+
+.img .networkChartRowItemBar {
+  background-color: var(--green-60);
+  opacity: 0.6;
 }
 
 .uriOpt {
