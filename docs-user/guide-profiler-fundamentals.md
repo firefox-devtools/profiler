@@ -1,6 +1,6 @@
 # Profiler Fundamentals
 
-When profiling code, there are two primary sources of information—stack samples and markers.
+When profiling code, there are two primary sources of information—stack: samples and markers.
 
 ## Samples
 
