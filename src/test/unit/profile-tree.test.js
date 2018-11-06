@@ -314,7 +314,7 @@ describe('unfiltered call tree', function() {
           selfTimeWithUnit: '—',
           totalTime: '3',
           totalTimeWithUnit: '3ms',
-          totalTimePercent: '100.0%',
+          totalTimePercent: '100%',
           categoryColor: 'grey',
           categoryName: 'Other',
         });

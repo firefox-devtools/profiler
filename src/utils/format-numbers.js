@@ -26,13 +26,18 @@ export function formatNumber(
   value: number,
   significantDigits: number = 2,
   maxFractionalDigits: number = 3,
-  style: string = 'decimal'
+  style: 'decimal' | 'percent' = 'decimal'
 ): string {
   /*
   * Note that numDigitsOnLeft can be negative when the first non-zero digit
   * is on the right of the decimal point.  0.01 = -1
   */
-  const numDigitsOnLeft = Math.floor(Math.log10(Math.abs(value))) + 1;
+  let numDigitsOnLeft = Math.floor(Math.log10(Math.abs(value))) + 1;
+  if (style === 'percent') {
+    // We receive percent values as `0.4` but display them as `40`, so we
+    // should add `2` here to account for this difference.
+    numDigitsOnLeft += 2;
+  }
   let places = significantDigits - numDigitsOnLeft;
   if (places < 0) {
     places = 0;
