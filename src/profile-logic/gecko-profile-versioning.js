@@ -17,7 +17,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 13; // The current version of the Gecko profile format.
+export const CURRENT_VERSION = 14; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -484,6 +484,58 @@ const _upgraders = {
       }
     }
     convertToVersionThirteenRecursive(profile);
+  },
+  [14]: profile => {
+    // Profiles now have a relevantForJS property in the frameTable.
+    // This column is false on C++ and JS frames, and true on label frames that
+    // are entry and exit points to JS.
+    // The upgrader below tries to detect existing JS entry and exit points
+    // based on the string name of the label frame.
+    // Existing entry points in old profiles are label frames with the string
+    // "AutoEntryScript <some entry reason>"
+    // and existing exit points in old profiles are label frames for WebIDL
+    // APIs, which have one of four forms: constructor, method, getter or setter.
+    // Examples:
+    // StructuredCloneHolder constructor
+    // Node.appendChild
+    // get Element.scrollTop
+    // set CSS2Properties.height
+    const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
+    function convertToVersionFourteenRecursive(p) {
+      for (const thread of p.threads) {
+        thread.frameTable.schema = {
+          location: 0,
+          relevantForJS: 1,
+          implementation: 2,
+          optimizations: 3,
+          line: 4,
+          column: 5,
+          category: 6,
+        };
+        const locationIndex = thread.frameTable.schema.location;
+        const relevantForJSIndex = thread.frameTable.schema.relevantForJS;
+        const stringTable = new UniqueStringArray(thread.stringTable);
+        for (let i = 0; i < thread.frameTable.data.length; i++) {
+          const frameData = thread.frameTable.data[i];
+          frameData.splice(relevantForJSIndex, 0, false);
+
+          const location = stringTable.getString(frameData[locationIndex]);
+          if (location.startsWith('AutoEntryScript ')) {
+            frameData[relevantForJSIndex] = true;
+            frameData[locationIndex] = stringTable.indexForString(
+              location.substring('AutoEntryScript '.length)
+            );
+          } else {
+            frameData[relevantForJSIndex] = domCallRegex.test(location);
+          }
+        }
+        thread.stringTable = stringTable.serializeToArray();
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersionFourteenRecursive(subprocessProfile);
+      }
+    }
+    convertToVersionFourteenRecursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */

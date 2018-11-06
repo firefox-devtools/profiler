@@ -142,6 +142,7 @@ type ExtractionInfo = {
  */
 export function extractFuncsAndResourcesFromFrameLocations(
   locationStringIndexes: IndexIntoStringTable[],
+  relevantForJSPerFrame: boolean[],
   stringTable: UniqueStringArray,
   libs: Lib[],
   extensions: ExtensionTable = emptyExtensions
@@ -152,6 +153,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
     length: 0,
     name: [],
     resource: [],
+    relevantForJS: [],
     address: [],
     isJS: [],
     fileName: [],
@@ -186,38 +188,42 @@ export function extractFuncsAndResourcesFromFrameLocations(
 
   // Go through every frame location string, and deduce the function and resource
   // information by applying various string matching heuristics.
-  const locationFuncs = locationStringIndexes.map(locationIndex => {
-    const locationString = stringTable.getString(locationIndex);
-    let funcIndex = extractionInfo.stringToNewFuncIndex.get(locationString);
-    if (funcIndex !== undefined) {
-      // The location string was already processed.
-      return funcIndex;
-    }
+  const locationFuncs = locationStringIndexes.map(
+    (locationIndex, frameIndex) => {
+      const locationString = stringTable.getString(locationIndex);
+      const relevantForJS = relevantForJSPerFrame[frameIndex];
+      let funcIndex = extractionInfo.stringToNewFuncIndex.get(locationString);
+      if (funcIndex !== undefined) {
+        // The location string was already processed.
+        return funcIndex;
+      }
 
-    // These nested `if` branches check for 3 cases for constructing function and
-    // resource information.
-    funcIndex = _extractUnsymbolicatedFunction(
-      extractionInfo,
-      locationString,
-      locationIndex
-    );
-    if (funcIndex === null) {
-      funcIndex = _extractCppFunction(extractionInfo, locationString);
+      // These nested `if` branches check for 3 cases for constructing function and
+      // resource information.
+      funcIndex = _extractUnsymbolicatedFunction(
+        extractionInfo,
+        locationString,
+        locationIndex
+      );
       if (funcIndex === null) {
-        funcIndex = _extractJsFunction(extractionInfo, locationString);
+        funcIndex = _extractCppFunction(extractionInfo, locationString);
         if (funcIndex === null) {
-          funcIndex = _extractUnknownFunctionType(
-            extractionInfo,
-            locationIndex
-          );
+          funcIndex = _extractJsFunction(extractionInfo, locationString);
+          if (funcIndex === null) {
+            funcIndex = _extractUnknownFunctionType(
+              extractionInfo,
+              locationIndex,
+              relevantForJS
+            );
+          }
         }
       }
-    }
 
-    // Cache the above results.
-    extractionInfo.stringToNewFuncIndex.set(locationString, funcIndex);
-    return funcIndex;
-  });
+      // Cache the above results.
+      extractionInfo.stringToNewFuncIndex.set(locationString, funcIndex);
+      return funcIndex;
+    }
+  );
 
   return [
     extractionInfo.funcTable,
@@ -275,6 +281,7 @@ function _extractUnsymbolicatedFunction(
   const funcIndex = funcTable.length++;
   funcTable.name[funcIndex] = locationIndex;
   funcTable.resource[funcIndex] = resourceIndex;
+  funcTable.relevantForJS[funcIndex] = false;
   funcTable.address[funcIndex] = addressRelativeToLib;
   funcTable.isJS[funcIndex] = false;
   funcTable.fileName[funcIndex] = null;
@@ -337,6 +344,7 @@ function _extractCppFunction(
   const newFuncIndex = funcTable.length++;
   funcTable.name[newFuncIndex] = funcNameIndex;
   funcTable.resource[newFuncIndex] = resourceIndex;
+  funcTable.relevantForJS[newFuncIndex] = false;
   funcTable.address[newFuncIndex] = -1;
   funcTable.isJS[newFuncIndex] = false;
   funcTable.fileName[newFuncIndex] = null;
@@ -465,6 +473,7 @@ function _extractJsFunction(
   const funcIndex = funcTable.length++;
   funcTable.name[funcIndex] = funcNameIndex;
   funcTable.resource[funcIndex] = resourceIndex;
+  funcTable.relevantForJS[funcIndex] = false;
   funcTable.address[funcIndex] = -1;
   funcTable.isJS[funcIndex] = true;
   funcTable.fileName[funcIndex] = fileName;
@@ -478,11 +487,13 @@ function _extractJsFunction(
  */
 function _extractUnknownFunctionType(
   { funcTable }: ExtractionInfo,
-  locationIndex: IndexIntoStringTable
+  locationIndex: IndexIntoStringTable,
+  relevantForJS: boolean
 ): IndexIntoFuncTable {
   const index = funcTable.length++;
   funcTable.name[index] = locationIndex;
   funcTable.resource[index] = -1;
+  funcTable.relevantForJS[index] = relevantForJS;
   funcTable.address[index] = -1;
   funcTable.isJS[index] = false;
   funcTable.fileName[index] = null;
@@ -704,6 +715,7 @@ function _processThread(
     frameFuncs,
   ] = extractFuncsAndResourcesFromFrameLocations(
     geckoFrameStruct.location,
+    geckoFrameStruct.relevantForJS,
     stringTable,
     libs,
     extensions
