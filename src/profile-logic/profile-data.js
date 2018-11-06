@@ -1336,7 +1336,7 @@ export function getFriendlyThreadName(
     case 'GeckoMain':
       switch (thread.processType) {
         case 'default':
-          label = 'Main Thread';
+          label = 'Parent Process';
           break;
         case 'gpu':
           label = 'GPU Process';
@@ -1347,14 +1347,14 @@ export function getFriendlyThreadName(
           });
           if (contentThreads.length > 1) {
             const index = 1 + contentThreads.indexOf(thread);
-            label = `Content (${index} of ${contentThreads.length})`;
+            label = `Content Process (${index} of ${contentThreads.length})`;
           } else {
-            label = 'Content';
+            label = 'Content Process';
           }
           break;
         }
         case 'plugin':
-          label = 'Plugin';
+          label = 'Plugin Process';
           break;
         default:
         // should we throw here ?

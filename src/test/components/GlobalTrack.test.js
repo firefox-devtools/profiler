@@ -90,7 +90,7 @@ describe('timeline/GlobalTrack', function() {
 
   it('has the correct selectors into useful parts of the component', function() {
     const { getGlobalTrackLabel, getGlobalTrackRow } = setup();
-    expect(getGlobalTrackLabel().text()).toBe('Content');
+    expect(getGlobalTrackLabel().text()).toBe('Content Process');
     expect(getGlobalTrackRow().exists()).toBe(true);
   });
 
