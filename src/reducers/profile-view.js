@@ -931,7 +931,7 @@ export const selectorsForThread = (
         transforms.reduce(
           // Apply the reducer using an arrow function to ensure correct memoization.
           (thread, transform) =>
-            applyTransformMemoized(thread, transform, defaultCategoryObj),
+            applyTransformMemoized(thread, transform, defaultCategoryObj.value),
           startingThread
         )
     );
