@@ -422,16 +422,17 @@ export const withChartViewport: WithChartViewport<*, *> =
           // for that here.
           event.deltaY === 0 ? 'deltaX' : 'deltaY'
         );
+        const zoomFactor = Math.pow(1.0009, deltaY);
 
         const mouseX = event.clientX;
         const { containerLeft, containerWidth } = this.state;
         const innerContainerWidth = containerWidth - marginLeft - marginRight;
         const mouseCenter =
           (mouseX - containerLeft - marginLeft) / innerContainerWidth;
-        this.zoomRangeSelection(mouseCenter, deltaY);
+        this.zoomRangeSelection(mouseCenter, zoomFactor);
       }
 
-      zoomRangeSelection = (center, deltaY) => {
+      zoomRangeSelection = (center, zoomFactor) => {
         const {
           disableHorizontalMovement,
           maximumZoom,
@@ -443,7 +444,6 @@ export const withChartViewport: WithChartViewport<*, *> =
         this._addBatchedPreviewSelectionUpdate(
           ({ viewportLeft, viewportRight }) => {
             const viewportLength = viewportRight - viewportLeft;
-            const zoomFactor = Math.pow(1.0009, deltaY);
             const newViewportLength = clamp(
               maximumZoom,
               1,
@@ -579,10 +579,10 @@ export const withChartViewport: WithChartViewport<*, *> =
         for (const navigationKey of this._keysDown.values()) {
           switch (navigationKey) {
             case 'zoomIn':
-              this.zoomRangeSelection(0.5, -delta);
+              this.zoomRangeSelection(0.5, Math.pow(1.0009, -delta));
               break;
             case 'zoomOut':
-              this.zoomRangeSelection(0.5, delta);
+              this.zoomRangeSelection(0.5, Math.pow(1.0009, delta));
               break;
             case 'up':
               this.moveViewport(0, delta);
