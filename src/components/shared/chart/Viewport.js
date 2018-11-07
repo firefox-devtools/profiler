@@ -23,6 +23,7 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../../utils/connect';
+import { assertExhaustiveCheck } from '../../../utils/flow';
 
 /**
  * Viewport terminology:
@@ -542,14 +543,17 @@ export const withChartViewport: WithChartViewport<*, *> =
       _keyUpListener = (
         event: { nativeEvent: KeyboardEvent } & SyntheticKeyboardEvent<>
       ) => {
+        function getObjectValuesAsUnion<T: Object>(obj: T): Array<$Values<T>> {
+          return Object.values(obj);
+        }
         if (!event.ctrlKey) {
           // The ctrl modifier might have been released here. Try to
           // delete all keys associated with the modifier. Since the
           // navigation is aliased with non-ctrl-modified keys also,
           // this will affect (stop) the operation even if it was
           // introduced without a ctrl-modified key.
-          for (const code of Object.keys(CTRL_KEYMAP)) {
-            this._keysDown.delete(CTRL_KEYMAP[code]);
+          for (const code of getObjectValuesAsUnion(CTRL_KEYMAP)) {
+            this._keysDown.delete(code);
           }
         }
         this._keysDown.delete(CTRL_KEYMAP[event.nativeEvent.code]);
@@ -572,8 +576,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         const delta = KEYBOARD_NAVIGATION_SPEED * dt * 0.001;
         this._lastKeyboardNavigationFrame = timestamp;
 
-        for (const k of this._keysDown.values()) {
-          const navigationKey: NavigationKey = k;
+        for (const navigationKey of this._keysDown.values()) {
           switch (navigationKey) {
             case 'zoomIn':
               this.zoomRangeSelection(0.5, -delta);
@@ -594,7 +597,7 @@ export const withChartViewport: WithChartViewport<*, *> =
               this.moveViewport(-delta, 0);
               break;
             default:
-              break;
+              throw assertExhaustiveCheck(navigationKey);
           }
         }
       };
