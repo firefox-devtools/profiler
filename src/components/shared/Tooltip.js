@@ -10,7 +10,7 @@ import type { CssPixels } from '../../types/units';
 import { ensureExists } from '../../utils/flow';
 require('./Tooltip.css');
 
-const MOUSE_OFFSET = 21;
+const MOUSE_OFFSET = 11;
 
 type Props = {
   mouseX: CssPixels,
@@ -82,25 +82,43 @@ export default class Tooltip extends React.PureComponent<Props, State> {
     const { children, mouseX, mouseY } = this.props;
     const { interiorElement } = this.state;
 
-    const offsetX = interiorElement
-      ? Math.max(0, mouseX + interiorElement.offsetWidth - window.innerWidth)
-      : 0;
+    // By default, position the tooltip below and at the right of the mouse cursor.
+    let top = mouseY + MOUSE_OFFSET;
+    let left = mouseX + MOUSE_OFFSET;
 
-    let offsetY = 0;
     if (interiorElement) {
       if (
-        mouseY + interiorElement.offsetHeight + MOUSE_OFFSET >
+        mouseY + MOUSE_OFFSET + interiorElement.offsetHeight >=
         window.innerHeight
       ) {
-        offsetY = interiorElement.offsetHeight + MOUSE_OFFSET;
-      } else {
-        offsetY = -MOUSE_OFFSET;
+        // if the tooltip doesn't fit below the mouse cursor
+        if (mouseY - MOUSE_OFFSET - interiorElement.offsetHeight > 0) {
+          // position the tooltip above the mouse cursor if it fits there
+          top = mouseY - interiorElement.offsetHeight - MOUSE_OFFSET;
+        } else {
+          // otherwise, align the tooltip with the window's top.
+          top = 0;
+        }
+      }
+
+      if (
+        mouseX + MOUSE_OFFSET + interiorElement.offsetWidth >=
+        window.innerWidth
+      ) {
+        // if the tooltip doesn't fit below the mouse cursor
+        if (mouseX - MOUSE_OFFSET - interiorElement.offsetWidth > 0) {
+          // position the tooltip above the mouse cursor if it fits there
+          left = mouseX - interiorElement.offsetWidth - MOUSE_OFFSET;
+        } else {
+          // otherwise, align the tooltip with the window's left.
+          left = 0;
+        }
       }
     }
 
     const style = {
-      left: mouseX - offsetX,
-      top: mouseY - offsetY,
+      left,
+      top,
     };
 
     return ReactDOM.createPortal(
