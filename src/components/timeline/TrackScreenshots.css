@@ -35,8 +35,6 @@
 }
 
 .timelineTrackScreenshotHoverImg {
-  position: relative;
-  left: -50%;
   border-radius: 5px;
   padding: 0.5px;
   border: 0.5px solid rgba(0,0,0,.2);

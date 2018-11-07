@@ -68,20 +68,21 @@ export type GeckoSamples = {
 export type GeckoSampleStruct = {
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
-  responsiveness: Milliseconds[],
-  rss: any[],
-  uss: any[],
+  responsiveness: Array<?Milliseconds>,
+  rss: Array<null | Milliseconds>,
+  uss: Array<null | Milliseconds>,
   length: number,
 };
 
 export type GeckoFrameTable = {
   schema: {
     location: 0,
-    implementation: 1,
-    optimizations: 2,
-    line: 3,
-    column: 4,
-    category: 5,
+    relevantForJS: 1,
+    implementation: 2,
+    optimizations: 3,
+    line: 4,
+    column: 5,
+    category: 6,
   },
   data: Array<
     [
@@ -89,6 +90,8 @@ export type GeckoFrameTable = {
       // JS: "Startup::XRE_Main"
       // C++: "0x7fff7d962da1"
       IndexIntoStringTable,
+      // for label frames, whether this frame should be shown in "JS only" stacks
+      boolean,
       // for JS frames, an index into the string table, usually "Baseline" or "Ion"
       null | IndexIntoStringTable,
       // JSON info about JIT optimizations.
@@ -113,6 +116,7 @@ export type GeckoFrameTable = {
 
 export type GeckoFrameStruct = {
   location: IndexIntoStringTable[],
+  relevantForJS: Array<boolean>,
   implementation: Array<null | IndexIntoStringTable>,
   optimizations: Array<null | Object>,
   line: Array<null | number>,

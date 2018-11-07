@@ -14,6 +14,7 @@ import {
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 import { CallTree } from '../profile-logic/call-tree';
+import { getFunctionName } from './function-info';
 
 import type {
   Thread,
@@ -327,7 +328,7 @@ export function getTransformLabels(
         throw assertExhaustiveCheck(transform);
     }
     const nameIndex = funcTable.name[funcIndex];
-    const funcName = stringTable.getString(nameIndex);
+    const funcName = getFunctionName(stringTable.getString(nameIndex));
 
     switch (transform.type) {
       case 'focus-subtree':
@@ -769,6 +770,7 @@ export function collapseResource(
     isJS: funcTable.isJS.slice(),
     name: funcTable.name.slice(),
     resource: funcTable.resource.slice(),
+    relevantForJS: funcTable.relevantForJS.slice(),
     fileName: funcTable.fileName.slice(),
     lineNumber: funcTable.lineNumber.slice(),
     length: funcTable.length,

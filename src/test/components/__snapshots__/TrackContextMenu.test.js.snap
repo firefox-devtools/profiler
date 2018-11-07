@@ -27,7 +27,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     tabIndex="-1"
   >
     Only show 
-    "Content"
+    "Content Process"
   </div>
   <div
     aria-disabled="false"
@@ -79,7 +79,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
       role="menuitem"
       tabIndex="-1"
     >
-      Content
+      Content Process
     </div>
     <div
       aria-disabled="false"
@@ -179,7 +179,7 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
       role="menuitem"
       tabIndex="-1"
     >
-      Content
+      Content Process
     </div>
     <div
       aria-disabled="false"

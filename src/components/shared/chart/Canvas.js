@@ -10,17 +10,19 @@ import Tooltip from '../Tooltip';
 
 import type { CssPixels, DevicePixels } from '../../../types/units';
 
-type Props<HoveredItem> = {
-  containerWidth: CssPixels,
-  containerHeight: CssPixels,
-  className: string,
-  onSelectItem?: (HoveredItem | null) => void,
-  onDoubleClickItem: (HoveredItem | null) => void,
-  getHoveredItemInfo: HoveredItem => React.Node,
-  drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
-  isDragging: boolean,
-  hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
-};
+type Props<HoveredItem> = {|
+  +containerWidth: CssPixels,
+  +containerHeight: CssPixels,
+  +className: string,
+  +onSelectItem?: (HoveredItem | null) => void,
+  +onDoubleClickItem: (HoveredItem | null) => void,
+  +getHoveredItemInfo: HoveredItem => React.Node,
+  +drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
+  +isDragging: boolean,
+  // Applies ctx.scale() to the canvas to draw using CssPixels rather than DevicePixels.
+  +scaleCtxToCssPixels: boolean,
+  +hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
+|};
 
 // The naming of the X and Y coordinates here correspond to the ones
 // found on the MouseEvent interface.
@@ -91,10 +93,10 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
 
   _prepCanvas() {
     const canvas = this._canvas;
-    const { containerWidth, containerHeight } = this.props;
+    const { containerWidth, containerHeight, scaleCtxToCssPixels } = this.props;
     const { devicePixelRatio } = window;
-    const pixelWidth: DevicePixels = containerWidth * devicePixelRatio;
-    const pixelHeight: DevicePixels = containerHeight * devicePixelRatio;
+    const devicePixelWidth: DevicePixels = containerWidth * devicePixelRatio;
+    const devicePixelHeight: DevicePixels = containerHeight * devicePixelRatio;
     if (!canvas) {
       return;
     }
@@ -103,18 +105,25 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     if (!this._ctx) {
       this._ctx = ctx;
     }
-    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
-      canvas.width = pixelWidth;
-      canvas.height = pixelHeight;
+    if (
+      canvas.width !== devicePixelWidth ||
+      canvas.height !== devicePixelHeight
+    ) {
+      canvas.width = devicePixelWidth;
+      canvas.height = devicePixelHeight;
       canvas.style.width = containerWidth + 'px';
       canvas.style.height = containerHeight + 'px';
-      ctx.scale(this._devicePixelRatio, this._devicePixelRatio);
+      if (scaleCtxToCssPixels) {
+        ctx.scale(this._devicePixelRatio, this._devicePixelRatio);
+      }
     }
     if (this._devicePixelRatio !== devicePixelRatio) {
-      // Make sure and multiply by the inverse of the previous ratio, as the scaling
-      // operates off of the previous set scale.
-      const scale = 1 / this._devicePixelRatio * devicePixelRatio;
-      ctx.scale(scale, scale);
+      if (scaleCtxToCssPixels) {
+        // Make sure and multiply by the inverse of the previous ratio, as the scaling
+        // operates off of the previous set scale.
+        const scale = 1 / this._devicePixelRatio * devicePixelRatio;
+        ctx.scale(scale, scale);
+      }
       this._devicePixelRatio = devicePixelRatio;
     }
   }

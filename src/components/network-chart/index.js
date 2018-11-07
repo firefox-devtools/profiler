@@ -114,7 +114,9 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       state
     );
     return {
-      markers: selectedThreadSelectors.getNetworkChartTracingMarkers(state),
+      markers: selectedThreadSelectors.getMergedNetworkChartTracingMarkers(
+        state
+      ),
       networkTimingRows,
       maxNetworkRows: networkTimingRows.length,
       timeRange: getCommittedRange(state),

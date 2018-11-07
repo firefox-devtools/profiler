@@ -171,6 +171,7 @@ function viewOptionsPerThread(
           return newFunc === undefined ? oldFunc : newFunc;
         };
         return {
+          ...threadViewOptions,
           selectedCallNodePath: threadViewOptions.selectedCallNodePath.map(
             mapOldFuncToNewFunc
           ),
@@ -179,7 +180,6 @@ function viewOptionsPerThread(
               oldPath.map(mapOldFuncToNewFunc)
             )
           ),
-          selectedMarker: threadViewOptions.selectedMarker,
         };
       });
     }
@@ -228,10 +228,11 @@ function viewOptionsPerThread(
 
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], {
+        {
+          ...state[threadIndex],
           selectedCallNodePath,
           expandedCallNodePaths,
-        }),
+        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -252,10 +253,11 @@ function viewOptionsPerThread(
           for (let i = 1; i < selectedCallNodePath.length; i++) {
             expandedCallNodePaths.add(selectedCallNodePath.slice(0, i));
           }
-          return Object.assign({}, viewOptions, {
+          return {
+            ...viewOptions,
             selectedCallNodePath,
             expandedCallNodePaths,
-          });
+          };
         }
         return viewOptions;
       });
@@ -264,9 +266,10 @@ function viewOptionsPerThread(
       const { threadIndex, expandedCallNodePaths } = action;
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], {
+        {
+          ...state[threadIndex],
           expandedCallNodePaths: new PathSet(expandedCallNodePaths),
-        }),
+        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -274,7 +277,7 @@ function viewOptionsPerThread(
       const { threadIndex, selectedMarker } = action;
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], { selectedMarker }),
+        { ...state[threadIndex], selectedMarker },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -300,10 +303,11 @@ function viewOptionsPerThread(
 
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], {
+        {
+          ...state[threadIndex],
           selectedCallNodePath,
           expandedCallNodePaths,
-        }),
+        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -313,10 +317,11 @@ function viewOptionsPerThread(
       const { threadIndex } = action;
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], {
+        {
+          ...state[threadIndex],
           selectedCallNodePath: [],
           expandedCallNodePaths: new PathSet(),
-        }),
+        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -367,10 +372,11 @@ function viewOptionsPerThread(
 
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], {
+        {
+          ...state[threadIndex],
           selectedCallNodePath,
           expandedCallNodePaths,
-        }),
+        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -795,6 +801,7 @@ export type SelectorsForThread = {
   getIsMarkerChartEmptyInFullRange: State => boolean,
   getMarkerChartTiming: State => MarkerTimingRows,
   getNetworkChartTiming: State => MarkerTimingRows,
+  getMergedNetworkChartTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkers: State => TracingMarker[],
   getCommittedRangeFilteredTracingMarkersForHeader: State => TracingMarker[],
   getNetworkTracingMarkers: State => TracingMarker[],
@@ -924,7 +931,7 @@ export const selectorsForThread = (
         transforms.reduce(
           // Apply the reducer using an arrow function to ensure correct memoization.
           (thread, transform) =>
-            applyTransformMemoized(thread, transform, defaultCategoryObj),
+            applyTransformMemoized(thread, transform, defaultCategoryObj.value),
           startingThread
         )
     );
@@ -1036,6 +1043,8 @@ export const selectorsForThread = (
           tm =>
             tm.name !== 'GCMajor' &&
             tm.name !== 'BHR-detected hang' &&
+            tm.name !== 'LongTask' &&
+            tm.name !== 'LongIdleTask' &&
             !MarkerData.isNetworkMarker(tm)
         )
     );
@@ -1067,6 +1076,10 @@ export const selectorsForThread = (
       getSearchFilteredTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker)
     );
+    const getMergedNetworkChartTracingMarkers = createSelector(
+      getNetworkChartTracingMarkers,
+      MarkerData.mergeStartAndEndNetworkMarker
+    );
     const getIsMarkerChartEmptyInFullRange = createSelector(
       getTracingMarkers,
       markers => MarkerData.filterForMarkerChart(markers).length === 0
@@ -1085,10 +1098,7 @@ export const selectorsForThread = (
     );
     const getNetworkTracingMarkers = createSelector(
       getCommittedRangeFilteredTracingMarkers,
-      tracingMarkers =>
-        tracingMarkers.filter(
-          marker => marker.data && marker.data.type === 'Network'
-        )
+      tracingMarkers => tracingMarkers.filter(MarkerData.isNetworkMarker)
     );
     const getNetworkTrackTiming = createSelector(
       getNetworkTracingMarkers,
@@ -1264,6 +1274,7 @@ export const selectorsForThread = (
       getCommittedRangeFilteredTracingMarkersForHeader,
       getNetworkTracingMarkers,
       getNetworkTrackTiming,
+      getMergedNetworkChartTracingMarkers,
       getRangeFilteredScreenshotsById,
       getFilteredThread,
       getPreviewFilteredThread,

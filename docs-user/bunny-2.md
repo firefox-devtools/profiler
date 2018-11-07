@@ -26,7 +26,7 @@ worker.addEventListener('message', message => {
 });
 ```
 
-In this example, the iframe draws to the canvas, and once it's done, it posts a message to the worker asking it generate a new list of the draw calls. While this works, it's not harnessing the fact that the worker can run code in parallel. The fix luckily is simple. Swap the order of the `drawRect` and `worker.postMessage` calls.
+In this example, the iframe draws to the canvas, and once it's done, it posts a message to the worker asking it to generate a new list of the draw calls. While this works, it's not harnessing the fact that the worker can run code in parallel. The fix luckily is simple. Swap the order of the `drawRect` and `worker.postMessage` calls.
 
 ```js
 worker.addEventListener('message', message => {
@@ -71,8 +71,8 @@ Here there are a lot more frames being drawn. The end-user will perceive a more 
 
 ## In summary
 
-Code can be optimized to do less work, and this is can be great for being able to have smoother running code, and a longer battery life. Another class of optimizations is better parallelism. Making code non-blocking means that more work can be performed at the same time, and the results can be presented to the user.
+Code can be optimized to do less work, and this can be great for being able to have smoother running code, and a longer battery life. Another class of optimizations is better parallelism. Making code non-blocking means that more work can be performed at the same time and the results can be presented to the user.
 
-The main trade-off with greater parallelism, is that more power can be consumed when threads do not remain idle. In the above example a greater frame-rate was achieved by parallelizing the tasks, but more work was in fact being done by the smoother-running parallel code.
+The main trade-off with greater parallelism is that more power can be consumed when threads do not remain idle. In the above example, a greater frame-rate was achieved by parallelizing the tasks, but more work was in fact being done by the smoother-running parallel code.
 
 This type of optimization has lots of relevance when working on large multi-threaded applications. While synchronous IPC (inter-process communication) can cause code to become blocked while waiting for a response, asynchronous communication can also cause code to be blocked from executing. It's important to profile to verify the assumptions of how tasks will be scheduled in real-world code.
