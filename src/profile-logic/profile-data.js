@@ -1347,7 +1347,7 @@ export function getFriendlyThreadName(
           });
           if (contentThreads.length > 1) {
             const index = 1 + contentThreads.indexOf(thread);
-            label = `Content Process (${index} of ${contentThreads.length})`;
+            label = `Content Process (${index}/${contentThreads.length})`;
           } else {
             label = 'Content Process';
           }
