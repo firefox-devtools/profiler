@@ -1335,14 +1335,10 @@ export function getFriendlyThreadName(
 
   switch (thread.name) {
     case 'GeckoMain': {
-      if (thread.hasOwnProperty('processName') && thread.processName) {
+      if (thread.processName) {
         label = thread.processName;
         const homonymThreads = threads.filter(thread => {
-          return (
-            thread.name === 'GeckoMain' &&
-            thread.hasOwnProperty('processName') &&
-            thread.processName === label
-          );
+          return thread.name === 'GeckoMain' && thread.processName === label;
         });
         if (homonymThreads.length > 1) {
           const index = 1 + homonymThreads.indexOf(thread);
