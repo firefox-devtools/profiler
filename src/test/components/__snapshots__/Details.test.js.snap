@@ -13,19 +13,8 @@ exports[`app/Details renders an initial view with the right panel 1`] = `
         type="button"
       />
     }
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -52,6 +41,15 @@ exports[`app/Details renders an initial view with the right panel 1`] = `
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
@@ -75,19 +73,8 @@ exports[`app/Details renders an initial view with the right panel for tab calltr
         type="button"
       />
     }
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -114,6 +101,15 @@ exports[`app/Details renders an initial view with the right panel for tab calltr
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
@@ -137,19 +133,8 @@ exports[`app/Details renders an initial view with the right panel for tab flame-
         type="button"
       />
     }
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="flame-graph"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -176,6 +161,15 @@ exports[`app/Details renders an initial view with the right panel for tab flame-
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
@@ -192,19 +186,8 @@ exports[`app/Details renders an initial view with the right panel for tab marker
 >
   <TabBar
     extraElements={false}
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="marker-chart"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -231,6 +214,15 @@ exports[`app/Details renders an initial view with the right panel for tab marker
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
@@ -247,19 +239,8 @@ exports[`app/Details renders an initial view with the right panel for tab marker
 >
   <TabBar
     extraElements={false}
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="marker-table"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -286,6 +267,15 @@ exports[`app/Details renders an initial view with the right panel for tab marker
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
@@ -302,19 +292,8 @@ exports[`app/Details renders an initial view with the right panel for tab networ
 >
   <TabBar
     extraElements={false}
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="network-chart"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -341,6 +320,15 @@ exports[`app/Details renders an initial view with the right panel for tab networ
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
@@ -357,19 +345,8 @@ exports[`app/Details renders an initial view with the right panel for tab stack-
 >
   <TabBar
     extraElements={false}
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="stack-chart"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -396,6 +373,15 @@ exports[`app/Details renders an initial view with the right panel for tab stack-
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
@@ -419,19 +405,8 @@ exports[`app/Details show the correct state for the sidebar open button 1`] = `
         type="button"
       />
     }
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -458,6 +433,15 @@ exports[`app/Details show the correct state for the sidebar open button 1`] = `
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
@@ -481,19 +465,8 @@ exports[`app/Details show the correct state for the sidebar open button 2`] = `
         type="button"
       />
     }
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -520,6 +493,15 @@ exports[`app/Details show the correct state for the sidebar open button 2`] = `
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
@@ -543,19 +525,8 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
         type="button"
       />
     }
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="flame-graph"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -582,6 +553,15 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
@@ -605,19 +585,8 @@ exports[`app/Details show the correct state for the sidebar open button 4`] = `
         type="button"
       />
     }
-    onChangeTabOrder={[Function]}
     onSelectTab={[Function]}
     selectedTabName="calltree"
-    tabOrder={
-      Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]
-    }
     tabs={
       Array [
         Object {
@@ -644,6 +613,15 @@ exports[`app/Details show the correct state for the sidebar open button 4`] = `
           "name": "network-chart",
           "title": "Network",
         },
+      ]
+    }
+    visibleTabs={
+      Array [
+        0,
+        1,
+        2,
+        3,
+        4,
       ]
     }
   />
