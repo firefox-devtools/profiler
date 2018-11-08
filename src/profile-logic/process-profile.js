@@ -906,8 +906,17 @@ export function serializeProfile(
   includeNetworkUrls: boolean = true
 ): string {
   // stringTable -> stringArray
+  let urlCounter = 0;
   const newProfile = Object.assign({}, profile, {
     meta: { ...profile.meta, networkURLsRemoved: !includeNetworkUrls },
+    pages:
+      includeNetworkUrls === false
+        ? profile.pages.map(page =>
+            Object.assign({}, page, {
+              url: 'Page #' + urlCounter++,
+            })
+          )
+        : profile.pages,
     threads: profile.threads.map(thread => {
       const stringArray = thread.stringTable.serializeToArray();
       const newThread = Object.assign({}, thread);
