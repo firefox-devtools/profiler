@@ -31,6 +31,11 @@ export const tabSlugs: $ReadOnlyArray<TabSlug> =
   Object.getOwnPropertyNames(tabsWithTitle);
 
 /**
+ * It can be useful to have a list of the tab indexes to operate upon.
+ */
+export const tabIndexes: $ReadOnlyArray<number> = tabSlugs.map((_, i) => i);
+
+/**
  * This array contains the same data as tabsWithTitle above, but in an ordered
  * array so that we can use it directly in some of our components.
  */
@@ -40,11 +45,3 @@ export const tabsWithTitleArray: $ReadOnlyArray<TabWithTitle> = tabSlugs.map(
     title: tabsWithTitle[tabSlug],
   })
 );
-
-/**
- * This function returns the initial order of the tabs.
- * This is simply the sequence of all array indices in ascending order.
- */
-export function getInitialTabOrder(): number[] {
-  return Array.from({ length: tabSlugs.length }, (_, i) => i);
-}

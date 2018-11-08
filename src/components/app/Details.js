@@ -17,14 +17,9 @@ import NetworkChart from '../network-chart/';
 import FlameGraph from '../flame-graph/';
 import selectSidebar from '../sidebar';
 
-import {
-  changeSelectedTab,
-  changeTabOrder,
-  changeSidebarOpenState,
-} from '../../actions/app';
-import { getTabOrder } from '../../reducers/profile-view';
+import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
 import { getSelectedTab } from '../../reducers/url-state';
-import { getIsSidebarOpen } from '../../reducers/app';
+import { getIsSidebarOpen, getVisibleTabs } from '../../reducers/app';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';
@@ -41,14 +36,13 @@ import '../../../res/css/photon-components.css';
 import './Details.css';
 
 type StateProps = {|
-  +tabOrder: number[],
+  +visibleTabs: $ReadOnlyArray<number>,
   +selectedTab: TabSlug,
   +isSidebarOpen: boolean,
 |};
 
 type DispatchProps = {|
   +changeSelectedTab: typeof changeSelectedTab,
-  +changeTabOrder: typeof changeTabOrder,
   +changeSidebarOpenState: typeof changeSidebarOpenState,
 |};
 
@@ -70,7 +64,7 @@ class ProfileViewer extends PureComponent<Props> {
   };
 
   render() {
-    const { tabOrder, selectedTab, isSidebarOpen, changeTabOrder } = this.props;
+    const { visibleTabs, selectedTab, isSidebarOpen } = this.props;
     const hasSidebar = selectSidebar(selectedTab) !== null;
     const extraButton = hasSidebar && (
       <button
@@ -94,9 +88,8 @@ class ProfileViewer extends PureComponent<Props> {
         <TabBar
           tabs={tabsWithTitleArray}
           selectedTabName={selectedTab}
-          tabOrder={tabOrder}
+          visibleTabs={visibleTabs}
           onSelectTab={this._onSelectTab}
-          onChangeTabOrder={changeTabOrder}
           extraElements={extraButton}
         />
         {
@@ -119,13 +112,12 @@ class ProfileViewer extends PureComponent<Props> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
-    tabOrder: getTabOrder(state),
+    visibleTabs: getVisibleTabs(state),
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
   }),
   mapDispatchToProps: {
     changeSelectedTab,
-    changeTabOrder,
     changeSidebarOpenState,
   },
   component: ProfileViewer,

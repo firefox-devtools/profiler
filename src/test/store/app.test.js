@@ -4,7 +4,6 @@
 // @flow
 
 import { storeWithSimpleProfile, storeWithProfile } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
 import * as AppSelectors from '../../reducers/app';
 import createStore from '../../app-logic/create-store';
@@ -56,29 +55,6 @@ describe('app actions', function() {
       expect(UrlStateSelectors.getHash(getState())).toBe('');
       dispatch(AppActions.profilePublished(hash));
       expect(UrlStateSelectors.getHash(getState())).toBe(hash);
-    });
-  });
-
-  describe('changeTabOrder', function() {
-    it('can change the saved tab order', function() {
-      const { dispatch, getState } = storeWithSimpleProfile();
-      expect(ProfileViewSelectors.getTabOrder(getState())).toEqual([
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-      ]);
-      dispatch(AppActions.changeTabOrder([2, 3, 1, 4, 5, 0]));
-      expect(ProfileViewSelectors.getTabOrder(getState())).toEqual([
-        2,
-        3,
-        1,
-        4,
-        5,
-        0,
-      ]);
     });
   });
 

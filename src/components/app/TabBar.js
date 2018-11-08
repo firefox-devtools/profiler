@@ -6,18 +6,15 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import Reorderable from '../shared/Reorderable';
 
-import type { Action } from '../../types/actions';
 import type { TabWithTitle } from '../../app-logic/tabs-handling';
 
 type Props = {|
   +className?: string,
   +tabs: $ReadOnlyArray<TabWithTitle>,
   +selectedTabName: string,
-  +tabOrder: number[],
+  +visibleTabs: $ReadOnlyArray<number>,
   +onSelectTab: string => void,
-  +onChangeTabOrder: (number[]) => Action,
   +extraElements?: React.Node,
 |};
 
@@ -34,33 +31,29 @@ class TabBar extends React.PureComponent<Props> {
       className,
       tabs,
       selectedTabName,
-      tabOrder,
-      onChangeTabOrder,
+      visibleTabs,
       extraElements,
     } = this.props;
     return (
       <div className={classNames('tabBarContainer', className)}>
-        <Reorderable
-          tagName="ol"
-          className="tabBarTabWrapper"
-          grippyClassName="grippy"
-          order={tabOrder}
-          orient="horizontal"
-          onChangeOrder={onChangeTabOrder}
-        >
-          {tabs.map(({ name, title }, i) => (
-            <li
-              className={classNames('tabBarTab', 'grippy', {
-                selected: name === selectedTabName,
-              })}
-              key={i}
-              data-name={name}
-              onMouseDown={this._mouseDownListener}
-            >
-              {title}
-            </li>
-          ))}
-        </Reorderable>
+        <ol className="tabBarTabWrapper">
+          {visibleTabs.map(tabIndex => {
+            const { name, title } = tabs[tabIndex];
+            return (
+              <li
+                className={classNames({
+                  tabBarTab: true,
+                  selected: name === selectedTabName,
+                })}
+                key={name}
+                data-name={name}
+                onMouseDown={this._mouseDownListener}
+              >
+                {title}
+              </li>
+            );
+          })}
+        </ol>
         {extraElements}
       </div>
     );
