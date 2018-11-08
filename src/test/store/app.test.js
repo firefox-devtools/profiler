@@ -10,6 +10,12 @@ import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { isolateProcess } from '../../actions/profile-view';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
+import { tabSlugs } from '../../app-logic/tabs-handling';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+  getNetworkMarker,
+} from '../fixtures/profiles/make-profile';
 
 import * as AppActions from '../../actions/app';
 
@@ -55,6 +61,35 @@ describe('app actions', function() {
       expect(UrlStateSelectors.getHash(getState())).toBe('');
       dispatch(AppActions.profilePublished(hash));
       expect(UrlStateSelectors.getHash(getState())).toBe(hash);
+    });
+  });
+
+  describe('visibleTabs', function() {
+    function getVisibleTabSlugs(state) {
+      return AppSelectors.getVisibleTabs(state).map(i => tabSlugs[i]);
+    }
+    it('hides the network chart when there are no network markers in a thread', function() {
+      const { profile } = getProfileFromTextSamples('A');
+      const { getState } = storeWithProfile(profile);
+      expect(getVisibleTabSlugs(getState())).toEqual([
+        'calltree',
+        'flame-graph',
+        'stack-chart',
+        'marker-chart',
+        'marker-table',
+      ]);
+    });
+    it('shows the network chart when network markers are present in the thread', function() {
+      const profile = getProfileWithMarkers([getNetworkMarker(10, 0)]);
+      const { getState } = storeWithProfile(profile);
+      expect(getVisibleTabSlugs(getState())).toEqual([
+        'calltree',
+        'flame-graph',
+        'stack-chart',
+        'marker-chart',
+        'marker-table',
+        'network-chart',
+      ]);
     });
   });
 
