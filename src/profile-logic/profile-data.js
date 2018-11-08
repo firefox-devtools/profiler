@@ -1336,6 +1336,9 @@ export function getFriendlyThreadName(
   switch (thread.name) {
     case 'GeckoMain': {
       if (thread.processName) {
+        // If processName is present, use that as it should contain a friendly name.
+        // We want to use that for the GeckoMain thread because it is shown as the
+        // root of other threads in each process group.
         label = thread.processName;
         const homonymThreads = threads.filter(thread => {
           return thread.name === 'GeckoMain' && thread.processName === label;
