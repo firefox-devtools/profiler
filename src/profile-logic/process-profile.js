@@ -859,6 +859,12 @@ export function processProfile(
     );
   }
 
+  let pages = [...(geckoProfile.pages || [])];
+
+  for (const subprocessProfile of geckoProfile.processes) {
+    pages = pages.concat(subprocessProfile.pages);
+  }
+
   const meta = {
     interval: geckoProfile.meta.interval,
     startTime: geckoProfile.meta.startTime,
@@ -885,6 +891,7 @@ export function processProfile(
 
   const result = {
     meta,
+    pages,
     threads,
   };
   return result;

@@ -190,6 +190,15 @@ export type Category = {
 
 export type CategoryList = Array<Category>;
 
+export type Page = {
+  docshellId: string,
+  historyId: number,
+  url: string,
+  isSubFrame: boolean,
+};
+
+export type PageList = Array<Page>;
+
 /**
  * Information about a period of time during which no samples were collected.
  */
@@ -327,5 +336,6 @@ export type ProfileMeta = {|
  */
 export type Profile = {
   meta: ProfileMeta,
+  pages: PageList,
   threads: Thread[],
 };
