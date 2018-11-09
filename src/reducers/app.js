@@ -7,7 +7,7 @@ import { combineReducers } from 'redux';
 import { createSelector } from 'reselect';
 
 import { getSelectedTab } from './url-state';
-import { tabSlugs, tabIndexes } from '../app-logic/tabs-handling';
+import { tabSlugs } from '../app-logic/tabs-handling';
 import { selectedThreadSelectors } from './profile-view';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -176,8 +176,8 @@ export const getLastVisibleThreadTabSlug = (state: State) =>
 
 export const getVisibleTabs = createSelector(
   selectedThreadSelectors.getIsNetworkChartEmptyInFullRange,
-  (isNetworkChartEmpty): $ReadOnlyArray<number> =>
+  (isNetworkChartEmpty): $ReadOnlyArray<TabSlug> =>
     isNetworkChartEmpty
-      ? tabIndexes.filter(tabIndex => tabSlugs[tabIndex] !== 'network-chart')
-      : tabIndexes
+      ? tabSlugs.filter(tabSlug => tabSlug !== 'network-chart')
+      : tabSlugs
 );

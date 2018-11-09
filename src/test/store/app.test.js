@@ -10,7 +10,6 @@ import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { isolateProcess } from '../../actions/profile-view';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
-import { tabSlugs } from '../../app-logic/tabs-handling';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
@@ -65,13 +64,10 @@ describe('app actions', function() {
   });
 
   describe('visibleTabs', function() {
-    function getVisibleTabSlugs(state) {
-      return AppSelectors.getVisibleTabs(state).map(i => tabSlugs[i]);
-    }
     it('hides the network chart when there are no network markers in a thread', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { getState } = storeWithProfile(profile);
-      expect(getVisibleTabSlugs(getState())).toEqual([
+      expect(AppSelectors.getVisibleTabs(getState())).toEqual([
         'calltree',
         'flame-graph',
         'stack-chart',
@@ -82,7 +78,7 @@ describe('app actions', function() {
     it('shows the network chart when network markers are present in the thread', function() {
       const profile = getProfileWithMarkers([getNetworkMarker(10, 0)]);
       const { getState } = storeWithProfile(profile);
-      expect(getVisibleTabSlugs(getState())).toEqual([
+      expect(AppSelectors.getVisibleTabs(getState())).toEqual([
         'calltree',
         'flame-graph',
         'stack-chart',

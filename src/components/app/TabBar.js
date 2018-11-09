@@ -7,13 +7,12 @@
 import * as React from 'react';
 import classNames from 'classnames';
 
-import type { TabWithTitle } from '../../app-logic/tabs-handling';
+import { tabsWithTitle, type TabSlug } from '../../app-logic/tabs-handling';
 
 type Props = {|
   +className?: string,
-  +tabs: $ReadOnlyArray<TabWithTitle>,
-  +selectedTabName: string,
-  +visibleTabs: $ReadOnlyArray<number>,
+  +selectedTabSlug: string,
+  +visibleTabs: $ReadOnlyArray<TabSlug>,
   +onSelectTab: string => void,
   +extraElements?: React.Node,
 |};
@@ -29,30 +28,26 @@ class TabBar extends React.PureComponent<Props> {
   render() {
     const {
       className,
-      tabs,
-      selectedTabName,
+      selectedTabSlug,
       visibleTabs,
       extraElements,
     } = this.props;
     return (
       <div className={classNames('tabBarContainer', className)}>
         <ol className="tabBarTabWrapper">
-          {visibleTabs.map(tabIndex => {
-            const { name, title } = tabs[tabIndex];
-            return (
-              <li
-                className={classNames({
-                  tabBarTab: true,
-                  selected: name === selectedTabName,
-                })}
-                key={name}
-                data-name={name}
-                onMouseDown={this._mouseDownListener}
-              >
-                {title}
-              </li>
-            );
-          })}
+          {visibleTabs.map(tabSlug => (
+            <li
+              className={classNames({
+                tabBarTab: true,
+                selected: tabSlug === selectedTabSlug,
+              })}
+              key={tabSlug}
+              data-name={tabSlug}
+              onMouseDown={this._mouseDownListener}
+            >
+              {tabsWithTitle[tabSlug]}
+            </li>
+          ))}
         </ol>
         {extraElements}
       </div>

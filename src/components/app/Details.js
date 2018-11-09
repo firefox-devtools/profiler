@@ -24,7 +24,6 @@ import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
-import { tabsWithTitleArray } from '../../app-logic/tabs-handling';
 
 import type {
   ExplicitConnectOptions,
@@ -36,7 +35,7 @@ import '../../../res/css/photon-components.css';
 import './Details.css';
 
 type StateProps = {|
-  +visibleTabs: $ReadOnlyArray<number>,
+  +visibleTabs: $ReadOnlyArray<TabSlug>,
   +selectedTab: TabSlug,
   +isSidebarOpen: boolean,
 |};
@@ -86,8 +85,7 @@ class ProfileViewer extends PureComponent<Props> {
     return (
       <div className="Details">
         <TabBar
-          tabs={tabsWithTitleArray}
-          selectedTabName={selectedTab}
+          selectedTabSlug={selectedTab}
           visibleTabs={visibleTabs}
           onSelectTab={this._onSelectTab}
           extraElements={extraButton}
