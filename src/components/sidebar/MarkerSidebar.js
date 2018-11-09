@@ -88,7 +88,7 @@ class MarkerSidebar extends React.PureComponent<Props> {
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: state => ({
     marker: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state)[
-      selectedThreadSelectors.getViewOptions(state).selectedMarker
+      selectedThreadSelectors.getSelectedMarkerIndex(state)
     ],
     selectedThreadIndex: getSelectedThreadIndex(state),
   }),
