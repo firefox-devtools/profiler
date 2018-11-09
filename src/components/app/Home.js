@@ -103,7 +103,7 @@ class ActionButtons extends React.PureComponent<
       : 'homeSectionButton';
 
     return (
-     <div className="homeSectionLoadProfile">
+      <div className="homeSectionLoadProfile">
         <div className="homeSectionActionButtons">
           <label className="homeSectionButton">
             <input
