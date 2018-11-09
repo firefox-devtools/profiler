@@ -9,8 +9,7 @@ import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
-import { formatMilliseconds } from '../../utils/format-numbers';
-import CanSelectContent from './CanSelectContent';
+import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 
 import type {
   ConnectedProps,
@@ -18,20 +17,6 @@ import type {
 } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
 import type { TracingMarker } from '../../types/profile-derived';
-
-type SidebarDetailProps = {|
-  +label: string,
-  +value: React.Node,
-|};
-
-function SidebarDetail({ label, value }: SidebarDetailProps) {
-  return (
-    <React.Fragment>
-      <div className="sidebar-label">{label}:</div>
-      <div className="sidebar-value">{value}</div>
-    </React.Fragment>
-  );
-}
 
 type StateProps = {|
   +selectedThreadIndex: ThreadIndex,
@@ -42,7 +27,7 @@ type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 class MarkerSidebar extends React.PureComponent<Props> {
   render() {
-    const { marker } = this.props;
+    const { marker, selectedThreadIndex } = this.props;
 
     if (marker === null || marker === undefined) {
       return (
@@ -55,30 +40,10 @@ class MarkerSidebar extends React.PureComponent<Props> {
     return (
       <aside className="sidebar sidebar-calltree">
         <div className="sidebar-contents-wrapper">
-          <header className="sidebar-titlegroup">
-            <CanSelectContent
-              tagName="h2"
-              className="sidebar-title"
-              content={marker.name}
-            />
-          </header>
-          <h3 className="sidebar-title2">General:</h3>
-
-          {marker.dur ? (
-            <SidebarDetail
-              label="Duration"
-              value={formatMilliseconds(marker.dur)}
-            />
-          ) : null}
-
-          {marker.data ? (
-            <React.Fragment>
-              <h3 className="sidebar-title2">Details:</h3>
-              {marker.data.type ? (
-                <SidebarDetail label="Type" value={marker.data.type} />
-              ) : null}
-            </React.Fragment>
-          ) : null}
+          <MarkerTooltipContents
+            marker={marker}
+            threadIndex={selectedThreadIndex}
+          />
         </div>
       </aside>
     );
