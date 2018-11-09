@@ -17,10 +17,7 @@ import type {
   ExplicitConnectOptions,
 } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
-import type {
-  IndexIntoTracingMarkers,
-  TracingMarker,
-} from '../../types/profile-derived';
+import type { TracingMarker } from '../../types/profile-derived';
 
 type SidebarDetailProps = {|
   +label: string,
@@ -37,26 +34,23 @@ function SidebarDetail({ label, value }: SidebarDetailProps) {
 }
 
 type StateProps = {|
-  +selectedNodeIndex: IndexIntoTracingMarkers,
   +selectedThreadIndex: ThreadIndex,
-  +markers: TracingMarker[],
+  +marker: TracingMarker,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 class MarkerSidebar extends React.PureComponent<Props> {
   render() {
-    const { selectedNodeIndex, markers } = this.props;
+    const { marker } = this.props;
 
-    if (selectedNodeIndex === null || selectedNodeIndex === -1) {
+    if (marker === null || marker === undefined) {
       return (
         <div className="sidebar sidebar-calltree">
           Select a marker to display some information about it.
         </div>
       );
     }
-
-    const selectedMarker = markers[selectedNodeIndex];
 
     return (
       <aside className="sidebar sidebar-calltree">
@@ -65,23 +59,23 @@ class MarkerSidebar extends React.PureComponent<Props> {
             <CanSelectContent
               tagName="h2"
               className="sidebar-title"
-              content={selectedMarker.name}
+              content={marker.name}
             />
           </header>
           <h3 className="sidebar-title2">General:</h3>
 
-          {selectedMarker.dur ? (
+          {marker.dur ? (
             <SidebarDetail
               label="Duration"
-              value={formatMilliseconds(selectedMarker.dur)}
+              value={formatMilliseconds(marker.dur)}
             />
           ) : null}
 
-          {selectedMarker.data ? (
+          {marker.data ? (
             <React.Fragment>
               <h3 className="sidebar-title2">Details:</h3>
-              {selectedMarker.data.type ? (
-                <SidebarDetail label="Type" value={selectedMarker.data.type} />
+              {marker.data.type ? (
+                <SidebarDetail label="Type" value={marker.data.type} />
               ) : null}
             </React.Fragment>
           ) : null}
@@ -93,9 +87,9 @@ class MarkerSidebar extends React.PureComponent<Props> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: state => ({
-    selectedNodeIndex: selectedThreadSelectors.getViewOptions(state)
-      .selectedMarker,
-    markers: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state),
+    marker: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state)[
+      selectedThreadSelectors.getViewOptions(state).selectedMarker
+    ],
     selectedThreadIndex: getSelectedThreadIndex(state),
   }),
   component: MarkerSidebar,
