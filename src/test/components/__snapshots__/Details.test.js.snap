@@ -14,42 +14,14 @@ exports[`app/Details renders an initial view with the right panel 1`] = `
       />
     }
     onSelectTab={[Function]}
-    selectedTabName="calltree"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="calltree"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
@@ -74,42 +46,14 @@ exports[`app/Details renders an initial view with the right panel for tab calltr
       />
     }
     onSelectTab={[Function]}
-    selectedTabName="calltree"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="calltree"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
@@ -134,42 +78,14 @@ exports[`app/Details renders an initial view with the right panel for tab flame-
       />
     }
     onSelectTab={[Function]}
-    selectedTabName="flame-graph"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="flame-graph"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
@@ -187,42 +103,14 @@ exports[`app/Details renders an initial view with the right panel for tab marker
   <TabBar
     extraElements={false}
     onSelectTab={[Function]}
-    selectedTabName="marker-chart"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="marker-chart"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
@@ -240,42 +128,14 @@ exports[`app/Details renders an initial view with the right panel for tab marker
   <TabBar
     extraElements={false}
     onSelectTab={[Function]}
-    selectedTabName="marker-table"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="marker-table"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
@@ -293,42 +153,14 @@ exports[`app/Details renders an initial view with the right panel for tab networ
   <TabBar
     extraElements={false}
     onSelectTab={[Function]}
-    selectedTabName="network-chart"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="network-chart"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
@@ -346,42 +178,14 @@ exports[`app/Details renders an initial view with the right panel for tab stack-
   <TabBar
     extraElements={false}
     onSelectTab={[Function]}
-    selectedTabName="stack-chart"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="stack-chart"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
@@ -406,42 +210,14 @@ exports[`app/Details show the correct state for the sidebar open button 1`] = `
       />
     }
     onSelectTab={[Function]}
-    selectedTabName="calltree"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="calltree"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
@@ -466,42 +242,14 @@ exports[`app/Details show the correct state for the sidebar open button 2`] = `
       />
     }
     onSelectTab={[Function]}
-    selectedTabName="calltree"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="calltree"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
@@ -526,42 +274,14 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
       />
     }
     onSelectTab={[Function]}
-    selectedTabName="flame-graph"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="flame-graph"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
@@ -586,42 +306,14 @@ exports[`app/Details show the correct state for the sidebar open button 4`] = `
       />
     }
     onSelectTab={[Function]}
-    selectedTabName="calltree"
-    tabs={
-      Array [
-        Object {
-          "name": "calltree",
-          "title": "Call Tree",
-        },
-        Object {
-          "name": "flame-graph",
-          "title": "Flame Graph",
-        },
-        Object {
-          "name": "stack-chart",
-          "title": "Stack Chart",
-        },
-        Object {
-          "name": "marker-chart",
-          "title": "Marker Chart",
-        },
-        Object {
-          "name": "marker-table",
-          "title": "Marker Table",
-        },
-        Object {
-          "name": "network-chart",
-          "title": "Network",
-        },
-      ]
-    }
+    selectedTabSlug="calltree"
     visibleTabs={
       Array [
-        0,
-        1,
-        2,
-        3,
-        4,
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
       ]
     }
   />
