@@ -143,6 +143,7 @@ export type GeckoThread = {
   name: string,
   registerTime: number,
   processType: string,
+  processName?: string,
   unregisterTime: number | null,
   tid: number,
   pid: number,

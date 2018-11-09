@@ -736,6 +736,8 @@ function _processThread(
   return {
     name: thread.name,
     processType: thread.processType,
+    processName:
+      typeof thread.processName === 'string' ? thread.processName : '',
     processStartupTime: 0,
     processShutdownTime: shutdownTime,
     registerTime: thread.registerTime,
