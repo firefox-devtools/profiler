@@ -387,10 +387,10 @@ function _extractJsFunction(
   const jsMatch: RegExpResult =
     // Given:   "functionName (http://script.url/:1234:1234)"
     // Captures: 1^^^^^^^^^^  2^^^^^^^^^^^^^^^^^^ 3^^^ 4^^^
-    /^(.*) \((.*):([0-9]+)(?::([0-9]+))?\)$/.exec(locationString) ||
+    /^(.*) \((.*):([0-9]+):([0-9]+)\)$/.exec(locationString) ||
     // Given:   "http://script.url/:1234:1234"
     // Captures: 2^^^^^^^^^^^^^^^^^ 3^^^ 4^^^
-    /^()(.*):([0-9]+)(?::([0-9]+))?$/.exec(locationString);
+    /^()(.*):([0-9]+):([0-9]+)$/.exec(locationString);
 
   if (!jsMatch) {
     return null;
@@ -462,7 +462,7 @@ function _extractJsFunction(
   }
   const fileName = stringTable.indexForString(scriptURI);
   const lineNumber = parseInt(jsMatch[3], 10);
-  const columnNumber = jsMatch[4] ? parseInt(jsMatch[4], 10) : null;
+  const columnNumber = parseInt(jsMatch[4], 10);
 
   // Add the function to the funcTable.
   const funcIndex = funcTable.length++;
