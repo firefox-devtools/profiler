@@ -140,6 +140,69 @@ describe('call node paths on implementation filter change', function() {
   });
 });
 
+describe('getJankInstances', function() {
+  function setup({ sampleCount, responsiveness }) {
+    const { profile } = getProfileFromTextSamples(
+      Array(sampleCount)
+        .fill('A')
+        .join('  ')
+    );
+    profile.threads[0].samples.responsiveness = responsiveness;
+    const { getState } = storeWithProfile(profile);
+    return selectedThreadSelectors.getJankInstances(getState());
+  }
+
+  it('will not create any jank markers for undefined responsiveness', function() {
+    const jankInstances = setup({
+      sampleCount: 10,
+      responsiveness: [],
+    });
+    expect(jankInstances).toEqual([]);
+  });
+
+  it('will not create any jank markers for null responsiveness', function() {
+    const responsiveness = Array(10).fill(null);
+    const jankInstances = setup({
+      sampleCount: responsiveness.length,
+      responsiveness,
+    });
+    expect(jankInstances).toEqual([]);
+  });
+
+  it('will create a jank instance', function() {
+    const breakingPoint = 70;
+    const responsiveness = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
+    const jankInstances = setup({
+      sampleCount: responsiveness.length,
+      responsiveness,
+    });
+    expect(jankInstances.length).toEqual(1);
+    expect(jankInstances[0].dur).toEqual(breakingPoint);
+  });
+
+  it('will skip null responsiveness values', function() {
+    const breakingPoint = 70;
+    const responsiveness = [0, 20, 40, null, breakingPoint, null, 0, 20, 40];
+    const jankInstances = setup({
+      sampleCount: responsiveness.length,
+      responsiveness,
+    });
+    expect(jankInstances.length).toEqual(1);
+    expect(jankInstances[0].dur).toEqual(breakingPoint);
+  });
+
+  it('will skip null responsiveness values after a breaking point', function() {
+    const breakingPoint = 70;
+    const responsiveness = [0, 20, 40, 60, breakingPoint, null, 10, 20];
+    const jankInstances = setup({
+      sampleCount: responsiveness.length,
+      responsiveness,
+    });
+    expect(jankInstances.length).toEqual(1);
+    expect(jankInstances[0].dur).toEqual(breakingPoint);
+  });
+});
+
 /**
  * The following tests run through a dispatch and selector to provide coverage
  * over the Redux store to ensure that it behaves correctly. The intent is to cover
