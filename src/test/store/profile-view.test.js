@@ -1191,6 +1191,4 @@ describe('getFriendlyThreadName', function() {
       'C (2/2)',
     ]);
   });
-
-  // Add as many `it`s as needed to provide coverage of all the cases.
 });
