@@ -297,6 +297,7 @@ export type NetworkPayload = {|
   count?: number, // Total size of transfer, if any
   dur: number,
   status: string,
+  cache?: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
   domainLookupStart?: Milliseconds,

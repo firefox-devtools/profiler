@@ -689,6 +689,7 @@ function getMarkerDetails(
         return (
           <div className="tooltipDetails">
             {_markerDetail('status', 'Status', _dataStatusReplace(data.status))}
+            {_markerDetailNullable('cache', 'Cache', data.cache)}
             {_markerDetailNullable('url', 'URL', data.URI)}
             {_markerDetailNullable(
               'redirect_url',
