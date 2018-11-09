@@ -80,15 +80,6 @@ describe('NetworkChart', function() {
 });
 
 describe('EmptyReasons', () => {
-  it('shows a reason when a profile has no network markers', () => {
-    const profile = getProfileWithMarkers([]);
-    const { dispatch, networkChart } = setupWithProfile(profile);
-
-    dispatch(changeSelectedTab('network-chart'));
-    networkChart.update();
-    expect(networkChart.find(EmptyReasons)).toMatchSnapshot();
-  });
-
   it("shows a reason when a profile's network markers have been filtered out", () => {
     const profile = getProfileWithMarkers(NETWORK_MARKERS);
     const { dispatch, networkChart } = setupWithProfile(profile);

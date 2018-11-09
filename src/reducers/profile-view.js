@@ -22,7 +22,6 @@ import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
-import { getInitialTabOrder } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
@@ -463,15 +462,6 @@ function zeroAt(state: Milliseconds = 0, action: Action) {
   }
 }
 
-function tabOrder(state: number[] = getInitialTabOrder(), action: Action) {
-  switch (action.type) {
-    case 'CHANGE_TAB_ORDER':
-      return action.tabOrder;
-    default:
-      return state;
-  }
-}
-
 function rightClickedTrack(
   // Make the initial value the first global track, which is assumed to exists.
   // This makes the track reference always exist, which in turn makes it so that
@@ -555,7 +545,6 @@ export default wrapReducerInResetter(
       focusCallTreeGeneration,
       rootRange,
       zeroAt,
-      tabOrder,
       rightClickedTrack,
       isCallNodeContextMenuVisible,
       profileSharingStatus,
@@ -593,11 +582,6 @@ export const getFocusCallTreeGeneration = createSelector(
 export const getZeroAt = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.zeroAt
-);
-
-export const getTabOrder = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.tabOrder
 );
 
 export const getCommittedRange = createSelector(
@@ -1069,7 +1053,7 @@ export const selectorsForThread = (
       }
     );
     const getIsNetworkChartEmptyInFullRange = createSelector(
-      getSearchFilteredTracingMarkers,
+      getTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker).length === 0
     );
     const getNetworkChartTracingMarkers = createSelector(
