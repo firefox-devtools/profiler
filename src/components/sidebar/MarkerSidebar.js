@@ -10,7 +10,7 @@ import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { formatMilliseconds } from '../../utils/format-numbers';
-import { CanSelectContent } from './index';
+import CanSelectContent from './CanSelectContent';
 
 import type {
   ConnectedProps,

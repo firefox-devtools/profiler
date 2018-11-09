@@ -14,7 +14,7 @@ import {
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { getFunctionName } from '../../profile-logic/function-info';
 import { assertExhaustiveCheck } from '../../utils/flow';
-import { CanSelectContent } from './index';
+import CanSelectContent from './CanSelectContent';
 
 import type {
   ConnectedProps,
