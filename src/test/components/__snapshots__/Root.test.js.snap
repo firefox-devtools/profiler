@@ -1,0 +1,231 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/ProfileViewWhenReady renders an home when the user pressed back after an error 1`] = `
+<div
+  className="rootMessageContainer"
+>
+  <div
+    className="rootMessage"
+  >
+    <h1
+      className="rootMessageTitle"
+    >
+      perf.html
+    </h1>
+    <div
+      className="rootMessageText"
+    >
+      Could not download the profile.
+    </div>
+    <div
+      className="rootMessageAdditional"
+    >
+      <p
+        key="0"
+      >
+        Error: Error while loading profile
+      </p>
+      <p
+        key="1"
+      >
+        The full stack has been written to the Web Console.
+      </p>
+      <a
+        href="/"
+      >
+        Back to home
+      </a>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/ProfileViewWhenReady renders an home when the user pressed back after an error 2`] = `<Connect(Home) />`;
+
+exports[`app/ProfileViewWhenReady renders an initial home 1`] = `<Connect(Home) />`;
+
+exports[`app/ProfileViewWhenReady renders temporary errors 1`] = `
+<div
+  className="rootMessageContainer"
+>
+  <div
+    className="rootMessage"
+  >
+    <h1
+      className="rootMessageTitle"
+    >
+      perf.html
+    </h1>
+    <div
+      className="rootMessageText"
+    >
+      Downloading and processing the profile...
+    </div>
+    <div
+      className="rootMessageAdditional"
+    >
+      <p
+        key="0"
+      >
+        This is a temporary error, wait a bit more.
+      </p>
+      <p
+        key="1"
+      >
+        Tried 3 times out of 10.
+      </p>
+      <a
+        href="/"
+      >
+        Back to home
+      </a>
+    </div>
+    <div
+      className="loading"
+    >
+      <div
+        className="loading-div loading-div-1 loading-row-1"
+      />
+      <div
+        className="loading-div loading-div-2 loading-row-2"
+      />
+      <div
+        className="loading-div loading-div-3 loading-row-3"
+      />
+      <div
+        className="loading-div loading-div-4 loading-row-3"
+      />
+      <div
+        className="loading-div loading-div-5 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-6 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-7 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-8 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-9 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-10 loading-row-4"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/ProfileViewWhenReady renders the addon loading page 1`] = `
+<div
+  className="rootMessageContainer"
+>
+  <div
+    className="rootMessage"
+  >
+    <h1
+      className="rootMessageTitle"
+    >
+      perf.html
+    </h1>
+    <div
+      className="rootMessageText"
+    >
+      Grabbing the profile from the Gecko Profiler Addon...
+    </div>
+    <div
+      className="loading"
+    >
+      <div
+        className="loading-div loading-div-1 loading-row-1"
+      />
+      <div
+        className="loading-div loading-div-2 loading-row-2"
+      />
+      <div
+        className="loading-div loading-div-3 loading-row-3"
+      />
+      <div
+        className="loading-div loading-div-4 loading-row-3"
+      />
+      <div
+        className="loading-div loading-div-5 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-6 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-7 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-8 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-9 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-10 loading-row-4"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/ProfileViewWhenReady renders the profile view 1`] = `
+<div
+  className="rootMessageContainer"
+>
+  <div
+    className="rootMessage"
+  >
+    <h1
+      className="rootMessageTitle"
+    >
+      perf.html
+    </h1>
+    <div
+      className="rootMessageText"
+    >
+      Downloading and processing the profile...
+    </div>
+    <div
+      className="loading"
+    >
+      <div
+        className="loading-div loading-div-1 loading-row-1"
+      />
+      <div
+        className="loading-div loading-div-2 loading-row-2"
+      />
+      <div
+        className="loading-div loading-div-3 loading-row-3"
+      />
+      <div
+        className="loading-div loading-div-4 loading-row-3"
+      />
+      <div
+        className="loading-div loading-div-5 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-6 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-7 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-8 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-9 loading-row-4"
+      />
+      <div
+        className="loading-div loading-div-10 loading-row-4"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/ProfileViewWhenReady renders the profile view 2`] = `<Connect(ProfileViewer) />`;

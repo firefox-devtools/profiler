@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 17; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 18; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -742,6 +742,9 @@ const _upgraders = {
     // The type field on some markers were missing. Renamed category field of
     // VsyncTimestamp and LayerTranslation marker payloads to type and added
     // a type field to Screenshot marker payload.
+    // In addition to that, we removed the `vsync` field from VsyncTimestamp
+    // since we don't use that field and have a timestamp for them already.
+    // Old profiles might still have this property.
     for (const thread of profile.threads) {
       const { stringArray, markers } = thread;
       const stringTable = new UniqueStringArray(stringArray);
@@ -782,11 +785,44 @@ const _upgraders = {
     }
   },
   [17]: profile => {
+    // Profiles now have a relevantForJS property in the funcTable.
+    // This column is false on C++ and JS frames, and true on label frames that
+    // are entry and exit points to JS.
+    // The upgrader below tries to detect existing JS entry and exit points
+    // based on the string name of the label frame.
+    // Existing entry points in old profiles are label frames with the string
+    // "AutoEntryScript <some entry reason>"
+    // and existing exit points in old profiles are label frames for WebIDL
+    // APIs, which have one of four forms: constructor, method, getter or setter.
+    // Examples:
+    // StructuredCloneHolder constructor
+    // Node.appendChild
+    // get Element.scrollTop
+    // set CSS2Properties.height
+    const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
+    for (const thread of profile.threads) {
+      const { funcTable, stringArray } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      funcTable.relevantForJS = new Array(funcTable.length);
+      for (let i = 0; i < funcTable.length; i++) {
+        const location = stringTable.getString(funcTable.name[i]);
+        if (location.startsWith('AutoEntryScript ')) {
+          funcTable.name[i] = stringTable.indexForString(
+            location.substring('AutoEntryScript '.length)
+          );
+          funcTable.relevantForJS[i] = true;
+        } else {
+          funcTable.relevantForJS[i] = domCallRegex.test(location);
+        }
+      }
+      thread.stringArray = stringTable.serializeToArray();
+    }
+  },
+ [18]: profile => {
     // funcTable gains a new field: columnNumber.
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
       const stringTable = new UniqueStringArray(stringArray);
-
       funcTable.columnNumber = [];
       for (
         let funcIndex = 0;
@@ -795,15 +831,13 @@ const _upgraders = {
       ) {
         if (funcTable.isJS[funcIndex]) {
           const fileNameIndex = funcTable.fileName[funcIndex];
-          let fileName;
           if (fileNameIndex !== null) {
-            fileName = stringTable.getString(fileNameIndex);
+            let fileName = stringTable.getString(fileNameIndex);
             const match = /^(.*):([0-9]+)$/.exec(fileName);
             if (match) {
               funcTable.columnNumber[funcIndex] =
                 funcTable.lineNumber[funcIndex];
-              stringTable.changeString(fileNameIndex, match[1]);
-
+              funcTable.fileName[funcIndex] = stringTable.indexForString(match[1]);
               funcTable.lineNumber[funcIndex] = parseInt(match[2], 10);
             } else {
               funcTable.columnNumber[funcIndex] = null;

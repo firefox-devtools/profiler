@@ -85,11 +85,11 @@ export type StackTable = {
  * are indices into other tables.
  */
 export type SamplesTable = {
-  responsiveness: number[],
+  responsiveness: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
-  time: number[],
-  rss: any[], // TODO
-  uss: any[], // TODO
+  time: Milliseconds[],
+  rss: Array<null | number>,
+  uss: Array<null | number>,
   length: number,
 };
 
@@ -146,6 +146,7 @@ export type FuncTable = {
   length: number,
   name: IndexIntoStringTable[],
   resource: Array<IndexIntoResourceTable | -1>,
+  relevantForJS: Array<boolean>,
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
   columnNumber: Array<number | null>,

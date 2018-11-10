@@ -770,6 +770,7 @@ export function collapseResource(
     isJS: funcTable.isJS.slice(),
     name: funcTable.name.slice(),
     resource: funcTable.resource.slice(),
+    relevantForJS: funcTable.relevantForJS.slice(),
     fileName: funcTable.fileName.slice(),
     lineNumber: funcTable.lineNumber.slice(),
     columnNumber: funcTable.columnNumber.slice(),

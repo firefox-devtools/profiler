@@ -350,7 +350,6 @@ type StyleMarkerPayload_Shared = {
 
 type VsyncTimestampPayload = {|
   type: 'VsyncTimestamp',
-  vsync: 0,
 |};
 
 export type ScreenshotPayload = {|
@@ -379,6 +378,13 @@ export type StyleMarkerPayload = StyleMarkerPayload_Shared & {
 
 export type BHRMarkerPayload = {
   type: 'BHR-detected hang',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+};
+
+export type LongTaskMarkerPayload = {
+  type: 'MainThreadLongTask',
+  category: 'LongTask',
   startTime: Milliseconds,
   endTime: Milliseconds,
 };
@@ -416,6 +422,7 @@ export type MarkerPayload =
   | GCSliceMarkerPayload
   | StyleMarkerPayload
   | BHRMarkerPayload
+  | LongTaskMarkerPayload
   | VsyncTimestampPayload
   | ScreenshotPayload
   | FrameConstructionMarkerPayload

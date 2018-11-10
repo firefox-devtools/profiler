@@ -38,14 +38,6 @@ export class UniqueStringArray {
     return index;
   }
 
-  changeString(index: IndexIntoStringTable, s: string) {
-    if (!(index in this._array)) {
-      throw new Error(`index ${index} not in UniqueStringArray`);
-    }
-    this._stringToIndex.set(s, index);
-    this._array[index] = s;
-  }
-
   serializeToArray(): string[] {
     return this._array.slice(0);
   }

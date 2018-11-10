@@ -503,6 +503,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         containerWidth={containerWidth}
         containerHeight={containerHeight}
         isDragging={isDragging}
+        scaleCtxToCssPixels={true}
         onDoubleClickItem={this._noOp}
         getHoveredItemInfo={this._getHoveredStackInfo}
         drawCanvas={this._drawCanvas}

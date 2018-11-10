@@ -70,9 +70,9 @@ describe('timeline/TrackScreenshots', function() {
 
   it('moves the hover when moving the mouse', () => {
     const { moveMouseAndGetLeft } = setup();
-    expect(moveMouseAndGetLeft(LEFT)).toBe(LEFT);
-    expect(moveMouseAndGetLeft(LEFT + 10)).toBe(LEFT + 10);
-    expect(moveMouseAndGetLeft(LEFT + 20)).toBe(LEFT + 20);
+    const base = moveMouseAndGetLeft(LEFT);
+    expect(moveMouseAndGetLeft(LEFT + 10)).toBe(base + 10);
+    expect(moveMouseAndGetLeft(LEFT + 20)).toBe(base + 20);
   });
 
   it('makes sure the hover image does not go off the end of the container', () => {

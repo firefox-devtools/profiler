@@ -78,6 +78,7 @@ describe('extract functions and resource from location strings', function() {
       frameFuncs,
     ] = extractFuncsAndResourcesFromFrameLocations(
       locationIndexes,
+      locationIndexes.map(() => false),
       stringTable,
       libs,
       extensions
