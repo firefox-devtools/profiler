@@ -41,7 +41,9 @@ const config = {
           path.join(__dirname, 'node_modules', 'photon-colors')
         ),
         use: [
-          process.env.NODE_ENV === 'development' ? 'style-loader' : MiniCssExtractPlugin.loader,
+          process.env.NODE_ENV === 'development'
+            ? 'style-loader'
+            : MiniCssExtractPlugin.loader,
           'css-loader?minimize',
         ],
       },
