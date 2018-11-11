@@ -21,15 +21,24 @@
  *
  */
 export default function mockRaf() {
-  let fns = [];
+  const fns = [];
   jest.spyOn(window, 'requestAnimationFrame').mockImplementation(fn => {
     fns.push(fn);
   });
 
-  return () => {
-    for (const fn of fns) {
-      fn();
+  return (timestamps: ?(number[])) => {
+    while (fns.length > 0) {
+      if (!timestamps) {
+        const fn = fns.shift();
+        fn();
+      } else {
+        const timestamp = timestamps.shift();
+        if (timestamp === undefined) {
+          return;
+        }
+        const fn = fns.shift();
+        fn(timestamp);
+      }
     }
-    fns = [];
   };
 }

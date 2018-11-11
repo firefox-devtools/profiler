@@ -210,7 +210,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
         this._container = container;
       };
-      _lastKeyboardNavigationFrame: number | null = null;
+      _lastKeyboardNavigationFrame: number = 0;
       _keysDown: Set<NavigationKey> = new Set();
 
       constructor(props: ViewportProps) {
@@ -564,16 +564,13 @@ export const withChartViewport: WithChartViewport<*, *> =
         if (this._keysDown.size === 0) {
           // No keys are down, nothing to do.  Don't request a new
           // animation frame.
-          this._lastKeyboardNavigationFrame = null;
           return;
         }
-        requestAnimationFrame(this._keyboardNavigation);
 
-        const dt =
-          this._lastKeyboardNavigationFrame === null
-            ? 0
-            : timestamp - this._lastKeyboardNavigationFrame;
-        const delta = KEYBOARD_NAVIGATION_SPEED * dt * 0.001;
+        const delta =
+          KEYBOARD_NAVIGATION_SPEED *
+          (timestamp - this._lastKeyboardNavigationFrame) *
+          0.001;
         this._lastKeyboardNavigationFrame = timestamp;
 
         for (const navigationKey of this._keysDown.values()) {
@@ -600,6 +597,7 @@ export const withChartViewport: WithChartViewport<*, *> =
               throw assertExhaustiveCheck(navigationKey);
           }
         }
+        requestAnimationFrame(this._keyboardNavigation);
       };
 
       moveViewport = (offsetX: CssPixels, offsetY: CssPixels): void => {
