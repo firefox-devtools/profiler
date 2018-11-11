@@ -26,19 +26,30 @@ export default function mockRaf() {
     fns.push(fn);
   });
 
+  /**
+   * Execute the queued functions, one at a time.
+   *
+   * If no argument is passed, flush and execute all functions in the
+   * queue.
+   *
+   * If an array of timestamps is passed, those timestamps will be
+   * passed in sequence to each queued function. When the array runs
+   * out, the execution loop will stop, even if there are remaining
+   * functions to be called.
+   */
   return (timestamps: ?(number[])) => {
     while (fns.length > 0) {
-      if (!timestamps) {
-        const fn = fns.shift();
-        fn();
-      } else {
-        const timestamp = timestamps.shift();
-        if (timestamp === undefined) {
+      let arg = undefined;
+      if (timestamps) {
+        arg = timestamps.shift();
+        if (arg === undefined) {
+          // We've run into the end of the passed array of
+          // timestamps. End the loop.
           return;
         }
-        const fn = fns.shift();
-        fn(timestamp);
       }
+      const fn = fns.shift();
+      fn(arg);
     }
   };
 }
