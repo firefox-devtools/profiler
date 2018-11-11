@@ -818,7 +818,7 @@ const _upgraders = {
       thread.stringArray = stringTable.serializeToArray();
     }
   },
- [18]: profile => {
+  [18]: profile => {
     // funcTable gains a new field: columnNumber.
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
@@ -832,12 +832,14 @@ const _upgraders = {
         if (funcTable.isJS[funcIndex]) {
           const fileNameIndex = funcTable.fileName[funcIndex];
           if (fileNameIndex !== null) {
-            let fileName = stringTable.getString(fileNameIndex);
+            const fileName = stringTable.getString(fileNameIndex);
             const match = /^(.*):([0-9]+)$/.exec(fileName);
             if (match) {
               funcTable.columnNumber[funcIndex] =
                 funcTable.lineNumber[funcIndex];
-              funcTable.fileName[funcIndex] = stringTable.indexForString(match[1]);
+              funcTable.fileName[funcIndex] = stringTable.indexForString(
+                match[1]
+              );
               funcTable.lineNumber[funcIndex] = parseInt(match[2], 10);
             } else {
               funcTable.columnNumber[funcIndex] = null;

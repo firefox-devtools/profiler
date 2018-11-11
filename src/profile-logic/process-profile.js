@@ -396,10 +396,10 @@ function _extractJsFunction(
   const jsMatch: RegExpResult =
     // Given:   "functionName (http://script.url/:1234:1234)"
     // Captures: 1^^^^^^^^^^  2^^^^^^^^^^^^^^^^^^ 3^^^ 4^^^
-    /^(.*) \((.+?):([0-9]+)(?::([0-9]+))\)$/.exec(locationString) ||
+    /^(.*) \((.+?):([0-9]+)(?::([0-9]+))?\)$/.exec(locationString) ||
     // Given:   "http://script.url/:1234:1234"
     // Captures: 2^^^^^^^^^^^^^^^^^ 3^^^ 4^^^
-    /^()(.+?):([0-9]+)(?::([0-9]+))$/.exec(locationString);
+    /^()(.+?):([0-9]+)(?::([0-9]+))?$/.exec(locationString);
 
   if (!jsMatch) {
     return null;
