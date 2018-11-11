@@ -212,6 +212,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       };
       _lastKeyboardNavigationFrame: number = 0;
       _keysDown: Set<NavigationKey> = new Set();
+      _deltaToZoomFactor = delta => Math.pow(1.0009, delta);
 
       constructor(props: ViewportProps) {
         super(props);
@@ -422,7 +423,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           // for that here.
           event.deltaY === 0 ? 'deltaX' : 'deltaY'
         );
-        const zoomFactor = Math.pow(1.0009, deltaY);
+        const zoomFactor = this._deltaToZoomFactor(deltaY);
 
         const mouseX = event.clientX;
         const { containerLeft, containerWidth } = this.state;
@@ -576,10 +577,10 @@ export const withChartViewport: WithChartViewport<*, *> =
         for (const navigationKey of this._keysDown.values()) {
           switch (navigationKey) {
             case 'zoomIn':
-              this.zoomRangeSelection(0.5, Math.pow(1.0009, -delta));
+              this.zoomRangeSelection(0.5, this._deltaToZoomFactor(-delta));
               break;
             case 'zoomOut':
-              this.zoomRangeSelection(0.5, Math.pow(1.0009, delta));
+              this.zoomRangeSelection(0.5, this._deltaToZoomFactor(delta));
               break;
             case 'up':
               this.moveViewport(0, delta);
