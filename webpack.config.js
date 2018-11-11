@@ -41,7 +41,8 @@ const config = {
           path.join(__dirname, 'node_modules', 'photon-colors')
         ),
         use: [
-          process.env.NODE_ENV === 'development' ? 'style-loader' : MiniCssExtractPlugin.loader,
+          'style-loader',
+          MiniCssExtractPlugin.loader,
           'css-loader?minimize',
         ],
       },
@@ -80,8 +81,8 @@ const config = {
       { from: 'res/analytics.js' },
     ]),
     new MiniCssExtractPlugin({
-      filename: '[name].[hash].css',
-      chunkFilename: '[id].[hash].css',
+      filename: '[name].css',
+      chunkFilename: '[id].css',
     }),
   ],
   entry: ['./src/index'],
