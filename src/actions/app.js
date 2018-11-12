@@ -77,6 +77,6 @@ export function invalidatePanelLayout(): Action {
  * is generated when the window.location is serialized, or the state is pulled out of
  * the history API.
  */
-export function updateUrlState(newUrlState: UrlState): Action {
+export function updateUrlState(newUrlState: UrlState | null): Action {
   return { type: 'UPDATE_URL_STATE', newUrlState };
 }
