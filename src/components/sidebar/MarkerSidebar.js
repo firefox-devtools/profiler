@@ -20,7 +20,7 @@ import type { TracingMarker } from '../../types/profile-derived';
 
 type StateProps = {|
   +selectedThreadIndex: ThreadIndex,
-  +marker: TracingMarker,
+  +marker: ?TracingMarker,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
@@ -31,14 +31,14 @@ class MarkerSidebar extends React.PureComponent<Props> {
 
     if (marker === null || marker === undefined) {
       return (
-        <div className="sidebar sidebar-calltree">
+        <div className="sidebar sidebar-marker-table">
           Select a marker to display some information about it.
         </div>
       );
     }
 
     return (
-      <aside className="sidebar sidebar-calltree">
+      <aside className="sidebar sidebar-marker-table">
         <div className="sidebar-contents-wrapper">
           <MarkerTooltipContents
             marker={marker}

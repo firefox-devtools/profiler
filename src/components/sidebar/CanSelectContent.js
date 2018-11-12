@@ -7,15 +7,13 @@
 import * as React from 'react';
 import classNames from 'classnames';
 
-type CanCopyContentProps = {|
+type Props = {|
   +tagName?: string,
   +content: string,
   +className?: string,
 |};
 
-export default class CanSelectContent extends React.PureComponent<
-  CanCopyContentProps
-> {
+export default class CanSelectContent extends React.PureComponent<Props> {
   _selectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
     const input = e.currentTarget;
     input.focus();
