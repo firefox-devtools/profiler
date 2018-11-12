@@ -862,7 +862,7 @@ export function processProfile(
   let pages = [...(geckoProfile.pages || [])];
 
   for (const subprocessProfile of geckoProfile.processes) {
-    pages = pages.concat(subprocessProfile.pages);
+    pages = pages.concat(subprocessProfile.pages || []);
   }
 
   const meta = {
@@ -910,7 +910,7 @@ export function serializeProfile(
   const newProfile = Object.assign({}, profile, {
     meta: { ...profile.meta, networkURLsRemoved: !includeNetworkUrls },
     pages:
-      includeNetworkUrls === false
+      includeNetworkUrls === false && profile.pages
         ? profile.pages.map(page =>
             Object.assign({}, page, {
               url: 'Page #' + urlCounter++,

@@ -190,12 +190,12 @@ export type Category = {
 
 export type CategoryList = Array<Category>;
 
-export type Page = {
+export type Page = {|
   docshellId: string,
   historyId: number,
   url: string,
   isSubFrame: boolean,
-};
+|};
 
 export type PageList = Array<Page>;
 
@@ -336,6 +336,6 @@ export type ProfileMeta = {|
  */
 export type Profile = {
   meta: ProfileMeta,
-  pages: PageList,
+  pages?: PageList,
   threads: Thread[],
 };

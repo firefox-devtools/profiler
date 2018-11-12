@@ -193,7 +193,7 @@ export type GeckoProfileMeta = {|
 export type GeckoProfile = {|
   meta: GeckoProfileMeta,
   libs: Lib[],
-  pages: PageList,
+  pages?: PageList,
   threads: GeckoThread[],
   pausedRanges: PausedRange[],
   tasktracer?: Object,
