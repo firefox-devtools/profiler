@@ -7,6 +7,7 @@ import type { TrackReference } from '../../types/actions';
 import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import {
+  getEmptyThread,
   getProfileFromTextSamples,
   getProfileWithMarkers,
   getNetworkTrackProfile,
@@ -14,6 +15,7 @@ import {
   getNetworkMarker,
 } from '../fixtures/profiles/make-profile';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
+import { getEmptyProfile } from '../../profile-logic/profile-data';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { blankStore, storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
@@ -137,6 +139,69 @@ describe('call node paths on implementation filter change', function() {
         [A],
       ]
     );
+  });
+});
+
+describe('getJankInstances', function() {
+  function setup({ sampleCount, responsiveness }) {
+    const { profile } = getProfileFromTextSamples(
+      Array(sampleCount)
+        .fill('A')
+        .join('  ')
+    );
+    profile.threads[0].samples.responsiveness = responsiveness;
+    const { getState } = storeWithProfile(profile);
+    return selectedThreadSelectors.getJankInstances(getState());
+  }
+
+  it('will not create any jank markers for undefined responsiveness', function() {
+    const jankInstances = setup({
+      sampleCount: 10,
+      responsiveness: [],
+    });
+    expect(jankInstances).toEqual([]);
+  });
+
+  it('will not create any jank markers for null responsiveness', function() {
+    const responsiveness = Array(10).fill(null);
+    const jankInstances = setup({
+      sampleCount: responsiveness.length,
+      responsiveness,
+    });
+    expect(jankInstances).toEqual([]);
+  });
+
+  it('will create a jank instance', function() {
+    const breakingPoint = 70;
+    const responsiveness = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
+    const jankInstances = setup({
+      sampleCount: responsiveness.length,
+      responsiveness,
+    });
+    expect(jankInstances.length).toEqual(1);
+    expect(jankInstances[0].dur).toEqual(breakingPoint);
+  });
+
+  it('will skip null responsiveness values', function() {
+    const breakingPoint = 70;
+    const responsiveness = [0, 20, 40, null, breakingPoint, null, 0, 20, 40];
+    const jankInstances = setup({
+      sampleCount: responsiveness.length,
+      responsiveness,
+    });
+    expect(jankInstances.length).toEqual(1);
+    expect(jankInstances[0].dur).toEqual(breakingPoint);
+  });
+
+  it('will skip null responsiveness values after a breaking point', function() {
+    const breakingPoint = 70;
+    const responsiveness = [0, 20, 40, 60, breakingPoint, null, 10, 20];
+    const jankInstances = setup({
+      sampleCount: responsiveness.length,
+      responsiveness,
+    });
+    expect(jankInstances.length).toEqual(1);
+    expect(jankInstances[0].dur).toEqual(breakingPoint);
   });
 });
 
@@ -1115,5 +1180,78 @@ describe('snapshots of selectors/profile-view', function() {
     expect(
       selectedNodeSelectors.getTimingsForSidebar(getState())
     ).toMatchSnapshot();
+  });
+});
+
+// Verify that getFriendlyThreadName gives the expected names for threads with or without processName.
+describe('getFriendlyThreadName', function() {
+  // Setup a profile with threads based on the given overrides.
+  function setup(threadOverrides: Array<*>) {
+    const profile = getEmptyProfile();
+    for (const threadOverride of threadOverrides) {
+      profile.threads.push(getEmptyThread(threadOverride));
+    }
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    const getFriendlyThreadNames = () =>
+      profile.threads.map((_, threadIndex) =>
+        ProfileViewSelectors.selectorsForThread(
+          threadIndex
+        ).getFriendlyThreadName(getState())
+      );
+
+    return { profile, dispatch, getState, getFriendlyThreadNames };
+  }
+
+  it('uses names based on GeckoMain processTypes when there are no processNames', function() {
+    const { getFriendlyThreadNames } = setup([
+      { name: 'GeckoMain', processType: 'default' },
+      { name: 'GeckoMain', processType: 'tab' },
+      { name: 'GeckoMain', processType: 'gpu' },
+      { name: 'GeckoMain', processType: 'plugin' },
+    ]);
+    expect(getFriendlyThreadNames()).toEqual([
+      'Parent Process',
+      'Content Process',
+      'GPU Process',
+      'Plugin Process',
+    ]);
+  });
+
+  it('uses names based on GeckoMain processTypes (and counts multiple tabs) when there are no processNames', function() {
+    const { getFriendlyThreadNames } = setup([
+      { name: 'GeckoMain', processType: 'default' },
+      { name: 'GeckoMain', processType: 'tab' },
+      { name: 'GeckoMain', processType: 'gpu' },
+      { name: 'GeckoMain', processType: 'tab' },
+    ]);
+    expect(getFriendlyThreadNames()).toEqual([
+      'Parent Process',
+      'Content Process (1/2)',
+      'GPU Process',
+      'Content Process (2/2)',
+    ]);
+  });
+
+  it('uses processName for GeckoMain threads that have one', function() {
+    const { getFriendlyThreadNames } = setup([
+      { name: 'GeckoMain', processName: 'A' },
+      { name: 'GeckoMain', processName: 'B' },
+      { name: 'GeckoMain', processName: 'C' },
+      { name: 'GeckoMain', processType: 'gpu' },
+      { name: 'GeckoMain', processName: 'B' },
+      { name: 'GeckoMain', processName: 'B' },
+      { name: 'GeckoMain', processName: 'C' },
+    ]);
+    expect(getFriendlyThreadNames()).toEqual([
+      'A',
+      'B (1/3)',
+      'C (1/2)',
+      'GPU Process',
+      'B (2/3)',
+      'B (3/3)',
+      'C (2/2)',
+    ]);
   });
 });

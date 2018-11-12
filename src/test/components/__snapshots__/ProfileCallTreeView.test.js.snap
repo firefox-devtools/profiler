@@ -11,33 +11,49 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -137,33 +153,49 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -263,33 +295,49 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="js"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -389,33 +437,49 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -568,9 +632,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -609,9 +673,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -650,9 +714,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -691,9 +755,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -732,9 +796,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -773,9 +837,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -814,9 +878,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -855,9 +919,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -896,9 +960,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -937,9 +1001,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -978,9 +1042,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1019,9 +1083,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1060,9 +1124,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1101,9 +1165,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1142,9 +1206,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1183,9 +1247,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1228,9 +1292,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1269,9 +1333,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -1310,9 +1374,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2050,33 +2114,49 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -2229,9 +2309,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="66.7%"
+                  title="67%"
                 >
-                  66.7%
+                  67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2270,9 +2350,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="66.7%"
+                  title="67%"
                 >
-                  66.7%
+                  67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2311,9 +2391,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="66.7%"
+                  title="67%"
                 >
-                  66.7%
+                  67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2352,9 +2432,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2393,9 +2473,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2434,9 +2514,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2475,9 +2555,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -2791,33 +2871,49 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -2970,9 +3066,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3011,9 +3107,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3052,9 +3148,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="66.7%"
+                  title="67%"
                 >
-                  66.7%
+                  67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3093,9 +3189,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3134,9 +3230,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3175,9 +3271,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3216,9 +3312,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3532,33 +3628,49 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -3711,9 +3823,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3752,9 +3864,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3793,9 +3905,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="66.7%"
+                  title="67%"
                 >
-                  66.7%
+                  67%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3834,9 +3946,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3875,9 +3987,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3916,9 +4028,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -3957,9 +4069,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="33.3%"
+                  title="33%"
                 >
-                  33.3%
+                  33%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4273,33 +4385,49 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -4452,9 +4580,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4493,9 +4621,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4534,9 +4662,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4575,9 +4703,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50.0%"
+                  title="50%"
                 >
-                  50.0%
+                  50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4616,9 +4744,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50.0%"
+                  title="50%"
                 >
-                  50.0%
+                  50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4657,9 +4785,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50.0%"
+                  title="50%"
                 >
-                  50.0%
+                  50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -4943,33 +5071,49 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -5122,9 +5266,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5163,9 +5307,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5204,9 +5348,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5245,9 +5389,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50.0%"
+                  title="50%"
                 >
-                  50.0%
+                  50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5286,9 +5430,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50.0%"
+                  title="50%"
                 >
-                  50.0%
+                  50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5327,9 +5471,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50.0%"
+                  title="50%"
                 >
-                  50.0%
+                  50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5613,33 +5757,49 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -5792,9 +5952,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5833,9 +5993,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5874,9 +6034,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -5915,9 +6075,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6136,33 +6296,49 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -6315,9 +6491,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6356,9 +6532,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6397,9 +6573,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6438,9 +6614,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6659,33 +6835,49 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -6838,9 +7030,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6879,9 +7071,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6920,9 +7112,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="100.0%"
+                  title="100%"
                 >
-                  100.0%
+                  100%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -6961,9 +7153,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50.0%"
+                  title="50%"
                 >
-                  50.0%
+                  50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -7002,9 +7194,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50.0%"
+                  title="50%"
                 >
-                  50.0%
+                  50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"
@@ -7043,9 +7235,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTimePercent"
                   key="totalTimePercent"
-                  title="50.0%"
+                  title="50%"
                 >
-                  50.0%
+                  50%
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn totalTime"

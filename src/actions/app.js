@@ -41,13 +41,6 @@ export function setProfileSharingStatus(
   };
 }
 
-export function changeTabOrder(tabOrder: number[]): Action {
-  return {
-    type: 'CHANGE_TAB_ORDER',
-    tabOrder,
-  };
-}
-
 export function urlSetupDone(): ThunkAction<void> {
   return (dispatch, getState) => {
     dispatch({ type: 'URL_SETUP_DONE' });

@@ -13,6 +13,7 @@ import {
   getLocalTracks,
   getLocalTrackFromReference,
   getGlobalTrackFromReference,
+  getPreviewSelection,
 } from '../reducers/profile-view';
 import {
   getImplementationFilter,
@@ -31,6 +32,7 @@ import {
 } from '../profile-logic/profile-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
+import { objectShallowEquals } from '../utils/index';
 
 import type {
   PreviewSelection,
@@ -898,10 +900,17 @@ export function changeInvertCallstack(
 
 export function updatePreviewSelection(
   previewSelection: PreviewSelection
-): Action {
-  return {
-    type: 'UPDATE_PREVIEW_SELECTION',
-    previewSelection,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const currentPreviewSelection = getPreviewSelection(getState());
+    if (!objectShallowEquals(currentPreviewSelection, previewSelection)) {
+      // Only dispatch if the selection changes. This function can fire in a tight loop,
+      // and this check saves a dispatch.
+      dispatch({
+        type: 'UPDATE_PREVIEW_SELECTION',
+        previewSelection,
+      });
+    }
   };
 }
 

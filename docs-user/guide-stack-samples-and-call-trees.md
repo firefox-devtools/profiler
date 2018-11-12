@@ -28,7 +28,7 @@ This image shows that the profiler sampled `B` at the beginning and end of the p
 
 ![This graphic demonstrates the modified call tree. It is a chart of the stacks A, B, C, and doWork, each connected by an arrow going from the root A to the leaf doWork. A has a running time of 5ms, and a self time of 0ms. B has a running time of 5ms, and a self time of 2ms. C has a running time of 3ms, and a self time of 0ms. doWork has a running time of 3ms, and a self time of 3ms.](./images/simple-call-tree-self-time.svg)
 
-The call node with the function `B` continues to have the running time of 5ms, but also has a self time of 2ms. Function `C` has a reduced running time of `3ms` and finally do work was only observed `3ms` for both the running and self time.
+The call node with the function `B` continues to have the running time of 5ms, but also has a self time of 2ms. Function `C` has a reduced running time of `3ms` and finally `doWork` was only observed `3ms` for both the running and self time.
 
 In summary, self time is where work was actually happening when observed by the profiler.
 

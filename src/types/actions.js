@@ -101,10 +101,6 @@ type ProfileAction =
       +previewSelection: PreviewSelection,
     |}
   | {|
-      +type: 'CHANGE_TAB_ORDER',
-      +tabOrder: number[],
-    |}
-  | {|
       +type: 'CHANGE_SELECTED_ZIP_FILE',
       +selectedZipFileIndex: IndexIntoZipFileTable | null,
     |}

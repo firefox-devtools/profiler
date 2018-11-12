@@ -4,13 +4,17 @@
 // @flow
 
 import { storeWithSimpleProfile, storeWithProfile } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
 import * as UrlStateSelectors from '../../reducers/url-state';
 import * as AppSelectors from '../../reducers/app';
 import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { isolateProcess } from '../../actions/profile-view';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+  getNetworkMarker,
+} from '../fixtures/profiles/make-profile';
 
 import * as AppActions from '../../actions/app';
 
@@ -59,25 +63,28 @@ describe('app actions', function() {
     });
   });
 
-  describe('changeTabOrder', function() {
-    it('can change the saved tab order', function() {
-      const { dispatch, getState } = storeWithSimpleProfile();
-      expect(ProfileViewSelectors.getTabOrder(getState())).toEqual([
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
+  describe('visibleTabs', function() {
+    it('hides the network chart when there are no network markers in a thread', function() {
+      const { profile } = getProfileFromTextSamples('A');
+      const { getState } = storeWithProfile(profile);
+      expect(AppSelectors.getVisibleTabs(getState())).toEqual([
+        'calltree',
+        'flame-graph',
+        'stack-chart',
+        'marker-chart',
+        'marker-table',
       ]);
-      dispatch(AppActions.changeTabOrder([2, 3, 1, 4, 5, 0]));
-      expect(ProfileViewSelectors.getTabOrder(getState())).toEqual([
-        2,
-        3,
-        1,
-        4,
-        5,
-        0,
+    });
+    it('shows the network chart when network markers are present in the thread', function() {
+      const profile = getProfileWithMarkers([getNetworkMarker(10, 0)]);
+      const { getState } = storeWithProfile(profile);
+      expect(AppSelectors.getVisibleTabs(getState())).toEqual([
+        'calltree',
+        'flame-graph',
+        'stack-chart',
+        'marker-chart',
+        'marker-table',
+        'network-chart',
       ]);
     });
   });

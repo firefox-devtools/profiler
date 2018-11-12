@@ -6,18 +6,14 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import Reorderable from '../shared/Reorderable';
 
-import type { Action } from '../../types/actions';
-import type { TabWithTitle } from '../../app-logic/tabs-handling';
+import { tabsWithTitle, type TabSlug } from '../../app-logic/tabs-handling';
 
 type Props = {|
   +className?: string,
-  +tabs: $ReadOnlyArray<TabWithTitle>,
-  +selectedTabName: string,
-  +tabOrder: number[],
+  +selectedTabSlug: string,
+  +visibleTabs: $ReadOnlyArray<TabSlug>,
   +onSelectTab: string => void,
-  +onChangeTabOrder: (number[]) => Action,
   +extraElements?: React.Node,
 |};
 
@@ -32,35 +28,27 @@ class TabBar extends React.PureComponent<Props> {
   render() {
     const {
       className,
-      tabs,
-      selectedTabName,
-      tabOrder,
-      onChangeTabOrder,
+      selectedTabSlug,
+      visibleTabs,
       extraElements,
     } = this.props;
     return (
       <div className={classNames('tabBarContainer', className)}>
-        <Reorderable
-          tagName="ol"
-          className="tabBarTabWrapper"
-          grippyClassName="grippy"
-          order={tabOrder}
-          orient="horizontal"
-          onChangeOrder={onChangeTabOrder}
-        >
-          {tabs.map(({ name, title }, i) => (
+        <ol className="tabBarTabWrapper">
+          {visibleTabs.map(tabSlug => (
             <li
-              className={classNames('tabBarTab', 'grippy', {
-                selected: name === selectedTabName,
+              className={classNames({
+                tabBarTab: true,
+                selected: tabSlug === selectedTabSlug,
               })}
-              key={i}
-              data-name={name}
+              key={tabSlug}
+              data-name={tabSlug}
               onMouseDown={this._mouseDownListener}
             >
-              {title}
+              {tabsWithTitle[tabSlug]}
             </li>
           ))}
-        </Reorderable>
+        </ol>
         {extraElements}
       </div>
     );

@@ -22,7 +22,6 @@ import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
-import { getInitialTabOrder } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
@@ -171,6 +170,7 @@ function viewOptionsPerThread(
           return newFunc === undefined ? oldFunc : newFunc;
         };
         return {
+          ...threadViewOptions,
           selectedCallNodePath: threadViewOptions.selectedCallNodePath.map(
             mapOldFuncToNewFunc
           ),
@@ -179,7 +179,6 @@ function viewOptionsPerThread(
               oldPath.map(mapOldFuncToNewFunc)
             )
           ),
-          selectedMarker: threadViewOptions.selectedMarker,
         };
       });
     }
@@ -228,10 +227,11 @@ function viewOptionsPerThread(
 
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], {
+        {
+          ...state[threadIndex],
           selectedCallNodePath,
           expandedCallNodePaths,
-        }),
+        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -252,10 +252,11 @@ function viewOptionsPerThread(
           for (let i = 1; i < selectedCallNodePath.length; i++) {
             expandedCallNodePaths.add(selectedCallNodePath.slice(0, i));
           }
-          return Object.assign({}, viewOptions, {
+          return {
+            ...viewOptions,
             selectedCallNodePath,
             expandedCallNodePaths,
-          });
+          };
         }
         return viewOptions;
       });
@@ -264,9 +265,10 @@ function viewOptionsPerThread(
       const { threadIndex, expandedCallNodePaths } = action;
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], {
+        {
+          ...state[threadIndex],
           expandedCallNodePaths: new PathSet(expandedCallNodePaths),
-        }),
+        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -274,7 +276,7 @@ function viewOptionsPerThread(
       const { threadIndex, selectedMarker } = action;
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], { selectedMarker }),
+        { ...state[threadIndex], selectedMarker },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -300,10 +302,11 @@ function viewOptionsPerThread(
 
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], {
+        {
+          ...state[threadIndex],
           selectedCallNodePath,
           expandedCallNodePaths,
-        }),
+        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -313,10 +316,11 @@ function viewOptionsPerThread(
       const { threadIndex } = action;
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], {
+        {
+          ...state[threadIndex],
           selectedCallNodePath: [],
           expandedCallNodePaths: new PathSet(),
-        }),
+        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -367,10 +371,11 @@ function viewOptionsPerThread(
 
       return [
         ...state.slice(0, threadIndex),
-        Object.assign({}, state[threadIndex], {
+        {
+          ...state[threadIndex],
           selectedCallNodePath,
           expandedCallNodePaths,
-        }),
+        },
         ...state.slice(threadIndex + 1),
       ];
     }
@@ -452,15 +457,6 @@ function zeroAt(state: Milliseconds = 0, action: Action) {
   switch (action.type) {
     case 'VIEW_PROFILE':
       return ProfileData.getTimeRangeIncludingAllThreads(action.profile).start;
-    default:
-      return state;
-  }
-}
-
-function tabOrder(state: number[] = getInitialTabOrder(), action: Action) {
-  switch (action.type) {
-    case 'CHANGE_TAB_ORDER':
-      return action.tabOrder;
     default:
       return state;
   }
@@ -549,7 +545,6 @@ export default wrapReducerInResetter(
       focusCallTreeGeneration,
       rootRange,
       zeroAt,
-      tabOrder,
       rightClickedTrack,
       isCallNodeContextMenuVisible,
       profileSharingStatus,
@@ -587,11 +582,6 @@ export const getFocusCallTreeGeneration = createSelector(
 export const getZeroAt = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.zeroAt
-);
-
-export const getTabOrder = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.tabOrder
 );
 
 export const getCommittedRange = createSelector(
@@ -925,7 +915,7 @@ export const selectorsForThread = (
         transforms.reduce(
           // Apply the reducer using an arrow function to ensure correct memoization.
           (thread, transform) =>
-            applyTransformMemoized(thread, transform, defaultCategoryObj),
+            applyTransformMemoized(thread, transform, defaultCategoryObj.value),
           startingThread
         )
     );
@@ -1037,6 +1027,8 @@ export const selectorsForThread = (
           tm =>
             tm.name !== 'GCMajor' &&
             tm.name !== 'BHR-detected hang' &&
+            tm.name !== 'LongTask' &&
+            tm.name !== 'LongIdleTask' &&
             !MarkerData.isNetworkMarker(tm)
         )
     );
@@ -1061,7 +1053,7 @@ export const selectorsForThread = (
       }
     );
     const getIsNetworkChartEmptyInFullRange = createSelector(
-      getSearchFilteredTracingMarkers,
+      getTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker).length === 0
     );
     const getNetworkChartTracingMarkers = createSelector(

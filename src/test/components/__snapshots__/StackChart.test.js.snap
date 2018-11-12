@@ -11,33 +11,49 @@ exports[`StackChart matches the snapshot 1`] = `
       className="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem"
+        className="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsLabel"
+          className="stackSettingsFilterLabel"
         >
-          Filter:
-          <select
-            className="stackSettingsSelect"
+          <input
+            checked={true}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
             onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
             value="combined"
-          >
-            <option
-              value="combined"
-            >
-              Combined stacks
-            </option>
-            <option
-              value="js"
-            >
-              JS only
-            </option>
-            <option
-              value="cpp"
-            >
-              C++ only
-            </option>
-          </select>
+          />
+          All stacks
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          className="stackSettingsFilterLabel"
+        >
+          <input
+            checked={false}
+            className="stackSettingsFilterInput"
+            name="stack-settings-filter"
+            onChange={[Function]}
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
         </label>
       </li>
       <li
@@ -134,9 +150,8 @@ exports[`StackChart matches the snapshot 1`] = `
 exports[`StackChart matches the snapshot 2`] = `
 Array [
   Array [
-    "scale",
-    1,
-    1,
+    "set font",
+    "10px sans-serif",
   ],
   Array [
     "measureText",
@@ -165,18 +180,7 @@ Array [
     "fillRect",
     150,
     0,
-    200,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    150,
-    0,
-    1,
+    199.4,
     15,
   ],
   Array [
@@ -201,18 +205,7 @@ Array [
     "fillRect",
     150,
     16,
-    200,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    150,
-    16,
-    1,
+    199.4,
     15,
   ],
   Array [
@@ -237,18 +230,7 @@ Array [
     "fillRect",
     150,
     32,
-    133.33333333333331,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    150,
-    32,
-    1,
+    133.4,
     15,
   ],
   Array [
@@ -271,20 +253,9 @@ Array [
   ],
   Array [
     "fillRect",
-    283.3333333333333,
+    284,
     32,
-    66.66666666666667,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    283.3333333333333,
-    32,
-    1,
+    65.4,
     15,
   ],
   Array [
@@ -309,18 +280,7 @@ Array [
     "fillRect",
     150,
     48,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    150,
-    48,
-    1,
+    66.4,
     15,
   ],
   Array [
@@ -343,20 +303,9 @@ Array [
   ],
   Array [
     "fillRect",
-    216.66666666666666,
+    217,
     48,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    216.66666666666666,
-    48,
-    1,
+    66.4,
     15,
   ],
   Array [
@@ -379,20 +328,9 @@ Array [
   ],
   Array [
     "fillRect",
-    283.3333333333333,
+    284,
     48,
-    66.66666666666667,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    283.3333333333333,
-    48,
-    1,
+    65.4,
     15,
   ],
   Array [
@@ -417,18 +355,7 @@ Array [
     "fillRect",
     150,
     64,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    150,
-    64,
-    1,
+    66.4,
     15,
   ],
   Array [
@@ -451,20 +378,9 @@ Array [
   ],
   Array [
     "fillRect",
-    216.66666666666666,
+    217,
     64,
-    66.66666666666666,
-    15,
-  ],
-  Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    216.66666666666666,
-    64,
-    1,
+    66.4,
     15,
   ],
   Array [

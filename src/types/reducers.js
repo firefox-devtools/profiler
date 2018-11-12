@@ -39,19 +39,19 @@ import type { PathSet } from '../utils/path.js';
 export type Reducer<T> = (T | void, Action) => T;
 
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
-export type ThreadViewOptions = {
-  selectedCallNodePath: CallNodePath,
-  expandedCallNodePaths: PathSet,
-  selectedMarker: IndexIntoMarkersTable | -1,
-};
+export type ThreadViewOptions = {|
+  +selectedCallNodePath: CallNodePath,
+  +expandedCallNodePaths: PathSet,
+  +selectedMarker: IndexIntoMarkersTable | -1,
+|};
 
-export type ProfileSharingStatus = {
-  sharedWithUrls: boolean,
-  sharedWithoutUrls: boolean,
-};
+export type ProfileSharingStatus = {|
+  +sharedWithUrls: boolean,
+  +sharedWithoutUrls: boolean,
+|};
 
-export type ProfileViewState = {
-  viewOptions: {
+export type ProfileViewState = {|
+  +viewOptions: {|
     perThread: ThreadViewOptions[],
     symbolicationStatus: SymbolicationStatus,
     waitingForLibs: Set<RequestedLib>,
@@ -60,15 +60,14 @@ export type ProfileViewState = {
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
     zeroAt: Milliseconds,
-    tabOrder: number[],
     rightClickedTrack: TrackReference,
     isCallNodeContextMenuVisible: boolean,
     profileSharingStatus: ProfileSharingStatus,
-  },
-  globalTracks: GlobalTrack[],
-  localTracksByPid: Map<Pid, LocalTrack[]>,
-  profile: Profile | null,
-};
+  |},
+  +globalTracks: GlobalTrack[],
+  +localTracksByPid: Map<Pid, LocalTrack[]>,
+  +profile: Profile | null,
+|};
 
 export type AppViewState =
   | {| +phase: 'ROUTE_NOT_FOUND' |}
@@ -136,12 +135,12 @@ export type ZippedProfilesState = {
 };
 
 export type UrlState = {|
-  dataSource: DataSource,
-  hash: string,
-  profileUrl: string,
-  selectedTab: TabSlug,
-  pathInZipFile: string | null,
-  profileSpecific: {|
+  +dataSource: DataSource,
+  +hash: string,
+  +profileUrl: string,
+  +selectedTab: TabSlug,
+  +pathInZipFile: string | null,
+  +profileSpecific: {|
     selectedThread: ThreadIndex | null,
     globalTrackOrder: TrackIndex[],
     hiddenGlobalTracks: Set<TrackIndex>,
@@ -161,21 +160,21 @@ export type UrlState = {|
 
 export type IconState = Set<string>;
 
-export type StackChartState = {
+export type StackChartState = {|
   categoryColorStrategy: GetCategory,
   labelingStrategy: GetLabel,
-};
-
-export type State = {|
-  app: AppState,
-  profileView: ProfileViewState,
-  urlState: UrlState,
-  stackChart: StackChartState,
-  icons: IconState,
-  zippedProfiles: ZippedProfilesState,
 |};
 
-export type IconWithClassName = {
-  icon: string,
-  className: string,
-};
+export type State = {|
+  +app: AppState,
+  +profileView: ProfileViewState,
+  +urlState: UrlState,
+  +stackChart: StackChartState,
+  +icons: IconState,
+  +zippedProfiles: ZippedProfilesState,
+|};
+
+export type IconWithClassName = {|
+  +icon: string,
+  +className: string,
+|};
