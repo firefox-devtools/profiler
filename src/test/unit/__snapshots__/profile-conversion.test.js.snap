@@ -60,6 +60,7 @@ Object {
     "toolkit": "",
     "version": 14,
   },
+  "pages": Array [],
   "threads": Array [
     Object {
       "frameTable": Object {
@@ -5619,6 +5620,7 @@ Object {
     "toolkit": undefined,
     "version": 14,
   },
+  "pages": Array [],
   "threads": Array [
     Object {
       "frameTable": Object {
