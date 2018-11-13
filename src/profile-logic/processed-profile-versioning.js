@@ -833,7 +833,7 @@ const _upgraders = {
         funcIndex < thread.funcTable.length;
         funcIndex++
       ) {
-        funcTable.columnNumber[funcIndex] = null; 
+        funcTable.columnNumber[funcIndex] = null;
         if (funcTable.isJS[funcIndex]) {
           const fileNameIndex = funcTable.fileName[funcIndex];
           if (fileNameIndex !== null) {
@@ -848,9 +848,9 @@ const _upgraders = {
                 match[1]
               );
               funcTable.lineNumber[funcIndex] = parseInt(match[2], 10);
-            } 
+            }
           }
-        } 
+        }
       }
       thread.stringArray = stringTable.serializeToArray();
     }
