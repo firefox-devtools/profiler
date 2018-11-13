@@ -1,0 +1,57 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.jsTracerSettings {
+  height: 25px;
+  padding: 0;
+  display: flex;
+  border-bottom: 1px solid var(--grey-30);
+  line-height: 25px;
+  flex-flow: row nowrap;
+  color: var(--ink-70);
+}
+
+.jsTracerSettingsList {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex: 1;
+  list-style: none;
+  align-items: flex-start;
+}
+
+.jsTracerSettingsListItem {
+  margin: 0 5px;
+  padding: 0;
+}
+
+.jsTracerSettingsLabel {
+  height: 25px;
+  display: inline-flex;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  flex-flow: row nowrap;
+  align-items: center;
+}
+
+.jsTracerSettingsCheckbox {
+  margin: 0 5px;
+}
+
+.jsTracerSettingsFilter {
+  border-right: 1px solid var(--grey-20);
+  padding-right: 10px;
+  white-space: nowrap;
+}
+
+.jsTracerSettingsFilterLabel {
+  padding-right: 5px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.jsTracerSettingsFilterInput {
+  margin: 0 4px;
+}
