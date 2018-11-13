@@ -33,6 +33,7 @@ import type {
   Pid,
   MarkersTable,
   IndexIntoSamplesTable,
+  IndexIntoMarkersTable,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -813,6 +814,7 @@ export type SelectorsForThread = {
   getSearchFilteredTracingMarkers: State => TracingMarker[],
   getPreviewFilteredTracingMarkers: State => TracingMarker[],
   unfilteredSamplesRange: State => StartEndRange | null,
+  getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -1237,6 +1239,8 @@ export const selectorsForThread = (
         return { start: time[0], end: time[time.length - 1] + interval };
       }
     );
+    const getSelectedMarkerIndex = (state: State) =>
+      getViewOptions(state).selectedMarker;
 
     selectorsForThreads[threadIndex] = {
       getThread,
@@ -1279,6 +1283,7 @@ export const selectorsForThread = (
       getSearchFilteredTracingMarkers,
       getPreviewFilteredTracingMarkers,
       unfilteredSamplesRange,
+      getSelectedMarkerIndex,
     };
   }
   return selectorsForThreads[threadIndex];
