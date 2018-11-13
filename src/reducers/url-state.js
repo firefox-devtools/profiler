@@ -175,6 +175,19 @@ function invertCallstack(state: boolean = false, action: Action) {
   }
 }
 
+/**
+ * This state controls whether or not to show a summary view of self time, or the full
+ * stack-based view of the JS tracer data.
+ */
+function showJsTracerSummary(state: boolean = false, action: Action) {
+  switch (action.type) {
+    case 'CHANGE_SHOW_JS_TRACER_SUMMARY':
+      return action.showSummary;
+    default:
+      return state;
+  }
+}
+
 function globalTrackOrder(state: TrackIndex[] = [], action: Action) {
   switch (action.type) {
     case 'VIEW_PROFILE':
@@ -286,6 +299,7 @@ const profileSpecific = combineReducers({
   localTrackOrderByPid,
   implementation,
   invertCallstack,
+  showJsTracerSummary,
   committedRanges,
   callTreeSearchString,
   markersSearchString,
@@ -354,6 +368,8 @@ export const getImplementationFilter = (state: State) =>
   getProfileSpecificState(state).implementation;
 export const getInvertCallstack = (state: State) =>
   getProfileSpecificState(state).invertCallstack;
+export const getShowJsTracerSummary = (state: State) =>
+  getProfileSpecificState(state).showJsTracerSummary;
 export const getCurrentSearchString = (state: State) =>
   getProfileSpecificState(state).callTreeSearchString;
 export const getSearchStrings = createSelector(

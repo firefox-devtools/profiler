@@ -78,6 +78,11 @@ type StackChartQuery = {|
   implementation?: string,
 |};
 
+type JsTracerQuery = {|
+  ...BaseQuery,
+  summary?: null | void,
+|};
+
 // Use object type spread in the definition of Query rather than unions, so that they
 // are really easy to manipulate. This permissive definition makes it easy to not have
 // to refine the type down to the individual query types when working with them.
@@ -85,6 +90,7 @@ type Query = {
   ...CallTreeQuery,
   ...MarkersQuery,
   ...StackChartQuery,
+  ...JsTracerQuery,
 };
 
 type UrlObject = {|
@@ -185,6 +191,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       query.markerSearch = urlState.profileSpecific.markersSearchString;
       break;
     case 'network-chart':
+    case 'js-tracer':
+      query.summary = urlState.profileSpecific.showJsTracerSummary;
       break;
     default:
       assertExhaustiveCheck(selectedTab);
@@ -274,6 +282,7 @@ export function stateFromLocation(location: Location): UrlState {
     profileSpecific: {
       implementation,
       invertCallstack: query.invertCallstack !== undefined,
+      showJsTracerSummary: query.summary !== undefined,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
       selectedThread: selectedThread,
       callTreeSearchString: query.search || '',

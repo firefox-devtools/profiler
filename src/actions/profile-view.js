@@ -898,6 +898,29 @@ export function changeInvertCallstack(
   };
 }
 
+/**
+ * This action toggles changes between using a summary view that shows only self time
+ * for the JS tracer data, and a stack-based view (similar to the stack chart) for the
+ * JS Tracer panel.
+ */
+export function changeShowJsTracerSummary(
+  showSummary: boolean
+): ThunkAction<void> {
+  return dispatch => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: showSummary
+        ? 'show JS tracer summary'
+        : 'show JS tracer stacks',
+    });
+    dispatch({
+      type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
+      showSummary,
+    });
+  };
+}
+
 export function updatePreviewSelection(
   previewSelection: PreviewSelection
 ): ThunkAction<void> {

@@ -267,6 +267,10 @@ type UrlStateAction =
       +callNodeTable: CallNodeTable,
       +selectedThreadIndex: ThreadIndex,
     |}
+  | {|
+      +type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
+      +showSummary: boolean,
+    |}
   | {| +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string |};
 
 type IconsAction =

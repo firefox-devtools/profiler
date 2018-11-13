@@ -149,6 +149,7 @@ export type UrlState = {|
     localTrackOrderByPid: Map<Pid, TrackIndex[]>,
     implementation: ImplementationFilter,
     invertCallstack: boolean,
+    showJsTracerSummary: boolean,
     committedRanges: StartEndRange[],
     callTreeSearchString: string,
     markersSearchString: string,
