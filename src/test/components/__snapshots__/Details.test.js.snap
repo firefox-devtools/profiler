@@ -22,6 +22,7 @@ exports[`app/Details renders an initial view with the right panel 1`] = `
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
@@ -54,6 +55,7 @@ exports[`app/Details renders an initial view with the right panel for tab calltr
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
@@ -86,10 +88,37 @@ exports[`app/Details renders an initial view with the right panel for tab flame-
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
   <FlameGraphView />
+  <Connect(CallNodeContextMenu) />
+  <Connect(MarkersContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
+</div>
+`;
+
+exports[`app/Details renders an initial view with the right panel for tab js-tracer 1`] = `
+<div
+  className="Details"
+>
+  <TabBar
+    extraElements={false}
+    onSelectTab={[Function]}
+    selectedTabSlug="js-tracer"
+    visibleTabs={
+      Array [
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
+        "js-tracer",
+      ]
+    }
+  />
+  <Connect(JsTracer) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
   <Connect(TimelineTrackContextMenu) />
@@ -111,6 +140,7 @@ exports[`app/Details renders an initial view with the right panel for tab marker
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
@@ -143,6 +173,7 @@ exports[`app/Details renders an initial view with the right panel for tab marker
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
@@ -168,6 +199,7 @@ exports[`app/Details renders an initial view with the right panel for tab networ
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
@@ -193,6 +225,7 @@ exports[`app/Details renders an initial view with the right panel for tab stack-
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
@@ -225,6 +258,7 @@ exports[`app/Details show the correct state for the sidebar open button 1`] = `
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
@@ -257,6 +291,7 @@ exports[`app/Details show the correct state for the sidebar open button 2`] = `
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
@@ -289,6 +324,7 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
@@ -321,6 +357,7 @@ exports[`app/Details show the correct state for the sidebar open button 4`] = `
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "js-tracer",
       ]
     }
   />
