@@ -176,8 +176,15 @@ export const getLastVisibleThreadTabSlug = (state: State) =>
 
 export const getVisibleTabs = createSelector(
   selectedThreadSelectors.getIsNetworkChartEmptyInFullRange,
-  (isNetworkChartEmpty): $ReadOnlyArray<TabSlug> =>
-    isNetworkChartEmpty
-      ? tabSlugs.filter(tabSlug => tabSlug !== 'network-chart')
-      : tabSlugs
+  selectedThreadSelectors.getJsTracerTable,
+  (isNetworkChartEmpty, jsTracerTable): $ReadOnlyArray<TabSlug> => {
+    let visibleTabs = tabSlugs;
+    if (isNetworkChartEmpty) {
+      visibleTabs = visibleTabs.filter(tabSlug => tabSlug !== 'network-chart');
+    }
+    if (!jsTracerTable) {
+      visibleTabs = visibleTabs.filter(tabSlug => tabSlug !== 'js-tracer');
+    }
+    return visibleTabs;
+  }
 );

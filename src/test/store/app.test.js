@@ -14,6 +14,7 @@ import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
   getNetworkMarker,
+  getProfileWithJsTracerEvents,
 } from '../fixtures/profiles/make-profile';
 
 import * as AppActions from '../../actions/app';
@@ -64,7 +65,7 @@ describe('app actions', function() {
   });
 
   describe('visibleTabs', function() {
-    it('hides the network chart when there are no network markers in a thread', function() {
+    it('hides the network chart and JS tracer when no data is in the thread', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { getState } = storeWithProfile(profile);
       expect(AppSelectors.getVisibleTabs(getState())).toEqual([
@@ -73,7 +74,6 @@ describe('app actions', function() {
         'stack-chart',
         'marker-chart',
         'marker-table',
-        'js-tracer',
       ]);
     });
     it('shows the network chart when network markers are present in the thread', function() {
@@ -86,6 +86,17 @@ describe('app actions', function() {
         'marker-chart',
         'marker-table',
         'network-chart',
+      ]);
+    });
+    it('shows the js tracer when it is available in a thread', function() {
+      const profile = getProfileWithJsTracerEvents([['A', 0, 10]]);
+      const { getState } = storeWithProfile(profile);
+      expect(AppSelectors.getVisibleTabs(getState())).toEqual([
+        'calltree',
+        'flame-graph',
+        'stack-chart',
+        'marker-chart',
+        'marker-table',
         'js-tracer',
       ]);
     });
