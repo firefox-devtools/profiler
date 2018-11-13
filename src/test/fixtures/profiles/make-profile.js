@@ -10,6 +10,7 @@ import type {
   Thread,
   IndexIntoCategoryList,
   CategoryList,
+  JsTracerTable,
 } from '../../../types/profile';
 import type { MarkerPayload, NetworkPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
@@ -21,6 +22,14 @@ type MockPayload = {| startTime: Milliseconds, endTime: Milliseconds |};
 type TestDefinedMarkers = Array<
   [MarkerName, MarkerTime, MarkerPayload | MockPayload]
 >;
+export type TestDefinedJsTracerEvent = [
+  // Event name:
+  string,
+  // Start time:
+  Milliseconds,
+  // End time:
+  Milliseconds,
+];
 
 /**
  * This function ensures that the mock payloads are converted correctly to real payloads
@@ -559,4 +568,79 @@ export function getScreenshotTrackProfile() {
         },
       ])
   );
+}
+
+export function getEmptyJsTracerTable(): JsTracerTable {
+  return {
+    events: {
+      events: [],
+      timestamps: [],
+      durations: [],
+      lines: [],
+      columns: [],
+      length: 0,
+    },
+    stringTable: new UniqueStringArray(),
+  };
+}
+
+export function getJsTracerTable(
+  events: TestDefinedJsTracerEvent[]
+): JsTracerTable {
+  const jsTracer = getEmptyJsTracerTable();
+
+  for (const [event, start, end] of events) {
+    const stringIndex = jsTracer.stringTable.indexForString(event);
+    jsTracer.events.events.push(stringIndex);
+    jsTracer.events.timestamps.push(start * 1000);
+    jsTracer.events.durations.push((end - start) * 1000);
+    jsTracer.events.lines.push(-1);
+    jsTracer.events.columns.push(-1);
+    jsTracer.events.length++;
+  }
+
+  return jsTracer;
+}
+
+export function getThreadWithJsTracerEvents(
+  events: TestDefinedJsTracerEvent[]
+): Thread {
+  const thread = getEmptyThread();
+  thread.jsTracer = getJsTracerTable(events);
+
+  let endOfEvents = 0;
+  for (const [, , end] of events) {
+    endOfEvents = Math.max(endOfEvents, end);
+  }
+
+  // Create a sample table that is of the same length as the tracer data
+  endOfEvents = Number.isInteger
+    ? // The profile end range adds on one profiling interval length. Assume that it is
+      // value 1 here.
+      Math.floor(endOfEvents)
+    : endOfEvents - 1;
+
+  // Re-create the table so that it creates a type error if we don't handle part of it.
+  thread.samples = {
+    responsiveness: Array(endOfEvents).fill(null),
+    stack: Array(endOfEvents).fill(null),
+    time: Array(endOfEvents)
+      .fill(0)
+      .map((_, i) => i),
+    rss: Array(endOfEvents).fill(null),
+    uss: Array(endOfEvents).fill(null),
+    length: endOfEvents,
+  };
+
+  return thread;
+}
+
+export function getProfileWithJsTracerEvents(
+  ...eventsLists: Array<TestDefinedJsTracerEvent[]>
+): Profile {
+  const profile = getEmptyProfile();
+  profile.threads = eventsLists.map(events =>
+    getThreadWithJsTracerEvents(events)
+  );
+  return profile;
 }
