@@ -29,12 +29,16 @@ import profileWithJS from '.././fixtures/profiles/timings-with-js';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { sortDataTable } from '../../utils/data-table-utils';
+import { ensureExists } from '../../utils/flow';
 import {
   getCategoryByImplementation,
   implementationCategoryMap,
 } from '../../profile-logic/color-categories';
 import getCallNodeProfile from '../fixtures/profiles/call-nodes';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import {
+  getProfileFromTextSamples,
+  getJsTracerTable,
+} from '../fixtures/profiles/make-profile';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
@@ -267,6 +271,54 @@ describe('process-profile', function() {
       const [name0, name1] = thread.resourceTable.name;
       expect(thread.stringTable.getString(name0)).toEqual('firefox');
       expect(thread.stringTable.getString(name1)).toEqual('chrome://blargh');
+    });
+  });
+  describe('JS tracer', function() {
+    it('does not have JS tracer information by default', function() {
+      const profile = processProfile(getGeckoProfile());
+      expect(profile.threads[0].jsTracer).toBe(undefined);
+    });
+    it('processes JS tracer events and offsets the timestamps', function() {
+      const geckoProfile = getGeckoProfile();
+      const timestampOffsetMs = 33;
+      const timestampOffsetMicro = timestampOffsetMs * 1000;
+
+      {
+        // Build the custom thread with JS tracer information. The startTime is offset
+        // from the parent process.
+        const geckoSubprocess = getGeckoProfile();
+        const childProcess = geckoSubprocess.threads[0];
+        const jsTracer = getJsTracerTable([
+          ['A', 0, 10],
+          ['B', 1, 9],
+          ['C', 2, 8],
+        ]);
+        childProcess.jsTracerEvents = jsTracer.events;
+        geckoSubprocess.jsTracerDictionary = jsTracer.stringTable._array;
+        geckoProfile.processes.push(geckoSubprocess);
+        geckoSubprocess.meta.startTime += timestampOffsetMs;
+      }
+
+      // Process the profile, and grab the threads we are interested in.
+      const processedProfile = processProfile(geckoProfile);
+      const childProcess = ensureExists(
+        processedProfile.threads.find(thread => thread.jsTracer),
+        'Could not find the thread with the JS tracer information'
+      );
+      const processedJsTracer = ensureExists(
+        childProcess.jsTracer,
+        'The JS tracer table was not found on the subprocess'
+      );
+
+      // Check that the values are correct from the test defined data.
+      expect(processedJsTracer.events.events).toEqual([0, 1, 2]);
+      expect(processedJsTracer.events.durations).toEqual([10000, 8000, 6000]);
+      expect(processedJsTracer.events.timestamps).toEqual([
+        0 + timestampOffsetMicro,
+        1000 + timestampOffsetMicro,
+        2000 + timestampOffsetMicro,
+      ]);
+      expect(processedJsTracer.stringTable._array).toEqual(['A', 'B', 'C']);
     });
   });
   describe('DevTools profiles', function() {
