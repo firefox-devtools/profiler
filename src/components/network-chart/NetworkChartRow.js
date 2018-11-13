@@ -25,10 +25,119 @@ export type NetworkChartRowProps = {
   +threadIndex: ThreadIndex,
 };
 
+export type NetworkChartRowPropsBar = {
+  +marker: TracingMarker,
+  // Pass the payload in as well, since our types can't express a TracingMarker with
+  // a specific payload.
+  +data: NetworkPayload | null,
+};
+
 type State = {
   pageX: CssPixels,
   pageY: CssPixels,
   hovered: ?boolean,
+};
+
+export type NetworkChartRowBarProps = {
+  +marker: TracingMarker,
+  // Pass the payload in as well, since our types can't express a TracingMarker with
+  // a specific payload.
+  +networkPayload: NetworkPayload | null,
+};
+
+// Splitting up the network marker duration in 4 different phases
+// 1. request queue
+// 2. request
+// 3. response
+// 4. response queue
+const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
+  if (
+    props &&
+    props.marker &&
+    props.marker.data &&
+    (props || props.marker || props.marker.data) !== null
+  ) {
+    const marker = props.marker;
+    const data = marker.data;
+    const start = marker.start;
+    const dur = marker.dur;
+
+    // A marker not always contains the same set of data on the start of the connection
+    const queueStart =
+      data.secureConnectionStart ||
+      data.tcpConnectEnd ||
+      data.connectStart ||
+      data.domainLookupStart ||
+      0;
+
+    // Default for width of the phases is always zero
+    let req_queue: ?number | string = 0;
+    let req: ?number | string = 0;
+    let res: ?number | string = 0;
+
+    // The start of a marker is related to the parentThread
+    // As e.g. a content thread can start earlier or the data starts
+    // before the start of the marker related to the parentThread, we need to prevent false data visualization
+    if (
+      data.requestStart &&
+      start < data.requestStart &&
+      data.responseStart &&
+      start < data.responseStart
+    ) {
+      req = (data.responseStart - data.requestStart || 0) / dur * 100 + '%';
+    }
+
+    if (
+      data.responseEnd &&
+      start < data.responseEnd &&
+      data.responseStart &&
+      start < data.responseStart
+    ) {
+      res = (data.responseEnd - data.responseStart || 0) / dur * 100 + '%';
+    }
+
+    if (queueStart && start < queueStart > 0) {
+      req_queue = (queueStart - start) / dur * 100 + '%';
+    }
+
+    // When we keep the default values (=zero), the
+    // response gets the full width of the bar to be more visible
+    if (req_queue + req + res === 0) {
+      res = 100 + '%';
+    }
+
+    // Adding either the default value (=zero) as width or
+    // we have calculated a new value that can be added as width
+    const boxWidth = {
+      req_queue: req_queue,
+      req: req,
+      res: res,
+    };
+
+    return (
+      <React.Fragment>
+        <span
+          className="networkChartRowItemBarInner request-queue"
+          style={{ width: boxWidth.req_queue }}
+        >
+          &nbsp;
+        </span>
+        <span
+          className="networkChartRowItemBarInner request"
+          style={{ width: boxWidth.req }}
+        >
+          &nbsp;
+        </span>
+        <span
+          className="networkChartRowItemBarInner response"
+          style={{ width: boxWidth.res }}
+        >
+          &nbsp;
+        </span>
+      </React.Fragment>
+    );
+  }
+  return null;
 };
 
 class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
@@ -109,7 +218,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   };
 
   // identifies mime type of request
-  // this is a workaround until we have mime types passed with network markers
+  // this is a workaround until we have mime types passed from gecko to network marker requests
   _identifyType = (name: string) => {
     const uri = this._extractURI(name);
     if (uri === null) {
@@ -164,7 +273,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           onMouseEnter={this._hoverIn}
           onMouseLeave={this._hoverOut}
         >
-          &nbsp;
+          <NetworkChartRowBar marker={marker} />
         </div>
         {this.state.hovered ? (
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY}>

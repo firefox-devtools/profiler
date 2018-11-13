@@ -121,11 +121,42 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               style={
                 Object {
                   "left": 0,
-                  "width": 2,
+                  "width": 2.5,
                 }
               }
             >
-               
+              Array [
+                <span
+                  className="networkChartRowItemBarInner request-queue"
+                  style={
+                    Object {
+                      "width": 0,
+                    }
+                  }
+                >
+                   
+                </span>,
+                <span
+                  className="networkChartRowItemBarInner request"
+                  style={
+                    Object {
+                      "width": 0,
+                    }
+                  }
+                >
+                   
+                </span>,
+                <span
+                  className="networkChartRowItemBarInner response"
+                  style={
+                    Object {
+                      "width": "100%",
+                    }
+                  }
+                >
+                   
+                </span>,
+              ]
             </div>
           </section>
         </div>
