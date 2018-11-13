@@ -98,6 +98,7 @@ describe('extract functions and resource from location strings', function() {
           fileNameIndex === null ? null : stringTable.getString(fileNameIndex);
         const lineNumber = funcTable.lineNumber[funcIndex];
         const columnNumber = funcTable.columnNumber[funcIndex];
+
         let libIndex, resourceName, host, resourceType;
         if (resourceIndex === -1) {
           resourceName = null;

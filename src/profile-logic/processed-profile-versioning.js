@@ -819,7 +819,11 @@ const _upgraders = {
     }
   },
   [18]: profile => {
-    // funcTable gains a new field: columnNumber.
+    // When we added column numbers we forgot to update the func table.
+    // As a result, when we had a column number for an entry, the line number
+    // ended up in the `fileName` property, and the column number in the
+    // `lineNumber` property.
+    // We update the func table with right values of 'fileName', 'lineNumber' and 'columnNumber'.
     for (const thread of profile.threads) {
       const { funcTable, stringArray } = thread;
       const stringTable = new UniqueStringArray(stringArray);
@@ -829,11 +833,14 @@ const _upgraders = {
         funcIndex < thread.funcTable.length;
         funcIndex++
       ) {
+        funcTable.columnNumber[funcIndex] = null; 
         if (funcTable.isJS[funcIndex]) {
           const fileNameIndex = funcTable.fileName[funcIndex];
           if (fileNameIndex !== null) {
             const fileName = stringTable.getString(fileNameIndex);
             const match = /^(.*):([0-9]+)$/.exec(fileName);
+            // If this regexp matches, this means that this is a lineNumber, and that the
+            // value in `lineNumber` is actually the column number.
             if (match) {
               funcTable.columnNumber[funcIndex] =
                 funcTable.lineNumber[funcIndex];
@@ -841,13 +848,9 @@ const _upgraders = {
                 match[1]
               );
               funcTable.lineNumber[funcIndex] = parseInt(match[2], 10);
-            } else {
-              funcTable.columnNumber[funcIndex] = null;
-            }
+            } 
           }
-        } else {
-          funcTable.columnNumber[funcIndex] = null;
-        }
+        } 
       }
       thread.stringArray = stringTable.serializeToArray();
     }

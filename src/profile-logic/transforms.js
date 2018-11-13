@@ -853,6 +853,7 @@ export function collapseResource(
             newFuncTable.resource.push(funcTable.resource[funcIndex]);
             newFuncTable.fileName.push(funcTable.fileName[funcIndex]);
             newFuncTable.lineNumber.push(null);
+            newFuncTable.columnNumber.push(null);
           }
 
           // Add the new stack.
