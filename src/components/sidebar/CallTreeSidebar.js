@@ -152,7 +152,7 @@ function Breakdown({ data }: BreakdownProps) {
 
     return (
       <SidebarDetail label={group} key={group}>
-        {formatNumber(value,2,0)}ms ({percentage}%)
+        {formatNumber(value, 2, 0)}ms ({percentage}%)
       </SidebarDetail>
     );
   });
@@ -214,11 +214,11 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </header>
           <h3 className="sidebar-title2">This selected call node</h3>
           <SidebarDetail label="Running Time">
-            {formatNumber(totalTime.value,2,0)}ms ({totalTimePercent}%)
+            {formatNumber(totalTime.value, 2, 0)}ms ({totalTimePercent}%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
             {selfTime.value
-              ? `${formatNumber(selfTime.value,2,0)}ms (${selfTimePercent}%)`
+              ? `${formatNumber(selfTime.value, 2, 0)}ms (${selfTimePercent}%)`
               : '—'}
           </SidebarDetail>
           {totalTime.breakdownByImplementation ? (
@@ -241,12 +241,16 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             This function across the entire tree
           </h3>
           <SidebarDetail label="Running Time">
-            {formatNumber(totalTimeForFunc.value,2,0)}ms ({totalTimeForFuncPercent}%)
+            {formatNumber(totalTimeForFunc.value, 2, 0)}ms ({
+              totalTimeForFuncPercent
+            }%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
             {selfTimeForFunc.value
               ? `${formatNumber(
-                  selfTimeForFunc.value,2,0
+                  selfTimeForFunc.value,
+                  2,
+                  0
                 )}ms (${selfTimeForFuncPercent}%)`
               : '—'}
           </SidebarDetail>
