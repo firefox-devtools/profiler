@@ -31,6 +31,8 @@ import type {
   StackImplementation,
   TimingsForPath,
 } from '../../profile-logic/profile-data';
+import { formatNumber } from '../../utils/format-numbers';
+
 
 type CanCopyContentProps = {|
   +tagName?: string,
@@ -151,7 +153,7 @@ function Breakdown({ data }: BreakdownProps) {
 
     return (
       <SidebarDetail label={group} key={group}>
-        {value}ms ({percentage}%)
+        {formatNumber(value)}ms ({percentage}%)
       </SidebarDetail>
     );
   });
@@ -213,10 +215,10 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </header>
           <h3 className="sidebar-title2">This selected call node</h3>
           <SidebarDetail label="Running Time">
-            {totalTime.value}ms ({totalTimePercent}%)
+            {formatNumber(totalTime.value)}ms ({totalTimePercent}%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
-            {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
+            {formatNumber(selfTime.value) ? `${formatNumber(selfTime.value)}ms (${selfTimePercent}%)` : '—'}
           </SidebarDetail>
           {totalTime.breakdownByImplementation ? (
             <React.Fragment>
@@ -238,11 +240,11 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             This function across the entire tree
           </h3>
           <SidebarDetail label="Running Time">
-            {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
+            {formatNumber(totalTimeForFunc.value)}ms ({totalTimeForFuncPercent}%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
-            {selfTimeForFunc.value
-              ? `${selfTimeForFunc.value}ms (${selfTimeForFuncPercent}%)`
+            {formatNumber(selfTimeForFunc.value)
+              ? `${formatNumber(selfTimeForFunc.value)}ms (${selfTimeForFuncPercent}%)`
               : '—'}
           </SidebarDetail>
           {totalTimeForFunc.breakdownByImplementation ? (
