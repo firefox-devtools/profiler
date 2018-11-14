@@ -76,6 +76,7 @@ type ProfileViewStateProps = {|
   +hash: string,
   +profileUrl: string,
   +hasZipFile: boolean,
+  +text: string,
 |};
 
 type ProfileViewDispatchProps = {|

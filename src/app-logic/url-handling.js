@@ -34,6 +34,8 @@ function dataSourceDirs(urlState: UrlState) {
       return ['public', urlState.hash];
     case 'from-url':
       return ['from-url', encodeURIComponent(urlState.profileUrl)];
+    case 'from-string':
+      return ['from-string', urlState.text];
     default:
       return [];
   }
@@ -249,8 +251,12 @@ export function stateFromLocation(location: Location): UrlState {
   // https://perf-html.io/from-url/{url}/calltree/
   const hasProfileUrl = ['from-url'].includes(dataSource);
 
+  // https://perf-html.io/from-string/{text}/calltree/
+  const hasProfileText = ['from-string'].includes(dataSource);
+
   // The selected tab is the last path part in the URL.
-  const selectedTabPathPart = hasProfileHash || hasProfileUrl ? 2 : 1;
+  const selectedTabPathPart =
+    hasProfileHash || hasProfileUrl || hasProfileText ? 2 : 1;
 
   let implementation = 'combined';
   // Don't trust the implementation values from the user. Make sure it conforms
@@ -268,6 +274,7 @@ export function stateFromLocation(location: Location): UrlState {
 
   return {
     dataSource,
+    text: hasProfileText ? pathParts[1] : '',
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
