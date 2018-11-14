@@ -217,7 +217,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             {formatNumber(totalTime.value)}ms ({totalTimePercent}%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
-            {formatNumber(selfTime.value)
+            {selfTime.value
               ? `${formatNumber(selfTime.value)}ms (${selfTimePercent}%)`
               : '—'}
           </SidebarDetail>
@@ -244,7 +244,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             {formatNumber(totalTimeForFunc.value)}ms ({totalTimeForFuncPercent}%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
-            {formatNumber(selfTimeForFunc.value)
+            {selfTimeForFunc.value
               ? `${formatNumber(
                   selfTimeForFunc.value
                 )}ms (${selfTimeForFuncPercent}%)`
