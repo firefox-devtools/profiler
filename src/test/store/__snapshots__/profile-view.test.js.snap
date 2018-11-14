@@ -60,6 +60,7 @@ Object {
     "toolkit": "",
     "version": 14,
   },
+  "pages": Array [],
   "threads": Array [
     Object {
       "frameTable": Object {

@@ -102,6 +102,7 @@ export default function createGeckoProfile(): GeckoProfile {
     meta: contentProcessMeta,
     pausedRanges: [],
     libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the Gecko profile
+    pages: [],
     threads: [
       {
         ..._createGeckoThread(),
@@ -115,6 +116,7 @@ export default function createGeckoProfile(): GeckoProfile {
   return {
     meta: parentProcessMeta,
     libs: [parentProcessBinary].concat(extraBinaries),
+    pages: [],
     pausedRanges: [],
     threads: [
       {

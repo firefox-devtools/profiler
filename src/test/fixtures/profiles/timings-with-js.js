@@ -11,6 +11,7 @@ export default function createGeckoProfile(): GeckoProfile {
   return {
     meta: geckoProfile.meta,
     libs: geckoProfile.libs,
+    pages: geckoProfile.pages,
     pausedRanges: [],
     threads: [
       _createGeckoThread('GeckoMain'),

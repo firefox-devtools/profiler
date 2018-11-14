@@ -742,6 +742,8 @@ function _processThread(
   return {
     name: thread.name,
     processType: thread.processType,
+    processName:
+      typeof thread.processName === 'string' ? thread.processName : '',
     processStartupTime: 0,
     processShutdownTime: shutdownTime,
     registerTime: thread.registerTime,
@@ -863,6 +865,12 @@ export function processProfile(
     );
   }
 
+  let pages = [...(geckoProfile.pages || [])];
+
+  for (const subprocessProfile of geckoProfile.processes) {
+    pages = pages.concat(subprocessProfile.pages || []);
+  }
+
   const meta = {
     interval: geckoProfile.meta.interval,
     startTime: geckoProfile.meta.startTime,
@@ -889,6 +897,7 @@ export function processProfile(
 
   const result = {
     meta,
+    pages,
     threads,
   };
   return result;
@@ -903,8 +912,17 @@ export function serializeProfile(
   includeNetworkUrls: boolean = true
 ): string {
   // stringTable -> stringArray
+  let urlCounter = 0;
   const newProfile = Object.assign({}, profile, {
     meta: { ...profile.meta, networkURLsRemoved: !includeNetworkUrls },
+    pages:
+      includeNetworkUrls === false && profile.pages
+        ? profile.pages.map(page =>
+            Object.assign({}, page, {
+              url: 'Page #' + urlCounter++,
+            })
+          )
+        : profile.pages,
     threads: profile.threads.map(thread => {
       const stringArray = thread.stringTable.serializeToArray();
       const newThread = Object.assign({}, thread);
