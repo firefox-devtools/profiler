@@ -33,7 +33,6 @@ import type {
 } from '../../profile-logic/profile-data';
 import { formatNumber } from '../../utils/format-numbers';
 
-
 type CanCopyContentProps = {|
   +tagName?: string,
   +content: string,
@@ -218,7 +217,9 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             {formatNumber(totalTime.value)}ms ({totalTimePercent}%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
-            {formatNumber(selfTime.value) ? `${formatNumber(selfTime.value)}ms (${selfTimePercent}%)` : '—'}
+            {formatNumber(selfTime.value)
+              ? `${formatNumber(selfTime.value)}ms (${selfTimePercent}%)`
+              : '—'}
           </SidebarDetail>
           {totalTime.breakdownByImplementation ? (
             <React.Fragment>
@@ -244,7 +245,9 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </SidebarDetail>
           <SidebarDetail label="Self Time">
             {formatNumber(selfTimeForFunc.value)
-              ? `${formatNumber(selfTimeForFunc.value)}ms (${selfTimeForFuncPercent}%)`
+              ? `${formatNumber(
+                  selfTimeForFunc.value
+                )}ms (${selfTimeForFuncPercent}%)`
               : '—'}
           </SidebarDetail>
           {totalTimeForFunc.breakdownByImplementation ? (
