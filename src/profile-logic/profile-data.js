@@ -754,6 +754,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
       isJS: funcTable.isJS.slice(),
       fileName: funcTable.fileName.slice(),
       lineNumber: funcTable.lineNumber.slice(),
+      columnNumber: funcTable.columnNumber.slice(),
     };
 
     // Create a Map that takes a prefix and frame as input, and maps it to the new stack
@@ -806,6 +807,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
               newFuncTable.isJS.push(false);
               newFuncTable.fileName.push(null);
               newFuncTable.lineNumber.push(null);
+              newFuncTable.columnNumber.push(null);
               if (newFuncTable.name.length !== newFuncTable.length) {
                 console.error(
                   'length is not correct',
@@ -1456,6 +1458,10 @@ export function getOriginAnnotationForFunc(
     const lineNumber = funcTable.lineNumber[funcIndex];
     if (lineNumber !== null) {
       fileName += ':' + lineNumber;
+      const columnNumber = funcTable.columnNumber[funcIndex];
+      if (columnNumber !== null) {
+        fileName += ':' + columnNumber;
+      }
     }
   }
 

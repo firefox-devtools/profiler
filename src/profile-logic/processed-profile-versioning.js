@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 17; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 18; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -813,6 +813,43 @@ const _upgraders = {
           funcTable.relevantForJS[i] = true;
         } else {
           funcTable.relevantForJS[i] = domCallRegex.test(location);
+        }
+      }
+      thread.stringArray = stringTable.serializeToArray();
+    }
+  },
+  [18]: profile => {
+    // When we added column numbers we forgot to update the func table.
+    // As a result, when we had a column number for an entry, the line number
+    // ended up in the `fileName` property, and the column number in the
+    // `lineNumber` property.
+    // We update the func table with right values of 'fileName', 'lineNumber' and 'columnNumber'.
+    for (const thread of profile.threads) {
+      const { funcTable, stringArray } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      funcTable.columnNumber = [];
+      for (
+        let funcIndex = 0;
+        funcIndex < thread.funcTable.length;
+        funcIndex++
+      ) {
+        funcTable.columnNumber[funcIndex] = null;
+        if (funcTable.isJS[funcIndex]) {
+          const fileNameIndex = funcTable.fileName[funcIndex];
+          if (fileNameIndex !== null) {
+            const fileName = stringTable.getString(fileNameIndex);
+            const match = /^(.*):([0-9]+)$/.exec(fileName);
+            if (match) {
+              // If this regexp matches, this means that this is a lineNumber, and that the
+              // value in `lineNumber` is actually the column number.
+              funcTable.columnNumber[funcIndex] =
+                funcTable.lineNumber[funcIndex];
+              funcTable.fileName[funcIndex] = stringTable.indexForString(
+                match[1]
+              );
+              funcTable.lineNumber[funcIndex] = parseInt(match[2], 10);
+            }
+          }
         }
       }
       thread.stringArray = stringTable.serializeToArray();
