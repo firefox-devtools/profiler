@@ -28,8 +28,6 @@ function dataSourceDirs(urlState: UrlState) {
       return ['from-addon'];
     case 'from-file':
       return ['from-file'];
-    case 'local':
-      return ['local', urlState.hash];
     case 'public':
       return ['public', urlState.hash];
     case 'from-url':
@@ -214,7 +212,6 @@ function getDataSourceFromPathParts(pathParts: string[]): DataSource {
     case 'none':
     case 'from-addon':
     case 'from-file':
-    case 'local':
     case 'public':
     case 'from-url':
     case 'from-string':
@@ -246,7 +243,7 @@ export function stateFromLocation(location: Location): UrlState {
   const selectedThread = query.thread !== undefined ? +query.thread : null;
 
   // https://perf-html.io/public/{hash}/calltree/
-  const hasProfileHash = ['local', 'public'].includes(dataSource);
+  const hasProfileHash = ['public'].includes(dataSource);
 
   // https://perf-html.io/from-url/{url}/calltree/
   const hasProfileUrl = ['from-url'].includes(dataSource);

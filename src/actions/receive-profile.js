@@ -450,7 +450,7 @@ export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
 
 export function waitingForProfileFromString(): Action {
   return {
-    type: 'WAITING_FOR_PROFILE_FROM_String',
+    type: 'WAITING_FOR_PROFILE_FROM_STRING',
   };
 }
 
