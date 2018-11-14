@@ -839,9 +839,9 @@ const _upgraders = {
           if (fileNameIndex !== null) {
             const fileName = stringTable.getString(fileNameIndex);
             const match = /^(.*):([0-9]+)$/.exec(fileName);
-            // If this regexp matches, this means that this is a lineNumber, and that the
-            // value in `lineNumber` is actually the column number.
             if (match) {
+              // If this regexp matches, this means that this is a lineNumber, and that the
+              // value in `lineNumber` is actually the column number.
               funcTable.columnNumber[funcIndex] =
                 funcTable.lineNumber[funcIndex];
               funcTable.fileName[funcIndex] = stringTable.indexForString(
