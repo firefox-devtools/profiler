@@ -19,17 +19,29 @@ import type {
   IndexIntoTracingMarkers,
 } from '../../types/profile-derived';
 import type { StartEndRange } from '../../types/units';
-import type { PreviewSelection } from '../../types/actions';
+import type {
+  PreviewSelection,
+  ImplementationFilter,
+} from '../../types/actions';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
+import { getImplementationFilter } from '../../reducers/url-state';
+import type { Thread } from '../../types/profile';
+import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
+import {
+  convertStackToCallNodePath,
+  getFuncNamesAndOriginsForPath,
+} from '../../profile-logic/profile-data';
 
 type StateProps = {|
   +markers: TracingMarker[],
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
   +selectedMarker: IndexIntoTracingMarkers,
+  +thread: Thread,
+  +implementationFilter: ImplementationFilter,
 |};
 
 type DispatchProps = {|
@@ -84,6 +96,21 @@ class MarkersContextMenu extends PureComponent<Props> {
     });
   };
 
+  convertStackToString(stack, thread, implementationFilter) {
+    const callNodePath = filterCallNodePathByImplementation(
+      thread,
+      implementationFilter,
+      convertStackToCallNodePath(thread, stack)
+    );
+    const funcNamesAndOrigins = getFuncNamesAndOriginsForPath(
+      callNodePath,
+      thread
+    );
+    return funcNamesAndOrigins.map(
+      ({ funcName, origin }) => `${funcName} [${origin}]`
+    );
+  }
+
   copyMarkerJSON = () => {
     const { selectedMarker, markers } = this.props;
     copy(JSON.stringify(markers[selectedMarker]));
@@ -92,6 +119,24 @@ class MarkersContextMenu extends PureComponent<Props> {
   copyMarkerName = () => {
     const { selectedMarker, markers } = this.props;
     copy(markers[selectedMarker].name);
+  };
+
+  copyMarkerCause = () => {
+    const {
+      thread,
+      implementationFilter,
+      markers,
+      selectedMarker,
+    } = this.props;
+    const marker = markers[selectedMarker];
+    if (marker.cause) {
+      const stack = this.convertStackToString(
+        marker.cause.stack,
+        thread,
+        implementationFilter
+      );
+      copy(stack);
+    }
   };
 
   render() {
@@ -105,6 +150,7 @@ class MarkersContextMenu extends PureComponent<Props> {
         </MenuItem>
         <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
         <MenuItem onClick={this.copyMarkerName}>Copy marker name</MenuItem>
+        <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
       </ContextMenu>
     );
   }
@@ -117,6 +163,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     committedRange: getCommittedRange(state),
     selectedMarker: selectedThreadSelectors.getViewOptions(state)
       .selectedMarker,
+    thread: selectedThreadSelectors.getThread(state),
+    implementationFilter: getImplementationFilter(state),
   }),
   mapDispatchToProps: { updatePreviewSelection },
   component: MarkersContextMenu,

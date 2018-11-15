@@ -1653,3 +1653,19 @@ export function getSampleCategories(
 ): Array<IndexIntoSamplesTable | null> {
   return samples.stack.map(s => (s !== null ? stackTable.category[s] : null));
 }
+
+export function getFuncNamesAndOriginsForPath(
+  path: CallNodePath,
+  thread: Thread
+): Array<{ funcName: string, origin: string }> {
+  const { funcTable, stringTable, resourceTable } = thread;
+  return path.map(func => ({
+    funcName: stringTable.getString(funcTable.name[func]),
+    origin: getOriginAnnotationForFunc(
+      func,
+      funcTable,
+      resourceTable,
+      stringTable
+    ),
+  }));
+}
