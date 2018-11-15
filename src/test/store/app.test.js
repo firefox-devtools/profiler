@@ -76,6 +76,7 @@ describe('app actions', function() {
         'marker-table',
       ]);
     });
+
     it('shows the network chart when network markers are present in the thread', function() {
       const profile = getProfileWithMarkers([getNetworkMarker(10, 0)]);
       const { getState } = storeWithProfile(profile);
@@ -88,6 +89,7 @@ describe('app actions', function() {
         'network-chart',
       ]);
     });
+
     it('shows the js tracer when it is available in a thread', function() {
       const profile = getProfileWithJsTracerEvents([['A', 0, 10]]);
       const { getState } = storeWithProfile(profile);

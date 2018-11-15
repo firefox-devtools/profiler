@@ -18,7 +18,6 @@ export type IndexIntoLibs = number;
 export type IndexIntoCategoryList = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
-export type IndexIntoJsTracerStringTable = number;
 export type IndexIntoJsTracerEvents = number;
 
 /**
@@ -224,19 +223,14 @@ export type PausedRange = {
   reason: 'profiler-paused' | 'collecting',
 };
 
-export type JsTracerTable = {
-  events: JsTracerEvents,
-  stringTable: UniqueStringArray,
-};
-
-export type JsTracerEvents = {
-  events: Array<IndexIntoJsTracerStringTable>,
+export type JsTracerTable = {|
+  events: Array<IndexIntoStringTable>,
   timestamps: Array<Microseconds>,
   durations: Array<Microseconds | -1>,
   lines: Array<number | -1>, // Line number.
   columns: Array<number | -1>, // Column number.
   length: number,
-};
+|};
 
 /**
  * Gecko has one or more processes. There can be multiple threads per processes. Each

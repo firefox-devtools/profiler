@@ -6,7 +6,7 @@
 import type { JsTracerTable } from '../types/profile';
 import type { JsTracerTiming } from '../types/profile-derived';
 import type { Microseconds } from '../types/units';
-
+import type { UniqueStringArray } from '../utils/unique-string-array';
 /**
  * This function is very similar in implementation as getStackTimingByDepth.
  * It creates a list of JsTracerTiming entries that represent the underlying
@@ -22,19 +22,19 @@ import type { Microseconds } from '../types/units';
  *
  * Where a single row, like B F H, would be one JsTracerTiming.
  */
-export function getJsTracerTiming({
-  events: tracerEvents,
-  stringTable,
-}: JsTracerTable): JsTracerTiming[] {
+export function getJsTracerTiming(
+  jsTracer: JsTracerTable,
+  stringTable: UniqueStringArray
+): JsTracerTiming[] {
   const jsTracerTiming: JsTracerTiming[] = [];
 
   // Go through all of the events.
   for (
     let tracerEventIndex = 0;
-    tracerEventIndex < tracerEvents.length;
+    tracerEventIndex < jsTracer.length;
     tracerEventIndex++
   ) {
-    const stringIndex = tracerEvents.events[tracerEventIndex];
+    const stringIndex = jsTracer.events[tracerEventIndex];
     const displayName = stringTable.getString(stringIndex);
 
     // Place the event in the closest row that is empty.
@@ -55,8 +55,8 @@ export function getJsTracerTiming({
 
       // The timing is converted here from Microseconds to Milliseconds.
       const division = 1000;
-      const start = tracerEvents.timestamps[tracerEventIndex] / division;
-      const durationRaw = tracerEvents.durations[tracerEventIndex];
+      const start = jsTracer.timestamps[tracerEventIndex] / division;
+      const durationRaw = jsTracer.durations[tracerEventIndex];
       const duration = durationRaw === -1 ? 0 : durationRaw / division;
 
       // Since the events are sorted, look at the last added event in this row. If
@@ -91,10 +91,10 @@ export function getJsTracerTiming({
  * Where "A" would be the name of the event, and the boxes in that row would be the self
  * time. Each row is stored as a JsTracerTiming.
  */
-export function getJsTracerLeafTiming({
-  events: tracerEvents,
-  stringTable,
-}: JsTracerTable): JsTracerTiming[] {
+export function getJsTracerLeafTiming(
+  jsTracer: JsTracerTable,
+  stringTable: UniqueStringArray
+): JsTracerTiming[] {
   // Each event type will have it's own timing information, later collapse these into
   // a single array.
   const jsTracerTimingMap: Map<string, JsTracerTiming> = new Map();
@@ -109,7 +109,7 @@ export function getJsTracerLeafTiming({
       // If this self time is 0, do not report it.
       return;
     }
-    const stringIndex = tracerEvents.events[tracerEventIndex];
+    const stringIndex = jsTracer.events[tracerEventIndex];
     const displayName = stringTable.getString(stringIndex);
     const rowName = isUrl[stringIndex] ? 'Script' : displayName;
     let timingRow = jsTracerTimingMap.get(rowName);
@@ -178,11 +178,11 @@ export function getJsTracerLeafTiming({
 
   for (
     let currentEventIndex = 0;
-    currentEventIndex < tracerEvents.length;
+    currentEventIndex < jsTracer.length;
     currentEventIndex++
   ) {
-    const currentStart = tracerEvents.timestamps[currentEventIndex];
-    const durationRaw = tracerEvents.durations[currentEventIndex];
+    const currentStart = jsTracer.timestamps[currentEventIndex];
+    const durationRaw = jsTracer.durations[currentEventIndex];
     const duration = durationRaw === -1 ? 0 : durationRaw;
     const currentEnd = currentStart + duration;
 
@@ -301,13 +301,13 @@ export function getJsTracerLeafTiming({
 
       // The data appears to be malformed, report a nice error to the console.
       const prefixName = stringTable.getString(
-        tracerEvents.events[prefixEventIndex]
+        jsTracer.events[prefixEventIndex]
       );
       const currentName = stringTable.getString(
-        tracerEvents.events[currentEventIndex]
+        jsTracer.events[currentEventIndex]
       );
       console.error('Current JS Tracer information:', {
-        tracerEvents,
+        jsTracer,
         stringTable,
         prefixEventIndex,
         currentEventIndex,

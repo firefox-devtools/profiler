@@ -191,6 +191,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       query.markerSearch = urlState.profileSpecific.markersSearchString;
       break;
     case 'network-chart':
+      break;
     case 'js-tracer':
       query.summary = urlState.profileSpecific.showJsTracerSummary;
       break;

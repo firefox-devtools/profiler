@@ -15,11 +15,13 @@ import {
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
+  selectedThreadSelectors,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import * as JsTracer from '../../profile-logic/js-tracer';
 
+import type { UniqueStringArray } from '../../utils/unique-string-array';
 import type { JsTracerTable } from '../../types/profile';
 import type { JsTracerTiming } from '../../types/profile-derived';
 import type {
@@ -48,6 +50,7 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
+  +stringTable: UniqueStringArray,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
   +threadIndex: number,
@@ -76,6 +79,7 @@ class JsTracerExpensiveChart extends React.PureComponent<Props> {
       timeRange,
       threadIndex,
       jsTracerTable,
+      stringTable,
       previewSelection,
       updatePreviewSelection,
       showJsTracerSummary,
@@ -83,6 +87,7 @@ class JsTracerExpensiveChart extends React.PureComponent<Props> {
 
     const jsTracerTimingRows = _getJsTracerTimingRows(
       jsTracerTable,
+      stringTable,
       showJsTracerSummary
     );
 
@@ -128,19 +133,20 @@ const _jsTracerLeafTimingWeakmap: JsTracerTimingWeakmap = new WeakMap();
  */
 function _getJsTracerTimingRows(
   jsTracerTable: JsTracerTable,
+  stringTable: UniqueStringArray,
   showJsTracerSummary: boolean
 ): JsTracerTiming[] {
   if (showJsTracerSummary) {
     let timing = _jsTracerTimingWeakmap.get(jsTracerTable);
     if (!timing) {
-      timing = JsTracer.getJsTracerLeafTiming(jsTracerTable);
+      timing = JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable);
       _jsTracerTimingWeakmap.set(jsTracerTable, timing);
     }
     return timing;
   }
   let timing = _jsTracerLeafTimingWeakmap.get(jsTracerTable);
   if (!timing) {
-    timing = JsTracer.getJsTracerTiming(jsTracerTable);
+    timing = JsTracer.getJsTracerTiming(jsTracerTable, stringTable);
     _jsTracerLeafTimingWeakmap.set(jsTracerTable, timing);
   }
   return timing;
@@ -157,6 +163,7 @@ function viewportNeedsUpdate(
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     timeRange: getCommittedRange(state),
+    stringTable: selectedThreadSelectors.getStringTable(state),
     interval: getProfileInterval(state),
     threadIndex: getSelectedThreadIndex(state),
     previewSelection: getPreviewSelection(state),

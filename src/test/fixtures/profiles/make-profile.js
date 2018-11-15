@@ -572,31 +572,29 @@ export function getScreenshotTrackProfile() {
 
 export function getEmptyJsTracerTable(): JsTracerTable {
   return {
-    events: {
-      events: [],
-      timestamps: [],
-      durations: [],
-      lines: [],
-      columns: [],
-      length: 0,
-    },
-    stringTable: new UniqueStringArray(),
+    events: [],
+    timestamps: [],
+    durations: [],
+    lines: [],
+    columns: [],
+    length: 0,
   };
 }
 
 export function getJsTracerTable(
+  stringTable: UniqueStringArray,
   events: TestDefinedJsTracerEvent[]
 ): JsTracerTable {
   const jsTracer = getEmptyJsTracerTable();
 
   for (const [event, start, end] of events) {
-    const stringIndex = jsTracer.stringTable.indexForString(event);
-    jsTracer.events.events.push(stringIndex);
-    jsTracer.events.timestamps.push(start * 1000);
-    jsTracer.events.durations.push((end - start) * 1000);
-    jsTracer.events.lines.push(-1);
-    jsTracer.events.columns.push(-1);
-    jsTracer.events.length++;
+    const stringIndex = stringTable.indexForString(event);
+    jsTracer.events.push(stringIndex);
+    jsTracer.timestamps.push(start * 1000);
+    jsTracer.durations.push((end - start) * 1000);
+    jsTracer.lines.push(-1);
+    jsTracer.columns.push(-1);
+    jsTracer.length++;
   }
 
   return jsTracer;
@@ -606,7 +604,7 @@ export function getThreadWithJsTracerEvents(
   events: TestDefinedJsTracerEvent[]
 ): Thread {
   const thread = getEmptyThread();
-  thread.jsTracer = getJsTracerTable(events);
+  thread.jsTracer = getJsTracerTable(thread.stringTable, events);
 
   let endOfEvents = 0;
   for (const [, , end] of events) {
@@ -614,13 +612,16 @@ export function getThreadWithJsTracerEvents(
   }
 
   // Create a sample table that is of the same length as the tracer data
-  endOfEvents = Number.isInteger
-    ? // The profile end range adds on one profiling interval length. Assume that it is
-      // value 1 here.
+  endOfEvents = Number.isInteger(endOfEvents)
+    ? // When considering the range of a profile, this range is set to the start of the
+      // first profile sample's timestamp, and the end timestamp of the last
+      // sample + profile.meta.interval.
+      // To keep things slightly realistic, Assume that the profile.meta.interval
+      // value is 1 here.
       Math.floor(endOfEvents)
     : endOfEvents - 1;
 
-  // Re-create the table so that it creates a type error if we don't handle part of it.
+  // Re-create the table so that it creates a Flow error if we don't handle part of it.
   thread.samples = {
     responsiveness: Array(endOfEvents).fill(null),
     stack: Array(endOfEvents).fill(null),

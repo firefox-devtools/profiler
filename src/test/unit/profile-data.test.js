@@ -273,12 +273,14 @@ describe('process-profile', function() {
       expect(thread.stringTable.getString(name1)).toEqual('chrome://blargh');
     });
   });
+
   describe('JS tracer', function() {
     it('does not have JS tracer information by default', function() {
       const profile = processProfile(getGeckoProfile());
       expect(profile.threads[0].jsTracer).toBe(undefined);
     });
-    it('processes JS tracer events and offsets the timestamps', function() {
+
+    it('processes JS tracer and offsets the timestamps', function() {
       const geckoProfile = getGeckoProfile();
       const timestampOffsetMs = 33;
       const timestampOffsetMicro = timestampOffsetMs * 1000;
@@ -287,40 +289,45 @@ describe('process-profile', function() {
         // Build the custom thread with JS tracer information. The startTime is offset
         // from the parent process.
         const geckoSubprocess = getGeckoProfile();
-        const childProcess = geckoSubprocess.threads[0];
-        const jsTracer = getJsTracerTable([
-          ['A', 0, 10],
-          ['B', 1, 9],
-          ['C', 2, 8],
+        const childProcessThread = geckoSubprocess.threads[0];
+        const stringTable = new UniqueStringArray();
+        const jsTracer = getJsTracerTable(stringTable, [
+          ['jsTracerA', 0, 10],
+          ['jsTracerB', 1, 9],
+          ['jsTracerC', 2, 8],
         ]);
-        childProcess.jsTracerEvents = jsTracer.events;
-        geckoSubprocess.jsTracerDictionary = jsTracer.stringTable._array;
+        childProcessThread.jsTracerEvents = jsTracer;
+        geckoSubprocess.jsTracerDictionary = stringTable._array;
         geckoProfile.processes.push(geckoSubprocess);
         geckoSubprocess.meta.startTime += timestampOffsetMs;
       }
 
       // Process the profile, and grab the threads we are interested in.
       const processedProfile = processProfile(geckoProfile);
-      const childProcess = ensureExists(
+      const childProcessThread = ensureExists(
         processedProfile.threads.find(thread => thread.jsTracer),
         'Could not find the thread with the JS tracer information'
       );
       const processedJsTracer = ensureExists(
-        childProcess.jsTracer,
+        childProcessThread.jsTracer,
         'The JS tracer table was not found on the subprocess'
       );
 
       // Check that the values are correct from the test defined data.
-      expect(processedJsTracer.events.events).toEqual([0, 1, 2]);
-      expect(processedJsTracer.events.durations).toEqual([10000, 8000, 6000]);
-      expect(processedJsTracer.events.timestamps).toEqual([
+      expect(
+        processedJsTracer.events.map(index =>
+          childProcessThread.stringTable.getString(index)
+        )
+      ).toEqual(['jsTracerA', 'jsTracerB', 'jsTracerC']);
+      expect(processedJsTracer.durations).toEqual([10000, 8000, 6000]);
+      expect(processedJsTracer.timestamps).toEqual([
         0 + timestampOffsetMicro,
         1000 + timestampOffsetMicro,
         2000 + timestampOffsetMicro,
       ]);
-      expect(processedJsTracer.stringTable._array).toEqual(['A', 'B', 'C']);
     });
   });
+
   describe('DevTools profiles', function() {
     it('should process correctly', function() {
       // Mock out a DevTools profile.

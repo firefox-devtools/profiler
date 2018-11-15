@@ -25,14 +25,14 @@ describe('selectors/getJsTracerTiming', function() {
 
     it('has empty JS tracer timing if no events are in the js tracer table', function() {
       expect(
-        getHumanReadableJsTracerTiming({ selfTime: false, events: [] })
+        getHumanReadableJsTracerTiming({ useSelfTime: false, events: [] })
       ).toEqual([]);
     });
 
     it('can generate some simple nested timing', function() {
       expect(
         getHumanReadableJsTracerTiming({
-          selfTime: false,
+          useSelfTime: false,
           events: [
             ['https://mozilla.org', 0, 20],
             ['Interpreter', 1, 19],
@@ -49,7 +49,7 @@ describe('selectors/getJsTracerTiming', function() {
     it('can generate sibling timing', function() {
       expect(
         getHumanReadableJsTracerTiming({
-          selfTime: false,
+          useSelfTime: false,
           events: [
             ['https://mozilla.org', 0, 20],
             ['Interpreter', 1, 5],
@@ -65,17 +65,18 @@ describe('selectors/getJsTracerTiming', function() {
       ]);
     });
   });
+
   describe('self time', function() {
     it('has empty JS tracer timing if no events are in the js tracer table', function() {
       expect(
-        getHumanReadableJsTracerTiming({ selfTime: true, events: [] })
+        getHumanReadableJsTracerTiming({ useSelfTime: true, events: [] })
       ).toEqual([]);
     });
 
     it('can generate some simple nested timing', function() {
       expect(
         getHumanReadableJsTracerTiming({
-          selfTime: true,
+          useSelfTime: true,
           events: [
             ['https://mozilla.org', 0, 20],
             ['Interpreter', 1, 19],
@@ -97,9 +98,9 @@ describe('selectors/getJsTracerTiming', function() {
       //    [prefix]
       expect(
         getHumanReadableJsTracerTiming({
-          selfTime: true,
+          useSelfTime: true,
           events: [
-            // Make the formatting "prettier".
+            // This comment makes the formatting "prettier".
             ['A', 0, 2],
             ['B', 0, 2],
             ['C', 0, 1],
@@ -107,7 +108,7 @@ describe('selectors/getJsTracerTiming', function() {
           ],
         })
       ).toEqual([
-        // Make the formatting "prettier".
+        // This comment makes the formatting "prettier".
         'A (2:3)',
         'B (1:2)',
         'C (0:1)',
@@ -121,15 +122,15 @@ describe('selectors/getJsTracerTiming', function() {
       //           [current]
       expect(
         getHumanReadableJsTracerTiming({
-          selfTime: true,
+          useSelfTime: true,
           events: [
-            // Make the formatting "prettier".
+            // This comment makes the formatting "prettier".
             ['A', 0, 2],
             ['B', 1, 2],
           ],
         })
       ).toEqual([
-        // Make the formatting "prettier".
+        // This comment makes the formatting "prettier".
         'A (0:1)',
         'B (1:2)',
       ]);
@@ -144,15 +145,15 @@ describe('selectors/getJsTracerTiming', function() {
  * "EventName1 (StartTime:EndTime) | EventName2 (StartTime:EndTime)"
  */
 function getHumanReadableJsTracerTiming({
-  selfTime,
+  useSelfTime,
   events,
-}: {
-  selfTime: boolean,
+}: {|
+  useSelfTime: boolean,
   events: TestDefinedJsTracerEvent[],
-}): string[] {
+|}): string[] {
   const profile = getProfileWithJsTracerEvents(events);
   const { dispatch, getState } = storeWithProfile(profile);
-  dispatch(changeShowJsTracerSummary(selfTime));
+  dispatch(changeShowJsTracerSummary(useSelfTime));
 
   return ensureExists(
     selectedThreadSelectors.getExpensiveJsTracerTiming(getState())

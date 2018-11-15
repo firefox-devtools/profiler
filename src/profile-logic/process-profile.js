@@ -767,15 +767,40 @@ function _processThread(
     samples,
   };
 
-  // Optionally extract the JS Tracer information, if they exist.
-  const { jsTracerEvents } = thread;
-  const { jsTracerDictionary } = processProfile;
-  if (jsTracerEvents && jsTracerDictionary) {
-    newThread.jsTracer = ({
-      events: jsTracerEvents,
-      stringTable: new UniqueStringArray(jsTracerDictionary),
-    }: JsTracerTable);
+  function processJsTracer() {
+    // Optionally extract the JS Tracer information, if they exist.
+    const { jsTracerEvents } = thread;
+    const { jsTracerDictionary } = processProfile;
+    if (jsTracerEvents && jsTracerDictionary) {
+      // Add the JS tracer's strings to the thread's existing string table, and create
+      // a mapping from the old string indexes to the new ones. Use an Array rather
+      // than a Map because it saves ~150ms out of ~300ms in one example.
+      const geckoToProcessedStringIndex: number[] = new Array(
+        jsTracerDictionary.length
+      );
+      for (let i = 0; i < jsTracerDictionary.length; i++) {
+        geckoToProcessedStringIndex[i] = newThread.stringTable.indexForString(
+          jsTracerDictionary[i]
+        );
+      }
+
+      // Use a manual .slice() and for loop instead of map because it went from
+      // taking ~150ms to ~30ms on one example. Omitting the .slice() resulted
+      // in ~8ms, but mutating the original structure is probably a bad idea.
+      const newEvents = jsTracerEvents.events.slice();
+      for (let i = 0; i < newEvents.length; i++) {
+        const geckoStringIndex = newEvents[i];
+        newEvents[i] = geckoToProcessedStringIndex[geckoStringIndex];
+      }
+
+      newThread.jsTracer = {
+        ...jsTracerEvents,
+        events: newEvents,
+      };
+    }
   }
+
+  processJsTracer();
 
   return newThread;
 }
@@ -808,12 +833,7 @@ function _adjustJsTracerTimestamps(
   const deltaMicroseconds = delta * 1000;
   return {
     ...jsTracer,
-    events: {
-      ...jsTracer.events,
-      timestamps: jsTracer.events.timestamps.map(
-        time => time + deltaMicroseconds
-      ),
-    },
+    timestamps: jsTracer.timestamps.map(time => time + deltaMicroseconds),
   };
 }
 /**
@@ -1048,10 +1068,8 @@ function _unserializeProfile(profile: Object): Profile {
   // stringArray -> stringTable
   const newProfile = Object.assign({}, profile, {
     threads: profile.threads.map(thread => {
-      const { stringArray, jsTracer } = thread;
-      const newThread = { ...thread };
+      const { stringArray, jsTracer, ...newThread } = thread;
 
-      delete newThread.stringArray;
       newThread.stringTable = new UniqueStringArray(stringArray);
 
       if (jsTracer) {
