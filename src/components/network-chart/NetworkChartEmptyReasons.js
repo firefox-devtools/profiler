@@ -7,6 +7,7 @@ import React, { PureComponent } from 'react';
 
 import EmptyReasons from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { oneLine } from 'common-tags';
 
 import explicitConnect, {
   type ExplicitConnectOptions,
@@ -17,21 +18,23 @@ import type { State } from '../../types/store';
 
 type StateProps = {|
   +threadName: string,
-  +isNetworkChartEmptyInFullRange: boolean,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 class MarkerChartEmptyReasons extends PureComponent<Props> {
   render() {
-    const { isNetworkChartEmptyInFullRange, threadName } = this.props;
+    const { threadName } = this.props;
 
     return (
       <EmptyReasons
         threadName={threadName}
         reason={
-          isNetworkChartEmptyInFullRange
-            ? 'This thread has no network information.'
-            : 'All network requests were filtered out by the current selection or search term.'
+          // The network tab is never displayed if there are no markers in the full
+          // range, so never give that as a reason for it being empty.
+          oneLine`
+            All network requests were filtered out by the current selection or search
+            term. Try changing the search term, or zooming out.
+          `
         }
         viewName="network chart"
       />
@@ -42,9 +45,6 @@ class MarkerChartEmptyReasons extends PureComponent<Props> {
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-    isNetworkChartEmptyInFullRange: selectedThreadSelectors.getIsNetworkChartEmptyInFullRange(
-      state
-    ),
   }),
   component: MarkerChartEmptyReasons,
 };

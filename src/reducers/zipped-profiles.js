@@ -34,6 +34,7 @@ function zipFile(
   switch (action.type) {
     case 'UPDATE_URL_STATE': {
       if (
+        action.newUrlState &&
         action.newUrlState.pathInZipFile === null &&
         state.phase === 'VIEW_PROFILE_IN_ZIP_FILE'
       ) {

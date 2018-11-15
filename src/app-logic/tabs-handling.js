@@ -40,11 +40,3 @@ export const tabsWithTitleArray: $ReadOnlyArray<TabWithTitle> = tabSlugs.map(
     title: tabsWithTitle[tabSlug],
   })
 );
-
-/**
- * This function returns the initial order of the tabs.
- * This is simply the sequence of all array indices in ascending order.
- */
-export function getInitialTabOrder(): number[] {
-  return Array.from({ length: tabSlugs.length }, (_, i) => i);
-}

@@ -112,6 +112,9 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
       // See http://searchfox.org/mozilla-central/rev/2fc8c8d483d9ec9fd0ec319c6c53807f7fa8e8a2/xpcom/build/nsXULAppAPI.h#396
       processType: "default",
 
+      // Optional friendly process name. "Parent Process" or ContentChild::GetProcessName.
+      processName: "Parent Process",
+
       // The thread ID
       tid: 7442229,
 
@@ -186,16 +189,19 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
       frameTable: {
         schema: {
           location: 0,
-          implementation: 1,
-          optimizations: 2,
-          line: 3,
-          category: 4
+          relevantForJS: 1,
+          implementation: 2,
+          optimizations: 3,
+          line: 4,
+          column: 5,
+          category: 6
         },
         data: [
           [
             18,    // index into stringTable, points to strings like:
                    // JS: "Startup::XRE_Main"
                    // C++: "0x7fff7d962da1"
+            false, // for label frames, whether this label should be shown in "JS only" stacks
             40,    // for JS frames, an index into the string table, usually "Baseline" or "Ion"
             null,  // JSON info about JIT optimizations.
             1536,  // The line of code
