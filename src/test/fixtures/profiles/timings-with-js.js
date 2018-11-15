@@ -11,6 +11,7 @@ export default function createGeckoProfile(): GeckoProfile {
   return {
     meta: geckoProfile.meta,
     libs: geckoProfile.libs,
+    pages: geckoProfile.pages,
     pausedRanges: [],
     threads: [
       _createGeckoThread('GeckoMain'),
@@ -92,11 +93,11 @@ function _createGeckoThread(name: string): GeckoThread {
       'VsyncTimestamp', // 4
       'Reflow', // 5
       'baseline', // 6
-      'javascriptOne (http://js.com/foobar:1)', // 7
-      'javascriptTwo (http://js.com/foobar:2)', // 8
+      'javascriptOne (http://js.com/foobar:1:1)', // 7
+      'javascriptTwo (http://js.com/foobar:2:2)', // 8
       '0x10000f0f0', // 9
       '0x100fefefe', // 10
-      'javascriptThree (http://js.com/foobar:3)', // 11
+      'javascriptThree (http://js.com/foobar:3:3)', // 11
     ],
   };
 }

@@ -8,12 +8,14 @@
 }
 
 .sidebar-contents-wrapper {
+  line-height: 1.5;
+}
+
+.sidebar-calltree .sidebar-contents-wrapper {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 2px 5px;
   align-content: start; /* the grid isn't vertically stretched */
-
-  line-height: 1.5;
 }
 
 .sidebar-titlegroup, .sidebar-title2, .sidebar-title3 {
@@ -44,8 +46,9 @@
 }
 
 .sidebar-title {
-  font-size: 12px;
+  font-size: 1.2em;
   margin-bottom: .3em;
+  font-weight: 500;
 }
 
 .sidebar-subtitle {

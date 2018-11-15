@@ -60,7 +60,6 @@ export type ProfileViewState = {|
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
     zeroAt: Milliseconds,
-    tabOrder: number[],
     rightClickedTrack: TrackReference,
     isCallNodeContextMenuVisible: boolean,
     profileSharingStatus: ProfileSharingStatus,

@@ -219,6 +219,9 @@ async function processTracingEvents(
           funcTable.lineNumber.push(
             lineNumber === undefined ? null : lineNumber
           );
+          funcTable.columnNumber.push(
+            columnNumber === undefined ? null : columnNumber
+          );
           funcKeyToFuncId.set(funcKey, funcId);
         }
 

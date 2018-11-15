@@ -161,10 +161,9 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     markers: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state),
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
-    selectedMarker: selectedThreadSelectors.getViewOptions(state)
-      .selectedMarker,
     thread: selectedThreadSelectors.getThread(state),
     implementationFilter: getImplementationFilter(state),
+    selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
   }),
   mapDispatchToProps: { updatePreviewSelection },
   component: MarkersContextMenu,
