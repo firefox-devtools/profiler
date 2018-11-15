@@ -48,8 +48,6 @@ const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
   const { marker, networkPayload } = props;
   const { start, dur } = marker;
 
-  console.log('🤮', start, typeof start);
-
   // A marker does not always contain the same set of networkPayload on the start of
   // the connection.
   const queueStart =
@@ -165,9 +163,17 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     copy(uri);
   };
 
+  _findIndexOfLoadid(name: string): number | null {
+    const number = name.indexOf('/Load d+: (.*)/');
+    if (number === -1) {
+      return null;
+    }
+    return number;
+  }
+
   // Remove `Load 123: ` from markers.name
   _cropNameToUrl(name: string): string {
-    const url = name.slice(name.indexOf(':') + 2);
+    const url = name.slice(this._findIndexOfLoadid(name) + 2);
     return url;
   }
 
@@ -184,7 +190,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   // and filename, shorten the rest if needed.
   _shortenURI(name: string): React.Node {
     // Extract loadId from markers.name, e.g. `Load 123:`
-    const loadId = name.slice(0, name.indexOf(':') + 2);
+    const loadId = name.slice(0, this._findIndexOfLoadid(name) + 2);
     // Extract URI from markers.name
     const uri = this._extractURI(name);
     if (uri !== null) {
