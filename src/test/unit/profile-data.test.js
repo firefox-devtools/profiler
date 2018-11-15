@@ -252,6 +252,7 @@ describe('process-profile', function() {
         'chrome://blargh'
       );
       expect(thread.funcTable.lineNumber[4]).toEqual(34);
+      expect(thread.funcTable.columnNumber[4]).toEqual(35);
       expect(thread.funcTable.address[0]).toEqual(-1);
       expect(thread.funcTable.address[1]).toEqual(3972);
       expect(thread.funcTable.address[2]).toEqual(6725);
@@ -266,15 +267,6 @@ describe('process-profile', function() {
       const [name0, name1] = thread.resourceTable.name;
       expect(thread.stringTable.getString(name0)).toEqual('firefox');
       expect(thread.stringTable.getString(name1)).toEqual('chrome://blargh');
-    });
-    it('should preserve pids for threads that have them', function() {
-      expect(profile.threads[0].pid).toEqual(2222);
-    });
-    it('should create a string label for unknown thread pids', function() {
-      const geckoProfile = getGeckoProfile();
-      delete geckoProfile.threads[0].pid;
-      const profileWithNoPids = processProfile(geckoProfile);
-      expect(profileWithNoPids.threads[0].pid).toEqual('Unknown Process 1');
     });
   });
   describe('DevTools profiles', function() {

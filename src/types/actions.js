@@ -101,10 +101,6 @@ type ProfileAction =
       +previewSelection: PreviewSelection,
     |}
   | {|
-      +type: 'CHANGE_TAB_ORDER',
-      +tabOrder: number[],
-    |}
-  | {|
       +type: 'CHANGE_SELECTED_ZIP_FILE',
       +selectedZipFileIndex: IndexIntoZipFileTable | null,
     |}
@@ -227,7 +223,7 @@ type StackChartAction =
 
 type UrlEnhancerAction =
   | {| +type: 'URL_SETUP_DONE' |}
-  | {| +type: 'UPDATE_URL_STATE', +newUrlState: UrlState |};
+  | {| +type: 'UPDATE_URL_STATE', +newUrlState: UrlState | null |};
 
 type UrlStateAction =
   | {| +type: 'WAITING_FOR_PROFILE_FROM_FILE' |}

@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import { isChromeProfile, convertChromeProfile } from './import/chrome';
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes, emptyExtensions } from './profile-data';
@@ -20,7 +21,7 @@ import {
 import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
-} from './perf-script-profile-format';
+} from './import/linux-perf';
 import { convertPhaseTimes } from './convert-markers';
 import type {
   Profile,
@@ -141,6 +142,7 @@ type ExtractionInfo = {
  */
 export function extractFuncsAndResourcesFromFrameLocations(
   locationStringIndexes: IndexIntoStringTable[],
+  relevantForJSPerFrame: boolean[],
   stringTable: UniqueStringArray,
   libs: Lib[],
   extensions: ExtensionTable = emptyExtensions
@@ -151,10 +153,12 @@ export function extractFuncsAndResourcesFromFrameLocations(
     length: 0,
     name: [],
     resource: [],
+    relevantForJS: [],
     address: [],
     isJS: [],
     fileName: [],
     lineNumber: [],
+    columnNumber: [],
   };
 
   // Explicitly create ResourceTable. If Flow complains about this, then all of
@@ -185,38 +189,42 @@ export function extractFuncsAndResourcesFromFrameLocations(
 
   // Go through every frame location string, and deduce the function and resource
   // information by applying various string matching heuristics.
-  const locationFuncs = locationStringIndexes.map(locationIndex => {
-    const locationString = stringTable.getString(locationIndex);
-    let funcIndex = extractionInfo.stringToNewFuncIndex.get(locationString);
-    if (funcIndex !== undefined) {
-      // The location string was already processed.
-      return funcIndex;
-    }
+  const locationFuncs = locationStringIndexes.map(
+    (locationIndex, frameIndex) => {
+      const locationString = stringTable.getString(locationIndex);
+      const relevantForJS = relevantForJSPerFrame[frameIndex];
+      let funcIndex = extractionInfo.stringToNewFuncIndex.get(locationString);
+      if (funcIndex !== undefined) {
+        // The location string was already processed.
+        return funcIndex;
+      }
 
-    // These nested `if` branches check for 3 cases for constructing function and
-    // resource information.
-    funcIndex = _extractUnsymbolicatedFunction(
-      extractionInfo,
-      locationString,
-      locationIndex
-    );
-    if (funcIndex === null) {
-      funcIndex = _extractCppFunction(extractionInfo, locationString);
+      // These nested `if` branches check for 3 cases for constructing function and
+      // resource information.
+      funcIndex = _extractUnsymbolicatedFunction(
+        extractionInfo,
+        locationString,
+        locationIndex
+      );
       if (funcIndex === null) {
-        funcIndex = _extractJsFunction(extractionInfo, locationString);
+        funcIndex = _extractCppFunction(extractionInfo, locationString);
         if (funcIndex === null) {
-          funcIndex = _extractUnknownFunctionType(
-            extractionInfo,
-            locationIndex
-          );
+          funcIndex = _extractJsFunction(extractionInfo, locationString);
+          if (funcIndex === null) {
+            funcIndex = _extractUnknownFunctionType(
+              extractionInfo,
+              locationIndex,
+              relevantForJS
+            );
+          }
         }
       }
-    }
 
-    // Cache the above results.
-    extractionInfo.stringToNewFuncIndex.set(locationString, funcIndex);
-    return funcIndex;
-  });
+      // Cache the above results.
+      extractionInfo.stringToNewFuncIndex.set(locationString, funcIndex);
+      return funcIndex;
+    }
+  );
 
   return [
     extractionInfo.funcTable,
@@ -274,10 +282,12 @@ function _extractUnsymbolicatedFunction(
   const funcIndex = funcTable.length++;
   funcTable.name[funcIndex] = locationIndex;
   funcTable.resource[funcIndex] = resourceIndex;
+  funcTable.relevantForJS[funcIndex] = false;
   funcTable.address[funcIndex] = addressRelativeToLib;
   funcTable.isJS[funcIndex] = false;
   funcTable.fileName[funcIndex] = null;
   funcTable.lineNumber[funcIndex] = null;
+  funcTable.columnNumber[funcIndex] = null;
   return funcIndex;
 }
 
@@ -336,10 +346,12 @@ function _extractCppFunction(
   const newFuncIndex = funcTable.length++;
   funcTable.name[newFuncIndex] = funcNameIndex;
   funcTable.resource[newFuncIndex] = resourceIndex;
+  funcTable.relevantForJS[newFuncIndex] = false;
   funcTable.address[newFuncIndex] = -1;
   funcTable.isJS[newFuncIndex] = false;
   funcTable.fileName[newFuncIndex] = null;
   funcTable.lineNumber[newFuncIndex] = null;
+  funcTable.columnNumber[newFuncIndex] = null;
 
   return newFuncIndex;
 }
@@ -382,12 +394,12 @@ function _extractJsFunction(
 ): IndexIntoFuncTable | null {
   // Check for a JS location string.
   const jsMatch: RegExpResult =
-    // Given:   "functionName (http://script.url/:1234)"
-    // Captures: 1^^^^^^^^^^  2^^^^^^^^^^^^^^^^^^ 3^^^
-    /^(.*) \((.*):([0-9]+)\)$/.exec(locationString) ||
-    // Given:   "http://script.url/:1234"
-    // Captures: 2^^^^^^^^^^^^^^^^^ 3^^^
-    /^()(.*):([0-9]+)$/.exec(locationString);
+    // Given:   "functionName (http://script.url/:1234:1234)"
+    // Captures: 1^^^^^^^^^^  2^^^^^^^^^^^^^^^^^^ 3^^^ 4^^^
+    /^(.*) \((.+?):([0-9]+)(?::([0-9]+))?\)$/.exec(locationString) ||
+    // Given:   "http://script.url/:1234:1234"
+    // Captures: 2^^^^^^^^^^^^^^^^^ 3^^^ 4^^^
+    /^()(.+?):([0-9]+)(?::([0-9]+))?$/.exec(locationString);
 
   if (!jsMatch) {
     return null;
@@ -459,15 +471,18 @@ function _extractJsFunction(
   }
   const fileName = stringTable.indexForString(scriptURI);
   const lineNumber = parseInt(jsMatch[3], 10);
+  const columnNumber = jsMatch[4] ? parseInt(jsMatch[4], 10) : null;
 
   // Add the function to the funcTable.
   const funcIndex = funcTable.length++;
   funcTable.name[funcIndex] = funcNameIndex;
   funcTable.resource[funcIndex] = resourceIndex;
+  funcTable.relevantForJS[funcIndex] = false;
   funcTable.address[funcIndex] = -1;
   funcTable.isJS[funcIndex] = true;
   funcTable.fileName[funcIndex] = fileName;
   funcTable.lineNumber[funcIndex] = lineNumber;
+  funcTable.columnNumber[funcIndex] = columnNumber;
 
   return funcIndex;
 }
@@ -477,15 +492,18 @@ function _extractJsFunction(
  */
 function _extractUnknownFunctionType(
   { funcTable }: ExtractionInfo,
-  locationIndex: IndexIntoStringTable
+  locationIndex: IndexIntoStringTable,
+  relevantForJS: boolean
 ): IndexIntoFuncTable {
   const index = funcTable.length++;
   funcTable.name[index] = locationIndex;
   funcTable.resource[index] = -1;
+  funcTable.relevantForJS[index] = relevantForJS;
   funcTable.address[index] = -1;
   funcTable.isJS[index] = false;
   funcTable.fileName[index] = null;
   funcTable.lineNumber[index] = null;
+  funcTable.columnNumber[index] = null;
   return index;
 }
 
@@ -703,6 +721,7 @@ function _processThread(
     frameFuncs,
   ] = extractFuncsAndResourcesFromFrameLocations(
     geckoFrameStruct.location,
+    geckoFrameStruct.relevantForJS,
     stringTable,
     libs,
     extensions
@@ -723,6 +742,8 @@ function _processThread(
   return {
     name: thread.name,
     processType: thread.processType,
+    processName:
+      typeof thread.processName === 'string' ? thread.processName : '',
     processStartupTime: 0,
     processShutdownTime: shutdownTime,
     registerTime: thread.registerTime,
@@ -844,6 +865,12 @@ export function processProfile(
     );
   }
 
+  let pages = [...(geckoProfile.pages || [])];
+
+  for (const subprocessProfile of geckoProfile.processes) {
+    pages = pages.concat(subprocessProfile.pages || []);
+  }
+
   const meta = {
     interval: geckoProfile.meta.interval,
     startTime: geckoProfile.meta.startTime,
@@ -870,6 +897,7 @@ export function processProfile(
 
   const result = {
     meta,
+    pages,
     threads,
   };
   return result;
@@ -884,8 +912,17 @@ export function serializeProfile(
   includeNetworkUrls: boolean = true
 ): string {
   // stringTable -> stringArray
+  let urlCounter = 0;
   const newProfile = Object.assign({}, profile, {
     meta: { ...profile.meta, networkURLsRemoved: !includeNetworkUrls },
+    pages:
+      includeNetworkUrls === false && profile.pages
+        ? profile.pages.map(page =>
+            Object.assign({}, page, {
+              url: 'Page #' + urlCounter++,
+            })
+          )
+        : profile.pages,
     threads: profile.threads.map(thread => {
       const stringArray = thread.stringTable.serializeToArray();
       const newThread = Object.assign({}, thread);
@@ -939,9 +976,9 @@ function _unserializeProfile(profile: Object): Profile {
  * Take some arbitrary profile file from some data source, and turn it into
  * the processed profile format.
  */
-export function unserializeProfileOfArbitraryFormat(
+export async function unserializeProfileOfArbitraryFormat(
   stringOrObject: string | Object
-): Profile {
+): Promise<Profile> {
   try {
     let profile = null;
     if (typeof stringOrObject === 'string') {
@@ -965,6 +1002,9 @@ export function unserializeProfileOfArbitraryFormat(
     if (isProcessedProfile(profile)) {
       upgradeProcessedProfileToCurrentVersion(profile);
       return _unserializeProfile(profile);
+    }
+    if (isChromeProfile(profile)) {
+      return convertChromeProfile(profile);
     }
     // Else: Treat it as a Gecko profile and just attempt to process it.
     return processProfile(profile);

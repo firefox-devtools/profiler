@@ -770,8 +770,10 @@ export function collapseResource(
     isJS: funcTable.isJS.slice(),
     name: funcTable.name.slice(),
     resource: funcTable.resource.slice(),
+    relevantForJS: funcTable.relevantForJS.slice(),
     fileName: funcTable.fileName.slice(),
     lineNumber: funcTable.lineNumber.slice(),
+    columnNumber: funcTable.columnNumber.slice(),
     length: funcTable.length,
   };
   const newStackTable: StackTable = {
@@ -851,6 +853,7 @@ export function collapseResource(
             newFuncTable.resource.push(funcTable.resource[funcIndex]);
             newFuncTable.fileName.push(funcTable.fileName[funcIndex]);
             newFuncTable.lineNumber.push(null);
+            newFuncTable.columnNumber.push(null);
           }
 
           // Add the new stack.

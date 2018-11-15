@@ -14,6 +14,27 @@ import type { StartEndRange } from '../types/units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import { getNumberPropertyOrNull } from '../utils/flow';
 
+/**
+ * Jank instances are created from responsiveness values. Responsiveness is a profiler
+ * feature that can be turned on and off. When on, every sample includes a responsiveness
+ * value.
+ *
+ * This timing is captured by instrumenting the event queue. A runnable is added to the
+ * browser's event queue, then the profiler times how long it takes to come back.
+ * Generally, if this takes longer than some threshold, then this can be jank for the
+ * browser.
+ *
+ * This function converts those measurings of milliseconds into individual tracing
+ * markers.
+ *
+ * For instance, take an array of responsiveness values:
+ *
+ *   [5, 25, 33, 3, 23, 42, 65, 71, 3, 10, 22, 31, 42, 3, 20, 40]
+ *           |___|              |___|              |___|
+ *     Runnable is reset    Jank of 71ms. The      Runnable reset under threshold.
+ *     but under 50ms,      responsiveness was
+ *     no jank.             reset from 71 to 3.
+ */
 export function getJankInstances(
   samples: SamplesTable,
   thresholdInMs: number
@@ -27,11 +48,19 @@ export function getJankInstances(
       data: null,
     });
 
-  let lastResponsiveness = 0;
-  let lastTimestamp = 0;
+  let lastResponsiveness: number = 0;
+  let lastTimestamp: number = 0;
   const jankInstances = [];
   for (let i = 0; i < samples.length; i++) {
     const currentResponsiveness = samples.responsiveness[i];
+    if (currentResponsiveness === null || currentResponsiveness === undefined) {
+      // Ignore anything that's not numeric. This can happen if there is no responsiveness
+      // information, or if the sampler failed to collect a responsiveness value. This
+      // can happen intermittently.
+      //
+      // See Bug 1506226.
+      continue;
+    }
     if (currentResponsiveness < lastResponsiveness) {
       if (lastResponsiveness >= thresholdInMs) {
         addTracingMarker();
@@ -328,8 +357,76 @@ export function filterForNetworkChart(markers: TracingMarker[]) {
 export function filterForMarkerChart(markers: TracingMarker[]) {
   return markers.filter(marker => !isNetworkMarker(marker));
 }
+// Firefox emits separate start and end markers for each load. It does this so that,
+// if a profile is collected while a request is in progress, the profile will still contain
+// a start marker for that request. So by looking at start markers we can get
+// information about requests that were in progress at profile collection time.
+// For requests that have finished, we want to merge the request's start and end
+// markers into one marker.
+export function mergeStartAndEndNetworkMarker(
+  markers: TracingMarker[]
+): TracingMarker[] {
+  const sortedMarkers: TracingMarker[] = markers.slice(0);
+  const filteredMarkers: TracingMarker[] = [];
 
-// TODO: add function to merge start and end markers
+  // Sort markers, alphabetized by name to filter for markers with the same name
+  sortedMarkers.sort((a, b) => {
+    if (a.name < b.name) return -1;
+    if (a.name > b.name) return 1;
+    return 0;
+  });
+  for (let i = 0; i < sortedMarkers.length; i++) {
+    const marker = sortedMarkers[i];
+    const markerNext = sortedMarkers[i + 1];
+
+    if (!marker.data || marker.data.type !== 'Network') {
+      continue;
+    }
+    // The timestamps on the start and end markers describe two non-overlapping parts
+    // of the same load. The start marker has a duration from channel-creation until Start
+    // (i.e. AsyncOpen()). The End marker has a duration from AsyncOpen time until
+    // OnStopRequest.
+    // In the merged marker, we want to represent the entire duration, from channel-creation
+    // until OnStopRequest.
+    if (markerNext !== undefined && marker.name === markerNext.name) {
+      if (
+        marker.data &&
+        marker.data.type === 'Network' &&
+        markerNext.data &&
+        markerNext.data.type === 'Network'
+      ) {
+        // Markers have either status STATUS_START or (STATUS_STOP || STATUS_REDIRECT || STATUS_READ). STATUS_START is reliable and the only not likely to change.
+        if (
+          (marker.data.status === 'STATUS_START' &&
+            markerNext.data.status !== 'STATUS_START') ||
+          (markerNext.data.status === 'STATUS_START' &&
+            marker.data.status !== 'STATUS_START')
+        ) {
+          // As we discard the start marker, but want the whole duration we override the
+          // start of the end marker with the start time of the start marker
+          const [startMarker, endMarker] =
+            marker.data.status === 'STATUS_START'
+              ? [marker, markerNext]
+              : [markerNext, marker];
+          const mergedMarker = {
+            data: endMarker.data,
+            dur: endMarker.dur,
+            name: endMarker.name,
+            title: endMarker.title,
+            start: startMarker.start,
+          };
+          filteredMarkers.push(mergedMarker);
+          i++;
+        }
+        continue;
+      }
+    }
+    filteredMarkers.push(marker);
+  }
+  // Sort markers by startTime to display in the right order in the network panel waterfall
+  filteredMarkers.sort((a, b) => a.start - b.start);
+  return filteredMarkers;
+}
 
 export function extractScreenshotsById(
   markers: MarkersTable,

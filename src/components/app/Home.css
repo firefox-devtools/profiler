@@ -6,6 +6,7 @@
   width: 100%;
   min-height: 100vh;
   display: flex;
+  align-self: flex-start;
   align-items: center;
   justify-content: center;
   line-height: 1.5;
@@ -78,10 +79,16 @@
 }
 
 .homeTitle {
-  margin-top: 0;
-  margin-bottom: 0.5em;
+  display: flex;
+  justify-content: space-between;
+  /* Negative margin is here to compensate for the children's margins */
+  margin: 0 -0.2em 0.5em;
   padding-bottom: 0.5em;
   border-bottom: 1px solid #DDD;
+}
+
+.homeTitleSlogan {
+  margin: 0 0.2em;
 }
 
 .homeTitleSubtext {
@@ -89,7 +96,7 @@
 }
 
 .homeTitleGithubIcon {
-  float: right;
+  margin: 0 0.2em;
 }
 
 .homeTitleGithubIcon svg {
@@ -113,8 +120,8 @@
   padding: 0.5em;
   margin: 15px 0;
   display: block;
-  border: 2px solid var(--blue-50);
-  color: var(--blue-50);
+  border: 2px solid var(--blue-60);
+  color: var(--blue-60);
   text-decoration: none;
   transition: background-color 300ms;
   font-weight: bold;
@@ -150,7 +157,7 @@
 
 .homeSectionButton:hover , .homeSectionButtonPressed {
   color: #fff;
-  background-color: var(--blue-50);
+  background-color: var(--blue-60);
 }
 
 .homeSectionPlus {
@@ -269,9 +276,18 @@ label.homeSectionButton:focus-within {
 
 @media (max-width: 767px) {
   .homeSection {
-    width: 80%;
+    width: 90%;
+    max-width: 90%;
+    padding-left: 2em;
+    padding-right: 2em;
+  }
+}
+
+@media (max-width: 499px) {
+  .homeSection {
+    width: 95%;
+    max-width: 95%;
     padding-left: 1em;
     padding-right: 1em;
   }
-
 }
