@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import Tooltip from '../shared/Tooltip';
 import copy from 'copy-to-clipboard';
@@ -25,13 +25,6 @@ export type NetworkChartRowProps = {
   +threadIndex: ThreadIndex,
 };
 
-export type NetworkChartRowPropsBar = {
-  +marker: TracingMarker,
-  // Pass the payload in as well, since our types can't express a TracingMarker with
-  // a specific payload.
-  +data: NetworkPayload | null,
-};
-
 type State = {
   pageX: CssPixels,
   pageY: CssPixels,
@@ -42,102 +35,102 @@ export type NetworkChartRowBarProps = {
   +marker: TracingMarker,
   // Pass the payload in as well, since our types can't express a TracingMarker with
   // a specific payload.
-  +networkPayload: NetworkPayload | null,
+  +networkPayload: NetworkPayload,
 };
 
-// Splitting up the network marker duration in 4 different phases
+// This component splits a network marker duration in 4 different phases,
+// and renders each phase as a differently colored bar.
 // 1. request queue
 // 2. request
 // 3. response
-// 4. response queue
+// 4. response queue (This is not calculated. We assume it is the rest of the duration.)
 const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
+  const { marker, networkPayload } = props;
+  const { start, dur } = marker;
+
+  console.log('🤮', start, typeof start);
+
+  // A marker does not always contain the same set of networkPayload on the start of
+  // the connection.
+  const queueStart =
+    networkPayload.secureConnectionStart ||
+    networkPayload.tcpConnectEnd ||
+    networkPayload.connectStart ||
+    networkPayload.domainLookupStart ||
+    0;
+
+  // The default for width of the phases is always zero.
+  let requestQueue: number = 0;
+  let request: number = 0;
+  let response: number = 0;
+
+  // Timestamps from network markers aren't adjusted when processing
+  // the gecko profile format. This is the reason why the start timestamp of a
+  // marker can be after the start timestamp of the request.
+  // To prevent false networkPayload visualization, we need this workaround.
+  // See https://github.com/devtools-html/perf.html/issues/1493 for more detail.
   if (
-    props &&
-    props.marker &&
-    props.marker.data &&
-    (props || props.marker || props.marker.data) !== null
+    networkPayload.requestStart &&
+    start < networkPayload.requestStart &&
+    networkPayload.responseStart &&
+    start < networkPayload.responseStart
   ) {
-    const marker = props.marker;
-    const data = marker.data;
-    const start = marker.start;
-    const dur = marker.dur;
-
-    // A marker not always contains the same set of data on the start of the connection
-    const queueStart =
-      data.secureConnectionStart ||
-      data.tcpConnectEnd ||
-      data.connectStart ||
-      data.domainLookupStart ||
-      0;
-
-    // Default for width of the phases is always zero
-    let req_queue: ?number | string = 0;
-    let req: ?number | string = 0;
-    let res: ?number | string = 0;
-
-    // The start of a marker is related to the parentThread
-    // As e.g. a content thread can start earlier or the data starts
-    // before the start of the marker related to the parentThread, we need to prevent false data visualization
-    if (
-      data.requestStart &&
-      start < data.requestStart &&
-      data.responseStart &&
-      start < data.responseStart
-    ) {
-      req = (data.responseStart - data.requestStart || 0) / dur * 100 + '%';
-    }
-
-    if (
-      data.responseEnd &&
-      start < data.responseEnd &&
-      data.responseStart &&
-      start < data.responseStart
-    ) {
-      res = (data.responseEnd - data.responseStart || 0) / dur * 100 + '%';
-    }
-
-    if (queueStart && start < queueStart > 0) {
-      req_queue = (queueStart - start) / dur * 100 + '%';
-    }
-
-    // When we keep the default values (=zero), the
-    // response gets the full width of the bar to be more visible
-    if (req_queue + req + res === 0) {
-      res = 100 + '%';
-    }
-
-    // Adding either the default value (=zero) as width or
-    // we have calculated a new value that can be added as width
-    const boxWidth = {
-      req_queue: req_queue,
-      req: req,
-      res: res,
-    };
-
-    return (
-      <React.Fragment>
-        <span
-          className="networkChartRowItemBarInner request-queue"
-          style={{ width: boxWidth.req_queue }}
-        >
-          &nbsp;
-        </span>
-        <span
-          className="networkChartRowItemBarInner request"
-          style={{ width: boxWidth.req }}
-        >
-          &nbsp;
-        </span>
-        <span
-          className="networkChartRowItemBarInner response"
-          style={{ width: boxWidth.res }}
-        >
-          &nbsp;
-        </span>
-      </React.Fragment>
-    );
+    request =
+      (networkPayload.responseStart - networkPayload.requestStart || 0) /
+      dur *
+      100;
   }
-  return null;
+
+  if (
+    networkPayload.responseEnd &&
+    start < networkPayload.responseEnd &&
+    networkPayload.responseStart &&
+    start < networkPayload.responseStart
+  ) {
+    response =
+      (networkPayload.responseEnd - networkPayload.responseStart || 0) /
+      dur *
+      100;
+  }
+
+  if (queueStart && start < queueStart && queueStart > 0) {
+    requestQueue = (queueStart - start) / dur * 100;
+  }
+
+  // When we keep the default values (=zero), the
+  // response takes the full width of the bar to be more visible.
+  if (requestQueue + request + response === 0) {
+    response = 100;
+  }
+
+  // Adding either the default value (=zero) as width or
+  // the new, calculated value that can be added.
+  const requestQueueWidth = requestQueue;
+  const requestWidth = request;
+  const responseWidth = response;
+
+  return (
+    <React.Fragment>
+      <span
+        className="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+        style={{ width: `${requestQueueWidth}%` }}
+      >
+        &nbsp;
+      </span>
+      <span
+        className="networkChartRowItemBarInner networkChartRowItemBarRequest"
+        style={{ width: `${requestWidth}%` }}
+      >
+        &nbsp;
+      </span>
+      <span
+        className="networkChartRowItemBarInner networkChartRowItemBarResponse"
+        style={{ width: `${responseWidth}%` }}
+      >
+        &nbsp;
+      </span>
+    </React.Fragment>
+  );
 };
 
 class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
@@ -173,23 +166,23 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   };
 
   // Remove `Load 123: ` from markers.name
-  _cropNameToUrl = (name: string) => {
+  _cropNameToUrl(name: string): string {
     const url = name.slice(name.indexOf(':') + 2);
     return url;
-  };
+  }
 
-  _extractURI = (url: string) => {
+  _extractURI(url: string): URL | null {
     try {
       const uri = new URL(this._cropNameToUrl(url));
       return uri;
     } catch (e) {
-      console.error('The network marker has no valid URL.');
       return null;
     }
-  };
+  }
 
-  // split markers.name in loadID and parts of URL to highlight domain and filename, shorten the rest if needed
-  _shortenURI = (name: string) => {
+  // Split markers.name in loadID and parts of URL to highlight domain
+  // and filename, shorten the rest if needed.
+  _shortenURI(name: string): React.Node {
     // Extract loadId from markers.name, e.g. `Load 123:`
     const loadId = name.slice(0, name.indexOf(':') + 2);
     // Extract URI from markers.name
@@ -202,49 +195,55 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
       return (
         <span>
-          <span className="uriReq">{loadId}</span>
-          <span className="uriOpt">{uri.protocol + '//'}</span>
-          <span className="uriReq">{uri.hostname}</span>
+          <span className="networkChartRowItemUriRequired">{loadId}</span>
+          <span className="networkChartRowItemUriOptional">
+            {uri.protocol + '//'}
+          </span>
+          <span className="networkChartRowItemUriRequired">{uri.hostname}</span>
           {uriPath !== uriFilename && uriPath.length > 0 ? (
-            <span className="uriOpt">{uriPath}</span>
+            <span className="networkChartRowItemUriOptional">{uriPath}</span>
           ) : null}
-          <span className="uriReq">{uriFilename}</span>
-          {uri.search ? <span className="uriOpt">{uri.search}</span> : null}
-          {uri.hash ? <span className="uriOpt">{uri.hash}</span> : null}
+          <span className="networkChartRowItemUriRequired">{uriFilename}</span>
+          {uri.search ? (
+            <span className="networkChartRowItemUriOptional">{uri.search}</span>
+          ) : null}
+          {uri.hash ? (
+            <span className="networkChartRowItemUriOptional">{uri.hash}</span>
+          ) : null}
         </span>
       );
     }
     return name;
-  };
+  }
 
-  // identifies mime type of request
-  // this is a workaround until we have mime types passed from gecko to network marker requests
-  _identifyType = (name: string) => {
+  // Identifies mime type of request. This is a workaround until we have
+  // mime types passed from gecko to network marker requests.
+  _identifyType(name: string): string {
     const uri = this._extractURI(name);
     if (uri === null) {
       return '';
     }
-    // Extract the fileName from the path
+    // Extracting the fileName from the path.
     const fileName = uri.pathname;
     const fileExt = fileName.slice(fileName.lastIndexOf('.'));
 
     switch (fileExt) {
       case '.js':
-        return 'js';
+        return 'networkChartRowItemjs';
       case '.css':
-        return 'css';
+        return 'networkChartRowItemcss';
       case '.gif':
       case '.png':
       case '.jpg':
       case '.jpeg':
       case '.svg':
-        return 'img';
+        return 'networkChartRowItemimg';
       case '.html':
-        return 'html';
+        return 'networkChartRowItemhtml';
       default:
         return '';
     }
-  };
+  }
 
   render() {
     const { index, marker, markerStyle, networkPayload } = this.props;
@@ -273,7 +272,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           onMouseEnter={this._hoverIn}
           onMouseLeave={this._hoverOut}
         >
-          <NetworkChartRowBar marker={marker} />
+          <NetworkChartRowBar marker={marker} networkPayload={networkPayload} />
         </div>
         {this.state.hovered ? (
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY}>
