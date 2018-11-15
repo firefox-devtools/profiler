@@ -816,7 +816,7 @@ export function retrieveProfileFromString(
     dispatch(waitingForProfileFromString());
     try {
       if (text) {
-        const profile = unserializeProfileOfArbitraryFormat(text);
+        const profile =await unserializeProfileOfArbitraryFormat(text);
         if (profile === undefined) {
           throw new Error('Unable to parse the profile.');
         }
