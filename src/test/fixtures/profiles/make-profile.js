@@ -145,10 +145,12 @@ export function getEmptyThread(overrides: ?Object): Thread {
       funcTable: {
         address: [],
         isJS: [],
+        relevantForJS: [],
         name: [],
         resource: [],
         fileName: [],
         lineNumber: [],
+        columnNumber: [],
         length: 0,
       },
       resourceTable: {
@@ -386,8 +388,10 @@ function _buildThreadFromTextOnlyStacks(
       funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : 0
     );
     funcTable.fileName.push(null);
+    funcTable.relevantForJS.push(funcName.endsWith('js-relevant'));
     funcTable.isJS.push(funcName.endsWith('js'));
     funcTable.lineNumber.push(null);
+    funcTable.columnNumber.push(null);
     // Ignore resources for now, this way funcNames have really nice string indexes.
     // The resource column will be filled in the loop below.
     funcTable.length++;

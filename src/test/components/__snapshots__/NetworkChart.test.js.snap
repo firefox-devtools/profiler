@@ -1,22 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EmptyReasons shows a reason when a profile has no network markers 1`] = `
-<div
-  className="EmptyReasons"
->
-  <h3>
-    The 
-    network chart
-     is empty for “
-    Empty
-    ”
-  </h3>
-  <p>
-    This thread has no network information.
-  </p>
-</div>
-`;
-
 exports[`EmptyReasons shows a reason when a profile's network markers have been filtered out 1`] = `
 <div
   className="EmptyReasons"
@@ -29,7 +12,7 @@ exports[`EmptyReasons shows a reason when a profile's network markers have been 
     ”
   </h3>
   <p>
-    This thread has no network information.
+    All network requests were filtered out by the current selection or search term. Try changing the search term, or zooming out.
   </p>
 </div>
 `;

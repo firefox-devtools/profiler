@@ -42,7 +42,7 @@ The following graphic demonstrates how it can be useful to filter to only JavaSc
 
 Before the implementation filter, the call tree contains both C++ JavaScript internals, as well as the JavaScript stacks. This interleaving could be useful when diagnosing how the JS engine is optimizing code, but for normal JS performance profiling this could be confusing to find hot JS functions. When the native stacks are removed, the call tree that is generated is much more sensible for representing the execution of JavaScript code.
 
-The implementation filter will modify the shape of stacks, and generate a completely new call tree. If the any of the filtered stacks in a sample are empty (for instance filtering on JavaScript when there are only C++ stacks), then those samples with empty stacks will be dropped from the analysis.
+The implementation filter will modify the shape of stacks, and generate a completely new call tree. If any of the filtered stacks in a sample are empty (for instance filtering on JavaScript when there are only C++ stacks), then those samples with empty stacks will be dropped from the analysis.
 
 ## Invert call stack
 

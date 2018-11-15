@@ -14,6 +14,27 @@ import type { StartEndRange } from '../types/units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import { getNumberPropertyOrNull } from '../utils/flow';
 
+/**
+ * Jank instances are created from responsiveness values. Responsiveness is a profiler
+ * feature that can be turned on and off. When on, every sample includes a responsiveness
+ * value.
+ *
+ * This timing is captured by instrumenting the event queue. A runnable is added to the
+ * browser's event queue, then the profiler times how long it takes to come back.
+ * Generally, if this takes longer than some threshold, then this can be jank for the
+ * browser.
+ *
+ * This function converts those measurings of milliseconds into individual tracing
+ * markers.
+ *
+ * For instance, take an array of responsiveness values:
+ *
+ *   [5, 25, 33, 3, 23, 42, 65, 71, 3, 10, 22, 31, 42, 3, 20, 40]
+ *           |___|              |___|              |___|
+ *     Runnable is reset    Jank of 71ms. The      Runnable reset under threshold.
+ *     but under 50ms,      responsiveness was
+ *     no jank.             reset from 71 to 3.
+ */
 export function getJankInstances(
   samples: SamplesTable,
   thresholdInMs: number
@@ -27,13 +48,18 @@ export function getJankInstances(
       data: null,
     });
 
-  let lastResponsiveness = 0;
-  let lastTimestamp = 0;
+  let lastResponsiveness: number = 0;
+  let lastTimestamp: number = 0;
   const jankInstances = [];
   for (let i = 0; i < samples.length; i++) {
     const currentResponsiveness = samples.responsiveness[i];
     if (currentResponsiveness === null || currentResponsiveness === undefined) {
-      return [];
+      // Ignore anything that's not numeric. This can happen if there is no responsiveness
+      // information, or if the sampler failed to collect a responsiveness value. This
+      // can happen intermittently.
+      //
+      // See Bug 1506226.
+      continue;
     }
     if (currentResponsiveness < lastResponsiveness) {
       if (lastResponsiveness >= thresholdInMs) {
