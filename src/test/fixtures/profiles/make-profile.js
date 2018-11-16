@@ -592,8 +592,8 @@ export function getJsTracerTable(
     jsTracer.events.push(stringIndex);
     jsTracer.timestamps.push(start * 1000);
     jsTracer.durations.push((end - start) * 1000);
-    jsTracer.lines.push(-1);
-    jsTracer.columns.push(-1);
+    jsTracer.lines.push(null);
+    jsTracer.columns.push(null);
     jsTracer.length++;
   }
 

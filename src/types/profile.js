@@ -226,9 +226,9 @@ export type PausedRange = {
 export type JsTracerTable = {|
   events: Array<IndexIntoStringTable>,
   timestamps: Array<Microseconds>,
-  durations: Array<Microseconds | -1>,
-  lines: Array<number | -1>, // Line number.
-  columns: Array<number | -1>, // Column number.
+  durations: Array<Microseconds | null>,
+  lines: Array<number | null>, // Line number.
+  columns: Array<number | null>, // Column number.
   length: number,
 |};
 

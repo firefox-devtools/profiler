@@ -57,7 +57,7 @@ export function getJsTracerTiming(
       const division = 1000;
       const start = jsTracer.timestamps[tracerEventIndex] / division;
       const durationRaw = jsTracer.durations[tracerEventIndex];
-      const duration = durationRaw === -1 ? 0 : durationRaw / division;
+      const duration = durationRaw === null ? 0 : durationRaw / division;
 
       // Since the events are sorted, look at the last added event in this row. If
       // the new event fits, go ahead and insert it.
@@ -163,6 +163,9 @@ export function getJsTracerLeafTiming(
   const prefixesStarts = [];
   const prefixesEnds = [];
   const prefixesEventIndexes = [];
+
+  // If there is no prefix, set it to -1. This simplifies some of the real-time
+  // type checks that would be required by Flow for this mutable variable.
   let prefixesTip = -1;
 
   // Go through all of the events. Each `if` branch is documented with a small diagram
@@ -183,7 +186,7 @@ export function getJsTracerLeafTiming(
   ) {
     const currentStart = jsTracer.timestamps[currentEventIndex];
     const durationRaw = jsTracer.durations[currentEventIndex];
-    const duration = durationRaw === -1 ? 0 : durationRaw;
+    const duration = durationRaw === null ? 0 : durationRaw;
     const currentEnd = currentStart + duration;
 
     if (prefixesTip === -1) {
