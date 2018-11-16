@@ -3,10 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { JsTracerTable } from '../types/profile';
+import type {
+  JsTracerTable,
+  IndexIntoStringTable,
+  IndexIntoJsTracerEvents,
+} from '../types/profile';
 import type { JsTracerTiming } from '../types/profile-derived';
 import type { Microseconds } from '../types/units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
+
 /**
  * This function is very similar in implementation as getStackTimingByDepth.
  * It creates a list of JsTracerTiming entries that represent the underlying
@@ -54,10 +59,9 @@ export function getJsTracerTiming(
       }
 
       // The timing is converted here from Microseconds to Milliseconds.
-      const division = 1000;
-      const start = jsTracer.timestamps[tracerEventIndex] / division;
+      const start = jsTracer.timestamps[tracerEventIndex] / 1000;
       const durationRaw = jsTracer.durations[tracerEventIndex];
-      const duration = durationRaw === null ? 0 : durationRaw / division;
+      const duration = durationRaw === null ? 0 : durationRaw / 1000;
 
       // Since the events are sorted, look at the last added event in this row. If
       // the new event fits, go ahead and insert it.
@@ -98,8 +102,21 @@ export function getJsTracerLeafTiming(
   // Each event type will have it's own timing information, later collapse these into
   // a single array.
   const jsTracerTimingMap: Map<string, JsTracerTiming> = new Map();
-  const isUrl = stringTable._array.map(string => /:\/\//.test(string));
+  const isUrlCache = [];
+  const isUrlRegex = /:\/\//;
 
+  function isUrl(index: IndexIntoStringTable): boolean {
+    const cachedIsUrl = isUrlCache[index];
+    if (cachedIsUrl !== undefined) {
+      return cachedIsUrl;
+    }
+    const booleanValue = isUrlRegex.test(stringTable.getString(index));
+    isUrlCache[index] = booleanValue;
+    return booleanValue;
+  }
+
+  // This function reports self time in the correct row of JsTracerTiming in
+  // jsTracerTimingMap, based on the event that is passed to it.
   function reportSelfTime(
     tracerEventIndex: number,
     start: Microseconds,
@@ -111,7 +128,10 @@ export function getJsTracerLeafTiming(
     }
     const stringIndex = jsTracer.events[tracerEventIndex];
     const displayName = stringTable.getString(stringIndex);
-    const rowName = isUrl[stringIndex] ? 'Script' : displayName;
+    // Event names are either some specific event in the JS engine, or it is the URL
+    // of the script that is executing. Put all of the URL events into a single row
+    // labeled 'Script'.
+    const rowName = isUrl(stringIndex) ? 'Script' : displayName;
     let timingRow = jsTracerTimingMap.get(rowName);
     if (timingRow === undefined) {
       timingRow = {
@@ -124,21 +144,15 @@ export function getJsTracerLeafTiming(
       };
       jsTracerTimingMap.set(rowName, timingRow);
     }
-    // Convert the timing to milliseconds.
-    const division = 1000;
-    if (end < start) {
-      throw new Error('end is less than the start');
-    }
-    timingRow.start.push(start / division);
-    timingRow.end.push(end / division);
-    timingRow.label.push(displayName);
-    timingRow.index.push(tracerEventIndex);
-    timingRow.length++;
 
-    if (timingRow.length > 1) {
+    {
+      // Perform sanity checks on the data that is being added.
       const currStart = timingRow.start[timingRow.length - 1];
       const currEnd = timingRow.end[timingRow.length - 1];
       const prevEnd = timingRow.end[timingRow.length - 2];
+      if (end < start) {
+        throw new Error('end is less than the start');
+      }
       if (currEnd < currStart) {
         throw new Error(
           `currEnd < currStart "${displayName} - ${currEnd} < ${currStart}"`
@@ -149,20 +163,25 @@ export function getJsTracerLeafTiming(
           `currStart < prevEnd "${displayName} - ${currStart} < ${prevEnd}"`
         );
       }
-      if (currEnd < prevEnd) {
-        throw new Error(
-          `currEnd < prevEnd "${displayName} - ${currEnd} < ${prevEnd}"`
-        );
-      }
     }
+
+    // Convert the timing to milliseconds.
+    timingRow.start.push(start / 1000);
+    timingRow.end.push(end / 1000);
+    timingRow.label.push(displayName);
+    timingRow.index.push(tracerEventIndex);
+    timingRow.length++;
   }
 
-  // Determine the self time of the various events. These values are all the stack
-  // of "prefix" events. The event details will be pushed on to these stacks until
-  // they are clearly self time.
-  const prefixesStarts = [];
-  const prefixesEnds = [];
-  const prefixesEventIndexes = [];
+  // Determine the self time of the various events.
+
+  // These arrays implement the stack of "prefix" events. This is implemented as 3
+  // arrays instead of an array of objects to reduce the GC pressure in this tight
+  // loop, but conceptually this is just one stack, not 3 stacks. At any given time,
+  // the stack represents the prefixes, aka the parents, of the current event.
+  const prefixesStarts: Microseconds[] = [];
+  const prefixesEnds: Microseconds[] = [];
+  const prefixesEventIndexes: IndexIntoJsTracerEvents[] = [];
 
   // If there is no prefix, set it to -1. This simplifies some of the real-time
   // type checks that would be required by Flow for this mutable variable.
@@ -190,7 +209,7 @@ export function getJsTracerLeafTiming(
     const currentEnd = currentStart + duration;
 
     if (prefixesTip === -1) {
-      // Nothing has been added yet, add this "current" event to to the stack of prefixes.
+      // Nothing has been added yet, add this "current" event to the stack of prefixes.
       prefixesTip = 0;
       prefixesStarts[prefixesTip] = currentStart;
       prefixesEnds[prefixesTip] = currentEnd;
@@ -198,10 +217,15 @@ export function getJsTracerLeafTiming(
       continue;
     }
 
-    while (prefixesTip >= 0) {
+    while (true) {
       const prefixStart = prefixesStarts[prefixesTip];
       const prefixEnd = prefixesEnds[prefixesTip];
       const prefixEventIndex = prefixesEventIndexes[prefixesTip];
+
+      // The following if/else blocks go through every potential case of timing for the
+      // the data, and finally throw if those cases weren't handled. Each block should
+      // have a diagram explaining the various states the timing can be in. Inside the
+      // if checks, the loop is either continued or broken.
 
       if (prefixEnd <= currentStart) {
         // In this case, the "current" event has passed the other "prefix" event.
@@ -220,13 +244,6 @@ export function getJsTracerLeafTiming(
         reportSelfTime(prefixEventIndex, prefixStart, prefixEnd);
 
         // Move the tip towards the prefix.
-        if (process.env.NODE_ENV === 'development') {
-          // To aid in debugging locally, reset the values to -1 when they are no
-          // longer valid. In production don't do this extra work.
-          prefixesEventIndexes[prefixesTip] = -1;
-          prefixesStarts[prefixesTip] = -1;
-          prefixesEnds[prefixesTip] = -1;
-        }
         prefixesTip--;
 
         if (prefixesTip === -1) {
@@ -243,11 +260,10 @@ export function getJsTracerLeafTiming(
           break;
         }
 
-        // This is the only branch that has a `continue`, and not a `break`.
+        // Move up the prefix stack to report more self times. This is the only branch
+        // that has a `continue`, and not a `break`.
         continue;
-      }
-
-      if (prefixEnd > currentEnd) {
+      } else if (prefixEnd > currentEnd) {
         // The current event occludes the prefix event.
         //
         //   [prefix=================]
@@ -278,9 +294,7 @@ export function getJsTracerLeafTiming(
         prefixesEnds[prefixesTip] = currentEnd;
         prefixesEventIndexes[prefixesTip] = currentEventIndex;
         break;
-      }
-
-      if (prefixEnd === currentEnd) {
+      } else if (prefixEnd === currentEnd) {
         if (prefixStart !== currentStart) {
           // The current event splits the event above it, so split the reported self
           // time of the prefix.
@@ -300,30 +314,31 @@ export function getJsTracerLeafTiming(
           prefixesEventIndexes[prefixesTip] = currentEventIndex;
         }
         break;
+      } else {
+        // There is some error in the data structure or this functions logic. Throw
+        // and error, and report some nice information to the console.
+        const prefixName = stringTable.getString(
+          jsTracer.events[prefixEventIndex]
+        );
+        const currentName = stringTable.getString(
+          jsTracer.events[currentEventIndex]
+        );
+        console.error('Current JS Tracer information:', {
+          jsTracer,
+          stringTable,
+          prefixEventIndex,
+          currentEventIndex,
+        });
+        console.error(
+          `Prefix (parent) times for "${prefixName}": ${prefixStart}ms to ${prefixEnd}ms`
+        );
+        console.error(
+          `Current (child) times for "${currentName}": ${currentStart}ms to ${currentEnd}ms`
+        );
+        throw new Error(
+          'The JS Tracer information was malformed. Some event lasted longer than its parent event.'
+        );
       }
-
-      // The data appears to be malformed, report a nice error to the console.
-      const prefixName = stringTable.getString(
-        jsTracer.events[prefixEventIndex]
-      );
-      const currentName = stringTable.getString(
-        jsTracer.events[currentEventIndex]
-      );
-      console.error('Current JS Tracer information:', {
-        jsTracer,
-        stringTable,
-        prefixEventIndex,
-        currentEventIndex,
-      });
-      console.error(
-        `Prefix (parent) times for "${prefixName}": ${prefixStart}ms to ${prefixEnd}ms`
-      );
-      console.error(
-        `Current (child) times for "${currentName}": ${currentStart}ms to ${currentEnd}ms`
-      );
-      throw new Error(
-        'The JS Tracer information was malformed. Some event lasted longer than its parent event.'
-      );
     }
   }
 
