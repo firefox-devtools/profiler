@@ -72,39 +72,39 @@
   background-color: var(--grey-40);
 }
 
-.networkChartRowItemcss .networkChartRowItemBar {
+.networkChartRowItemCss .networkChartRowItemBar {
   border-color: var(--purple-50);
   opacity: 0.6;
 }
 
-.networkChartRowItemcss .networkChartRowItemBarInner {
+.networkChartRowItemCss .networkChartRowItemBarInner {
   background-color: var(--purple-50);
 }
 
-.networkChartRowItemjs .networkChartRowItemBar {
+.networkChartRowItemJs .networkChartRowItemBar {
   border-color: var(--yellow-50);
   opacity: 0.6;
 }
 
-.networkChartRowItemjs .networkChartRowItemBarInner {
+.networkChartRowItemJs .networkChartRowItemBarInner {
   background-color: var(--yellow-50);
 }
 
-.networkChartRowItemhtml .networkChartRowItemBar {
+.networkChartRowItemHtml .networkChartRowItemBar {
   border-color: var(--blue-60);
   opacity: 0.6;
 }
 
-.networkChartRowItemhtml .networkChartRowItemBarInner {
+.networkChartRowItemHtml .networkChartRowItemBarInner {
   background-color: var(--blue-60);
 }
 
-.networkChartRowItemimg .networkChartRowItemBar {
+.networkChartRowItemImg .networkChartRowItemBar {
   border-color: var(--green-60);
   opacity: 0.6;
 }
 
-.networkChartRowItemimg .networkChartRowItemBarInner {
+.networkChartRowItemImg .networkChartRowItemBarInner {
   background-color: var(--green-60);
 }
 

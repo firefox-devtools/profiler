@@ -6,7 +6,6 @@
 import * as React from 'react';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import Tooltip from '../shared/Tooltip';
-import copy from 'copy-to-clipboard';
 
 import type { CssPixels } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
@@ -155,16 +154,9 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     });
   };
 
-  // copy URI
-  _onDoubleClick = (_event: SyntheticEvent<>): void => {
-    // strip marker name to url
-    const uri = this._cropNameToUrl(this.props.marker.name);
-    // copy url to clipboard
-    copy(uri);
-  };
-
   _findIndexOfLoadid(name: string): number | null {
-    const number = name.indexOf('/Load d+: (.*)/');
+    const regex = /[:]/g;
+    const number = name.search(regex);
     if (number === -1) {
       return null;
     }
@@ -189,8 +181,6 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   // Split markers.name in loadID and parts of URL to highlight domain
   // and filename, shorten the rest if needed.
   _shortenURI(name: string): React.Node {
-    // Extract loadId from markers.name, e.g. `Load 123:`
-    const loadId = name.slice(0, this._findIndexOfLoadid(name) + 2);
     // Extract URI from markers.name
     const uri = this._extractURI(name);
     if (uri !== null) {
@@ -201,7 +191,6 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
       return (
         <span>
-          <span className="networkChartRowItemUriRequired">{loadId}</span>
           <span className="networkChartRowItemUriOptional">
             {uri.protocol + '//'}
           </span>
@@ -235,17 +224,17 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
     switch (fileExt) {
       case '.js':
-        return 'networkChartRowItemjs';
+        return 'networkChartRowItemJs';
       case '.css':
-        return 'networkChartRowItemcss';
+        return 'networkChartRowItemCss';
       case '.gif':
       case '.png':
       case '.jpg':
       case '.jpeg':
       case '.svg':
-        return 'networkChartRowItemimg';
+        return 'networkChartRowItemImg';
       case '.html':
-        return 'networkChartRowItemhtml';
+        return 'networkChartRowItemHtml';
       default:
         return '';
     }
@@ -264,12 +253,11 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
       ' networkChartRowItem ' +
       this._identifyType(marker.name);
 
+    console.log('👁👁👁', this._identifyType(marker.name));
+
     return (
       <section className={itemClassName}>
-        <div
-          className="networkChartRowItemLabel"
-          onDoubleClick={this._onDoubleClick}
-        >
+        <div className="networkChartRowItemLabel">
           {this._shortenURI(marker.name)}
         </div>
         <div
