@@ -27,7 +27,7 @@ import { sendAnalytics } from '../../utils/analytics';
 import url from 'url';
 
 import type { StartEndRange } from '../../types/units';
-import type { Profile } from '../../types/profile';
+import type { Profile, ProfileMeta } from '../../types/profile';
 import type { Action, DataSource } from '../../types/actions';
 import type {
   ProfileSharingStatus,
@@ -151,7 +151,7 @@ type ProfileSharingCompositeButtonState = {
   shareNetworkUrls: boolean,
 };
 
-function _mapMetaInfoExtensionNames(data: any) {
+function _mapMetaInfoExtensionNames(data: string[]): React.DOM {
   const extensionList = data.map(d => (
     <li className="metaInfoListItem" key={d}>
       {d}
@@ -164,21 +164,20 @@ function _formatDate(timestamp: number): string {
   const timestampDate = new Date(timestamp).toUTCString();
   return timestampDate;
 }
-function _formatVersionNumber(version: string) {
-  const regex = /[0-9]+.+[0-9]/g;
-  let match;
 
-  while ((match = regex.exec(version)) !== null) {
-    // This is necessary to avoid infinite loops with zero-width matches
-    if (match.index === regex.lastIndex) {
-      regex.lastIndex++;
+function _formatVersionNumber(version?: string): string | null {
+  const regex = /[0-9]+.+[0-9]/gi;
+
+  if (version) {
+    const match = version.match(regex);
+    if (match) {
+      return match.toString();
     }
-    return match;
   }
   return null;
 }
 
-function _formatLabel(meta: Object): string | null {
+function _formatLabel(meta: ProfileMeta): string | null {
   const product = meta.product || '';
   const version = _formatVersionNumber(meta.misc) || '';
   const os = meta.oscpu || '';
@@ -198,15 +197,15 @@ class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
 
     if (meta !== undefined && meta !== null) {
       return (
-        <div className="menuButtonsOpenMetainfoButtonBox">
-          <div className="menuButtonsOpenMetainfoButtonLabel">
+        <div className="menuButtonsOpenMetaInfoButtonBox">
+          <div className="menuButtonsOpenMetaInfoButtonLabel">
             {_formatLabel(meta)}
           </div>
           <ButtonWithPanel
-            className="menuButtonsOpenMetainfoButtonButton"
+            className="menuButtonsOpenMetaInfoButtonButton"
             label="&nbsp;"
             panel={
-              <ArrowPanel className="arrowPanelOpenMetainfo">
+              <ArrowPanel className="arrowPanelOpenMetaInfo">
                 <h2 className="arrowPanelSubTitle">Timing</h2>
                 <div className="arrowPanelSection">
                   {meta.startTime ? (

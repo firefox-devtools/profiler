@@ -5,21 +5,21 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
   className="menuButtons"
 >
   <div
-    className="menuButtonsOpenMetainfoButtonBox"
+    className="menuButtonsOpenMetaInfoButtonBox"
   >
     <div
-      className="menuButtonsOpenMetainfoButtonLabel"
+      className="menuButtonsOpenMetaInfoButtonLabel"
     >
       Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
+      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -30,7 +30,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel arrowPanelOpenMetainfo"
+          className="arrowPanel arrowPanelOpenMetaInfo"
         >
           <div
             className="arrowPanelArrow"
@@ -75,7 +75,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 >
                   Profile Version:
                 </span>
-                16
+                18
               </div>
             </div>
             <h2
@@ -498,21 +498,21 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
   className="menuButtons"
 >
   <div
-    className="menuButtonsOpenMetainfoButtonBox"
+    className="menuButtonsOpenMetaInfoButtonBox"
   >
     <div
-      className="menuButtonsOpenMetainfoButtonLabel"
+      className="menuButtonsOpenMetaInfoButtonLabel"
     >
       Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
+      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -523,7 +523,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel arrowPanelOpenMetainfo"
+          className="arrowPanel arrowPanelOpenMetaInfo"
         >
           <div
             className="arrowPanelArrow"
@@ -568,7 +568,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 >
                   Profile Version:
                 </span>
-                16
+                18
               </div>
             </div>
             <h2
@@ -991,21 +991,21 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
   className="menuButtons"
 >
   <div
-    className="menuButtonsOpenMetainfoButtonBox"
+    className="menuButtonsOpenMetaInfoButtonBox"
   >
     <div
-      className="menuButtonsOpenMetainfoButtonLabel"
+      className="menuButtonsOpenMetaInfoButtonLabel"
     >
       Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
+      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1016,7 +1016,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel arrowPanelOpenMetainfo"
+          className="arrowPanel arrowPanelOpenMetaInfo"
         >
           <div
             className="arrowPanelArrow"
@@ -1061,7 +1061,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                16
+                18
               </div>
             </div>
             <h2
@@ -1484,21 +1484,21 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
   className="menuButtons"
 >
   <div
-    className="menuButtonsOpenMetainfoButtonBox"
+    className="menuButtonsOpenMetaInfoButtonBox"
   >
     <div
-      className="menuButtonsOpenMetainfoButtonLabel"
+      className="menuButtonsOpenMetaInfoButtonLabel"
     >
       Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
+      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -1509,7 +1509,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel arrowPanelOpenMetainfo"
+          className="arrowPanel arrowPanelOpenMetaInfo"
         >
           <div
             className="arrowPanelArrow"
@@ -1554,7 +1554,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                16
+                18
               </div>
             </div>
             <h2
@@ -1977,21 +1977,21 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
   className="menuButtons"
 >
   <div
-    className="menuButtonsOpenMetainfoButtonBox"
+    className="menuButtonsOpenMetaInfoButtonBox"
   >
     <div
-      className="menuButtonsOpenMetainfoButtonLabel"
+      className="menuButtonsOpenMetaInfoButtonLabel"
     >
       Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
+      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -2002,7 +2002,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel arrowPanelOpenMetainfo"
+          className="arrowPanel arrowPanelOpenMetaInfo"
         >
           <div
             className="arrowPanelArrow"
@@ -2047,7 +2047,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                16
+                18
               </div>
             </div>
             <h2
@@ -2470,21 +2470,21 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
   className="menuButtons"
 >
   <div
-    className="menuButtonsOpenMetainfoButtonBox"
+    className="menuButtonsOpenMetaInfoButtonBox"
   >
     <div
-      className="menuButtonsOpenMetainfoButtonLabel"
+      className="menuButtonsOpenMetaInfoButtonLabel"
     >
       Firefox (48.0) Intel Mac OS X 10.11
     </div>
     <div
-      className="buttonWithPanel menuButtonsOpenMetainfoButtonButton"
+      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
     >
       <div
         className="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton menuButtonsOpenMetainfoButtonButtonButton"
+          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
           disabled={false}
           onClick={[Function]}
           type="button"
@@ -2495,7 +2495,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
         className="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel arrowPanelOpenMetainfo"
+          className="arrowPanel arrowPanelOpenMetaInfo"
         >
           <div
             className="arrowPanelArrow"
@@ -2540,7 +2540,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                16
+                18
               </div>
             </div>
             <h2

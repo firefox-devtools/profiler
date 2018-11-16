@@ -157,25 +157,23 @@
   background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2));
 }
 
-.arrowPanelOpenMetainfo {
+.arrowPanelOpenMetaInfo {
   width: 350px;
   font-size: 12px;
   line-height: 20px;
   padding-top: 5px;
+  max-height: calc(100vh - 60px);
+  overflow-y: scroll; 
 }
 
-.arrowPanelOpenMetainfo,
-.arrowPanelOpenMetainfo .arrowPanelArrow::before {
+.arrowPanelOpenMetaInfo,
+.arrowPanelOpenMetaInfo .arrowPanelArrow::before {
   background-color: white;
 }
 
 .arrowPanelSection {
   margin-top: 7px;
   margin-bottom: 12px;
-}
-
-.metaInfoRow {
-  display: block;
 }
 
 .metaInfoLabel {
