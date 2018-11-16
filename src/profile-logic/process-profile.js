@@ -1047,13 +1047,6 @@ export function serializeProfile(
         }
       }
       newThread.stringArray = stringArray;
-
-      if (thread.jsTracer) {
-        const deserializedJsTracer: Object = { ...thread.jsTracer };
-        deserializedJsTracer.stringArray = deserializedJsTracer.stringTable.serializeToArray();
-        delete deserializedJsTracer.stringTable;
-        newThread.jsTracer = deserializedJsTracer;
-      }
       return newThread;
     }),
   });

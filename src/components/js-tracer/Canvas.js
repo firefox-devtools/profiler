@@ -50,6 +50,7 @@ type OwnProps = {|
   +jsTracerTable: JsTracerTable,
   +rowHeight: CssPixels,
   +threadIndex: ThreadIndex,
+  +doFadeIn: boolean,
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
@@ -547,6 +548,7 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
     return (
       <ChartCanvas
         className={classNames({
+          jsTracerCanvasFadeIn: this.props.doFadeIn,
           jsTracerCanvas: true,
           jsTracerCanvasDrawn: this.state.hasFirstDraw,
         })}

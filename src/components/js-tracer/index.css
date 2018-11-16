@@ -29,12 +29,12 @@
   }
 }
 
-.jsTracerCanvas {
+.jsTracerCanvasFadeIn {
   background-color: #fff;
   opacity: 0;
 }
 
-.jsTracerCanvasDrawn {
+.jsTracerCanvasFadeIn.jsTracerCanvasDrawn {
   opacity: 1;
   animation-name: jsTracerCanvasFadeIn;
   animation-duration: 200ms;

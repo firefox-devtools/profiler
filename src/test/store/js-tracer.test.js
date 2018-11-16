@@ -153,19 +153,22 @@ function getHumanReadableJsTracerTiming({
 |}): string[] {
   const profile = getProfileWithJsTracerEvents(events);
   const { dispatch, getState } = storeWithProfile(profile);
+  const computeTiming = useSelfTime
+    ? selectedThreadSelectors.getExpensiveJsTracerLeafTiming
+    : selectedThreadSelectors.getExpensiveJsTracerTiming;
   dispatch(changeShowJsTracerSummary(useSelfTime));
 
-  return ensureExists(
-    selectedThreadSelectors.getExpensiveJsTracerTiming(getState())
-  ).map(({ start, end, label, length }) => {
-    const lines = [];
-    for (let i = 0; i < length; i++) {
-      lines.push(
-        `${label[i]} (${parseFloat(start[i].toFixed(2))}:${parseFloat(
-          end[i].toFixed(2)
-        )})`
-      );
+  return ensureExists(computeTiming(getState())).map(
+    ({ start, end, label, length }) => {
+      const lines = [];
+      for (let i = 0; i < length; i++) {
+        lines.push(
+          `${label[i]} (${parseFloat(start[i].toFixed(2))}:${parseFloat(
+            end[i].toFixed(2)
+          )})`
+        );
+      }
+      return lines.join(' | ');
     }
-    return lines.join(' | ');
-  });
+  );
 }

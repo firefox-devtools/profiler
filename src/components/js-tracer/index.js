@@ -5,16 +5,22 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import JsTracerExpensiveChart from './ExpensiveChart';
+import JsTracerChart from './Chart';
 import JsTracerSettings from './Settings';
 import EmptyReasons from './EmptyReasons';
 
-import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { getShowJsTracerSummary } from '../../reducers/url-state';
+import {
+  getProfile,
+  selectedThreadSelectors,
+} from '../../reducers/profile-view';
+import {
+  getShowJsTracerSummary,
+  getSelectedThreadIndex,
+} from '../../reducers/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { changeSelectedTab } from '../../actions/app';
 
-import type { JsTracerTable } from '../../types/profile';
+import type { Profile, JsTracerTable, ThreadIndex } from '../../types/profile';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -28,65 +34,16 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
+  +profile: Profile,
+  +threadIndex: ThreadIndex,
   +jsTracerTable: JsTracerTable | null,
   +showJsTracerSummary: boolean,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-type State = {|
-  wasLoaderMounted: boolean,
-|};
-
-const LOADER_WAS_MOUNTED = { wasLoaderMounted: true };
-const LOADER_HAS_NOT_BEEN_MOUNTED = { wasLoaderMounted: false };
-
-// Keep track of all of the JsTracerTables seen. It's expensive to compute their
-// timing information, so always display a loading screen first before passing them
-// on to the the JsTracerExpensiveChart.
-const _seenJsTracerTable: WeakSet<JsTracerTable> = new WeakSet();
-const _seenJsTracerSummaryTable: WeakSet<JsTracerTable> = new WeakSet();
-
-class JsTracer extends React.PureComponent<Props, State> {
-  state: State = LOADER_HAS_NOT_BEEN_MOUNTED;
-
+class JsTracer extends React.PureComponent<Props> {
   _rafGeneration: number = 0;
-
-  componentDidMount() {
-    this._checkForNewJsTracerTable(this.props);
-  }
-
-  componentWillReceiveProps(props: Props) {
-    this._checkForNewJsTracerTable(props);
-  }
-
-  /**
-   * This method controls how a loader gets displayed to the user while the JsTracerTiming
-   * information is computed.
-   */
-  _checkForNewJsTracerTable({
-    jsTracerTable,
-    showJsTracerSummary,
-  }: Props): void {
-    const weakset = showJsTracerSummary
-      ? _seenJsTracerTable
-      : _seenJsTracerSummaryTable;
-    if (jsTracerTable !== null && !weakset.has(jsTracerTable)) {
-      weakset.add(jsTracerTable);
-      const rafGeneration = ++this._rafGeneration;
-      requestAnimationFrame(() => {
-        // Ensure the requested frame is the one after the React update.
-        requestAnimationFrame(() => {
-          if (rafGeneration === this._rafGeneration) {
-            this.setState(LOADER_WAS_MOUNTED);
-          }
-        });
-      });
-      this.setState(LOADER_HAS_NOT_BEEN_MOUNTED);
-    } else {
-      this.setState(LOADER_WAS_MOUNTED);
-    }
-  }
 
   componentDidUpdate() {
     const { changeSelectedTab, jsTracerTable } = this.props;
@@ -98,8 +55,12 @@ class JsTracer extends React.PureComponent<Props, State> {
   }
 
   render() {
-    const { jsTracerTable, showJsTracerSummary } = this.props;
-
+    const {
+      profile,
+      jsTracerTable,
+      showJsTracerSummary,
+      threadIndex,
+    } = this.props;
     return (
       <div className="jsTracer">
         {jsTracerTable === null || jsTracerTable.events.length === 0 ? (
@@ -107,18 +68,13 @@ class JsTracer extends React.PureComponent<Props, State> {
         ) : (
           <>
             <JsTracerSettings />
-            {this.state.wasLoaderMounted ? (
-              <JsTracerExpensiveChart
-                jsTracerTable={jsTracerTable}
-                showJsTracerSummary={showJsTracerSummary}
-              />
-            ) : (
-              <div className="jsTracerLoader">
-                Re-constructing tracing information from{' '}
-                {jsTracerTable.events.length.toLocaleString()} events. This
-                might take a moment.
-              </div>
-            )}
+            <JsTracerChart
+              key={`${threadIndex}-${showJsTracerSummary ? 'true' : 'false'}`}
+              profile={profile}
+              jsTracerTable={jsTracerTable}
+              showJsTracerSummary={showJsTracerSummary}
+              threadIndex={threadIndex}
+            />
           </>
         )}
       </div>
@@ -129,6 +85,8 @@ class JsTracer extends React.PureComponent<Props, State> {
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
     return {
+      profile: getProfile(state),
+      threadIndex: getSelectedThreadIndex(state),
       jsTracerTable: selectedThreadSelectors.getJsTracerTable(state),
       showJsTracerSummary: getShowJsTracerSummary(state),
     };

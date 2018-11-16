@@ -370,7 +370,7 @@ exports[`StackChart matches the snapshot for the chart 1`] = `
   >
     <div>
       <canvas
-        className="chartCanvas jsTracerCanvas jsTracerCanvasDrawn"
+        className="chartCanvas jsTracerCanvasFadeIn jsTracerCanvas jsTracerCanvasDrawn"
         onDoubleClick={[Function]}
         onMouseDown={[Function]}
         onMouseMove={[Function]}

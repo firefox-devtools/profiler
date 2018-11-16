@@ -803,6 +803,7 @@ export type SelectorsForThread = {
   getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
   getJsTracerTable: State => JsTracerTable | null,
   getExpensiveJsTracerTiming: State => null | JsTracerTiming[],
+  getExpensiveJsTracerLeafTiming: State => null | JsTracerTiming[],
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -1232,22 +1233,33 @@ export const selectorsForThread = (
 
     const getJsTracerTable = (state: State) =>
       getThread(state).jsTracer || null;
+
     /**
-     * This selector may not be good to run in components directly, as it is so expensive
-     * that it janks the browser. It is provided here for convenience in tests.
+     * This selector can be very slow, so care should be taken when running it to provide
+     * a helpful loading message for the user. Provide separate selectors for the stack
+     * based timing, and the leaf timing, so that they memoize nicely.
      */
     const getExpensiveJsTracerTiming = createSelector(
       getJsTracerTable,
       getStringTable,
-      UrlState.getShowJsTracerSummary,
-      (jsTracerTable, stringTable, showSummary) => {
-        if (jsTracerTable === null) {
-          return null;
-        }
-        return showSummary
-          ? JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
-          : JsTracer.getJsTracerTiming(jsTracerTable, stringTable);
-      }
+      (jsTracerTable, stringTable) =>
+        jsTracerTable === null
+          ? null
+          : JsTracer.getJsTracerTiming(jsTracerTable, stringTable)
+    );
+
+    /**
+     * This selector can be very slow, so care should be taken when running it to provide
+     * a helpful loading message for the user. Provide separate selectors for the stack
+     * based timing, and the leaf timing, so that they memoize nicely.
+     */
+    const getExpensiveJsTracerLeafTiming = createSelector(
+      getJsTracerTable,
+      getStringTable,
+      (jsTracerTable, stringTable) =>
+        jsTracerTable === null
+          ? null
+          : JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
     );
 
     selectorsForThreads[threadIndex] = {
@@ -1295,6 +1307,7 @@ export const selectorsForThread = (
       getSelectedMarkerIndex,
       getJsTracerTable,
       getExpensiveJsTracerTiming,
+      getExpensiveJsTracerLeafTiming,
     };
   }
   return selectorsForThreads[threadIndex];
