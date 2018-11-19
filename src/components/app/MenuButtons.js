@@ -41,30 +41,6 @@ import type {
 
 require('./MenuButtons.css');
 
-const PrivacyNotice = () => (
-  <section className="privacyNotice">
-    <p>
-      You’re about to upload your profile publicly where anyone will be able to
-      access it. To better diagnose performance problems profiles include the
-      following information:
-    </p>
-    <ul>
-      <li>The URLs of all painted tabs, and running scripts.</li>
-      <li>The metadata of all your add-ons to identify slow add-ons.</li>
-      <li>Firefox build and runtime configuration.</li>
-    </ul>
-    <p>
-      To view all the information you can download the full profile to a file
-      and open the json structure with a text editor.
-    </p>
-    <p>
-      {`By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:`}
-    </p>
-  </section>
-);
-
 const UploadingStatus = ({ progress }: { progress: number }) => (
   <div className="menuButtonsUploadingButton">
     <div className="menuButtonsUploadingButtonInner">
@@ -105,25 +81,82 @@ const ProfileSharingButton = ({
     panel={
       <ArrowPanel
         className="menuButtonsPrivacyPanel"
-        title="Upload Profile – Privacy Notice"
-        okButtonText="Share"
-        cancelButtonText="Cancel"
-        onOkButtonClick={okButtonClickEvent}
+        // title="Upload Profile – Privacy Notice"
+        // okButtonText="Share"
+        // cancelButtonText="Cancel"
+        // onOkButtonClick={okButtonClickEvent}
         onOpen={panelOpenEvent ? panelOpenEvent : undefined}
       >
-        <PrivacyNotice />
-        <p className="menuButtonsShareNetworkUrlsContainer">
-          <label>
-            <input
-              type="checkbox"
-              className="menuButtonsShareNetworkUrlsCheckbox"
-              checked={shareNetworkUrlCheckboxChecked}
-              onChange={shareNetworkUrlCheckboxOnChange}
-              disabled={checkboxDisabled}
-            />
-            Share the URLs of all network requests
-          </label>
-        </p>
+        <div className="menuButtonsPrivacyContent">
+          <div className="menuButtonsPrivacyIcon" />
+          <p className="menuButtonsPrivacyInfoDescription">
+            You’re about to share your profile potentially where others have
+            public access to it. By default, the profile is stripped of much of
+            the personally identifiable information.
+          </p>
+          <details className="menuButtonsPrivacyData">
+            <summary className="menuButtonsPrivacyDataSummary">
+              Select more data to include
+            </summary>
+            <label className="menuButtonsPrivacyDataLabel menuButtonsPrivacyDataLabelAll">
+              <input
+                className="menuButtonsPrivacyDataLabelAllInput"
+                type="checkbox"
+                value="all"
+              />
+              Include all information
+            </label>
+            <div className="menuButtonsPrivacyDataColumns">
+              <div className="menuButtonsPrivacyDataColumn">
+                <label className="menuButtonsPrivacyDataLabel">
+                  <input type="checkbox" value="screenshots" />
+                  Include hidden threads
+                </label>
+                <label className="menuButtonsPrivacyDataLabel">
+                  <input type="checkbox" value="screenshots" />
+                  Include full time range
+                </label>
+                <label className="menuButtonsPrivacyDataLabel">
+                  <input type="checkbox" value="screenshots" />
+                  Screenshots
+                </label>
+              </div>
+              <div className="menuButtonsPrivacyDataColumn">
+                <label className="menuButtonsPrivacyDataLabel">
+                  <input type="checkbox" value="screenshots" />
+                  Network traffic URLs
+                </label>
+                <label className="menuButtonsPrivacyDataLabel">
+                  <input type="checkbox" value="screenshots" />
+                  All profile URLs
+                </label>
+              </div>
+            </div>
+          </details>
+          <div className="menuButtonsPrivacyButtons">
+            <div
+              aria-role="button"
+              className="menuButtonsPrivacyButton menuButtonsPrivacyButtonsUpload"
+            >
+              <span className="menuButtonsPrivacyButtonsSvg menuButtonsPrivacyButtonsSvgUpload" />
+              Upload
+            </div>
+            <div
+              aria-role="button"
+              className="menuButtonsPrivacyButton menuButtonsPrivacyButtonsDownload"
+            >
+              <span className="menuButtonsPrivacyButtonsSvg menuButtonsPrivacyButtonsSvgDownload" />
+              Download
+            </div>
+            <div
+              aria-role="button"
+              className="menuButtonsPrivacyButton menuButtonsPrivacyButtonsCancel"
+            >
+              <span className="menuButtonsPrivacyButtonsSvg menuButtonsPrivacyButtonsSvgCancel" />
+              Cancel
+            </div>
+          </div>
+        </div>
       </ArrowPanel>
     }
   />

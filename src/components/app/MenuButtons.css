@@ -155,7 +155,7 @@
 
 .menuButtonsPrivacyPanel,
 .menuButtonsUploadErrorPanel {
-  --width: 280px;
+  --width: 500px;
 }
 
 .menuButtonsProfileDownloadPanel {
@@ -172,8 +172,78 @@
   margin: 5px -5px;
 }
 
-.menuButtonsShareNetworkUrlsContainer {
-  margin: 20px 0;
+.menuButtonsPrivacyContent {
+  position: relative;
+  padding: 10px 10px 10px 70px;
+}
+
+.menuButtonsPrivacyIcon {
+  position: absolute;
+  left: 10px;
+  top: 34px;
+  width: 44px;
+  height: 44px;
+  background: url(../../../res/img/svg/info.svg) center center no-repeat;
+}
+
+.menuButtonsPrivacyInfoDescription {
+  flex: 1;
+  line-height: 2.1;
+  margin-bottom: 1em;
+}
+
+.menuButtonsPrivacyDataColumns {
+  display: flex;
+  margin-left: 11px;
+}
+
+.menuButtonsPrivacyDataColumn {
+  width: 50%;
+}
+
+.menuButtonsPrivacyDataSummary {
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+}
+
+.menuButtonsPrivacyDataLabel {
+  display: block;
+  line-height: 2.3;
+}
+
+.menuButtonsPrivacyDataLabelAll {
+  background: var(--blue-40);
+  color: #fff;
+  border-radius: 3px;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.menuButtonsPrivacyDataLabelAllInput {
+  margin: 0 9px;
+}
+
+.menuButtonsPrivacyButtons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.menuButtonsPrivacyButton {
+  padding: 10px 20px;
+  border-radius: 3px;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
 }
@@ -227,4 +297,48 @@
 .menuButtonsOpenMetaInfoButtonBox .buttonWithPanel.open {
   width: 40px;
   background: url(../../../res/img/svg/meatball.svg) 50% 50% no-repeat;
+}
+
+.menuButtonsPrivacyButtonsUpload,
+.menuButtonsPrivacyButtonsDownload {
+  background-color: var(--blue-40);
+}
+
+.menuButtonsPrivacyButtonsUpload:hover,
+.menuButtonsPrivacyButtonsDownload:hover {
+  background-color: var(--blue-50);
+}
+
+.menuButtonsPrivacyButtonsCancel {
+  background-color: var(--grey-40);
+}
+
+.menuButtonsPrivacyButtonsCancel:hover {
+  background-color: var(--grey-50);
+}
+
+.menuButtonsPrivacyButtonsSvg {
+  position: relative;
+  top: 4px;
+  margin-top: -6px;
+  margin-right: 5px;
+  display: inline-block;
+}
+
+.menuButtonsPrivacyButtonsSvgUpload {
+  width: 20px;
+  height: 20px;
+  background: url(../../../res/img/svg/upload.svg) center center no-repeat;
+}
+
+.menuButtonsPrivacyButtonsSvgDownload {
+  width: 20px;
+  height: 20px;
+  background: url(../../../res/img/svg/download.svg) center center no-repeat;
+}
+
+.menuButtonsPrivacyButtonsSvgCancel {
+  width: 20px;
+  height: 20px;
+  background: url(../../../res/img/svg/cancel.svg) center center no-repeat;
 }
