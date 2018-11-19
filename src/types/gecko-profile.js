@@ -8,6 +8,7 @@ import type {
   IndexIntoStringTable,
   PausedRange,
   CategoryList,
+  PageList,
 } from './profile';
 import type { MarkerPayload_Gecko } from './markers';
 import type { Milliseconds } from './units';
@@ -143,6 +144,7 @@ export type GeckoThread = {
   name: string,
   registerTime: number,
   processType: string,
+  processName?: string,
   unregisterTime: number | null,
   tid: number,
   pid: number,
@@ -191,6 +193,7 @@ export type GeckoProfileMeta = {|
 export type GeckoProfile = {|
   meta: GeckoProfileMeta,
   libs: Lib[],
+  pages?: PageList,
   threads: GeckoThread[],
   pausedRanges: PausedRange[],
   tasktracer?: Object,

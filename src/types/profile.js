@@ -149,6 +149,7 @@ export type FuncTable = {
   relevantForJS: Array<boolean>,
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
+  columnNumber: Array<number | null>,
 };
 
 /**
@@ -190,6 +191,15 @@ export type Category = {
 
 export type CategoryList = Array<Category>;
 
+export type Page = {|
+  docshellId: string,
+  historyId: number,
+  url: string,
+  isSubFrame: boolean,
+|};
+
+export type PageList = Array<Page>;
+
 /**
  * Information about a period of time during which no samples were collected.
  */
@@ -228,6 +238,7 @@ export type Thread = {
   unregisterTime: Milliseconds | null,
   pausedRanges: PausedRange[],
   name: string,
+  processName?: string,
   // An undefined pid is a valid value. An undefined value will key
   // properly on Map<pid, T>.
   pid: Pid,
@@ -326,5 +337,6 @@ export type ProfileMeta = {|
  */
 export type Profile = {
   meta: ProfileMeta,
+  pages?: PageList,
   threads: Thread[],
 };

@@ -112,6 +112,9 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
       // See http://searchfox.org/mozilla-central/rev/2fc8c8d483d9ec9fd0ec319c6c53807f7fa8e8a2/xpcom/build/nsXULAppAPI.h#396
       processType: "default",
 
+      // Optional friendly process name. "Parent Process" or ContentChild::GetProcessName.
+      processName: "Parent Process",
+
       // The thread ID
       tid: 7442229,
 

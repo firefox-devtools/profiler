@@ -24,3 +24,25 @@ export class FastFillStyle {
     }
   }
 }
+
+/**
+ * Perform a simple shallow object equality check.
+ */
+export function objectShallowEquals(a: Object, b: Object): boolean {
+  let aLength = 0;
+  let bLength = 0;
+  for (const key in a) {
+    if (a.hasOwnProperty(key)) {
+      aLength++;
+      if (a[key] !== b[key]) {
+        return false;
+      }
+    }
+  }
+  for (const key in b) {
+    if (b.hasOwnProperty(key)) {
+      bLength++;
+    }
+  }
+  return aLength === bLength;
+}

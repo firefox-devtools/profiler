@@ -754,6 +754,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
       isJS: funcTable.isJS.slice(),
       fileName: funcTable.fileName.slice(),
       lineNumber: funcTable.lineNumber.slice(),
+      columnNumber: funcTable.columnNumber.slice(),
     };
 
     // Create a Map that takes a prefix and frame as input, and maps it to the new stack
@@ -806,6 +807,7 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
               newFuncTable.isJS.push(false);
               newFuncTable.fileName.push(null);
               newFuncTable.lineNumber.push(null);
+              newFuncTable.columnNumber.push(null);
               if (newFuncTable.name.length !== newFuncTable.length) {
                 console.error(
                   'length is not correct',
@@ -1332,34 +1334,52 @@ export function getFriendlyThreadName(
   thread: Thread
 ): string {
   let label;
+
   switch (thread.name) {
-    case 'GeckoMain':
-      switch (thread.processType) {
-        case 'default':
-          label = 'Main Thread';
-          break;
-        case 'gpu':
-          label = 'GPU Process';
-          break;
-        case 'tab': {
-          const contentThreads = threads.filter(thread => {
-            return thread.name === 'GeckoMain' && thread.processType === 'tab';
-          });
-          if (contentThreads.length > 1) {
-            const index = 1 + contentThreads.indexOf(thread);
-            label = `Content (${index} of ${contentThreads.length})`;
-          } else {
-            label = 'Content';
-          }
-          break;
+    case 'GeckoMain': {
+      if (thread.processName) {
+        // If processName is present, use that as it should contain a friendly name.
+        // We want to use that for the GeckoMain thread because it is shown as the
+        // root of other threads in each process group.
+        label = thread.processName;
+        const homonymThreads = threads.filter(thread => {
+          return thread.name === 'GeckoMain' && thread.processName === label;
+        });
+        if (homonymThreads.length > 1) {
+          const index = 1 + homonymThreads.indexOf(thread);
+          label += ` (${index}/${homonymThreads.length})`;
         }
-        case 'plugin':
-          label = 'Plugin';
-          break;
-        default:
-        // should we throw here ?
+      } else {
+        switch (thread.processType) {
+          case 'default':
+            label = 'Parent Process';
+            break;
+          case 'gpu':
+            label = 'GPU Process';
+            break;
+          case 'tab': {
+            const contentThreads = threads.filter(thread => {
+              return (
+                thread.name === 'GeckoMain' && thread.processType === 'tab'
+              );
+            });
+            if (contentThreads.length > 1) {
+              const index = 1 + contentThreads.indexOf(thread);
+              label = `Content Process (${index}/${contentThreads.length})`;
+            } else {
+              label = 'Content Process';
+            }
+            break;
+          }
+          case 'plugin':
+            label = 'Plugin Process';
+            break;
+          default:
+          // should we throw here ?
+        }
       }
       break;
+    }
     default:
   }
 
@@ -1407,6 +1427,7 @@ export function getEmptyProfile(): Profile {
       physicalCPUs: 0,
       logicalCPUs: 0,
     },
+    pages: [],
     threads: [],
   };
 }
@@ -1437,6 +1458,10 @@ export function getOriginAnnotationForFunc(
     const lineNumber = funcTable.lineNumber[funcIndex];
     if (lineNumber !== null) {
       fileName += ':' + lineNumber;
+      const columnNumber = funcTable.columnNumber[funcIndex];
+      if (columnNumber !== null) {
+        fileName += ':' + columnNumber;
+      }
     }
   }
 

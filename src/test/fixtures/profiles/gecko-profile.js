@@ -102,6 +102,7 @@ export default function createGeckoProfile(): GeckoProfile {
     meta: contentProcessMeta,
     pausedRanges: [],
     libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the Gecko profile
+    pages: [],
     threads: [
       {
         ..._createGeckoThread(),
@@ -115,6 +116,7 @@ export default function createGeckoProfile(): GeckoProfile {
   return {
     meta: parentProcessMeta,
     libs: [parentProcessBinary].concat(extraBinaries),
+    pages: [],
     pausedRanges: [],
     threads: [
       {
@@ -416,7 +418,7 @@ function _createGeckoThread(): GeckoThread {
       'VsyncTimestamp',
       'Reflow',
       'baseline',
-      'frobnicate (chrome://blargh:34)',
+      'frobnicate (chrome://blargh:34:35)',
       'DOMEvent',
       'MinorGC',
       'Rasterize',
