@@ -120,6 +120,10 @@ export function objectEntries<Value, Obj: {| [string]: Value |}>(
   return (Object.entries: Function)(object);
 }
 
+export function getObjectValuesAsUnion<T: Object>(obj: T): Array<$Values<T>> {
+  return Object.values(obj);
+}
+
 /**
  * This function will take an arbitrary string, and will turn it into a TransformType
  * it will throw an error if an invalid type was passed to it.

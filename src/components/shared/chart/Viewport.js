@@ -23,7 +23,10 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../../utils/connect';
-import { assertExhaustiveCheck } from '../../../utils/flow';
+import {
+  getObjectValuesAsUnion,
+  assertExhaustiveCheck,
+} from '../../../utils/flow';
 
 /**
  * Viewport terminology:
@@ -62,10 +65,14 @@ const { DOM_DELTA_PAGE, DOM_DELTA_LINE } =
  * How fast the viewport should move when navigating with the keyboard
  * in pixels per second.
  */
-const KEYBOARD_NAVIGATION_SPEED = 1500;
+const KEYBOARD_NAVIGATION_SPEED = 2000;
+const MAX_KEYBOARD_DELTA = 500;
 
 type NavigationKey = 'zoomIn' | 'zoomOut' | 'up' | 'down' | 'left' | 'right';
 
+/**
+ * Mapping from keycode to navigation key when no modifiers are down.
+ */
 const BARE_KEYMAP: { [string]: NavigationKey } = {
   KeyQ: 'zoomIn',
   KeyY: 'zoomIn',
@@ -84,6 +91,9 @@ const BARE_KEYMAP: { [string]: NavigationKey } = {
   KeyL: 'right',
   ArrowRight: 'right',
 };
+/**
+ * Mapping from keycode to navigation key when the ctrl modifier is down.
+ */
 const CTRL_KEYMAP: { [string]: NavigationKey } = {
   ArrowUp: 'zoomIn',
   ArrowDown: 'zoomOut',
@@ -525,6 +535,8 @@ export const withChartViewport: WithChartViewport<*, *> =
         ) {
           navigationKey = BARE_KEYMAP[event.nativeEvent.code];
         } else if (event.ctrlKey) {
+          /* Having the ctrl key down changes the meaning of the key
+           * it's modifying, so pick the navigation key from another keymap. */
           navigationKey = CTRL_KEYMAP[event.nativeEvent.code];
         }
 
@@ -544,9 +556,6 @@ export const withChartViewport: WithChartViewport<*, *> =
       _keyUpListener = (
         event: { nativeEvent: KeyboardEvent } & SyntheticKeyboardEvent<>
       ) => {
-        function getObjectValuesAsUnion<T: Object>(obj: T): Array<$Values<T>> {
-          return Object.values(obj);
-        }
         if (!event.ctrlKey) {
           // The ctrl modifier might have been released here. Try to
           // delete all keys associated with the modifier. Since the
@@ -568,10 +577,12 @@ export const withChartViewport: WithChartViewport<*, *> =
           return;
         }
 
-        const delta =
+        const delta = Math.min(
           KEYBOARD_NAVIGATION_SPEED *
-          (timestamp - this._lastKeyboardNavigationFrame) *
-          0.001;
+            (timestamp - this._lastKeyboardNavigationFrame) *
+            0.001,
+          MAX_KEYBOARD_DELTA // Don't jump like crazy if we experience long janks
+        );
         this._lastKeyboardNavigationFrame = timestamp;
 
         for (const navigationKey of this._keysDown.values()) {

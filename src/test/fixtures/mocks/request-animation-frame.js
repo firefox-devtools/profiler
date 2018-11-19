@@ -21,34 +21,16 @@
  *
  */
 export default function mockRaf() {
-  const fns = [];
+  let fns = [];
   jest.spyOn(window, 'requestAnimationFrame').mockImplementation(fn => {
     fns.push(fn);
   });
 
-  /**
-   * Execute the queued functions, one at a time.
-   *
-   * If no argument is passed, flush and execute all functions in the
-   * queue.
-   *
-   * If an array of timestamps is passed, those timestamps will be
-   * passed in sequence to each queued function. When the array runs
-   * out, the execution loop will stop, even if there are remaining
-   * functions to be called.
-   */
-  return (timestamps: ?(number[])) => {
-    while (fns.length > 0) {
-      let arg = undefined;
-      if (timestamps) {
-        arg = timestamps.shift();
-        if (arg === undefined) {
-          // We've run into the end of the passed array of
-          // timestamps. End the loop.
-          return;
-        }
-      }
-      const fn = fns.shift();
+  return (timestamps: number[] = []) => {
+    const oldFns = fns;
+    fns = [];
+    for (const fn of oldFns) {
+      const arg = timestamps.shift();
       fn(arg);
     }
   };

@@ -510,15 +510,15 @@ describe('Viewport', function() {
       expect(getChartViewport()).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
-        viewportTop: 150,
-        viewportBottom: BOUNDING_BOX_HEIGHT + 150,
+        viewportTop: 200,
+        viewportBottom: BOUNDING_BOX_HEIGHT + 200,
       });
       depressKey('KeyW', 50);
       expect(getChartViewport()).toMatchObject({
         viewportLeft: 0,
         viewportRight: 1,
-        viewportTop: 75,
-        viewportBottom: BOUNDING_BOX_HEIGHT + 75,
+        viewportTop: 100,
+        viewportBottom: BOUNDING_BOX_HEIGHT + 100,
       });
     });
 
@@ -698,8 +698,6 @@ function setup(profileOverrides: Object = {}) {
   function depressKey(code: string, duration: Milliseconds) {
     jest.spyOn(performance, 'now').mockReturnValue(0);
     view.simulate('keydown', { nativeEvent: { code } });
-    // Only flush one raf call in order to handle one frame before we
-    // release the key again.
     flushRafCalls([duration]);
     view.simulate('keyup', { nativeEvent: { code } });
     flushRafCalls();
