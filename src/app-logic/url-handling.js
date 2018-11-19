@@ -57,6 +57,8 @@ type BaseQuery = {|
   // must be fetched to compute the tracks.
   threadOrder?: string, // "3-2-0-1"
   hiddenThreads?: string, // "0-1"
+  // The current PageList filter.
+  page?: string,
 |};
 
 type CallTreeQuery = {|
@@ -155,6 +157,10 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     /* eslint-disable camelcase */
     query.react_perf = null;
     /* eslint-enable camelcase */
+  }
+
+  if (urlState.profileSpecific.page !== null) {
+    query.page = urlState.profileSpecific.page;
   }
 
   // Depending on which tab is active, also show tab-specific query parameters.
@@ -265,6 +271,12 @@ export function stateFromLocation(location: Location): UrlState {
       : [];
   }
 
+  // Perform some basic sanitization on the page index.
+  let page = parseInt(Number(query.page), 10);
+  if (isNaN(page) || page < 0) {
+    page = null;
+  }
+
   return {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
@@ -294,6 +306,7 @@ export function stateFromLocation(location: Location): UrlState {
       markersSearchString: query.markerSearch || '',
       transforms,
       timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
+      page,
       legacyThreadOrder: query.threadOrder
         ? query.threadOrder.split('-').map(index => Number(index))
         : null,

@@ -22,24 +22,38 @@
   background-color: var(--grey-20);
 }
 
-.timelineToggle {
-  position: absolute;
-  top: 0;
-  left: -150px;
-  width: 150px;
-  height: 22px;
+.timelineSettings {
+  height: 25px;
+  padding: 0;
+  line-height: 25px;
   display: flex;
-  font-size: 9px;
+  flex-flow: row nowrap;
+  color: var(--ink-70);
+  border-bottom: 1px solid var(--grey-30);
+  justify-content: space-between;
+  white-space: nowrap;
 }
 
-.timelineToggleInput {
-  height: 12px;
-  width: 12px;
-  margin: 0 3px;
+.timelineSettingsToggle {
+  display: flex;
+  border-right: 1px solid var(--grey-30);
+  padding: 0 8px;
+}
+
+.timelineSettingsToggleInput {
+  margin: 0 5px;
   vertical-align: middle;
 }
 
-.timelineToggleLabel {
+.timelineSettingsToggleLabel {
   display: flex;
   align-items: center;
+}
+
+.timelineSettingsPages {
+  padding: 0 8px;
+}
+
+.timelineSettingsPagesSelect {
+  max-width: 350px;
 }

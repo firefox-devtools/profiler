@@ -10,7 +10,7 @@ import { ensureExists } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 
-import type { ThreadIndex, Pid } from '../types/profile';
+import type { ThreadIndex, Pid, IndexIntoPageList } from '../types/profile';
 import type { TrackIndex } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type {
@@ -166,6 +166,31 @@ function implementation(
   }
 }
 
+/**
+ * Represents the current filter applied to the stack frames, where it will show
+ * frames only by implementation.
+ */
+function page(
+  state: IndexIntoPageList | null = null,
+  action: Action
+): IndexIntoPageList | null {
+  switch (action.type) {
+    case 'VIEW_PROFILE': {
+      // Sanitize the page information, as this could come from the URL.
+      const { pages } = action.profile;
+      if (!pages || state === null) {
+        return null;
+      }
+      // Does this page exist in the page list?
+      return pages[state] === undefined ? null : state;
+    }
+    case 'CHANGE_PAGE_FILTER':
+      return action.pageIndex;
+    default:
+      return state;
+  }
+}
+
 function invertCallstack(state: boolean = false, action: Action) {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
@@ -285,6 +310,7 @@ const profileSpecific = combineReducers({
   hiddenLocalTracksByPid,
   localTrackOrderByPid,
   implementation,
+  page,
   invertCallstack,
   committedRanges,
   callTreeSearchString,
@@ -352,6 +378,8 @@ export const getAllCommittedRanges = (state: State) =>
   getProfileSpecificState(state).committedRanges;
 export const getImplementationFilter = (state: State) =>
   getProfileSpecificState(state).implementation;
+export const getPageFilter = (state: State) =>
+  getProfileSpecificState(state).page;
 export const getInvertCallstack = (state: State) =>
   getProfileSpecificState(state).invertCallstack;
 export const getCurrentSearchString = (state: State) =>

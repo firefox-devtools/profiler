@@ -16,6 +16,7 @@ export type IndexIntoFuncTable = number;
 export type IndexIntoResourceTable = number;
 export type IndexIntoLibs = number;
 export type IndexIntoCategoryList = number;
+export type IndexIntoPageList = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 

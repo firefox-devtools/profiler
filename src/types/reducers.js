@@ -20,6 +20,7 @@ import type {
   Profile,
   ThreadIndex,
   Pid,
+  IndexIntoPageList,
 } from './profile';
 
 import type {
@@ -147,6 +148,7 @@ export type UrlState = {|
     hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
     localTrackOrderByPid: Map<Pid, TrackIndex[]>,
     implementation: ImplementationFilter,
+    page: IndexIntoPageList | null,
     invertCallstack: boolean,
     committedRanges: StartEndRange[],
     callTreeSearchString: string,

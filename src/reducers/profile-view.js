@@ -20,7 +20,12 @@ import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
-import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import {
+  assertExhaustiveCheck,
+  ensureExists,
+  getStringPropertyOrNull,
+  getNumberPropertyOrNull,
+} from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
 
 import type {
@@ -34,6 +39,7 @@ import type {
   MarkersTable,
   IndexIntoSamplesTable,
   IndexIntoMarkersTable,
+  PageList,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -610,6 +616,8 @@ export const getProfile = (state: State): Profile =>
     getProfileOrNull(state),
     'Tried to access the profile before it was loaded.'
   );
+export const getPageList = (state: State): PageList | null =>
+  getProfile(state).pages || null;
 export const getProfileInterval = (state: State): Milliseconds =>
   getProfile(state).meta.interval;
 export const getCategories = (state: State): CategoryList =>
@@ -1000,9 +1008,10 @@ export const selectorsForThread = (
      *                               still.
      * 3. getTracingMarkers - Match up start/end markers, and start returning
      *                        TracingMarkers.
-     * 4. getCommittedRangeFilteredTracingMarkers - Apply the commited range.
-     * 5. getSearchFilteredTracingMarkers - Apply the search string
-     * 6. getPreviewFilteredTracingMarkers - Apply the preview range
+     * 4. getPageFilteredTracingMarkers - Filter markers to a page.
+     * 5. getCommittedRangeFilteredTracingMarkers - Apply the commited range.
+     * 6. getSearchFilteredTracingMarkers - Apply the search string
+     * 7. getPreviewFilteredTracingMarkers - Apply the preview range
      */
     const getProcessedMarkersTable = createSelector(
       _getMarkersTable,
@@ -1014,8 +1023,30 @@ export const selectorsForThread = (
       _getStringTable,
       MarkerData.getTracingMarkers
     );
-    const getCommittedRangeFilteredTracingMarkers = createSelector(
+    const getPageFilteredTracingMarkers = createSelector(
       getTracingMarkers,
+      UrlState.getPageFilter,
+      getPageList,
+      (markers, pageFilter, pageList) => {
+        if (pageFilter === null || pageList === null) {
+          return markers;
+        }
+        const page = pageList[pageFilter];
+        return markers.filter(marker => {
+          const { data } = marker;
+          if (!data) {
+            return false;
+          }
+          return (
+            page.docshellId === getStringPropertyOrNull(data, 'docShellId') &&
+            page.historyId ===
+              getNumberPropertyOrNull(data, 'docshellHistoryId')
+          );
+        });
+      }
+    );
+    const getCommittedRangeFilteredTracingMarkers = createSelector(
+      getPageFilteredTracingMarkers,
       getCommittedRange,
       (markers, range): TracingMarker[] => {
         const { start, end } = range;

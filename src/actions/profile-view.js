@@ -47,6 +47,7 @@ import type {
   IndexIntoMarkersTable,
   Pid,
   IndexIntoSamplesTable,
+  IndexIntoPageList,
 } from '../types/profile';
 import type {
   CallNodePath,
@@ -874,6 +875,23 @@ export function changeImplementationFilter(
       threadIndex,
       transformedThread,
       previousImplementation,
+    });
+  };
+}
+
+export function changePageFilter(
+  pageIndex: IndexIntoPageList | null
+): ThunkAction<void> {
+  return dispatch => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'change page filter',
+    });
+
+    dispatch({
+      type: 'CHANGE_PAGE_FILTER',
+      pageIndex,
     });
   };
 }

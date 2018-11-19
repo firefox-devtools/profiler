@@ -12,6 +12,7 @@ import type {
   IndexIntoMarkersTable,
   IndexIntoFuncTable,
   Pid,
+  IndexIntoPageList,
 } from './profile';
 import type {
   CallNodePath,
@@ -259,6 +260,10 @@ type UrlStateAction =
       +transformedThread: Thread,
       +previousImplementation: ImplementationFilter,
       +implementation: ImplementationFilter,
+    |}
+  | {|
+      +type: 'CHANGE_PAGE_FILTER',
+      +pageIndex: IndexIntoPageList | null,
     |}
   | {|
       +type: 'CHANGE_INVERT_CALLSTACK',

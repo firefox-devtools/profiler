@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import TimelineGlobalTrack from './GlobalTrack';
 import TimelineRuler from './Ruler';
 import TimelineSelection from './Selection';
@@ -18,8 +18,13 @@ import {
   getZeroAt,
   getGlobalTracks,
   getGlobalTrackReferences,
+  getPageList,
 } from '../../reducers/profile-view';
-import { getGlobalTrackOrder, getTimelineType } from '../../reducers/url-state';
+import {
+  getGlobalTrackOrder,
+  getTimelineType,
+  getPageFilter,
+} from '../../reducers/url-state';
 import './index.css';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -29,8 +34,10 @@ import {
   updatePreviewSelection,
   commitRange,
   changeTimelineType,
+  changePageFilter,
 } from '../../actions/profile-view';
 
+import type { PageList, IndexIntoPageList } from '../../types/profile';
 import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
 import type { TrackReference, TimelineType } from '../../types/actions';
 import type { Milliseconds, StartEndRange } from '../../types/units';
@@ -49,6 +56,8 @@ type StateProps = {|
   +panelLayoutGeneration: number,
   +zeroAt: Milliseconds,
   +timelineType: TimelineType,
+  +pageList: PageList | null,
+  +pageFilter: IndexIntoPageList | null,
 |};
 
 type DispatchProps = {|
@@ -56,13 +65,42 @@ type DispatchProps = {|
   +commitRange: typeof commitRange,
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeTimelineType: typeof changeTimelineType,
+  +changePageFilter: typeof changePageFilter,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class Timeline extends PureComponent<Props> {
+class Timeline extends React.PureComponent<Props> {
   _changeToCategories = () => this.props.changeTimelineType('category');
   _changeToStacks = () => this.props.changeTimelineType('stack');
+  _changePageFilter = event =>
+    this.props.changePageFilter(
+      event.target.value === 'all' ? null : Number(event.target.value)
+    );
+
+  renderPageList() {
+    const { pageList, pageFilter } = this.props;
+    if (pageList === null) {
+      return null;
+    }
+    return (
+      <div className="timelineSettingsPages">
+        Filter by page:{' '}
+        <select
+          className="timelineSettingsPagesSelect"
+          value={pageFilter === null ? 'all' : pageFilter.toString()}
+          onChange={this._changePageFilter}
+        >
+          <option value="all">Show all pages</option>
+          {pageList.map((page, pageIndex) => (
+            <option key={pageIndex} value={pageIndex}>
+              {page.url}
+            </option>
+          ))}
+        </select>
+      </div>
+    );
+  }
 
   render() {
     const {
@@ -78,61 +116,67 @@ class Timeline extends PureComponent<Props> {
     } = this.props;
 
     return (
-      <TimelineSelection width={width}>
-        <form>
-          <div className="timelineToggle">
-            <label className="timelineToggleLabel">
-              <input
-                type="radio"
-                name="timelineToggle"
-                className="timelineToggleInput"
-                checked={timelineType === 'category'}
-                onChange={this._changeToCategories}
-              />
-              Categories
-            </label>
-            <label className="timelineToggleLabel">
-              <input
-                type="radio"
-                name="timelineToggle"
-                className="timelineToggleInput"
-                checked={timelineType === 'stack'}
-                onChange={this._changeToStacks}
-              />
-              Stack height
-            </label>
-          </div>
-        </form>
-        <TimelineRuler
-          zeroAt={zeroAt}
-          rangeStart={committedRange.start}
-          rangeEnd={committedRange.end}
-          width={width}
-        />
-        <OverflowEdgeIndicator
-          className="timelineOverflowEdgeIndicator"
-          panelLayoutGeneration={panelLayoutGeneration}
-        >
-          {
-            <Reorderable
-              tagName="ol"
-              className="timelineThreadList"
-              grippyClassName="timelineTrackGlobalGrippy"
-              order={globalTrackOrder}
-              orient="vertical"
-              onChangeOrder={changeGlobalTrackOrder}
-            >
-              {globalTracks.map((globalTrack, trackIndex) => (
-                <TimelineGlobalTrack
-                  key={trackIndex}
-                  trackIndex={trackIndex}
-                  trackReference={globalTrackReferences[trackIndex]}
+      <>
+        <div className="timelineSettings">
+          <form>
+            <div className="timelineSettingsToggle">
+              Graph type:{' '}
+              <label className="timelineSettingsToggleLabel">
+                <input
+                  type="radio"
+                  name="timelineSettingsToggle"
+                  className="timelineSettingsToggleInput"
+                  checked={timelineType === 'category'}
+                  onChange={this._changeToCategories}
                 />
-              ))}
-            </Reorderable>
-          }
-        </OverflowEdgeIndicator>
-      </TimelineSelection>
+                Categories
+              </label>
+              <label className="timelineSettingsToggleLabel">
+                <input
+                  type="radio"
+                  name="timelineSettingsToggle"
+                  className="timelineSettingsToggleInput"
+                  checked={timelineType === 'stack'}
+                  onChange={this._changeToStacks}
+                />
+                Stack height
+              </label>
+            </div>
+          </form>
+          {this.renderPageList()}
+        </div>
+        <TimelineSelection width={width}>
+          <TimelineRuler
+            zeroAt={zeroAt}
+            rangeStart={committedRange.start}
+            rangeEnd={committedRange.end}
+            width={width}
+          />
+          <OverflowEdgeIndicator
+            className="timelineOverflowEdgeIndicator"
+            panelLayoutGeneration={panelLayoutGeneration}
+          >
+            {
+              <Reorderable
+                tagName="ol"
+                className="timelineThreadList"
+                grippyClassName="timelineTrackGlobalGrippy"
+                order={globalTrackOrder}
+                orient="vertical"
+                onChangeOrder={changeGlobalTrackOrder}
+              >
+                {globalTracks.map((globalTrack, trackIndex) => (
+                  <TimelineGlobalTrack
+                    key={trackIndex}
+                    trackIndex={trackIndex}
+                    trackReference={globalTrackReferences[trackIndex]}
+                  />
+                ))}
+              </Reorderable>
+            }
+          </OverflowEdgeIndicator>
+        </TimelineSelection>
+      </>
     );
   }
 }
@@ -146,12 +190,15 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     zeroAt: getZeroAt(state),
     panelLayoutGeneration: getPanelLayoutGeneration(state),
     timelineType: getTimelineType(state),
+    pageList: getPageList(state),
+    pageFilter: getPageFilter(state),
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
     updatePreviewSelection,
     commitRange,
     changeTimelineType,
+    changePageFilter,
   },
   component: Timeline,
 };
