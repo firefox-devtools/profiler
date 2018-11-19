@@ -100,11 +100,13 @@ export function upgradeGCMajorMarker_Processed8to9(
   const mt = marker9.timings;
   switch (mt.status) {
     case 'completed': {
-      const timings: GCMajorCompleted = Object.assign({}, mt, {
-        phase_times: convertPhaseTimes(mt.totals),
+      const { totals, ...partialMt } = mt;
+      const timings: GCMajorCompleted = {
+        ...partialMt,
+        phase_times: convertPhaseTimes(totals),
         mmu_20ms: mt.mmu_20ms / 100,
         mmu_50ms: mt.mmu_50ms / 100,
-      });
+      };
       return {
         type: 'GCMajor',
         startTime: marker9.startTime,
