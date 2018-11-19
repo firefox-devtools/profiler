@@ -87,30 +87,38 @@ export default class Tooltip extends React.PureComponent<Props, State> {
     let left = mouseX + MOUSE_OFFSET;
 
     if (interiorElement) {
+      // Let's check the vertical position.
       if (
         mouseY + MOUSE_OFFSET + interiorElement.offsetHeight >=
         window.innerHeight
       ) {
-        // if the tooltip doesn't fit below the mouse cursor
+        // The tooltip doesn't fit below the mouse cursor (which is our
+        // default strategy). Therefore we try to position it either above the
+        // mouse cursor or finally aligned with the window's top edge.
         if (mouseY - MOUSE_OFFSET - interiorElement.offsetHeight > 0) {
-          // position the tooltip above the mouse cursor if it fits there
+          // We position the tooltip above the mouse cursor if it fits there.
           top = mouseY - interiorElement.offsetHeight - MOUSE_OFFSET;
         } else {
-          // otherwise, align the tooltip with the window's top.
+          // Otherwise we align the tooltip with the window's top edge.
           top = 0;
         }
       }
 
+      // Now let's check the horizontal position.
       if (
         mouseX + MOUSE_OFFSET + interiorElement.offsetWidth >=
         window.innerWidth
       ) {
-        // if the tooltip doesn't fit below the mouse cursor
+        // The tooltip doesn't fit at the right of the mouse cursor (which is
+        // our default strategy). Therefore we try to position it either at the
+        // left of the mouse cursor or finally aligned with the window's left
+        // edge.
         if (mouseX - MOUSE_OFFSET - interiorElement.offsetWidth > 0) {
-          // position the tooltip above the mouse cursor if it fits there
+          // We position the tooltip at the left of the mouse cursor if it fits
+          // there.
           left = mouseX - interiorElement.offsetWidth - MOUSE_OFFSET;
         } else {
-          // otherwise, align the tooltip with the window's left.
+          // Otherwise, align the tooltip with the window's left edge.
           left = 0;
         }
       }
