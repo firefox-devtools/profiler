@@ -49,8 +49,10 @@ export default function getProfile(): Profile {
     address: Array(funcNames.length).fill(''),
     isJS: Array(funcNames.length).fill(false),
     resource: Array(funcNames.length).fill(-1),
+    relevantForJS: Array(funcNames.length).fill(false),
     fileName: Array(funcNames.length).fill(''),
     lineNumber: Array(funcNames.length).fill(null),
+    columnNumber: Array(funcNames.length).fill(null),
     length: funcNames.length,
   };
 

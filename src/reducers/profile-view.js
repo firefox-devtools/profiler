@@ -22,7 +22,6 @@ import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
-import { getInitialTabOrder } from '../app-logic/tabs-handling';
 
 import type {
   Profile,
@@ -34,6 +33,7 @@ import type {
   Pid,
   MarkersTable,
   IndexIntoSamplesTable,
+  IndexIntoMarkersTable,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -463,15 +463,6 @@ function zeroAt(state: Milliseconds = 0, action: Action) {
   }
 }
 
-function tabOrder(state: number[] = getInitialTabOrder(), action: Action) {
-  switch (action.type) {
-    case 'CHANGE_TAB_ORDER':
-      return action.tabOrder;
-    default:
-      return state;
-  }
-}
-
 function rightClickedTrack(
   // Make the initial value the first global track, which is assumed to exists.
   // This makes the track reference always exist, which in turn makes it so that
@@ -555,7 +546,6 @@ export default wrapReducerInResetter(
       focusCallTreeGeneration,
       rootRange,
       zeroAt,
-      tabOrder,
       rightClickedTrack,
       isCallNodeContextMenuVisible,
       profileSharingStatus,
@@ -593,11 +583,6 @@ export const getFocusCallTreeGeneration = createSelector(
 export const getZeroAt = createSelector(
   getProfileViewOptions,
   viewOptions => viewOptions.zeroAt
-);
-
-export const getTabOrder = createSelector(
-  getProfileViewOptions,
-  viewOptions => viewOptions.tabOrder
 );
 
 export const getCommittedRange = createSelector(
@@ -829,6 +814,7 @@ export type SelectorsForThread = {
   getSearchFilteredTracingMarkers: State => TracingMarker[],
   getPreviewFilteredTracingMarkers: State => TracingMarker[],
   unfilteredSamplesRange: State => StartEndRange | null,
+  getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -931,7 +917,7 @@ export const selectorsForThread = (
         transforms.reduce(
           // Apply the reducer using an arrow function to ensure correct memoization.
           (thread, transform) =>
-            applyTransformMemoized(thread, transform, defaultCategoryObj),
+            applyTransformMemoized(thread, transform, defaultCategoryObj.value),
           startingThread
         )
     );
@@ -1043,6 +1029,8 @@ export const selectorsForThread = (
           tm =>
             tm.name !== 'GCMajor' &&
             tm.name !== 'BHR-detected hang' &&
+            tm.name !== 'LongTask' &&
+            tm.name !== 'LongIdleTask' &&
             !MarkerData.isNetworkMarker(tm)
         )
     );
@@ -1067,7 +1055,7 @@ export const selectorsForThread = (
       }
     );
     const getIsNetworkChartEmptyInFullRange = createSelector(
-      getSearchFilteredTracingMarkers,
+      getTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker).length === 0
     );
     const getNetworkChartTracingMarkers = createSelector(
@@ -1251,6 +1239,8 @@ export const selectorsForThread = (
         return { start: time[0], end: time[time.length - 1] + interval };
       }
     );
+    const getSelectedMarkerIndex = (state: State) =>
+      getViewOptions(state).selectedMarker;
 
     selectorsForThreads[threadIndex] = {
       getThread,
@@ -1293,6 +1283,7 @@ export const selectorsForThread = (
       getSearchFilteredTracingMarkers,
       getPreviewFilteredTracingMarkers,
       unfilteredSamplesRange,
+      getSelectedMarkerIndex,
     };
   }
   return selectorsForThreads[threadIndex];

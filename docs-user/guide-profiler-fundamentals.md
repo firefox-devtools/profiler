@@ -12,7 +12,7 @@ There are two ways to get more samples to provide more statistical significance.
 
 ![A picture of the dropdown in the Gecko Profiler Addon with the interval adjustment highlighted.](images/interval.jpg)
 
-For example the sampling rate could be increased from 1ms to 0.1ms to collect 10 times more samples. This makes it easy to run the profiled program fewer times, but comes with a trade-off. When the profiler is collecting more samples, the profiler needs to do more work to collect these samples, and thus there is more overhead from the profiler. This can skew the results by measuring more of the overhead of profiling, compared to the actual program that is being run.
+For example the sampling rate could be increased by changing the interval from 1ms to 0.1ms to collect 10 times more samples. This makes it easy to run the profiled program fewer times, but comes with a trade-off. When the profiler is collecting more samples, the profiler needs to do more work to collect these samples, and thus there is more overhead from the profiler. This can skew the results by measuring more of the overhead of profiling, compared to the actual program that is being run.
 
 The other way to increase the number of samples is to run the code more often, and not increase the sampling rate. For instance to profile a mouse click event, one click event would not be sampled much with a frequency of 1ms. However, performing the click event multiple times over the course of a minute would increase the amount of samples collected, without introducing additional overhead from the profiler.
 

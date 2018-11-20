@@ -7,6 +7,7 @@
   * [Filtering call trees](./guide-filtering-call-trees.md)
   * [Profiling Firefox Startup](./guide-startup.md)
   * [Remote profiling on Android](./guide-remote-profiling.md)
+  * [Perf profiling on Linux](./guide-perf-profiling.md)
 * [Video Tutorials](./videos.md)
   * [perf.html intro](./videos-intro.md)
   * [Samples and markers](./videos-samples-markers.md)

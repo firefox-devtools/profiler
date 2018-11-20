@@ -11,6 +11,7 @@
     "build-prod": "yarn build-prod:quiet --progress",
     "lint": "eslint *.js bin src",
     "lint-fix": "yarn lint --fix",
+    "prettier-json": "prettier --write src/**/*.json",
     "flow": "flow",
     "flow-coverage": "flow-coverage-report -i 'src/**/*.js' -t html -t text",
     "flow-generate-libdefs": "flow-typed install --libdefDir src/types/libdef",
