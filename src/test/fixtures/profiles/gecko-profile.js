@@ -418,7 +418,7 @@ function _createGeckoThread(): GeckoThread {
       'VsyncTimestamp',
       'Reflow',
       'baseline',
-      'frobnicate (chrome://blargh:34)',
+      'frobnicate (chrome://blargh:34:35)',
       'DOMEvent',
       'MinorGC',
       'Rasterize',

@@ -237,8 +237,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     markers: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state),
-    selectedMarker: selectedThreadSelectors.getViewOptions(state)
-      .selectedMarker,
+    selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
     zeroAt: getZeroAt(state),
   }),
   mapDispatchToProps: { changeSelectedMarker },

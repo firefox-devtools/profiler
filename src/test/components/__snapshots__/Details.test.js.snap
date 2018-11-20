@@ -126,7 +126,14 @@ exports[`app/Details renders an initial view with the right panel for tab marker
   className="Details"
 >
   <TabBar
-    extraElements={false}
+    extraElements={
+      <button
+        className="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+        onClick={[Function]}
+        title="Open the sidebar"
+        type="button"
+      />
+    }
     onSelectTab={[Function]}
     selectedTabSlug="marker-table"
     visibleTabs={

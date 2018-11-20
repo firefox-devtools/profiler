@@ -149,6 +149,7 @@ export type FuncTable = {
   relevantForJS: Array<boolean>,
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
+  columnNumber: Array<number | null>,
 };
 
 /**
