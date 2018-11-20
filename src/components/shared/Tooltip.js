@@ -10,7 +10,7 @@ import type { CssPixels } from '../../types/units';
 import { ensureExists } from '../../utils/flow';
 require('./Tooltip.css');
 
-const MOUSE_OFFSET = 11;
+export const MOUSE_OFFSET = 11;
 
 type Props = {
   mouseX: CssPixels,
