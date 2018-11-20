@@ -74,6 +74,7 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class StackChartGraph extends React.PureComponent<Props> {
+  _viewport: HTMLDivElement | null = null;
   /**
    * Determine the maximum amount available to zoom in.
    */
@@ -91,6 +92,20 @@ class StackChartGraph extends React.PureComponent<Props> {
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
+
+  _takeViewportRef = (viewport: HTMLDivElement | null) => {
+    this._viewport = viewport;
+  };
+
+  _focusViewport = () => {
+    if (this._viewport) {
+      this._viewport.focus();
+    }
+  };
+
+  componentDidMount() {
+    this._focusViewport();
+  }
 
   render() {
     const {
@@ -123,6 +138,7 @@ class StackChartGraph extends React.PureComponent<Props> {
               marginLeft: TIMELINE_MARGIN_LEFT,
               marginRight: TIMELINE_MARGIN_RIGHT,
               maximumZoom: this.getMaximumZoom(),
+              containerRef: this._takeViewportRef,
             }}
             chartProps={{
               interval,
