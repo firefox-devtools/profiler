@@ -214,6 +214,9 @@ export type GCMinorCompletedData = {
 
   chunk_alloc_us?: Microseconds,
 
+  // Added in https://bugzilla.mozilla.org/show_bug.cgi?id=1507379
+  groups_pretenured?: number,
+
   phase_times: PhaseTimes<Microseconds>,
 };
 

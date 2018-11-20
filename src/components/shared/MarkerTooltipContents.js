@@ -480,6 +480,14 @@ function getMarkerDetails(
                         formatMicroseconds
                       )
                     : null}
+                  {nursery.groups_pretenured
+                    ? _markerDetail(
+                        'gcpretenured',
+                        'Number of groups to pretenure',
+                        nursery.groups_pretenured,
+                        x => formatNumber(x, 2, 0)
+                      )
+                    : null}
                   {_makePhaseTimesArray(nursery.phase_times)
                     /*
                      * Nursery collection should usually be very quick.  1ms
