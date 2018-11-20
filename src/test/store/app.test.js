@@ -73,6 +73,7 @@ describe('app actions', function() {
         'stack-chart',
         'marker-chart',
         'marker-table',
+        'view-360',
       ]);
     });
     it('shows the network chart when network markers are present in the thread', function() {
@@ -85,6 +86,7 @@ describe('app actions', function() {
         'marker-chart',
         'marker-table',
         'network-chart',
+        'view-360',
       ]);
     });
   });
