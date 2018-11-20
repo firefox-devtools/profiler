@@ -184,6 +184,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     case 'marker-chart':
       query.markerSearch = urlState.profileSpecific.markersSearchString;
       break;
+    case 'view-360':
     case 'network-chart':
       break;
     default:

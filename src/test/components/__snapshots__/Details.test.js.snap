@@ -22,6 +22,7 @@ exports[`app/Details renders an initial view with the right panel 1`] = `
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />
@@ -54,6 +55,7 @@ exports[`app/Details renders an initial view with the right panel for tab calltr
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />
@@ -86,6 +88,7 @@ exports[`app/Details renders an initial view with the right panel for tab flame-
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />
@@ -111,6 +114,7 @@ exports[`app/Details renders an initial view with the right panel for tab marker
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />
@@ -143,6 +147,7 @@ exports[`app/Details renders an initial view with the right panel for tab marker
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />
@@ -168,6 +173,7 @@ exports[`app/Details renders an initial view with the right panel for tab networ
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />
@@ -193,10 +199,36 @@ exports[`app/Details renders an initial view with the right panel for tab stack-
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />
   <Connect(StackChartGraph) />
+  <Connect(CallNodeContextMenu) />
+  <Connect(MarkersContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
+</div>
+`;
+
+exports[`app/Details renders an initial view with the right panel for tab view-360 1`] = `
+<div
+  className="Details"
+>
+  <TabBar
+    extraElements={false}
+    onSelectTab={[Function]}
+    selectedTabSlug="view-360"
+    visibleTabs={
+      Array [
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
+        "view-360",
+      ]
+    }
+  />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
   <Connect(TimelineTrackContextMenu) />
@@ -225,6 +257,7 @@ exports[`app/Details show the correct state for the sidebar open button 1`] = `
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />
@@ -257,6 +290,7 @@ exports[`app/Details show the correct state for the sidebar open button 2`] = `
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />
@@ -289,6 +323,7 @@ exports[`app/Details show the correct state for the sidebar open button 3`] = `
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />
@@ -321,6 +356,7 @@ exports[`app/Details show the correct state for the sidebar open button 4`] = `
         "stack-chart",
         "marker-chart",
         "marker-table",
+        "view-360",
       ]
     }
   />

@@ -98,6 +98,7 @@ class ProfileViewer extends PureComponent<Props> {
             'marker-chart': <MarkerChart />,
             'marker-table': <MarkerTable />,
             'network-chart': <NetworkChart />,
+            'view-360': null,
           }[selectedTab]
         }
         <CallNodeContextMenu />

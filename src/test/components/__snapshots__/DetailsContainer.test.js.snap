@@ -122,3 +122,20 @@ exports[`app/DetailsContainer renders an initial view with or without a sidebar 
   <Connect(ProfileViewer) />
 </t>
 `;
+
+exports[`app/DetailsContainer renders an initial view with or without a sidebar for tab view-360 1`] = `
+<t
+  customClassName="DetailsContainer"
+  onDragEnd={[Function]}
+  onDragStart={null}
+  onSecondaryPaneSizeChange={null}
+  percentage={true}
+  primaryIndex={0}
+  primaryMinSize={0}
+  secondaryInitialSize={20}
+  secondaryMinSize={0}
+  vertical={false}
+>
+  <Connect(ProfileViewer) />
+</t>
+`;

@@ -24,5 +24,6 @@ export default function selectSidebar(
     'marker-chart': null,
     'marker-table': MarkerSidebar, // MarkerSidebar
     'network-chart': null,
+    'view-360': null,
   }[selectedTab];
 }
