@@ -7,7 +7,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 const es6modules = ['pretty-bytes'];
 const es6modulePaths = es6modules.map(module => {
@@ -98,12 +98,13 @@ const config = {
     // Workaround for https://github.com/webpack/webpack/issues/7760
     usedExports: false,
     minimizer: [
-        new UglifyJsPlugin({
-            cache: true,
-            parallel: true,
-            sourceMap: true
-        }),
-        new OptimizeCSSAssetsPlugin({})],
+      new UglifyJsPlugin({
+        cache: true,
+        parallel: true,
+        sourceMap: true,
+      }),
+      new OptimizeCSSAssetsPlugin({}),
+    ],
   },
 };
 
