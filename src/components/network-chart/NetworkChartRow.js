@@ -73,9 +73,7 @@ const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
     start < networkPayload.responseStart
   ) {
     request =
-      (networkPayload.responseStart - networkPayload.requestStart || 0) /
-      dur *
-      100;
+      (networkPayload.responseStart - networkPayload.requestStart) / dur * 100;
   }
 
   if (
@@ -85,9 +83,7 @@ const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
     start < networkPayload.responseStart
   ) {
     response =
-      (networkPayload.responseEnd - networkPayload.responseStart || 0) /
-      dur *
-      100;
+      (networkPayload.responseEnd - networkPayload.responseStart) / dur * 100;
   }
 
   if (queueStart && start < queueStart && queueStart > 0) {
@@ -252,9 +248,6 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
       evenOddClassName +
       ' networkChartRowItem ' +
       this._identifyType(marker.name);
-
-    console.log('👁👁👁', this._identifyType(marker.name));
-
     return (
       <section className={itemClassName}>
         <div className="networkChartRowItemLabel">
