@@ -60,6 +60,8 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class FlameGraph extends React.PureComponent<Props> {
+  _viewport: HTMLDivElement | null = null;
+
   _onSelectedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
@@ -69,6 +71,20 @@ class FlameGraph extends React.PureComponent<Props> {
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
+
+  _takeViewportRef = (viewport: HTMLDivElement | null) => {
+    this._viewport = viewport;
+  };
+
+  _focusViewport = () => {
+    if (this._viewport) {
+      this._viewport.focus();
+    }
+  };
+
+  componentDidMount() {
+    this._focusViewport();
+  }
 
   render() {
     const {
@@ -116,6 +132,7 @@ class FlameGraph extends React.PureComponent<Props> {
               viewportNeedsUpdate,
               marginLeft: 0,
               marginRight: 0,
+              containerRef: this._takeViewportRef,
             }}
             // FlameGraphCanvas props
             chartProps={{

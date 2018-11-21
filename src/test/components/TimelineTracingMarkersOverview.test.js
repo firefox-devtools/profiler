@@ -91,6 +91,9 @@ describe('TimelineTracingMarkersOverview', function() {
       { createNodeMock }
     );
 
+    // We need to flush twice since when the first flush is run, it
+    // will request more code to be run in later animation frames.
+    flushRafCalls();
     flushRafCalls();
 
     const tree = overview.toJSON();
