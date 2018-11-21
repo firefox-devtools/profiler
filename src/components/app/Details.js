@@ -15,6 +15,7 @@ import StackChart from '../stack-chart/';
 import MarkerChart from '../marker-chart/';
 import NetworkChart from '../network-chart/';
 import FlameGraph from '../flame-graph/';
+import View360 from '../view-360';
 import selectSidebar from '../sidebar';
 
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
@@ -98,7 +99,7 @@ class ProfileViewer extends PureComponent<Props> {
             'marker-chart': <MarkerChart />,
             'marker-table': <MarkerTable />,
             'network-chart': <NetworkChart />,
-            'view-360': null,
+            'view-360': <View360 />,
           }[selectedTab]
         }
         <CallNodeContextMenu />
