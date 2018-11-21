@@ -6,12 +6,16 @@
 
 import React from 'react';
 
+import LongestMarkers from './LongestMarkers';
+
 import './View360.css';
 
 export default function View360(_props: {||}) {
   return (
     <section className="view360">
-      <div className="view360-overview" />
+      <div className="view360-overview">
+        <LongestMarkers />
+      </div>
       <div className="view360-details" />
     </section>
   );

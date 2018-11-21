@@ -813,6 +813,7 @@ export type SelectorsForThread = {
   getThreadProcessDetails: State => string,
   getSearchFilteredTracingMarkers: State => TracingMarker[],
   getPreviewFilteredTracingMarkers: State => TracingMarker[],
+  getPreviewFilteredLongestMarkers: State => TracingMarker[],
   unfilteredSamplesRange: State => StartEndRange | null,
   getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
 };
@@ -1054,6 +1055,10 @@ export const selectorsForThread = (
         );
       }
     );
+    const getPreviewFilteredLongestMarkers = createSelector(
+      getPreviewFilteredTracingMarkers,
+      markers => MarkerData.getLongestMarkers(markers, 15)
+    );
     const getIsNetworkChartEmptyInFullRange = createSelector(
       getTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker).length === 0
@@ -1282,6 +1287,7 @@ export const selectorsForThread = (
       getThreadProcessDetails,
       getSearchFilteredTracingMarkers,
       getPreviewFilteredTracingMarkers,
+      getPreviewFilteredLongestMarkers,
       unfilteredSamplesRange,
       getSelectedMarkerIndex,
     };
