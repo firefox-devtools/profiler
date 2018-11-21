@@ -70,6 +70,7 @@
     "redux-logger": "^3.0.6",
     "redux-thunk": "^2.2.0",
     "reselect": "^3.0.1",
+    "uglify-es": "^3.3.9",
     "url": "^0.11.0",
     "weaktuplemap": "^1.0.0"
   },
@@ -124,7 +125,6 @@
     "rimraf": "^2.6.2",
     "sinon": "^4.3.0",
     "style-loader": "^0.23.0",
-    "uglifyjs-webpack-plugin": "^2.0.1",
     "webpack": "^4.21.0",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.7",

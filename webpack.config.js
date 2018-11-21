@@ -98,12 +98,12 @@ const config = {
     // Workaround for https://github.com/webpack/webpack/issues/7760
     usedExports: false,
     minimizer: [
+      new OptimizeCSSAssetsPlugin({}),
       new UglifyJsPlugin({
         cache: true,
         parallel: true,
         sourceMap: true,
       }),
-      new OptimizeCSSAssetsPlugin({}),
     ],
   },
 };
