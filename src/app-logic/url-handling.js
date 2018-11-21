@@ -186,6 +186,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       break;
     case 'network-chart':
       break;
+    case 'gc-stats':
+      break;
     default:
       assertExhaustiveCheck(selectedTab);
   }

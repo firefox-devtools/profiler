@@ -16,6 +16,7 @@ export const tabsWithTitle = {
   'marker-chart': 'Marker Chart',
   'marker-table': 'Marker Table',
   'network-chart': 'Network',
+  'gc-stats': 'GC Stats',
 };
 
 export type TabSlug = $Keys<typeof tabsWithTitle>;
