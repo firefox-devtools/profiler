@@ -12,7 +12,7 @@ import type { TracingMarker } from '../types/profile-derived';
 import type { BailoutPayload, ScreenshotPayload } from '../types/markers';
 import type { StartEndRange } from '../types/units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
-import { getNumberPropertyOrNull } from '../utils/flow';
+import { getNumberPropertyOrNull, objectEntries } from '../utils/flow';
 
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler
@@ -482,4 +482,23 @@ export function getLongestMarkers(
     .slice()
     .sort((a, b) => b.dur - a.dur)
     .slice(0, length);
+}
+
+export function getFrequentMarkers(
+  markers: TracingMarker[],
+  length: number
+): Array<{| name: string, count: number |}> {
+  const markersGroupedByName = {};
+
+  markers.forEach(({ name }) => {
+    if (!markersGroupedByName[name]) {
+      markersGroupedByName[name] = 0;
+    }
+    markersGroupedByName[name]++;
+  });
+
+  return objectEntries(markersGroupedByName)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, length)
+    .map(([name, count]) => ({ name, count }));
 }
