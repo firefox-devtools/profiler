@@ -4,7 +4,12 @@
 
 // @flow
 import type { Milliseconds } from './units';
-import type { MarkerPayload } from './markers';
+import type {
+  MarkerPayload,
+  GCMinorMarkerPayload,
+  GCSliceMarkerPayload,
+  GCMajorMarkerPayload,
+} from './markers';
 import type { IndexIntoFuncTable, ThreadIndex, Pid } from './profile';
 export type IndexIntoCallNodeTable = number;
 
@@ -65,13 +70,19 @@ export type CallNodeInfo = {
  */
 export type CallNodePath = IndexIntoFuncTable[];
 
-export type TracingMarker = {
+export type Marker<T> = {
   start: Milliseconds,
   dur: Milliseconds,
   name: string,
   title: string | null,
-  data: MarkerPayload,
+  data: T,
 };
+
+export type TracingMarker = Marker<MarkerPayload>;
+
+export type GCMinorMarker = Marker<GCMinorMarkerPayload>;
+export type GCSliceMarker = Marker<GCSliceMarkerPayload>;
+export type GCMajorMarker = Marker<GCMajorMarkerPayload>;
 
 export type IndexIntoTracingMarkers = number;
 

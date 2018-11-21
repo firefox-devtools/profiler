@@ -8,7 +8,12 @@ import type {
   MarkersTable,
   IndexIntoStringTable,
 } from '../types/profile';
-import type { TracingMarker } from '../types/profile-derived';
+import type {
+  TracingMarker,
+  GCMinorMarker,
+  GCSliceMarker,
+  GCMajorMarker,
+} from '../types/profile-derived';
 import type { BailoutPayload, ScreenshotPayload } from '../types/markers';
 import type { StartEndRange } from '../types/units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -350,6 +355,16 @@ export function isNetworkMarker(marker: TracingMarker): boolean {
   return !!(marker.data && marker.data.type === 'Network');
 }
 
+function isGCMinorMarker(marker: TracingMarker): boolean {
+  return !!marker.data && marker.data.type === 'GCMinor';
+}
+function isGCSliceMarker(marker: TracingMarker): boolean {
+  return !!marker.data && marker.data.type === 'GCSlice';
+}
+function isGCMajorMarker(marker: TracingMarker): boolean {
+  return !!marker.data && marker.data.type === 'GCMajor';
+}
+
 export function filterForNetworkChart(markers: TracingMarker[]) {
   return markers.filter(marker => isNetworkMarker(marker));
 }
@@ -357,6 +372,17 @@ export function filterForNetworkChart(markers: TracingMarker[]) {
 export function filterForMarkerChart(markers: TracingMarker[]) {
   return markers.filter(marker => !isNetworkMarker(marker));
 }
+
+export function filterGCMinor(markers: TracingMarker[]): GCMinorMarker[] {
+  return (markers.filter(marker => isGCMinorMarker(marker)): any);
+}
+export function filterGCSlice(markers: TracingMarker[]): GCSliceMarker[] {
+  return (markers.filter(marker => isGCSliceMarker(marker)): any);
+}
+export function filterGCMajor(markers: TracingMarker[]): GCMajorMarker[] {
+  return (markers.filter(marker => isGCMajorMarker(marker)): any);
+}
+
 // Firefox emits separate start and end markers for each load. It does this so that,
 // if a profile is collected while a request is in progress, the profile will still contain
 // a start marker for that request. So by looking at start markers we can get

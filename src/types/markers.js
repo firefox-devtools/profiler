@@ -444,3 +444,8 @@ export type MarkerPayload_Gecko =
   | VsyncTimestampPayload
   | ArbitraryEventTracing
   | null;
+
+export type GCMarkerPayload =
+  | GCMinorMarkerPayload
+  | GCMajorMarkerPayload
+  | GCSliceMarkerPayload;

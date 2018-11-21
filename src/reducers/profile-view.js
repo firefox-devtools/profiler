@@ -37,6 +37,9 @@ import type {
 } from '../types/profile';
 import type {
   TracingMarker,
+  GCMinorMarker,
+  GCSliceMarker,
+  GCMajorMarker,
   CallNodeInfo,
   CallNodePath,
   IndexIntoCallNodeTable,
@@ -813,6 +816,9 @@ export type SelectorsForThread = {
   getThreadProcessDetails: State => string,
   getSearchFilteredTracingMarkers: State => TracingMarker[],
   getPreviewFilteredTracingMarkers: State => TracingMarker[],
+  getPreviewFilteredGCMinorMarkers: State => GCMinorMarker[],
+  getPreviewFilteredGCSliceMarkers: State => GCSliceMarker[],
+  getPreviewFilteredGCMajorMarkers: State => GCMajorMarker[],
   unfilteredSamplesRange: State => StartEndRange | null,
   getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
 };
@@ -1054,6 +1060,18 @@ export const selectorsForThread = (
         );
       }
     );
+    const getPreviewFilteredGCMinorMarkers = createSelector(
+      getPreviewFilteredTracingMarkers,
+      MarkerData.filterGCMinor
+    );
+    const getPreviewFilteredGCSliceMarkers = createSelector(
+      getPreviewFilteredTracingMarkers,
+      MarkerData.filterGCSlice
+    );
+    const getPreviewFilteredGCMajorMarkers = createSelector(
+      getPreviewFilteredTracingMarkers,
+      MarkerData.filterGCMajor
+    );
     const getIsNetworkChartEmptyInFullRange = createSelector(
       getTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker).length === 0
@@ -1282,6 +1300,9 @@ export const selectorsForThread = (
       getThreadProcessDetails,
       getSearchFilteredTracingMarkers,
       getPreviewFilteredTracingMarkers,
+      getPreviewFilteredGCMinorMarkers,
+      getPreviewFilteredGCSliceMarkers,
+      getPreviewFilteredGCMajorMarkers,
       unfilteredSamplesRange,
       getSelectedMarkerIndex,
     };
