@@ -473,3 +473,13 @@ export function extractScreenshotsById(
 
   return idToScreenshotMarkers;
 }
+
+export function getLongestMarkers(
+  markers: TracingMarker[],
+  length: number
+): TracingMarker[] {
+  return markers
+    .slice()
+    .sort((a, b) => b.dur - a.dur)
+    .slice(0, length);
+}
