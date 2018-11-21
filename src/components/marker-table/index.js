@@ -15,7 +15,7 @@ import {
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { changeSelectedMarker } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
-import { formatSeconds } from '../../utils/format-numbers';
+import { getMarkerTree } from '../../profile-logic/marker-tree';
 
 import './index.css';
 
@@ -30,129 +30,7 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
-type MarkerDisplayData = {|
-  start: string,
-  duration: string,
-  name: string,
-  category: string,
-|};
-
-class MarkerTree {
-  _markers: TracingMarker[];
-  _zeroAt: Milliseconds;
-  _displayDataByIndex: Map<IndexIntoTracingMarkers, MarkerDisplayData>;
-
-  constructor(markers: TracingMarker[], zeroAt: Milliseconds) {
-    this._markers = markers;
-    this._zeroAt = zeroAt;
-    this._displayDataByIndex = new Map();
-  }
-
-  getRoots(): IndexIntoTracingMarkers[] {
-    const markerIndices = [];
-    for (let i = 0; i < this._markers.length; i++) {
-      markerIndices.push(i);
-    }
-    return markerIndices;
-  }
-
-  getChildren(markerIndex: IndexIntoTracingMarkers): IndexIntoTracingMarkers[] {
-    return markerIndex === -1 ? this.getRoots() : [];
-  }
-
-  hasChildren(_markerIndex: IndexIntoTracingMarkers): boolean {
-    return false;
-  }
-
-  getAllDescendants() {
-    return new Set();
-  }
-
-  getParent(): IndexIntoTracingMarkers {
-    // -1 isn't used, but needs to be compatible with the call tree.
-    return -1;
-  }
-
-  getDepth() {
-    return 0;
-  }
-
-  hasSameNodeIds(tree) {
-    return this._markers === tree._markers;
-  }
-
-  getDisplayData(markerIndex: IndexIntoTracingMarkers): MarkerDisplayData {
-    let displayData = this._displayDataByIndex.get(markerIndex);
-    if (displayData === undefined) {
-      const marker = this._markers[markerIndex];
-      let category = 'unknown';
-      let name = marker.name;
-      if (marker.data) {
-        const data = marker.data;
-
-        if (typeof data.category === 'string') {
-          category = data.category;
-        }
-
-        switch (data.type) {
-          case 'tracing':
-            if (category === 'log') {
-              // name is actually the whole message that was sent to fprintf_stderr. Would you consider that.
-              if (name.length > 100) {
-                name = name.substring(0, 100) + '...';
-              }
-            } else if (data.category === 'DOMEvent') {
-              name = data.eventType;
-            }
-            break;
-
-          case 'UserTiming':
-            category = name;
-            name = data.name;
-            break;
-          case 'Bailout':
-            category = 'Bailout';
-            break;
-          case 'Network':
-            category = 'Network';
-            break;
-          default:
-        }
-      }
-
-      displayData = {
-        start: _formatStart(marker.start, this._zeroAt),
-        duration: _formatDuration(marker.dur),
-        name,
-        category,
-      };
-      this._displayDataByIndex.set(markerIndex, displayData);
-    }
-    return displayData;
-  }
-}
-
-function _formatStart(start: number, zeroAt) {
-  return formatSeconds(start - zeroAt);
-}
-
-function _formatDuration(duration: number): string {
-  if (duration === 0) {
-    return '—';
-  }
-  let maximumFractionDigits = 1;
-  if (duration < 0.01) {
-    maximumFractionDigits = 3;
-  } else if (duration < 1) {
-    maximumFractionDigits = 2;
-  }
-  return (
-    duration.toLocaleString(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits,
-    }) + 'ms'
-  );
-}
+import type { MarkerDisplayData } from '../../profile-logic/marker-tree';
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
@@ -209,7 +87,7 @@ class MarkerTable extends PureComponent<Props> {
 
   render() {
     const { markers, zeroAt, selectedMarker } = this.props;
-    const tree = new MarkerTree(markers, zeroAt);
+    const tree = getMarkerTree(markers, zeroAt);
     return (
       <div className="markerTable">
         <MarkerSettings />
