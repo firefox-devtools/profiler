@@ -176,7 +176,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
   // Split markers.name in loadID and parts of URL to highlight domain
   // and filename, shorten the rest if needed.
-  _shortenURI(name: string): React.Node {
+  _splitsURI(name: string): React.Node {
     // Extract URI from markers.name
     const uri = this._extractURI(name);
     if (uri !== null) {
@@ -251,7 +251,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     return (
       <section className={itemClassName}>
         <div className="networkChartRowItemLabel">
-          {this._shortenURI(marker.name)}
+          {this._splitsURI(marker.name)}
         </div>
         <div
           className="networkChartRowItemBar"

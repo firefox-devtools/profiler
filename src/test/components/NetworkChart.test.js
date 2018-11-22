@@ -88,8 +88,8 @@ describe('NetworkChart', function() {
   });
 });
 
-describe('NetworkChartRowBar - check phase calculations', function() {
-  it('Network marker with full network payload timing information', () => {
+describe('NetworkChartRowBar phase calculations', function() {
+  it('divides up the different phases of the request with full set of required information', () => {
     const { networkChart } = setupWithPayload(
       'Load 100: https://test.mozilla.org',
       {
@@ -122,7 +122,7 @@ describe('NetworkChartRowBar - check phase calculations', function() {
     ).toHaveProperty('width', '25%');
   });
 
-  it('Network marker with partial network marker payload timing information', () => {
+  it('divides up the different phases of the request with subset of required information', () => {
     const { networkChart } = setupWithPayload(
       'Load 101: https://test.mozilla.org',
       {
@@ -154,7 +154,7 @@ describe('NetworkChartRowBar - check phase calculations', function() {
     ).toHaveProperty('width', '25%');
   });
 
-  it('Network marker with no network marker payload timing information', () => {
+  it('divides up the different phases of the request with no set of required information', () => {
     const { networkChart } = setupWithPayload(
       'Load 101: https://test.mozilla.org',
       {
@@ -184,8 +184,8 @@ describe('NetworkChartRowBar - check phase calculations', function() {
   });
 });
 
-describe('NetworkChartRowBar - check URL', function() {
-  it('splits up a url by protocol / domain / path / filemane / params / hash', function() {
+describe('NetworkChartRowBar URL split', function() {
+  it('splits up the url by protocol / domain / path / filemane / params / hash', function() {
     const { networkChart } = setupWithPayload(
       'Load 101: https://test.mozilla.org/img/optimized/test.gif?param1=123&param2=321#hashNode2',
       {
@@ -219,7 +219,7 @@ describe('NetworkChartRowBar - check URL', function() {
     ]);
   });
 
-  it('invalid url', function() {
+  it('returns null with an invalid url', function() {
     const { networkChart } = setupWithPayload(
       'Load 101: test.mozilla.org/img/optimized/',
       {
@@ -246,8 +246,8 @@ describe('NetworkChartRowBar - check URL', function() {
   });
 });
 
-describe('NetworkChartRowBar - check MIME-type in URL', function() {
-  it('MIME-type - img', function() {
+describe('NetworkChartRowBar MIME-type filter', function() {
+  it('searches for img MIME-Type', function() {
     const { networkChart } = setupWithPayload(
       'Load 101: htps://test.mozilla.org/img/optimized/test.png',
       {
@@ -273,7 +273,7 @@ describe('NetworkChartRowBar - check MIME-type in URL', function() {
     ).toEqual(['even networkChartRowItem networkChartRowItemImg']);
   });
 
-  it('MIME-type - html', function() {
+  it('searches for html MIME-Type', function() {
     const { networkChart } = setupWithPayload(
       'Load 101: htps://test.mozilla.org/img/optimized/test.html',
       {
@@ -299,7 +299,7 @@ describe('NetworkChartRowBar - check MIME-type in URL', function() {
     ).toEqual(['even networkChartRowItem networkChartRowItemHtml']);
   });
 
-  it('MIME-type - js', function() {
+  it('searches for js MIME-Type', function() {
     const { networkChart } = setupWithPayload(
       'Load 101: htps://test.mozilla.org/img/optimized/test.js',
       {
@@ -325,7 +325,7 @@ describe('NetworkChartRowBar - check MIME-type in URL', function() {
     ).toEqual(['even networkChartRowItem networkChartRowItemJs']);
   });
 
-  it('MIME-type - CSS', function() {
+  it('searches for css MIME-Type', function() {
     const { networkChart } = setupWithPayload(
       'Load 101: htps://test.mozilla.org/img/optimized/test.css',
       {
@@ -351,7 +351,7 @@ describe('NetworkChartRowBar - check MIME-type in URL', function() {
     ).toEqual(['even networkChartRowItem networkChartRowItemCss']);
   });
 
-  it('MIME-type - other', function() {
+  it('uses default when no filter applies', function() {
     const { networkChart } = setupWithPayload(
       'Load 101: htps://test.mozilla.org/img/optimized/test.xuul',
       {
