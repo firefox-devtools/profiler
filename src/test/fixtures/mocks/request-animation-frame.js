@@ -26,10 +26,12 @@ export default function mockRaf() {
     fns.push(fn);
   });
 
-  return () => {
-    for (const fn of fns) {
-      fn();
-    }
+  return (timestamps: number[] = []) => {
+    const oldFns = fns;
     fns = [];
+    for (const fn of oldFns) {
+      const arg = timestamps.shift();
+      fn(arg);
+    }
   };
 }

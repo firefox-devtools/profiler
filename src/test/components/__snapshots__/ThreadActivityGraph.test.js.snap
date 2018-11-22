@@ -2595,8 +2595,11 @@ Array [
 exports[`SelectedThreadActivityGraph matches the component snapshot 1`] = `
 <div
   className="chartViewport selectedThreadActivityGraphViewport"
+  onKeyDown={[Function]}
+  onKeyUp={[Function]}
   onMouseDown={[Function]}
   onWheel={[Function]}
+  tabIndex={0}
 >
   <div>
     <div

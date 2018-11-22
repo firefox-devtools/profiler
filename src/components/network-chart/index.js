@@ -207,7 +207,7 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
     // Set min-width for marker bar.
     let markerWidth = endPosition - startPosition;
     if (markerWidth < 1) {
-      markerWidth = 2;
+      markerWidth = 2.5;
     }
 
     return {
