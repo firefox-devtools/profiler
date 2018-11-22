@@ -57,12 +57,27 @@ type StateProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkerChart extends React.PureComponent<Props> {
+  _viewport: HTMLDivElement | null = null;
   /**
    * Determine the maximum zoom of the viewport.
    */
   getMaximumZoom(): UnitIntervalOfProfileRange {
     const { timeRange: { start, end }, interval } = this.props;
     return interval / (end - start);
+  }
+
+  _takeViewportRef = (viewport: HTMLDivElement | null) => {
+    this._viewport = viewport;
+  };
+
+  _focusViewport = () => {
+    if (this._viewport) {
+      this._viewport.focus();
+    }
+  };
+
+  componentDidMount() {
+    this._focusViewport();
   }
 
   render() {
@@ -96,6 +111,7 @@ class MarkerChart extends React.PureComponent<Props> {
               maximumZoom: this.getMaximumZoom(),
               marginLeft: TIMELINE_MARGIN_LEFT,
               marginRight: TIMELINE_MARGIN_RIGHT,
+              containerRef: this._takeViewportRef,
             }}
             chartProps={{
               markerTimingRows,
