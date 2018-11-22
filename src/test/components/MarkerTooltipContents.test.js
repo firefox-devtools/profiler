@@ -94,11 +94,8 @@ describe('MarkerTooltipContents', function() {
         14.5,
         {
           type: 'tracing',
-          startTime: 14.5,
-          endTime: 14.5,
           category: 'Paint',
           interval: 'start',
-          name: 'NotifyDidPaint',
         },
       ],
       [
@@ -232,14 +229,12 @@ describe('MarkerTooltipContents', function() {
             reason: 'CC_WAITING',
             slice: 1,
             pause: 5.23,
-            when: 17.5,
             budget: '11ms',
             initial_state: 'Initial',
             final_state: 'Final',
             major_gc_number: 1,
             page_faults: 1,
             start_timestamp: 17,
-            end_timestamp: 17,
             phase_times: {
               mark: 10046,
               wait_background_thread: 0,
@@ -266,14 +261,6 @@ describe('MarkerTooltipContents', function() {
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
-          // The startTime and endTime properties are currently required by
-          // our flow type annotations, but those annotations are wrong:
-          // Actual Gecko profiles won't have these properties in their
-          // tracing markers. The flow types should really be fixed, but I had
-          // some trouble when I tried to do that so I deferred it to some
-          // later point.
-          startTime: 18.5,
-          endTime: 18.5,
         },
       ],
       [
@@ -283,9 +270,6 @@ describe('MarkerTooltipContents', function() {
           type: 'tracing',
           category: 'Paint',
           interval: 'end',
-          // startTime and endTime should be unnecessary, see above
-          startTime: 18.5,
-          endTime: 18.5,
         },
       ],
       [

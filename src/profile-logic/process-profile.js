@@ -600,10 +600,11 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
            */
           case 'GCSlice': {
             const mt: GCSliceData_Gecko = m.timings;
-            const timings = Object.assign({}, mt, {
-              phase_times: mt.times ? convertPhaseTimes(mt.times) : {},
-            });
-            delete timings.times;
+            const { times, ...partialMt } = mt;
+            const timings = {
+              ...partialMt,
+              phase_times: times ? convertPhaseTimes(times) : {},
+            };
             return {
               type: 'GCSlice',
               startTime: m.startTime,
@@ -615,11 +616,13 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
             const mt: GCMajorAborted | GCMajorCompleted_Gecko = m.timings;
             switch (mt.status) {
               case 'completed': {
-                const timings: GCMajorCompleted = Object.assign({}, mt, {
-                  phase_times: convertPhaseTimes(mt.totals),
+                const { totals, ...partialMt } = mt;
+                const timings: GCMajorCompleted = {
+                  ...partialMt,
+                  phase_times: convertPhaseTimes(totals),
                   mmu_20ms: mt.mmu_20ms / 100,
                   mmu_50ms: mt.mmu_50ms / 100,
-                });
+                };
                 return {
                   type: 'GCMajor',
                   startTime: m.startTime,
@@ -645,9 +648,11 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
            * profiles from older gecko will be of type "tracing".
            */
           case 'Styles': {
-            const newData = Object.assign({}, m);
+            const newData = { ...m };
             _convertStackToCause(newData);
-            const result: StyleMarkerPayload = newData;
+            // We had to use any here because _convertStackToCause is not
+            // providing the type system with information how it's operating
+            const result: StyleMarkerPayload = (newData: any);
             return result;
           }
           case 'tracing': {
