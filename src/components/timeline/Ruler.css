@@ -4,11 +4,12 @@
 
 .timelineRuler {
   height: 20px;
-  overflow: hidden;
-  /* Don't allow this component to steal pointer events, as it can overlay the timeline */
-  pointer-events: none;
 }
 
+/**
+ * Create a border underneath the ruler that spans both the timeline track names on the
+ * left, and the scrollbar area on the right.
+ */
 .timelineRuler::after {
   content: '';
   position: absolute;
@@ -30,16 +31,19 @@
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  height: 20px;
   -moz-user-select: none;
   user-select: none;
   line-height: 20px;
   font-size: 9px;
   color: #888;
   cursor: default;
-  z-index: 1; /* between .timelineThread background and .timelineThreadDetails */
 }
 
+/**
+ * The notch is a 1px wide span with a gradient. It has a text numeric label that is
+ * then overflows to the left of the line.
+ */
 .timelineRulerNotch {
   display: block;
   position: absolute;
