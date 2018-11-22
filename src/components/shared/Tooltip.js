@@ -10,7 +10,7 @@ import type { CssPixels } from '../../types/units';
 import { ensureExists } from '../../utils/flow';
 require('./Tooltip.css');
 
-const MOUSE_OFFSET = 21;
+export const MOUSE_OFFSET = 11;
 
 type Props = {
   mouseX: CssPixels,
@@ -82,25 +82,51 @@ export default class Tooltip extends React.PureComponent<Props, State> {
     const { children, mouseX, mouseY } = this.props;
     const { interiorElement } = this.state;
 
-    const offsetX = interiorElement
-      ? Math.max(0, mouseX + interiorElement.offsetWidth - window.innerWidth)
-      : 0;
+    // By default, position the tooltip below and at the right of the mouse cursor.
+    let top = mouseY + MOUSE_OFFSET;
+    let left = mouseX + MOUSE_OFFSET;
 
-    let offsetY = 0;
     if (interiorElement) {
+      // Let's check the vertical position.
       if (
-        mouseY + interiorElement.offsetHeight + MOUSE_OFFSET >
+        mouseY + MOUSE_OFFSET + interiorElement.offsetHeight >=
         window.innerHeight
       ) {
-        offsetY = interiorElement.offsetHeight + MOUSE_OFFSET;
-      } else {
-        offsetY = -MOUSE_OFFSET;
+        // The tooltip doesn't fit below the mouse cursor (which is our
+        // default strategy). Therefore we try to position it either above the
+        // mouse cursor or finally aligned with the window's top edge.
+        if (mouseY - MOUSE_OFFSET - interiorElement.offsetHeight > 0) {
+          // We position the tooltip above the mouse cursor if it fits there.
+          top = mouseY - interiorElement.offsetHeight - MOUSE_OFFSET;
+        } else {
+          // Otherwise we align the tooltip with the window's top edge.
+          top = 0;
+        }
+      }
+
+      // Now let's check the horizontal position.
+      if (
+        mouseX + MOUSE_OFFSET + interiorElement.offsetWidth >=
+        window.innerWidth
+      ) {
+        // The tooltip doesn't fit at the right of the mouse cursor (which is
+        // our default strategy). Therefore we try to position it either at the
+        // left of the mouse cursor or finally aligned with the window's left
+        // edge.
+        if (mouseX - MOUSE_OFFSET - interiorElement.offsetWidth > 0) {
+          // We position the tooltip at the left of the mouse cursor if it fits
+          // there.
+          left = mouseX - interiorElement.offsetWidth - MOUSE_OFFSET;
+        } else {
+          // Otherwise, align the tooltip with the window's left edge.
+          left = 0;
+        }
       }
     }
 
     const style = {
-      left: mouseX - offsetX,
-      top: mouseY - offsetY,
+      left,
+      top,
     };
 
     return ReactDOM.createPortal(

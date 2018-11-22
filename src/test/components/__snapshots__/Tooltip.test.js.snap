@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`shared/Tooltip is rendered appropriately 1`] = `
+<div
+  class="tooltip"
+  style="left: 11px; top: 11px;"
+>
+  <p>
+    Lorem ipsum
+  </p>
+</div>
+`;
