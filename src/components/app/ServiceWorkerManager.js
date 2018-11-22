@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { PureComponent } from 'react';
+import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
 import { getDataSource } from '../../reducers/url-state';
@@ -85,7 +85,25 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
   }
 
   render() {
-    return null;
+    const { dataSource } = this.props;
+    const { installStatus } = this.state;
+
+    if (dataSource !== 'none' && dataSource === 'public') {
+      return null;
+    }
+
+    if (installStatus !== 'ready') {
+      return null;
+    }
+
+    return (
+      <div className="serviceworker-ready-notice">
+        An update is ready, if you want to use it now you can
+        <a href="javascript:location.reload()">
+          click here to reload the page
+        </a>.
+      </div>
+    );
   }
 }
 
