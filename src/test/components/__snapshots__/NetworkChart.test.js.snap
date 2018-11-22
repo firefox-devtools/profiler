@@ -89,7 +89,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
           className="treeViewBodyInner treeViewBodyInner0InnerChunk"
         >
           <section
-            className="even networkChartRowItem STOP"
+            className="even networkChartRowItem "
           >
             <div
               className="networkChartRowItemLabel"
@@ -103,11 +103,42 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
               style={
                 Object {
                   "left": 0,
-                  "width": 2,
+                  "width": 2.5,
                 }
               }
             >
-               
+              Array [
+                <span
+                  className="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                  style={
+                    Object {
+                      "width": "0%",
+                    }
+                  }
+                >
+                   
+                </span>,
+                <span
+                  className="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                  style={
+                    Object {
+                      "width": "0%",
+                    }
+                  }
+                >
+                   
+                </span>,
+                <span
+                  className="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                  style={
+                    Object {
+                      "width": "100%",
+                    }
+                  }
+                >
+                   
+                </span>,
+              ]
             </div>
           </section>
         </div>
