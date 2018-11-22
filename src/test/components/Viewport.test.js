@@ -22,6 +22,8 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 
+import type { Milliseconds } from '../../types/units';
+
 // The following define the magic values used for the mocked bounding box of the
 // the rendered component.
 const BOUNDING_BOX_WIDTH = 300;
@@ -473,6 +475,71 @@ describe('Viewport', function() {
     });
   });
 
+  describe('keyboard navigation', function() {
+    it('zooms in and out at center', () => {
+      const { getChartViewport, depressKey } = setup();
+
+      // Zoom in.
+      depressKey('KeyQ', 500);
+      expect(getChartViewport().viewportLeft).toBeGreaterThan(0);
+      expect(getChartViewport().viewportRight).toBeLessThan(1);
+      // Assert we're centered.
+      expect(1 - getChartViewport().viewportRight).toBeCloseTo(
+        getChartViewport().viewportLeft,
+        7
+      );
+
+      // Remember where we are so that we can compare after zoom out.
+      const { viewportLeft, viewportRight } = getChartViewport();
+
+      // Zoom out.
+      depressKey('KeyE', 200);
+      expect(getChartViewport().viewportLeft).toBeLessThan(viewportLeft);
+      expect(getChartViewport().viewportRight).toBeGreaterThan(viewportRight);
+      // Assert we're still in the middle.
+      expect(1 - getChartViewport().viewportRight).toBeCloseTo(
+        getChartViewport().viewportLeft,
+        7
+      );
+    });
+
+    it('moves viewport down and up', () => {
+      const { getChartViewport, depressKey } = setup();
+
+      depressKey('KeyS', 100);
+      expect(getChartViewport()).toMatchObject({
+        viewportLeft: 0,
+        viewportRight: 1,
+        viewportTop: 200,
+        viewportBottom: BOUNDING_BOX_HEIGHT + 200,
+      });
+      depressKey('KeyW', 50);
+      expect(getChartViewport()).toMatchObject({
+        viewportLeft: 0,
+        viewportRight: 1,
+        viewportTop: 100,
+        viewportBottom: BOUNDING_BOX_HEIGHT + 100,
+      });
+    });
+
+    it('moves viewport left and right', () => {
+      const { getChartViewport, depressKey } = setup();
+      // Zoom in a bit to enable panning horizontally.
+      depressKey('KeyQ', 1000);
+      const { viewportLeft, viewportRight } = getChartViewport();
+
+      // Move to the left.
+      depressKey('KeyA', 100);
+      expect(getChartViewport().viewportLeft).toBeLessThan(viewportLeft);
+      expect(getChartViewport().viewportRight).toBeLessThan(viewportRight);
+
+      // Move to the right.
+      depressKey('KeyD', 200);
+      expect(getChartViewport().viewportLeft).toBeGreaterThan(viewportLeft);
+      expect(getChartViewport().viewportRight).toBeGreaterThan(viewportRight);
+    });
+  });
+
   it('reacts to changes to the panel layout generation', function() {
     const {
       dispatch,
@@ -620,6 +687,23 @@ function setup(profileOverrides: Object = {}) {
     view.update();
   }
 
+  /**
+   * Send a keydown and keyup event with a specified duration in
+   * between.
+   *
+   * Assumes and relies on the fact that time is measured with
+   * `performance.now` and the timestamps sent to the
+   * requestAnimationFrame `_keyboardNavigation` callback.
+   */
+  function depressKey(code: string, duration: Milliseconds) {
+    jest.spyOn(performance, 'now').mockReturnValue(0);
+    view.simulate('keydown', { nativeEvent: { code } });
+    flushRafCalls([duration]);
+    view.simulate('keyup', { nativeEvent: { code } });
+    flushRafCalls();
+    view.update();
+  }
+
   function scrollAndGetViewport(eventOverrides) {
     scroll(eventOverrides);
     return getChartViewport();
@@ -661,6 +745,7 @@ function setup(profileOverrides: Object = {}) {
     getChartViewport,
     scrollAndGetViewport,
     scroll,
+    depressKey,
     clickAndDrag,
     setBoundingBoxMock,
     dispatch: store.dispatch,
