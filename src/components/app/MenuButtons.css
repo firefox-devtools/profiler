@@ -79,7 +79,7 @@
 
 .menuButtonsShareButtonButton:not([disabled]),
 .menuButtonsSecondaryShareButtonButton:not([disabled]) {
-  background-color: var(--internal-share-button-background-color);
+  background-color: #0D8730;
   color: white;
 }
 
