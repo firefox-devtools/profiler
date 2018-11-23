@@ -138,8 +138,19 @@ export type LocalTrack =
 export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
 
+export type PauseInfo = {|
+  +numberOfPauses: number,
+  +meanPause: number,
+  +stdDev: number,
+  +medianPause: number,
+  +p90Pause: number,
+  +maxPause: number,
+  +totalPaused: number,
+|};
+
 export type GCStats = {|
-  +numMinor: number,
-  +numSlice: number,
+  +minorPauses: PauseInfo | null,
+  +slicePauses: PauseInfo | null,
+  +allPauses: PauseInfo | null,
   +numMajor: number,
 |};
