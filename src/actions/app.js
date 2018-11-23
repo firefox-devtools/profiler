@@ -41,13 +41,6 @@ export function setProfileSharingStatus(
   };
 }
 
-export function changeTabOrder(tabOrder: number[]): Action {
-  return {
-    type: 'CHANGE_TAB_ORDER',
-    tabOrder,
-  };
-}
-
 export function urlSetupDone(): ThunkAction<void> {
   return (dispatch, getState) => {
     dispatch({ type: 'URL_SETUP_DONE' });
@@ -84,6 +77,6 @@ export function invalidatePanelLayout(): Action {
  * is generated when the window.location is serialized, or the state is pulled out of
  * the history API.
  */
-export function updateUrlState(newUrlState: UrlState): Action {
+export function updateUrlState(newUrlState: UrlState | null): Action {
   return { type: 'UPDATE_URL_STATE', newUrlState };
 }

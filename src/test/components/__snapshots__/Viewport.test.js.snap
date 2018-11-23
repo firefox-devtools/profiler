@@ -3,8 +3,11 @@
 exports[`Viewport matches the component snapshot 1`] = `
 <div
   className="chartViewport"
+  onKeyDown={[Function]}
+  onKeyUp={[Function]}
   onMouseDown={[Function]}
   onWheel={[Function]}
+  tabIndex={0}
 >
   <div
     id="dummy-chart"

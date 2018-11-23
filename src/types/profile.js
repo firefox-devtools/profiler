@@ -146,8 +146,10 @@ export type FuncTable = {
   length: number,
   name: IndexIntoStringTable[],
   resource: Array<IndexIntoResourceTable | -1>,
+  relevantForJS: Array<boolean>,
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
+  columnNumber: Array<number | null>,
 };
 
 /**
@@ -190,6 +192,25 @@ export type Category = {
 export type CategoryList = Array<Category>;
 
 /**
+ * A Page describes all of the pages the browser profiled. In Firefox, there exists
+ * the idea of a docshell, which a large collection of useful things associated
+ * with a particular tab or iframe. However, this docshell can be used to navigate
+ * over many pages. The historyId property represents current history position
+ * of that given the docshell.
+ *
+ * The unique value for a page is then represented by the combination of the docshellId
+ * and the historyId.
+ */
+export type Page = {|
+  docshellId: string,
+  historyId: number,
+  url: string,
+  isSubFrame: boolean,
+|};
+
+export type PageList = Array<Page>;
+
+/**
  * Information about a period of time during which no samples were collected.
  */
 export type PausedRange = {
@@ -227,6 +248,7 @@ export type Thread = {
   unregisterTime: Milliseconds | null,
   pausedRanges: PausedRange[],
   name: string,
+  processName?: string,
   // An undefined pid is a valid value. An undefined value will key
   // properly on Map<pid, T>.
   pid: Pid,
@@ -325,5 +347,6 @@ export type ProfileMeta = {|
  */
 export type Profile = {
   meta: ProfileMeta,
+  pages?: PageList,
   threads: Thread[],
 };

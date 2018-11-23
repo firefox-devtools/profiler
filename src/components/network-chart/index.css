@@ -38,7 +38,7 @@
 }
 
 .networkChartRowItem:hover .networkChartRowItemLabel{
-  opacity: .2;
+  opacity: .4;
 }
 
 .networkChartRowItemLabel {
@@ -54,7 +54,8 @@
 }
 
 .networkChartRowItemBar {
-  background-color: var(--blue-50);
+  background-color: white;
+  border: 1px solid var(--grey-40);
   display: inline-block;
   z-index: 3;
   border-radius: 2px;
@@ -62,15 +63,75 @@
   flex-grow: 1;
   position: absolute;
   margin-top: 2px;
+  opacity: 0.7;
+}
+
+.networkChartRowItemBarInner {
+  height: 12px;
+  display: inline-block;
+  background-color: var(--grey-40);
+}
+
+.networkChartRowItemCss .networkChartRowItemBar {
+  border-color: var(--purple-50);
   opacity: 0.6;
 }
 
-.STATUS_START .networkChartRowItemBar {
-  background-color: var(--magenta-50);
-  opacity: 0.2;
+.networkChartRowItemCss .networkChartRowItemBarInner {
+  background-color: var(--purple-50);
 }
 
-.STATUS_REDIRECT .networkChartRowItemBar {
-  background-color: var(--teal-70);
-  opacity: 0.4;
+.networkChartRowItemJs .networkChartRowItemBar {
+  border-color: var(--yellow-50);
+  opacity: 0.6;
+}
+
+.networkChartRowItemJs .networkChartRowItemBarInner {
+  background-color: var(--yellow-50);
+}
+
+.networkChartRowItemHtml .networkChartRowItemBar {
+  border-color: var(--blue-60);
+  opacity: 0.6;
+}
+
+.networkChartRowItemHtml .networkChartRowItemBarInner {
+  background-color: var(--blue-60);
+}
+
+.networkChartRowItemImg .networkChartRowItemBar {
+  border-color: var(--green-60);
+  opacity: 0.6;
+}
+
+.networkChartRowItemImg .networkChartRowItemBarInner {
+  background-color: var(--green-60);
+}
+
+.networkChartRowItemBarRequestQueue {
+  opacity: 0;
+}
+.networkChartRowItemBarRequest {
+  opacity: 0.5;
+}
+.networkChartRowItemBarResponse {
+  opacity: 1;
+}
+
+.networkChartRowItemUriOptional {
+  color: var(--grey-40);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+  display: inline-block;
+}
+
+.networkChartRowItemUriRequired {
+  display: inline-block;
+  overflow: hidden;
+}
+
+.networkChartRowItemUriRequired:nth-child(1) {
+  padding-right: 8px;
 }
