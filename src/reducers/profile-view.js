@@ -20,6 +20,7 @@ import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as CallTree from '../profile-logic/call-tree';
+import * as GCAnalysis from '../profile-logic/gc-analysis';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
 
@@ -47,6 +48,7 @@ import type {
   LocalTrack,
   GlobalTrack,
   TrackIndex,
+  GCStats,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -819,6 +821,7 @@ export type SelectorsForThread = {
   getPreviewFilteredGCMinorMarkers: State => GCMinorMarker[],
   getPreviewFilteredGCSliceMarkers: State => GCSliceMarker[],
   getPreviewFilteredGCMajorMarkers: State => GCMajorMarker[],
+  getPreviewFilteredGCStats: State => GCStats,
   unfilteredSamplesRange: State => StartEndRange | null,
   getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
 };
@@ -1072,6 +1075,12 @@ export const selectorsForThread = (
       getPreviewFilteredTracingMarkers,
       MarkerData.filterGCMajor
     );
+    const getPreviewFilteredGCStats = createSelector(
+      getPreviewFilteredGCMinorMarkers,
+      getPreviewFilteredGCSliceMarkers,
+      getPreviewFilteredGCMajorMarkers,
+      GCAnalysis.computeGCStats
+    );
     const getIsNetworkChartEmptyInFullRange = createSelector(
       getTracingMarkers,
       markers => markers.filter(MarkerData.isNetworkMarker).length === 0
@@ -1303,6 +1312,7 @@ export const selectorsForThread = (
       getPreviewFilteredGCMinorMarkers,
       getPreviewFilteredGCSliceMarkers,
       getPreviewFilteredGCMajorMarkers,
+      getPreviewFilteredGCStats,
       unfilteredSamplesRange,
       getSelectedMarkerIndex,
     };

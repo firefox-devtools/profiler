@@ -118,7 +118,7 @@ exports[`app/Details renders an initial view with the right panel for tab gc-sta
       ]
     }
   />
-  <Connect(GCStats) />
+  <Connect(GCStatsView) />
   <Connect(CallNodeContextMenu) />
   <Connect(MarkersContextMenu) />
   <Connect(TimelineTrackContextMenu) />

@@ -137,3 +137,9 @@ export type LocalTrack =
 
 export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
+
+export type GCStats = {|
+  +numMinor: number,
+  +numSlice: number,
+  +numMajor: number,
+|};
