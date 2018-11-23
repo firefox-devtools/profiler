@@ -5,7 +5,7 @@ Consider the [previous case study](bunny.md). The amount of work being done was 
 
 Consider the optimized profile from the previous case study: [https://perfht.ml/2IqQTH2](https://perfht.ml/2IqQTH2)
 
-![A view of the content and worker stacks. The content thread does work, and is blocked as the worker thread does work, making things effectively synchronous.](./images/bunny-analysis/threads-sync.png)
+![A view of the content and worker stacks. The content thread does work and is blocked as the worker thread does work, making things effectively synchronous.](./images/bunny-analysis/threads-sync.png)
 
 Looking at a zoomed-in view of the thread stack graph shows how the content process' main thread is drawing the visualization to the screen, then asking the worker for the next draw calls. This effectively makes the two threads synchronous as they block each other taking turns doing the work. The blank spots in the content thread (which contain idle stacks) represent time where the content thread is blocked as it waits for the worker to complete its work.
 
@@ -67,11 +67,11 @@ This is a profile for parallel processing: https://perfht.ml/2KajgWV
 
 ![A view of the content and worker stacks. The content thread and worker thread do work in parallel, and are not blocked by each other.](./images/bunny-analysis/threads-work-parallel.png)
 
-Here there are a lot more frames being drawn. The end-user will perceive a more fluid animation, and the experience will feel much faster. This performance boost perceived by the end user means that in fact, the threads are each doing more work. The work is evenly distributed between the two threads, and they do spend time idle by being blocked.
+Here there are a lot more frames being drawn. The end-user will perceive a more fluid animation, and the experience will feel much faster. This performance boost perceived by the end user means that in fact, the threads are each doing more work. The work is evenly distributed between the two threads and they do spend time idle by being blocked.
 
 ## In summary
 
-Code can be optimized to do less work, and this can be great for being able to have smoother running code, and a longer battery life. Another class of optimizations is better parallelism. Making code non-blocking means that more work can be performed at the same time and the results can be presented to the user.
+Code can be optimized to do less work and this can be great for being able to have smoother running code and a longer battery life. Another class of optimizations is better parallelism. Making code non-blocking means that more work can be performed at the same time and the results can be presented to the user.
 
 The main trade-off with greater parallelism is that more power can be consumed when threads do not remain idle. In the above example, a greater frame-rate was achieved by parallelizing the tasks, but more work was in fact being done by the smoother-running parallel code.
 
