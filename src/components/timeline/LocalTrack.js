@@ -18,12 +18,16 @@ import {
   getSelectedTab,
 } from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
-import { getLocalTrackName } from '../../selectors/profile';
+import {
+  getLocalTrackName,
+  getCounterSelectors,
+} from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';
+import TrackMemory from './TrackMemory';
 import type { TrackReference } from '../../types/actions';
-import type { ThreadIndex, Pid } from '../../types/profile';
+import type { Pid } from '../../types/profile';
 import type { TrackIndex, LocalTrack } from '../../types/profile-derived';
 import type {
   ExplicitConnectOptions,
@@ -38,7 +42,6 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  +threadIndex: null | ThreadIndex,
   +trackName: string,
   +isSelected: boolean,
   +isHidden: boolean,
@@ -82,8 +85,7 @@ class LocalTrackComponent extends PureComponent<Props> {
       case 'network':
         return <TrackNetwork threadIndex={localTrack.threadIndex} />;
       case 'memory':
-        // TODO: Add support for these track types.
-        return null;
+        return <TrackMemory counterIndex={localTrack.counterIndex} />;
       default:
         console.error('Unhandled localTrack type', (localTrack: empty));
         return null;
@@ -132,9 +134,6 @@ class LocalTrackComponent extends PureComponent<Props> {
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state, { pid, localTrack, trackIndex }) => {
     // These get assigned based on the track type.
-    const threadIndex = localTrack.threadIndex;
-    const selectedThreadIndex = getSelectedThreadIndex(state);
-    const selectedTab = getSelectedTab(state);
     let titleText = null;
     let isSelected = false;
 
@@ -142,6 +141,9 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     switch (localTrack.type) {
       case 'thread': {
         // Look up the thread information for the process if it exists.
+        const threadIndex = localTrack.threadIndex;
+        const selectedThreadIndex = getSelectedThreadIndex(state);
+        const selectedTab = getSelectedTab(state);
         const selectors = getThreadSelectors(threadIndex);
         isSelected =
           threadIndex === selectedThreadIndex &&
@@ -149,19 +151,26 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
         titleText = selectors.getThreadProcessDetails(state);
         break;
       }
-      case 'network':
+      case 'network': {
+        const threadIndex = localTrack.threadIndex;
+        const selectedThreadIndex = getSelectedThreadIndex(state);
+        const selectedTab = getSelectedTab(state);
         isSelected =
           threadIndex === selectedThreadIndex &&
           selectedTab === 'network-chart';
         break;
-      case 'memory':
+      }
+      case 'memory': {
+        titleText = getCounterSelectors(localTrack.counterIndex).getDescription(
+          state
+        );
         break;
+      }
       default:
         throw assertExhaustiveCheck(localTrack, `Unhandled LocalTrack type.`);
     }
 
     return {
-      threadIndex,
       trackName: getLocalTrackName(state, pid, trackIndex),
       titleText,
       isSelected,

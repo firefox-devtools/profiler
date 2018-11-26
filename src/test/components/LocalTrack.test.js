@@ -121,6 +121,9 @@ function setup(
   localTrack: LocalTrack
 ) {
   const { getState, dispatch } = store;
+  if (localTrack.type === 'memory') {
+    throw new Error('This test assumes that the local track has a thread.');
+  }
   const { threadIndex } = localTrack;
   // The assertions are simpler if this thread is not already selected.
   dispatch(changeSelectedThread(threadIndex + 1));
