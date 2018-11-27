@@ -52,6 +52,7 @@ export type ProfileSharingStatus = {|
 
 export type FrequentMarkerInfo = {|
   name: string,
+  markerName: string,
   count: number,
 |};
 

@@ -485,13 +485,32 @@ export function getLongestMarkers(
     .slice(0, length);
 }
 
+function getAugmentedNameForMarker(marker: TracingMarker): string {
+  if (marker.data) {
+    if (marker.data.type === 'tracing') {
+      if (marker.data.category === 'DOMEvent') {
+        return `DOMEvent [${marker.data.eventType}]`;
+      }
+    }
+    if (marker.data.type === 'UserTiming') {
+      return `UserTiming [${marker.data.name}]`;
+    }
+  }
+  return marker.name;
+}
+
 export function getFrequentMarkers(
   markers: TracingMarker[],
   length: number
 ): Array<FrequentMarkerInfo> {
   const markersGroupedByName = {};
+  const niceNameToMarkerName = {};
 
-  markers.forEach(({ name }) => {
+  markers.forEach(marker => {
+    const name = getAugmentedNameForMarker(marker);
+    if (marker.name !== name && !niceNameToMarkerName[name]) {
+      niceNameToMarkerName[name] = marker.name;
+    }
     if (!markersGroupedByName[name]) {
       markersGroupedByName[name] = 0;
     }
@@ -501,5 +520,9 @@ export function getFrequentMarkers(
   return objectEntries(markersGroupedByName)
     .sort(([, a], [, b]) => b - a)
     .slice(0, length)
-    .map(([name, count]) => ({ name, count }));
+    .map(([name, count]) => ({
+      name,
+      count,
+      markerName: niceNameToMarkerName[name] || name,
+    }));
 }
