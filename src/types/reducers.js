@@ -50,6 +50,11 @@ export type ProfileSharingStatus = {|
   +sharedWithoutUrls: boolean,
 |};
 
+export type FrequentMarkerInfo = {|
+  name: string,
+  count: number,
+|};
+
 export type ProfileViewState = {|
   +viewOptions: {|
     perThread: ThreadViewOptions[],

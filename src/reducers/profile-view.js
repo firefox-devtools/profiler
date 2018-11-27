@@ -59,6 +59,7 @@ import type {
   ProfileSharingStatus,
   SymbolicationStatus,
   ThreadViewOptions,
+  FrequentMarkerInfo,
 } from '../types/reducers';
 import type { Transform, TransformStack } from '../types/transforms';
 import type {
@@ -814,10 +815,7 @@ export type SelectorsForThread = {
   getSearchFilteredTracingMarkers: State => TracingMarker[],
   getPreviewFilteredTracingMarkers: State => TracingMarker[],
   getPreviewFilteredLongestMarkers: State => TracingMarker[],
-  getPreviewFilteredFrequentMarkers: State => Array<{|
-    name: string,
-    count: number,
-  |}>,
+  getPreviewFilteredFrequentMarkers: State => Array<FrequentMarkerInfo>,
   unfilteredSamplesRange: State => StartEndRange | null,
   getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
 };
