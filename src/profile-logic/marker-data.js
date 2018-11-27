@@ -10,6 +10,7 @@ import type {
 } from '../types/profile';
 import type { TracingMarker } from '../types/profile-derived';
 import type { BailoutPayload, ScreenshotPayload } from '../types/markers';
+import type { FrequentMarkerInfo } from '../types/reducers';
 import type { StartEndRange } from '../types/units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import { getNumberPropertyOrNull, objectEntries } from '../utils/flow';
@@ -487,7 +488,7 @@ export function getLongestMarkers(
 export function getFrequentMarkers(
   markers: TracingMarker[],
   length: number
-): Array<{| name: string, count: number |}> {
+): Array<FrequentMarkerInfo> {
   const markersGroupedByName = {};
 
   markers.forEach(({ name }) => {

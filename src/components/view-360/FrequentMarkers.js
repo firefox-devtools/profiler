@@ -14,8 +14,8 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
+import type { FrequentMarkerInfo } from '../../types/reducers';
 
-type FrequentMarkerInfo = {| name: string, count: number |};
 type StateProps = {|
   +frequentMarkers: FrequentMarkerInfo[],
 |};
