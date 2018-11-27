@@ -33,7 +33,6 @@
     "test-build-coverage": "jest --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
     "test-coverage": "run-s test-build-coverage test-serve-coverage"
-
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",
@@ -120,6 +119,7 @@
     "prettier": "^1.10.2",
     "raw-loader": "^0.5.1",
     "react-test-renderer": "^16.4.2",
+    "react-testing-library": "^5.2.3",
     "rimraf": "^2.6.2",
     "sinon": "^4.3.0",
     "style-loader": "^0.23.0",

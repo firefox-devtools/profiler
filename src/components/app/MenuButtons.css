@@ -79,7 +79,7 @@
 
 .menuButtonsShareButtonButton:not([disabled]),
 .menuButtonsSecondaryShareButtonButton:not([disabled]) {
-  background-color: var(--internal-share-button-background-color);
+  background-color: #0D8730;
   color: white;
 }
 
@@ -149,4 +149,31 @@
   vertical-align: middle;
   position: relative;
   bottom: 1px;
+}
+
+.menuButtonsOpenMetaInfoButtonBox,
+.menuButtonsOpenMetaInfoButtonLabel,
+.menuButtonsOpenMetaInfoButtonButton {
+  height: 100%;
+  font-size: 100%;
+}
+
+.menuButtonsOpenMetaInfoButtonBox {
+  display: flex;
+  padding: 0;
+}
+
+.menuButtonsOpenMetaInfoButtonLabel {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: stretch;
+  position: relative;
+  padding: 5px 10px 10px;
+}
+
+.menuButtonsOpenMetaInfoButtonBox .buttonWithPanelButton,
+.menuButtonsOpenMetaInfoButtonBox .buttonWithPanel:hover,
+.menuButtonsOpenMetaInfoButtonBox .buttonWithPanel.open {
+  background: url(../../../res/img/svg/meatball.svg) 50% 50% no-repeat;
+  width: 40px;
 }

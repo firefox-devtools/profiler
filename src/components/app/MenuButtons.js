@@ -27,7 +27,7 @@ import { sendAnalytics } from '../../utils/analytics';
 import url from 'url';
 
 import type { StartEndRange } from '../../types/units';
-import type { Profile } from '../../types/profile';
+import type { Profile, ProfileMeta } from '../../types/profile';
 import type { Action, DataSource } from '../../types/actions';
 import type {
   ProfileSharingStatus,
@@ -128,6 +128,10 @@ const ProfileSharingButton = ({
   />
 );
 
+type ProfileMetaInfoButtonProps = {
+  profile: Profile,
+};
+
 type ProfileSharingCompositeButtonProps = {
   profile: Profile,
   dataSource: DataSource,
@@ -146,6 +150,146 @@ type ProfileSharingCompositeButtonState = {
   shortUrl: string,
   shareNetworkUrls: boolean,
 };
+
+function _mapMetaInfoExtensionNames(data: string[]): React.DOM {
+  const extensionList = data.map(d => (
+    <li className="metaInfoListItem" key={d}>
+      {d}
+    </li>
+  ));
+  return extensionList;
+}
+
+function _formatDate(timestamp: number): string {
+  const timestampDate = new Date(timestamp).toUTCString();
+  return timestampDate;
+}
+
+function _formatVersionNumber(version?: string): string | null {
+  const regex = /[0-9]+.+[0-9]/gi;
+
+  if (version) {
+    const match = version.match(regex);
+    if (match) {
+      return match.toString();
+    }
+  }
+  return null;
+}
+
+function _formatLabel(meta: ProfileMeta): string | null {
+  const product = meta.product || '';
+  const version = _formatVersionNumber(meta.misc) || '';
+  const os = meta.oscpu || '';
+
+  const labelTitle = product + ' (' + version + ') ' + os;
+
+  if (labelTitle.length < 5) {
+    return null;
+  }
+  return labelTitle;
+}
+
+class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
+  render() {
+    const { profile } = this.props;
+    const meta = profile.meta;
+
+    if (meta !== undefined && meta !== null) {
+      return (
+        <div className="menuButtonsOpenMetaInfoButtonBox">
+          <div className="menuButtonsOpenMetaInfoButtonLabel">
+            {_formatLabel(meta)}
+          </div>
+          <ButtonWithPanel
+            className="menuButtonsOpenMetaInfoButtonButton"
+            label="&nbsp;"
+            panel={
+              <ArrowPanel className="arrowPanelOpenMetaInfo">
+                <h2 className="arrowPanelSubTitle">Timing</h2>
+                <div className="arrowPanelSection">
+                  {meta.startTime ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">Recording started:</span>
+                      {_formatDate(meta.startTime)}
+                    </div>
+                  ) : null}
+                  {meta.interval ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">Interval:</span>
+                      {meta.interval}ms
+                    </div>
+                  ) : null}
+                  {meta.preprocessedProfileVersion ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">Profile Version:</span>
+                      {meta.preprocessedProfileVersion}
+                    </div>
+                  ) : null}
+                </div>
+                <h2 className="arrowPanelSubTitle">Application</h2>
+                <div className="arrowPanelSection">
+                  {meta.product ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">Name:</span>
+                      {meta.product}
+                    </div>
+                  ) : null}
+                  {meta.misc ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">Version:</span>
+                      {_formatVersionNumber(meta.misc)}
+                    </div>
+                  ) : null}
+                  {meta.appBuildID ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">Build ID:</span>
+                      {meta.sourceURL ? (
+                        <a
+                          href={meta.sourceURL}
+                          title={meta.sourceURL}
+                          target="_blank"
+                        >
+                          {meta.appBuildID}
+                        </a>
+                      ) : (
+                        meta.appBuildID
+                      )}
+                    </div>
+                  ) : null}
+                  {meta.extensions ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">Extensions:</span>
+                      <ul className="metaInfoList">
+                        {_mapMetaInfoExtensionNames(meta.extensions.name)}
+                      </ul>
+                    </div>
+                  ) : null}
+                </div>
+                <h2 className="arrowPanelSubTitle">Platform</h2>
+                <div className="arrowPanelSection">
+                  {meta.platform ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">Platform:</span>
+                      {meta.platform}
+                    </div>
+                  ) : null}
+                  {meta.oscpu ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">OS:</span>
+                      {meta.oscpu}
+                    </div>
+                  ) : null}
+                </div>
+              </ArrowPanel>
+            }
+          />
+        </div>
+      );
+    }
+    return null;
+  }
+}
 
 class ProfileSharingCompositeButton extends PureComponent<
   ProfileSharingCompositeButtonProps,
@@ -589,6 +733,7 @@ const MenuButtons = ({
   predictUrl,
 }: MenuButtonsProps) => (
   <div className="menuButtons">
+    <ProfileMetaInfoButton profile={profile} />
     <ProfileSharingCompositeButton
       profile={profile}
       dataSource={dataSource}

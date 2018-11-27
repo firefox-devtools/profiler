@@ -10,7 +10,7 @@ import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
 /**
  * Measurement for how long draw calls take for the compositor.
  */
-export type GPUMarkerPayload = {
+export type GPUMarkerPayload = {|
   type: 'gpu_timer_query',
   startTime: Milliseconds, // Same as cpustart
   endTime: Milliseconds, // Same as cpuend
@@ -18,31 +18,31 @@ export type GPUMarkerPayload = {
   cpuend: Milliseconds,
   gpustart: Milliseconds, // Always 0.
   gpuend: Milliseconds, // The time the GPU took to execute the command.
-};
+|};
 
-export type CauseBacktrace = {
+export type CauseBacktrace = {|
   time: Milliseconds,
   stack: IndexIntoStackTable,
-};
+|};
 
 /**
  * These markers don't have a start and end time. They work in pairs, one
  * specifying the start, the other specifying the end of a specific tracing
  * marker.
  */
-export type PaintProfilerMarkerTracing_Gecko = {
+export type PaintProfilerMarkerTracing_Gecko = {|
   type: 'tracing',
   category: 'Paint',
   stack?: GeckoMarkerStack,
   interval: 'start' | 'end',
-};
+|};
 
-export type PaintProfilerMarkerTracing = {
+export type PaintProfilerMarkerTracing = {|
   type: 'tracing',
   category: 'Paint',
   cause?: CauseBacktrace,
   interval: 'start' | 'end',
-};
+|};
 
 export type ArbitraryEventTracing = {|
   +type: 'tracing',
@@ -51,7 +51,7 @@ export type ArbitraryEventTracing = {|
 
 export type PhaseTimes<Unit> = { [phase: string]: Unit };
 
-type GCSliceData_Shared = {
+type GCSliceData_Shared = {|
   // Slice number within the GCMajor collection.
   slice: number,
 
@@ -80,22 +80,24 @@ type GCSliceData_Shared = {
   page_faults?: number,
 
   start_timestamp: Seconds,
-};
-export type GCSliceData_Gecko = GCSliceData_Shared & {
+|};
+export type GCSliceData_Gecko = {|
+  ...GCSliceData_Shared,
   times: PhaseTimes<Milliseconds>,
-};
-export type GCSliceData = GCSliceData_Shared & {
+|};
+export type GCSliceData = {|
+  ...GCSliceData_Shared,
   phase_times: PhaseTimes<Microseconds>,
-};
+|};
 
-export type GCMajorAborted = {
+export type GCMajorAborted = {|
   status: 'aborted',
-};
+|};
 
-type GCMajorCompleted_Shared = {
+type GCMajorCompleted_Shared = {|
   status: 'completed',
   // timestamp is present but is usually 0
-  // timestamp: number,
+  timestamp: number,
   max_pause: Milliseconds,
 
   // The sum of all the slice durations
@@ -138,9 +140,10 @@ type GCMajorCompleted_Shared = {
   // This usually isn't present with the gecko profiler, but it's the same
   // as all of the slice markers themselves.
   slices_list?: GCSliceData[],
-};
+|};
 
-export type GCMajorCompleted = GCMajorCompleted_Shared & {
+export type GCMajorCompleted = {|
+  ...GCMajorCompleted_Shared,
   // MMU (Minimum mutator utilisation) A measure of GC's affect on
   // responsiveness  See Statistics::computeMMU(), these percentages in the
   // rage of 0-100.
@@ -151,29 +154,31 @@ export type GCMajorCompleted = GCMajorCompleted_Shared & {
 
   // The duration of each phase.
   phase_times: PhaseTimes<Microseconds>,
-};
-export type GCMajorCompleted_Gecko = GCMajorCompleted_Shared & {
+|};
+
+export type GCMajorCompleted_Gecko = {|
+  ...GCMajorCompleted_Shared,
   // As above except in parts of 100.
   mmu_20ms: number,
   mmu_50ms: number,
   totals: PhaseTimes<Milliseconds>,
-};
+|};
 
-export type GCMajorMarkerPayload = {
+export type GCMajorMarkerPayload = {|
   type: 'GCMajor',
   startTime: Milliseconds,
   endTime: Milliseconds,
   timings: GCMajorAborted | GCMajorCompleted,
-};
+|};
 
-export type GCMajorMarkerPayload_Gecko = {
+export type GCMajorMarkerPayload_Gecko = {|
   type: 'GCMajor',
   startTime: Milliseconds,
   endTime: Milliseconds,
   timings: GCMajorAborted | GCMajorCompleted_Gecko,
-};
+|};
 
-export type GCMinorCompletedData = {
+export type GCMinorCompletedData = {|
   status: 'complete',
 
   // The reason for initiating the GC.
@@ -214,8 +219,11 @@ export type GCMinorCompletedData = {
 
   chunk_alloc_us?: Microseconds,
 
+  // Added in https://bugzilla.mozilla.org/show_bug.cgi?id=1507379
+  groups_pretenured?: number,
+
   phase_times: PhaseTimes<Microseconds>,
-};
+|};
 
 export type GCMinorDisabledData = {|
   status: 'nursery disabled',
@@ -224,34 +232,34 @@ export type GCMinorEmptyData = {|
   status: 'nursery empty',
 |};
 
-export type GCMinorMarkerPayload = {
+export type GCMinorMarkerPayload = {|
   type: 'GCMinor',
   startTime: Milliseconds,
   endTime: Milliseconds,
   // nursery is only present in newer profile format.
   nursery?: GCMinorCompletedData | GCMinorDisabledData | GCMinorEmptyData,
-};
+|};
 
-export type GCSliceMarkerPayload = {
+export type GCSliceMarkerPayload = {|
   type: 'GCSlice',
   startTime: Milliseconds,
   endTime: Milliseconds,
   timings: GCSliceData,
-};
+|};
 
-export type GCSliceMarkerPayload_Gecko = {
+export type GCSliceMarkerPayload_Gecko = {|
   type: 'GCSlice',
   startTime: Milliseconds,
   endTime: Milliseconds,
   timings: GCSliceData_Gecko,
-};
+|};
 
 /**
  * The bailout payload describes a bailout from JIT code where some assumption in
  * the optimization was broken, and the code had to fall back to Baseline. Currently
  * this information is encoded as a string and extracted as a selector.
  */
-export type BailoutPayload = {
+export type BailoutPayload = {|
   type: 'Bailout',
   bailoutType: string,
   where: string,
@@ -260,18 +268,18 @@ export type BailoutPayload = {
   functionLine: number,
   startTime: Milliseconds,
   endTime: Milliseconds,
-};
+|};
 
 /**
  * TODO - Please describe an invalidation.
  */
-export type InvalidationPayload = {
+export type InvalidationPayload = {|
   type: 'Invalidation',
   url: string,
   line: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
-};
+|};
 
 /**
  * Network http/https loads - one marker for each load that reaches the
@@ -316,15 +324,15 @@ export type NetworkPayload = {|
  * The payload for the UserTimings API. These are added through performance.measure()
  * and performance.mark(). https://developer.mozilla.org/en-US/docs/Web/API/Performance
  */
-export type UserTimingMarkerPayload = {
+export type UserTimingMarkerPayload = {|
   type: 'UserTiming',
   startTime: Milliseconds,
   endTime: Milliseconds,
   name: string,
   entryType: 'measure' | 'mark',
-};
+|};
 
-export type DOMEventMarkerPayload = {
+export type DOMEventMarkerPayload = {|
   type: 'tracing',
   category: 'DOMEvent',
   timeStamp?: Milliseconds,
@@ -332,9 +340,9 @@ export type DOMEventMarkerPayload = {
   eventType: string,
   phase: 0 | 1 | 2 | 3,
   cause?: CauseBacktrace,
-};
+|};
 
-type StyleMarkerPayload_Shared = {
+type StyleMarkerPayload_Shared = {|
   type: 'Styles',
   category: 'Paint',
   startTime: Milliseconds,
@@ -346,7 +354,7 @@ type StyleMarkerPayload_Shared = {
   elementsMatched: number,
   stylesShared: number,
   stylesReused: number,
-};
+|};
 
 type VsyncTimestampPayload = {|
   type: 'VsyncTimestamp',
@@ -368,42 +376,44 @@ export type ScreenshotPayload = {|
 /**
  * The payload for Styles.
  */
-export type StyleMarkerPayload_Gecko = StyleMarkerPayload_Shared & {
+export type StyleMarkerPayload_Gecko = {|
+  ...StyleMarkerPayload_Shared,
   stack?: GeckoMarkerStack,
-};
+|};
 
-export type StyleMarkerPayload = StyleMarkerPayload_Shared & {
+export type StyleMarkerPayload = {|
+  ...StyleMarkerPayload_Shared,
   cause?: CauseBacktrace,
-};
+|};
 
-export type BHRMarkerPayload = {
+export type BHRMarkerPayload = {|
   type: 'BHR-detected hang',
   startTime: Milliseconds,
   endTime: Milliseconds,
-};
+|};
 
-export type LongTaskMarkerPayload = {
+export type LongTaskMarkerPayload = {|
   type: 'MainThreadLongTask',
   category: 'LongTask',
   startTime: Milliseconds,
   endTime: Milliseconds,
-};
+|};
 
 /*
  * The payload for Frame Construction.
  */
-export type FrameConstructionMarkerPayload = {
+export type FrameConstructionMarkerPayload = {|
   type: 'tracing',
   category: 'Frame Construction',
   interval: 'start' | 'end',
   cause?: CauseBacktrace,
-};
+|};
 
-export type DummyForTestsMarkerPayload = {
+export type DummyForTestsMarkerPayload = {|
   type: 'DummyForTests',
   startTime: Milliseconds,
   endTime: Milliseconds,
-};
+|};
 
 /**
  * The union of all the different marker payloads that perf.html knows about, this is

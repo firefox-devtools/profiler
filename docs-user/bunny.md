@@ -1,7 +1,7 @@
 # Case Study
 ## 2D canvas and worker messaging
 
-The following article is a case study in using the profiler to identify performance issues. The fixes made the code run four times faster, and changed the frame rate from a fairly slow 15fps to a smooth 60fps. The process for this analysis follows a common pattern:
+The following article is a case study in using the profiler to identify performance issues. The fixes made the code run four times faster and changed the frame rate from a fairly slow 15fps to a smooth 60fps. The process for this analysis follows a common pattern:
 
  * Profile the code
  * Identify slow areas
@@ -14,7 +14,7 @@ The following article is a case study in using the profiler to identify performa
 
 ![A picture of a 3d bunny rabbit model rendered using small squares.](./images/bunny-analysis/bunny.png)
 
-The project is a website that takes user's JavaScript code and runs it to produce a visualization. The user's code only has access to the function `rect(color, x, y, width, height)`, which draws a rectangle to the screen. For the implementation, the website posts the user's code to a sandboxed iframe. The iframe has a `<canvas>` element that is rendered to via the [`CanvasRenderingContext2D`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) API. The user's code is evaluated in a WebWorker, and then the results of `rect()` are posted back to the iframe's code.
+The project is a website that takes user's JavaScript code and runs it to produce a visualization. The user's code only has access to the function `rect(color, x, y, width, height)`, which draws a rectangle to the screen. For the implementation, the website posts the user's code to a sandboxed iframe. The iframe has a `<canvas>` element that is rendered to via the [`CanvasRenderingContext2D`](https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D) API. The user's code is evaluated in a WebWorker and then the results of `rect()` are posted back to the iframe's code.
 
 In a simplified example, the `worker.js` would run something like:
 
@@ -60,7 +60,7 @@ This code ended up not scaling well for large sets of rectangles being drawn to 
 
  * Load the page with the bunny visualization.
  * Hit Ctrl Shift 1 to turn on the Gecko Profiler.
- * Wait around 5 seconds
+ * Wait around 5 seconds.
  * Hit Ctrl Shift 2 to capture the profile.
  * Set the range to 3.0 seconds of relatively stable frames that don't have stutters or GC pauses.
  * Hide idle stacks by right clicking `__psync_cvwait` and `mach_msg_trap` in the Flame Graph, and choosing **"Drop samples with this function"**.
@@ -83,7 +83,7 @@ The time between frames can be measured using a range selection. The brown marks
 
 The timing here is typically between 60-70ms. This is about 15 frames per second (fps), which is really too long. Visualizations should take around ~16ms per frame for the smooth 60fps visual experience.
 
-The thread list also nicely shows the message passing between the content process' main thread and the worker thread. The content process posts a message, and then effectively waits for a response before it does anything. This is a fairly common pattern to see in multi-threaded code.
+The thread list also nicely shows the message passing between the content process' main thread and the worker thread. The content process posts a message and then effectively waits for a response before it does anything. This is a fairly common pattern to see in multi-threaded code.
 
 ### Problems in the content process' main thread
 
@@ -93,7 +93,7 @@ The stacks are rather deep here, so a nice first step is to focus on just the su
 
 ![A screenshot of the context menu on the flame graph for focus subtree.](./images/bunny-analysis/focus-subtree.png)
 
-Two functions really stand out as taking a lot of time. `JSStructuredCloneReader::read` takes almost 30% of the time. It is a C++ function, and is called when the iframe receives a message from the worker. It safely reads a clone of the data, and provides it to the iframe's JavaScript code.
+Two functions really stand out as taking a lot of time. `JSStructuredCloneReader::read` takes almost 30% of the time. It is a C++ function and is called when the iframe receives a message from the worker. It safely reads a clone of the data and provides it to the iframe's JavaScript code.
 
 The bigger culprit is `drawRects`, which takes 60% of the time. This is the function that calls out the `CanvasRenderingContext2D` API to actually draw to the screen. There are two functions that are being called from drawRects. These are `set CanvasRenderingContext2D.fillStyle` and `CanvasRenderingContext2D.fillRect`.
 
@@ -173,11 +173,11 @@ self.postMessage({
 });
 ```
 
-Already the structure is optimized to not have lots of little objects, making it more GC-friendly. Perhaps it can be made more dense. The structured cloning algorithm has to take into account many of the complexities of JavaScript arrays. The entire array needs to be traversed in order to be copied, and each item needs to be considered. We know that the array at `x` only contains numbers, but the JS engine does not.
+Already the structure is optimized to not have lots of little objects, making it more GC-friendly. Perhaps it can be made more dense. The structured cloning algorithm has to take into account many of the complexities of JavaScript arrays. The entire array needs to be traversed in order to be copied and each item needs to be considered. We know that the array at `x` only contains numbers, but the JS engine does not.
 
 Perhaps it would be better to send over typed arrays, that better match the data that will be sent over. A typed array is probably much simpler in its internal representation for cloning.
 
-Another thing is that duplicating the strings over and over could get expensive and unnecessarily bloat the code. It would be better to store a table of strings, and use an array that stores indexes into that table.
+Another thing is that duplicating the strings over and over could get expensive and unnecessarily bloat the code. It would be better to store a table of strings and use an array that stores indexes into that table.
 
 ## The code
 

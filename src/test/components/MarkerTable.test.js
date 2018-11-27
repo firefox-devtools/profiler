@@ -32,11 +32,8 @@ describe('MarkerTable', function() {
           14.5,
           {
             type: 'tracing',
-            startTime: 14.5,
-            endTime: 14.5,
             category: 'Paint',
             interval: 'start',
-            name: 'NotifyDidPaint',
           },
         ],
       ]
