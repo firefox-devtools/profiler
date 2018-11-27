@@ -97,7 +97,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -239,7 +239,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -381,7 +381,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -523,7 +523,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -2200,7 +2200,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -2957,7 +2957,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -3714,7 +3714,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -4471,7 +4471,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -5157,7 +5157,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -5843,7 +5843,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -6382,7 +6382,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -6921,7 +6921,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
