@@ -1,11 +1,17 @@
 .view360 {
   flex: 1;
   display: flex;
+
+  background: var(--grey-30);
 }
 
 .view360-column {
   flex: 1;
+  margin: 0 5px;
+  padding: 5px;
 
   display: flex;
   flex-direction: column;
+
+  background: var(--grey-10);
 }
