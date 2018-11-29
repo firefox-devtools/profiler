@@ -4,6 +4,7 @@
 
 // @flow
 
+import { BasicTree } from './basic-tree';
 import { formatSeconds } from '../utils/format-numbers';
 
 import type { Milliseconds } from '../types/units';
@@ -19,54 +20,18 @@ export type MarkerDisplayData = {|
   category: string,
 |};
 
-class MarkerTree {
-  _markers: TracingMarker[];
+class MarkerTree extends BasicTree<TracingMarker, MarkerDisplayData> {
   _zeroAt: Milliseconds;
-  _displayDataByIndex: Map<IndexIntoTracingMarkers, MarkerDisplayData>;
 
   constructor(markers: TracingMarker[], zeroAt: Milliseconds) {
-    this._markers = markers;
+    super(markers);
     this._zeroAt = zeroAt;
-    this._displayDataByIndex = new Map();
-  }
-
-  getRoots(): IndexIntoTracingMarkers[] {
-    const markerIndices = [];
-    for (let i = 0; i < this._markers.length; i++) {
-      markerIndices.push(i);
-    }
-    return markerIndices;
-  }
-
-  getChildren(markerIndex: IndexIntoTracingMarkers): IndexIntoTracingMarkers[] {
-    return markerIndex === -1 ? this.getRoots() : [];
-  }
-
-  hasChildren(_markerIndex: IndexIntoTracingMarkers): boolean {
-    return false;
-  }
-
-  getAllDescendants(): Set<IndexIntoTracingMarkers> {
-    return new Set();
-  }
-
-  getParent(): IndexIntoTracingMarkers {
-    // -1 isn't used, but needs to be compatible with the call tree.
-    return -1;
-  }
-
-  getDepth() {
-    return 0;
-  }
-
-  hasSameNodeIds(tree: MarkerTree) {
-    return this._markers === tree._markers;
   }
 
   getDisplayData(markerIndex: IndexIntoTracingMarkers): MarkerDisplayData {
     let displayData = this._displayDataByIndex.get(markerIndex);
     if (displayData === undefined) {
-      const marker = this._markers[markerIndex];
+      const marker = this._data[markerIndex];
       let category = 'unknown';
       let name = marker.name;
       if (marker.data) {
