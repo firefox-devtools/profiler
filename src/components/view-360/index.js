@@ -27,11 +27,13 @@ export default class View360 extends React.PureComponent<{||}, State> {
   render() {
     return (
       <section className="view360">
-        <div className="view360-overview">
+        <div className="view360-column">
+          <h2>Longest markers</h2>
           <LongestMarkers />
-          <FrequentMarkers onMarkerSelect={this.onFrequentMarkerSelect} />
         </div>
-        <div className="view360-details">
+        <div className="view360-column">
+          <h2>Most frequent markers</h2>
+          <FrequentMarkers onMarkerSelect={this.onFrequentMarkerSelect} />
           <FilteredMarkersList filter={this.state.selectedFrequentMarker} />
         </div>
       </section>
