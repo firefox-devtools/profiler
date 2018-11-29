@@ -1074,11 +1074,19 @@ export const selectorsForThread = (
     );
     const getCommittedRangeFilteredLongestMarkers = createSelector(
       getCommittedRangeFilteredTracingMarkers,
-      markers => MarkerData.getLongestMarkers(markers, 15)
+      markers =>
+        MarkerData.getLongestMarkers(
+          MarkerData.filterForMarkerChart(markers),
+          15
+        )
     );
     const getCommittedRangeFilteredFrequentMarkers = createSelector(
       getCommittedRangeFilteredTracingMarkers,
-      markers => MarkerData.getFrequentMarkers(markers, 15)
+      markers =>
+        MarkerData.getFrequentMarkers(
+          MarkerData.filterForMarkerChart(markers),
+          15
+        )
     );
     const getIsNetworkChartEmptyInFullRange = createSelector(
       getTracingMarkers,
