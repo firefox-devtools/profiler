@@ -1675,6 +1675,6 @@ export function findBestAncestorCallNode(
 export function getSampleCategories(
   samples: SamplesTable,
   stackTable: StackTable
-): Array<IndexIntoSamplesTable | null> {
+): Array<IndexIntoCategoryList | null> {
   return samples.stack.map(s => (s !== null ? stackTable.category[s] : null));
 }
