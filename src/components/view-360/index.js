@@ -9,6 +9,7 @@ import React from 'react';
 import LongestMarkers from './LongestMarkers';
 import FrequentMarkers from './FrequentMarkers';
 import FilteredMarkersList from './FilteredMarkersList';
+import MostSelftimeFunctions from './MostSelftimeFunctions';
 import MostSelftimeCategories from './MostSelftimeCategories';
 
 import './View360.css';
@@ -28,6 +29,10 @@ export default class View360 extends React.PureComponent<{||}, State> {
   render() {
     return (
       <section className="view360">
+        <div className="view360-column">
+          <h2>Most selftime spent grouped per functions</h2>
+          <MostSelftimeFunctions />
+        </div>
         <div className="view360-column">
           <h2>Most selftime spent grouped per category</h2>
           <MostSelftimeCategories />

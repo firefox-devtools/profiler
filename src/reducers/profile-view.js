@@ -34,6 +34,7 @@ import type {
   MarkersTable,
   IndexIntoSamplesTable,
   IndexIntoMarkersTable,
+  IndexIntoFuncTable,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -778,6 +779,7 @@ export type SelectorsForThread = {
   getTransformLabels: State => string[],
   getRangeFilteredThread: State => Thread,
   getRangeAndTransformFilteredThread: State => Thread,
+  getImplementationFilteredThread: State => Thread,
   getJankInstances: State => TracingMarker[],
   getProcessedMarkersTable: State => MarkersTable,
   getTracingMarkers: State => TracingMarker[],
@@ -824,6 +826,10 @@ export type SelectorsForThread = {
   getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
   getSelftimeByCategoryOrdered: State => Array<{|
     +categoryIndex: IndexIntoCategoryList,
+    +count: number,
+  |}>,
+  getSelftimeByFuncOrdered: State => Array<{|
+    +funcIndex: IndexIntoFuncTable,
     +count: number,
   |}>,
 };
@@ -932,14 +938,14 @@ export const selectorsForThread = (
           startingThread
         )
     );
-    const _getImplementationFilteredThread = createSelector(
+    const getImplementationFilteredThread = createSelector(
       getRangeAndTransformFilteredThread,
       UrlState.getImplementationFilter,
       getDefaultCategory,
       ProfileData.filterThreadByImplementation
     );
     const _getImplementationAndSearchFilteredThread = createSelector(
-      _getImplementationFilteredThread,
+      getImplementationFilteredThread,
       UrlState.getSearchStrings,
       (thread: Thread, searchStrings: string[] | null): Thread => {
         return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
@@ -1313,6 +1319,23 @@ export const selectorsForThread = (
       }
     );
 
+    const getSelftimeByFuncOrdered = createSelector(
+      getImplementationFilteredThread,
+      getProfileInterval,
+      (thread, interval) => {
+        const selftimeGroupedByFunc = ProfileData.getSelftimeGroupedByFunc(
+          thread,
+          interval
+        );
+        return Array.from(selftimeGroupedByFunc)
+          .map((count, funcIndex) => ({
+            funcIndex,
+            count,
+          }))
+          .sort((a, b) => b.count - a.count);
+      }
+    );
+
     selectorsForThreads[threadIndex] = {
       getThread,
       getViewOptions,
@@ -1320,6 +1343,7 @@ export const selectorsForThread = (
       getTransformLabels,
       getRangeFilteredThread,
       getRangeAndTransformFilteredThread,
+      getImplementationFilteredThread,
       getJankInstances,
       getProcessedMarkersTable,
       getTracingMarkers,
@@ -1359,6 +1383,7 @@ export const selectorsForThread = (
       unfilteredSamplesRange,
       getSelectedMarkerIndex,
       getSelftimeByCategoryOrdered,
+      getSelftimeByFuncOrdered,
     };
   }
   return selectorsForThreads[threadIndex];

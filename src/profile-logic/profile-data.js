@@ -1678,3 +1678,22 @@ export function getSampleCategories(
 ): Array<IndexIntoCategoryList | null> {
   return samples.stack.map(s => (s !== null ? stackTable.category[s] : null));
 }
+
+export function getSelftimeGroupedByFunc(
+  thread: Thread,
+  interval: number
+): Uint32Array {
+  const result = new Uint32Array(thread.funcTable.length);
+
+  for (const stackIndex of thread.samples.stack) {
+    if (stackIndex === null) {
+      continue;
+    }
+
+    const frameIndex = thread.stackTable.frame[stackIndex];
+    const funcIndex = thread.frameTable.func[frameIndex];
+    result[funcIndex] += interval;
+  }
+
+  return result;
+}
