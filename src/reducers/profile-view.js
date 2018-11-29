@@ -822,6 +822,10 @@ export type SelectorsForThread = {
   getCommittedRangeFilteredFrequentMarkers: State => Array<FrequentMarkerInfo>,
   unfilteredSamplesRange: State => StartEndRange | null,
   getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
+  getSelftimeByCategoryOrdered: State => Array<{|
+    +categoryIndex: IndexIntoCategoryList,
+    +count: number,
+  |}>,
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -1276,6 +1280,39 @@ export const selectorsForThread = (
     const getSelectedMarkerIndex = (state: State) =>
       getViewOptions(state).selectedMarker;
 
+    const getSelftimeByCategoryOrdered = createSelector(
+      getRangeAndTransformFilteredThread,
+      getProfileInterval,
+      ({ samples, stackTable }, interval) => {
+        const sampleCategories = ProfileData.getSampleCategories(
+          samples,
+          stackTable
+        );
+        const sampleCountByCategory = sampleCategories.reduce(
+          (result, categoryIndex) => {
+            if (categoryIndex === null) {
+              return result;
+            }
+            if (!result[categoryIndex]) {
+              result[categoryIndex] = 0;
+            }
+            result[categoryIndex] += interval;
+            return result;
+          },
+          {}
+        );
+        return Object.keys(sampleCountByCategory)
+          .sort(
+            (idxA, idxB) =>
+              sampleCountByCategory[idxB] - sampleCountByCategory[idxA]
+          )
+          .map(categoryIndex => ({
+            categoryIndex: +categoryIndex,
+            count: sampleCountByCategory[categoryIndex],
+          }));
+      }
+    );
+
     selectorsForThreads[threadIndex] = {
       getThread,
       getViewOptions,
@@ -1321,6 +1358,7 @@ export const selectorsForThread = (
       getCommittedRangeFilteredFrequentMarkers,
       unfilteredSamplesRange,
       getSelectedMarkerIndex,
+      getSelftimeByCategoryOrdered,
     };
   }
   return selectorsForThreads[threadIndex];
