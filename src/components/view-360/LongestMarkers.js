@@ -11,6 +11,7 @@ import {
   getZeroAt,
   selectedThreadSelectors,
 } from '../../reducers/profile-view';
+import { updatePreviewSelection } from '../../actions/profile-view';
 import { getMarkerTree } from '../../profile-logic/marker-tree';
 import explicitConnect from '../../utils/connect';
 
@@ -26,7 +27,11 @@ type StateProps = {|
   +zeroAt: Milliseconds,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type DispatchProps = {|
+  +updatePreviewSelection: typeof updatePreviewSelection,
+|};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 type State = {|
   selectedMarker: number | null,
@@ -44,7 +49,20 @@ class LongestMarkers extends React.PureComponent<Props, State> {
   _onExpandedNodeIdsChange() {}
 
   _onSelectionChange = (selectedMarker: number) => {
+    const { longestMarkers, updatePreviewSelection } = this.props;
+
     this.setState({ selectedMarker });
+
+    if (longestMarkers) {
+      // Flow wants this
+      const marker = longestMarkers[selectedMarker];
+      updatePreviewSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: marker.start,
+        selectionEnd: marker.dur ? marker.start + marker.dur : marker.start + 1,
+      });
+    }
   };
 
   render() {
@@ -71,13 +89,14 @@ class LongestMarkers extends React.PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     longestMarkers: selectedThreadSelectors.getCommittedRangeFilteredLongestMarkers(
       state
     ),
     zeroAt: getZeroAt(state),
   }),
+  mapDispatchToProps: { updatePreviewSelection },
   component: LongestMarkers,
 };
 export default explicitConnect(options);
