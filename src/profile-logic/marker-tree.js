@@ -5,7 +5,7 @@
 // @flow
 
 import { getMarkerFullDescription, getMarkerCategory } from './marker-data';
-
+import { ListTree } from './list-tree';
 import { formatSeconds } from '../utils/format-numbers';
 
 import type { Milliseconds } from '../types/units';
@@ -18,9 +18,8 @@ export type MarkerDisplayData = {|
   category: string,
 |};
 
-class MarkerTree {
+class MarkerTree extends ListTree<MarkerDisplayData> {
   _getMarker: MarkerIndex => Marker;
-  _markerIndexes: MarkerIndex[];
   _zeroAt: Milliseconds;
   _displayDataByIndex: Map<MarkerIndex, MarkerDisplayData>;
 
@@ -29,57 +28,22 @@ class MarkerTree {
     markerIndexes: MarkerIndex[],
     zeroAt: Milliseconds
   ) {
+    super(markerIndexes);
     this._getMarker = getMarker;
-    this._markerIndexes = markerIndexes;
     this._zeroAt = zeroAt;
     this._displayDataByIndex = new Map();
   }
 
-  getRoots(): MarkerIndex[] {
-    return this._markerIndexes;
-  }
-
-  getChildren(markerIndex: MarkerIndex): MarkerIndex[] {
-    return markerIndex === -1 ? this.getRoots() : [];
-  }
-
-  hasChildren(_markerIndex: MarkerIndex): boolean {
-    return false;
-  }
-
-  getAllDescendants() {
-    return new Set();
-  }
-
-  getParent(): MarkerIndex {
-    // -1 isn't used, but needs to be compatible with the call tree.
-    return -1;
-  }
-
-  getDepth() {
-    return 0;
-  }
-
-  hasSameNodeIds(tree) {
-    return this._markerIndexes === tree._markerIndexes;
-  }
-
-  getDisplayData(markerIndex: MarkerIndex): MarkerDisplayData {
-    let displayData = this._displayDataByIndex.get(markerIndex);
-    if (displayData === undefined) {
-      const marker = this._getMarker(markerIndex);
-      const name = getMarkerFullDescription(marker);
-      const category = getMarkerCategory(marker);
-
-      displayData = {
-        start: _formatStart(marker.start, this._zeroAt),
-        duration: marker.incomplete ? 'unknown' : _formatDuration(marker.dur),
-        name,
-        category,
-      };
-      this._displayDataByIndex.set(markerIndex, displayData);
-    }
-    return displayData;
+  _getDisplayData(markerIndex: MarkerIndex): MarkerDisplayData {
+    const marker = this._getMarker(markerIndex);
+    const name = getMarkerFullDescription(marker);
+    const category = getMarkerCategory(marker);
+    return {
+      start: _formatStart(marker.start, this._zeroAt),
+      duration: marker.incomplete ? 'unknown' : _formatDuration(marker.dur),
+      name,
+      category,
+    };
   }
 }
 
