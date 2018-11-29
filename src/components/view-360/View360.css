@@ -5,11 +5,7 @@
   flex-direction: column;
 }
 
-.view360-overview {
+.view360-overview, .view360-details {
   flex: 1;
   display: flex;
-}
-
-.view360-details {
-  flex: 1;
 }

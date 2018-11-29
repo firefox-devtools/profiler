@@ -814,8 +814,12 @@ export type SelectorsForThread = {
   getThreadProcessDetails: State => string,
   getSearchFilteredTracingMarkers: State => TracingMarker[],
   getPreviewFilteredTracingMarkers: State => TracingMarker[],
-  getPreviewFilteredLongestMarkers: State => TracingMarker[],
-  getPreviewFilteredFrequentMarkers: State => Array<FrequentMarkerInfo>,
+  getCommittedRangeFilteredTracingMarkersFilteredByString: (
+    State,
+    string
+  ) => TracingMarker[],
+  getCommittedRangeFilteredLongestMarkers: State => TracingMarker[],
+  getCommittedRangeFilteredFrequentMarkers: State => Array<FrequentMarkerInfo>,
   unfilteredSamplesRange: State => StartEndRange | null,
   getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
 };
@@ -1057,12 +1061,23 @@ export const selectorsForThread = (
         );
       }
     );
-    const getPreviewFilteredLongestMarkers = createSelector(
-      getPreviewFilteredTracingMarkers,
+    const getCommittedRangeFilteredTracingMarkersFilteredByString = createSelector(
+      getCommittedRangeFilteredTracingMarkers,
+      (_state, filter) => filter,
+      (markers, filter) => {
+        const result = MarkerData.getSearchFilteredTracingMarkers(
+          markers,
+          filter
+        );
+        return result;
+      }
+    );
+    const getCommittedRangeFilteredLongestMarkers = createSelector(
+      getCommittedRangeFilteredTracingMarkers,
       markers => MarkerData.getLongestMarkers(markers, 15)
     );
-    const getPreviewFilteredFrequentMarkers = createSelector(
-      getPreviewFilteredTracingMarkers,
+    const getCommittedRangeFilteredFrequentMarkers = createSelector(
+      getCommittedRangeFilteredTracingMarkers,
       markers => MarkerData.getFrequentMarkers(markers, 15)
     );
     const getIsNetworkChartEmptyInFullRange = createSelector(
@@ -1293,8 +1308,9 @@ export const selectorsForThread = (
       getThreadProcessDetails,
       getSearchFilteredTracingMarkers,
       getPreviewFilteredTracingMarkers,
-      getPreviewFilteredLongestMarkers,
-      getPreviewFilteredFrequentMarkers,
+      getCommittedRangeFilteredTracingMarkersFilteredByString,
+      getCommittedRangeFilteredLongestMarkers,
+      getCommittedRangeFilteredFrequentMarkers,
       unfilteredSamplesRange,
       getSelectedMarkerIndex,
     };
@@ -1304,10 +1320,13 @@ export const selectorsForThread = (
 
 export const selectedThreadSelectors: SelectorsForThread = (() => {
   const anyThreadSelectors: SelectorsForThread = selectorsForThread(0);
-  const result: { [key: string]: (State) => any } = {};
+  const result: { [key: string]: (State, ...rest: any[]) => any } = {};
   for (const key in anyThreadSelectors) {
-    result[key] = (state: State) =>
-      selectorsForThread(UrlState.getSelectedThreadIndex(state))[key](state);
+    result[key] = (state: State, ...rest: any[]) =>
+      selectorsForThread(UrlState.getSelectedThreadIndex(state))[key](
+        state,
+        ...rest
+      );
   }
   const result2: SelectorsForThread = result;
   return result2;
