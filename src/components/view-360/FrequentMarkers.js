@@ -16,11 +16,15 @@ import type {
 } from '../../utils/connect';
 import type { FrequentMarkerInfo } from '../../types/reducers';
 
+type OwnProps = {|
+  +onMarkerSelect: (string | null) => mixed,
+|};
+
 type StateProps = {|
   +frequentMarkers: FrequentMarkerInfo[],
 |};
 
-type Props = ConnectedProps<{||}, StateProps, {||}>;
+type Props = ConnectedProps<OwnProps, StateProps, {||}>;
 type State = {|
   selectedLine: number | null,
 |};
@@ -75,6 +79,10 @@ class FrequentMarkers extends React.PureComponent<Props, State> {
   _onExpandedNodeIdsChange() {}
 
   _onSelectionChange = (selectedLine: number) => {
+    const selectedMarkerInfo = this.props.frequentMarkers[selectedLine];
+    if (selectedMarkerInfo) {
+      this.props.onMarkerSelect(selectedMarkerInfo.markerName);
+    }
     this.setState({ selectedLine });
   };
 
@@ -102,9 +110,9 @@ class FrequentMarkers extends React.PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   mapStateToProps: state => ({
-    frequentMarkers: selectedThreadSelectors.getPreviewFilteredFrequentMarkers(
+    frequentMarkers: selectedThreadSelectors.getCommittedRangeFilteredFrequentMarkers(
       state
     ),
   }),
