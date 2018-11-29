@@ -4253,9 +4253,10 @@ gauge@~2.7.3:
     strip-ansi "^3.0.1"
     wide-align "^1.1.0"
 
-gecko-profiler-demangle@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/gecko-profiler-demangle/-/gecko-profiler-demangle-0.1.0.tgz#7bc08d43e3572e64a6c09c4ed6680e4bc4ce356e"
+gecko-profiler-demangle@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/gecko-profiler-demangle/-/gecko-profiler-demangle-0.2.0.tgz#d0ebdd40c9dfd402a6c28e05b2c757396683e75d"
+  integrity sha512-dIamdbOrBCNNXHbJaNnAElxqcBBcNoHkekKi/at+z88lu4x2/tVGKPLKiF9El5kFiWNYDjou4ykEL+5+W8CxQw==
 
 get-caller-file@^1.0.1:
   version "1.0.3"
