@@ -27,13 +27,13 @@ type Props = ConnectedProps<{||}, StateProps, {||}>;
 type InstallStatus = 'pending' | 'ready' | 'idle';
 type State = {|
   installStatus: InstallStatus,
-  closeNotice: boolean,
+  isNoticeDisplayed: boolean,
 |};
 
 class ServiceWorkerManager extends PureComponent<Props, State> {
   state = {
     installStatus: 'idle',
-    closeNotice: true,
+    isNoticeDisplayed: false,
   };
 
   _installServiceWorker() {
@@ -61,7 +61,7 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
         console.log(
           '[ServiceWorker] The new version of the application has been enabled.'
         );
-        this.setState({ installStatus: 'ready', closeNotice: false });
+        this.setState({ installStatus: 'ready', isNoticeDisplayed: true });
       },
       onUpdateFailed: () => {
         console.log(
@@ -95,14 +95,18 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
   }
 
   _onCloseNotice = () => {
-    this.setState({ closeNotice: true });
+    this.setState({ isNoticeDisplayed: false });
   };
 
   render() {
     const { dataSource } = this.props;
-    const { installStatus, closeNotice } = this.state;
+    const { installStatus, isNoticeDisplayed } = this.state;
 
-    if (dataSource !== 'none' && dataSource !== 'public') {
+    if (
+      dataSource !== 'none' &&
+      dataSource !== 'public' &&
+      dataSource !== 'from-url'
+    ) {
       return null;
     }
 
@@ -110,7 +114,7 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
       return null;
     }
 
-    if (closeNotice) {
+    if (!isNoticeDisplayed) {
       return null;
     }
 
