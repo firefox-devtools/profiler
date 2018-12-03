@@ -8,6 +8,10 @@ import React from 'react';
 
 import TreeView from '../shared/TreeView';
 import { selectedThreadSelectors } from '../../reducers/profile-view';
+import {
+  getCallersForFunction,
+  getCalleesForFunction,
+} from '../../reducers/functions-butterfly';
 import { BasicTree } from '../../profile-logic/basic-tree';
 import explicitConnect from '../../utils/connect';
 
@@ -22,22 +26,16 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
-type FuncIndexWithCount = {|
-  +funcIndex: IndexIntoFuncTable,
-  +count: number,
-|};
-
 type DisplayData = {|
   +funcName: string,
-  +count: string,
 |};
 
-class Tree extends BasicTree<FuncIndexWithCount, DisplayData> {
+class Tree extends BasicTree<number, DisplayData> {
   _funcTable: FuncTable;
   _stringTable: UniqueStringArray;
 
   constructor(
-    funcList: FuncIndexWithCount[],
+    funcList: IndexIntoFuncTable[],
     { funcTable, stringTable }: Thread
   ) {
     super(funcList);
@@ -45,17 +43,16 @@ class Tree extends BasicTree<FuncIndexWithCount, DisplayData> {
     this._stringTable = stringTable;
   }
 
-  getDisplayData(index: IndexIntoFuncTable): DisplayData {
+  getDisplayData(index: number): DisplayData {
     let displayData = this._displayDataByIndex.get(index);
     if (displayData === undefined) {
-      const funcInfo = this._data[index];
+      const funcIndex = this._data[index];
       const funcName = this._stringTable.getString(
-        this._funcTable.name[funcInfo.funcIndex]
+        this._funcTable.name[funcIndex]
       );
 
       displayData = {
         funcName,
-        count: funcInfo.count + 'ms',
       };
       this._displayDataByIndex.set(index, displayData);
     }
@@ -63,22 +60,26 @@ class Tree extends BasicTree<FuncIndexWithCount, DisplayData> {
   }
 }
 
+type OwnProps = {|
+  +funcIndex: IndexIntoFuncTable | null,
+|};
+
 type StateProps = {|
-  +selfTimeByFunc: Array<FuncIndexWithCount>,
+  +funcIndexList: Array<IndexIntoFuncTable>,
   +thread: Thread,
 |};
 
 type DispatchProps = {||};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {|
   selectedFunc: number | null,
 |};
 
-class SelftimeByFunc extends React.PureComponent<Props, State> {
+class FuncSimpleList extends React.PureComponent<Props, State> {
   state = { selectedFunc: null };
-  _fixedColumns = [{ propName: 'count', title: 'Count' }];
+  _fixedColumns = [];
   _mainColumn = { propName: 'funcName', title: '' };
   _expandedNodeIds: Array<number | null> = [];
   _onExpandedNodeIdsChange() {}
@@ -88,10 +89,10 @@ class SelftimeByFunc extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { selfTimeByFunc, thread } = this.props;
+    const { funcIndexList, thread } = this.props;
     const { selectedFunc } = this.state;
 
-    const tree = new Tree(selfTimeByFunc, thread);
+    const tree = new Tree(funcIndexList, thread);
 
     return (
       <TreeView
@@ -103,7 +104,7 @@ class SelftimeByFunc extends React.PureComponent<Props, State> {
         onExpandedNodesChange={this._onExpandedNodeIdsChange}
         selectedNodeId={selectedFunc}
         expandedNodeIds={this._expandedNodeIds}
-        contextMenuId="MarkersContextMenu"
+        contextMenuId=""
         rowHeight={16}
         indentWidth={10}
       />
@@ -111,11 +112,28 @@ class SelftimeByFunc extends React.PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
-  mapStateToProps: state => ({
-    selfTimeByFunc: selectedThreadSelectors.getSelftimeByFuncOrdered(state),
+const calleeOptions: ExplicitConnectOptions<
+  OwnProps,
+  StateProps,
+  DispatchProps
+> = {
+  mapStateToProps: (state, ownProps) => ({
+    funcIndexList: getCalleesForFunction(state, ownProps.funcIndex),
     thread: selectedThreadSelectors.getImplementationFilteredThread(state),
   }),
-  component: SelftimeByFunc,
+  component: FuncSimpleList,
 };
-export default explicitConnect(options);
+export const FunctionCallees = explicitConnect(calleeOptions);
+
+const callerOptions: ExplicitConnectOptions<
+  OwnProps,
+  StateProps,
+  DispatchProps
+> = {
+  mapStateToProps: (state, ownProps) => ({
+    funcIndexList: getCallersForFunction(state, ownProps.funcIndex),
+    thread: selectedThreadSelectors.getImplementationFilteredThread(state),
+  }),
+  component: FuncSimpleList,
+};
+export const FunctionCallers = explicitConnect(callerOptions);

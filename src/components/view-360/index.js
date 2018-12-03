@@ -9,7 +9,7 @@ import React from 'react';
 import LongestMarkers from './LongestMarkers';
 import FrequentMarkers from './FrequentMarkers';
 import FilteredMarkersList from './FilteredMarkersList';
-import MostSelftimeFunctions from './MostSelftimeFunctions';
+import MostSelftimeFunctions from '../shared/FunctionsList';
 import MostSelftimeCategories from './MostSelftimeCategories';
 
 import './View360.css';

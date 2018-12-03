@@ -17,6 +17,7 @@ export const tabsWithTitle = {
   'marker-table': 'Marker Table',
   'network-chart': 'Network',
   'view-360': 'View 360',
+  functions: 'Functions',
 };
 
 export type TabSlug = $Keys<typeof tabsWithTitle>;

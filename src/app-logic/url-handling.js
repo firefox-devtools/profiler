@@ -186,6 +186,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       break;
     case 'view-360':
     case 'network-chart':
+    case 'functions':
       break;
     default:
       assertExhaustiveCheck(selectedTab);
