@@ -78,6 +78,8 @@ export type AppViewState =
       +additionalData?: {| +attempt: Attempt | null, +message: string |},
     |};
 
+export type Phase = $PropertyType<AppViewState, 'phase'>;
+
 /**
  * This represents the finite state machine for loading zip files. The phase represents
  * where the state is now.
