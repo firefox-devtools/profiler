@@ -48,7 +48,7 @@ const getCallingInformationForFunction = createSelector(
       const thisFuncIndex = callNodeTable.func[i];
       const callerNodeIndex = callNodeTable.prefix[i];
 
-      if (callerNodeIndex > 0) {
+      if (callerNodeIndex >= 0) {
         const callerFuncIndex = callNodeTable.func[callerNodeIndex];
 
         if (thisFuncIndex === funcIndex) {
