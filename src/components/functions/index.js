@@ -9,6 +9,8 @@ import FunctionsList from '../shared/FunctionsList';
 import { FunctionCallers, FunctionCallees } from './FunctionButterfly';
 import type { IndexIntoFuncTable } from '../../types/profile';
 
+import './FunctionsPanel.css';
+
 type State = {|
   selectedFuncIndex: IndexIntoFuncTable | null,
 |};
@@ -27,8 +29,12 @@ export default class FunctionsPanel extends React.PureComponent<{||}, State> {
     return (
       <div className="functions-panel">
         <FunctionsList onFunctionSelect={this.onFunctionSelect} />
-        <FunctionCallers funcIndex={selectedFuncIndex} />
-        <FunctionCallees funcIndex={selectedFuncIndex} />
+        <div className="functions-panel-details">
+          <h2>Callers</h2>
+          <FunctionCallers funcIndex={selectedFuncIndex} />
+          <h2>Callees</h2>
+          <FunctionCallees funcIndex={selectedFuncIndex} />
+        </div>
       </div>
     );
   }
