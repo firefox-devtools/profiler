@@ -90,7 +90,8 @@ class SelftimeByFunc extends React.PureComponent<Props, State> {
   _onSelectionChange = (selectedFunc: number) => {
     this.setState({ selectedFunc });
     if (this.props.onFunctionSelect) {
-      this.props.onFunctionSelect(selectedFunc);
+      const funcIndex = this.props.selfTimeByFunc[selectedFunc].funcIndex;
+      this.props.onFunctionSelect(funcIndex);
     }
   };
 
@@ -110,7 +111,7 @@ class SelftimeByFunc extends React.PureComponent<Props, State> {
         onExpandedNodesChange={this._onExpandedNodeIdsChange}
         selectedNodeId={selectedFunc}
         expandedNodeIds={this._expandedNodeIds}
-        contextMenuId="MarkersContextMenu"
+        contextMenuId=""
         rowHeight={16}
         indentWidth={10}
       />
