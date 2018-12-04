@@ -334,7 +334,7 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
