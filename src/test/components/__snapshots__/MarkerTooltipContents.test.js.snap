@@ -235,6 +235,13 @@ Array [
         :
       </div>
       Low(8)
+      <div
+        className="tooltipLabel"
+      >
+        MIME-type
+        :
+      </div>
+      Css
     </div>
   </div>,
   <div
@@ -1319,6 +1326,13 @@ Array [
         :
       </div>
       Low(8)
+      <div
+        className="tooltipLabel"
+      >
+        MIME-type
+        :
+      </div>
+      Css
     </div>
   </div>,
   <div
@@ -1429,10 +1443,38 @@ Array [
       <div
         className="tooltipLabel"
       >
+        MIME-type
+        :
+      </div>
+      Css
+      <div
+        className="tooltipLabel"
+      >
         Response time
         :
       </div>
       3.5ms
+      <div
+        className="tooltipLabel"
+      >
+        Request Queue Duration
+        :
+      </div>
+      100ms
+      <div
+        className="tooltipLabel"
+      >
+        Request Duration
+        :
+      </div>
+      20ms
+      <div
+        className="tooltipLabel"
+      >
+        Response Duration
+        :
+      </div>
+      50ms
     </div>
   </div>,
   <div
@@ -1504,6 +1546,34 @@ Array [
         :
       </div>
       0.000B
+      <div
+        className="tooltipLabel"
+      >
+        MIME-type
+        :
+      </div>
+      Css
+      <div
+        className="tooltipLabel"
+      >
+        Request Queue Duration
+        :
+      </div>
+      100ms
+      <div
+        className="tooltipLabel"
+      >
+        Request Duration
+        :
+      </div>
+      20ms
+      <div
+        className="tooltipLabel"
+      >
+        Response Duration
+        :
+      </div>
+      50ms
     </div>
   </div>,
 ]

@@ -34,7 +34,12 @@ export type NetworkChartRowBarProps = {
   +marker: TracingMarker,
   // Pass the payload in as well, since our types can't express a TracingMarker with
   // a specific payload.
-  +networkPayload: NetworkPayload,
+  markerMeta: {
+      requestQueue: number,
+      request: number,
+      response: number,
+      type: string
+    },
 };
 
 // This component splits a network marker duration in 4 different phases,
@@ -44,63 +49,29 @@ export type NetworkChartRowBarProps = {
 // 3. response
 // 4. response queue (This is not calculated. We assume it is the rest of the duration.)
 const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
-  const { marker, networkPayload } = props;
-  const { start, dur } = marker;
+  const { markerMeta } = props;
+  const { dur } = props.marker;
 
-  // A marker does not always contain the same set of networkPayload on the start of
-  // the connection.
-  const queueStart =
-    networkPayload.secureConnectionStart ||
-    networkPayload.tcpConnectEnd ||
-    networkPayload.connectStart ||
-    networkPayload.domainLookupStart ||
-    0;
-
-  // The default for width of the phases is always zero.
-  let requestQueue: number = 0;
-  let request: number = 0;
-  let response: number = 0;
-
-  // Timestamps from network markers aren't adjusted when processing
-  // the gecko profile format. This is the reason why the start timestamp of a
-  // marker can be after the start timestamp of the request.
-  // To prevent false networkPayload visualization, we need this workaround.
-  // See https://github.com/devtools-html/perf.html/issues/1493 for more detail.
-  if (
-    networkPayload.requestStart &&
-    start < networkPayload.requestStart &&
-    networkPayload.responseStart &&
-    start < networkPayload.responseStart
-  ) {
-    request =
-      (networkPayload.responseStart - networkPayload.requestStart) / dur * 100;
+  const _numberToPercent = (num: number): number => {
+    return num / dur * 100;
   }
 
-  if (
-    networkPayload.responseEnd &&
-    start < networkPayload.responseEnd &&
-    networkPayload.responseStart &&
-    start < networkPayload.responseStart
-  ) {
-    response =
-      (networkPayload.responseEnd - networkPayload.responseStart) / dur * 100;
-  }
-
-  if (queueStart && start < queueStart && queueStart > 0) {
-    requestQueue = (queueStart - start) / dur * 100;
-  }
-
-  // When we keep the default values (=zero), the
-  // response takes the full width of the bar to be more visible.
-  if (requestQueue + request + response === 0) {
-    response = 100;
-  }
+  let responseWidth = 0;
+  const partialDuration = markerMeta.requestQueue + markerMeta.request + markerMeta.response;
 
   // Adding either the default value (=zero) as width or
   // the new, calculated value that can be added.
-  const requestQueueWidth = requestQueue;
-  const requestWidth = request;
-  const responseWidth = response;
+  const requestQueueWidth = _numberToPercent(markerMeta.requestQueue);
+  const requestWidth = _numberToPercent(markerMeta.request);
+  responseWidth = _numberToPercent(markerMeta.response);
+
+  if (partialDuration === 0) {
+    responseWidth = 100;
+  }
+
+  if (partialDuration > 0 && markerMeta.response !== 0) {
+    responseWidth = _numberToPercent(markerMeta.response)
+  }
 
   return (
     <React.Fragment>
@@ -220,26 +191,96 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
     switch (fileExt) {
       case '.js':
-        return 'networkChartRowItemJs';
+        return 'Js';
       case '.css':
-        return 'networkChartRowItemCss';
+        return 'Css';
       case '.gif':
       case '.png':
       case '.jpg':
       case '.jpeg':
       case '.svg':
-        return 'networkChartRowItemImg';
+        return 'Img';
       case '.html':
-        return 'networkChartRowItemHtml';
+        return 'Html';
       default:
-        return '';
+        return 'Other';
     }
+  }
+
+  _createMarkerMetaData(marker: TracingMarker): {
+      requestQueue: number,
+      request: number,
+      response: number,
+      type: string
+    } { //change object to actuall definition
+      const { networkPayload } = this.props;
+      const { start, dur } = marker;
+
+      if (!networkPayload) {
+        return {
+          requestQueue: 0,
+          request: 0,
+          response: 0,
+          type: ''
+        };
+      }
+  // A marker does not always contain the same set of networkPayload on the start of
+  // the connection.
+  const queueStart =
+    networkPayload.secureConnectionStart ||
+    networkPayload.tcpConnectEnd ||
+    networkPayload.connectStart ||
+    networkPayload.domainLookupStart ||
+    0;
+
+  // The default for width of the phases is always zero.
+  let requestQueue: number = 0;
+  let request: number = 0;
+  let response: number = 0;
+
+  // Timestamps from network markers aren't adjusted when processing
+  // the gecko profile format. This is the reason why the start timestamp of a
+  // marker can be after the start timestamp of the request.
+  // To prevent false networkPayload visualization, we need this workaround.
+  // See https://github.com/devtools-html/perf.html/issues/1493 for more detail.
+  if (
+    networkPayload.requestStart &&
+    start < networkPayload.requestStart &&
+    networkPayload.responseStart &&
+    start < networkPayload.responseStart
+  ) {
+    request =
+      networkPayload.responseStart - networkPayload.requestStart; // create object to throw into tooltip
+  }
+
+  if (
+    networkPayload.responseEnd &&
+    start < networkPayload.responseEnd &&
+    networkPayload.responseStart &&
+    start < networkPayload.responseStart
+  ) {
+    response =
+      networkPayload.responseEnd - networkPayload.responseStart;
+  }
+
+  if (queueStart && start < queueStart && queueStart > 0) {
+    requestQueue = queueStart - start;
+  }
+
+  const markerMeta = {
+    requestQueue: requestQueue,
+    request: request,
+    response: response,
+    type: this._identifyType(marker.name)
+  }
+
+  return markerMeta;
   }
 
   render() {
     const { index, marker, markerStyle, networkPayload } = this.props;
-
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
+    const markerMetaData = this._createMarkerMetaData(marker);
 
     if (networkPayload === null) {
       return null;
@@ -247,7 +288,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     const itemClassName =
       evenOddClassName +
       ' networkChartRowItem ' +
-      this._identifyType(marker.name);
+      'networkChartRowItem' + this._identifyType(marker.name);
     return (
       <section className={itemClassName}>
         <div className="networkChartRowItemLabel">
@@ -259,12 +300,13 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           onMouseEnter={this._hoverIn}
           onMouseLeave={this._hoverOut}
         >
-          <NetworkChartRowBar marker={marker} networkPayload={networkPayload} />
+          <NetworkChartRowBar marker={marker} networkPayload={networkPayload} markerMeta={markerMetaData} />
         </div>
         {this.state.hovered ? (
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY}>
             <MarkerTooltipContents
               marker={marker}
+              markerMeta={markerMetaData}
               threadIndex={this.props.threadIndex}
             />
           </Tooltip>
