@@ -336,6 +336,8 @@ export const selectorsForThread = (
       getThread(state).markers;
     const getStringTable: Selector<UniqueStringArray> = state =>
       getThread(state).stringTable;
+    const getFirstSampleTime = (state: State) =>
+      getThread(state).samples.time[0] || 0;
 
     /**
      * The first per-thread selectors filter out and transform a thread based on user's
@@ -482,6 +484,7 @@ export const selectorsForThread = (
     const getTracingMarkers: Selector<TracingMarker[]> = createSelector(
       getProcessedMarkersTable,
       getStringTable,
+      getFirstSampleTime,
       MarkerData.getTracingMarkers
     );
 
