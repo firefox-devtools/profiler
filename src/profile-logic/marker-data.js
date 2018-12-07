@@ -218,7 +218,8 @@ export function extractMarkerDataFromName(
 
 export function getTracingMarkers(
   markers: MarkersTable,
-  stringTable: UniqueStringArray
+  stringTable: UniqueStringArray,
+  firstSampleTime: number
 ): TracingMarker[] {
   const tracingMarkers: TracingMarker[] = [];
   // This map is used to track start and end markers for tracing markers.
@@ -272,18 +273,24 @@ export function getTracingMarkers(
         } else {
           // No matching "start" marker has been encountered before this "end",
           // this means it was issued before the capture started. Here we create
-          // a fake "start" marker to create the final tracing marker.
+          // an "incomplete" marker which will be truncated at the starting end
+          // since we don't know exactly when it started.
           // Note we won't have additional data (eg the cause stack) for this
           // marker because that data is contained in the "start" marker.
 
           const nameStringIndex = markers.name[i];
 
+          // Also note that the end marker could occur before the
+          // first sample. In that case it'll become a dot marker at
+          // the location of the end marker. Otherwise we'll use the
+          // time of the first sample as its start.
           marker = {
-            start: -1, // Something negative so that we can distinguish it later
+            start: Math.min(firstSampleTime, time),
             name: stringTable.getString(nameStringIndex),
             dur: 0,
             title: null,
             data,
+            incomplete: true,
           };
         }
         if (marker.start !== undefined) {

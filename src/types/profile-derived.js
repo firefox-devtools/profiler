@@ -70,13 +70,14 @@ export type CallNodeInfo = {
  */
 export type CallNodePath = IndexIntoFuncTable[];
 
-export type TracingMarker = {
+export type TracingMarker = {|
   start: Milliseconds,
   dur: Milliseconds,
   name: string,
   title: string | null,
   data: MarkerPayload,
-};
+  incomplete?: boolean,
+|};
 
 export type IndexIntoTracingMarkers = number;
 
