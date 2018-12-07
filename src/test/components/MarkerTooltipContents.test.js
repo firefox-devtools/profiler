@@ -383,8 +383,8 @@ describe('MarkerTooltipContents', function() {
       requestQueue: 100,
       request: 20,
       response: 50,
-      type: 'Css'
-    } 
+      type: 'Css',
+    };
 
     expect(
       renderer.create(
