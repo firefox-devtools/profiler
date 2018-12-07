@@ -813,6 +813,35 @@ function _adjustMarkerTimestamps(
           newData.timeStamp += delta;
         }
       }
+      if (newData.type === 'Network') {
+        if (newData.domainLookupStart) {
+          newData.domainLookupStart += delta;
+        }
+        if (newData.domainLookupEnd) {
+          newData.domainLookupEnd += delta;
+        }
+        if (newData.connectStart) {
+          newData.connectStart += delta;
+        }
+        if (newData.tcpConnectEnd) {
+          newData.tcpConnectEnd += delta;
+        }
+        if (newData.secureConnectionStart) {
+          newData.secureConnectionStart += delta;
+        }
+        if (newData.connectEnd) {
+          newData.connectEnd += delta;
+        }
+        if (newData.requestStart) {
+          newData.requestStart += delta;
+        }
+        if (newData.responseStart) {
+          newData.responseStart += delta;
+        }
+        if (newData.responseEnd) {
+          newData.responseEnd += delta;
+        }
+      }
       return newData;
     }),
   });
