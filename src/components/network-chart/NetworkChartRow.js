@@ -218,7 +218,6 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   } {
     //change object to actuall definition
     const { networkPayload } = this.props;
-    const { start } = marker;
 
     if (!networkPayload) {
       return {
@@ -228,6 +227,9 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
         type: '',
       };
     }
+
+    const start = networkPayload.startTime;
+
     // A marker does not always contain the same set of networkPayload on the start of
     // the connection.
     const queueStart =
