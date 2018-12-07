@@ -374,7 +374,7 @@ describe('NetworkChartRowBar MIME-type filter', function() {
       networkChart
         .find('.networkChartRowItem')
         .map(node => node.prop('className'))
-    ).toEqual(['even networkChartRowItem ']);
+    ).toEqual(['even networkChartRowItem networkChartRowItemOther']);
   });
 });
 

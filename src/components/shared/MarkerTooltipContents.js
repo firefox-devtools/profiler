@@ -357,7 +357,13 @@ function _markerBacktrace(
 function getMarkerDetails(
   marker: TracingMarker,
   thread: Thread,
-  implementationFilter: ImplementationFilter
+  implementationFilter: ImplementationFilter,
+  markerMeta: {
+      requestQueue: number,
+      request: number,
+      response: number,
+      type: string
+    }
 ): React.Node {
   const data = marker.data;
 
@@ -691,6 +697,11 @@ function getMarkerDetails(
                 'Requested bytes',
                 data.count
               )}
+              {_markerDetailNullable(
+                'mime-type',
+                'MIME-type',
+                markerMeta.type
+              )}
             </div>
           );
         }
@@ -705,6 +716,11 @@ function getMarkerDetails(
             )}
             {_makePriorityHumanReadable('pri', 'Priority', data.pri)}
             {_markerDetailBytesNullable('count', 'Requested bytes', data.count)}
+            {_markerDetailNullable(
+              'mime-type',
+              'MIME-type',
+              markerMeta.type
+            )}
             {_markerDetailDeltaTimeNullable(
               'domainLookup',
               'Domain lookup in total',
@@ -740,6 +756,21 @@ function getMarkerDetails(
               'Response time',
               data.responseEnd,
               data.responseStart
+            )}
+            {_markerDetailNullable(
+              'requestQueue',
+              'Request Queue Duration',
+              formatMilliseconds(markerMeta.requestQueue)
+            )}
+            {_markerDetailNullable(
+              'request',
+              'Request Duration',
+              formatMilliseconds(markerMeta.request)
+            )}
+            {_markerDetailNullable(
+              'response',
+              'Response Duration',
+              formatMilliseconds(markerMeta.response)
             )}
           </div>
         );
@@ -781,6 +812,12 @@ type OwnProps = {|
   +marker: TracingMarker,
   +threadIndex: ThreadIndex,
   +className?: string,
+  +markerMeta: {
+      requestQueue: number,
+      request: number,
+      response: number,
+      type: string
+    }
 |};
 
 type StateProps = {|
@@ -799,8 +836,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       threadName,
       thread,
       implementationFilter,
+      markerMeta,
     } = this.props;
-    const details = getMarkerDetails(marker, thread, implementationFilter);
+    const details = getMarkerDetails(marker, thread, implementationFilter, markerMeta);
     return (
       <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>

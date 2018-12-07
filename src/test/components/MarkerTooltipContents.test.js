@@ -391,6 +391,12 @@ describe('MarkerTooltipContents', function() {
     const state = store.getState();
     const threadIndex = getSelectedThreadIndex(state);
     const tracingMarkers = selectedThreadSelectors.getTracingMarkers(state);
+    const markerMeta = {
+      requestQueue: 100,
+      request: 20,
+      response: 50,
+      type: 'Css'
+    } 
 
     expect(
       renderer.create(
@@ -402,6 +408,7 @@ describe('MarkerTooltipContents', function() {
                 marker={marker}
                 threadIndex={threadIndex}
                 className="propClass"
+                markerMeta={markerMeta}
               />
             ))}
           </Fragment>
