@@ -201,7 +201,7 @@ class ProfileMetaInfoButton extends React.PureComponent<
       return (
         <div className="menuButtonsOpenMetaInfoButtonBox">
           <div className="menuButtonsOpenMetaInfoButtonLabel">
-            <span className="menuButtonsOpenMetaInforButtonLabelOverflow">
+            <span className="menuButtonsOpenMetaInfoButtonLabelOverflow">
               {_formatLabel(meta)}
             </span>
           </div>

@@ -179,7 +179,7 @@
   box-sizing: border-box;
 }
 
-.menuButtonsOpenMetaInforButtonLabelOverflow {
+.menuButtonsOpenMetaInfoButtonLabelOverflow {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
