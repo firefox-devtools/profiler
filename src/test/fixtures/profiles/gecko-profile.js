@@ -389,8 +389,17 @@ function _createGeckoThread(): GeckoThread {
             type: 'tracing',
           },
         ],
-        // Starting a tracing but never finishing it.
-        // Please keep it at the end if you add more markers in this structure
+        [
+          12, // ArbitraryName
+          21,
+          {
+            category: 'ArbitraryCategory',
+            type: 'tracing',
+          },
+        ],
+        // INSERT NEW MARKERS HERE
+
+        // Start a tracing marker but never finish it.
         [
           10, // Rasterize
           20,
@@ -400,14 +409,9 @@ function _createGeckoThread(): GeckoThread {
             type: 'tracing',
           },
         ],
-        [
-          12, // ArbitraryName
-          21,
-          {
-            category: 'ArbitraryCategory',
-            type: 'tracing',
-          },
-        ],
+        // Please keep the open-ended rasterize marker the last marker of the
+        // list. Any new markers should be inserted before the rasterize marker.
+        // DO NOT ADD NEW MARKERS HERE
       ],
     },
     stringTable: [
