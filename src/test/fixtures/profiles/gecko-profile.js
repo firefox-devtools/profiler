@@ -397,6 +397,29 @@ function _createGeckoThread(): GeckoThread {
             type: 'tracing',
           },
         ],
+        [
+          13, // Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5
+          24,
+          {
+            type: 'Network',
+            startTime: 22,
+            endTime: 24,
+            id: 388634410746504,
+            status: 'STATUS_STOP',
+            pri: -20,
+            count: 37838,
+            URI: 'https://github.com/rustwasm/wasm-bindgen/issues/2',
+            domainLookupStart: 22.1,
+            domainLookupEnd: 22.2,
+            connectStart: 22.3,
+            tcpConnectEnd: 22.4,
+            secureConnectionStart: 22.5,
+            connectEnd: 22.6,
+            requestStart: 22.7,
+            responseStart: 22.8,
+            responseEnd: 22.9,
+          },
+        ],
         // INSERT NEW MARKERS HERE
 
         // Start a tracing marker but never finish it.
@@ -415,19 +438,20 @@ function _createGeckoThread(): GeckoThread {
       ],
     },
     stringTable: [
-      '(root)',
-      '0x100000f84',
-      '0x100001a45',
-      'Startup::XRE_Main',
-      'VsyncTimestamp',
-      'Reflow',
-      'baseline',
-      'frobnicate (chrome://blargh:34:35)',
-      'DOMEvent',
-      'MinorGC',
-      'Rasterize',
-      'UserTiming',
-      'ArbitraryName',
+      '(root)', // 0
+      '0x100000f84', // 1
+      '0x100001a45', // 2
+      'Startup::XRE_Main', // 3
+      'VsyncTimestamp', // 4
+      'Reflow', // 5
+      'baseline', // 6
+      'frobnicate (chrome://blargh:34:35)', // 7
+      'DOMEvent', // 8
+      'MinorGC', // 9
+      'Rasterize', // 10
+      'UserTiming', // 11
+      'ArbitraryName', // 12
+      'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5', // 13
     ],
   };
 }
