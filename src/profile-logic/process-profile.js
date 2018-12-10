@@ -813,6 +813,40 @@ function _adjustMarkerTimestamps(
           newData.timeStamp += delta;
         }
       }
+      if (newData.type === 'Network') {
+        if (newData.domainLookupStart) {
+          newData.domainLookupStart += delta;
+        }
+        if (newData.domainLookupEnd) {
+          newData.domainLookupEnd += delta;
+        }
+        if (newData.connectStart) {
+          newData.connectStart += delta;
+        }
+        if (newData.tcpConnectEnd) {
+          newData.tcpConnectEnd += delta;
+        }
+        if (newData.secureConnectionStart) {
+          newData.secureConnectionStart += delta;
+        }
+        if (newData.connectEnd) {
+          newData.connectEnd += delta;
+        }
+        if (newData.requestStart) {
+          newData.requestStart += delta;
+        }
+        if (newData.responseStart) {
+          newData.responseStart += delta;
+        }
+        if (newData.responseEnd) {
+          newData.responseEnd += delta;
+        }
+      }
+      // Note: When adding code for new fields here, you may need to fix up
+      // existing processed profiles that were missing the relevant adjustments.
+      // This should be done by adding an upgrader in processed-profile-versioning.js.
+      // In fact, that file already includes code duplicated from this function
+      // for at least two cases where we forgot to do the adjustment initially.
       return newData;
     }),
   });

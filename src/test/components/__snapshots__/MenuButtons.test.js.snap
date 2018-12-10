@@ -75,7 +75,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
                 >
                   Profile Version:
                 </span>
-                18
+                19
               </div>
             </div>
             <h2
@@ -568,7 +568,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
                 >
                   Profile Version:
                 </span>
-                18
+                19
               </div>
             </div>
             <h2
@@ -1061,7 +1061,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                18
+                19
               </div>
             </div>
             <h2
@@ -1554,7 +1554,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                18
+                19
               </div>
             </div>
             <h2
@@ -2047,7 +2047,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                18
+                19
               </div>
             </div>
             <h2
@@ -2540,7 +2540,7 @@ exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.netwo
                 >
                   Profile Version:
                 </span>
-                18
+                19
               </div>
             </div>
             <h2

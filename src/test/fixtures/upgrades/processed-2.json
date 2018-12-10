@@ -87,9 +87,9 @@
         "frame": [0, 1, 2, 3, 4]
       },
       "markers": {
-        "length": 7,
-        "name": [4, 5, 10, 10, 5, 8, 9],
-        "time": [0, 2, 4, 5, 8, 9, 11],
+        "length": 8,
+        "name": [4, 5, 10, 10, 5, 8, 9, 14],
+        "time": [0, 2, 4, 5, 8, 9, 11, 13],
         "data": [
           {
             "category": "VsyncTimestamp",
@@ -148,6 +148,25 @@
           {
             "startTime": 11,
             "endTime": 12
+          },
+          {
+            "type": "Network",
+            "startTime": 3,
+            "endTime": 13,
+            "id": 388634410746504,
+            "status": "STATUS_STOP",
+            "pri": -20,
+            "count": 37838,
+            "URI": "https://github.com/rustwasm/wasm-bindgen/issues/3",
+            "domainLookupStart": 4,
+            "domainLookupEnd": 5,
+            "connectStart": 6,
+            "tcpConnectEnd": 7,
+            "secureConnectionStart": 8,
+            "connectEnd": 9,
+            "requestStart": 10,
+            "responseStart": 11,
+            "responseEnd": 12
           }
         ]
       },
@@ -173,7 +192,8 @@
         "Rasterize",
         "firefox",
         "chrome://blargh",
-        "frobnicate"
+        "frobnicate",
+        "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/3"
       ]
     },
     {
@@ -412,9 +432,9 @@
         "frame": [0, 1, 2, 3, 5, 4, 6]
       },
       "markers": {
-        "length": 7,
-        "name": [4, 5, 10, 10, 5, 8, 9],
-        "time": [1000, 1002, 1004, 1005, 1008, 1009, 1011],
+        "length": 8,
+        "name": [4, 5, 10, 10, 5, 8, 9, 11],
+        "time": [1000, 1002, 1004, 1005, 1008, 1009, 1011, 1013],
         "data": [
           {
             "category": "VsyncTimestamp",
@@ -474,6 +494,25 @@
           {
             "startTime": 1011,
             "endTime": 1012
+          },
+          {
+            "type": "Network",
+            "startTime": 1003,
+            "endTime": 1013,
+            "id": 388634410746504,
+            "status": "STATUS_STOP",
+            "pri": -20,
+            "count": 37838,
+            "URI": "https://github.com/rustwasm/wasm-bindgen/issues/4",
+            "domainLookupStart": 4,
+            "domainLookupEnd": 5,
+            "connectStart": 6,
+            "tcpConnectEnd": 7,
+            "secureConnectionStart": 8,
+            "connectEnd": 9,
+            "requestStart": 10,
+            "responseStart": 11,
+            "responseEnd": 12
           }
         ]
       },
@@ -501,7 +540,8 @@
         "chrome://blargh",
         "frobnicate",
         "AutoEntryScript setTimeout handler",
-        "Element.getBoundingClientRect"
+        "Element.getBoundingClientRect",
+        "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/4"
       ]
     }
   ],
