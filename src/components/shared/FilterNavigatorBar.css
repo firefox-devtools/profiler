@@ -33,6 +33,7 @@
 .filterNavigatorBarRootItem {
   margin-left: -8px;
   flex-shrink: 0;
+  max-width: 100%;
 }
 
 .filterNavigatorBarItemContent {

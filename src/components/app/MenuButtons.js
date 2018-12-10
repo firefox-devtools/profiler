@@ -4,7 +4,7 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import {
@@ -190,7 +190,9 @@ function _formatLabel(meta: ProfileMeta): string | null {
   return labelTitle;
 }
 
-class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
+class ProfileMetaInfoButton extends React.PureComponent<
+  ProfileMetaInfoButtonProps
+> {
   render() {
     const { profile } = this.props;
     const meta = profile.meta;
@@ -199,7 +201,9 @@ class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
       return (
         <div className="menuButtonsOpenMetaInfoButtonBox">
           <div className="menuButtonsOpenMetaInfoButtonLabel">
-            {_formatLabel(meta)}
+            <span className="menuButtonsOpenMetaInforButtonLabelOverflow">
+              {_formatLabel(meta)}
+            </span>
           </div>
           <ButtonWithPanel
             className="menuButtonsOpenMetaInfoButtonButton"
@@ -291,7 +295,7 @@ class ProfileMetaInfoButton extends PureComponent<ProfileMetaInfoButtonProps> {
   }
 }
 
-class ProfileSharingCompositeButton extends PureComponent<
+class ProfileSharingCompositeButton extends React.PureComponent<
   ProfileSharingCompositeButtonProps,
   ProfileSharingCompositeButtonState
 > {
@@ -611,7 +615,7 @@ type ProfileDownloadButtonState = {|
   filename: string,
 |};
 
-class ProfileDownloadButton extends PureComponent<
+class ProfileDownloadButton extends React.PureComponent<
   ProfileDownloadButtonProps,
   ProfileDownloadButtonState
 > {
@@ -732,27 +736,30 @@ const MenuButtons = ({
   setProfileSharingStatus,
   predictUrl,
 }: MenuButtonsProps) => (
-  <div className="menuButtons">
+  <>
+    {/* Place the info button outside of the menu buttons to allow it to shrink. */}
     <ProfileMetaInfoButton profile={profile} />
-    <ProfileSharingCompositeButton
-      profile={profile}
-      dataSource={dataSource}
-      symbolicationStatus={symbolicationStatus}
-      onProfilePublished={profilePublished}
-      profileSharingStatus={profileSharingStatus}
-      setProfileSharingStatus={setProfileSharingStatus}
-      predictUrl={predictUrl}
-    />
-    <ProfileDownloadButton profile={profile} rootRange={rootRange} />
-    <a
-      href="/docs/"
-      target="_blank"
-      className="menuButtonsLink"
-      title="Open the documentation in a new window"
-    >
-      Docs…
-    </a>
-  </div>
+    <div className="menuButtons">
+      <ProfileSharingCompositeButton
+        profile={profile}
+        dataSource={dataSource}
+        symbolicationStatus={symbolicationStatus}
+        onProfilePublished={profilePublished}
+        profileSharingStatus={profileSharingStatus}
+        setProfileSharingStatus={setProfileSharingStatus}
+        predictUrl={predictUrl}
+      />
+      <ProfileDownloadButton profile={profile} rootRange={rootRange} />
+      <a
+        href="/docs/"
+        target="_blank"
+        className="menuButtonsLink"
+        title="Open the documentation in a new window"
+      >
+        Docs…
+      </a>
+    </div>
+  </>
 );
 
 const options: ExplicitConnectOptions<
