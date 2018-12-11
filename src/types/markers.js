@@ -299,11 +299,10 @@ export type InvalidationPayload = {|
 export type NetworkPayload = {|
   type: 'Network',
   URI: string,
-  RedirectURI: string,
+  RedirectURI?: string,
   id: number,
   pri: number, // priority of the load; always included as it can change
   count?: number, // Total size of transfer, if any
-  dur: number,
   status: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
@@ -316,8 +315,6 @@ export type NetworkPayload = {|
   requestStart?: Milliseconds,
   responseStart?: Milliseconds,
   responseEnd?: Milliseconds,
-  title: string,
-  name: string,
 |};
 
 /**

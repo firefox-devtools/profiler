@@ -98,7 +98,8 @@
             "MinorGC",
             "Rasterize",
             "AutoEntryScript Promise resolution or rejection",
-            "get CSSStyleRule.selectorText"
+            "get CSSStyleRule.selectorText",
+            "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/1"
           ],
           "unregisterTime": null,
           "name": "GeckoMain",
@@ -189,7 +190,30 @@
                   "eventType": "mouseout",
                   "phase": 3
                 }
-              ]
+              ],
+            [
+              11,
+              13,
+              {
+                "type": "Network",
+                "startTime": 3,
+                "endTime": 13,
+                "id": 388634410746504,
+                "status": "STATUS_STOP",
+                "pri": -20,
+                "count": 37838,
+                "URI": "https://github.com/rustwasm/wasm-bindgen/issues/1",
+                "domainLookupStart": 4,
+                "domainLookupEnd": 5,
+                "connectStart": 6,
+                "tcpConnectEnd": 7,
+                "secureConnectionStart": 8,
+                "connectEnd": 9,
+                "requestStart": 10,
+                "responseStart": 11,
+                "responseEnd": 12
+              }
+            ]
             ],
             "schema": { "name": 0, "data": 2, "time": 1 }
           }
@@ -343,6 +367,29 @@
               "eventType": "mouseout",
               "phase": 3
             }
+          ],
+          [
+            11,
+            13,
+            {
+              "type": "Network",
+              "startTime": 3,
+              "endTime": 13,
+              "id": 388634410746504,
+              "status": "STATUS_STOP",
+              "pri": -20,
+              "count": 37838,
+              "URI": "https://github.com/rustwasm/wasm-bindgen/issues/2",
+              "domainLookupStart": 4,
+              "domainLookupEnd": 5,
+              "connectStart": 6,
+              "tcpConnectEnd": 7,
+              "secureConnectionStart": 8,
+              "connectEnd": 9,
+              "requestStart": 10,
+              "responseStart": 11,
+              "responseEnd": 12
+            }
           ]
         ]
       },
@@ -382,7 +429,8 @@
         "frobnicate (chrome://blargh:34)",
         "DOMEvent",
         "MinorGC",
-        "Rasterize"
+        "Rasterize",
+        "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/2"
       ],
       "registerTime": 0
     },

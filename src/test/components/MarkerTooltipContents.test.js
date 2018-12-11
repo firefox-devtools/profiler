@@ -307,9 +307,6 @@ describe('MarkerTooltipContents', function() {
           URI: 'http://www.wikia.com/',
           RedirectURI:
             'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
-          dur: 10.5,
-          name: '',
-          title: '',
         }: NetworkPayload),
       ],
       [
@@ -329,9 +326,6 @@ describe('MarkerTooltipContents', function() {
           responseStart: 11172.047379,
           responseEnd: 11175.561877,
           RedirectURI: '',
-          dur: 10.5,
-          name: '',
-          title: '',
         }: NetworkPayload),
       ],
       [
@@ -346,9 +340,6 @@ describe('MarkerTooltipContents', function() {
           status: 'STATUS_START',
           URI: 'http://wikia.com/',
           RedirectURI: '',
-          dur: 10.5,
-          name: '',
-          title: '',
         }: NetworkPayload),
       ],
       [
@@ -363,9 +354,6 @@ describe('MarkerTooltipContents', function() {
           status: 'STATUS_READING',
           RedirectURI: '',
           URI: '',
-          dur: 10.5,
-          name: '',
-          title: '',
         }: NetworkPayload),
       ],
       [
