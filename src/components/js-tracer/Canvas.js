@@ -34,15 +34,6 @@ import type {
 import type { JsTracerTiming } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
 
-type DrawingInformation = {|
-  +x: CssPixels,
-  +y: CssPixels,
-  +w: CssPixels,
-  +h: CssPixels,
-  +uncutWidth: CssPixels,
-  +text: string,
-|};
-
 type OwnProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -189,10 +180,11 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
     h: DevicePixels,
     uncutWidth: DevicePixels,
     text: string,
-    backgroundColor: string = BLUE_40,
-    foregroundColor: string = 'white'
+    isHovered: boolean
   ) {
     const { ctx, textMeasurement, fastFillStyle, devicePixels } = renderPass;
+    const backgroundColor = isHovered ? 'Highlight' : BLUE_40;
+    const foregroundColor = isHovered ? 'HighlightText' : 'white';
 
     fastFillStyle.set(backgroundColor);
 
@@ -296,7 +288,6 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
       const y: CssPixels =
         rowIndex * devicePixels.rowHeight - devicePixels.viewportTop;
 
-      let hoveredElement: DrawingInformation | null = null;
       let currentPixelLeftSide: DevicePixels = devicePixels.timelineMarginLeft;
       let currentPixelRightSide: DevicePixels = currentPixelLeftSide + 1;
       // This value ranges from 0 to 1:
@@ -311,7 +302,9 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
             currentPixelPartialValue,
             h,
             currentPixelPartialValue,
-            ''
+            '',
+            // Never draw a partial pixel as hovered:
+            false // isHovered
           );
           currentPixelLeftSide++;
           currentPixelRightSide++;
@@ -345,8 +338,8 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
             (unitIntervalEndTime - unitIntervalStartTime) *
             devicePixels.innerContainerWidth /
             viewportLength;
-          const eventIndex = timing.index[i];
           const text = timing.label[i];
+          const isHovered = hoveredItem === timing.index[i];
 
           // Perform some checks to see if we can skip drawing this event.
           {
@@ -376,14 +369,6 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
               w = w - (devicePixels.timelineMarginLeft - x);
               x = devicePixels.timelineMarginLeft;
             }
-          }
-
-          // Is this event hovered?
-          if (hoveredItem === eventIndex) {
-            // Defer the drawing of the hovered element until after drawing all the other
-            // events, so that it is always on top.
-            hoveredElement = { x, y, w, h, uncutWidth, text };
-            continue;
           }
 
           // Now determine if we can draw the event or commit partial pixels.
@@ -469,7 +454,16 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
             commitAndDrawPartialPixel(y);
           }
           const floorW = Math.floor(w);
-          this.drawOneEvent(renderPass, x, y, floorW, h, uncutWidth, text);
+          this.drawOneEvent(
+            renderPass,
+            x,
+            y,
+            floorW,
+            h,
+            uncutWidth,
+            text,
+            isHovered
+          );
           currentPixelLeftSide = x + floorW;
           currentPixelRightSide = x + floorW + 1;
           currentPixelPartialValue = w - floorW;
@@ -477,20 +471,6 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
 
         // Commit the last partial pixel of this row.
         commitAndDrawPartialPixel(y);
-      }
-
-      if (hoveredElement) {
-        this.drawOneEvent(
-          renderPass,
-          hoveredElement.x,
-          hoveredElement.y,
-          Math.max(1, hoveredElement.w),
-          hoveredElement.h,
-          hoveredElement.uncutWidth,
-          hoveredElement.text,
-          'Highlight', //    background color
-          'HighlightText' // foreground color
-        );
       }
     }
   }
