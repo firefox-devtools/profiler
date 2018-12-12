@@ -84,7 +84,13 @@ class NetworkChart extends React.PureComponent<Props> {
   render() {
     const { markers } = this.props;
     return (
-      <div className="networkChart">
+      <div
+        className="networkChart"
+        id="network-chart-tab"
+        tabIndex="0"
+        role="tabpanel"
+        aria-labelledby="network-chart"
+      >
         <MarkerSettings />
         {markers.length === 0 ? (
           <NetworkChartEmptyReasons />

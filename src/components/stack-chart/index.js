@@ -126,7 +126,13 @@ class StackChartGraph extends React.PureComponent<Props> {
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
-      <div className="stackChart">
+      <div
+        className="stackChart"
+        id="stack-chart-tab"
+        tabIndex="0"
+        role="tabpanel"
+        aria-labelledby="stack-chart"
+      >
         <StackSettings />
         <div className="stackChartContent">
           <StackChartCanvas

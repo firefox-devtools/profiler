@@ -211,7 +211,13 @@ class MarkerTable extends PureComponent<Props> {
     const { markers, zeroAt, selectedMarker } = this.props;
     const tree = new MarkerTree(markers, zeroAt);
     return (
-      <div className="markerTable">
+      <div
+        className="markerTable"
+        id="marker-table-tab"
+        tabIndex="0"
+        role="tabpanel"
+        aria-labelledby="marker-table"
+      >
         <MarkerSettings />
         <TreeView
           maxNodeDepth={0}

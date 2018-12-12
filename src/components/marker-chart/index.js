@@ -96,7 +96,13 @@ class MarkerChart extends React.PureComponent<Props> {
     const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
 
     return (
-      <div className="markerChart">
+      <div
+        className="markerChart"
+        id="marker-chart-tab"
+        tabIndex="0"
+        role="tabpanel"
+        aria-labelledby="marker-chart"
+      >
         <MarkerSettings />
         {markers.length === 0 ? (
           <MarkerChartEmptyReasons />
