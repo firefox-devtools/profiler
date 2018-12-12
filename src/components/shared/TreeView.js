@@ -247,7 +247,7 @@ class TreeViewRowScrolledColumns<
         >
           {displayData.categoryColor && displayData.categoryName ? (
             <span
-              className={`treeViewCategoryKnob category-color-${
+              className={`category-swatch category-color-${
                 displayData.categoryColor
               }`}
               title={displayData.categoryName}

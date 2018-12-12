@@ -220,6 +220,8 @@ process: \\"default\\" (0)"
                       </div>
                       <div
                         className="threadActivityGraph"
+                        onMouseLeave={[Function]}
+                        onMouseMove={[Function]}
                       >
                         <canvas
                           className="threadActivityGraphCanvas threadActivityGraphCanvas"
@@ -277,6 +279,8 @@ process: \\"default\\" (0)"
                       </div>
                       <div
                         className="threadActivityGraph"
+                        onMouseLeave={[Function]}
+                        onMouseMove={[Function]}
                       >
                         <canvas
                           className="threadActivityGraphCanvas threadActivityGraphCanvas"
@@ -368,6 +372,8 @@ process: \\"default\\" (0)"
                       </div>
                       <div
                         className="threadActivityGraph"
+                        onMouseLeave={[Function]}
+                        onMouseMove={[Function]}
                       >
                         <canvas
                           className="threadActivityGraphCanvas threadActivityGraphCanvas"

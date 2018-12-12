@@ -1,0 +1,52 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/**
+ * This class should be used to create a small color swatch to describe a
+ * category. It is a global css class as it can be used across the project.
+ */
+.category-swatch {
+  display: inline-block;
+  box-sizing: border-box;
+  width: 9px;
+  height: 9px;
+  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  margin-right: 3px;
+}
+
+.category-swatch.category-color-transparent {
+  background-color: transparent;
+}
+
+.category-swatch.category-color-purple {
+  background-color: var(--purple-70);
+}
+
+.category-swatch.category-color-green {
+  background-color: var(--green-60);
+}
+
+.category-swatch.category-color-orange {
+  background-color: var(--orange-50);
+}
+
+.category-swatch.category-color-yellow {
+  background-color: var(--yellow-50);
+}
+
+.category-swatch.category-color-lightblue {
+  background-color: var(--blue-40);
+}
+
+.category-swatch.category-color-grey {
+  background-color: var(--grey-30);
+}
+
+.category-swatch.category-color-blue {
+  background-color: var(--blue-60);
+}
+
+.category-swatch.category-color-brown {
+  background-color: var(--magenta-60);
+}

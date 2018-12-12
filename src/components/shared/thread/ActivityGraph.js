@@ -3,11 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import { computeActivityGraphFills } from './ActivityGraphFills';
 import { timeCode } from '../../../utils/time-code';
 import classNames from 'classnames';
 import photonColors from 'photon-colors';
+import Tooltip, { MOUSE_OFFSET } from '../Tooltip';
+import SampleTooltipContents from '../SampleTooltipContents';
 
 import './ActivityGraph.css';
 
@@ -16,7 +18,7 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
 } from '../../../types/profile';
-import type { Milliseconds } from '../../../types/units';
+import type { Milliseconds, CssPixels } from '../../../types/units';
 import type {
   CategoryDrawStyles,
   ActivityFillGraphQuerier,
@@ -37,11 +39,41 @@ export type Props = {|
   ) => number,
 |};
 
-class ThreadActivityGraph extends PureComponent<Props> {
+type State = {
+  hoveredSample: null | IndexIntoSamplesTable,
+  mouseX: CssPixels,
+  mouseY: CssPixels,
+};
+
+class ThreadActivityGraph extends React.PureComponent<Props, State> {
   _canvas: null | HTMLCanvasElement = null;
   _resizeListener = () => this.forceUpdate();
   _categoryDrawStyles: null | CategoryDrawStyles = null;
   _fillsQuerier: null | ActivityFillGraphQuerier = null;
+
+  state = {
+    hoveredSample: null,
+    mouseX: 0,
+    mouseY: 0,
+  };
+
+  _onMouseLeave = () => {
+    this.setState({ hoveredSample: null });
+  };
+
+  _onMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
+    const canvas = this._canvas;
+    if (!canvas) {
+      return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    this.setState({
+      hoveredSample: this._getSampleAtMouseEvent(event),
+      mouseX: event.pageX,
+      // Have the tooltip align to the bottom of the track.
+      mouseY: rect.bottom - MOUSE_OFFSET,
+    });
+  };
 
   _takeCanvasRef = (canvas: HTMLCanvasElement | null) => {
     this._canvas = canvas;
@@ -186,21 +218,27 @@ class ThreadActivityGraph extends PureComponent<Props> {
     }
   }
 
-  _onMouseUp = (e: SyntheticMouseEvent<>) => {
+  _getSampleAtMouseEvent(
+    event: SyntheticMouseEvent<>
+  ): null | IndexIntoSamplesTable {
     // Create local variables so that Flow can refine the following to be non-null.
     const fillsQuerier = this._fillsQuerier;
     const canvas = this._canvas;
     if (!canvas || !fillsQuerier) {
-      return;
+      return null;
     }
     // Re-measure the canvas and get the coordinates and time for the click.
     const { rangeStart, rangeEnd } = this.props;
     const rect = canvas.getBoundingClientRect();
-    const x = e.pageX - rect.left;
-    const y = e.pageY - rect.top;
+    const x = event.pageX - rect.left;
+    const y = event.pageY - rect.top;
     const time = rangeStart + x / rect.width * (rangeEnd - rangeStart);
 
-    const sample = fillsQuerier.getSampleAtClick(x, y, time, rect);
+    return fillsQuerier.getSampleAtClick(x, y, time, rect);
+  }
+
+  _onMouseUp = (event: SyntheticMouseEvent<>) => {
+    const sample = this._getSampleAtMouseEvent(event);
     if (sample !== null) {
       this.props.onSampleClick(sample);
     }
@@ -208,8 +246,14 @@ class ThreadActivityGraph extends PureComponent<Props> {
 
   render() {
     this._renderCanvas();
+    const { fullThread, categories } = this.props;
+    const { hoveredSample, mouseX, mouseY } = this.state;
     return (
-      <div className={this.props.className}>
+      <div
+        className={this.props.className}
+        onMouseMove={this._onMouseMove}
+        onMouseLeave={this._onMouseLeave}
+      >
         <canvas
           className={classNames(
             `${this.props.className}Canvas`,
@@ -218,6 +262,15 @@ class ThreadActivityGraph extends PureComponent<Props> {
           ref={this._takeCanvasRef}
           onMouseUp={this._onMouseUp}
         />
+        {hoveredSample === null ? null : (
+          <Tooltip mouseX={mouseX} mouseY={mouseY}>
+            <SampleTooltipContents
+              sampleIndex={hoveredSample}
+              fullThread={fullThread}
+              categories={categories}
+            />
+          </Tooltip>
+        )}
       </div>
     );
   }

@@ -90,6 +90,8 @@ process: \\"tab\\" (222)"
         </div>
         <div
           className="threadActivityGraph"
+          onMouseLeave={[Function]}
+          onMouseMove={[Function]}
         >
           <canvas
             className="threadActivityGraphCanvas threadActivityGraphCanvas"

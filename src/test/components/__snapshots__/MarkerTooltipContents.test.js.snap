@@ -701,6 +701,11 @@ Array [
       </h2>
       <ol
         className="backtrace"
+        style={
+          Object {
+            "--max-height": "30em",
+          }
+        }
       >
         <li
           className="backtraceStackFrame"
@@ -1027,6 +1032,11 @@ Array [
       </h2>
       <ol
         className="backtrace"
+        style={
+          Object {
+            "--max-height": "30em",
+          }
+        }
       >
         <li
           className="backtraceStackFrame"

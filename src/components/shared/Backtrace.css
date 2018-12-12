@@ -1,5 +1,4 @@
 .backtrace {
-  --max-height: 30em;
   --gradient-height: calc(var(--max-height) - 5em);
 
   margin: 5px;
