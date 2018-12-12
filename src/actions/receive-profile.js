@@ -42,6 +42,7 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
+import { mergeCategories, adjustCategories } from '../profile-logic/comparison';
 
 import type {
   FunctionsUpdatePerThread,
@@ -53,6 +54,7 @@ import type {
   Profile,
   ThreadIndex,
   IndexIntoFuncTable,
+  IndexIntoCategoryList,
 } from '../types/profile';
 
 /**
@@ -863,16 +865,39 @@ export function retrieveProfilesToCompare(
       const profiles = await Promise.all(promises);
       const resultProfile = getEmptyProfile();
 
+      // First let's merge categories. We'll use the resulting maps when
+      // handling the thread data later.
+      const {
+        categories: newCategories,
+        translationMaps: translationMapsForCategories,
+      } = mergeCategories(
+        profiles[0].meta.categories,
+        profiles[1].meta.categories
+      );
+      resultProfile.meta.categories = newCategories;
+
       // Then we loop over all profiles and do the necessary changes according
       // to the states we computed earlier.
       for (let i = 0; i < profileStates.length; i++) {
         const { profileSpecific } = profileStates[i];
         const selectedThreadIndex = profileSpecific.selectedThread;
         if (selectedThreadIndex === null) {
-          continue;
+          throw new Error(`No thread has been selected in profile ${i}`);
         }
         const profile = profiles[i];
         let thread = profile.threads[selectedThreadIndex];
+
+        // We adjust the categories using the maps computed above.
+        // Here we're cheating a bit with flow here because we know that we
+        // can't have null values in this table.
+        thread.stackTable.category = ((adjustCategories(
+          thread.stackTable.category,
+          translationMapsForCategories[i]
+        ): any): IndexIntoCategoryList[]);
+        thread.frameTable.category = adjustCategories(
+          thread.frameTable.category,
+          translationMapsForCategories[i]
+        );
 
         // We filter the profile using the range from the state for this profile.
         const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
