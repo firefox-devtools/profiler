@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import classNames from 'classnames';
 
 import explicitConnect from '../../utils/connect';
 import {
@@ -14,7 +15,6 @@ import {
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { getFunctionName } from '../../profile-logic/function-info';
 import { assertExhaustiveCheck } from '../../utils/flow';
-import CanSelectContent from './CanSelectContent';
 
 import type {
   ConnectedProps,
@@ -31,6 +31,45 @@ import type {
   StackImplementation,
   TimingsForPath,
 } from '../../profile-logic/profile-data';
+import { formatNumber } from '../../utils/format-numbers';
+
+type CanCopyContentProps = {|
+  +tagName?: string,
+  +content: string,
+  +className?: string,
+|};
+
+class CanSelectContent extends React.PureComponent<CanCopyContentProps> {
+  _selectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
+    const input = e.currentTarget;
+    input.focus();
+    input.select();
+  }
+
+  _unselectContent(e: SyntheticMouseEvent<HTMLInputElement>) {
+    e.currentTarget.setSelectionRange(0, 0);
+  }
+
+  render() {
+    const { tagName, content, className } = this.props;
+    const TagName = tagName || 'div';
+
+    return (
+      <TagName
+        className={classNames(className, 'can-select-content')}
+        title={`${content}\n(click to select)`}
+      >
+        <input
+          value={content}
+          className="can-select-content-input"
+          onFocus={this._selectContent}
+          onBlur={this._unselectContent}
+          readOnly={true}
+        />
+      </TagName>
+    );
+  }
+}
 
 type SidebarDetailProps = {|
   +label: string,
@@ -113,7 +152,7 @@ function Breakdown({ data }: BreakdownProps) {
 
     return (
       <SidebarDetail label={group} key={group}>
-        {value}ms ({percentage}%)
+        {formatNumber(value, 2, 0)}ms ({percentage}%)
       </SidebarDetail>
     );
   });
@@ -175,10 +214,12 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </header>
           <h3 className="sidebar-title2">This selected call node</h3>
           <SidebarDetail label="Running Time">
-            {totalTime.value}ms ({totalTimePercent}%)
+            {formatNumber(totalTime.value, 2, 0)}ms ({totalTimePercent}%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
-            {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
+            {selfTime.value
+              ? `${formatNumber(selfTime.value, 2, 0)}ms (${selfTimePercent}%)`
+              : '—'}
           </SidebarDetail>
           {totalTime.breakdownByImplementation ? (
             <React.Fragment>
@@ -200,11 +241,17 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             This function across the entire tree
           </h3>
           <SidebarDetail label="Running Time">
-            {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
+            {formatNumber(totalTimeForFunc.value, 2, 0)}ms ({
+              totalTimeForFuncPercent
+            }%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
             {selfTimeForFunc.value
-              ? `${selfTimeForFunc.value}ms (${selfTimeForFuncPercent}%)`
+              ? `${formatNumber(
+                  selfTimeForFunc.value,
+                  2,
+                  0
+                )}ms (${selfTimeForFuncPercent}%)`
               : '—'}
           </SidebarDetail>
           {totalTimeForFunc.breakdownByImplementation ? (
