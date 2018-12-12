@@ -1,0 +1,8 @@
+/* Removing styling from the button */
+.tapBarTabButton{
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  font: inherit
+}

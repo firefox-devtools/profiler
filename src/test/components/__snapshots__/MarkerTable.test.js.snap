@@ -2,7 +2,11 @@
 
 exports[`MarkerTable renders some basic markers 1`] = `
 <div
+  aria-labelledby="marker-table"
   className="markerTable"
+  id="marker-table-tab"
+  role="tabpanel"
+  tabIndex="0"
 >
   <div
     className="markerSettings"
