@@ -16,7 +16,7 @@ import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
 import * as JsTracer from '../profile-logic/js-tracer';
 import * as CallTree from '../profile-logic/call-tree';
-import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
+import { ensureExists } from '../utils/flow';
 import { PathSet } from '../utils/path';
 
 import type {
@@ -58,7 +58,7 @@ import type {
   SymbolicationStatus,
   ProfileSharingStatus,
 } from '../types/state';
-import type { Transform, TransformStack } from '../types/transforms';
+import type { TransformStack } from '../types/transforms';
 import type {
   TimingsForPath,
   SelectedState,
@@ -362,65 +362,11 @@ export const selectorsForThread = (
       }
     );
 
-    const applyTransform = (
-      thread: Thread,
-      transform: Transform,
-      defaultCategory: IndexIntoCategoryList
-    ) => {
-      switch (transform.type) {
-        case 'focus-subtree':
-          return transform.inverted
-            ? Transforms.focusInvertedSubtree(
-                thread,
-                transform.callNodePath,
-                transform.implementation
-              )
-            : Transforms.focusSubtree(
-                thread,
-                transform.callNodePath,
-                transform.implementation
-              );
-        case 'merge-call-node':
-          return Transforms.mergeCallNode(
-            thread,
-            transform.callNodePath,
-            transform.implementation
-          );
-        case 'merge-function':
-          return Transforms.mergeFunction(thread, transform.funcIndex);
-        case 'drop-function':
-          return Transforms.dropFunction(thread, transform.funcIndex);
-        case 'focus-function':
-          return Transforms.focusFunction(thread, transform.funcIndex);
-        case 'collapse-resource':
-          return Transforms.collapseResource(
-            thread,
-            transform.resourceIndex,
-            transform.implementation,
-            defaultCategory
-          );
-        case 'collapse-direct-recursion':
-          return Transforms.collapseDirectRecursion(
-            thread,
-            transform.funcIndex,
-            transform.implementation
-          );
-        case 'collapse-function-subtree':
-          return Transforms.collapseFunctionSubtree(
-            thread,
-            transform.funcIndex,
-            defaultCategory
-          );
-        default:
-          throw assertExhaustiveCheck(transform);
-      }
-    };
-
     // It becomes very expensive to apply each transform over and over again as they
     // typically take around 100ms to run per transform on a fast machine. Memoize
     // memoize each step individually so that they transform stack can be pushed and
     // popped frequently and easily.
-    const applyTransformMemoized = memoize(applyTransform, {
+    const applyTransformMemoized = memoize(Transforms.applyTransform, {
       cache: new MixedTupleMap(),
     });
 
