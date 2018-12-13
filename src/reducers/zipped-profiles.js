@@ -8,7 +8,6 @@ import { oneLine } from 'common-tags';
 import { ensureExists } from '../utils/flow';
 import * as ZipFiles from '../profile-logic/zip-files';
 
-import type { Action } from '../types/store';
 import type {
   ZipFileState,
   Reducer,
@@ -19,14 +18,14 @@ import type {
  * This reducer contains all of the state that deals with loading in profiles from
  * zip files.
  */
-function zipFile(
-  state: ZipFileState = {
+const zipFile: Reducer<ZipFileState> = (
+  state = {
     phase: 'NO_ZIP_FILE',
     zip: null,
     pathInZipFile: null,
   },
-  action: Action
-): ZipFileState {
+  action
+) => {
   switch (action.type) {
     case 'UPDATE_URL_STATE': {
       if (
@@ -99,9 +98,9 @@ function zipFile(
     default:
       return state;
   }
-}
+};
 
-function error(state: null | Error = null, action: Action): null | Error {
+const error: Reducer<null | Error> = (state = null, action) => {
   switch (action.type) {
     case 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE':
     case 'FATAL_ERROR':
@@ -109,7 +108,7 @@ function error(state: null | Error = null, action: Action): null | Error {
     default:
       return state;
   }
-}
+};
 
 /**
  * This function ensures that the state transitions are logical and make sense. The
@@ -173,10 +172,10 @@ function _validateStateTransition(
   return next;
 }
 
-function selectedZipFileIndex(
-  state: null | ZipFiles.IndexIntoZipFileTable = null,
-  action: Action
-) {
+const selectedZipFileIndex: Reducer<null | ZipFiles.IndexIntoZipFileTable> = (
+  state = null,
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_ZIP_FILE': {
       return action.selectedZipFileIndex;
@@ -184,14 +183,16 @@ function selectedZipFileIndex(
     default:
       return state;
   }
-}
+};
 
-function expandedZipFileIndexes(
+const expandedZipFileIndexes: Reducer<
+  Array<ZipFiles.IndexIntoZipFileTable | null>
+> = (
   // In practice this should never contain null, but needs to support the
   // TreeView interface.
-  state: Array<ZipFiles.IndexIntoZipFileTable | null> = [],
-  action: Action
-) {
+  state = [],
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_EXPANDED_ZIP_FILES': {
       return action.expandedZipFileIndexes;
@@ -199,7 +200,7 @@ function expandedZipFileIndexes(
     default:
       return state;
   }
-}
+};
 
 const zipFileReducer: Reducer<ZippedProfilesState> = combineReducers({
   zipFile,

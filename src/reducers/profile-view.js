@@ -16,7 +16,6 @@ import type { Profile, Pid } from '../types/profile';
 import type { LocalTrack, GlobalTrack } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type {
-  Action,
   PreviewSelection,
   RequestedLib,
   TrackReference,
@@ -29,7 +28,7 @@ import type {
   ThreadViewOptions,
 } from '../types/state';
 
-function profile(state: Profile | null = null, action: Action): Profile | null {
+const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
       return action.profile;
@@ -63,42 +62,42 @@ function profile(state: Profile | null = null, action: Action): Profile | null {
     default:
       return state;
   }
-}
+};
 
 /**
  * This information is stored, rather than derived via selectors, since the coalesced
  * function update would force it to be recomputed on every symbolication update
  * pass. It is valid for the lifetime of the profile.
  */
-function globalTracks(state: GlobalTrack[] = [], action: Action) {
+const globalTracks: Reducer<GlobalTrack[]> = (state = [], action) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
       return action.globalTracks;
     default:
       return state;
   }
-}
+};
 
 /**
  * This can be derived like the globalTracks information, but is stored in the state
  * for the same reason.
  */
-function localTracksByPid(
-  state: Map<Pid, LocalTrack[]> = new Map(),
-  action: Action
-) {
+const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
+  state = new Map(),
+  action
+) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
       return action.localTracksByPid;
     default:
       return state;
   }
-}
+};
 
-function symbolicationStatus(
-  state: SymbolicationStatus = 'DONE',
-  action: Action
-) {
+const symbolicationStatus: Reducer<SymbolicationStatus> = (
+  state = 'DONE',
+  action
+) => {
   switch (action.type) {
     case 'START_SYMBOLICATING':
       return 'SYMBOLICATING';
@@ -107,12 +106,12 @@ function symbolicationStatus(
     default:
       return state;
   }
-}
+};
 
-function viewOptionsPerThread(
-  state: ThreadViewOptions[] = [],
-  action: Action
-): ThreadViewOptions[] {
+const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
+  state = [],
+  action
+) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
       return action.profile.threads.map(() => ({
@@ -346,9 +345,12 @@ function viewOptionsPerThread(
     default:
       return state;
   }
-}
+};
 
-function waitingForLibs(state: Set<RequestedLib> = new Set(), action: Action) {
+const waitingForLibs: Reducer<Set<RequestedLib>> = (
+  state = new Set(),
+  action
+) => {
   switch (action.type) {
     case 'REQUESTING_SYMBOL_TABLE': {
       const newState = new Set(state);
@@ -363,13 +365,12 @@ function waitingForLibs(state: Set<RequestedLib> = new Set(), action: Action) {
     default:
       return state;
   }
-}
+};
 
-function previewSelection(
-  state: PreviewSelection = { hasSelection: false, isModifying: false },
-  action: Action
-): PreviewSelection {
-  // TODO: Rename to timeRangeSelection
+const previewSelection: Reducer<PreviewSelection> = (
+  state = { hasSelection: false, isModifying: false },
+  action
+) => {
   switch (action.type) {
     case 'UPDATE_PREVIEW_SELECTION':
       return action.previewSelection;
@@ -379,9 +380,9 @@ function previewSelection(
     default:
       return state;
   }
-}
+};
 
-function scrollToSelectionGeneration(state: number = 0, action: Action) {
+const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
     case 'CHANGE_SELECTED_CALL_NODE':
@@ -394,60 +395,63 @@ function scrollToSelectionGeneration(state: number = 0, action: Action) {
     default:
       return state;
   }
-}
+};
 
-function focusCallTreeGeneration(state: number = 0, action: Action) {
+const focusCallTreeGeneration: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
     case 'FOCUS_CALL_TREE':
       return state + 1;
     default:
       return state;
   }
-}
+};
 
-function rootRange(
-  state: StartEndRange = { start: 0, end: 1 },
-  action: Action
-) {
+const rootRange: Reducer<StartEndRange> = (
+  state = { start: 0, end: 1 },
+  action
+) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
       return ProfileData.getTimeRangeIncludingAllThreads(action.profile);
     default:
       return state;
   }
-}
+};
 
-function rightClickedTrack(
+const rightClickedTrack: Reducer<TrackReference> = (
   // Make the initial value the first global track, which is assumed to exists.
   // This makes the track reference always exist, which in turn makes it so that
   // we do not have to check for a null TrackReference.
-  state: TrackReference = { type: 'global', trackIndex: 0 },
-  action: Action
-) {
+  state = { type: 'global', trackIndex: 0 },
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_RIGHT_CLICKED_TRACK':
       return action.trackReference;
     default:
       return state;
   }
-}
+};
 
-function isCallNodeContextMenuVisible(state: boolean = false, action: Action) {
+const isCallNodeContextMenuVisible: Reducer<boolean> = (
+  state = false,
+  action
+) => {
   switch (action.type) {
     case 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY':
       return action.isVisible;
     default:
       return state;
   }
-}
+};
 
-function profileSharingStatus(
-  state: ProfileSharingStatus = {
+const profileSharingStatus: Reducer<ProfileSharingStatus> = (
+  state = {
     sharedWithUrls: false,
     sharedWithoutUrls: false,
   },
-  action: Action
-): ProfileSharingStatus {
+  action
+) => {
   switch (action.type) {
     case 'SET_PROFILE_SHARING_STATUS':
       return action.profileSharingStatus;
@@ -466,7 +470,7 @@ function profileSharingStatus(
     default:
       return state;
   }
-}
+};
 
 /**
  * Provide a mechanism to wrap the reducer in a special function that can reset
@@ -489,7 +493,7 @@ const wrapReducerInResetter = (
   };
 };
 
-export default wrapReducerInResetter(
+const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
   combineReducers({
     viewOptions: combineReducers({
       perThread: viewOptionsPerThread,
@@ -508,3 +512,5 @@ export default wrapReducerInResetter(
     profile,
   })
 );
+
+export default profileViewReducer;
