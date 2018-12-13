@@ -14,8 +14,8 @@ import {
   getPreviewSelection,
   getProfile,
   getCommittedRange,
-} from '../../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../../reducers/url-state';
+} from '../../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../../selectors/url-state';
 import {
   selectBestAncestorCallNodeAndExpandCallTree,
   focusCallTree,

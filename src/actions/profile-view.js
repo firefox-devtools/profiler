@@ -4,7 +4,7 @@
 
 // @flow
 import { oneLine } from 'common-tags';
-import { getLastVisibleThreadTabSlug } from '../reducers/app';
+import { getLastVisibleThreadTabSlug } from '../selectors/app';
 import {
   selectorsForThread,
   selectedThreadSelectors,
@@ -14,7 +14,7 @@ import {
   getLocalTrackFromReference,
   getGlobalTrackFromReference,
   getPreviewSelection,
-} from '../reducers/profile-view';
+} from '../selectors/profile-view';
 import {
   getImplementationFilter,
   getSelectedThreadIndex,
@@ -23,7 +23,7 @@ import {
   getLocalTrackOrder,
   getHiddenLocalTracks,
   getSelectedTab,
-} from '../reducers/url-state';
+} from '../selectors/url-state';
 import {
   getCallNodePathFromIndex,
   getSampleCallNodes,

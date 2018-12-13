@@ -5,7 +5,7 @@
 // @flow
 
 import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/profile-view';
 import FilterNavigatorBar from './FilterNavigatorBar';
 import { popTransformsFromStack } from '../../actions/profile-view';
 

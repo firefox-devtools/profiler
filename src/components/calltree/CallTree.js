@@ -14,14 +14,14 @@ import {
   getImplementationFilter,
   getSearchStringsAsRegExp,
   getSelectedThreadIndex,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import {
   selectedThreadSelectors,
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelection,
-} from '../../reducers/profile-view';
-import { getIconsWithClassNames } from '../../reducers/icons';
+} from '../../selectors/profile-view';
+import { getIconsWithClassNames } from '../../selectors/icons';
 import {
   changeSelectedCallNode,
   changeExpandedCallNodes,

@@ -13,7 +13,7 @@ import {
 import {
   getImplementationFilter,
   getInvertCallstack,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import StackSearchField from '../shared/StackSearchField';
 import { toValidImplementationFilter } from '../../profile-logic/profile-data';
 

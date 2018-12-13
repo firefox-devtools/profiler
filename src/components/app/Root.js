@@ -15,13 +15,13 @@ import {
 import ProfileViewer from './ProfileViewer';
 import ZipFileViewer from './ZipFileViewer';
 import Home from './Home';
-import { getView } from '../../reducers/app';
-import { getHasZipFile } from '../../reducers/zipped-profiles';
+import { getView } from '../../selectors/app';
+import { getHasZipFile } from '../../selectors/zipped-profiles';
 import {
   getDataSource,
   getHash,
   getProfileUrl,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import UrlManager from './UrlManager';
 import ServiceWorkerManager from './ServiceWorkerManager';
 import FooterLinks from './FooterLinks';

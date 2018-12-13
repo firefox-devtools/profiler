@@ -12,8 +12,8 @@ import {
   getProfileRootRange,
   getProfileSharingStatus,
   getSymbolicationStatus,
-} from '../../reducers/profile-view';
-import { getDataSource, getUrlPredictor } from '../../reducers/url-state';
+} from '../../selectors/profile-view';
+import { getDataSource, getUrlPredictor } from '../../selectors/url-state';
 import actions from '../../actions';
 import { compress } from '../../utils/gz';
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';

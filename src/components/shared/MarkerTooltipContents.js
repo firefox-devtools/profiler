@@ -16,8 +16,8 @@ import {
   formatValueTotal,
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
-import { selectorsForThread } from '../../reducers/profile-view';
-import { getImplementationFilter } from '../../reducers/url-state';
+import { selectorsForThread } from '../../selectors/profile-view';
+import { getImplementationFilter } from '../../selectors/url-state';
 
 import Backtrace from './Backtrace';
 

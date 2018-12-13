@@ -23,8 +23,8 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
 import { viewProfile } from '../../actions/receive-profile';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
-import * as UrlStateSelectors from '../../reducers/url-state';
+import * as ProfileViewSelectors from '../../selectors/profile-view';
+import * as UrlStateSelectors from '../../selectors/url-state';
 import { stateFromLocation } from '../../app-logic/url-handling';
 
 const { selectedThreadSelectors, selectedNodeSelectors } = ProfileViewSelectors;
@@ -209,7 +209,7 @@ describe('getJankInstances', function() {
  * The following tests run through a dispatch and selector to provide coverage
  * over the Redux store to ensure that it behaves correctly. The intent is to cover
  * every single action, but do the bare minimum in the test to assert the relationship
- * between the actions and reducers.
+ * between the actions, reducers, and selectors.
  */
 describe('actions/ProfileView', function() {
   describe('changeSelectedCallNode', function() {

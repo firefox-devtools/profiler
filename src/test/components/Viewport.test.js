@@ -11,7 +11,7 @@ import { withChartViewport } from '../../components/shared/chart/Viewport';
 import {
   getCommittedRange,
   getPreviewSelection,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 
 import { changeSidebarOpenState } from '../../actions/app';
 

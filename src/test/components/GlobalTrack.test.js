@@ -16,8 +16,8 @@ import GlobalTrack from '../../components/timeline/GlobalTrack';
 import {
   getGlobalTracks,
   getRightClickedTrack,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';

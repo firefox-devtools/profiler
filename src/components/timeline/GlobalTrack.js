@@ -17,14 +17,14 @@ import {
   getHiddenGlobalTracks,
   getLocalTrackOrder,
   getSelectedTab,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
 import {
   getGlobalTracks,
   selectorsForThread,
   getLocalTracks,
   getGlobalTrackName,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';

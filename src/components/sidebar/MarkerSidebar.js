@@ -7,8 +7,8 @@
 import * as React from 'react';
 
 import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import { selectedThreadSelectors } from '../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 
 import type {

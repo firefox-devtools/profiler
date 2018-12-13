@@ -12,11 +12,11 @@ import EmptyReasons from './EmptyReasons';
 import {
   getProfile,
   selectedThreadSelectors,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 import {
   getShowJsTracerSummary,
   getSelectedThreadIndex,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { Profile, JsTracerTable, ThreadIndex } from '../../types/profile';

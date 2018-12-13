@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getIsUrlSetupDone } from '../../reducers/app';
+import { getIsUrlSetupDone } from '../../selectors/app';
 import { updateUrlState, urlSetupDone, show404 } from '../../actions/app';
 import { urlFromState, stateFromLocation } from '../../app-logic/url-handling';
 

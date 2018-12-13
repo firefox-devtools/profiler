@@ -7,10 +7,10 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
 
-import { getIsUrlSetupDone } from '../../reducers/app';
+import { getIsUrlSetupDone } from '../../selectors/app';
 import UrlManager from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
-import { getDataSource } from '../../reducers/url-state';
+import { getDataSource } from '../../selectors/url-state';
 
 describe('UrlManager', function() {
   function setup(urlPath: ?string) {
