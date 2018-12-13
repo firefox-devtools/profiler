@@ -18,7 +18,6 @@ import {
   getSelectedThreadIndex,
 } from '../../reducers/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
-import { changeSelectedTab } from '../../actions/app';
 
 import type { Profile, JsTracerTable, ThreadIndex } from '../../types/profile';
 import type {
@@ -30,7 +29,6 @@ require('./index.css');
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
-  +changeSelectedTab: typeof changeSelectedTab,
 |};
 
 type StateProps = {|
@@ -44,15 +42,6 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class JsTracer extends React.PureComponent<Props> {
   _rafGeneration: number = 0;
-
-  componentDidUpdate() {
-    const { changeSelectedTab, jsTracerTable } = this.props;
-    if (jsTracerTable === null) {
-      // If the user switches to another thread that doesn't have JS Tracer information,
-      // then switch to the calltree.
-      changeSelectedTab('calltree');
-    }
-  }
 
   render() {
     const {
@@ -69,7 +58,6 @@ class JsTracer extends React.PureComponent<Props> {
           <>
             <JsTracerSettings />
             <JsTracerChart
-              key={`${threadIndex}-${showJsTracerSummary ? 'true' : 'false'}`}
               profile={profile}
               jsTracerTable={jsTracerTable}
               showJsTracerSummary={showJsTracerSummary}
@@ -91,7 +79,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       showJsTracerSummary: getShowJsTracerSummary(state),
     };
   },
-  mapDispatchToProps: { updatePreviewSelection, changeSelectedTab },
+  mapDispatchToProps: { updatePreviewSelection },
   component: JsTracer,
 };
 export default explicitConnect(options);

@@ -68,7 +68,7 @@ import type {
   TimingsForPath,
   SelectedState,
 } from '../profile-logic/profile-data';
-import { type UniqueStringArray } from '../utils/unique-string-array';
+import type { UniqueStringArray } from '../utils/unique-string-array';
 
 function profile(state: Profile | null = null, action: Action): Profile | null {
   switch (action.type) {

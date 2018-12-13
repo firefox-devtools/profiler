@@ -268,6 +268,16 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
     }
 
     if (
+      selectedTab === 'js-tracer' &&
+      selectorsForThread(selectedThreadIndex).getJsTracerTable(getState()) ===
+        null
+    ) {
+      // If the user switches to another thread that doesn't have JS Tracer information,
+      // then switch to the calltree.
+      selectedTab = 'calltree';
+    }
+
+    if (
       currentlySelectedTab === selectedTab &&
       currentlySelectedThreadIndex === selectedThreadIndex
     ) {

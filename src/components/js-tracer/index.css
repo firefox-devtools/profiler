@@ -20,15 +20,6 @@
   justify-content: center;
 }
 
-@keyframes jsTracerCanvasFadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
 .jsTracerCanvasFadeIn {
   background-color: #fff;
   opacity: 0;
@@ -36,6 +27,5 @@
 
 .jsTracerCanvasFadeIn.jsTracerCanvasDrawn {
   opacity: 1;
-  animation-name: jsTracerCanvasFadeIn;
-  animation-duration: 200ms;
+  transition: opacity 200ms;
 }

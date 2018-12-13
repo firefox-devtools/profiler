@@ -342,33 +342,29 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
           const isHovered = hoveredItem === timing.index[i];
 
           // Perform some checks to see if we can skip drawing this event.
-          {
-            if (uncutWidth === 0) {
-              // This event width is 0, so there is nothing to draw. This may not happen
-              // in practice with JS tracer data, but perform a check anyway.
-              continue;
-            }
-            if (x + uncutWidth < devicePixels.timelineMarginLeft) {
-              // The right hand side of the box is not in the viewport range.
-              continue;
-            }
-            if (
-              x >
-              devicePixels.containerWidth - devicePixels.timelineMarginRight
-            ) {
-              // Start of the box is not in the viewport rage.
-              continue;
-            }
+          if (uncutWidth === 0) {
+            // This event width is 0, so there is nothing to draw. This may not happen
+            // in practice with JS tracer data, but perform a check anyway.
+            continue;
+          }
+          if (x + uncutWidth < devicePixels.timelineMarginLeft) {
+            // The right hand side of the box is not in the viewport range.
+            continue;
+          }
+          if (
+            x >
+            devicePixels.containerWidth - devicePixels.timelineMarginRight
+          ) {
+            // Start of the box is not in the viewport rage.
+            continue;
           }
 
           // Adjust the width if this box is cut by the viewport.
           let w = uncutWidth;
-          {
-            if (x < devicePixels.timelineMarginLeft) {
-              // Adjust events that are before the left margin.
-              w = w - (devicePixels.timelineMarginLeft - x);
-              x = devicePixels.timelineMarginLeft;
-            }
+          if (x < devicePixels.timelineMarginLeft) {
+            // Adjust events that are before the left margin.
+            w = w - (devicePixels.timelineMarginLeft - x);
+            x = devicePixels.timelineMarginLeft;
           }
 
           // Now determine if we can draw the event or commit partial pixels.

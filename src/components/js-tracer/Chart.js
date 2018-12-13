@@ -155,7 +155,7 @@ type ChartLoaderProps = {|
 |};
 
 type ChartLoaderState = {|
-  wasLoaderMounted: boolean,
+  readyToRenderExpensiveChart: boolean,
 |};
 
 // Keep track of all the React keys seen for a component. If everything is correctly
@@ -167,14 +167,20 @@ const _seenChartKeysPerProfile: WeakMap<Profile, Set<string>> = new WeakMap();
 
 /**
  * This component displays a helpful loading screen for the first time a selector is
- * run. It relies on having a propery `key` property on the component. This way
+ * run. It relies on having a property `key` property on the component. This way
  * initialization and invalidation is all handled through the component lifecycles.
  */
 class JsTracerChartLoader extends React.PureComponent<
   ChartLoaderProps,
   ChartLoaderState
 > {
-  state = { wasLoaderMounted: false };
+  state = {
+    // The loader needs to be mounted before rendering the chart, as it has expensive
+    // selectors.
+    readyToRenderExpensiveChart: false,
+  };
+  // When loading the JS Tracer information multiple times, the expensive selectors
+  // will have already run. There is no need to fade the component in.
   _doFadeIn: boolean = false;
 
   constructor(props) {
@@ -199,7 +205,7 @@ class JsTracerChartLoader extends React.PureComponent<
       // Let the screen render at least once, then start computing the expensive chart.
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          this.setState({ wasLoaderMounted: true });
+          this.setState({ readyToRenderExpensiveChart: true });
         });
       });
     }
@@ -207,7 +213,7 @@ class JsTracerChartLoader extends React.PureComponent<
 
   render() {
     const { jsTracerTable, showJsTracerSummary } = this.props;
-    return this.state.wasLoaderMounted || !this._doFadeIn ? (
+    return this.state.readyToRenderExpensiveChart || !this._doFadeIn ? (
       <JsTracerExpensiveChart
         doFadeIn={this._doFadeIn}
         jsTracerTable={jsTracerTable}
@@ -232,10 +238,12 @@ type ChartProps = {|
 
 /**
  * This component enforces that the JsTracerChartLoader has a correct key in order
- * to signal React to unmount the previous JsTracerChartLoader componenent, and create
- * a new one. This ensures that expensive selectors won't re-run as we are following
- * the React component lifecycle.
+ * to signal React to unmount the previous JsTracerChartLoader component, and create
+ * a new one. This ensures that the loading message is correctly displayed for new
+ * JS tracer data. The initial computation of the timing information is quite expensive,
+ * so it's nice to show a friendly message in the UI to the end user first.
  *
+ * For more information on the life cycle of keyed components see:
  * See: https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-uncontrolled-component-with-a-key
  */
 export default class JsTracerChart extends React.PureComponent<ChartProps> {
