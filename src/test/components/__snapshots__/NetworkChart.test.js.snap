@@ -52,7 +52,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -94,7 +94,23 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               className="networkChartRowItemLabel"
             >
-              Network
+              <span>
+                <span
+                  className="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  className="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  className="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </span>
             </div>
             <div
               className="networkChartRowItemBar"

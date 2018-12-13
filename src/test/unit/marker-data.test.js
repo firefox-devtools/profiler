@@ -9,11 +9,22 @@ import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
 
 describe('getTracingMarkers', function() {
   const profile = processProfile(getGeckoProfile());
-  const thread = profile.threads[0];
+  const thread = profile.threads[0]; // This is the parent process main thread
+  const contentThread = profile.threads[2]; // This is the content process main thread
   const tracingMarkers = getTracingMarkers(thread.markers, thread.stringTable);
+  const contentTracingMarkers = getTracingMarkers(
+    contentThread.markers,
+    contentThread.stringTable
+  );
 
-  it('creates 11 tracing markers given the test data', function() {
-    expect(tracingMarkers.length).toEqual(11);
+  it('creates a reasonable processed profile', function() {
+    expect(thread.name).toBe('GeckoMain');
+    expect(thread.processType).toBe('default');
+    expect(contentThread.name).toBe('GeckoMain');
+    expect(contentThread.processType).toBe('tab');
+  });
+  it('creates 12 tracing markers given the test data', function() {
+    expect(tracingMarkers.length).toEqual(12);
   });
   it('creates a tracing marker even if there is no start or end time', function() {
     expect(tracingMarkers[1]).toMatchObject({
@@ -32,7 +43,7 @@ describe('getTracingMarkers', function() {
     });
   });
   it('should fold the two reflow markers into one tracing marker', function() {
-    expect(tracingMarkers.length).toEqual(11);
+    expect(tracingMarkers.length).toEqual(12);
     expect(tracingMarkers[2]).toMatchObject({
       start: 3,
       dur: 5,
@@ -109,6 +120,60 @@ describe('getTracingMarkers', function() {
       name: 'ArbitraryName',
       title: null,
       data: { category: 'ArbitraryCategory', type: 'tracing' },
+    });
+  });
+  it('shifts content process marker times correctly', function() {
+    expect(thread.processStartupTime).toBe(0);
+    expect(contentThread.processStartupTime).toBe(1000);
+    expect(tracingMarkers[11]).toEqual({
+      data: {
+        type: 'Network',
+        startTime: 22,
+        endTime: 24,
+        id: 388634410746504,
+        status: 'STATUS_STOP',
+        pri: -20,
+        count: 37838,
+        URI: 'https://github.com/rustwasm/wasm-bindgen/issues/2',
+        domainLookupStart: 22.1,
+        domainLookupEnd: 22.2,
+        connectStart: 22.3,
+        tcpConnectEnd: 22.4,
+        secureConnectionStart: 22.5,
+        connectEnd: 22.6,
+        requestStart: 22.7,
+        responseStart: 22.8,
+        responseEnd: 22.9,
+      },
+      dur: 2,
+      name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
+      start: 22,
+      title: null,
+    });
+    expect(contentTracingMarkers[11]).toEqual({
+      data: {
+        type: 'Network',
+        startTime: 1022,
+        endTime: 1024,
+        id: 388634410746504,
+        status: 'STATUS_STOP',
+        pri: -20,
+        count: 37838,
+        URI: 'https://github.com/rustwasm/wasm-bindgen/issues/2',
+        domainLookupStart: 1022.1,
+        domainLookupEnd: 1022.2,
+        connectStart: 1022.3,
+        tcpConnectEnd: 1022.4,
+        secureConnectionStart: 1022.5,
+        connectEnd: 1022.6,
+        requestStart: 1022.7,
+        responseStart: 1022.8,
+        responseEnd: 1022.9,
+      },
+      dur: 2,
+      name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
+      start: 1022,
+      title: null,
     });
   });
 });

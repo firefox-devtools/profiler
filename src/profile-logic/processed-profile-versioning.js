@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 18; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 19; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -853,6 +853,51 @@ const _upgraders = {
         }
       }
       thread.stringArray = stringTable.serializeToArray();
+    }
+  },
+  [19]: profile => {
+    // When we added timing information to network markers, we forgot to shift
+    // timestamps from subprocesses during profile processing. This upgrade
+    // fixes that.
+    for (const thread of profile.threads) {
+      const markers = thread.markers;
+      const delta = thread.processStartupTime;
+      for (
+        let markerIndex = 0;
+        markerIndex < thread.markers.length;
+        markerIndex++
+      ) {
+        const data = markers.data[markerIndex];
+        if (data && 'type' in data && data.type === 'Network') {
+          if (data.domainLookupStart) {
+            data.domainLookupStart += delta;
+          }
+          if (data.domainLookupEnd) {
+            data.domainLookupEnd += delta;
+          }
+          if (data.connectStart) {
+            data.connectStart += delta;
+          }
+          if (data.tcpConnectEnd) {
+            data.tcpConnectEnd += delta;
+          }
+          if (data.secureConnectionStart) {
+            data.secureConnectionStart += delta;
+          }
+          if (data.connectEnd) {
+            data.connectEnd += delta;
+          }
+          if (data.requestStart) {
+            data.requestStart += delta;
+          }
+          if (data.responseStart) {
+            data.responseStart += delta;
+          }
+          if (data.responseEnd) {
+            data.responseEnd += delta;
+          }
+        }
+      }
     }
   },
 };

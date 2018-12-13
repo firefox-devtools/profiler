@@ -99,7 +99,6 @@ describe('NetworkChartRowBar phase calculations', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        dur: 100,
         status: 'STATUS_REDIRECT',
         connectStart: 20,
         startTime: 10,
@@ -107,8 +106,6 @@ describe('NetworkChartRowBar phase calculations', function() {
         requestStart: 20,
         responseStart: 60,
         responseEnd: 80,
-        title: 'Load 100',
-        name: 'Name',
       }
     );
     expect(
@@ -132,15 +129,12 @@ describe('NetworkChartRowBar phase calculations', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        dur: 100,
         status: 'STATUS_REDIRECT',
         connectStart: 20,
         startTime: 10,
         endTime: 90,
         responseStart: 60,
         responseEnd: 80,
-        title: 'Load 100',
-        name: 'Name',
       }
     );
     expect(
@@ -164,12 +158,9 @@ describe('NetworkChartRowBar phase calculations', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        dur: 100,
         status: 'STATUS_REDIRECT',
         startTime: 10,
         endTime: 90,
-        title: 'Load 100',
-        name: 'Name',
       }
     );
     expect(
@@ -195,12 +186,9 @@ describe('NetworkChartRowBar URL split', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        dur: 100,
         status: 'STATUS_REDIRECT',
         startTime: 10,
         endTime: 90,
-        title: 'Load 100',
-        name: 'Name',
       }
     );
     expect(
@@ -229,12 +217,9 @@ describe('NetworkChartRowBar URL split', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        dur: 100,
         status: 'STATUS_REDIRECT',
         startTime: 10,
         endTime: 90,
-        title: 'Load 100',
-        name: 'Name',
       }
     );
     expect(
@@ -257,12 +242,9 @@ describe('NetworkChartRowBar MIME-type filter', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        dur: 100,
         status: 'STATUS_REDIRECT',
         startTime: 10,
         endTime: 90,
-        title: 'Load 100',
-        name: 'Name',
       }
     );
     expect(
@@ -283,12 +265,9 @@ describe('NetworkChartRowBar MIME-type filter', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        dur: 100,
         status: 'STATUS_REDIRECT',
         startTime: 10,
         endTime: 90,
-        title: 'Load 100',
-        name: 'Name',
       }
     );
     expect(
@@ -309,12 +288,9 @@ describe('NetworkChartRowBar MIME-type filter', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        dur: 100,
         status: 'STATUS_REDIRECT',
         startTime: 10,
         endTime: 90,
-        title: 'Load 100',
-        name: 'Name',
       }
     );
     expect(
@@ -335,12 +311,9 @@ describe('NetworkChartRowBar MIME-type filter', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        dur: 100,
         status: 'STATUS_REDIRECT',
         startTime: 10,
         endTime: 90,
-        title: 'Load 100',
-        name: 'Name',
       }
     );
     expect(
@@ -361,12 +334,9 @@ describe('NetworkChartRowBar MIME-type filter', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        dur: 100,
         status: 'STATUS_REDIRECT',
         startTime: 10,
         endTime: 90,
-        title: 'Load 100',
-        name: 'Name',
       }
     );
     expect(
