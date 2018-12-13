@@ -19,6 +19,7 @@ import * as MarkerData from '../profile-logic/marker-data';
 import * as StackTiming from '../profile-logic/stack-timing';
 import * as FlameGraph from '../profile-logic/flame-graph';
 import * as MarkerTiming from '../profile-logic/marker-timing';
+import * as JsTracer from '../profile-logic/js-tracer';
 import * as CallTree from '../profile-logic/call-tree';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import { arePathsEqual, PathSet } from '../utils/path';
@@ -34,6 +35,7 @@ import type {
   MarkersTable,
   IndexIntoSamplesTable,
   IndexIntoMarkersTable,
+  JsTracerTable,
 } from '../types/profile';
 import type {
   TracingMarker,
@@ -44,6 +46,7 @@ import type {
   LocalTrack,
   GlobalTrack,
   TrackIndex,
+  JsTracerTiming,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -65,6 +68,7 @@ import type {
   TimingsForPath,
   SelectedState,
 } from '../profile-logic/profile-data';
+import type { UniqueStringArray } from '../utils/unique-string-array';
 
 function profile(state: Profile | null = null, action: Action): Profile | null {
   switch (action.type) {
@@ -753,6 +757,7 @@ const _getDefaultCategoryWrappedInObject = createSelector(
 
 export type SelectorsForThread = {
   getThread: State => Thread,
+  getStringTable: State => UniqueStringArray,
   getViewOptions: State => ThreadViewOptions,
   getTransformStack: State => TransformStack,
   getTransformLabels: State => string[],
@@ -796,6 +801,9 @@ export type SelectorsForThread = {
   getPreviewFilteredTracingMarkers: State => TracingMarker[],
   unfilteredSamplesRange: State => StartEndRange | null,
   getSelectedMarkerIndex: State => IndexIntoMarkersTable | -1,
+  getJsTracerTable: State => JsTracerTable | null,
+  getExpensiveJsTracerTiming: State => null | JsTracerTiming[],
+  getExpensiveJsTracerLeafTiming: State => null | JsTracerTiming[],
 };
 
 const selectorsForThreads: { [key: ThreadIndex]: SelectorsForThread } = {};
@@ -807,7 +815,7 @@ export const selectorsForThread = (
     const getThread = (state: State): Thread =>
       getProfile(state).threads[threadIndex];
     const _getMarkersTable = (state: State) => getThread(state).markers;
-    const _getStringTable = (state: State) => getThread(state).stringTable;
+    const getStringTable = (state: State) => getThread(state).stringTable;
 
     /**
      * The first per-thread selectors filter out and transform a thread based on user's
@@ -987,12 +995,12 @@ export const selectorsForThread = (
      */
     const getProcessedMarkersTable = createSelector(
       _getMarkersTable,
-      _getStringTable,
+      getStringTable,
       MarkerData.extractMarkerDataFromName
     );
     const getTracingMarkers = createSelector(
       getProcessedMarkersTable,
-      _getStringTable,
+      getStringTable,
       MarkerData.getTracingMarkers
     );
     const getCommittedRangeFilteredTracingMarkers = createSelector(
@@ -1073,7 +1081,7 @@ export const selectorsForThread = (
     );
     const getScreenshotsById = createSelector(
       _getMarkersTable,
-      _getStringTable,
+      getStringTable,
       getProfileRootRange,
       MarkerData.extractScreenshotsById
     );
@@ -1223,8 +1231,40 @@ export const selectorsForThread = (
     const getSelectedMarkerIndex = (state: State) =>
       getViewOptions(state).selectedMarker;
 
+    const getJsTracerTable = (state: State) =>
+      getThread(state).jsTracer || null;
+
+    /**
+     * This selector can be very slow, so care should be taken when running it to provide
+     * a helpful loading message for the user. Provide separate selectors for the stack
+     * based timing, and the leaf timing, so that they memoize nicely.
+     */
+    const getExpensiveJsTracerTiming = createSelector(
+      getJsTracerTable,
+      getStringTable,
+      (jsTracerTable, stringTable) =>
+        jsTracerTable === null
+          ? null
+          : JsTracer.getJsTracerTiming(jsTracerTable, stringTable)
+    );
+
+    /**
+     * This selector can be very slow, so care should be taken when running it to provide
+     * a helpful loading message for the user. Provide separate selectors for the stack
+     * based timing, and the leaf timing, so that they memoize nicely.
+     */
+    const getExpensiveJsTracerLeafTiming = createSelector(
+      getJsTracerTable,
+      getStringTable,
+      (jsTracerTable, stringTable) =>
+        jsTracerTable === null
+          ? null
+          : JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
+    );
+
     selectorsForThreads[threadIndex] = {
       getThread,
+      getStringTable,
       getViewOptions,
       getTransformStack,
       getTransformLabels,
@@ -1265,6 +1305,9 @@ export const selectorsForThread = (
       getPreviewFilteredTracingMarkers,
       unfilteredSamplesRange,
       getSelectedMarkerIndex,
+      getJsTracerTable,
+      getExpensiveJsTracerTiming,
+      getExpensiveJsTracerLeafTiming,
     };
   }
   return selectorsForThreads[threadIndex];
