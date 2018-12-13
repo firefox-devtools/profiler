@@ -65,6 +65,7 @@
     "react-dom": "^16.2.0",
     "react-redux": "^5.0.6",
     "react-splitter-layout": "^3.0.0",
+    "react-tabs": "^2.3.0",
     "react-transition-group": "^2.2.1",
     "redux": "^3.7.2",
     "redux-logger": "^3.0.6",
