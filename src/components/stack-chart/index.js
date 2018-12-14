@@ -129,9 +129,8 @@ class StackChartGraph extends React.PureComponent<Props> {
       <div
         className="stackChart"
         id="stack-chart-tab"
-        tabIndex="0"
         role="tabpanel"
-        aria-labelledby="stack-chart"
+        aria-labelledby="stack-chart-tab-button"
       >
         <StackSettings />
         <div className="stackChartContent">

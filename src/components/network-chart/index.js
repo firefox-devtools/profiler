@@ -87,9 +87,8 @@ class NetworkChart extends React.PureComponent<Props> {
       <div
         className="networkChart"
         id="network-chart-tab"
-        tabIndex="0"
         role="tabpanel"
-        aria-labelledby="network-chart"
+        aria-labelledby="network-chart-tab-button"
       >
         <MarkerSettings />
         {markers.length === 0 ? (

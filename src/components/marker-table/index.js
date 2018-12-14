@@ -214,9 +214,8 @@ class MarkerTable extends PureComponent<Props> {
       <div
         className="markerTable"
         id="marker-table-tab"
-        tabIndex="0"
         role="tabpanel"
-        aria-labelledby="marker-table"
+        aria-labelledby="marker-table-tab-button"
       >
         <MarkerSettings />
         <TreeView

@@ -2,11 +2,10 @@
 
 exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tree with no samples 1`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -148,11 +147,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
 
 exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out of range of a threads samples 1`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -294,11 +292,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
 
 exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when samples are completely filtered out 1`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -440,11 +437,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
 
 exports[`calltree/ProfileCallTreeView computes a width for a call tree of a really deep stack 1`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -2121,11 +2117,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
 
 exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -2882,11 +2877,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
 
 exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -3643,11 +3637,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
 
 exports[`calltree/ProfileCallTreeView renders call tree with some search strings 1`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -4404,11 +4397,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
 
 exports[`calltree/ProfileCallTreeView renders call tree with some search strings 2`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -5094,11 +5086,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
 
 exports[`calltree/ProfileCallTreeView renders call tree with some search strings 3`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -5784,11 +5775,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
 
 exports[`calltree/ProfileCallTreeView renders call tree with some search strings 4`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -6327,11 +6317,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
 
 exports[`calltree/ProfileCallTreeView renders call tree with some search strings 5`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"
@@ -6870,11 +6859,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
 
 exports[`calltree/ProfileCallTreeView renders call tree with some search strings 6`] = `
 <div
-  aria-labelledby="calltree"
+  aria-labelledby="calltree-tab-button"
   className="treeAndSidebarWrapper"
   id="calltree-tab"
   role="tabpanel"
-  tabIndex="0"
 >
   <div
     className="stackSettings"

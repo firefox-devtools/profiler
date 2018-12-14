@@ -9,7 +9,7 @@ import classNames from 'classnames';
 
 import { tabsWithTitle, type TabSlug } from '../../app-logic/tabs-handling';
 
-import './TapBar.css';
+import './TabBar.css';
 
 type Props = {|
   +className?: string,
@@ -51,18 +51,21 @@ class TabBar extends React.PureComponent<Props> {
               data-name={tabSlug}
               onClick={this._onClickListener}
             >
-              {/* adding a button for better keyboard navigation  
-            (allows tabbing between the different panels)
-            ARIA attributes for better accessibility and usability
-            (arrow navigation between the tabs) */}
+              {/* adding a button for better keyboard navigation and
+              adding ARIA attributes for screen reader support.*/}
               <button
-                className="tapBarTabButton"
+                className="tabBarTabButton"
                 type="button"
-                id={tabSlug}
+                // The tab's id attribute connects the tab to its tabpanel
+                // that has an aria-labelledby attribute of the same value.
+                // The id is not used for CSS styling.
+                id={`${tabSlug}-tab-button`}
                 role="tab"
                 aria-selected={tabSlug === selectedTabSlug}
+                // The control and content relationship is established
+                // with aria-controls attribute
+                // (the tabbanel has an id of the same value).
                 aria-controls={`${tabSlug}-tab`}
-                tab-index={tabSlug === selectedTabSlug ? null : -1}
               >
                 {tabsWithTitle[tabSlug]}
               </button>
