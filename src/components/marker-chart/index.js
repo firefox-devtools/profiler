@@ -99,9 +99,8 @@ class MarkerChart extends React.PureComponent<Props> {
       <div
         className="markerChart"
         id="marker-chart-tab"
-        tabIndex="0"
         role="tabpanel"
-        aria-labelledby="marker-chart"
+        aria-labelledby="marker-chart-tab-button"
       >
         <MarkerSettings />
         {markers.length === 0 ? (

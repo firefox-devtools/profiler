@@ -19,9 +19,8 @@ const ProfileCallTreeView = (props: Props) => (
   <div
     className="treeAndSidebarWrapper"
     id="calltree-tab"
-    tabIndex="0"
     role="tabpanel"
-    aria-labelledby="calltree"
+    aria-labelledby="calltree-tab-button"
   >
     <StackSettings />
     <TransformNavigator />
