@@ -7,7 +7,7 @@
 import * as React from 'react';
 
 import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from '../../selectors/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 

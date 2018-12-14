@@ -11,12 +11,12 @@ import {
 import explicitConnect from '../../utils/connect';
 import StackChartCanvas from './Canvas';
 import {
-  selectedThreadSelectors,
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
   getScrollToSelectionGeneration,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import {
   getCategoryColorStrategy,

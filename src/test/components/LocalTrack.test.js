@@ -21,7 +21,7 @@ import {
   getRightClickedTrack,
   getLocalTrackFromReference,
   getProfile,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getNetworkTrackProfile } from '../fixtures/profiles/make-profile';

@@ -14,11 +14,11 @@ import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
 import MarkerSettings from '../shared/MarkerSettings';
 
 import {
-  selectedThreadSelectors,
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 

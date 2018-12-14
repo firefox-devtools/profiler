@@ -10,7 +10,7 @@ import explicitConnect from '../../utils/connect';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
-} from '../../selectors/profile-view';
+} from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { getFunctionName } from '../../profile-logic/function-info';
 import { assertExhaustiveCheck } from '../../utils/flow';

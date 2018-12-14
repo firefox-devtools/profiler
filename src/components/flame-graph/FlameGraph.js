@@ -7,12 +7,12 @@ import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import FlameGraphCanvas from './Canvas';
 import {
-  selectedThreadSelectors,
   getCommittedRange,
   getProfileViewOptions,
   getPreviewSelection,
   getScrollToSelectionGeneration,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
