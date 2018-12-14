@@ -9,6 +9,7 @@ import {
   unserializeProfileOfArbitraryFormat,
 } from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
+import { getEmptyProfile } from '../profile-logic/data-structures';
 import { symbolicateProfile } from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { decompress } from '../utils/gz';
@@ -24,6 +25,7 @@ import {
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
 } from '../selectors/url-state';
+import { stateFromLocation } from '../app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -661,12 +663,14 @@ async function _extractJsonFromResponse(
   }
 }
 
+function getProfileUrlForHash(hash: string): string {
+  return `https://profile-store.commondatastorage.googleapis.com/${hash}`;
+}
+
 export function retrieveProfileFromStore(
   hash: string
 ): ThunkAction<Promise<void>> {
-  return retrieveProfileOrZipFromUrl(
-    `https://profile-store.commondatastorage.googleapis.com/${hash}`
-  );
+  return retrieveProfileOrZipFromUrl(getProfileUrlForHash(hash));
 }
 
 /**
@@ -797,6 +801,74 @@ export function retrieveProfileFromFile(
           dispatch(viewProfile(profile));
         }
       }
+    } catch (error) {
+      dispatch(fatalError(error));
+    }
+  };
+}
+
+/**
+ * This action retrieves 2 profiles and push them into 1 profile using the
+ * information contained in the query.
+ */
+export function retrieveProfilesToCompare(
+  profileViewUrls: [string, string]
+): ThunkAction<Promise<void>> {
+  return async dispatch => {
+    dispatch(waitingForProfileFromUrl());
+
+    try {
+      // First we get a state from each URL. From these states we'll get all the
+      // data we need to fetch and process the profiles.
+      const profileStates = profileViewUrls.map(url =>
+        stateFromLocation(new URL(url))
+      );
+      const hasSupportedDatasources = profileStates.every(
+        state => state.dataSource === 'public'
+      );
+      if (!hasSupportedDatasources) {
+        throw new Error(
+          'Only public uploaded profiles are supported by the comparison function.'
+        );
+      }
+
+      // Then we retrieve the profiles from the online store, and unserialize
+      // and process them if needed.
+      const promises = profileStates.map(async ({ hash }) => {
+        const profileUrl = getProfileUrlForHash(hash);
+        const response = await _fetchProfile({
+          url: profileUrl,
+          onTemporaryError: (e: TemporaryError) => {
+            dispatch(temporaryError(e));
+          },
+        });
+        const serializedProfile = response.profile;
+        if (!serializedProfile) {
+          throw new Error('Expected to receive a profile from _fetchProfile');
+        }
+
+        const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
+        return profile;
+      });
+
+      // Once all profiles have been fetched and unserialized, we can start
+      // pushing them to a brand new profile. This resulting profile will keep
+      // only the 2 selected threads from the 2 profiles.
+      const profiles = await Promise.all(promises);
+      const resultProfile = getEmptyProfile();
+      resultProfile.meta.categories = profiles[0].meta.categories;
+      for (let i = 0; i < profileStates.length; i++) {
+        const { profileSpecific: { selectedThread } } = profileStates[i];
+        if (selectedThread === null) {
+          continue;
+        }
+        const thread = profiles[i].threads[selectedThread];
+        thread.processName = `Profile ${i}: ${thread.processName ||
+          thread.name}`;
+        resultProfile.threads.push(thread);
+      }
+
+      dispatch(viewProfile(resultProfile));
     } catch (error) {
       dispatch(fatalError(error));
     }
