@@ -14,21 +14,21 @@ import {
   getImplementationFilter,
   getSearchStringsAsRegExp,
   getSelectedThreadIndex,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import {
   selectedThreadSelectors,
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelection,
-} from '../../reducers/profile-view';
-import { getIconsWithClassNames } from '../../reducers/icons';
+} from '../../selectors/profile-view';
+import { getIconsWithClassNames } from '../../selectors/icons';
 import {
   changeSelectedCallNode,
   changeExpandedCallNodes,
   addTransformToStack,
 } from '../../actions/profile-view';
 
-import type { IconWithClassName, State } from '../../types/reducers';
+import type { IconWithClassName, State } from '../../types/state';
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { ImplementationFilter } from '../../types/actions';
 import type { ThreadIndex } from '../../types/profile';

@@ -21,8 +21,8 @@ import {
   getSelectedZipFileIndex,
   getExpandedZipFileIndexes,
   getZipFileErrorMessage,
-} from '../../reducers/zipped-profiles';
-import { getPathInZipFileFromUrl } from '../../reducers/url-state';
+} from '../../selectors/zipped-profiles';
+import { getPathInZipFileFromUrl } from '../../selectors/url-state';
 import TreeView from '../shared/TreeView';
 import ProfileViewer from './ProfileViewer';
 
@@ -30,7 +30,7 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
-import type { ZipFileState } from '../../types/reducers';
+import type { ZipFileState } from '../../types/state';
 import type {
   ZipFileTable,
   ZipDisplayData,

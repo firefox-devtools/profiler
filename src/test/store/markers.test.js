@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/profile-view';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 
 describe('selectors/getMarkerChartTiming', function() {

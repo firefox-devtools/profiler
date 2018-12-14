@@ -11,7 +11,7 @@ import { changeCallTreeSearchString } from '../../actions/profile-view';
 import {
   getCurrentSearchString,
   getSearchStrings,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 
 import type {
   ExplicitConnectOptions,

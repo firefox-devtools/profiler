@@ -14,8 +14,8 @@ import {
   addMarkersToThreadWithCorrespondingSamples,
   getProfileFromTextSamples,
 } from '../fixtures/profiles/make-profile';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import { selectedThreadSelectors } from '../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 
 describe('MarkerTooltipContents', function() {
   it('renders tooltips for various markers', () => {

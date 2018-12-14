@@ -7,7 +7,7 @@
 import React, { PureComponent } from 'react';
 import { connect } from 'react-redux';
 import { changeShowJsTracerSummary } from '../../actions/profile-view';
-import { getShowJsTracerSummary } from '../../reducers/url-state';
+import { getShowJsTracerSummary } from '../../selectors/url-state';
 
 import './Settings.css';
 

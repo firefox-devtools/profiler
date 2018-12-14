@@ -16,12 +16,12 @@ import {
   getSelectedThreadIndex,
   getHiddenLocalTracks,
   getSelectedTab,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
 import {
   selectorsForThread,
   getLocalTrackName,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';
 import type { TrackReference } from '../../types/actions';

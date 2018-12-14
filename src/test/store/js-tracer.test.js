@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/profile-view';
 import { ensureExists } from '../../utils/flow';
 import { changeShowJsTracerSummary } from '../../actions/profile-view';
 import {

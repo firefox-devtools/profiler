@@ -7,7 +7,7 @@
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import { changeMarkersSearchString } from '../../actions/profile-view';
-import { getMarkersSearchString } from '../../reducers/url-state';
+import { getMarkersSearchString } from '../../selectors/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
 
 import type {

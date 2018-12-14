@@ -10,7 +10,7 @@ import { BackgroundImageStyleDef } from './StyleDef';
 
 import ContextMenuTrigger from './ContextMenuTrigger';
 
-import type { IconWithClassName } from '../../types/reducers';
+import type { IconWithClassName } from '../../types/state';
 import type { CssPixels } from '../../types/units';
 
 /**

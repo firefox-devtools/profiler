@@ -14,7 +14,7 @@ import {
 } from '../profile-logic/transforms';
 import { assertExhaustiveCheck, toValidTabSlug } from '../utils/flow';
 import { oneLine } from 'common-tags';
-import type { UrlState } from '../types/reducers';
+import type { UrlState } from '../types/state';
 import type { DataSource } from '../types/actions';
 import type { Pid } from '../types/profile';
 import type { TrackIndex } from '../types/profile-derived';

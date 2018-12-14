@@ -11,9 +11,9 @@ import ProfileFilterNavigator from './ProfileFilterNavigator';
 import MenuButtons from './MenuButtons';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import { returnToZipFileList } from '../../actions/zipped-profiles';
-import { getProfileName } from '../../reducers/url-state';
+import { getProfileName } from '../../selectors/url-state';
 import Timeline from '../timeline';
-import { getHasZipFile } from '../../reducers/zipped-profiles';
+import { getHasZipFile } from '../../selectors/zipped-profiles';
 
 import type {
   ExplicitConnectOptions,

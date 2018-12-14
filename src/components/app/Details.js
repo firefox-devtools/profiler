@@ -19,8 +19,8 @@ import JsTracer from '../js-tracer/';
 import selectSidebar from '../sidebar';
 
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
-import { getSelectedTab } from '../../reducers/url-state';
-import { getIsSidebarOpen, getVisibleTabs } from '../../reducers/app';
+import { getSelectedTab } from '../../selectors/url-state';
+import { getIsSidebarOpen, getVisibleTabs } from '../../selectors/app';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';

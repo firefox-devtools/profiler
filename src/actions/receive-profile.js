@@ -23,7 +23,7 @@ import {
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
-} from '../reducers/url-state';
+} from '../selectors/url-state';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,

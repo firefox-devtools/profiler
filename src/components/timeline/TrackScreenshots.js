@@ -11,7 +11,7 @@ import {
   selectorsForThread,
   getCommittedRange,
   getPreviewSelection,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 import { withSize, type SizeProps } from '../shared/WithSize';
 
 import type { ThreadIndex, Thread } from '../../types/profile';

@@ -6,15 +6,15 @@
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
-import { getDataSource } from '../../reducers/url-state';
-import { getView } from '../../reducers/app';
+import { getDataSource } from '../../selectors/url-state';
+import { getView } from '../../selectors/app';
 
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
 import type { DataSource } from '../../types/actions';
-import type { Phase } from '../../types/reducers';
+import type { Phase } from '../../types/state';
 
 import './ServiceWorkerManager.css';
 

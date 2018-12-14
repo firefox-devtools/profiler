@@ -9,7 +9,7 @@ import explicitConnect from '../../../utils/connect';
 import {
   getHasZoomedViaMousewheel,
   getPanelLayoutGeneration,
-} from '../../../reducers/app';
+} from '../../../selectors/app';
 import { setHasZoomedViaMousewheel } from '../../../actions/stack-chart';
 import { updatePreviewSelection } from '../../../actions/profile-view';
 

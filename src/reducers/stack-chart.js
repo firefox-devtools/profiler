@@ -6,7 +6,6 @@
 import { combineReducers } from 'redux';
 import { getCategoryByImplementation } from '../profile-logic/color-categories';
 import { getFunctionName } from '../profile-logic/labeling-strategies';
-import type { State } from '../types/reducers';
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
 import type { Action } from '../types/actions';
@@ -33,9 +32,3 @@ function labelingStrategy(state: GetLabel = getFunctionName, action: Action) {
 }
 
 export default combineReducers({ categoryColorStrategy, labelingStrategy });
-
-export const getStackChart = (state: State) => state.stackChart;
-export const getCategoryColorStrategy = (state: State) =>
-  getStackChart(state).categoryColorStrategy;
-export const getLabelingStrategy = (state: State) =>
-  getStackChart(state).labelingStrategy;

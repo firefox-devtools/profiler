@@ -11,7 +11,7 @@ import explicitConnect from '../../utils/connect';
 import {
   selectorsForThread,
   getCommittedRange,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 
 import type { ThreadIndex } from '../../types/profile';
 import type {} from '../../types/markers';
