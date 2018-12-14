@@ -83,7 +83,9 @@ class ImplementationBreakdown extends React.PureComponent<
 
   render() {
     const { breakdown } = this.props;
+
     const data = [];
+    const isIntervalInteger = false;
 
     for (const implementation of this._orderedImplementations) {
       const value = breakdown[implementation];
@@ -97,7 +99,7 @@ class ImplementationBreakdown extends React.PureComponent<
       });
     }
 
-    return <Breakdown data={data} />;
+    return <Breakdown data={data} isIntervalInteger={isIntervalInteger}/>;
   }
 }
 
