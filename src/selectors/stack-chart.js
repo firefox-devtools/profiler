@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { State } from '../types/reducers';
+import type { State } from '../types/state';
 
 export const getStackChart = (state: State) => state.stackChart;
 export const getCategoryColorStrategy = (state: State) =>

@@ -8,11 +8,7 @@ import { getProfileUrl } from './url-state';
 import { ensureExists } from '../utils/flow';
 import * as ZipFiles from '../profile-logic/zip-files';
 
-import type {
-  State,
-  ZipFileState,
-  ZippedProfilesState,
-} from '../types/reducers';
+import type { State, ZipFileState, ZippedProfilesState } from '../types/state';
 import type JSZip from 'jszip';
 
 export const getZippedProfilesState = (state: State): ZippedProfilesState =>

@@ -13,7 +13,7 @@ import type {
   AppViewState,
   IsSidebarOpenPerPanelState,
   Reducer,
-} from '../types/reducers';
+} from '../types/state';
 
 function view(
   state: AppViewState = { phase: 'INITIALIZING' },

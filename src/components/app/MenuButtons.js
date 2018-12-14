@@ -32,7 +32,7 @@ import type { Action, DataSource } from '../../types/actions';
 import type {
   ProfileSharingStatus,
   SymbolicationStatus,
-} from '../../types/reducers';
+} from '../../types/state';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,

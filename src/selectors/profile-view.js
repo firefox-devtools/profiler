@@ -48,7 +48,7 @@ import type {
   State,
   ProfileViewState,
   ThreadViewOptions,
-} from '../types/reducers';
+} from '../types/state';
 import type { Transform, TransformStack } from '../types/transforms';
 import type {
   TimingsForPath,

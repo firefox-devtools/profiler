@@ -26,7 +26,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { ProfileSharingStatus, UrlState } from '../types/reducers';
+import type { ProfileSharingStatus, UrlState } from '../types/state';
 
 export type DataSource =
   | 'none'

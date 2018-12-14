@@ -12,7 +12,7 @@ import * as CommittedRanges from '../profile-logic/committed-ranges';
 import type { ThreadIndex, Pid } from '../types/profile';
 import type { TransformStack } from '../types/transforms';
 import type { Action, TimelineType } from '../types/actions';
-import type { State, UrlState } from '../types/reducers';
+import type { State, UrlState } from '../types/state';
 import urlStateReducer from '../reducers/url-state';
 
 // Pre-allocate an array to help with strict equality tests in the selectors.

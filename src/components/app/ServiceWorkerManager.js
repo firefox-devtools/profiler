@@ -14,7 +14,7 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 import type { DataSource } from '../../types/actions';
-import type { Phase } from '../../types/reducers';
+import type { Phase } from '../../types/state';
 
 import './ServiceWorkerManager.css';
 

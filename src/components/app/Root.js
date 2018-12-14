@@ -27,7 +27,7 @@ import ServiceWorkerManager from './ServiceWorkerManager';
 import FooterLinks from './FooterLinks';
 
 import type { Store } from '../../types/store';
-import type { AppViewState, State } from '../../types/reducers';
+import type { AppViewState, State } from '../../types/state';
 import type { DataSource } from '../../types/actions';
 import type {
   ExplicitConnectOptions,

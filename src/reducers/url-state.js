@@ -15,7 +15,7 @@ import type {
   ImplementationFilter,
   TimelineType,
 } from '../types/actions';
-import type { UrlState, Reducer } from '../types/reducers';
+import type { UrlState, Reducer } from '../types/state';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 function dataSource(state: DataSource = 'none', action: Action) {

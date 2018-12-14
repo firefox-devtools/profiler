@@ -4,7 +4,7 @@
 
 // @flow
 import { createSelector } from 'reselect';
-import type { IconWithClassName, State } from '../types/reducers';
+import type { IconWithClassName, State } from '../types/state';
 import type { CallNodeDisplayData } from '../types/profile-derived';
 
 function classNameFromUrl(url) {

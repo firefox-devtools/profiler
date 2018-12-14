@@ -27,7 +27,7 @@ import type {
   ProfileSharingStatus,
   SymbolicationStatus,
   ThreadViewOptions,
-} from '../types/reducers';
+} from '../types/state';
 
 function profile(state: Profile | null = null, action: Action): Profile | null {
   switch (action.type) {

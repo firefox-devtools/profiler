@@ -9,7 +9,7 @@ import { selectedThreadSelectors } from '../../selectors/profile-view';
 import FilterNavigatorBar from './FilterNavigatorBar';
 import { popTransformsFromStack } from '../../actions/profile-view';
 
-import type { State } from '../../types/reducers';
+import type { State } from '../../types/state';
 import type { ExplicitConnectOptions } from '../../utils/connect';
 import type { ElementProps } from 'react';
 

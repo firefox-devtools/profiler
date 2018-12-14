@@ -30,7 +30,7 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
-import type { ZipFileState } from '../../types/reducers';
+import type { ZipFileState } from '../../types/state';
 import type {
   ZipFileTable,
   ZipDisplayData,

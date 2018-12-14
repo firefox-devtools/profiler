@@ -39,7 +39,7 @@ import type {
   GlobalTrack,
   LocalTrack,
 } from '../../types/profile-derived';
-import type { State } from '../../types/reducers';
+import type { State } from '../../types/state';
 import type { TrackReference } from '../../types/actions';
 
 import type {

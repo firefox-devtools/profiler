@@ -40,7 +40,7 @@ import type {
   TrackReference,
   TimelineType,
 } from '../types/actions';
-import type { State } from '../types/reducers';
+import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
 import type {
   ThreadIndex,

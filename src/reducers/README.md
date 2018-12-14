@@ -8,4 +8,4 @@ See [`src/selectors`](../selectors)) for how this state is accessed.
 
 # Flow typing
 
-The state is fully [Flow](https://flow.org/) typed and the definitions live in the [`src/types/reducers.js`](../types/reducers.js) file.
+The state is fully [Flow](https://flow.org/) typed and the definitions live in the [`src/types/state.js`](../types/state.js) file.

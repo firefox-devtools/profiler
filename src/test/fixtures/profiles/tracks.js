@@ -9,7 +9,7 @@ import { getProfileFromTextSamples } from './make-profile';
 import { oneLine } from 'common-tags';
 
 import type { Profile } from '../../../types/profile';
-import type { State } from '../../../types/reducers';
+import type { State } from '../../../types/state';
 
 /**
  * This function takes the current timeline tracks, and generates a human readable result

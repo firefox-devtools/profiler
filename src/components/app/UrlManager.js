@@ -14,7 +14,7 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
-import type { UrlState } from '../../types/reducers';
+import type { UrlState } from '../../types/state';
 
 type StateProps = {|
   +urlState: UrlState,

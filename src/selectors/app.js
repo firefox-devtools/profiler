@@ -10,7 +10,7 @@ import { tabSlugs } from '../app-logic/tabs-handling';
 import { selectedThreadSelectors } from './profile-view';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { State, AppState, AppViewState } from '../types/reducers';
+import type { State, AppState, AppViewState } from '../types/state';
 
 export const getApp = (state: State): AppState => state.app;
 export const getView = (state: State): AppViewState => getApp(state).view;

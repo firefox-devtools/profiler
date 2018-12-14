@@ -29,7 +29,7 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { CallTree } from '../../profile-logic/call-tree';
-import type { IconWithClassName } from '../../types/reducers';
+import type { IconWithClassName } from '../../types/state';
 
 import type {
   ExplicitConnectOptions,

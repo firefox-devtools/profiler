@@ -4,7 +4,7 @@
 
 // @flow
 import type { Action } from '../types/actions';
-import type { Reducer } from '../types/reducers';
+import type { Reducer } from '../types/state';
 
 function favicons(state: Set<string> = new Set(), action: Action) {
   switch (action.type) {

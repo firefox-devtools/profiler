@@ -13,7 +13,7 @@ import type {
   ZipFileState,
   Reducer,
   ZippedProfilesState,
-} from '../types/reducers';
+} from '../types/state';
 
 /**
  * This reducer contains all of the state that deals with loading in profiles from

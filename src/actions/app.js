@@ -7,7 +7,7 @@ import { getSelectedTab, getDataSource } from '../selectors/url-state';
 import { sendAnalytics } from '../utils/analytics';
 import type { Action, ThunkAction } from '../types/store';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { ProfileSharingStatus, UrlState } from '../types/reducers';
+import type { ProfileSharingStatus, UrlState } from '../types/state';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
