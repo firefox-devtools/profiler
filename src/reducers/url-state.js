@@ -133,6 +133,8 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
         [threadIndex]: transforms.slice(0, firstPoppedFilterIndex),
       });
     }
+    case 'SET_TRANSFORM_STACKS':
+      return action.transformStacks;
     default:
       return state;
   }

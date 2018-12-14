@@ -21,7 +21,7 @@ import type {
   TrackIndex,
 } from './profile-derived';
 import type { TemporaryError } from '../utils/errors';
-import type { Transform } from './transforms';
+import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { ProfileSharingStatus, UrlState } from '../types/state';
@@ -251,6 +251,10 @@ type UrlStateAction =
       +type: 'POP_TRANSFORMS_FROM_STACK',
       +threadIndex: ThreadIndex,
       +firstPoppedFilterIndex: number,
+    |}
+  | {|
+      +type: 'SET_TRANSFORM_STACKS',
+      +transformStacks: TransformStacksPerThread,
     |}
   | {|
       +type: 'CHANGE_TIMELINE_TYPE',

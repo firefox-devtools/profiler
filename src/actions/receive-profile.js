@@ -21,6 +21,7 @@ import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication
 import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
+import { setTransformsStack } from '../actions/profile-view';
 import {
   getDataSource,
   getSelectedThreadIndexOrNull,
@@ -878,6 +879,7 @@ export function retrieveProfilesToCompare(
 
       // Then we loop over all profiles and do the necessary changes according
       // to the states we computed earlier.
+      const transformStacks = {};
       for (let i = 0; i < profileStates.length; i++) {
         const { profileSpecific } = profileStates[i];
         const selectedThreadIndex = profileSpecific.selectedThread;
@@ -886,6 +888,7 @@ export function retrieveProfilesToCompare(
         }
         const profile = profiles[i];
         let thread = profile.threads[selectedThreadIndex];
+        transformStacks[i] = profileSpecific.transforms[selectedThreadIndex];
 
         // We adjust the categories using the maps computed above.
         // Here we're cheating a bit with flow here because we know that we
@@ -936,6 +939,7 @@ export function retrieveProfilesToCompare(
         resultProfile.threads.push(thread);
       }
 
+      dispatch(setTransformsStack(transformStacks));
       dispatch(viewProfile(resultProfile));
     } catch (error) {
       dispatch(fatalError(error));
