@@ -10,7 +10,6 @@ import type { TrackIndex } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type { TransformStacksPerThread } from '../types/transforms';
 import type {
-  Action,
   DataSource,
   ImplementationFilter,
   TimelineType,
@@ -18,7 +17,7 @@ import type {
 import type { UrlState, Reducer } from '../types/state';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
-function dataSource(state: DataSource = 'none', action: Action) {
+const dataSource: Reducer<DataSource> = (state = 'none', action) => {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
       return 'from-file';
@@ -27,25 +26,25 @@ function dataSource(state: DataSource = 'none', action: Action) {
     default:
       return state;
   }
-}
+};
 
-function hash(state: string = '', action: Action) {
+const hash: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'PROFILE_PUBLISHED':
       return action.hash;
     default:
       return state;
   }
-}
+};
 
-function profileUrl(state: string = '', action: Action) {
+const profileUrl: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     default:
       return state;
   }
-}
+};
 
-function selectedTab(state: TabSlug = 'calltree', action: Action): TabSlug {
+const selectedTab: Reducer<TabSlug> = (state = 'calltree', action) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_TAB':
     case 'SELECT_TRACK':
@@ -53,9 +52,9 @@ function selectedTab(state: TabSlug = 'calltree', action: Action): TabSlug {
     default:
       return state;
   }
-}
+};
 
-function committedRanges(state: StartEndRange[] = [], action: Action) {
+const committedRanges: Reducer<StartEndRange[]> = (state = [], action) => {
   switch (action.type) {
     case 'COMMIT_RANGE': {
       const { start, end } = action;
@@ -66,12 +65,9 @@ function committedRanges(state: StartEndRange[] = [], action: Action) {
     default:
       return state;
   }
-}
+};
 
-function selectedThread(
-  state: ThreadIndex | null = null,
-  action: Action
-): ThreadIndex | null {
+const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
@@ -86,27 +82,27 @@ function selectedThread(
     default:
       return state;
   }
-}
+};
 
-function callTreeSearchString(state: string = '', action: Action) {
+const callTreeSearchString: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'CHANGE_CALL_TREE_SEARCH_STRING':
       return action.searchString;
     default:
       return state;
   }
-}
+};
 
-function markersSearchString(state: string = '', action: Action) {
+const markersSearchString: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'CHANGE_MARKER_SEARCH_STRING':
       return action.searchString;
     default:
       return state;
   }
-}
+};
 
-function transforms(state: TransformStacksPerThread = {}, action: Action) {
+const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
   switch (action.type) {
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadIndex, transform } = action;
@@ -125,59 +121,56 @@ function transforms(state: TransformStacksPerThread = {}, action: Action) {
     default:
       return state;
   }
-}
+};
 
-function timelineType(
-  state: TimelineType = 'category',
-  action: Action
-): TimelineType {
+const timelineType: Reducer<TimelineType> = (state = 'category', action) => {
   switch (action.type) {
     case 'CHANGE_TIMELINE_TYPE':
       return action.timelineType;
     default:
       return state;
   }
-}
+};
 
 /**
  * Represents the current filter applied to the stack frames, where it will show
  * frames only by implementation.
  */
-function implementation(
-  state: ImplementationFilter = 'combined',
-  action: Action
-) {
+const implementation: Reducer<ImplementationFilter> = (
+  state = 'combined',
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_IMPLEMENTATION_FILTER':
       return action.implementation;
     default:
       return state;
   }
-}
+};
 
-function invertCallstack(state: boolean = false, action: Action) {
+const invertCallstack: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
       return action.invertCallstack;
     default:
       return state;
   }
-}
+};
 
 /**
  * This state controls whether or not to show a summary view of self time, or the full
  * stack-based view of the JS tracer data.
  */
-function showJsTracerSummary(state: boolean = false, action: Action) {
+const showJsTracerSummary: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'CHANGE_SHOW_JS_TRACER_SUMMARY':
       return action.showSummary;
     default:
       return state;
   }
-}
+};
 
-function globalTrackOrder(state: TrackIndex[] = [], action: Action) {
+const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
@@ -185,12 +178,12 @@ function globalTrackOrder(state: TrackIndex[] = [], action: Action) {
     default:
       return state;
   }
-}
+};
 
-function hiddenGlobalTracks(
-  state: Set<TrackIndex> = new Set(),
-  action: Action
-) {
+const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
+  state = new Set(),
+  action
+) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
     case 'ISOLATE_LOCAL_TRACK':
@@ -210,12 +203,12 @@ function hiddenGlobalTracks(
     default:
       return state;
   }
-}
+};
 
-function hiddenLocalTracksByPid(
-  state: Map<Pid, Set<TrackIndex>> = new Map(),
-  action: Action
-) {
+const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
+  state = new Map(),
+  action
+) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
       return action.hiddenLocalTracksByPid;
@@ -242,12 +235,12 @@ function hiddenLocalTracksByPid(
     default:
       return state;
   }
-}
+};
 
-function localTrackOrderByPid(
-  state: Map<Pid, TrackIndex[]> = new Map(),
-  action: Action
-) {
+const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
+  state = new Map(),
+  action
+) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
       return action.localTrackOrderByPid;
@@ -259,12 +252,9 @@ function localTrackOrderByPid(
     default:
       return state;
   }
-}
+};
 
-function pathInZipFile(
-  state: string | null = null,
-  action: Action
-): string | null {
+const pathInZipFile: Reducer<string | null> = (state = null, action) => {
   switch (action.type) {
     // Update the URL the moment the zip file is starting to be
     // processed, not when it is viewed. The processing is async.
@@ -275,7 +265,7 @@ function pathInZipFile(
     default:
       return state;
   }
-}
+};
 
 /**
  * These values are specific to an individual profile.
@@ -331,7 +321,7 @@ const wrapReducerInResetter = (
   };
 };
 
-const urlStateReducer = wrapReducerInResetter(
+const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
   combineReducers({
     dataSource,
     hash,

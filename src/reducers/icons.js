@@ -3,10 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Action } from '../types/actions';
 import type { Reducer } from '../types/state';
 
-function favicons(state: Set<string> = new Set(), action: Action) {
+const favicons: Reducer<Set<string>> = (state = new Set(), action) => {
   switch (action.type) {
     case 'ICON_HAS_LOADED':
       return new Set([...state, action.icon]);
@@ -14,7 +13,6 @@ function favicons(state: Set<string> = new Set(), action: Action) {
     default:
       return state;
   }
-}
+};
 
-const iconsStateReducer: Reducer<Set<string>> = favicons;
-export default iconsStateReducer;
+export default favicons;

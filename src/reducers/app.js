@@ -7,7 +7,6 @@ import { combineReducers } from 'redux';
 import { tabSlugs } from '../app-logic/tabs-handling';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { Action } from '../types/store';
 import type {
   AppState,
   AppViewState,
@@ -15,10 +14,10 @@ import type {
   Reducer,
 } from '../types/state';
 
-function view(
-  state: AppViewState = { phase: 'INITIALIZING' },
-  action: Action
-): AppViewState {
+const view: Reducer<AppViewState> = (
+  state = { phase: 'INITIALIZING' },
+  action
+) => {
   if (state.phase === 'DATA_LOADED') {
     // Let's not come back at another phase if we're already displaying a profile
     return state;
@@ -45,18 +44,18 @@ function view(
     default:
       return state;
   }
-}
+};
 
-function isUrlSetupDone(state: boolean = false, action: Action) {
+const isUrlSetupDone: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'URL_SETUP_DONE':
       return true;
     default:
       return state;
   }
-}
+};
 
-function hasZoomedViaMousewheel(state: boolean = false, action: Action) {
+const hasZoomedViaMousewheel: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'HAS_ZOOMED_VIA_MOUSEWHEEL': {
       return true;
@@ -64,17 +63,18 @@ function hasZoomedViaMousewheel(state: boolean = false, action: Action) {
     default:
       return state;
   }
+};
+
+function _getNoSidebarsOpen() {
+  const state = {};
+  tabSlugs.forEach(tabSlug => (state[tabSlug] = false));
+  return state;
 }
 
-function isSidebarOpenPerPanel(
-  state: IsSidebarOpenPerPanelState,
-  action: Action
-): IsSidebarOpenPerPanelState {
-  if (state === undefined) {
-    state = {};
-    tabSlugs.forEach(tabSlug => (state[tabSlug] = false));
-  }
-
+const isSidebarOpenPerPanel: Reducer<IsSidebarOpenPerPanelState> = (
+  state = _getNoSidebarsOpen(),
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_SIDEBAR_OPEN_STATE': {
       const { tab, isOpen } = action;
@@ -89,7 +89,7 @@ function isSidebarOpenPerPanel(
     default:
       return state;
   }
-}
+};
 
 /**
  * The panels that make up the timeline, details view, and sidebar can all change
@@ -99,7 +99,7 @@ function isSidebarOpenPerPanel(
  * any of the panels. This provides a mechanism for subscribing components to
  * deterministically update their sizing correctly.
  */
-function panelLayoutGeneration(state: number = 0, action: Action): number {
+const panelLayoutGeneration: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
     case 'INCREMENT_PANEL_LAYOUT_GENERATION':
     // Sidebar: (fallthrough)
@@ -119,7 +119,7 @@ function panelLayoutGeneration(state: number = 0, action: Action): number {
     default:
       return state;
   }
-}
+};
 
 /**
  * Clicking on tracks can switch between different tabs. This piece of state holds
@@ -128,10 +128,10 @@ function panelLayoutGeneration(state: number = 0, action: Action): number {
  * panel, then clicks on a thread or process track. With this state we can smoothly
  * transition them back to the panel they were using.
  */
-function lastVisibleThreadTabSlug(
-  state: TabSlug = 'calltree',
-  action: Action
-): TabSlug {
+const lastVisibleThreadTabSlug: Reducer<TabSlug> = (
+  state = 'calltree',
+  action
+) => {
   switch (action.type) {
     case 'SELECT_TRACK':
     case 'CHANGE_SELECTED_TAB':
@@ -142,7 +142,7 @@ function lastVisibleThreadTabSlug(
     default:
       return state;
   }
-}
+};
 
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
