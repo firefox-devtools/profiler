@@ -10,6 +10,7 @@ import explicitConnect from '../../utils/connect';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
+  getProfileInterval,
 } from '../../reducers/profile-view';
 import { getSelectedThreadIndex } from '../../reducers/url-state';
 import { getFunctionName } from '../../profile-logic/function-info';
@@ -31,7 +32,7 @@ import type {
   StackImplementation,
   TimingsForPath,
 } from '../../profile-logic/profile-data';
-import { formatNumber } from '../../utils/format-numbers';
+import { formatMilliseconds } from '../../utils/format-numbers';
 
 type SidebarDetailProps = {|
   +label: string,
@@ -102,19 +103,21 @@ class ImplementationBreakdown extends React.PureComponent<
 
 type BreakdownProps = {|
   +data: $ReadOnlyArray<{| group: string, value: Milliseconds |}>,
+  +isIntervalInteger: boolean,
 |};
 
 // This stateless component is responsible for displaying the implementation
 // breakdown. It also computes the percentage from the total time.
-function Breakdown({ data }: BreakdownProps) {
+function Breakdown({ data, isIntervalInteger }: BreakdownProps) {
   const totalTime = data.reduce((result, item) => result + item.value, 0);
 
   return data.filter(({ value }) => value).map(({ group, value }) => {
     const percentage = Math.round(value / totalTime * 100);
+    const maxFractionalDigits = isIntervalInteger ? 0 : 1;
 
     return (
       <SidebarDetail label={group} key={group}>
-        {formatNumber(value, 2, 0)}ms ({percentage}%)
+        {formatMilliseconds(value, 2, maxFractionalDigits)} ({percentage}%)
       </SidebarDetail>
     );
   });
@@ -127,13 +130,20 @@ type StateProps = {|
   +name: string,
   +lib: string,
   +timings: TimingsForPath,
+  +isIntervalInteger: boolean,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 class CallTreeSidebar extends React.PureComponent<Props> {
   render() {
-    const { selectedNodeIndex, name, lib, timings } = this.props;
+    const {
+      selectedNodeIndex,
+      name,
+      lib,
+      timings,
+      isIntervalInteger,
+    } = this.props;
     const {
       forPath: { selfTime, totalTime },
       forFunc: { selfTime: selfTimeForFunc, totalTime: totalTimeForFunc },
@@ -157,6 +167,8 @@ class CallTreeSidebar extends React.PureComponent<Props> {
       selfTimeForFunc.value / rootTime * 100
     );
 
+    const maxFractionalDigits = isIntervalInteger ? 0 : 1;
+
     return (
       <aside className="sidebar sidebar-calltree">
         <div className="sidebar-contents-wrapper">
@@ -176,11 +188,17 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </header>
           <h3 className="sidebar-title2">This selected call node</h3>
           <SidebarDetail label="Running Time">
-            {formatNumber(totalTime.value, 2, 0)}ms ({totalTimePercent}%)
+            {formatMilliseconds(totalTime.value, 2, maxFractionalDigits)} ({
+              totalTimePercent
+            }%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
             {selfTime.value
-              ? `${formatNumber(selfTime.value, 2, 0)}ms (${selfTimePercent}%)`
+              ? `${formatMilliseconds(
+                  selfTime.value,
+                  2,
+                  maxFractionalDigits
+                )} (${selfTimePercent}%)`
               : '—'}
           </SidebarDetail>
           {totalTime.breakdownByImplementation ? (
@@ -203,17 +221,16 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             This function across the entire tree
           </h3>
           <SidebarDetail label="Running Time">
-            {formatNumber(totalTimeForFunc.value, 2, 0)}ms ({
-              totalTimeForFuncPercent
-            }%)
+            {formatMilliseconds(totalTimeForFunc.value, 2, maxFractionalDigits)}{' '}
+            ({totalTimeForFuncPercent}%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
             {selfTimeForFunc.value
-              ? `${formatNumber(
+              ? `${formatMilliseconds(
                   selfTimeForFunc.value,
                   2,
-                  0
-                )}ms (${selfTimeForFuncPercent}%)`
+                  maxFractionalDigits
+                )} (${selfTimeForFuncPercent}%)`
               : '—'}
           </SidebarDetail>
           {totalTimeForFunc.breakdownByImplementation ? (
@@ -246,6 +263,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
     name: getFunctionName(selectedNodeSelectors.getName(state)),
     lib: selectedNodeSelectors.getLib(state),
     timings: selectedNodeSelectors.getTimingsForSidebar(state),
+    isIntervalInteger: Number.isInteger(getProfileInterval(state)),
   }),
   component: CallTreeSidebar,
 };
