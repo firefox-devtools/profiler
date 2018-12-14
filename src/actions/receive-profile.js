@@ -21,7 +21,10 @@ import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication
 import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
-import { setTransformsStack } from '../actions/profile-view';
+import {
+  setTransformsStack,
+  changeImplementationFilter,
+} from '../actions/profile-view';
 import {
   getDataSource,
   getSelectedThreadIndexOrNull,
@@ -880,6 +883,8 @@ export function retrieveProfilesToCompare(
       // Then we loop over all profiles and do the necessary changes according
       // to the states we computed earlier.
       const transformStacks = {};
+      const implementationFilters = [];
+
       for (let i = 0; i < profileStates.length; i++) {
         const { profileSpecific } = profileStates[i];
         const selectedThreadIndex = profileSpecific.selectedThread;
@@ -889,6 +894,7 @@ export function retrieveProfilesToCompare(
         const profile = profiles[i];
         let thread = profile.threads[selectedThreadIndex];
         transformStacks[i] = profileSpecific.transforms[selectedThreadIndex];
+        implementationFilters.push(profileSpecific.implementation);
 
         // We adjust the categories using the maps computed above.
         // Here we're cheating a bit with flow here because we know that we
@@ -939,8 +945,16 @@ export function retrieveProfilesToCompare(
         resultProfile.threads.push(thread);
       }
 
+      // Changing the view configuration before dispatching the profile itself,
+      // for performance reason.
       dispatch(setTransformsStack(transformStacks));
       dispatch(viewProfile(resultProfile));
+      // But the implementation filter is actually more complex and needs the
+      // data from a displayed profile to work properly. We can try to change it
+      // if this is a problem.
+      if (implementationFilters[0] === implementationFilters[1]) {
+        dispatch(changeImplementationFilter(implementationFilters[0]));
+      }
     } catch (error) {
       dispatch(fatalError(error));
     }
