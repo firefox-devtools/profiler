@@ -11,31 +11,105 @@ import * as CommittedRanges from '../profile-logic/committed-ranges';
 
 import type { ThreadIndex, Pid } from '../types/profile';
 import type { TransformStack } from '../types/transforms';
-import type { Action, TimelineType } from '../types/actions';
-import type { State, UrlState } from '../types/state';
+import type {
+  Action,
+  TimelineType,
+  DataSource,
+  ImplementationFilter,
+} from '../types/actions';
+import type { TabSlug } from '../app-logic/tabs-handling';
+import type { UrlState } from '../types/state';
+import type { Selector, DangerousSelectorWithArguments } from '../types/store';
+import type { StartEndRange } from '../types/units';
+import type { TrackIndex } from '../types/profile-derived';
+
 import urlStateReducer from '../reducers/url-state';
 
-// Pre-allocate an array to help with strict equality tests in the selectors.
-const EMPTY_TRANSFORM_STACK = [];
-
-export const getUrlState = (state: State): UrlState => state.urlState;
-export const getProfileSpecificState = (state: State) =>
+/**
+ * Various simple selectors into the UrlState.
+ */
+export const getUrlState: Selector<UrlState> = (state): UrlState =>
+  state.urlState;
+export const getProfileSpecificState: Selector<*> = state =>
   getUrlState(state).profileSpecific;
-
-export const getDataSource = (state: State) => getUrlState(state).dataSource;
-export const getHash = (state: State) => getUrlState(state).hash;
-export const getProfileUrl = (state: State) => getUrlState(state).profileUrl;
-export const getAllCommittedRanges = (state: State) =>
+export const getDataSource: Selector<DataSource> = state =>
+  getUrlState(state).dataSource;
+export const getHash: Selector<string> = state => getUrlState(state).hash;
+export const getProfileUrl: Selector<string> = state =>
+  getUrlState(state).profileUrl;
+export const getAllCommittedRanges: Selector<StartEndRange[]> = state =>
   getProfileSpecificState(state).committedRanges;
-export const getImplementationFilter = (state: State) =>
+export const getImplementationFilter: Selector<ImplementationFilter> = state =>
   getProfileSpecificState(state).implementation;
-export const getInvertCallstack = (state: State) =>
+export const getInvertCallstack: Selector<boolean> = state =>
   getProfileSpecificState(state).invertCallstack;
-export const getShowJsTracerSummary = (state: State) =>
+export const getShowJsTracerSummary: Selector<boolean> = state =>
   getProfileSpecificState(state).showJsTracerSummary;
-export const getCurrentSearchString = (state: State) =>
+export const getCurrentSearchString: Selector<string> = state =>
   getProfileSpecificState(state).callTreeSearchString;
-export const getSearchStrings = createSelector(
+export const getMarkersSearchString: Selector<string> = state =>
+  getProfileSpecificState(state).markersSearchString;
+export const getSelectedTab: Selector<TabSlug> = state =>
+  getUrlState(state).selectedTab;
+export const getSelectedThreadIndexOrNull: Selector<ThreadIndex | null> = state =>
+  getProfileSpecificState(state).selectedThread;
+export const getSelectedThreadIndex: Selector<ThreadIndex> = state =>
+  ensureExists(
+    getSelectedThreadIndexOrNull(state),
+    'Attempted to get a thread index before a profile was loaded.'
+  );
+export const getTimelineType: Selector<TimelineType> = state =>
+  getProfileSpecificState(state).timelineType;
+
+/**
+ * Simple selectors for tracks and track order.
+ */
+export const getLegacyThreadOrder: Selector<ThreadIndex[] | null> = state =>
+  getProfileSpecificState(state).legacyThreadOrder;
+export const getLegacyHiddenThreads: Selector<ThreadIndex[] | null> = state =>
+  getProfileSpecificState(state).legacyHiddenThreads;
+export const getGlobalTrackOrder: Selector<TrackIndex[]> = state =>
+  getProfileSpecificState(state).globalTrackOrder;
+export const getHiddenGlobalTracks: Selector<Set<TrackIndex>> = state =>
+  getProfileSpecificState(state).hiddenGlobalTracks;
+export const getHiddenLocalTracksByPid: Selector<
+  Map<Pid, Set<TrackIndex>>
+> = state => getProfileSpecificState(state).hiddenLocalTracksByPid;
+export const getLocalTrackOrderByPid: Selector<
+  Map<Pid, TrackIndex[]>
+> = state => getProfileSpecificState(state).localTrackOrderByPid;
+
+/**
+ * This selector does a simple lookup in the set of hidden tracks for a PID, and ensures
+ * that a TrackIndex is selected correctly. This makes it easier to avoid doing null
+ * checks everywhere.
+ */
+export const getHiddenLocalTracks: DangerousSelectorWithArguments<
+  Set<TrackIndex>,
+  Pid
+> = (state, pid) =>
+  ensureExists(
+    getHiddenLocalTracksByPid(state).get(pid),
+    'Unable to get the hidden tracks from the given pid'
+  );
+
+/**
+ * This selector gets the local track order for a PID, and ensures that one is
+ * selected correctly. This makes it easier to avoid doing null checks everywhere.
+ */
+export const getLocalTrackOrder: DangerousSelectorWithArguments<
+  TrackIndex[],
+  Pid
+> = (state, pid) =>
+  ensureExists(
+    getLocalTrackOrderByPid(state).get(pid),
+    'Unable to get the track order from the given pid'
+  );
+
+/**
+ * Search strings filter a thread to only samples that match the strings.
+ */
+export const getSearchStrings: Selector<string[] | null> = createSelector(
   getCurrentSearchString,
   searchString => {
     if (!searchString) {
@@ -53,7 +127,11 @@ export const getSearchStrings = createSelector(
     return null;
   }
 );
-export const getSearchStringsAsRegExp = createSelector(
+
+/**
+ * A RegExp can be used for searching and filtering the thread's samples.
+ */
+export const getSearchStringsAsRegExp: Selector<RegExp | null> = createSelector(
   getSearchStrings,
   strings => {
     if (!strings || !strings.length) {
@@ -63,57 +141,27 @@ export const getSearchStringsAsRegExp = createSelector(
     return new RegExp(regexpStr, 'gi');
   }
 );
-export const getMarkersSearchString = (state: State) =>
-  getProfileSpecificState(state).markersSearchString;
-export const getSelectedTab = (state: State) => getUrlState(state).selectedTab;
-export const getSelectedThreadIndexOrNull = (state: State) =>
-  getProfileSpecificState(state).selectedThread;
-export const getSelectedThreadIndex = (state: State) => {
-  const threadIndex = getSelectedThreadIndexOrNull(state);
-  if (threadIndex === null) {
-    throw new Error(
-      'Attempted to get a thread index before a profile was loaded.'
-    );
-  }
-  return threadIndex;
-};
-export const getTransformStack = (
-  state: State,
-  threadIndex: ThreadIndex
-): TransformStack => {
+
+// Pre-allocate an array to help with strict equality tests in the selectors.
+const EMPTY_TRANSFORM_STACK = [];
+
+export const getTransformStack: DangerousSelectorWithArguments<
+  TransformStack,
+  ThreadIndex
+> = (state, threadIndex) => {
   return (
     getProfileSpecificState(state).transforms[threadIndex] ||
     EMPTY_TRANSFORM_STACK
   );
 };
 
-export const getTimelineType = (state: State): TimelineType =>
-  getProfileSpecificState(state).timelineType;
-
-export const getLegacyThreadOrder = (state: State) =>
-  getProfileSpecificState(state).legacyThreadOrder;
-export const getLegacyHiddenThreads = (state: State) =>
-  getProfileSpecificState(state).legacyHiddenThreads;
-export const getGlobalTrackOrder = (state: State) =>
-  getProfileSpecificState(state).globalTrackOrder;
-export const getHiddenGlobalTracks = (state: State) =>
-  getProfileSpecificState(state).hiddenGlobalTracks;
-export const getHiddenLocalTracksByPid = (state: State) =>
-  getProfileSpecificState(state).hiddenLocalTracksByPid;
-export const getHiddenLocalTracks = (state: State, pid: Pid) =>
-  ensureExists(
-    getHiddenLocalTracksByPid(state).get(pid),
-    'Unable to get the hidden tracks from the given pid'
-  );
-export const getLocalTrackOrderByPid = (state: State) =>
-  getProfileSpecificState(state).localTrackOrderByPid;
-export const getLocalTrackOrder = (state: State, pid: Pid) =>
-  ensureExists(
-    getLocalTrackOrderByPid(state).get(pid),
-    'Unable to get the track order from the given pid'
-  );
-
-export const getUrlPredictor = createSelector(
+/**
+ * The URL predictor is used to generate a link for an uploaded profile, to predict
+ * what the URL will be.
+ */
+export const getUrlPredictor: Selector<
+  (Action | Action[]) => string
+> = createSelector(
   getUrlState,
   (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {
     const actionList: Action[] = Array.isArray(actionOrActionList)
@@ -124,13 +172,16 @@ export const getUrlPredictor = createSelector(
   }
 );
 
-export const getPathInZipFileFromUrl = (state: State) =>
+/**
+ * Get the current path for a zip file that is being used.
+ */
+export const getPathInZipFileFromUrl: Selector<string | null> = state =>
   getUrlState(state).pathInZipFile;
 
 /**
  * For now only provide a name for a profile if it came from a zip file.
  */
-export const getProfileName: State => null | string = createSelector(
+export const getProfileName: Selector<null | string> = createSelector(
   getPathInZipFileFromUrl,
   pathInZipFile => {
     if (!pathInZipFile) {
@@ -141,7 +192,11 @@ export const getProfileName: State => null | string = createSelector(
   }
 );
 
-export const getCommittedRangeLabels = createSelector(
+/**
+ * This selector transforms the committed ranges into a list of labels that can
+ * be displayed in the UI.
+ */
+export const getCommittedRangeLabels: Selector<string[]> = createSelector(
   getAllCommittedRanges,
   CommittedRanges.getCommittedRangeLabels
 );

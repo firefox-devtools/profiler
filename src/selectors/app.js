@@ -10,26 +10,34 @@ import { tabSlugs } from '../app-logic/tabs-handling';
 import { selectedThreadSelectors } from './profile-view';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { State, AppState, AppViewState } from '../types/state';
+import type { AppState, AppViewState } from '../types/state';
+import type { Selector } from '../types/store';
 
-export const getApp = (state: State): AppState => state.app;
-export const getView = (state: State): AppViewState => getApp(state).view;
-export const getIsUrlSetupDone = (state: State): boolean =>
+/**
+ * Simple selectors into the app state.
+ */
+export const getApp: Selector<AppState> = state => state.app;
+export const getView: Selector<AppViewState> = state => getApp(state).view;
+export const getIsUrlSetupDone: Selector<boolean> = state =>
   getApp(state).isUrlSetupDone;
-export const getHasZoomedViaMousewheel = (state: State): boolean => {
+export const getHasZoomedViaMousewheel: Selector<boolean> = state => {
   return getApp(state).hasZoomedViaMousewheel;
 };
-export const getIsSidebarOpen = (state: State): boolean =>
+export const getIsSidebarOpen: Selector<boolean> = state =>
   getApp(state).isSidebarOpenPerPanel[getSelectedTab(state)];
-export const getPanelLayoutGeneration = (state: State) =>
+export const getPanelLayoutGeneration: Selector<number> = state =>
   getApp(state).panelLayoutGeneration;
-export const getLastVisibleThreadTabSlug = (state: State) =>
+export const getLastVisibleThreadTabSlug: Selector<TabSlug> = state =>
   getApp(state).lastVisibleThreadTabSlug;
 
-export const getVisibleTabs = createSelector(
+/**
+ * Visible tabs are computed based on the current state of the profile. Some
+ * effort is made to not show a tab when there is no data available for it.
+ */
+export const getVisibleTabs: Selector<$ReadOnlyArray<TabSlug>> = createSelector(
   selectedThreadSelectors.getIsNetworkChartEmptyInFullRange,
   selectedThreadSelectors.getJsTracerTable,
-  (isNetworkChartEmpty, jsTracerTable): $ReadOnlyArray<TabSlug> => {
+  (isNetworkChartEmpty, jsTracerTable) => {
     let visibleTabs = tabSlugs;
     if (isNetworkChartEmpty) {
       visibleTabs = visibleTabs.filter(tabSlug => tabSlug !== 'network-chart');

@@ -3,10 +3,17 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { State } from '../types/state';
+import type { StackChartState } from '../types/state';
+import type { Selector } from '../types/store';
+import type { GetCategory } from '../profile-logic/color-categories';
+import type { GetLabel } from '../profile-logic/labeling-strategies';
 
-export const getStackChart = (state: State) => state.stackChart;
-export const getCategoryColorStrategy = (state: State) =>
+/**
+ * Simple selectors in the StackChartState.
+ */
+export const getStackChart: Selector<StackChartState> = state =>
+  state.stackChart;
+export const getCategoryColorStrategy: Selector<GetCategory> = state =>
   getStackChart(state).categoryColorStrategy;
-export const getLabelingStrategy = (state: State) =>
+export const getLabelingStrategy: Selector<GetLabel> = state =>
   getStackChart(state).labelingStrategy;

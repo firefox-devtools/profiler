@@ -669,7 +669,8 @@ export function hideLocalTrack(
 
       if (
         nextSelectedThreadIndex === null &&
-        globalTrack.mainThreadIndex !== null
+        globalTrack.mainThreadIndex !== null &&
+        globalTrack.mainThreadIndex !== undefined
       ) {
         // Case 2a: Use the current process's main thread.
         nextSelectedThreadIndex = globalTrack.mainThreadIndex;
