@@ -274,11 +274,6 @@ export const getLocalTrackName = (
     'Could not find the track names from the given pid'
   )[trackIndex];
 
-const _getDefaultCategoryWrappedInObject = createSelector(
-  getDefaultCategory,
-  defaultCategory => ({ value: defaultCategory })
-);
-
 export type SelectorsForThread = {
   getThread: Selector<Thread>,
   getStringTable: Selector<UniqueStringArray>,
@@ -376,12 +371,12 @@ export const selectorsForThread = (
     const getRangeAndTransformFilteredThread: Selector<Thread> = createSelector(
       getRangeFilteredThread,
       getTransformStack,
-      _getDefaultCategoryWrappedInObject,
-      (startingThread, transforms, defaultCategoryObj) =>
+      getDefaultCategory,
+      (startingThread, transforms, defaultCategory) =>
         transforms.reduce(
           // Apply the reducer using an arrow function to ensure correct memoization.
           (thread, transform) =>
-            applyTransformMemoized(thread, transform, defaultCategoryObj.value),
+            applyTransformMemoized(thread, transform, defaultCategory),
           startingThread
         )
     );
