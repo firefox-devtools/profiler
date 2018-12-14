@@ -8,10 +8,10 @@ import React, { PureComponent } from 'react';
 import { createPortal } from 'react-dom';
 import explicitConnect from '../../utils/connect';
 import {
-  selectorsForThread,
   getCommittedRange,
   getPreviewSelection,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import { withSize, type SizeProps } from '../shared/WithSize';
 
 import type { ThreadIndex, Thread } from '../../types/profile';
@@ -231,7 +231,7 @@ class Screenshots extends PureComponent<Props, State> {
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state, ownProps) => {
     const { threadIndex, windowId } = ownProps;
-    const selectors = selectorsForThread(threadIndex);
+    const selectors = getThreadSelectors(threadIndex);
     const { start, end } = getCommittedRange(state);
     const previewSelection = getPreviewSelection(state);
     return {

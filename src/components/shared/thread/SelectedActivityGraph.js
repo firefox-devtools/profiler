@@ -10,11 +10,11 @@ import ThreadActivityGraph from './ActivityGraph';
 import ThreadStackGraph from './StackGraph';
 import { withChartViewport } from '../chart/Viewport';
 import {
-  selectedThreadSelectors,
   getPreviewSelection,
   getProfile,
   getCommittedRange,
-} from '../../../selectors/profile-view';
+} from '../../../selectors/profile';
+import { selectedThreadSelectors } from '../../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../../selectors/url-state';
 import {
   selectBestAncestorCallNodeAndExpandCallTree,

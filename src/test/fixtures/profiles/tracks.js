@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import * as profileViewSelectors from '../../../selectors/profile-view';
+import * as profileViewSelectors from '../../../selectors/profile';
 import * as urlStateReducers from '../../../selectors/url-state';
 import { getProfileFromTextSamples } from './make-profile';
 import { oneLine } from 'common-tags';

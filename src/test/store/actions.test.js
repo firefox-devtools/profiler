@@ -4,7 +4,7 @@
 // @flow
 
 import { storeWithProfile } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../selectors/profile-view';
+import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
 
 import {
@@ -16,8 +16,7 @@ import {
   changeShowJsTracerSummary,
 } from '../../actions/profile-view';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-
-const { selectedThreadSelectors } = ProfileViewSelectors;
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 describe('selectors/getStackTimingByDepth', function() {
   /**

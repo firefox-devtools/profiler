@@ -13,7 +13,7 @@ import {
   changeRightClickedTrack,
 } from '../../actions/profile-view';
 import TrackContextMenu from '../../components/timeline/TrackContextMenu';
-import { getGlobalTracks, getLocalTracks } from '../../selectors/profile-view';
+import { getGlobalTracks, getLocalTracks } from '../../selectors/profile';
 import {
   getHiddenGlobalTracks,
   getHiddenLocalTracks,

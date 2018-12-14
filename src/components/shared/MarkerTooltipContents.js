@@ -16,7 +16,7 @@ import {
   formatValueTotal,
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
-import { selectorsForThread } from '../../selectors/profile-view';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import { getImplementationFilter } from '../../selectors/url-state';
 
 import Backtrace from './Backtrace';
@@ -829,7 +829,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
-    const selectors = selectorsForThread(threadIndex);
+    const selectors = getThreadSelectors(threadIndex);
     const threadName = selectors.getFriendlyThreadName(state);
     const thread = selectors.getThread(state);
     const implementationFilter = getImplementationFilter(state);

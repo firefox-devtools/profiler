@@ -12,10 +12,8 @@ import { mount } from 'enzyme';
 
 import { changeTimelineType } from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
-import {
-  selectedThreadSelectors,
-  getPreviewSelection,
-} from '../../selectors/profile-view';
+import { getPreviewSelection } from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';

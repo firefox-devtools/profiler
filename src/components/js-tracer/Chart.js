@@ -15,8 +15,8 @@ import {
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
-  selectedThreadSelectors,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
