@@ -99,7 +99,7 @@ class ImplementationBreakdown extends React.PureComponent<
       });
     }
 
-    return <Breakdown data={data} isIntervalInteger={isIntervalInteger}/>;
+    return <Breakdown data={data} isIntervalInteger={isIntervalInteger} />;
   }
 }
 
