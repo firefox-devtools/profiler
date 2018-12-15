@@ -1,0 +1,52 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.serviceworker-ready-notice-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+
+  z-index: 4;
+
+  display: flex;
+}
+.serviceworker-ready-notice {
+  margin: 0 auto;
+  padding: 0 4px;
+
+  display: flex;
+  align-items: center;
+
+  background: var(--grey-20);
+  color: var(--grey-90);
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.serviceworker-ready-notice-close-button {
+  flex: none;
+
+  padding: 4px;
+  width: 16px;
+  height: 16px;
+  margin-left: 8px;
+
+  border-radius: 4px;
+  background-image: url(../../../res/img/svg/close-icon.svg);
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 16px 16px;
+}
+
+.serviceworker-ready-notice-action-button {
+  margin-left: 8px;
+}
+
+.serviceworker-ready-notice p {
+  flex: auto;
+  padding: .5em .5em .5em 24px;
+  margin: 0;
+  background: url(../../../res/img/svg/info-icon.svg) no-repeat left center / 16px 16px;
+}

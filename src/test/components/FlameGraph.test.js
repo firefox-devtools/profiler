@@ -35,6 +35,7 @@ it('renders FlameGraph correctly', () => {
     if (element.props.className.split(' ').includes('chartViewport')) {
       return {
         getBoundingClientRect: () => getBoundingBox(200, 300),
+        focus: () => {},
       };
     }
     return null;

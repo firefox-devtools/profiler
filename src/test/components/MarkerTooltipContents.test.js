@@ -14,8 +14,8 @@ import {
   addMarkersToThreadWithCorrespondingSamples,
   getProfileFromTextSamples,
 } from '../fixtures/profiles/make-profile';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import { selectedThreadSelectors } from '../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 
 describe('MarkerTooltipContents', function() {
   it('renders tooltips for various markers', () => {
@@ -94,11 +94,8 @@ describe('MarkerTooltipContents', function() {
         14.5,
         {
           type: 'tracing',
-          startTime: 14.5,
-          endTime: 14.5,
           category: 'Paint',
           interval: 'start',
-          name: 'NotifyDidPaint',
         },
       ],
       [
@@ -232,14 +229,12 @@ describe('MarkerTooltipContents', function() {
             reason: 'CC_WAITING',
             slice: 1,
             pause: 5.23,
-            when: 17.5,
             budget: '11ms',
             initial_state: 'Initial',
             final_state: 'Final',
             major_gc_number: 1,
             page_faults: 1,
             start_timestamp: 17,
-            end_timestamp: 17,
             phase_times: {
               mark: 10046,
               wait_background_thread: 0,
@@ -266,14 +261,6 @@ describe('MarkerTooltipContents', function() {
             time: 17.0,
             stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
           },
-          // The startTime and endTime properties are currently required by
-          // our flow type annotations, but those annotations are wrong:
-          // Actual Gecko profiles won't have these properties in their
-          // tracing markers. The flow types should really be fixed, but I had
-          // some trouble when I tried to do that so I deferred it to some
-          // later point.
-          startTime: 18.5,
-          endTime: 18.5,
         },
       ],
       [
@@ -283,9 +270,6 @@ describe('MarkerTooltipContents', function() {
           type: 'tracing',
           category: 'Paint',
           interval: 'end',
-          // startTime and endTime should be unnecessary, see above
-          startTime: 18.5,
-          endTime: 18.5,
         },
       ],
       [
@@ -323,9 +307,6 @@ describe('MarkerTooltipContents', function() {
           URI: 'http://www.wikia.com/',
           RedirectURI:
             'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
-          dur: 10.5,
-          name: '',
-          title: '',
         }: NetworkPayload),
       ],
       [
@@ -345,9 +326,6 @@ describe('MarkerTooltipContents', function() {
           responseStart: 11172.047379,
           responseEnd: 11175.561877,
           RedirectURI: '',
-          dur: 10.5,
-          name: '',
-          title: '',
         }: NetworkPayload),
       ],
       [
@@ -362,9 +340,6 @@ describe('MarkerTooltipContents', function() {
           status: 'STATUS_START',
           URI: 'http://wikia.com/',
           RedirectURI: '',
-          dur: 10.5,
-          name: '',
-          title: '',
         }: NetworkPayload),
       ],
       [
@@ -379,9 +354,6 @@ describe('MarkerTooltipContents', function() {
           status: 'STATUS_READING',
           RedirectURI: '',
           URI: '',
-          dur: 10.5,
-          name: '',
-          title: '',
         }: NetworkPayload),
       ],
       [

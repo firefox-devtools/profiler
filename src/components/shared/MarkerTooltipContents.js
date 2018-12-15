@@ -16,8 +16,8 @@ import {
   formatValueTotal,
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
-import { selectorsForThread } from '../../reducers/profile-view';
-import { getImplementationFilter } from '../../reducers/url-state';
+import { selectorsForThread } from '../../selectors/profile-view';
+import { getImplementationFilter } from '../../selectors/url-state';
 
 import Backtrace from './Backtrace';
 
@@ -478,6 +478,14 @@ function getMarkerDetails(
                         'Time spent allocating chunks in mutator',
                         nursery.chunk_alloc_us,
                         formatMicroseconds
+                      )
+                    : null}
+                  {nursery.groups_pretenured
+                    ? _markerDetail(
+                        'gcpretenured',
+                        'Number of groups to pretenure',
+                        nursery.groups_pretenured,
+                        x => formatNumber(x, 2, 0)
                       )
                     : null}
                   {_makePhaseTimesArray(nursery.phase_times)

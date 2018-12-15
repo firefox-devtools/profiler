@@ -33,8 +33,11 @@
 
 .arrowPanel:not(.open) {
   pointer-events: none;
-  transition: opacity 200ms ease-out;
   opacity: 0;
+  /* visibility: hidden hides the panel from the accessibility tree when it's closed */
+  visibility: hidden;
+  /* The visibility is set to hidden after the panel closing transition. */
+  transition: opacity 200ms ease-out, visibility 0s 200ms;
 }
 
 .arrowPanel.open {
@@ -86,10 +89,16 @@
   z-index: -1;
 }
 
-.arrowPanelTitle {
+.arrowPanelTitle,
+.arrowPanelSubTitle {
   font-size: 1.2em;
   padding: 10px;
   margin: 0;
+}
+
+.arrowPanelSubTitle {
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding: 5px 0;
 }
 
 .arrowPanelContent {
@@ -149,4 +158,38 @@
 .arrowPanelOkButton:hover:active,
 .arrowPanelCancelButton:hover:active {
   background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2));
+}
+
+.arrowPanelOpenMetaInfo {
+  width: 350px;
+  font-size: 12px;
+  line-height: 20px;
+  padding-top: 5px;
+  max-height: calc(100vh - 60px);
+  overflow-y: auto;
+}
+
+.arrowPanelOpenMetaInfo,
+.arrowPanelOpenMetaInfo .arrowPanelArrow::before {
+  background-color: white;
+}
+
+.arrowPanelSection {
+  margin-top: 7px;
+  margin-bottom: 12px;
+}
+
+.metaInfoLabel {
+  width: 120px;
+  color: var(--grey-40);
+  display: inline-block;
+}
+
+.metaInfoList {
+  margin-top: -19px;
+}
+
+.metaInfoList .metaInfoListItem {
+  margin-left: 110px;
+  list-style: circle;
 }

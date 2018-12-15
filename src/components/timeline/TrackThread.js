@@ -13,11 +13,11 @@ import {
   getProfileInterval,
   getCommittedRange,
   getCategories,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 import {
   getSelectedThreadIndex,
   getTimelineType,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import {
   TimelineTracingMarkersJank,
   TimelineTracingMarkersOverview,
@@ -44,7 +44,7 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
-import type { State } from '../../types/reducers';
+import type { State } from '../../types/state';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,

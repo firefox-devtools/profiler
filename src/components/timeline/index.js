@@ -12,14 +12,17 @@ import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import Reorderable from '../shared/Reorderable';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
-import { getPanelLayoutGeneration } from '../../reducers/app';
+import { getPanelLayoutGeneration } from '../../selectors/app';
 import {
   getCommittedRange,
   getZeroAt,
   getGlobalTracks,
   getGlobalTrackReferences,
-} from '../../reducers/profile-view';
-import { getGlobalTrackOrder, getTimelineType } from '../../reducers/url-state';
+} from '../../selectors/profile-view';
+import {
+  getGlobalTrackOrder,
+  getTimelineType,
+} from '../../selectors/url-state';
 import './index.css';
 
 import type { SizeProps } from '../shared/WithSize';

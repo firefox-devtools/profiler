@@ -4,32 +4,20 @@
 
 // @flow
 import { combineReducers } from 'redux';
-import escapeStringRegexp from 'escape-string-regexp';
-import { createSelector } from 'reselect';
-import { ensureExists } from '../utils/flow';
-import { urlFromState } from '../app-logic/url-handling';
-import * as CommittedRanges from '../profile-logic/committed-ranges';
 
 import type { ThreadIndex, Pid } from '../types/profile';
 import type { TrackIndex } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
+import type { TransformStacksPerThread } from '../types/transforms';
 import type {
-  TransformStacksPerThread,
-  TransformStack,
-} from '../types/transforms';
-import type {
-  Action,
   DataSource,
   ImplementationFilter,
   TimelineType,
 } from '../types/actions';
-import type { State, UrlState, Reducer } from '../types/reducers';
+import type { UrlState, Reducer } from '../types/state';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
-// Pre-allocate an array to help with strict equality tests in the selectors.
-const EMPTY_TRANSFORM_STACK = [];
-
-function dataSource(state: DataSource = 'none', action: Action) {
+const dataSource: Reducer<DataSource> = (state = 'none', action) => {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
       return 'from-file';
@@ -38,25 +26,25 @@ function dataSource(state: DataSource = 'none', action: Action) {
     default:
       return state;
   }
-}
+};
 
-function hash(state: string = '', action: Action) {
+const hash: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'PROFILE_PUBLISHED':
       return action.hash;
     default:
       return state;
   }
-}
+};
 
-function profileUrl(state: string = '', action: Action) {
+const profileUrl: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     default:
       return state;
   }
-}
+};
 
-function selectedTab(state: TabSlug = 'calltree', action: Action): TabSlug {
+const selectedTab: Reducer<TabSlug> = (state = 'calltree', action) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_TAB':
     case 'SELECT_TRACK':
@@ -64,9 +52,9 @@ function selectedTab(state: TabSlug = 'calltree', action: Action): TabSlug {
     default:
       return state;
   }
-}
+};
 
-function committedRanges(state: StartEndRange[] = [], action: Action) {
+const committedRanges: Reducer<StartEndRange[]> = (state = [], action) => {
   switch (action.type) {
     case 'COMMIT_RANGE': {
       const { start, end } = action;
@@ -77,12 +65,9 @@ function committedRanges(state: StartEndRange[] = [], action: Action) {
     default:
       return state;
   }
-}
+};
 
-function selectedThread(
-  state: ThreadIndex | null = null,
-  action: Action
-): ThreadIndex | null {
+const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
@@ -97,27 +82,27 @@ function selectedThread(
     default:
       return state;
   }
-}
+};
 
-function callTreeSearchString(state: string = '', action: Action) {
+const callTreeSearchString: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'CHANGE_CALL_TREE_SEARCH_STRING':
       return action.searchString;
     default:
       return state;
   }
-}
+};
 
-function markersSearchString(state: string = '', action: Action) {
+const markersSearchString: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'CHANGE_MARKER_SEARCH_STRING':
       return action.searchString;
     default:
       return state;
   }
-}
+};
 
-function transforms(state: TransformStacksPerThread = {}, action: Action) {
+const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
   switch (action.type) {
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadIndex, transform } = action;
@@ -136,46 +121,56 @@ function transforms(state: TransformStacksPerThread = {}, action: Action) {
     default:
       return state;
   }
-}
+};
 
-function timelineType(
-  state: TimelineType = 'category',
-  action: Action
-): TimelineType {
+const timelineType: Reducer<TimelineType> = (state = 'category', action) => {
   switch (action.type) {
     case 'CHANGE_TIMELINE_TYPE':
       return action.timelineType;
     default:
       return state;
   }
-}
+};
 
 /**
  * Represents the current filter applied to the stack frames, where it will show
  * frames only by implementation.
  */
-function implementation(
-  state: ImplementationFilter = 'combined',
-  action: Action
-) {
+const implementation: Reducer<ImplementationFilter> = (
+  state = 'combined',
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_IMPLEMENTATION_FILTER':
       return action.implementation;
     default:
       return state;
   }
-}
+};
 
-function invertCallstack(state: boolean = false, action: Action) {
+const invertCallstack: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
       return action.invertCallstack;
     default:
       return state;
   }
-}
+};
 
-function globalTrackOrder(state: TrackIndex[] = [], action: Action) {
+/**
+ * This state controls whether or not to show a summary view of self time, or the full
+ * stack-based view of the JS tracer data.
+ */
+const showJsTracerSummary: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'CHANGE_SHOW_JS_TRACER_SUMMARY':
+      return action.showSummary;
+    default:
+      return state;
+  }
+};
+
+const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
@@ -183,12 +178,12 @@ function globalTrackOrder(state: TrackIndex[] = [], action: Action) {
     default:
       return state;
   }
-}
+};
 
-function hiddenGlobalTracks(
-  state: Set<TrackIndex> = new Set(),
-  action: Action
-) {
+const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
+  state = new Set(),
+  action
+) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
     case 'ISOLATE_LOCAL_TRACK':
@@ -208,12 +203,12 @@ function hiddenGlobalTracks(
     default:
       return state;
   }
-}
+};
 
-function hiddenLocalTracksByPid(
-  state: Map<Pid, Set<TrackIndex>> = new Map(),
-  action: Action
-) {
+const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
+  state = new Map(),
+  action
+) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
       return action.hiddenLocalTracksByPid;
@@ -240,12 +235,12 @@ function hiddenLocalTracksByPid(
     default:
       return state;
   }
-}
+};
 
-function localTrackOrderByPid(
-  state: Map<Pid, TrackIndex[]> = new Map(),
-  action: Action
-) {
+const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
+  state = new Map(),
+  action
+) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
       return action.localTrackOrderByPid;
@@ -257,12 +252,9 @@ function localTrackOrderByPid(
     default:
       return state;
   }
-}
+};
 
-function pathInZipFile(
-  state: string | null = null,
-  action: Action
-): string | null {
+const pathInZipFile: Reducer<string | null> = (state = null, action) => {
   switch (action.type) {
     // Update the URL the moment the zip file is starting to be
     // processed, not when it is viewed. The processing is async.
@@ -273,7 +265,7 @@ function pathInZipFile(
     default:
       return state;
   }
-}
+};
 
 /**
  * These values are specific to an individual profile.
@@ -286,6 +278,7 @@ const profileSpecific = combineReducers({
   localTrackOrderByPid,
   implementation,
   invertCallstack,
+  showJsTracerSummary,
   committedRanges,
   callTreeSearchString,
   markersSearchString,
@@ -313,7 +306,9 @@ const wrapReducerInResetter = (
         // A new URL came in because of a browser action, discard the current UrlState
         // and use the new one, which was probably serialized from the URL, or stored
         // in the history API.
-        return action.newUrlState;
+        return action.newUrlState
+          ? action.newUrlState
+          : regularUrlStateReducer(undefined, action);
       case 'RETURN_TO_ZIP_FILE_LIST':
         // Invalidate all information that would be specific to an individual profile.
         return {
@@ -326,7 +321,7 @@ const wrapReducerInResetter = (
   };
 };
 
-const urlStateReducer = wrapReducerInResetter(
+const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
   combineReducers({
     dataSource,
     hash,
@@ -338,129 +333,3 @@ const urlStateReducer = wrapReducerInResetter(
 );
 
 export default urlStateReducer;
-
-export const getUrlState = (state: State): UrlState => state.urlState;
-export const getProfileSpecificState = (state: State) =>
-  getUrlState(state).profileSpecific;
-
-export const getDataSource = (state: State) => getUrlState(state).dataSource;
-export const getHash = (state: State) => getUrlState(state).hash;
-export const getProfileUrl = (state: State) => getUrlState(state).profileUrl;
-export const getAllCommittedRanges = (state: State) =>
-  getProfileSpecificState(state).committedRanges;
-export const getImplementationFilter = (state: State) =>
-  getProfileSpecificState(state).implementation;
-export const getInvertCallstack = (state: State) =>
-  getProfileSpecificState(state).invertCallstack;
-export const getCurrentSearchString = (state: State) =>
-  getProfileSpecificState(state).callTreeSearchString;
-export const getSearchStrings = createSelector(
-  getCurrentSearchString,
-  searchString => {
-    if (!searchString) {
-      return null;
-    }
-    const result = searchString
-      .split(',')
-      .map(part => part.trim())
-      .filter(part => part);
-
-    if (result.length) {
-      return result;
-    }
-
-    return null;
-  }
-);
-export const getSearchStringsAsRegExp = createSelector(
-  getSearchStrings,
-  strings => {
-    if (!strings || !strings.length) {
-      return null;
-    }
-    const regexpStr = strings.map(escapeStringRegexp).join('|');
-    return new RegExp(regexpStr, 'gi');
-  }
-);
-export const getMarkersSearchString = (state: State) =>
-  getProfileSpecificState(state).markersSearchString;
-export const getSelectedTab = (state: State) => getUrlState(state).selectedTab;
-export const getSelectedThreadIndexOrNull = (state: State) =>
-  getProfileSpecificState(state).selectedThread;
-export const getSelectedThreadIndex = (state: State) => {
-  const threadIndex = getSelectedThreadIndexOrNull(state);
-  if (threadIndex === null) {
-    throw new Error(
-      'Attempted to get a thread index before a profile was loaded.'
-    );
-  }
-  return threadIndex;
-};
-export const getTransformStack = (
-  state: State,
-  threadIndex: ThreadIndex
-): TransformStack => {
-  return (
-    getProfileSpecificState(state).transforms[threadIndex] ||
-    EMPTY_TRANSFORM_STACK
-  );
-};
-
-export const getTimelineType = (state: State): TimelineType =>
-  getProfileSpecificState(state).timelineType;
-
-export const getLegacyThreadOrder = (state: State) =>
-  getProfileSpecificState(state).legacyThreadOrder;
-export const getLegacyHiddenThreads = (state: State) =>
-  getProfileSpecificState(state).legacyHiddenThreads;
-export const getGlobalTrackOrder = (state: State) =>
-  getProfileSpecificState(state).globalTrackOrder;
-export const getHiddenGlobalTracks = (state: State) =>
-  getProfileSpecificState(state).hiddenGlobalTracks;
-export const getHiddenLocalTracksByPid = (state: State) =>
-  getProfileSpecificState(state).hiddenLocalTracksByPid;
-export const getHiddenLocalTracks = (state: State, pid: Pid) =>
-  ensureExists(
-    getHiddenLocalTracksByPid(state).get(pid),
-    'Unable to get the hidden tracks from the given pid'
-  );
-export const getLocalTrackOrderByPid = (state: State) =>
-  getProfileSpecificState(state).localTrackOrderByPid;
-export const getLocalTrackOrder = (state: State, pid: Pid) =>
-  ensureExists(
-    getLocalTrackOrderByPid(state).get(pid),
-    'Unable to get the track order from the given pid'
-  );
-
-export const getUrlPredictor = createSelector(
-  getUrlState,
-  (oldUrlState: UrlState) => (actionOrActionList: Action | Action[]) => {
-    const actionList: Action[] = Array.isArray(actionOrActionList)
-      ? actionOrActionList
-      : [actionOrActionList];
-    const newUrlState = actionList.reduce(urlStateReducer, oldUrlState);
-    return urlFromState(newUrlState);
-  }
-);
-
-export const getPathInZipFileFromUrl = (state: State) =>
-  getUrlState(state).pathInZipFile;
-
-/**
- * For now only provide a name for a profile if it came from a zip file.
- */
-export const getProfileName: State => null | string = createSelector(
-  getPathInZipFileFromUrl,
-  pathInZipFile => {
-    if (!pathInZipFile) {
-      return null;
-    }
-    const pathParts = pathInZipFile.split('/');
-    return pathParts[pathParts.length - 1];
-  }
-);
-
-export const getCommittedRangeLabels = createSelector(
-  getAllCommittedRanges,
-  CommittedRanges.getCommittedRangeLabels
-);

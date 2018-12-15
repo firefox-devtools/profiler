@@ -16,8 +16,8 @@ import GlobalTrack from '../../components/timeline/GlobalTrack';
 import {
   getGlobalTracks,
   getRightClickedTrack,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
@@ -90,7 +90,7 @@ describe('timeline/GlobalTrack', function() {
 
   it('has the correct selectors into useful parts of the component', function() {
     const { getGlobalTrackLabel, getGlobalTrackRow } = setup();
-    expect(getGlobalTrackLabel().text()).toBe('Content');
+    expect(getGlobalTrackLabel().text()).toBe('Content Process');
     expect(getGlobalTrackRow().exists()).toBe(true);
   });
 

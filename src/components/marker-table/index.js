@@ -11,8 +11,8 @@ import {
   getZeroAt,
   selectedThreadSelectors,
   getScrollToSelectionGeneration,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { changeSelectedMarker } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
 import { formatSeconds } from '../../utils/format-numbers';
@@ -237,8 +237,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     markers: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state),
-    selectedMarker: selectedThreadSelectors.getViewOptions(state)
-      .selectedMarker,
+    selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
     zeroAt: getZeroAt(state),
   }),
   mapDispatchToProps: { changeSelectedMarker },

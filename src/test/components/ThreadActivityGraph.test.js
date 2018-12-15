@@ -13,7 +13,7 @@ import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
 
 import SelectedThreadActivityGraph from '../../components/shared/thread/SelectedActivityGraph';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/profile-view';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';

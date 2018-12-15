@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import {
   getProfileViewOptions,
   getSymbolicationStatus,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 import explicitConnect from '../../utils/connect';
 
 import type { RequestedLib } from '../../types/actions';

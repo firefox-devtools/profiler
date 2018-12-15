@@ -54,6 +54,23 @@ exports[`app/DetailsContainer renders an initial view with or without a sidebar 
 </t>
 `;
 
+exports[`app/DetailsContainer renders an initial view with or without a sidebar for tab js-tracer 1`] = `
+<t
+  customClassName="DetailsContainer"
+  onDragEnd={[Function]}
+  onDragStart={null}
+  onSecondaryPaneSizeChange={null}
+  percentage={true}
+  primaryIndex={0}
+  primaryMinSize={0}
+  secondaryInitialSize={20}
+  secondaryMinSize={0}
+  vertical={false}
+>
+  <Connect(ProfileViewer) />
+</t>
+`;
+
 exports[`app/DetailsContainer renders an initial view with or without a sidebar for tab marker-chart 1`] = `
 <t
   customClassName="DetailsContainer"
@@ -85,6 +102,7 @@ exports[`app/DetailsContainer renders an initial view with or without a sidebar 
   vertical={false}
 >
   <Connect(ProfileViewer) />
+  <Connect(MarkerSidebar) />
 </t>
 `;
 

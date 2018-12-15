@@ -48,6 +48,7 @@ export function toValidTabSlug(tabSlug: any): TabSlug | null {
     case 'network-chart':
     case 'marker-table':
     case 'flame-graph':
+    case 'js-tracer':
       return coercedTabSlug;
     default: {
       // The coerced type SHOULD be empty here. If in reality we get
@@ -118,6 +119,10 @@ export function objectEntries<Value, Obj: {| [string]: Value |}>(
   object: Obj
 ): Array<[string, Value]> {
   return (Object.entries: Function)(object);
+}
+
+export function getObjectValuesAsUnion<T: Object>(obj: T): Array<$Values<T>> {
+  return Object.values(obj);
 }
 
 /**

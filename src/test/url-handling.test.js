@@ -6,8 +6,8 @@
 /**
  * @jest-environment jsdom
  */
-import * as urlStateReducers from '../reducers/url-state';
-import * as profileViewSelectors from '../reducers/profile-view';
+import * as urlStateReducers from '../selectors/url-state';
+import * as profileViewSelectors from '../selectors/profile-view';
 import {
   changeCallTreeSearchString,
   changeMarkersSearchString,

@@ -5,7 +5,7 @@
 
 import type { Store as ReduxStore } from 'redux'; // eslint-disable-line import/named
 import type { Action as ActionsRef } from './actions';
-import type { State as StateRef } from './reducers';
+import type { State as StateRef } from './state';
 
 /**
  * This file contains type definitions for the Redux store. Unlike the definitions

@@ -15,7 +15,7 @@ import {
   changeImplementationFilter,
   changeSelectedCallNode,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/profile-view';
 
 describe('"focus-subtree" transform', function() {
   describe('on a call tree', function() {

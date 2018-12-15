@@ -12,6 +12,8 @@ import type {
   GeckoMarkerStack,
 } from '../../../types/gecko-profile';
 
+import { CURRENT_VERSION } from '../../../profile-logic/gecko-profile-versioning';
+
 /**
  * export defaults one object that is an example profile, in the Gecko format,
  * i.e. the format that nsIProfiler.getProfileDataAsync outputs.
@@ -80,8 +82,13 @@ export default function createGeckoProfile(): GeckoProfile {
     startTime: 1460221352723.438,
     shutdownTime: 1560221352723,
     toolkit: 'cocoa',
-    version: 5,
-    categories: [],
+    version: CURRENT_VERSION,
+    categories: [
+      {
+        name: 'Other',
+        color: 'grey',
+      },
+    ],
   };
 
   const contentProcessMeta: GeckoProfileMeta = {
@@ -95,6 +102,7 @@ export default function createGeckoProfile(): GeckoProfile {
     meta: contentProcessMeta,
     pausedRanges: [],
     libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the Gecko profile
+    pages: [],
     threads: [
       {
         ..._createGeckoThread(),
@@ -108,6 +116,7 @@ export default function createGeckoProfile(): GeckoProfile {
   return {
     meta: parentProcessMeta,
     libs: [parentProcessBinary].concat(extraBinaries),
+    pages: [],
     pausedRanges: [],
     threads: [
       {
@@ -140,8 +149,6 @@ function _createGeckoThread(): GeckoThread {
         responsiveness: 2,
         rss: 3,
         uss: 4,
-        frameNumber: 5,
-        power: 6,
       },
       data: [
         [1, 0, 0, null, null], // (root), 0x100000f84
@@ -166,18 +173,19 @@ function _createGeckoThread(): GeckoThread {
     frameTable: {
       schema: {
         location: 0,
-        implementation: 1,
-        optimizations: 2,
-        line: 3,
-        column: 4,
-        category: 5,
+        relevantForJS: 1,
+        implementation: 2,
+        optimizations: 3,
+        line: 4,
+        column: 5,
+        category: 6,
       },
       data: [
-        [0, null, null, null, null], // (root)
-        [1, null, null, null, null], // 0x100000f84
-        [2, null, null, null, null], // 0x100001a45
-        [3, null, null, 4391, 16], // Startup::XRE_Main, line 4391, category 16
-        [7, 6, null, 34, null], // frobnicate, implementation 'baseline', line 34
+        [0, false, null, null, null, null], // (root)
+        [1, false, null, null, null, null], // 0x100000f84
+        [2, false, null, null, null, null], // 0x100001a45
+        [3, false, null, null, 4391, 0], // Startup::XRE_Main, line 4391, category Other
+        [7, false, 6, null, 34, null], // frobnicate, implementation 'baseline', line 34
       ],
     },
     markers: {
@@ -268,16 +276,28 @@ function _createGeckoThread(): GeckoThread {
         [
           8,
           9,
-          // This doesn't really match the current marker payloads, so coerce
-          // it to any:
-          ({
-            // DOMEvent at time 9ms from 9ms to 10ms
-            startTime: 9,
-            endTime: 10,
+          {
+            // DOMEvent at time 9ms from 9ms to 10ms, this is the start marker
+            type: 'tracing',
+            category: 'DOMEvent',
             timeStamp: 1,
-            type: 'mouseout',
+            interval: 'start',
+            eventType: 'mouseout',
             phase: 3,
-          }: any),
+          },
+        ],
+        [
+          8,
+          10,
+          {
+            // DOMEvent at time 9ms from 9ms to 10ms, this is the end marker
+            type: 'tracing',
+            category: 'DOMEvent',
+            timeStamp: 1,
+            interval: 'end',
+            eventType: 'mouseout',
+            phase: 3,
+          },
         ],
         [
           11, // UserTiming
@@ -369,8 +389,40 @@ function _createGeckoThread(): GeckoThread {
             type: 'tracing',
           },
         ],
-        // Starting a tracing but never finishing it.
-        // Please keep it at the end if you add more markers in this structure
+        [
+          12, // ArbitraryName
+          21,
+          {
+            category: 'ArbitraryCategory',
+            type: 'tracing',
+          },
+        ],
+        [
+          13, // Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5
+          24,
+          {
+            type: 'Network',
+            startTime: 22,
+            endTime: 24,
+            id: 388634410746504,
+            status: 'STATUS_STOP',
+            pri: -20,
+            count: 37838,
+            URI: 'https://github.com/rustwasm/wasm-bindgen/issues/2',
+            domainLookupStart: 22.1,
+            domainLookupEnd: 22.2,
+            connectStart: 22.3,
+            tcpConnectEnd: 22.4,
+            secureConnectionStart: 22.5,
+            connectEnd: 22.6,
+            requestStart: 22.7,
+            responseStart: 22.8,
+            responseEnd: 22.9,
+          },
+        ],
+        // INSERT NEW MARKERS HERE
+
+        // Start a tracing marker but never finish it.
         [
           10, // Rasterize
           20,
@@ -380,30 +432,26 @@ function _createGeckoThread(): GeckoThread {
             type: 'tracing',
           },
         ],
-        [
-          12, // ArbitraryName
-          21,
-          {
-            category: 'ArbitraryCategory',
-            type: 'tracing',
-          },
-        ],
+        // Please keep the open-ended rasterize marker the last marker of the
+        // list. Any new markers should be inserted before the rasterize marker.
+        // DO NOT ADD NEW MARKERS HERE
       ],
     },
     stringTable: [
-      '(root)',
-      '0x100000f84',
-      '0x100001a45',
-      'Startup::XRE_Main',
-      'VsyncTimestamp',
-      'Reflow',
-      'baseline',
-      'frobnicate (chrome://blargh:34)',
-      'DOMEvent',
-      'MinorGC',
-      'Rasterize',
-      'UserTiming',
-      'ArbitraryName',
+      '(root)', // 0
+      '0x100000f84', // 1
+      '0x100001a45', // 2
+      'Startup::XRE_Main', // 3
+      'VsyncTimestamp', // 4
+      'Reflow', // 5
+      'baseline', // 6
+      'frobnicate (chrome://blargh:34:35)', // 7
+      'DOMEvent', // 8
+      'MinorGC', // 9
+      'Rasterize', // 10
+      'UserTiming', // 11
+      'ArbitraryName', // 12
+      'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5', // 13
     ],
   };
 }

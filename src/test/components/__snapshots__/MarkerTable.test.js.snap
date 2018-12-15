@@ -35,7 +35,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>

@@ -82,7 +82,7 @@ exports[`renders FlameGraph correctly 1`] = `
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>
@@ -124,8 +124,11 @@ exports[`renders FlameGraph correctly 1`] = `
     >
       <div
         className="chartViewport"
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
         onMouseDown={[Function]}
         onWheel={[Function]}
+        tabIndex={0}
       >
         <div>
           <canvas
@@ -593,7 +596,7 @@ exports[`renders a message instead of FlameGraph when call stack is inverted 1`]
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>

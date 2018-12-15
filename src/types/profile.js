@@ -4,7 +4,7 @@
 
 // @flow
 
-import type { Milliseconds, MemoryOffset } from './units';
+import type { Milliseconds, MemoryOffset, Microseconds } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload } from './markers';
 export type IndexIntoStackTable = number;
@@ -18,6 +18,7 @@ export type IndexIntoLibs = number;
 export type IndexIntoCategoryList = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
+export type IndexIntoJsTracerEvents = number;
 
 /**
  * If a pid is a number, then it is the int value that came from the profiler.
@@ -85,11 +86,11 @@ export type StackTable = {
  * are indices into other tables.
  */
 export type SamplesTable = {
-  responsiveness: number[],
+  responsiveness: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
-  time: number[],
-  rss: any[], // TODO
-  uss: any[], // TODO
+  time: Milliseconds[],
+  rss: Array<null | number>,
+  uss: Array<null | number>,
   length: number,
 };
 
@@ -146,8 +147,10 @@ export type FuncTable = {
   length: number,
   name: IndexIntoStringTable[],
   resource: Array<IndexIntoResourceTable | -1>,
+  relevantForJS: Array<boolean>,
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
+  columnNumber: Array<number | null>,
 };
 
 /**
@@ -190,6 +193,25 @@ export type Category = {
 export type CategoryList = Array<Category>;
 
 /**
+ * A Page describes all of the pages the browser profiled. In Firefox, there exists
+ * the idea of a docshell, which a large collection of useful things associated
+ * with a particular tab or iframe. However, this docshell can be used to navigate
+ * over many pages. The historyId property represents current history position
+ * of that given the docshell.
+ *
+ * The unique value for a page is then represented by the combination of the docshellId
+ * and the historyId.
+ */
+export type Page = {|
+  docshellId: string,
+  historyId: number,
+  url: string,
+  isSubFrame: boolean,
+|};
+
+export type PageList = Array<Page>;
+
+/**
  * Information about a period of time during which no samples were collected.
  */
 export type PausedRange = {
@@ -200,6 +222,15 @@ export type PausedRange = {
   endTime: Milliseconds | null,
   reason: 'profiler-paused' | 'collecting',
 };
+
+export type JsTracerTable = {|
+  events: Array<IndexIntoStringTable>,
+  timestamps: Array<Microseconds>,
+  durations: Array<Microseconds | null>,
+  lines: Array<number | null>, // Line number.
+  columns: Array<number | null>, // Column number.
+  length: number,
+|};
 
 /**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
@@ -227,6 +258,7 @@ export type Thread = {
   unregisterTime: Milliseconds | null,
   pausedRanges: PausedRange[],
   name: string,
+  processName?: string,
   // An undefined pid is a valid value. An undefined value will key
   // properly on Map<pid, T>.
   pid: Pid,
@@ -241,6 +273,7 @@ export type Thread = {
   libs: Lib[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
+  jsTracer?: JsTracerTable,
 };
 
 export type ExtensionTable = {|
@@ -325,5 +358,6 @@ export type ProfileMeta = {|
  */
 export type Profile = {
   meta: ProfileMeta,
+  pages?: PageList,
   threads: Thread[],
 };

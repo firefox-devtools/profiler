@@ -23,8 +23,8 @@ import {
   selectedThreadSelectors,
   getCommittedRange,
   getProfileInterval,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -207,7 +207,7 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
     // Set min-width for marker bar.
     let markerWidth = endPosition - startPosition;
     if (markerWidth < 1) {
-      markerWidth = 2;
+      markerWidth = 2.5;
     }
 
     return {

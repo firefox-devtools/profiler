@@ -11,7 +11,7 @@ import {
   selectedThreadSelectors,
   getPreviewSelection,
   getCommittedRange,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 import copy from 'copy-to-clipboard';
 
 import type {
@@ -115,8 +115,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     markers: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state),
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
-    selectedMarker: selectedThreadSelectors.getViewOptions(state)
-      .selectedMarker,
+    selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
   }),
   mapDispatchToProps: { updatePreviewSelection },
   component: MarkersContextMenu,
