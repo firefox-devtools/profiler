@@ -329,6 +329,11 @@ export type UserTimingMarkerPayload = {|
   entryType: 'measure' | 'mark',
 |};
 
+export type TextMarkerPayload = {|
+  type: 'Text',
+  name: string,
+|};
+
 export type DOMEventMarkerPayload = {|
   type: 'tracing',
   category: 'DOMEvent',
@@ -422,6 +427,7 @@ export type MarkerPayload =
   | InvalidationPayload
   | NetworkPayload
   | UserTimingMarkerPayload
+  | TextMarkerPayload
   | PaintProfilerMarkerTracing
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
@@ -440,6 +446,7 @@ export type MarkerPayload_Gecko =
   | GPUMarkerPayload
   | NetworkPayload
   | UserTimingMarkerPayload
+  | TextMarkerPayload
   | PaintProfilerMarkerTracing_Gecko
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
