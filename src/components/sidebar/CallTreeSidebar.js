@@ -50,7 +50,6 @@ function SidebarDetail({ label, children }: SidebarDetailProps) {
 
 type ImplementationBreakdownProps = {|
   +breakdown: BreakdownByImplementation,
-  +isIntervalInteger: isIntervalInteger,
 |};
 
 // This component is responsible for displaying the breakdown data specific to
