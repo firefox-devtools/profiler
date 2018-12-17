@@ -335,6 +335,7 @@ export function getTracingMarkers(
   for (const markerBucket of openMarkers.values()) {
     for (const marker of markerBucket) {
       marker.dur = Infinity;
+      marker.incomplete = true;
       tracingMarkers.push(marker);
     }
   }
