@@ -8,45 +8,69 @@ import { getProfileUrl } from './url-state';
 import { ensureExists } from '../utils/flow';
 import * as ZipFiles from '../profile-logic/zip-files';
 
-import type { State, ZipFileState, ZippedProfilesState } from '../types/state';
+import type { ZipFileState, ZippedProfilesState } from '../types/state';
+import type { Selector } from '../types/store';
+import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type JSZip from 'jszip';
 
-export const getZippedProfilesState = (state: State): ZippedProfilesState =>
+/**
+ * Simple selectors into the ZippedProfilesState.
+ */
+export const getZippedProfilesState: Selector<ZippedProfilesState> = state =>
   state.zippedProfiles;
-export const getSelectedZipFileIndex = (state: State) =>
+export const getSelectedZipFileIndex: Selector<IndexIntoZipFileTable | null> = state =>
   getZippedProfilesState(state).selectedZipFileIndex;
-export const getExpandedZipFileIndexes = (state: State) =>
-  getZippedProfilesState(state).expandedZipFileIndexes;
-export const getZipFileErrorMessage = (state: State): string | null => {
+export const getExpandedZipFileIndexes: Selector<
+  Array<IndexIntoZipFileTable | null>
+> = state => getZippedProfilesState(state).expandedZipFileIndexes;
+export const getZipFileState: Selector<ZipFileState> = state =>
+  getZippedProfilesState(state).zipFile;
+export const getZipFile: Selector<JSZip | null> = state => {
+  return getZipFileState(state).zip;
+};
+export const getHasZipFile: Selector<boolean> = state =>
+  getZipFileState(state).phase !== 'NO_ZIP_FILE';
+
+/**
+ * Looks up the message in the zip file error.
+ */
+export const getZipFileErrorMessage: Selector<string | null> = state => {
   const { error } = getZippedProfilesState(state);
   return error === null ? null : error.message;
 };
 
-export const getZipFileState = (state: State): ZipFileState =>
-  getZippedProfilesState(state).zipFile;
-export const getZipFile = (state: State): JSZip | null => {
-  return getZipFileState(state).zip;
-};
-export const getHasZipFile = (state: State): boolean =>
-  getZipFileState(state).phase !== 'NO_ZIP_FILE';
-
-export const getZipFileTableOrNull = createSelector(
+/**
+ * Creates a zip file table, if a zip file exists.
+ */
+export const getZipFileTableOrNull: Selector<null | ZipFiles.ZipFileTable> = createSelector(
   getZipFile,
   zip => (zip === null ? null : ZipFiles.createZipTable(zip))
 );
 
-export const getZipFileTable = (state: State) =>
+/**
+ * This function creates a zip file table, but throws an error if the JSZip object does
+ * not exist. This throw behavior helps avoid a null check when used in areas where it
+ * is pretty safe to assume that the JSZip object exists.
+ */
+export const getZipFileTable: Selector<ZipFiles.ZipFileTable> = state =>
   ensureExists(
     getZipFileTableOrNull(state),
     'Attempted to view a profile from a zip, when there is no zip file loaded.'
   );
 
-export const getZipFileMaxDepth = createSelector(
+/**
+ * This selector computes the max depth of the zip file directory structure.
+ */
+export const getZipFileMaxDepth: Selector<number> = createSelector(
   getZipFileTable,
   ZipFiles.getZipFileMaxDepth
 );
 
-export const getZipFileTreeOrNull = createSelector(
+/**
+ * This selector creates a ZipFileTree class if a zip file exists. This is used to
+ * render a file picker to load profiles from the zip file.
+ */
+export const getZipFileTreeOrNull: Selector<ZipFiles.ZipFileTree | null> = createSelector(
   getZipFileTable,
   getProfileUrl,
   (zipFileTable, zipFileUrl) =>
@@ -55,7 +79,11 @@ export const getZipFileTreeOrNull = createSelector(
       : new ZipFiles.ZipFileTree(zipFileTable, zipFileUrl)
 );
 
-export const getZipFileTree = (state: State) =>
+/**
+ * Avoid a null check, by throwing an error if trying to use zip a file when it doesn't
+ * exist.
+ */
+export const getZipFileTree: Selector<*> = state =>
   ensureExists(
     getZipFileTreeOrNull(state),
     'Attempted to view a profile from a zip, when there is no zip file loaded.'
