@@ -50,6 +50,7 @@ function SidebarDetail({ label, children }: SidebarDetailProps) {
 
 type ImplementationBreakdownProps = {|
   +breakdown: BreakdownByImplementation,
+  +isIntervalInteger: isIntervalInteger,
 |};
 
 // This component is responsible for displaying the breakdown data specific to
@@ -82,10 +83,9 @@ class ImplementationBreakdown extends React.PureComponent<
   }
 
   render() {
-    const { breakdown } = this.props;
+    const { breakdown, isIntervalInteger } = this.props;
 
     const data = [];
-    const isIntervalInteger = false;
 
     for (const implementation of this._orderedImplementations) {
       const value = breakdown[implementation];
@@ -208,6 +208,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               <h4 className="sidebar-title3">Implementation – running time</h4>
               <ImplementationBreakdown
                 breakdown={totalTime.breakdownByImplementation}
+                isIntervalInteger={isIntervalInteger}
               />
             </React.Fragment>
           ) : null}
@@ -216,6 +217,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               <h4 className="sidebar-title3">Implementation – self time</h4>
               <ImplementationBreakdown
                 breakdown={selfTime.breakdownByImplementation}
+                isIntervalInteger={isIntervalInteger}
               />
             </React.Fragment>
           ) : null}
@@ -240,6 +242,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               <h4 className="sidebar-title3">Implementation – running time</h4>
               <ImplementationBreakdown
                 breakdown={totalTimeForFunc.breakdownByImplementation}
+                isIntervalInteger={isIntervalInteger}
               />
             </React.Fragment>
           ) : null}
@@ -248,6 +251,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               <h4 className="sidebar-title3">Implementation – self time</h4>
               <ImplementationBreakdown
                 breakdown={selfTimeForFunc.breakdownByImplementation}
+                isIntervalInteger={isIntervalInteger}
               />
             </React.Fragment>
           ) : null}
