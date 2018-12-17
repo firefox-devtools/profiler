@@ -806,9 +806,8 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
             <div className="tooltipTiming">
-              {/* we don't know the duration if the marker is incomplete (unknown start),
-                  or when the duration is infinite */}
-              {!marker.incomplete && Number.isFinite(marker.dur)
+              {/* we don't know the duration if the marker is incomplete */}
+              {!marker.incomplete
                 ? formatMilliseconds(marker.dur)
                 : 'unknown duration'}
             </div>
