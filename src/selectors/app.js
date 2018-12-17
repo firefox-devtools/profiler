@@ -7,7 +7,7 @@ import { createSelector } from 'reselect';
 
 import { getSelectedTab } from './url-state';
 import { tabSlugs } from '../app-logic/tabs-handling';
-import { selectedThreadSelectors } from './profile-view';
+import { selectedThreadSelectors } from './per-thread';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { AppState, AppViewState } from '../types/state';
