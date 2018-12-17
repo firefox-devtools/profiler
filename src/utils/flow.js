@@ -48,6 +48,7 @@ export function toValidTabSlug(tabSlug: any): TabSlug | null {
     case 'network-chart':
     case 'marker-table':
     case 'flame-graph':
+    case 'js-tracer':
       return coercedTabSlug;
     default: {
       // The coerced type SHOULD be empty here. If in reality we get

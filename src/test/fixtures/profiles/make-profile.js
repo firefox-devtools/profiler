@@ -10,6 +10,7 @@ import type {
   Thread,
   IndexIntoCategoryList,
   CategoryList,
+  JsTracerTable,
 } from '../../../types/profile';
 import type { MarkerPayload, NetworkPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
@@ -21,6 +22,14 @@ type MockPayload = {| startTime: Milliseconds, endTime: Milliseconds |};
 type TestDefinedMarkers = Array<
   [MarkerName, MarkerTime, MarkerPayload | MockPayload]
 >;
+export type TestDefinedJsTracerEvent = [
+  // Event name:
+  string,
+  // Start time:
+  Milliseconds,
+  // End time:
+  Milliseconds,
+];
 
 /**
  * This function ensures that the mock payloads are converted correctly to real payloads
@@ -559,4 +568,80 @@ export function getScreenshotTrackProfile() {
         },
       ])
   );
+}
+
+export function getEmptyJsTracerTable(): JsTracerTable {
+  return {
+    events: [],
+    timestamps: [],
+    durations: [],
+    lines: [],
+    columns: [],
+    length: 0,
+  };
+}
+
+export function getJsTracerTable(
+  stringTable: UniqueStringArray,
+  events: TestDefinedJsTracerEvent[]
+): JsTracerTable {
+  const jsTracer = getEmptyJsTracerTable();
+
+  for (const [event, start, end] of events) {
+    const stringIndex = stringTable.indexForString(event);
+    jsTracer.events.push(stringIndex);
+    jsTracer.timestamps.push(start * 1000);
+    jsTracer.durations.push((end - start) * 1000);
+    jsTracer.lines.push(null);
+    jsTracer.columns.push(null);
+    jsTracer.length++;
+  }
+
+  return jsTracer;
+}
+
+export function getThreadWithJsTracerEvents(
+  events: TestDefinedJsTracerEvent[]
+): Thread {
+  const thread = getEmptyThread();
+  thread.jsTracer = getJsTracerTable(thread.stringTable, events);
+
+  let endOfEvents = 0;
+  for (const [, , end] of events) {
+    endOfEvents = Math.max(endOfEvents, end);
+  }
+
+  // Create a sample table that is of the same length as the tracer data
+  endOfEvents = Number.isInteger(endOfEvents)
+    ? // When considering the range of a profile, this range is set to the start of the
+      // first profile sample's timestamp, and the end timestamp of the last
+      // sample + profile.meta.interval.
+      // To keep things slightly realistic, Assume that the profile.meta.interval
+      // value is 1 here.
+      Math.floor(endOfEvents)
+    : endOfEvents - 1;
+
+  // Re-create the table so that it creates a Flow error if we don't handle part of it.
+  thread.samples = {
+    responsiveness: Array(endOfEvents).fill(null),
+    stack: Array(endOfEvents).fill(null),
+    time: Array(endOfEvents)
+      .fill(0)
+      .map((_, i) => i),
+    rss: Array(endOfEvents).fill(null),
+    uss: Array(endOfEvents).fill(null),
+    length: endOfEvents,
+  };
+
+  return thread;
+}
+
+export function getProfileWithJsTracerEvents(
+  ...eventsLists: Array<TestDefinedJsTracerEvent[]>
+): Profile {
+  const profile = getEmptyProfile();
+  profile.threads = eventsLists.map(events =>
+    getThreadWithJsTracerEvents(events)
+  );
+  return profile;
 }

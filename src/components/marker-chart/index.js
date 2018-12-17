@@ -18,8 +18,8 @@ import {
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type {

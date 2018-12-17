@@ -4,7 +4,7 @@
 
 // @flow
 
-import type { Milliseconds, MemoryOffset } from './units';
+import type { Milliseconds, MemoryOffset, Microseconds } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload } from './markers';
 export type IndexIntoStackTable = number;
@@ -18,6 +18,7 @@ export type IndexIntoLibs = number;
 export type IndexIntoCategoryList = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
+export type IndexIntoJsTracerEvents = number;
 
 /**
  * If a pid is a number, then it is the int value that came from the profiler.
@@ -222,6 +223,15 @@ export type PausedRange = {
   reason: 'profiler-paused' | 'collecting',
 };
 
+export type JsTracerTable = {|
+  events: Array<IndexIntoStringTable>,
+  timestamps: Array<Microseconds>,
+  durations: Array<Microseconds | null>,
+  lines: Array<number | null>, // Line number.
+  columns: Array<number | null>, // Column number.
+  length: number,
+|};
+
 /**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
@@ -263,6 +273,7 @@ export type Thread = {
   libs: Lib[],
   funcTable: FuncTable,
   resourceTable: ResourceTable,
+  jsTracer?: JsTracerTable,
 };
 
 export type ExtensionTable = {|

@@ -6,36 +6,37 @@
 import { combineReducers } from 'redux';
 import { getCategoryByImplementation } from '../profile-logic/color-categories';
 import { getFunctionName } from '../profile-logic/labeling-strategies';
-import type { State } from '../types/reducers';
 import type { GetLabel } from '../profile-logic/labeling-strategies';
 import type { GetCategory } from '../profile-logic/color-categories';
-import type { Action } from '../types/actions';
+import type { StackChartState, Reducer } from '../types/state';
 
-function categoryColorStrategy(
-  state: GetCategory = getCategoryByImplementation,
-  action: Action
-) {
+const categoryColorStrategy: Reducer<GetCategory> = (
+  state = getCategoryByImplementation,
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_STACK_CHART_COLOR_STRATEGY':
       return action.getCategory;
     default:
       return state;
   }
-}
+};
 
-function labelingStrategy(state: GetLabel = getFunctionName, action: Action) {
+const labelingStrategy: Reducer<GetLabel> = (
+  state = getFunctionName,
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_STACK_CHART_LABELING_STRATEGY':
       return action.getLabel;
     default:
       return state;
   }
-}
+};
 
-export default combineReducers({ categoryColorStrategy, labelingStrategy });
+const stackChartReducer: Reducer<StackChartState> = combineReducers({
+  categoryColorStrategy,
+  labelingStrategy,
+});
 
-export const getStackChart = (state: State) => state.stackChart;
-export const getCategoryColorStrategy = (state: State) =>
-  getStackChart(state).categoryColorStrategy;
-export const getLabelingStrategy = (state: State) =>
-  getStackChart(state).labelingStrategy;
+export default stackChartReducer;

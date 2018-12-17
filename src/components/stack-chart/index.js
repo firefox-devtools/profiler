@@ -16,12 +16,12 @@ import {
   getProfileInterval,
   getPreviewSelection,
   getScrollToSelectionGeneration,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import {
   getCategoryColorStrategy,
   getLabelingStrategy,
-} from '../../reducers/stack-chart';
+} from '../../selectors/stack-chart';
 import StackSettings from '../shared/StackSettings';
 import {
   updatePreviewSelection,

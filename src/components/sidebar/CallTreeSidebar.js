@@ -11,8 +11,8 @@ import {
   selectedThreadSelectors,
   selectedNodeSelectors,
   getProfileInterval,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile-view';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { getFunctionName } from '../../profile-logic/function-info';
 import { assertExhaustiveCheck } from '../../utils/flow';
 import CanSelectContent from './CanSelectContent';

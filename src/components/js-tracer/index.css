@@ -1,0 +1,31 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.jsTracer {
+  display: flex;
+  flex: 1;
+  flex-flow: column nowrap;
+}
+
+.jsTracerLoader {
+  flex: 1;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  vertical-align: middle;
+  background-color: var(--grey-10);
+  border-top: solid 1px var(--grey-20);
+  font-size: 12px;
+  justify-content: center;
+}
+
+.jsTracerCanvasFadeIn {
+  background-color: #fff;
+  opacity: 0;
+}
+
+.jsTracerCanvasFadeIn.jsTracerCanvasDrawn {
+  opacity: 1;
+  transition: opacity 200ms;
+}

@@ -15,11 +15,12 @@ import StackChart from '../stack-chart/';
 import MarkerChart from '../marker-chart/';
 import NetworkChart from '../network-chart/';
 import FlameGraph from '../flame-graph/';
+import JsTracer from '../js-tracer/';
 import selectSidebar from '../sidebar';
 
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
-import { getSelectedTab } from '../../reducers/url-state';
-import { getIsSidebarOpen, getVisibleTabs } from '../../reducers/app';
+import { getSelectedTab } from '../../selectors/url-state';
+import { getIsSidebarOpen, getVisibleTabs } from '../../selectors/app';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';
@@ -98,6 +99,7 @@ class ProfileViewer extends PureComponent<Props> {
             'marker-chart': <MarkerChart />,
             'marker-table': <MarkerTable />,
             'network-chart': <NetworkChart />,
+            'js-tracer': <JsTracer />,
           }[selectedTab]
         }
         <CallNodeContextMenu />

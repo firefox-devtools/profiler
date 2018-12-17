@@ -11,7 +11,7 @@ import {
   selectedThreadSelectors,
   getPreviewSelection,
   getCommittedRange,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 import copy from 'copy-to-clipboard';
 
 import type {

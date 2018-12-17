@@ -161,6 +161,10 @@
 .menuButtonsOpenMetaInfoButtonBox {
   display: flex;
   padding: 0;
+  /* Let this box shrink down to the size of the three dots and a bit of text. */
+  min-width: 75px;
+  /* Shrink down twice as fast as the range selection labels. */
+  flex-shrink: 2;
 }
 
 .menuButtonsOpenMetaInfoButtonLabel {
@@ -168,7 +172,17 @@
   flex-flow: column nowrap;
   align-items: stretch;
   position: relative;
-  padding: 5px 10px 10px;
+  padding: 5px 10px;
+  /* Let this box shrink down to the size of the three dots. */
+  min-width: 0;
+  /* Make sure the padding doesn't contribute to the height, which is 100% */
+  box-sizing: border-box;
+}
+
+.menuButtonsOpenMetaInfoButtonLabelOverflow {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .menuButtonsOpenMetaInfoButtonBox .buttonWithPanelButton,

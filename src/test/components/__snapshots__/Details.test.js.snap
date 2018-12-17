@@ -96,6 +96,31 @@ exports[`app/Details renders an initial view with the right panel for tab flame-
 </div>
 `;
 
+exports[`app/Details renders an initial view with the right panel for tab js-tracer 1`] = `
+<div
+  className="Details"
+>
+  <TabBar
+    extraElements={false}
+    onSelectTab={[Function]}
+    selectedTabSlug="js-tracer"
+    visibleTabs={
+      Array [
+        "calltree",
+        "flame-graph",
+        "stack-chart",
+        "marker-chart",
+        "marker-table",
+      ]
+    }
+  />
+  <Connect(JsTracer) />
+  <Connect(CallNodeContextMenu) />
+  <Connect(MarkersContextMenu) />
+  <Connect(TimelineTrackContextMenu) />
+</div>
+`;
+
 exports[`app/Details renders an initial view with the right panel for tab marker-chart 1`] = `
 <div
   className="Details"

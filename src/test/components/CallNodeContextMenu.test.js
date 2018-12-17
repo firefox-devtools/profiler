@@ -11,7 +11,7 @@ import { mount } from 'enzyme';
 import { changeSelectedCallNode } from '../../actions/profile-view';
 import { MenuItem } from 'react-contextmenu';
 import { Provider } from 'react-redux';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/profile-view';
 import copy from 'copy-to-clipboard';
 
 describe('calltree/CallNodeContextMenu', function() {

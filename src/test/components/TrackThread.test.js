@@ -15,7 +15,7 @@ import TrackThread from '../../components/timeline/TrackThread';
 import {
   selectedThreadSelectors,
   getPreviewSelection,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile-view';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
