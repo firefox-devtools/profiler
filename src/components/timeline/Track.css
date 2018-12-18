@@ -54,9 +54,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
 }
 
 .timelineTrackTrack {

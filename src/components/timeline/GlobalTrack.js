@@ -176,7 +176,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
               onMouseDown: this._onLabelMouseDown,
             }}
           >
-            {/* replaced the <h1> with <button> tag for navigation */}
+            {/* replaced the <h1> with <button> for navigation */}
             <button type="button" className="timelineTrackNameButton">
               {trackName}
             </button>
