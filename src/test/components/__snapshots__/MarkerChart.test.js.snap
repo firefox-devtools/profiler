@@ -301,7 +301,10 @@ Array [
 
 exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`] = `
 <div
+  aria-labelledby="marker-chart-tab-button"
   className="markerChart"
+  id="marker-chart-tab"
+  role="tabpanel"
 >
   <div
     className="markerSettings"

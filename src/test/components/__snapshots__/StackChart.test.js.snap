@@ -2,7 +2,10 @@
 
 exports[`StackChart matches the snapshot 1`] = `
 <div
+  aria-labelledby="stack-chart-tab-button"
   className="stackChart"
+  id="stack-chart-tab"
+  role="tabpanel"
 >
   <div
     className="stackSettings"

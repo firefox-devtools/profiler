@@ -7,8 +7,6 @@ import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
 import bisection from 'bisection';
 
-const demangleModulePromise = import('gecko-profiler-demangle');
-
 import type { RequestedLib } from '../types/actions';
 import type { SymbolTableAsTuple } from './symbol-store-db';
 
@@ -70,6 +68,31 @@ function _partitionIntoChunksOfMaxValue<T>(
     chunk.value += elementValue;
   }
   return chunks.map(({ elements }) => elements);
+}
+
+type DemangleFunction = string => string;
+
+/**
+ * This function returns a function that can demangle function name using a
+ * WebAssembly module, but falls back on the identity function if the
+ * WebAssembly module isn't available for some reason.
+ */
+async function _getDemangleCallback(): Promise<DemangleFunction> {
+  try {
+    // When this module imports some WebAssembly module, Webpack's mechanism
+    // invokes the WebAssembly object which might be absent in some browsers,
+    // therefore `import` can throw. Also some browsers might refuse to load a
+    // wasm module because of our CSP.
+    // See webpack bug https://github.com/webpack/webpack/issues/8517
+    const demangleModule = await import('gecko-profiler-demangle');
+    return demangleModule.demangle_any;
+  } catch (error) {
+    // Module loading can fail (for example in browsers without WebAssembly
+    // support, or due to bad server configuration), so we will fall back
+    // to a pass-through function if that happens.
+    console.error('Demangling module could not be imported.', error);
+    return mangledString => mangledString;
+  }
 }
 
 /**
@@ -279,16 +302,7 @@ export class SymbolStore {
     // because it can take some time.
 
     // We also need a demangling function for this, which is in an async module.
-    const demangleCallback = await demangleModulePromise.then(
-      demangleModule => demangleModule.demangle_any,
-      error => {
-        // Module loading can fail (for example in browsers without WebAssembly
-        // support, or due to bad server configuration), so we will fall back
-        // to a pass-through function if that happens.
-        console.error('Demangling module could not be imported.', error);
-        return mangledString => mangledString;
-      }
-    );
+    const demangleCallback = await _getDemangleCallback();
 
     for (const { request, symbolTable } of requestsForCachedLibs) {
       successCb(
