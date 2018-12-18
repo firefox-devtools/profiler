@@ -707,13 +707,23 @@ export const selectorsForThread = (
       }
     );
 
+    const getCallTreeCountsAndTimings: Selector<
+      CallTree.CallTreeCountsAndTimings
+    > = createSelector(
+      getPreviewFilteredThread,
+      getCallNodeInfo,
+      getProfileInterval,
+      UrlState.getInvertCallstack,
+      CallTree.computeCallTreeCountsAndTimings
+    );
+
     const getCallTree: Selector<CallTree.CallTree> = createSelector(
       getPreviewFilteredThread,
       getProfileInterval,
       getCallNodeInfo,
       getCategories,
       UrlState.getImplementationFilter,
-      UrlState.getInvertCallstack,
+      getCallTreeCountsAndTimings,
       CallTree.getCallTree
     );
 
@@ -737,9 +747,8 @@ export const selectorsForThread = (
       FlameGraph.FlameGraphTiming
     > = createSelector(
       getPreviewFilteredThread,
-      getProfileInterval,
       getCallNodeInfo,
-      UrlState.getInvertCallstack,
+      getCallTreeCountsAndTimings,
       FlameGraph.getFlameGraphTiming
     );
 
