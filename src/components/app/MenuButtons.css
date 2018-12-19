@@ -42,6 +42,10 @@
   margin-bottom: -24px;
 }
 
+.menuButtonsShareButton {
+  width: 110px;
+}
+
 .menuButtonsUploadingButton {
   overflow: hidden;
 }
@@ -82,15 +86,6 @@
   background-color: #0D8730;
   color: white;
 }
-
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadingButton) > .menuButtonsUploadingButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .menuButtonsUploadErrorButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) > .menuButtonsSecondaryShareButton {
-  pointer-events: none;
-}
-
 .menuButtonsShareButtonButton,
 .menuButtonsUploadingButtonInner,
 .menuButtonsPermalinkButtonButton,
