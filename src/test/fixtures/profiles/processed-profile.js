@@ -112,68 +112,73 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
   return profile;
 }
 
-export function getEmptyThread(overrides: ?Object): Thread {
-  return Object.assign(
-    {
-      processType: 'default',
-      name: 'Empty',
-      pid: 0,
-      tid: 0,
-      samples: {
-        responsiveness: [],
-        stack: [],
-        time: [],
-        rss: [],
-        uss: [],
-        length: 0,
-      },
-      markers: {
-        data: [],
-        name: [],
-        time: [],
-        length: 0,
-      },
-      stackTable: {
-        frame: [],
-        prefix: [],
-        category: [],
-        length: 0,
-      },
-      frameTable: {
-        address: [],
-        category: [],
-        func: [],
-        implementation: [],
-        line: [],
-        column: [],
-        optimizations: [],
-        length: 0,
-      },
-      stringTable: new UniqueStringArray(),
-      libs: [],
-      funcTable: {
-        address: [],
-        isJS: [],
-        relevantForJS: [],
-        name: [],
-        resource: [],
-        fileName: [],
-        lineNumber: [],
-        columnNumber: [],
-        length: 0,
-      },
-      resourceTable: {
-        addonId: [],
-        icon: [],
-        length: 0,
-        lib: [],
-        name: [],
-        host: [],
-        type: [],
-      },
+export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
+  const defaultThread: Thread = {
+    processType: 'default',
+    processStartupTime: 0,
+    processShutdownTime: null,
+    registerTime: 0,
+    unregisterTime: null,
+    pausedRanges: [],
+    name: 'Empty',
+    pid: 0,
+    tid: 0,
+    samples: {
+      responsiveness: [],
+      stack: [],
+      time: [],
+      rss: [],
+      uss: [],
+      length: 0,
     },
-    overrides
-  );
+    markers: {
+      data: [],
+      name: [],
+      time: [],
+      length: 0,
+    },
+    stackTable: {
+      frame: [],
+      prefix: [],
+      category: [],
+      length: 0,
+    },
+    frameTable: {
+      address: [],
+      category: [],
+      func: [],
+      implementation: [],
+      line: [],
+      column: [],
+      optimizations: [],
+      length: 0,
+    },
+    stringTable: new UniqueStringArray(),
+    libs: [],
+    funcTable: {
+      address: [],
+      isJS: [],
+      relevantForJS: [],
+      name: [],
+      resource: [],
+      fileName: [],
+      lineNumber: [],
+      columnNumber: [],
+      length: 0,
+    },
+    resourceTable: {
+      length: 0,
+      lib: [],
+      name: [],
+      host: [],
+      type: [],
+    },
+  };
+
+  return {
+    ...defaultThread,
+    ...overrides,
+  };
 }
 
 /**
