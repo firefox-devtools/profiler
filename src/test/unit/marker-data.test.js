@@ -14,12 +14,14 @@ describe('getTracingMarkers', function() {
   const tracingMarkers = getTracingMarkers(
     thread.markers,
     thread.stringTable,
-    thread.samples.time[0]
+    thread.samples.time[0],
+    thread.samples.time.slice(-1)[0]
   );
   const contentTracingMarkers = getTracingMarkers(
     contentThread.markers,
     contentThread.stringTable,
-    thread.samples.time[0]
+    thread.samples.time[0],
+    thread.samples.time.slice(-1)[0]
   );
 
   it('creates a reasonable processed profile', function() {
@@ -99,7 +101,7 @@ describe('getTracingMarkers', function() {
   it('should handle tracing markers without an end', function() {
     expect(tracingMarkers[9]).toMatchObject({
       start: 20,
-      dur: Infinity,
+      dur: 0,
       name: 'Rasterize',
       title: null,
     });

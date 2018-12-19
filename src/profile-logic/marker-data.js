@@ -219,7 +219,8 @@ export function extractMarkerDataFromName(
 export function getTracingMarkers(
   markers: MarkersTable,
   stringTable: UniqueStringArray,
-  firstSampleTime: number
+  firstSampleTime: number,
+  lastSampleTime: number
 ): TracingMarker[] {
   const tracingMarkers: TracingMarker[] = [];
   // This map is used to track start and end markers for tracing markers.
@@ -334,7 +335,7 @@ export function getTracingMarkers(
   // Loop over tracing "start" markers without any "end" markers
   for (const markerBucket of openMarkers.values()) {
     for (const marker of markerBucket) {
-      marker.dur = Infinity;
+      marker.dur = Math.max(lastSampleTime - marker.start, 0);
       marker.incomplete = true;
       tracingMarkers.push(marker);
     }

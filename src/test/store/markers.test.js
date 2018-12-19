@@ -112,7 +112,7 @@ describe('selectors/getMarkerChartTiming', function() {
         {
           name: 'Rasterize',
           start: [20],
-          end: [Infinity],
+          end: [20], // Truncated to the time of the last sample.
           index: [0],
           label: [''],
           length: 1,

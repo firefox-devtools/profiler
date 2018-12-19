@@ -74,11 +74,14 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
 
   const _getFirstSampleTime: Selector<Milliseconds> = state =>
     threadSelectors.getThread(state).samples.time[0] || 0;
+  const _getLastSampleTime: Selector<Milliseconds> = state =>
+    threadSelectors.getThread(state).samples.time.slice(-1)[0] || 0;
 
   const getTracingMarkers: Selector<TracingMarker[]> = createSelector(
     getProcessedMarkersTable,
     threadSelectors.getStringTable,
     _getFirstSampleTime,
+    _getLastSampleTime,
     MarkerData.getTracingMarkers
   );
 

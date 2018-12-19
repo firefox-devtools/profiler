@@ -156,9 +156,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn duration"
-                  title="∞ms"
+                  title="n/a"
                 >
-                  ∞ms
+                  n/a
                 </span>
                 <span
                   className="treeViewRowColumn treeViewFixedColumn category"
