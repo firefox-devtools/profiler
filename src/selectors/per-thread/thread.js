@@ -55,7 +55,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     ProfileSelectors.getCommittedRange,
     (thread, range) => {
       const { start, end } = range;
-      return ProfileData.filterThreadToRange(thread, start, end);
+      return ProfileData.filterThreadSamplesToRange(thread, start, end);
     }
   );
 
@@ -119,7 +119,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
         return thread;
       }
       const { selectionStart, selectionEnd } = previewSelection;
-      return ProfileData.filterThreadToRange(
+      return ProfileData.filterThreadSamplesToRange(
         thread,
         selectionStart,
         selectionEnd
