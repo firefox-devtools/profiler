@@ -81,10 +81,17 @@ export function addMarkersToThreadWithCorrespondingSamples(
     const endTime =
       data && typeof data.endTime === 'number' ? data.endTime : time;
 
-    // Push on the start and end time.
-    samples.time.push(startTime, endTime);
-    samples.stack.push(null, null);
-    samples.length += 2;
+    // Push on the start and end time if necessary
+    [startTime, endTime].forEach(time => {
+      if (!samples.time.includes(time)) {
+        samples.time.push(time);
+        samples.stack.push(null);
+        samples.rss.push(null);
+        samples.uss.push(null);
+        samples.responsiveness.push(null);
+        samples.length++;
+      }
+    });
   });
 
   samples.time.sort();
