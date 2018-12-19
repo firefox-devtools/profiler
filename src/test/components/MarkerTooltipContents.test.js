@@ -388,13 +388,13 @@ describe('MarkerTooltipContents', function() {
     const store = storeWithProfile(profile);
     const state = store.getState();
     const threadIndex = getSelectedThreadIndex(state);
-    const tracingMarkers = selectedThreadSelectors.getTracingMarkers(state);
+    const markers = selectedThreadSelectors.getMarkers(state);
 
     expect(
       renderer.create(
         <Provider store={store}>
           <Fragment>
-            {tracingMarkers.map((marker, i) => (
+            {markers.map((marker, i) => (
               <MarkersTooltipContents
                 key={i}
                 marker={marker}

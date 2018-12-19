@@ -31,7 +31,7 @@ import type {
   FrameTable,
   SamplesTable,
   StackTable,
-  MarkersTable,
+  RawMarkerTable,
   Lib,
   FuncTable,
   ResourceTable,
@@ -585,7 +585,7 @@ function _convertStackToCause(data: Object) {
 /**
  * Explicitly recreate the markers here to help enforce our assumptions about types.
  */
-function _processMarkers(geckoMarkers: GeckoMarkerStruct): MarkersTable {
+function _processMarkers(geckoMarkers: GeckoMarkerStruct): RawMarkerTable {
   return {
     data: geckoMarkers.data.map(function(
       m: MarkerPayload_Gecko
@@ -843,9 +843,9 @@ function _adjustJsTracerTimestamps(
  * converting timestamps when we deal with the integrated profile.
  */
 function _adjustMarkerTimestamps(
-  markers: MarkersTable,
+  markers: RawMarkerTable,
   delta: Milliseconds
-): MarkersTable {
+): RawMarkerTable {
   return Object.assign({}, markers, {
     time: markers.time.map(time => time + delta),
     data: markers.data.map(data => {
