@@ -9,11 +9,19 @@ import explicitConnect from '../../utils/connect';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
+  WrapDispatchProps,
+  WrapFunctionInDispatch,
 } from '../../utils/connect';
-import type { State, Action, ThunkAction } from '../../types/store';
+import type {
+  State,
+  Action,
+  ThunkAction,
+  Dispatch,
+  GetState,
+} from '../../types/store';
 /* eslint-disable no-unused-vars, react/prefer-stateless-function, flowtype/no-unused-expressions */
 
-// Use this any value to create fake variables.
+// Use this any value to create fake variables as a type.
 const ANY_VALUE = (0: any);
 
 /**
@@ -43,22 +51,15 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class ExampleComponent extends React.PureComponent<Props> {
   render() {
-    const {
-      ownPropString,
-      ownPropNumber,
-      statePropString,
-      statePropNumber,
-      dispatchString,
-      dispatchThunk,
-    } = this.props;
-
     // Ensure that the React component has the correct types inside of it.
-    (ownPropString: string);
-    (ownPropNumber: number);
-    (statePropString: string);
-    (statePropNumber: number);
-    (dispatchString: ExampleActionCreator);
-    (dispatchThunk: ExampleThunkActionCreator);
+    (this.props.ownPropString: string);
+    (this.props.ownPropNumber: number);
+    (this.props.statePropString: string);
+    (this.props.statePropNumber: number);
+
+    // The action creators are properly wrapped by dispatch.
+    (this.props.dispatchString: string => Action);
+    (this.props.dispatchThunk: string => number);
 
     return null;
   }
@@ -79,7 +80,8 @@ const validDispatchToProps = (ANY_VALUE: {|
   +dispatchThunk: string => ThunkAction<number>,
 |});
 
-// Test the common case of create a component with valid values.
+// This value also serves as a test for the common case of creating a component
+// with valid values.
 const ConnectedExampleComponent = explicitConnect(
   ({
     mapStateToProps: validMapStateToProps,
@@ -87,6 +89,40 @@ const ConnectedExampleComponent = explicitConnect(
     component: ExampleComponent,
   }: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps>)
 );
+
+{
+  // Test that WrapDispatchProps modifies the ThunkActions.
+  const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {|
+    +dispatchString: string => Action,
+    +dispatchThunk: string => number,
+  |});
+}
+
+{
+  // Test that the original unwrapped action creators do not work.
+  const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {|
+    +dispatchString: string => Action,
+    // $ExpectError
+    +dispatchThunk: string => ThunkAction<number>,
+  |});
+}
+
+{
+  // Test that WrapFunctionInDispatch works to strip off the return action.
+  const exampleAction = (string: string) => (ANY_VALUE: Action);
+  const exampleThunkAction = (string: string) => (
+    dispatch: Dispatch,
+    getState: GetState
+  ) => (ANY_VALUE: number);
+  const exampleThunkActionWrapped = (string: string) => 5;
+
+  (exampleAction: WrapFunctionInDispatch<ExampleActionCreator>);
+  (exampleThunkActionWrapped: WrapFunctionInDispatch<
+    ExampleThunkActionCreator
+  >);
+  // $ExpectError
+  (exampleThunkAction: WrapFunctionInDispatch<ExampleThunkActionCreator>);
+}
 
 {
   // Test that mapStateToProps will error out if provided an extra value.

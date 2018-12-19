@@ -17,6 +17,7 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
+  WrapFunctionInDispatch,
 } from '../../utils/connect';
 
 require('./Home.css');
@@ -53,7 +54,9 @@ class InstallButton extends React.PureComponent<InstallButtonProps> {
 }
 
 type ActionButtonsProps = {
-  retrieveProfileFromFile: typeof retrieveProfileFromFile,
+  retrieveProfileFromFile: WrapFunctionInDispatch<
+    typeof retrieveProfileFromFile
+  >,
   triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
 };
 

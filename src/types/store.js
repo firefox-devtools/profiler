@@ -81,24 +81,3 @@ export type Dispatch = PlainDispatch & ThunkDispatch;
  * of all Actions, as well as specific Dispatch behavior.
  */
 export type Store = ReduxStore<State, Action, Dispatch>;
-
-/**
- * This type definition takes a ThunkAction, and strips out the function
- * that accepts the (Dispatch, GetState). This is effectively what wrapping
- * the action in the connect function does.
- *
- * For instance:
- *   (...Args) => (Dispatch, GetState) => Returns
- *
- * Gets transformed into:
- *   (...Args) => Returns
- */
-export type ConnectedThunk<Fn> = $Call<
-  <Args, Returns>(
-    // Take as input a ThunkAction.
-    (...Args) => (Dispatch, GetState) => Returns
-    // Return the wrapped action.
-  ) => (...Args) => Returns,
-  // Apply this to the function:
-  Fn
->;

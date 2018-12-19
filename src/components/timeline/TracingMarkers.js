@@ -71,7 +71,10 @@ export type StateProps = {|
   +isModifyingSelection: boolean,
 |};
 
-type Props = ConnectedProps<SizeProps, OwnProps, StateProps>;
+type Props = {|
+  ...ConnectedProps<OwnProps, StateProps, {||}>,
+  ...SizeProps,
+|};
 
 type State = {
   hoveredItem: TracingMarker | null,
