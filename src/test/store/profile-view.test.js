@@ -23,11 +23,14 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
 import { viewProfile } from '../../actions/receive-profile';
-import * as ProfileViewSelectors from '../../selectors/profile-view';
+import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import { stateFromLocation } from '../../app-logic/url-handling';
-
-const { selectedThreadSelectors, selectedNodeSelectors } = ProfileViewSelectors;
+import {
+  selectedThreadSelectors,
+  selectedNodeSelectors,
+  getThreadSelectors,
+} from '../../selectors/per-thread';
 
 describe('call node paths on implementation filter change', function() {
   const {
@@ -913,7 +916,7 @@ describe('actions/ProfileView', function() {
  * should be left up to better informed unit tests. This provides some base coverage
  * of mechanically running through the selectors in tests.
  */
-describe('snapshots of selectors/profile-view', function() {
+describe('snapshots of selectors/profile', function() {
   // Set up a profile that has some nice features that can show that the selectors work.
   function setupStore() {
     const {
@@ -1196,9 +1199,7 @@ describe('getFriendlyThreadName', function() {
 
     const getFriendlyThreadNames = () =>
       profile.threads.map((_, threadIndex) =>
-        ProfileViewSelectors.selectorsForThread(
-          threadIndex
-        ).getFriendlyThreadName(getState())
+        getThreadSelectors(threadIndex).getFriendlyThreadName(getState())
       );
 
     return { profile, dispatch, getState, getFriendlyThreadNames };

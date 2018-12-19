@@ -21,10 +21,10 @@ import {
 import explicitConnect from '../../utils/connect';
 import {
   getGlobalTracks,
-  selectorsForThread,
   getLocalTracks,
   getGlobalTrackName,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';
@@ -215,7 +215,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
         // Look up the thread information for the process if it exists.
         if (globalTrack.mainThreadIndex !== null) {
           threadIndex = globalTrack.mainThreadIndex;
-          const selectors = selectorsForThread(threadIndex);
+          const selectors = getThreadSelectors(threadIndex);
           isSelected =
             threadIndex === getSelectedThreadIndex(state) &&
             selectedTab !== 'network-chart';

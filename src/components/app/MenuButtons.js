@@ -12,7 +12,7 @@ import {
   getProfileRootRange,
   getProfileSharingStatus,
   getSymbolicationStatus,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
 import { getDataSource, getUrlPredictor } from '../../selectors/url-state';
 import actions from '../../actions';
 import { compress } from '../../utils/gz';

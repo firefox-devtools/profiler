@@ -9,9 +9,9 @@ import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import {
   getZeroAt,
-  selectedThreadSelectors,
   getScrollToSelectionGeneration,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { changeSelectedMarker } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
