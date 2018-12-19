@@ -31,7 +31,7 @@ import TimelineTrackScreenshots from './TrackScreenshots';
 import TimelineLocalTrack from './LocalTrack';
 import Reorderable from '../shared/Reorderable';
 import type { TabSlug } from '../../app-logic/tabs-handling';
-import type { TrackReference } from '../../types/actions';
+import type { GlobalTrackReference } from '../../types/actions';
 import type { Pid } from '../../types/profile';
 import type {
   TrackIndex,
@@ -44,7 +44,7 @@ import type {
 } from '../../utils/connect';
 
 type OwnProps = {|
-  +trackReference: TrackReference,
+  +trackReference: GlobalTrackReference,
   +trackIndex: TrackIndex,
   +style?: Object /* This is used by Reorderable */,
 |};

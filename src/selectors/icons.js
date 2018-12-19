@@ -4,38 +4,43 @@
 
 // @flow
 import { createSelector } from 'reselect';
-import type { IconWithClassName, State } from '../types/state';
+import type { IconWithClassName, IconState } from '../types/state';
+import type { Selector, DangerousSelectorWithArguments } from '../types/store';
 import type { CallNodeDisplayData } from '../types/profile-derived';
 
-function classNameFromUrl(url) {
-  return url.replace(/[/:.+>< ~()#,]/g, '_');
-}
+/**
+ * A simple selector into the icon state.
+ */
+export const getIcons: Selector<IconState> = state => state.icons;
 
-export const getIcons = (state: State) => state.icons;
-
-export const getIconForCallNode = (
-  state: State,
-  displayData: CallNodeDisplayData
-) => {
-  // Without an intermediary variable, flow doesn't seem to be able to refine
-  // displayData.icon type from `string | null` to `string`.
-  // See https://github.com/facebook/flow/issues/3715
+/**
+ * In order to load icons without multiple requests, icons are created through
+ * CSS. This function gets the CSS class name for a call node. This function
+ * does not perform any memoization, and updates every time. It could be updated
+ * to memoize.
+ */
+export const getIconClassNameForCallNode: DangerousSelectorWithArguments<
+  string,
+  CallNodeDisplayData
+> = (state, displayData) => {
   const icons = getIcons(state);
   return displayData.icon !== null && icons.has(displayData.icon)
-    ? displayData.icon
-    : null;
+    ? _classNameFromUrl(displayData.icon)
+    : '';
 };
 
-export const getIconClassNameForCallNode = createSelector(
-  getIcons,
-  (state, displayData: CallNodeDisplayData) => displayData,
-  (icons, displayData: CallNodeDisplayData) =>
-    displayData.icon !== null && icons.has(displayData.icon)
-      ? classNameFromUrl(displayData.icon)
-      : ''
+/**
+ * This functions returns an object with both the icon URL and the class name.
+ */
+export const getIconsWithClassNames: Selector<
+  IconWithClassName[]
+> = createSelector(getIcons, icons =>
+  [...icons].map(icon => ({ icon, className: _classNameFromUrl(icon) }))
 );
 
-export const getIconsWithClassNames: State => IconWithClassName[] = createSelector(
-  getIcons,
-  icons => [...icons].map(icon => ({ icon, className: classNameFromUrl(icon) }))
-);
+/**
+ * Transforms a URL into a valid CSS class name.
+ */
+function _classNameFromUrl(url): string {
+  return url.replace(/[/:.+>< ~()#,]/g, '_');
+}

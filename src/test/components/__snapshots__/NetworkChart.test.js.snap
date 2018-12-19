@@ -19,7 +19,10 @@ exports[`EmptyReasons shows a reason when a profile's network markers have been 
 
 exports[`NetworkChart renders NetworkChart correctly 1`] = `
 <div
+  aria-labelledby="network-chart-tab-button"
   className="networkChart"
+  id="network-chart-tab"
+  role="tabpanel"
 >
   <div
     className="markerSettings"

@@ -33,7 +33,7 @@ type CallNodeTimes = {
   selfTime: Float32Array,
   totalTime: Float32Array,
 };
-type CallTreeCountsAndTimings = {
+export type CallTreeCountsAndTimings = {
   callNodeChildCount: Uint32Array,
   callNodeTimes: CallNodeTimes,
   rootCount: number,
@@ -408,7 +408,7 @@ export function getCallTree(
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
   implementationFilter: string,
-  invertCallstack: boolean
+  callTreeCountsAndTimings: CallTreeCountsAndTimings
 ): CallTree {
   return timeCode('getCallTree', () => {
     const {
@@ -416,12 +416,7 @@ export function getCallTree(
       callNodeChildCount,
       rootTotalTime,
       rootCount,
-    } = computeCallTreeCountsAndTimings(
-      thread,
-      callNodeInfo,
-      interval,
-      invertCallstack
-    );
+    } = callTreeCountsAndTimings;
 
     const jsOnly = implementationFilter === 'js';
     const isIntegerInterval = Math.floor(interval) === interval;
