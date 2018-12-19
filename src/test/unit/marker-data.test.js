@@ -11,10 +11,15 @@ describe('getTracingMarkers', function() {
   const profile = processProfile(getGeckoProfile());
   const thread = profile.threads[0]; // This is the parent process main thread
   const contentThread = profile.threads[2]; // This is the content process main thread
-  const tracingMarkers = getTracingMarkers(thread.markers, thread.stringTable);
+  const tracingMarkers = getTracingMarkers(
+    thread.markers,
+    thread.stringTable,
+    thread.samples.time[0]
+  );
   const contentTracingMarkers = getTracingMarkers(
     contentThread.markers,
-    contentThread.stringTable
+    contentThread.stringTable,
+    thread.samples.time[0]
   );
 
   it('creates a reasonable processed profile', function() {
@@ -85,8 +90,8 @@ describe('getTracingMarkers', function() {
   });
   it('should handle tracing markers without a start', function() {
     expect(tracingMarkers[0]).toMatchObject({
-      start: -1,
-      dur: 2, // This duration doesn't represent much and won't be displayed anyway
+      start: 0, // Truncated to the time of the first captured sample.
+      dur: 1,
       name: 'Rasterize',
       title: null,
     });

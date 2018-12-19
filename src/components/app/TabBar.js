@@ -9,6 +9,8 @@ import classNames from 'classnames';
 
 import { tabsWithTitle, type TabSlug } from '../../app-logic/tabs-handling';
 
+import './TabBar.css';
+
 type Props = {|
   +className?: string,
   +selectedTabSlug: string,
@@ -18,7 +20,7 @@ type Props = {|
 |};
 
 class TabBar extends React.PureComponent<Props> {
-  _mouseDownListener = (e: SyntheticMouseEvent<HTMLElement>) => {
+  _onClickListener = (e: SyntheticMouseEvent<HTMLElement>) => {
     this.props.onSelectTab(e.currentTarget.dataset.name);
     // Prevent focusing the tab so that actual content like the
     // calltree can perform its own focusing.
@@ -34,7 +36,11 @@ class TabBar extends React.PureComponent<Props> {
     } = this.props;
     return (
       <div className={classNames('tabBarContainer', className)}>
-        <ol className="tabBarTabWrapper">
+        <ol
+          className="tabBarTabWrapper"
+          role="tablist"
+          aria-label="Profiler tabs"
+        >
           {visibleTabs.map(tabSlug => (
             <li
               className={classNames({
@@ -43,9 +49,26 @@ class TabBar extends React.PureComponent<Props> {
               })}
               key={tabSlug}
               data-name={tabSlug}
-              onMouseDown={this._mouseDownListener}
+              onClick={this._onClickListener}
             >
-              {tabsWithTitle[tabSlug]}
+              {/* adding a button for better keyboard navigation and
+              adding ARIA attributes for screen reader support.*/}
+              <button
+                className="tabBarTabButton"
+                type="button"
+                // The tab's id attribute connects the tab to its tabpanel
+                // that has an aria-labelledby attribute of the same value.
+                // The id is not used for CSS styling.
+                id={`${tabSlug}-tab-button`}
+                role="tab"
+                aria-selected={tabSlug === selectedTabSlug}
+                // The control and content relationship is established
+                // with aria-controls attribute
+                // (the tabbanel has an id of the same value).
+                aria-controls={`${tabSlug}-tab`}
+              >
+                {tabsWithTitle[tabSlug]}
+              </button>
             </li>
           ))}
         </ol>
