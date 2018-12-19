@@ -24,7 +24,7 @@ import {
   getLocalTrackNamesByPid,
   getGlobalTrackNames,
   getLocalTracksByPid,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
 import {
   getGlobalTrackOrder,
   getHiddenGlobalTracks,

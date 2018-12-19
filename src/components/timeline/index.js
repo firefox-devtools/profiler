@@ -18,7 +18,7 @@ import {
   getZeroAt,
   getGlobalTracks,
   getGlobalTrackReferences,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
 import {
   getGlobalTrackOrder,
   getTimelineType,

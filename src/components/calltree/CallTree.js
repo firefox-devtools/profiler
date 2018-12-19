@@ -16,11 +16,11 @@ import {
   getSelectedThreadIndex,
 } from '../../selectors/url-state';
 import {
-  selectedThreadSelectors,
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelection,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getIconsWithClassNames } from '../../selectors/icons';
 import {
   changeSelectedCallNode,
