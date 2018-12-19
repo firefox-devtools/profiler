@@ -118,7 +118,9 @@ class LocalTrackComponent extends PureComponent<Props> {
               onMouseDown: this._onLabelMouseDown,
             }}
           >
-            <h1 className="timelineTrackName">{trackName}</h1>
+            <button type="button" className="timelineTrackNameButton">
+              {trackName}
+            </button>
           </ContextMenuTrigger>
           <div className="timelineTrackTrack">{this.renderTrack()}</div>
         </div>
