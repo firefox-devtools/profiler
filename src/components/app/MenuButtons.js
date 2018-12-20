@@ -535,17 +535,16 @@ class ProfileSharingCompositeButton extends React.PureComponent<
         })}
       >
         {/* conditionally render a button, depending on the state */}
-        {state === 'local' ? (
-          <ProfileSharingButton
-            buttonClassName="menuButtonsShareButton"
-            shareLabel={shareLabel}
-            symbolicationStatus={symbolicationStatus}
-            okButtonClickEvent={this._attemptToShare}
-            shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
-            shareNetworkUrlCheckboxOnChange={this._onChangeShareNetworkUrls}
-            checkboxDisabled={false}
-          />
-        ) : null}
+
+        <ProfileSharingButton
+          buttonClassName="menuButtonsShareButton"
+          shareLabel={shareLabel}
+          symbolicationStatus={symbolicationStatus}
+          okButtonClickEvent={this._attemptToShare}
+          shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
+          shareNetworkUrlCheckboxOnChange={this._onChangeShareNetworkUrls}
+          checkboxDisabled={false}
+        />
 
         {state === 'uploading' || state === 'public' ? (
           <React.Fragment>
