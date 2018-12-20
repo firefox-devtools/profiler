@@ -9,9 +9,9 @@ import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import {
   getZeroAt,
-  selectedThreadSelectors,
   getScrollToSelectionGeneration,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { changeSelectedMarker } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
@@ -211,7 +211,12 @@ class MarkerTable extends PureComponent<Props> {
     const { markers, zeroAt, selectedMarker } = this.props;
     const tree = new MarkerTree(markers, zeroAt);
     return (
-      <div className="markerTable">
+      <div
+        className="markerTable"
+        id="marker-table-tab"
+        role="tabpanel"
+        aria-labelledby="marker-table-tab-button"
+      >
         <MarkerSettings />
         <TreeView
           maxNodeDepth={0}

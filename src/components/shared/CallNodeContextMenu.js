@@ -6,7 +6,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
 import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from '../../selectors/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 import { getFunctionName } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';

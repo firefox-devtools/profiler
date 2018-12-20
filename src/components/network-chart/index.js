@@ -19,11 +19,8 @@ import NetworkChartRow from './NetworkChartRow';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 
-import {
-  selectedThreadSelectors,
-  getCommittedRange,
-  getProfileInterval,
-} from '../../selectors/profile-view';
+import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
@@ -84,7 +81,12 @@ class NetworkChart extends React.PureComponent<Props> {
   render() {
     const { markers } = this.props;
     return (
-      <div className="networkChart">
+      <div
+        className="networkChart"
+        id="network-chart-tab"
+        role="tabpanel"
+        aria-labelledby="network-chart-tab-button"
+      >
         <MarkerSettings />
         {markers.length === 0 ? (
           <NetworkChartEmptyReasons />

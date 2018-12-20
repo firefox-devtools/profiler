@@ -8,7 +8,7 @@ import {
   getNetworkTrackProfile,
 } from '../fixtures/profiles/make-profile';
 import { storeWithProfile } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../selectors/profile-view';
+import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import {
   getHumanReadableTracks,

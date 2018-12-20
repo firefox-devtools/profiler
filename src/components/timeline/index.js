@@ -18,7 +18,7 @@ import {
   getZeroAt,
   getGlobalTracks,
   getGlobalTrackReferences,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
 import {
   getGlobalTrackOrder,
   getTimelineType,
@@ -35,7 +35,7 @@ import {
 } from '../../actions/profile-view';
 
 import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
-import type { TrackReference, TimelineType } from '../../types/actions';
+import type { GlobalTrackReference, TimelineType } from '../../types/actions';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -48,7 +48,7 @@ type StateProps = {|
   +committedRange: StartEndRange,
   +globalTracks: GlobalTrack[],
   +globalTrackOrder: TrackIndex[],
-  +globalTrackReferences: TrackReference[],
+  +globalTrackReferences: GlobalTrackReference[],
   +panelLayoutGeneration: number,
   +zeroAt: Milliseconds,
   +timelineType: TimelineType,

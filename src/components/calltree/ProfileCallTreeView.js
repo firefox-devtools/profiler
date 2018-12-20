@@ -16,7 +16,12 @@ type Props = {|
 |};
 
 const ProfileCallTreeView = (props: Props) => (
-  <div className="treeAndSidebarWrapper">
+  <div
+    className="treeAndSidebarWrapper"
+    id="calltree-tab"
+    role="tabpanel"
+    aria-labelledby="calltree-tab-button"
+  >
     <StackSettings />
     <TransformNavigator />
     {props && props.hideThreadActivityGraph ? null : (

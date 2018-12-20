@@ -16,7 +16,7 @@ import {
   formatValueTotal,
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
-import { selectorsForThread } from '../../selectors/profile-view';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import { getImplementationFilter } from '../../selectors/url-state';
 
 import Backtrace from './Backtrace';
@@ -807,10 +807,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
             <div className="tooltipTiming">
-              {/* tracing markers with no start have a negative start, while the
-                ones with no end have an infinite duration */}
-              {Number.isFinite(marker.dur) && marker.start >= 0
-                ? formatNumber(marker.dur) + 'ms'
+              {/* we don't know the duration if the marker is incomplete */}
+              {!marker.incomplete
+                ? formatMilliseconds(marker.dur)
                 : 'unknown duration'}
             </div>
             <div className="tooltipTitle">{marker.title || marker.name}</div>
@@ -831,7 +830,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
-    const selectors = selectorsForThread(threadIndex);
+    const selectors = getThreadSelectors(threadIndex);
     const threadName = selectors.getFriendlyThreadName(state);
     const thread = selectors.getThread(state);
     const implementationFilter = getImplementationFilter(state);

@@ -18,11 +18,12 @@ exports[`timeline/LocalTrack with a network track matches the snapshot of the ne
       onTouchStart={[Function]}
       title={null}
     >
-      <h1
-        className="timelineTrackName"
+      <button
+        className="timelineTrackNameButton"
+        type="button"
       >
         Network
-      </h1>
+      </button>
     </div>
     <div
       className="timelineTrackTrack"
@@ -63,11 +64,12 @@ exports[`timeline/LocalTrack with a thread track matches the snapshot of a local
       title="thread: \\"DOM Worker\\" (0)
 process: \\"tab\\" (222)"
     >
-      <h1
-        className="timelineTrackName"
+      <button
+        className="timelineTrackNameButton"
+        type="button"
       >
         DOM Worker
-      </h1>
+      </button>
     </div>
     <div
       className="timelineTrackTrack"

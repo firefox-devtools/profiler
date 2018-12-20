@@ -2,7 +2,10 @@
 
 exports[`renders FlameGraph correctly 1`] = `
 <div
+  aria-labelledby="flame-graph-tab-button"
   className="flameGraph"
+  id="flame-graph-tab"
+  role="tabpanel"
 >
   <div
     className="stackSettings"
@@ -516,7 +519,10 @@ Array [
 
 exports[`renders a message instead of FlameGraph when call stack is inverted 1`] = `
 <div
+  aria-labelledby="flame-graph-tab-button"
   className="flameGraph"
+  id="flame-graph-tab"
+  role="tabpanel"
 >
   <div
     className="stackSettings"

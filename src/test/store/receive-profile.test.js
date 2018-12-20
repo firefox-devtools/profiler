@@ -9,7 +9,7 @@ import sinon from 'sinon';
 
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../selectors/profile-view';
+import * as ProfileViewSelectors from '../../selectors/profile';
 import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import { getView } from '../../selectors/app';
 import {

@@ -18,10 +18,8 @@ import {
   getSelectedTab,
 } from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
-import {
-  selectorsForThread,
-  getLocalTrackName,
-} from '../../selectors/profile-view';
+import { getLocalTrackName } from '../../selectors/profile';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';
 import type { TrackReference } from '../../types/actions';
@@ -120,7 +118,9 @@ class LocalTrackComponent extends PureComponent<Props> {
               onMouseDown: this._onLabelMouseDown,
             }}
           >
-            <h1 className="timelineTrackName">{trackName}</h1>
+            <button type="button" className="timelineTrackNameButton">
+              {trackName}
+            </button>
           </ContextMenuTrigger>
           <div className="timelineTrackTrack">{this.renderTrack()}</div>
         </div>
@@ -142,7 +142,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     switch (localTrack.type) {
       case 'thread': {
         // Look up the thread information for the process if it exists.
-        const selectors = selectorsForThread(threadIndex);
+        const selectors = getThreadSelectors(threadIndex);
         isSelected =
           threadIndex === selectedThreadIndex &&
           selectedTab !== 'network-chart';
