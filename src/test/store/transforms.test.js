@@ -867,9 +867,9 @@ describe('"collapse-function-subtree" transform', function() {
       [
         '- A (total: 4, self: —)',
         '  - B (total: 4, self: —)',
-        '    - C (total: 2, self: 2)', // All children are gone, and the self time was applied.
+        '    - C (total: 2, self: 2)', // All children are gone, and the self count was applied.
         '    - H (total: 2, self: —)',
-        '      - C (total: 2, self: 2)', // All children are gone, and the self time was applied.
+        '      - C (total: 2, self: 2)', // All children are gone, and the self count was applied.
       ]
     );
   });

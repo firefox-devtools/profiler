@@ -29,7 +29,7 @@ import type { Milliseconds } from '../../types/units';
 import type {
   BreakdownByImplementation,
   StackImplementation,
-  TimingsForPath,
+  CountsForPath,
 } from '../../profile-logic/profile-data';
 
 type SidebarDetailProps = {|
@@ -106,14 +106,14 @@ type BreakdownProps = {|
 // This stateless component is responsible for displaying the implementation
 // breakdown. It also computes the percentage from the total time.
 function Breakdown({ data }: BreakdownProps) {
-  const totalTime = data.reduce((result, item) => result + item.value, 0);
+  const totalCount = data.reduce((result, item) => result + item.value, 0);
 
   return data.filter(({ value }) => value).map(({ group, value }) => {
-    const percentage = Math.round(value / totalTime * 100);
+    const percentage = Math.round(value / totalCount * 100);
 
     return (
       <SidebarDetail label={group} key={group}>
-        {value}ms ({percentage}%)
+        {value} ({percentage}%)
       </SidebarDetail>
     );
   });
@@ -125,7 +125,7 @@ type StateProps = {|
   +selectedThreadIndex: ThreadIndex,
   +name: string,
   +lib: string,
-  +timings: TimingsForPath,
+  +timings: CountsForPath,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
@@ -134,8 +134,8 @@ class CallTreeSidebar extends React.PureComponent<Props> {
   render() {
     const { selectedNodeIndex, name, lib, timings } = this.props;
     const {
-      forPath: { selfTime, totalTime },
-      forFunc: { selfTime: selfTimeForFunc, totalTime: totalTimeForFunc },
+      forPath: { selfCount, totalCount },
+      forFunc: { selfCount: selfCountForFunc, totalCount: totalTimeForFunc },
       rootTime,
     } = timings;
 
@@ -147,13 +147,13 @@ class CallTreeSidebar extends React.PureComponent<Props> {
       );
     }
 
-    const totalTimePercent = Math.round(totalTime.value / rootTime * 100);
-    const selfTimePercent = Math.round(selfTime.value / rootTime * 100);
+    const totalCountPercent = Math.round(totalCount.value / rootTime * 100);
+    const selfCountPercent = Math.round(selfCount.value / rootTime * 100);
     const totalTimeForFuncPercent = Math.round(
       totalTimeForFunc.value / rootTime * 100
     );
-    const selfTimeForFuncPercent = Math.round(
-      selfTimeForFunc.value / rootTime * 100
+    const selfCountForFuncPercent = Math.round(
+      selfCountForFunc.value / rootTime * 100
     );
 
     return (
@@ -174,52 +174,62 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             ) : null}
           </header>
           <h3 className="sidebar-title2">This selected call node</h3>
-          <SidebarDetail label="Running Time">
-            {totalTime.value}ms ({totalTimePercent}%)
+          <SidebarDetail label="Running Count">
+            {totalCount.value} ({totalCountPercent}%)
           </SidebarDetail>
-          <SidebarDetail label="Self Time">
-            {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
+          <SidebarDetail label="Self Count">
+            {selfCount.value
+              ? `${selfCount.value} (${selfCountPercent}%)`
+              : '—'}
           </SidebarDetail>
-          {totalTime.breakdownByImplementation ? (
+          {totalCount.breakdownByImplementation ? (
             <React.Fragment>
-              <h4 className="sidebar-title3">Implementation – running time</h4>
+              <h4 className="sidebar-title3">
+                Implementation – running sample count
+              </h4>
               <ImplementationBreakdown
-                breakdown={totalTime.breakdownByImplementation}
+                breakdown={totalCount.breakdownByImplementation}
               />
             </React.Fragment>
           ) : null}
-          {selfTime.breakdownByImplementation ? (
+          {selfCount.breakdownByImplementation ? (
             <React.Fragment>
-              <h4 className="sidebar-title3">Implementation – self time</h4>
+              <h4 className="sidebar-title3">
+                Implementation – self sample count
+              </h4>
               <ImplementationBreakdown
-                breakdown={selfTime.breakdownByImplementation}
+                breakdown={selfCount.breakdownByImplementation}
               />
             </React.Fragment>
           ) : null}
           <h3 className="sidebar-title2">
             This function across the entire tree
           </h3>
-          <SidebarDetail label="Running Time">
-            {totalTimeForFunc.value}ms ({totalTimeForFuncPercent}%)
+          <SidebarDetail label="Running Count">
+            {totalTimeForFunc.value} ({totalTimeForFuncPercent}%)
           </SidebarDetail>
-          <SidebarDetail label="Self Time">
-            {selfTimeForFunc.value
-              ? `${selfTimeForFunc.value}ms (${selfTimeForFuncPercent}%)`
+          <SidebarDetail label="Self Count">
+            {selfCountForFunc.value
+              ? `${selfCountForFunc.value} (${selfCountForFuncPercent}%)`
               : '—'}
           </SidebarDetail>
           {totalTimeForFunc.breakdownByImplementation ? (
             <React.Fragment>
-              <h4 className="sidebar-title3">Implementation – running time</h4>
+              <h4 className="sidebar-title3">
+                Implementation – running sample count
+              </h4>
               <ImplementationBreakdown
                 breakdown={totalTimeForFunc.breakdownByImplementation}
               />
             </React.Fragment>
           ) : null}
-          {selfTimeForFunc.breakdownByImplementation ? (
+          {selfCountForFunc.breakdownByImplementation ? (
             <React.Fragment>
-              <h4 className="sidebar-title3">Implementation – self time</h4>
+              <h4 className="sidebar-title3">
+                Implementation – self sample count
+              </h4>
               <ImplementationBreakdown
-                breakdown={selfTimeForFunc.breakdownByImplementation}
+                breakdown={selfCountForFunc.breakdownByImplementation}
               />
             </React.Fragment>
           ) : null}

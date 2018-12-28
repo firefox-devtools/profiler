@@ -124,8 +124,8 @@ body,
   width: 1px;
   background: #e5e5e5;
 }
-.treeViewHeaderColumn.totalTime,
-.treeViewHeaderColumn.selfTime {
+.treeViewHeaderColumn.totalCount,
+.treeViewHeaderColumn.selfCount {
   text-align: right;
 }
 .treeViewRowColumn.treeViewFixedColumn {
@@ -135,20 +135,20 @@ body,
   box-sizing: border-box;
   border-right: 1px solid var(--grey-30);
 }
-.treeViewFixedColumn.totalTime {
+.treeViewFixedColumn.totalCount {
   left: 0px;
   width: 70px;
 }
-.treeViewFixedColumn.totalTimePercent {
+.treeViewFixedColumn.totalCountPercent {
   left: 70px;
   width: 50px;
   border-right: none;
 }
-.treeViewFixedColumn.selfTime {
+.treeViewFixedColumn.selfCount {
   left: 120px;
   width: 70px;
 }
-.treeViewHeaderColumn.totalTime {
+.treeViewHeaderColumn.totalCount {
   width: 120px;
 }
 .treeViewFixedColumn.icon {
@@ -158,9 +158,9 @@ body,
   flex-flow: column nowrap;
   align-items: center;
 }
-.treeViewRowColumn.totalTime,
-.treeViewRowColumn.totalTimePercent,
-.treeViewRowColumn.selfTime,
+.treeViewRowColumn.totalCount,
+.treeViewRowColumn.totalCountPercent,
+.treeViewRowColumn.selfCount,
 .treeViewRowColumn.timestamp {
   text-align: right;
   padding-right: 5px;

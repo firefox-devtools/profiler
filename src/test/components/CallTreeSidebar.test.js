@@ -59,7 +59,7 @@ describe('CallTreeSidebar', function() {
 
     expect(view).toMatchSnapshot();
 
-    // Cjs is a JS node, but has no self time, so we shouldn't see the
+    // Cjs is a JS node, but has no self count, so we shouldn't see the
     // implementation information.
     selectNode([A, B, Cjs]);
     view.update();

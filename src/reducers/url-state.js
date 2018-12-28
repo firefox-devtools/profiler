@@ -158,7 +158,7 @@ const invertCallstack: Reducer<boolean> = (state = false, action) => {
 };
 
 /**
- * This state controls whether or not to show a summary view of self time, or the full
+ * This state controls whether or not to show a summary view of self count, or the full
  * stack-based view of the JS tracer data.
  */
 const showJsTracerSummary: Reducer<boolean> = (state = false, action) => {

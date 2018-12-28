@@ -41,14 +41,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         2
-        ms (
+         (
         50
         %)
       </div>,
@@ -57,7 +57,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
@@ -69,7 +69,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -82,7 +82,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -96,14 +96,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         2
-        ms (
+         (
         50
         %)
       </div>,
@@ -112,7 +112,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
@@ -124,7 +124,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -137,7 +137,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -179,14 +179,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         1
-        ms (
+         (
         25
         %)
       </div>,
@@ -195,7 +195,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
@@ -207,7 +207,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -220,7 +220,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -234,14 +234,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         1
-        ms (
+         (
         25
         %)
       </div>,
@@ -250,7 +250,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
@@ -262,7 +262,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -275,7 +275,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -317,14 +317,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         2
-        ms (
+         (
         50
         %)
       </div>,
@@ -333,19 +333,19 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
-        1ms (25%)
+        1 (25%)
       </div>,
     ]
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -358,7 +358,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -366,7 +366,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – self time
+      Implementation – self sample count
     </h4>
     Array [
       <div
@@ -379,7 +379,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -393,14 +393,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         2
-        ms (
+         (
         50
         %)
       </div>,
@@ -409,19 +409,19 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
-        1ms (25%)
+        1 (25%)
       </div>,
     ]
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -434,7 +434,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -442,7 +442,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – self time
+      Implementation – self sample count
     </h4>
     Array [
       <div
@@ -455,7 +455,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -497,14 +497,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         1
-        ms (
+         (
         25
         %)
       </div>,
@@ -513,19 +513,19 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
-        1ms (25%)
+        1 (25%)
       </div>,
     ]
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -538,7 +538,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -546,7 +546,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – self time
+      Implementation – self sample count
     </h4>
     Array [
       <div
@@ -559,7 +559,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -573,14 +573,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         2
-        ms (
+         (
         50
         %)
       </div>,
@@ -589,19 +589,19 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
-        2ms (50%)
+        2 (50%)
       </div>,
     ]
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -614,7 +614,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -622,7 +622,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – self time
+      Implementation – self sample count
     </h4>
     Array [
       <div
@@ -635,7 +635,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -685,14 +685,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         2
-        ms (
+         (
         50
         %)
       </div>,
@@ -701,19 +701,19 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
-        2ms (50%)
+        2 (50%)
       </div>,
     ]
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -726,7 +726,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -740,14 +740,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         2
-        ms (
+         (
         50
         %)
       </div>,
@@ -756,19 +756,19 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
-        2ms (50%)
+        2 (50%)
       </div>,
     ]
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -781,7 +781,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -789,7 +789,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – self time
+      Implementation – self sample count
     </h4>
     Array [
       <div
@@ -802,7 +802,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -844,14 +844,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         1
-        ms (
+         (
         25
         %)
       </div>,
@@ -860,19 +860,19 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
-        1ms (25%)
+        1 (25%)
       </div>,
     ]
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -885,7 +885,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -899,14 +899,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         2
-        ms (
+         (
         50
         %)
       </div>,
@@ -915,19 +915,19 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
-        1ms (25%)
+        1 (25%)
       </div>,
     ]
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -940,7 +940,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -948,7 +948,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – self time
+      Implementation – self sample count
     </h4>
     Array [
       <div
@@ -961,7 +961,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -1003,14 +1003,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         1
-        ms (
+         (
         25
         %)
       </div>,
@@ -1019,7 +1019,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
@@ -1031,7 +1031,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -1044,7 +1044,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -1058,14 +1058,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         2
-        ms (
+         (
         50
         %)
       </div>,
@@ -1074,19 +1074,19 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
-        1ms (25%)
+        1 (25%)
       </div>,
     ]
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -1099,7 +1099,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         2
-        ms (
+         (
         100
         %)
       </div>,
@@ -1107,7 +1107,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – self time
+      Implementation – self sample count
     </h4>
     Array [
       <div
@@ -1120,7 +1120,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -1162,14 +1162,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         1
-        ms (
+         (
         25
         %)
       </div>,
@@ -1178,7 +1178,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
@@ -1190,7 +1190,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       <div
@@ -1203,7 +1203,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         className="sidebar-value"
       >
         1
-        ms (
+         (
         100
         %)
       </div>,
@@ -1217,14 +1217,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Running Time
+        Running Count
         :
       </div>,
       <div
         className="sidebar-value"
       >
         4
-        ms (
+         (
         100
         %)
       </div>,
@@ -1233,7 +1233,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       <div
         className="sidebar-label"
       >
-        Self Time
+        Self Count
         :
       </div>,
       <div
@@ -1245,7 +1245,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <h4
       className="sidebar-title3"
     >
-      Implementation – running time
+      Implementation – running sample count
     </h4>
     Array [
       Array [
@@ -1259,7 +1259,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
           className="sidebar-value"
         >
           2
-          ms (
+           (
           50
           %)
         </div>,
@@ -1275,7 +1275,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
           className="sidebar-value"
         >
           2
-          ms (
+           (
           50
           %)
         </div>,

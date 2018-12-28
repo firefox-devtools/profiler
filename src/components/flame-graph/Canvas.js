@@ -112,33 +112,33 @@ function lerpColors(hexColorA: number, hexColorB: number, t: number): string {
 
 /**
  * Return the background color used to paint a flame graph box. The
- * passed stack type determines the hue while the self time determines
+ * passed stack type determines the hue while the self count determines
  * the lightness of the color. Darker colors indicate higher self
  * times.
  */
 export function getBackgroundColor(
   stackType: StackType,
-  selfTimeRelative: number
+  selfCountRelative: number
 ): string {
   /**
    * The colors are defined as a range where the starting color is the
-   * color shown when the function has no self time at all, and the
-   * ending color is when all available self time (the total time) in
+   * color shown when the function has no self count at all, and the
+   * ending color is when all available self count (the total count) in
    * the flame graph is assigned to a single function. This latter
    * case occurs when there's only a single box at the top, stretching
    * over all horizontal space in the graph, covering all boxes below
-   * it. When the self time lies in between these two extremes, the
+   * it. When the self count lies in between these two extremes, the
    * color is an interpolated value lying between the starting and
    * ending colors in the range.
    *
-   * The interpolated color is derived from `selfTimeRelative`, which
-   * is the self time of the frame relative to all available self time
+   * The interpolated color is derived from `selfCountRelative`, which
+   * is the self count of the frame relative to all available self count
    * possibly represented in the flame graph. However, using this
    * value to interpolate to a color linearly will require the value
    * to be relatively big in order to be able to see the shift in
-   * color, and such large self times would be visually apparent from
+   * color, and such large self counts would be visually apparent from
    * the shape of the flame graph anyway. We are better off if we can
-   * discern also small values of self time from the color, and this
+   * discern also small values of self count from the color, and this
    * is accomplished by changing the linear interpolation to a
    * logarithmic one instead, with a steep increase in the beginning.
    *
@@ -151,7 +151,7 @@ export function getBackgroundColor(
   let backgroundRangeStart;
   let backgroundRangeEnd;
 
-  const t = Math.log(5000 * selfTimeRelative + 1) / Math.log(5001);
+  const t = Math.log(5000 * selfCountRelative + 1) / Math.log(5001);
 
   switch (stackType) {
     case 'native':
@@ -180,9 +180,9 @@ export function getBackgroundColor(
  */
 export function getForegroundColor(
   stackType: StackType,
-  selfTimeRelative: number
+  selfCountRelative: number
 ): string {
-  const t = Math.log(5000 * selfTimeRelative + 1) / Math.log(5001);
+  const t = Math.log(5000 * selfCountRelative + 1) / Math.log(5001);
 
   switch (stackType) {
     case 'native':
@@ -344,11 +344,11 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         } else {
           background = getBackgroundColor(
             stackType,
-            stackTiming.selfTimeRelative[i]
+            stackTiming.selfCountRelative[i]
           );
           foreground = getForegroundColor(
             stackType,
-            stackTiming.selfTimeRelative[i]
+            stackTiming.selfCountRelative[i]
           );
         }
 
@@ -406,7 +406,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     const stackType = getStackType(thread, funcIndex);
     const background = getBackgroundColor(
       stackType,
-      stackTiming.selfTimeRelative[flameGraphTimingIndex]
+      stackTiming.selfCountRelative[flameGraphTimingIndex]
     );
 
     let stackTypeLabel;
@@ -445,10 +445,10 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
             />
             {stackTypeLabel}
           </div>
-          <div className="tooltipLabel">Running Time:</div>
-          <div>{displayData.totalTimeWithUnit}</div>
-          <div className="tooltipLabel">Self Time:</div>
-          <div>{displayData.selfTimeWithUnit}</div>
+          <div className="tooltipLabel">Running Count:</div>
+          <div>{displayData.totalCountWithUnit}</div>
+          <div className="tooltipLabel">Self Count:</div>
+          <div>{displayData.selfCountWithUnit}</div>
         </div>
       </div>
     );

@@ -156,14 +156,12 @@ export function getStackAndSampleSelectorsPerThread(
   > = createSelector(
     threadSelectors.getPreviewFilteredThread,
     getCallNodeInfo,
-    ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
     CallTree.computeCallTreeCountsAndTimings
   );
 
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
     threadSelectors.getPreviewFilteredThread,
-    ProfileSelectors.getProfileInterval,
     getCallNodeInfo,
     ProfileSelectors.getCategories,
     UrlState.getImplementationFilter,

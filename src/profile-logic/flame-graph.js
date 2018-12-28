@@ -27,13 +27,13 @@ export type IndexIntoFlameGraphTiming = number;
  * callNode allows extracting information such as function names which
  * are shown in the flame graph.
  *
- * selfTimeRelative contains the self time relative to the total time,
+ * selfCountRelative contains the self count relative to the total sample count,
  * which is used to color the drawn functions.
  */
 export type FlameGraphTiming = Array<{
   start: UnitIntervalOfProfileRange[],
   end: UnitIntervalOfProfileRange[],
-  selfTimeRelative: Array<number>,
+  selfCountRelative: Array<number>,
   callNode: IndexIntoCallNodeTable[],
   length: number,
 }>;
@@ -83,7 +83,7 @@ export function getRootsAndChildren(
   thread: Thread,
   callNodeTable: CallNodeTable,
   callNodeChildCount: Uint32Array,
-  totalTime: Float32Array
+  totalCount: Float32Array
 ): RootsAndChildren {
   const roots = [];
   const array = new Uint32Array(callNodeTable.length);
@@ -108,7 +108,7 @@ export function getRootsAndChildren(
     offsets[callNodeIndex] = ptr;
     ptr += callNodeChildCount[callNodeIndex];
 
-    if (totalTime[callNodeIndex] === 0) {
+    if (totalCount[callNodeIndex] === 0) {
       continue;
     }
 
@@ -175,7 +175,7 @@ export function getFlameGraphTiming(
 ): FlameGraphTiming {
   const {
     callNodeChildCount,
-    callNodeTimes,
+    callNodeSampleCounts,
     rootTotalTime,
   } = callTreeCountsAndTimings;
 
@@ -183,7 +183,7 @@ export function getFlameGraphTiming(
     thread,
     callNodeInfo.callNodeTable,
     callNodeChildCount,
-    callNodeTimes.totalTime
+    callNodeSampleCounts.totalCount
   );
   const timing = [];
 
@@ -206,21 +206,22 @@ export function getFlameGraphTiming(
       row = {
         start: [],
         end: [],
-        selfTimeRelative: [],
+        selfCountRelative: [],
         callNode: [],
         length: 0,
       };
       timing[depth] = row;
     }
 
-    const totalTimeRelative =
-      callNodeTimes.totalTime[nodeIndex] / rootTotalTime;
-    const selfTimeRelative = callNodeTimes.selfTime[nodeIndex] / rootTotalTime;
+    const totalCountRelative =
+      callNodeSampleCounts.totalCount[nodeIndex] / rootTotalTime;
+    const selfCountRelative =
+      callNodeSampleCounts.selfCount[nodeIndex] / rootTotalTime;
 
     // Compute the timing information.
     row.start.push(timeOffset[depth]);
-    row.end.push(timeOffset[depth] + totalTimeRelative);
-    row.selfTimeRelative.push(selfTimeRelative);
+    row.end.push(timeOffset[depth] + totalCountRelative);
+    row.selfCountRelative.push(selfCountRelative);
     row.callNode.push(nodeIndex);
     row.length++;
 
@@ -228,7 +229,7 @@ export function getFlameGraphTiming(
     // we'll make sure that the first child (if any) begins with the
     // same time offset.
     timeOffset[depth + 1] = timeOffset[depth];
-    timeOffset[depth] += totalTimeRelative;
+    timeOffset[depth] += totalCountRelative;
 
     // The items in the children array are sorted in descending order,
     // but since they are popped from the stack at the top of the

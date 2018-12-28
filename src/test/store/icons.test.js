@@ -35,11 +35,11 @@ describe('actions/icons', function() {
 
   function _createCallNodeWithIcon(icon: string): CallNodeDisplayData {
     return {
-      totalTime: '0',
-      totalTimeWithUnit: '0 ms',
-      totalTimePercent: '0',
-      selfTime: '0',
-      selfTimeWithUnit: '0 ms',
+      totalCount: '0',
+      totalCountWithUnit: '0 ms',
+      totalCountPercent: '0',
+      selfCount: '0',
+      selfCountWithUnit: '0 ms',
       name: 'icon',
       lib: 'icon',
       dim: false,

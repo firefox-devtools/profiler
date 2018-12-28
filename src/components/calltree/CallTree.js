@@ -69,9 +69,9 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class CallTreeComponent extends PureComponent<Props> {
   _fixedColumns: Column[] = [
-    { propName: 'totalTimePercent', title: '' },
-    { propName: 'totalTime', title: 'Running Time (ms)' },
-    { propName: 'selfTime', title: 'Self (ms)' },
+    { propName: 'totalCountPercent', title: '' },
+    { propName: 'totalCount', title: 'Running Count' },
+    { propName: 'selfCount', title: 'Self Count' },
     { propName: 'icon', title: '', component: NodeIcon },
   ];
   _mainColumn: Column = { propName: 'name', title: '' };

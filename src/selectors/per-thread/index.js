@@ -21,7 +21,7 @@ import * as ProfileSelectors from '../profile';
 
 import type { ThreadIndex } from '../../types/profile';
 import type { Selector } from '../../types/store';
-import type { TimingsForPath } from '../../profile-logic/profile-data';
+import type { CountsForPath } from '../../profile-logic/profile-data';
 
 /**
  * Traditional selectors only take one parameter, the `State` object. The selectors
@@ -79,7 +79,7 @@ export type NodeSelectors = {|
   +getName: Selector<string>,
   +getIsJS: Selector<boolean>,
   +getLib: Selector<string>,
-  +getTimingsForSidebar: Selector<TimingsForPath>,
+  +getTimingsForSidebar: Selector<CountsForPath>,
 |};
 
 export const selectedNodeSelectors: NodeSelectors = (() => {
@@ -126,7 +126,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     }
   );
 
-  const getTimingsForSidebar: Selector<TimingsForPath> = createSelector(
+  const getTimingsForSidebar: Selector<CountsForPath> = createSelector(
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
@@ -138,7 +138,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
       interval,
       isInvertedTree,
       thread
-    ): TimingsForPath => {
+    ): CountsForPath => {
       return ProfileData.getTimingsForPath(
         selectedPath,
         callNodeInfo,

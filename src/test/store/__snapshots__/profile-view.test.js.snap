@@ -1098,11 +1098,11 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of selectedNodeSelectors.getTimingsForSidebar 1`] = `
 Object {
   "forFunc": Object {
-    "selfTime": Object {
+    "selfCount": Object {
       "breakdownByImplementation": null,
       "value": 0,
     },
-    "totalTime": Object {
+    "totalCount": Object {
       "breakdownByImplementation": Object {
         "native": 2,
       },
@@ -1110,11 +1110,11 @@ Object {
     },
   },
   "forPath": Object {
-    "selfTime": Object {
+    "selfCount": Object {
       "breakdownByImplementation": null,
       "value": 0,
     },
-    "totalTime": Object {
+    "totalCount": Object {
       "breakdownByImplementation": Object {
         "native": 2,
       },
@@ -1239,7 +1239,7 @@ CallTree {
     ],
   },
   "_callNodeTimes": Object {
-    "selfTime": Float32Array [
+    "selfCount": Float32Array [
       0,
       0,
       0,
@@ -1249,7 +1249,7 @@ CallTree {
       0,
       0,
     ],
-    "totalTime": Float32Array [
+    "totalCount": Float32Array [
       2,
       2,
       0,
@@ -1387,7 +1387,6 @@ CallTree {
       -1,
     ],
   },
-  "_isIntegerInterval": true,
   "_jsOnly": false,
   "_resourceTable": Object {
     "addonId": Array [],
@@ -1815,7 +1814,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfCountRelative": Array [
       0,
     ],
     "start": Array [
@@ -1830,7 +1829,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfCountRelative": Array [
       0,
     ],
     "start": Array [
@@ -1845,7 +1844,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfCountRelative": Array [
       0,
     ],
     "start": Array [
@@ -1860,7 +1859,7 @@ Array [
       1,
     ],
     "length": 1,
-    "selfTimeRelative": Array [
+    "selfCountRelative": Array [
       1,
     ],
     "start": Array [

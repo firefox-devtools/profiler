@@ -83,19 +83,19 @@ export type IndexIntoTracingMarkers = number;
 
 export type CallNodeData = {
   funcName: string,
-  totalTime: number,
-  totalTimeRelative: number,
-  selfTime: number,
-  selfTimeRelative: number,
+  totalCount: number,
+  totalCountRelative: number,
+  selfCount: number,
+  selfCountRelative: number,
 };
 
 export type CallNodeDisplayData = $Exact<
   $ReadOnly<{
-    totalTime: string,
-    totalTimeWithUnit: string,
-    totalTimePercent: string,
-    selfTime: string,
-    selfTimeWithUnit: string,
+    totalCount: string,
+    totalCountWithUnit: string,
+    totalCountPercent: string,
+    selfCount: string,
+    selfCountWithUnit: string,
     name: string,
     lib: string,
     dim: boolean,

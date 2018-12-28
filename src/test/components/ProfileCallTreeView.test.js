@@ -205,7 +205,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
 
   it('reacts properly to up/down navigation keys', () => {
     // This generates a profile where function "name<i + 1>" is present
-    // <length - i> times, which means it will have a self time of <length - i>
+    // <length - i> times, which means it will have a self count of <length - i>
     // ms. This is a good way to control the order we'll get in the call tree
     // view: function "name1" will be first, etc.
     const profileString = Array.from({ length: 100 }).reduce(

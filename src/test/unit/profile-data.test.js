@@ -837,19 +837,19 @@ describe('getTimingsForPath in a non-inverted tree', function() {
   it('returns good timings for a root node', () => {
     const { getTimingsForPath, funcNamesDict: { A } } = setup();
 
-    // This is a root node: it should have no self time but all the total time.
+    // This is a root node: it should have no self count but all the total time.
     const timings = getTimingsForPath([A]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: {
+        selfCount: { value: 0, breakdownByImplementation: null },
+        totalCount: {
           value: 5,
           breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
         },
       },
       forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: {
+        selfCount: { value: 0, breakdownByImplementation: null },
+        totalCount: {
           value: 5,
           breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
         },
@@ -861,7 +861,7 @@ describe('getTimingsForPath in a non-inverted tree', function() {
   it('returns good timings for a leaf node, also present in other stacks', () => {
     const { getTimingsForPath, funcNamesDict: { A, B, Cjs, D, Ejs } } = setup();
 
-    // This is a leaf node: it should have some self time and some total time
+    // This is a leaf node: it should have some self count and some total time
     // holding the same value.
     //
     // This is also a JS node so it should have some js engine implementation
@@ -872,21 +872,21 @@ describe('getTimingsForPath in a non-inverted tree', function() {
     const timings = getTimingsForPath([A, B, Cjs, D, Ejs]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: {
+        selfCount: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
         },
-        totalTime: {
+        totalCount: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
         },
       },
       forFunc: {
-        selfTime: {
+        selfCount: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
         },
-        totalTime: {
+        totalCount: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
         },
@@ -895,20 +895,20 @@ describe('getTimingsForPath in a non-inverted tree', function() {
     });
   });
 
-  it('returns good timings for a node that has both children and self time', () => {
+  it('returns good timings for a node that has both children and self count', () => {
     const { getTimingsForPath, funcNamesDict: { A, B, H } } = setup();
 
-    // This is a node that has both children and some self time. So it should
-    // have some running time that's different than the self time.
+    // This is a node that has both children and some self count. So it should
+    // have some running time that's different than the self count.
     const timings = getTimingsForPath([A, B, H]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+        selfCount: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalCount: { value: 2, breakdownByImplementation: { native: 2 } },
       },
       forFunc: {
-        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+        selfCount: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalCount: { value: 2, breakdownByImplementation: { native: 2 } },
       },
       rootTime: 5,
     });
@@ -962,18 +962,18 @@ describe('getTimingsForPath for an inverted tree', function() {
     const timings = getTimingsForPath([Ejs]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 3, breakdownByImplementation: null },
-        totalTime: {
+        selfCount: { value: 3, breakdownByImplementation: null },
+        totalCount: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
         },
       },
       forFunc: {
-        selfTime: {
+        selfCount: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
         },
-        totalTime: {
+        totalCount: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
         },
@@ -982,20 +982,20 @@ describe('getTimingsForPath for an inverted tree', function() {
     });
   });
 
-  it('returns good timings for a node present in several stacks without self time', () => {
+  it('returns good timings for a node present in several stacks without self count', () => {
     const { getTimingsForPath, funcNamesDict: { Ejs, D, Cjs, B } } = setup();
     const timings = getTimingsForPath([Ejs, D, Cjs, B]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: {
+        selfCount: { value: 0, breakdownByImplementation: null },
+        totalCount: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
         },
       },
       forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: {
+        selfCount: { value: 0, breakdownByImplementation: null },
+        totalCount: {
           value: 5,
           breakdownByImplementation: {
             ion: 2,
@@ -1008,19 +1008,19 @@ describe('getTimingsForPath for an inverted tree', function() {
     });
   });
 
-  it('returns good timings for a node present in several stacks with self time', () => {
+  it('returns good timings for a node present in several stacks with self count', () => {
     const { getTimingsForPath, funcNamesDict: { I, H } } = setup();
 
     // Select the function as a root node
     let timings = getTimingsForPath([H]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 1, breakdownByImplementation: null },
-        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        selfCount: { value: 1, breakdownByImplementation: null },
+        totalCount: { value: 1, breakdownByImplementation: { native: 1 } },
       },
       forFunc: {
-        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+        selfCount: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalCount: { value: 2, breakdownByImplementation: { native: 2 } },
       },
       rootTime: 5,
     });
@@ -1029,12 +1029,12 @@ describe('getTimingsForPath for an inverted tree', function() {
     timings = getTimingsForPath([I, H]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        selfCount: { value: 0, breakdownByImplementation: null },
+        totalCount: { value: 1, breakdownByImplementation: { native: 1 } },
       },
       forFunc: {
-        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+        selfCount: { value: 1, breakdownByImplementation: { native: 1 } },
+        totalCount: { value: 2, breakdownByImplementation: { native: 2 } },
       },
       rootTime: 5,
     });
@@ -1045,12 +1045,12 @@ describe('getTimingsForPath for an inverted tree', function() {
     const timings = getTimingsForPath([H, B, A]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        selfCount: { value: 0, breakdownByImplementation: null },
+        totalCount: { value: 1, breakdownByImplementation: { native: 1 } },
       },
       forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: {
+        selfCount: { value: 0, breakdownByImplementation: null },
+        totalCount: {
           value: 5,
           breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
         },

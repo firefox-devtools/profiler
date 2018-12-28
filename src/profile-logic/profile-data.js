@@ -303,24 +303,24 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
 export type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
 export type StackImplementation = 'native' | JsImplementation;
 export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
-type ItemTimings = {|
-  selfTime: {|
+type ItemCounts = {|
+  selfCount: {|
     // time spent excluding children
     value: Milliseconds,
     breakdownByImplementation: BreakdownByImplementation | null,
   |},
-  totalTime: {|
+  totalCount: {|
     // time spent including children
     value: Milliseconds,
     breakdownByImplementation: BreakdownByImplementation | null,
   |},
 |};
 
-export type TimingsForPath = {|
+export type CountsForPath = {|
   // timings for this path
-  forPath: ItemTimings,
+  forPath: ItemCounts,
   // timings for this func across the tree
-  forFunc: ItemTimings,
+  forFunc: ItemCounts,
   rootTime: Milliseconds, // time for all the samples in the current tree
 |};
 
@@ -359,19 +359,19 @@ export function getTimingsForPath(
   interval: number,
   isInvertedTree: boolean,
   thread: Thread
-): TimingsForPath {
+): CountsForPath {
   if (!needlePath.length) {
     // If the path is empty, which shouldn't usually happen, we return an empty
     // structure right away.
     // The rest of this function's code assumes a non-empty path.
     return {
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 0, breakdownByImplementation: null },
+        selfCount: { value: 0, breakdownByImplementation: null },
+        totalCount: { value: 0, breakdownByImplementation: null },
       },
       forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 0, breakdownByImplementation: null },
+        selfCount: { value: 0, breakdownByImplementation: null },
+        totalCount: { value: 0, breakdownByImplementation: null },
       },
       rootTime: 0,
     };
@@ -381,13 +381,13 @@ export function getTimingsForPath(
   const needleNodeIndex = getCallNodeIndexFromPath(needlePath, callNodeTable);
   const needleFuncIndex = getLeafFuncIndex(needlePath);
 
-  const pathTimings: ItemTimings = {
-    selfTime: { value: 0, breakdownByImplementation: null },
-    totalTime: { value: 0, breakdownByImplementation: null },
+  const pathTimings: ItemCounts = {
+    selfCount: { value: 0, breakdownByImplementation: null },
+    totalCount: { value: 0, breakdownByImplementation: null },
   };
-  const funcTimings: ItemTimings = {
-    selfTime: { value: 0, breakdownByImplementation: null },
-    totalTime: { value: 0, breakdownByImplementation: null },
+  const funcTimings: ItemCounts = {
+    selfCount: { value: 0, breakdownByImplementation: null },
+    totalCount: { value: 0, breakdownByImplementation: null },
   };
   let rootTime = 0;
 
@@ -422,7 +422,7 @@ export function getTimingsForPath(
     timings.breakdownByImplementation[implementation] += interval;
   }
 
-  // Loop over each sample and accumulate the self time, running time, and
+  // Loop over each sample and accumulate the self count, running count, and
   // the implementation breakdown.
   for (const thisStackIndex of samples.stack) {
     if (thisStackIndex === null) {
@@ -435,13 +435,21 @@ export function getTimingsForPath(
     const thisFunc = callNodeTable.func[thisNodeIndex];
 
     if (!isInvertedTree) {
-      // For non-inverted trees, we compute the self time from the stacks' leaf nodes.
+      // For non-inverted trees, we compute the self count from the stacks' leaf nodes.
       if (thisNodeIndex === needleNodeIndex) {
-        accumulateDataToTimings(pathTimings.selfTime, thisStackIndex, thisFunc);
+        accumulateDataToTimings(
+          pathTimings.selfCount,
+          thisStackIndex,
+          thisFunc
+        );
       }
 
       if (thisFunc === needleFuncIndex) {
-        accumulateDataToTimings(funcTimings.selfTime, thisStackIndex, thisFunc);
+        accumulateDataToTimings(
+          funcTimings.selfCount,
+          thisStackIndex,
+          thisFunc
+        );
       }
     }
 
@@ -470,7 +478,7 @@ export function getTimingsForPath(
         // first, see below for this.
         if (!isInvertedTree) {
           accumulateDataToTimings(
-            pathTimings.totalTime,
+            pathTimings.totalCount,
             thisStackIndex,
             thisFunc
           );
@@ -487,7 +495,7 @@ export function getTimingsForPath(
         // inverted trees below.
         if (!isInvertedTree) {
           accumulateDataToTimings(
-            funcTimings.totalTime,
+            funcTimings.totalCount,
             thisStackIndex,
             thisFunc
           );
@@ -497,7 +505,7 @@ export function getTimingsForPath(
 
       // When the tree isn't inverted, we don't need to move further up the call
       // node if we already found all the data.
-      // But for inverted trees, the selfTime is counted on the root node so we
+      // But for inverted trees, the selfCount is counted on the root node so we
       // need to go on looping the stack until we find it.
 
       if (!isInvertedTree && funcFound && pathFound) {
@@ -513,13 +521,13 @@ export function getTimingsForPath(
           // This root node matches the passed call node path.
           // This is the only place where we don't accumulate timings, mainly
           // because this would be the same as for the total time.
-          pathTimings.selfTime.value += interval;
+          pathTimings.selfCount.value += interval;
         }
 
         if (currentFuncIndex === needleFuncIndex) {
           // This root node is the same function as the passed call node path.
           accumulateDataToTimings(
-            funcTimings.selfTime,
+            funcTimings.selfCount,
             currentStackIndex,
             currentFuncIndex
           );
@@ -529,7 +537,7 @@ export function getTimingsForPath(
           // We contribute the implementation information if the passed path was
           // found in this stack earlier.
           accumulateDataToTimings(
-            pathTimings.totalTime,
+            pathTimings.totalCount,
             currentStackIndex,
             currentFuncIndex
           );
@@ -539,7 +547,7 @@ export function getTimingsForPath(
           // We contribute the implementation information if the leaf function
           // of the passed path was found in this stack earlier.
           accumulateDataToTimings(
-            funcTimings.totalTime,
+            funcTimings.totalCount,
             currentStackIndex,
             currentFuncIndex
           );

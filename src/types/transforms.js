@@ -126,7 +126,7 @@ export type TransformDefinitions = {
    * The MergeCallNode transform represents merging a CallNode into the parent CallNode. The
    * CallNode must match the given CallNodePath. In the call tree below, if the CallNode
    * at path [A, B, C] is removed, then the `D` and `F` CallNodes are re-assigned to `B`.
-   * No self time in this case would change, as `C` was not a leaf CallNode, but the
+   * No self sample count in this case would change, as `C` was not a leaf CallNode, but the
    * structure of the tree was changed slightly. The merging work is done by transforming
    * an existing thread's stackTable.
    *
@@ -145,7 +145,7 @@ export type TransformDefinitions = {
    *      E:1,1       G:1,1
    *
    *
-   * When a leaf CallNode is merged, the self time for that CallNode is assigned to the
+   * When a leaf CallNode is merged, the self sample count for that CallNode is assigned to the
    * parent CallNode. Here the leaf CallNode `E` is merged. `D` goes from having a self
    * time of 0 to 1.
    *                A:3,0                              A:3,0
