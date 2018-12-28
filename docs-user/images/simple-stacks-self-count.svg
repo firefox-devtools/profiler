@@ -1,16 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="410" height="328" viewBox="0 0 410 328">
   <defs>
-    <rect id="simple-stacks-self-time-a" width="61" height="24" x="50" y="181" rx="8"/>
-    <rect id="simple-stacks-self-time-b" width="61" height="24" x="117" y="181" rx="8"/>
-    <rect id="simple-stacks-self-time-c" width="61" height="24" x="184" y="181" rx="8"/>
+    <rect id="simple-stacks-self-count-a" width="61" height="24" x="50" y="181" rx="8"/>
+    <rect id="simple-stacks-self-count-b" width="61" height="24" x="117" y="181" rx="8"/>
+    <rect id="simple-stacks-self-count-c" width="61" height="24" x="184" y="181" rx="8"/>
   </defs>
   <g fill="none" fill-rule="evenodd" transform="translate(56 64)">
-    <use fill="#D8D8D8" xlink:href="#simple-stacks-self-time-a"/>
+    <use fill="#D8D8D8" xlink:href="#simple-stacks-self-count-a"/>
     <rect width="60" height="23" x="50.5" y="181.5" stroke="#979797" rx="8"/>
-    <use fill="#D8D8D8" xlink:href="#simple-stacks-self-time-b"/>
+    <use fill="#D8D8D8" xlink:href="#simple-stacks-self-count-b"/>
     <rect width="60" height="23" x="117.5" y="181.5" stroke="#979797" rx="8"/>
     <g>
-      <use fill="#D8D8D8" xlink:href="#simple-stacks-self-time-c"/>
+      <use fill="#D8D8D8" xlink:href="#simple-stacks-self-count-c"/>
       <rect width="60" height="23" x="184.5" y="181.5" stroke="#979797" rx="8"/>
     </g>
     <g>

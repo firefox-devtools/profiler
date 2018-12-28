@@ -37,11 +37,11 @@ In this case the profiler took 3 samples, each 1 millisecond apart. Visualizing 
       E       G
 ```
 
-This structure makes it much easier to tell where time is being spent in different parts of the application. Here the call tree shows that function `A` is the root of our samples, and all samples were called from there. According to this call tree `B` calls out to two different functions, `C` and `H`. However with just this tree we do not yet know how long each function took. This is where self time and running time come into play.
+This structure makes it much easier to tell where time is being spent in different parts of the application. Here the call tree shows that function `A` is the root of our samples, and all samples were called from there. According to this call tree `B` calls out to two different functions, `C` and `H`. However with just this tree we do not yet know how long each function took. This is where self counts and running counts come into play.
 
-# Self and running time
+# Self and running sample counts
 
-With the above graph, we know that the functions at the leaf of the graph were the actual functions that were running when we took the samples. So for the leaf functions `E`, `G`, and `F`, their self times are 1ms. Their running times will be the same as their self time. Now walking up the stack, respectively the function `D`, `F`, and `H` called those functions. Since we never actually observed those functions directly running (they weren't at the end of the stack), then the self times for all of those functions would be 0ms. However, because the functions they called *did* in fact run, then the running times would be 1ms each. Walking all the way up to root of the graph we get to function `A`. This node on the call tree would have a self time of 0ms as we never actually directly observed it running, but it includes every other function that we did observe, so the running time would be 3ms. The following is a graph of all the running and self times where the first number is the running time, and the second is the self time. So `A:3,0` would be the function `A` with the running time of 3ms, and the self time of 0ms.
+With the above graph, we know that the functions at the leaf of the graph were the actual functions that were running when we took the samples. So for the leaf functions `E`, `G`, and `F`, their self count are 1ms. Their running times will be the same as their self count. Now walking up the stack, respectively the function `D`, `F`, and `H` called those functions. Since we never actually observed those functions directly running (they weren't at the end of the stack), then the self counts for all of those functions would be 0ms. However, because the functions they called *did* in fact run, then the running times would be 1ms each. Walking all the way up to root of the graph we get to function `A`. This node on the call tree would have a self count of 0ms as we never actually directly observed it running, but it includes every other function that we did observe, so the running time would be 3ms. The following is a graph of all the running and self counts where the first number is the running time, and the second is the self count. So `A:3,0` would be the function `A` with the running time of 3ms, and the self count of 0ms.
 
 ```
              A:3,0
@@ -221,7 +221,7 @@ Call trees are interesting for the information they provide, but they can be qui
 
 ## Merge (charge to caller)
 
-Merging involves removing a single CallNode from the call tree, and then assigning its self time to the parent CallNode. In the call tree below, if the CallNode C is removed, then the `D` and `F` CallNodes are re-assigned to `B`. No self time in this case would change, as `C` was not a leaf CallNode, but the structure of the tree was changed slightly.
+Merging involves removing a single CallNode from the call tree, and then assigning its self count to the parent CallNode. In the call tree below, if the CallNode C is removed, then the `D` and `F` CallNodes are re-assigned to `B`. No self count in this case would change, as `C` was not a leaf CallNode, but the structure of the tree was changed slightly.
 
 ```
                    A:3,0                              A:3,0
@@ -239,7 +239,7 @@ Merging involves removing a single CallNode from the call tree, and then assigni
         E:1,1       G:1,1
 ```
 
-When a leaf CallNode is merged, the self time for that CallNode is assigned to the parent CallNode. Here the leaf CallNode `E` is merged. `D` goes from having a self time of 0 to 1.
+When a leaf CallNode is merged, the self count for that CallNode is assigned to the parent CallNode. Here the leaf CallNode `E` is merged. `D` goes from having a self count of 0 to 1.
 
 ```
                   A:3,0                              A:3,0
@@ -259,7 +259,7 @@ When a leaf CallNode is merged, the self time for that CallNode is assigned to t
 
 ## Merge subtree (prune subtree)
 
-The self time of an entire subtree is placed to the parent CallNode. In the case of merging CallNode C's subtree, CallNode B would go from having a self time of 0 seconds, to gaining 2 milliseconds of self time from the merged subtree.
+The self count of an entire subtree is placed to the parent CallNode. In the case of merging CallNode C's subtree, CallNode B would go from having a self count of 0 seconds, to gaining 2 milliseconds of self count from the merged subtree.
 
 ```
                   A:3,0                             A:3,0

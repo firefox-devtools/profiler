@@ -3,34 +3,34 @@
     <g transform="translate(38 48)">
       <g fill="#000" font-family="Helvetica" font-size="12" transform="translate(87 1)">
         <text>
-          <tspan x="125.165" y="11">0ms</tspan>
+          <tspan x="125.165" y="11">3 samples</tspan>
         </text>
         <text>
-          <tspan x="125.165" y="63">0ms</tspan>
+          <tspan x="125.165" y="63">3 samples</tspan>
         </text>
         <text>
-          <tspan x="164.165" y="119">0ms</tspan>
+          <tspan x="164.165" y="119">1 sample</tspan>
         </text>
         <text>
-          <tspan x="183.165" y="175">0ms</tspan>
+          <tspan x="183.165" y="175">1 sample</tspan>
         </text>
         <text>
-          <tspan x="184.165" y="232">1ms</tspan>
+          <tspan x="184.165" y="232">1 sample</tspan>
         </text>
         <text>
-          <tspan x="29.165" y="120">0ms</tspan>
+          <tspan x="-5" y="120">2 samples</tspan>
         </text>
         <text>
-          <tspan x="1.165" y="174">0ms</tspan>
+          <tspan x="-25" y="174">1 sample</tspan>
         </text>
         <text>
-          <tspan x="1.165" y="229">1ms</tspan>
+          <tspan x="-25" y="229">1 sample</tspan>
         </text>
         <text>
-          <tspan x="111.165" y="174">0ms</tspan>
+          <tspan x="111.165" y="174">1</tspan>
         </text>
         <text>
-          <tspan x="111.165" y="232">1ms</tspan>
+          <tspan x="111.165" y="232">1</tspan>
         </text>
       </g>
     </g>
@@ -76,7 +76,7 @@
       <tspan x="266.389" y="171.582">H</tspan>
     </text>
     <text fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold">
-      <tspan x="37" y="53">Call Tree</tspan> <tspan x="37" y="73">Self Time</tspan>
+      <tspan x="33" y="53">Call Tree</tspan> <tspan x="33" y="73">Running Counts</tspan>
     </text>
   </g>
 </svg>

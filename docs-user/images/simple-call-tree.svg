@@ -26,16 +26,16 @@
       </g>
     </g>
     <text font-family="Helvetica" font-size="11">
-      <tspan x="128.215" y="88" fill="#000">(Running time: </tspan> <tspan x="202.803" y="88" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5ms</tspan> <tspan x="224.82" y="88" fill="#000">) (Self time: </tspan> <tspan x="284.106" y="88" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">0ms</tspan> <tspan x="306.122" y="88" fill="#000">)</tspan>
+      <tspan x="128.215" y="88" fill="#000">(Running count: </tspan> <tspan x="206.803" y="88" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5 samples</tspan> <tspan x="260" y="88" fill="#000">) (Self count: </tspan> <tspan x="325" y="88" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">0 samples</tspan> <tspan x="380" y="88" fill="#000">)</tspan>
     </text>
     <text font-family="Helvetica" font-size="11">
-      <tspan x="129.215" y="142" fill="#000">(Running time: </tspan> <tspan x="203.803" y="142" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5ms</tspan> <tspan x="225.82" y="142" fill="#000">) (Self time: </tspan> <tspan x="285.106" y="142" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">0ms</tspan> <tspan x="307.122" y="142" fill="#000">)</tspan>
+      <tspan x="129.215" y="142" fill="#000">(Running count: </tspan> <tspan x="207.803" y="142" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5 samples</tspan> <tspan x="260" y="142" fill="#000">) (Self count: </tspan> <tspan x="325" y="142" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">0 samples</tspan> <tspan x="380" y="142" fill="#000">)</tspan>
     </text>
     <text font-family="Helvetica" font-size="11">
-      <tspan x="128.215" y="196" fill="#000">(Running time: </tspan> <tspan x="202.803" y="196" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5ms</tspan> <tspan x="224.82" y="196" fill="#000">) (Self time: </tspan> <tspan x="284.106" y="196" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">0ms</tspan> <tspan x="306.122" y="196" fill="#000">)</tspan>
+      <tspan x="128.215" y="196" fill="#000">(Running count: </tspan> <tspan x="206.803" y="196" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5 samples</tspan> <tspan x="260" y="196" fill="#000">) (Self count: </tspan> <tspan x="325" y="196" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">0 samples</tspan> <tspan x="380" y="196" fill="#000">)</tspan>
     </text>
     <text font-family="Helvetica" font-size="11">
-      <tspan x="147.215" y="249" fill="#000">(Running time: </tspan> <tspan x="221.803" y="249" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5ms</tspan> <tspan x="243.82" y="249" fill="#000">) (Self time: </tspan> <tspan x="303.106" y="249" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5ms</tspan> <tspan x="325.122" y="249" fill="#000">)</tspan>
+      <tspan x="147.215" y="249" fill="#000">(Running count: </tspan> <tspan x="225.803" y="249" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5 samples</tspan> <tspan x="280" y="249" fill="#000">) (Self count: </tspan> <tspan x="345" y="249" fill="#0A84FF" font-family="Helvetica-Bold, Helvetica" font-weight="bold">5 samples</tspan> <tspan x="400" y="249" fill="#000">)</tspan>
     </text>
   </g>
 </svg>

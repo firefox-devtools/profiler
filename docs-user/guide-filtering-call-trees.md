@@ -48,7 +48,7 @@ The implementation filter will modify the shape of stacks and generate a complet
 
 ![A screenshot of the "Invert call stacks" checkbox.](./images/invert-2018-05.jpg)
 
-Inverting the call stacks of samples will produce an entirely new call tree. All of the self time will be at the roots of the call tree. The implications to the shape of the call tree may be surprising, but consider the following graphics.
+Inverting the call stacks of samples will produce an entirely new call tree. All of the self count will be at the roots of the call tree. The implications to the shape of the call tree may be surprising, but consider the following graphics.
 
 ![An image showing samples on the left and the call tree on the right. This is before the invert operation.](./images/invert-before.svg)
 
@@ -66,7 +66,7 @@ Call tree transforms provide a finer grain control over how to modify the call t
 
 ### Merge
 
-Merging takes a call node and removes it from the call tree. Any self time for that node is then charged to its parent node. This can be done for a single call node, or for all functions in the tree. This type of operation can be useful for modifying the shape of the tree and removing unhelpful functions from the call tree.
+Merging takes a call node and removes it from the call tree. Any self count for that node is then charged to its parent node. This can be done for a single call node, or for all functions in the tree. This type of operation can be useful for modifying the shape of the tree and removing unhelpful functions from the call tree.
 
 ### Focus
 
