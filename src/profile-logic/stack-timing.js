@@ -50,12 +50,13 @@ import type { GetCategory } from './color-categories';
 export type StackTimingDepth = number;
 export type IndexIntoStackTiming = number;
 
-export type StackTimingByDepth = Array<{
+export type StackTiming = {
   start: Milliseconds[],
   end: Milliseconds[],
   stack: IndexIntoStackTable[],
   length: number,
-}>;
+};
+export type StackTimingByDepth = Array<StackTiming>;
 
 type LastSeen = {
   startTimeByDepth: number[],
@@ -264,4 +265,63 @@ function getNearestJSFrame(
     nextStackIndex = thread.stackTable.prefix[nextStackIndex];
   }
   return stackIndex;
+}
+
+export function getSampleCountsInTracingRange(
+  hoveredStackIndex: IndexIntoStackTable,
+  thread: Thread,
+  callNodeInfo: CallNodeInfo,
+  tracingStart: Milliseconds,
+  tracingEnd: Milliseconds
+): { selfCount: number, runningCount: number } {
+  const { samples } = thread;
+  const { stackIndexToCallNodeIndex, callNodeTable } = callNodeInfo;
+
+  const hoveredCallNodeIndex = stackIndexToCallNodeIndex[hoveredStackIndex];
+
+  let selfCount = 0;
+  let runningCount = 0;
+
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const sampleTime = samples.time[sampleIndex];
+
+    if (sampleTime < tracingStart) {
+      continue;
+    }
+    if (sampleTime > tracingEnd) {
+      break;
+    }
+
+    const stackIndex = samples.stack[sampleIndex];
+
+    if (stackIndex === null) {
+      // There is no stack, so skip counting it.
+      continue;
+    }
+
+    const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+    if (callNodeIndex === hoveredCallNodeIndex) {
+      selfCount++;
+      runningCount++;
+      continue;
+    }
+
+    for (
+      let walkingCallNodeIndex = callNodeTable.prefix[callNodeIndex];
+      walkingCallNodeIndex >= 0;
+      walkingCallNodeIndex = callNodeTable.prefix[walkingCallNodeIndex]
+    ) {
+      if (walkingCallNodeIndex < hoveredCallNodeIndex) {
+        // Indexes are ordered so that ancestor node indexes will always be lower than
+        // child node index. We are at a call node that is before the hovered
+        // call node index.
+        break;
+      }
+      if (walkingCallNodeIndex === hoveredCallNodeIndex) {
+        runningCount++;
+        continue;
+      }
+    }
+  }
+  return { selfCount, runningCount };
 }

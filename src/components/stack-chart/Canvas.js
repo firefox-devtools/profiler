@@ -18,6 +18,7 @@ import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatNumber } from '../../utils/format-numbers';
 import { updatePreviewSelection } from '../../actions/profile-view';
+import { getSampleCountsInTracingRange } from '../../profile-logic/stack-timing';
 
 import type { Thread } from '../../types/profile';
 import type {
@@ -62,7 +63,7 @@ type Props = $ReadOnly<{|
 
 type HoveredStackTiming = {|
   +depth: StackTimingDepth,
-  +stackTableIndex: IndexIntoStackTiming,
+  +stackTimingIndex: IndexIntoStackTiming,
 |};
 
 require('./Canvas.css');
@@ -300,7 +301,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
           const isHovered =
             hoveredItem &&
             depth === hoveredItem.depth &&
-            i === hoveredItem.stackTableIndex;
+            i === hoveredItem.stackTimingIndex;
           const isSelected = selectedCallNodeIndex === callNodeIndex;
 
           // Draw the box.
@@ -361,19 +362,32 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
   _getHoveredStackInfo = ({
     depth,
-    stackTableIndex,
+    stackTimingIndex,
   }: HoveredStackTiming): React.Node => {
-    const { thread, getLabel, getCategory, stackTimingByDepth } = this.props;
+    const {
+      thread,
+      callNodeInfo,
+      getLabel,
+      getCategory,
+      stackTimingByDepth,
+    } = this.props;
     const stackTiming = stackTimingByDepth[depth];
 
     const duration =
-      stackTiming.end[stackTableIndex] - stackTiming.start[stackTableIndex];
+      stackTiming.end[stackTimingIndex] - stackTiming.start[stackTimingIndex];
 
-    const stackIndex = stackTiming.stack[stackTableIndex];
+    const stackIndex = stackTiming.stack[stackTimingIndex];
     const frameIndex = thread.stackTable.frame[stackIndex];
     const label = getLabel(thread, stackIndex);
     const category = getCategory(thread, frameIndex);
     const funcIndex = thread.frameTable.func[frameIndex];
+    const { runningCount, selfCount } = getSampleCountsInTracingRange(
+      stackIndex,
+      thread,
+      callNodeInfo,
+      stackTiming.start[stackTimingIndex],
+      stackTiming.end[stackTimingIndex]
+    );
 
     let resourceOrFileName = null;
     // Only JavaScript functions have a filename.
@@ -409,10 +423,22 @@ class StackChartCanvas extends React.PureComponent<Props> {
     return (
       <div className="stackChartCanvasTooltip">
         <div className="tooltipOneLine tooltipHeader">
-          <div className="tooltipTiming">{formatNumber(duration)}ms</div>
           <div className="tooltipTitle">{label}</div>
         </div>
         <div className="tooltipDetails">
+          <div className="tooltipLabel">Traced timing:</div>
+          <div>{formatNumber(duration)}ms (estimated)</div>
+
+          <div className="tooltipLabel">Running count:</div>
+          <div>
+            {runningCount} {runningCount === 1 ? 'sample' : 'samples'}
+          </div>
+
+          <div className="tooltipLabel">Self count:</div>
+          <div>
+            {selfCount} {selfCount === 1 ? 'sample' : 'samples'}
+          </div>
+
           <div className="tooltipLabel">Category:</div>
           <div>
             <div
@@ -421,6 +447,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
             />
             {category.name}
           </div>
+
           {resourceOrFileName}
         </div>
       </div>
@@ -431,13 +458,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
     if (hoveredItem === null) {
       return;
     }
-    const { depth, stackTableIndex } = hoveredItem;
+    const { depth, stackTimingIndex } = hoveredItem;
     const { stackTimingByDepth, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: stackTimingByDepth[depth].start[stackTableIndex],
-      selectionEnd: stackTimingByDepth[depth].end[stackTableIndex],
+      selectionStart: stackTimingByDepth[depth].start[stackTimingIndex],
+      selectionEnd: stackTimingByDepth[depth].end[stackTimingIndex],
     });
   };
 
@@ -446,9 +473,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
     // null) if there's nothing hovered.
     let callNodeIndex = null;
     if (hoveredItem !== null) {
-      const { depth, stackTableIndex } = hoveredItem;
+      const { depth, stackTimingIndex } = hoveredItem;
       const { stackTimingByDepth } = this.props;
-      const stackIndex = stackTimingByDepth[depth].stack[stackTableIndex];
+      const stackIndex = stackTimingByDepth[depth].stack[stackTimingIndex];
       const { stackIndexToCallNodeIndex } = this.props.callNodeInfo;
       callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
     }
@@ -483,7 +510,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
       const start = stackTiming.start[i];
       const end = stackTiming.end[i];
       if (start < time && end > time) {
-        return { depth, stackTableIndex: i };
+        return { depth, stackTimingIndex: i };
       }
     }
 

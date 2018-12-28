@@ -17,6 +17,7 @@ import {
 } from '../../actions/profile-view';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSampleCountsInTracingRange } from '../../profile-logic/stack-timing';
 
 describe('selectors/getStackTimingByDepth', function() {
   /**
@@ -120,6 +121,36 @@ describe('selectors/getStackTimingByDepth', function() {
       { start: [80], end: [90], stack: [22], length: 1 },
     ]);
   });
+
+  /**
+   * This test doesn't really have anything to do with the store, but it's easy
+   * to not have to re-work the tests to add it.
+   */
+  it('can get counts from stack timing information with getSampleCountsInTracingRange', function() {
+    const { getState } = storeWithProfile();
+    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
+      getState()
+    );
+    const stackTiming = stackTimingByDepth[1];
+
+    /**
+     *   0-10-20-30-40
+     *  ==============
+     *  0P 0P 0P 0P 0P
+     *  1P 1P 1P 1P    <- Use this tracing time from the fixture.
+     *     2P 2P 3P
+     */
+
+    expect(
+      getSampleCountsInTracingRange(
+        stackTiming.stack[0],
+        selectedThreadSelectors.getFilteredThread(getState()),
+        selectedThreadSelectors.getCallNodeInfo(getState()),
+        stackTiming.start[0],
+        stackTiming.end[0]
+      )
+    ).toEqual({ selfCount: 1, runningCount: 4 });
+  });
 });
 
 describe('selectors/getFlameGraphTiming', function() {
@@ -167,13 +198,13 @@ describe('selectors/getFlameGraphTiming', function() {
       store.getState()
     );
 
-    return flameGraphTiming.map(({ selfTimeRelative, callNode, length }) => {
+    return flameGraphTiming.map(({ selfCountRelative, callNode, length }) => {
       const lines = [];
       for (let i = 0; i < length; i++) {
         const callNodeIndex = callNode[i];
         const funcIndex = callNodeTable.func[callNodeIndex];
         const funcName = funcNames[funcIndex];
-        lines.push(`${funcName} (${selfTimeRelative[i]})`);
+        lines.push(`${funcName} (${selfCountRelative[i]})`);
       }
       return lines.join(' | ');
     });
@@ -244,7 +275,7 @@ describe('selectors/getFlameGraphTiming', function() {
     ]);
   });
 
-  it('contains totalTime, selfTime and selfTimeRelative', function() {
+  it('contains totalCount, selfCount and selfCountRelative', function() {
     const {
       profile,
       funcNamesPerThread: [funcNames],
