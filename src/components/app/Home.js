@@ -98,10 +98,6 @@ class ActionButtons extends React.PureComponent<
   };
 
   render() {
-    const loadFromUrlButtonClassName = this.state.isLoadFromUrlPressed
-      ? ['homeSectionButtonPressed', 'homeSectionButton'].join(' ')
-      : 'homeSectionButton';
-
     return (
       <div className="homeSectionLoadProfile">
         <div className="homeSectionActionButtons">
@@ -116,7 +112,10 @@ class ActionButtons extends React.PureComponent<
           </label>
           <button
             type="button"
-            className={loadFromUrlButtonClassName}
+            className={classnames({
+              homeSectionButton: true,
+              homeSectionButtonPressed: this.state.isLoadFromUrlPressed,
+            })}
             onClick={this._loadFromUrlPressed}
           >
             Load a profile from an URL
@@ -162,7 +161,7 @@ class LoadFromUrl extends React.PureComponent<
         />
         <input
           type="submit"
-          className="homeSectionButton"
+          className="homeSectionButton homeSectionLoadFromUrlSubmitButton"
           value="Load"
           disabled={!this.state.isLoadButtonPressed}
         />

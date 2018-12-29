@@ -158,7 +158,7 @@
 .homeSectionActionButtons .homeSectionButton ,
 .homeSectionLoadFromUrl .homeSectionButton {
   font-size: 13px;
-  padding: 0.3em;
+  padding: 0.3em 1em;
 } 
 
 .homeSectionButton:hover , 
@@ -240,13 +240,14 @@
 }
 
 .homeSectionLoadFromUrlInput {
-    width: 85%;
-    padding: 8px 20px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
+  flex: auto;
+  padding: 8px 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.homeSectionLoadFromUrlSubmitButton {
+  margin: 0;
 }
 
 label.homeSectionButton:focus-within {
