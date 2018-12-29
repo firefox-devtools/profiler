@@ -112,7 +112,7 @@ class ActionButtons extends React.PureComponent<
           </label>
           <button
             type="button"
-            className={classnames({
+            className={classNames({
               homeSectionButton: true,
               homeSectionButtonPressed: this.state.isLoadFromUrlPressed,
             })}
