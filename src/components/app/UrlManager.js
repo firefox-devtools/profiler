@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getIsUrlSetupDone } from '../../reducers/app';
+import { getIsUrlSetupDone } from '../../selectors/app';
 import { updateUrlState, urlSetupDone, show404 } from '../../actions/app';
 import { urlFromState, stateFromLocation } from '../../app-logic/url-handling';
 
@@ -14,7 +14,7 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
-import type { UrlState } from '../../types/reducers';
+import type { UrlState } from '../../types/state';
 
 type StateProps = {|
   +urlState: UrlState,
@@ -34,23 +34,31 @@ type OwnProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class UrlManager extends React.PureComponent<Props> {
-  _updateState() {
+  _updateState(firstRun: boolean) {
     const { updateUrlState, show404 } = this.props;
+    let urlState;
     if (window.history.state) {
-      updateUrlState(window.history.state);
+      urlState = (window.history.state: UrlState);
     } else {
       try {
-        const urlState = stateFromLocation(window.location);
-        updateUrlState(urlState);
+        urlState = stateFromLocation(window.location);
       } catch (e) {
         console.error(e);
         show404(window.location.pathname + window.location.search);
+        return;
       }
     }
+    if (firstRun) {
+      // Validate the initial URL state.
+      if (urlState.dataSource === 'from-file') {
+        urlState = null;
+      }
+    }
+    updateUrlState(urlState);
   }
   componentDidMount() {
-    this._updateState();
-    window.addEventListener('popstate', () => this._updateState());
+    this._updateState(true);
+    window.addEventListener('popstate', () => this._updateState(false));
     this.props.urlSetupDone();
   }
 

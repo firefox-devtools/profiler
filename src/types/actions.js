@@ -26,7 +26,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { ProfileSharingStatus, UrlState } from '../types/reducers';
+import type { ProfileSharingStatus, UrlState } from '../types/state';
 
 export type DataSource =
   | 'none'
@@ -58,9 +58,17 @@ export type FunctionsUpdatePerThread = {
  * Note that TrackIndexes aren't globally unique: they're unique among global
  * tracks, and they're unique among local tracks for a specific Pid.
  */
-export type TrackReference =
-  | {| +type: 'global', +trackIndex: TrackIndex |}
-  | {| +type: 'local', +trackIndex: TrackIndex, +pid: Pid |};
+export type GlobalTrackReference = {|
+  +type: 'global',
+  +trackIndex: TrackIndex,
+|};
+export type LocalTrackReference = {|
+  +type: 'local',
+  +trackIndex: TrackIndex,
+  +pid: Pid,
+|};
+export type TrackReference = GlobalTrackReference | LocalTrackReference;
+
 export type RequestedLib = {|
   +debugName: string,
   +breakpadId: string,
@@ -99,10 +107,6 @@ type ProfileAction =
   | {|
       +type: 'UPDATE_PREVIEW_SELECTION',
       +previewSelection: PreviewSelection,
-    |}
-  | {|
-      +type: 'CHANGE_TAB_ORDER',
-      +tabOrder: number[],
     |}
   | {|
       +type: 'CHANGE_SELECTED_ZIP_FILE',
@@ -226,7 +230,7 @@ type StackChartAction =
 
 type UrlEnhancerAction =
   | {| +type: 'URL_SETUP_DONE' |}
-  | {| +type: 'UPDATE_URL_STATE', +newUrlState: UrlState |};
+  | {| +type: 'UPDATE_URL_STATE', +newUrlState: UrlState | null |};
 
 type UrlStateAction =
   | {| +type: 'WAITING_FOR_PROFILE_FROM_FILE' |}
@@ -271,6 +275,10 @@ type UrlStateAction =
       +callTree: CallTree,
       +callNodeTable: CallNodeTable,
       +selectedThreadIndex: ThreadIndex,
+    |}
+  | {|
+      +type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
+      +showSummary: boolean,
     |}
   | {| +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string |};
 

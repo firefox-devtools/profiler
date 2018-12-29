@@ -12,7 +12,7 @@ import {
   getPreviewSelection,
   getCommittedRange,
   getZeroAt,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile';
 import {
   updatePreviewSelection,
   commitRange,

@@ -6,8 +6,7 @@
 /**
  * @jest-environment jsdom
  */
-import * as urlStateReducers from '../reducers/url-state';
-import * as profileViewSelectors from '../reducers/profile-view';
+import * as urlStateReducers from '../selectors/url-state';
 import {
   changeCallTreeSearchString,
   changeMarkersSearchString,
@@ -30,8 +29,8 @@ import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,
 } from './fixtures/profiles/tracks';
-
-const { selectedThreadSelectors } = profileViewSelectors;
+import { getProfileFromTextSamples } from './fixtures/profiles/make-profile';
+import { selectedThreadSelectors } from '../selectors/per-thread';
 
 function _getStoreWithURL(
   settings: {
@@ -186,6 +185,44 @@ describe('url handling tracks', function() {
         'show [thread GeckoMain process] SELECTED',
         'show [thread GeckoMain tab]',
         '  - show [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
+    });
+
+    // This is a test for issue https://github.com/devtools-html/perf.html/issues/1389
+    it('can select a local track without mixing track and thread indexes', function() {
+      // We're building a very specific profile, where local track indexes and
+      // thread indexes could be confused. This is easier if we have local
+      // tracks for the first process, because then the thread indexes and the
+      // local track indexes are off by one.
+      const { profile } = getProfileFromTextSamples('A', 'B', 'C');
+      const [thread1, thread2, thread3] = profile.threads;
+      thread1.name = 'GeckoMain';
+      thread1.processType = 'process';
+      thread1.pid = 111;
+
+      thread2.name = 'DOM Worker';
+      thread2.processType = 'tab';
+      thread2.pid = 111;
+
+      thread3.name = 'Style';
+      thread3.processType = 'tab';
+      thread3.pid = 111;
+
+      const { getState } = _getStoreWithURL(
+        // In this search query, we want to hide the second local track of the
+        // process with PID 111 (`111-1`), that is the "Style" thread, and
+        // select the second thread (`thread=1`), that is the "DOM Worker"
+        // thread, which is the local track `111-0`.
+        // This ensures that we don't confuse local track and thread indexes
+        // when selecting threads (see issue #1389).
+        { search: '?hiddenLocalTracksByPid=111-1&thread=1' },
+        profile
+      );
+
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process]',
+        '  - show [thread DOM Worker] SELECTED',
         '  - hide [thread Style]',
       ]);
     });

@@ -14,12 +14,12 @@ import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
 import MarkerSettings from '../shared/MarkerSettings';
 
 import {
-  selectedThreadSelectors,
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type {
@@ -57,12 +57,27 @@ type StateProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MarkerChart extends React.PureComponent<Props> {
+  _viewport: HTMLDivElement | null = null;
   /**
    * Determine the maximum zoom of the viewport.
    */
   getMaximumZoom(): UnitIntervalOfProfileRange {
     const { timeRange: { start, end }, interval } = this.props;
     return interval / (end - start);
+  }
+
+  _takeViewportRef = (viewport: HTMLDivElement | null) => {
+    this._viewport = viewport;
+  };
+
+  _focusViewport = () => {
+    if (this._viewport) {
+      this._viewport.focus();
+    }
+  };
+
+  componentDidMount() {
+    this._focusViewport();
   }
 
   render() {
@@ -81,7 +96,12 @@ class MarkerChart extends React.PureComponent<Props> {
     const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
 
     return (
-      <div className="markerChart">
+      <div
+        className="markerChart"
+        id="marker-chart-tab"
+        role="tabpanel"
+        aria-labelledby="marker-chart-tab-button"
+      >
         <MarkerSettings />
         {markers.length === 0 ? (
           <MarkerChartEmptyReasons />
@@ -96,6 +116,7 @@ class MarkerChart extends React.PureComponent<Props> {
               maximumZoom: this.getMaximumZoom(),
               marginLeft: TIMELINE_MARGIN_LEFT,
               marginRight: TIMELINE_MARGIN_RIGHT,
+              containerRef: this._takeViewportRef,
             }}
             chartProps={{
               markerTimingRows,

@@ -27,12 +27,12 @@
   border-right-color: transparent !important;
   padding: 0 6px 0 8px;
   background-clip: padding-box;
-  max-width: 20%;
 }
 
 .filterNavigatorBarRootItem {
   margin-left: -8px;
   flex-shrink: 0;
+  max-width: 100%;
 }
 
 .filterNavigatorBarItemContent {

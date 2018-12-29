@@ -29,12 +29,16 @@ import profileWithJS from '.././fixtures/profiles/timings-with-js';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { sortDataTable } from '../../utils/data-table-utils';
+import { ensureExists } from '../../utils/flow';
 import {
   getCategoryByImplementation,
   implementationCategoryMap,
 } from '../../profile-logic/color-categories';
 import getCallNodeProfile from '../fixtures/profiles/call-nodes';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import {
+  getProfileFromTextSamples,
+  getJsTracerTable,
+} from '../fixtures/profiles/make-profile';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
@@ -252,6 +256,7 @@ describe('process-profile', function() {
         'chrome://blargh'
       );
       expect(thread.funcTable.lineNumber[4]).toEqual(34);
+      expect(thread.funcTable.columnNumber[4]).toEqual(35);
       expect(thread.funcTable.address[0]).toEqual(-1);
       expect(thread.funcTable.address[1]).toEqual(3972);
       expect(thread.funcTable.address[2]).toEqual(6725);
@@ -267,16 +272,62 @@ describe('process-profile', function() {
       expect(thread.stringTable.getString(name0)).toEqual('firefox');
       expect(thread.stringTable.getString(name1)).toEqual('chrome://blargh');
     });
-    it('should preserve pids for threads that have them', function() {
-      expect(profile.threads[0].pid).toEqual(2222);
+  });
+
+  describe('JS tracer', function() {
+    it('does not have JS tracer information by default', function() {
+      const profile = processProfile(getGeckoProfile());
+      expect(profile.threads[0].jsTracer).toBe(undefined);
     });
-    it('should create a string label for unknown thread pids', function() {
+
+    it('processes JS tracer and offsets the timestamps', function() {
       const geckoProfile = getGeckoProfile();
-      delete geckoProfile.threads[0].pid;
-      const profileWithNoPids = processProfile(geckoProfile);
-      expect(profileWithNoPids.threads[0].pid).toEqual('Unknown Process 1');
+      const timestampOffsetMs = 33;
+      const timestampOffsetMicro = timestampOffsetMs * 1000;
+
+      {
+        // Build the custom thread with JS tracer information. The startTime is offset
+        // from the parent process.
+        const geckoSubprocess = getGeckoProfile();
+        const childProcessThread = geckoSubprocess.threads[0];
+        const stringTable = new UniqueStringArray();
+        const jsTracer = getJsTracerTable(stringTable, [
+          ['jsTracerA', 0, 10],
+          ['jsTracerB', 1, 9],
+          ['jsTracerC', 2, 8],
+        ]);
+        childProcessThread.jsTracerEvents = jsTracer;
+        geckoSubprocess.jsTracerDictionary = stringTable._array;
+        geckoProfile.processes.push(geckoSubprocess);
+        geckoSubprocess.meta.startTime += timestampOffsetMs;
+      }
+
+      // Process the profile, and grab the threads we are interested in.
+      const processedProfile = processProfile(geckoProfile);
+      const childProcessThread = ensureExists(
+        processedProfile.threads.find(thread => thread.jsTracer),
+        'Could not find the thread with the JS tracer information'
+      );
+      const processedJsTracer = ensureExists(
+        childProcessThread.jsTracer,
+        'The JS tracer table was not found on the subprocess'
+      );
+
+      // Check that the values are correct from the test defined data.
+      expect(
+        processedJsTracer.events.map(index =>
+          childProcessThread.stringTable.getString(index)
+        )
+      ).toEqual(['jsTracerA', 'jsTracerB', 'jsTracerC']);
+      expect(processedJsTracer.durations).toEqual([10000, 8000, 6000]);
+      expect(processedJsTracer.timestamps).toEqual([
+        0 + timestampOffsetMicro,
+        1000 + timestampOffsetMicro,
+        2000 + timestampOffsetMicro,
+      ]);
     });
   });
+
   describe('DevTools profiles', function() {
     it('should process correctly', function() {
       // Mock out a DevTools profile.

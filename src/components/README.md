@@ -15,7 +15,7 @@ Some components use the `connect()` function to hook up the contents of the [Red
 ```js
 export default connect(
   // The first parameter's function receives the Redux state. Use the selectors located
-  // in the reducers directory to select the relevant information from the state.
+  // in the src/selectors directory to select the relevant information from the state.
   // Selectors are often memoized, and so as these functions are run multiple times,
   // their results will still pass a strict equality test for component updates. In
   // addition notice how the state object is Flow typed.

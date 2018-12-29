@@ -10,12 +10,12 @@ import ThreadActivityGraph from './ActivityGraph';
 import ThreadStackGraph from './StackGraph';
 import { withChartViewport } from '../chart/Viewport';
 import {
-  selectedThreadSelectors,
   getPreviewSelection,
   getProfile,
   getCommittedRange,
-} from '../../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../../reducers/url-state';
+} from '../../../selectors/profile';
+import { selectedThreadSelectors } from '../../../selectors/per-thread';
+import { getSelectedThreadIndex } from '../../../selectors/url-state';
 import {
   selectBestAncestorCallNodeAndExpandCallTree,
   focusCallTree,
@@ -34,7 +34,7 @@ import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
 } from '../../../types/profile-derived';
-import type { State } from '../../../types/reducers';
+import type { State } from '../../../types/state';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,

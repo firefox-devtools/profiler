@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import React, { PureComponent } from 'react';
+import React, { Fragment, PureComponent } from 'react';
 import { Provider } from 'react-redux';
 import explicitConnect from '../../utils/connect';
 
@@ -15,18 +15,19 @@ import {
 import ProfileViewer from './ProfileViewer';
 import ZipFileViewer from './ZipFileViewer';
 import Home from './Home';
-import { getView } from '../../reducers/app';
-import { getHasZipFile } from '../../reducers/zipped-profiles';
+import { getView } from '../../selectors/app';
+import { getHasZipFile } from '../../selectors/zipped-profiles';
 import {
   getDataSource,
   getHash,
   getProfileUrl,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import UrlManager from './UrlManager';
+import ServiceWorkerManager from './ServiceWorkerManager';
 import FooterLinks from './FooterLinks';
 
 import type { Store } from '../../types/store';
-import type { AppViewState, State } from '../../types/reducers';
+import type { AppViewState, State } from '../../types/state';
 import type { DataSource } from '../../types/actions';
 import type {
   ExplicitConnectOptions,
@@ -166,7 +167,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
     );
   }
 
-  render() {
+  renderAppropriateComponents() {
     const { view, dataSource, hasZipFile } = this.props;
     const phase = view.phase;
     if (dataSource === 'none') {
@@ -221,6 +222,15 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
           <Home specialMessage="The URL you came in on was not recognized." />
         );
     }
+  }
+
+  render() {
+    return (
+      <Fragment>
+        <ServiceWorkerManager />
+        {this.renderAppropriateComponents()}
+      </Fragment>
+    );
   }
 }
 

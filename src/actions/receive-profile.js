@@ -23,7 +23,7 @@ import {
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
-} from '../reducers/url-state';
+} from '../selectors/url-state';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -691,7 +691,9 @@ export function retrieveProfileOrZipFromUrl(
       const serializedProfile = response.profile;
       const zip = response.zip;
       if (serializedProfile) {
-        const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
+        const profile = await unserializeProfileOfArbitraryFormat(
+          serializedProfile
+        );
         if (profile === undefined) {
           throw new Error('Unable to parse the profile.');
         }
@@ -765,7 +767,7 @@ export function retrieveProfileFromFile(
             const decompressedArrayBuffer = await decompress(arrayBuffer);
             const textDecoder = new TextDecoder();
             const text = await textDecoder.decode(decompressedArrayBuffer);
-            const profile = unserializeProfileOfArbitraryFormat(text);
+            const profile = await unserializeProfileOfArbitraryFormat(text);
             if (profile === undefined) {
               throw new Error('Unable to parse the profile.');
             }
@@ -787,7 +789,7 @@ export function retrieveProfileFromFile(
           // decide how to handle them. We'll try to parse them as a plain JSON
           // file.
           const text = await fileReader(file).asText();
-          const profile = unserializeProfileOfArbitraryFormat(text);
+          const profile = await unserializeProfileOfArbitraryFormat(text);
           if (profile === undefined) {
             throw new Error('Unable to parse the profile.');
           }

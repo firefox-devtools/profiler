@@ -26,13 +26,14 @@ import type {
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
+import { formatNumber, formatPercent } from '../utils/format-numbers';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
   selfTime: Float32Array,
   totalTime: Float32Array,
 };
-type CallTreeCountsAndTimings = {
+export type CallTreeCountsAndTimings = {
   callNodeChildCount: Uint32Array,
   callNodeTimes: CallNodeTimes,
   rootCount: number,
@@ -211,18 +212,22 @@ export class CallTree {
         icon = ExtensionIcon;
       }
 
-      const formatNumber = this._isIntegerInterval
-        ? _formatIntegerNumber
-        : _formatDecimalNumber;
+      const maxFractionalDigits = this._isIntegerInterval ? 0 : 1;
 
-      const formattedTotalTime = formatNumber(totalTime);
-      const formattedSelfTime = formatNumber(selfTime);
+      const formattedTotalTime = formatNumber(
+        totalTime,
+        3,
+        maxFractionalDigits
+      );
+
+      const formattedSelfTime = formatNumber(selfTime, 3, maxFractionalDigits);
+
       displayData = {
         totalTime: formattedTotalTime,
         totalTimeWithUnit: formattedTotalTime + 'ms',
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
         selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
-        totalTimePercent: `${(100 * totalTimeRelative).toFixed(1)}%`,
+        totalTimePercent: `${formatPercent(totalTimeRelative)}`,
         name: funcName,
         lib: libName,
         // Dim platform pseudo-stacks.
@@ -403,7 +408,7 @@ export function getCallTree(
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
   implementationFilter: string,
-  invertCallstack: boolean
+  callTreeCountsAndTimings: CallTreeCountsAndTimings
 ): CallTree {
   return timeCode('getCallTree', () => {
     const {
@@ -411,12 +416,7 @@ export function getCallTree(
       callNodeChildCount,
       rootTotalTime,
       rootCount,
-    } = computeCallTreeCountsAndTimings(
-      thread,
-      callNodeInfo,
-      interval,
-      invertCallstack
-    );
+    } = callTreeCountsAndTimings;
 
     const jsOnly = implementationFilter === 'js';
     const isIntegerInterval = Math.floor(interval) === interval;
@@ -433,16 +433,4 @@ export function getCallTree(
       isIntegerInterval
     );
   });
-}
-
-const LOCALE_WITH_DECIMAL_POINT = {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-};
-function _formatDecimalNumber(number: number): string {
-  return number.toLocaleString(undefined, LOCALE_WITH_DECIMAL_POINT);
-}
-
-function _formatIntegerNumber(number: number): string {
-  return number.toLocaleString();
 }

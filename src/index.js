@@ -26,18 +26,6 @@ if (process.env.NODE_ENV === 'development') {
   window.ga = () => {};
 }
 
-if (process.env.NODE_ENV === 'production') {
-  // We use '@mstange/offline-plugin/runtime' here instead of
-  // 'offline-plugin/runtime' because the fork contains the fix from
-  // https://github.com/NekR/offline-plugin/pull/410
-  const runtime = require('@mstange/offline-plugin/runtime');
-  runtime.install({
-    onUpdateReady: () => {
-      runtime.applyUpdate();
-    },
-  });
-}
-
 window.geckoProfilerPromise = new Promise(function(resolve) {
   window.connectToGeckoProfiler = resolve;
 });

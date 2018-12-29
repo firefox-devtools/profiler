@@ -4,16 +4,19 @@
 
 // @flow
 import { oneLine } from 'common-tags';
-import { getLastVisibleThreadTabSlug } from '../reducers/app';
+import { getLastVisibleThreadTabSlug } from '../selectors/app';
 import {
-  selectorsForThread,
-  selectedThreadSelectors,
   getGlobalTracks,
   getGlobalTrackAndIndexByPid,
   getLocalTracks,
   getLocalTrackFromReference,
   getGlobalTrackFromReference,
-} from '../reducers/profile-view';
+  getPreviewSelection,
+} from '../selectors/profile';
+import {
+  getThreadSelectors,
+  selectedThreadSelectors,
+} from '../selectors/per-thread';
 import {
   getImplementationFilter,
   getSelectedThreadIndex,
@@ -22,7 +25,7 @@ import {
   getLocalTrackOrder,
   getHiddenLocalTracks,
   getSelectedTab,
-} from '../reducers/url-state';
+} from '../selectors/url-state';
 import {
   getCallNodePathFromIndex,
   getSampleCallNodes,
@@ -31,6 +34,7 @@ import {
 } from '../profile-logic/profile-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
+import { objectShallowEquals } from '../utils/index';
 
 import type {
   PreviewSelection,
@@ -38,7 +42,7 @@ import type {
   TrackReference,
   TimelineType,
 } from '../types/actions';
-import type { State } from '../types/reducers';
+import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
 import type {
   ThreadIndex,
@@ -102,7 +106,7 @@ export function selectLeafCallNode(
   sampleIndex: IndexIntoSamplesTable
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const threadSelectors = selectorsForThread(threadIndex);
+    const threadSelectors = getThreadSelectors(threadIndex);
     const filteredThread = threadSelectors.getFilteredThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
@@ -134,7 +138,7 @@ export function selectBestAncestorCallNodeAndExpandCallTree(
   sampleIndex: IndexIntoSamplesTable
 ): ThunkAction<boolean> {
   return (dispatch, getState) => {
-    const threadSelectors = selectorsForThread(threadIndex);
+    const threadSelectors = getThreadSelectors(threadIndex);
     const fullThread = threadSelectors.getRangeFilteredThread(getState());
     const filteredThread = threadSelectors.getFilteredThread(getState());
     const unfilteredStack = fullThread.samples.stack[sampleIndex];
@@ -263,6 +267,16 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
         default:
           throw assertExhaustiveCheck(localTrack, `Unhandled LocalTrack type.`);
       }
+    }
+
+    if (
+      selectedTab === 'js-tracer' &&
+      getThreadSelectors(selectedThreadIndex).getJsTracerTable(getState()) ===
+        null
+    ) {
+      // If the user switches to another thread that doesn't have JS Tracer information,
+      // then switch to the calltree.
+      selectedTab = 'calltree';
     }
 
     if (
@@ -657,7 +671,8 @@ export function hideLocalTrack(
 
       if (
         nextSelectedThreadIndex === null &&
-        globalTrack.mainThreadIndex !== null
+        globalTrack.mainThreadIndex !== null &&
+        globalTrack.mainThreadIndex !== undefined
       ) {
         // Case 2a: Use the current process's main thread.
         nextSelectedThreadIndex = globalTrack.mainThreadIndex;
@@ -896,12 +911,42 @@ export function changeInvertCallstack(
   };
 }
 
+/**
+ * This action toggles changes between using a summary view that shows only self time
+ * for the JS tracer data, and a stack-based view (similar to the stack chart) for the
+ * JS Tracer panel.
+ */
+export function changeShowJsTracerSummary(
+  showSummary: boolean
+): ThunkAction<void> {
+  return dispatch => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: showSummary
+        ? 'show JS tracer summary'
+        : 'show JS tracer stacks',
+    });
+    dispatch({
+      type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
+      showSummary,
+    });
+  };
+}
+
 export function updatePreviewSelection(
   previewSelection: PreviewSelection
-): Action {
-  return {
-    type: 'UPDATE_PREVIEW_SELECTION',
-    previewSelection,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const currentPreviewSelection = getPreviewSelection(getState());
+    if (!objectShallowEquals(currentPreviewSelection, previewSelection)) {
+      // Only dispatch if the selection changes. This function can fire in a tight loop,
+      // and this check saves a dispatch.
+      dispatch({
+        type: 'UPDATE_PREVIEW_SELECTION',
+        previewSelection,
+      });
+    }
   };
 }
 
@@ -929,7 +974,7 @@ export function addTransformToStack(
   transform: Transform
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const transformedThread = selectorsForThread(
+    const transformedThread = getThreadSelectors(
       threadIndex
     ).getRangeAndTransformFilteredThread(getState());
 

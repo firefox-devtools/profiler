@@ -14,11 +14,9 @@ import {
   overlayFills,
 } from '../../profile-logic/interval-marker-styles';
 import explicitConnect from '../../utils/connect';
-import {
-  selectorsForThread,
-  getPreviewSelection,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import { getPreviewSelection } from '../../selectors/profile';
+import { getThreadSelectors } from '../../selectors/per-thread';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import './TracingMarkers.css';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
@@ -358,7 +356,7 @@ export const TimelineTracingMarkers = withSize(
 const jankOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
-    const selectors = selectorsForThread(threadIndex);
+    const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
 
     return {
@@ -380,7 +378,7 @@ export const TimelineTracingMarkersJank = explicitConnect(jankOptions);
 const tracingOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
-    const selectors = selectorsForThread(threadIndex);
+    const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
     const intervalMarkers = selectors.getCommittedRangeFilteredTracingMarkersForHeader(
       state

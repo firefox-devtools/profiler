@@ -11,6 +11,7 @@
     "build-prod": "yarn build-prod:quiet --progress",
     "lint": "eslint *.js bin src",
     "lint-fix": "yarn lint --fix",
+    "prettier-json": "prettier --write src/**/*.json",
     "flow": "flow",
     "flow-coverage": "flow-coverage-report -i 'src/**/*.js' -t html -t text",
     "flow-generate-libdefs": "flow-typed install --libdefDir src/types/libdef",
@@ -32,7 +33,6 @@
     "test-build-coverage": "jest --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
     "test-coverage": "run-s test-build-coverage test-serve-coverage"
-
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",
@@ -53,7 +53,7 @@
     "common-tags": "^1.7.2",
     "copy-to-clipboard": "^3.0.8",
     "escape-string-regexp": "^1.0.5",
-    "gecko-profiler-demangle": "^0.1.0",
+    "gecko-profiler-demangle": "^0.2.0",
     "jszip": "^3.1.5",
     "memoize-immutable": "^3.0.0",
     "mixedtuplemap": "^1.0.0",
@@ -119,10 +119,11 @@
     "prettier": "^1.10.2",
     "raw-loader": "^0.5.1",
     "react-test-renderer": "^16.4.2",
+    "react-testing-library": "^5.2.3",
     "rimraf": "^2.6.2",
     "sinon": "^4.3.0",
     "style-loader": "^0.23.0",
-    "webpack": "^4.17.1",
+    "webpack": "^4.26.1",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.7",
     "workerjs": "github:jasonLaster/workerjs"

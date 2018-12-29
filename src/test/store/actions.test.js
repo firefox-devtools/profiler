@@ -4,8 +4,8 @@
 // @flow
 
 import { storeWithProfile } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
-import * as UrlStateSelectors from '../../reducers/url-state';
+import * as ProfileViewSelectors from '../../selectors/profile';
+import * as UrlStateSelectors from '../../selectors/url-state';
 
 import {
   changeCallTreeSearchString,
@@ -13,10 +13,10 @@ import {
   updatePreviewSelection,
   changeImplementationFilter,
   changeSelectedCallNode,
+  changeShowJsTracerSummary,
 } from '../../actions/profile-view';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-
-const { selectedThreadSelectors } = ProfileViewSelectors;
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 describe('selectors/getStackTimingByDepth', function() {
   /**
@@ -430,5 +430,15 @@ describe('actions/changeInvertCallstack', function() {
       expect(selectedCallNodePath).toEqual(['A', 'B']);
       expect(expandedCallNodePaths).toEqual([['A']]);
     });
+  });
+});
+
+describe('actions/changeShowJsTracerSummary', function() {
+  it('can change the view to show a summary', function() {
+    const { profile } = getProfileFromTextSamples(`A`);
+    const { dispatch, getState } = storeWithProfile(profile);
+    expect(UrlStateSelectors.getShowJsTracerSummary(getState())).toBe(false);
+    dispatch(changeShowJsTracerSummary(true));
+    expect(UrlStateSelectors.getShowJsTracerSummary(getState())).toBe(true);
   });
 });

@@ -13,11 +13,11 @@ import {
   changeRightClickedTrack,
 } from '../../actions/profile-view';
 import TrackContextMenu from '../../components/timeline/TrackContextMenu';
-import { getGlobalTracks, getLocalTracks } from '../../reducers/profile-view';
+import { getGlobalTracks, getLocalTracks } from '../../selectors/profile';
 import {
   getHiddenGlobalTracks,
   getHiddenLocalTracks,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import {
   getProfileWithNiceTracks,
   getHumanReadableTracks,
@@ -108,9 +108,11 @@ describe('timeline/TrackContextMenu', function() {
         trackItem,
         getState,
       } = setupGlobalTrack();
-      expect(isolateProcessMainThreadItem.text()).toBe('Only show "Content"');
+      expect(isolateProcessMainThreadItem.text()).toBe(
+        'Only show "Content Process"'
+      );
       expect(isolateProcessItem.text()).toBe('Only show this process');
-      expect(trackItem.text()).toBe('Content');
+      expect(trackItem.text()).toBe('Content Process');
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process]',
         'show [thread GeckoMain tab] SELECTED',
