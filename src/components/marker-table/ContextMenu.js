@@ -16,17 +16,29 @@ import copy from 'copy-to-clipboard';
 
 import type { Marker, IndexIntoMarkers } from '../../types/profile-derived';
 import type { StartEndRange } from '../../types/units';
-import type { PreviewSelection } from '../../types/actions';
+import type {
+  PreviewSelection,
+  ImplementationFilter,
+} from '../../types/actions';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
+import { getImplementationFilter } from '../../selectors/url-state';
+import type { Thread, IndexIntoStackTable } from '../../types/profile';
+import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
+import {
+  convertStackToCallNodePath,
+  getFuncNamesAndOriginsForPath,
+} from '../../profile-logic/profile-data';
 
 type StateProps = {|
   +markers: Marker[],
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
   +selectedMarker: IndexIntoMarkers,
+  +thread: Thread,
+  +implementationFilter: ImplementationFilter,
 |};
 
 type DispatchProps = {|
@@ -81,6 +93,24 @@ class MarkersContextMenu extends PureComponent<Props> {
     });
   };
 
+  _convertStackToString(stack: IndexIntoStackTable): string {
+    const { thread, implementationFilter } = this.props;
+
+    const callNodePath = filterCallNodePathByImplementation(
+      thread,
+      implementationFilter,
+      convertStackToCallNodePath(thread, stack)
+    );
+
+    const funcNamesAndOrigins = getFuncNamesAndOriginsForPath(
+      callNodePath,
+      thread
+    );
+    return funcNamesAndOrigins
+      .map(({ funcName, origin }) => `${funcName} [${origin}]`)
+      .join('\n');
+  }
+
   copyMarkerJSON = () => {
     const { selectedMarker, markers } = this.props;
     copy(JSON.stringify(markers[selectedMarker]));
@@ -91,7 +121,19 @@ class MarkersContextMenu extends PureComponent<Props> {
     copy(markers[selectedMarker].name);
   };
 
+  copyMarkerCause = () => {
+    const { markers, selectedMarker } = this.props;
+    const marker = markers[selectedMarker];
+    if (marker && marker.data && marker.data.cause) {
+      const stack = this._convertStackToString(marker.data.cause.stack);
+      copy(stack);
+    }
+  };
+
   render() {
+    const { markers, selectedMarker } = this.props;
+    const marker = markers[selectedMarker];
+
     return (
       <ContextMenu id="MarkersContextMenu">
         <MenuItem onClick={this.setStartRange}>
@@ -102,6 +144,9 @@ class MarkersContextMenu extends PureComponent<Props> {
         </MenuItem>
         <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
         <MenuItem onClick={this.copyMarkerName}>Copy marker name</MenuItem>
+        {marker && marker.data && marker.data.cause ? (
+          <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
+        ) : null}
       </ContextMenu>
     );
   }
@@ -112,6 +157,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     markers: selectedThreadSelectors.getPreviewFilteredMarkers(state),
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
+    thread: selectedThreadSelectors.getThread(state),
+    implementationFilter: getImplementationFilter(state),
     selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
   }),
   mapDispatchToProps: { updatePreviewSelection },
