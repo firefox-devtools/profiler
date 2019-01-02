@@ -143,7 +143,8 @@ class LoadFromUrl extends React.PureComponent<
     this.setState({ isLoadButtonPressed: true, value: event.target.value });
   };
 
-  _upload = () => {
+  _upload = event => {
+    event.preventDefault();
     if (this.state.value) {
       this.props.triggerLoadingFromUrl(this.state.value);
     }
