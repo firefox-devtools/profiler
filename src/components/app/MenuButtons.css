@@ -83,14 +83,6 @@
   color: white;
 }
 
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadingButton) > .menuButtonsUploadingButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .menuButtonsUploadErrorButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) > .menuButtonsSecondaryShareButton {
-  pointer-events: none;
-}
-
 .menuButtonsShareButtonButton,
 .menuButtonsUploadingButtonInner,
 .menuButtonsPermalinkButtonButton,
@@ -99,20 +91,30 @@
   transition: transform 200ms ease-in-out, margin-left 200ms ease-in-out;
 }
 
+/* CSS transition animation */
+.animateDown-enter {
+  transform: translateY(-24px);
+}
+.animateDown-enter.animateDown-enter-active {
+  transform: translateY(0);
+  transition: transform 200ms ease-in-out;
+}
+/* move 24px up */
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton > .buttonWithPanelButtonWrapper > .menuButtonsShareButtonButton,
-.menuButtonsCompositeButtonContainer.currentButtonIsPermalinkButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
-.menuButtonsCompositeButtonContainer.currentButtonIsUploadErrorButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) .menuButtonsSecondaryShareButtonButton {
   transform: translateY(-24px);
 }
 
-.menuButtonsCompositeButtonContainer.currentButtonIsShareButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
+/* move 24px down */
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton > .buttonWithPanelButtonWrapper > .menuButtonsPermalinkButtonButton,
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .menuButtonsUploadErrorButton > .buttonWithPanelButtonWrapper > .menuButtonsUploadErrorButtonButton {
   transform: translateY(24px);
 }
 
-.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsPermalinkButton {
+.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsPermalinkButton, 
+.menuButtonsShareButtonButton, 
+.menuButtonsUploadErrorButtonButton,
+.menuButtonsUploadingButtonInner {
   width: 112px;
 }
 
