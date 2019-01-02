@@ -9,7 +9,10 @@ import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/img/png/gecko-profiler-screenshot-2018-01-18.png';
 import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2017-09-08.jpg';
-import { retrieveProfileFromFile } from '../../actions/receive-profile';
+import {
+  retrieveProfileFromFile,
+  triggerLoadingFromUrl,
+} from '../../actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import type {
   ExplicitConnectOptions,
@@ -49,36 +52,124 @@ class InstallButton extends React.PureComponent<InstallButtonProps> {
   }
 }
 
-type UploadButtonProps = {
+type ActionButtonsProps = {
   retrieveProfileFromFile: typeof retrieveProfileFromFile,
+  triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
 };
 
-class UploadButton extends React.PureComponent<UploadButtonProps> {
-  _input: HTMLInputElement | null;
+type ActionButtonsState = {
+  isLoadFromUrlPressed: boolean,
+};
 
-  _takeInputRef = input => {
-    this._input = input;
+type LoadFromUrlProps = {
+  triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+};
+
+type LoadFromUrlState = {
+  isLoadButtonPressed: boolean,
+  value: string,
+};
+
+class ActionButtons extends React.PureComponent<
+  ActionButtonsProps,
+  ActionButtonsState
+> {
+  _fileInput: HTMLInputElement | null;
+
+  state = {
+    isLoadFromUrlPressed: false,
   };
 
-  _upload = () => {
-    if (this._input) {
-      this.props.retrieveProfileFromFile(this._input.files[0]);
+  _takeInputRef = input => {
+    this._fileInput = input;
+  };
+
+  _uploadProfileFromFile = () => {
+    if (this._fileInput) {
+      this.props.retrieveProfileFromFile(this._fileInput.files[0]);
+    }
+  };
+
+  _loadFromUrlPressed = (event: SyntheticEvent<>) => {
+    event.preventDefault();
+    this.setState(prevState => {
+      return { isLoadFromUrlPressed: !prevState.isLoadFromUrlPressed };
+    });
+  };
+
+  render() {
+    return (
+      <div className="homeSectionLoadProfile">
+        <div className="homeSectionActionButtons">
+          <label className="homeSectionButton">
+            <input
+              className="homeSectionUploadFromFileInput"
+              type="file"
+              ref={this._takeInputRef}
+              onChange={this._uploadProfileFromFile}
+            />
+            Load a profile from file
+          </label>
+          <button
+            type="button"
+            className={classNames({
+              homeSectionButton: true,
+              homeSectionButtonPressed: this.state.isLoadFromUrlPressed,
+            })}
+            onClick={this._loadFromUrlPressed}
+          >
+            Load a profile from an URL
+          </button>
+        </div>
+        {this.state.isLoadFromUrlPressed ? (
+          <LoadFromUrl {...this.props} />
+        ) : null}
+      </div>
+    );
+  }
+}
+
+class LoadFromUrl extends React.PureComponent<
+  LoadFromUrlProps,
+  LoadFromUrlState
+> {
+  state = {
+    isLoadButtonPressed: false,
+    value: '',
+  };
+
+  handleChange = (event: SyntheticEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    this.setState({
+      isLoadButtonPressed: true,
+      value: event.currentTarget.value,
+    });
+  };
+
+  _upload = (event: SyntheticEvent<>) => {
+    event.preventDefault();
+    if (this.state.value) {
+      this.props.triggerLoadingFromUrl(this.state.value);
     }
   };
 
   render() {
     return (
-      <div>
-        <label className="homeSectionButton">
-          <input
-            className="homeSectionUploadInput"
-            type="file"
-            ref={this._takeInputRef}
-            onChange={this._upload}
-          />
-          Select a profile to open
-        </label>
-      </div>
+      <form className="homeSectionLoadFromUrl" onSubmit={this._upload}>
+        <input
+          className="homeSectionLoadFromUrlInput"
+          type="url"
+          placeholder="https://"
+          value={this.state.value}
+          onChange={this.handleChange}
+        />
+        <input
+          type="submit"
+          className="homeSectionButton homeSectionLoadFromUrlSubmitButton"
+          value="Load"
+          disabled={!this.state.isLoadButtonPressed}
+        />
+      </form>
     );
   }
 }
@@ -120,6 +211,7 @@ type OwnHomeProps = {|
 
 type DispatchHomeProps = {|
   +retrieveProfileFromFile: typeof retrieveProfileFromFile,
+  +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
 |};
 
 type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
@@ -220,11 +312,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               Install the Gecko Profiler Add-on to start recording a performance
               profile in Firefox, then analyze it and share it with perf.html.
             </p>
-            <p>
-              You can also analyze a local profile by either dragging and
-              dropping it here or selecting it using the button below.
-            </p>
-            <UploadButton {...this.props} />
+            <ActionButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -253,11 +341,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <kbd>Capture Profile</kbd> to load the data into perf.html.
             </p>
             {this._renderShortcuts()}
-            <p>
-              You can also analyze a local profile by either dragging and
-              dropping it here or selecting it using the button below.
-            </p>
-            <UploadButton {...this.props} />
+            <ActionButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -290,11 +374,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               to load the data into perf.html.
             </p>
             {this._renderShortcuts()}
-            <p>
-              You can also analyze a local profile by either dragging and
-              dropping it here or selecting it using the button below.
-            </p>
-            <UploadButton {...this.props} />
+            <ActionButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -320,12 +400,9 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <p>
               Recording performance profiles requires{' '}
               <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
-              However, existing profiles can be viewed in any modern browser. To
-              view a profile, either follow a link to a public profile, drag a
-              saved local profile onto this screen or select it using the button
-              below.
+              However, existing profiles can be viewed in any modern browser.
             </p>
-            <UploadButton {...this.props} />
+            <ActionButtons {...this.props} />
           </div>
         </div>
       </InstructionTransition>
@@ -428,7 +505,7 @@ function _isFirefox(): boolean {
 }
 
 const options: ExplicitConnectOptions<OwnHomeProps, {||}, DispatchHomeProps> = {
-  mapDispatchToProps: { retrieveProfileFromFile },
+  mapDispatchToProps: { retrieveProfileFromFile, triggerLoadingFromUrl },
   component: Home,
 };
 export default explicitConnect(options);

@@ -106,19 +106,32 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             >
               Firefox
             </a>
-            . However, existing profiles can be viewed in any modern browser. To view a profile, either follow a link to a public profile, drag a saved local profile onto this screen or select it using the button below.
+            . However, existing profiles can be viewed in any modern browser.
           </p>
-          <div>
-            <label
-              className="homeSectionButton"
+          <div
+            className="homeSectionLoadProfile"
+          >
+            <div
+              className="homeSectionActionButtons"
             >
-              <input
-                className="homeSectionUploadInput"
-                onChange={[Function]}
-                type="file"
-              />
-              Select a profile to open
-            </label>
+              <label
+                className="homeSectionButton"
+              >
+                <input
+                  className="homeSectionUploadFromFileInput"
+                  onChange={[Function]}
+                  type="file"
+                />
+                Load a profile from file
+              </label>
+              <button
+                className="homeSectionButton"
+                onClick={[Function]}
+                type="button"
+              >
+                Load a profile from an URL
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -246,20 +259,30 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           <p>
             Install the Gecko Profiler Add-on to start recording a performance profile in Firefox, then analyze it and share it with perf.html.
           </p>
-          <p>
-            You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
-          </p>
-          <div>
-            <label
-              className="homeSectionButton"
+          <div
+            className="homeSectionLoadProfile"
+          >
+            <div
+              className="homeSectionActionButtons"
             >
-              <input
-                className="homeSectionUploadInput"
-                onChange={[Function]}
-                type="file"
-              />
-              Select a profile to open
-            </label>
+              <label
+                className="homeSectionButton"
+              >
+                <input
+                  className="homeSectionUploadFromFileInput"
+                  onChange={[Function]}
+                  type="file"
+                />
+                Load a profile from file
+              </label>
+              <button
+                className="homeSectionButton"
+                onClick={[Function]}
+                type="button"
+              >
+                Load a profile from an URL
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -420,20 +443,30 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
               </p>
             </div>
           </p>
-          <p>
-            You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
-          </p>
-          <div>
-            <label
-              className="homeSectionButton"
+          <div
+            className="homeSectionLoadProfile"
+          >
+            <div
+              className="homeSectionActionButtons"
             >
-              <input
-                className="homeSectionUploadInput"
-                onChange={[Function]}
-                type="file"
-              />
-              Select a profile to open
-            </label>
+              <label
+                className="homeSectionButton"
+              >
+                <input
+                  className="homeSectionUploadFromFileInput"
+                  onChange={[Function]}
+                  type="file"
+                />
+                Load a profile from file
+              </label>
+              <button
+                className="homeSectionButton"
+                onClick={[Function]}
+                type="button"
+              >
+                Load a profile from an URL
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -579,20 +612,30 @@ exports[`app/Home renders the usage instructions for pages with the extension in
               </p>
             </div>
           </p>
-          <p>
-            You can also analyze a local profile by either dragging and dropping it here or selecting it using the button below.
-          </p>
-          <div>
-            <label
-              className="homeSectionButton"
+          <div
+            className="homeSectionLoadProfile"
+          >
+            <div
+              className="homeSectionActionButtons"
             >
-              <input
-                className="homeSectionUploadInput"
-                onChange={[Function]}
-                type="file"
-              />
-              Select a profile to open
-            </label>
+              <label
+                className="homeSectionButton"
+              >
+                <input
+                  className="homeSectionUploadFromFileInput"
+                  onChange={[Function]}
+                  type="file"
+                />
+                Load a profile from file
+              </label>
+              <button
+                className="homeSectionButton"
+                onClick={[Function]}
+                type="button"
+              >
+                Load a profile from an URL
+              </button>
+            </div>
           </div>
         </div>
       </div>
