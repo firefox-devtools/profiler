@@ -96,7 +96,11 @@
 .menuButtonsPermalinkButtonButton,
 .menuButtonsUploadErrorButtonButton,
 .menuButtonsSecondaryShareButtonButton {
-  transition: transform 200ms ease-in-out, margin-left 200ms ease-in-out;
+  transition: transform 500ms ease-in-out, margin-left 200ms ease-in-out;
+}
+
+.menuButtonsShareButtonButton {
+  width: 110px;
 }
 
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton > .buttonWithPanelButtonWrapper > .menuButtonsShareButtonButton,
@@ -110,6 +114,10 @@
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton > .buttonWithPanelButtonWrapper > .menuButtonsPermalinkButtonButton,
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .menuButtonsUploadErrorButton > .buttonWithPanelButtonWrapper > .menuButtonsUploadErrorButtonButton {
   transform: translateY(24px);
+}
+
+.menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton > .buttonWithPanelButtonWrapper > .menuButtonsPermalinkButtonButton {
+  opacity: 0;
 }
 
 .currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsPermalinkButton {
