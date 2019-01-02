@@ -153,6 +153,7 @@
   display: flex;
   justify-content: space-between;
   position: absolute;
+  margin: 0 10px 0 0;
 }
 
 .homeSectionActionButtons .homeSectionButton ,
