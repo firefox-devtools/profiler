@@ -90,7 +90,7 @@ class ActionButtons extends React.PureComponent<
     }
   };
 
-  _loadFromUrlPressed = (event: Event) => {
+  _loadFromUrlPressed = (event: SyntheticEvent<>) => {
     event.preventDefault();
     this.setState(prevState => {
       return { isLoadFromUrlPressed: !prevState.isLoadFromUrlPressed };
@@ -138,12 +138,15 @@ class LoadFromUrl extends React.PureComponent<
     value: '',
   };
 
-  handleChange = event => {
+  handleChange = (event: SyntheticEvent<HTMLInputElement>) => {
     event.preventDefault();
-    this.setState({ isLoadButtonPressed: true, value: event.target.value });
+    this.setState({
+      isLoadButtonPressed: true,
+      value: event.currentTarget.value,
+    });
   };
 
-  _upload = event => {
+  _upload = (event: SyntheticEvent<>) => {
     event.preventDefault();
     if (this.state.value) {
       this.props.triggerLoadingFromUrl(this.state.value);
