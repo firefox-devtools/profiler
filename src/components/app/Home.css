@@ -153,7 +153,6 @@
   display: flex;
   justify-content: space-between;
   position: absolute;
-  margin: 0 10px 0 0;
 }
 
 .homeSectionActionButtons .homeSectionButton ,
@@ -242,6 +241,7 @@
 
 .homeSectionLoadFromUrlInput {
   flex: auto;
+  margin: 0 10px 0 0;
   padding: 8px 20px;
   border: 1px solid #ccc;
   border-radius: 4px;
