@@ -96,7 +96,7 @@
 .menuButtonsPermalinkButtonButton,
 .menuButtonsUploadErrorButtonButton,
 .menuButtonsSecondaryShareButtonButton {
-  transition: transform 500ms ease-in-out, margin-left 200ms ease-in-out;
+  transition: transform 200ms ease-in-out, margin-left 200ms ease-in-out;
 }
 
 .menuButtonsShareButtonButton {
