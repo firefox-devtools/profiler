@@ -220,7 +220,8 @@ type ReceiveProfileAction =
   | {| +type: 'START_SYMBOLICATING' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_ADDON' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_STORE' |}
-  | {| +type: 'WAITING_FOR_PROFILE_FROM_URL' |};
+  | {| +type: 'WAITING_FOR_PROFILE_FROM_URL' |}
+  | {| +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string |};
 
 type StackChartAction =
   | {| +type: 'CHANGE_STACK_CHART_COLOR_STRATEGY', +getCategory: GetCategory |}
