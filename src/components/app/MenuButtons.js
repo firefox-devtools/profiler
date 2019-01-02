@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import {
@@ -525,7 +526,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
       : 'Share with URLs';
 
     return (
-      <div
+      <TransitionGroup
         className={classNames('menuButtonsCompositeButtonContainer', {
           currentButtonIsShareButton: state === 'local',
           currentButtonIsUploadingButton: state === 'uploading',
@@ -597,17 +598,19 @@ class ProfileSharingCompositeButton extends React.PureComponent<
         ) : null}
 
         {isSecondaryShareButtonVisible ? (
-          <ProfileSharingButton
-            buttonClassName="menuButtonsSecondaryShareButton"
-            shareLabel={secondaryShareLabel}
-            symbolicationStatus={symbolicationStatus}
-            okButtonClickEvent={this._attemptToSecondaryShare}
-            panelOpenEvent={this._onSecondarySharePanelOpen}
-            shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
-            checkboxDisabled={true}
-          />
+          <CSSTransition classNames="animateDown" timeout={200}>
+            <ProfileSharingButton
+              buttonClassName="menuButtonsSecondaryShareButton"
+              shareLabel={secondaryShareLabel}
+              symbolicationStatus={symbolicationStatus}
+              okButtonClickEvent={this._attemptToSecondaryShare}
+              panelOpenEvent={this._onSecondarySharePanelOpen}
+              shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
+              checkboxDisabled={true}
+            />
+          </CSSTransition>
         ) : null}
-      </div>
+      </TransitionGroup>
     );
   }
 }

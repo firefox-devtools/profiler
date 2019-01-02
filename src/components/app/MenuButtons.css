@@ -103,6 +103,14 @@
   width: 110px;
 }
 
+.animateDown-enter {
+  transform: translateY(-24px);
+}
+.animateDown-enter.animateDown-enter-active {
+  transform: translateY(0);
+  transition: transform 200ms ease-in-out;
+}
+
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton > .buttonWithPanelButtonWrapper > .menuButtonsShareButtonButton,
 .menuButtonsCompositeButtonContainer.currentButtonIsPermalinkButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
 .menuButtonsCompositeButtonContainer.currentButtonIsUploadErrorButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
