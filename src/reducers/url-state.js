@@ -23,6 +23,8 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
       return 'from-file';
     case 'PROFILE_PUBLISHED':
       return 'public';
+    case 'TRIGGER_LOADING_FROM_URL':
+      return 'from-url';
     default:
       return state;
   }
@@ -39,6 +41,8 @@ const hash: Reducer<string> = (state = '', action) => {
 
 const profileUrl: Reducer<string> = (state = '', action) => {
   switch (action.type) {
+    case 'TRIGGER_LOADING_FROM_URL':
+      return action.profileUrl;
     default:
       return state;
   }
