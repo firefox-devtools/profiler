@@ -21,7 +21,7 @@ import {
   _fetchProfile,
 } from '../../actions/receive-profile';
 
-import getGeckoProfile from '../fixtures/profiles/gecko-profile';
+import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getEmptyProfile } from '../../profile-logic/profile-data';
 import JSZip from 'jszip';
 import { serializeProfile } from '../../profile-logic/process-profile';
@@ -219,7 +219,7 @@ describe('actions/receive-profile', function() {
       clock = sinon.useFakeTimers();
 
       geckoProfiler = {
-        getProfile: () => Promise.resolve(getGeckoProfile()),
+        getProfile: () => Promise.resolve(createGeckoProfile()),
         getSymbolTable: () =>
           Promise.reject(new Error('No symbol tables available')),
       };
@@ -302,7 +302,7 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'appliciation/json',
       },
-      json: () => Promise.resolve(getGeckoProfile()),
+      json: () => Promise.resolve(createGeckoProfile()),
     };
 
     beforeEach(function() {
@@ -417,7 +417,7 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () => Promise.resolve(getGeckoProfile()),
+      json: () => Promise.resolve(createGeckoProfile()),
     };
 
     beforeEach(function() {

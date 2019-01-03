@@ -19,7 +19,7 @@ import {
   CURRENT_URL_VERSION,
 } from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
-import getGeckoProfile from './fixtures/profiles/gecko-profile';
+import { createGeckoProfile } from './fixtures/profiles/gecko-profile';
 import { processProfile } from '../profile-logic/process-profile';
 import { viewProfile } from '../actions/receive-profile';
 import type { Profile } from '../types/profile';
@@ -94,7 +94,7 @@ describe('selectedThread', function() {
   }
 
   it('selects the right thread when receiving a profile from web', function() {
-    const profile: Profile = processProfile(getGeckoProfile());
+    const profile: Profile = processProfile(createGeckoProfile());
 
     const store = storeWithThread(1);
     store.dispatch(viewProfile(profile));
@@ -103,7 +103,7 @@ describe('selectedThread', function() {
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
-    const profile: Profile = processProfile(getGeckoProfile());
+    const profile: Profile = processProfile(createGeckoProfile());
 
     const store = storeWithThread(100);
     store.dispatch(viewProfile(profile));

@@ -5,7 +5,7 @@
 
 import createStore from '../../app-logic/create-store';
 import { viewProfile } from '../../actions/receive-profile';
-import exampleProfile from './profiles/timings-with-js';
+import { createGeckoProfileWithJsTimings } from './profiles/gecko-profile';
 import { processProfile } from '../../profile-logic/process-profile';
 import { getProfileFromTextSamples } from './profiles/make-profile';
 
@@ -17,7 +17,7 @@ export function blankStore() {
 }
 
 export function storeWithProfile(
-  profile: Profile = processProfile(exampleProfile())
+  profile: Profile = processProfile(createGeckoProfileWithJsTimings())
 ): Store {
   const store = createStore();
   store.dispatch(viewProfile(profile));

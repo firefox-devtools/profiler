@@ -24,8 +24,10 @@ import {
   getTreeOrderComparator,
   getSamplesSelectedStates,
 } from '../../profile-logic/profile-data';
-import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
-import profileWithJS from '.././fixtures/profiles/timings-with-js';
+import {
+  createGeckoProfile,
+  createGeckoProfileWithJsTimings,
+} from '.././fixtures/profiles/gecko-profile';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { sortDataTable } from '../../utils/data-table-utils';
@@ -115,7 +117,7 @@ describe('data-table-utils', function() {
 
 describe('process-profile', function() {
   describe('processProfile', function() {
-    const profile = processProfile(getGeckoProfile());
+    const profile = processProfile(createGeckoProfile());
     it('should have three threads', function() {
       expect(profile.threads.length).toEqual(3);
     });
@@ -276,19 +278,19 @@ describe('process-profile', function() {
 
   describe('JS tracer', function() {
     it('does not have JS tracer information by default', function() {
-      const profile = processProfile(getGeckoProfile());
+      const profile = processProfile(createGeckoProfile());
       expect(profile.threads[0].jsTracer).toBe(undefined);
     });
 
     it('processes JS tracer and offsets the timestamps', function() {
-      const geckoProfile = getGeckoProfile();
+      const geckoProfile = createGeckoProfile();
       const timestampOffsetMs = 33;
       const timestampOffsetMicro = timestampOffsetMs * 1000;
 
       {
         // Build the custom thread with JS tracer information. The startTime is offset
         // from the parent process.
-        const geckoSubprocess = getGeckoProfile();
+        const geckoSubprocess = createGeckoProfile();
         const childProcessThread = geckoSubprocess.threads[0];
         const stringTable = new UniqueStringArray();
         const jsTracer = getJsTracerTable(stringTable, [
@@ -339,7 +341,7 @@ describe('process-profile', function() {
         memory: null,
         ticks: null,
         allocations: null,
-        profile: getGeckoProfile(),
+        profile: createGeckoProfile(),
         configuration: null,
         systemHost: null,
         systemClient: null,
@@ -351,7 +353,7 @@ describe('process-profile', function() {
   });
   describe('extensions metadata', function() {
     it('should be processed correctly', function() {
-      const geckoProfile = getGeckoProfile();
+      const geckoProfile = createGeckoProfile();
       geckoProfile.meta.extensions = {
         schema: {
           id: 0,
@@ -384,7 +386,7 @@ describe('process-profile', function() {
       });
     });
     it('should be handled correctly if missing', function() {
-      const geckoProfile = getGeckoProfile();
+      const geckoProfile = createGeckoProfile();
       delete geckoProfile.meta.extensions;
 
       const profile = processProfile(geckoProfile);
@@ -400,7 +402,7 @@ describe('process-profile', function() {
 
 describe('profile-data', function() {
   describe('createCallNodeTableAndFixupSamples', function() {
-    const profile = processProfile(getGeckoProfile());
+    const profile = processProfile(createGeckoProfile());
     const defaultCategory = profile.meta.categories.findIndex(
       c => c.name === 'Other'
     );
@@ -582,7 +584,7 @@ describe('symbolication', function() {
     let symbolicatedProfile = null;
 
     beforeAll(function() {
-      unsymbolicatedProfile = processProfile(getGeckoProfile());
+      unsymbolicatedProfile = processProfile(createGeckoProfile());
       const symbolTable = new Map();
       symbolTable.set(0, 'first symbol');
       symbolTable.set(0xf00, 'second symbol');
@@ -652,7 +654,7 @@ describe('symbolication', function() {
 });
 
 describe('color-categories', function() {
-  const profile = processProfile(getGeckoProfile());
+  const profile = processProfile(createGeckoProfile());
   const [thread] = profile.threads;
   it('calculates the category for each frame', function() {
     const categories = thread.samples.stack.map(stackIndex => {
@@ -675,7 +677,7 @@ describe('color-categories', function() {
 });
 
 describe('filter-by-implementation', function() {
-  const profile = processProfile(profileWithJS());
+  const profile = processProfile(createGeckoProfileWithJsTimings());
   const defaultCategory = profile.meta.categories.findIndex(
     c => c.name === 'Other'
   );
