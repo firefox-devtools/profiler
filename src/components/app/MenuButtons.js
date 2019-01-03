@@ -537,68 +537,74 @@ class ProfileSharingCompositeButton extends React.PureComponent<
       >
         {/* display only the button that is visible */}
         {state === 'local' ? (
-          <ProfileSharingButton
-            buttonClassName="menuButtonsShareButton"
-            shareLabel={shareLabel}
-            symbolicationStatus={symbolicationStatus}
-            okButtonClickEvent={this._attemptToShare}
-            shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
-            shareNetworkUrlCheckboxOnChange={this._onChangeShareNetworkUrls}
-            checkboxDisabled={false}
-          />
+          <CSSTransition classNames="animateDown" timeout={200} in={true}>
+            <ProfileSharingButton
+              buttonClassName="menuButtonsShareButton"
+              shareLabel={shareLabel}
+              symbolicationStatus={symbolicationStatus}
+              okButtonClickEvent={this._attemptToShare}
+              shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
+              shareNetworkUrlCheckboxOnChange={this._onChangeShareNetworkUrls}
+              checkboxDisabled={false}
+            />
+          </CSSTransition>
         ) : null}
 
         {state === 'uploading' || state === 'public' ? (
-          <React.Fragment>
-            {state === 'uploading' ? (
-              <UploadingStatus progress={uploadProgress} />
-            ) : null}
+          <CSSTransition classNames="animateDown" timeout={0} in={true}>
+            <React.Fragment>
+              {state === 'uploading' ? (
+                <UploadingStatus progress={uploadProgress} />
+              ) : null}
 
-            <ButtonWithPanel
-              className="menuButtonsPermalinkButton"
-              ref={this._takePermalinkButtonRef}
-              label="Permalink"
-              panel={
-                <ArrowPanel
-                  className="menuButtonsPermalinkPanel"
-                  onOpen={this._onPermalinkPanelOpen}
-                  onClose={this._onPermalinkPanelClose}
-                >
-                  <input
-                    type="text"
-                    className="menuButtonsPermalinkTextField"
-                    value={shortUrl}
-                    readOnly="readOnly"
-                    ref={this._takePermalinkTextFieldRef}
-                  />
-                </ArrowPanel>
-              }
-            />
-          </React.Fragment>
+              <ButtonWithPanel
+                className="menuButtonsPermalinkButton"
+                ref={this._takePermalinkButtonRef}
+                label="Permalink"
+                panel={
+                  <ArrowPanel
+                    className="menuButtonsPermalinkPanel"
+                    onOpen={this._onPermalinkPanelOpen}
+                    onClose={this._onPermalinkPanelClose}
+                  >
+                    <input
+                      type="text"
+                      className="menuButtonsPermalinkTextField"
+                      value={shortUrl}
+                      readOnly="readOnly"
+                      ref={this._takePermalinkTextFieldRef}
+                    />
+                  </ArrowPanel>
+                }
+              />
+            </React.Fragment>
+          </CSSTransition>
         ) : null}
 
         {state === 'error' ? (
-          <ButtonWithPanel
-            className="menuButtonsUploadErrorButton"
-            ref={this._takeUploadErrorButtonRef}
-            label="Upload Error"
-            panel={
-              <ArrowPanel
-                className="menuButtonsUploadErrorPanel"
-                title="Upload Error"
-                okButtonText="Try Again"
-                cancelButtonText="Cancel"
-                onOkButtonClick={this._attemptToShare}
-              >
-                <p>An error occurred during upload:</p>
-                <pre>{error && error.toString()}</pre>
-              </ArrowPanel>
-            }
-          />
+          <CSSTransition classNames="animateDown" timeout={0} in={true}>
+            <ButtonWithPanel
+              className="menuButtonsUploadErrorButton"
+              ref={this._takeUploadErrorButtonRef}
+              label="Upload Error"
+              panel={
+                <ArrowPanel
+                  className="menuButtonsUploadErrorPanel"
+                  title="Upload Error"
+                  okButtonText="Try Again"
+                  cancelButtonText="Cancel"
+                  onOkButtonClick={this._attemptToShare}
+                >
+                  <p>An error occurred during upload:</p>
+                  <pre>{error && error.toString()}</pre>
+                </ArrowPanel>
+              }
+            />
+          </CSSTransition>
         ) : null}
 
         {isSecondaryShareButtonVisible ? (
-          <CSSTransition classNames="animateDown" timeout={200}>
+          <CSSTransition classNames="animateDown" timeout={200} in={true}>
             <ProfileSharingButton
               buttonClassName="menuButtonsSecondaryShareButton"
               shareLabel={secondaryShareLabel}
