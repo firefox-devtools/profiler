@@ -13,9 +13,11 @@ import { UniqueStringArray } from '../../../utils/unique-string-array';
 import type {
   Profile,
   Thread,
+  ThreadIndex,
   IndexIntoCategoryList,
   CategoryList,
   JsTracerTable,
+  Counter,
 } from '../../../types/profile';
 import type { MarkerPayload, NetworkPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
@@ -579,4 +581,32 @@ export function getProfileWithJsTracerEvents(
     getThreadWithJsTracerEvents(events)
   );
   return profile;
+}
+
+export function getCounter(
+  thread: Thread,
+  mainThreadIndex: ThreadIndex,
+  countRange: number
+): Counter {
+  const counter: Counter = {
+    name: 'My Counter',
+    category: 'My Category',
+    description: 'My Description',
+    pid: thread.pid,
+    mainThreadIndex,
+    sampleGroups: {
+      id: 0,
+      samples: {
+        time: thread.samples.time.slice(),
+        // Create some arbitrary values for the number.
+        number: thread.samples.time.map((_, i) =>
+          Math.floor(50 * Math.sin(i) + 50)
+        ),
+        // Create some arbitrary (positive integer) values for the count.
+        count: thread.samples.time.map((_, i) => Math.sin(i) * countRange),
+        length: thread.samples.length,
+      },
+    },
+  };
+  return counter;
 }

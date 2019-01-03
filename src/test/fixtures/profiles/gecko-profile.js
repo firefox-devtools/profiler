@@ -581,8 +581,9 @@ export function createGeckoCounters(thread: GeckoThread): GeckoCounter {
     // Go through all the thread samples and create a corresponding counter entry.
     const time = thread.samples.data[i][1];
     // Create some arbitrary data.
-    const number = Math.sin(i / 50);
-    const count = Math.sin(i / 100);
+    const number = Math.sin(i);
+    // Counts are integers, make them range as int values 0 to 100.
+    const count = Math.floor(50 * Math.sin(i) + 50);
     geckoCounter.sample_groups.samples.data.push([time, number, count]);
   }
   return geckoCounter;

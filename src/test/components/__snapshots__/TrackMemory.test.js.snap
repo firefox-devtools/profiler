@@ -1,0 +1,148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TrackMemory draws a dot that matches the snapshot 1`] = `
+<div
+  className="timelineTrackMemoryDot"
+  style={
+    Object {
+      "left": 20,
+      "top": 2.6975632502354685,
+    }
+  }
+/>
+`;
+
+exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
+<div
+  className="timelineTrackMemoryTooltip"
+>
+  <div
+    className="timelineTrackMemoryTooltipLine"
+  >
+    <span
+      className="timelineTrackMemoryTooltipNumber"
+    >
+      0mb
+    </span>
+     current relative memory
+  </div>
+  <div
+    className="timelineTrackMemoryTooltipLine"
+  >
+    <span
+      className="timelineTrackMemoryTooltipNumber"
+    >
+      0mb
+    </span>
+     total change in memory in range
+  </div>
+</div>
+`;
+
+exports[`TrackMemory matches the 2d canvas draw snapshot 1`] = `
+Array [
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    25,
+  ],
+  Array [
+    "set lineWidth",
+    2,
+  ],
+  Array [
+    "set strokeStyle",
+    "#ff9400",
+  ],
+  Array [
+    "set fillStyle",
+    "#ff940088",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "moveTo",
+    0,
+    22.809689638253786,
+  ],
+  Array [
+    "lineTo",
+    10,
+    13.109212153841828,
+  ],
+  Array [
+    "lineTo",
+    20,
+    2.6268314481423225,
+  ],
+  Array [
+    "lineTo",
+    30,
+    1,
+  ],
+  Array [
+    "lineTo",
+    40,
+    9.724419140319302,
+  ],
+  Array [
+    "lineTo",
+    50,
+    20.778898146210928,
+  ],
+  Array [
+    "lineTo",
+    60,
+    24,
+  ],
+  Array [
+    "lineTo",
+    70,
+    16.42625851218512,
+  ],
+  Array [
+    "lineTo",
+    71,
+    16.42625851218512,
+  ],
+  Array [
+    "stroke",
+  ],
+  Array [
+    "lineTo",
+    71,
+    25,
+  ],
+  Array [
+    "lineTo",
+    1,
+    25,
+  ],
+  Array [
+    "fill",
+  ],
+]
+`;
+
+exports[`TrackMemory matches the component snapshot 1`] = `
+<div
+  className="timelineTrackMemory"
+  onMouseLeave={[Function]}
+  onMouseMove={[Function]}
+  style={
+    Object {
+      "height": 25,
+    }
+  }
+>
+  <canvas
+    className="timelineTrackMemoryCanvas"
+  />
+  <div
+    className="timelineEmptyThreadIndicator"
+  />
+</div>
+`;
