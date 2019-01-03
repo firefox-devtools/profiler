@@ -83,14 +83,6 @@
   color: white;
 }
 
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadingButton) > .menuButtonsUploadingButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .menuButtonsUploadErrorButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) > .menuButtonsSecondaryShareButton {
-  pointer-events: none;
-}
-
 .menuButtonsShareButtonButton,
 .menuButtonsUploadingButtonInner,
 .menuButtonsPermalinkButtonButton,
@@ -107,12 +99,13 @@
   transform: translateY(0);
   transition: transform 200ms ease-in-out;
 }
-
+/* move 24px up */
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton > .buttonWithPanelButtonWrapper > .menuButtonsShareButtonButton,
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) .menuButtonsSecondaryShareButtonButton {
   transform: translateY(-24px);
 }
 
+/* move 24px down */
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton > .buttonWithPanelButtonWrapper > .menuButtonsPermalinkButtonButton,
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .menuButtonsUploadErrorButton > .buttonWithPanelButtonWrapper > .menuButtonsUploadErrorButtonButton {
   transform: translateY(24px);
