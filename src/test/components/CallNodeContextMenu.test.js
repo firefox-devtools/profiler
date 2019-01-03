@@ -6,7 +6,7 @@
 import * as React from 'react';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { mount } from 'enzyme';
 import { changeSelectedCallNode } from '../../actions/profile-view';
 import { MenuItem } from 'react-contextmenu';

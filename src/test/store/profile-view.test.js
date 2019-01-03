@@ -13,7 +13,7 @@ import {
   getNetworkTrackProfile,
   getScreenshotTrackProfile,
   getNetworkMarker,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getEmptyProfile } from '../../profile-logic/profile-data';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';

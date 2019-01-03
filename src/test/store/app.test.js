@@ -15,7 +15,7 @@ import {
   getProfileWithMarkers,
   getNetworkMarker,
   getProfileWithJsTracerEvents,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 
 import * as AppActions from '../../actions/app';
 

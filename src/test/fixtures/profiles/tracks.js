@@ -5,7 +5,7 @@
 
 import * as profileViewSelectors from '../../../selectors/profile';
 import * as urlStateReducers from '../../../selectors/url-state';
-import { getProfileFromTextSamples } from './make-profile';
+import { getProfileFromTextSamples } from './processed-profile';
 import { oneLine } from 'common-tags';
 
 import type { Profile } from '../../../types/profile';

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import exampleSymbolTable from '../fixtures/example-symbol-table';
 import { SymbolStore } from '../../profile-logic/symbol-store.js';
 import * as ProfileViewSelectors from '../../selectors/profile';

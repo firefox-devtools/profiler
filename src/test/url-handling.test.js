@@ -29,7 +29,7 @@ import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,
 } from './fixtures/profiles/tracks';
-import { getProfileFromTextSamples } from './fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 
 function _getStoreWithURL(

@@ -14,7 +14,7 @@ import {
   changeInvertCallstack,
 } from '../../actions/profile-view';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 import type { CallNodePath } from '../../types/profile-derived';
 

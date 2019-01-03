@@ -6,7 +6,7 @@ import {
   getScreenshotTrackProfile,
   getEmptyThread,
   getNetworkTrackProfile,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';

@@ -8,7 +8,7 @@ import Markers from '../../components/marker-table';
 import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('MarkerTable', function() {

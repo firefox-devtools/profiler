@@ -10,7 +10,7 @@ import {
   getProfileFromTextSamples,
   getProfileWithJsTracerEvents,
   type TestDefinedJsTracerEvent,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 
 describe('selectors/getJsTracerTiming', function() {
   describe('full stack-based view', function() {

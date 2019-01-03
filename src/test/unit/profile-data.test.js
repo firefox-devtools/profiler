@@ -40,7 +40,7 @@ import getCallNodeProfile from '../fixtures/profiles/call-nodes';
 import {
   getProfileFromTextSamples,
   getJsTracerTable,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from '../../types/profile';

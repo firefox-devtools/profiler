@@ -28,7 +28,7 @@ import { serializeProfile } from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 
 // Mocking SymbolStoreDB

@@ -19,7 +19,7 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
-import { getProfileWithJsTracerEvents } from '../fixtures/profiles/make-profile';
+import { getProfileWithJsTracerEvents } from '../fixtures/profiles/processed-profile';
 import { getShowJsTracerSummary } from '../../selectors/url-state';
 jest.useFakeTimers();
 

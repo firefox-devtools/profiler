@@ -47,7 +47,7 @@ import { stateFromLocation } from '../../app-logic/url-handling';
 import { TemporaryError } from '../../utils/errors';
 
 import { blankStore } from '../fixtures/stores';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 afterEach(cleanup);
 describe('app/ProfileViewWhenReady', function() {
