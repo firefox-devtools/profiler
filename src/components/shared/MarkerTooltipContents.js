@@ -580,7 +580,7 @@ function getMarkerDetails(
                 )}
                 {_markerDetail(
                   'gcusage',
-                  'Heap usage',
+                  'Heap size',
                   timings.allocated_bytes,
                   formatBytes
                 )}
