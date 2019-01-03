@@ -106,7 +106,7 @@
   overflow: auto;
   --internal-approx-distance-from-top: 60px;
   --internal-approx-distance-to-bottom: 100px;
-  max-height: calc(100vh - var(--internal-approx-distance-from-top) - var(--internal-button-height) - var(--internal-approx-distance-to-top));
+  max-height: calc(100vh - var(--internal-approx-distance-from-top) - var(--internal-button-height) - var(--internal-approx-distance-to-bottom));
 }
 
 .arrowPanel.hasTitle > .arrowPanelContent {
@@ -165,8 +165,6 @@
   font-size: 12px;
   line-height: 20px;
   padding-top: 5px;
-  max-height: calc(100vh - 60px);
-  overflow-y: auto;
 }
 
 .arrowPanelOpenMetaInfo,
