@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`app/ProfileViewWhenReady does not try to retrieve a profile when moving from from-addon to public 1`] = `<profile-viewer />`;
+
 exports[`app/ProfileViewWhenReady renders an home when the user pressed back after an error 1`] = `
 <div
   class="rootMessageContainer"
@@ -110,7 +112,7 @@ exports[`app/ProfileViewWhenReady renders temporary errors 1`] = `
 </div>
 `;
 
-exports[`app/ProfileViewWhenReady renders the addon loading page 1`] = `
+exports[`app/ProfileViewWhenReady renders the addon loading page, and the profile view after capturing 1`] = `
 <div
   class="rootMessageContainer"
 >
@@ -164,6 +166,8 @@ exports[`app/ProfileViewWhenReady renders the addon loading page 1`] = `
   </div>
 </div>
 `;
+
+exports[`app/ProfileViewWhenReady renders the addon loading page, and the profile view after capturing 2`] = `<profile-viewer />`;
 
 exports[`app/ProfileViewWhenReady renders the profile view 1`] = `
 <div

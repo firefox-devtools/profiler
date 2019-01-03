@@ -8,8 +8,11 @@
 // dispatched and avoid any side-effects.  That's why we mock this module and
 // return dummy thunk actions that return a Promise.
 jest.mock('../../actions/receive-profile', () => ({
-  retrieveProfileFromAddon: () => async () => {},
-  retrieveProfileFromStore: () => async () => {},
+  // These mocks will get their implementation in the `setup` function.
+  // Otherwise the implementation is wiped before the test starts.
+  // See https://github.com/facebook/jest/issues/7573 for more info.
+  retrieveProfileFromAddon: jest.fn(),
+  retrieveProfileFromStore: jest.fn(),
 }));
 
 // We mock <ProfileViewer> because it's complex and we should really test it
@@ -35,6 +38,11 @@ const {
   waitingForProfileFromAddon,
   waitingForProfileFromStore,
 } = jest.requireActual('../../actions/receive-profile');
+// These functions are mocks
+import {
+  retrieveProfileFromStore,
+  retrieveProfileFromAddon,
+} from '../../actions/receive-profile';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { TemporaryError } from '../../utils/errors';
 
@@ -49,12 +57,35 @@ describe('app/ProfileViewWhenReady', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders the addon loading page', function() {
+  it('renders the addon loading page, and the profile view after capturing', function() {
     const { container, dispatch, navigateToAddonLoadingPage } = setup();
 
     navigateToAddonLoadingPage();
     dispatch(waitingForProfileFromAddon());
     expect(container.firstChild).toMatchSnapshot();
+    expect(retrieveProfileFromAddon).toBeCalled();
+
+    const { profile } = getProfileFromTextSamples(`A`);
+    dispatch(viewProfile(profile));
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('does not try to retrieve a profile when moving from from-addon to public', function() {
+    const {
+      container,
+      dispatch,
+      navigateToAddonLoadingPage,
+      navigateToStoreLoadingPage,
+    } = setup();
+
+    navigateToAddonLoadingPage();
+    dispatch(waitingForProfileFromAddon());
+    const { profile } = getProfileFromTextSamples(`A`);
+    dispatch(viewProfile(profile));
+
+    navigateToStoreLoadingPage();
+    expect(container.firstChild).toMatchSnapshot();
+    expect(retrieveProfileFromStore).not.toBeCalled();
   });
 
   it('renders the profile view', function() {
@@ -63,6 +94,7 @@ describe('app/ProfileViewWhenReady', function() {
     navigateToStoreLoadingPage();
     dispatch(waitingForProfileFromStore());
     expect(container.firstChild).toMatchSnapshot();
+    expect(retrieveProfileFromStore).toBeCalledWith('ThisIsAFakeHash');
 
     const { profile } = getProfileFromTextSamples(`A`);
     dispatch(viewProfile(profile));
@@ -105,6 +137,10 @@ describe('app/ProfileViewWhenReady', function() {
 function setup() {
   // Let's silence the error output to the console
   jest.spyOn(console, 'error').mockImplementation(() => {});
+  // $FlowFixMe Flow doesn't know retrieveProfileFromAddon is a jest mock.
+  retrieveProfileFromAddon.mockImplementation(() => async () => {});
+  // $FlowFixMe Flow doesn't know retrieveProfileFromStore is a jest mock.
+  retrieveProfileFromStore.mockImplementation(() => async () => {});
 
   const store = blankStore();
   const renderResult = render(
