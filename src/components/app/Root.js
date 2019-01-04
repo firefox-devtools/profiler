@@ -127,7 +127,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
   }
 
   componentDidUpdate(prevProps) {
-    if (prevProps.dataSource !== this.props.dataSource) {
+    if (prevProps.dataSource === 'none' && this.props.dataSource !== 'none') {
       this._retrieveProfileFromDataSource();
     }
   }

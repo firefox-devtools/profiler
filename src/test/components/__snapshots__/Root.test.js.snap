@@ -1,258 +1,227 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`app/ProfileViewWhenReady does not try to retrieve a profile when moving from from-addon to public 1`] = `<profile-viewer />`;
+
 exports[`app/ProfileViewWhenReady renders an home when the user pressed back after an error 1`] = `
-<Fragment>
-  <Connect(ServiceWorkerManager) />
+<div
+  class="rootMessageContainer"
+>
   <div
-    className="rootMessageContainer"
+    class="rootMessage"
   >
-    <div
-      className="rootMessage"
+    <h1
+      class="rootMessageTitle"
     >
-      <h1
-        className="rootMessageTitle"
+      perf.html
+    </h1>
+    <div
+      class="rootMessageText"
+    >
+      Could not download the profile.
+    </div>
+    <div
+      class="rootMessageAdditional"
+    >
+      <p>
+        Error: Error while loading profile
+      </p>
+      <p>
+        The full stack has been written to the Web Console.
+      </p>
+      <a
+        href="/"
       >
-        perf.html
-      </h1>
-      <div
-        className="rootMessageText"
-      >
-        Could not download the profile.
-      </div>
-      <div
-        className="rootMessageAdditional"
-      >
-        <p
-          key="0"
-        >
-          Error: Error while loading profile
-        </p>
-        <p
-          key="1"
-        >
-          The full stack has been written to the Web Console.
-        </p>
-        <a
-          href="/"
-        >
-          Back to home
-        </a>
-      </div>
+        Back to home
+      </a>
     </div>
   </div>
-</Fragment>
+</div>
 `;
 
-exports[`app/ProfileViewWhenReady renders an home when the user pressed back after an error 2`] = `
-<Fragment>
-  <Connect(ServiceWorkerManager) />
-  <Connect(Home) />
-</Fragment>
-`;
+exports[`app/ProfileViewWhenReady renders an home when the user pressed back after an error 2`] = `<home />`;
 
-exports[`app/ProfileViewWhenReady renders an initial home 1`] = `
-<Fragment>
-  <Connect(ServiceWorkerManager) />
-  <Connect(Home) />
-</Fragment>
-`;
+exports[`app/ProfileViewWhenReady renders an initial home 1`] = `<home />`;
 
 exports[`app/ProfileViewWhenReady renders temporary errors 1`] = `
-<Fragment>
-  <Connect(ServiceWorkerManager) />
+<div
+  class="rootMessageContainer"
+>
   <div
-    className="rootMessageContainer"
+    class="rootMessage"
   >
-    <div
-      className="rootMessage"
+    <h1
+      class="rootMessageTitle"
     >
-      <h1
-        className="rootMessageTitle"
+      perf.html
+    </h1>
+    <div
+      class="rootMessageText"
+    >
+      Downloading and processing the profile...
+    </div>
+    <div
+      class="rootMessageAdditional"
+    >
+      <p>
+        This is a temporary error, wait a bit more.
+      </p>
+      <p>
+        Tried 3 times out of 10.
+      </p>
+      <a
+        href="/"
       >
-        perf.html
-      </h1>
+        Back to home
+      </a>
+    </div>
+    <div
+      class="loading"
+    >
       <div
-        className="rootMessageText"
-      >
-        Downloading and processing the profile...
-      </div>
+        class="loading-div loading-div-1 loading-row-1"
+      />
       <div
-        className="rootMessageAdditional"
-      >
-        <p
-          key="0"
-        >
-          This is a temporary error, wait a bit more.
-        </p>
-        <p
-          key="1"
-        >
-          Tried 3 times out of 10.
-        </p>
-        <a
-          href="/"
-        >
-          Back to home
-        </a>
-      </div>
+        class="loading-div loading-div-2 loading-row-2"
+      />
       <div
-        className="loading"
-      >
-        <div
-          className="loading-div loading-div-1 loading-row-1"
-        />
-        <div
-          className="loading-div loading-div-2 loading-row-2"
-        />
-        <div
-          className="loading-div loading-div-3 loading-row-3"
-        />
-        <div
-          className="loading-div loading-div-4 loading-row-3"
-        />
-        <div
-          className="loading-div loading-div-5 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-6 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-7 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-8 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-9 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-10 loading-row-4"
-        />
-      </div>
+        class="loading-div loading-div-3 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-4 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-5 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-6 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-7 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-8 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-9 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-10 loading-row-4"
+      />
     </div>
   </div>
-</Fragment>
+</div>
 `;
 
-exports[`app/ProfileViewWhenReady renders the addon loading page 1`] = `
-<Fragment>
-  <Connect(ServiceWorkerManager) />
+exports[`app/ProfileViewWhenReady renders the addon loading page, and the profile view after capturing 1`] = `
+<div
+  class="rootMessageContainer"
+>
   <div
-    className="rootMessageContainer"
+    class="rootMessage"
   >
-    <div
-      className="rootMessage"
+    <h1
+      class="rootMessageTitle"
     >
-      <h1
-        className="rootMessageTitle"
-      >
-        perf.html
-      </h1>
+      perf.html
+    </h1>
+    <div
+      class="rootMessageText"
+    >
+      Grabbing the profile from the Gecko Profiler Addon...
+    </div>
+    <div
+      class="loading"
+    >
       <div
-        className="rootMessageText"
-      >
-        Grabbing the profile from the Gecko Profiler Addon...
-      </div>
+        class="loading-div loading-div-1 loading-row-1"
+      />
       <div
-        className="loading"
-      >
-        <div
-          className="loading-div loading-div-1 loading-row-1"
-        />
-        <div
-          className="loading-div loading-div-2 loading-row-2"
-        />
-        <div
-          className="loading-div loading-div-3 loading-row-3"
-        />
-        <div
-          className="loading-div loading-div-4 loading-row-3"
-        />
-        <div
-          className="loading-div loading-div-5 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-6 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-7 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-8 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-9 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-10 loading-row-4"
-        />
-      </div>
+        class="loading-div loading-div-2 loading-row-2"
+      />
+      <div
+        class="loading-div loading-div-3 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-4 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-5 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-6 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-7 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-8 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-9 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-10 loading-row-4"
+      />
     </div>
   </div>
-</Fragment>
+</div>
 `;
+
+exports[`app/ProfileViewWhenReady renders the addon loading page, and the profile view after capturing 2`] = `<profile-viewer />`;
 
 exports[`app/ProfileViewWhenReady renders the profile view 1`] = `
-<Fragment>
-  <Connect(ServiceWorkerManager) />
+<div
+  class="rootMessageContainer"
+>
   <div
-    className="rootMessageContainer"
+    class="rootMessage"
   >
-    <div
-      className="rootMessage"
+    <h1
+      class="rootMessageTitle"
     >
-      <h1
-        className="rootMessageTitle"
-      >
-        perf.html
-      </h1>
+      perf.html
+    </h1>
+    <div
+      class="rootMessageText"
+    >
+      Downloading and processing the profile...
+    </div>
+    <div
+      class="loading"
+    >
       <div
-        className="rootMessageText"
-      >
-        Downloading and processing the profile...
-      </div>
+        class="loading-div loading-div-1 loading-row-1"
+      />
       <div
-        className="loading"
-      >
-        <div
-          className="loading-div loading-div-1 loading-row-1"
-        />
-        <div
-          className="loading-div loading-div-2 loading-row-2"
-        />
-        <div
-          className="loading-div loading-div-3 loading-row-3"
-        />
-        <div
-          className="loading-div loading-div-4 loading-row-3"
-        />
-        <div
-          className="loading-div loading-div-5 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-6 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-7 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-8 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-9 loading-row-4"
-        />
-        <div
-          className="loading-div loading-div-10 loading-row-4"
-        />
-      </div>
+        class="loading-div loading-div-2 loading-row-2"
+      />
+      <div
+        class="loading-div loading-div-3 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-4 loading-row-3"
+      />
+      <div
+        class="loading-div loading-div-5 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-6 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-7 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-8 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-9 loading-row-4"
+      />
+      <div
+        class="loading-div loading-div-10 loading-row-4"
+      />
     </div>
   </div>
-</Fragment>
+</div>
 `;
 
-exports[`app/ProfileViewWhenReady renders the profile view 2`] = `
-<Fragment>
-  <Connect(ServiceWorkerManager) />
-  <Connect(ProfileViewer) />
-</Fragment>
-`;
+exports[`app/ProfileViewWhenReady renders the profile view 2`] = `<profile-viewer />`;

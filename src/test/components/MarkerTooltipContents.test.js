@@ -273,6 +273,14 @@ describe('MarkerTooltipContents', function() {
         },
       ],
       [
+        'TTFI',
+        21.4,
+        {
+          type: 'Text',
+          name: 'TTFI after 100.01ms (longTask was 100.001ms)',
+        },
+      ],
+      [
         'Styles',
         20.5,
         {
@@ -302,6 +310,7 @@ describe('MarkerTooltipContents', function() {
           endTime: 18736.9210449375,
           id: 107838038867999,
           status: 'STATUS_REDIRECT',
+          cache: 'any string could be here',
           pri: -20,
           count: 0,
           URI: 'http://www.wikia.com/',
@@ -318,6 +327,7 @@ describe('MarkerTooltipContents', function() {
           endTime: 13587.6919060625,
           id: 1234,
           status: 'STATUS_STOP',
+          cache: 'Hit',
           pri: 8,
           count: 47027,
           URI:

@@ -304,6 +304,7 @@ export type NetworkPayload = {|
   pri: number, // priority of the load; always included as it can change
   count?: number, // Total size of transfer, if any
   status: string,
+  cache?: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
   domainLookupStart?: Milliseconds,
@@ -327,6 +328,11 @@ export type UserTimingMarkerPayload = {|
   endTime: Milliseconds,
   name: string,
   entryType: 'measure' | 'mark',
+|};
+
+export type TextMarkerPayload = {|
+  type: 'Text',
+  name: string,
 |};
 
 export type DOMEventMarkerPayload = {|
@@ -422,6 +428,7 @@ export type MarkerPayload =
   | InvalidationPayload
   | NetworkPayload
   | UserTimingMarkerPayload
+  | TextMarkerPayload
   | PaintProfilerMarkerTracing
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
@@ -440,6 +447,7 @@ export type MarkerPayload_Gecko =
   | GPUMarkerPayload
   | NetworkPayload
   | UserTimingMarkerPayload
+  | TextMarkerPayload
   | PaintProfilerMarkerTracing_Gecko
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
