@@ -13,6 +13,7 @@
     "lint-fix": "yarn lint --fix",
     "prettier-json": "prettier --write src/**/*.json",
     "flow": "flow --max-warnings 0",
+    "flow-stop": "flow stop",
     "flow-coverage": "flow-coverage-report -i 'src/**/*.js' -t html -t text",
     "flow-generate-libdefs": "flow-typed install --libdefDir src/types/libdef",
     "init-docs": "gitbook install ./docs-user",
