@@ -137,10 +137,10 @@ describe('app/ProfileViewWhenReady', function() {
 function setup() {
   // Let's silence the error output to the console
   jest.spyOn(console, 'error').mockImplementation(() => {});
-  // $FlowFixMe Flow doesn't know retrieveProfileFromAddon is a jest mock.
-  retrieveProfileFromAddon.mockImplementation(() => async () => {});
-  // $FlowFixMe Flow doesn't know retrieveProfileFromStore is a jest mock.
-  retrieveProfileFromStore.mockImplementation(() => async () => {});
+  // Flow doesn't know retrieveProfileFromAddon is a jest mock.
+  (retrieveProfileFromAddon: any).mockImplementation(() => async () => {});
+  // Flow doesn't know retrieveProfileFromStore is a jest mock.
+  (retrieveProfileFromStore: any).mockImplementation(() => async () => {});
 
   const store = blankStore();
   const renderResult = render(
