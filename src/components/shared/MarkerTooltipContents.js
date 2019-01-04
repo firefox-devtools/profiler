@@ -370,6 +370,13 @@ function getMarkerDetails(
           </div>
         );
       }
+      case 'Text': {
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('name', 'Name', data.name)}
+          </div>
+        );
+      }
       case 'GCMinor': {
         if (data.nursery) {
           const nursery = data.nursery;
