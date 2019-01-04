@@ -304,6 +304,7 @@ export type NetworkPayload = {|
   pri: number, // priority of the load; always included as it can change
   count?: number, // Total size of transfer, if any
   status: string,
+  cache?: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
   domainLookupStart?: Milliseconds,

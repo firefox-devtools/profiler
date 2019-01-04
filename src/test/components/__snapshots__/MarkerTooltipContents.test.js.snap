@@ -1451,6 +1451,13 @@ Array [
       <div
         className="tooltipLabel"
       >
+        Cache
+        :
+      </div>
+      Hit
+      <div
+        className="tooltipLabel"
+      >
         URL
         :
       </div>
@@ -1519,6 +1526,13 @@ Array [
         :
       </div>
       Redirecting request
+      <div
+        className="tooltipLabel"
+      >
+        Cache
+        :
+      </div>
+      any string could be here
       <div
         className="tooltipLabel"
       >
