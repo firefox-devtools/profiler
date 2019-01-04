@@ -5,8 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import ScreenshotStrip from './ScreenshotStrip';
-import HoverPreview from './HoverPreview';
 import explicitConnect from '../../utils/connect';
 import {
   getCommittedRange,
@@ -14,7 +12,9 @@ import {
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { withSize, type SizeProps } from '../shared/WithSize';
+import { createPortal } from 'react-dom';
 
+import type { ScreenshotPayload } from '../../types/markers';
 import type { ThreadIndex, Thread } from '../../types/profile';
 import type { TracingMarker } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
@@ -137,3 +137,169 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
 };
 
 export default withSize(explicitConnect(options));
+
+type HoverPreviewProps = {|
+  +thread: Thread,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +screenshots: TracingMarker[],
+  +isMakingPreviewSelection: boolean,
+  +offsetX: null | number,
+  +pageX: null | number,
+  +containerTop: null | number,
+  +width: number,
+|};
+
+const HOVER_HEIGHT = 100;
+const HOVER_MAX_WIDTH_RATIO = 1.75;
+
+class HoverPreview extends PureComponent<HoverPreviewProps> {
+  findScreenshotAtMouse(offsetX: number): number | null {
+    const { width, rangeStart, rangeEnd, screenshots } = this.props;
+    const rangeLength = rangeEnd - rangeStart;
+    const mouseTime = offsetX / width * rangeLength + rangeStart;
+
+    // Loop backwards to find the latest screenshot that has a time less
+    // than the current time at the mouse position.
+    for (let i = screenshots.length - 1; i >= 0; i--) {
+      const screenshotTime = screenshots[i].start;
+      if (mouseTime >= screenshotTime) {
+        return i;
+      }
+    }
+
+    return null;
+  }
+
+  _overlayElement = ensureExists(
+    document.querySelector('#root-overlay'),
+    'Expected to find a root overlay element.'
+  );
+
+  render() {
+    const {
+      screenshots,
+      thread,
+      isMakingPreviewSelection,
+      width,
+      pageX,
+      offsetX,
+      containerTop,
+    } = this.props;
+
+    if (isMakingPreviewSelection || offsetX === null || pageX === null) {
+      return null;
+    }
+
+    const screenshotIndex = this.findScreenshotAtMouse(offsetX);
+    if (screenshotIndex === null) {
+      return null;
+    }
+
+    // Coerce the payload into a screenshot one.
+    const payload: ScreenshotPayload = (screenshots[screenshotIndex].data: any);
+    const { url, windowWidth, windowHeight } = payload;
+
+    // Compute the hover image's thumbnail size.
+    let hoverHeight = HOVER_HEIGHT;
+    let hoverWidth = HOVER_HEIGHT / windowHeight * windowWidth;
+
+    if (hoverWidth > HOVER_HEIGHT * HOVER_MAX_WIDTH_RATIO) {
+      // This is a really wide image, limit the height so it lays out reasonably.
+      hoverWidth = HOVER_HEIGHT * HOVER_MAX_WIDTH_RATIO;
+      hoverHeight = hoverWidth / windowWidth * windowHeight;
+    }
+
+    // Set the top so it centers around the track.
+    const top = containerTop + (TRACK_HEIGHT - hoverHeight) * 0.5;
+    const left =
+      offsetX + hoverWidth * 0.5 > width
+        ? // Stick the hover image on to the right side of the container.
+          pageX - offsetX + width - hoverWidth
+        : // Center the hover image around the mouse.
+          pageX - hoverWidth * 0.5;
+
+    return createPortal(
+      <div className="timelineTrackScreenshotHover" style={{ left, top }}>
+        <img
+          className="timelineTrackScreenshotHoverImg"
+          src={thread.stringTable.getString(url)}
+          style={{
+            height: hoverHeight,
+            width: hoverWidth,
+          }}
+        />
+      </div>,
+      this._overlayElement
+    );
+  }
+}
+
+type ScreenshotStripProps = {|
+  +thread: Thread,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +screenshots: TracingMarker[],
+  +width: number,
+|};
+
+class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
+  render() {
+    const {
+      thread,
+      width: outerContainerWidth,
+      rangeStart,
+      rangeEnd,
+      screenshots,
+    } = this.props;
+
+    if (screenshots.length === 0) {
+      return null;
+    }
+
+    const images = [];
+    const rangeLength = rangeEnd - rangeStart;
+    const imageContainerWidth = TRACK_HEIGHT * 0.75;
+    const timeToPixel = time =>
+      outerContainerWidth * (time - rangeStart) / rangeLength;
+
+    let screenshotIndex = 0;
+    for (
+      let left = timeToPixel(screenshots[0].start);
+      left < outerContainerWidth;
+      left += imageContainerWidth
+    ) {
+      // Try to find the next screenshot to fit in, or re-use the existing one.
+      for (let i = screenshotIndex; i < screenshots.length; i++) {
+        if (timeToPixel(screenshots[i].start) <= left) {
+          screenshotIndex = i;
+        } else {
+          break;
+        }
+      }
+      // Coerce the payload into a screenshot one.
+      const payload: ScreenshotPayload = (screenshots[screenshotIndex]
+        .data: any);
+      const { url: urlStringIndex, windowWidth, windowHeight } = payload;
+      const scaledImageWidth = TRACK_HEIGHT * windowWidth / windowHeight;
+      images.push(
+        <div
+          className="timelineTrackScreenshotImgContainer"
+          style={{ left, width: imageContainerWidth }}
+          key={left}
+        >
+          {/* The following image is centered and cropped by the outer container. */}
+          <img
+            className="timelineTrackScreenshotImg"
+            src={thread.stringTable.getString(urlStringIndex)}
+            style={{
+              width: scaledImageWidth,
+              height: TRACK_HEIGHT,
+            }}
+          />
+        </div>
+      );
+    }
+    return images;
+  }
+}
