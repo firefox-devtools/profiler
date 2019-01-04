@@ -22,7 +22,7 @@ The aim of all new code is to have good test coverage. A handy way to do this is
 
 ## Flow type tests
 
-Flow type tests are a little different, because they do not use Jest. Instead, types are created that should pass the type system. In addition, the special comment `// $ExpectError` can be used for when errors are expected to be generated. If the types do not generate an error, then Flow will emit a warning (not an error) that something is wrong.
+Flow type tests are a little different, because they do not use Jest. Instead, types are created that should pass the type system. In addition, the special comment `// $FlowExpectError` can be used for when errors are expected to be generated. If the types do not generate an error, then Flow will emit a warning (not an error) that something is wrong.
 
 ## The tests
 

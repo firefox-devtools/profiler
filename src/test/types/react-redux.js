@@ -21,7 +21,10 @@ import type {
 } from '../../types/store';
 /* eslint-disable no-unused-vars, react/prefer-stateless-function, flowtype/no-unused-expressions */
 
-// Use this any value to create fake variables as a type.
+// Use this any value to create fake variables as a type. Consider using
+// `declare var myVariables: MyType;` instead. However, it can sometimes be clearer to
+// create values inline, or from pre-existing type definitions. In addition,
+// `declare var` is not correctly lexically scoped.
 const ANY_VALUE = (0: any);
 
 /**
@@ -60,6 +63,7 @@ class ExampleComponent extends React.PureComponent<Props> {
     // The action creators are properly wrapped by dispatch.
     (this.props.dispatchString: string => Action);
     (this.props.dispatchThunk: string => number);
+    (this.props.dispatchThunk('foo'): number);
 
     return null;
   }
@@ -75,10 +79,10 @@ const validMapStateToProps = (state, ownProps) => {
   };
 };
 
-const validDispatchToProps = (ANY_VALUE: {|
+declare var validDispatchToProps: {|
   +dispatchString: string => Action,
   +dispatchThunk: string => ThunkAction<number>,
-|});
+|};
 
 // This value also serves as a test for the common case of creating a component
 // with valid values.
@@ -102,7 +106,7 @@ const ConnectedExampleComponent = explicitConnect(
   // Test that the original unwrapped action creators do not work.
   const wrapped: WrapDispatchProps<DispatchProps> = (ANY_VALUE: {|
     +dispatchString: string => Action,
-    // $ExpectError
+    // $FlowExpectError
     +dispatchThunk: string => ThunkAction<number>,
   |});
 }
@@ -120,14 +124,14 @@ const ConnectedExampleComponent = explicitConnect(
   (exampleThunkActionWrapped: WrapFunctionInDispatch<
     ExampleThunkActionCreator
   >);
-  // $ExpectError
+  // $FlowExpectError
   (exampleThunkAction: WrapFunctionInDispatch<ExampleThunkActionCreator>);
 }
 
 {
   // Test that mapStateToProps will error out if provided an extra value.
   const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
-    // $ExpectError
+    // $FlowExpectError
     mapStateToProps: state => ({
       statePropString: 'string',
       statePropNumber: 0,
@@ -144,7 +148,7 @@ const ConnectedExampleComponent = explicitConnect(
   const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     mapStateToProps: state => ({
       statePropString: 'string',
-      // $ExpectError
+      // $FlowExpectError
       statePropNumber: 'not a number',
     }),
     mapDispatchToProps: validDispatchToProps,
@@ -157,7 +161,7 @@ const ConnectedExampleComponent = explicitConnect(
   // Test that mapDispatchToProps will error if a value is omitted.
   const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     mapStateToProps: validMapStateToProps,
-    // $ExpectError
+    // $FlowExpectError
     mapDispatchToProps: (ANY_VALUE: {|
       +dispatchThunk: string => ThunkAction<number>,
     |}),
@@ -171,9 +175,23 @@ const ConnectedExampleComponent = explicitConnect(
   const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     mapStateToProps: validMapStateToProps,
     mapDispatchToProps: (ANY_VALUE: {|
-      // $ExpectError
+      // $FlowExpectError
       +dispatchString: string => string,
       +dispatchThunk: string => ThunkAction<number>,
+    |}),
+    component: ExampleComponent,
+  };
+  explicitConnect(options);
+}
+
+{
+  // Test that mapDispatchToProps will error if an extra property is given.
+  const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+    mapStateToProps: validMapStateToProps,
+    // $FlowExpectError
+    mapDispatchToProps: (ANY_VALUE: {|
+      ...typeof validDispatchToProps,
+      +extraProperty: string => string,
     |}),
     component: ExampleComponent,
   };
@@ -186,13 +204,23 @@ const ConnectedExampleComponent = explicitConnect(
 }
 
 {
+  // The connected component must not accept more props.
+  // $FlowExpectError
+  <ConnectedExampleComponent
+    ownPropString="string"
+    ownPropNumber={0}
+    ownPropsExtra={0}
+  />;
+}
+
+{
   // It throws an error when an OwnProps is incorrect.
-  // $ExpectError
+  // $FlowExpectError
   <ConnectedExampleComponent ownPropString={0} ownPropNumber={0} />;
 }
 
 {
   // It throws an error if no OwnProps are provided.
-  // $ExpectError
+  // $FlowExpectError
   <ConnectedExampleComponent />;
 }
