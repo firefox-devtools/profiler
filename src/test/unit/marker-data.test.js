@@ -5,10 +5,10 @@
 
 import { getTracingMarkers } from '../../profile-logic/marker-data';
 import { processProfile } from '../../profile-logic/process-profile';
-import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
+import { createGeckoProfile } from '.././fixtures/profiles/gecko-profile';
 
 describe('getTracingMarkers', function() {
-  const profile = processProfile(getGeckoProfile());
+  const profile = processProfile(createGeckoProfile());
   const thread = profile.threads[0]; // This is the parent process main thread
   const contentThread = profile.threads[2]; // This is the content process main thread
   const tracingMarkers = getTracingMarkers(

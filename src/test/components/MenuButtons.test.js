@@ -12,7 +12,7 @@ import {
   startSymbolicating,
   doneSymbolicating,
 } from '../../actions/receive-profile';
-import exampleProfile from '../fixtures/profiles/timings-with-js';
+import { createGeckoProfileWithJsTimings } from '../fixtures/profiles/gecko-profile';
 import { processProfile } from '../../profile-logic/process-profile';
 
 describe('app/MenuButtons', function() {
@@ -49,7 +49,7 @@ describe('app/MenuButtons', function() {
   });
 
   it('renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to true', () => {
-    const profile = processProfile(exampleProfile());
+    const profile = processProfile(createGeckoProfileWithJsTimings());
     profile.meta.networkURLsRemoved = true;
     const store = storeWithProfile(profile);
     store.dispatch(startSymbolicating());
@@ -68,7 +68,7 @@ describe('app/MenuButtons', function() {
   });
 
   it('renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to undefined', () => {
-    const profile = processProfile(exampleProfile());
+    const profile = processProfile(createGeckoProfileWithJsTimings());
     profile.meta.networkURLsRemoved = undefined;
     const store = storeWithProfile(profile);
     store.dispatch(startSymbolicating());

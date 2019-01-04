@@ -16,7 +16,7 @@ import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 
-import { getNetworkTrackProfile } from '../fixtures/profiles/make-profile';
+import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock, and the graph height
 // mimicks what is computed by the actual component.

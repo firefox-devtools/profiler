@@ -19,7 +19,7 @@ import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
 
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;

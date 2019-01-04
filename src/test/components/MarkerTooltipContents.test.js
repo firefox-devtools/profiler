@@ -13,7 +13,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import {
   addMarkersToThreadWithCorrespondingSamples,
   getProfileFromTextSamples,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 

@@ -15,7 +15,7 @@ import {
   getProfileFromTextSamples,
   getEmptyThread,
   getEmptyProfile,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 import {
   changeCallTreeSearchString,
   changeImplementationFilter,

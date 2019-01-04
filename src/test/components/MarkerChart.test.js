@@ -18,7 +18,7 @@ import { changeSelectedTab } from '../../actions/app';
 import EmptyReasons from '../../components/shared/EmptyReasons';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import {
   getBoundingBox,
   addRootOverlayElement,

@@ -11,7 +11,7 @@ import type {
   Profile,
 } from '../../../types/profile';
 
-import { getEmptyThread, getEmptyProfile } from './make-profile';
+import { getEmptyThread, getEmptyProfile } from './processed-profile';
 
 /**
  * Note that this fixture doesn't use the `getProfileFromTextSamples()` function to

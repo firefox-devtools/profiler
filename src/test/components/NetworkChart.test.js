@@ -17,7 +17,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithMarkers,
   getNetworkMarker,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { type NetworkPayload } from '../../types/markers';

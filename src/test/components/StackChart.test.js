@@ -20,7 +20,7 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { changeSelectedCallNode } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 jest.useFakeTimers();

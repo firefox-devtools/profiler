@@ -27,7 +27,7 @@ import {
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock. Each stack is 100
 // pixels wide. Use the value 50 to click in the middle of this stack, and

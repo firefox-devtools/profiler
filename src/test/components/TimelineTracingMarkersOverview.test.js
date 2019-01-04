@@ -9,7 +9,7 @@ import renderer from 'react-test-renderer';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import ReactDOM from 'react-dom';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';

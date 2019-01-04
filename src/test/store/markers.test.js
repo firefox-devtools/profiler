@@ -4,7 +4,7 @@
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 
 describe('selectors/getMarkerChartTiming', function() {
   function getMarkerChartTiming(testMarkers) {
