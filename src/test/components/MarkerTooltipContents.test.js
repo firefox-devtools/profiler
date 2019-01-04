@@ -273,6 +273,14 @@ describe('MarkerTooltipContents', function() {
         },
       ],
       [
+        'TTFI',
+        21.4,
+        {
+          type: 'Text',
+          name: 'TTFI after 100.01ms (longTask was 100.001ms)',
+        },
+      ],
+      [
         'Styles',
         20.5,
         {
