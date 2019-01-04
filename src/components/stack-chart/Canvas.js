@@ -38,6 +38,7 @@ import type {
 import type { GetCategory } from '../../profile-logic/color-categories';
 import type { GetLabel } from '../../profile-logic/labeling-strategies';
 import type { Viewport } from '../shared/chart/Viewport';
+import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {|
   +thread: Thread,
@@ -48,7 +49,9 @@ type OwnProps = {|
   +stackFrameHeight: CssPixels,
   +getCategory: GetCategory,
   +getLabel: GetLabel,
-  +updatePreviewSelection: typeof updatePreviewSelection,
+  +updatePreviewSelection: WrapFunctionInDispatch<
+    typeof updatePreviewSelection
+  >,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,

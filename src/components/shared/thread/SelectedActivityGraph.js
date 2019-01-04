@@ -28,7 +28,6 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
 } from '../../../types/profile';
-import type { ConnectedThunk } from '../../../types/store';
 import type { Milliseconds } from '../../../types/units';
 import type {
   CallNodeInfo,
@@ -66,9 +65,7 @@ type StateProps = {|
 |};
 
 type DispatchProps = {|
-  +selectBestAncestorCallNodeAndExpandCallTree: ConnectedThunk<
-    typeof selectBestAncestorCallNodeAndExpandCallTree
-  >,
+  +selectBestAncestorCallNodeAndExpandCallTree: typeof selectBestAncestorCallNodeAndExpandCallTree,
   +selectLeafCallNode: typeof selectLeafCallNode,
   +focusCallTree: typeof focusCallTree,
 |};

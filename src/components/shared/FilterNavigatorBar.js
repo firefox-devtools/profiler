@@ -12,7 +12,7 @@ import './FilterNavigatorBar.css';
 type Props = {|
   +className: string,
   +items: string[],
-  +onPop: number => mixed,
+  +onPop: number => *,
   +selectedItem: number,
   +uncommittedItem?: string,
 |};
