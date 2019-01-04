@@ -12,12 +12,10 @@ import type {
   CategoryList,
   FrameTable,
   FuncTable,
-  MarkersTable,
   ResourceTable,
   IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoSamplesTable,
-  IndexIntoMarkersTable,
   IndexIntoStackTable,
   ThreadIndex,
 } from '../types/profile';
@@ -967,31 +965,12 @@ function _getSampleIndexRangeForSelection(
   return [firstSample, firstSample + afterLastSample];
 }
 
-function _getMarkerIndexRangeForSelection(
-  markers: MarkersTable,
-  rangeStart: number,
-  rangeEnd: number
-): [IndexIntoMarkersTable, IndexIntoMarkersTable] {
-  // TODO: This should really use bisect. samples.time is sorted.
-  const firstMarker = markers.time.findIndex(t => t >= rangeStart);
-  if (firstMarker === -1) {
-    return [markers.length, markers.length];
-  }
-  const afterLastSample = markers.time
-    .slice(firstMarker)
-    .findIndex(t => t >= rangeEnd);
-  if (afterLastSample === -1) {
-    return [firstMarker, markers.length];
-  }
-  return [firstMarker, firstMarker + afterLastSample];
-}
-
-export function filterThreadToRange(
+export function filterThreadSamplesToRange(
   thread: Thread,
   rangeStart: number,
   rangeEnd: number
 ): Thread {
-  const { samples, markers } = thread;
+  const { samples } = thread;
   const [sBegin, sEnd] = _getSampleIndexRangeForSelection(
     samples,
     rangeStart,
@@ -1005,20 +984,8 @@ export function filterThreadToRange(
     rss: samples.rss.slice(sBegin, sEnd),
     uss: samples.uss.slice(sBegin, sEnd),
   };
-  const [mBegin, mEnd] = _getMarkerIndexRangeForSelection(
-    markers,
-    rangeStart,
-    rangeEnd
-  );
-  const newMarkers = {
-    length: mEnd - mBegin,
-    time: markers.time.slice(mBegin, mEnd),
-    name: markers.name.slice(mBegin, mEnd),
-    data: markers.data.slice(mBegin, mEnd),
-  };
   return Object.assign({}, thread, {
     samples: newSamples,
-    markers: newMarkers,
   });
 }
 
