@@ -14,7 +14,7 @@ import {
   addMarkersToThreadWithCorrespondingSamples,
   getProfileFromTextSamples,
 } from '../fixtures/profiles/make-profile';
-import { selectedThreadSelectors } from '../../selectors/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 
 describe('MarkerTooltipContents', function() {

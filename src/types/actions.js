@@ -58,9 +58,17 @@ export type FunctionsUpdatePerThread = {
  * Note that TrackIndexes aren't globally unique: they're unique among global
  * tracks, and they're unique among local tracks for a specific Pid.
  */
-export type TrackReference =
-  | {| +type: 'global', +trackIndex: TrackIndex |}
-  | {| +type: 'local', +trackIndex: TrackIndex, +pid: Pid |};
+export type GlobalTrackReference = {|
+  +type: 'global',
+  +trackIndex: TrackIndex,
+|};
+export type LocalTrackReference = {|
+  +type: 'local',
+  +trackIndex: TrackIndex,
+  +pid: Pid,
+|};
+export type TrackReference = GlobalTrackReference | LocalTrackReference;
+
 export type RequestedLib = {|
   +debugName: string,
   +breakpadId: string,
@@ -212,7 +220,8 @@ type ReceiveProfileAction =
   | {| +type: 'START_SYMBOLICATING' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_ADDON' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_STORE' |}
-  | {| +type: 'WAITING_FOR_PROFILE_FROM_URL' |};
+  | {| +type: 'WAITING_FOR_PROFILE_FROM_URL' |}
+  | {| +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string |};
 
 type StackChartAction =
   | {| +type: 'CHANGE_STACK_CHART_COLOR_STRATEGY', +getCategory: GetCategory |}

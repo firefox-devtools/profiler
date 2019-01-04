@@ -14,11 +14,11 @@ import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
 import MarkerSettings from '../shared/MarkerSettings';
 
 import {
-  selectedThreadSelectors,
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
@@ -96,7 +96,12 @@ class MarkerChart extends React.PureComponent<Props> {
     const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
 
     return (
-      <div className="markerChart">
+      <div
+        className="markerChart"
+        id="marker-chart-tab"
+        role="tabpanel"
+        aria-labelledby="marker-chart-tab-button"
+      >
         <MarkerSettings />
         {markers.length === 0 ? (
           <MarkerChartEmptyReasons />

@@ -9,11 +9,12 @@ import explicitConnect from '../../utils/connect';
 import ThreadStackGraph from '../shared/thread/StackGraph';
 import ThreadActivityGraph from '../shared/thread/ActivityGraph';
 import {
-  selectorsForThread,
   getProfileInterval,
   getCommittedRange,
   getCategories,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { getThreadSelectors } from '../../selectors/per-thread';
+
 import {
   getSelectedThreadIndex,
   getTimelineType,
@@ -192,7 +193,7 @@ class TimelineTrackThread extends PureComponent<Props> {
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadIndex } = ownProps;
-    const selectors = selectorsForThread(threadIndex);
+    const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
     const committedRange = getCommittedRange(state);
     return {

@@ -8,10 +8,10 @@ import { ContextMenu, MenuItem } from 'react-contextmenu';
 import explicitConnect from '../../utils/connect';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import {
-  selectedThreadSelectors,
   getPreviewSelection,
   getCommittedRange,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import copy from 'copy-to-clipboard';
 
 import type {

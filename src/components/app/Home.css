@@ -128,9 +128,41 @@
   font-size: 16px;
   text-align: center;
   cursor: pointer;
+  background-color: #fff;
 }
 
-.homeSectionButton:hover {
+.homeSectionLoadProfile {
+  position: relative;
+}
+
+.homeSectionActionButtons {
+  display: flex;
+}
+
+.homeSectionActionButtons .homeSectionButton {
+  flex: 1;
+  margin: 5px 0;
+}
+
+.homeSectionActionButtons button {
+  border-left: none; 
+}
+
+.homeSectionLoadFromUrl {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+}
+
+.homeSectionActionButtons .homeSectionButton ,
+.homeSectionLoadFromUrl .homeSectionButton {
+  font-size: 13px;
+  padding: 0.3em 1em;
+} 
+
+.homeSectionButton:hover , 
+.homeSectionButtonPressed{
   color: #fff;
   background-color: var(--blue-60);
 }
@@ -198,13 +230,25 @@
 
 /* This code comes from https://tympanus.net/codrops/2015/09/15/styling-customizing-file-inputs-smart-way/ */
 
-.homeSectionUploadInput {
+.homeSectionUploadFromFileInput {
   width: 0.1px;
   height: 0.1px;
   opacity: 0;
   overflow: hidden;
   position: absolute;
   z-index: -1;
+}
+
+.homeSectionLoadFromUrlInput {
+  flex: auto;
+  margin: 0 10px 0 0;
+  padding: 8px 20px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.homeSectionLoadFromUrlSubmitButton {
+  margin: 0;
 }
 
 label.homeSectionButton:focus-within {

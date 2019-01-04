@@ -9,10 +9,8 @@ import JsTracerChart from './Chart';
 import JsTracerSettings from './Settings';
 import EmptyReasons from './EmptyReasons';
 
-import {
-  getProfile,
-  selectedThreadSelectors,
-} from '../../selectors/profile-view';
+import { getProfile } from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   getShowJsTracerSummary,
   getSelectedThreadIndex,

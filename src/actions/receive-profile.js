@@ -52,6 +52,13 @@ import type {
  * client and getting it into the processed format.
  */
 
+export function triggerLoadingFromUrl(profileUrl: string): Action {
+  return {
+    type: 'TRIGGER_LOADING_FROM_URL',
+    profileUrl,
+  };
+}
+
 export function waitingForProfileFromAddon(): Action {
   return {
     type: 'WAITING_FOR_PROFILE_FROM_ADDON',

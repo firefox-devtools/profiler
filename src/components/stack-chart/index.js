@@ -11,12 +11,12 @@ import {
 import explicitConnect from '../../utils/connect';
 import StackChartCanvas from './Canvas';
 import {
-  selectedThreadSelectors,
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
   getScrollToSelectionGeneration,
-} from '../../selectors/profile-view';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import {
   getCategoryColorStrategy,
@@ -126,7 +126,12 @@ class StackChartGraph extends React.PureComponent<Props> {
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
-      <div className="stackChart">
+      <div
+        className="stackChart"
+        id="stack-chart-tab"
+        role="tabpanel"
+        aria-labelledby="stack-chart-tab-button"
+      >
         <StackSettings />
         <div className="stackChartContent">
           <StackChartCanvas
