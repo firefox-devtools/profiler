@@ -3,13 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import * as profileViewSelectors from '../../../reducers/profile-view';
-import * as urlStateReducers from '../../../reducers/url-state';
+import * as profileViewSelectors from '../../../selectors/profile';
+import * as urlStateReducers from '../../../selectors/url-state';
 import { getProfileFromTextSamples } from './make-profile';
 import { oneLine } from 'common-tags';
 
 import type { Profile } from '../../../types/profile';
-import type { State } from '../../../types/reducers';
+import type { State } from '../../../types/state';
 
 /**
  * This function takes the current timeline tracks, and generates a human readable result

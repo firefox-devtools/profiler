@@ -19,11 +19,12 @@ exports[`timeline/GlobalTrack matches the snapshot of a global track 1`] = `
       title="thread: \\"GeckoMain\\" (0)
 process: \\"tab\\" (222)"
     >
-      <h1
-        className="timelineTrackName"
+      <button
+        className="timelineTrackNameButton"
+        type="button"
       >
-        Content
-      </h1>
+        Content Process
+      </button>
     </div>
     <div
       className="timelineTrackTrack"
@@ -92,11 +93,12 @@ process: \\"tab\\" (222)"
           title="thread: \\"DOM Worker\\" (0)
 process: \\"tab\\" (222)"
         >
-          <h1
-            className="timelineTrackName"
+          <button
+            className="timelineTrackNameButton"
+            type="button"
           >
             DOM Worker
-          </h1>
+          </button>
         </div>
         <div
           className="timelineTrackTrack"
@@ -148,11 +150,12 @@ process: \\"tab\\" (222)"
           title="thread: \\"Style\\" (0)
 process: \\"tab\\" (222)"
         >
-          <h1
-            className="timelineTrackName"
+          <button
+            className="timelineTrackNameButton"
+            type="button"
           >
             Style
-          </h1>
+          </button>
         </div>
         <div
           className="timelineTrackTrack"

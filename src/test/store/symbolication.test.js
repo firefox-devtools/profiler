@@ -6,7 +6,8 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
 import exampleSymbolTable from '../fixtures/example-symbol-table';
 import { SymbolStore } from '../../profile-logic/symbol-store.js';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
+import * as ProfileViewSelectors from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { resourceTypes } from '../../profile-logic/profile-data';
 import { doSymbolicateProfile } from '../../actions/receive-profile';
 import {
@@ -84,7 +85,7 @@ describe('doSymbolicateProfile', function() {
     getExpandedCallNodePaths,
     getThread,
     getCallTree,
-  } = ProfileViewSelectors.selectedThreadSelectors;
+  } = selectedThreadSelectors;
 
   describe('doSymbolicateProfile', function() {
     it('can symbolicate a profile', async () => {

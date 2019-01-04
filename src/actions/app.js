@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getSelectedTab, getDataSource } from '../reducers/url-state';
+import { getSelectedTab, getDataSource } from '../selectors/url-state';
 import { sendAnalytics } from '../utils/analytics';
 import type { Action, ThunkAction } from '../types/store';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { ProfileSharingStatus, UrlState } from '../types/reducers';
+import type { ProfileSharingStatus, UrlState } from '../types/state';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -38,13 +38,6 @@ export function setProfileSharingStatus(
   return {
     type: 'SET_PROFILE_SHARING_STATUS',
     profileSharingStatus,
-  };
-}
-
-export function changeTabOrder(tabOrder: number[]): Action {
-  return {
-    type: 'CHANGE_TAB_ORDER',
-    tabOrder,
   };
 }
 
@@ -84,6 +77,6 @@ export function invalidatePanelLayout(): Action {
  * is generated when the window.location is serialized, or the state is pulled out of
  * the history API.
  */
-export function updateUrlState(newUrlState: UrlState): Action {
+export function updateUrlState(newUrlState: UrlState | null): Action {
   return { type: 'UPDATE_URL_STATE', newUrlState };
 }

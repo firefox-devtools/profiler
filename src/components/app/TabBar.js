@@ -6,23 +6,21 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
-import Reorderable from '../shared/Reorderable';
 
-import type { Action } from '../../types/actions';
-import type { TabWithTitle } from '../../app-logic/tabs-handling';
+import { tabsWithTitle, type TabSlug } from '../../app-logic/tabs-handling';
+
+import './TabBar.css';
 
 type Props = {|
   +className?: string,
-  +tabs: $ReadOnlyArray<TabWithTitle>,
-  +selectedTabName: string,
-  +tabOrder: number[],
+  +selectedTabSlug: string,
+  +visibleTabs: $ReadOnlyArray<TabSlug>,
   +onSelectTab: string => void,
-  +onChangeTabOrder: (number[]) => Action,
   +extraElements?: React.Node,
 |};
 
 class TabBar extends React.PureComponent<Props> {
-  _mouseDownListener = (e: SyntheticMouseEvent<HTMLElement>) => {
+  _onClickListener = (e: SyntheticMouseEvent<HTMLElement>) => {
     this.props.onSelectTab(e.currentTarget.dataset.name);
     // Prevent focusing the tab so that actual content like the
     // calltree can perform its own focusing.
@@ -32,35 +30,48 @@ class TabBar extends React.PureComponent<Props> {
   render() {
     const {
       className,
-      tabs,
-      selectedTabName,
-      tabOrder,
-      onChangeTabOrder,
+      selectedTabSlug,
+      visibleTabs,
       extraElements,
     } = this.props;
     return (
       <div className={classNames('tabBarContainer', className)}>
-        <Reorderable
-          tagName="ol"
+        <ol
           className="tabBarTabWrapper"
-          grippyClassName="grippy"
-          order={tabOrder}
-          orient="horizontal"
-          onChangeOrder={onChangeTabOrder}
+          role="tablist"
+          aria-label="Profiler tabs"
         >
-          {tabs.map(({ name, title }, i) => (
+          {visibleTabs.map(tabSlug => (
             <li
-              className={classNames('tabBarTab', 'grippy', {
-                selected: name === selectedTabName,
+              className={classNames({
+                tabBarTab: true,
+                selected: tabSlug === selectedTabSlug,
               })}
-              key={i}
-              data-name={name}
-              onMouseDown={this._mouseDownListener}
+              key={tabSlug}
+              data-name={tabSlug}
+              onClick={this._onClickListener}
             >
-              {title}
+              {/* adding a button for better keyboard navigation and
+              adding ARIA attributes for screen reader support.*/}
+              <button
+                className="tabBarTabButton"
+                type="button"
+                // The tab's id attribute connects the tab to its tabpanel
+                // that has an aria-labelledby attribute of the same value.
+                // The id is not used for CSS styling.
+                id={`${tabSlug}-tab-button`}
+                role="tab"
+                aria-selected={tabSlug === selectedTabSlug}
+                // The control and content relationship is established
+                // with aria-controls attribute
+                // (the tabbanel has an id of the same value).
+                aria-controls={`${tabSlug}-tab`}
+              >
+                {tabsWithTitle[tabSlug]}
+              </button>
             </li>
           ))}
-        </Reorderable>
+        </ol>
         {extraElements}
       </div>
     );

@@ -25,6 +25,8 @@ type State = {
 class IdleSearchField extends PureComponent<Props, State> {
   _timeout: TimeoutID | null = null;
   _previouslyNotifiedValue: string;
+  _input: HTMLInputElement | null = null;
+  _takeInputRef = (input: HTMLInputElement | null) => (this._input = input);
 
   constructor(props: Props) {
     super(props);
@@ -72,6 +74,10 @@ class IdleSearchField extends PureComponent<Props, State> {
   }
 
   _onClearButtonClick = () => {
+    if (this._input) {
+      this._input.focus();
+    }
+
     if (this._timeout !== null) {
       clearTimeout(this._timeout);
       this._timeout = null;
@@ -80,17 +86,6 @@ class IdleSearchField extends PureComponent<Props, State> {
     this.setState({ value: '' });
     this._notifyIfChanged('');
   };
-
-  _onClearButtonFocus(
-    e: SyntheticEvent<HTMLElement> & { relatedTarget: HTMLElement }
-  ) {
-    // prevent the focus on the clear button
-    if (e.relatedTarget) {
-      e.relatedTarget.focus();
-    } else {
-      e.currentTarget.blur();
-    }
-  }
 
   _onFormSubmit(e: SyntheticEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -122,12 +117,13 @@ class IdleSearchField extends PureComponent<Props, State> {
           onChange={this._onSearchFieldChange}
           onFocus={this._onSearchFieldFocus}
           onBlur={this._onSearchFieldBlur}
+          ref={this._takeInputRef}
         />
         <input
           type="reset"
           className="idleSearchFieldButton"
           onClick={this._onClearButtonClick}
-          onFocus={this._onClearButtonFocus}
+          tabIndex={-1}
         />
       </form>
     );

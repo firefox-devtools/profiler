@@ -15,21 +15,16 @@ import StackChart from '../stack-chart/';
 import MarkerChart from '../marker-chart/';
 import NetworkChart from '../network-chart/';
 import FlameGraph from '../flame-graph/';
+import JsTracer from '../js-tracer/';
 import selectSidebar from '../sidebar';
 
-import {
-  changeSelectedTab,
-  changeTabOrder,
-  changeSidebarOpenState,
-} from '../../actions/app';
-import { getTabOrder } from '../../reducers/profile-view';
-import { getSelectedTab } from '../../reducers/url-state';
-import { getIsSidebarOpen } from '../../reducers/app';
+import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
+import { getSelectedTab } from '../../selectors/url-state';
+import { getIsSidebarOpen, getVisibleTabs } from '../../selectors/app';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
-import { tabsWithTitleArray } from '../../app-logic/tabs-handling';
 
 import type {
   ExplicitConnectOptions,
@@ -41,14 +36,13 @@ import '../../../res/css/photon-components.css';
 import './Details.css';
 
 type StateProps = {|
-  +tabOrder: number[],
+  +visibleTabs: $ReadOnlyArray<TabSlug>,
   +selectedTab: TabSlug,
   +isSidebarOpen: boolean,
 |};
 
 type DispatchProps = {|
   +changeSelectedTab: typeof changeSelectedTab,
-  +changeTabOrder: typeof changeTabOrder,
   +changeSidebarOpenState: typeof changeSidebarOpenState,
 |};
 
@@ -70,7 +64,7 @@ class ProfileViewer extends PureComponent<Props> {
   };
 
   render() {
-    const { tabOrder, selectedTab, isSidebarOpen, changeTabOrder } = this.props;
+    const { visibleTabs, selectedTab, isSidebarOpen } = this.props;
     const hasSidebar = selectSidebar(selectedTab) !== null;
     const extraButton = hasSidebar && (
       <button
@@ -92,11 +86,9 @@ class ProfileViewer extends PureComponent<Props> {
     return (
       <div className="Details">
         <TabBar
-          tabs={tabsWithTitleArray}
-          selectedTabName={selectedTab}
-          tabOrder={tabOrder}
+          selectedTabSlug={selectedTab}
+          visibleTabs={visibleTabs}
           onSelectTab={this._onSelectTab}
-          onChangeTabOrder={changeTabOrder}
           extraElements={extraButton}
         />
         {
@@ -107,6 +99,7 @@ class ProfileViewer extends PureComponent<Props> {
             'marker-chart': <MarkerChart />,
             'marker-table': <MarkerTable />,
             'network-chart': <NetworkChart />,
+            'js-tracer': <JsTracer />,
           }[selectedTab]
         }
         <CallNodeContextMenu />
@@ -119,13 +112,12 @@ class ProfileViewer extends PureComponent<Props> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
-    tabOrder: getTabOrder(state),
+    visibleTabs: getVisibleTabs(state),
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
   }),
   mapDispatchToProps: {
     changeSelectedTab,
-    changeTabOrder,
     changeSidebarOpenState,
   },
   component: ProfileViewer,

@@ -9,9 +9,9 @@ import sinon from 'sinon';
 
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
-import * as ZippedProfilesSelectors from '../../reducers/zipped-profiles';
-import { getView } from '../../reducers/app';
+import * as ProfileViewSelectors from '../../selectors/profile';
+import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
+import { getView } from '../../selectors/app';
 import {
   viewProfile,
   retrieveProfileFromAddon,

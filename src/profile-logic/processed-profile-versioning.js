@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 16; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 19; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -782,6 +782,122 @@ const _upgraders = {
         }
       }
       thread.markers.data = newDataArray;
+    }
+  },
+  [17]: profile => {
+    // Profiles now have a relevantForJS property in the funcTable.
+    // This column is false on C++ and JS frames, and true on label frames that
+    // are entry and exit points to JS.
+    // The upgrader below tries to detect existing JS entry and exit points
+    // based on the string name of the label frame.
+    // Existing entry points in old profiles are label frames with the string
+    // "AutoEntryScript <some entry reason>"
+    // and existing exit points in old profiles are label frames for WebIDL
+    // APIs, which have one of four forms: constructor, method, getter or setter.
+    // Examples:
+    // StructuredCloneHolder constructor
+    // Node.appendChild
+    // get Element.scrollTop
+    // set CSS2Properties.height
+    const domCallRegex = /^(get |set )?\w+(\.\w+| constructor)$/;
+    for (const thread of profile.threads) {
+      const { funcTable, stringArray } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      funcTable.relevantForJS = new Array(funcTable.length);
+      for (let i = 0; i < funcTable.length; i++) {
+        const location = stringTable.getString(funcTable.name[i]);
+        if (location.startsWith('AutoEntryScript ')) {
+          funcTable.name[i] = stringTable.indexForString(
+            location.substring('AutoEntryScript '.length)
+          );
+          funcTable.relevantForJS[i] = true;
+        } else {
+          funcTable.relevantForJS[i] = domCallRegex.test(location);
+        }
+      }
+      thread.stringArray = stringTable.serializeToArray();
+    }
+  },
+  [18]: profile => {
+    // When we added column numbers we forgot to update the func table.
+    // As a result, when we had a column number for an entry, the line number
+    // ended up in the `fileName` property, and the column number in the
+    // `lineNumber` property.
+    // We update the func table with right values of 'fileName', 'lineNumber' and 'columnNumber'.
+    for (const thread of profile.threads) {
+      const { funcTable, stringArray } = thread;
+      const stringTable = new UniqueStringArray(stringArray);
+      funcTable.columnNumber = [];
+      for (
+        let funcIndex = 0;
+        funcIndex < thread.funcTable.length;
+        funcIndex++
+      ) {
+        funcTable.columnNumber[funcIndex] = null;
+        if (funcTable.isJS[funcIndex]) {
+          const fileNameIndex = funcTable.fileName[funcIndex];
+          if (fileNameIndex !== null) {
+            const fileName = stringTable.getString(fileNameIndex);
+            const match = /^(.*):([0-9]+)$/.exec(fileName);
+            if (match) {
+              // If this regexp matches, this means that this is a lineNumber, and that the
+              // value in `lineNumber` is actually the column number.
+              funcTable.columnNumber[funcIndex] =
+                funcTable.lineNumber[funcIndex];
+              funcTable.fileName[funcIndex] = stringTable.indexForString(
+                match[1]
+              );
+              funcTable.lineNumber[funcIndex] = parseInt(match[2], 10);
+            }
+          }
+        }
+      }
+      thread.stringArray = stringTable.serializeToArray();
+    }
+  },
+  [19]: profile => {
+    // When we added timing information to network markers, we forgot to shift
+    // timestamps from subprocesses during profile processing. This upgrade
+    // fixes that.
+    for (const thread of profile.threads) {
+      const markers = thread.markers;
+      const delta = thread.processStartupTime;
+      for (
+        let markerIndex = 0;
+        markerIndex < thread.markers.length;
+        markerIndex++
+      ) {
+        const data = markers.data[markerIndex];
+        if (data && 'type' in data && data.type === 'Network') {
+          if (data.domainLookupStart) {
+            data.domainLookupStart += delta;
+          }
+          if (data.domainLookupEnd) {
+            data.domainLookupEnd += delta;
+          }
+          if (data.connectStart) {
+            data.connectStart += delta;
+          }
+          if (data.tcpConnectEnd) {
+            data.tcpConnectEnd += delta;
+          }
+          if (data.secureConnectionStart) {
+            data.secureConnectionStart += delta;
+          }
+          if (data.connectEnd) {
+            data.connectEnd += delta;
+          }
+          if (data.requestStart) {
+            data.requestStart += delta;
+          }
+          if (data.responseStart) {
+            data.responseStart += delta;
+          }
+          if (data.responseEnd) {
+            data.responseEnd += delta;
+          }
+        }
+      }
     }
   },
 };

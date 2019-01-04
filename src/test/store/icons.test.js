@@ -5,7 +5,7 @@
 
 import { createImageMock } from '../fixtures/mocks/image';
 import { blankStore } from '../fixtures/stores';
-import * as iconsAccessors from '../../reducers/icons';
+import * as iconsAccessors from '../../selectors/icons';
 import * as iconsActions from '../../actions/icons';
 import type { CallNodeDisplayData } from '../../types/profile-derived';
 
@@ -59,14 +59,6 @@ describe('actions/icons', function() {
       expect(initialState.size).toEqual(0);
     });
 
-    it('getIconForCallNode returns null for any icon', function() {
-      const subject = iconsAccessors.getIconForCallNode(
-        getInitialState(),
-        _createCallNodeWithIcon(validIcons[0])
-      );
-      expect(subject).toBeNull();
-    });
-
     it('getIconClassNameForCallNode returns an empty string for any icon', function() {
       const subject = iconsAccessors.getIconClassNameForCallNode(
         getInitialState(),
@@ -111,12 +103,6 @@ describe('actions/icons', function() {
       );
 
       validIcons.forEach((icon, i) => {
-        subject = iconsAccessors.getIconForCallNode(
-          state,
-          _createCallNodeWithIcon(icon)
-        );
-        expect(subject).toEqual(icon);
-
         subject = iconsAccessors.getIconClassNameForCallNode(
           state,
           _createCallNodeWithIcon(icon)
@@ -140,12 +126,6 @@ describe('actions/icons', function() {
       const state = getState();
       let subject = iconsAccessors.getIcons(state);
       expect([...subject]).toEqual([]);
-
-      subject = iconsAccessors.getIconForCallNode(
-        state,
-        _createCallNodeWithIcon(invalidIcon)
-      );
-      expect(subject).toBeNull();
 
       subject = iconsAccessors.getIconClassNameForCallNode(
         state,

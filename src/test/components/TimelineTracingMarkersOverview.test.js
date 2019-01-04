@@ -56,6 +56,26 @@ describe('TimelineTracingMarkersOverview', function() {
         5,
         { type: 'BHR-detected hang', startTime: 2, endTime: 13 },
       ],
+      [
+        'LongTask',
+        6,
+        {
+          type: 'MainThreadLongTask',
+          category: 'LongTask',
+          startTime: 2,
+          endTime: 6,
+        },
+      ],
+      [
+        'LongIdleTask',
+        8,
+        {
+          type: 'MainThreadLongTask',
+          category: 'LongTask',
+          startTime: 6,
+          endTime: 8,
+        },
+      ],
     ]);
 
     const overview = renderer.create(
@@ -71,6 +91,9 @@ describe('TimelineTracingMarkersOverview', function() {
       { createNodeMock }
     );
 
+    // We need to flush twice since when the first flush is run, it
+    // will request more code to be run in later animation frames.
+    flushRafCalls();
     flushRafCalls();
 
     const tree = overview.toJSON();

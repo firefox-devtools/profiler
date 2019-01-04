@@ -16,8 +16,8 @@ import {
   formatValueTotal,
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
-import { selectorsForThread } from '../../reducers/profile-view';
-import { getImplementationFilter } from '../../reducers/url-state';
+import { getThreadSelectors } from '../../selectors/per-thread';
+import { getImplementationFilter } from '../../selectors/url-state';
 
 import Backtrace from './Backtrace';
 
@@ -370,6 +370,13 @@ function getMarkerDetails(
           </div>
         );
       }
+      case 'Text': {
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('name', 'Name', data.name)}
+          </div>
+        );
+      }
       case 'GCMinor': {
         if (data.nursery) {
           const nursery = data.nursery;
@@ -478,6 +485,14 @@ function getMarkerDetails(
                         'Time spent allocating chunks in mutator',
                         nursery.chunk_alloc_us,
                         formatMicroseconds
+                      )
+                    : null}
+                  {nursery.groups_pretenured
+                    ? _markerDetail(
+                        'gcpretenured',
+                        'Number of groups to pretenure',
+                        nursery.groups_pretenured,
+                        x => formatNumber(x, 2, 0)
                       )
                     : null}
                   {_makePhaseTimesArray(nursery.phase_times)
@@ -799,10 +814,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
             <div className="tooltipTiming">
-              {/* tracing markers with no start have a negative start, while the
-                ones with no end have an infinite duration */}
-              {Number.isFinite(marker.dur) && marker.start >= 0
-                ? formatNumber(marker.dur) + 'ms'
+              {/* we don't know the duration if the marker is incomplete */}
+              {!marker.incomplete
+                ? formatMilliseconds(marker.dur)
                 : 'unknown duration'}
             </div>
             <div className="tooltipTitle">{marker.title || marker.name}</div>
@@ -823,7 +837,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
-    const selectors = selectorsForThread(threadIndex);
+    const selectors = getThreadSelectors(threadIndex);
     const threadName = selectors.getFriendlyThreadName(state);
     const thread = selectors.getThread(state);
     const implementationFilter = getImplementationFilter(state);

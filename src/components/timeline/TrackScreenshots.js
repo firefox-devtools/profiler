@@ -5,17 +5,17 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { createPortal } from 'react-dom';
 import explicitConnect from '../../utils/connect';
 import {
-  selectorsForThread,
   getCommittedRange,
   getPreviewSelection,
-} from '../../reducers/profile-view';
+} from '../../selectors/profile';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import { withSize, type SizeProps } from '../shared/WithSize';
+import { createPortal } from 'react-dom';
 
-import type { ThreadIndex, Thread } from '../../types/profile';
 import type { ScreenshotPayload } from '../../types/markers';
+import type { ThreadIndex, Thread } from '../../types/profile';
 import type { TracingMarker } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 import type {
@@ -49,8 +49,6 @@ type State = {|
 
 // Export the value for tests.
 export const TRACK_HEIGHT = 50;
-const HOVER_HEIGHT = 100;
-const HOVER_MAX_WIDTH_RATIO = 1.75;
 
 class Screenshots extends PureComponent<Props, State> {
   state = {
@@ -59,11 +57,103 @@ class Screenshots extends PureComponent<Props, State> {
     containerTop: null,
   };
 
-  _overlayElement = ensureExists(
-    document.querySelector('#root-overlay'),
-    'Expected to find a root overlay element.'
-  );
+  _handleMouseLeave = () => {
+    this.setState({
+      offsetX: null,
+      pageX: null,
+      containerTop: null,
+    });
+  };
 
+  _handleMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
+    const { top, left } = event.currentTarget.getBoundingClientRect();
+    this.setState({
+      pageX: event.pageX,
+      offsetX: event.pageX - left,
+      containerTop: top,
+    });
+  };
+
+  render() {
+    const {
+      screenshots,
+      thread,
+      isMakingPreviewSelection,
+      width,
+      rangeStart,
+      rangeEnd,
+    } = this.props;
+    const { pageX, offsetX, containerTop } = this.state;
+    return (
+      <div
+        className="timelineTrackScreenshot"
+        style={{ height: TRACK_HEIGHT }}
+        onMouseLeave={this._handleMouseLeave}
+        onMouseMove={this._handleMouseMove}
+      >
+        <ScreenshotStrip
+          thread={thread}
+          width={width}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          screenshots={screenshots}
+        />
+        <HoverPreview
+          screenshots={screenshots}
+          thread={thread}
+          isMakingPreviewSelection={isMakingPreviewSelection}
+          width={width}
+          pageX={pageX}
+          offsetX={offsetX}
+          containerTop={containerTop}
+          rangeEnd={rangeEnd}
+          rangeStart={rangeStart}
+        />
+      </div>
+    );
+  }
+}
+
+const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+  mapStateToProps: (state, ownProps) => {
+    const { threadIndex, windowId } = ownProps;
+    const selectors = getThreadSelectors(threadIndex);
+    const { start, end } = getCommittedRange(state);
+    const previewSelection = getPreviewSelection(state);
+    return {
+      thread: selectors.getRangeFilteredThread(state),
+      screenshots: ensureExists(
+        selectors.getRangeFilteredScreenshotsById(state).get(windowId),
+        'Expected to find screenshots for the given pid'
+      ),
+      threadName: selectors.getFriendlyThreadName(state),
+      rangeStart: start,
+      rangeEnd: end,
+      isMakingPreviewSelection:
+        previewSelection.hasSelection && previewSelection.isModifying,
+    };
+  },
+  component: Screenshots,
+};
+
+export default withSize(explicitConnect(options));
+
+type HoverPreviewProps = {|
+  +thread: Thread,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +screenshots: TracingMarker[],
+  +isMakingPreviewSelection: boolean,
+  +offsetX: null | number,
+  +pageX: null | number,
+  +containerTop: null | number,
+  +width: number,
+|};
+
+const HOVER_HEIGHT = 100;
+const HOVER_MAX_WIDTH_RATIO = 1.75;
+
+class HoverPreview extends PureComponent<HoverPreviewProps> {
   findScreenshotAtMouse(offsetX: number): number | null {
     const { width, rangeStart, rangeEnd, screenshots } = this.props;
     const rangeLength = rangeEnd - rangeStart;
@@ -81,11 +171,80 @@ class Screenshots extends PureComponent<Props, State> {
     return null;
   }
 
-  /**
-   * This function runs through all of the screenshots, and then samples the last known
-   * screenshot, and places it on the screen, making a film strip.
-   */
-  renderScreenshotStrip() {
+  _overlayElement = ensureExists(
+    document.querySelector('#root-overlay'),
+    'Expected to find a root overlay element.'
+  );
+
+  render() {
+    const {
+      screenshots,
+      thread,
+      isMakingPreviewSelection,
+      width,
+      pageX,
+      offsetX,
+      containerTop,
+    } = this.props;
+
+    if (isMakingPreviewSelection || offsetX === null || pageX === null) {
+      return null;
+    }
+
+    const screenshotIndex = this.findScreenshotAtMouse(offsetX);
+    if (screenshotIndex === null) {
+      return null;
+    }
+
+    // Coerce the payload into a screenshot one.
+    const payload: ScreenshotPayload = (screenshots[screenshotIndex].data: any);
+    const { url, windowWidth, windowHeight } = payload;
+
+    // Compute the hover image's thumbnail size.
+    let hoverHeight = HOVER_HEIGHT;
+    let hoverWidth = HOVER_HEIGHT / windowHeight * windowWidth;
+
+    if (hoverWidth > HOVER_HEIGHT * HOVER_MAX_WIDTH_RATIO) {
+      // This is a really wide image, limit the height so it lays out reasonably.
+      hoverWidth = HOVER_HEIGHT * HOVER_MAX_WIDTH_RATIO;
+      hoverHeight = hoverWidth / windowWidth * windowHeight;
+    }
+
+    // Set the top so it centers around the track.
+    const top = containerTop + (TRACK_HEIGHT - hoverHeight) * 0.5;
+    const left =
+      offsetX + hoverWidth * 0.5 > width
+        ? // Stick the hover image on to the right side of the container.
+          pageX - offsetX + width - hoverWidth
+        : // Center the hover image around the mouse.
+          pageX - hoverWidth * 0.5;
+
+    return createPortal(
+      <div className="timelineTrackScreenshotHover" style={{ left, top }}>
+        <img
+          className="timelineTrackScreenshotHoverImg"
+          src={thread.stringTable.getString(url)}
+          style={{
+            height: hoverHeight,
+            width: hoverWidth,
+          }}
+        />
+      </div>,
+      this._overlayElement
+    );
+  }
+}
+
+type ScreenshotStripProps = {|
+  +thread: Thread,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +screenshots: TracingMarker[],
+  +width: number,
+|};
+
+class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
+  render() {
     const {
       thread,
       width: outerContainerWidth,
@@ -141,113 +300,6 @@ class Screenshots extends PureComponent<Props, State> {
         </div>
       );
     }
-
     return images;
   }
-
-  renderHoverPreview() {
-    const { pageX, offsetX, containerTop } = this.state;
-    const { screenshots, thread, isMakingPreviewSelection, width } = this.props;
-
-    if (isMakingPreviewSelection || offsetX === null || pageX === null) {
-      return null;
-    }
-
-    const screenshotIndex = this.findScreenshotAtMouse(offsetX);
-    if (screenshotIndex === null) {
-      return null;
-    }
-
-    // Coerce the payload into a screenshot one.
-    const payload: ScreenshotPayload = (screenshots[screenshotIndex].data: any);
-    const { url, windowWidth, windowHeight } = payload;
-
-    // Compute the hover image's thumbnail size.
-    let hoverHeight = HOVER_HEIGHT;
-    let hoverWidth = HOVER_HEIGHT / windowHeight * windowWidth;
-
-    if (hoverWidth > HOVER_HEIGHT * HOVER_MAX_WIDTH_RATIO) {
-      // This is a really wide image, limit the height so it lays out reasonably.
-      hoverWidth = HOVER_HEIGHT * HOVER_MAX_WIDTH_RATIO;
-      hoverHeight = hoverWidth / windowWidth * windowHeight;
-    }
-
-    // Set the top so it centers around the track.
-    const top = containerTop + (TRACK_HEIGHT - hoverHeight) * 0.5;
-    const left =
-      offsetX + hoverWidth * 0.5 > width
-        ? // Stick the hover image on to the right side of the container.
-          pageX - offsetX + width - hoverWidth * 0.5
-        : // Center the hover image around the mouse.
-          pageX;
-
-    return createPortal(
-      <div className="timelineTrackScreenshotHover" style={{ left, top }}>
-        <img
-          className="timelineTrackScreenshotHoverImg"
-          src={thread.stringTable.getString(url)}
-          style={{
-            height: hoverHeight,
-            width: hoverWidth,
-          }}
-        />
-      </div>,
-      this._overlayElement
-    );
-  }
-
-  _handleMouseLeave = () => {
-    this.setState({
-      offsetX: null,
-      pageX: null,
-      containerTop: null,
-    });
-  };
-
-  _handleMouseMove = (event: SyntheticMouseEvent<HTMLDivElement>) => {
-    const { top, left } = event.currentTarget.getBoundingClientRect();
-    this.setState({
-      pageX: event.pageX,
-      offsetX: event.pageX - left,
-      containerTop: top,
-    });
-  };
-
-  render() {
-    return (
-      <div
-        className="timelineTrackScreenshot"
-        style={{ height: TRACK_HEIGHT }}
-        onMouseLeave={this._handleMouseLeave}
-        onMouseMove={this._handleMouseMove}
-      >
-        {this.renderScreenshotStrip()}
-        {this.renderHoverPreview()}
-      </div>
-    );
-  }
 }
-
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
-  mapStateToProps: (state, ownProps) => {
-    const { threadIndex, windowId } = ownProps;
-    const selectors = selectorsForThread(threadIndex);
-    const { start, end } = getCommittedRange(state);
-    const previewSelection = getPreviewSelection(state);
-    return {
-      thread: selectors.getRangeFilteredThread(state),
-      screenshots: ensureExists(
-        selectors.getRangeFilteredScreenshotsById(state).get(windowId),
-        'Expected to find screenshots for the given pid'
-      ),
-      threadName: selectors.getFriendlyThreadName(state),
-      rangeStart: start,
-      rangeEnd: end,
-      isMakingPreviewSelection:
-        previewSelection.hasSelection && previewSelection.isModifying,
-    };
-  },
-  component: Screenshots,
-};
-
-export default withSize(explicitConnect(options));

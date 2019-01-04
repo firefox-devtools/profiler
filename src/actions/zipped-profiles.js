@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getZipFileTable, getZipFileState } from '../reducers/zipped-profiles';
+import { getZipFileTable, getZipFileState } from '../selectors/zipped-profiles';
 import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
 import { viewProfile } from './receive-profile';
 
@@ -54,7 +54,7 @@ export function viewProfileFromZip(
 
     try {
       // Attempt to unserialize the profile.
-      const profile = unserializeProfileOfArbitraryFormat(
+      const profile = await unserializeProfileOfArbitraryFormat(
         await file.async('string')
       );
 

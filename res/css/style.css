@@ -327,9 +327,13 @@ body,
   border-bottom: 1px solid var(--grey-30);
 }
 
+.profileViewerSpacer {
+  flex: 1;
+}
+
 .profileFilterNavigator {
   height: 24px;
-  flex: 1;
+  flex-shrink: 1;
 }
 
 .tabBarContainer {

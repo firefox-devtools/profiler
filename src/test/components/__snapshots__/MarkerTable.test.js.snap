@@ -2,7 +2,10 @@
 
 exports[`MarkerTable renders some basic markers 1`] = `
 <div
+  aria-labelledby="marker-table-tab-button"
   className="markerTable"
+  id="marker-table-tab"
+  role="tabpanel"
 >
   <div
     className="markerSettings"
@@ -35,7 +38,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
           <input
             className="idleSearchFieldButton"
             onClick={[Function]}
-            onFocus={[Function]}
+            tabIndex={-1}
             type="reset"
           />
         </form>

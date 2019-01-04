@@ -5,7 +5,10 @@
 
 // Disabling the call tree's sidebar until it's useful
 // https://github.com/devtools-html/perf.html/issues/914
+import * as React from 'react';
+
 import CallTreeSidebar from './CallTreeSidebar';
+import MarkerSidebar from './MarkerSidebar';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
 
@@ -19,7 +22,8 @@ export default function selectSidebar(
     'flame-graph': CallTreeSidebar,
     'stack-chart': null,
     'marker-chart': null,
-    'marker-table': null,
+    'marker-table': MarkerSidebar, // MarkerSidebar
     'network-chart': null,
+    'js-tracer': null,
   }[selectedTab];
 }

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
 
 describe('selectors/getMarkerChartTiming', function() {
@@ -89,7 +89,9 @@ describe('selectors/getMarkerChartTiming', function() {
       expect(markerTiming).toEqual([
         {
           name: 'Rasterize',
-          start: [-1],
+          // First sample is captured at time 1, so this incomplete
+          // marker will start at that same point.
+          start: [1],
           end: [1],
           index: [0],
           label: [''],

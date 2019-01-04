@@ -19,12 +19,9 @@ import NetworkChartRow from './NetworkChartRow';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 
-import {
-  selectedThreadSelectors,
-  getCommittedRange,
-  getProfileInterval,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -84,7 +81,12 @@ class NetworkChart extends React.PureComponent<Props> {
   render() {
     const { markers } = this.props;
     return (
-      <div className="networkChart">
+      <div
+        className="networkChart"
+        id="network-chart-tab"
+        role="tabpanel"
+        aria-labelledby="network-chart-tab-button"
+      >
         <MarkerSettings />
         {markers.length === 0 ? (
           <NetworkChartEmptyReasons />
@@ -207,7 +209,7 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
     // Set min-width for marker bar.
     let markerWidth = endPosition - startPosition;
     if (markerWidth < 1) {
-      markerWidth = 2;
+      markerWidth = 2.5;
     }
 
     return {

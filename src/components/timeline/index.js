@@ -12,14 +12,17 @@ import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import Reorderable from '../shared/Reorderable';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
-import { getPanelLayoutGeneration } from '../../reducers/app';
+import { getPanelLayoutGeneration } from '../../selectors/app';
 import {
   getCommittedRange,
   getZeroAt,
   getGlobalTracks,
   getGlobalTrackReferences,
-} from '../../reducers/profile-view';
-import { getGlobalTrackOrder, getTimelineType } from '../../reducers/url-state';
+} from '../../selectors/profile';
+import {
+  getGlobalTrackOrder,
+  getTimelineType,
+} from '../../selectors/url-state';
 import './index.css';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -32,7 +35,7 @@ import {
 } from '../../actions/profile-view';
 
 import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
-import type { TrackReference, TimelineType } from '../../types/actions';
+import type { GlobalTrackReference, TimelineType } from '../../types/actions';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -45,7 +48,7 @@ type StateProps = {|
   +committedRange: StartEndRange,
   +globalTracks: GlobalTrack[],
   +globalTrackOrder: TrackIndex[],
-  +globalTrackReferences: TrackReference[],
+  +globalTrackReferences: GlobalTrackReference[],
   +panelLayoutGeneration: number,
   +zeroAt: Milliseconds,
   +timelineType: TimelineType,

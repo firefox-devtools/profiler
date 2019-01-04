@@ -6,8 +6,8 @@
 
 import explicitConnect from '../../utils/connect';
 import { popCommittedRanges } from '../../actions/profile-view';
-import { getPreviewSelection } from '../../reducers/profile-view';
-import { getCommittedRangeLabels } from '../../reducers/url-state';
+import { getPreviewSelection } from '../../selectors/profile';
+import { getCommittedRangeLabels } from '../../selectors/url-state';
 import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
 import FilterNavigatorBar from '../shared/FilterNavigatorBar';
 

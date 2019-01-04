@@ -770,8 +770,10 @@ export function collapseResource(
     isJS: funcTable.isJS.slice(),
     name: funcTable.name.slice(),
     resource: funcTable.resource.slice(),
+    relevantForJS: funcTable.relevantForJS.slice(),
     fileName: funcTable.fileName.slice(),
     lineNumber: funcTable.lineNumber.slice(),
+    columnNumber: funcTable.columnNumber.slice(),
     length: funcTable.length,
   };
   const newStackTable: StackTable = {
@@ -851,6 +853,7 @@ export function collapseResource(
             newFuncTable.resource.push(funcTable.resource[funcIndex]);
             newFuncTable.fileName.push(funcTable.fileName[funcIndex]);
             newFuncTable.lineNumber.push(null);
+            newFuncTable.columnNumber.push(null);
           }
 
           // Add the new stack.
@@ -1423,4 +1426,58 @@ export function funcHasRecursiveCall(
     }
   }
   return false;
+}
+
+export function applyTransform(
+  thread: Thread,
+  transform: Transform,
+  defaultCategory: IndexIntoCategoryList
+): Thread {
+  switch (transform.type) {
+    case 'focus-subtree':
+      return transform.inverted
+        ? focusInvertedSubtree(
+            thread,
+            transform.callNodePath,
+            transform.implementation
+          )
+        : focusSubtree(
+            thread,
+            transform.callNodePath,
+            transform.implementation
+          );
+    case 'merge-call-node':
+      return mergeCallNode(
+        thread,
+        transform.callNodePath,
+        transform.implementation
+      );
+    case 'merge-function':
+      return mergeFunction(thread, transform.funcIndex);
+    case 'drop-function':
+      return dropFunction(thread, transform.funcIndex);
+    case 'focus-function':
+      return focusFunction(thread, transform.funcIndex);
+    case 'collapse-resource':
+      return collapseResource(
+        thread,
+        transform.resourceIndex,
+        transform.implementation,
+        defaultCategory
+      );
+    case 'collapse-direct-recursion':
+      return collapseDirectRecursion(
+        thread,
+        transform.funcIndex,
+        transform.implementation
+      );
+    case 'collapse-function-subtree':
+      return collapseFunctionSubtree(
+        thread,
+        transform.funcIndex,
+        defaultCategory
+      );
+    default:
+      throw assertExhaustiveCheck(transform);
+  }
 }
