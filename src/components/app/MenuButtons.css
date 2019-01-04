@@ -112,6 +112,7 @@
 }
 
 .currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsPermalinkButton, 
+.menuButtonsPermalinkButtonButton,
 .menuButtonsShareButtonButton, 
 .menuButtonsUploadErrorButtonButton,
 .menuButtonsUploadingButtonInner {
