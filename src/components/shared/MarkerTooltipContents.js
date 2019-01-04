@@ -553,6 +553,24 @@ function getMarkerDetails(
               timings.phase_times,
               6
             );
+            let gcsize;
+            const post_heap_size = timings.post_heap_size;
+            if (post_heap_size !== undefined) {
+              gcsize = _markerDetail(
+                'gcsize',
+                'Heap size',
+                formatBytes(timings.allocated_bytes) +
+                  ' - ' +
+                  formatBytes(post_heap_size)
+              );
+            } else {
+              gcsize = _markerDetail(
+                'gcsizepre',
+                'Heap size (pre)',
+                timings.allocated_bytes,
+                formatBytes
+              );
+            }
             return (
               <div className="tooltipDetails">
                 {_markerDetail('gcreason', 'Reason', timings.reason)}
@@ -579,12 +597,7 @@ function getMarkerDetails(
                       /* maxFractionalDigits */ 2
                     )
                 )}
-                {_markerDetail(
-                  'gcusage',
-                  'Heap size',
-                  timings.allocated_bytes,
-                  formatBytes
-                )}
+                {gcsize}
                 {_markerDetail(
                   'gcmmu20ms',
                   'MMU 20ms',
