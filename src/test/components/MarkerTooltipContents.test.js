@@ -5,7 +5,7 @@
 // @flow
 import type { NetworkPayload } from '../../types/markers';
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { Provider } from 'react-redux';
 import MarkersTooltipContents from '../../components/shared/MarkerTooltipContents';
 import renderer from 'react-test-renderer';
@@ -390,21 +390,23 @@ describe('MarkerTooltipContents', function() {
     const threadIndex = getSelectedThreadIndex(state);
     const markers = selectedThreadSelectors.getMarkers(state);
 
-    expect(
-      renderer.create(
-        <Provider store={store}>
-          <Fragment>
-            {markers.map((marker, i) => (
-              <MarkersTooltipContents
-                key={i}
-                marker={marker}
-                threadIndex={threadIndex}
-                className="propClass"
-              />
-            ))}
-          </Fragment>
-        </Provider>
-      )
-    ).toMatchSnapshot();
+    markers.forEach((marker, i) => {
+      expect(
+        renderer.create(
+          <Provider store={store}>
+            <MarkersTooltipContents
+              key={i}
+              marker={marker}
+              threadIndex={threadIndex}
+              className="propClass"
+            />
+          </Provider>
+        )
+      ).toMatchSnapshot(`${marker.name}-${marker.start}`);
+      // Markers are ordered by start time, but for markers with the same start
+      // time the order is implementation-dependent. As a result we use a unique
+      // name for snapshots so that we don't depend on the resulting order in
+      // this test, as this isn't important.
+    });
   });
 });
