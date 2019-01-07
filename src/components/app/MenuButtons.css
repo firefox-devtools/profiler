@@ -83,12 +83,9 @@
   color: white;
 }
 
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadingButton) > .menuButtonsUploadingButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .menuButtonsUploadErrorButton,
-.menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) > .menuButtonsSecondaryShareButton {
-  pointer-events: none;
+.animateDown-enter.animateDown-enter-active {
+  transform: translateY(0);
+  transition: transform 200ms ease-in-out;
 }
 
 .menuButtonsShareButtonButton,
@@ -100,19 +97,20 @@
 }
 
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsShareButton) > .menuButtonsShareButton > .buttonWithPanelButtonWrapper > .menuButtonsShareButtonButton,
-.menuButtonsCompositeButtonContainer.currentButtonIsPermalinkButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
-.menuButtonsCompositeButtonContainer.currentButtonIsUploadErrorButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsSecondaryShareButton) .menuButtonsSecondaryShareButtonButton {
   transform: translateY(-24px);
 }
 
-.menuButtonsCompositeButtonContainer.currentButtonIsShareButton > .menuButtonsUploadingButton > .menuButtonsUploadingButtonInner,
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsPermalinkButton) > .menuButtonsPermalinkButton > .buttonWithPanelButtonWrapper > .menuButtonsPermalinkButtonButton,
 .menuButtonsCompositeButtonContainer:not(.currentButtonIsUploadErrorButton) > .menuButtonsUploadErrorButton > .buttonWithPanelButtonWrapper > .menuButtonsUploadErrorButtonButton {
   transform: translateY(24px);
 }
 
-.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsPermalinkButton {
+.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsPermalinkButton,
+.menuButtonsPermalinkButtonButton,
+.menuButtonsShareButtonButton, 
+.menuButtonsUploadErrorButtonButton,
+.menuButtonsUploadingButtonInner {
   width: 112px;
 }
 
