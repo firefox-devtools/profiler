@@ -971,6 +971,13 @@ describe('actions/receive-profile', function() {
       const { dispatch, getState } = blankStore();
       await dispatch(retrieveProfilesToCompare([fakeUrl1, fakeUrl2]));
 
+      // To find stupid mistakes more easily, check that we didn't get a fatal
+      // error here. If we got one, let's rethrow the error.
+      const view = getView(getState());
+      if (view.phase === 'FATAL_ERROR') {
+        throw view.error;
+      }
+
       const resultProfile = ProfileViewSelectors.getProfile(getState());
       return { profile1, profile2, dispatch, getState, resultProfile };
     }
