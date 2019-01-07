@@ -73,6 +73,7 @@ export function createGeckoProfile(): GeckoProfile {
 
   const parentProcessMeta: GeckoProfileMeta = {
     abi: 'x86_64-gcc3',
+    appBuildID: '20181126165837',
     interval: 1,
     misc: 'rv:48.0',
     oscpu: 'Intel Mac OS X 10.11',
@@ -84,6 +85,9 @@ export function createGeckoProfile(): GeckoProfile {
     shutdownTime: 1560221352723,
     toolkit: 'cocoa',
     version: CURRENT_VERSION,
+    logicalCPUs: 8,
+    physicalCPUs: 4,
+    sourceURL: '',
     categories: [
       {
         name: 'Other',
@@ -103,7 +107,14 @@ export function createGeckoProfile(): GeckoProfile {
     meta: contentProcessMeta,
     pausedRanges: [],
     libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the Gecko profile
-    pages: [],
+    pages: [
+      {
+        docshellId: '{e18794dd-3960-3543-b101-e5ed287ab617}',
+        historyId: 1,
+        url: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
+        isSubFrame: false,
+      },
+    ],
     threads: [
       {
         ..._createGeckoThread(),
