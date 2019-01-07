@@ -287,12 +287,14 @@ Object {
         ],
       },
       "name": "Thread with samples",
+      "pausedRanges": Array [],
       "pid": 0,
+      "processShutdownTime": null,
+      "processStartupTime": 0,
       "processType": "default",
+      "registerTime": 0,
       "resourceTable": Object {
-        "addonId": Array [],
         "host": Array [],
-        "icon": Array [],
         "length": 0,
         "lib": Array [],
         "name": Array [],
@@ -417,6 +419,7 @@ Object {
         },
       },
       "tid": 0,
+      "unregisterTime": null,
     },
     Object {
       "frameTable": Object {
@@ -493,12 +496,14 @@ Object {
         ],
       },
       "name": "Thread with markers",
+      "pausedRanges": Array [],
       "pid": 0,
+      "processShutdownTime": null,
+      "processStartupTime": 0,
       "processType": "default",
+      "registerTime": 0,
       "resourceTable": Object {
-        "addonId": Array [],
         "host": Array [],
-        "icon": Array [],
         "length": 0,
         "lib": Array [],
         "name": Array [],
@@ -573,6 +578,7 @@ Object {
         },
       },
       "tid": 0,
+      "unregisterTime": null,
     },
   ],
 }
@@ -805,12 +811,14 @@ Array [
       ],
     },
     "name": "Thread with samples",
+    "pausedRanges": Array [],
     "pid": 0,
+    "processShutdownTime": null,
+    "processStartupTime": 0,
     "processType": "default",
+    "registerTime": 0,
     "resourceTable": Object {
-      "addonId": Array [],
       "host": Array [],
-      "icon": Array [],
       "length": 0,
       "lib": Array [],
       "name": Array [],
@@ -935,6 +943,7 @@ Array [
       },
     },
     "tid": 0,
+    "unregisterTime": null,
   },
   Object {
     "frameTable": Object {
@@ -1011,12 +1020,14 @@ Array [
       ],
     },
     "name": "Thread with markers",
+    "pausedRanges": Array [],
     "pid": 0,
+    "processShutdownTime": null,
+    "processStartupTime": 0,
     "processType": "default",
+    "registerTime": 0,
     "resourceTable": Object {
-      "addonId": Array [],
       "host": Array [],
-      "icon": Array [],
       "length": 0,
       "lib": Array [],
       "name": Array [],
@@ -1091,6 +1102,7 @@ Array [
       },
     },
     "tid": 0,
+    "unregisterTime": null,
   },
 ]
 `;
@@ -1390,9 +1402,7 @@ CallTree {
   "_isIntegerInterval": true,
   "_jsOnly": false,
   "_resourceTable": Object {
-    "addonId": Array [],
     "host": Array [],
-    "icon": Array [],
     "length": 0,
     "lib": Array [],
     "name": Array [],
@@ -1721,12 +1731,14 @@ Object {
     ],
   },
   "name": "Thread with samples",
+  "pausedRanges": Array [],
   "pid": 0,
+  "processShutdownTime": null,
+  "processStartupTime": 0,
   "processType": "default",
+  "registerTime": 0,
   "resourceTable": Object {
-    "addonId": Array [],
     "host": Array [],
-    "icon": Array [],
     "length": 0,
     "lib": Array [],
     "name": Array [],
@@ -1823,6 +1835,7 @@ Object {
     },
   },
   "tid": 0,
+  "unregisterTime": null,
 }
 `;
 
@@ -2203,12 +2216,14 @@ Object {
     ],
   },
   "name": "Thread with samples",
+  "pausedRanges": Array [],
   "pid": 0,
+  "processShutdownTime": null,
+  "processStartupTime": 0,
   "processType": "default",
+  "registerTime": 0,
   "resourceTable": Object {
-    "addonId": Array [],
     "host": Array [],
-    "icon": Array [],
     "length": 0,
     "lib": Array [],
     "name": Array [],
@@ -2295,6 +2310,7 @@ Object {
     },
   },
   "tid": 0,
+  "unregisterTime": null,
 }
 `;
 
@@ -2578,12 +2594,14 @@ Object {
     ],
   },
   "name": "Thread with samples",
+  "pausedRanges": Array [],
   "pid": 0,
+  "processShutdownTime": null,
+  "processStartupTime": 0,
   "processType": "default",
+  "registerTime": 0,
   "resourceTable": Object {
-    "addonId": Array [],
     "host": Array [],
-    "icon": Array [],
     "length": 0,
     "lib": Array [],
     "name": Array [],
@@ -2680,6 +2698,7 @@ Object {
     },
   },
   "tid": 0,
+  "unregisterTime": null,
 }
 `;
 
@@ -2909,12 +2928,14 @@ Object {
     ],
   },
   "name": "Thread with samples",
+  "pausedRanges": Array [],
   "pid": 0,
+  "processShutdownTime": null,
+  "processStartupTime": 0,
   "processType": "default",
+  "registerTime": 0,
   "resourceTable": Object {
-    "addonId": Array [],
     "host": Array [],
-    "icon": Array [],
     "length": 0,
     "lib": Array [],
     "name": Array [],
@@ -3014,6 +3035,7 @@ Object {
     },
   },
   "tid": 0,
+  "unregisterTime": null,
 }
 `;
 
