@@ -9,6 +9,7 @@ import type {
   GeckoProfile,
   GeckoProfileMeta,
   GeckoThread,
+  GeckoCounter,
   GeckoMarkerStack,
 } from '../../../types/gecko-profile';
 
@@ -123,11 +124,13 @@ export function createGeckoProfile(): GeckoProfile {
         ..._createGeckoThread(),
         name: 'GeckoMain',
         processType: 'default',
+        pid: 3333,
       },
       {
         ..._createGeckoThread(),
         name: 'Compositor',
         processType: 'default',
+        pid: 3333,
       },
     ],
     processes: [contentProcessProfile],
@@ -555,4 +558,32 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
       'javascriptThree (http://js.com/foobar:3:3)', // 11
     ],
   };
+}
+
+export function createGeckoCounters(thread: GeckoThread): GeckoCounter {
+  const geckoCounter: GeckoCounter = {
+    name: 'My Counter',
+    category: 'My Category',
+    description: 'My Description',
+    sample_groups: {
+      id: 0,
+      samples: {
+        schema: {
+          time: 0,
+          number: 1,
+          count: 2,
+        },
+        data: [],
+      },
+    },
+  };
+  for (let i = 0; i < thread.samples.data.length; i++) {
+    // Go through all the thread samples and create a corresponding counter entry.
+    const time = thread.samples.data[i][1];
+    // Create some arbitrary data.
+    const number = Math.sin(i / 50);
+    const count = Math.sin(i / 100);
+    geckoCounter.sample_groups.samples.data.push([time, number, count]);
+  }
+  return geckoCounter;
 }

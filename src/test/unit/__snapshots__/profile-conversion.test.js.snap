@@ -5595,6 +5595,7 @@ Object {
 
 exports[`converting Linux perf profile should import a perf profile 1`] = `
 Object {
+  "counters": Array [],
   "meta": Object {
     "abi": undefined,
     "appBuildID": undefined,

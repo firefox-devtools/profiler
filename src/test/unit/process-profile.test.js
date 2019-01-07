@@ -3,8 +3,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { extractFuncsAndResourcesFromFrameLocations } from '../../profile-logic/process-profile';
+import {
+  extractFuncsAndResourcesFromFrameLocations,
+  processProfile,
+} from '../../profile-logic/process-profile';
 import { UniqueStringArray } from '../../utils/unique-string-array';
+import {
+  createGeckoProfile,
+  createGeckoCounters,
+} from '../fixtures/profiles/gecko-profile';
+import { ensureExists } from '../../utils/flow';
 
 describe('extract functions and resource from location strings', function() {
   // These location strings are turned into the proper funcs.
@@ -140,5 +148,84 @@ describe('extract functions and resource from location strings', function() {
         ];
       })
     ).toMatchSnapshot();
+  });
+});
+
+describe('gecko counters processing', function() {
+  function setup() {
+    // Create a gecko profile with counters.
+    const findMainThread = profile =>
+      ensureExists(
+        profile.threads.find(thread => thread.name === 'GeckoMain'),
+        'There should be a GeckoMain thread in the Gecko profile'
+      );
+
+    const parentGeckoProfile = createGeckoProfile();
+    const [childGeckoProfile] = parentGeckoProfile.processes;
+
+    const parentPid = findMainThread(parentGeckoProfile).pid;
+    const childPid = findMainThread(childGeckoProfile).pid;
+    expect(parentPid).toEqual(3333);
+    expect(childPid).toEqual(2222);
+
+    const parentCounter = createGeckoCounters(
+      findMainThread(parentGeckoProfile)
+    );
+    const childCounter = createGeckoCounters(findMainThread(childGeckoProfile));
+    parentGeckoProfile.counters = [parentCounter];
+    childGeckoProfile.counters = [childCounter];
+    return {
+      parentGeckoProfile,
+      parentPid,
+      childPid,
+      parentCounter,
+      childCounter,
+    };
+  }
+
+  it('can extract the counter information correctly', function() {
+    const { parentGeckoProfile, parentPid, childPid } = setup();
+    const processedProfile = processProfile(parentGeckoProfile);
+    const counters = ensureExists(
+      processedProfile.counters,
+      'Expected to find counters on the processed profile'
+    );
+    expect(counters.length).toBe(2);
+    expect(counters[0].pid).toBe(parentPid);
+    expect(counters[1].pid).toBe(childPid);
+
+    const findMainThreadIndexByPid = (pid: number): number =>
+      processedProfile.threads.findIndex(
+        thread => thread.name === 'GeckoMain' && thread.pid === pid
+      );
+
+    expect(counters[0].mainThreadIndex).toBe(
+      findMainThreadIndexByPid(parentPid)
+    );
+    expect(counters[1].mainThreadIndex).toBe(
+      findMainThreadIndexByPid(childPid)
+    );
+  });
+
+  it('offsets the counter timing for child processes', function() {
+    const { parentGeckoProfile, parentCounter, childCounter } = setup();
+    const processedProfile = processProfile(parentGeckoProfile);
+    const processedCounters = ensureExists(processedProfile.counters);
+
+    const originalTime = [0, 1, 2, 3, 4, 5, 6];
+    const offsetTime = originalTime.map(n => n + 1000);
+
+    const extractTime = counter =>
+      counter.sample_groups.samples.data.map(tuple => tuple[0]);
+
+    // The original times and parent process are not offset.
+    expect(extractTime(parentCounter)).toEqual(originalTime);
+    expect(extractTime(childCounter)).toEqual(originalTime);
+    expect(processedCounters[0].sampleGroups.samples.time).toEqual(
+      originalTime
+    );
+
+    // The subprocess times are offset when processed:
+    expect(processedCounters[1].sampleGroups.samples.time).toEqual(offsetTime);
   });
 });
