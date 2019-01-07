@@ -7,6 +7,10 @@ import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
 import { ensureExists } from '../utils/flow';
+import {
+  filterCountersToRange,
+  accumulateCounterSamples,
+} from '../profile-logic/profile-data';
 
 import type {
   Profile,
@@ -15,11 +19,14 @@ import type {
   Thread,
   ThreadIndex,
   Pid,
+  Counter,
+  CounterIndex,
 } from '../types/profile';
 import type {
   LocalTrack,
   TrackIndex,
   GlobalTrack,
+  AccumulatedCounterSamples,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -96,6 +103,51 @@ export const getRightClickedTrack: Selector<TrackReference> = state =>
   getProfileViewOptions(state).rightClickedTrack;
 export const getPreviewSelection: Selector<PreviewSelection> = state =>
   getProfileViewOptions(state).previewSelection;
+export const getCounters: Selector<Counter[] | null> = state =>
+  getProfile(state).counters || null;
+
+const _counterSelectors = {};
+export const getCounterSelectors = (index: CounterIndex) => {
+  let selectors = _counterSelectors[index];
+  if (!selectors) {
+    selectors = _createCounterSelectors(index);
+    _counterSelectors[index] = selectors;
+  }
+  return selectors;
+};
+
+function _createCounterSelectors(counterIndex: CounterIndex) {
+  const getCounters: Selector<Counter> = state =>
+    ensureExists(
+      getProfile(state).counters,
+      'Attempting to get a counter by index, but no counters exist.'
+    )[counterIndex];
+
+  const getDescription: Selector<string> = state =>
+    getCounters(state).description;
+
+  const getPid: Selector<Pid> = state => getCounters(state).pid;
+
+  const getCommittedRangeFilteredCounters: Selector<Counter> = createSelector(
+    getCounters,
+    getCommittedRange,
+    (counters, range) => filterCountersToRange(counters, range.start, range.end)
+  );
+
+  const getAccumulateCounterSamples: Selector<
+    AccumulatedCounterSamples
+  > = createSelector(getCommittedRangeFilteredCounters, counters =>
+    accumulateCounterSamples(counters.sampleGroups.samples)
+  );
+
+  return {
+    getCounters,
+    getDescription,
+    getPid,
+    getCommittedRangeFilteredCounters,
+    getAccumulateCounterSamples,
+  };
+}
 
 /**
  * Tracks

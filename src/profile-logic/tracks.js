@@ -226,6 +226,21 @@ export function computeLocalTracksByPid(
     }
   }
 
+  const { counters } = profile;
+  if (counters) {
+    for (let counterIndex = 0; counterIndex < counters.length; counterIndex++) {
+      const { pid, category } = counters[counterIndex];
+      if (category === 'Memory') {
+        let tracks = localTracksByPid.get(pid);
+        if (tracks === undefined) {
+          tracks = [];
+          localTracksByPid.set(pid, tracks);
+        }
+        tracks.push({ type: 'memory', counterIndex });
+      }
+    }
+  }
+
   // When adding a new track type, this for loop ensures that the newer tracks are
   // added at the end so that the local track indexes are stable and backwards compatible.
   for (const localTracks of localTracksByPid.values()) {

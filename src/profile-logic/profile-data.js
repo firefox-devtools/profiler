@@ -16,12 +16,15 @@ import type {
   IndexIntoSamplesTable,
   IndexIntoStackTable,
   ThreadIndex,
+  Counter,
+  CounterSamples,
 } from '../types/profile';
 import type {
   CallNodeInfo,
   CallNodeTable,
   CallNodePath,
   IndexIntoCallNodeTable,
+  AccumulatedCounterSamples,
 } from '../types/profile-derived';
 import {
   getEmptyStackTable,
@@ -923,8 +926,11 @@ export function filterThreadToSearchString(
   });
 }
 
+/**
+ * This function takes both a SamplesTable and can be used on CounterSamples.
+ */
 function _getSampleIndexRangeForSelection(
-  samples: SamplesTable,
+  samples: SamplesTable | CounterSamples,
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -964,6 +970,55 @@ export function filterThreadSamplesToRange(
   return Object.assign({}, thread, {
     samples: newSamples,
   });
+}
+
+export function filterCountersToRange(
+  counters: Counter,
+  rangeStart: number,
+  rangeEnd: number
+): Counter {
+  const samples = counters.sampleGroups.samples;
+  const [sBegin, sEnd] = _getSampleIndexRangeForSelection(
+    samples,
+    rangeStart,
+    rangeEnd
+  );
+  return {
+    ...counters,
+    sampleGroups: {
+      ...counters.sampleGroups,
+      samples: {
+        time: samples.time.slice(sBegin, sEnd),
+        number: samples.number.slice(sBegin, sEnd),
+        count: samples.count.slice(sBegin, sEnd),
+        length: sEnd - sBegin,
+      },
+    },
+  };
+}
+
+/**
+ * The memory counters are relative offsets of memory. In order to draw an interesting
+ * graph, take the memory in the counters, and find the minimum and maximum values, by
+ * accumulating them over the entire profile range. Then, map those values to the
+ * accumulatedCounts array.
+ */
+export function accumulateCounterSamples(
+  samples: CounterSamples
+): AccumulatedCounterSamples {
+  let minCount = 0;
+  let maxCount = 0;
+  let accumulated = 0;
+  const accumulatedCounts = [];
+  for (let i = 0; i < samples.length; i++) {
+    accumulated += samples.count[i];
+    minCount = Math.min(accumulated, minCount);
+    maxCount = Math.max(accumulated, maxCount);
+    accumulatedCounts[i] = accumulated;
+  }
+  const countRange = maxCount - minCount;
+
+  return { minCount, maxCount, countRange, accumulatedCounts };
 }
 
 // --------------- CallNodePath and CallNodeIndex manipulations ---------------

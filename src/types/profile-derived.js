@@ -10,6 +10,7 @@ import type {
   ThreadIndex,
   Pid,
   IndexIntoJsTracerEvents,
+  CounterIndex,
 } from './profile';
 export type IndexIntoCallNodeTable = number;
 
@@ -130,6 +131,17 @@ export type JsTracerTiming = {
   length: number,
 };
 
+/**
+ * The memory counters are relative offsets of memory. This type provides a data
+ * structure that can be used to see the total range of change over all the samples.
+ */
+export type AccumulatedCounterSamples = {|
+  +minCount: number,
+  +maxCount: number,
+  +countRange: number,
+  +accumulatedCounts: number[],
+|};
+
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
@@ -139,7 +151,7 @@ export type GlobalTrack =
 export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}
   | {| +type: 'network', +threadIndex: ThreadIndex |}
-  | {| +type: 'memory', +threadIndex: ThreadIndex |};
+  | {| +type: 'memory', +counterIndex: CounterIndex |};
 
 export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;

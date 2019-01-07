@@ -166,6 +166,23 @@ export type GeckoExtensionMeta = {|
   data: Array<[string, string, string]>,
 |};
 
+export type GeckoCounter = {|
+  name: string,
+  category: string,
+  description: string,
+  sample_groups: {|
+    id: number,
+    samples: {|
+      schema: {|
+        time: 0,
+        number: 1,
+        count: 2,
+      |},
+      data: Array<[number, number, number]>,
+    |},
+  |},
+|};
+
 export type GeckoProfileMeta = {|
   interval: Milliseconds,
   startTime: Milliseconds,
@@ -193,6 +210,7 @@ export type GeckoProfileMeta = {|
 |};
 
 export type GeckoProfile = {|
+  counters?: GeckoCounter[],
   meta: GeckoProfileMeta,
   libs: Lib[],
   pages?: PageList,
