@@ -6,7 +6,7 @@
 import type {
   Profile,
   Thread,
-  IndexIntoMarkersTable,
+  IndexIntoRawMarkerTable,
 } from '../../types/profile';
 
 import * as React from 'react';
@@ -184,7 +184,7 @@ function setup(
  */
 function _setScreenshotMarkersToUnknown(
   thread: Thread,
-  ...markerIndexes: IndexIntoMarkersTable[]
+  ...markerIndexes: IndexIntoRawMarkerTable[]
 ) {
   // Remove off the last few screenshot markers
   const unknownStringIndex = thread.stringTable.indexForString('Unknown');

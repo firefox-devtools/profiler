@@ -20,7 +20,7 @@
   background-color: #fff;
 }
 
-.timelineTrackThreadIntervalMarkerOverview {
+.timelineTrackThreadMarkerOverview {
   position: relative;
   margin: 0;
   height: 6px;
@@ -30,14 +30,14 @@
   opacity: 0.75;
 }
 
-.timelineTrackThreadIntervalMarkerOverviewContainerJank {
+.timelineTrackThreadMarkerOverviewContainerJank {
   border-bottom: 1px solid var(--grey-30);
 }
 
-.timelineTrackThreadIntervalMarkerOverview.selected {
+.timelineTrackThreadMarkerOverview.selected {
   opacity: 1;
 }
 
-.timelineTrackThreadIntervalMarkerOverviewThreadGeckoMain {
+.timelineTrackThreadMarkerOverviewThreadGeckoMain {
   height: 18px;
 }

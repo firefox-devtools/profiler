@@ -1469,7 +1469,7 @@ CallTree {
 }
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkers 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkers 1`] = `
 Array [
   Object {
     "data": null,
@@ -1511,7 +1511,7 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkersForHeader 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkersForHeader 1`] = `
 Array [
   Object {
     "data": null,
@@ -1936,7 +1936,7 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankInstances 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankMarkers 1`] = `
 Array [
   Object {
     "data": null,
@@ -1997,6 +1997,85 @@ Array [
     "start": Array [
       5,
     ],
+  },
+]
+`;
+
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getMarkers 1`] = `
+Array [
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "A",
+    "start": 0,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "B",
+    "start": 1,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "C",
+    "start": 2,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "D",
+    "start": 3,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "E",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "F",
+    "start": 5,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 7,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6,
+      "status": "STOP",
+      "type": "Network",
+    },
+    "dur": 1,
+    "name": "G",
+    "start": 6,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 8,
+      "id": 7,
+      "pri": 0,
+      "startTime": 7,
+      "status": "STOP",
+      "type": "Network",
+    },
+    "dur": 1,
+    "name": "G",
+    "start": 7,
+    "title": null,
   },
 ]
 `;
@@ -2346,7 +2425,7 @@ Object {
 }
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getProcessedMarkersTable 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getProcessedRawMarkerTable 1`] = `
 Object {
   "data": Array [
     null,
@@ -3071,7 +3150,7 @@ Object {
 }
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getSearchFilteredTracingMarkers 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers 1`] = `
 Array [
   Object {
     "data": null,
@@ -3116,85 +3195,6 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getThreadProcessDetails 1`] = `
 "thread: \\"Thread with samples\\" (0)
 process: \\"default\\" (0)"
-`;
-
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getTracingMarkers 1`] = `
-Array [
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "A",
-    "start": 0,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "B",
-    "start": 1,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "C",
-    "start": 2,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "D",
-    "start": 3,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "E",
-    "start": 4,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "F",
-    "start": 5,
-    "title": null,
-  },
-  Object {
-    "data": Object {
-      "RedirectURI": "https://mozilla.org",
-      "URI": "https://mozilla.org",
-      "endTime": 7,
-      "id": 6,
-      "pri": 0,
-      "startTime": 6,
-      "status": "STOP",
-      "type": "Network",
-    },
-    "dur": 1,
-    "name": "G",
-    "start": 6,
-    "title": null,
-  },
-  Object {
-    "data": Object {
-      "RedirectURI": "https://mozilla.org",
-      "URI": "https://mozilla.org",
-      "endTime": 8,
-      "id": 7,
-      "pri": 0,
-      "startTime": 7,
-      "status": "STOP",
-      "type": "Network",
-    },
-    "dur": 1,
-    "name": "G",
-    "start": 7,
-    "title": null,
-  },
-]
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getViewOptions 1`] = `

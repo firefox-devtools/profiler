@@ -99,11 +99,11 @@ describe('timeline/TrackThread', function() {
     view.update();
 
     const stackGraphCanvas = view.find('.threadStackGraphCanvas').first();
-    const tracingMarkersCanvas = view
+    const markerCanvas = view
       .find(
         [
-          '.timelineTrackThreadIntervalMarkerOverviewThreadGeckoMain',
-          '.timelineTracingMarkersCanvas',
+          '.timelineTrackThreadMarkerOverviewThreadGeckoMain',
+          '.timelineMarkersCanvas',
         ].join(' ')
       )
       .first();
@@ -117,7 +117,7 @@ describe('timeline/TrackThread', function() {
       view,
       threadIndex,
       stackGraphCanvas,
-      tracingMarkersCanvas,
+      markerCanvas,
     };
   }
 
@@ -132,8 +132,8 @@ describe('timeline/TrackThread', function() {
   });
 
   it('has the correct selectors into useful parts of the component for the markers profile', function() {
-    const { tracingMarkersCanvas } = setup(getMarkersProfile());
-    expect(tracingMarkersCanvas.exists()).toBe(true);
+    const { markerCanvas } = setup(getMarkersProfile());
+    expect(markerCanvas.exists()).toBe(true);
   });
 
   it('can click a stack in the stack graph', function() {
@@ -173,11 +173,11 @@ describe('timeline/TrackThread', function() {
   });
 
   it('can click a marker', function() {
-    const { getState, tracingMarkersCanvas } = setup(getMarkersProfile());
+    const { getState, markerCanvas } = setup(getMarkersProfile());
 
     function clickAndGetMarkerName(pageX: number) {
-      tracingMarkersCanvas.simulate('mousedown', getMouseEvent({ pageX }));
-      tracingMarkersCanvas.simulate('mouseup', getMouseEvent({ pageX }));
+      markerCanvas.simulate('mousedown', getMouseEvent({ pageX }));
+      markerCanvas.simulate('mouseup', getMouseEvent({ pageX }));
       return getPreviewSelection(getState());
     }
 

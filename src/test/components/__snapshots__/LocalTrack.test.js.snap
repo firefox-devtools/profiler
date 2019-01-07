@@ -78,10 +78,10 @@ process: \\"tab\\" (222)"
         className="timelineTrackThread"
       >
         <div
-          className="timelineTrackThreadIntervalMarkerOverview"
+          className="timelineTrackThreadMarkerOverview"
         >
           <canvas
-            className="timelineTracingMarkersCanvas"
+            className="timelineMarkersCanvas"
             onMouseDown={[Function]}
             onMouseMove={[Function]}
             onMouseOut={[Function]}

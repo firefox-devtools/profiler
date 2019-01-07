@@ -22,10 +22,7 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
-import type {
-  TracingMarker,
-  MarkerTimingRows,
-} from '../../types/profile-derived';
+import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
 import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
@@ -45,7 +42,7 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
-  +markers: TracingMarker[],
+  +markers: Marker[],
   +markerTimingRows: MarkerTimingRows,
   +maxMarkerRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
@@ -150,7 +147,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       state
     );
     return {
-      markers: selectedThreadSelectors.getMarkerChartTracingMarkers(state),
+      markers: selectedThreadSelectors.getMarkerChartMarkers(state),
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
       timeRange: getCommittedRange(state),

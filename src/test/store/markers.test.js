@@ -122,15 +122,15 @@ describe('selectors/getMarkerChartTiming', function() {
   });
 });
 
-describe('getProcessedMarkersThread', function() {
-  function getProcessedMarkers(testMarkers) {
+describe('getProcessedRawMarkerTable', function() {
+  function setup(testMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
-    return selectedThreadSelectors.getProcessedMarkersTable(getState());
+    return selectedThreadSelectors.getProcessedRawMarkerTable(getState());
   }
 
   it('can process Invalidation markers', function() {
-    const markers = getProcessedMarkers([
+    const markers = setup([
       ['Invalidate http://mozilla.com/script.js:1234', 10, null],
       ['Invalidate self-hosted:2345', 20, null],
       ['Invalidate resource://foo -> resource://bar:3456', 30, null],
@@ -162,7 +162,7 @@ describe('getProcessedMarkersThread', function() {
   });
 
   it('can process Bailout markers', function() {
-    const markers = getProcessedMarkers([
+    const markers = setup([
       [
         'Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662',
         10,

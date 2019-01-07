@@ -19,10 +19,7 @@ import {
   getSelectedThreadIndex,
   getTimelineType,
 } from '../../selectors/url-state';
-import {
-  TimelineTracingMarkersJank,
-  TimelineTracingMarkersOverview,
-} from './TracingMarkers';
+import { TimelineMarkersJank, TimelineMarkersOverview } from './Markers';
 import {
   updatePreviewSelection,
   changeRightClickedTrack,
@@ -89,7 +86,7 @@ class TimelineTrackThread extends PureComponent<Props> {
     focusCallTree();
   };
 
-  _onIntervalMarkerSelect = (
+  _onMarkerSelect = (
     threadIndex: ThreadIndex,
     start: Milliseconds,
     end: Milliseconds
@@ -120,7 +117,7 @@ class TimelineTrackThread extends PureComponent<Props> {
 
     const processType = filteredThread.processType;
     const displayJank = processType !== 'plugin';
-    const displayTracingMarkers =
+    const displayMarkers =
       (filteredThread.name === 'GeckoMain' ||
         filteredThread.name === 'Compositor' ||
         filteredThread.name === 'Renderer') &&
@@ -129,30 +126,28 @@ class TimelineTrackThread extends PureComponent<Props> {
     return (
       <div className="timelineTrackThread">
         {displayJank ? (
-          <TimelineTracingMarkersJank
-            className="timelineTrackThreadIntervalMarkerOverview"
+          <TimelineMarkersJank
+            className="timelineTrackThreadMarkerOverview"
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             threadIndex={threadIndex}
-            onSelect={this._onIntervalMarkerSelect}
+            onSelect={this._onMarkerSelect}
           />
         ) : null}
-        {displayTracingMarkers ? (
-          <TimelineTracingMarkersOverview
+        {displayMarkers ? (
+          <TimelineMarkersOverview
             // Feed in the thread name to the class. This is used for conditional
             // sizing rules, for instance with GeckoMain threads.
             // TODO - This seems kind of brittle, and should probably done through
             // JavaScript and props instead.
             className={`
-              timelineTrackThreadIntervalMarkerOverview
-              timelineTrackThreadIntervalMarkerOverviewThread${
-                filteredThread.name
-              }
+              timelineTrackThreadMarkerOverview
+              timelineTrackThreadMarkerOverviewThread${filteredThread.name}
             `}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             threadIndex={threadIndex}
-            onSelect={this._onIntervalMarkerSelect}
+            onSelect={this._onMarkerSelect}
           />
         ) : null}
         {timelineType === 'category' ? (

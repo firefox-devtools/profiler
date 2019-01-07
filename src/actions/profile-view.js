@@ -46,7 +46,7 @@ import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
 import type {
   ThreadIndex,
-  IndexIntoMarkersTable,
+  IndexIntoRawMarkerTable,
   Pid,
   IndexIntoSamplesTable,
 } from '../types/profile';
@@ -845,7 +845,7 @@ export function changeExpandedCallNodes(
 
 export function changeSelectedMarker(
   threadIndex: ThreadIndex,
-  selectedMarker: IndexIntoMarkersTable | -1
+  selectedMarker: IndexIntoRawMarkerTable | -1
 ): Action {
   return {
     type: 'CHANGE_SELECTED_MARKER',
