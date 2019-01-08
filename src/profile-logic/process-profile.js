@@ -6,7 +6,12 @@
 import { isChromeProfile, convertChromeProfile } from './import/chrome';
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
-import { resourceTypes, getEmptyExtensions } from './data-structures';
+import {
+  resourceTypes,
+  getEmptyExtensions,
+  getEmptyFuncTable,
+  getEmptyResourceTable,
+} from './data-structures';
 import { immutableUpdate } from '../utils/flow';
 import {
   CURRENT_VERSION,
@@ -148,29 +153,13 @@ export function extractFuncsAndResourcesFromFrameLocations(
   libs: Lib[],
   extensions: ExtensionTable = getEmptyExtensions()
 ): [FuncTable, ResourceTable, IndexIntoFuncTable[]] {
-  // Explicitly create FuncTable. If Flow complains about this, then all of
-  // the functions in this file starting with the word "extract" should be updated.
-  const funcTable: FuncTable = {
-    length: 0,
-    name: [],
-    resource: [],
-    relevantForJS: [],
-    address: [],
-    isJS: [],
-    fileName: [],
-    lineNumber: [],
-    columnNumber: [],
-  };
+  // Important! If the flow type for the FuncTable was changed, update all the functions
+  // in this file that start with the word "extract".
+  const funcTable = getEmptyFuncTable();
 
-  // Explicitly create ResourceTable. If Flow complains about this, then all of
-  // the functions in this file starting with the word "extract" should be updated.
-  const resourceTable: ResourceTable = {
-    length: 0,
-    type: [],
-    name: [],
-    lib: [],
-    host: [],
-  };
+  // Important! If the flow type for the ResourceTable was changed, update all the functions
+  // in this file that start with the word "extract".
+  const resourceTable = getEmptyResourceTable();
 
   // Bundle all of the variables up into an object to pass them around to functions.
   const extractionInfo: ExtractionInfo = {

@@ -9,6 +9,7 @@ import {
   getEmptyJsTracerTable,
 } from '../../../profile-logic/data-structures';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
+
 import type {
   Profile,
   Thread,

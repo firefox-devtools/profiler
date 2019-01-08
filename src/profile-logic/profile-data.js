@@ -23,6 +23,11 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
 } from '../types/profile-derived';
+import {
+  getEmptyStackTable,
+  cloneFrameTable,
+  cloneFuncTable,
+} from './data-structures';
 
 import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
@@ -723,33 +728,9 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
     const { stackTable, funcTable, frameTable, samples, stringTable } = thread;
 
     // Create new tables for the data.
-    const newStackTable: StackTable = {
-      length: 0,
-      frame: [],
-      category: [],
-      prefix: [],
-    };
-    const newFrameTable: FrameTable = {
-      length: frameTable.length,
-      implementation: frameTable.implementation.slice(),
-      optimizations: frameTable.optimizations.slice(),
-      line: frameTable.line.slice(),
-      column: frameTable.column.slice(),
-      category: frameTable.category.slice(),
-      func: frameTable.func.slice(),
-      address: frameTable.address.slice(),
-    };
-    const newFuncTable: FuncTable = {
-      length: funcTable.length,
-      name: funcTable.name.slice(),
-      resource: funcTable.resource.slice(),
-      relevantForJS: funcTable.relevantForJS.slice(),
-      address: funcTable.address.slice(),
-      isJS: funcTable.isJS.slice(),
-      fileName: funcTable.fileName.slice(),
-      lineNumber: funcTable.lineNumber.slice(),
-      columnNumber: funcTable.columnNumber.slice(),
-    };
+    const newStackTable = getEmptyStackTable();
+    const newFrameTable = cloneFrameTable(frameTable);
+    const newFuncTable = cloneFuncTable(funcTable);
 
     // Create a Map that takes a prefix and frame as input, and maps it to the new stack
     // index. Since Maps can't be keyed off of two values, do a little math to key off
