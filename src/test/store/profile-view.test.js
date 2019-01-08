@@ -7,15 +7,17 @@ import type { TrackReference } from '../../types/actions';
 import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import {
-  getEmptyThread,
   getProfileFromTextSamples,
   getProfileWithMarkers,
   getNetworkTrackProfile,
   getScreenshotTrackProfile,
   getNetworkMarker,
 } from '../fixtures/profiles/processed-profile';
+import {
+  getEmptyThread,
+  getEmptyProfile,
+} from '../../profile-logic/data-structures';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
-import { getEmptyProfile } from '../../profile-logic/profile-data';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { blankStore, storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';

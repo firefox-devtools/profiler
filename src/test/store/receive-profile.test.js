@@ -7,6 +7,7 @@ import type { Profile } from '../../types/profile';
 
 import sinon from 'sinon';
 
+import { getEmptyProfile } from '../../profile-logic/data-structures';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../selectors/profile';
@@ -22,7 +23,6 @@ import {
 } from '../../actions/receive-profile';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import { getEmptyProfile } from '../../profile-logic/profile-data';
 import JSZip from 'jszip';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import {

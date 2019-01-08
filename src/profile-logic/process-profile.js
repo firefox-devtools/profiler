@@ -6,7 +6,7 @@
 import { isChromeProfile, convertChromeProfile } from './import/chrome';
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
-import { resourceTypes, emptyExtensions } from './profile-data';
+import { resourceTypes, getEmptyExtensions } from './data-structures';
 import { immutableUpdate } from '../utils/flow';
 import {
   CURRENT_VERSION,
@@ -146,7 +146,7 @@ export function extractFuncsAndResourcesFromFrameLocations(
   relevantForJSPerFrame: boolean[],
   stringTable: UniqueStringArray,
   libs: Lib[],
-  extensions: ExtensionTable = emptyExtensions
+  extensions: ExtensionTable = getEmptyExtensions()
 ): [FuncTable, ResourceTable, IndexIntoFuncTable[]] {
   // Explicitly create FuncTable. If Flow complains about this, then all of
   // the functions in this file starting with the word "extract" should be updated.
@@ -925,7 +925,7 @@ export function processProfile(
 
   const extensions: ExtensionTable = geckoProfile.meta.extensions
     ? _toStructOfArrays(geckoProfile.meta.extensions)
-    : emptyExtensions;
+    : getEmptyExtensions();
 
   for (const thread of geckoProfile.threads) {
     threads.push(_processThread(thread, geckoProfile, extensions));

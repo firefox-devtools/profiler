@@ -3,7 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getEmptyProfile } from '../../../profile-logic/profile-data';
+import {
+  getEmptyProfile,
+  getEmptyThread,
+  getEmptyJsTracerTable,
+} from '../../../profile-logic/data-structures';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 import type {
   Profile,
@@ -58,8 +62,6 @@ function _refineMockPayload(
   // into a MarkerPayload using the function signature.
   return (payload: any);
 }
-
-export { getEmptyProfile } from '../../../profile-logic/profile-data';
 
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: Thread,
@@ -117,75 +119,6 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
   const profile = getEmptyProfile();
   profile.threads = threadNames.map(name => getEmptyThread({ name }));
   return profile;
-}
-
-export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
-  const defaultThread: Thread = {
-    processType: 'default',
-    processStartupTime: 0,
-    processShutdownTime: null,
-    registerTime: 0,
-    unregisterTime: null,
-    pausedRanges: [],
-    name: 'Empty',
-    pid: 0,
-    tid: 0,
-    samples: {
-      responsiveness: [],
-      stack: [],
-      time: [],
-      rss: [],
-      uss: [],
-      length: 0,
-    },
-    markers: {
-      data: [],
-      name: [],
-      time: [],
-      length: 0,
-    },
-    stackTable: {
-      frame: [],
-      prefix: [],
-      category: [],
-      length: 0,
-    },
-    frameTable: {
-      address: [],
-      category: [],
-      func: [],
-      implementation: [],
-      line: [],
-      column: [],
-      optimizations: [],
-      length: 0,
-    },
-    stringTable: new UniqueStringArray(),
-    libs: [],
-    funcTable: {
-      address: [],
-      isJS: [],
-      relevantForJS: [],
-      name: [],
-      resource: [],
-      fileName: [],
-      lineNumber: [],
-      columnNumber: [],
-      length: 0,
-    },
-    resourceTable: {
-      length: 0,
-      lib: [],
-      name: [],
-      host: [],
-      type: [],
-    },
-  };
-
-  return {
-    ...defaultThread,
-    ...overrides,
-  };
 }
 
 /**
@@ -580,17 +513,6 @@ export function getScreenshotTrackProfile() {
         },
       ])
   );
-}
-
-export function getEmptyJsTracerTable(): JsTracerTable {
-  return {
-    events: [],
-    timestamps: [],
-    durations: [],
-    lines: [],
-    columns: [],
-    length: 0,
-  };
 }
 
 export function getJsTracerTable(

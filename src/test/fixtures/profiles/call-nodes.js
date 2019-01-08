@@ -11,8 +11,10 @@ import type {
   Profile,
 } from '../../../types/profile';
 
-import { getEmptyThread, getEmptyProfile } from './processed-profile';
-
+import {
+  getEmptyThread,
+  getEmptyProfile,
+} from '../../../profile-logic/data-structures';
 /**
  * Note that this fixture doesn't use the `getProfileFromTextSamples()` function to
  * generate the profile, as it's testing the relationships between frames, and thus
