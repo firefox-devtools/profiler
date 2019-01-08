@@ -6,11 +6,47 @@ import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 import { changeShowJsTracerSummary } from '../../actions/profile-view';
+import { convertJsTracerToThread } from '../../profile-logic/js-tracer';
+import { getEmptyProfile } from '../../profile-logic/data-structures';
+import { formatTree } from '../fixtures/utils';
+
 import {
   getProfileFromTextSamples,
   getProfileWithJsTracerEvents,
   type TestDefinedJsTracerEvent,
 } from '../fixtures/profiles/processed-profile';
+
+describe('convertJsTracerToThread', function() {
+  it('can generate stacks correctly', function() {
+    const {
+      meta: { categories },
+      threads: [thread],
+    } = getProfileWithJsTracerEvents([
+      // [mozilla                  ]
+      //  [int   ][ion          ]
+      //   [int]    [ion      ]
+      ['https://mozilla.org', 0, 20],
+      ['Interpreter', 1, 5],
+      ['Interpreter', 2, 4],
+      ['IonMonkey', 5, 19],
+      ['IonMonkey', 6, 18],
+    ]);
+
+    const profile = getEmptyProfile();
+    const jsTracer = ensureExists(thread.jsTracer);
+    profile.threads.push(convertJsTracerToThread(thread, jsTracer, categories));
+    const { getState } = storeWithProfile(profile);
+    const callTree = selectedThreadSelectors.getCallTree(getState());
+
+    expect(formatTree(callTree)).toEqual([
+      '- https://mozilla.org (total: 5, self: 1)',
+      '  - Interpreter (total: 4, self: 1)',
+      '    - IonMonkey (total: 2, self: 1)',
+      '      - IonMonkey (total: 1, self: 1)',
+      '    - Interpreter (total: 1, self: 1)',
+    ]);
+  });
+});
 
 describe('selectors/getJsTracerTiming', function() {
   describe('full stack-based view', function() {

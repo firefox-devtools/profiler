@@ -89,6 +89,8 @@ export type SamplesTable = {
   responsiveness: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
+  weight?: Array<number>,
+  weightType?: 'microseconds' | 'compare' | 'milliseconds',
   rss: Array<null | number>,
   uss: Array<null | number>,
   length: number,
