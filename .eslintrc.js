@@ -46,11 +46,6 @@ module.exports = {
     // See https://github.com/yannickcr/eslint-plugin-react/issues/1561
     // 'react/no-unused-prop-types': 'error',
     'react/no-unused-state': 'error',
-    'react/prefer-stateless-function': 'error',
-    'react/prefer-stateless-function': [
-      'error',
-      { ignorePureComponents: true },
-    ],
     'react/jsx-no-bind': 'error',
     'flowtype/require-valid-file-annotation': [ 'error', 'always', { annotationStyle: 'line' } ],
     // no-dupe-keys crashes with recent eslint. See

@@ -344,7 +344,8 @@ function _markerBacktrace(
           First invalidated {formatNumber(causeAge)}ms before the flush, at:
         </h2>
         <Backtrace
-          cause={cause}
+          maxHeight="30em"
+          stackIndex={cause.stack}
           thread={thread}
           implementationFilter={implementationFilter}
         />

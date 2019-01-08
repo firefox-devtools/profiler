@@ -2604,6 +2604,8 @@ exports[`SelectedThreadActivityGraph matches the component snapshot 1`] = `
   <div>
     <div
       className="selectedThreadActivityGraph"
+      onMouseLeave={[Function]}
+      onMouseMove={[Function]}
     >
       <canvas
         className="selectedThreadActivityGraphCanvas threadActivityGraphCanvas"
