@@ -13,7 +13,7 @@ import {
   getNetworkTrackProfile,
   getScreenshotTrackProfile,
   getNetworkMarker,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getEmptyProfile } from '../../profile-logic/profile-data';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -23,11 +23,14 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
 import { viewProfile } from '../../actions/receive-profile';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
-import * as UrlStateSelectors from '../../reducers/url-state';
+import * as ProfileViewSelectors from '../../selectors/profile';
+import * as UrlStateSelectors from '../../selectors/url-state';
 import { stateFromLocation } from '../../app-logic/url-handling';
-
-const { selectedThreadSelectors, selectedNodeSelectors } = ProfileViewSelectors;
+import {
+  selectedThreadSelectors,
+  selectedNodeSelectors,
+  getThreadSelectors,
+} from '../../selectors/per-thread';
 
 describe('call node paths on implementation filter change', function() {
   const {
@@ -142,7 +145,7 @@ describe('call node paths on implementation filter change', function() {
   });
 });
 
-describe('getJankInstances', function() {
+describe('getJankMarkers', function() {
   function setup({ sampleCount, responsiveness }) {
     const { profile } = getProfileFromTextSamples(
       Array(sampleCount)
@@ -151,7 +154,7 @@ describe('getJankInstances', function() {
     );
     profile.threads[0].samples.responsiveness = responsiveness;
     const { getState } = storeWithProfile(profile);
-    return selectedThreadSelectors.getJankInstances(getState());
+    return selectedThreadSelectors.getJankMarkers(getState());
   }
 
   it('will not create any jank markers for undefined responsiveness', function() {
@@ -209,7 +212,7 @@ describe('getJankInstances', function() {
  * The following tests run through a dispatch and selector to provide coverage
  * over the Redux store to ensure that it behaves correctly. The intent is to cover
  * every single action, but do the bare minimum in the test to assert the relationship
- * between the actions and reducers.
+ * between the actions, reducers, and selectors.
  */
 describe('actions/ProfileView', function() {
   describe('changeSelectedCallNode', function() {
@@ -894,7 +897,7 @@ describe('actions/ProfileView', function() {
       const endTime = markers.time[endIndex];
       dispatch(ProfileView.commitRange(startTime, endTime));
 
-      // Get out the tracing markers.
+      // Get out the markers.
       const screenshotMarkersById = selectedThreadSelectors.getRangeFilteredScreenshotsById(
         getState()
       );
@@ -913,7 +916,7 @@ describe('actions/ProfileView', function() {
  * should be left up to better informed unit tests. This provides some base coverage
  * of mechanically running through the selectors in tests.
  */
-describe('snapshots of selectors/profile-view', function() {
+describe('snapshots of selectors/profile', function() {
   // Set up a profile that has some nice features that can show that the selectors work.
   function setupStore() {
     const {
@@ -1031,23 +1034,21 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getRangeAndTransformFilteredThread(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getJankInstances', function() {
+  it('matches the last stored run of selectedThreadSelector.getJankMarkers', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getJankInstances(getState())
+      selectedThreadSelectors.getJankMarkers(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getProcessedMarkersTable', function() {
+  it('matches the last stored run of selectedThreadSelector.getProcessedRawMarkerTable', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getProcessedMarkersTable(getState())
+      selectedThreadSelectors.getProcessedRawMarkerTable(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getTracingMarkers', function() {
+  it('matches the last stored run of selectedThreadSelector.getMarkers', function() {
     const { getState } = setupStore();
-    expect(
-      selectedThreadSelectors.getTracingMarkers(getState())
-    ).toMatchSnapshot();
+    expect(selectedThreadSelectors.getMarkers(getState())).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getMarkerChartTiming', function() {
     const { getState } = setupStore();
@@ -1061,18 +1062,16 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getNetworkChartTiming(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkers', function() {
+  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkers', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getCommittedRangeFilteredTracingMarkers(
-        getState()
-      )
+      selectedThreadSelectors.getCommittedRangeFilteredMarkers(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkersForHeader', function() {
+  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkersForHeader', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getCommittedRangeFilteredTracingMarkersForHeader(
+      selectedThreadSelectors.getCommittedRangeFilteredMarkersForHeader(
         getState()
       )
     ).toMatchSnapshot();
@@ -1146,10 +1145,10 @@ describe('snapshots of selectors/profile-view', function() {
       selectedThreadSelectors.getThreadProcessDetails(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getSearchFilteredTracingMarkers', function() {
+  it('matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getSearchFilteredTracingMarkers(getState())
+      selectedThreadSelectors.getSearchFilteredMarkers(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.unfilteredSamplesRange', function() {
@@ -1196,9 +1195,7 @@ describe('getFriendlyThreadName', function() {
 
     const getFriendlyThreadNames = () =>
       profile.threads.map((_, threadIndex) =>
-        ProfileViewSelectors.selectorsForThread(
-          threadIndex
-        ).getFriendlyThreadName(getState())
+        getThreadSelectors(threadIndex).getFriendlyThreadName(getState())
       );
 
     return { profile, dispatch, getState, getFriendlyThreadNames };

@@ -5,7 +5,7 @@ import type {
   MarkerPayload,
 } from '../types/markers';
 import type {
-  TracingMarker,
+  Marker,
   MarkerTiming,
   MarkerTimingRows,
 } from '../types/profile-derived';
@@ -59,20 +59,14 @@ const MAX_STACKING_DEPTH = 300;
  *   | User Timings |       *--*     *---*        |
  *   |______________|_____________________________|
  */
-export function getMarkerTiming(
-  tracingMarkers: TracingMarker[]
-): MarkerTimingRows {
+export function getMarkerTiming(markers: Marker[]): MarkerTimingRows {
   // Each marker type will have it's own timing information, later collapse these into
   // a single array.
   const markerTimingsMap: Map<string, MarkerTiming[]> = new Map();
 
   // Go through all of the markers.
-  for (
-    let tracingMarkerIndex = 0;
-    tracingMarkerIndex < tracingMarkers.length;
-    tracingMarkerIndex++
-  ) {
-    const marker = tracingMarkers[tracingMarkerIndex];
+  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+    const marker = markers[markerIndex];
     let markerTimingsByName = markerTimingsMap.get(marker.name);
     if (markerTimingsByName === undefined) {
       markerTimingsByName = [];
@@ -102,7 +96,7 @@ export function getMarkerTiming(
         markerTimingsRow.start.push(marker.start);
         markerTimingsRow.end.push(marker.start + marker.dur);
         markerTimingsRow.label.push(computeMarkerLabel(marker.data));
-        markerTimingsRow.index.push(tracingMarkerIndex);
+        markerTimingsRow.index.push(markerIndex);
         markerTimingsRow.length++;
         break;
       }

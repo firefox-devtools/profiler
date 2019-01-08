@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   getCallTree,
   computeCallTreeCountsAndTimings,
@@ -54,13 +54,19 @@ describe('unfiltered call tree', function() {
       thread.funcTable,
       defaultCategory
     );
+    const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+      thread,
+      callNodeInfo,
+      interval,
+      false
+    );
     return getCallTree(
       thread,
       interval,
       callNodeInfo,
       categories,
       'combined',
-      false
+      callTreeCountsAndTimings
     );
   }
 
@@ -412,13 +418,19 @@ describe('inverted call tree', function() {
       thread.funcTable,
       defaultCategory
     );
+    const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+      thread,
+      callNodeInfo,
+      interval,
+      true
+    );
     const callTree = getCallTree(
       thread,
       interval,
       callNodeInfo,
       categories,
       'combined',
-      true
+      callTreeCountsAndTimings
     );
     it('computes an non-inverted call tree', function() {
       expect(formatTreeIncludeCategories(callTree)).toEqual([
@@ -444,13 +456,19 @@ describe('inverted call tree', function() {
       invertedThread.funcTable,
       defaultCategory
     );
+    const invertedCallTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+      invertedThread,
+      invertedCallNodeInfo,
+      interval,
+      true
+    );
     const invertedCallTree = getCallTree(
       invertedThread,
       interval,
       invertedCallNodeInfo,
       categories,
       'combined',
-      true
+      invertedCallTreeCountsAndTimings
     );
 
     /**

@@ -19,11 +19,12 @@ exports[`timeline/GlobalTrack matches the snapshot of a global track 1`] = `
       title="thread: \\"GeckoMain\\" (0)
 process: \\"tab\\" (222)"
     >
-      <h1
-        className="timelineTrackName"
+      <button
+        className="timelineTrackNameButton"
+        type="button"
       >
         Content Process
-      </h1>
+      </button>
     </div>
     <div
       className="timelineTrackTrack"
@@ -32,10 +33,10 @@ process: \\"tab\\" (222)"
         className="timelineTrackThread"
       >
         <div
-          className="timelineTrackThreadIntervalMarkerOverview"
+          className="timelineTrackThreadMarkerOverview"
         >
           <canvas
-            className="timelineTracingMarkersCanvas"
+            className="timelineMarkersCanvas"
             onMouseDown={[Function]}
             onMouseMove={[Function]}
             onMouseOut={[Function]}
@@ -44,12 +45,12 @@ process: \\"tab\\" (222)"
         </div>
         <div
           className="
-              timelineTrackThreadIntervalMarkerOverview
-              timelineTrackThreadIntervalMarkerOverviewThreadGeckoMain
+              timelineTrackThreadMarkerOverview
+              timelineTrackThreadMarkerOverviewThreadGeckoMain
             "
         >
           <canvas
-            className="timelineTracingMarkersCanvas"
+            className="timelineMarkersCanvas"
             onMouseDown={[Function]}
             onMouseMove={[Function]}
             onMouseOut={[Function]}
@@ -92,11 +93,12 @@ process: \\"tab\\" (222)"
           title="thread: \\"DOM Worker\\" (0)
 process: \\"tab\\" (222)"
         >
-          <h1
-            className="timelineTrackName"
+          <button
+            className="timelineTrackNameButton"
+            type="button"
           >
             DOM Worker
-          </h1>
+          </button>
         </div>
         <div
           className="timelineTrackTrack"
@@ -105,10 +107,10 @@ process: \\"tab\\" (222)"
             className="timelineTrackThread"
           >
             <div
-              className="timelineTrackThreadIntervalMarkerOverview selected"
+              className="timelineTrackThreadMarkerOverview selected"
             >
               <canvas
-                className="timelineTracingMarkersCanvas"
+                className="timelineMarkersCanvas"
                 onMouseDown={[Function]}
                 onMouseMove={[Function]}
                 onMouseOut={[Function]}
@@ -148,11 +150,12 @@ process: \\"tab\\" (222)"
           title="thread: \\"Style\\" (0)
 process: \\"tab\\" (222)"
         >
-          <h1
-            className="timelineTrackName"
+          <button
+            className="timelineTrackNameButton"
+            type="button"
           >
             Style
-          </h1>
+          </button>
         </div>
         <div
           className="timelineTrackTrack"
@@ -161,10 +164,10 @@ process: \\"tab\\" (222)"
             className="timelineTrackThread"
           >
             <div
-              className="timelineTrackThreadIntervalMarkerOverview"
+              className="timelineTrackThreadMarkerOverview"
             >
               <canvas
-                className="timelineTracingMarkersCanvas"
+                className="timelineMarkersCanvas"
                 onMouseDown={[Function]}
                 onMouseMove={[Function]}
                 onMouseOut={[Function]}

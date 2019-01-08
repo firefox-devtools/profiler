@@ -10,8 +10,8 @@ import explicitConnect from '../../utils/connect';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/per-thread';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { getFunctionName } from '../../profile-logic/function-info';
 import { assertExhaustiveCheck } from '../../utils/flow';
 import CanSelectContent from './CanSelectContent';

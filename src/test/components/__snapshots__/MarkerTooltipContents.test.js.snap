@@ -497,7 +497,7 @@ Array [
       <div
         className="tooltipLabel"
       >
-        Heap usage
+        Heap size
         :
       </div>
       46.1MB
@@ -1283,6 +1283,49 @@ Array [
         <div
           className="tooltipTiming"
         >
+          0.000ms
+        </div>
+        <div
+          className="tooltipTitle"
+        >
+          TTFI
+        </div>
+      </div>
+      <div
+        className="tooltipDetails"
+      >
+        <div
+          className="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Main Thread
+      </div>
+    </div>
+    <div
+      className="tooltipDetails"
+    >
+      <div
+        className="tooltipLabel"
+      >
+        Name
+        :
+      </div>
+      TTFI after 100.01ms (longTask was 100.001ms)
+    </div>
+  </div>,
+  <div
+    className="tooltipMarker propClass"
+  >
+    <div
+      className="tooltipHeader"
+    >
+      <div
+        className="tooltipOneLine"
+      >
+        <div
+          className="tooltipTiming"
+        >
           11ms
         </div>
         <div
@@ -1408,6 +1451,13 @@ Array [
       <div
         className="tooltipLabel"
       >
+        Cache
+        :
+      </div>
+      Hit
+      <div
+        className="tooltipLabel"
+      >
         URL
         :
       </div>
@@ -1476,6 +1526,13 @@ Array [
         :
       </div>
       Redirecting request
+      <div
+        className="tooltipLabel"
+      >
+        Cache
+        :
+      </div>
+      any string could be here
       <div
         className="tooltipLabel"
       >

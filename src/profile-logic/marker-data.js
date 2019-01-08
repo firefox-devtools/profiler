@@ -5,10 +5,10 @@
 
 import type {
   SamplesTable,
-  MarkersTable,
+  RawMarkerTable,
   IndexIntoStringTable,
 } from '../types/profile';
-import type { TracingMarker } from '../types/profile-derived';
+import type { Marker } from '../types/profile-derived';
 import type { BailoutPayload, ScreenshotPayload } from '../types/markers';
 import type { StartEndRange } from '../types/units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
@@ -24,8 +24,7 @@ import { getNumberPropertyOrNull } from '../utils/flow';
  * Generally, if this takes longer than some threshold, then this can be jank for the
  * browser.
  *
- * This function converts those measurings of milliseconds into individual tracing
- * markers.
+ * This function converts those measurings of milliseconds into individual markers.
  *
  * For instance, take an array of responsiveness values:
  *
@@ -35,11 +34,11 @@ import { getNumberPropertyOrNull } from '../utils/flow';
  *     but under 50ms,      responsiveness was
  *     no jank.             reset from 71 to 3.
  */
-export function getJankInstances(
+export function getJankMarkers(
   samples: SamplesTable,
   thresholdInMs: number
-): TracingMarker[] {
-  const addTracingMarker = () =>
+): Marker[] {
+  const addMarker = () =>
     jankInstances.push({
       start: lastTimestamp - lastResponsiveness,
       dur: lastResponsiveness,
@@ -63,27 +62,27 @@ export function getJankInstances(
     }
     if (currentResponsiveness < lastResponsiveness) {
       if (lastResponsiveness >= thresholdInMs) {
-        addTracingMarker();
+        addMarker();
       }
     }
     lastResponsiveness = currentResponsiveness;
     lastTimestamp = samples.time[i];
   }
   if (lastResponsiveness >= thresholdInMs) {
-    addTracingMarker();
+    addMarker();
   }
   return jankInstances;
 }
 
-export function getSearchFilteredTracingMarkers(
-  markers: TracingMarker[],
+export function getSearchFilteredMarkers(
+  markers: Marker[],
   searchString: string
-): TracingMarker[] {
+): Marker[] {
   if (!searchString) {
     return markers;
   }
   const lowerCaseSearchString = searchString.toLowerCase();
-  const newMarkers: TracingMarker[] = [];
+  const newMarkers: Marker[] = [];
   for (const marker of markers) {
     const { data, name } = marker;
     const lowerCaseName = name.toLowerCase();
@@ -126,10 +125,10 @@ export function getSearchFilteredTracingMarkers(
  * name. This extracts that and turns it into a payload.
  */
 export function extractMarkerDataFromName(
-  markers: MarkersTable,
+  markers: RawMarkerTable,
   stringTable: UniqueStringArray
-): MarkersTable {
-  const newMarkers: MarkersTable = {
+): RawMarkerTable {
+  const newMarkers: RawMarkerTable = {
     data: markers.data.slice(),
     name: markers.name.slice(),
     time: markers.time.slice(),
@@ -216,39 +215,40 @@ export function extractMarkerDataFromName(
   return newMarkers;
 }
 
-export function getTracingMarkers(
-  markers: MarkersTable,
-  stringTable: UniqueStringArray
-): TracingMarker[] {
-  const tracingMarkers: TracingMarker[] = [];
-  // This map is used to track start and end markers for tracing markers.
-  const openMarkers: Map<IndexIntoStringTable, TracingMarker[]> = new Map();
-  for (let i = 0; i < markers.length; i++) {
-    const data = markers.data[i];
+export function deriveMarkersFromRawMarkerTable(
+  rawMarkers: RawMarkerTable,
+  stringTable: UniqueStringArray,
+  firstSampleTime: number
+): Marker[] {
+  const matchedMarkers: Marker[] = [];
+  // This map is used to track start and end raw markers for the time-matched markers.
+  const openMarkers: Map<IndexIntoStringTable, Marker[]> = new Map();
+  for (let i = 0; i < rawMarkers.length; i++) {
+    const data = rawMarkers.data[i];
     if (!data) {
       // Add a marker with a zero duration
       const marker = {
-        start: markers.time[i],
+        start: rawMarkers.time[i],
         dur: 0,
-        name: stringTable.getString(markers.name[i]),
+        name: stringTable.getString(rawMarkers.name[i]),
         title: null,
         data: null,
       };
-      tracingMarkers.push(marker);
+      matchedMarkers.push(marker);
     } else if (data.type === 'tracing' && data.interval) {
-      // Tracing markers are created from two distinct markers that are created at
+      // Markers are created from two distinct raw markers that are created at
       // the start and end of whatever code that is running that we care about.
       // This is implemented by AutoProfilerTracing in Gecko.
       //
       // In this function we convert both of these raw markers into a single
-      // tracing marker with a non-null duration.
+      // marker with a non-null duration.
       //
       // We also handle nested markers by assuming markers of the same type are
       // never interwoven: given input markers startA, startB, endC, endD, we'll
       // get 2 markers A-D and B-C.
 
-      const time = markers.time[i];
-      const nameStringIndex = markers.name[i];
+      const time = rawMarkers.time[i];
+      const nameStringIndex = rawMarkers.name[i];
       if (data.interval === 'start') {
         let markerBucket = openMarkers.get(nameStringIndex);
         if (markerBucket === undefined) {
@@ -272,24 +272,30 @@ export function getTracingMarkers(
         } else {
           // No matching "start" marker has been encountered before this "end",
           // this means it was issued before the capture started. Here we create
-          // a fake "start" marker to create the final tracing marker.
+          // an "incomplete" marker which will be truncated at the starting end
+          // since we don't know exactly when it started.
           // Note we won't have additional data (eg the cause stack) for this
           // marker because that data is contained in the "start" marker.
 
-          const nameStringIndex = markers.name[i];
+          const nameStringIndex = rawMarkers.name[i];
 
+          // Also note that the end marker could occur before the
+          // first sample. In that case it'll become a dot marker at
+          // the location of the end marker. Otherwise we'll use the
+          // time of the first sample as its start.
           marker = {
-            start: -1, // Something negative so that we can distinguish it later
+            start: Math.min(firstSampleTime, time),
             name: stringTable.getString(nameStringIndex),
             dur: 0,
             title: null,
             data,
+            incomplete: true,
           };
         }
         if (marker.start !== undefined) {
           marker.dur = time - marker.start;
         }
-        tracingMarkers.push(marker);
+        matchedMarkers.push(marker);
       }
     } else {
       // `data` here is a union of different shaped objects, that may or not have
@@ -299,10 +305,10 @@ export function getTracingMarkers(
       const endTime = getNumberPropertyOrNull(data, 'endTime');
 
       if (startTime !== null && endTime !== null) {
-        // Construct a tracing marker with a duration if these properties exist.
-        const name = stringTable.getString(markers.name[i]);
+        // Construct a marker with a duration if these properties exist.
+        const name = stringTable.getString(rawMarkers.name[i]);
         const duration = endTime - startTime;
-        tracingMarkers.push({
+        matchedMarkers.push({
           start: startTime,
           dur: duration,
           name,
@@ -310,13 +316,13 @@ export function getTracingMarkers(
           title: null,
         });
       } else {
-        // Ensure all markers are converted to tracing markers, even if they have no
+        // Ensure all raw markers are converted to markers, even if they have no
         // more timing information. This ensures that markers can be filtered by time
         // in a consistent manner.
-        tracingMarkers.push({
-          start: markers.time[i],
+        matchedMarkers.push({
+          start: rawMarkers.time[i],
           dur: 0,
-          name: stringTable.getString(markers.name[i]),
+          name: stringTable.getString(rawMarkers.name[i]),
           data,
           title: null,
         });
@@ -324,37 +330,38 @@ export function getTracingMarkers(
     }
   }
 
-  // Loop over tracing "start" markers without any "end" markers
+  // Loop over "start" markers without any "end" markers
   for (const markerBucket of openMarkers.values()) {
     for (const marker of markerBucket) {
       marker.dur = Infinity;
-      tracingMarkers.push(marker);
+      marker.incomplete = true;
+      matchedMarkers.push(marker);
     }
   }
 
-  tracingMarkers.sort((a, b) => a.start - b.start);
-  return tracingMarkers;
+  matchedMarkers.sort((a, b) => a.start - b.start);
+  return matchedMarkers;
 }
 
-export function filterTracingMarkersToRange(
-  tracingMarkers: TracingMarker[],
+export function filterMarkersToRange(
+  markers: Marker[],
   rangeStart: number,
   rangeEnd: number
-): TracingMarker[] {
-  return tracingMarkers.filter(
+): Marker[] {
+  return markers.filter(
     tm => tm.start < rangeEnd && tm.start + tm.dur >= rangeStart
   );
 }
 
-export function isNetworkMarker(marker: TracingMarker): boolean {
+export function isNetworkMarker(marker: Marker): boolean {
   return !!(marker.data && marker.data.type === 'Network');
 }
 
-export function filterForNetworkChart(markers: TracingMarker[]) {
+export function filterForNetworkChart(markers: Marker[]) {
   return markers.filter(marker => isNetworkMarker(marker));
 }
 
-export function filterForMarkerChart(markers: TracingMarker[]) {
+export function filterForMarkerChart(markers: Marker[]) {
   return markers.filter(marker => !isNetworkMarker(marker));
 }
 // Firefox emits separate start and end markers for each load. It does this so that,
@@ -363,11 +370,9 @@ export function filterForMarkerChart(markers: TracingMarker[]) {
 // information about requests that were in progress at profile collection time.
 // For requests that have finished, we want to merge the request's start and end
 // markers into one marker.
-export function mergeStartAndEndNetworkMarker(
-  markers: TracingMarker[]
-): TracingMarker[] {
-  const sortedMarkers: TracingMarker[] = markers.slice(0);
-  const filteredMarkers: TracingMarker[] = [];
+export function mergeStartAndEndNetworkMarker(markers: Marker[]): Marker[] {
+  const sortedMarkers: Marker[] = markers.slice(0);
+  const filteredMarkers: Marker[] = [];
 
   // Sort markers, alphabetized by name to filter for markers with the same name
   sortedMarkers.sort((a, b) => {
@@ -429,45 +434,45 @@ export function mergeStartAndEndNetworkMarker(
 }
 
 export function extractScreenshotsById(
-  markers: MarkersTable,
+  rawMarkers: RawMarkerTable,
   stringTable: UniqueStringArray,
   rootRange: StartEndRange
-): Map<string, TracingMarker[]> {
+): Map<string, Marker[]> {
   const idToScreenshotMarkers = new Map();
   const name = 'CompositorScreenshot';
   const nameIndex = stringTable.indexForString(name);
-  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-    if (markers.name[markerIndex] === nameIndex) {
+  for (let markerIndex = 0; markerIndex < rawMarkers.length; markerIndex++) {
+    if (rawMarkers.name[markerIndex] === nameIndex) {
       // Coerce the payload to a screenshot one. Don't do a runtime check that
       // this is correct.
-      const data: ScreenshotPayload = (markers.data[markerIndex]: any);
+      const data: ScreenshotPayload = (rawMarkers.data[markerIndex]: any);
 
-      let tracingMarkers = idToScreenshotMarkers.get(data.windowID);
-      if (tracingMarkers === undefined) {
-        tracingMarkers = [];
-        idToScreenshotMarkers.set(data.windowID, tracingMarkers);
+      let markers = idToScreenshotMarkers.get(data.windowID);
+      if (markers === undefined) {
+        markers = [];
+        idToScreenshotMarkers.set(data.windowID, markers);
       }
 
-      tracingMarkers.push({
-        start: markers.time[markerIndex],
+      markers.push({
+        start: rawMarkers.time[markerIndex],
         dur: 0,
         title: null,
         name,
         data,
       });
 
-      if (tracingMarkers.length > 1) {
+      if (markers.length > 1) {
         // Set the duration
-        const prevMarker = tracingMarkers[tracingMarkers.length - 2];
-        const nextMarker = tracingMarkers[tracingMarkers.length - 1];
+        const prevMarker = markers[markers.length - 2];
+        const nextMarker = markers[markers.length - 1];
         prevMarker.dur = nextMarker.start - prevMarker.start;
       }
     }
   }
 
-  for (const [, tracingMarkers] of idToScreenshotMarkers) {
+  for (const [, markers] of idToScreenshotMarkers) {
     // This last marker must exist.
-    const lastMarker = tracingMarkers[tracingMarkers.length - 1];
+    const lastMarker = markers[markers.length - 1];
     lastMarker.dur = rootRange.end - lastMarker.start;
   }
 

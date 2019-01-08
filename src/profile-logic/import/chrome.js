@@ -11,7 +11,7 @@ import type {
 } from '../../types/profile';
 
 import { getEmptyProfile } from '../../profile-logic/profile-data';
-import { getEmptyThread } from '../../test/fixtures/profiles/make-profile';
+import { getEmptyThread } from '../../test/fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
 
 // Chrome Tracing Event Spec:

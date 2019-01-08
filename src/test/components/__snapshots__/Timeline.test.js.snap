@@ -157,11 +157,12 @@ exports[`Timeline renders the header 1`] = `
                 onTouchStart={[Function]}
                 title={null}
               >
-                <h1
-                  className="timelineTrackName"
+                <button
+                  className="timelineTrackNameButton"
+                  type="button"
                 >
                   Process 0
-                </h1>
+                </button>
               </div>
               <div
                 className="timelineTrackTrack"
@@ -193,11 +194,12 @@ exports[`Timeline renders the header 1`] = `
                     title="thread: \\"Main Thread\\" (0)
 process: \\"default\\" (0)"
                   >
-                    <h1
-                      className="timelineTrackName"
+                    <button
+                      className="timelineTrackNameButton"
+                      type="button"
                     >
                       Main Thread
-                    </h1>
+                    </button>
                   </div>
                   <div
                     className="timelineTrackTrack"
@@ -206,10 +208,10 @@ process: \\"default\\" (0)"
                       className="timelineTrackThread"
                     >
                       <div
-                        className="timelineTrackThreadIntervalMarkerOverview selected"
+                        className="timelineTrackThreadMarkerOverview selected"
                       >
                         <canvas
-                          className="timelineTracingMarkersCanvas"
+                          className="timelineMarkersCanvas"
                           onMouseDown={[Function]}
                           onMouseMove={[Function]}
                           onMouseOut={[Function]}
@@ -249,11 +251,12 @@ process: \\"default\\" (0)"
                     title="thread: \\"Thread with dropped samples\\" (0)
 process: \\"default\\" (0)"
                   >
-                    <h1
-                      className="timelineTrackName"
+                    <button
+                      className="timelineTrackNameButton"
+                      type="button"
                     >
                       Thread with dropped samples
-                    </h1>
+                    </button>
                   </div>
                   <div
                     className="timelineTrackTrack"
@@ -262,10 +265,10 @@ process: \\"default\\" (0)"
                       className="timelineTrackThread"
                     >
                       <div
-                        className="timelineTrackThreadIntervalMarkerOverview"
+                        className="timelineTrackThreadMarkerOverview"
                       >
                         <canvas
-                          className="timelineTracingMarkersCanvas"
+                          className="timelineMarkersCanvas"
                           onMouseDown={[Function]}
                           onMouseMove={[Function]}
                           onMouseOut={[Function]}
@@ -339,11 +342,12 @@ process: \\"default\\" (0)"
                     title="thread: \\"Thread with dropped samples\\" (0)
 process: \\"default\\" (0)"
                   >
-                    <h1
-                      className="timelineTrackName"
+                    <button
+                      className="timelineTrackNameButton"
+                      type="button"
                     >
                       Thread with dropped samples
-                    </h1>
+                    </button>
                   </div>
                   <div
                     className="timelineTrackTrack"
@@ -352,10 +356,10 @@ process: \\"default\\" (0)"
                       className="timelineTrackThread"
                     >
                       <div
-                        className="timelineTrackThreadIntervalMarkerOverview"
+                        className="timelineTrackThreadMarkerOverview"
                       >
                         <canvas
-                          className="timelineTracingMarkersCanvas"
+                          className="timelineMarkersCanvas"
                           onMouseDown={[Function]}
                           onMouseMove={[Function]}
                           onMouseOut={[Function]}

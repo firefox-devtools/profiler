@@ -9,9 +9,9 @@ import sinon from 'sinon';
 
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
-import * as ZippedProfilesSelectors from '../../reducers/zipped-profiles';
-import { getView } from '../../reducers/app';
+import * as ProfileViewSelectors from '../../selectors/profile';
+import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
+import { getView } from '../../selectors/app';
 import {
   viewProfile,
   retrieveProfileFromAddon,
@@ -21,14 +21,14 @@ import {
   _fetchProfile,
 } from '../../actions/receive-profile';
 
-import getGeckoProfile from '../fixtures/profiles/gecko-profile';
+import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getEmptyProfile } from '../../profile-logic/profile-data';
 import JSZip from 'jszip';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 
 // Mocking SymbolStoreDB
@@ -219,7 +219,7 @@ describe('actions/receive-profile', function() {
       clock = sinon.useFakeTimers();
 
       geckoProfiler = {
-        getProfile: () => Promise.resolve(getGeckoProfile()),
+        getProfile: () => Promise.resolve(createGeckoProfile()),
         getSymbolTable: () =>
           Promise.reject(new Error('No symbol tables available')),
       };
@@ -302,7 +302,7 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'appliciation/json',
       },
-      json: () => Promise.resolve(getGeckoProfile()),
+      json: () => Promise.resolve(createGeckoProfile()),
     };
 
     beforeEach(function() {
@@ -417,7 +417,7 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () => Promise.resolve(getGeckoProfile()),
+      json: () => Promise.resolve(createGeckoProfile()),
     };
 
     beforeEach(function() {

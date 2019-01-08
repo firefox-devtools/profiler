@@ -5,10 +5,10 @@ exports[`timeline/TrackThread matches the snapshot 1`] = `
   className="timelineTrackThread"
 >
   <div
-    className="timelineTrackThreadIntervalMarkerOverview selected"
+    className="timelineTrackThreadMarkerOverview selected"
   >
     <canvas
-      className="timelineTracingMarkersCanvas"
+      className="timelineMarkersCanvas"
       onMouseDown={[Function]}
       onMouseMove={[Function]}
       onMouseOut={[Function]}

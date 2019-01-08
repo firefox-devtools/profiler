@@ -6,7 +6,7 @@
 import React, { PureComponent } from 'react';
 
 import EmptyReasons from '../shared/EmptyReasons';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { oneLine } from 'common-tags';
 
 import explicitConnect, {

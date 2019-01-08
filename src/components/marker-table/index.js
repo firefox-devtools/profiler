@@ -9,10 +9,10 @@ import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import {
   getZeroAt,
-  selectedThreadSelectors,
   getScrollToSelectionGeneration,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { changeSelectedMarker } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
 import { formatSeconds } from '../../utils/format-numbers';
@@ -20,10 +20,7 @@ import { formatSeconds } from '../../utils/format-numbers';
 import './index.css';
 
 import type { ThreadIndex } from '../../types/profile';
-import type {
-  TracingMarker,
-  IndexIntoTracingMarkers,
-} from '../../types/profile-derived';
+import type { Marker, IndexIntoMarkers } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -38,17 +35,17 @@ type MarkerDisplayData = {|
 |};
 
 class MarkerTree {
-  _markers: TracingMarker[];
+  _markers: Marker[];
   _zeroAt: Milliseconds;
-  _displayDataByIndex: Map<IndexIntoTracingMarkers, MarkerDisplayData>;
+  _displayDataByIndex: Map<IndexIntoMarkers, MarkerDisplayData>;
 
-  constructor(markers: TracingMarker[], zeroAt: Milliseconds) {
+  constructor(markers: Marker[], zeroAt: Milliseconds) {
     this._markers = markers;
     this._zeroAt = zeroAt;
     this._displayDataByIndex = new Map();
   }
 
-  getRoots(): IndexIntoTracingMarkers[] {
+  getRoots(): IndexIntoMarkers[] {
     const markerIndices = [];
     for (let i = 0; i < this._markers.length; i++) {
       markerIndices.push(i);
@@ -56,11 +53,11 @@ class MarkerTree {
     return markerIndices;
   }
 
-  getChildren(markerIndex: IndexIntoTracingMarkers): IndexIntoTracingMarkers[] {
+  getChildren(markerIndex: IndexIntoMarkers): IndexIntoMarkers[] {
     return markerIndex === -1 ? this.getRoots() : [];
   }
 
-  hasChildren(_markerIndex: IndexIntoTracingMarkers): boolean {
+  hasChildren(_markerIndex: IndexIntoMarkers): boolean {
     return false;
   }
 
@@ -68,7 +65,7 @@ class MarkerTree {
     return new Set();
   }
 
-  getParent(): IndexIntoTracingMarkers {
+  getParent(): IndexIntoMarkers {
     // -1 isn't used, but needs to be compatible with the call tree.
     return -1;
   }
@@ -81,7 +78,7 @@ class MarkerTree {
     return this._markers === tree._markers;
   }
 
-  getDisplayData(markerIndex: IndexIntoTracingMarkers): MarkerDisplayData {
+  getDisplayData(markerIndex: IndexIntoMarkers): MarkerDisplayData {
     let displayData = this._displayDataByIndex.get(markerIndex);
     if (displayData === undefined) {
       const marker = this._markers[markerIndex];
@@ -156,8 +153,8 @@ function _formatDuration(duration: number): string {
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
-  +markers: TracingMarker[],
-  +selectedMarker: IndexIntoTracingMarkers,
+  +markers: Marker[],
+  +selectedMarker: IndexIntoMarkers,
   +zeroAt: Milliseconds,
   +scrollToSelectionGeneration: number,
 |};
@@ -175,7 +172,7 @@ class MarkerTable extends PureComponent<Props> {
     { propName: 'category', title: 'Category' },
   ];
   _mainColumn = { propName: 'name', title: '' };
-  _expandedNodeIds: Array<IndexIntoTracingMarkers | null> = [];
+  _expandedNodeIds: Array<IndexIntoMarkers | null> = [];
   _onExpandedNodeIdsChange = () => {};
   _treeView: ?TreeView<MarkerDisplayData>;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
@@ -202,7 +199,7 @@ class MarkerTable extends PureComponent<Props> {
     }
   }
 
-  _onSelectionChange = (selectedMarker: IndexIntoTracingMarkers) => {
+  _onSelectionChange = (selectedMarker: IndexIntoMarkers) => {
     const { threadIndex, changeSelectedMarker } = this.props;
     changeSelectedMarker(threadIndex, selectedMarker);
   };
@@ -211,7 +208,12 @@ class MarkerTable extends PureComponent<Props> {
     const { markers, zeroAt, selectedMarker } = this.props;
     const tree = new MarkerTree(markers, zeroAt);
     return (
-      <div className="markerTable">
+      <div
+        className="markerTable"
+        id="marker-table-tab"
+        role="tabpanel"
+        aria-labelledby="marker-table-tab-button"
+      >
         <MarkerSettings />
         <TreeView
           maxNodeDepth={0}
@@ -236,7 +238,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    markers: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state),
+    markers: selectedThreadSelectors.getPreviewFilteredMarkers(state),
     selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
     zeroAt: getZeroAt(state),
   }),

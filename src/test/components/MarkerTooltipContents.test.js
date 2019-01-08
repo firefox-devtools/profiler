@@ -13,9 +13,9 @@ import { storeWithProfile } from '../fixtures/stores';
 import {
   addMarkersToThreadWithCorrespondingSamples,
   getProfileFromTextSamples,
-} from '../fixtures/profiles/make-profile';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../fixtures/profiles/processed-profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 
 describe('MarkerTooltipContents', function() {
   it('renders tooltips for various markers', () => {
@@ -273,6 +273,14 @@ describe('MarkerTooltipContents', function() {
         },
       ],
       [
+        'TTFI',
+        21.4,
+        {
+          type: 'Text',
+          name: 'TTFI after 100.01ms (longTask was 100.001ms)',
+        },
+      ],
+      [
         'Styles',
         20.5,
         {
@@ -302,6 +310,7 @@ describe('MarkerTooltipContents', function() {
           endTime: 18736.9210449375,
           id: 107838038867999,
           status: 'STATUS_REDIRECT',
+          cache: 'any string could be here',
           pri: -20,
           count: 0,
           URI: 'http://www.wikia.com/',
@@ -318,6 +327,7 @@ describe('MarkerTooltipContents', function() {
           endTime: 13587.6919060625,
           id: 1234,
           status: 'STATUS_STOP',
+          cache: 'Hit',
           pri: 8,
           count: 47027,
           URI:
@@ -378,13 +388,13 @@ describe('MarkerTooltipContents', function() {
     const store = storeWithProfile(profile);
     const state = store.getState();
     const threadIndex = getSelectedThreadIndex(state);
-    const tracingMarkers = selectedThreadSelectors.getTracingMarkers(state);
+    const markers = selectedThreadSelectors.getMarkers(state);
 
     expect(
       renderer.create(
         <Provider store={store}>
           <Fragment>
-            {tracingMarkers.map((marker, i) => (
+            {markers.map((marker, i) => (
               <MarkersTooltipContents
                 key={i}
                 marker={marker}

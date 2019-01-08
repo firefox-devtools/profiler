@@ -5,7 +5,7 @@
 
 import type { Store as ReduxStore } from 'redux'; // eslint-disable-line import/named
 import type { Action as ActionsRef } from './actions';
-import type { State as StateRef } from './reducers';
+import type { State as StateRef } from './state';
 
 /**
  * This file contains type definitions for the Redux store. Unlike the definitions
@@ -17,6 +17,48 @@ import type { State as StateRef } from './reducers';
 // circular dependencies.
 export type Action = ActionsRef;
 export type State = StateRef;
+
+/**
+ * The selector type enforces the selector pattern, and should be used when
+ * defining selectors. These selectors can be simple functions, or created using
+ * the reselect library. This type enforces the common pattern of a pure function that
+ * only accesses the state, and selects, or derives something from it.
+ *
+ * See the type below for additional considerations.
+ */
+export type Selector<T> = State => T;
+
+/**
+ * Selectors generally come in two different varieties: selectors that trivially access
+ * a value, and selectors that do some kind of complex or expensive computation.
+ *
+ * Simple selectors are used to build up a language of functions for looking up values
+ * in the state. For instance a selector named `getMyProperty` could trivially
+ * access that from the state `state => state.myProperty`. This function can then be
+ * used in other selectors to de-couple the access of some state, from where the state
+ * is actually stored. These are really cheap to run.
+ *
+ * Selectors using the "reselect" library can memoize complicated or expensive
+ * derived state. These selectors often combine multiple pieces of state and then
+ * run some kind of function to derive the desired information. This way when any of
+ * the pieces of dependent state used for the calculation change, then the entire
+ * function is invalidated and runs again.
+ *
+ * A "dangerous" problem arises if this memoized function takes an argument that does
+ * not come directly from the state. The additional argument can break the typical
+ * memoization pattern, and could be used incorrectly to re-compute something expensive.
+ * Care should be taken that a value isn't needlessly recomputed. The following type is
+ * used as a hint that something a bit different is going on with the selector, and
+ * memoization might not be happening in the same way.
+ *
+ * See: https://github.com/reduxjs/reselect/blob/master/README.md#q-how-do-i-create-a-selector-that-takes-an-argument
+ */
+export type DangerousSelectorWithArguments<T, A1, A2 = void, A3 = void> = (
+  State,
+  A1,
+  A2,
+  A3
+) => T;
 
 type ThunkDispatch = <Returns>(action: ThunkAction<Returns>) => Returns;
 type PlainDispatch = (action: Action) => Action;
@@ -39,24 +81,3 @@ export type Dispatch = PlainDispatch & ThunkDispatch;
  * of all Actions, as well as specific Dispatch behavior.
  */
 export type Store = ReduxStore<State, Action, Dispatch>;
-
-/**
- * This type definition takes a ThunkAction, and strips out the function
- * that accepts the (Dispatch, GetState). This is effectively what wrapping
- * the action in the connect function does.
- *
- * For instance:
- *   (...Args) => (Dispatch, GetState) => Returns
- *
- * Gets transformed into:
- *   (...Args) => Returns
- */
-export type ConnectedThunk<Fn> = $Call<
-  <Args, Returns>(
-    // Take as input a ThunkAction.
-    (...Args) => (Dispatch, GetState) => Returns
-    // Return the wrapped action.
-  ) => (...Args) => Returns,
-  // Apply this to the function:
-  Fn
->;

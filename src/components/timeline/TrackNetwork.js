@@ -8,10 +8,8 @@ import React, { PureComponent } from 'react';
 import clamp from 'clamp';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
-import {
-  selectorsForThread,
-  getCommittedRange,
-} from '../../reducers/profile-view';
+import { getCommittedRange } from '../../selectors/profile';
+import { getThreadSelectors } from '../../selectors/per-thread';
 
 import type { ThreadIndex } from '../../types/profile';
 import type {} from '../../types/markers';
@@ -138,11 +136,11 @@ class Network extends PureComponent<Props, State> {
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state, ownProps) => {
     const { threadIndex } = ownProps;
-    const selectors = selectorsForThread(threadIndex);
+    const selectors = getThreadSelectors(threadIndex);
     const { start, end } = getCommittedRange(state);
     const networkTiming = selectors.getNetworkTrackTiming(state);
     return {
-      networkMarkers: selectors.getNetworkTracingMarkers(state),
+      networkMarkers: selectors.getNetworkMarkers(state),
       networkTiming: networkTiming,
       rangeStart: start,
       rangeEnd: end,

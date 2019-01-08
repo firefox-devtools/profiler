@@ -10,7 +10,7 @@ import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { changeInvertCallstack } from '../../actions/profile-view';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 

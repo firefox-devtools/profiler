@@ -16,14 +16,14 @@ import {
   formatValueTotal,
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
-import { selectorsForThread } from '../../reducers/profile-view';
-import { getImplementationFilter } from '../../reducers/url-state';
+import { getThreadSelectors } from '../../selectors/per-thread';
+import { getImplementationFilter } from '../../selectors/url-state';
 
 import Backtrace from './Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 import type { Microseconds } from '../../types/units';
-import type { TracingMarker } from '../../types/profile-derived';
+import type { Marker } from '../../types/profile-derived';
 import type { NotVoidOrNull } from '../../types/utils';
 import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex } from '../../types/profile';
@@ -302,7 +302,7 @@ function _sumMaybeEntries(
 }
 
 function _markerBacktrace(
-  marker: TracingMarker,
+  marker: Marker,
   data:
     | StyleMarkerPayload
     | PaintProfilerMarkerTracing
@@ -355,7 +355,7 @@ function _markerBacktrace(
 }
 
 function getMarkerDetails(
-  marker: TracingMarker,
+  marker: Marker,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {
@@ -364,6 +364,13 @@ function getMarkerDetails(
   if (data) {
     switch (data.type) {
       case 'UserTiming': {
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('name', 'Name', data.name)}
+          </div>
+        );
+      }
+      case 'Text': {
         return (
           <div className="tooltipDetails">
             {_markerDetail('name', 'Name', data.name)}
@@ -573,7 +580,7 @@ function getMarkerDetails(
                 )}
                 {_markerDetail(
                   'gcusage',
-                  'Heap usage',
+                  'Heap size',
                   timings.allocated_bytes,
                   formatBytes
                 )}
@@ -697,6 +704,7 @@ function getMarkerDetails(
         return (
           <div className="tooltipDetails">
             {_markerDetail('status', 'Status', _dataStatusReplace(data.status))}
+            {_markerDetailNullable('cache', 'Cache', data.cache)}
             {_markerDetailNullable('url', 'URL', data.URI)}
             {_markerDetailNullable(
               'redirect_url',
@@ -778,7 +786,7 @@ function getMarkerDetails(
 }
 
 type OwnProps = {|
-  +marker: TracingMarker,
+  +marker: Marker,
   +threadIndex: ThreadIndex,
   +className?: string,
 |};
@@ -806,10 +814,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
             <div className="tooltipTiming">
-              {/* tracing markers with no start have a negative start, while the
-                ones with no end have an infinite duration */}
-              {Number.isFinite(marker.dur) && marker.start >= 0
-                ? formatNumber(marker.dur) + 'ms'
+              {/* we don't know the duration if the marker is incomplete */}
+              {!marker.incomplete
+                ? formatMilliseconds(marker.dur)
                 : 'unknown duration'}
             </div>
             <div className="tooltipTitle">{marker.title || marker.name}</div>
@@ -830,7 +837,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
 const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
-    const selectors = selectorsForThread(threadIndex);
+    const selectors = getThreadSelectors(threadIndex);
     const threadName = selectors.getFriendlyThreadName(state);
     const thread = selectors.getThread(state);
     const implementationFilter = getImplementationFilter(state);

@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import { connect } from 'react-redux';
-import type { Dispatch, State } from '../types/store';
+import type { Dispatch, State, ThunkAction, Action } from '../types/store';
 
 type MapStateToProps<OwnProps: Object, StateProps: Object> = (
   state: State,
@@ -37,6 +37,52 @@ type ConnectOptions = {
   withRef?: boolean,
 };
 
+/**
+ * This function type describes the operation of taking a simple action creator, and
+ * just returning it.
+ */
+type WrapActionCreator<Args> = (
+  // Take as input an action creator.
+  (...Args) => Action
+  // If this function matches the above signature, do not modify it.
+) => (...Args) => Action;
+
+/**
+ * This function type describes the operation of removing the (Dispatch, GetState) from
+ * a thunk action creator.
+ * For instance:
+ *   (...Args) => (Dispatch, GetState) => Returns
+ *
+ * Gets transformed into:
+ *   (...Args) => Returns
+ */
+type WrapThunkActionCreator<Args, Returns> = (
+  // Take as input a ThunkAction.
+  (...Args) => ThunkAction<Returns>
+  // Return the wrapped action.
+) => (...Args) => Returns;
+
+/**
+ * This type takes a Props object and wraps each function in Redux's connect function.
+ * It is primarily exported for testing as explicitConnect should do this for us
+ * automatically. It leaves normal action creators alone, but with ThunkActions it
+ * removes the (Dispatch, GetState) part of a ThunkAction.
+ */
+export type WrapDispatchProps<DispatchProps: Object> = $ObjMap<
+  DispatchProps,
+  WrapActionCreator<*> & WrapThunkActionCreator<*, *>
+>;
+
+/**
+ * This type takes a single action creator, and returns the type as if the dispatch
+ * function was wrapped around it. It leaves normal action creators alone, but with
+ * ThunkActions it removes the (Dispatch, GetState) part of a ThunkAction.
+ */
+export type WrapFunctionInDispatch<Fn: Function> = $Call<
+  WrapActionCreator<*> & WrapThunkActionCreator<*, *>,
+  Fn
+>;
+
 export type ExplicitConnectOptions<
   OwnProps: Object,
   StateProps: Object,
@@ -63,7 +109,7 @@ export type ConnectedProps<
 > = $ReadOnly<{|
   ...OwnProps,
   ...StateProps,
-  ...DispatchProps,
+  ...WrapDispatchProps<DispatchProps>,
 |}>;
 
 export type ConnectedComponent<

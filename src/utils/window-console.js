@@ -4,7 +4,8 @@
 // @flow
 import { stripIndent } from 'common-tags';
 import type { GetState } from '../types/store';
-import { getProfile, selectedThreadSelectors } from '../reducers/profile-view';
+import { getProfile } from '../selectors/profile';
+import { selectedThreadSelectors } from '../selectors/per-thread';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using

@@ -9,14 +9,12 @@ import JsTracerChart from './Chart';
 import JsTracerSettings from './Settings';
 import EmptyReasons from './EmptyReasons';
 
-import {
-  getProfile,
-  selectedThreadSelectors,
-} from '../../reducers/profile-view';
+import { getProfile } from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   getShowJsTracerSummary,
   getSelectedThreadIndex,
-} from '../../reducers/url-state';
+} from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { Profile, JsTracerTable, ThreadIndex } from '../../types/profile';

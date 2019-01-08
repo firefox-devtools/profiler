@@ -6,7 +6,7 @@
 import type {
   Profile,
   Thread,
-  IndexIntoMarkersTable,
+  IndexIntoRawMarkerTable,
 } from '../../types/profile';
 
 import * as React from 'react';
@@ -26,7 +26,7 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
-import { getScreenshotTrackProfile } from '../fixtures/profiles/make-profile';
+import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 
 // Mock out the getBoundingBox to have a 400 pixel width.
@@ -184,7 +184,7 @@ function setup(
  */
 function _setScreenshotMarkersToUnknown(
   thread: Thread,
-  ...markerIndexes: IndexIntoMarkersTable[]
+  ...markerIndexes: IndexIntoRawMarkerTable[]
 ) {
   // Remove off the last few screenshot markers
   const unknownStringIndex = thread.stringTable.indexForString('Unknown');

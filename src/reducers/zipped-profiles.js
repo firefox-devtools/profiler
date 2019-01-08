@@ -4,33 +4,28 @@
 
 // @flow
 import { combineReducers } from 'redux';
-import { createSelector } from 'reselect';
 import { oneLine } from 'common-tags';
-import { getProfileUrl } from './url-state';
 import { ensureExists } from '../utils/flow';
 import * as ZipFiles from '../profile-logic/zip-files';
 
-import type { Action } from '../types/store';
 import type {
-  State,
   ZipFileState,
   Reducer,
   ZippedProfilesState,
-} from '../types/reducers';
-import type JSZip from 'jszip';
+} from '../types/state';
 
 /**
  * This reducer contains all of the state that deals with loading in profiles from
  * zip files.
  */
-function zipFile(
-  state: ZipFileState = {
+const zipFile: Reducer<ZipFileState> = (
+  state = {
     phase: 'NO_ZIP_FILE',
     zip: null,
     pathInZipFile: null,
   },
-  action: Action
-): ZipFileState {
+  action
+) => {
   switch (action.type) {
     case 'UPDATE_URL_STATE': {
       if (
@@ -103,9 +98,9 @@ function zipFile(
     default:
       return state;
   }
-}
+};
 
-function error(state: null | Error = null, action: Action): null | Error {
+const error: Reducer<null | Error> = (state = null, action) => {
   switch (action.type) {
     case 'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE':
     case 'FATAL_ERROR':
@@ -113,7 +108,7 @@ function error(state: null | Error = null, action: Action): null | Error {
     default:
       return state;
   }
-}
+};
 
 /**
  * This function ensures that the state transitions are logical and make sense. The
@@ -177,10 +172,10 @@ function _validateStateTransition(
   return next;
 }
 
-function selectedZipFileIndex(
-  state: null | ZipFiles.IndexIntoZipFileTable = null,
-  action: Action
-) {
+const selectedZipFileIndex: Reducer<null | ZipFiles.IndexIntoZipFileTable> = (
+  state = null,
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_ZIP_FILE': {
       return action.selectedZipFileIndex;
@@ -188,14 +183,16 @@ function selectedZipFileIndex(
     default:
       return state;
   }
-}
+};
 
-function expandedZipFileIndexes(
+const expandedZipFileIndexes: Reducer<
+  Array<ZipFiles.IndexIntoZipFileTable | null>
+> = (
   // In practice this should never contain null, but needs to support the
   // TreeView interface.
-  state: Array<ZipFiles.IndexIntoZipFileTable | null> = [],
-  action: Action
-) {
+  state = [],
+  action
+) => {
   switch (action.type) {
     case 'CHANGE_EXPANDED_ZIP_FILES': {
       return action.expandedZipFileIndexes;
@@ -203,7 +200,7 @@ function expandedZipFileIndexes(
     default:
       return state;
   }
-}
+};
 
 const zipFileReducer: Reducer<ZippedProfilesState> = combineReducers({
   zipFile,
@@ -213,53 +210,3 @@ const zipFileReducer: Reducer<ZippedProfilesState> = combineReducers({
 });
 
 export default zipFileReducer;
-
-export const getZippedProfilesState = (state: State): ZippedProfilesState =>
-  state.zippedProfiles;
-export const getSelectedZipFileIndex = (state: State) =>
-  getZippedProfilesState(state).selectedZipFileIndex;
-export const getExpandedZipFileIndexes = (state: State) =>
-  getZippedProfilesState(state).expandedZipFileIndexes;
-export const getZipFileErrorMessage = (state: State): string | null => {
-  const { error } = getZippedProfilesState(state);
-  return error === null ? null : error.message;
-};
-
-export const getZipFileState = (state: State): ZipFileState =>
-  getZippedProfilesState(state).zipFile;
-export const getZipFile = (state: State): JSZip | null => {
-  return getZipFileState(state).zip;
-};
-export const getHasZipFile = (state: State): boolean =>
-  getZipFileState(state).phase !== 'NO_ZIP_FILE';
-
-export const getZipFileTableOrNull = createSelector(
-  getZipFile,
-  zip => (zip === null ? null : ZipFiles.createZipTable(zip))
-);
-
-export const getZipFileTable = (state: State) =>
-  ensureExists(
-    getZipFileTableOrNull(state),
-    'Attempted to view a profile from a zip, when there is no zip file loaded.'
-  );
-
-export const getZipFileMaxDepth = createSelector(
-  getZipFileTable,
-  ZipFiles.getZipFileMaxDepth
-);
-
-export const getZipFileTreeOrNull = createSelector(
-  getZipFileTable,
-  getProfileUrl,
-  (zipFileTable, zipFileUrl) =>
-    zipFileTable === null
-      ? null
-      : new ZipFiles.ZipFileTree(zipFileTable, zipFileUrl)
-);
-
-export const getZipFileTree = (state: State) =>
-  ensureExists(
-    getZipFileTreeOrNull(state),
-    'Attempted to view a profile from a zip, when there is no zip file loaded.'
-  );

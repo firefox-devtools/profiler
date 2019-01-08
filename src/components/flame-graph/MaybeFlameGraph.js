@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getInvertCallstack } from '../../reducers/url-state';
+import { getInvertCallstack } from '../../selectors/url-state';
 import { changeInvertCallstack } from '../../actions/profile-view';
 import FlameGraph from './FlameGraph';
 

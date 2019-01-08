@@ -6,12 +6,12 @@
 import * as React from 'react';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { mount } from 'enzyme';
 import { changeSelectedCallNode } from '../../actions/profile-view';
 import { MenuItem } from 'react-contextmenu';
 import { Provider } from 'react-redux';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import copy from 'copy-to-clipboard';
 
 describe('calltree/CallNodeContextMenu', function() {

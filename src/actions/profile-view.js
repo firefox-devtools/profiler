@@ -4,17 +4,19 @@
 
 // @flow
 import { oneLine } from 'common-tags';
-import { getLastVisibleThreadTabSlug } from '../reducers/app';
+import { getLastVisibleThreadTabSlug } from '../selectors/app';
 import {
-  selectorsForThread,
-  selectedThreadSelectors,
   getGlobalTracks,
   getGlobalTrackAndIndexByPid,
   getLocalTracks,
   getLocalTrackFromReference,
   getGlobalTrackFromReference,
   getPreviewSelection,
-} from '../reducers/profile-view';
+} from '../selectors/profile';
+import {
+  getThreadSelectors,
+  selectedThreadSelectors,
+} from '../selectors/per-thread';
 import {
   getImplementationFilter,
   getSelectedThreadIndex,
@@ -23,7 +25,7 @@ import {
   getLocalTrackOrder,
   getHiddenLocalTracks,
   getSelectedTab,
-} from '../reducers/url-state';
+} from '../selectors/url-state';
 import {
   getCallNodePathFromIndex,
   getSampleCallNodes,
@@ -40,11 +42,11 @@ import type {
   TrackReference,
   TimelineType,
 } from '../types/actions';
-import type { State } from '../types/reducers';
+import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
 import type {
   ThreadIndex,
-  IndexIntoMarkersTable,
+  IndexIntoRawMarkerTable,
   Pid,
   IndexIntoSamplesTable,
 } from '../types/profile';
@@ -104,7 +106,7 @@ export function selectLeafCallNode(
   sampleIndex: IndexIntoSamplesTable
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const threadSelectors = selectorsForThread(threadIndex);
+    const threadSelectors = getThreadSelectors(threadIndex);
     const filteredThread = threadSelectors.getFilteredThread(getState());
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
@@ -136,7 +138,7 @@ export function selectBestAncestorCallNodeAndExpandCallTree(
   sampleIndex: IndexIntoSamplesTable
 ): ThunkAction<boolean> {
   return (dispatch, getState) => {
-    const threadSelectors = selectorsForThread(threadIndex);
+    const threadSelectors = getThreadSelectors(threadIndex);
     const fullThread = threadSelectors.getRangeFilteredThread(getState());
     const filteredThread = threadSelectors.getFilteredThread(getState());
     const unfilteredStack = fullThread.samples.stack[sampleIndex];
@@ -269,7 +271,7 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
 
     if (
       selectedTab === 'js-tracer' &&
-      selectorsForThread(selectedThreadIndex).getJsTracerTable(getState()) ===
+      getThreadSelectors(selectedThreadIndex).getJsTracerTable(getState()) ===
         null
     ) {
       // If the user switches to another thread that doesn't have JS Tracer information,
@@ -669,7 +671,8 @@ export function hideLocalTrack(
 
       if (
         nextSelectedThreadIndex === null &&
-        globalTrack.mainThreadIndex !== null
+        globalTrack.mainThreadIndex !== null &&
+        globalTrack.mainThreadIndex !== undefined
       ) {
         // Case 2a: Use the current process's main thread.
         nextSelectedThreadIndex = globalTrack.mainThreadIndex;
@@ -842,7 +845,7 @@ export function changeExpandedCallNodes(
 
 export function changeSelectedMarker(
   threadIndex: ThreadIndex,
-  selectedMarker: IndexIntoMarkersTable | -1
+  selectedMarker: IndexIntoRawMarkerTable | -1
 ): Action {
   return {
     type: 'CHANGE_SELECTED_MARKER',
@@ -971,7 +974,7 @@ export function addTransformToStack(
   transform: Transform
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const transformedThread = selectorsForThread(
+    const transformedThread = getThreadSelectors(
       threadIndex
     ).getRangeAndTransformFilteredThread(getState());
 

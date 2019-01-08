@@ -12,10 +12,8 @@ import { mount } from 'enzyme';
 
 import { changeTimelineType } from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
-import {
-  selectedThreadSelectors,
-  getPreviewSelection,
-} from '../../reducers/profile-view';
+import { getPreviewSelection } from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -29,7 +27,7 @@ import {
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock. Each stack is 100
 // pixels wide. Use the value 50 to click in the middle of this stack, and
@@ -101,11 +99,11 @@ describe('timeline/TrackThread', function() {
     view.update();
 
     const stackGraphCanvas = view.find('.threadStackGraphCanvas').first();
-    const tracingMarkersCanvas = view
+    const markerCanvas = view
       .find(
         [
-          '.timelineTrackThreadIntervalMarkerOverviewThreadGeckoMain',
-          '.timelineTracingMarkersCanvas',
+          '.timelineTrackThreadMarkerOverviewThreadGeckoMain',
+          '.timelineMarkersCanvas',
         ].join(' ')
       )
       .first();
@@ -119,7 +117,7 @@ describe('timeline/TrackThread', function() {
       view,
       threadIndex,
       stackGraphCanvas,
-      tracingMarkersCanvas,
+      markerCanvas,
     };
   }
 
@@ -134,8 +132,8 @@ describe('timeline/TrackThread', function() {
   });
 
   it('has the correct selectors into useful parts of the component for the markers profile', function() {
-    const { tracingMarkersCanvas } = setup(getMarkersProfile());
-    expect(tracingMarkersCanvas.exists()).toBe(true);
+    const { markerCanvas } = setup(getMarkersProfile());
+    expect(markerCanvas.exists()).toBe(true);
   });
 
   it('can click a stack in the stack graph', function() {
@@ -175,11 +173,11 @@ describe('timeline/TrackThread', function() {
   });
 
   it('can click a marker', function() {
-    const { getState, tracingMarkersCanvas } = setup(getMarkersProfile());
+    const { getState, markerCanvas } = setup(getMarkersProfile());
 
     function clickAndGetMarkerName(pageX: number) {
-      tracingMarkersCanvas.simulate('mousedown', getMouseEvent({ pageX }));
-      tracingMarkersCanvas.simulate('mouseup', getMouseEvent({ pageX }));
+      markerCanvas.simulate('mousedown', getMouseEvent({ pageX }));
+      markerCanvas.simulate('mouseup', getMouseEvent({ pageX }));
       return getPreviewSelection(getState());
     }
 

@@ -9,7 +9,12 @@ import TransformNavigator from '../shared/TransformNavigator';
 import MaybeFlameGraph from './MaybeFlameGraph';
 
 const FlameGraphView = () => (
-  <div className="flameGraph">
+  <div
+    className="flameGraph"
+    id="flame-graph-tab"
+    role="tabpanel"
+    aria-labelledby="flame-graph-tab-button"
+  >
     <StackSettings hideInvertCallstack={true} />
     <TransformNavigator />
     <MaybeFlameGraph />

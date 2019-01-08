@@ -4,8 +4,8 @@
 // @flow
 
 import { storeWithSimpleProfile, storeWithProfile } from '../fixtures/stores';
-import * as UrlStateSelectors from '../../reducers/url-state';
-import * as AppSelectors from '../../reducers/app';
+import * as UrlStateSelectors from '../../selectors/url-state';
+import * as AppSelectors from '../../selectors/app';
 import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { isolateProcess } from '../../actions/profile-view';
@@ -15,7 +15,7 @@ import {
   getProfileWithMarkers,
   getNetworkMarker,
   getProfileWithJsTracerEvents,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 
 import * as AppActions from '../../actions/app';
 

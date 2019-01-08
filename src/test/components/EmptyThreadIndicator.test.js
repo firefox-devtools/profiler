@@ -12,7 +12,7 @@ import renderer from 'react-test-renderer';
 import EmptyThreadIndicator, {
   getIndicatorPositions,
 } from '../../components/timeline/EmptyThreadIndicator';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 

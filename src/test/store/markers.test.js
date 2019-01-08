@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
-import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 
 describe('selectors/getMarkerChartTiming', function() {
   function getMarkerChartTiming(testMarkers) {
@@ -89,7 +89,9 @@ describe('selectors/getMarkerChartTiming', function() {
       expect(markerTiming).toEqual([
         {
           name: 'Rasterize',
-          start: [-1],
+          // First sample is captured at time 1, so this incomplete
+          // marker will start at that same point.
+          start: [1],
           end: [1],
           index: [0],
           label: [''],
@@ -120,15 +122,15 @@ describe('selectors/getMarkerChartTiming', function() {
   });
 });
 
-describe('getProcessedMarkersThread', function() {
-  function getProcessedMarkers(testMarkers) {
+describe('getProcessedRawMarkerTable', function() {
+  function setup(testMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
-    return selectedThreadSelectors.getProcessedMarkersTable(getState());
+    return selectedThreadSelectors.getProcessedRawMarkerTable(getState());
   }
 
   it('can process Invalidation markers', function() {
-    const markers = getProcessedMarkers([
+    const markers = setup([
       ['Invalidate http://mozilla.com/script.js:1234', 10, null],
       ['Invalidate self-hosted:2345', 20, null],
       ['Invalidate resource://foo -> resource://bar:3456', 30, null],
@@ -160,7 +162,7 @@ describe('getProcessedMarkersThread', function() {
   });
 
   it('can process Bailout markers', function() {
-    const markers = getProcessedMarkers([
+    const markers = setup([
       [
         'Bailout_ShapeGuard after getelem on line 3666 of resource://foo.js -> resource://bar.js:3662',
         10,

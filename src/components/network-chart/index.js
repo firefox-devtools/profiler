@@ -19,20 +19,14 @@ import NetworkChartRow from './NetworkChartRow';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 
-import {
-  selectedThreadSelectors,
-  getCommittedRange,
-  getProfileInterval,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
 import type { NetworkPayload } from '../../types/markers';
-import type {
-  TracingMarker,
-  MarkerTimingRows,
-} from '../../types/profile-derived';
+import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -52,7 +46,7 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
-  +markers: TracingMarker[],
+  +markers: Marker[],
   +networkTimingRows: MarkerTimingRows,
   +maxNetworkRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
@@ -84,7 +78,12 @@ class NetworkChart extends React.PureComponent<Props> {
   render() {
     const { markers } = this.props;
     return (
-      <div className="networkChart">
+      <div
+        className="networkChart"
+        id="network-chart-tab"
+        role="tabpanel"
+        aria-labelledby="network-chart-tab-button"
+      >
         <MarkerSettings />
         {markers.length === 0 ? (
           <NetworkChartEmptyReasons />
@@ -114,9 +113,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       state
     );
     return {
-      markers: selectedThreadSelectors.getMergedNetworkChartTracingMarkers(
-        state
-      ),
+      markers: selectedThreadSelectors.getMergedNetworkChartMarkers(state),
       networkTimingRows,
       maxNetworkRows: networkTimingRows.length,
       timeRange: getCommittedRange(state),
@@ -143,13 +140,11 @@ function _renderRow(rowProps: NetworkChartRowProps): React.Node {
 }
 
 /**
- * Our definition of tracing markers does not currently have the ability to refine
+ * Our definition of markers does not currently have the ability to refine
  * the union of all payloads to one specific payload through the type definition.
  * This function does a runtime check to do so.
  */
-function _getNetworkPayloadOrNull(
-  marker: TracingMarker
-): null | NetworkPayload {
+function _getNetworkPayloadOrNull(marker: Marker): null | NetworkPayload {
   if (!marker.data || marker.data.type !== 'Network') {
     return null;
   }
@@ -182,7 +177,7 @@ function _timeToCssPixels(props: Props, time: Milliseconds): CssPixels {
 function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
   const { markers, threadIndex } = props;
   return markers.map((marker, markerIndex) => {
-    // Since our type definition for TracingMarker can't refine to just Network
+    // Since our type definition for Marker can't refine to just Network
     // markers, extract the payload.
     const networkPayload = _getNetworkPayloadOrNull(marker);
     if (networkPayload === null) {

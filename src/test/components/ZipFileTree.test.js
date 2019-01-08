@@ -9,8 +9,8 @@ import ProfileViewer from '../../components/app/ProfileViewer';
 import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
-import * as UrlStateSelectors from '../../reducers/url-state';
-import * as ZippedProfileSelectors from '../../reducers/zipped-profiles';
+import * as UrlStateSelectors from '../../selectors/url-state';
+import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { waitUntilState } from '../fixtures/utils';
 

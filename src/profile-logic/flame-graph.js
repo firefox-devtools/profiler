@@ -3,15 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { UnitIntervalOfProfileRange, Milliseconds } from '../types/units';
+import type { UnitIntervalOfProfileRange } from '../types/units';
 import type { Thread } from '../types/profile';
 import type {
   CallNodeInfo,
   CallNodeTable,
   IndexIntoCallNodeTable,
 } from '../types/profile-derived';
-
-import { computeCallTreeCountsAndTimings } from './call-tree';
+import type { CallTreeCountsAndTimings } from './call-tree';
 
 export type FlameGraphDepth = number;
 export type IndexIntoFlameGraphTiming = number;
@@ -171,20 +170,15 @@ export function getRootsAndChildren(
  */
 export function getFlameGraphTiming(
   thread: Thread,
-  interval: Milliseconds,
   callNodeInfo: CallNodeInfo,
-  invertCallstack: boolean
+  callTreeCountsAndTimings: CallTreeCountsAndTimings
 ): FlameGraphTiming {
   const {
     callNodeChildCount,
     callNodeTimes,
     rootTotalTime,
-  } = computeCallTreeCountsAndTimings(
-    thread,
-    callNodeInfo,
-    interval,
-    invertCallstack
-  );
+  } = callTreeCountsAndTimings;
+
   const { roots, children } = getRootsAndChildren(
     thread,
     callNodeInfo.callNodeTable,

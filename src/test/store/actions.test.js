@@ -4,8 +4,8 @@
 // @flow
 
 import { storeWithProfile } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../reducers/profile-view';
-import * as UrlStateSelectors from '../../reducers/url-state';
+import * as ProfileViewSelectors from '../../selectors/profile';
+import * as UrlStateSelectors from '../../selectors/url-state';
 
 import {
   changeCallTreeSearchString,
@@ -15,9 +15,8 @@ import {
   changeSelectedCallNode,
   changeShowJsTracerSummary,
 } from '../../actions/profile-view';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-
-const { selectedThreadSelectors } = ProfileViewSelectors;
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 describe('selectors/getStackTimingByDepth', function() {
   /**

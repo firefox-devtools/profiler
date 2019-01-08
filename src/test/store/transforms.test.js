@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
@@ -15,7 +15,7 @@ import {
   changeImplementationFilter,
   changeSelectedCallNode,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 describe('"focus-subtree" transform', function() {
   describe('on a call tree', function() {

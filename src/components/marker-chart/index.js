@@ -14,18 +14,15 @@ import MarkerChartEmptyReasons from './MarkerChartEmptyReasons';
 import MarkerSettings from '../shared/MarkerSettings';
 
 import {
-  selectedThreadSelectors,
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
-import type {
-  TracingMarker,
-  MarkerTimingRows,
-} from '../../types/profile-derived';
+import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
 import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
@@ -45,7 +42,7 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
-  +markers: TracingMarker[],
+  +markers: Marker[],
   +markerTimingRows: MarkerTimingRows,
   +maxMarkerRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
@@ -96,7 +93,12 @@ class MarkerChart extends React.PureComponent<Props> {
     const maxViewportHeight = maxMarkerRows * ROW_HEIGHT;
 
     return (
-      <div className="markerChart">
+      <div
+        className="markerChart"
+        id="marker-chart-tab"
+        role="tabpanel"
+        aria-labelledby="marker-chart-tab-button"
+      >
         <MarkerSettings />
         {markers.length === 0 ? (
           <MarkerChartEmptyReasons />
@@ -145,7 +147,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       state
     );
     return {
-      markers: selectedThreadSelectors.getMarkerChartTracingMarkers(state),
+      markers: selectedThreadSelectors.getMarkerChartMarkers(state),
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
       timeRange: getCommittedRange(state),

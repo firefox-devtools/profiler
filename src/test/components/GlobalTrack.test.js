@@ -13,11 +13,8 @@ import {
   hideGlobalTrack,
 } from '../../actions/profile-view';
 import GlobalTrack from '../../components/timeline/GlobalTrack';
-import {
-  getGlobalTracks,
-  getRightClickedTrack,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+import { getGlobalTracks, getRightClickedTrack } from '../../selectors/profile';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';

@@ -7,17 +7,17 @@ import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import FlameGraphCanvas from './Canvas';
 import {
-  selectedThreadSelectors,
   getCommittedRange,
   getProfileViewOptions,
   getPreviewSelection,
   getScrollToSelectionGeneration,
-} from '../../reducers/profile-view';
-import { getSelectedThreadIndex } from '../../reducers/url-state';
+} from '../../selectors/profile';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSelectedThreadIndex } from '../../selectors/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import { changeSelectedCallNode } from '../../actions/profile-view';
-import { getIconsWithClassNames } from '../../reducers/icons';
+import { getIconsWithClassNames } from '../../selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
 import type { Thread } from '../../types/profile';
@@ -29,7 +29,7 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { CallTree } from '../../profile-logic/call-tree';
-import type { IconWithClassName } from '../../types/reducers';
+import type { IconWithClassName } from '../../types/state';
 
 import type {
   ExplicitConnectOptions,

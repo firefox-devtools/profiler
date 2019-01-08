@@ -23,7 +23,7 @@ import {
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
-} from '../reducers/url-state';
+} from '../selectors/url-state';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -51,6 +51,13 @@ import type {
  * This file collects all the actions that are used for receiving the profile in the
  * client and getting it into the processed format.
  */
+
+export function triggerLoadingFromUrl(profileUrl: string): Action {
+  return {
+    type: 'TRIGGER_LOADING_FROM_URL',
+    profileUrl,
+  };
+}
 
 export function waitingForProfileFromAddon(): Action {
   return {

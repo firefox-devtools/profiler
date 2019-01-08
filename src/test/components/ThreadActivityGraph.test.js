@@ -13,13 +13,13 @@ import { Provider } from 'react-redux';
 import { mount } from 'enzyme';
 
 import SelectedThreadActivityGraph from '../../components/shared/thread/SelectedActivityGraph';
-import { selectedThreadSelectors } from '../../reducers/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
 
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
