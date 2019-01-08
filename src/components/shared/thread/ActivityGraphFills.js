@@ -543,7 +543,7 @@ export class ActivityFillGraphQuerier {
     const sampleTimeRangeStart =
       sample > 0 ? (samples.time[sample - 1] + sampleTime) / 2 : -Infinity;
     const sampleTimeRangeEnd =
-      sample < samples.length
+      sample + 1 < samples.length
         ? (samples.time[sample + 1] + sampleTime) / 2
         : Infinity;
 
