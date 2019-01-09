@@ -25,10 +25,10 @@ describe('app/CompareHome', () => {
     expect(container.firstChild).toMatchSnapshot();
 
     fireEvent.change(getByLabelText(/Profile 1/), {
-      target: { value: 'www.url11.com' },
+      target: { value: 'http://www.url11.com' },
     });
     fireEvent.change(getByLabelText(/Profile 2/), {
-      target: { value: 'www.url12.com' },
+      target: { value: 'http://www.url12.com' },
     });
     const retrieveButton = getByText(
       (content, element) =>

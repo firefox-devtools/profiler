@@ -1,9 +1,4 @@
 .compareHome {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  grid-gap: .5em;
-  align-items: center;
-
   width: 75%;
   margin: auto;
   padding: 8em;
@@ -14,8 +9,24 @@
   background: #fff;
 }
 
-.compareHome h1,
-.compareHome input[type=submit],
-.compareHome p {
+.compareHomeForm {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-gap: 1em;
+  align-items: center;
+}
+
+.compareHomeSubmitButton {
   grid-column-start: span 2
+}
+
+.compareHomeFormLabel {
+  white-space: nowrap;
+}
+
+@media (max-width: 450px) {
+  .compareHome {
+    width: auto;
+    padding: 1em;
+  }
 }

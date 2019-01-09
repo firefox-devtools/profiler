@@ -3,43 +3,57 @@
 exports[`app/ProfileViewWhenReady does not try to retrieve a profile when moving from from-addon to public 1`] = `<profile-viewer />`;
 
 exports[`app/ProfileViewWhenReady renders a compare home when navigating to /compare/, then loads when changing profiles 1`] = `
-<form
+<main
   class="compareHome"
 >
-  <h1>
-    Enter the 2 profile URLs that you’d like to compare
+  <h1
+    class="compareHomeTitle"
+  >
+    Enter the profile URLs that you’d like to compare
   </h1>
   <p>
     The tool will extract the data from the selected track and range for each profile, and put them both on the same view to make them easy to compare.
   </p>
-  <label
-    for="compareHomeProfile1"
+  <form
+    class="compareHomeForm"
   >
-    Profile 1:
-  </label>
-  <input
-    class="compareHome-input"
-    id="compareHomeProfile1"
-    name="profile1"
-    value=""
-  />
-  <label
-    for="compareHomeProfile2"
-  >
-    Profile 2:
-  </label>
-  <input
-    class="compareHome-input"
-    id="compareHomeProfile2"
-    name="profile2"
-    value=""
-  />
-  <input
-    class="compareHome-submit-button"
-    type="submit"
-    value="Retrieve profiles"
-  />
-</form>
+    <label
+      class="compareHomeFormLabel"
+      for="compareHomeProfile1"
+    >
+      Profile 1:
+    </label>
+    <input
+      class="photon-input"
+      id="compareHomeProfile1"
+      name="profile1"
+      placeholder="http://"
+      required=""
+      type="url"
+      value=""
+    />
+    <label
+      class="compareHomeFormLabel"
+      for="compareHomeProfile2"
+    >
+      Profile 2:
+    </label>
+    <input
+      class="photon-input"
+      id="compareHomeProfile2"
+      name="profile2"
+      placeholder="http://"
+      required=""
+      type="url"
+      value=""
+    />
+    <input
+      class="compareHomeSubmitButton"
+      type="submit"
+      value="Retrieve profiles"
+    />
+  </form>
+</main>
 `;
 
 exports[`app/ProfileViewWhenReady renders a compare home when navigating to /compare/, then loads when changing profiles 2`] = `
