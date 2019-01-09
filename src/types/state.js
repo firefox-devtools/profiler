@@ -140,7 +140,7 @@ export type UrlState = {|
   // This is used for the "from-url" dataSource.
   +profileUrl: string,
   // This is used for the "compare" dataSource, to compare 2 profiles.
-  +profiles: [string, string] | null,
+  +profilesToCompare: string[] | null,
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
   +profileSpecific: {|

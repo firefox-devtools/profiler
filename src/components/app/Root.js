@@ -23,7 +23,7 @@ import {
   getDataSource,
   getHash,
   getProfileUrl,
-  getProfiles,
+  getProfilesToCompare,
 } from '../../selectors/url-state';
 import UrlManager from './UrlManager';
 import ServiceWorkerManager from './ServiceWorkerManager';
@@ -79,7 +79,7 @@ type ProfileViewStateProps = {|
   +dataSource: DataSource,
   +hash: string,
   +profileUrl: string,
-  +profiles: [string, string] | null,
+  +profilesToCompare: string[] | null,
   +hasZipFile: boolean,
 |};
 
@@ -102,7 +102,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       dataSource,
       hash,
       profileUrl,
-      profiles,
+      profilesToCompare,
       retrieveProfileFromAddon,
       retrieveProfileFromStore,
       retrieveProfileOrZipFromUrl,
@@ -124,8 +124,8 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
         retrieveProfileOrZipFromUrl(profileUrl).catch(e => console.error(e));
         break;
       case 'compare':
-        if (profiles) {
-          retrieveProfilesToCompare(profiles);
+        if (profilesToCompare) {
+          retrieveProfilesToCompare(profilesToCompare);
         }
         break;
       case 'none':
@@ -145,10 +145,10 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       this._retrieveProfileFromDataSource();
     } else if (
       this.props.dataSource === 'compare' &&
-      !prevProps.profiles &&
-      this.props.profiles
+      !prevProps.profilesToCompare &&
+      this.props.profilesToCompare
     ) {
-      this.props.retrieveProfilesToCompare(this.props.profiles);
+      this.props.retrieveProfilesToCompare(this.props.profilesToCompare);
     }
   }
 
@@ -188,13 +188,13 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
   }
 
   renderAppropriateComponents() {
-    const { view, dataSource, profiles, hasZipFile } = this.props;
+    const { view, dataSource, profilesToCompare, hasZipFile } = this.props;
     const phase = view.phase;
     if (dataSource === 'none') {
       return <Home />;
     }
 
-    if (dataSource === 'compare' && profiles === null) {
+    if (dataSource === 'compare' && profilesToCompare === null) {
       return <CompareHome />;
     }
     switch (phase) {
@@ -268,7 +268,7 @@ const options: ExplicitConnectOptions<
     dataSource: getDataSource(state),
     hash: getHash(state),
     profileUrl: getProfileUrl(state),
-    profiles: getProfiles(state),
+    profilesToCompare: getProfilesToCompare(state),
     hasZipFile: getHasZipFile(state),
   }),
   mapDispatchToProps: {

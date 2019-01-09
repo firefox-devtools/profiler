@@ -507,7 +507,7 @@ describe('compare', function() {
       /* no profile */ null
     );
 
-    expect(urlStateReducers.getProfiles(store.getState())).toEqual([
+    expect(urlStateReducers.getProfilesToCompare(store.getState())).toEqual([
       url1,
       url2,
     ]);
@@ -518,7 +518,7 @@ describe('compare', function() {
       { pathname: '/compare/' },
       /* no profile */ null
     );
-    store.dispatch(changeProfilesToCompare(url1, url2));
+    store.dispatch(changeProfilesToCompare([url1, url2]));
 
     expect(
       urlFromState(urlStateReducers.getUrlState(store.getState()))

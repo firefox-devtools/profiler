@@ -49,9 +49,9 @@ const profileUrl: Reducer<string> = (state = '', action) => {
   }
 };
 
-const profiles: Reducer<[string, string] | null> = (state = null, action) => {
+const profilesToCompare: Reducer<string[] | null> = (state = null, action) => {
   switch (action.type) {
-    case 'CHANGE_PROFILES':
+    case 'CHANGE_PROFILES_TO_COMPARE':
       return action.profiles;
     default:
       // This will also be set by UPDATE_URL_STATE
@@ -343,7 +343,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     dataSource,
     hash,
     profileUrl,
-    profiles,
+    profilesToCompare,
     selectedTab,
     pathInZipFile,
     profileSpecific,

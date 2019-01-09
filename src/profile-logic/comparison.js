@@ -10,16 +10,15 @@ type TranslationMapForCategories = Map<
   IndexIntoCategoryList
 >;
 export function mergeCategories(
-  categories1: CategoryList,
-  categories2: CategoryList
-): {
+  categoriesPerThread: CategoryList[]
+): {|
   categories: CategoryList,
   translationMaps: TranslationMapForCategories[],
-} {
+|} {
   const newCategories = [];
   const translationMaps = [];
 
-  [categories1, categories2].forEach(categories => {
+  categoriesPerThread.forEach(categories => {
     const translationMap = new Map();
     translationMaps.push(translationMap);
     const insertedCategories: Map<string, IndexIntoCategoryList> = new Map();

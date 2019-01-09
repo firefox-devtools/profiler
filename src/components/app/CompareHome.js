@@ -44,7 +44,7 @@ class CompareHome extends PureComponent<Props, State> {
     if (!profile2.startsWith('http')) {
       profile2 = 'http://' + profile2;
     }
-    changeProfilesToCompare(profile1, profile2);
+    changeProfilesToCompare([profile1, profile2]);
   };
 
   render() {

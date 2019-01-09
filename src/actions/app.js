@@ -41,13 +41,10 @@ export function setProfileSharingStatus(
   };
 }
 
-export function changeProfilesToCompare(
-  profileUrl1: string,
-  profileUrl2: string
-): Action {
+export function changeProfilesToCompare(profiles: string[]): Action {
   return {
-    type: 'CHANGE_PROFILES',
-    profiles: [profileUrl1, profileUrl2],
+    type: 'CHANGE_PROFILES_TO_COMPARE',
+    profiles,
   };
 }
 

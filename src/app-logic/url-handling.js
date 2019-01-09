@@ -37,12 +37,14 @@ function getDataSourceDirs(
     case 'from-url':
       return ['from-url', encodeURIComponent(urlState.profileUrl)];
     case 'compare':
-      if (urlState.profiles) {
-        const { profiles } = urlState;
-        if (profiles.length >= 2) {
+      if (urlState.profilesToCompare) {
+        const { profilesToCompare } = urlState;
+        if (profilesToCompare.length >= 2) {
           return [
             'compare',
-            encodeURIComponent(`${profiles[0]}...${profiles[1]}`),
+            encodeURIComponent(
+              `${profilesToCompare[0]}...${profilesToCompare[1]}`
+            ),
           ];
         }
       }
@@ -315,7 +317,7 @@ export function stateFromLocation(location: Location): UrlState {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
-    profiles: profilesToCompare,
+    profilesToCompare,
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
     profileSpecific: {

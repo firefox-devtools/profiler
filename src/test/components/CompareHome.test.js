@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import { render, fireEvent, cleanup } from 'react-testing-library';
 
 import CompareHome from '../../components/app/CompareHome';
-import { getProfiles } from '../../selectors/url-state';
+import { getProfilesToCompare } from '../../selectors/url-state';
 
 import { blankStore } from '../fixtures/stores';
 
@@ -36,7 +36,7 @@ describe('app/CompareHome', () => {
     );
     fireEvent.click(retrieveButton);
 
-    expect(getProfiles(store.getState())).toEqual([
+    expect(getProfilesToCompare(store.getState())).toEqual([
       'http://www.url11.com',
       'http://www.url12.com',
     ]);

@@ -820,11 +820,11 @@ export function retrieveProfileFromFile(
 }
 
 /**
- * This action retrieves 2 profiles and push them into 1 profile using the
+ * This action retrieves several profiles and push them into 1 profile using the
  * information contained in the query.
  */
 export function retrieveProfilesToCompare(
-  profileViewUrls: [string, string]
+  profileViewUrls: string[]
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
     dispatch(waitingForProfileFromUrl());
@@ -874,10 +874,7 @@ export function retrieveProfilesToCompare(
       const {
         categories: newCategories,
         translationMaps: translationMapsForCategories,
-      } = mergeCategories(
-        profiles[0].meta.categories,
-        profiles[1].meta.categories
-      );
+      } = mergeCategories(profiles.map(profile => profile.meta.categories));
       resultProfile.meta.categories = newCategories;
 
       // Then we loop over all profiles and do the necessary changes according

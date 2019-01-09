@@ -143,7 +143,7 @@ describe('app/ProfileViewWhenReady', function() {
     const url1 = 'http://fake-url.com/hash/1';
     const url2 = 'http://fake-url.com/hash/2';
 
-    dispatch(changeProfilesToCompare(url1, url2));
+    dispatch(changeProfilesToCompare([url1, url2]));
     expect(container.firstChild).toMatchSnapshot();
     expect(retrieveProfilesToCompare).toHaveBeenCalledWith([url1, url2]);
   });
