@@ -8,6 +8,7 @@ import clamp from 'clamp';
 
 import './ActivityGraph.css';
 
+import type { SelectedState } from '../../../profile-logic/profile-data';
 import type {
   IndexIntoSamplesTable,
   IndexIntoCategoryList,
@@ -42,7 +43,7 @@ type RenderedComponentSettings = {|
     IndexIntoSamplesTable
   ) => number,
   +greyCategoryIndex: IndexIntoCategoryList,
-  +samplesSelectedStates: ?Array<boolean>,
+  +samplesSelectedStates: ?Array<SelectedState>,
   +categoryDrawStyles: CategoryDrawStyles,
 |};
 

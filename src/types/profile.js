@@ -266,6 +266,7 @@ export type Thread = {
   pausedRanges: PausedRange[],
   name: string,
   processName?: string,
+  isJsTracer?: boolean,
   // An undefined pid is a valid value. An undefined value will key
   // properly on Map<pid, T>.
   pid: Pid,

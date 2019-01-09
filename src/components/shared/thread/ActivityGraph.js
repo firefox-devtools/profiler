@@ -23,6 +23,7 @@ import type {
   CategoryDrawStyles,
   ActivityFillGraphQuerier,
 } from './ActivityGraphFills';
+import type { SelectedState } from '../../../profile-logic/profile-data';
 
 export type Props = {|
   +className: string,
@@ -32,7 +33,7 @@ export type Props = {|
   +rangeEnd: Milliseconds,
   +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
   +categories: CategoryList,
-  +samplesSelectedStates?: boolean[],
+  +samplesSelectedStates?: void | null | SelectedState[],
   +treeOrderSampleComparator?: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable

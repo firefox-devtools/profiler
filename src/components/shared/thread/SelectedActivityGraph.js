@@ -22,13 +22,15 @@ import {
   selectLeafCallNode,
 } from '../../../actions/profile-view';
 
+import type { SelectedState } from '../../../profile-logic/profile-data';
+import type { PreviewSelection } from '../../../types/actions';
 import type {
   Thread,
   ThreadIndex,
   CategoryList,
   IndexIntoSamplesTable,
 } from '../../../types/profile';
-import type { Milliseconds } from '../../../types/units';
+import type { Milliseconds, StartEndRange } from '../../../types/units';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -57,7 +59,9 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
-  +samplesSelectedStates: boolean[],
+  +timeRange: StartEndRange,
+  +samplesSelectedStates: null | SelectedState[],
+  +previewSelection: PreviewSelection,
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
@@ -210,7 +214,7 @@ class SelectedThreadActivityGraph extends PureComponent<*> {
   }
 }
 
-const options: ExplicitConnectOptions<*, *, *> = {
+const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state: State) => {
     const committedRange = getCommittedRange(state);
     const previewSelection = getPreviewSelection(state);
@@ -220,10 +224,11 @@ const options: ExplicitConnectOptions<*, *, *> = {
     const rangeEnd = previewSelection.hasSelection
       ? previewSelection.selectionEnd
       : committedRange.end;
+    const fullThread = selectedThreadSelectors.getRangeFilteredThread(state);
     return {
       interval: getProfile(state).meta.interval,
       selectedThreadIndex: getSelectedThreadIndex(state),
-      fullThread: selectedThreadSelectors.getRangeFilteredThread(state),
+      fullThread,
       filteredThread: selectedThreadSelectors.getFilteredThread(state),
       rangeStart,
       rangeEnd,
@@ -232,9 +237,11 @@ const options: ExplicitConnectOptions<*, *, *> = {
         state
       ),
       categories: getProfile(state).meta.categories,
-      samplesSelectedStates: selectedThreadSelectors.getSamplesSelectedStatesInFilteredThread(
-        state
-      ),
+      samplesSelectedStates: fullThread.isJsTracer
+        ? null
+        : selectedThreadSelectors.getSamplesSelectedStatesInFilteredThread(
+            state
+          ),
       treeOrderSampleComparator: selectedThreadSelectors.getTreeOrderComparatorInFilteredThread(
         state
       ),

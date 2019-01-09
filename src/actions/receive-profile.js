@@ -108,6 +108,7 @@ export function viewProfile(
           jsTracer,
           profile.meta.categories
         );
+        jsTracerThread.isJsTracer = true;
         jsTracerThread.name = `JS Tracer of ${friendlyThreadName}`;
         jsTracerThreads.push(jsTracerThread);
       }

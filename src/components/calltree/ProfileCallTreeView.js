@@ -25,7 +25,7 @@ const ProfileCallTreeView = (props: Props) => (
     <StackSettings />
     <TransformNavigator />
     {props && props.hideThreadActivityGraph ? null : (
-      <SelectedThreadActivityGraph />
+      <SelectedThreadActivityGraph viewport={(null: any)} />
     )}
     <CallTree />
   </div>

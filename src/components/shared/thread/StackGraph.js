@@ -91,11 +91,13 @@ class StackGraph extends PureComponent<Props> {
       thread.samples,
       stackIndexToCallNodeIndex
     );
-    const samplesSelectedStates = getSamplesSelectedStates(
-      callNodeTable,
-      sampleCallNodes,
-      selectedCallNodeIndex
-    );
+    const samplesSelectedStates = thread.isJsTracer
+      ? null
+      : getSamplesSelectedStates(
+          callNodeTable,
+          sampleCallNodes,
+          selectedCallNodeIndex
+        );
     for (let i = 0; i < callNodeTable.depth.length; i++) {
       if (callNodeTable.depth[i] > maxDepth) {
         maxDepth = callNodeTable.depth[i];
@@ -154,7 +156,10 @@ class StackGraph extends PureComponent<Props> {
       const height = callNodeTable.depth[callNodeIndex] * yPixelsPerDepth;
       const xPos = (sampleTime - range[0]) * xPixelsPerMs;
       let samplesBucket;
-      if (samplesSelectedStates[i] === 'SELECTED') {
+      if (
+        samplesSelectedStates !== null &&
+        samplesSelectedStates[i] === 'SELECTED'
+      ) {
         samplesBucket = highlightedSamples;
       } else {
         const stackIndex = ensureExists(
