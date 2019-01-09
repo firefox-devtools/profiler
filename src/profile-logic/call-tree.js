@@ -288,6 +288,7 @@ function _getInvertedStackSelfTimes(
   // Calculate the timing information by going through each sample.
   const callNodeSelfTime = new Float32Array(callNodeTable.length);
   const callNodeLeafTime = new Float32Array(callNodeTable.length);
+  const weights = thread.samples.weight;
   for (
     let sampleIndex = 0;
     sampleIndex < sampleCallNodes.length;
@@ -296,8 +297,9 @@ function _getInvertedStackSelfTimes(
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       const rootIndex = callNodeToRoot[callNodeIndex];
-      callNodeSelfTime[rootIndex] += interval;
-      callNodeLeafTime[callNodeIndex] += interval;
+      const weight = weights ? weights[sampleIndex] : interval;
+      callNodeSelfTime[rootIndex] += weight;
+      callNodeLeafTime[callNodeIndex] += weight;
     }
   }
 
@@ -317,7 +319,7 @@ function _getStackSelfTimes(
   callNodeLeafTime: Float32Array, // Milliseconds[]
 } {
   const callNodeSelfTime = new Float32Array(callNodeTable.length);
-
+  const weights = thread.samples.weight;
   for (
     let sampleIndex = 0;
     sampleIndex < sampleCallNodes.length;
@@ -325,7 +327,9 @@ function _getStackSelfTimes(
   ) {
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
-      callNodeSelfTime[callNodeIndex] += interval;
+      callNodeSelfTime[callNodeIndex] += weights
+        ? weights[sampleIndex]
+        : interval;
     }
   }
 

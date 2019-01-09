@@ -953,7 +953,7 @@ export function filterThreadSamplesToRange(
     rangeStart,
     rangeEnd
   );
-  const newSamples = {
+  const newSamples: SamplesTable = {
     length: sEnd - sBegin,
     time: samples.time.slice(sBegin, sEnd),
     stack: samples.stack.slice(sBegin, sEnd),
@@ -961,9 +961,17 @@ export function filterThreadSamplesToRange(
     rss: samples.rss.slice(sBegin, sEnd),
     uss: samples.uss.slice(sBegin, sEnd),
   };
-  return Object.assign({}, thread, {
+  const { weight, weightType } = samples;
+  if (weight) {
+    newSamples.weight = weight.slice(sBegin, sEnd);
+  }
+  if (weightType) {
+    newSamples.weightType = weightType;
+  }
+  return {
+    ...thread,
     samples: newSamples,
-  });
+  };
 }
 
 // --------------- CallNodePath and CallNodeIndex manipulations ---------------

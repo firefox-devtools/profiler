@@ -18,10 +18,7 @@ import {
 
 describe('convertJsTracerToThread', function() {
   it('can generate stacks correctly', function() {
-    const {
-      meta: { categories },
-      threads: [thread],
-    } = getProfileWithJsTracerEvents([
+    const existingProfile = getProfileWithJsTracerEvents([
       // [mozilla                  ]
       //  [int   ][ion          ]
       //   [int]    [ion      ]
@@ -31,19 +28,23 @@ describe('convertJsTracerToThread', function() {
       ['IonMonkey', 5, 19],
       ['IonMonkey', 6, 18],
     ]);
+    const existingThread = existingProfile.threads[0];
+    const categories = existingProfile.meta.categories;
 
     const profile = getEmptyProfile();
-    const jsTracer = ensureExists(thread.jsTracer);
-    profile.threads.push(convertJsTracerToThread(thread, jsTracer, categories));
+    const jsTracer = ensureExists(existingThread.jsTracer);
+    profile.threads = [
+      convertJsTracerToThread(existingThread, jsTracer, categories),
+    ];
     const { getState } = storeWithProfile(profile);
     const callTree = selectedThreadSelectors.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
-      '- https://mozilla.org (total: 5, self: 1)',
-      '  - Interpreter (total: 4, self: 1)',
-      '    - IonMonkey (total: 2, self: 1)',
-      '      - IonMonkey (total: 1, self: 1)',
-      '    - Interpreter (total: 1, self: 1)',
+      '- https://mozilla.org (total: 20,000, self: 2,000)',
+      '  - Interpreter (total: 18,000, self: 2,000)',
+      '    - IonMonkey (total: 14,000, self: 2,000)',
+      '      - IonMonkey (total: 12,000, self: 12,000)',
+      '    - Interpreter (total: 2,000, self: 2,000)',
     ]);
   });
 });
