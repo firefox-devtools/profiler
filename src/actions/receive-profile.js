@@ -920,6 +920,9 @@ export function retrieveProfilesToCompare(
               committedRange.end + zeroAt
             )
           : thread;
+
+        // We're reseting the thread's PID to make sure we don't have any collision.
+        thread.pid = i;
         thread.processName = `Profile ${i}: ${thread.processName ||
           thread.name}`;
 
@@ -942,6 +945,7 @@ export function retrieveProfilesToCompare(
         if (thread.unregisterTime !== null) {
           thread.unregisterTime -= startTimeDelta;
         }
+
         resultProfile.threads.push(thread);
       }
 

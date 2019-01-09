@@ -979,7 +979,15 @@ describe('actions/receive-profile', function() {
       }
 
       const resultProfile = ProfileViewSelectors.getProfile(getState());
-      return { profile1, profile2, dispatch, getState, resultProfile };
+      const globalTracks = ProfileViewSelectors.getGlobalTracks(getState());
+      return {
+        profile1,
+        profile2,
+        dispatch,
+        getState,
+        resultProfile,
+        globalTracks,
+      };
     }
 
     beforeEach(function() {
@@ -997,7 +1005,7 @@ describe('actions/receive-profile', function() {
     });
 
     it('retrieves profiles and put them in the same view', async function() {
-      const { profile1, profile2, resultProfile } = await setup(
+      const { profile1, profile2, resultProfile, globalTracks } = await setup(
         'thread=0',
         'thread=1'
       );
@@ -1005,10 +1013,12 @@ describe('actions/receive-profile', function() {
       const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
         (thread, i) => ({
           ...thread,
+          pid: i,
           processName: `Profile ${i}: ${thread.name}`,
         })
       );
       expect(resultProfile.threads).toEqual(expectedThreads);
+      expect(globalTracks).toHaveLength(2);
     });
 
     it('filters samples, but not markers, according to the URL', async function() {
