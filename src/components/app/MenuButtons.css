@@ -83,9 +83,15 @@
   color: white;
 }
 
+.animateDown-enter {
+  opacity: 0.1;
+  transform: translateY(-24px);
+}
+
 .animateDown-enter.animateDown-enter-active {
+  opacity: 1;
   transform: translateY(0);
-  transition: transform 200ms ease-in-out;
+  transition: transform 200ms ease-in-out opacity 200ms ease-in-out;
 }
 
 .menuButtonsShareButtonButton,

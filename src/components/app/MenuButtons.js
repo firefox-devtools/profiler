@@ -525,6 +525,10 @@ class ProfileSharingCompositeButton extends React.PureComponent<
       ? 'Share without URLs'
       : 'Share with URLs';
 
+    function Transition(props: {}) {
+      return <CSSTransition {...props} classNames="animateDown" />;
+    }
+
     return (
       <TransitionGroup
         className={classNames('menuButtonsCompositeButtonContainer', {
@@ -537,7 +541,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
       >
         {/* display only the button that is visible */}
         {state === 'local' ? (
-          <CSSTransition classNames="animateDown" timeout={200} in={true}>
+          <Transition timeout={200}>
             <ProfileSharingButton
               buttonClassName="menuButtonsShareButton"
               shareLabel={shareLabel}
@@ -547,41 +551,41 @@ class ProfileSharingCompositeButton extends React.PureComponent<
               shareNetworkUrlCheckboxOnChange={this._onChangeShareNetworkUrls}
               checkboxDisabled={false}
             />
-          </CSSTransition>
+          </Transition>
         ) : null}
 
         {state === 'uploading' || state === 'public' ? (
-          <CSSTransition classNames="animateDown" timeout={0} in={true}>
-            <React.Fragment>
-              {state === 'uploading' ? (
+          <React.Fragment>
+            {state === 'uploading' ? (
+              <Transition timeout={0}>
                 <UploadingStatus progress={uploadProgress} />
-              ) : null}
-              <ButtonWithPanel
-                className="menuButtonsPermalinkButton"
-                ref={this._takePermalinkButtonRef}
-                label="Permalink"
-                panel={
-                  <ArrowPanel
-                    className="menuButtonsPermalinkPanel"
-                    onOpen={this._onPermalinkPanelOpen}
-                    onClose={this._onPermalinkPanelClose}
-                  >
-                    <input
-                      type="text"
-                      className="menuButtonsPermalinkTextField"
-                      value={shortUrl}
-                      readOnly="readOnly"
-                      ref={this._takePermalinkTextFieldRef}
-                    />
-                  </ArrowPanel>
-                }
-              />
-            </React.Fragment>
-          </CSSTransition>
+              </Transition>
+            ) : null}
+            <ButtonWithPanel
+              className="menuButtonsPermalinkButton"
+              ref={this._takePermalinkButtonRef}
+              label="Permalink"
+              panel={
+                <ArrowPanel
+                  className="menuButtonsPermalinkPanel"
+                  onOpen={this._onPermalinkPanelOpen}
+                  onClose={this._onPermalinkPanelClose}
+                >
+                  <input
+                    type="text"
+                    className="menuButtonsPermalinkTextField"
+                    value={shortUrl}
+                    readOnly="readOnly"
+                    ref={this._takePermalinkTextFieldRef}
+                  />
+                </ArrowPanel>
+              }
+            />
+          </React.Fragment>
         ) : null}
 
         {state === 'error' ? (
-          <CSSTransition classNames="animateDown" timeout={0} in={true}>
+          <Transition timeout={0}>
             <ButtonWithPanel
               className="menuButtonsUploadErrorButton"
               ref={this._takeUploadErrorButtonRef}
@@ -599,11 +603,11 @@ class ProfileSharingCompositeButton extends React.PureComponent<
                 </ArrowPanel>
               }
             />
-          </CSSTransition>
+          </Transition>
         ) : null}
 
         {isSecondaryShareButtonVisible ? (
-          <CSSTransition classNames="animateDown" timeout={200} in={true}>
+          <Transition timeout={200}>
             <ProfileSharingButton
               buttonClassName="menuButtonsSecondaryShareButton"
               shareLabel={secondaryShareLabel}
@@ -613,7 +617,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
               shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
               checkboxDisabled={true}
             />
-          </CSSTransition>
+          </Transition>
         ) : null}
       </TransitionGroup>
     );
