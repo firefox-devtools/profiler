@@ -7,12 +7,14 @@ import type {
   FuncTable,
   SamplesTable,
   FrameTable,
-  StackTable,
   Profile,
 } from '../../../types/profile';
 
-import { getEmptyThread, getEmptyProfile } from './processed-profile';
-
+import {
+  getEmptyThread,
+  getEmptyProfile,
+  getEmptyStackTable,
+} from '../../../profile-logic/data-structures';
 /**
  * Note that this fixture doesn't use the `getProfileFromTextSamples()` function to
  * generate the profile, as it's testing the relationships between frames, and thus
@@ -87,13 +89,7 @@ export default function getProfile(): Profile {
     length: frameFuncs.length,
   };
 
-  const stackTable: StackTable = {
-    frame: [],
-    category: [],
-    prefix: [],
-    length: 0,
-    depth: [], // ??? depth?
-  };
+  const stackTable = getEmptyStackTable();
 
   // Provide a utility function for readability.
   function addToStackTable(frame, prefix, category) {

@@ -13,7 +13,7 @@
  */
 
 import { sortDataTable } from '../utils/data-table-utils';
-import { resourceTypes } from './profile-data';
+import { resourceTypes } from './data-structures';
 import {
   upgradeGCMinorMarker,
   upgradeGCMajorMarker_Processed8to9,

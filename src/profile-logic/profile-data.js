@@ -8,8 +8,6 @@ import type {
   Thread,
   SamplesTable,
   StackTable,
-  ExtensionTable,
-  CategoryList,
   FrameTable,
   FuncTable,
   ResourceTable,
@@ -25,8 +23,11 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
 } from '../types/profile-derived';
-import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
-import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profile-versioning';
+import {
+  getEmptyStackTable,
+  cloneFrameTable,
+  cloneFuncTable,
+} from './data-structures';
 
 import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
@@ -39,33 +40,6 @@ import type { UniqueStringArray } from '../utils/unique-string-array';
  * Various helpers for dealing with the profile as a data structure.
  * @module profile-data
  */
-
-export const resourceTypes = {
-  unknown: 0,
-  library: 1,
-  addon: 2,
-  webhost: 3,
-  otherhost: 4,
-  url: 5,
-};
-
-export const emptyExtensions: ExtensionTable = Object.freeze({
-  id: Object.freeze([]),
-  name: Object.freeze([]),
-  baseURL: Object.freeze([]),
-  length: 0,
-});
-
-export const defaultCategories: CategoryList = Object.freeze([
-  { name: 'Idle', color: 'transparent' },
-  { name: 'Other', color: 'grey' },
-  { name: 'Layout', color: 'purple' },
-  { name: 'JavaScript', color: 'yellow' },
-  { name: 'GC / CC', color: 'orange' },
-  { name: 'Network', color: 'lightblue' },
-  { name: 'Graphics', color: 'green' },
-  { name: 'DOM', color: 'blue' },
-]);
 
 /**
  * Generate the CallNodeInfo which contains the CallNodeTable, and a map to convert
@@ -754,33 +728,9 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
     const { stackTable, funcTable, frameTable, samples, stringTable } = thread;
 
     // Create new tables for the data.
-    const newStackTable: StackTable = {
-      length: 0,
-      frame: [],
-      category: [],
-      prefix: [],
-    };
-    const newFrameTable: FrameTable = {
-      length: frameTable.length,
-      implementation: frameTable.implementation.slice(),
-      optimizations: frameTable.optimizations.slice(),
-      line: frameTable.line.slice(),
-      column: frameTable.column.slice(),
-      category: frameTable.category.slice(),
-      func: frameTable.func.slice(),
-      address: frameTable.address.slice(),
-    };
-    const newFuncTable: FuncTable = {
-      length: funcTable.length,
-      name: funcTable.name.slice(),
-      resource: funcTable.resource.slice(),
-      relevantForJS: funcTable.relevantForJS.slice(),
-      address: funcTable.address.slice(),
-      isJS: funcTable.isJS.slice(),
-      fileName: funcTable.fileName.slice(),
-      lineNumber: funcTable.lineNumber.slice(),
-      columnNumber: funcTable.columnNumber.slice(),
-    };
+    const newStackTable = getEmptyStackTable();
+    const newFrameTable = cloneFrameTable(frameTable);
+    const newFuncTable = cloneFuncTable(funcTable);
 
     // Create a Map that takes a prefix and frame as input, and maps it to the new stack
     // index. Since Maps can't be keyed off of two values, do a little math to key off
@@ -1397,33 +1347,6 @@ export function getThreadProcessDetails(thread: Thread): string {
   }
 
   return label;
-}
-
-export function getEmptyProfile(): Profile {
-  return {
-    meta: {
-      interval: 1,
-      startTime: 0,
-      abi: '',
-      misc: '',
-      oscpu: '',
-      platform: '',
-      processType: 0,
-      extensions: emptyExtensions,
-      categories: [...defaultCategories],
-      product: 'Firefox',
-      stackwalk: 0,
-      toolkit: '',
-      version: GECKO_PROFILE_VERSION,
-      preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
-      appBuildID: '',
-      sourceURL: '',
-      physicalCPUs: 0,
-      logicalCPUs: 0,
-    },
-    pages: [],
-    threads: [],
-  };
 }
 
 /**

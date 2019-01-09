@@ -11,7 +11,6 @@ import {
 } from '../../profile-logic/symbolication';
 import { processProfile } from '../../profile-logic/process-profile';
 import {
-  resourceTypes,
   getCallNodeInfo,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
@@ -24,6 +23,7 @@ import {
   getTreeOrderComparator,
   getSamplesSelectedStates,
 } from '../../profile-logic/profile-data';
+import { resourceTypes } from '../../profile-logic/data-structures';
 import {
   createGeckoProfile,
   createGeckoProfileWithJsTimings,

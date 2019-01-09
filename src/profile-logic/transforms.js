@@ -14,12 +14,15 @@ import {
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 import { CallTree } from '../profile-logic/call-tree';
+import {
+  cloneFrameTable,
+  cloneFuncTable,
+  getEmptyStackTable,
+} from './data-structures';
 import { getFunctionName } from './function-info';
 
 import type {
   Thread,
-  FrameTable,
-  StackTable,
   FuncTable,
   IndexIntoCategoryList,
   IndexIntoFuncTable,
@@ -563,12 +566,7 @@ export function mergeCallNode(
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
-    const newStackTable = {
-      length: 0,
-      prefix: [],
-      frame: [],
-      category: [],
-    };
+    const newStackTable = getEmptyStackTable();
     // Provide two arrays to efficiently cache values for the algorithm. This probably
     // could be refactored to use only one array here.
     const stackDepths = [];
@@ -632,7 +630,8 @@ export function mergeCallNode(
         oldStackToNewStack.set(stackIndex, newStackIndex);
       }
     }
-    const newSamples = Object.assign({}, samples, {
+    const newSamples = {
+      ...samples,
       stack: samples.stack.map(oldStack => {
         const newStack = oldStackToNewStack.get(oldStack);
         if (newStack === undefined) {
@@ -642,11 +641,13 @@ export function mergeCallNode(
         }
         return newStack;
       }),
-    });
-    return Object.assign({}, thread, {
+    };
+
+    return {
+      ...thread,
       stackTable: newStackTable,
       samples: newSamples,
-    });
+    };
   });
 }
 
@@ -666,12 +667,7 @@ export function mergeFunction(
   // A root stack's prefix will be null. Maintain that relationship from old to new
   // stacks by mapping from null to null.
   oldStackToNewStack.set(null, null);
-  const newStackTable = {
-    length: 0,
-    prefix: [],
-    frame: [],
-    category: [],
-  };
+  const newStackTable = getEmptyStackTable();
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
@@ -694,7 +690,8 @@ export function mergeFunction(
       oldStackToNewStack.set(stackIndex, newStackIndex);
     }
   }
-  const newSamples = Object.assign({}, samples, {
+  const newSamples = {
+    ...samples,
     stack: samples.stack.map(oldStack => {
       const newStack = oldStackToNewStack.get(oldStack);
       if (newStack === undefined) {
@@ -704,11 +701,12 @@ export function mergeFunction(
       }
       return newStack;
     }),
-  });
-  return Object.assign({}, thread, {
+  };
+  return {
+    ...thread,
     stackTable: newStackTable,
     samples: newSamples,
-  });
+  };
 }
 
 /**
@@ -742,9 +740,10 @@ export function dropFunction(
   );
 
   // Return the thread with the replaced samples.
-  return Object.assign({}, thread, {
-    samples: Object.assign({}, samples, { stack }),
-  });
+  return {
+    ...thread,
+    samples: { ...samples, stack },
+  };
 }
 
 export function collapseResource(
@@ -755,33 +754,9 @@ export function collapseResource(
 ): Thread {
   const { stackTable, funcTable, frameTable, resourceTable, samples } = thread;
   const resourceNameIndex = resourceTable.name[resourceIndexToCollapse];
-  const newFrameTable: FrameTable = {
-    address: frameTable.address.slice(),
-    category: frameTable.category.slice(),
-    func: frameTable.func.slice(),
-    implementation: frameTable.implementation.slice(),
-    line: frameTable.line.slice(),
-    column: frameTable.column.slice(),
-    optimizations: frameTable.optimizations.slice(),
-    length: frameTable.length,
-  };
-  const newFuncTable: FuncTable = {
-    address: funcTable.address.slice(),
-    isJS: funcTable.isJS.slice(),
-    name: funcTable.name.slice(),
-    resource: funcTable.resource.slice(),
-    relevantForJS: funcTable.relevantForJS.slice(),
-    fileName: funcTable.fileName.slice(),
-    lineNumber: funcTable.lineNumber.slice(),
-    columnNumber: funcTable.columnNumber.slice(),
-    length: funcTable.length,
-  };
-  const newStackTable: StackTable = {
-    length: 0,
-    prefix: [],
-    frame: [],
-    category: [],
-  };
+  const newFrameTable = cloneFrameTable(frameTable);
+  const newFuncTable = cloneFuncTable(funcTable);
+  const newStackTable = getEmptyStackTable();
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
     IndexIntoStackTable | null
@@ -901,7 +876,8 @@ export function collapseResource(
     }
   }
 
-  const newSamples = Object.assign({}, samples, {
+  const newSamples = {
+    ...samples,
     stack: samples.stack.map(oldStack => {
       const newStack = oldStackToNewStack.get(oldStack);
       if (newStack === undefined) {
@@ -911,14 +887,15 @@ export function collapseResource(
       }
       return newStack;
     }),
-  });
+  };
 
-  return Object.assign({}, thread, {
+  return {
+    ...thread,
     stackTable: newStackTable,
     frameTable: newFrameTable,
     funcTable: newFuncTable,
     samples: newSamples,
-  });
+  };
 }
 
 export function collapseDirectRecursion(
@@ -935,12 +912,7 @@ export function collapseDirectRecursion(
   // stacks by mapping from null to null.
   oldStackToNewStack.set(null, null);
   const recursiveStacks = new Set();
-  const newStackTable = {
-    length: 0,
-    prefix: [],
-    frame: [],
-    category: [],
-  };
+  const newStackTable = getEmptyStackTable();
   const funcMatchesImplementation = FUNC_MATCHES[implementation];
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
@@ -987,7 +959,8 @@ export function collapseDirectRecursion(
       }
     }
   }
-  const newSamples = Object.assign({}, samples, {
+  const newSamples = {
+    ...samples,
     stack: samples.stack.map(oldStack => {
       const newStack = oldStackToNewStack.get(oldStack);
       if (newStack === undefined) {
@@ -997,11 +970,12 @@ export function collapseDirectRecursion(
       }
       return newStack;
     }),
-  });
-  return Object.assign({}, thread, {
+  };
+  return {
+    ...thread,
     stackTable: newStackTable,
     samples: newSamples,
-  });
+  };
 }
 const FUNC_MATCHES = {
   combined: (_thread: Thread, _funcIndex: IndexIntoFuncTable) => true,
@@ -1040,12 +1014,7 @@ export function collapseFunctionSubtree(
   // stacks by mapping from null to null.
   oldStackToNewStack.set(null, null);
   const collapsedStacks = new Set();
-  const newStackTable = {
-    length: 0,
-    prefix: [],
-    frame: [],
-    category: [],
-  };
+  const newStackTable = getEmptyStackTable();
 
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
@@ -1097,7 +1066,8 @@ export function collapseFunctionSubtree(
       }
     }
   }
-  const newSamples = Object.assign({}, samples, {
+  const newSamples = {
+    ...samples,
     stack: samples.stack.map(oldStack => {
       const newStack = oldStackToNewStack.get(oldStack);
       if (newStack === undefined) {
@@ -1107,11 +1077,12 @@ export function collapseFunctionSubtree(
       }
       return newStack;
     }),
-  });
-  return Object.assign({}, thread, {
+  };
+  return {
+    ...thread,
     stackTable: newStackTable,
     samples: newSamples,
-  });
+  };
 }
 
 /**
@@ -1136,12 +1107,7 @@ export function focusSubtree(
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
-    const newStackTable = {
-      length: 0,
-      prefix: [],
-      frame: [],
-      category: [],
-    };
+    const newStackTable = getEmptyStackTable();
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const prefixMatchesUpTo = prefix !== null ? stackMatches[prefix] : 0;
@@ -1171,7 +1137,8 @@ export function focusSubtree(
       }
       stackMatches[stackIndex] = stackMatchesUpTo;
     }
-    const newSamples = Object.assign({}, samples, {
+    const newSamples = {
+      ...samples,
       stack: samples.stack.map(oldStack => {
         if (oldStack === null || stackMatches[oldStack] !== prefixDepth) {
           return null;
@@ -1184,11 +1151,12 @@ export function focusSubtree(
         }
         return newStack;
       }),
-    });
-    return Object.assign({}, thread, {
+    };
+    return {
+      ...thread,
       stackTable: newStackTable,
       samples: newSamples,
-    });
+    };
   });
 }
 
@@ -1227,7 +1195,8 @@ export function focusInvertedSubtree(
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
-    const newSamples = Object.assign({}, samples, {
+    const newSamples = {
+      ...samples,
       stack: samples.stack.map(stackIndex => {
         let newStackIndex = oldStackToNewStack.get(stackIndex);
         if (newStackIndex === undefined) {
@@ -1236,10 +1205,11 @@ export function focusInvertedSubtree(
         }
         return newStackIndex;
       }),
-    });
-    return Object.assign({}, thread, {
+    };
+    return {
+      ...thread,
       samples: newSamples,
-    });
+    };
   });
 }
 export function focusFunction(
@@ -1255,12 +1225,7 @@ export function focusFunction(
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
-    const newStackTable = {
-      length: 0,
-      prefix: [],
-      frame: [],
-      category: [],
-    };
+    const newStackTable = getEmptyStackTable();
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const frameIndex = stackTable.frame[stackIndex];
@@ -1297,10 +1262,11 @@ export function focusFunction(
         return newStack;
       }),
     });
-    return Object.assign({}, thread, {
+    return {
+      ...thread,
       stackTable: newStackTable,
       samples: newSamples,
-    });
+    };
   });
 }
 
