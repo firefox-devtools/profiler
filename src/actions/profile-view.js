@@ -56,7 +56,7 @@ import type {
   IndexIntoCallNodeTable,
   TrackIndex,
 } from '../types/profile-derived';
-import type { Transform, TransformStacksPerThread } from '../types/transforms';
+import type { Transform } from '../types/transforms';
 
 /**
  * This file contains actions that pertain to changing the view on the profile, including
@@ -1003,15 +1003,6 @@ export function popTransformsFromStack(
       threadIndex,
       firstPoppedFilterIndex,
     });
-  };
-}
-
-export function setTransformsStack(
-  transformStacks: TransformStacksPerThread
-): Action {
-  return {
-    type: 'SET_TRANSFORM_STACKS',
-    transformStacks,
   };
 }
 

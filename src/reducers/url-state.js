@@ -125,6 +125,8 @@ const markersSearchString: Reducer<string> = (state = '', action) => {
 
 const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
   switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.transformStacks || state;
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadIndex, transform } = action;
       const transforms = state[threadIndex] || [];
@@ -139,8 +141,6 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
         [threadIndex]: transforms.slice(0, firstPoppedFilterIndex),
       });
     }
-    case 'SET_TRANSFORM_STACKS':
-      return action.transformStacks;
     default:
       return state;
   }
@@ -164,6 +164,8 @@ const implementation: Reducer<ImplementationFilter> = (
   action
 ) => {
   switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.implementationFilter || state;
     case 'CHANGE_IMPLEMENTATION_FILTER':
       return action.implementation;
     default:

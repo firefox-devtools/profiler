@@ -22,10 +22,6 @@ import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
 import {
-  setTransformsStack,
-  changeImplementationFilter,
-} from '../actions/profile-view';
-import {
   getDataSource,
   getSelectedThreadIndexOrNull,
   getGlobalTrackOrder,
@@ -52,7 +48,9 @@ import type {
   FunctionsUpdatePerThread,
   FuncToFuncMap,
   RequestedLib,
+  ImplementationFilter,
 } from '../types/actions';
+import type { TransformStacksPerThread } from '../types/transforms';
 import type { Action, ThunkAction, Dispatch } from '../types/store';
 import type {
   Profile,
@@ -90,7 +88,11 @@ export function waitingForProfileFromAddon(): Action {
  */
 export function viewProfile(
   profile: Profile,
-  pathInZipFile: ?string
+  config: $Shape<{|
+    pathInZipFile: string,
+    implementationFilter: ImplementationFilter,
+    transformStacks: TransformStacksPerThread,
+  |}> = {}
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     if (profile.threads.length === 0) {
@@ -174,7 +176,9 @@ export function viewProfile(
       localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
-      pathInZipFile,
+      pathInZipFile: config.pathInZipFile,
+      implementationFilter: config.implementationFilter,
+      transformStacks: config.transformStacks,
       dataSource: getDataSource(getState()),
     });
   };
@@ -946,16 +950,18 @@ export function retrieveProfilesToCompare(
         resultProfile.threads.push(thread);
       }
 
-      // Changing the view configuration before dispatching the profile itself,
-      // for performance reason.
-      dispatch(setTransformsStack(transformStacks));
-      dispatch(viewProfile(resultProfile));
-      // But the implementation filter is actually more complex and needs the
-      // data from a displayed profile to work properly. We can try to change it
-      // if this is a problem.
+      // We define an implementationFilter if both profiles agree with the value.
+      let implementationFilter;
       if (implementationFilters[0] === implementationFilters[1]) {
-        dispatch(changeImplementationFilter(implementationFilters[0]));
+        implementationFilter = implementationFilters[0];
       }
+
+      dispatch(
+        viewProfile(resultProfile, {
+          transformStacks,
+          implementationFilter,
+        })
+      );
     } catch (error) {
       dispatch(fatalError(error));
     }

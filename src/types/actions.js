@@ -207,6 +207,8 @@ type ReceiveProfileAction =
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
       +pathInZipFile: ?string,
+      +implementationFilter: ?ImplementationFilter,
+      +transformStacks: ?TransformStacksPerThread,
       +dataSource: DataSource,
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
@@ -251,10 +253,6 @@ type UrlStateAction =
       +type: 'POP_TRANSFORMS_FROM_STACK',
       +threadIndex: ThreadIndex,
       +firstPoppedFilterIndex: number,
-    |}
-  | {|
-      +type: 'SET_TRANSFORM_STACKS',
-      +transformStacks: TransformStacksPerThread,
     |}
   | {|
       +type: 'CHANGE_TIMELINE_TYPE',
