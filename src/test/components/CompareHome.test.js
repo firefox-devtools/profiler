@@ -30,10 +30,7 @@ describe('app/CompareHome', () => {
     fireEvent.change(getByLabelText(/Profile 2/), {
       target: { value: 'http://www.url12.com' },
     });
-    const retrieveButton = getByText(
-      (content, element) =>
-        element instanceof HTMLInputElement && /Retrieve/.test(element.value)
-    );
+    const retrieveButton = getByText(/Retrieve/);
     fireEvent.click(retrieveButton);
 
     expect(getProfilesToCompare(store.getState())).toEqual([
