@@ -17,6 +17,14 @@ import type {
 import type { UrlState, Reducer } from '../types/state';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
+/*
+ * Note: all reducers in this state can be shortcut and the state reset
+ * completely using the action `UPDATE_URL_STATE`. This action is dispatched
+ * from the URL, either at the first load or when it changes when the user
+ * navigates.
+ * That's why the individual reducers might look incomplete at times.
+ * See below the function `wrapReducerInResetter`.
+ */
 const dataSource: Reducer<DataSource> = (state = 'none', action) => {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
@@ -44,7 +52,6 @@ const profileUrl: Reducer<string> = (state = '', action) => {
     case 'TRIGGER_LOADING_FROM_URL':
       return action.profileUrl;
     default:
-      // This will be set by UPDATE_URL_STATE
       return state;
   }
 };
@@ -54,7 +61,6 @@ const profilesToCompare: Reducer<string[] | null> = (state = null, action) => {
     case 'CHANGE_PROFILES_TO_COMPARE':
       return action.profiles;
     default:
-      // This will also be set by UPDATE_URL_STATE
       return state;
   }
 };
