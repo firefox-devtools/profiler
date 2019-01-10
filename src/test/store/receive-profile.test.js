@@ -905,30 +905,14 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfilesToCompare', function() {
-    function fetch200Response(profile: Profile) {
+    function fetch200Response(profile: string) {
       return {
         ok: true,
         status: 200,
         headers: {
           get: () => 'application/json',
         },
-        json: () => Promise.resolve(profile),
-      };
-    }
-
-    // This turns a processed profile into a processed profile that would come
-    // from the store. Especially the stringTable needs to be serialized to a
-    // stringArray.
-    function unhydrateProfile(profile: Profile): Object {
-      return {
-        ...profile,
-        threads: profile.threads.map(thread => {
-          const { stringTable, ...restThread } = thread;
-          return {
-            ...restThread,
-            stringArray: stringTable.serializeToArray(),
-          };
-        }),
+        json: () => Promise.resolve(JSON.parse(profile)),
       };
     }
 
@@ -962,8 +946,8 @@ describe('actions/receive-profile', function() {
       );
 
       window.fetch
-        .mockResolvedValueOnce(fetch200Response(unhydrateProfile(profile1)))
-        .mockResolvedValueOnce(fetch200Response(unhydrateProfile(profile2)));
+        .mockResolvedValueOnce(fetch200Response(serializeProfile(profile1)))
+        .mockResolvedValueOnce(fetch200Response(serializeProfile(profile2)));
 
       const fakeUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
       const fakeUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;

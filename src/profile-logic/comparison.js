@@ -28,11 +28,11 @@ export function mergeCategories(
 |} {
   const newCategories = [];
   const translationMaps = [];
+  const insertedCategories: Map<string, IndexIntoCategoryList> = new Map();
 
   categoriesPerThread.forEach(categories => {
     const translationMap = new Map();
     translationMaps.push(translationMap);
-    const insertedCategories: Map<string, IndexIntoCategoryList> = new Map();
 
     categories.forEach((category, i) => {
       const { name } = category;
