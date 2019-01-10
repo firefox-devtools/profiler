@@ -3,9 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-/**
- * @jest-environment jsdom
- */
+
+import { oneLineTrim } from 'common-tags';
 import * as urlStateReducers from '../selectors/url-state';
 import {
   changeCallTreeSearchString,
@@ -59,12 +58,12 @@ function _getStoreWithURL(
       // Ensure there is a thread index.
       thread: 0,
     },
-    queryString.parse(search.substr(1))
+    queryString.parse(search.substr(1), { arrayFormat: 'bracket' })
   );
 
   const newUrlState = stateFromLocation({
     pathname,
-    search: '?' + queryString.stringify(query),
+    search: '?' + queryString.stringify(query, { arrayFormat: 'bracket' }),
     hash,
   });
 
@@ -500,9 +499,11 @@ describe('compare', function() {
   it('unserializes profiles URL properly', function() {
     const store = _getStoreWithURL(
       {
-        pathname: `/compare/${encodeURIComponent(url1)}...${encodeURIComponent(
-          url2
-        )}`,
+        pathname: '/compare/',
+        search: oneLineTrim`
+          ?profiles[]=${encodeURIComponent(url1)}
+          &profiles[]=${encodeURIComponent(url2)}
+        `,
       },
       /* no profile */ null
     );
@@ -520,10 +521,10 @@ describe('compare', function() {
     );
     store.dispatch(changeProfilesToCompare([url1, url2]));
 
-    expect(
-      urlFromState(urlStateReducers.getUrlState(store.getState()))
-    ).toMatch(
-      `/compare/${encodeURIComponent(url1)}...${encodeURIComponent(url2)}/`
+    const resultingUrl = urlFromState(
+      urlStateReducers.getUrlState(store.getState())
     );
+    expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url1)}`);
+    expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url2)}`);
   });
 });

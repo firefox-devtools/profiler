@@ -37,17 +37,6 @@ function getDataSourceDirs(
     case 'from-url':
       return ['from-url', encodeURIComponent(urlState.profileUrl)];
     case 'compare':
-      if (urlState.profilesToCompare) {
-        const { profilesToCompare } = urlState;
-        if (profilesToCompare.length >= 2) {
-          return [
-            'compare',
-            encodeURIComponent(
-              `${profilesToCompare[0]}...${profilesToCompare[1]}`
-            ),
-          ];
-        }
-      }
       return ['compare'];
     case 'none':
       return [];
@@ -74,6 +63,7 @@ type BaseQuery = {|
   // must be fetched to compute the tracks.
   threadOrder?: string, // "3-2-0-1"
   hiddenThreads?: string, // "0-1"
+  profiles?: string[],
 |};
 
 type CallTreeQuery = {|
@@ -127,14 +117,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       query: {},
     };
   }
-  const dataSourceDirs = getDataSourceDirs(urlState);
-  if (dataSource === 'compare' && dataSourceDirs.length < 2) {
-    return {
-      pathParts: [...dataSourceDirs],
-      query: {},
-    };
-  }
 
+  const dataSourceDirs = getDataSourceDirs(urlState);
   const pathParts = [...dataSourceDirs, urlState.selectedTab];
   const { selectedThread } = urlState.profileSpecific;
 
@@ -147,6 +131,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     globalTrackOrder:
       urlState.profileSpecific.globalTrackOrder.join('-') || undefined,
     file: urlState.pathInZipFile || undefined,
+    profiles: urlState.profilesToCompare || undefined,
     v: CURRENT_URL_VERSION,
   };
 
@@ -235,7 +220,9 @@ export function urlFromState(urlState: UrlState): string {
   const pathname =
     pathParts.length === 0 ? '/' : '/' + pathParts.join('/') + '/';
 
-  const qString = queryString.stringify(query);
+  const qString = queryString.stringify(query, {
+    arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+  });
   return pathname + (qString ? '?' + qString : '');
 }
 
@@ -270,7 +257,9 @@ export function stateFromLocation(location: Location): UrlState {
   const { pathname, query } = upgradeLocationToCurrentVersion({
     pathname: location.pathname,
     hash: location.hash,
-    query: queryString.parse(location.search.substr(1)),
+    query: queryString.parse(location.search.substr(1), {
+      arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+    }),
   });
 
   const pathParts = pathname.split('/').filter(d => d);
@@ -283,11 +272,8 @@ export function stateFromLocation(location: Location): UrlState {
   // https://perf-html.io/from-url/{url}/calltree/
   const hasProfileUrl = ['from-url'].includes(dataSource);
 
-  const hasProfilesToCompare = dataSource === 'compare';
-
   // The selected tab is the last path part in the URL.
-  const selectedTabPathPart =
-    hasProfileHash || hasProfileUrl || hasProfilesToCompare ? 2 : 1;
+  const selectedTabPathPart = hasProfileHash || hasProfileUrl ? 2 : 1;
 
   let implementation = 'combined';
   // Don't trust the implementation values from the user. Make sure it conforms
@@ -303,21 +289,11 @@ export function stateFromLocation(location: Location): UrlState {
       : [];
   }
 
-  let profilesToCompare = null;
-  if (hasProfilesToCompare && pathParts[1]) {
-    profilesToCompare = decodeURIComponent(pathParts[1]).split('...');
-    if (profilesToCompare.length >= 2) {
-      profilesToCompare = [profilesToCompare[0], profilesToCompare[1]];
-    } else {
-      profilesToCompare = null;
-    }
-  }
-
   return {
     dataSource,
     hash: hasProfileHash ? pathParts[1] : '',
     profileUrl: hasProfileUrl ? decodeURIComponent(pathParts[1]) : '',
-    profilesToCompare,
+    profilesToCompare: query.profiles || null,
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
     profileSpecific: {
