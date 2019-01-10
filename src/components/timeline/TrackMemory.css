@@ -29,8 +29,8 @@
 }
 
 .timelineTrackMemoryTooltipNumber {
-  font-weight: bold;
-  color: var(--grey-60);
   display: inline-block;
   min-width: 60px;
+  font-weight: bold;
+  color: var(--grey-60);
 }

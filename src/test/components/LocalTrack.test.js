@@ -27,7 +27,7 @@ import { getSelectedThreadIndex } from '../../selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import {
   getNetworkTrackProfile,
-  getCounter,
+  getCounterForThread,
   getProfileFromTextSamples,
 } from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -120,12 +120,12 @@ describe('timeline/LocalTrack', function() {
   });
 
   describe('with a memory track', function() {
-    it('has correctly renders the network label', function() {
+    it('correctly renders the network label', function() {
       const { getLocalTrackLabel } = setupWithMemory();
       expect(getLocalTrackLabel().text()).toBe('Memory');
     });
 
-    it('matches the snapshot of the network track', () => {
+    it('matches the snapshot of the memory track', () => {
       const { view } = setupWithMemory();
       expect(view).toMatchSnapshot();
     });
@@ -219,10 +219,11 @@ function setupWithNetworkProfile() {
 }
 
 /**
- * Set up a profile with memory counters.
+ * Set up a profile with a memory counter.
  */
 function setupWithMemory() {
   const { profile } = getProfileFromTextSamples(
+    // Create a trivial profile with 10 samples, all of the function "A".
     Array(10)
       .fill('A')
       .join('  ')
@@ -232,12 +233,12 @@ function setupWithMemory() {
   const trackReference = { type: 'local', pid: PID, trackIndex };
 
   {
-    // Modify the thread to include counters.
+    // Modify the thread to include the counter.
     const thread = profile.threads[threadIndex];
     thread.name = 'GeckoMain';
     thread.processType = 'default';
     thread.pid = PID;
-    const counter = getCounter(thread, threadIndex, 1000);
+    const counter = getCounterForThread(thread, threadIndex);
     counter.category = 'Memory';
     profile.counters = [counter];
   }

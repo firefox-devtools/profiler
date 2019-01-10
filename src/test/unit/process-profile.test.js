@@ -10,7 +10,7 @@ import {
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import {
   createGeckoProfile,
-  createGeckoCounters,
+  createGeckoCounter,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/flow';
 
@@ -168,10 +168,10 @@ describe('gecko counters processing', function() {
     expect(parentPid).toEqual(3333);
     expect(childPid).toEqual(2222);
 
-    const parentCounter = createGeckoCounters(
+    const parentCounter = createGeckoCounter(
       findMainThread(parentGeckoProfile)
     );
-    const childCounter = createGeckoCounters(findMainThread(childGeckoProfile));
+    const childCounter = createGeckoCounter(findMainThread(childGeckoProfile));
     parentGeckoProfile.counters = [parentCounter];
     childGeckoProfile.counters = [childCounter];
     return {

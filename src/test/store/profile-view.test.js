@@ -12,7 +12,7 @@ import {
   getNetworkTrackProfile,
   getScreenshotTrackProfile,
   getNetworkMarker,
-  getCounter,
+  getCounterForThread,
 } from '../fixtures/profiles/processed-profile';
 import {
   getEmptyThread,
@@ -1266,8 +1266,8 @@ describe('counter selectors', function() {
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    const counterA = getCounter(thread, threadIndex, 1000);
-    const counterB = getCounter(thread, threadIndex, 1000);
+    const counterA = getCounterForThread(thread, threadIndex);
+    const counterB = getCounterForThread(thread, threadIndex);
     profile.counters = [counterA, counterB];
     const { getState, dispatch } = storeWithProfile(profile);
     return { getState, dispatch, counterA, counterB };
@@ -1275,8 +1275,8 @@ describe('counter selectors', function() {
 
   it('can get the counters', function() {
     const { counterA, counterB, getState } = setup();
-    expect(getCounterSelectors(0).getCounters(getState())).toBe(counterA);
-    expect(getCounterSelectors(1).getCounters(getState())).toBe(counterB);
+    expect(getCounterSelectors(0).getCounter(getState())).toBe(counterA);
+    expect(getCounterSelectors(1).getCounter(getState())).toBe(counterB);
   });
 
   it('can get the counter description', function() {
@@ -1293,9 +1293,11 @@ describe('counter selectors', function() {
 
   it('can get the commited range filtered counters', function() {
     const { getState, dispatch } = setup();
-    dispatch(ProfileView.commitRange(2.5, 6.5));
-    const originalCounters = getCounterSelectors(0).getCounters(getState());
-    expect(originalCounters.sampleGroups.samples.time).toEqual([
+    // The range includes the sample just before and the sample just after the selection
+    // range.
+    dispatch(ProfileView.commitRange(3.5, 5.5));
+    const originalCounter = getCounterSelectors(0).getCounter(getState());
+    expect(originalCounter.sampleGroups.samples.time).toEqual([
       0,
       1,
       2,
@@ -1308,10 +1310,10 @@ describe('counter selectors', function() {
       9,
     ]);
 
-    const filteredCounters = getCounterSelectors(
+    const filteredCounter = getCounterSelectors(
       0
-    ).getCommittedRangeFilteredCounters(getState());
-    expect(filteredCounters.sampleGroups.samples.time).toEqual([3, 4, 5, 6]);
+    ).getCommittedRangeFilteredCounter(getState());
+    expect(filteredCounter.sampleGroups.samples.time).toEqual([3, 4, 5, 6]);
   });
 
   it('can accumulate samples', function() {

@@ -583,10 +583,12 @@ export function getProfileWithJsTracerEvents(
   return profile;
 }
 
-export function getCounter(
+/**
+ * Creates a Counter fixture for a given thread.
+ */
+export function getCounterForThread(
   thread: Thread,
-  mainThreadIndex: ThreadIndex,
-  countRange: number
+  mainThreadIndex: ThreadIndex
 ): Counter {
   const counter: Counter = {
     name: 'My Counter',
@@ -598,12 +600,12 @@ export function getCounter(
       id: 0,
       samples: {
         time: thread.samples.time.slice(),
-        // Create some arbitrary values for the number.
+        // Create some arbitrary (positive integer) values for the number.
         number: thread.samples.time.map((_, i) =>
           Math.floor(50 * Math.sin(i) + 50)
         ),
-        // Create some arbitrary (positive integer) values for the count.
-        count: thread.samples.time.map((_, i) => Math.sin(i) * countRange),
+        // Create some arbitrary values for the count.
+        count: thread.samples.time.map((_, i) => Math.sin(i)),
         length: thread.samples.length,
       },
     },

@@ -6,7 +6,7 @@ exports[`TrackMemory draws a dot that matches the snapshot 1`] = `
   style={
     Object {
       "left": 20,
-      "top": 2.6975632502354685,
+      "top": 2.697563250235465,
     }
   }
 />
@@ -22,9 +22,9 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
     <span
       className="timelineTrackMemoryTooltipNumber"
     >
-      0mb
+      0.000B
     </span>
-     current relative memory
+     relative memory at this time
   </div>
   <div
     className="timelineTrackMemoryTooltipLine"
@@ -32,9 +32,9 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
     <span
       className="timelineTrackMemoryTooltipNumber"
     >
-      0mb
+      2.0B
     </span>
-     total change in memory in range
+     memory range in graph
   </div>
 </div>
 `;
@@ -76,7 +76,7 @@ Array [
   Array [
     "lineTo",
     20,
-    2.6268314481423225,
+    2.626831448142319,
   ],
   Array [
     "lineTo",
@@ -86,7 +86,7 @@ Array [
   Array [
     "lineTo",
     40,
-    9.724419140319302,
+    9.7244191403193,
   ],
   Array [
     "lineTo",

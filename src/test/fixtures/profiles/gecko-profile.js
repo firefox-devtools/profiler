@@ -560,7 +560,7 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
   };
 }
 
-export function createGeckoCounters(thread: GeckoThread): GeckoCounter {
+export function createGeckoCounter(thread: GeckoThread): GeckoCounter {
   const geckoCounter: GeckoCounter = {
     name: 'My Counter',
     category: 'My Category',
@@ -580,10 +580,10 @@ export function createGeckoCounters(thread: GeckoThread): GeckoCounter {
   for (let i = 0; i < thread.samples.data.length; i++) {
     // Go through all the thread samples and create a corresponding counter entry.
     const time = thread.samples.data[i][1];
-    // Create some arbitrary data.
-    const number = Math.sin(i);
-    // Counts are integers, make them range as int values 0 to 100.
-    const count = Math.floor(50 * Math.sin(i) + 50);
+    // Create some arbitrary (positive integer) values for the number.
+    const number = Math.floor(50 * Math.sin(i) + 50);
+    // Create some arbitrary values for the count.
+    const count = Math.sin(i);
     geckoCounter.sample_groups.samples.data.push([time, number, count]);
   }
   return geckoCounter;

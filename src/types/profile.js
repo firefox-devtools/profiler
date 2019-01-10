@@ -238,9 +238,9 @@ export type JsTracerTable = {|
   length: number,
 |};
 
-export type CounterSamples = {|
+export type CounterSamplesTable = {|
   time: Milliseconds[],
-  // The number of times the counter was changed.
+  // The number of times the Counter's "number" was changed since the previous sample.
   number: number[],
   // The count of the data, for instance for memory this would be bytes.
   count: number[],
@@ -255,7 +255,7 @@ export type Counter = {|
   mainThreadIndex: ThreadIndex,
   sampleGroups: {|
     id: number,
-    samples: CounterSamples,
+    samples: CounterSamplesTable,
   |},
 |};
 

@@ -17,7 +17,7 @@ import type {
   IndexIntoStackTable,
   ThreadIndex,
   Counter,
-  CounterSamples,
+  CounterSamplesTable,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -927,10 +927,10 @@ export function filterThreadToSearchString(
 }
 
 /**
- * This function takes both a SamplesTable and can be used on CounterSamples.
+ * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 function _getSampleIndexRangeForSelection(
-  samples: SamplesTable | CounterSamples,
+  samples: SamplesTable | CounterSamplesTable,
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -972,21 +972,31 @@ export function filterThreadSamplesToRange(
   });
 }
 
-export function filterCountersToRange(
-  counters: Counter,
+export function filterCounterToRange(
+  counter: Counter,
   rangeStart: number,
   rangeEnd: number
 ): Counter {
-  const samples = counters.sampleGroups.samples;
-  const [sBegin, sEnd] = _getSampleIndexRangeForSelection(
+  const samples = counter.sampleGroups.samples;
+  let [sBegin, sEnd] = _getSampleIndexRangeForSelection(
     samples,
     rangeStart,
     rangeEnd
   );
+
+  // Include the samples just before and after the selection range, so that charts will
+  // not be cut off at the edges.
+  if (sBegin > 0) {
+    sBegin--;
+  }
+  if (sEnd < samples.length) {
+    sEnd++;
+  }
+
   return {
-    ...counters,
+    ...counter,
     sampleGroups: {
-      ...counters.sampleGroups,
+      ...counter.sampleGroups,
       samples: {
         time: samples.time.slice(sBegin, sEnd),
         number: samples.number.slice(sBegin, sEnd),
@@ -998,13 +1008,13 @@ export function filterCountersToRange(
 }
 
 /**
- * The memory counters are relative offsets of memory. In order to draw an interesting
- * graph, take the memory in the counters, and find the minimum and maximum values, by
+ * The memory counter contains relative offsets of memory. In order to draw an interesting
+ * graph, take the memory counts, and find the minimum and maximum values, by
  * accumulating them over the entire profile range. Then, map those values to the
  * accumulatedCounts array.
  */
 export function accumulateCounterSamples(
-  samples: CounterSamples
+  samples: CounterSamplesTable
 ): AccumulatedCounterSamples {
   let minCount = 0;
   let maxCount = 0;

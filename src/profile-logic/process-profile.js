@@ -687,9 +687,18 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
   };
 }
 
+/**
+ * Converts the Gecko list of counters into the processed format.
+ */
 function _processCounters(
   geckoProfile: GeckoProfile,
+  // The counters are listed independently from the threads, so we need an index that
+  // references back into a stable list of threads. The threads list in the processing
+  // step is built dynamically, so the "stableThreadList" variable is a hint that this
+  // should be a stable and sorted list of threads.
   stableThreadList: Thread[],
+  // The timing across processes must be normalized, this is the timing delta between
+  // various processes.
   delta: Milliseconds
 ): Counter[] {
   const geckoCounters = geckoProfile.counters;
@@ -698,7 +707,7 @@ function _processCounters(
   );
 
   if (!mainThread || !geckoCounters) {
-    // Counters or a main thread weren't found, bail out, and don't return anything.
+    // Counters or a main thread weren't found, bail out, and return an empty array.
     return [];
   }
 
@@ -709,28 +718,28 @@ function _processCounters(
   );
 
   if (mainThreadIndex === -1) {
-    // If this error throws, then the logic in this function is wrong.
     throw new Error(
-      'Unable to find the main thread in the stable thread list.'
+      'Unable to find the main thread in the stable thread list. This means that the ' +
+        'logic in the _processCounters function is wrong.'
     );
   }
 
-  return geckoCounters && mainThread
-    ? geckoCounters.map(({ name, category, description, sample_groups }) => ({
-        name,
-        category,
-        description,
-        pid: mainThread.pid,
-        mainThreadIndex,
-        sampleGroups: {
-          id: sample_groups.id,
-          samples: _adjustCounterTimestamps(
-            _toStructOfArrays(sample_groups.samples),
-            delta
-          ),
-        },
-      }))
-    : [];
+  return geckoCounters.map(
+    ({ name, category, description, sample_groups }) => ({
+      name,
+      category,
+      description,
+      pid: mainThread.pid,
+      mainThreadIndex,
+      sampleGroups: {
+        id: sample_groups.id,
+        samples: _adjustCounterTimestamps(
+          _toStructOfArrays(sample_groups.samples),
+          delta
+        ),
+      },
+    })
+  );
 }
 
 /**
@@ -942,7 +951,10 @@ function _adjustMarkerTimestamps(
   });
 }
 
-function _adjustCounterTimestamps(sampleGroups: *, delta: Milliseconds): * {
+function _adjustCounterTimestamps<T: Object>(
+  sampleGroups: T,
+  delta: Milliseconds
+): T {
   return {
     ...sampleGroups,
     time: sampleGroups.time.map(time => time + delta),

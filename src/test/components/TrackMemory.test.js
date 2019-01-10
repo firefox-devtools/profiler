@@ -24,7 +24,7 @@ import {
 
 import {
   getProfileFromTextSamples,
-  getCounter,
+  getCounterForThread,
 } from '../fixtures/profiles/processed-profile';
 
 // The following constants determine the size of the drawn graph.
@@ -52,7 +52,7 @@ describe('TrackMemory', function() {
     );
     const threadIndex = 0;
     const thread = profile.threads[threadIndex];
-    profile.counters = [getCounter(thread, threadIndex, 1000)];
+    profile.counters = [getCounterForThread(thread, threadIndex)];
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const flushRafCalls = mockRaf();
