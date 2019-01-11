@@ -573,7 +573,7 @@ export function getTimingsForPath(
   return { forPath: pathTimings, forFunc: funcTimings, rootTime };
 }
 
-function _getTimeRangeForThread(
+export function getTimeRangeForThread(
   thread: Thread,
   interval: number
 ): StartEndRange {
@@ -591,7 +591,7 @@ export function getTimeRangeIncludingAllThreads(
 ): StartEndRange {
   const completeRange = { start: Infinity, end: -Infinity };
   profile.threads.forEach(thread => {
-    const threadRange = _getTimeRangeForThread(thread, profile.meta.interval);
+    const threadRange = getTimeRangeForThread(thread, profile.meta.interval);
     completeRange.start = Math.min(completeRange.start, threadRange.start);
     completeRange.end = Math.max(completeRange.end, threadRange.end);
   });

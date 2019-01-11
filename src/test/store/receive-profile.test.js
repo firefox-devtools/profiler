@@ -922,8 +922,8 @@ describe('actions/receive-profile', function() {
         `G  H  I  J  K`
       );
       const { profile: profile2 } = getProfileFromTextSamples(
-        `L  M  N  O  P`,
-        `Q  R  S  T  U`
+        `L  M  N  O  P  Ex  Ex  Ex  Ex`,
+        `Q  R  S  T  U  Ex  Ex  Ex  Ex`
       );
 
       profile1.threads.forEach(thread =>
@@ -964,6 +964,7 @@ describe('actions/receive-profile', function() {
 
       const resultProfile = ProfileViewSelectors.getProfile(getState());
       const globalTracks = ProfileViewSelectors.getGlobalTracks(getState());
+      const rootRange = ProfileViewSelectors.getProfileRootRange(getState());
       return {
         profile1,
         profile2,
@@ -971,6 +972,7 @@ describe('actions/receive-profile', function() {
         getState,
         resultProfile,
         globalTracks,
+        rootRange,
       };
     }
 
@@ -989,20 +991,25 @@ describe('actions/receive-profile', function() {
     });
 
     it('retrieves profiles and put them in the same view', async function() {
-      const { profile1, profile2, resultProfile, globalTracks } = await setup(
-        'thread=0',
-        'thread=1'
-      );
+      const {
+        profile1,
+        profile2,
+        resultProfile,
+        globalTracks,
+        rootRange,
+      } = await setup('thread=0', 'thread=1');
 
       const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
         (thread, i) => ({
           ...thread,
           pid: i,
           processName: `Profile ${i}: ${thread.name}`,
+          unregisterTime: thread.samples.length,
         })
       );
       expect(resultProfile.threads).toEqual(expectedThreads);
       expect(globalTracks).toHaveLength(2);
+      expect(rootRange).toEqual({ start: 0, end: 9 });
     });
 
     it('filters samples, but not markers, according to the URL', async function() {

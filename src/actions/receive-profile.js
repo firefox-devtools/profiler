@@ -14,6 +14,7 @@ import { SymbolStore } from '../profile-logic/symbol-store';
 import { getEmptyProfile } from '../profile-logic/data-structures';
 import {
   filterThreadSamplesToRange,
+  getTimeRangeForThread,
   getTimeRangeIncludingAllThreads,
 } from '../profile-logic/profile-data';
 import { symbolicateProfile } from '../profile-logic/symbolication';
@@ -945,6 +946,18 @@ export function retrieveProfilesToCompare(
         }
         if (thread.unregisterTime !== null) {
           thread.unregisterTime -= startTimeDelta;
+        }
+
+        // Use a sensible value so that the empty thread indicators are drawn
+        // for the smaller profiles.
+        if (
+          thread.processShutdownTime === null &&
+          thread.unregisterTime === null
+        ) {
+          thread.unregisterTime = getTimeRangeForThread(
+            thread,
+            profile.meta.interval
+          ).end;
         }
 
         resultProfile.threads.push(thread);
