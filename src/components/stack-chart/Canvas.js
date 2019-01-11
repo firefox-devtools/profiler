@@ -37,8 +37,6 @@ import type {
   StackTimingDepth,
   IndexIntoStackTiming,
 } from '../../profile-logic/stack-timing';
-import type { GetCategory } from '../../profile-logic/color-categories';
-import type { GetLabel } from '../../profile-logic/labeling-strategies';
 import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
 
@@ -49,8 +47,6 @@ type OwnProps = {|
   +rangeEnd: Milliseconds,
   +stackTimingByDepth: StackTimingByDepth,
   +stackFrameHeight: CssPixels,
-  +getCategory: GetCategory,
-  +getLabel: GetLabel,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection
   >,

@@ -29,8 +29,6 @@ import type {
   TrackIndex,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
-import type { GetLabel } from '../profile-logic/labeling-strategies';
-import type { GetCategory } from '../profile-logic/color-categories';
 import type { TransformStacksPerThread } from './transforms';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
@@ -162,16 +160,10 @@ export type UrlState = {|
 
 export type IconState = Set<string>;
 
-export type StackChartState = {|
-  categoryColorStrategy: GetCategory,
-  labelingStrategy: GetLabel,
-|};
-
 export type State = {|
   +app: AppState,
   +profileView: ProfileViewState,
   +urlState: UrlState,
-  +stackChart: StackChartState,
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
 |};

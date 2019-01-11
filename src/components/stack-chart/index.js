@@ -19,10 +19,6 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import {
-  getCategoryColorStrategy,
-  getLabelingStrategy,
-} from '../../selectors/stack-chart';
 import StackSettings from '../shared/StackSettings';
 import {
   updatePreviewSelection,
@@ -40,8 +36,6 @@ import type {
   UnitIntervalOfProfileRange,
 } from '../../types/units';
 import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
-import type { GetCategory } from '../../profile-logic/color-categories';
-import type { GetLabel } from '../../profile-logic/labeling-strategies';
 import type { PreviewSelection } from '../../types/actions';
 import type {
   ExplicitConnectOptions,
@@ -58,8 +52,6 @@ type StateProps = {|
   +stackTimingByDepth: StackTimingByDepth,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
-  +getCategory: GetCategory,
-  +getLabel: GetLabel,
   +previewSelection: PreviewSelection,
   +threadIndex: number,
   +callNodeInfo: CallNodeInfo,
@@ -116,8 +108,6 @@ class StackChartGraph extends React.PureComponent<Props> {
       stackTimingByDepth,
       timeRange,
       interval,
-      getCategory,
-      getLabel,
       previewSelection,
       updatePreviewSelection,
       callNodeInfo,
@@ -151,8 +141,6 @@ class StackChartGraph extends React.PureComponent<Props> {
             chartProps={{
               interval,
               thread,
-              getCategory,
-              getLabel,
               stackTimingByDepth,
               updatePreviewSelection,
               rangeStart: timeRange.start,
@@ -183,8 +171,6 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       stackTimingByDepth,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
-      getCategory: getCategoryColorStrategy(state),
-      getLabel: getLabelingStrategy(state),
       previewSelection: getPreviewSelection(state),
       threadIndex: getSelectedThreadIndex(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
