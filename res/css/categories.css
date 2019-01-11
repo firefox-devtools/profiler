@@ -16,7 +16,8 @@
 }
 
 .category-swatch.category-color-transparent {
-  background-color: transparent;
+  background-color: #fff;
+  border-color: rgba(0, 0, 0, 0.4);
 }
 
 .category-swatch.category-color-purple {

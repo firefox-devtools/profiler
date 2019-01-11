@@ -15,6 +15,7 @@ import {
   getProfileInterval,
   getPreviewSelection,
   getScrollToSelectionGeneration,
+  getCategories,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
@@ -29,7 +30,7 @@ import {
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
-import type { Thread } from '../../types/profile';
+import type { Thread, CategoryList } from '../../types/profile';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -62,6 +63,7 @@ type StateProps = {|
   +previewSelection: PreviewSelection,
   +threadIndex: number,
   +callNodeInfo: CallNodeInfo,
+  +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
 |};
@@ -119,6 +121,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       previewSelection,
       updatePreviewSelection,
       callNodeInfo,
+      categories,
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
     } = this.props;
@@ -156,6 +159,7 @@ class StackChartGraph extends React.PureComponent<Props> {
               rangeEnd: timeRange.end,
               stackFrameHeight: STACK_FRAME_HEIGHT,
               callNodeInfo,
+              categories,
               selectedCallNodeIndex,
               onSelectionChange: this._onSelectedCallNodeChange,
               scrollToSelectionGeneration,
@@ -184,6 +188,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       previewSelection: getPreviewSelection(state),
       threadIndex: getSelectedThreadIndex(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+      categories: getCategories(state),
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
