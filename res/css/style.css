@@ -424,7 +424,7 @@ body,
   padding-top: 8px;
   left: 30%;
   right: 30%;
-  background: rgba(0, 0, 0, 0.07);
+  background: var(--grey-20);
   text-align: center;
   padding-left: 10px;
   padding-right: 10px;
