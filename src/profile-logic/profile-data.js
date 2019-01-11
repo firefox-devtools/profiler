@@ -16,12 +16,15 @@ import type {
   IndexIntoSamplesTable,
   IndexIntoStackTable,
   ThreadIndex,
+  Counter,
+  CounterSamplesTable,
 } from '../types/profile';
 import type {
   CallNodeInfo,
   CallNodeTable,
   CallNodePath,
   IndexIntoCallNodeTable,
+  AccumulatedCounterSamples,
 } from '../types/profile-derived';
 import {
   getEmptyStackTable,
@@ -923,8 +926,11 @@ export function filterThreadToSearchString(
   });
 }
 
+/**
+ * This function takes both a SamplesTable and can be used on CounterSamplesTable.
+ */
 function _getSampleIndexRangeForSelection(
-  samples: SamplesTable,
+  samples: SamplesTable | CounterSamplesTable,
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -964,6 +970,65 @@ export function filterThreadSamplesToRange(
   return Object.assign({}, thread, {
     samples: newSamples,
   });
+}
+
+export function filterCounterToRange(
+  counter: Counter,
+  rangeStart: number,
+  rangeEnd: number
+): Counter {
+  const samples = counter.sampleGroups.samples;
+  let [sBegin, sEnd] = _getSampleIndexRangeForSelection(
+    samples,
+    rangeStart,
+    rangeEnd
+  );
+
+  // Include the samples just before and after the selection range, so that charts will
+  // not be cut off at the edges.
+  if (sBegin > 0) {
+    sBegin--;
+  }
+  if (sEnd < samples.length) {
+    sEnd++;
+  }
+
+  return {
+    ...counter,
+    sampleGroups: {
+      ...counter.sampleGroups,
+      samples: {
+        time: samples.time.slice(sBegin, sEnd),
+        number: samples.number.slice(sBegin, sEnd),
+        count: samples.count.slice(sBegin, sEnd),
+        length: sEnd - sBegin,
+      },
+    },
+  };
+}
+
+/**
+ * The memory counter contains relative offsets of memory. In order to draw an interesting
+ * graph, take the memory counts, and find the minimum and maximum values, by
+ * accumulating them over the entire profile range. Then, map those values to the
+ * accumulatedCounts array.
+ */
+export function accumulateCounterSamples(
+  samples: CounterSamplesTable
+): AccumulatedCounterSamples {
+  let minCount = 0;
+  let maxCount = 0;
+  let accumulated = 0;
+  const accumulatedCounts = [];
+  for (let i = 0; i < samples.length; i++) {
+    accumulated += samples.count[i];
+    minCount = Math.min(accumulated, minCount);
+    maxCount = Math.max(accumulated, maxCount);
+    accumulatedCounts[i] = accumulated;
+  }
+  const countRange = maxCount - minCount;
+
+  return { minCount, maxCount, countRange, accumulatedCounts };
 }
 
 // --------------- CallNodePath and CallNodeIndex manipulations ---------------

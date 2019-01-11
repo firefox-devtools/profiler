@@ -6,6 +6,7 @@
 
 import type { TrackReference } from '../../types/actions';
 import type { Store } from '../../types/store';
+import type { ThreadIndex } from '../../types/profile';
 import type { LocalTrack } from '../../types/profile-derived';
 
 import * as React from 'react';
@@ -24,7 +25,11 @@ import {
 } from '../../selectors/profile';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
-import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
+import {
+  getNetworkTrackProfile,
+  getCounterForThread,
+  getProfileFromTextSamples,
+} from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
 
@@ -113,15 +118,27 @@ describe('timeline/LocalTrack', function() {
       expect(view).toMatchSnapshot();
     });
   });
+
+  describe('with a memory track', function() {
+    it('correctly renders the network label', function() {
+      const { getLocalTrackLabel } = setupWithMemory();
+      expect(getLocalTrackLabel().text()).toBe('Memory');
+    });
+
+    it('matches the snapshot of the memory track', () => {
+      const { view } = setupWithMemory();
+      expect(view).toMatchSnapshot();
+    });
+  });
 });
 
 function setup(
   store: Store,
   trackReference: TrackReference,
-  localTrack: LocalTrack
+  localTrack: LocalTrack,
+  threadIndex: ThreadIndex
 ) {
   const { getState, dispatch } = store;
-  const { threadIndex } = localTrack;
   // The assertions are simpler if this thread is not already selected.
   dispatch(changeSelectedThread(threadIndex + 1));
 
@@ -179,7 +196,7 @@ function setupThreadTrack() {
   if (localTrack.type !== 'thread') {
     throw new Error('Expected a thread track.');
   }
-  return setup(store, trackReference, localTrack);
+  return setup(store, trackReference, localTrack, localTrack.threadIndex);
 }
 
 function setupWithNetworkProfile() {
@@ -198,5 +215,43 @@ function setupWithNetworkProfile() {
   if (localTrack.type !== 'network') {
     throw new Error('Expected a network track.');
   }
-  return setup(store, trackReference, localTrack);
+  return setup(store, trackReference, localTrack, localTrack.threadIndex);
+}
+
+/**
+ * Set up a profile with a memory counter.
+ */
+function setupWithMemory() {
+  const { profile } = getProfileFromTextSamples(
+    // Create a trivial profile with 10 samples, all of the function "A".
+    Array(10)
+      .fill('A')
+      .join('  ')
+  );
+  const threadIndex = 0;
+  const trackIndex = 0;
+  const trackReference = { type: 'local', pid: PID, trackIndex };
+
+  {
+    // Modify the thread to include the counter.
+    const thread = profile.threads[threadIndex];
+    thread.name = 'GeckoMain';
+    thread.processType = 'default';
+    thread.pid = PID;
+    const counter = getCounterForThread(thread, threadIndex);
+    counter.category = 'Memory';
+    profile.counters = [counter];
+  }
+
+  const store = storeWithProfile(profile);
+  const localTrack = getLocalTrackFromReference(
+    store.getState(),
+    trackReference
+  );
+
+  if (localTrack.type !== 'memory') {
+    throw new Error('Expected a memory track.');
+  }
+
+  return setup(store, trackReference, localTrack, threadIndex);
 }

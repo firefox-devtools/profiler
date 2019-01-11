@@ -31,6 +31,7 @@ import { convertPhaseTimes } from './convert-markers';
 import type {
   Profile,
   Thread,
+  Counter,
   ExtensionTable,
   CategoryList,
   FrameTable,
@@ -687,6 +688,61 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
 }
 
 /**
+ * Converts the Gecko list of counters into the processed format.
+ */
+function _processCounters(
+  geckoProfile: GeckoProfile,
+  // The counters are listed independently from the threads, so we need an index that
+  // references back into a stable list of threads. The threads list in the processing
+  // step is built dynamically, so the "stableThreadList" variable is a hint that this
+  // should be a stable and sorted list of threads.
+  stableThreadList: Thread[],
+  // The timing across processes must be normalized, this is the timing delta between
+  // various processes.
+  delta: Milliseconds
+): Counter[] {
+  const geckoCounters = geckoProfile.counters;
+  const mainThread = geckoProfile.threads.find(
+    thread => thread.name === 'GeckoMain'
+  );
+
+  if (!mainThread || !geckoCounters) {
+    // Counters or a main thread weren't found, bail out, and return an empty array.
+    return [];
+  }
+
+  // The gecko profile's process don't map to the final thread list. Use the stable
+  // thread list to look up the thread index for the main thread in this profile.
+  const mainThreadIndex = stableThreadList.findIndex(
+    thread => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+  );
+
+  if (mainThreadIndex === -1) {
+    throw new Error(
+      'Unable to find the main thread in the stable thread list. This means that the ' +
+        'logic in the _processCounters function is wrong.'
+    );
+  }
+
+  return geckoCounters.map(
+    ({ name, category, description, sample_groups }) => ({
+      name,
+      category,
+      description,
+      pid: mainThread.pid,
+      mainThreadIndex,
+      sampleGroups: {
+        id: sample_groups.id,
+        samples: _adjustCounterTimestamps(
+          _toStructOfArrays(sample_groups.samples),
+          delta
+        ),
+      },
+    })
+  );
+}
+
+/**
  * Convert the given thread into processed form. See docs-developer/gecko-profile-format for more
  * information.
  */
@@ -895,6 +951,16 @@ function _adjustMarkerTimestamps(
   });
 }
 
+function _adjustCounterTimestamps<T: Object>(
+  sampleGroups: T,
+  delta: Milliseconds
+): T {
+  return {
+    ...sampleGroups,
+    time: sampleGroups.time.map(time => time + delta),
+  };
+}
+
 /**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
@@ -919,6 +985,7 @@ export function processProfile(
   for (const thread of geckoProfile.threads) {
     threads.push(_processThread(thread, geckoProfile, extensions));
   }
+  const counters: Counter[] = _processCounters(geckoProfile, threads, 0);
 
   for (const subprocessProfile of geckoProfile.processes) {
     const adjustTimestampsBy =
@@ -950,6 +1017,10 @@ export function processProfile(
         }
         return newThread;
       })
+    );
+
+    counters.push(
+      ..._processCounters(subprocessProfile, threads, adjustTimestampsBy)
     );
   }
 
@@ -986,6 +1057,7 @@ export function processProfile(
   const result = {
     meta,
     pages,
+    counters,
     threads,
   };
   return result;
