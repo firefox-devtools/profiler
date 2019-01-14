@@ -1143,10 +1143,15 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedN
 Object {
   "forFunc": Object {
     "selfTime": Object {
+      "breakdownByCategory": null,
       "breakdownByImplementation": null,
       "value": 0,
     },
     "totalTime": Object {
+      "breakdownByCategory": Array [
+        undefined,
+        2,
+      ],
       "breakdownByImplementation": Object {
         "native": 2,
       },
@@ -1155,10 +1160,15 @@ Object {
   },
   "forPath": Object {
     "selfTime": Object {
+      "breakdownByCategory": null,
       "breakdownByImplementation": null,
       "value": 0,
     },
     "totalTime": Object {
+      "breakdownByCategory": Array [
+        undefined,
+        2,
+      ],
       "breakdownByImplementation": Object {
         "native": 2,
       },

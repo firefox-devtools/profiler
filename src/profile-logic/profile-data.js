@@ -278,16 +278,19 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
 export type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
 export type StackImplementation = 'native' | JsImplementation;
 export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
+export type BreakdownByCategory = Milliseconds[]; // { [IndexIntoCategoryList]: Milliseconds }
 type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
     value: Milliseconds,
     breakdownByImplementation: BreakdownByImplementation | null,
+    breakdownByCategory: BreakdownByCategory | null,
   |},
   totalTime: {|
     // time spent including children
     value: Milliseconds,
     breakdownByImplementation: BreakdownByImplementation | null,
+    breakdownByCategory: BreakdownByCategory | null,
   |},
 |};
 
@@ -341,12 +344,28 @@ export function getTimingsForPath(
     // The rest of this function's code assumes a non-empty path.
     return {
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 0, breakdownByImplementation: null },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
+        totalTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
       },
       forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 0, breakdownByImplementation: null },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
+        totalTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
       },
       rootTime: 0,
     };
@@ -357,12 +376,28 @@ export function getTimingsForPath(
   const needleFuncIndex = getLeafFuncIndex(needlePath);
 
   const pathTimings: ItemTimings = {
-    selfTime: { value: 0, breakdownByImplementation: null },
-    totalTime: { value: 0, breakdownByImplementation: null },
+    selfTime: {
+      value: 0,
+      breakdownByImplementation: null,
+      breakdownByCategory: null,
+    },
+    totalTime: {
+      value: 0,
+      breakdownByImplementation: null,
+      breakdownByCategory: null,
+    },
   };
   const funcTimings: ItemTimings = {
-    selfTime: { value: 0, breakdownByImplementation: null },
-    totalTime: { value: 0, breakdownByImplementation: null },
+    selfTime: {
+      value: 0,
+      breakdownByImplementation: null,
+      breakdownByCategory: null,
+    },
+    totalTime: {
+      value: 0,
+      breakdownByImplementation: null,
+      breakdownByCategory: null,
+    },
   };
   let rootTime = 0;
 
@@ -374,6 +409,7 @@ export function getTimingsForPath(
   function accumulateDataToTimings(
     timings: {
       breakdownByImplementation: BreakdownByImplementation | null,
+      breakdownByCategory: BreakdownByCategory | null,
       value: number,
     },
     stackIndex: IndexIntoStackTable,
@@ -395,6 +431,18 @@ export function getTimingsForPath(
       timings.breakdownByImplementation[implementation] = 0;
     }
     timings.breakdownByImplementation[implementation] += interval;
+
+    // step 4: find the category value for this stack
+    const categoryIndex = stackTable.category[stackIndex];
+
+    // step 5: increment the right value in the category breakdown
+    if (timings.breakdownByCategory === null) {
+      timings.breakdownByCategory = [];
+    }
+    if (timings.breakdownByCategory[categoryIndex] === undefined) {
+      timings.breakdownByCategory[categoryIndex] = 0;
+    }
+    timings.breakdownByCategory[categoryIndex] += interval;
   }
 
   // Loop over each sample and accumulate the self time, running time, and
