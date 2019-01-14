@@ -220,8 +220,10 @@ export class CallTree {
       const formattedSelfTime = formatNumber(selfTime, 3, maxFractionalDigits);
 
       displayData = {
+        totalTimeNumeric: totalTime,
         totalTime: formattedTotalTime,
         totalTimeWithUnit: formattedTotalTime + 'ms',
+        selfTimeNumeric: selfTime,
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
         selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
         totalTimePercent: `${formatPercent(totalTimeRelative)}`,

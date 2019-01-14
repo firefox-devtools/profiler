@@ -13,9 +13,11 @@ import ChartCanvas from '../shared/chart/Canvas';
 import TextMeasurement from '../../utils/text-measurement';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
+import { getTimingsForCallNodeIndex } from '../../profile-logic/profile-data';
+import MixedTupleMap from 'mixedtuplemap';
 
 import type { Thread, CategoryList } from '../../types/profile';
-import type { CssPixels } from '../../types/units';
+import type { CssPixels, Milliseconds } from '../../types/units';
 import type {
   FlameGraphTiming,
   FlameGraphDepth,
@@ -41,6 +43,8 @@ export type OwnProps = {|
   +disableTooltips: boolean,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
+  +interval: Milliseconds,
+  +isInverted: boolean,
 |};
 
 type Props = {|
@@ -230,6 +234,11 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     }
   };
 
+  // Properly memoize this derived information for the Tooltip component.
+  _getTimingsForCallNodeIndex = memoize(getTimingsForCallNodeIndex, {
+    cache: new MixedTupleMap(),
+  });
+
   _getHoveredStackInfo = ({
     depth,
     flameGraphTimingIndex,
@@ -241,6 +250,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       callNodeInfo,
       disableTooltips,
       categories,
+      interval,
+      isInverted,
     } = this.props;
 
     if (disableTooltips) {
@@ -248,12 +259,14 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     }
 
     const stackTiming = flameGraphTiming[depth];
+    const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
     const duration =
       stackTiming.end[flameGraphTimingIndex] -
       stackTiming.start[flameGraphTimingIndex];
-    const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
 
     return (
+      // Important! Only pass in props that have been properly memoized so this component
+      // doesn't over-render.
       <TooltipCallNode
         thread={thread}
         callNodeIndex={callNodeIndex}
@@ -261,6 +274,14 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         categories={categories}
         durationText={`${(100 * duration).toFixed(2)}%`}
         callTree={callTree}
+        timings={this._getTimingsForCallNodeIndex(
+          callNodeIndex,
+          callNodeInfo,
+          interval,
+          isInverted,
+          thread,
+          categories
+        )}
       />
     );
   };

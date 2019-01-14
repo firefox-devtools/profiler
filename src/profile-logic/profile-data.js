@@ -329,6 +329,28 @@ export function getJsImplementationForStack(
 }
 
 /**
+ * This function is the same as getTimingsForPath, but accepts an IndexIntoCallNodeTable
+ * instead of a CallNodePath.
+ */
+export function getTimingsForCallNodeIndex(
+  callNodeIndex: IndexIntoCallNodeTable,
+  callNodeInfo: CallNodeInfo,
+  interval: number,
+  isInvertedTree: boolean,
+  thread: Thread,
+  categories: CategoryList
+) {
+  return getTimingsForPath(
+    getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable),
+    callNodeInfo,
+    interval,
+    isInvertedTree,
+    thread,
+    categories
+  );
+}
+
+/**
  * This function returns the timings for a specific path. The algorithm is
  * adjusted when the call tree is inverted.
  */

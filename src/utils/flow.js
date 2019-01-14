@@ -112,12 +112,22 @@ export function objectValues<Value, Obj: {| [string]: Value |}>(
 }
 
 /**
+ * This is a type-friendly version of Object.entries that assumes the object is an
+ * exact object.
+ */
+export function objectEntriesExact<Value, Obj: {| [string]: Value |}>(
+  object: Obj
+): Array<[string, Value]> {
+  return (Object.entries: Function)(object);
+}
+
+/**
  * This is a type-friendly version of Object.entries that assumes the object has
  * a Map-like structure.
  */
-export function objectEntries<Value, Obj: {| [string]: Value |}>(
-  object: Obj
-): Array<[string, Value]> {
+export function objectEntriesMap<Key, Value>(object: {
+  [Key]: Value,
+}): Array<[Key, Value]> {
   return (Object.entries: Function)(object);
 }
 
