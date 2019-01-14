@@ -70,6 +70,7 @@ export type CategoryDrawStyles = $ReadOnlyArray<{|
   +selectedFillStyle: string,
   +unselectedFillStyle: string,
   +filteredOutFillStyle: CanvasPattern,
+  +selectedTextColor: string,
 |}>;
 
 type SelectedPercentageAtPixelBuffers = {|

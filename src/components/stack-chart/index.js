@@ -15,13 +15,10 @@ import {
   getProfileInterval,
   getPreviewSelection,
   getScrollToSelectionGeneration,
+  getCategories,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import {
-  getCategoryColorStrategy,
-  getLabelingStrategy,
-} from '../../selectors/stack-chart';
 import StackSettings from '../shared/StackSettings';
 import {
   updatePreviewSelection,
@@ -29,7 +26,7 @@ import {
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
-import type { Thread } from '../../types/profile';
+import type { Thread, CategoryList } from '../../types/profile';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -39,8 +36,6 @@ import type {
   UnitIntervalOfProfileRange,
 } from '../../types/units';
 import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
-import type { GetCategory } from '../../profile-logic/color-categories';
-import type { GetLabel } from '../../profile-logic/labeling-strategies';
 import type { PreviewSelection } from '../../types/actions';
 import type {
   ExplicitConnectOptions,
@@ -57,11 +52,10 @@ type StateProps = {|
   +stackTimingByDepth: StackTimingByDepth,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
-  +getCategory: GetCategory,
-  +getLabel: GetLabel,
   +previewSelection: PreviewSelection,
   +threadIndex: number,
   +callNodeInfo: CallNodeInfo,
+  +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
 |};
@@ -114,11 +108,10 @@ class StackChartGraph extends React.PureComponent<Props> {
       stackTimingByDepth,
       timeRange,
       interval,
-      getCategory,
-      getLabel,
       previewSelection,
       updatePreviewSelection,
       callNodeInfo,
+      categories,
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
     } = this.props;
@@ -148,14 +141,13 @@ class StackChartGraph extends React.PureComponent<Props> {
             chartProps={{
               interval,
               thread,
-              getCategory,
-              getLabel,
               stackTimingByDepth,
               updatePreviewSelection,
               rangeStart: timeRange.start,
               rangeEnd: timeRange.end,
               stackFrameHeight: STACK_FRAME_HEIGHT,
               callNodeInfo,
+              categories,
               selectedCallNodeIndex,
               onSelectionChange: this._onSelectedCallNodeChange,
               scrollToSelectionGeneration,
@@ -179,11 +171,10 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       stackTimingByDepth,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
-      getCategory: getCategoryColorStrategy(state),
-      getLabel: getLabelingStrategy(state),
       previewSelection: getPreviewSelection(state),
       threadIndex: getSelectedThreadIndex(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+      categories: getCategories(state),
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),

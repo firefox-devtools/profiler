@@ -41,13 +41,18 @@ describe('selectors/getStackTimingByDepth', function() {
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
-      { start: [0], end: [91], stack: [0], length: 1 },
-      { start: [0, 50], end: [40, 91], stack: [1, 1], length: 2 },
-      { start: [10, 30, 60], end: [30, 40, 91], stack: [2, 3, 4], length: 3 },
-      { start: [70], end: [90], stack: [5], length: 1 },
-      { start: [80], end: [90], stack: [6], length: 1 },
-      { start: [80], end: [90], stack: [7], length: 1 },
-      { start: [80], end: [90], stack: [8], length: 1 },
+      { start: [0], end: [91], callNode: [0], length: 1 },
+      { start: [0, 50], end: [40, 91], callNode: [1, 1], length: 2 },
+      {
+        start: [10, 30, 60],
+        end: [30, 40, 91],
+        callNode: [2, 3, 4],
+        length: 3,
+      },
+      { start: [70], end: [90], callNode: [5], length: 1 },
+      { start: [80], end: [90], callNode: [6], length: 1 },
+      { start: [80], end: [90], callNode: [7], length: 1 },
+      { start: [80], end: [90], callNode: [8], length: 1 },
     ]);
   });
 
@@ -58,13 +63,13 @@ describe('selectors/getStackTimingByDepth', function() {
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
-      { start: [60], end: [91], stack: [0], length: 1 },
-      { start: [60], end: [91], stack: [1], length: 1 },
-      { start: [60], end: [91], stack: [4], length: 1 },
-      { start: [70], end: [90], stack: [5], length: 1 },
-      { start: [80], end: [90], stack: [6], length: 1 },
-      { start: [80], end: [90], stack: [7], length: 1 },
-      { start: [80], end: [90], stack: [8], length: 1 },
+      { start: [60], end: [91], callNode: [0], length: 1 },
+      { start: [60], end: [91], callNode: [1], length: 1 },
+      { start: [60], end: [91], callNode: [4], length: 1 },
+      { start: [70], end: [90], callNode: [5], length: 1 },
+      { start: [80], end: [90], callNode: [6], length: 1 },
+      { start: [80], end: [90], callNode: [7], length: 1 },
+      { start: [80], end: [90], callNode: [8], length: 1 },
     ]);
   });
 
@@ -94,30 +99,30 @@ describe('selectors/getStackTimingByDepth', function() {
       {
         start: [0, 10, 30, 40, 50, 60, 70, 80, 90],
         end: [10, 30, 40, 50, 60, 70, 80, 90, 91],
-        stack: [0, 2, 5, 8, 0, 9, 12, 16, 9],
+        callNode: [0, 2, 5, 8, 0, 9, 12, 16, 9],
         length: 9,
       },
       {
         start: [0, 10, 30, 50, 60, 70, 80, 90],
         end: [10, 30, 40, 60, 70, 80, 90, 91],
-        stack: [1, 3, 6, 1, 10, 13, 17, 10],
+        callNode: [1, 3, 6, 1, 10, 13, 17, 10],
         length: 8,
       },
       {
         start: [10, 30, 60, 70, 80, 90],
         end: [30, 40, 70, 80, 90, 91],
-        stack: [4, 7, 11, 14, 18, 11],
+        callNode: [4, 7, 11, 14, 18, 11],
         length: 6,
       },
       {
         start: [70, 80],
         end: [80, 90],
-        stack: [15, 19],
+        callNode: [15, 19],
         length: 2,
       },
-      { start: [80], end: [90], stack: [20], length: 1 },
-      { start: [80], end: [90], stack: [21], length: 1 },
-      { start: [80], end: [90], stack: [22], length: 1 },
+      { start: [80], end: [90], callNode: [20], length: 1 },
+      { start: [80], end: [90], callNode: [21], length: 1 },
+      { start: [80], end: [90], callNode: [22], length: 1 },
     ]);
   });
 });

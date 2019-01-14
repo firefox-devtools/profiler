@@ -7,9 +7,9 @@ import * as React from 'react';
 import { computeActivityGraphFills } from './ActivityGraphFills';
 import { timeCode } from '../../../utils/time-code';
 import classNames from 'classnames';
-import photonColors from 'photon-colors';
 import Tooltip, { MOUSE_OFFSET } from '../Tooltip';
 import SampleTooltipContents from '../SampleTooltipContents';
+import { mapCategoryColorNameToStyles } from '../../../utils/colors';
 
 import './ActivityGraph.css';
 
@@ -106,7 +106,7 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
       // Lazily initialize this list.
       this._categoryDrawStyles = this.props.categories.map(
         ({ color: colorName }, categoryIndex) => {
-          const styles = _mapColorNameToStyles(colorName);
+          const styles = mapCategoryColorNameToStyles(colorName);
           return {
             ...styles,
             category: categoryIndex,
@@ -307,84 +307,6 @@ function _createDiagonalStripePattern(
   patternContext.fillRect(0, 0, 4, 4);
 
   return chartCtx.createPattern(patternCanvas, 'repeat');
-}
-
-/**
- * Map a color name, which comes from Gecko, into a CSS style color. These colors cannot
- * be changed without considering the values coming from Gecko, and from old profiles
- * that already have their category colors saved into the profile.
- *
- * Category color names come from:
- * https://searchfox.org/mozilla-central/rev/0b8ed772d24605d7cb44c1af6d59e4ca023bd5f5/tools/profiler/core/platform.cpp#1593-1627
- */
-function _mapColorNameToStyles(colorName: string) {
-  switch (colorName) {
-    case 'transparent':
-      return {
-        selectedFillStyle: 'transparent',
-        unselectedFillStyle: 'transparent',
-        gravity: 0,
-      };
-    case 'purple':
-      return {
-        selectedFillStyle: photonColors.PURPLE_70,
-        // Colors are assumed to have the form #RRGGBB, so concatenating 2 more digits to
-        // the end defines the transparency #RRGGBBAA.
-        unselectedFillStyle: photonColors.PURPLE_70 + '60',
-        gravity: 5,
-      };
-    case 'green':
-      return {
-        selectedFillStyle: photonColors.GREEN_60,
-        unselectedFillStyle: photonColors.GREEN_60 + '60',
-        gravity: 4,
-      };
-    case 'orange':
-      return {
-        selectedFillStyle: photonColors.ORANGE_50,
-        unselectedFillStyle: photonColors.ORANGE_50 + '60',
-        gravity: 2,
-      };
-    case 'yellow':
-      return {
-        selectedFillStyle: photonColors.YELLOW_50,
-        unselectedFillStyle: photonColors.YELLOW_50 + '60',
-        gravity: 6,
-      };
-    case 'lightblue':
-      return {
-        selectedFillStyle: photonColors.BLUE_40,
-        unselectedFillStyle: photonColors.BLUE_40 + '60',
-        gravity: 1,
-      };
-    case 'grey':
-      return {
-        selectedFillStyle: photonColors.GREY_30,
-        unselectedFillStyle: photonColors.GREY_30 + '60',
-        gravity: 8,
-      };
-    case 'blue':
-      return {
-        selectedFillStyle: photonColors.BLUE_60,
-        unselectedFillStyle: photonColors.BLUE_60 + '60',
-        gravity: 3,
-      };
-    case 'brown':
-      return {
-        selectedFillStyle: photonColors.MAGENTA_60,
-        unselectedFillStyle: photonColors.MAGENTA_60 + '60',
-        gravity: 7,
-      };
-    default:
-      console.error(
-        'Unknown color name encountered. Consider updating this code to handle it.'
-      );
-      return {
-        selectedFillStyle: photonColors.GREY_30,
-        unselectedFillStyle: photonColors.GREY_30 + '60',
-        gravity: 8,
-      };
-  }
 }
 
 /**

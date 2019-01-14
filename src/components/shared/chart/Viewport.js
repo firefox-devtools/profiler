@@ -10,7 +10,7 @@ import {
   getHasZoomedViaMousewheel,
   getPanelLayoutGeneration,
 } from '../../../selectors/app';
-import { setHasZoomedViaMousewheel } from '../../../actions/stack-chart';
+import { setHasZoomedViaMousewheel } from '../../../actions/app';
 import { updatePreviewSelection } from '../../../actions/profile-view';
 
 import type {
