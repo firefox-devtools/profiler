@@ -6,7 +6,7 @@ You can use perf.html to investigate performance issues on Android, not just Win
 
 TL;DR: You probably want to profile [a "GeckoView example" nightly](https://tools.taskcluster.net/index/gecko.v2.mozilla-central.nightly.latest.mobile/android-api-16-opt). Read on for more details, or skip to the next section if you already know exactly which browser you want to profile.
 
-The current landscape of Gecko products, versions and channels is a lot more complicated on mobile than it is on desktop. On desktop, when it comes to profiling, there's really only one product that's interesting to profile: Firefox Nightly. On mobile, the choice is not so easy.
+The current landscape of Gecko products, versions and channels is a lot more complicated on mobile than it is on desktop. On desktop, when it comes to profiling, there's really only one product that's interesting to profile: Firefox Nightly. On mobile, the choice is not so simple.
 
 Currently there are five different apps you can install on Android, all of which use Gecko in some fashion:
 
@@ -16,14 +16,14 @@ Currently there are five different apps you can install on Android, all of which
  - [Fenix](https://github.com/mozilla-mobile/fenix)
  - [The GeckoView-example app](https://searchfox.org/mozilla-central/source/mobile/android/geckoview_example)
 
-Among these, Firefox for Android is the only one that has a Nightly channel which uses a recent [mozilla-central](https://hg.mozilla.org/mozilla-central/)-based Gecko, updates automatically (because it's on the Play Store), and is usable as a daily browser. However, it doesn't use GeckoView or e10s.
+Among these, Firefox for Android is the only one that has a Nightly channel which uses a recent [mozilla-central](https://hg.mozilla.org/mozilla-central/)-based Gecko, receives automatic updates (because it's on the Play Store), and is usable as a daily browser. However, it doesn't use GeckoView or e10s.
 
-Mozilla's current development efforts on mobile are focused on GeckoView. GeckoView has very different performance characteristics from non-GeckoView Gecko, mainly because GeckoView uses e10s: it runs web content in a different process from the browser process. Some new features, such as WebRender, are even exclusively targeting GeckoView. So if you do performance investigations and profiling, you'll really want to be profiling GeckoView, which means that Firefox for Android is not a good choice for a profiling target.
+Mozilla's current development efforts on mobile are focused on GeckoView. GeckoView has very different performance characteristics from non-GeckoView Gecko, mainly because GeckoView uses e10s: it runs web content in a different process from the browser process. Some new features, such as WebRender, are even exclusively targeting GeckoView. So whenever you do performance investigations and profiling, you really want to be profiling GeckoView, which means that Firefox for Android is not a good choice for a profiling target.
 
 That leaves the other four products:
 
  - Focus is usable as a daily browser, and it has [a "Nightly" channel](https://github.com/mozilla-mobile/focus-android/wiki/Release-tracks#nightly), but that channel [uses GeckoView Beta](https://github.com/mozilla-mobile/focus-android/blob/master/build.gradle#L9-L10). This makes it almost useless for profiling work - you don't want to spend your time finding problems that have already been fixed. The Gecko Beta channel is also missing some recent profiling improvements.
- - The reference browser uses a more recent version of GeckoView: It tries to stick very closely to mozilla-central, but since it uses [a pinned version of GeckoView](https://github.com/mozilla-mobile/android-components/blob/master/buildSrc/src/main/java/Gecko.kt#L6), it only refreshes to a new build of GeckoView whenever somebody manually updates the pinned version. [This happens around once a week](https://github.com/mozilla-mobile/android-components/commits/master/buildSrc/src/main/java/Gecko.kt). The reference browser is somewhat usable as a regular browser. It is not on the Google Play Store, so it does not auto-update, but you can install it from an apk manually.
+ - The reference browser uses a more recent version of GeckoView: It tries to stick very closely to mozilla-central, but it uses [a pinned version of GeckoView](https://github.com/mozilla-mobile/android-components/blob/master/buildSrc/src/main/java/Gecko.kt#L6). This means that it only refreshes to a new build of GeckoView whenever somebody manually updates the pinned version, [which happens around once a week](https://github.com/mozilla-mobile/android-components/commits/master/buildSrc/src/main/java/Gecko.kt). The reference browser is somewhat usable as a regular browser. It is not on the Google Play Store, so it does not auto-update, but you can install it from an apk manually.
  - Fenix is supposed to become a GeckoView-based replacement for Fennec in the future, but at this point, it is in a very early stage and there might not even be downloadable builds for it.
  - Lastly, there's the GeckoView-example app: This app is an extremely simple GeckoView-based app, which is generated along with every GeckoView build on the mozilla-central trees. That means you can get GeckoView-example apks for any GeckoView build you want. GeckoView-example is also the easiest GeckoView-based app to compile locally. It's not really usable as your daily browser, and it's not on the Play Store so it doesn't auto-update, but it's usually enough for performance testing and profiling work.
 
@@ -102,11 +102,14 @@ Make any necessary adjustments in the presented options, like threads to sample 
 
 ## Symbols and symbol sources
 
-If you've been profiling one of the builds suggested in this document, your profile should contain fully symbolicated C++ call stacks at least for libxul.so. If not, it probably was not a "Nightly" GeckoView build; regular GeckoView build jobs  on treeherder don't upload symbols to the Mozilla symbol server.
+If you've been profiling one of the builds suggested in this document, your profile should contain fully symbolicated C++ call stacks at least for libxul.so. If it doesn't, check the following:
 
-For Android system libraries, symbol information can be a bit hit and miss. Depending on your Android version, if the browser on the phone is running Gecko 64 or newer, sometimes you will get symbols for system libraries, sometimes you won't; if you don't, the patch in [bug 1505719](https://bugzilla.mozilla.org/show_bug.cgi?id=1505719) should help. It's currently in review.
+ - Are you profiling a "Nightly" GeckoView build? A common mistake is to profile a regular "build" build from treeherder, i.e. one that was not compiled with the "nightly" configuration. Unfortunately, those regular treeherder builds do not upload symbol information to the Mozilla symbol server. Please use a different build in that case.
+ - Are you profiling a build from the tryserver or a local build? Read on below for how to obtain symbol information in those cases.
 
-There are other types of builds you might want to profile:
+As for Android system libraries, if the browser on the phone is running Gecko 66 or newer, you should get full symbol information for system libraries. If you don't, [please file a bug](https://bugzilla.mozilla.org/enter_bug.cgi?product=Core&component=Gecko+Profiler).
+
+There are other types of builds you may want to profile:
 
 ### Try builds
 
