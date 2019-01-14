@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { TimelineMarkersOverview } from '../../components/timeline/Markers';
-import renderer from 'react-test-renderer';
+import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
@@ -30,21 +30,12 @@ describe('TimelineMarkersOverview', function() {
     const flushRafCalls = mockRaf();
     window.devicePixelRatio = 1;
     const ctx = mockCanvasContext();
-
-    /**
-     * Mock out any created refs for the components with relevant information.
-     */
-    function createNodeMock(element) {
-      // This is the canvas used to draw markers
-      if (element.type === 'canvas') {
-        return {
-          getBoundingClientRect: () => getBoundingBox(200, 300),
-          getContext: () => ctx,
-          style: {},
-        };
-      }
-      return null;
-    }
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(200, 300));
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => ctx);
 
     const profile = getProfileWithMarkers([
       ['GCMajor', 2, { startTime: 2, endTime: 12 }],
@@ -78,7 +69,7 @@ describe('TimelineMarkersOverview', function() {
       ],
     ]);
 
-    const overview = renderer.create(
+    const { container } = render(
       <Provider store={storeWithProfile(profile)}>
         <TimelineMarkersOverview
           className="timelineMarkersOverview"
@@ -87,8 +78,7 @@ describe('TimelineMarkersOverview', function() {
           threadIndex={0}
           onSelect={() => {}}
         />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
     // We need to flush twice since when the first flush is run, it
@@ -96,10 +86,9 @@ describe('TimelineMarkersOverview', function() {
     flushRafCalls();
     flushRafCalls();
 
-    const tree = overview.toJSON();
     const drawCalls = ctx.__flushDrawLog();
 
-    expect(tree).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
 
     delete window.devicePixelRatio;

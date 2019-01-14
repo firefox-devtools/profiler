@@ -2,14 +2,12 @@
 
 exports[`TimelineMarkersOverview renders correctly 1`] = `
 <div
-  className="timelineMarkersOverview selected"
+  class="timelineMarkersOverview selected"
 >
   <canvas
-    className="timelineMarkersCanvas"
-    onMouseDown={[Function]}
-    onMouseMove={[Function]}
-    onMouseOut={[Function]}
-    onMouseUp={[Function]}
+    class="timelineMarkersCanvas"
+    height="300"
+    width="200"
   />
 </div>
 `;

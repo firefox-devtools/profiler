@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
-import renderer from 'react-test-renderer';
+import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -16,36 +16,23 @@ import { createGeckoProfileWithJsTimings } from '../fixtures/profiles/gecko-prof
 import { processProfile } from '../../profile-logic/process-profile';
 
 describe('app/MenuButtons', function() {
-  /**
-   * Mock out any created refs for the components with relevant information.
-   */
-  function createNodeMock(element) {
-    if (element.type === 'input') {
-      return {
-        focus() {},
-        select() {},
-        blur() {},
-      };
-    }
-    return null;
-  }
-
   // profile.meta.networkURLsRemoved flag is set to false as a default.
   it('renders the MenuButtons buttons', () => {
     const store = storeWithProfile();
     store.dispatch(startSymbolicating());
 
-    const profileSharing = renderer.create(
+    const { container } = render(
       <Provider store={store}>
         <MenuButtons />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
-    expect(profileSharing).toMatchSnapshot();
+    // MenuButtons is rendering a fragment with several children. We need to
+    // check all children to assess that the component renders properly.
+    expect(Array.from(container.children)).toMatchSnapshot();
 
     store.dispatch(doneSymbolicating());
-    expect(profileSharing).toMatchSnapshot();
+    expect(Array.from(container.children)).toMatchSnapshot();
   });
 
   it('renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to true', () => {
@@ -54,17 +41,16 @@ describe('app/MenuButtons', function() {
     const store = storeWithProfile(profile);
     store.dispatch(startSymbolicating());
 
-    const profileSharing = renderer.create(
+    const { container } = render(
       <Provider store={store}>
         <MenuButtons />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
-    expect(profileSharing).toMatchSnapshot();
+    expect(Array.from(container.children)).toMatchSnapshot();
 
     store.dispatch(doneSymbolicating());
-    expect(profileSharing).toMatchSnapshot();
+    expect(Array.from(container.children)).toMatchSnapshot();
   });
 
   it('renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to undefined', () => {
@@ -73,16 +59,15 @@ describe('app/MenuButtons', function() {
     const store = storeWithProfile(profile);
     store.dispatch(startSymbolicating());
 
-    const profileSharing = renderer.create(
+    const { container } = render(
       <Provider store={store}>
         <MenuButtons />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
-    expect(profileSharing).toMatchSnapshot();
+    expect(Array.from(container.children)).toMatchSnapshot();
 
     store.dispatch(doneSymbolicating());
-    expect(profileSharing).toMatchSnapshot();
+    expect(Array.from(container.children)).toMatchSnapshot();
   });
 });

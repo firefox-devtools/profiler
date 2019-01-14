@@ -2,35 +2,32 @@
 
 exports[`app/Home renders the information screen for other browsers 1`] = `
 <div
-  className="home"
-  onDragEnter={[Function]}
-  onDragExit={[Function]}
-  onDrop={[Function]}
+  class="home"
 >
   <section
-    className="homeSection"
+    class="homeSection"
   >
     <header>
       <h1
-        className="homeTitle"
+        class="homeTitle"
       >
         <span
-          className="homeTitleSlogan"
+          class="homeTitleSlogan"
         >
           <span
-            className="homeTitleText"
+            class="homeTitleText"
           >
             perf.html
           </span>
           <span
-            className="homeTitleSubtext"
+            class="homeTitleSubtext"
           >
              
             — Web app for Firefox performance analysis
           </span>
         </span>
         <a
-          className="homeTitleGithubIcon"
+          class="homeTitleGithubIcon"
           href="https://github.com/devtools-html/perf.html"
           rel="noopener noreferrer"
           target="_blank"
@@ -38,7 +35,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
         >
           <svg
             aria-label="github"
-            className="octicon octicon-mark-github"
+            class="octicon octicon-mark-github"
             height="22"
             version="1.1"
             viewBox="0 0 16 16"
@@ -46,13 +43,13 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
           >
             <path
               d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-              fillRule="evenodd"
+              fill-rule="evenodd"
             />
           </svg>
         </a>
       </h1>
       <div
-        className="homeSpecialMessage"
+        class="homeSpecialMessage"
       >
         This is a special message
       </div>
@@ -61,37 +58,33 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       </p>
     </header>
     <div
-      className="homeInstructionsTransitionGroup"
+      class="homeInstructionsTransitionGroup"
     >
       <div
-        className="homeInstructions"
+        class="homeInstructions"
       >
         <div
-          className="homeInstructionsLeft"
+          class="homeInstructionsLeft"
         >
           <div
-            style={
-              Object {
-                "textAlign": "center",
-              }
-            }
+            style="text-align: center;"
           >
             <img
               alt="screenshot of perf.html"
-              className="homeSectionScreenshot"
+              class="homeSectionScreenshot"
               src="test-file-stub"
             />
           </div>
         </div>
         <div
-          className="homeInstructionsRight"
+          class="homeInstructionsRight"
         >
           <a
-            className="homeSectionButton"
+            class="homeSectionButton"
             href="/docs/"
           >
             <span
-              className="homeSectionDocsIcon"
+              class="homeSectionDocsIcon"
             />
             Documentation
           </a>
@@ -109,24 +102,22 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
             . However, existing profiles can be viewed in any modern browser.
           </p>
           <div
-            className="homeSectionLoadProfile"
+            class="homeSectionLoadProfile"
           >
             <div
-              className="homeSectionActionButtons"
+              class="homeSectionActionButtons"
             >
               <label
-                className="homeSectionButton"
+                class="homeSectionButton"
               >
                 <input
-                  className="homeSectionUploadFromFileInput"
-                  onChange={[Function]}
+                  class="homeSectionUploadFromFileInput"
                   type="file"
                 />
                 Load a profile from file
               </label>
               <button
-                className="homeSectionButton"
-                onClick={[Function]}
+                class="homeSectionButton"
                 type="button"
               >
                 Load a profile from an URL
@@ -137,10 +128,10 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       </div>
     </div>
     <div
-      className="homeDrop"
+      class="homeDrop"
     >
       <div
-        className="homeDropMessage"
+        class="homeDropMessage"
       >
         Drop a saved profile here
       </div>
@@ -151,35 +142,32 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
 
 exports[`app/Home renders the install screen for the extension 1`] = `
 <div
-  className="home"
-  onDragEnter={[Function]}
-  onDragExit={[Function]}
-  onDrop={[Function]}
+  class="home"
 >
   <section
-    className="homeSection"
+    class="homeSection"
   >
     <header>
       <h1
-        className="homeTitle"
+        class="homeTitle"
       >
         <span
-          className="homeTitleSlogan"
+          class="homeTitleSlogan"
         >
           <span
-            className="homeTitleText"
+            class="homeTitleText"
           >
             perf.html
           </span>
           <span
-            className="homeTitleSubtext"
+            class="homeTitleSubtext"
           >
              
             — Web app for Firefox performance analysis
           </span>
         </span>
         <a
-          className="homeTitleGithubIcon"
+          class="homeTitleGithubIcon"
           href="https://github.com/devtools-html/perf.html"
           rel="noopener noreferrer"
           target="_blank"
@@ -187,7 +175,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
         >
           <svg
             aria-label="github"
-            className="octicon octicon-mark-github"
+            class="octicon octicon-mark-github"
             height="22"
             version="1.1"
             viewBox="0 0 16 16"
@@ -195,13 +183,13 @@ exports[`app/Home renders the install screen for the extension 1`] = `
           >
             <path
               d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-              fillRule="evenodd"
+              fill-rule="evenodd"
             />
           </svg>
         </a>
       </h1>
       <div
-        className="homeSpecialMessage"
+        class="homeSpecialMessage"
       >
         This is a special message
       </div>
@@ -210,49 +198,44 @@ exports[`app/Home renders the install screen for the extension 1`] = `
       </p>
     </header>
     <div
-      className="homeInstructionsTransitionGroup"
+      class="homeInstructionsTransitionGroup"
     >
       <div
-        className="homeInstructions"
+        class="homeInstructions"
       >
         <div
-          className="homeInstructionsLeft"
+          class="homeInstructionsLeft"
         >
           <div
-            style={
-              Object {
-                "textAlign": "center",
-              }
-            }
+            style="text-align: center;"
           >
             <img
               alt="screenshot of perf.html"
-              className="homeSectionScreenshot"
+              class="homeSectionScreenshot"
               src="test-file-stub"
             />
           </div>
         </div>
         <div
-          className="homeInstructionsRight"
+          class="homeInstructionsRight"
         >
           <a
-            className="homeSectionButton"
+            class="homeSectionButton"
             href="https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi"
-            onClick={[Function]}
           >
             <span
-              className="homeSectionPlus"
+              class="homeSectionPlus"
             >
               +
             </span>
             Install add-on
           </a>
           <a
-            className="homeSectionButton"
+            class="homeSectionButton"
             href="/docs/"
           >
             <span
-              className="homeSectionDocsIcon"
+              class="homeSectionDocsIcon"
             />
             Documentation
           </a>
@@ -260,24 +243,22 @@ exports[`app/Home renders the install screen for the extension 1`] = `
             Install the Gecko Profiler Add-on to start recording a performance profile in Firefox, then analyze it and share it with perf.html.
           </p>
           <div
-            className="homeSectionLoadProfile"
+            class="homeSectionLoadProfile"
           >
             <div
-              className="homeSectionActionButtons"
+              class="homeSectionActionButtons"
             >
               <label
-                className="homeSectionButton"
+                class="homeSectionButton"
               >
                 <input
-                  className="homeSectionUploadFromFileInput"
-                  onChange={[Function]}
+                  class="homeSectionUploadFromFileInput"
                   type="file"
                 />
                 Load a profile from file
               </label>
               <button
-                className="homeSectionButton"
-                onClick={[Function]}
+                class="homeSectionButton"
                 type="button"
               >
                 Load a profile from an URL
@@ -288,10 +269,10 @@ exports[`app/Home renders the install screen for the extension 1`] = `
       </div>
     </div>
     <div
-      className="homeDrop"
+      class="homeDrop"
     >
       <div
-        className="homeDropMessage"
+        class="homeDropMessage"
       >
         Drop a saved profile here
       </div>
@@ -302,35 +283,32 @@ exports[`app/Home renders the install screen for the extension 1`] = `
 
 exports[`app/Home renders the install screen for the legacy add-on 1`] = `
 <div
-  className="home"
-  onDragEnter={[Function]}
-  onDragExit={[Function]}
-  onDrop={[Function]}
+  class="home"
 >
   <section
-    className="homeSection"
+    class="homeSection"
   >
     <header>
       <h1
-        className="homeTitle"
+        class="homeTitle"
       >
         <span
-          className="homeTitleSlogan"
+          class="homeTitleSlogan"
         >
           <span
-            className="homeTitleText"
+            class="homeTitleText"
           >
             perf.html
           </span>
           <span
-            className="homeTitleSubtext"
+            class="homeTitleSubtext"
           >
              
             — Web app for Firefox performance analysis
           </span>
         </span>
         <a
-          className="homeTitleGithubIcon"
+          class="homeTitleGithubIcon"
           href="https://github.com/devtools-html/perf.html"
           rel="noopener noreferrer"
           target="_blank"
@@ -338,7 +316,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
         >
           <svg
             aria-label="github"
-            className="octicon octicon-mark-github"
+            class="octicon octicon-mark-github"
             height="22"
             version="1.1"
             viewBox="0 0 16 16"
@@ -346,13 +324,13 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
           >
             <path
               d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-              fillRule="evenodd"
+              fill-rule="evenodd"
             />
           </svg>
         </a>
       </h1>
       <div
-        className="homeSpecialMessage"
+        class="homeSpecialMessage"
       >
         This is a special message
       </div>
@@ -361,37 +339,33 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
       </p>
     </header>
     <div
-      className="homeInstructionsTransitionGroup"
+      class="homeInstructionsTransitionGroup"
     >
       <div
-        className="homeInstructions"
+        class="homeInstructions"
       >
         <div
-          className="homeInstructionsLeft"
+          class="homeInstructionsLeft"
         >
           <div
-            style={
-              Object {
-                "textAlign": "center",
-              }
-            }
+            style="text-align: center;"
           >
             <img
               alt="screenshot of perf.html"
-              className="homeSectionScreenshot"
+              class="homeSectionScreenshot"
               src="test-file-stub"
             />
           </div>
         </div>
         <div
-          className="homeInstructionsRight"
+          class="homeInstructionsRight"
         >
           <a
-            className="homeSectionButton"
+            class="homeSectionButton"
             href="/docs/"
           >
             <span
-              className="homeSectionDocsIcon"
+              class="homeSectionDocsIcon"
             />
             Documentation
           </a>
@@ -400,7 +374,6 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
              
             <a
               href="https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi"
-              onClick={[Function]}
             >
               Gecko Profiler Add-on
             </a>
@@ -444,24 +417,22 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
             </div>
           </p>
           <div
-            className="homeSectionLoadProfile"
+            class="homeSectionLoadProfile"
           >
             <div
-              className="homeSectionActionButtons"
+              class="homeSectionActionButtons"
             >
               <label
-                className="homeSectionButton"
+                class="homeSectionButton"
               >
                 <input
-                  className="homeSectionUploadFromFileInput"
-                  onChange={[Function]}
+                  class="homeSectionUploadFromFileInput"
                   type="file"
                 />
                 Load a profile from file
               </label>
               <button
-                className="homeSectionButton"
-                onClick={[Function]}
+                class="homeSectionButton"
                 type="button"
               >
                 Load a profile from an URL
@@ -472,10 +443,10 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
       </div>
     </div>
     <div
-      className="homeDrop"
+      class="homeDrop"
     >
       <div
-        className="homeDropMessage"
+        class="homeDropMessage"
       >
         Drop a saved profile here
       </div>
@@ -486,35 +457,32 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
 
 exports[`app/Home renders the usage instructions for pages with the extension installed 1`] = `
 <div
-  className="home"
-  onDragEnter={[Function]}
-  onDragExit={[Function]}
-  onDrop={[Function]}
+  class="home"
 >
   <section
-    className="homeSection"
+    class="homeSection"
   >
     <header>
       <h1
-        className="homeTitle"
+        class="homeTitle"
       >
         <span
-          className="homeTitleSlogan"
+          class="homeTitleSlogan"
         >
           <span
-            className="homeTitleText"
+            class="homeTitleText"
           >
             perf.html
           </span>
           <span
-            className="homeTitleSubtext"
+            class="homeTitleSubtext"
           >
              
             — Web app for Firefox performance analysis
           </span>
         </span>
         <a
-          className="homeTitleGithubIcon"
+          class="homeTitleGithubIcon"
           href="https://github.com/devtools-html/perf.html"
           rel="noopener noreferrer"
           target="_blank"
@@ -522,7 +490,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
         >
           <svg
             aria-label="github"
-            className="octicon octicon-mark-github"
+            class="octicon octicon-mark-github"
             height="22"
             version="1.1"
             viewBox="0 0 16 16"
@@ -530,13 +498,13 @@ exports[`app/Home renders the usage instructions for pages with the extension in
           >
             <path
               d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"
-              fillRule="evenodd"
+              fill-rule="evenodd"
             />
           </svg>
         </a>
       </h1>
       <div
-        className="homeSpecialMessage"
+        class="homeSpecialMessage"
       >
         This is a special message
       </div>
@@ -545,31 +513,31 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       </p>
     </header>
     <div
-      className="homeInstructionsTransitionGroup"
+      class="homeInstructionsTransitionGroup"
     >
       <div
-        className="homeInstructions"
+        class="homeInstructions"
       >
         <div
-          className="homeInstructionsLeft"
+          class="homeInstructionsLeft"
         >
           <p>
             <img
               alt="Screenshot of the Gecko Profiler addon settings"
-              className="homeSectionScreenshot"
+              class="homeSectionScreenshot"
               src="test-file-stub"
             />
           </p>
         </div>
         <div
-          className="homeInstructionsRight"
+          class="homeInstructionsRight"
         >
           <a
-            className="homeSectionButton"
+            class="homeSectionButton"
             href="/docs/"
           >
             <span
-              className="homeSectionDocsIcon"
+              class="homeSectionDocsIcon"
             />
             Documentation
           </a>
@@ -613,24 +581,22 @@ exports[`app/Home renders the usage instructions for pages with the extension in
             </div>
           </p>
           <div
-            className="homeSectionLoadProfile"
+            class="homeSectionLoadProfile"
           >
             <div
-              className="homeSectionActionButtons"
+              class="homeSectionActionButtons"
             >
               <label
-                className="homeSectionButton"
+                class="homeSectionButton"
               >
                 <input
-                  className="homeSectionUploadFromFileInput"
-                  onChange={[Function]}
+                  class="homeSectionUploadFromFileInput"
                   type="file"
                 />
                 Load a profile from file
               </label>
               <button
-                className="homeSectionButton"
-                onClick={[Function]}
+                class="homeSectionButton"
                 type="button"
               >
                 Load a profile from an URL
@@ -641,10 +607,10 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       </div>
     </div>
     <div
-      className="homeDrop"
+      class="homeDrop"
     >
       <div
-        className="homeDropMessage"
+        class="homeDropMessage"
       >
         Drop a saved profile here
       </div>
