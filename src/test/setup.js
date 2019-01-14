@@ -6,6 +6,7 @@
 import Enzyme from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { createSerializer } from 'enzyme-to-json';
+import { cleanup } from 'react-testing-library';
 
 Enzyme.configure({ adapter: new Adapter() });
 expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
@@ -19,3 +20,5 @@ afterEach(function() {
   const { __shutdownWorkers } = (WorkerFactory: Object);
   __shutdownWorkers();
 });
+
+afterEach(cleanup);
