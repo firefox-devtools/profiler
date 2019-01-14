@@ -204,6 +204,8 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
         'The container was assumed to exist while mounting The VirtualList.'
       );
     }
+    // adds focus to the container when the associated tab is selected
+    this.focus();
     container.addEventListener('scroll', this._onScroll);
     this._onScroll(); // for initial size
   }
