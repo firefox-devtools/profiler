@@ -19,7 +19,7 @@ import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
 import { formatNumber } from '../../utils/format-numbers';
 import { updatePreviewSelection } from '../../actions/profile-view';
-import { mapStackChartColorNameToStyles } from '../../utils/colors';
+import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 
 import type { Thread, CategoryList } from '../../types/profile';
 import type {
@@ -370,10 +370,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
   };
 
   // Re-use the colors from the ThreadActivityGraph,
-  _mapCategoryColorNameToStyles = memoize(mapStackChartColorNameToStyles, {
-    // Memoize every color that is seen.
-    limit: Infinity,
-  });
+  _mapCategoryColorNameToStyles = memoize(
+    mapCategoryColorNameToStackChartStyles,
+    {
+      // Memoize every color that is seen.
+      limit: Infinity,
+    }
+  );
 
   _getHoveredStackInfo = ({
     depth,

@@ -173,7 +173,9 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
  * This function tweaks the colors for the stack chart, but re-uses most
  * of the logic from `mapCategoryColorNameToStyles`.
  */
-export function mapStackChartColorNameToStyles(colorName: string): ColorStyles {
+export function mapCategoryColorNameToStackChartStyles(
+  colorName: string
+): ColorStyles {
   if (colorName === 'transparent') {
     return {
       selectedFillStyle: GREY_30,
