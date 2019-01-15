@@ -8,7 +8,7 @@ import exampleSymbolTable from '../fixtures/example-symbol-table';
 import { SymbolStore } from '../../profile-logic/symbol-store.js';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { resourceTypes } from '../../profile-logic/profile-data';
+import { resourceTypes } from '../../profile-logic/data-structures';
 import { doSymbolicateProfile } from '../../actions/receive-profile';
 import {
   changeSelectedCallNode,

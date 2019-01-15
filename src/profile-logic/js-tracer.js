@@ -352,7 +352,15 @@ export function getJsTracerLeafTiming(
   }
 
   // Return the list of events, sorted alphabetically.
-  return [...jsTracerTimingMap.values()].sort(
-    (a, b) => (a.name > b.name ? 1 : -1)
-  );
+  return [...jsTracerTimingMap.values()].sort((a, b) => {
+    if (a.name > b.name) {
+      return 1;
+    }
+
+    if (a.name < b.name) {
+      return -1;
+    }
+
+    return 0;
+  });
 }

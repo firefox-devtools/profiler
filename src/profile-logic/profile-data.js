@@ -8,8 +8,6 @@ import type {
   Thread,
   SamplesTable,
   StackTable,
-  ExtensionTable,
-  CategoryList,
   FrameTable,
   FuncTable,
   ResourceTable,
@@ -18,15 +16,21 @@ import type {
   IndexIntoSamplesTable,
   IndexIntoStackTable,
   ThreadIndex,
+  Counter,
+  CounterSamplesTable,
 } from '../types/profile';
 import type {
   CallNodeInfo,
   CallNodeTable,
   CallNodePath,
   IndexIntoCallNodeTable,
+  AccumulatedCounterSamples,
 } from '../types/profile-derived';
-import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
-import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profile-versioning';
+import {
+  getEmptyStackTable,
+  cloneFrameTable,
+  cloneFuncTable,
+} from './data-structures';
 
 import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
@@ -39,33 +43,6 @@ import type { UniqueStringArray } from '../utils/unique-string-array';
  * Various helpers for dealing with the profile as a data structure.
  * @module profile-data
  */
-
-export const resourceTypes = {
-  unknown: 0,
-  library: 1,
-  addon: 2,
-  webhost: 3,
-  otherhost: 4,
-  url: 5,
-};
-
-export const emptyExtensions: ExtensionTable = Object.freeze({
-  id: Object.freeze([]),
-  name: Object.freeze([]),
-  baseURL: Object.freeze([]),
-  length: 0,
-});
-
-export const defaultCategories: CategoryList = Object.freeze([
-  { name: 'Idle', color: 'transparent' },
-  { name: 'Other', color: 'grey' },
-  { name: 'Layout', color: 'purple' },
-  { name: 'JavaScript', color: 'yellow' },
-  { name: 'GC / CC', color: 'orange' },
-  { name: 'Network', color: 'lightblue' },
-  { name: 'Graphics', color: 'green' },
-  { name: 'DOM', color: 'blue' },
-]);
 
 /**
  * Generate the CallNodeInfo which contains the CallNodeTable, and a map to convert
@@ -575,15 +552,42 @@ export function getTimeRangeIncludingAllThreads(
 }
 
 export function defaultThreadOrder(threads: Thread[]): ThreadIndex[] {
-  // Put the compositor/renderer thread last.
   const threadOrder = threads.map((thread, i) => i);
+
+  // Note: to have a consistent behavior independant of the sorting algorithm,
+  // we need to be careful that the comparator function is consistent:
+  // comparator(a, b) === - comparator(b, a)
+  // and
+  // comparator(a, b) === 0   if and only if   a === b
   threadOrder.sort((a, b) => {
     const nameA = threads[a].name;
     const nameB = threads[b].name;
+
     if (nameA === nameB) {
       return a - b;
     }
-    return nameA === 'Compositor' || nameA === 'Renderer' ? 1 : -1;
+
+    // Put the compositor/renderer thread last.
+    // Compositor will always be before Renderer, if both are present.
+    if (nameA === 'Compositor') {
+      return 1;
+    }
+
+    if (nameB === 'Compositor') {
+      return -1;
+    }
+
+    if (nameA === 'Renderer') {
+      return 1;
+    }
+
+    if (nameB === 'Renderer') {
+      return -1;
+    }
+
+    // Otherwise keep the existing order. We don't return 0 to guarantee that
+    // the sort is stable even if the sort algorithm isn't.
+    return a - b;
   });
   return threadOrder;
 }
@@ -727,33 +731,9 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
     const { stackTable, funcTable, frameTable, samples, stringTable } = thread;
 
     // Create new tables for the data.
-    const newStackTable: StackTable = {
-      length: 0,
-      frame: [],
-      category: [],
-      prefix: [],
-    };
-    const newFrameTable: FrameTable = {
-      length: frameTable.length,
-      implementation: frameTable.implementation.slice(),
-      optimizations: frameTable.optimizations.slice(),
-      line: frameTable.line.slice(),
-      column: frameTable.column.slice(),
-      category: frameTable.category.slice(),
-      func: frameTable.func.slice(),
-      address: frameTable.address.slice(),
-    };
-    const newFuncTable: FuncTable = {
-      length: funcTable.length,
-      name: funcTable.name.slice(),
-      resource: funcTable.resource.slice(),
-      relevantForJS: funcTable.relevantForJS.slice(),
-      address: funcTable.address.slice(),
-      isJS: funcTable.isJS.slice(),
-      fileName: funcTable.fileName.slice(),
-      lineNumber: funcTable.lineNumber.slice(),
-      columnNumber: funcTable.columnNumber.slice(),
-    };
+    const newStackTable = getEmptyStackTable();
+    const newFrameTable = cloneFrameTable(frameTable);
+    const newFuncTable = cloneFuncTable(funcTable);
 
     // Create a Map that takes a prefix and frame as input, and maps it to the new stack
     // index. Since Maps can't be keyed off of two values, do a little math to key off
@@ -946,8 +926,11 @@ export function filterThreadToSearchString(
   });
 }
 
+/**
+ * This function takes both a SamplesTable and can be used on CounterSamplesTable.
+ */
 function _getSampleIndexRangeForSelection(
-  samples: SamplesTable,
+  samples: SamplesTable | CounterSamplesTable,
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -987,6 +970,65 @@ export function filterThreadSamplesToRange(
   return Object.assign({}, thread, {
     samples: newSamples,
   });
+}
+
+export function filterCounterToRange(
+  counter: Counter,
+  rangeStart: number,
+  rangeEnd: number
+): Counter {
+  const samples = counter.sampleGroups.samples;
+  let [sBegin, sEnd] = _getSampleIndexRangeForSelection(
+    samples,
+    rangeStart,
+    rangeEnd
+  );
+
+  // Include the samples just before and after the selection range, so that charts will
+  // not be cut off at the edges.
+  if (sBegin > 0) {
+    sBegin--;
+  }
+  if (sEnd < samples.length) {
+    sEnd++;
+  }
+
+  return {
+    ...counter,
+    sampleGroups: {
+      ...counter.sampleGroups,
+      samples: {
+        time: samples.time.slice(sBegin, sEnd),
+        number: samples.number.slice(sBegin, sEnd),
+        count: samples.count.slice(sBegin, sEnd),
+        length: sEnd - sBegin,
+      },
+    },
+  };
+}
+
+/**
+ * The memory counter contains relative offsets of memory. In order to draw an interesting
+ * graph, take the memory counts, and find the minimum and maximum values, by
+ * accumulating them over the entire profile range. Then, map those values to the
+ * accumulatedCounts array.
+ */
+export function accumulateCounterSamples(
+  samples: CounterSamplesTable
+): AccumulatedCounterSamples {
+  let minCount = 0;
+  let maxCount = 0;
+  let accumulated = 0;
+  const accumulatedCounts = [];
+  for (let i = 0; i < samples.length; i++) {
+    accumulated += samples.count[i];
+    minCount = Math.min(accumulated, minCount);
+    maxCount = Math.max(accumulated, maxCount);
+    accumulatedCounts[i] = accumulated;
+  }
+  const countRange = maxCount - minCount;
+
+  return { minCount, maxCount, countRange, accumulatedCounts };
 }
 
 // --------------- CallNodePath and CallNodeIndex manipulations ---------------
@@ -1370,33 +1412,6 @@ export function getThreadProcessDetails(thread: Thread): string {
   }
 
   return label;
-}
-
-export function getEmptyProfile(): Profile {
-  return {
-    meta: {
-      interval: 1,
-      startTime: 0,
-      abi: '',
-      misc: '',
-      oscpu: '',
-      platform: '',
-      processType: 0,
-      extensions: emptyExtensions,
-      categories: [...defaultCategories],
-      product: 'Firefox',
-      stackwalk: 0,
-      toolkit: '',
-      version: GECKO_PROFILE_VERSION,
-      preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
-      appBuildID: '',
-      sourceURL: '',
-      physicalCPUs: 0,
-      logicalCPUs: 0,
-    },
-    pages: [],
-    threads: [],
-  };
 }
 
 /**

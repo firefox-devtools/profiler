@@ -3,15 +3,13 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type {
-  IndexIntoStackTable,
-  IndexIntoFrameTable,
-  Thread,
-  StackTable,
-} from '../types/profile';
+import type { Thread } from '../types/profile';
 import type { Milliseconds } from '../types/units';
-import type { CallNodeInfo } from '../types/profile-derived';
-import type { GetCategory } from './color-categories';
+import type {
+  CallNodeInfo,
+  CallNodeTable,
+  IndexIntoCallNodeTable,
+} from '../types/profile-derived';
 /**
  * The StackTimingByDepth data structure organizes stack frames by their depth, and start
  * and end times. This optimizes sample data for Stack Chart views. It
@@ -53,23 +51,17 @@ export type IndexIntoStackTiming = number;
 export type StackTimingByDepth = Array<{
   start: Milliseconds[],
   end: Milliseconds[],
-  stack: IndexIntoStackTable[],
+  callNode: IndexIntoCallNodeTable[],
   length: number,
 }>;
 
 type LastSeen = {
   startTimeByDepth: number[],
-  stackIndexByDepth: IndexIntoStackTable[],
+  callNodeIndexByDepth: IndexIntoCallNodeTable[],
 };
 
 /**
  * Build a StackTimingByDepth table from a given thread.
- *
- * @param {object} thread - The profile thread.
- * @param {object} callNodeInfo - from the callNodeInfo selector.
- * @param {integer} maxDepth - The max depth of the all the stacks.
- * @param {number} interval - The sampling interval that the profile was recorded with.
- * @return {array} stackTimingByDepth
  */
 export function getStackTimingByDepth(
   thread: Thread,
@@ -81,13 +73,13 @@ export function getStackTimingByDepth(
   const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({
     start: [],
     end: [],
-    stack: [],
+    callNode: [],
     length: 0,
   }));
 
   const lastSeen: LastSeen = {
     startTimeByDepth: [],
-    stackIndexByDepth: [],
+    callNodeIndexByDepth: [],
   };
 
   // Go through each sample, and push/pop it on the stack to build up
@@ -107,9 +99,9 @@ export function getStackTimingByDepth(
       const depth = callNodeTable.depth[callNodeIndex];
 
       // Find the depth of the nearest shared stack.
-      const depthToPop = _findNearestSharedStackDepth(
-        thread.stackTable,
-        stackIndex,
+      const depthToPop = _findNearestSharedCallNodeDepth(
+        callNodeTable,
+        callNodeIndex,
         lastSeen,
         depth
       );
@@ -120,7 +112,14 @@ export function getStackTimingByDepth(
         previousDepth,
         sampleTime
       );
-      _pushStacks(thread, lastSeen, depth, stackIndex, sampleTime);
+      _pushStacks(
+        thread,
+        callNodeTable,
+        lastSeen,
+        depth,
+        callNodeIndex,
+        sampleTime
+      );
       previousDepth = depth;
     }
   }
@@ -133,18 +132,18 @@ export function getStackTimingByDepth(
   return stackTimingByDepth;
 }
 
-function _findNearestSharedStackDepth(
-  stackTable: StackTable,
-  stackIndex: IndexIntoStackTable,
+function _findNearestSharedCallNodeDepth(
+  callNodeTable: CallNodeTable,
+  callNodeIndex: IndexIntoCallNodeTable,
   lastSeen: LastSeen,
   depthStart: number
 ): number {
-  let nextStackIndex = stackIndex;
+  let nextCallNodeIndex = callNodeIndex;
   for (let depth = depthStart; depth >= 0; depth--) {
-    if (lastSeen.stackIndexByDepth[depth] === nextStackIndex) {
+    if (lastSeen.callNodeIndexByDepth[depth] === nextCallNodeIndex) {
       return depth;
     }
-    nextStackIndex = stackTable.prefix[nextStackIndex];
+    nextCallNodeIndex = callNodeTable.prefix[nextCallNodeIndex];
   }
   return -1;
 }
@@ -163,105 +162,36 @@ function _popStacks(
       lastSeen.startTimeByDepth[stackDepth]
     );
     stackTimingByDepth[stackDepth].end.push(sampleTime);
-    stackTimingByDepth[stackDepth].stack.push(
-      lastSeen.stackIndexByDepth[stackDepth]
+    stackTimingByDepth[stackDepth].callNode.push(
+      lastSeen.callNodeIndexByDepth[stackDepth]
     );
     stackTimingByDepth[stackDepth].length++;
 
     // Delete that this stack frame has been seen.
-    delete lastSeen.stackIndexByDepth[stackDepth];
+    delete lastSeen.callNodeIndexByDepth[stackDepth];
     delete lastSeen.startTimeByDepth[stackDepth];
   }
 }
 
 function _pushStacks(
   thread: Thread,
+  callNodeTable: CallNodeTable,
   lastSeen: LastSeen,
   depth: number,
-  startingIndex: IndexIntoStackTable,
+  startingCallNodeIndex: IndexIntoCallNodeTable,
   sampleTime: number
 ) {
-  let stackIndex = startingIndex;
+  let callNodeIndex = startingCallNodeIndex;
   // "Push" onto the stack with new frames
   for (let parentDepth = depth; parentDepth >= 0; parentDepth--) {
     if (
-      stackIndex === null ||
-      lastSeen.stackIndexByDepth[parentDepth] !== undefined
+      callNodeIndex === -1 ||
+      lastSeen.callNodeIndexByDepth[parentDepth] !== undefined
     ) {
       break;
     }
-    lastSeen.stackIndexByDepth[parentDepth] = stackIndex;
+    lastSeen.callNodeIndexByDepth[parentDepth] = callNodeIndex;
     lastSeen.startTimeByDepth[parentDepth] = sampleTime;
-    stackIndex = thread.stackTable.prefix[stackIndex];
+    callNodeIndex = callNodeTable.prefix[callNodeIndex];
   }
-}
-
-type GetRelevantFrame = (Thread, IndexIntoStackTable) => IndexIntoFrameTable;
-
-export function getLeafCategoryStackTiming(
-  thread: Thread,
-  interval: number,
-  getCategory: GetCategory,
-  getRelevantLeafStack: GetRelevantFrame = getNearestJSFrame
-) {
-  const stackTiming = {
-    start: [],
-    end: [],
-    stack: [],
-    length: 0,
-  };
-
-  let previousName = null;
-  let previousSampleTime = null;
-  for (let i = 0; i < thread.samples.length; i++) {
-    const stackIndex = thread.samples.stack[i];
-    if (stackIndex === null) {
-      if (previousSampleTime !== null) {
-        stackTiming.end.push(previousSampleTime);
-      }
-      previousName = null;
-    } else {
-      const relevantStackIndex = getRelevantLeafStack(thread, stackIndex);
-      const frameIndex = thread.stackTable.frame[relevantStackIndex];
-      const { name } = getCategory(thread, frameIndex);
-
-      if (name !== previousName) {
-        const sampleTime = thread.samples.time[i];
-        stackTiming.start.push(sampleTime);
-        stackTiming.stack.push(relevantStackIndex);
-        stackTiming.length++;
-        if (previousName !== null) {
-          stackTiming.end.push(sampleTime);
-        }
-        previousName = name;
-        previousSampleTime = sampleTime;
-      }
-    }
-  }
-
-  if (stackTiming.end.length !== stackTiming.start.length) {
-    // Calculate the final end time.
-    stackTiming.end.push(
-      thread.samples.time[thread.samples.length - 1] + interval
-    );
-  }
-
-  return [stackTiming];
-}
-
-function getNearestJSFrame(
-  thread: Thread,
-  stackIndex: IndexIntoStackTable
-): IndexIntoStackTable {
-  let nextStackIndex = stackIndex;
-  while (nextStackIndex !== null) {
-    const frameIndex = thread.stackTable.frame[nextStackIndex];
-    const funcIndex = thread.frameTable.func[frameIndex];
-    const isJS = thread.funcTable.isJS[funcIndex];
-    if (isJS) {
-      return nextStackIndex;
-    }
-    nextStackIndex = thread.stackTable.prefix[nextStackIndex];
-  }
-  return stackIndex;
 }

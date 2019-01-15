@@ -77,7 +77,14 @@ export function getHumanReadableTracks(state: State): string[] {
 
       for (const trackIndex of trackOrder) {
         const track = tracks[trackIndex];
-        const thread = threads[track.threadIndex];
+        let trackName;
+        if (track.type === 'memory') {
+          trackName = profileViewSelectors
+            .getCounterSelectors(track.counterIndex)
+            .getPid(state);
+        } else {
+          trackName = threads[track.threadIndex].name;
+        }
         const hiddenTracks = urlStateReducers.getHiddenLocalTracks(
           state,
           globalTrack.pid
@@ -86,9 +93,7 @@ export function getHumanReadableTracks(state: State): string[] {
         const selected =
           track.threadIndex === selectedThreadIndex ? ' SELECTED' : '';
 
-        text.push(
-          `  - ${hiddenText} [${track.type} ${thread.name}]${selected}`
-        );
+        text.push(`  - ${hiddenText} [${track.type} ${trackName}]${selected}`);
       }
     }
   }

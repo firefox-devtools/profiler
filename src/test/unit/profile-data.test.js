@@ -11,7 +11,6 @@ import {
 } from '../../profile-logic/symbolication';
 import { processProfile } from '../../profile-logic/process-profile';
 import {
-  resourceTypes,
   getCallNodeInfo,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
@@ -24,6 +23,7 @@ import {
   getTreeOrderComparator,
   getSamplesSelectedStates,
 } from '../../profile-logic/profile-data';
+import { resourceTypes } from '../../profile-logic/data-structures';
 import {
   createGeckoProfile,
   createGeckoProfileWithJsTimings,
@@ -32,10 +32,6 @@ import { UniqueStringArray } from '../../utils/unique-string-array';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { sortDataTable } from '../../utils/data-table-utils';
 import { ensureExists } from '../../utils/flow';
-import {
-  getCategoryByImplementation,
-  implementationCategoryMap,
-} from '../../profile-logic/color-categories';
 import getCallNodeProfile from '../fixtures/profiles/call-nodes';
 import {
   getProfileFromTextSamples,
@@ -651,29 +647,6 @@ describe('symbolication', function() {
     });
   });
   // TODO: check that functions are collapsed correctly
-});
-
-describe('color-categories', function() {
-  const profile = processProfile(createGeckoProfile());
-  const [thread] = profile.threads;
-  it('calculates the category for each frame', function() {
-    const categories = thread.samples.stack.map(stackIndex => {
-      const frameIndex =
-        stackIndex === null ? null : thread.stackTable.frame[stackIndex];
-      if (frameIndex === null) {
-        throw new Error('frameIndex cannot be null');
-      }
-      return getCategoryByImplementation(thread, frameIndex);
-    });
-    for (let i = 0; i < 6; i++) {
-      expect(categories[i].name).toEqual('Platform');
-      expect(categories[i].color).toEqual(implementationCategoryMap.Platform);
-    }
-    expect(categories[6].name).toEqual('JS Baseline');
-    expect(categories[6].color).toEqual(
-      implementationCategoryMap['JS Baseline']
-    );
-  });
 });
 
 describe('filter-by-implementation', function() {

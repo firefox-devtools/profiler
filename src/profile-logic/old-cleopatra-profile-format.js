@@ -4,7 +4,7 @@
 
 // @flow
 import { UniqueStringArray } from '../utils/unique-string-array';
-import { resourceTypes } from './profile-data';
+import { resourceTypes } from './data-structures';
 import { CURRENT_VERSION } from './gecko-profile-versioning.js';
 
 /**

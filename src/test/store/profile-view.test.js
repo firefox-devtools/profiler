@@ -7,15 +7,18 @@ import type { TrackReference } from '../../types/actions';
 import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import {
-  getEmptyThread,
   getProfileFromTextSamples,
   getProfileWithMarkers,
   getNetworkTrackProfile,
   getScreenshotTrackProfile,
   getNetworkMarker,
+  getCounterForThread,
 } from '../fixtures/profiles/processed-profile';
+import {
+  getEmptyThread,
+  getEmptyProfile,
+} from '../../profile-logic/data-structures';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
-import { getEmptyProfile } from '../../profile-logic/profile-data';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { blankStore, storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
@@ -1250,5 +1253,90 @@ describe('getFriendlyThreadName', function() {
       'B (3/3)',
       'C (2/2)',
     ]);
+  });
+});
+
+describe('counter selectors', function() {
+  const { getCounterSelectors } = ProfileViewSelectors;
+  function setup() {
+    const { profile } = getProfileFromTextSamples(
+      Array(10)
+        .fill('A')
+        .join('  ')
+    );
+    const threadIndex = 0;
+    const thread = profile.threads[threadIndex];
+    const counterA = getCounterForThread(thread, threadIndex);
+    const counterB = getCounterForThread(thread, threadIndex);
+    profile.counters = [counterA, counterB];
+    const { getState, dispatch } = storeWithProfile(profile);
+    return { getState, dispatch, counterA, counterB };
+  }
+
+  it('can get the counters', function() {
+    const { counterA, counterB, getState } = setup();
+    expect(getCounterSelectors(0).getCounter(getState())).toBe(counterA);
+    expect(getCounterSelectors(1).getCounter(getState())).toBe(counterB);
+  });
+
+  it('can get the counter description', function() {
+    const { getState } = setup();
+    expect(getCounterSelectors(0).getDescription(getState())).toBe(
+      'My Description'
+    );
+  });
+
+  it('can get the counter pid', function() {
+    const { getState } = setup();
+    expect(getCounterSelectors(0).getPid(getState())).toBe(0);
+  });
+
+  it('can get the commited range filtered counters', function() {
+    const { getState, dispatch } = setup();
+    // The range includes the sample just before and the sample just after the selection
+    // range.
+    dispatch(ProfileView.commitRange(3.5, 5.5));
+    const originalCounter = getCounterSelectors(0).getCounter(getState());
+    expect(originalCounter.sampleGroups.samples.time).toEqual([
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+    ]);
+
+    const filteredCounter = getCounterSelectors(
+      0
+    ).getCommittedRangeFilteredCounter(getState());
+    expect(filteredCounter.sampleGroups.samples.time).toEqual([3, 4, 5, 6]);
+  });
+
+  it('can accumulate samples', function() {
+    const { getState, counterA } = setup();
+    counterA.sampleGroups.samples.count = [
+      1,
+      -2,
+      3,
+      -5,
+      7,
+      -11,
+      13,
+      -17,
+      19,
+      23,
+    ];
+    expect(
+      getCounterSelectors(0).getAccumulateCounterSamples(getState())
+    ).toEqual({
+      accumulatedCounts: [1, -1, 2, -3, 4, -7, 6, -11, 8, 31],
+      countRange: 42,
+      maxCount: 31,
+      minCount: -11,
+    });
   });
 });

@@ -6,7 +6,6 @@
 import profileView from './profile-view';
 import app from './app';
 import urlState from './url-state';
-import stackChart from './stack-chart';
 import icons from './icons';
 import zippedProfiles from './zipped-profiles';
 import { combineReducers } from 'redux';
@@ -15,7 +14,6 @@ export default combineReducers({
   app,
   profileView,
   urlState,
-  stackChart,
   icons,
   zippedProfiles,
 });

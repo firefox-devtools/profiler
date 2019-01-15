@@ -10,8 +10,10 @@ import type {
   IndexIntoStackTable,
 } from '../../types/profile';
 
-import { getEmptyProfile } from '../../profile-logic/profile-data';
-import { getEmptyThread } from '../../test/fixtures/profiles/processed-profile';
+import {
+  getEmptyProfile,
+  getEmptyThread,
+} from '../../profile-logic/data-structures';
 import { ensureExists } from '../../utils/flow';
 
 // Chrome Tracing Event Spec:

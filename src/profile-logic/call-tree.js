@@ -4,11 +4,8 @@
 
 // @flow
 import { timeCode } from '../utils/time-code';
-import {
-  getSampleCallNodes,
-  resourceTypes,
-  getOriginAnnotationForFunc,
-} from './profile-data';
+import { getSampleCallNodes, getOriginAnnotationForFunc } from './profile-data';
+import { resourceTypes } from './data-structures';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import type {
   CategoryList,

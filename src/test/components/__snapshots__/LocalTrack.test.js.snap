@@ -1,5 +1,55 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`timeline/LocalTrack with a memory track matches the snapshot of the memory track 1`] = `
+<li
+  className="timelineTrack timelineTrackLocal"
+>
+  <div
+    className="timelineTrackRow timelineTrackLocalRow"
+    onClick={[Function]}
+  >
+    <div
+      className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+      onContextMenu={[Function]}
+      onMouseDown={[Function]}
+      onMouseOut={[Function]}
+      onMouseUp={[Function]}
+      onTouchEnd={[Function]}
+      onTouchStart={[Function]}
+      title="My Description"
+    >
+      <button
+        className="timelineTrackNameButton"
+        type="button"
+      >
+        Memory
+      </button>
+    </div>
+    <div
+      className="timelineTrackTrack"
+    >
+      <div
+        className="timelineTrackMemory"
+        onMouseLeave={[Function]}
+        onMouseMove={[Function]}
+        style={
+          Object {
+            "height": 25,
+          }
+        }
+      >
+        <canvas
+          className="timelineTrackMemoryCanvas"
+        />
+        <div
+          className="timelineEmptyThreadIndicator"
+        />
+      </div>
+    </div>
+  </div>
+</li>
+`;
+
 exports[`timeline/LocalTrack with a network track matches the snapshot of the network track 1`] = `
 <li
   className="timelineTrack timelineTrackLocal"
@@ -90,6 +140,8 @@ process: \\"tab\\" (222)"
         </div>
         <div
           className="threadActivityGraph"
+          onMouseLeave={[Function]}
+          onMouseMove={[Function]}
         >
           <canvas
             className="threadActivityGraphCanvas threadActivityGraphCanvas"

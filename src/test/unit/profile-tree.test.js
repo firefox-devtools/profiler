@@ -12,10 +12,10 @@ import { getRootsAndChildren } from '../../profile-logic/flame-graph';
 import {
   getCallNodeInfo,
   invertCallstack,
-  resourceTypes,
   getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
 } from '../../profile-logic/profile-data';
+import { resourceTypes } from '../../profile-logic/data-structures';
 import { formatTree, formatTreeIncludeCategories } from '../fixtures/utils';
 
 import type { Profile } from '../../types/profile';

@@ -6,7 +6,12 @@
 import { isChromeProfile, convertChromeProfile } from './import/chrome';
 import { getContainingLibrary } from './symbolication';
 import { UniqueStringArray } from '../utils/unique-string-array';
-import { resourceTypes, emptyExtensions } from './profile-data';
+import {
+  resourceTypes,
+  getEmptyExtensions,
+  getEmptyFuncTable,
+  getEmptyResourceTable,
+} from './data-structures';
 import { immutableUpdate } from '../utils/flow';
 import {
   CURRENT_VERSION,
@@ -26,6 +31,7 @@ import { convertPhaseTimes } from './convert-markers';
 import type {
   Profile,
   Thread,
+  Counter,
   ExtensionTable,
   CategoryList,
   FrameTable,
@@ -146,31 +152,15 @@ export function extractFuncsAndResourcesFromFrameLocations(
   relevantForJSPerFrame: boolean[],
   stringTable: UniqueStringArray,
   libs: Lib[],
-  extensions: ExtensionTable = emptyExtensions
+  extensions: ExtensionTable = getEmptyExtensions()
 ): [FuncTable, ResourceTable, IndexIntoFuncTable[]] {
-  // Explicitly create FuncTable. If Flow complains about this, then all of
-  // the functions in this file starting with the word "extract" should be updated.
-  const funcTable: FuncTable = {
-    length: 0,
-    name: [],
-    resource: [],
-    relevantForJS: [],
-    address: [],
-    isJS: [],
-    fileName: [],
-    lineNumber: [],
-    columnNumber: [],
-  };
+  // Important! If the flow type for the FuncTable was changed, update all the functions
+  // in this file that start with the word "extract".
+  const funcTable = getEmptyFuncTable();
 
-  // Explicitly create ResourceTable. If Flow complains about this, then all of
-  // the functions in this file starting with the word "extract" should be updated.
-  const resourceTable: ResourceTable = {
-    length: 0,
-    type: [],
-    name: [],
-    lib: [],
-    host: [],
-  };
+  // Important! If the flow type for the ResourceTable was changed, update all the functions
+  // in this file that start with the word "extract".
+  const resourceTable = getEmptyResourceTable();
 
   // Bundle all of the variables up into an object to pass them around to functions.
   const extractionInfo: ExtractionInfo = {
@@ -698,6 +688,61 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
 }
 
 /**
+ * Converts the Gecko list of counters into the processed format.
+ */
+function _processCounters(
+  geckoProfile: GeckoProfile,
+  // The counters are listed independently from the threads, so we need an index that
+  // references back into a stable list of threads. The threads list in the processing
+  // step is built dynamically, so the "stableThreadList" variable is a hint that this
+  // should be a stable and sorted list of threads.
+  stableThreadList: Thread[],
+  // The timing across processes must be normalized, this is the timing delta between
+  // various processes.
+  delta: Milliseconds
+): Counter[] {
+  const geckoCounters = geckoProfile.counters;
+  const mainThread = geckoProfile.threads.find(
+    thread => thread.name === 'GeckoMain'
+  );
+
+  if (!mainThread || !geckoCounters) {
+    // Counters or a main thread weren't found, bail out, and return an empty array.
+    return [];
+  }
+
+  // The gecko profile's process don't map to the final thread list. Use the stable
+  // thread list to look up the thread index for the main thread in this profile.
+  const mainThreadIndex = stableThreadList.findIndex(
+    thread => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+  );
+
+  if (mainThreadIndex === -1) {
+    throw new Error(
+      'Unable to find the main thread in the stable thread list. This means that the ' +
+        'logic in the _processCounters function is wrong.'
+    );
+  }
+
+  return geckoCounters.map(
+    ({ name, category, description, sample_groups }) => ({
+      name,
+      category,
+      description,
+      pid: mainThread.pid,
+      mainThreadIndex,
+      sampleGroups: {
+        id: sample_groups.id,
+        samples: _adjustCounterTimestamps(
+          _toStructOfArrays(sample_groups.samples),
+          delta
+        ),
+      },
+    })
+  );
+}
+
+/**
  * Convert the given thread into processed form. See docs-developer/gecko-profile-format for more
  * information.
  */
@@ -906,6 +951,16 @@ function _adjustMarkerTimestamps(
   });
 }
 
+function _adjustCounterTimestamps<T: Object>(
+  sampleGroups: T,
+  delta: Milliseconds
+): T {
+  return {
+    ...sampleGroups,
+    time: sampleGroups.time.map(time => time + delta),
+  };
+}
+
 /**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
@@ -925,11 +980,12 @@ export function processProfile(
 
   const extensions: ExtensionTable = geckoProfile.meta.extensions
     ? _toStructOfArrays(geckoProfile.meta.extensions)
-    : emptyExtensions;
+    : getEmptyExtensions();
 
   for (const thread of geckoProfile.threads) {
     threads.push(_processThread(thread, geckoProfile, extensions));
   }
+  const counters: Counter[] = _processCounters(geckoProfile, threads, 0);
 
   for (const subprocessProfile of geckoProfile.processes) {
     const adjustTimestampsBy =
@@ -961,6 +1017,10 @@ export function processProfile(
         }
         return newThread;
       })
+    );
+
+    counters.push(
+      ..._processCounters(subprocessProfile, threads, adjustTimestampsBy)
     );
   }
 
@@ -997,6 +1057,7 @@ export function processProfile(
   const result = {
     meta,
     pages,
+    counters,
     threads,
   };
   return result;
