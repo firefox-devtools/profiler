@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import {
@@ -294,6 +295,15 @@ class ProfileMetaInfoButton extends React.PureComponent<
     return null;
   }
 }
+// CSSTransition wrapper component
+const AnimateUpTransition = (props: {}) => (
+  <CSSTransition
+    {...props}
+    unmountOnExit
+    timeout={200}
+    classNames="menuButtonsTransitionUp"
+  />
+);
 
 class ProfileSharingCompositeButton extends React.PureComponent<
   ProfileSharingCompositeButtonProps,
@@ -525,7 +535,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
       : 'Share with URLs';
 
     return (
-      <div
+      <TransitionGroup
         className={classNames('menuButtonsCompositeButtonContainer', {
           currentButtonIsShareButton: state === 'local',
           currentButtonIsUploadingButton: state === 'uploading',
@@ -534,63 +544,92 @@ class ProfileSharingCompositeButton extends React.PureComponent<
           currentButtonIsSecondaryShareButton: isSecondaryShareButtonVisible,
         })}
       >
-        <ProfileSharingButton
-          buttonClassName="menuButtonsShareButton"
-          shareLabel={shareLabel}
-          symbolicationStatus={symbolicationStatus}
-          okButtonClickEvent={this._attemptToShare}
-          shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
-          shareNetworkUrlCheckboxOnChange={this._onChangeShareNetworkUrls}
-          checkboxDisabled={false}
-        />
-        <UploadingStatus progress={uploadProgress} />
-        <ButtonWithPanel
-          className="menuButtonsPermalinkButton"
-          ref={this._takePermalinkButtonRef}
-          label="Permalink"
-          panel={
-            <ArrowPanel
-              className="menuButtonsPermalinkPanel"
-              onOpen={this._onPermalinkPanelOpen}
-              onClose={this._onPermalinkPanelClose}
-            >
-              <input
-                type="text"
-                className="menuButtonsPermalinkTextField"
-                value={shortUrl}
-                readOnly="readOnly"
-                ref={this._takePermalinkTextFieldRef}
-              />
-            </ArrowPanel>
-          }
-        />
-        <ButtonWithPanel
-          className="menuButtonsUploadErrorButton"
-          ref={this._takeUploadErrorButtonRef}
-          label="Upload Error"
-          panel={
-            <ArrowPanel
-              className="menuButtonsUploadErrorPanel"
-              title="Upload Error"
-              okButtonText="Try Again"
-              cancelButtonText="Cancel"
-              onOkButtonClick={this._attemptToShare}
-            >
-              <p>An error occurred during upload:</p>
-              <pre>{error && error.toString()}</pre>
-            </ArrowPanel>
-          }
-        />
-        <ProfileSharingButton
-          buttonClassName="menuButtonsSecondaryShareButton"
-          shareLabel={secondaryShareLabel}
-          symbolicationStatus={symbolicationStatus}
-          okButtonClickEvent={this._attemptToSecondaryShare}
-          panelOpenEvent={this._onSecondarySharePanelOpen}
-          shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
-          checkboxDisabled={true}
-        />
-      </div>
+        {/* the buttons are conditionally rendered (depending on the state) */}
+        {state === 'local' && (
+          <AnimateUpTransition>
+            <ProfileSharingButton
+              buttonClassName="menuButtonsShareButton"
+              shareLabel={shareLabel}
+              symbolicationStatus={symbolicationStatus}
+              okButtonClickEvent={this._attemptToShare}
+              shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
+              shareNetworkUrlCheckboxOnChange={this._onChangeShareNetworkUrls}
+              checkboxDisabled={false}
+            />
+          </AnimateUpTransition>
+        )}
+
+        {/* The Permalink button is rendered when state===uploading and state===public.
+       The Permalink button itself is hidden when uploading is in progress, 
+       but the Permalink's ArrowPanel with the URL is always displayed. */}
+        {(state === 'uploading' || state === 'public') && (
+          <AnimateUpTransition>
+            <React.Fragment>
+              <AnimateUpTransition in={state === 'uploading'}>
+                <UploadingStatus progress={uploadProgress} />
+              </AnimateUpTransition>
+
+              <AnimateUpTransition in={true}>
+                <ButtonWithPanel
+                  className="menuButtonsPermalinkButton"
+                  ref={this._takePermalinkButtonRef}
+                  label="Permalink"
+                  panel={
+                    <ArrowPanel
+                      className="menuButtonsPermalinkPanel"
+                      onOpen={this._onPermalinkPanelOpen}
+                      onClose={this._onPermalinkPanelClose}
+                    >
+                      <input
+                        type="text"
+                        className="menuButtonsPermalinkTextField"
+                        value={shortUrl}
+                        readOnly="readOnly"
+                        ref={this._takePermalinkTextFieldRef}
+                      />
+                    </ArrowPanel>
+                  }
+                />
+              </AnimateUpTransition>
+            </React.Fragment>
+          </AnimateUpTransition>
+        )}
+
+        {state === 'error' && (
+          <AnimateUpTransition>
+            <ButtonWithPanel
+              className="menuButtonsUploadErrorButton"
+              ref={this._takeUploadErrorButtonRef}
+              label="Upload Error"
+              panel={
+                <ArrowPanel
+                  className="menuButtonsUploadErrorPanel"
+                  title="Upload Error"
+                  okButtonText="Try Again"
+                  cancelButtonText="Cancel"
+                  onOkButtonClick={this._attemptToShare}
+                >
+                  <p>An error occurred during upload:</p>
+                  <pre>{error && error.toString()}</pre>
+                </ArrowPanel>
+              }
+            />
+          </AnimateUpTransition>
+        )}
+        {isSecondaryShareButtonVisible && (
+          <AnimateUpTransition>
+            <ProfileSharingButton
+              buttonClassName="menuButtonsSecondaryShareButton"
+              shareLabel={secondaryShareLabel}
+              symbolicationStatus={symbolicationStatus}
+              okButtonClickEvent={this._attemptToSecondaryShare}
+              panelOpenEvent={this._onSecondarySharePanelOpen}
+              shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
+              checkboxDisabled={true}
+            />
+          </AnimateUpTransition>
+        )}
+      </TransitionGroup>
     );
   }
 }
