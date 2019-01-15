@@ -220,7 +220,14 @@ class TrackMemory extends React.PureComponent<Props, State> {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredCounter: null });
     } else {
-      const hoveredCounter = bisection.right(samples.time, timeAtMouse);
+      let hoveredCounter = bisection.right(samples.time, timeAtMouse);
+      if (hoveredCounter === samples.length) {
+        // When hovering the last sample, it's possible the mouse is past the time.
+        // In this case, hover over the last sample. This happens because of the
+        // ` + interval` line in the `if` condition above.
+        hoveredCounter = samples.time.length - 1;
+      }
+
       this.setState({
         mouseX,
         mouseY,
