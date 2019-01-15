@@ -335,6 +335,12 @@ export type TextMarkerPayload = {|
   name: string,
 |};
 
+export type LogMarkerPayload = {|
+  type: 'Log',
+  name: string,
+  module: string,
+|};
+
 export type DOMEventMarkerPayload = {|
   type: 'tracing',
   category: 'DOMEvent',
@@ -429,6 +435,7 @@ export type MarkerPayload =
   | NetworkPayload
   | UserTimingMarkerPayload
   | TextMarkerPayload
+  | LogMarkerPayload
   | PaintProfilerMarkerTracing
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
@@ -448,6 +455,7 @@ export type MarkerPayload_Gecko =
   | NetworkPayload
   | UserTimingMarkerPayload
   | TextMarkerPayload
+  | LogMarkerPayload
   | PaintProfilerMarkerTracing_Gecko
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload

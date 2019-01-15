@@ -863,6 +863,59 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: 
 </div>
 `;
 
+exports[`MarkerTooltipContents renders tooltips for various markers: Log-21.7 1`] = `
+<div
+  className="tooltipMarker propClass"
+>
+  <div
+    className="tooltipHeader"
+  >
+    <div
+      className="tooltipOneLine"
+    >
+      <div
+        className="tooltipTiming"
+      >
+        0.000ms
+      </div>
+      <div
+        className="tooltipTitle"
+      >
+        Log
+      </div>
+    </div>
+    <div
+      className="tooltipDetails"
+    >
+      <div
+        className="tooltipLabel"
+      >
+        Thread:
+      </div>
+      Main Thread
+    </div>
+  </div>
+  <div
+    className="tooltipDetails"
+  >
+    <div
+      className="tooltipLabel"
+    >
+      Module
+      :
+    </div>
+    RandomModule
+    <div
+      className="tooltipLabel"
+    >
+      Name
+      :
+    </div>
+    Random log message
+  </div>
+</div>
+`;
+
 exports[`MarkerTooltipContents renders tooltips for various markers: NotifyDidPaint-14.5 1`] = `
 <div
   className="tooltipMarker propClass"
