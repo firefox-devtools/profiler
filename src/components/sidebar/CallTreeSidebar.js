@@ -118,14 +118,17 @@ type CategoryBreakdownProps = {|
 class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
   render() {
     const { breakdown, categoryList } = this.props;
-    const data = breakdown.map((value, categoryIndex) => {
-      const category = categoryList[categoryIndex];
-      return {
-        group: category.name,
-        value: value || 0,
-        color: category.color,
-      };
-    });
+    const data = breakdown
+      .map((value, categoryIndex) => {
+        const category = categoryList[categoryIndex];
+        return {
+          group: category.name,
+          value: value || 0,
+          color: category.color,
+        };
+      })
+      // sort in descending order
+      .sort(({ value: valueA }, { value: valueB }) => valueB - valueA);
 
     return <Breakdown data={data} />;
   }

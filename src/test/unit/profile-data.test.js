@@ -800,7 +800,8 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         callNodeInfo,
         profile.meta.interval,
         false,
-        thread
+        thread,
+        profile.meta.categories
       );
 
     return {
@@ -824,7 +825,7 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         totalTime: {
           value: 5,
           breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
-          breakdownByCategory: [1, 3, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [1, 3, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
         },
       },
       forFunc: {
@@ -836,7 +837,7 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         totalTime: {
           value: 5,
           breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
-          breakdownByCategory: [1, 3, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [1, 3, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
         },
       },
       rootTime: 5,
@@ -860,24 +861,24 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         selfTime: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
-          breakdownByCategory: [undefined, 2], // [Idle, Other]
+          breakdownByCategory: [0, 2, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
         totalTime: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
-          breakdownByCategory: [undefined, 2], // [Idle, Other]
+          breakdownByCategory: [0, 2, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
       },
       forFunc: {
         selfTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
-          breakdownByCategory: [undefined, 3], // [Idle, Other]
+          breakdownByCategory: [0, 3, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
         totalTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
-          breakdownByCategory: [undefined, 3], // [Idle, Other]
+          breakdownByCategory: [0, 3, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
       },
       rootTime: 5,
@@ -895,25 +896,25 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         selfTime: {
           value: 1,
           breakdownByImplementation: { native: 1 },
-          breakdownByCategory: [undefined, undefined, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
         },
         totalTime: {
           value: 2,
           breakdownByImplementation: { native: 2 },
 
-          breakdownByCategory: [1, undefined, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [1, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
         },
       },
       forFunc: {
         selfTime: {
           value: 1,
           breakdownByImplementation: { native: 1 },
-          breakdownByCategory: [undefined, undefined, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
         },
         totalTime: {
           value: 2,
           breakdownByImplementation: { native: 2 },
-          breakdownByCategory: [1, undefined, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [1, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
         },
       },
       rootTime: 5,
@@ -954,7 +955,8 @@ describe('getTimingsForPath for an inverted tree', function() {
         callNodeInfo,
         profile.meta.interval,
         true,
-        thread
+        thread,
+        profile.meta.categories
       );
 
     return {
@@ -976,19 +978,19 @@ describe('getTimingsForPath for an inverted tree', function() {
         totalTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
-          breakdownByCategory: [undefined, 3], // [Idle, Other]
+          breakdownByCategory: [0, 3, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
       },
       forFunc: {
         selfTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
-          breakdownByCategory: [undefined, 3], // [Idle, Other]
+          breakdownByCategory: [0, 3, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
         totalTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
-          breakdownByCategory: [undefined, 3], // [Idle, Other]
+          breakdownByCategory: [0, 3, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
       },
       rootTime: 5,
@@ -1008,7 +1010,7 @@ describe('getTimingsForPath for an inverted tree', function() {
         totalTime: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
-          breakdownByCategory: [undefined, 2], // [Idle, Other]
+          breakdownByCategory: [0, 2, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
       },
       forFunc: {
@@ -1024,7 +1026,7 @@ describe('getTimingsForPath for an inverted tree', function() {
             baseline: 1,
             native: 2,
           },
-          breakdownByCategory: [1, 3, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [1, 3, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
         },
       },
       rootTime: 5,
@@ -1046,19 +1048,19 @@ describe('getTimingsForPath for an inverted tree', function() {
         totalTime: {
           value: 1,
           breakdownByImplementation: { native: 1 },
-          breakdownByCategory: [undefined, undefined, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
         },
       },
       forFunc: {
         selfTime: {
           value: 1,
           breakdownByImplementation: { native: 1 },
-          breakdownByCategory: [undefined, undefined, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
         },
         totalTime: {
           value: 2,
           breakdownByImplementation: { native: 2 },
-          breakdownByCategory: [1, undefined, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [1, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
         },
       },
       rootTime: 5,
@@ -1076,19 +1078,19 @@ describe('getTimingsForPath for an inverted tree', function() {
         totalTime: {
           value: 1,
           breakdownByImplementation: { native: 1 },
-          breakdownByCategory: [1], // [Idle]
+          breakdownByCategory: [1, 0, 0, 0, 0, 0, 0, 0], // [Idle]
         },
       },
       forFunc: {
         selfTime: {
           value: 1,
           breakdownByImplementation: { native: 1 },
-          breakdownByCategory: [undefined, undefined, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
         },
         totalTime: {
           value: 2,
           breakdownByImplementation: { native: 2 },
-          breakdownByCategory: [1, undefined, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [1, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
         },
       },
       rootTime: 5,
@@ -1108,7 +1110,7 @@ describe('getTimingsForPath for an inverted tree', function() {
         totalTime: {
           value: 1,
           breakdownByImplementation: { native: 1 },
-          breakdownByCategory: [undefined, undefined, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
         },
       },
       forFunc: {
@@ -1120,7 +1122,7 @@ describe('getTimingsForPath for an inverted tree', function() {
         totalTime: {
           value: 5,
           breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
-          breakdownByCategory: [1, 3, 1], // [Idle, Other, Layout]
+          breakdownByCategory: [1, 3, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
         },
       },
       rootTime: 5,

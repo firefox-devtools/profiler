@@ -13,7 +13,7 @@
 
 .sidebar-calltree .sidebar-contents-wrapper {
   display: grid;
-  grid-template-columns: min-content 1fr 1fr;
+  grid-template-columns: 1fr 1fr min-content;
   grid-gap: 2px 5px;
   align-content: start; /* the grid isn't vertically stretched */
   align-items: center;

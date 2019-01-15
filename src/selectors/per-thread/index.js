@@ -132,21 +132,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
     selectedThreadSelectors.getPreviewFilteredThread,
-    (
-      selectedPath,
-      callNodeInfo,
-      interval,
-      isInvertedTree,
-      thread
-    ): TimingsForPath => {
-      return ProfileData.getTimingsForPath(
-        selectedPath,
-        callNodeInfo,
-        interval,
-        isInvertedTree,
-        thread
-      );
-    }
+    ProfileSelectors.getCategories,
+    ProfileData.getTimingsForPath
   );
 
   return {

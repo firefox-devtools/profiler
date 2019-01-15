@@ -11,6 +11,7 @@ import type {
   FrameTable,
   FuncTable,
   ResourceTable,
+  CategoryList,
   IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoSamplesTable,
@@ -336,7 +337,8 @@ export function getTimingsForPath(
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   interval: number,
   isInvertedTree: boolean,
-  thread: Thread
+  thread: Thread,
+  categories: CategoryList
 ): TimingsForPath {
   if (!needlePath.length) {
     // If the path is empty, which shouldn't usually happen, we return an empty
@@ -437,10 +439,7 @@ export function getTimingsForPath(
 
     // step 5: increment the right value in the category breakdown
     if (timings.breakdownByCategory === null) {
-      timings.breakdownByCategory = [];
-    }
-    if (timings.breakdownByCategory[categoryIndex] === undefined) {
-      timings.breakdownByCategory[categoryIndex] = 0;
+      timings.breakdownByCategory = Array(categories.length).fill(0);
     }
     timings.breakdownByCategory[categoryIndex] += interval;
   }

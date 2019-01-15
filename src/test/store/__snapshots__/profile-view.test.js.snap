@@ -1149,8 +1149,14 @@ Object {
     },
     "totalTime": Object {
       "breakdownByCategory": Array [
-        undefined,
+        0,
         2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
       ],
       "breakdownByImplementation": Object {
         "native": 2,
@@ -1166,8 +1172,14 @@ Object {
     },
     "totalTime": Object {
       "breakdownByCategory": Array [
-        undefined,
+        0,
         2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
       ],
       "breakdownByImplementation": Object {
         "native": 2,
