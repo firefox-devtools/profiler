@@ -52,6 +52,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         50
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -65,6 +66,32 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         —
       </div>,
+      <div />,
+    ]
+    <h4
+      className="sidebar-title3"
+    >
+      Categories
+    </h4>
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Other
+        :
+      </div>,
+      <div
+        className="sidebar-value"
+      >
+        2
+        ms (
+        100
+        %)
+      </div>,
+      <div
+        className="sidebar-color category-swatch category-color-grey"
+        title="Other"
+      />,
     ]
     <h4
       className="sidebar-title3"
@@ -86,6 +113,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h3
       className="sidebar-title2"
@@ -107,6 +135,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         50
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -120,6 +149,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         —
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -141,6 +171,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
   </div>
 </aside>
@@ -190,6 +221,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         25
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -203,6 +235,32 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         —
       </div>,
+      <div />,
+    ]
+    <h4
+      className="sidebar-title3"
+    >
+      Categories
+    </h4>
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Other
+        :
+      </div>,
+      <div
+        className="sidebar-value"
+      >
+        1
+        ms (
+        100
+        %)
+      </div>,
+      <div
+        className="sidebar-color category-swatch category-color-grey"
+        title="Other"
+      />,
     ]
     <h4
       className="sidebar-title3"
@@ -224,6 +282,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h3
       className="sidebar-title2"
@@ -245,6 +304,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         25
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -258,6 +318,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         —
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -279,6 +340,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
   </div>
 </aside>
@@ -328,6 +390,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         50
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -341,6 +404,54 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms (25%)
       </div>,
+      <div />,
+    ]
+    <h4
+      className="sidebar-title3"
+    >
+      Categories
+    </h4>
+    Array [
+      Array [
+        <div
+          className="sidebar-label"
+        >
+          Idle
+          :
+        </div>,
+        <div
+          className="sidebar-value"
+        >
+          1
+          ms (
+          50
+          %)
+        </div>,
+        <div
+          className="sidebar-color category-swatch category-color-transparent"
+          title="Idle"
+        />,
+      ],
+      Array [
+        <div
+          className="sidebar-label"
+        >
+          Layout
+          :
+        </div>,
+        <div
+          className="sidebar-value"
+        >
+          1
+          ms (
+          50
+          %)
+        </div>,
+        <div
+          className="sidebar-color category-swatch category-color-purple"
+          title="Layout"
+        />,
+      ],
     ]
     <h4
       className="sidebar-title3"
@@ -362,6 +473,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -383,6 +495,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h3
       className="sidebar-title2"
@@ -404,6 +517,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         50
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -417,6 +531,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms (25%)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -438,6 +553,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -459,6 +575,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
   </div>
 </aside>
@@ -508,6 +625,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         25
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -521,6 +639,32 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms (25%)
       </div>,
+      <div />,
+    ]
+    <h4
+      className="sidebar-title3"
+    >
+      Categories
+    </h4>
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Other
+        :
+      </div>,
+      <div
+        className="sidebar-value"
+      >
+        1
+        ms (
+        100
+        %)
+      </div>,
+      <div
+        className="sidebar-color category-swatch category-color-grey"
+        title="Other"
+      />,
     ]
     <h4
       className="sidebar-title3"
@@ -542,6 +686,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -563,6 +708,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h3
       className="sidebar-title2"
@@ -584,6 +730,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         50
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -597,6 +744,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         2ms (50%)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -618,6 +766,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -639,6 +788,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
   </div>
 </aside>
@@ -696,6 +846,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         50
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -709,6 +860,32 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         2ms (50%)
       </div>,
+      <div />,
+    ]
+    <h4
+      className="sidebar-title3"
+    >
+      Categories
+    </h4>
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Other
+        :
+      </div>,
+      <div
+        className="sidebar-value"
+      >
+        2
+        ms (
+        100
+        %)
+      </div>,
+      <div
+        className="sidebar-color category-swatch category-color-grey"
+        title="Other"
+      />,
     ]
     <h4
       className="sidebar-title3"
@@ -730,6 +907,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h3
       className="sidebar-title2"
@@ -751,6 +929,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         50
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -764,6 +943,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         2ms (50%)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -785,6 +965,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -806,6 +987,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
   </div>
 </aside>
@@ -855,6 +1037,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         25
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -868,6 +1051,32 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms (25%)
       </div>,
+      <div />,
+    ]
+    <h4
+      className="sidebar-title3"
+    >
+      Categories
+    </h4>
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Layout
+        :
+      </div>,
+      <div
+        className="sidebar-value"
+      >
+        1
+        ms (
+        100
+        %)
+      </div>,
+      <div
+        className="sidebar-color category-swatch category-color-purple"
+        title="Layout"
+      />,
     ]
     <h4
       className="sidebar-title3"
@@ -889,6 +1098,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h3
       className="sidebar-title2"
@@ -910,6 +1120,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         50
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -923,6 +1134,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms (25%)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -944,6 +1156,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -965,6 +1178,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
   </div>
 </aside>
@@ -1014,6 +1228,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         25
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -1027,6 +1242,32 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         —
       </div>,
+      <div />,
+    ]
+    <h4
+      className="sidebar-title3"
+    >
+      Categories
+    </h4>
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Idle
+        :
+      </div>,
+      <div
+        className="sidebar-value"
+      >
+        1
+        ms (
+        100
+        %)
+      </div>,
+      <div
+        className="sidebar-color category-swatch category-color-transparent"
+        title="Idle"
+      />,
     ]
     <h4
       className="sidebar-title3"
@@ -1048,6 +1289,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h3
       className="sidebar-title2"
@@ -1069,6 +1311,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         50
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -1082,6 +1325,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms (25%)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -1103,6 +1347,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -1124,6 +1369,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
   </div>
 </aside>
@@ -1173,6 +1419,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         25
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -1186,6 +1433,32 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         —
       </div>,
+      <div />,
+    ]
+    <h4
+      className="sidebar-title3"
+    >
+      Categories
+    </h4>
+    Array [
+      <div
+        className="sidebar-label"
+      >
+        Layout
+        :
+      </div>,
+      <div
+        className="sidebar-value"
+      >
+        1
+        ms (
+        100
+        %)
+      </div>,
+      <div
+        className="sidebar-color category-swatch category-color-purple"
+        title="Layout"
+      />,
     ]
     <h4
       className="sidebar-title3"
@@ -1207,6 +1480,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     <h3
       className="sidebar-title2"
@@ -1228,6 +1502,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         100
         %)
       </div>,
+      <div />,
     ]
     Array [
       <div
@@ -1241,6 +1516,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         —
       </div>,
+      <div />,
     ]
     <h4
       className="sidebar-title3"
@@ -1263,6 +1539,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
           50
           %)
         </div>,
+        <div />,
       ],
       Array [
         <div
@@ -1279,6 +1556,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
           50
           %)
         </div>,
+        <div />,
       ],
     ]
   </div>

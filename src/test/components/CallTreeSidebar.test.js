@@ -21,10 +21,10 @@ import type { CallNodePath } from '../../types/profile-derived';
 describe('CallTreeSidebar', function() {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A    A    A  A
-      B    B    B  B
-      Cjs  Cjs  H  H
-      D    F    I
+      A    A    A              A
+      B    B    B              B
+      Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
+      D    F    I[cat:Idle]
       Ejs  Ejs
     `);
 
