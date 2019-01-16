@@ -38,6 +38,10 @@ yarn install
 yarn start
 ```
 
+You can also develop the Firefox Profiler online in a pre-configured development environment:
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/devtools-html/profiler)
+
 For more detailed information on getting started contributing. We have plenty of docs available to get you started.
 
 | | |
