@@ -20,28 +20,63 @@ export function getBoundingBox(width: number, height: number) {
   };
 }
 
-export function getMouseEvent(values: Object = {}): $Shape<MouseEvent> {
-  return {
-    altKey: false,
-    button: 0,
-    buttons: 1,
-    clientX: 0,
-    clientY: 0,
-    ctrlKey: false,
-    metaKey: false,
-    movementX: 0,
-    movementY: 0,
-    nativeEvent: {
-      offsetX: 0,
-      offsetY: 0,
-    },
-    pageX: 0,
-    pageY: 0,
-    screenX: 0,
-    screenY: 0,
-    shiftKey: false,
+type FakeMouseEventInit = $Shape<{
+  bubbles: boolean,
+  cancelable: boolean,
+  composed: boolean,
+  altKey: boolean,
+  button: 0 | 1 | 2 | 3 | 4,
+  buttons: number,
+  clientX: number,
+  clientY: number,
+  ctrlKey: boolean,
+  metaKey: boolean,
+  movementX: number,
+  movementY: number,
+  offsetX: number,
+  offsetY: number,
+  pageX: number,
+  pageY: number,
+  screenX: number,
+  screenY: number,
+  shiftKey: boolean,
+  x: number,
+  y: number,
+}>;
+
+class FakeMouseEvent extends MouseEvent {
+  offsetX: number;
+  offsetY: number;
+  pageX: number;
+  pageY: number;
+  x: number;
+  y: number;
+
+  constructor(type: string, values: FakeMouseEventInit) {
+    const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
+    super(type, (mouseValues: Object));
+
+    Object.assign(this, {
+      offsetX: offsetX || 0,
+      offsetY: offsetY || 0,
+      pageX: pageX || 0,
+      pageY: pageY || 0,
+      x: x || 0,
+      y: y || 0,
+    });
+  }
+}
+
+export function getMouseEvent(
+  type: string,
+  values: FakeMouseEventInit = {}
+): FakeMouseEvent {
+  values = {
+    bubbles: true,
+    cancelable: true,
     ...values,
   };
+  return new FakeMouseEvent(type, values);
 }
 
 /**
