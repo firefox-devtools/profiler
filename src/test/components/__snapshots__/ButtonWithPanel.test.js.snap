@@ -1,6 +1,40 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`shared/ButtonWithPanel renders a closed panel and opens it when asked 1`] = `
+exports[`shared/ButtonWithPanel opens the panel when the button is clicked and closes the panel by clicking outside the panel 1`] = `
+<div
+  class="buttonWithPanel button open"
+>
+  <div
+    class="buttonWithPanelButtonWrapper"
+  >
+    <input
+      class="buttonWithPanelButton buttonButton"
+      type="button"
+      value="My Button"
+    />
+  </div>
+  <div
+    class="arrowPanelAnchor"
+  >
+    <div
+      class="arrowPanel open panel"
+    >
+      <div
+        class="arrowPanelArrow"
+      />
+      <div
+        class="arrowPanelContent"
+      >
+        <div>
+          Panel content
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/ButtonWithPanel opens the panel when the button is clicked and closes the panel by clicking outside the panel 2`] = `
 <div
   class="buttonWithPanel button"
 >
@@ -34,7 +68,75 @@ exports[`shared/ButtonWithPanel renders a closed panel and opens it when asked 1
 </div>
 `;
 
-exports[`shared/ButtonWithPanel renders a closed panel and opens it when asked 2`] = `
+exports[`shared/ButtonWithPanel opens the panel when the button is clicked and closes the panel when the escape key is pressed 1`] = `
+<div
+  class="buttonWithPanel button open"
+>
+  <div
+    class="buttonWithPanelButtonWrapper"
+  >
+    <input
+      class="buttonWithPanelButton buttonButton"
+      type="button"
+      value="My Button"
+    />
+  </div>
+  <div
+    class="arrowPanelAnchor"
+  >
+    <div
+      class="arrowPanel open panel"
+    >
+      <div
+        class="arrowPanelArrow"
+      />
+      <div
+        class="arrowPanelContent"
+      >
+        <div>
+          Panel content
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/ButtonWithPanel opens the panel when the button is clicked and closes the panel when the escape key is pressed 2`] = `
+<div
+  class="buttonWithPanel button open"
+>
+  <div
+    class="buttonWithPanelButtonWrapper"
+  >
+    <input
+      class="buttonWithPanelButton buttonButton"
+      type="button"
+      value="My Button"
+    />
+  </div>
+  <div
+    class="arrowPanelAnchor"
+  >
+    <div
+      class="arrowPanel open panel"
+    >
+      <div
+        class="arrowPanelArrow"
+      />
+      <div
+        class="arrowPanelContent"
+      >
+        <div>
+          Panel content
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`shared/ButtonWithPanel renders a button with a panel 1`] = `
 <div
   class="buttonWithPanel button open"
 >
@@ -103,9 +205,9 @@ exports[`shared/ButtonWithPanel renders a disabled button 1`] = `
 </div>
 `;
 
-exports[`shared/ButtonWithPanel renders an opened panel 1`] = `
+exports[`shared/ButtonWithPanel renders the ButtonWithPanel with a closed panel 1`] = `
 <div
-  class="buttonWithPanel button open"
+  class="buttonWithPanel button"
 >
   <div
     class="buttonWithPanelButtonWrapper"
