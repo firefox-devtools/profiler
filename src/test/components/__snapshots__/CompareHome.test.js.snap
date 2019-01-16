@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/CompareHome renders properly 1`] = `
+exports[`app/CompareHome matches the snapshot 1`] = `
 <main
   class="compareHome"
 >

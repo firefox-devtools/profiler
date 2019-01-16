@@ -924,32 +924,36 @@ export function retrieveProfilesToCompare(
           : thread;
 
         // We're reseting the thread's PID to make sure we don't have any collision.
-        thread.pid = i;
-        thread.processName = `Profile ${i}: ${thread.processName ||
+        thread.pid = `${thread.pid} from profile ${i + 1}`;
+        thread.processName = `Profile ${i + 1}: ${thread.processName ||
           thread.name}`;
 
-        // We adjust the various times so that the 2 profiles are aligned and
-        // the data is consistent.
-        const startTimeDelta = thread.samples.time[0];
+        // We adjust the various times so that the 2 profiles are aligned at the
+        // start and the data is consistent.
+        const startTimeAdjustment = -thread.samples.time[0];
         thread.samples = adjustSampleTimestamps(
           thread.samples,
-          -startTimeDelta
+          startTimeAdjustment
         );
         thread.markers = adjustMarkerTimestamps(
           thread.markers,
-          -startTimeDelta
+          startTimeAdjustment
         );
-        thread.registerTime -= startTimeDelta;
-        thread.processStartupTime -= startTimeDelta;
+        thread.registerTime += startTimeAdjustment;
+        thread.processStartupTime += startTimeAdjustment;
         if (thread.processShutdownTime !== null) {
-          thread.processShutdownTime -= startTimeDelta;
+          thread.processShutdownTime += startTimeAdjustment;
         }
         if (thread.unregisterTime !== null) {
-          thread.unregisterTime -= startTimeDelta;
+          thread.unregisterTime += startTimeAdjustment;
         }
 
-        // Use a sensible value so that the empty thread indicators are drawn
-        // for the smaller profiles.
+        // The loaded profiles will often have different lengths. We align the
+        // start times in the block above, so this means the end times will be
+        // different.
+        // By setting `unregisterTime` here, the empty thread indicators will be
+        // drawn, which will help the users visualizing the different lengths of
+        // the loaded profiles.
         if (
           thread.processShutdownTime === null &&
           thread.unregisterTime === null

@@ -15,14 +15,24 @@ import { blankStore } from '../fixtures/stores';
 describe('app/CompareHome', () => {
   afterEach(cleanup);
 
-  it('renders properly', () => {
+  function setup() {
     const store = blankStore();
-    const { container, getByLabelText, getByText } = render(
+    const renderResult = render(
       <Provider store={store}>
         <CompareHome />
       </Provider>
     );
+
+    return { ...renderResult, getState: store.getState };
+  }
+
+  it('matches the snapshot', () => {
+    const { container } = setup();
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('starts loading profiles after user action', () => {
+    const { getByLabelText, getByText, getState } = setup();
 
     fireEvent.change(getByLabelText(/Profile 1/), {
       target: { value: 'http://www.url11.com' },
@@ -33,7 +43,7 @@ describe('app/CompareHome', () => {
     const retrieveButton = getByText(/Retrieve/);
     fireEvent.click(retrieveButton);
 
-    expect(getProfilesToCompare(store.getState())).toEqual([
+    expect(getProfilesToCompare(getState())).toEqual([
       'http://www.url11.com',
       'http://www.url12.com',
     ]);

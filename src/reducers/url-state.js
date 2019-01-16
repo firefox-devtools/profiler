@@ -18,13 +18,18 @@ import type { UrlState, Reducer } from '../types/state';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 /*
- * Note: all reducers in this state can be shortcut and the state reset
+ * This state file governs the state that comes from, and alters, the window
+ * location. The location itself is changed in `src/components/app/UrlManager`,
+ * and the computations are handled in `src/app-logic/url-handling`.
+ *
+ * All reducers in this state can be circumvented and the state reset
  * completely using the action `UPDATE_URL_STATE`. This action is dispatched
  * from the URL, either at the first load or when it changes when the user
  * navigates.
  * That's why the individual reducers might look incomplete at times.
  * See below the function `wrapReducerInResetter`.
  */
+
 const dataSource: Reducer<DataSource> = (state = 'none', action) => {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_FILE':

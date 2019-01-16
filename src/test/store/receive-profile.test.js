@@ -1002,8 +1002,8 @@ describe('actions/receive-profile', function() {
       const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
         (thread, i) => ({
           ...thread,
-          pid: i,
-          processName: `Profile ${i}: ${thread.name}`,
+          pid: `${thread.pid} from profile ${i + 1}`,
+          processName: `Profile ${i + 1}: ${thread.name}`,
           unregisterTime: thread.samples.length,
         })
       );
