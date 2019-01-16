@@ -46,6 +46,7 @@ declare module 'react-testing-library' {
   ) => Array<HTMLElement>;
 
   declare type GetsAndQueries = {|
+<<<<<<< HEAD:src/types/libdef/npm/react-testing-library_v5.x.x.js
     getByAltText: GetByBoundAttribute,
     getAllByAltText: AllByBoundAttribute,
     queryByAltText: QueryByBoundAttribute,
@@ -57,6 +58,26 @@ declare module 'react-testing-library' {
     queryAllByDisplayValue: AllByBoundAttribute,
 
     getByLabelText: GetByText,
+=======
+    getByTestId: (id: TextMatch, options?: TextMatchOptions) => HTMLElement,
+    getByText: (text: TextMatch, options?: SelectorMatchOptions) => HTMLElement,
+    getByPlaceholderText: (
+      text: TextMatch,
+      options?: TextMatchOptions
+    ) => HTMLElement,
+    getByValue: (
+      text: TextMatch,
+      options?: TextMatchOptions,
+    ) => HTMLElement,
+    getByLabelText: (
+      text: TextMatch,
+      options?: SelectorMatchOptions
+    ) => HTMLElement,
+    getByTitle: (
+      text: TextMatch,
+      options?: SelectorMatchOptions
+    ) => HTMLElement,
+>>>>>>> 0010f6f1... Adds and removes  window event listener for Esc key:src/types/libdef/npm-custom/react-testing-library_v5.x.x.js
     getAllByLabelText: AllByText,
     queryByLabelText: QueryByText,
     queryAllByLabelText: AllByText,
@@ -256,6 +277,11 @@ declare module 'react-testing-library' {
       text: TextMatch,
       options?: TextMatchOptions
     ) => ?HTMLElement,
+    getByValue: (
+      container: HTMLElement,
+      text: TextMatch,
+      options?: TextMatchOptions,
+    ) => HTMLElement,
     getByLabelText: (
       container: HTMLElement,
       text: TextMatch,
