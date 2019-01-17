@@ -335,6 +335,10 @@ export type TextMarkerPayload = {|
   name: string,
 |};
 
+/**
+ * Gecko includes rich log information. This marker payload is used to mirror that
+ * log information in the profile.
+ */
 export type LogMarkerPayload = {|
   type: 'Log',
   name: string,
