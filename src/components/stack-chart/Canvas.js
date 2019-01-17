@@ -17,7 +17,7 @@ import {
 import ChartCanvas from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
-import { formatNumber } from '../../utils/format-numbers';
+import { formatMilliseconds } from '../../utils/format-numbers';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
@@ -370,7 +370,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
     );
   };
 
-  // Re-use the colors from the ThreadActivityGraph,
+  // Provide a memoized function that maps the category color names to specific color
+  // choices that are used across this project's charts.
   _mapCategoryColorNameToStyles = memoize(
     mapCategoryColorNameToStackChartStyles,
     {
@@ -396,7 +397,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}
         categories={categories}
-        durationText={`${formatNumber(duration)}ms`}
+        durationText={formatMilliseconds(duration)}
       />
     );
   };

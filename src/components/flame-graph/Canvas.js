@@ -92,7 +92,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     }
   }
 
-  // Re-use the colors from the ThreadActivityGraph,
+  // Provide a memoized function that maps the category color names to specific color
+  // choices that are used across this project's charts.
   _mapCategoryColorNameToStyles = memoize(
     mapCategoryColorNameToStackChartStyles,
     {
@@ -221,7 +222,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         if (w2 > textMeasurement.minWidth) {
           const fittedText = textMeasurement.getFittedText(funcName, w2);
           if (fittedText) {
-            ctx.fillStyle = isSelected ? 'HighlightText' : foreground;
+            ctx.fillStyle = foreground;
             ctx.fillText(fittedText, x2, y + TEXT_OFFSET_TOP);
           }
         }
