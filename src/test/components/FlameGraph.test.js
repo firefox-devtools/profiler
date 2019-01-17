@@ -42,11 +42,11 @@ it('renders FlameGraph correctly', () => {
   }
 
   const { profile } = getProfileFromTextSamples(`
-    A  A  A
-    B  B  B
-    C  C  H
-    D  F  I
-    E  G
+    A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
+    B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
+    C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
+    D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
+    E[cat:Graphics]  G[cat:Graphics]
   `);
 
   const store = storeWithProfile(profile);
