@@ -260,7 +260,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         callNodeInfo={callNodeInfo}
         categories={categories}
         durationText={`${(100 * duration).toFixed(2)}%`}
-        displayData={callTree.getDisplayData(callNodeIndex)}
+        callTree={callTree}
       />
     );
   };

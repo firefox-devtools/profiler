@@ -7,11 +7,11 @@ import * as React from 'react';
 import { getStackType } from '../../profile-logic/transforms';
 import NodeIcon from '../shared/NodeIcon';
 
+import type { CallTree } from '../../profile-logic/call-tree';
 import type { Thread, CategoryList } from '../../types/profile';
 import type {
   IndexIntoCallNodeTable,
   CallNodeInfo,
-  CallNodeDisplayData,
 } from '../../types/profile-derived';
 
 type Props = {|
@@ -22,7 +22,7 @@ type Props = {|
   // Since this tooltip can be used in different context, provide some kind of duration
   // label, e.g. "100ms" or "33%".
   durationText: string,
-  displayData?: CallNodeDisplayData,
+  callTree?: CallTree,
 |};
 
 /**
@@ -36,7 +36,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       thread,
       durationText,
       categories,
-      displayData,
+      callTree,
       callNodeInfo: { callNodeTable },
     } = this.props;
 
@@ -45,6 +45,11 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     const funcIndex = callNodeTable.func[callNodeIndex];
     const funcStringIndex = thread.funcTable.name[funcIndex];
     const funcName = thread.stringTable.getString(funcStringIndex);
+
+    let displayData;
+    if (callTree) {
+      displayData = callTree.getDisplayData(callNodeIndex);
+    }
 
     let resourceOrFileName = null;
     // Only JavaScript functions have a filename.
