@@ -2,247 +2,118 @@
 
 exports[`timeline/TrackScreenshots matches the component snapshot 1`] = `
 <div
-  className="timelineTrackScreenshot"
-  onMouseLeave={[Function]}
-  onMouseMove={[Function]}
-  style={
-    Object {
-      "height": 50,
-    }
-  }
+  class="timelineTrackScreenshot"
+  style="height: 50px;"
 >
-  Array [
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="0"
-      style={
-        Object {
-          "left": 0,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="37.5"
-      style={
-        Object {
-          "left": 37.5,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="75"
-      style={
-        Object {
-          "left": 75,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="112.5"
-      style={
-        Object {
-          "left": 112.5,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="150"
-      style={
-        Object {
-          "left": 150,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="187.5"
-      style={
-        Object {
-          "left": 187.5,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="225"
-      style={
-        Object {
-          "left": 225,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="262.5"
-      style={
-        Object {
-          "left": 262.5,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="300"
-      style={
-        Object {
-          "left": 300,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="337.5"
-      style={
-        Object {
-          "left": 337.5,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-    <div
-      className="timelineTrackScreenshotImgContainer"
-      key="375"
-      style={
-        Object {
-          "left": 375,
-          "width": 37.5,
-        }
-      }
-    >
-      <img
-        className="timelineTrackScreenshotImg"
-        src="CompositorScreenshot"
-        style={
-          Object {
-            "height": 50,
-            "width": 100,
-          }
-        }
-      />
-    </div>,
-  ]
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 0px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 37.5px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 75px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 112.5px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 150px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 187.5px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 225px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 262.5px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 300px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 337.5px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
+  <div
+    class="timelineTrackScreenshotImgContainer"
+    style="left: 375px; width: 37.5px;"
+  >
+    <img
+      class="timelineTrackScreenshotImg"
+      src="CompositorScreenshot"
+      style="width: 100px; height: 50px;"
+    />
+  </div>
 </div>
 `;

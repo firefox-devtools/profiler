@@ -11,18 +11,21 @@ import type {
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
 
 import { commitRange } from '../../actions/profile-view';
 import TrackScreenshots, {
   TRACK_HEIGHT,
 } from '../../components/timeline/TrackScreenshots';
 import Timeline from '../../components/timeline';
+import { ensureExists } from '../../utils/flow';
+
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
+  getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
@@ -39,33 +42,31 @@ describe('timeline/TrackScreenshots', function() {
   afterEach(removeRootOverlayElement);
 
   it('matches the component snapshot', () => {
-    const { view } = setup();
-    expect(view).toMatchSnapshot();
+    const { container, unmount } = setup();
+    expect(container.firstChild).toMatchSnapshot();
     // Trigger any unmounting behavior handlers, just make sure it doesn't
     // throw any errors.
-    view.unmount();
+    unmount();
   });
 
   it('shows a hover when moving the mouse', () => {
-    const { view } = setup();
-    expect(view.find('.timelineTrackScreenshotHover').length).toBe(0);
+    const { screenshotHover, moveMouse } = setup();
 
-    view.simulate('mousemove', { pageX: LEFT + 0 });
-    view.update();
-    expect(view.find('.timelineTrackScreenshotHover').length).toBe(1);
+    expect(screenshotHover).toThrow();
+    moveMouse(LEFT + 0);
+    expect(screenshotHover()).toBeTruthy();
   });
 
   it('removes the hover when moving the mouse out', () => {
-    const { view } = setup();
-    expect(view.find('.timelineTrackScreenshotHover').length).toBe(0);
+    const { screenshotHover, screenshotTrack, moveMouse } = setup();
 
-    view.simulate('mousemove', { pageX: LEFT + 0 });
-    view.update();
-    expect(view.find('.timelineTrackScreenshotHover').length).toBe(1);
+    expect(screenshotHover).toThrow();
 
-    view.simulate('mouseleave');
-    view.update();
-    expect(view.find('.timelineTrackScreenshotHover').length).toBe(0);
+    moveMouse(LEFT + 0);
+    expect(screenshotHover()).toBeTruthy();
+
+    fireEvent.mouseLeave(screenshotTrack());
+    expect(screenshotHover).toThrow();
   });
 
   it('moves the hover when moving the mouse', () => {
@@ -89,15 +90,14 @@ describe('timeline/TrackScreenshots', function() {
 
     _setScreenshotMarkersToUnknown(thread, markerIndexA, markerIndexB);
 
-    const { dispatch, view } = setup(profile);
+    const { dispatch, container } = setup(profile);
     dispatch(
       commitRange(
         thread.markers.time[markerIndexA],
         thread.markers.time[markerIndexB]
       )
     );
-    view.update();
-    expect(view.find('.timelineTrackScreenshotImg').length).toBeGreaterThan(0);
+    expect(container.querySelector('.timelineTrackScreenshotImg')).toBeTruthy();
   });
 
   it('renders a no images when zooming into a range before screenshots', () => {
@@ -109,25 +109,28 @@ describe('timeline/TrackScreenshots', function() {
 
     _setScreenshotMarkersToUnknown(thread, markerIndexA, markerIndexB);
 
-    const { dispatch, view } = setup(profile);
+    const { dispatch, container } = setup(profile);
     dispatch(
       commitRange(
         thread.markers.time[markerIndexA],
         thread.markers.time[markerIndexB]
       )
     );
-    view.update();
-    expect(view.find('.timelineTrackScreenshotImg').length).toBe(0);
+    expect(container.querySelector('.timelineTrackScreenshotImg')).toBeFalsy();
   });
 
   it('is created in the <Timeline /> with a profile with screenshots', function() {
-    const { view } = setup(getScreenshotTrackProfile(), <Timeline />);
-    expect(view.find(TrackScreenshots).length).toBe(1);
+    const { getByText } = setup(getScreenshotTrackProfile(), <Timeline />);
+
+    // The function `getByText` throws already, with a useful Error, if it can't
+    // find the element. But we still use `expect` to keep a "test-like"
+    // assertion, even if it's useless.
+    expect(getByText('Screenshots')).toBeTruthy();
   });
 
   it('is not created in the <Timeline /> with a profile with no screenshots', function() {
-    const { view } = setup(getProfileWithNiceTracks(), <Timeline />);
-    expect(view.find(TrackScreenshots).length).toBe(0);
+    const { queryByText } = setup(getProfileWithNiceTracks(), <Timeline />);
+    expect(queryByText('Screenshots')).toBeFalsy();
   });
 });
 
@@ -156,24 +159,43 @@ function setup(
       return rect;
     });
 
-  const view = mount(<Provider store={store}>{component}</Provider>);
+  const renderResult = render(<Provider store={store}>{component}</Provider>);
+  const { container } = renderResult;
 
   // WithSize uses requestAnimationFrame
   flushRafCalls();
-  view.update();
+
+  function screenshotHover() {
+    return ensureExists(
+      document.querySelector('.timelineTrackScreenshotHover')
+    );
+  }
+
+  function screenshotTrack() {
+    return ensureExists(container.querySelector('.timelineTrackScreenshot'));
+  }
+
+  function moveMouse(pageX: number) {
+    fireEvent(
+      screenshotTrack(),
+      getMouseEvent('mousemove', { pageX, pageY: 0 })
+    );
+  }
 
   function moveMouseAndGetLeft(pageX: number): number {
-    view.simulate('mousemove', { pageX });
-    view.update();
-    return view.find('.timelineTrackScreenshotHover').prop('style').left;
+    moveMouse(pageX);
+    return parseInt(screenshotHover().style.left);
   }
 
   return {
+    ...renderResult,
     dispatch,
     getState,
     thread: profile.threads[0],
     store,
-    view,
+    screenshotHover,
+    screenshotTrack,
+    moveMouse,
     moveMouseAndGetLeft,
   };
 }
