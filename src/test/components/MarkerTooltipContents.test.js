@@ -281,6 +281,15 @@ describe('MarkerTooltipContents', function() {
         },
       ],
       [
+        'Log',
+        21.7,
+        {
+          type: 'Log',
+          name: 'Random log message',
+          module: 'RandomModule',
+        },
+      ],
+      [
         'Styles',
         20.5,
         {
