@@ -246,7 +246,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMajor-16.
     <div
       className="tooltipLabel"
     >
-      Heap size
+      Heap size (pre - post)
       :
     </div>
     46.1MB - 36.3MB
@@ -513,7 +513,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCSlice-17.
     <div
       className="tooltipLabel"
     >
-      States
+      States (pre - post)
       :
     </div>
     Initial – Final

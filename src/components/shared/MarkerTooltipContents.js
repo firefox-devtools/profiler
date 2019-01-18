@@ -558,7 +558,7 @@ function getMarkerDetails(
             if (post_heap_size !== undefined) {
               gcsize = _markerDetail(
                 'gcsize',
-                'Heap size',
+                'Heap size (pre - post)',
                 formatBytes(timings.allocated_bytes) +
                   ' - ' +
                   formatBytes(post_heap_size)
@@ -659,7 +659,7 @@ function getMarkerDetails(
             {_markerDetail('gcbudget', 'Budget', timings.budget)}
             {_markerDetail(
               'gcstate',
-              'States',
+              'States (pre - post)',
               timings.initial_state + ' – ' + timings.final_state
             )}
             {triggers}
