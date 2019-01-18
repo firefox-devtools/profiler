@@ -1,5 +1,136 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`FlameGraph has a tooltip that matches the screenshot 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 111px; top: 308px;"
+>
+  <div
+    class="tooltipCallNode"
+  >
+    <div
+      class="tooltipOneLine tooltipHeader"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        100.00%
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        A
+      </div>
+      <div
+        class="tooltipIcon"
+      />
+    </div>
+    <div
+      class="tooltipCallNodeDetails"
+    >
+      <div
+        class="tooltipCallNodeImplementation"
+      >
+        <div />
+        <div
+          class="tooltipCallNodeImplementationHeader"
+        />
+        <div
+          class="tooltipCallNodeImplementationHeader"
+        >
+          <span
+            class="tooltipCallNodeImplementationHeaderSwatchRunning"
+          />
+          Running
+        </div>
+        <div
+          class="tooltipCallNodeImplementationHeader"
+        >
+          <span
+            class="tooltipCallNodeImplementationHeaderSwatchSelf"
+          />
+          Self
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Overall
+        </div>
+        <div
+          class="tooltipCallNodeImplementationGraph"
+        >
+          <div
+            class="tooltipCallNodeImplementationGraphRunning"
+            style="width: 150px;"
+          />
+          <div
+            class="tooltipCallNodeImplementationGraphSelf"
+            style="width: 0px;"
+          />
+        </div>
+        <div>
+          3ms
+        </div>
+        <div>
+          —
+        </div>
+        <div
+          class="tooltipCallNodeImplementationName tooltipLabel"
+        >
+          Native code
+        </div>
+        <div
+          class="tooltipCallNodeImplementationGraph"
+        >
+          <div
+            class="tooltipCallNodeImplementationGraphRunning"
+            style="width: 150px;"
+          />
+          <div
+            class="tooltipCallNodeImplementationGraphSelf"
+            style="width: 0px;"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeImplementationTiming"
+        >
+          3.0ms
+        </div>
+        <div
+          class="tooltipCallNodeImplementationTiming"
+        >
+          —
+        </div>
+      </div>
+      <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          Native
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="category-swatch category-color-blue"
+          />
+          DOM
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`FlameGraph matches the snapshot 1`] = `
 <div
   aria-labelledby="flame-graph-tab-button"

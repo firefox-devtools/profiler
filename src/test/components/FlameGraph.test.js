@@ -9,16 +9,25 @@ import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+  getMouseEvent,
+} from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { changeInvertCallstack } from '../../actions/profile-view';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getInvertCallstack } from '../../selectors/url-state';
+import { ensureExists } from '../../utils/flow';
 
 const GRAPH_WIDTH = 200;
 const GRAPH_HEIGHT = 300;
 
 describe('FlameGraph', function() {
+  afterEach(removeRootOverlayElement);
+  beforeEach(addRootOverlayElement);
+
   it('matches the snapshot', () => {
     const { ctx, container } = setupFlameGraph();
     const drawCalls = ctx.__flushDrawLog();
@@ -39,6 +48,19 @@ describe('FlameGraph', function() {
     expect(getInvertCallstack(getState())).toBe(true);
     fireEvent.click(getByText(/Switch to the normal call stack/));
     expect(getInvertCallstack(getState())).toBe(false);
+  });
+
+  it('shows a tooltip when hovering', () => {
+    const { getTooltip, moveMouse } = setupFlameGraph();
+    expect(getTooltip()).toBe(null);
+    moveMouse(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    expect(getTooltip()).toBeTruthy();
+  });
+
+  it('has a tooltip that matches the screenshot', () => {
+    const { getTooltip, moveMouse } = setupFlameGraph();
+    moveMouse(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    expect(getTooltip()).toMatchSnapshot();
   });
 });
 
@@ -64,7 +86,7 @@ function setupFlameGraph() {
 
   const store = storeWithProfile(profile);
 
-  const renderResult = render(
+  const { container, getByText } = render(
     <Provider store={store}>
       <FlameGraph />
     </Provider>
@@ -72,5 +94,29 @@ function setupFlameGraph() {
 
   flushRafCalls();
 
-  return { ...renderResult, ...store, ctx };
+  function moveMouse(x, y) {
+    fireEvent(
+      ensureExists(
+        container.querySelector('canvas'),
+        'The container should contain a canvas element.'
+      ),
+      getMouseEvent('mousemove', {
+        pageX: x,
+        pageY: y,
+        clientX: x,
+        clientY: y,
+        offsetX: x,
+        offsetY: y,
+      })
+    );
+  }
+
+  /**
+   * The tooltip is in a portal, and created in the root overlay elements.
+   */
+  function getTooltip() {
+    return document.querySelector('#root-overlay .tooltip');
+  }
+
+  return { container, getByText, ctx, moveMouse, getTooltip, ...store };
 }
