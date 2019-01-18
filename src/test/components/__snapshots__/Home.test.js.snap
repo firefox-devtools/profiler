@@ -384,38 +384,36 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
              
             to load the data into perf.html.
           </p>
-          <p>
-            <div>
-              <p>
-                <kbd>
-                  Ctrl
-                </kbd>
-                +
-                <kbd>
-                  Shift
-                </kbd>
-                +
-                <kbd>
-                  1
-                </kbd>
-                 Stop and start profiling
-              </p>
-              <p>
-                <kbd>
-                  Ctrl
-                </kbd>
-                +
-                <kbd>
-                  Shift
-                </kbd>
-                +
-                <kbd>
-                  2
-                </kbd>
-                 Capture and load profile
-              </p>
-            </div>
-          </p>
+          <div>
+            <p>
+              <kbd>
+                Ctrl
+              </kbd>
+              +
+              <kbd>
+                Shift
+              </kbd>
+              +
+              <kbd>
+                1
+              </kbd>
+               Stop and start profiling
+            </p>
+            <p>
+              <kbd>
+                Ctrl
+              </kbd>
+              +
+              <kbd>
+                Shift
+              </kbd>
+              +
+              <kbd>
+                2
+              </kbd>
+               Capture and load profile
+            </p>
+          </div>
           <div
             class="homeSectionLoadProfile"
           >
@@ -548,38 +546,36 @@ exports[`app/Home renders the usage instructions for pages with the extension in
             </kbd>
              to load the data into perf.html.
           </p>
-          <p>
-            <div>
-              <p>
-                <kbd>
-                  Ctrl
-                </kbd>
-                +
-                <kbd>
-                  Shift
-                </kbd>
-                +
-                <kbd>
-                  1
-                </kbd>
-                 Stop and start profiling
-              </p>
-              <p>
-                <kbd>
-                  Ctrl
-                </kbd>
-                +
-                <kbd>
-                  Shift
-                </kbd>
-                +
-                <kbd>
-                  2
-                </kbd>
-                 Capture and load profile
-              </p>
-            </div>
-          </p>
+          <div>
+            <p>
+              <kbd>
+                Ctrl
+              </kbd>
+              +
+              <kbd>
+                Shift
+              </kbd>
+              +
+              <kbd>
+                1
+              </kbd>
+               Stop and start profiling
+            </p>
+            <p>
+              <kbd>
+                Ctrl
+              </kbd>
+              +
+              <kbd>
+                Shift
+              </kbd>
+              +
+              <kbd>
+                2
+              </kbd>
+               Capture and load profile
+            </p>
+          </div>
           <div
             class="homeSectionLoadProfile"
           >
