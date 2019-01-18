@@ -10,7 +10,6 @@ import { render, fireEvent } from 'react-testing-library';
 
 import * as UrlStateSelectors from '../../selectors/url-state';
 import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
-import { ensureExists } from '../../utils/flow';
 
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -61,7 +60,7 @@ describe('calltree/ZipFileTree', function() {
   describe('clicking on a profile link', function() {
     const setupClickingTest = async () => {
       const setupResult = await setup();
-      const { getByText, store } = setupResult;
+      const { getByText, store, container } = setupResult;
 
       const profile1OpenLink = getByText('profile1.json');
 
@@ -73,25 +72,31 @@ describe('calltree/ZipFileTree', function() {
             'VIEW_PROFILE_IN_ZIP_FILE'
         );
 
+      function profileViewer() {
+        return container.querySelector('.profileViewer');
+      }
+
       return {
         ...setupResult,
         profile1OpenLink,
         waitUntilDoneProcessingZip,
+        profileViewer,
       };
     };
 
     it('starts out without any path in the zip file', async () => {
-      const { getState, container } = await setupClickingTest();
+      const { getState, profileViewer } = await setupClickingTest();
       expect(UrlStateSelectors.getPathInZipFileFromUrl(getState())).toBe(null);
-      expect(container.querySelector('.profileViewer')).toBeFalsy();
+      expect(profileViewer()).toBeFalsy();
     });
 
     it('kicks off the profile loading process when clicked', async () => {
       const {
-        container,
+        getByText,
         getState,
         profile1OpenLink,
         waitUntilDoneProcessingZip,
+        profileViewer,
       } = await setupClickingTest();
       fireEvent.click(profile1OpenLink);
       expect(UrlStateSelectors.getPathInZipFileFromUrl(getState())).toBe(
@@ -99,11 +104,8 @@ describe('calltree/ZipFileTree', function() {
       );
 
       // The profile isn't actually viewed yet.
-      expect(container.querySelector('.profileViewer')).toBeFalsy();
-      expect(
-        ensureExists(container.querySelector('.zipFileViewerMessage'))
-          .textContent
-      ).toMatchSnapshot();
+      expect(profileViewer()).toBeFalsy();
+      expect(getByText(/Loading the profile/).textContent).toMatchSnapshot();
 
       // There is async behavior going on. Wait until it is done or else
       // redux-react will throw an error.
@@ -120,14 +122,14 @@ describe('calltree/ZipFileTree', function() {
         });
 
       const {
-        container,
+        profileViewer,
         profile1OpenLink,
         waitUntilDoneProcessingZip,
       } = await setupClickingTest();
 
       fireEvent.click(profile1OpenLink);
       await waitUntilDoneProcessingZip();
-      expect(container.querySelector('.profileViewer')).toBeTruthy();
+      expect(profileViewer()).toBeTruthy();
     });
   });
 });

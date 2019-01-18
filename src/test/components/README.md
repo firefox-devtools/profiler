@@ -36,7 +36,7 @@ can make use of.
 
 Here is a full example:
 ```js
-describe('app/Defails', function() {
+describe('app/Details', function() {
   function setup() {
     const { profile } = getProfileFromTextSamples(`
       A A A
@@ -110,3 +110,18 @@ it('draws the right things to the screen', () => {
   expect(flushDrawLogs()).toMatchSnapshot();
 });
 ```
+
+### A quick way to know the render output
+
+The `render` calls return a useful utility `debug` that can be called in tests,
+that will output the result of the render to the console. This is extremely
+useful to better know how to target elements. This utility is also returned by
+all `setup` functions, so it's very easy to use it when needed:
+```js
+it('renders a lot of things', () => {
+  const { container, debug } = setup()
+  debug();
+  ...
+});
+```
+

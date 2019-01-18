@@ -55,8 +55,16 @@ function setupWithProfile(profile) {
   }
 
   function styleForClass(className: string): ?string {
-    return ensureExists(container.querySelector(className)).getAttribute(
-      'style'
+    return ensureExists(
+      container.querySelector(className),
+      `Couldn't find the element with selector ${className}`
+    ).getAttribute('style');
+  }
+
+  function rowItem() {
+    return ensureExists(
+      container.querySelector('.networkChartRowItem'),
+      `Couldn't find the row item in the network chart, with selector .networkChartRowItem`
     );
   }
 
@@ -67,6 +75,7 @@ function setupWithProfile(profile) {
     flushDrawLog: () => ctx.__flushDrawLog(),
     getUrlShorteningParts,
     styleForClass,
+    rowItem,
   };
 }
 
@@ -236,7 +245,7 @@ describe('NetworkChartRowBar URL split', function() {
 
 describe('NetworkChartRowBar MIME-type filter', function() {
   it('searches for img MIME-Type', function() {
-    const { container } = setupWithPayload(
+    const { rowItem } = setupWithPayload(
       'Load 101: https://test.mozilla.org/img/optimized/test.png',
       {
         type: 'Network',
@@ -249,15 +258,11 @@ describe('NetworkChartRowBar MIME-type filter', function() {
         endTime: 90,
       }
     );
-    expect(
-      ensureExists(
-        container.querySelector('.networkChartRowItem')
-      ).classList.contains('networkChartRowItemImg')
-    ).toBe(true);
+    expect(rowItem().classList.contains('networkChartRowItemImg')).toBe(true);
   });
 
   it('searches for html MIME-Type', function() {
-    const { container } = setupWithPayload(
+    const { rowItem } = setupWithPayload(
       'Load 101: https://test.mozilla.org/img/optimized/test.html',
       {
         type: 'Network',
@@ -271,15 +276,11 @@ describe('NetworkChartRowBar MIME-type filter', function() {
       }
     );
 
-    expect(
-      ensureExists(
-        container.querySelector('.networkChartRowItem')
-      ).classList.contains('networkChartRowItemHtml')
-    ).toBe(true);
+    expect(rowItem().classList.contains('networkChartRowItemHtml')).toBe(true);
   });
 
   it('searches for js MIME-Type', function() {
-    const { container } = setupWithPayload(
+    const { rowItem } = setupWithPayload(
       'Load 101: https://test.mozilla.org/img/optimized/test.js',
       {
         type: 'Network',
@@ -293,15 +294,11 @@ describe('NetworkChartRowBar MIME-type filter', function() {
       }
     );
 
-    expect(
-      ensureExists(
-        container.querySelector('.networkChartRowItem')
-      ).classList.contains('networkChartRowItemJs')
-    ).toBe(true);
+    expect(rowItem().classList.contains('networkChartRowItemJs')).toBe(true);
   });
 
   it('searches for css MIME-Type', function() {
-    const { container } = setupWithPayload(
+    const { rowItem } = setupWithPayload(
       'Load 101: https://test.mozilla.org/img/optimized/test.css',
       {
         type: 'Network',
@@ -315,15 +312,11 @@ describe('NetworkChartRowBar MIME-type filter', function() {
       }
     );
 
-    expect(
-      ensureExists(
-        container.querySelector('.networkChartRowItem')
-      ).classList.contains('networkChartRowItemCss')
-    ).toBe(true);
+    expect(rowItem().classList.contains('networkChartRowItemCss')).toBe(true);
   });
 
   it('uses default when no filter applies', function() {
-    const { container } = setupWithPayload(
+    const { rowItem } = setupWithPayload(
       'Load 101: https://test.mozilla.org/img/optimized/test.xuul',
       {
         type: 'Network',
@@ -337,9 +330,7 @@ describe('NetworkChartRowBar MIME-type filter', function() {
       }
     );
 
-    expect(
-      ensureExists(container.querySelector('.networkChartRowItem')).className
-    ).toEqual('even networkChartRowItem ');
+    expect(rowItem().className).toEqual('even networkChartRowItem ');
   });
 });
 

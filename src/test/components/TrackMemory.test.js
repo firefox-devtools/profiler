@@ -78,7 +78,8 @@ describe('TrackMemory', function() {
     flushRafCalls();
 
     const canvas = ensureExists(
-      container.querySelector('.timelineTrackMemoryCanvas')
+      container.querySelector('.timelineTrackMemoryCanvas'),
+      `Couldn't find the memory canvas, with selector .timelineTrackMemoryCanvas`
     );
     const getTooltipContents = () =>
       document.querySelector('.timelineTrackMemoryTooltip');

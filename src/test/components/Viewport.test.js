@@ -679,7 +679,10 @@ function setup(profileOverrides: Object = {}) {
   }
 
   function viewportContainer() {
-    return ensureExists(container.querySelector('.chartViewport'));
+    return ensureExists(
+      container.querySelector('.chartViewport'),
+      `Couldn't find the viewport container, with the selector .chartViewport`
+    );
   }
 
   function scroll(eventOverrides) {

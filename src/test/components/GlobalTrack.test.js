@@ -68,9 +68,15 @@ describe('timeline/GlobalTrack', function() {
     const { container } = renderResult;
 
     const getGlobalTrackLabel = () =>
-      ensureExists(container.querySelector('.timelineTrackLabel'));
+      ensureExists(
+        container.querySelector('.timelineTrackLabel'),
+        `Couldn't find the track label with selector .timelineTrackLabel`
+      );
     const getGlobalTrackRow = () =>
-      ensureExists(container.querySelector('.timelineTrackGlobalRow'));
+      ensureExists(
+        container.querySelector('.timelineTrackGlobalRow'),
+        `Couldn't find the track global row with selector .timelineTrackGlobalRow`
+      );
 
     return {
       ...renderResult,

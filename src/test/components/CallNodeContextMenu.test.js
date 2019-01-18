@@ -55,7 +55,10 @@ describe('calltree/CallNodeContextMenu', function() {
       const isContextMenuOpen = false;
       const { container } = setup(createStore(), isContextMenuOpen);
       expect(
-        ensureExists(container.querySelector('.react-contextmenu')).children
+        ensureExists(
+          container.querySelector('.react-contextmenu'),
+          `Couldn't find the context menu root component .react-contextmenu`
+        ).children
       ).toHaveLength(1);
       expect(container.firstChild).toMatchSnapshot();
     });
@@ -64,8 +67,10 @@ describe('calltree/CallNodeContextMenu', function() {
       const isContextMenuOpen = true;
       const { container } = setup(createStore(), isContextMenuOpen);
       expect(
-        ensureExists(container.querySelector('.react-contextmenu')).children
-          .length > 1
+        ensureExists(
+          container.querySelector('.react-contextmenu'),
+          `Couldn't find the context menu root component .react-contextmenu`
+        ).children.length > 1
       ).toBeTruthy();
       expect(container.firstChild).toMatchSnapshot();
     });

@@ -77,7 +77,8 @@ describe('StackChart', function() {
     flushRafCalls();
 
     const stackChartCanvas = ensureExists(
-      container.querySelector('.chartCanvas.stackChartCanvas')
+      container.querySelector('.chartCanvas.stackChartCanvas'),
+      `Couldn't find the stack chart canvas, with selector .chartCanvas.stackChartCanvas`
     );
     return {
       ...renderResult,

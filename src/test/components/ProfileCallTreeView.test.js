@@ -194,16 +194,22 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     return {
       // take either a key as a string, or a full event if we need more
       // information like modifier keys.
-      simulateKey: (param: string | { key: string }) =>
+      simulateKey: (param: string | { key: string }) => {
+        const treeViewBody = ensureExists(
+          container.querySelector('div.treeViewBody'),
+          `Couldn't find the tree view body with selector div.treeViewBody`
+        );
         fireEvent.keyDown(
-          ensureExists(container.querySelector('div.treeViewBody')),
+          treeViewBody,
           // There's a shortcoming in either Flow or the flow type for the
           // `keyDown` method. $FlowExpectError
           param.key ? param : { key: param }
-        ),
+        );
+      },
       selectedText: () =>
         ensureExists(
-          container.querySelector('.treeViewRowScrolledColumns.selected')
+          container.querySelector('.treeViewRowScrolledColumns.selected'),
+          `Couldn't find the selected column with selector .treeViewRowScrolledColumns.selected`
         ).textContent,
     };
   }

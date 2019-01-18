@@ -164,9 +164,15 @@ function setup(
   const { container } = renderResult;
 
   const getLocalTrackLabel = () =>
-    ensureExists(container.querySelector('.timelineTrackLabel'));
+    ensureExists(
+      container.querySelector('.timelineTrackLabel'),
+      `Couldn't find the track label with selector .timelineTrackLabel`
+    );
   const getLocalTrackRow = () =>
-    ensureExists(container.querySelector('.timelineTrackLocalRow'));
+    ensureExists(
+      container.querySelector('.timelineTrackLocalRow'),
+      `Couldn't find the track local row with selector .timelineTrackLocalRow`
+    );
 
   return {
     ...renderResult,

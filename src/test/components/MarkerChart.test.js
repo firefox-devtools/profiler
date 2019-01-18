@@ -139,7 +139,10 @@ describe('MarkerChart', function() {
 
     // Move the mouse on top of an item.
     fireEvent(
-      ensureExists(container.querySelector('canvas')),
+      ensureExists(
+        container.querySelector('canvas'),
+        `Couldn't find the canvas element`
+      ),
       getMouseEvent('mousemove', {
         offsetX: 50 + TIMELINE_MARGIN_LEFT,
         offsetY: 5,
@@ -154,7 +157,7 @@ describe('MarkerChart', function() {
     expect(drawCalls).toMatchSnapshot();
 
     // The tooltip should be displayed
-    expect(ensureExists(document.querySelector('.tooltip'))).toMatchSnapshot();
+    expect(document.querySelector('.tooltip')).toMatchSnapshot();
   });
 
   describe('with search strings', function() {

@@ -102,13 +102,17 @@ describe('timeline/TrackThread', function() {
     flushRafCalls();
 
     const stackGraphCanvas = () =>
-      ensureExists(container.querySelector('.threadStackGraphCanvas'));
+      ensureExists(
+        container.querySelector('.threadStackGraphCanvas'),
+        `Couldn't find the stack graph canvas, with selector .threadStackGraphCanvas`
+      );
     const markerCanvas = () =>
       ensureExists(
         container.querySelector(oneLine`
-        .timelineTrackThreadMarkerOverviewThreadGeckoMain
-        .timelineMarkersCanvas
-      `)
+          .timelineTrackThreadMarkerOverviewThreadGeckoMain
+          .timelineMarkersCanvas
+        `),
+        `Couldn't find the marker canvas`
       );
 
     return {

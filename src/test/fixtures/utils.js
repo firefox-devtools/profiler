@@ -20,6 +20,13 @@ export function getBoundingBox(width: number, height: number) {
   };
 }
 
+/**
+ * jsdom's MouseEvent object is incomplete (see
+ * https://github.com/jsdom/jsdom/issues/1911) and we use some of the
+ * missing properties in our app code. This fake MouseEvent allows the test code
+ * to supply these properties.
+ */
+
 type FakeMouseEventInit = $Shape<{
   bubbles: boolean,
   cancelable: boolean,
@@ -67,6 +74,19 @@ class FakeMouseEvent extends MouseEvent {
   }
 }
 
+/**
+ * Use this function to retrieve a fake MouseEvent instance. This is really only
+ * necessary when we need to use some of the properties unsupported by jsdom,
+ * like `clientX` and `clientY` or `pageX` and `pageY`.
+ * This is to be used directly by `fireEvent`, not `fireEvent.mouseXXX`, eg:
+ *
+ *   fireEvent(target, getMouseEvent('mousemove', { pageX: 5 });
+ *
+ * For other cases it's not necessary to use `getMouseEvent`, eg:
+ *
+ *   fireEvent.mouseDown(target, { clientX: 5 });
+ *
+ */
 export function getMouseEvent(
   type: string,
   values: FakeMouseEventInit = {}

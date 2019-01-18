@@ -89,10 +89,12 @@ describe('SelectedThreadActivityGraph', function() {
     flushRafCalls();
 
     const activityGraphCanvas = ensureExists(
-      container.querySelector('.threadActivityGraphCanvas')
+      container.querySelector('.threadActivityGraphCanvas'),
+      `Couldn't find the activity graph canvas, with selector .threadActivityGraphCanvas`
     );
     const stackGraphCanvas = ensureExists(
-      container.querySelector('.threadStackGraphCanvas')
+      container.querySelector('.threadStackGraphCanvas'),
+      `Couldn't find the stack graph canvas, with selector .threadStackGraphCanvas`
     );
     const thread = profile.threads[0];
 

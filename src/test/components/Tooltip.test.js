@@ -111,7 +111,10 @@ function setup({ box, mouse }: Setup) {
   );
 
   function getTooltip() {
-    return ensureExists(document.querySelector('.tooltip'));
+    return ensureExists(
+      document.querySelector('.tooltip'),
+      `Couldn't find the tooltip element, with selector .tooltip`
+    );
   }
 
   function getTooltipStyle() {

@@ -167,12 +167,16 @@ function setup(
 
   function screenshotHover() {
     return ensureExists(
-      document.querySelector('.timelineTrackScreenshotHover')
+      document.querySelector('.timelineTrackScreenshotHover'),
+      `Couldn't find the screenshot hover element, with selector .timelineTrackScreenshotHover`
     );
   }
 
   function screenshotTrack() {
-    return ensureExists(container.querySelector('.timelineTrackScreenshot'));
+    return ensureExists(
+      container.querySelector('.timelineTrackScreenshot'),
+      `Couldn't find the screenshot track, with selector .timelineTrackScreenshot`
+    );
   }
 
   function moveMouse(pageX: number) {
