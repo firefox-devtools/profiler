@@ -8,12 +8,15 @@ import type { Profile } from '../../types/profile';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
+import { oneLine } from 'common-tags';
 
 import { changeTimelineType } from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
 import { getPreviewSelection } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { ensureExists } from '../../utils/flow';
+
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -88,33 +91,33 @@ describe('timeline/TrackThread', function() {
     // view.
     store.dispatch(changeTimelineType('stack'));
 
-    const view = mount(
+    const renderResult = render(
       <Provider store={store}>
         <TrackThread threadIndex={threadIndex} />
       </Provider>
     );
+    const { container } = renderResult;
 
     // WithSize uses requestAnimationFrame
     flushRafCalls();
-    view.update();
 
-    const stackGraphCanvas = view.find('.threadStackGraphCanvas').first();
-    const markerCanvas = view
-      .find(
-        [
-          '.timelineTrackThreadMarkerOverviewThreadGeckoMain',
-          '.timelineMarkersCanvas',
-        ].join(' ')
-      )
-      .first();
+    const stackGraphCanvas = () =>
+      ensureExists(container.querySelector('.threadStackGraphCanvas'));
+    const markerCanvas = () =>
+      ensureExists(
+        container.querySelector(oneLine`
+        .timelineTrackThreadMarkerOverviewThreadGeckoMain
+        .timelineMarkersCanvas
+      `)
+      );
 
     return {
+      ...renderResult,
       dispatch,
       getState,
       profile,
       thread: profile.threads[0],
       store,
-      view,
       threadIndex,
       stackGraphCanvas,
       markerCanvas,
@@ -122,18 +125,8 @@ describe('timeline/TrackThread', function() {
   }
 
   it('matches the snapshot', () => {
-    const { view } = setup(getSamplesProfile());
-    expect(view).toMatchSnapshot();
-  });
-
-  it('has the correct selectors into useful parts of the component for the samples profile', function() {
-    const { stackGraphCanvas } = setup(getSamplesProfile());
-    expect(stackGraphCanvas.exists()).toBe(true);
-  });
-
-  it('has the correct selectors into useful parts of the component for the markers profile', function() {
-    const { markerCanvas } = setup(getMarkersProfile());
-    expect(markerCanvas.exists()).toBe(true);
+    const { container } = setup(getSamplesProfile());
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('can click a stack in the stack graph', function() {
@@ -147,27 +140,27 @@ describe('timeline/TrackThread', function() {
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
 
-    stackGraphCanvas.simulate(
-      'mouseup',
-      getMouseEvent({ pageX: STACK_1_X_POSITION })
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_1_X_POSITION })
     );
     expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
 
-    stackGraphCanvas.simulate(
-      'mouseup',
-      getMouseEvent({ pageX: STACK_2_X_POSITION })
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_2_X_POSITION })
     );
     expect(getCallNodePath()).toEqual(['d', 'e', 'f']);
 
-    stackGraphCanvas.simulate(
-      'mouseup',
-      getMouseEvent({ pageX: STACK_3_X_POSITION })
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_3_X_POSITION })
     );
     expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
 
-    stackGraphCanvas.simulate(
-      'mouseup',
-      getMouseEvent({ pageX: STACK_4_X_POSITION })
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_4_X_POSITION })
     );
     expect(getCallNodePath()).toEqual(['j', 'k', 'l']);
   });
@@ -176,8 +169,8 @@ describe('timeline/TrackThread', function() {
     const { getState, markerCanvas } = setup(getMarkersProfile());
 
     function clickAndGetMarkerName(pageX: number) {
-      markerCanvas.simulate('mousedown', getMouseEvent({ pageX }));
-      markerCanvas.simulate('mouseup', getMouseEvent({ pageX }));
+      fireEvent(markerCanvas(), getMouseEvent('mousedown', { pageX }));
+      fireEvent(markerCanvas(), getMouseEvent('mouseup', { pageX }));
       return getPreviewSelection(getState());
     }
 
