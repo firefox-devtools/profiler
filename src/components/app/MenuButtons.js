@@ -559,7 +559,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
           </AnimateUpTransition>
         )}
 
-        {/* The Permalink button is rendered when state===uploading and state===public.
+        {/* The Permalink button is rendered when state === 'uploading' AND state === 'public'.
        The Permalink button itself is hidden when uploading is in progress, 
        but the Permalink's ArrowPanel with the URL is always displayed. */}
         {(state === 'uploading' || state === 'public') && (

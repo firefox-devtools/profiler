@@ -83,10 +83,9 @@
   color: white;
 }
 
-/* CSS Transition */
+/* CSSTransition */
 .menuButtonsTransitionUp-enter .buttonWithPanelButton,
-.menuButtonsTransitionUp-enter .menuButtonsUploadingButtonInner
-{
+.menuButtonsTransitionUp-enter .menuButtonsUploadingButtonInner {
   opacity: 0;
   transform: translateY(100%)
 }
@@ -110,9 +109,9 @@
   transform: translateY(-100%);
   transition: all 200ms ease-in-out;
 }
+/* end of CSSTransition */
 
-/* permalink button is "manually" moved 
-whenever uploading is in progress  */
+/* permalink button is "manually" moved whenever uploading is in progress  */
 .menuButtonsCompositeButtonContainer.currentButtonIsUploadingButton > .menuButtonsPermalinkButton > .buttonWithPanelButtonWrapper > .menuButtonsPermalinkButtonButton{
   opacity: 0;
   transform: translateY(-100%);
@@ -131,7 +130,7 @@ whenever uploading is in progress  */
   width: 115px;
 }
 
-/* The button is larger during symbolication to fit the text: 
+/* The button will be larger during symbolication to fit the text: 
 "Sharing will be enabled once symbolication is complete" */
 .menuButtonsShareButtonButton {
   min-width: 115px;
