@@ -7,11 +7,11 @@ import * as React from 'react';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { mount } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
 import { changeSelectedCallNode } from '../../actions/profile-view';
-import { MenuItem } from 'react-contextmenu';
 import { Provider } from 'react-redux';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { ensureExists } from '../../utils/flow';
 import copy from 'copy-to-clipboard';
 
 describe('calltree/CallNodeContextMenu', function() {
@@ -41,70 +41,68 @@ describe('calltree/CallNodeContextMenu', function() {
   }
 
   function setup(store = createStore(), forceOpenForTests = true) {
-    const wrapper = mount(
+    const renderResult = render(
       <Provider store={store}>
         <CallNodeContextMenu forceOpenForTests={forceOpenForTests} />
       </Provider>
     );
 
-    function findMenuItem(type: string) {
-      return wrapper.find(MenuItem).findWhere(n => {
-        const { data } = n.props();
-        return typeof data === 'object' && data.type === type;
-      });
-    }
-
-    return { store, wrapper, findMenuItem };
+    return { ...renderResult, getState: store.getState };
   }
 
   describe('basic rendering', function() {
     it('renders a blank context menu (with only 1 div) before it is open', () => {
       const isContextMenuOpen = false;
-      const { wrapper } = setup(createStore(), isContextMenuOpen);
-      expect(wrapper.find('ContextMenu > nav').children().length).toBe(1);
-      expect(wrapper).toMatchSnapshot();
+      const { container } = setup(createStore(), isContextMenuOpen);
+      expect(
+        ensureExists(container.querySelector('.react-contextmenu')).children
+      ).toHaveLength(1);
+      expect(container.firstChild).toMatchSnapshot();
     });
 
     it('renders a full context menu when open, with many nav items', () => {
       const isContextMenuOpen = true;
-      const { wrapper } = setup(createStore(), isContextMenuOpen);
+      const { container } = setup(createStore(), isContextMenuOpen);
       expect(
-        wrapper.find('ContextMenu > nav').children().length > 1
+        ensureExists(container.querySelector('.react-contextmenu')).children
+          .length > 1
       ).toBeTruthy();
-      expect(wrapper).toMatchSnapshot();
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 
   describe('clicking on call tree transforms', function() {
     // Iterate through each transform slug, and click things in it.
-    for (const type of [
-      'merge-call-node',
-      'merge-function',
-      'focus-subtree',
-      'focus-function',
-      'collapse-function-subtree',
-      'collapse-resource',
-      'collapse-direct-recursion',
-      'drop-function',
-    ]) {
+    const fixtures = [
+      { matcher: /Merge node/, type: 'merge-call-node' },
+      { matcher: /Merge function/, type: 'merge-function' },
+      { matcher: /Focus.*subtree/, type: 'focus-subtree' },
+      { matcher: /Focus.*function/, type: 'focus-function' },
+      { matcher: /Collapse.*subtree/, type: 'collapse-function-subtree' },
+      { matcher: /Collapse functions/, type: 'collapse-resource' },
+      { matcher: /Collapse.*recursion/, type: 'collapse-direct-recursion' },
+      { matcher: /Drop samples/, type: 'drop-function' },
+    ];
+
+    fixtures.forEach(({ matcher, type }) => {
       it(`adds a transform for "${type}"`, function() {
-        const { store: { getState }, findMenuItem } = setup();
-        findMenuItem(type).simulate('click');
+        const { getState, getByText } = setup();
+        fireEvent.click(getByText(matcher));
         expect(
           selectedThreadSelectors.getTransformStack(getState())[0].type
         ).toBe(type);
       });
-    }
+    });
   });
 
   describe('clicking on the rest of the menu items', function() {
     it('can expand all call nodes in the call tree', function() {
-      const { store: { getState }, findMenuItem } = setup();
+      const { getState, getByText } = setup();
       expect(
         selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
       ).toHaveLength(1);
 
-      findMenuItem('expand-all').simulate('click');
+      fireEvent.click(getByText('Expand all'));
 
       // This test only asserts that a bunch of call nodes were actually expanded.
       expect(
@@ -113,9 +111,9 @@ describe('calltree/CallNodeContextMenu', function() {
     });
 
     it('can look up functions on SearchFox', function() {
-      const { findMenuItem } = setup();
+      const { getByText } = setup();
       jest.spyOn(window, 'open').mockImplementation(() => {});
-      findMenuItem('searchfox').simulate('click');
+      fireEvent.click(getByText(/Searchfox/));
       expect(window.open).toBeCalledWith(
         'https://searchfox.org/mozilla-central/search?q=B%3Alibrary',
         '_blank'
@@ -123,9 +121,9 @@ describe('calltree/CallNodeContextMenu', function() {
     });
 
     it('can copy a function name', function() {
-      const { findMenuItem } = setup();
+      const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
-      findMenuItem('copy-function-name').simulate('click');
+      fireEvent.click(getByText('Copy function name'));
       expect(copy).toBeCalledWith('B:library');
     });
 
@@ -145,17 +143,17 @@ describe('calltree/CallNodeContextMenu', function() {
 
       const store = storeWithProfile(profile);
       store.dispatch(changeSelectedCallNode(0, [funcIndex]));
-      const { findMenuItem } = setup(store);
+      const { getByText } = setup(store);
 
       // Copy is a mocked module, clear it both before and after.
-      findMenuItem('copy-url').simulate('click');
+      fireEvent.click(getByText('Copy script URL'));
       expect(copy).toBeCalledWith('https://example.com/script.js');
     });
 
     it('can copy a stack', function() {
-      const { findMenuItem } = setup();
+      const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
-      findMenuItem('copy-stack').simulate('click');
+      fireEvent.click(getByText('Copy stack'));
       expect(copy).toBeCalledWith(`B:library\nA\n`);
     });
   });
