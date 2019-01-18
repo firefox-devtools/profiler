@@ -4,14 +4,13 @@
 
 // @flow
 import * as React from 'react';
-import { mount } from 'enzyme';
+import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 
 import { changeMarkersSearchString } from '../../actions/profile-view';
 import NetworkChart from '../../components/network-chart';
 import { changeSelectedTab } from '../../actions/app';
-
-import EmptyReasons from '../../components/shared/EmptyReasons';
+import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -42,30 +41,45 @@ function setupWithProfile(profile) {
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('network-chart'));
 
-  const networkChart = mount(
+  const renderResult = render(
     <Provider store={store}>
       <NetworkChart />
     </Provider>
   );
+  const { container } = renderResult;
+
+  function getUrlShorteningParts(): Array<[string, string]> {
+    return Array.from(
+      container.querySelectorAll('.networkChartRowItemLabel span span')
+    ).map(node => [node.className, node.textContent]);
+  }
+
+  function styleForClass(className: string): ?string {
+    return ensureExists(container.querySelector(className)).getAttribute(
+      'style'
+    );
+  }
 
   return {
-    networkChart,
+    ...renderResult,
     flushRafCalls,
     dispatch: store.dispatch,
     flushDrawLog: () => ctx.__flushDrawLog(),
+    getUrlShorteningParts,
+    styleForClass,
   };
 }
 
 // create new function to get ProfileWithNetworkMarkers
 function setupWithPayload(name: string, payload: NetworkPayload) {
   const profile = getProfileWithMarkers([[name, 0, payload]]);
-  const { flushRafCalls, dispatch, networkChart } = setupWithProfile(profile);
+  const setupResult = setupWithProfile(profile);
+  const { flushRafCalls, dispatch } = setupResult;
 
   dispatch(changeSelectedTab('network-chart'));
-  networkChart.update();
   flushRafCalls();
 
-  return { networkChart };
+  return setupResult;
 }
 
 describe('NetworkChart', function() {
@@ -74,28 +88,26 @@ describe('NetworkChart', function() {
     const {
       flushRafCalls,
       dispatch,
-      networkChart,
       flushDrawLog,
+      container,
     } = setupWithProfile(profile);
 
     dispatch(changeSelectedTab('network-chart'));
-    networkChart.update();
     flushRafCalls();
 
     const drawCalls = flushDrawLog();
-    expect(networkChart).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
   });
 });
 
 describe('NetworkChartRowBar phase calculations', function() {
   it('divides up the different phases of the request with full set of required information', () => {
-    const { networkChart } = setupWithPayload(
+    const { styleForClass } = setupWithPayload(
       'Load 100: https://test.mozilla.org',
       {
         type: 'Network',
         URI: 'https://mozilla.org/img/',
-        RedirectURI: 'https://mozilla.org/img/optimized',
         id: 90001,
         pri: 20,
         count: 10,
@@ -108,19 +120,19 @@ describe('NetworkChartRowBar phase calculations', function() {
         responseEnd: 80,
       }
     );
-    expect(
-      networkChart.find('.networkChartRowItemBarRequestQueue').prop('style')
-    ).toHaveProperty('width', '12.5%');
-    expect(
-      networkChart.find('.networkChartRowItemBarRequest').prop('style')
-    ).toHaveProperty('width', '50%');
-    expect(
-      networkChart.find('.networkChartRowItemBarResponse').prop('style')
-    ).toHaveProperty('width', '25%');
+    expect(styleForClass('.networkChartRowItemBarRequestQueue')).toMatch(
+      'width: 12.5%'
+    );
+    expect(styleForClass('.networkChartRowItemBarRequest')).toMatch(
+      'width: 50%'
+    );
+    expect(styleForClass('.networkChartRowItemBarResponse')).toMatch(
+      'width: 25%'
+    );
   });
 
   it('divides up the different phases of the request with subset of required information', () => {
-    const { networkChart } = setupWithPayload(
+    const { styleForClass } = setupWithPayload(
       'Load 101: https://test.mozilla.org',
       {
         type: 'Network',
@@ -137,19 +149,20 @@ describe('NetworkChartRowBar phase calculations', function() {
         responseEnd: 80,
       }
     );
-    expect(
-      networkChart.find('.networkChartRowItemBarRequestQueue').prop('style')
-    ).toHaveProperty('width', '12.5%');
-    expect(
-      networkChart.find('.networkChartRowItemBarRequest').prop('style')
-    ).toHaveProperty('width', '0%');
-    expect(
-      networkChart.find('.networkChartRowItemBarResponse').prop('style')
-    ).toHaveProperty('width', '25%');
+
+    expect(styleForClass('.networkChartRowItemBarRequestQueue')).toMatch(
+      'width: 12.5%'
+    );
+    expect(styleForClass('.networkChartRowItemBarRequest')).toMatch(
+      'width: 0%'
+    );
+    expect(styleForClass('.networkChartRowItemBarResponse')).toMatch(
+      'width: 25%'
+    );
   });
 
   it('divides up the different phases of the request with no set of required information', () => {
-    const { networkChart } = setupWithPayload(
+    const { styleForClass } = setupWithPayload(
       'Load 101: https://test.mozilla.org',
       {
         type: 'Network',
@@ -163,21 +176,21 @@ describe('NetworkChartRowBar phase calculations', function() {
         endTime: 90,
       }
     );
-    expect(
-      networkChart.find('.networkChartRowItemBarRequestQueue').prop('style')
-    ).toHaveProperty('width', '0%');
-    expect(
-      networkChart.find('.networkChartRowItemBarRequest').prop('style')
-    ).toHaveProperty('width', '0%');
-    expect(
-      networkChart.find('.networkChartRowItemBarResponse').prop('style')
-    ).toHaveProperty('width', '100%');
+    expect(styleForClass('.networkChartRowItemBarRequestQueue')).toMatch(
+      'width: 0%'
+    );
+    expect(styleForClass('.networkChartRowItemBarRequest')).toMatch(
+      'width: 0%'
+    );
+    expect(styleForClass('.networkChartRowItemBarResponse')).toMatch(
+      'width: 100%'
+    );
   });
 });
 
 describe('NetworkChartRowBar URL split', function() {
-  it('splits up the url by protocol / domain / path / filemane / params / hash', function() {
-    const { networkChart } = setupWithPayload(
+  it('splits up the url by protocol / domain / path / filename / params / hash', function() {
+    const { getUrlShorteningParts } = setupWithPayload(
       'Load 101: https://test.mozilla.org/img/optimized/test.gif?param1=123&param2=321#hashNode2',
       {
         type: 'Network',
@@ -191,12 +204,7 @@ describe('NetworkChartRowBar URL split', function() {
         endTime: 90,
       }
     );
-    expect(
-      // Find the URL shortening parts
-      networkChart
-        .find('.networkChartRowItemLabel span span')
-        .map(node => [node.prop('className'), node.text()])
-    ).toEqual([
+    expect(getUrlShorteningParts()).toEqual([
       // Then assert that it's broken up as expected
       ['networkChartRowItemUriOptional', 'https://'],
       ['networkChartRowItemUriRequired', 'test.mozilla.org'],
@@ -208,7 +216,7 @@ describe('NetworkChartRowBar URL split', function() {
   });
 
   it('returns null with an invalid url', function() {
-    const { networkChart } = setupWithPayload(
+    const { getUrlShorteningParts } = setupWithPayload(
       'Load 101: test.mozilla.org/img/optimized/',
       {
         type: 'Network',
@@ -222,140 +230,126 @@ describe('NetworkChartRowBar URL split', function() {
         endTime: 90,
       }
     );
-    expect(
-      // Find the URL shortening parts
-      networkChart
-        .find('.networkChartRowItemLabel span span')
-        .map(node => [node.prop('className'), node.text()])
-    ).toEqual([]);
+    expect(getUrlShorteningParts()).toEqual([]);
   });
 });
 
 describe('NetworkChartRowBar MIME-type filter', function() {
   it('searches for img MIME-Type', function() {
-    const { networkChart } = setupWithPayload(
-      'Load 101: htps://test.mozilla.org/img/optimized/test.png',
+    const { container } = setupWithPayload(
+      'Load 101: https://test.mozilla.org/img/optimized/test.png',
       {
         type: 'Network',
-        URI: 'https://mozilla.org/img/test123.png',
-        RedirectURI: 'https://mozilla.org/img/optimized',
+        URI: 'https://test.mozilla.org/img/optimized/test.png',
         id: 90001,
         pri: 20,
         count: 10,
-        status: 'STATUS_REDIRECT',
+        status: 'STATUS_STOP',
         startTime: 10,
         endTime: 90,
       }
     );
     expect(
-      // Find the URL shortening parts
-      networkChart
-        .find('.networkChartRowItem')
-        .map(node => node.prop('className'))
-    ).toEqual(['even networkChartRowItem networkChartRowItemImg']);
+      ensureExists(
+        container.querySelector('.networkChartRowItem')
+      ).classList.contains('networkChartRowItemImg')
+    ).toBe(true);
   });
 
   it('searches for html MIME-Type', function() {
-    const { networkChart } = setupWithPayload(
-      'Load 101: htps://test.mozilla.org/img/optimized/test.html',
+    const { container } = setupWithPayload(
+      'Load 101: https://test.mozilla.org/img/optimized/test.html',
       {
         type: 'Network',
-        URI: 'https://mozilla.org/img/test123.png',
-        RedirectURI: 'https://mozilla.org/img/optimized',
+        URI: 'https://test.mozilla.org/img/optimized/test.html',
         id: 90001,
         pri: 20,
         count: 10,
-        status: 'STATUS_REDIRECT',
+        status: 'STATUS_STOP',
         startTime: 10,
         endTime: 90,
       }
     );
+
     expect(
-      // Find the URL shortening parts
-      networkChart
-        .find('.networkChartRowItem')
-        .map(node => node.prop('className'))
-    ).toEqual(['even networkChartRowItem networkChartRowItemHtml']);
+      ensureExists(
+        container.querySelector('.networkChartRowItem')
+      ).classList.contains('networkChartRowItemHtml')
+    ).toBe(true);
   });
 
   it('searches for js MIME-Type', function() {
-    const { networkChart } = setupWithPayload(
-      'Load 101: htps://test.mozilla.org/img/optimized/test.js',
+    const { container } = setupWithPayload(
+      'Load 101: https://test.mozilla.org/img/optimized/test.js',
       {
         type: 'Network',
-        URI: 'https://mozilla.org/img/test123.png',
-        RedirectURI: 'https://mozilla.org/img/optimized',
+        URI: 'https://test.mozilla.org/img/optimized/test.js',
         id: 90001,
         pri: 20,
         count: 10,
-        status: 'STATUS_REDIRECT',
+        status: 'STATUS_STOP',
         startTime: 10,
         endTime: 90,
       }
     );
+
     expect(
-      // Find the URL shortening parts
-      networkChart
-        .find('.networkChartRowItem')
-        .map(node => node.prop('className'))
-    ).toEqual(['even networkChartRowItem networkChartRowItemJs']);
+      ensureExists(
+        container.querySelector('.networkChartRowItem')
+      ).classList.contains('networkChartRowItemJs')
+    ).toBe(true);
   });
 
   it('searches for css MIME-Type', function() {
-    const { networkChart } = setupWithPayload(
-      'Load 101: htps://test.mozilla.org/img/optimized/test.css',
+    const { container } = setupWithPayload(
+      'Load 101: https://test.mozilla.org/img/optimized/test.css',
       {
         type: 'Network',
-        URI: 'https://mozilla.org/img/test123.png',
-        RedirectURI: 'https://mozilla.org/img/optimized',
+        URI: 'https://test.mozilla.org/img/optimized/test.css',
         id: 90001,
         pri: 20,
         count: 10,
-        status: 'STATUS_REDIRECT',
+        status: 'STATUS_STOP',
         startTime: 10,
         endTime: 90,
       }
     );
+
     expect(
-      // Find the URL shortening parts
-      networkChart
-        .find('.networkChartRowItem')
-        .map(node => node.prop('className'))
-    ).toEqual(['even networkChartRowItem networkChartRowItemCss']);
+      ensureExists(
+        container.querySelector('.networkChartRowItem')
+      ).classList.contains('networkChartRowItemCss')
+    ).toBe(true);
   });
 
   it('uses default when no filter applies', function() {
-    const { networkChart } = setupWithPayload(
-      'Load 101: htps://test.mozilla.org/img/optimized/test.xuul',
+    const { container } = setupWithPayload(
+      'Load 101: https://test.mozilla.org/img/optimized/test.xuul',
       {
         type: 'Network',
-        URI: 'https://mozilla.org/img/test123.png',
-        RedirectURI: 'https://mozilla.org/img/optimized',
+        URI: 'https://test.mozilla.org/img/optimized/test.xuul',
         id: 90001,
         pri: 20,
         count: 10,
-        status: 'STATUS_REDIRECT',
+        status: 'STATUS_STOP',
         startTime: 10,
         endTime: 90,
       }
     );
+
     expect(
-      // Find the URL shortening parts
-      networkChart
-        .find('.networkChartRowItem')
-        .map(node => node.prop('className'))
-    ).toEqual(['even networkChartRowItem ']);
+      ensureExists(container.querySelector('.networkChartRowItem')).className
+    ).toEqual('even networkChartRowItem ');
   });
 });
 
 describe('EmptyReasons', () => {
   it("shows a reason when a profile's network markers have been filtered out", () => {
     const profile = getProfileWithMarkers(NETWORK_MARKERS);
-    const { dispatch, networkChart } = setupWithProfile(profile);
+    const { dispatch, container } = setupWithProfile(profile);
 
     dispatch(changeSelectedTab('network-chart'));
     dispatch(changeMarkersSearchString('MATCH_NOTHING'));
-    networkChart.update();
-    expect(networkChart.find(EmptyReasons)).toMatchSnapshot();
+    expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
   });
 });
