@@ -2,35 +2,30 @@
 
 exports[`TrackMemory draws a dot that matches the snapshot 1`] = `
 <div
-  className="timelineTrackMemoryDot"
-  style={
-    Object {
-      "left": 20,
-      "top": 2.697563250235465,
-    }
-  }
+  class="timelineTrackMemoryDot"
+  style="left: 20px; top: 2.697563250235465px;"
 />
 `;
 
 exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
 <div
-  className="timelineTrackMemoryTooltip"
+  class="timelineTrackMemoryTooltip"
 >
   <div
-    className="timelineTrackMemoryTooltipLine"
+    class="timelineTrackMemoryTooltipLine"
   >
     <span
-      className="timelineTrackMemoryTooltipNumber"
+      class="timelineTrackMemoryTooltipNumber"
     >
       0.000B
     </span>
      relative memory at this time
   </div>
   <div
-    className="timelineTrackMemoryTooltipLine"
+    class="timelineTrackMemoryTooltipLine"
   >
     <span
-      className="timelineTrackMemoryTooltipNumber"
+      class="timelineTrackMemoryTooltipNumber"
     >
       2.0B
     </span>
@@ -129,20 +124,14 @@ Array [
 
 exports[`TrackMemory matches the component snapshot 1`] = `
 <div
-  className="timelineTrackMemory"
-  onMouseLeave={[Function]}
-  onMouseMove={[Function]}
-  style={
-    Object {
-      "height": 25,
-    }
-  }
+  class="timelineTrackMemory"
+  style="height: 25px;"
 >
   <canvas
-    className="timelineTrackMemoryCanvas"
+    class="timelineTrackMemoryCanvas"
   />
   <div
-    className="timelineEmptyThreadIndicator"
+    class="timelineEmptyThreadIndicator"
   />
 </div>
 `;
