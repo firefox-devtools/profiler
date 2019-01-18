@@ -4,10 +4,11 @@
 
 // @flow
 import * as React from 'react';
-import { mount } from 'enzyme';
+import { Provider } from 'react-redux';
+import { render, fireEvent } from 'react-testing-library';
 
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
-import { Provider } from 'react-redux';
+import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
@@ -40,13 +41,13 @@ describe('calltree/ProfileCallTreeView', function() {
   });
 
   it('renders an unfiltered call tree', () => {
-    const calltree = mount(
+    const { container } = render(
       <Provider store={storeWithProfile(profile)}>
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
 
-    expect(calltree).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders an inverted call tree', () => {
@@ -61,39 +62,39 @@ describe('calltree/ProfileCallTreeView', function() {
     const store = storeWithProfile(profileForInvertedTree);
     store.dispatch(changeInvertCallstack(true));
 
-    const calltree = mount(
+    const { container } = render(
       <Provider store={store}>
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
 
-    expect(calltree).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders call tree with some search strings', () => {
     const store = storeWithProfile(profile);
-    const calltree = mount(
+    const { container } = render(
       <Provider store={store}>
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
 
-    expect(calltree).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C'));
-    expect(calltree.update()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C,'));
-    expect(calltree.update()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C, F'));
-    expect(calltree.update()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString('C, F,E'));
-    expect(calltree.update()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     store.dispatch(changeCallTreeSearchString(' C , E   '));
-    expect(calltree.update()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('computes a width for a call tree of a really deep stack', () => {
@@ -103,13 +104,13 @@ describe('calltree/ProfileCallTreeView', function() {
         .join('\n')
     );
     const store = storeWithProfile(profile);
-    const calltree = mount(
+    const { container } = render(
       <Provider store={store}>
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
 
-    expect(calltree).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
 
@@ -131,11 +132,11 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   profile.threads[0].name = 'Thread with samples';
 
   function renderWithStore(store) {
-    return mount(
+    return render(
       <Provider store={store}>
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
-    );
+    ).container.firstChild;
   }
 
   it('shows a reason for a call tree with no samples', function() {
@@ -169,7 +170,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
       .mockImplementation(() => mockCanvasContext());
   });
 
-  function setup(profileString: string) {
+  function setup(profileString: string, expectedRowsLength: number) {
     // This makes the bounding box large enough so that we don't trigger
     // VirtualList's virtualization. We assert this above.
     jest
@@ -178,28 +179,32 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
 
     const { profile } = getProfileFromTextSamples(profileString);
     const store = storeWithProfile(profile);
-    const callTree = mount(
+    const { container } = render(
       <Provider store={store}>
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
 
     // Assert that we used a large enough bounding box to include all children.
-    const renderedRows = callTree.find(
+    const renderedRows = container.querySelectorAll(
       '.treeViewRow.treeViewRowScrolledColumns'
     );
-    const expectedRows = callTree.find('VirtualList').prop('items');
-    expect(renderedRows.length).toBe(expectedRows.length);
+    expect(renderedRows.length).toBe(expectedRowsLength);
 
     return {
       // take either a key as a string, or a full event if we need more
       // information like modifier keys.
       simulateKey: (param: string | { key: string }) =>
-        callTree
-          .find('div.treeViewBody')
-          .simulate('keydown', param.key ? param : { key: param }),
+        fireEvent.keyDown(
+          ensureExists(container.querySelector('div.treeViewBody')),
+          // There's a shortcoming in either Flow or the flow type for the
+          // `keyDown` method. $FlowExpectError
+          param.key ? param : { key: param }
+        ),
       selectedText: () =>
-        callTree.find('.treeViewRowScrolledColumns.selected').text(),
+        ensureExists(
+          container.querySelector('.treeViewRowScrolledColumns.selected')
+        ).textContent,
     };
   }
 
@@ -217,7 +222,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
       ''
     );
 
-    const { simulateKey, selectedText } = setup(profileString);
+    const { simulateKey, selectedText } = setup(profileString, 100);
 
     expect(selectedText()).toBe('name1');
     simulateKey('ArrowDown');
