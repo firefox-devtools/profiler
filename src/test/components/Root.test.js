@@ -25,7 +25,7 @@ jest.mock('../../components/app/Home', () => 'home');
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, cleanup } from 'react-testing-library';
+import { render } from 'react-testing-library';
 
 import { ProfileViewWhenReady } from '../../components/app/Root';
 import { updateUrlState } from '../../actions/app';
@@ -49,7 +49,6 @@ import { TemporaryError } from '../../utils/errors';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-afterEach(cleanup);
 describe('app/ProfileViewWhenReady', function() {
   it('renders an initial home', function() {
     const { container } = setup();

@@ -4,13 +4,13 @@ exports[`calltree/ZipFileTree clicking on a profile link kicks off the profile l
 
 exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
 <section
-  className="zipFileViewer"
+  class="zipFileViewer"
 >
   <div
-    className="zipFileViewerSection"
+    class="zipFileViewerSection"
   >
     <header
-      className="zipFileViewerHeader"
+      class="zipFileViewerHeader"
     >
       <h1>
         perf.html
@@ -20,307 +20,175 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
       </p>
     </header>
     <div
-      className="treeView"
+      class="treeView"
     >
       <div
-        className="react-contextmenu-wrapper treeViewContextMenu"
-        onContextMenu={[Function]}
-        onMouseDown={[Function]}
-        onMouseOut={[Function]}
-        onMouseUp={[Function]}
-        onTouchEnd={[Function]}
-        onTouchStart={[Function]}
+        class="react-contextmenu-wrapper treeViewContextMenu"
       >
         <div
-          className="treeViewBody"
-          onKeyDown={[Function]}
-          tabIndex={0}
+          class="treeViewBody"
+          tabindex="0"
         >
           <div
-            className="treeViewBodyInnerWrapper"
+            class="treeViewBodyInnerWrapper"
           >
             <div
-              className="treeViewBodyInner treeViewBodyInner0"
-              style={
-                Object {
-                  "height": "180px",
-                  "width": undefined,
-                }
-              }
+              class="treeViewBodyInner treeViewBodyInner0"
+              style="height: 180px;"
             >
               <div
-                className="treeViewBodyInner treeViewBodyInner0TopSpacer"
-                key="-1"
-                style={
-                  Object {
-                    "height": "0px",
-                  }
-                }
+                class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+                style="height: 0px;"
               />
               <div
-                className="treeViewBodyInner treeViewBodyInner0InnerChunk"
+                class="treeViewBodyInner treeViewBodyInner0InnerChunk"
               >
                 <div
-                  className="treeViewRow treeViewRowFixedColumns even "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowFixedColumns even "
+                  style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  className="treeViewRow treeViewRowFixedColumns odd "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowFixedColumns odd "
+                  style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  className="treeViewRow treeViewRowFixedColumns even "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowFixedColumns even "
+                  style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  className="treeViewRow treeViewRowFixedColumns odd "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowFixedColumns odd "
+                  style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  className="treeViewRow treeViewRowFixedColumns even "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowFixedColumns even "
+                  style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  className="treeViewRow treeViewRowFixedColumns odd "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowFixedColumns odd "
+                  style="height: 30px; line-height: 30px;"
                 />
               </div>
             </div>
             <div
-              className="treeViewBodyInner treeViewBodyInner1"
-              style={
-                Object {
-                  "height": "180px",
-                  "width": 3000,
-                }
-              }
+              class="treeViewBodyInner treeViewBodyInner1"
+              style="height: 180px; width: 3000px;"
             >
               <div
-                className="treeViewBodyInner treeViewBodyInner1TopSpacer"
-                key="-1"
-                style={
-                  Object {
-                    "height": "0px",
-                  }
-                }
+                class="treeViewBodyInner treeViewBodyInner1TopSpacer"
+                style="height: 0px;"
               />
               <div
-                className="treeViewBodyInner treeViewBodyInner1InnerChunk"
+                class="treeViewBodyInner treeViewBodyInner1InnerChunk"
               >
                 <div
-                  className="treeViewRow treeViewRowScrolledColumns even  "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowScrolledColumns even  "
+                  style="height: 30px; line-height: 30px;"
                 >
                   <span
-                    className="treeRowIndentSpacer"
-                    style={
-                      Object {
-                        "width": "0px",
-                      }
-                    }
+                    class="treeRowIndentSpacer"
+                    style="width: 0px;"
                   />
                   <span
-                    className="treeRowToggleButton expanded canBeExpanded"
-                    onClick={[Function]}
+                    class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    className="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewRowColumn treeViewMainColumn name"
                   >
                     foo
                   </span>
                 </div>
                 <div
-                  className="treeViewRow treeViewRowScrolledColumns odd  "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowScrolledColumns odd  "
+                  style="height: 30px; line-height: 30px;"
                 >
                   <span
-                    className="treeRowIndentSpacer"
-                    style={
-                      Object {
-                        "width": "15px",
-                      }
-                    }
+                    class="treeRowIndentSpacer"
+                    style="width: 15px;"
                   />
                   <span
-                    className="treeRowToggleButton expanded canBeExpanded"
-                    onClick={[Function]}
+                    class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    className="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewRowColumn treeViewMainColumn name"
                   >
                     bar
                   </span>
                 </div>
                 <div
-                  className="treeViewRow treeViewRowScrolledColumns even  "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowScrolledColumns even  "
+                  style="height: 30px; line-height: 30px;"
                 >
                   <span
-                    className="treeRowIndentSpacer"
-                    style={
-                      Object {
-                        "width": "30px",
-                      }
-                    }
+                    class="treeRowIndentSpacer"
+                    style="width: 30px;"
                   />
                   <span
-                    className="treeRowToggleButton collapsed leaf"
-                    onClick={[Function]}
+                    class="treeRowToggleButton collapsed leaf"
                   />
                   <span
-                    className="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewRowColumn treeViewMainColumn name"
                   >
                     <a
                       href="http://localhost/from-url//calltree/?file=foo%2Fbar%2Fprofile1.json"
-                      onClick={[Function]}
                     >
                       profile1.json
                     </a>
                   </span>
                 </div>
                 <div
-                  className="treeViewRow treeViewRowScrolledColumns odd  "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowScrolledColumns odd  "
+                  style="height: 30px; line-height: 30px;"
                 >
                   <span
-                    className="treeRowIndentSpacer"
-                    style={
-                      Object {
-                        "width": "15px",
-                      }
-                    }
+                    class="treeRowIndentSpacer"
+                    style="width: 15px;"
                   />
                   <span
-                    className="treeRowToggleButton collapsed leaf"
-                    onClick={[Function]}
+                    class="treeRowToggleButton collapsed leaf"
                   />
                   <span
-                    className="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewRowColumn treeViewMainColumn name"
                   >
                     <a
                       href="http://localhost/from-url//calltree/?file=foo%2Fprofile2.json"
-                      onClick={[Function]}
                     >
                       profile2.json
                     </a>
                   </span>
                 </div>
                 <div
-                  className="treeViewRow treeViewRowScrolledColumns even  "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowScrolledColumns even  "
+                  style="height: 30px; line-height: 30px;"
                 >
                   <span
-                    className="treeRowIndentSpacer"
-                    style={
-                      Object {
-                        "width": "0px",
-                      }
-                    }
+                    class="treeRowIndentSpacer"
+                    style="width: 0px;"
                   />
                   <span
-                    className="treeRowToggleButton expanded canBeExpanded"
-                    onClick={[Function]}
+                    class="treeRowToggleButton expanded canBeExpanded"
                   />
                   <span
-                    className="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewRowColumn treeViewMainColumn name"
                   >
                     baz
                   </span>
                 </div>
                 <div
-                  className="treeViewRow treeViewRowScrolledColumns odd  "
-                  onMouseDown={[Function]}
-                  style={
-                    Object {
-                      "height": 30,
-                      "lineHeight": "30px",
-                    }
-                  }
+                  class="treeViewRow treeViewRowScrolledColumns odd  "
+                  style="height: 30px; line-height: 30px;"
                 >
                   <span
-                    className="treeRowIndentSpacer"
-                    style={
-                      Object {
-                        "width": "15px",
-                      }
-                    }
+                    class="treeRowIndentSpacer"
+                    style="width: 15px;"
                   />
                   <span
-                    className="treeRowToggleButton collapsed leaf"
-                    onClick={[Function]}
+                    class="treeRowToggleButton collapsed leaf"
                   />
                   <span
-                    className="treeViewRowColumn treeViewMainColumn name"
+                    class="treeViewRowColumn treeViewMainColumn name"
                   >
                     <a
                       href="http://localhost/from-url//calltree/?file=baz%2Fprofile3.json"
-                      onClick={[Function]}
                     >
                       profile3.json
                     </a>

@@ -2594,44 +2594,40 @@ Array [
 
 exports[`SelectedThreadActivityGraph matches the component snapshot 1`] = `
 <div
-  className="chartViewport selectedThreadActivityGraphViewport"
-  onKeyDown={[Function]}
-  onKeyUp={[Function]}
-  onMouseDown={[Function]}
-  onWheel={[Function]}
-  tabIndex={0}
+  class="chartViewport selectedThreadActivityGraphViewport"
+  tabindex="0"
 >
   <div>
     <div
-      className="selectedThreadActivityGraph"
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
+      class="selectedThreadActivityGraph"
     >
       <canvas
-        className="selectedThreadActivityGraphCanvas threadActivityGraphCanvas"
-        onMouseUp={[Function]}
+        class="selectedThreadActivityGraphCanvas threadActivityGraphCanvas"
+        height="10"
+        width="80"
       />
     </div>
     <div
-      className="selectedThreadStackGraph"
+      class="selectedThreadStackGraph"
     >
       <canvas
-        className="selectedThreadStackGraphCanvas threadStackGraphCanvas"
-        onMouseUp={[Function]}
+        class="selectedThreadStackGraphCanvas threadStackGraphCanvas"
+        height="10"
+        width="80"
       />
     </div>
   </div>
   <div
-    className="chartViewportShiftScroll hidden"
+    class="chartViewportShiftScroll hidden"
   >
     Zoom Chart:
     <kbd
-      className="chartViewportShiftScrollKbd"
+      class="chartViewportShiftScrollKbd"
     >
       Shift
     </kbd>
     <kbd
-      className="chartViewportShiftScrollKbd"
+      class="chartViewportShiftScrollKbd"
     >
       Scroll
     </kbd>

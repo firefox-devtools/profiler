@@ -3,27 +3,25 @@
 exports[`renders FlameGraph correctly 1`] = `
 <div
   aria-labelledby="flame-graph-tab-button"
-  className="flameGraph"
+  class="flameGraph"
   id="flame-graph-tab"
   role="tabpanel"
 >
   <div
-    className="stackSettings"
+    class="stackSettings"
   >
     <ul
-      className="stackSettingsList"
+      class="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem stackSettingsFilter"
+        class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsFilterLabel"
+          class="stackSettingsFilterLabel"
         >
           <input
-            checked={true}
-            className="stackSettingsFilterInput"
+            class="stackSettingsFilterInput"
             name="stack-settings-filter"
-            onChange={[Function]}
             title="Filter stack frames to a type."
             type="radio"
             value="combined"
@@ -31,13 +29,11 @@ exports[`renders FlameGraph correctly 1`] = `
           All stacks
         </label>
         <label
-          className="stackSettingsFilterLabel"
+          class="stackSettingsFilterLabel"
         >
           <input
-            checked={false}
-            className="stackSettingsFilterInput"
+            class="stackSettingsFilterInput"
             name="stack-settings-filter"
-            onChange={[Function]}
             title="Filter stack frames to a type."
             type="radio"
             value="js"
@@ -45,13 +41,11 @@ exports[`renders FlameGraph correctly 1`] = `
           JavaScript
         </label>
         <label
-          className="stackSettingsFilterLabel"
+          class="stackSettingsFilterLabel"
         >
           <input
-            checked={false}
-            className="stackSettingsFilterInput"
+            class="stackSettingsFilterInput"
             name="stack-settings-filter"
-            onChange={[Function]}
             title="Filter stack frames to a type."
             type="radio"
             value="cpp"
@@ -61,36 +55,31 @@ exports[`renders FlameGraph correctly 1`] = `
       </li>
     </ul>
     <div
-      className="stackSearchField stackSettingsSearchField"
+      class="stackSearchField stackSettingsSearchField"
     >
       <label
-        className="stackSearchFieldLabel"
+        class="stackSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          className="idleSearchField stackSearchFieldInput"
-          onSubmit={[Function]}
+          class="idleSearchField stackSearchFieldInput"
         >
           <input
-            className="idleSearchFieldInput"
+            class="idleSearchFieldInput"
             name="search"
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-            required="required"
+            required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
             value=""
           />
           <input
-            className="idleSearchFieldButton"
-            onClick={[Function]}
-            tabIndex={-1}
+            class="idleSearchFieldButton"
+            tabindex="-1"
             type="reset"
           />
         </form>
         <div
-          className="stackSearchFieldIntroduction isHidden"
+          class="stackSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -98,62 +87,49 @@ exports[`renders FlameGraph correctly 1`] = `
     </div>
   </div>
   <ol
-    className="filterNavigatorBar calltreeTransformNavigator"
+    class="filterNavigatorBar calltreeTransformNavigator"
   >
     <li
-      className="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
-      data-index={0}
-      onClick={[Function]}
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index="0"
       title="Complete \\"Empty\\""
     >
       <span
-        className="filterNavigatorBarItemContent"
+        class="filterNavigatorBarItemContent"
       >
         Complete "Empty"
       </span>
     </li>
   </ol>
   <div
-    className="flameGraphContent"
+    class="flameGraphContent"
   >
     <div
-      className="react-contextmenu-wrapper treeViewContextMenu"
-      onContextMenu={[Function]}
-      onMouseDown={[Function]}
-      onMouseOut={[Function]}
-      onMouseUp={[Function]}
-      onTouchEnd={[Function]}
-      onTouchStart={[Function]}
+      class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
-        className="chartViewport"
-        onKeyDown={[Function]}
-        onKeyUp={[Function]}
-        onMouseDown={[Function]}
-        onWheel={[Function]}
-        tabIndex={0}
+        class="chartViewport"
+        tabindex="0"
       >
         <div>
           <canvas
-            className="chartCanvas flameGraphCanvas"
-            onDoubleClick={[Function]}
-            onMouseDown={[Function]}
-            onMouseMove={[Function]}
-            onMouseOut={[Function]}
-            onMouseUp={[Function]}
+            class="chartCanvas flameGraphCanvas"
+            height="300"
+            style="width: 200px; height: 300px;"
+            width="200"
           />
         </div>
         <div
-          className="chartViewportShiftScroll hidden"
+          class="chartViewportShiftScroll hidden"
         >
           Zoom Chart:
           <kbd
-            className="chartViewportShiftScrollKbd"
+            class="chartViewportShiftScrollKbd"
           >
             Shift
           </kbd>
           <kbd
-            className="chartViewportShiftScrollKbd"
+            class="chartViewportShiftScrollKbd"
           >
             Scroll
           </kbd>
@@ -520,27 +496,25 @@ Array [
 exports[`renders a message instead of FlameGraph when call stack is inverted 1`] = `
 <div
   aria-labelledby="flame-graph-tab-button"
-  className="flameGraph"
+  class="flameGraph"
   id="flame-graph-tab"
   role="tabpanel"
 >
   <div
-    className="stackSettings"
+    class="stackSettings"
   >
     <ul
-      className="stackSettingsList"
+      class="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem stackSettingsFilter"
+        class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsFilterLabel"
+          class="stackSettingsFilterLabel"
         >
           <input
-            checked={true}
-            className="stackSettingsFilterInput"
+            class="stackSettingsFilterInput"
             name="stack-settings-filter"
-            onChange={[Function]}
             title="Filter stack frames to a type."
             type="radio"
             value="combined"
@@ -548,13 +522,11 @@ exports[`renders a message instead of FlameGraph when call stack is inverted 1`]
           All stacks
         </label>
         <label
-          className="stackSettingsFilterLabel"
+          class="stackSettingsFilterLabel"
         >
           <input
-            checked={false}
-            className="stackSettingsFilterInput"
+            class="stackSettingsFilterInput"
             name="stack-settings-filter"
-            onChange={[Function]}
             title="Filter stack frames to a type."
             type="radio"
             value="js"
@@ -562,13 +534,11 @@ exports[`renders a message instead of FlameGraph when call stack is inverted 1`]
           JavaScript
         </label>
         <label
-          className="stackSettingsFilterLabel"
+          class="stackSettingsFilterLabel"
         >
           <input
-            checked={false}
-            className="stackSettingsFilterInput"
+            class="stackSettingsFilterInput"
             name="stack-settings-filter"
-            onChange={[Function]}
             title="Filter stack frames to a type."
             type="radio"
             value="cpp"
@@ -578,36 +548,31 @@ exports[`renders a message instead of FlameGraph when call stack is inverted 1`]
       </li>
     </ul>
     <div
-      className="stackSearchField stackSettingsSearchField"
+      class="stackSearchField stackSettingsSearchField"
     >
       <label
-        className="stackSearchFieldLabel"
+        class="stackSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          className="idleSearchField stackSearchFieldInput"
-          onSubmit={[Function]}
+          class="idleSearchField stackSearchFieldInput"
         >
           <input
-            className="idleSearchFieldInput"
+            class="idleSearchFieldInput"
             name="search"
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-            required="required"
+            required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
             value=""
           />
           <input
-            className="idleSearchFieldButton"
-            onClick={[Function]}
-            tabIndex={-1}
+            class="idleSearchFieldButton"
+            tabindex="-1"
             type="reset"
           />
         </form>
         <div
-          className="stackSearchFieldIntroduction isHidden"
+          class="stackSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -615,30 +580,28 @@ exports[`renders a message instead of FlameGraph when call stack is inverted 1`]
     </div>
   </div>
   <ol
-    className="filterNavigatorBar calltreeTransformNavigator"
+    class="filterNavigatorBar calltreeTransformNavigator"
   >
     <li
-      className="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
-      data-index={0}
-      onClick={[Function]}
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index="0"
       title="Complete \\"Empty\\""
     >
       <span
-        className="filterNavigatorBarItemContent"
+        class="filterNavigatorBarItemContent"
       >
         Complete "Empty"
       </span>
     </li>
   </ol>
   <div
-    className="flameGraphDisabledMessage"
+    class="flameGraphDisabledMessage"
   >
     <h3>
       The Flame Graph is not available for inverted call stacks
     </h3>
     <p>
       <button
-        onClick={[Function]}
         type="button"
       >
         Switch to the normal call stack

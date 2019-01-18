@@ -9,9 +9,10 @@ import type { CssPixels } from '../../types/units';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
 
 import TrackMemory from '../../components/timeline/TrackMemory';
+import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -66,33 +67,37 @@ describe('TrackMemory', function() {
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
-    const view = mount(
+    const renderResult = render(
       <Provider store={store}>
         <TrackMemory counterIndex={0} />
       </Provider>
     );
+    const { container } = renderResult;
 
     // WithSize uses requestAnimationFrame
     flushRafCalls();
-    view.update();
 
-    const canvas = view.find('.timelineTrackMemoryCanvas').first();
+    const canvas = ensureExists(
+      container.querySelector('.timelineTrackMemoryCanvas'),
+      `Couldn't find the memory canvas, with selector .timelineTrackMemoryCanvas`
+    );
     const getTooltipContents = () =>
-      view.find('.timelineTrackMemoryTooltip').first();
-    const getMemoryDot = () => view.find('.timelineTrackMemoryDot').first();
+      document.querySelector('.timelineTrackMemoryTooltip');
+    const getMemoryDot = () =>
+      container.querySelector('.timelineTrackMemoryDot');
     const moveMouseAtCounter = index =>
-      view.simulate(
-        'mousemove',
-        getMouseEvent({ pageX: getSamplesPixelPosition(index) })
+      fireEvent(
+        canvas,
+        getMouseEvent('mousemove', { pageX: getSamplesPixelPosition(index) })
       );
 
     return {
+      ...renderResult,
       dispatch,
       getState,
       profile,
       thread,
       store,
-      view,
       threadIndex,
       canvas,
       getTooltipContents,
@@ -107,8 +112,8 @@ describe('TrackMemory', function() {
   afterEach(removeRootOverlayElement);
 
   it('matches the component snapshot', () => {
-    const { view } = setup();
-    expect(view).toMatchSnapshot();
+    const { container } = setup();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the 2d canvas draw snapshot', () => {
@@ -117,18 +122,13 @@ describe('TrackMemory', function() {
     expect(ctx.__flushDrawLog()).toMatchSnapshot();
   });
 
-  it('has the correct selectors into useful parts of the component for the samples profile', function() {
-    const { canvas } = setup();
-    expect(canvas.exists()).toBe(true);
-  });
-
   it('can create a tooltip', function() {
-    const { moveMouseAtCounter, getTooltipContents, view } = setup();
-    expect(getTooltipContents().exists()).toBe(false);
+    const { moveMouseAtCounter, getTooltipContents, canvas } = setup();
+    expect(getTooltipContents()).toBeFalsy();
     moveMouseAtCounter(1);
-    expect(getTooltipContents().exists()).toBe(true);
-    view.simulate('mouseleave');
-    expect(getTooltipContents().exists()).toBe(false);
+    expect(getTooltipContents()).toBeTruthy();
+    fireEvent.mouseLeave(canvas);
+    expect(getTooltipContents()).toBeFalsy();
   });
 
   it('has a tooltip that matches the snapshot', function() {
@@ -139,9 +139,9 @@ describe('TrackMemory', function() {
 
   it('draws a dot on the graph', function() {
     const { moveMouseAtCounter, getMemoryDot } = setup();
-    expect(getMemoryDot().exists()).toBe(false);
+    expect(getMemoryDot()).toBeFalsy();
     moveMouseAtCounter(1);
-    expect(getMemoryDot().exists()).toBe(true);
+    expect(getMemoryDot()).toBeTruthy();
   });
 
   it('draws a dot that matches the snapshot', function() {

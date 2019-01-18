@@ -3,12 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import { createSerializer } from 'enzyme-to-json';
-
-Enzyme.configure({ adapter: new Adapter() });
-expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
+import { cleanup } from 'react-testing-library';
 
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
@@ -19,3 +14,5 @@ afterEach(function() {
   const { __shutdownWorkers } = (WorkerFactory: Object);
   __shutdownWorkers();
 });
+
+afterEach(cleanup);

@@ -2,29 +2,26 @@
 
 exports[`timeline/TrackThread matches the snapshot 1`] = `
 <div
-  className="timelineTrackThread"
+  class="timelineTrackThread"
 >
   <div
-    className="timelineTrackThreadMarkerOverview selected"
+    class="timelineTrackThreadMarkerOverview selected"
   >
     <canvas
-      className="timelineMarkersCanvas"
-      onMouseDown={[Function]}
-      onMouseMove={[Function]}
-      onMouseOut={[Function]}
-      onMouseUp={[Function]}
+      class="timelineMarkersCanvas"
     />
   </div>
   <div
-    className="threadStackGraph"
+    class="threadStackGraph"
   >
     <canvas
-      className="threadStackGraphCanvas threadStackGraphCanvas"
-      onMouseUp={[Function]}
+      class="threadStackGraphCanvas threadStackGraphCanvas"
+      height="50"
+      width="400"
     />
   </div>
   <div
-    className="timelineEmptyThreadIndicator"
+    class="timelineEmptyThreadIndicator"
   />
 </div>
 `;

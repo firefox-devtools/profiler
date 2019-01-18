@@ -426,18 +426,14 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
 
   _renderShortcuts() {
     return (
-      <p>
-        <div>
-          <p>
-            <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> Stop and start
-            profiling
-          </p>
-          <p>
-            <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd> Capture and load
-            profile
-          </p>
-        </div>
-      </p>
+      <div>
+        <p>
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> Stop and start profiling
+        </p>
+        <p>
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd> Capture and load profile
+        </p>
+      </div>
     );
   }
 

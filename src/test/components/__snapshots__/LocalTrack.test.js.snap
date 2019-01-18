@@ -2,47 +2,34 @@
 
 exports[`timeline/LocalTrack with a memory track matches the snapshot of the memory track 1`] = `
 <li
-  className="timelineTrack timelineTrackLocal"
+  class="timelineTrack timelineTrackLocal"
 >
   <div
-    className="timelineTrackRow timelineTrackLocalRow"
-    onClick={[Function]}
+    class="timelineTrackRow timelineTrackLocalRow"
   >
     <div
-      className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-      onContextMenu={[Function]}
-      onMouseDown={[Function]}
-      onMouseOut={[Function]}
-      onMouseUp={[Function]}
-      onTouchEnd={[Function]}
-      onTouchStart={[Function]}
+      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
       title="My Description"
     >
       <button
-        className="timelineTrackNameButton"
+        class="timelineTrackNameButton"
         type="button"
       >
         Memory
       </button>
     </div>
     <div
-      className="timelineTrackTrack"
+      class="timelineTrackTrack"
     >
       <div
-        className="timelineTrackMemory"
-        onMouseLeave={[Function]}
-        onMouseMove={[Function]}
-        style={
-          Object {
-            "height": 25,
-          }
-        }
+        class="timelineTrackMemory"
+        style="height: 25px;"
       >
         <canvas
-          className="timelineTrackMemoryCanvas"
+          class="timelineTrackMemoryCanvas"
         />
         <div
-          className="timelineEmptyThreadIndicator"
+          class="timelineEmptyThreadIndicator"
         />
       </div>
     </div>
@@ -52,42 +39,30 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
 
 exports[`timeline/LocalTrack with a network track matches the snapshot of the network track 1`] = `
 <li
-  className="timelineTrack timelineTrackLocal"
+  class="timelineTrack timelineTrackLocal"
 >
   <div
-    className="timelineTrackRow timelineTrackLocalRow"
-    onClick={[Function]}
+    class="timelineTrackRow timelineTrackLocalRow"
   >
     <div
-      className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-      onContextMenu={[Function]}
-      onMouseDown={[Function]}
-      onMouseOut={[Function]}
-      onMouseUp={[Function]}
-      onTouchEnd={[Function]}
-      onTouchStart={[Function]}
-      title={null}
+      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
     >
       <button
-        className="timelineTrackNameButton"
+        class="timelineTrackNameButton"
         type="button"
       >
         Network
       </button>
     </div>
     <div
-      className="timelineTrackTrack"
+      class="timelineTrackTrack"
     >
       <div
-        className="timelineTrackNetwork"
-        style={
-          Object {
-            "height": 35,
-          }
-        }
+        class="timelineTrackNetwork"
+        style="height: 35px;"
       >
         <canvas
-          className="timelineTrackNetworkCanvas"
+          class="timelineTrackNetworkCanvas"
         />
       </div>
     </div>
@@ -97,59 +72,47 @@ exports[`timeline/LocalTrack with a network track matches the snapshot of the ne
 
 exports[`timeline/LocalTrack with a thread track matches the snapshot of a local track 1`] = `
 <li
-  className="timelineTrack timelineTrackLocal"
+  class="timelineTrack timelineTrackLocal"
 >
   <div
-    className="timelineTrackRow timelineTrackLocalRow"
-    onClick={[Function]}
+    class="timelineTrackRow timelineTrackLocalRow"
   >
     <div
-      className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-      onContextMenu={[Function]}
-      onMouseDown={[Function]}
-      onMouseOut={[Function]}
-      onMouseUp={[Function]}
-      onTouchEnd={[Function]}
-      onTouchStart={[Function]}
+      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
       title="thread: \\"DOM Worker\\" (0)
 process: \\"tab\\" (222)"
     >
       <button
-        className="timelineTrackNameButton"
+        class="timelineTrackNameButton"
         type="button"
       >
         DOM Worker
       </button>
     </div>
     <div
-      className="timelineTrackTrack"
+      class="timelineTrackTrack"
     >
       <div
-        className="timelineTrackThread"
+        class="timelineTrackThread"
       >
         <div
-          className="timelineTrackThreadMarkerOverview"
+          class="timelineTrackThreadMarkerOverview"
         >
           <canvas
-            className="timelineMarkersCanvas"
-            onMouseDown={[Function]}
-            onMouseMove={[Function]}
-            onMouseOut={[Function]}
-            onMouseUp={[Function]}
+            class="timelineMarkersCanvas"
           />
         </div>
         <div
-          className="threadActivityGraph"
-          onMouseLeave={[Function]}
-          onMouseMove={[Function]}
+          class="threadActivityGraph"
         >
           <canvas
-            className="threadActivityGraphCanvas threadActivityGraphCanvas"
-            onMouseUp={[Function]}
+            class="threadActivityGraphCanvas threadActivityGraphCanvas"
+            height="400"
+            width="400"
           />
         </div>
         <div
-          className="timelineEmptyThreadIndicator"
+          class="timelineEmptyThreadIndicator"
         />
       </div>
     </div>
