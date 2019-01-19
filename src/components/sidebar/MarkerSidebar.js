@@ -16,11 +16,11 @@ import type {
   ExplicitConnectOptions,
 } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
-import type { TracingMarker } from '../../types/profile-derived';
+import type { Marker } from '../../types/profile-derived';
 
 type StateProps = {|
   +selectedThreadIndex: ThreadIndex,
-  +marker: ?TracingMarker,
+  +marker: ?Marker,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
@@ -52,7 +52,7 @@ class MarkerSidebar extends React.PureComponent<Props> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: state => ({
-    marker: selectedThreadSelectors.getPreviewFilteredTracingMarkers(state)[
+    marker: selectedThreadSelectors.getPreviewFilteredMarkers(state)[
       selectedThreadSelectors.getSelectedMarkerIndex(state)
     ],
     selectedThreadIndex: getSelectedThreadIndex(state),

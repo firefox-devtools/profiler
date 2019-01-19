@@ -7,12 +7,12 @@ jest.mock('react-dom');
 
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import renderer from 'react-test-renderer';
+import { render } from 'react-testing-library';
 
 import EmptyThreadIndicator, {
   getIndicatorPositions,
 } from '../../components/timeline/EmptyThreadIndicator';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
@@ -62,7 +62,7 @@ describe('EmptyThreadIndicator', function() {
       const props = propsFromViewportRange({ start: 0, end: 10 });
 
       const flushRafCalls = mockRaf(); // WithSize uses requestAnimationFrame
-      const component = renderer.create(
+      const { container } = render(
         // The props have to be passed in manually to avoid adding the SizeProps.
         <EmptyThreadIndicator
           rangeStart={props.rangeStart}
@@ -74,7 +74,7 @@ describe('EmptyThreadIndicator', function() {
       );
       flushRafCalls();
 
-      expect(component).toMatchSnapshot();
+      expect(container.firstChild).toMatchSnapshot();
     });
 
     it('matches the snapshot when rendering no indicators', () => {
@@ -82,7 +82,7 @@ describe('EmptyThreadIndicator', function() {
       const props = propsFromViewportRange({ start: 5.5, end: 6.5 });
 
       const flushRafCalls = mockRaf(); // WithSize uses requestAnimationFrame
-      const component = renderer.create(
+      const { container } = render(
         // The props have to be passed in manually to avoid adding the SizeProps.
         <EmptyThreadIndicator
           rangeStart={props.rangeStart}
@@ -93,7 +93,7 @@ describe('EmptyThreadIndicator', function() {
         />
       );
       flushRafCalls();
-      expect(component).toMatchSnapshot();
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 

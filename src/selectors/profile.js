@@ -7,6 +7,10 @@ import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
 import { ensureExists } from '../utils/flow';
+import {
+  filterCounterToRange,
+  accumulateCounterSamples,
+} from '../profile-logic/profile-data';
 
 import type {
   Profile,
@@ -15,11 +19,14 @@ import type {
   Thread,
   ThreadIndex,
   Pid,
+  Counter,
+  CounterIndex,
 } from '../types/profile';
 import type {
   LocalTrack,
   TrackIndex,
   GlobalTrack,
+  AccumulatedCounterSamples,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -96,6 +103,56 @@ export const getRightClickedTrack: Selector<TrackReference> = state =>
   getProfileViewOptions(state).rightClickedTrack;
 export const getPreviewSelection: Selector<PreviewSelection> = state =>
   getProfileViewOptions(state).previewSelection;
+export const getCounter: Selector<Counter[] | null> = state =>
+  getProfile(state).counters || null;
+
+const _counterSelectors = {};
+export const getCounterSelectors = (index: CounterIndex) => {
+  let selectors = _counterSelectors[index];
+  if (!selectors) {
+    selectors = _createCounterSelectors(index);
+    _counterSelectors[index] = selectors;
+  }
+  return selectors;
+};
+
+/**
+ * This function creates selectors for each of the Counters in the profile. The type
+ * signature of each selector is defined in the function body, and inferred in the return
+ * type of the function.
+ */
+function _createCounterSelectors(counterIndex: CounterIndex): * {
+  const getCounter: Selector<Counter> = state =>
+    ensureExists(
+      getProfile(state).counters,
+      'Attempting to get a counter by index, but no counters exist.'
+    )[counterIndex];
+
+  const getDescription: Selector<string> = state =>
+    getCounter(state).description;
+
+  const getPid: Selector<Pid> = state => getCounter(state).pid;
+
+  const getCommittedRangeFilteredCounter: Selector<Counter> = createSelector(
+    getCounter,
+    getCommittedRange,
+    (counters, range) => filterCounterToRange(counters, range.start, range.end)
+  );
+
+  const getAccumulateCounterSamples: Selector<
+    AccumulatedCounterSamples
+  > = createSelector(getCommittedRangeFilteredCounter, counters =>
+    accumulateCounterSamples(counters.sampleGroups.samples)
+  );
+
+  return {
+    getCounter,
+    getDescription,
+    getPid,
+    getCommittedRangeFilteredCounter,
+    getAccumulateCounterSamples,
+  };
+}
 
 /**
  * Tracks

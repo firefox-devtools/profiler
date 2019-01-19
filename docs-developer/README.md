@@ -26,3 +26,4 @@ This project is a client for reading profiles from the Gecko Profiler and potent
  * [Call tree](./call-tree.md)
  * [Frames, funcs, stacks and CallNodes in C++](./call-nodes-in-cpp.md)
  * [Deploying to production](./deploying.md)
+ * [Symbolication](./symbolication.md)

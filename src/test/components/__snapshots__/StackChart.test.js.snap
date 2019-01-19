@@ -3,27 +3,25 @@
 exports[`StackChart matches the snapshot 1`] = `
 <div
   aria-labelledby="stack-chart-tab-button"
-  className="stackChart"
+  class="stackChart"
   id="stack-chart-tab"
   role="tabpanel"
 >
   <div
-    className="stackSettings"
+    class="stackSettings"
   >
     <ul
-      className="stackSettingsList"
+      class="stackSettingsList"
     >
       <li
-        className="stackSettingsListItem stackSettingsFilter"
+        class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          className="stackSettingsFilterLabel"
+          class="stackSettingsFilterLabel"
         >
           <input
-            checked={true}
-            className="stackSettingsFilterInput"
+            class="stackSettingsFilterInput"
             name="stack-settings-filter"
-            onChange={[Function]}
             title="Filter stack frames to a type."
             type="radio"
             value="combined"
@@ -31,13 +29,11 @@ exports[`StackChart matches the snapshot 1`] = `
           All stacks
         </label>
         <label
-          className="stackSettingsFilterLabel"
+          class="stackSettingsFilterLabel"
         >
           <input
-            checked={false}
-            className="stackSettingsFilterInput"
+            class="stackSettingsFilterInput"
             name="stack-settings-filter"
-            onChange={[Function]}
             title="Filter stack frames to a type."
             type="radio"
             value="js"
@@ -45,13 +41,11 @@ exports[`StackChart matches the snapshot 1`] = `
           JavaScript
         </label>
         <label
-          className="stackSettingsFilterLabel"
+          class="stackSettingsFilterLabel"
         >
           <input
-            checked={false}
-            className="stackSettingsFilterInput"
+            class="stackSettingsFilterInput"
             name="stack-settings-filter"
-            onChange={[Function]}
             title="Filter stack frames to a type."
             type="radio"
             value="cpp"
@@ -60,52 +54,46 @@ exports[`StackChart matches the snapshot 1`] = `
         </label>
       </li>
       <li
-        className="stackSettingsListItem"
+        class="stackSettingsListItem"
       >
         <label
-          className="stackSettingsLabel"
+          class="stackSettingsLabel"
         >
           <input
-            checked={false}
-            className="stackSettingsCheckbox"
-            onChange={[Function]}
+            class="stackSettingsCheckbox"
             type="checkbox"
+            value="on"
           />
            Invert call stack
         </label>
       </li>
     </ul>
     <div
-      className="stackSearchField stackSettingsSearchField"
+      class="stackSearchField stackSettingsSearchField"
     >
       <label
-        className="stackSearchFieldLabel"
+        class="stackSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          className="idleSearchField stackSearchFieldInput"
-          onSubmit={[Function]}
+          class="idleSearchField stackSearchFieldInput"
         >
           <input
-            className="idleSearchFieldInput"
+            class="idleSearchFieldInput"
             name="search"
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-            required="required"
+            required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
             value=""
           />
           <input
-            className="idleSearchFieldButton"
-            onClick={[Function]}
-            tabIndex={-1}
+            class="idleSearchFieldButton"
+            tabindex="-1"
             type="reset"
           />
         </form>
         <div
-          className="stackSearchFieldIntroduction isHidden"
+          class="stackSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -113,37 +101,31 @@ exports[`StackChart matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    className="stackChartContent"
+    class="stackChartContent"
   >
     <div
-      className="chartViewport"
-      onKeyDown={[Function]}
-      onKeyUp={[Function]}
-      onMouseDown={[Function]}
-      onWheel={[Function]}
-      tabIndex={0}
+      class="chartViewport"
+      tabindex="0"
     >
       <div>
         <canvas
-          className="chartCanvas stackChartCanvas"
-          onDoubleClick={[Function]}
-          onMouseDown={[Function]}
-          onMouseMove={[Function]}
-          onMouseOut={[Function]}
-          onMouseUp={[Function]}
+          class="chartCanvas stackChartCanvas"
+          height="300"
+          style="width: 365px; height: 300px;"
+          width="365"
         />
       </div>
       <div
-        className="chartViewportShiftScroll hidden"
+        class="chartViewportShiftScroll hidden"
       >
         Zoom Chart:
         <kbd
-          className="chartViewportShiftScrollKbd"
+          class="chartViewportShiftScrollKbd"
         >
           Shift
         </kbd>
         <kbd
-          className="chartViewportShiftScrollKbd"
+          class="chartViewportShiftScrollKbd"
         >
           Scroll
         </kbd>
@@ -180,7 +162,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#0060df60",
   ],
   Array [
     "fillRect",
@@ -205,7 +187,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#0060df60",
   ],
   Array [
     "fillRect",
@@ -230,7 +212,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#12bc0060",
   ],
   Array [
     "fillRect",
@@ -255,7 +237,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#45a1ff60",
   ],
   Array [
     "fillRect",
@@ -280,7 +262,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#12bc0060",
   ],
   Array [
     "fillRect",
@@ -305,7 +287,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#12bc0060",
   ],
   Array [
     "fillRect",
@@ -330,7 +312,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#45a1ff60",
   ],
   Array [
     "fillRect",
@@ -355,7 +337,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#12bc0060",
   ],
   Array [
     "fillRect",
@@ -380,7 +362,7 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#ededf0",
+    "#12bc0060",
   ],
   Array [
     "fillRect",

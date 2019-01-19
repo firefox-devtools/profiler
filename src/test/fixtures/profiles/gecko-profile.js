@@ -9,6 +9,7 @@ import type {
   GeckoProfile,
   GeckoProfileMeta,
   GeckoThread,
+  GeckoCounter,
   GeckoMarkerStack,
 } from '../../../types/gecko-profile';
 
@@ -18,7 +19,7 @@ import { CURRENT_VERSION } from '../../../profile-logic/gecko-profile-versioning
  * export defaults one object that is an example profile, in the Gecko format,
  * i.e. the format that nsIProfiler.getProfileDataAsync outputs.
  */
-export default function createGeckoProfile(): GeckoProfile {
+export function createGeckoProfile(): GeckoProfile {
   const parentProcessBinary: Lib = {
     breakpadId: 'F1D957D30B413D55A539BBA06F90DD8F0',
     debugName: 'firefox',
@@ -123,11 +124,13 @@ export default function createGeckoProfile(): GeckoProfile {
         ..._createGeckoThread(),
         name: 'GeckoMain',
         processType: 'default',
+        pid: 3333,
       },
       {
         ..._createGeckoThread(),
         name: 'Compositor',
         processType: 'default',
+        pid: 3333,
       },
     ],
     processes: [contentProcessProfile],
@@ -454,4 +457,134 @@ function _createGeckoThread(): GeckoThread {
       'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5', // 13
     ],
   };
+}
+
+/**
+ * This function creates a gecko profile with some arbitrary JS timings. This was
+ * primarily created for before this project had the richer profile making fixtures.
+ * It most likely shouldn't be used for new tests.
+ */
+export function createGeckoProfileWithJsTimings(): GeckoProfile {
+  const geckoProfile = createGeckoProfile();
+  return {
+    meta: geckoProfile.meta,
+    libs: geckoProfile.libs,
+    pages: geckoProfile.pages,
+    pausedRanges: [],
+    threads: [
+      _createGeckoThreadWithJsTimings('GeckoMain'),
+      _createGeckoThreadWithJsTimings('Compositor'),
+      _createGeckoThreadWithJsTimings('GeckoMain'),
+    ],
+    processes: [],
+  };
+}
+
+function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
+  return {
+    name,
+    registerTime: 0,
+    processType: 'default',
+    unregisterTime: 100,
+    tid: 1111,
+    pid: 2222,
+    samples: {
+      schema: { stack: 0, time: 1, responsiveness: 2, rss: 3, uss: 4 },
+      data: [
+        [1, 0, 0, null, null], // (root), 0x100000f84
+        [2, 10, 0, null, null], // (root), 0x100000f84, 0x100001a45
+        [2, 20, 0, null, null], // (root), 0x100000f84, 0x100001a45
+        [3, 30, 0, null, null], // (root), 0x100000f84, Startup::XRE_Main
+        [0, 40, 0, null, null], // (root)
+        [1, 50, 0, null, null], // (root), 0x100000f84
+        [4, 60, 0, null, null], // (root), 0x100000f84, javascriptOne
+        [5, 70, 0, null, null], // (root), 0x100000f84, javascriptOne, javascriptTwo
+        [8, 80, 0, null, null], // (root), 0x100000f84, javascriptOne, javascriptTwo, 0x10000f0f0, 0x100fefefe, javascriptThree
+        [4, 90, 0, null, null], // (root), 0x100000f84, javascriptOne
+      ],
+    },
+    stackTable: {
+      schema: { prefix: 0, frame: 1 },
+      data: [
+        [null, 0], // 0: (root)
+        [0, 1], // 1: (root), 0x100000f84
+        [1, 2], // 2: (root), 0x100000f84, 0x100001a45
+        [1, 3], // 3: (root), 0x100000f84, Startup::XRE_Main
+        [1, 4], // 4: (root), 0x100000f84, javascriptOne
+        [4, 5], // 5: (root), 0x100000f84, javascriptOne, javascriptTwo
+        [5, 6], // 6: (root), 0x100000f84, javascriptOne, javascriptTwo, 0x10000f0f0
+        [6, 7], // 7: (root), 0x100000f84, javascriptOne, javascriptTwo, 0x10000f0f0, 0x100fefefe
+        [7, 8], // 8: (root), 0x100000f84, javascriptOne, javascriptTwo, 0x10000f0f0, 0x100fefefe, javascriptThree
+      ],
+    },
+    frameTable: {
+      schema: {
+        location: 0,
+        relevantForJS: 1,
+        implementation: 2,
+        optimizations: 3,
+        line: 4,
+        column: 5,
+        category: 6,
+      },
+      data: [
+        [0, false, null, null, null, null], // 0: (root)
+        [1, false, null, null, null, null], // 1: 0x100000f84
+        [2, false, null, null, null, null], // 2: 0x100001a45
+        [3, false, null, null, 4391, 16], // 3: Startup::XRE_Main, line 4391, category 16
+        [7, false, 6, null, 1, null], // 4: javascriptOne, implementation 'baseline', line 1
+        [8, false, 6, null, 2, null], // 5: javascriptTwo, implementation 'baseline', line 2
+        [9, false, null, null, null, null], // 6: 0x10000f0f0
+        [10, false, null, null, null, null], // 7: 0x100fefefe
+        [11, false, null, null, 3, null], // 8: javascriptThree, implementation null, line 3
+      ],
+    },
+    markers: {
+      schema: { name: 0, time: 1, data: 2 },
+      data: [],
+    },
+    stringTable: [
+      '(root)', // 0
+      '0x100000f84', // 1
+      '0x100001a45', // 2
+      'Startup::XRE_Main', // 3
+      'VsyncTimestamp', // 4
+      'Reflow', // 5
+      'baseline', // 6
+      'javascriptOne (http://js.com/foobar:1:1)', // 7
+      'javascriptTwo (http://js.com/foobar:2:2)', // 8
+      '0x10000f0f0', // 9
+      '0x100fefefe', // 10
+      'javascriptThree (http://js.com/foobar:3:3)', // 11
+    ],
+  };
+}
+
+export function createGeckoCounter(thread: GeckoThread): GeckoCounter {
+  const geckoCounter: GeckoCounter = {
+    name: 'My Counter',
+    category: 'My Category',
+    description: 'My Description',
+    sample_groups: {
+      id: 0,
+      samples: {
+        schema: {
+          time: 0,
+          number: 1,
+          count: 2,
+        },
+        data: [],
+      },
+    },
+  };
+  for (let i = 0; i < thread.samples.data.length; i++) {
+    // Go through all the thread samples and create a corresponding counter entry.
+    const time = thread.samples.data[i][1];
+    // Create some arbitrary (positive integer) values for the number.
+    const number = Math.floor(50 * Math.sin(i) + 50);
+    // Create some arbitrary values for the count.
+    const count = Math.sin(i);
+    geckoCounter.sample_groups.samples.data.push([time, number, count]);
+  }
+  return geckoCounter;
 }

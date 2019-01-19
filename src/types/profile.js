@@ -9,7 +9,7 @@ import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload } from './markers';
 export type IndexIntoStackTable = number;
 export type IndexIntoSamplesTable = number;
-export type IndexIntoMarkersTable = number;
+export type IndexIntoRawMarkerTable = number;
 export type IndexIntoFrameTable = number;
 export type IndexIntoStringTable = number;
 export type IndexIntoFuncTable = number;
@@ -19,6 +19,7 @@ export type IndexIntoCategoryList = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 export type IndexIntoJsTracerEvents = number;
+export type CounterIndex = number;
 
 /**
  * If a pid is a number, then it is the int value that came from the profiler.
@@ -111,8 +112,13 @@ export type ProfilerMarkerPayload = {
  * system. For instance Paint markers instrument the rendering and layout process.
  * Engineers can easily add arbitrary markers to their code without coordinating with
  * perf.html to instrument their code.
+ *
+ * In the profile, these markers are raw and unprocessed. In the marker selectors, we
+ * can run them through a processing pipeline to match up start and end markers to
+ * create markers with durations, or even take a string-only marker and parse
+ * it into a structured marker.
  */
-export type MarkersTable = {
+export type RawMarkerTable = {
   data: MarkerPayload[],
   name: IndexIntoStringTable[],
   time: number[],
@@ -232,6 +238,27 @@ export type JsTracerTable = {|
   length: number,
 |};
 
+export type CounterSamplesTable = {|
+  time: Milliseconds[],
+  // The number of times the Counter's "number" was changed since the previous sample.
+  number: number[],
+  // The count of the data, for instance for memory this would be bytes.
+  count: number[],
+  length: number,
+|};
+
+export type Counter = {|
+  name: string,
+  category: string,
+  description: string,
+  pid: Pid,
+  mainThreadIndex: ThreadIndex,
+  sampleGroups: {|
+    id: number,
+    samples: CounterSamplesTable,
+  |},
+|};
+
 /**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
@@ -264,7 +291,7 @@ export type Thread = {
   pid: Pid,
   tid: number | void,
   samples: SamplesTable,
-  markers: MarkersTable,
+  markers: RawMarkerTable,
   stackTable: StackTable,
   frameTable: FrameTable,
   // Strings for profiles are collected into a single table, and are referred to by
@@ -359,5 +386,8 @@ export type ProfileMeta = {|
 export type Profile = {
   meta: ProfileMeta,
   pages?: PageList,
+  // The counters list is optional only because old profilers may not have them.
+  // An upgrader could be written to make this non-optional.
+  counters?: Counter[],
   threads: Thread[],
 };

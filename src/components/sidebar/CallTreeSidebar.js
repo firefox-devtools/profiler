@@ -12,6 +12,7 @@ import {
   selectedNodeSelectors,
 } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getCategories } from '../../selectors/profile';
 import { getFunctionName } from '../../profile-logic/function-info';
 import { assertExhaustiveCheck } from '../../utils/flow';
 import CanSelectContent from './CanSelectContent';
@@ -20,7 +21,7 @@ import type {
   ConnectedProps,
   ExplicitConnectOptions,
 } from '../../utils/connect';
-import type { ThreadIndex } from '../../types/profile';
+import type { ThreadIndex, CategoryList } from '../../types/profile';
 import type {
   CallNodeTable,
   IndexIntoCallNodeTable,
@@ -28,20 +29,30 @@ import type {
 import type { Milliseconds } from '../../types/units';
 import type {
   BreakdownByImplementation,
+  BreakdownByCategory,
   StackImplementation,
   TimingsForPath,
 } from '../../profile-logic/profile-data';
 
 type SidebarDetailProps = {|
   +label: string,
+  +color?: string,
   +children: React.Node,
 |};
 
-function SidebarDetail({ label, children }: SidebarDetailProps) {
+function SidebarDetail({ label, color, children }: SidebarDetailProps) {
   return (
     <React.Fragment>
       <div className="sidebar-label">{label}:</div>
       <div className="sidebar-value">{children}</div>
+      {color ? (
+        <div
+          className={`sidebar-color category-swatch category-color-${color}`}
+          title={label}
+        />
+      ) : (
+        <div />
+      )}
     </React.Fragment>
   );
 }
@@ -99,8 +110,36 @@ class ImplementationBreakdown extends React.PureComponent<
   }
 }
 
+type CategoryBreakdownProps = {|
+  +breakdown: BreakdownByCategory,
+  +categoryList: CategoryList,
+|};
+
+class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
+  render() {
+    const { breakdown, categoryList } = this.props;
+    const data = breakdown
+      .map((value, categoryIndex) => {
+        const category = categoryList[categoryIndex];
+        return {
+          group: category.name,
+          value: value || 0,
+          color: category.color,
+        };
+      })
+      // sort in descending order
+      .sort(({ value: valueA }, { value: valueB }) => valueB - valueA);
+
+    return <Breakdown data={data} />;
+  }
+}
+
 type BreakdownProps = {|
-  +data: $ReadOnlyArray<{| group: string, value: Milliseconds |}>,
+  +data: $ReadOnlyArray<{|
+    group: string,
+    color?: string,
+    value: Milliseconds,
+  |}>,
 |};
 
 // This stateless component is responsible for displaying the implementation
@@ -108,11 +147,11 @@ type BreakdownProps = {|
 function Breakdown({ data }: BreakdownProps) {
   const totalTime = data.reduce((result, item) => result + item.value, 0);
 
-  return data.filter(({ value }) => value).map(({ group, value }) => {
+  return data.filter(({ value }) => value).map(({ group, color, value }) => {
     const percentage = Math.round(value / totalTime * 100);
 
     return (
-      <SidebarDetail label={group} key={group}>
+      <SidebarDetail label={group} color={color} key={group}>
         {value}ms ({percentage}%)
       </SidebarDetail>
     );
@@ -126,13 +165,14 @@ type StateProps = {|
   +name: string,
   +lib: string,
   +timings: TimingsForPath,
+  +categoryList: CategoryList,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 class CallTreeSidebar extends React.PureComponent<Props> {
   render() {
-    const { selectedNodeIndex, name, lib, timings } = this.props;
+    const { selectedNodeIndex, name, lib, timings, categoryList } = this.props;
     const {
       forPath: { selfTime, totalTime },
       forFunc: { selfTime: selfTimeForFunc, totalTime: totalTimeForFunc },
@@ -180,6 +220,15 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           <SidebarDetail label="Self Time">
             {selfTime.value ? `${selfTime.value}ms (${selfTimePercent}%)` : '—'}
           </SidebarDetail>
+          {totalTime.breakdownByCategory ? (
+            <>
+              <h4 className="sidebar-title3">Categories</h4>
+              <CategoryBreakdown
+                breakdown={totalTime.breakdownByCategory}
+                categoryList={categoryList}
+              />
+            </>
+          ) : null}
           {totalTime.breakdownByImplementation ? (
             <React.Fragment>
               <h4 className="sidebar-title3">Implementation – running time</h4>
@@ -237,6 +286,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
     name: getFunctionName(selectedNodeSelectors.getName(state)),
     lib: selectedNodeSelectors.getLib(state),
     timings: selectedNodeSelectors.getTimingsForSidebar(state),
+    categoryList: getCategories(state),
   }),
   component: CallTreeSidebar,
 };

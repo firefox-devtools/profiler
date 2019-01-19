@@ -5,14 +5,19 @@
 // @flow
 import * as React from 'react';
 import Markers from '../../components/marker-table';
-import renderer from 'react-test-renderer';
+import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('MarkerTable', function() {
   it('renders some basic markers', () => {
+    // Set an arbitrary size that will not kick in any virtualization behavior.
+    jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(2000, 1000));
+
     // These were all taken from real-world values.
     const profile = getProfileWithMarkers(
       [
@@ -41,34 +46,12 @@ describe('MarkerTable', function() {
         .sort((a, b) => a[1] - b[1])
     );
 
-    const markers = renderer.create(
+    const { container } = render(
       <Provider store={storeWithProfile(profile)}>
         <Markers />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
-    expect(markers.toJSON()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
-
-/**
- * Mock out any created refs for the call tree components with relevant information.
- */
-function createNodeMock(element) {
-  const classNameParts = element.props.className.split(' ');
-  if (
-    // <VirtualList />
-    classNameParts.includes('treeViewBody') ||
-    // <VirtualListInner />
-    classNameParts.includes('treeViewBodyInner')
-  ) {
-    return {
-      addEventListener: () => {},
-      // Set an arbitrary size that will not kick in any virtualization behavior.
-      getBoundingClientRect: () => getBoundingBox(2000, 1000),
-      focus: () => {},
-    };
-  }
-  return null;
-}

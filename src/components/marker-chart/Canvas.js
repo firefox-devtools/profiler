@@ -22,11 +22,12 @@ import type {
 } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
 import type {
-  TracingMarker,
+  Marker,
   MarkerTimingRows,
   IndexIntoMarkerTiming,
 } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
+import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type MarkerDrawingInformation = {
   x: CssPixels,
@@ -42,9 +43,11 @@ type OwnProps = {|
   +rangeEnd: Milliseconds,
   +markerTimingRows: MarkerTimingRows,
   +rowHeight: CssPixels,
-  +markers: TracingMarker[],
+  +markers: Marker[],
   +threadIndex: ThreadIndex,
-  +updatePreviewSelection: typeof updatePreviewSelection,
+  +updatePreviewSelection: WrapFunctionInDispatch<
+    typeof updatePreviewSelection
+  >,
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
 |};
@@ -217,8 +220,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
             w = 10;
           }
 
-          const tracingMarkerIndex = markerTiming.index[i];
-          const isHovered = hoveredItem === tracingMarkerIndex;
+          const markerIndex = markerTiming.index[i];
+          const isHovered = hoveredItem === markerIndex;
           const text = markerTiming.label[i];
           if (isHovered) {
             hoveredElement = { x, y, w, h, uncutWidth, text };

@@ -6,11 +6,11 @@
 import * as React from 'react';
 import ButtonWithPanel from '../../components/shared/ButtonWithPanel';
 import ArrowPanel from '../../components/shared/ArrowPanel';
-import renderer from 'react-test-renderer';
+import { render } from 'react-testing-library';
 
 describe('shared/ButtonWithPanel', function() {
   it('renders a closed panel and opens it when asked', () => {
-    const button = renderer.create(
+    const { container, rerender } = render(
       <ButtonWithPanel
         className="button"
         label="My Button"
@@ -21,10 +21,10 @@ describe('shared/ButtonWithPanel', function() {
         }
       />
     );
-    expect(button).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     // Checking it correctly updates if the boolean property `open` changes.
-    button.update(
+    rerender(
       <ButtonWithPanel
         className="button"
         label="My Button"
@@ -36,11 +36,11 @@ describe('shared/ButtonWithPanel', function() {
         }
       />
     );
-    expect(button).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders an opened panel', () => {
-    const button = renderer.create(
+    const { container } = render(
       <ButtonWithPanel
         className="button"
         label="My Button"
@@ -53,11 +53,11 @@ describe('shared/ButtonWithPanel', function() {
       />
     );
 
-    expect(button).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders a disabled button', () => {
-    const button = renderer.create(
+    const { container } = render(
       <ButtonWithPanel
         className="button"
         label="My Button"
@@ -70,6 +70,6 @@ describe('shared/ButtonWithPanel', function() {
       />
     );
 
-    expect(button).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

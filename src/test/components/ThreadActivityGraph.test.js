@@ -10,16 +10,18 @@ import type { CssPixels } from '../../types/units';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
 
 import SelectedThreadActivityGraph from '../../components/shared/thread/SelectedActivityGraph';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { ensureExists } from '../../utils/flow';
+
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
 
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -76,18 +78,24 @@ describe('SelectedThreadActivityGraph', function() {
       isSizeSet: true,
     };
 
-    const view = mount(
+    const renderResult = render(
       <Provider store={store}>
         <SelectedThreadActivityGraph viewport={viewport} />
       </Provider>
     );
+    const { container } = renderResult;
 
     // WithSize uses requestAnimationFrame
     flushRafCalls();
-    view.update();
 
-    const activityGraphCanvas = view.find('.threadActivityGraphCanvas').first();
-    const stackGraphCanvas = view.find('.threadStackGraphCanvas').first();
+    const activityGraphCanvas = ensureExists(
+      container.querySelector('.threadActivityGraphCanvas'),
+      `Couldn't find the activity graph canvas, with selector .threadActivityGraphCanvas`
+    );
+    const stackGraphCanvas = ensureExists(
+      container.querySelector('.threadStackGraphCanvas'),
+      `Couldn't find the stack graph canvas, with selector .threadStackGraphCanvas`
+    );
     const thread = profile.threads[0];
 
     // Perform a click on the activity graph.
@@ -95,9 +103,9 @@ describe('SelectedThreadActivityGraph', function() {
       index: IndexIntoSamplesTable,
       graphHeightPercentage: number
     ) {
-      return activityGraphCanvas.simulate(
-        'mouseup',
-        getMouseEvent({
+      fireEvent(
+        activityGraphCanvas,
+        getMouseEvent('mouseup', {
           pageX: getSamplesPixelPosition(index),
           pageY: GRAPH_HEIGHT * graphHeightPercentage,
         })
@@ -114,12 +122,12 @@ describe('SelectedThreadActivityGraph', function() {
     }
 
     return {
+      ...renderResult,
       dispatch,
       getState,
       profile,
       thread,
       store,
-      view,
       threadIndex,
       activityGraphCanvas,
       stackGraphCanvas,
@@ -130,19 +138,13 @@ describe('SelectedThreadActivityGraph', function() {
   }
 
   it('matches the component snapshot', () => {
-    const { view } = setup();
-    expect(view).toMatchSnapshot();
+    const { container } = setup();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the 2d canvas draw snapshot', () => {
     const { ctx } = setup();
     expect(ctx.__flushDrawLog()).toMatchSnapshot();
-  });
-
-  it('has the correct selectors into useful parts of the component for the samples profile', function() {
-    const { activityGraphCanvas, stackGraphCanvas } = setup();
-    expect(activityGraphCanvas.exists()).toBe(true);
-    expect(stackGraphCanvas.exists()).toBe(true);
   });
 
   /**
@@ -178,9 +180,9 @@ describe('SelectedThreadActivityGraph', function() {
   describe('ThreadStackGraph', function() {
     it('can click a stack', function() {
       const { stackGraphCanvas, getCallNodePath } = setup();
-      stackGraphCanvas.simulate(
-        'mouseup',
-        getMouseEvent({ pageX: getSamplesPixelPosition(1) })
+      fireEvent(
+        stackGraphCanvas,
+        getMouseEvent('mouseup', { pageX: getSamplesPixelPosition(1) })
       );
       expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
     });

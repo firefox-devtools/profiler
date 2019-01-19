@@ -287,12 +287,14 @@ Object {
         ],
       },
       "name": "Thread with samples",
+      "pausedRanges": Array [],
       "pid": 0,
+      "processShutdownTime": null,
+      "processStartupTime": 0,
       "processType": "default",
+      "registerTime": 0,
       "resourceTable": Object {
-        "addonId": Array [],
         "host": Array [],
-        "icon": Array [],
         "length": 0,
         "lib": Array [],
         "name": Array [],
@@ -417,6 +419,7 @@ Object {
         },
       },
       "tid": 0,
+      "unregisterTime": null,
     },
     Object {
       "frameTable": Object {
@@ -493,29 +496,44 @@ Object {
         ],
       },
       "name": "Thread with markers",
+      "pausedRanges": Array [],
       "pid": 0,
+      "processShutdownTime": null,
+      "processStartupTime": 0,
       "processType": "default",
+      "registerTime": 0,
       "resourceTable": Object {
-        "addonId": Array [],
         "host": Array [],
-        "icon": Array [],
         "length": 0,
         "lib": Array [],
         "name": Array [],
         "type": Array [],
       },
       "samples": Object {
-        "length": 16,
-        "responsiveness": Array [],
-        "rss": Array [],
+        "length": 9,
+        "responsiveness": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        "rss": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
         "stack": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
           null,
           null,
           null,
@@ -528,23 +546,26 @@ Object {
         ],
         "time": Array [
           0,
-          0,
-          1,
           1,
           2,
-          2,
-          3,
           3,
           4,
-          4,
-          5,
           5,
           6,
           7,
-          7,
           8,
         ],
-        "uss": Array [],
+        "uss": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "stackTable": Object {
         "category": Array [],
@@ -573,6 +594,7 @@ Object {
         },
       },
       "tid": 0,
+      "unregisterTime": null,
     },
   ],
 }
@@ -805,12 +827,14 @@ Array [
       ],
     },
     "name": "Thread with samples",
+    "pausedRanges": Array [],
     "pid": 0,
+    "processShutdownTime": null,
+    "processStartupTime": 0,
     "processType": "default",
+    "registerTime": 0,
     "resourceTable": Object {
-      "addonId": Array [],
       "host": Array [],
-      "icon": Array [],
       "length": 0,
       "lib": Array [],
       "name": Array [],
@@ -935,6 +959,7 @@ Array [
       },
     },
     "tid": 0,
+    "unregisterTime": null,
   },
   Object {
     "frameTable": Object {
@@ -1011,29 +1036,44 @@ Array [
       ],
     },
     "name": "Thread with markers",
+    "pausedRanges": Array [],
     "pid": 0,
+    "processShutdownTime": null,
+    "processStartupTime": 0,
     "processType": "default",
+    "registerTime": 0,
     "resourceTable": Object {
-      "addonId": Array [],
       "host": Array [],
-      "icon": Array [],
       "length": 0,
       "lib": Array [],
       "name": Array [],
       "type": Array [],
     },
     "samples": Object {
-      "length": 16,
-      "responsiveness": Array [],
-      "rss": Array [],
+      "length": 9,
+      "responsiveness": Array [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
+      "rss": Array [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
       "stack": Array [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
         null,
         null,
         null,
@@ -1046,23 +1086,26 @@ Array [
       ],
       "time": Array [
         0,
-        0,
-        1,
         1,
         2,
-        2,
-        3,
         3,
         4,
-        4,
-        5,
         5,
         6,
         7,
-        7,
         8,
       ],
-      "uss": Array [],
+      "uss": Array [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+      ],
     },
     "stackTable": Object {
       "category": Array [],
@@ -1091,6 +1134,7 @@ Array [
       },
     },
     "tid": 0,
+    "unregisterTime": null,
   },
 ]
 `;
@@ -1099,10 +1143,21 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedN
 Object {
   "forFunc": Object {
     "selfTime": Object {
+      "breakdownByCategory": null,
       "breakdownByImplementation": null,
       "value": 0,
     },
     "totalTime": Object {
+      "breakdownByCategory": Array [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
       "breakdownByImplementation": Object {
         "native": 2,
       },
@@ -1111,10 +1166,21 @@ Object {
   },
   "forPath": Object {
     "selfTime": Object {
+      "breakdownByCategory": null,
       "breakdownByImplementation": null,
       "value": 0,
     },
     "totalTime": Object {
+      "breakdownByCategory": Array [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
       "breakdownByImplementation": Object {
         "native": 2,
       },
@@ -1390,9 +1456,7 @@ CallTree {
   "_isIntegerInterval": true,
   "_jsOnly": false,
   "_resourceTable": Object {
-    "addonId": Array [],
     "host": Array [],
-    "icon": Array [],
     "length": 0,
     "lib": Array [],
     "name": Array [],
@@ -1427,7 +1491,7 @@ CallTree {
 }
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkers 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkers 1`] = `
 Array [
   Object {
     "data": null,
@@ -1469,7 +1533,7 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredTracingMarkersForHeader 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkersForHeader 1`] = `
 Array [
   Object {
     "data": null,
@@ -1674,6 +1738,9 @@ Object {
       null,
       null,
       null,
+      null,
+      null,
+      null,
       Object {
         "RedirectURI": "https://mozilla.org",
         "URI": "https://mozilla.org",
@@ -1684,28 +1751,48 @@ Object {
         "status": "STOP",
         "type": "Network",
       },
+      Object {
+        "RedirectURI": "https://mozilla.org",
+        "URI": "https://mozilla.org",
+        "endTime": 8,
+        "id": 7,
+        "pri": 0,
+        "startTime": 7,
+        "status": "STOP",
+        "type": "Network",
+      },
     ],
-    "length": 4,
+    "length": 8,
     "name": Array [
+      0,
+      1,
+      2,
       3,
       4,
       5,
+      6,
       6,
     ],
     "time": Array [
+      0,
+      1,
+      2,
       3,
       4,
       5,
       6,
+      7,
     ],
   },
   "name": "Thread with samples",
+  "pausedRanges": Array [],
   "pid": 0,
+  "processShutdownTime": null,
+  "processStartupTime": 0,
   "processType": "default",
+  "registerTime": 0,
   "resourceTable": Object {
-    "addonId": Array [],
     "host": Array [],
-    "icon": Array [],
     "length": 0,
     "lib": Array [],
     "name": Array [],
@@ -1802,6 +1889,7 @@ Object {
     },
   },
   "tid": 0,
+  "unregisterTime": null,
 }
 `;
 
@@ -1870,7 +1958,7 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankInstances 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankMarkers 1`] = `
 Array [
   Object {
     "data": null,
@@ -1931,6 +2019,85 @@ Array [
     "start": Array [
       5,
     ],
+  },
+]
+`;
+
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getMarkers 1`] = `
+Array [
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "A",
+    "start": 0,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "B",
+    "start": 1,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "C",
+    "start": 2,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "D",
+    "start": 3,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "E",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "F",
+    "start": 5,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 7,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6,
+      "status": "STOP",
+      "type": "Network",
+    },
+    "dur": 1,
+    "name": "G",
+    "start": 6,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 8,
+      "id": 7,
+      "pri": 0,
+      "startTime": 7,
+      "status": "STOP",
+      "type": "Network",
+    },
+    "dur": 1,
+    "name": "G",
+    "start": 7,
+    "title": null,
   },
 ]
 `;
@@ -2134,24 +2301,62 @@ Object {
     "data": Array [
       null,
       null,
+      null,
+      null,
+      null,
+      null,
+      Object {
+        "RedirectURI": "https://mozilla.org",
+        "URI": "https://mozilla.org",
+        "endTime": 7,
+        "id": 6,
+        "pri": 0,
+        "startTime": 6,
+        "status": "STOP",
+        "type": "Network",
+      },
+      Object {
+        "RedirectURI": "https://mozilla.org",
+        "URI": "https://mozilla.org",
+        "endTime": 8,
+        "id": 7,
+        "pri": 0,
+        "startTime": 7,
+        "status": "STOP",
+        "type": "Network",
+      },
     ],
-    "length": 2,
+    "length": 8,
     "name": Array [
+      0,
+      1,
+      2,
+      3,
       4,
       5,
+      6,
+      6,
     ],
     "time": Array [
+      0,
+      1,
+      2,
+      3,
       4,
       5,
+      6,
+      7,
     ],
   },
   "name": "Thread with samples",
+  "pausedRanges": Array [],
   "pid": 0,
+  "processShutdownTime": null,
+  "processStartupTime": 0,
   "processType": "default",
+  "registerTime": 0,
   "resourceTable": Object {
-    "addonId": Array [],
     "host": Array [],
-    "icon": Array [],
     "length": 0,
     "lib": Array [],
     "name": Array [],
@@ -2238,10 +2443,11 @@ Object {
     },
   },
   "tid": 0,
+  "unregisterTime": null,
 }
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getProcessedMarkersTable 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getProcessedRawMarkerTable 1`] = `
 Object {
   "data": Array [
     null,
@@ -2474,6 +2680,9 @@ Object {
       null,
       null,
       null,
+      null,
+      null,
+      null,
       Object {
         "RedirectURI": "https://mozilla.org",
         "URI": "https://mozilla.org",
@@ -2484,28 +2693,48 @@ Object {
         "status": "STOP",
         "type": "Network",
       },
+      Object {
+        "RedirectURI": "https://mozilla.org",
+        "URI": "https://mozilla.org",
+        "endTime": 8,
+        "id": 7,
+        "pri": 0,
+        "startTime": 7,
+        "status": "STOP",
+        "type": "Network",
+      },
     ],
-    "length": 4,
+    "length": 8,
     "name": Array [
+      0,
+      1,
+      2,
       3,
       4,
       5,
+      6,
       6,
     ],
     "time": Array [
+      0,
+      1,
+      2,
       3,
       4,
       5,
       6,
+      7,
     ],
   },
   "name": "Thread with samples",
+  "pausedRanges": Array [],
   "pid": 0,
+  "processShutdownTime": null,
+  "processStartupTime": 0,
   "processType": "default",
+  "registerTime": 0,
   "resourceTable": Object {
-    "addonId": Array [],
     "host": Array [],
-    "icon": Array [],
     "length": 0,
     "lib": Array [],
     "name": Array [],
@@ -2602,6 +2831,7 @@ Object {
     },
   },
   "tid": 0,
+  "unregisterTime": null,
 }
 `;
 
@@ -2784,6 +3014,9 @@ Object {
       null,
       null,
       null,
+      null,
+      null,
+      null,
       Object {
         "RedirectURI": "https://mozilla.org",
         "URI": "https://mozilla.org",
@@ -2794,28 +3027,48 @@ Object {
         "status": "STOP",
         "type": "Network",
       },
+      Object {
+        "RedirectURI": "https://mozilla.org",
+        "URI": "https://mozilla.org",
+        "endTime": 8,
+        "id": 7,
+        "pri": 0,
+        "startTime": 7,
+        "status": "STOP",
+        "type": "Network",
+      },
     ],
-    "length": 4,
+    "length": 8,
     "name": Array [
+      0,
+      1,
+      2,
       3,
       4,
       5,
+      6,
       6,
     ],
     "time": Array [
+      0,
+      1,
+      2,
       3,
       4,
       5,
       6,
+      7,
     ],
   },
   "name": "Thread with samples",
+  "pausedRanges": Array [],
   "pid": 0,
+  "processShutdownTime": null,
+  "processStartupTime": 0,
   "processType": "default",
+  "registerTime": 0,
   "resourceTable": Object {
-    "addonId": Array [],
     "host": Array [],
-    "icon": Array [],
     "length": 0,
     "lib": Array [],
     "name": Array [],
@@ -2915,10 +3168,11 @@ Object {
     },
   },
   "tid": 0,
+  "unregisterTime": null,
 }
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getSearchFilteredTracingMarkers 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers 1`] = `
 Array [
   Object {
     "data": null,
@@ -2963,85 +3217,6 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getThreadProcessDetails 1`] = `
 "thread: \\"Thread with samples\\" (0)
 process: \\"default\\" (0)"
-`;
-
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getTracingMarkers 1`] = `
-Array [
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "A",
-    "start": 0,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "B",
-    "start": 1,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "C",
-    "start": 2,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "D",
-    "start": 3,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "E",
-    "start": 4,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "F",
-    "start": 5,
-    "title": null,
-  },
-  Object {
-    "data": Object {
-      "RedirectURI": "https://mozilla.org",
-      "URI": "https://mozilla.org",
-      "endTime": 7,
-      "id": 6,
-      "pri": 0,
-      "startTime": 6,
-      "status": "STOP",
-      "type": "Network",
-    },
-    "dur": 1,
-    "name": "G",
-    "start": 6,
-    "title": null,
-  },
-  Object {
-    "data": Object {
-      "RedirectURI": "https://mozilla.org",
-      "URI": "https://mozilla.org",
-      "endTime": 8,
-      "id": 7,
-      "pri": 0,
-      "startTime": 7,
-      "status": "STOP",
-      "type": "Network",
-    },
-    "dur": 1,
-    "name": "G",
-    "start": 7,
-    "title": null,
-  },
-]
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getViewOptions 1`] = `

@@ -4,13 +4,18 @@
 
 // @flow
 import * as React from 'react';
+import { render, fireEvent } from 'react-testing-library';
+import { Provider } from 'react-redux';
+
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import StackChartGraph from '../../components/stack-chart';
-import { mount } from 'enzyme';
-import { Provider } from 'react-redux';
+import { changeSelectedCallNode } from '../../actions/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { ensureExists } from '../../utils/flow';
+
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -20,9 +25,8 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
-import { changeSelectedCallNode } from '../../actions/profile-view';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+
 jest.useFakeTimers();
 
 const GRAPH_BASE_WIDTH = 200;
@@ -52,31 +56,35 @@ describe('StackChart', function() {
     } = getProfileFromTextSamples(
       samples ||
         `
-      A  A  A
-      B  B  B
-      C  C  H
-      D  F  I
-      E  G
-    `
+          A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
+          B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
+          C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
+          D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
+          E[cat:Graphics]  G[cat:Graphics]
+        `
     );
 
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
 
-    const view = mount(
+    const renderResult = render(
       <Provider store={store}>
         <StackChartGraph />
       </Provider>
     );
+    const { container } = renderResult;
 
     flushRafCalls();
 
-    const stackChartCanvas = view.find('.chartCanvas.stackChartCanvas').first();
+    const stackChartCanvas = ensureExists(
+      container.querySelector('.chartCanvas.stackChartCanvas'),
+      `Couldn't find the stack chart canvas, with selector .chartCanvas.stackChartCanvas`
+    );
     return {
+      ...renderResult,
       dispatch,
       getState,
       funcNames,
-      view,
       ctx,
       flushRafCalls,
       stackChartCanvas,
@@ -84,9 +92,9 @@ describe('StackChart', function() {
   }
 
   it('matches the snapshot', () => {
-    const { view, ctx } = setup();
+    const { container, ctx } = setup();
     const drawCalls = ctx.__flushDrawLog();
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
   });
 
@@ -100,34 +108,30 @@ describe('StackChart', function() {
     );
 
     // Click the first frame
-    stackChartCanvas.simulate(
-      'mousemove',
-      getMouseEvent({
-        nativeEvent: {
-          offsetX: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
-          offsetY: 10,
-        },
+    fireEvent(
+      stackChartCanvas,
+      getMouseEvent('mousemove', {
+        offsetX: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
+        offsetY: 10,
       })
     );
-    stackChartCanvas.simulate('mousedown');
-    stackChartCanvas.simulate('mouseup');
+    fireEvent.mouseDown(stackChartCanvas);
+    fireEvent.mouseUp(stackChartCanvas);
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       0
     );
 
     // Click on a region without any drawn box to deselect
-    stackChartCanvas.simulate(
-      'mousemove',
-      getMouseEvent({
-        nativeEvent: {
-          offsetX: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
-          offsetY: 100,
-        },
+    fireEvent(
+      stackChartCanvas,
+      getMouseEvent('mousemove', {
+        offsetX: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
+        offsetY: 100,
       })
     );
-    stackChartCanvas.simulate('mousedown');
-    stackChartCanvas.simulate('mouseup');
+    fireEvent.mouseDown(stackChartCanvas);
+    fireEvent.mouseUp(stackChartCanvas);
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       null

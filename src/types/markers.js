@@ -304,6 +304,7 @@ export type NetworkPayload = {|
   pri: number, // priority of the load; always included as it can change
   count?: number, // Total size of transfer, if any
   status: string,
+  cache?: string,
   startTime: Milliseconds,
   endTime: Milliseconds,
   domainLookupStart?: Milliseconds,
@@ -327,6 +328,21 @@ export type UserTimingMarkerPayload = {|
   endTime: Milliseconds,
   name: string,
   entryType: 'measure' | 'mark',
+|};
+
+export type TextMarkerPayload = {|
+  type: 'Text',
+  name: string,
+|};
+
+/**
+ * Gecko includes rich log information. This marker payload is used to mirror that
+ * log information in the profile.
+ */
+export type LogMarkerPayload = {|
+  type: 'Log',
+  name: string,
+  module: string,
 |};
 
 export type DOMEventMarkerPayload = {|
@@ -422,6 +438,8 @@ export type MarkerPayload =
   | InvalidationPayload
   | NetworkPayload
   | UserTimingMarkerPayload
+  | TextMarkerPayload
+  | LogMarkerPayload
   | PaintProfilerMarkerTracing
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
@@ -440,6 +458,8 @@ export type MarkerPayload_Gecko =
   | GPUMarkerPayload
   | NetworkPayload
   | UserTimingMarkerPayload
+  | TextMarkerPayload
+  | LogMarkerPayload
   | PaintProfilerMarkerTracing_Gecko
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload

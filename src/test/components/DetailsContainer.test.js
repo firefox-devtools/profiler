@@ -4,15 +4,18 @@
 
 // @flow
 import * as React from 'react';
-import { shallowWithStore } from '../fixtures/enzyme';
+import { Provider } from 'react-redux';
+import { render } from 'react-testing-library';
 
 import DetailsContainer from '../../components/app/DetailsContainer';
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 import { tabSlugs } from '../../app-logic/tabs-handling';
 import type { TabSlug } from '../../app-logic/tabs-handling';
+
+jest.mock('../../components/app/Details', () => 'details-viewer');
 
 describe('app/DetailsContainer', function() {
   function setup() {
@@ -32,20 +35,41 @@ describe('app/DetailsContainer', function() {
     return { store };
   }
 
-  it('renders an initial view with or without a sidebar', () => {
+  const expectedSidebar: { [TabSlug]: boolean } = {
+    calltree: true,
+    'flame-graph': true,
+    'stack-chart': false,
+    'marker-chart': false,
+    'marker-table': true,
+    'network-chart': false,
+    'js-tracer': false,
+  };
+
+  it('renders an initial view with a sidebar', () => {
     const { store } = setup();
-    // dive() will shallow-render the wrapped component
-    const view = shallowWithStore(<DetailsContainer />, store);
-    expect(view.dive()).toMatchSnapshot();
+    const { container } = render(
+      <Provider store={store}>
+        <DetailsContainer />
+      </Provider>
+    );
+    expect(container.querySelector('.sidebar')).toBeTruthy();
   });
 
   tabSlugs.forEach((tabSlug: TabSlug) => {
-    it(`renders an initial view with or without a sidebar for tab ${tabSlug}`, () => {
+    const expected = expectedSidebar[tabSlug];
+    it(`renders an initial view ${
+      expected ? 'with' : 'without'
+    } a sidebar for tab ${tabSlug}`, () => {
       const { store } = setup();
       store.dispatch(changeSelectedTab(tabSlug));
 
-      const view = shallowWithStore(<DetailsContainer />, store);
-      expect(view.dive()).toMatchSnapshot();
+      const { container } = render(
+        <Provider store={store}>
+          <DetailsContainer />
+        </Provider>
+      );
+
+      expect(!!container.querySelector('.sidebar')).toBe(expected);
     });
   });
 });

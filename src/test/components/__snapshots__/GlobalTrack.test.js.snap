@@ -2,188 +2,153 @@
 
 exports[`timeline/GlobalTrack matches the snapshot of a global track 1`] = `
 <li
-  className="timelineTrack"
+  class="timelineTrack"
 >
   <div
-    className="timelineTrackRow timelineTrackGlobalRow"
-    onClick={[Function]}
+    class="timelineTrackRow timelineTrackGlobalRow"
   >
     <div
-      className="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
-      onContextMenu={[Function]}
-      onMouseDown={[Function]}
-      onMouseOut={[Function]}
-      onMouseUp={[Function]}
-      onTouchEnd={[Function]}
-      onTouchStart={[Function]}
+      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
       title="thread: \\"GeckoMain\\" (0)
 process: \\"tab\\" (222)"
     >
       <button
-        className="timelineTrackNameButton"
+        class="timelineTrackNameButton"
         type="button"
       >
         Content Process
       </button>
     </div>
     <div
-      className="timelineTrackTrack"
+      class="timelineTrackTrack"
     >
       <div
-        className="timelineTrackThread"
+        class="timelineTrackThread"
       >
         <div
-          className="timelineTrackThreadIntervalMarkerOverview"
+          class="timelineTrackThreadMarkerOverview"
         >
           <canvas
-            className="timelineTracingMarkersCanvas"
-            onMouseDown={[Function]}
-            onMouseMove={[Function]}
-            onMouseOut={[Function]}
-            onMouseUp={[Function]}
+            class="timelineMarkersCanvas"
           />
         </div>
         <div
-          className="
-              timelineTrackThreadIntervalMarkerOverview
-              timelineTrackThreadIntervalMarkerOverviewThreadGeckoMain
+          class="
+              timelineTrackThreadMarkerOverview
+              timelineTrackThreadMarkerOverviewThreadGeckoMain
             "
         >
           <canvas
-            className="timelineTracingMarkersCanvas"
-            onMouseDown={[Function]}
-            onMouseMove={[Function]}
-            onMouseOut={[Function]}
-            onMouseUp={[Function]}
+            class="timelineMarkersCanvas"
           />
         </div>
         <div
-          className="threadActivityGraph"
+          class="threadActivityGraph"
         >
           <canvas
-            className="threadActivityGraphCanvas threadActivityGraphCanvas"
-            onMouseUp={[Function]}
+            class="threadActivityGraphCanvas threadActivityGraphCanvas"
+            height="400"
+            width="400"
           />
         </div>
         <div
-          className="timelineEmptyThreadIndicator"
+          class="timelineEmptyThreadIndicator"
         />
       </div>
     </div>
   </div>
   <ol
-    className="timelineTrackLocalTracks"
-    onMouseDown={[Function]}
+    class="timelineTrackLocalTracks"
   >
     <li
-      className="timelineTrack timelineTrackLocal"
+      class="timelineTrack timelineTrackLocal"
     >
       <div
-        className="timelineTrackRow timelineTrackLocalRow selected"
-        onClick={[Function]}
+        class="timelineTrackRow timelineTrackLocalRow selected"
       >
         <div
-          className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-          onContextMenu={[Function]}
-          onMouseDown={[Function]}
-          onMouseOut={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchStart={[Function]}
+          class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="thread: \\"DOM Worker\\" (0)
 process: \\"tab\\" (222)"
         >
           <button
-            className="timelineTrackNameButton"
+            class="timelineTrackNameButton"
             type="button"
           >
             DOM Worker
           </button>
         </div>
         <div
-          className="timelineTrackTrack"
+          class="timelineTrackTrack"
         >
           <div
-            className="timelineTrackThread"
+            class="timelineTrackThread"
           >
             <div
-              className="timelineTrackThreadIntervalMarkerOverview selected"
+              class="timelineTrackThreadMarkerOverview selected"
             >
               <canvas
-                className="timelineTracingMarkersCanvas"
-                onMouseDown={[Function]}
-                onMouseMove={[Function]}
-                onMouseOut={[Function]}
-                onMouseUp={[Function]}
+                class="timelineMarkersCanvas"
               />
             </div>
             <div
-              className="threadActivityGraph"
+              class="threadActivityGraph"
             >
               <canvas
-                className="threadActivityGraphCanvas threadActivityGraphCanvas"
-                onMouseUp={[Function]}
+                class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                height="400"
+                width="400"
               />
             </div>
             <div
-              className="timelineEmptyThreadIndicator"
+              class="timelineEmptyThreadIndicator"
             />
           </div>
         </div>
       </div>
     </li>
     <li
-      className="timelineTrack timelineTrackLocal"
+      class="timelineTrack timelineTrackLocal"
     >
       <div
-        className="timelineTrackRow timelineTrackLocalRow"
-        onClick={[Function]}
+        class="timelineTrackRow timelineTrackLocalRow"
       >
         <div
-          className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-          onContextMenu={[Function]}
-          onMouseDown={[Function]}
-          onMouseOut={[Function]}
-          onMouseUp={[Function]}
-          onTouchEnd={[Function]}
-          onTouchStart={[Function]}
+          class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
           title="thread: \\"Style\\" (0)
 process: \\"tab\\" (222)"
         >
           <button
-            className="timelineTrackNameButton"
+            class="timelineTrackNameButton"
             type="button"
           >
             Style
           </button>
         </div>
         <div
-          className="timelineTrackTrack"
+          class="timelineTrackTrack"
         >
           <div
-            className="timelineTrackThread"
+            class="timelineTrackThread"
           >
             <div
-              className="timelineTrackThreadIntervalMarkerOverview"
+              class="timelineTrackThreadMarkerOverview"
             >
               <canvas
-                className="timelineTracingMarkersCanvas"
-                onMouseDown={[Function]}
-                onMouseMove={[Function]}
-                onMouseOut={[Function]}
-                onMouseUp={[Function]}
+                class="timelineMarkersCanvas"
               />
             </div>
             <div
-              className="threadActivityGraph"
+              class="threadActivityGraph"
             >
               <canvas
-                className="threadActivityGraphCanvas threadActivityGraphCanvas"
-                onMouseUp={[Function]}
+                class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                height="400"
+                width="400"
               />
             </div>
             <div
-              className="timelineEmptyThreadIndicator"
+              class="timelineEmptyThreadIndicator"
             />
           </div>
         </div>

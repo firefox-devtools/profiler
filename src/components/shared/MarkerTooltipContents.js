@@ -23,7 +23,7 @@ import Backtrace from './Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 import type { Microseconds } from '../../types/units';
-import type { TracingMarker } from '../../types/profile-derived';
+import type { Marker } from '../../types/profile-derived';
 import type { NotVoidOrNull } from '../../types/utils';
 import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex } from '../../types/profile';
@@ -302,7 +302,7 @@ function _sumMaybeEntries(
 }
 
 function _markerBacktrace(
-  marker: TracingMarker,
+  marker: Marker,
   data:
     | StyleMarkerPayload
     | PaintProfilerMarkerTracing
@@ -344,7 +344,8 @@ function _markerBacktrace(
           First invalidated {formatNumber(causeAge)}ms before the flush, at:
         </h2>
         <Backtrace
-          cause={cause}
+          maxHeight="30em"
+          stackIndex={cause.stack}
           thread={thread}
           implementationFilter={implementationFilter}
         />
@@ -355,7 +356,7 @@ function _markerBacktrace(
 }
 
 function getMarkerDetails(
-  marker: TracingMarker,
+  marker: Marker,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {
@@ -366,6 +367,21 @@ function getMarkerDetails(
       case 'UserTiming': {
         return (
           <div className="tooltipDetails">
+            {_markerDetail('name', 'Name', data.name)}
+          </div>
+        );
+      }
+      case 'Text': {
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('name', 'Name', data.name)}
+          </div>
+        );
+      }
+      case 'Log': {
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('module', 'Module', data.module)}
             {_markerDetail('name', 'Name', data.name)}
           </div>
         );
@@ -573,7 +589,7 @@ function getMarkerDetails(
                 )}
                 {_markerDetail(
                   'gcusage',
-                  'Heap usage',
+                  'Heap size',
                   timings.allocated_bytes,
                   formatBytes
                 )}
@@ -697,6 +713,7 @@ function getMarkerDetails(
         return (
           <div className="tooltipDetails">
             {_markerDetail('status', 'Status', _dataStatusReplace(data.status))}
+            {_markerDetailNullable('cache', 'Cache', data.cache)}
             {_markerDetailNullable('url', 'URL', data.URI)}
             {_markerDetailNullable(
               'redirect_url',
@@ -778,7 +795,7 @@ function getMarkerDetails(
 }
 
 type OwnProps = {|
-  +marker: TracingMarker,
+  +marker: Marker,
   +threadIndex: ThreadIndex,
   +className?: string,
 |};

@@ -6,11 +6,12 @@
 
 import type { TrackReference } from '../../types/actions';
 import type { Store } from '../../types/store';
+import type { ThreadIndex } from '../../types/profile';
 import type { LocalTrack } from '../../types/profile-derived';
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
 
 import {
   changeSelectedThread,
@@ -22,11 +23,17 @@ import {
   getLocalTrackFromReference,
   getProfile,
 } from '../../selectors/profile';
+import { ensureExists } from '../../utils/flow';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
-import { getNetworkTrackProfile } from '../fixtures/profiles/make-profile';
+import {
+  getNetworkTrackProfile,
+  getCounterForThread,
+  getProfileFromTextSamples,
+} from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
+import { getBoundingBox } from '../fixtures/utils';
 
 // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
 // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
@@ -38,14 +45,14 @@ const RIGHT_CLICK = 2;
 describe('timeline/LocalTrack', function() {
   describe('with a thread track', function() {
     it('matches the snapshot of a local track', () => {
-      const { view } = setupThreadTrack();
-      expect(view).toMatchSnapshot();
+      const { container } = setupThreadTrack();
+      expect(container.firstChild).toMatchSnapshot();
     });
 
     it('has the correct selectors into useful parts of the component', function() {
       const { getLocalTrackLabel, getLocalTrackRow } = setupThreadTrack();
-      expect(getLocalTrackLabel().text()).toBe('DOM Worker');
-      expect(getLocalTrackRow().exists()).toBe(true);
+      expect(getLocalTrackLabel().textContent).toBe('DOM Worker');
+      expect(getLocalTrackRow()).toBeTruthy();
     });
 
     it('starts out not being selected', function() {
@@ -57,7 +64,7 @@ describe('timeline/LocalTrack', function() {
       } = setupThreadTrack();
       expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
       expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      expect(getLocalTrackRow().hasClass('selected')).toBe(false);
+      expect(getLocalTrackRow().classList.contains('selected')).toBe(false);
     });
 
     it('can select a thread by clicking the label', () => {
@@ -68,9 +75,9 @@ describe('timeline/LocalTrack', function() {
         getLocalTrackRow,
       } = setupThreadTrack();
       expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      getLocalTrackLabel().simulate('mousedown', { button: LEFT_CLICK });
+      fireEvent.mouseDown(getLocalTrackLabel(), { button: LEFT_CLICK });
       expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
-      expect(getLocalTrackRow().hasClass('selected')).toBe(true);
+      expect(getLocalTrackRow().classList.contains('selected')).toBe(true);
     });
 
     it('can right click a thread', () => {
@@ -81,7 +88,7 @@ describe('timeline/LocalTrack', function() {
         trackReference,
       } = setupThreadTrack();
 
-      getLocalTrackLabel().simulate('mousedown', { button: RIGHT_CLICK });
+      fireEvent.mouseDown(getLocalTrackLabel(), { button: RIGHT_CLICK });
       expect(getRightClickedTrack(getState())).toEqual(trackReference);
       expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
     });
@@ -89,28 +96,39 @@ describe('timeline/LocalTrack', function() {
     it('can select a thread by clicking the row', () => {
       const { getState, getLocalTrackRow, threadIndex } = setupThreadTrack();
       expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-      getLocalTrackRow().simulate('click');
+      fireEvent.click(getLocalTrackRow());
       expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
     });
 
     it('will render a stub div if the track is hidden', () => {
-      const { view, pid, trackReference, dispatch } = setupThreadTrack();
+      const { container, pid, trackReference, dispatch } = setupThreadTrack();
       dispatch(hideLocalTrack(pid, trackReference.trackIndex));
-      view.update();
-      expect(view.find('.timelineTrackHidden').exists()).toBe(true);
-      expect(view.find('.timelineTrack').exists()).toBe(false);
+      expect(container.querySelector('.timelineTrackHidden')).toBeTruthy();
+      expect(container.querySelector('.timelineTrack')).toBeFalsy();
     });
   });
 
   describe('with a network track', function() {
     it('has correctly renders the network label', function() {
       const { getLocalTrackLabel } = setupWithNetworkProfile();
-      expect(getLocalTrackLabel().text()).toBe('Network');
+      expect(getLocalTrackLabel().textContent).toBe('Network');
     });
 
     it('matches the snapshot of the network track', () => {
-      const { view } = setupWithNetworkProfile();
-      expect(view).toMatchSnapshot();
+      const { container } = setupWithNetworkProfile();
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  describe('with a memory track', function() {
+    it('correctly renders the network label', function() {
+      const { getLocalTrackLabel } = setupWithMemory();
+      expect(getLocalTrackLabel().textContent).toBe('Memory');
+    });
+
+    it('matches the snapshot of the memory track', () => {
+      const { container } = setupWithMemory();
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 });
@@ -118,10 +136,10 @@ describe('timeline/LocalTrack', function() {
 function setup(
   store: Store,
   trackReference: TrackReference,
-  localTrack: LocalTrack
+  localTrack: LocalTrack,
+  threadIndex: ThreadIndex
 ) {
   const { getState, dispatch } = store;
-  const { threadIndex } = localTrack;
   // The assertions are simpler if this thread is not already selected.
   dispatch(changeSelectedThread(threadIndex + 1));
 
@@ -129,8 +147,11 @@ function setup(
   jest
     .spyOn(HTMLCanvasElement.prototype, 'getContext')
     .mockImplementation(() => mockCanvasContext());
+  jest
+    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+    .mockImplementation(() => getBoundingBox(400, 400));
 
-  const view = mount(
+  const renderResult = render(
     <Provider store={store}>
       <TimelineLocalTrack
         pid={PID}
@@ -140,15 +161,25 @@ function setup(
     </Provider>
   );
 
-  const getLocalTrackLabel = () => view.find('.timelineTrackLabel').first();
-  const getLocalTrackRow = () => view.find('.timelineTrackLocalRow').first();
+  const { container } = renderResult;
+
+  const getLocalTrackLabel = () =>
+    ensureExists(
+      container.querySelector('.timelineTrackLabel'),
+      `Couldn't find the track label with selector .timelineTrackLabel`
+    );
+  const getLocalTrackRow = () =>
+    ensureExists(
+      container.querySelector('.timelineTrackLocalRow'),
+      `Couldn't find the track local row with selector .timelineTrackLocalRow`
+    );
 
   return {
+    ...renderResult,
     dispatch,
     getState,
     profile: getProfile(getState()),
     store,
-    view,
     trackReference,
     threadIndex,
     pid: PID,
@@ -179,7 +210,7 @@ function setupThreadTrack() {
   if (localTrack.type !== 'thread') {
     throw new Error('Expected a thread track.');
   }
-  return setup(store, trackReference, localTrack);
+  return setup(store, trackReference, localTrack, localTrack.threadIndex);
 }
 
 function setupWithNetworkProfile() {
@@ -198,5 +229,43 @@ function setupWithNetworkProfile() {
   if (localTrack.type !== 'network') {
     throw new Error('Expected a network track.');
   }
-  return setup(store, trackReference, localTrack);
+  return setup(store, trackReference, localTrack, localTrack.threadIndex);
+}
+
+/**
+ * Set up a profile with a memory counter.
+ */
+function setupWithMemory() {
+  const { profile } = getProfileFromTextSamples(
+    // Create a trivial profile with 10 samples, all of the function "A".
+    Array(10)
+      .fill('A')
+      .join('  ')
+  );
+  const threadIndex = 0;
+  const trackIndex = 0;
+  const trackReference = { type: 'local', pid: PID, trackIndex };
+
+  {
+    // Modify the thread to include the counter.
+    const thread = profile.threads[threadIndex];
+    thread.name = 'GeckoMain';
+    thread.processType = 'default';
+    thread.pid = PID;
+    const counter = getCounterForThread(thread, threadIndex);
+    counter.category = 'Memory';
+    profile.counters = [counter];
+  }
+
+  const store = storeWithProfile(profile);
+  const localTrack = getLocalTrackFromReference(
+    store.getState(),
+    trackReference
+  );
+
+  if (localTrack.type !== 'memory') {
+    throw new Error('Expected a memory track.');
+  }
+
+  return setup(store, trackReference, localTrack, threadIndex);
 }

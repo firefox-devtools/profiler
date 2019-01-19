@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
+import { render } from 'react-testing-library';
 
 import TrackNetwork, {
   ROW_HEIGHT,
@@ -16,7 +16,7 @@ import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 
-import { getNetworkTrackProfile } from '../fixtures/profiles/make-profile';
+import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock, and the graph height
 // mimicks what is computed by the actual component.
@@ -25,11 +25,11 @@ const GRAPH_HEIGHT = ROW_HEIGHT * ROW_REPEAT;
 
 describe('timeline/TrackNetwork', function() {
   it('matches the component snapshot', () => {
-    const { view } = setup();
-    expect(view).toMatchSnapshot();
+    const { container, unmount } = setup();
+    expect(container.firstChild).toMatchSnapshot();
     // Trigger any unmounting behavior handlers, just make sure it doesn't
     // throw any errors.
-    view.unmount();
+    unmount();
   });
 
   it('matches the 2d context snapshot', () => {
@@ -64,7 +64,7 @@ function setup() {
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
-  const view = mount(
+  const renderResult = render(
     <Provider store={store}>
       <TrackNetwork threadIndex={0} />
     </Provider>
@@ -72,7 +72,6 @@ function setup() {
 
   // WithSize uses requestAnimationFrame
   flushRafCalls();
-  view.update();
 
   /**
    * Coordinate the flushing of the requestAnimationFrame and the draw calls.
@@ -83,11 +82,11 @@ function setup() {
   }
 
   return {
+    ...renderResult,
     dispatch,
     getState,
     thread: profile.threads[0],
     store,
-    view,
     getContextDrawCalls,
   };
 }

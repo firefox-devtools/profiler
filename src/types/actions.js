@@ -9,7 +9,7 @@ import type {
   Profile,
   Thread,
   ThreadIndex,
-  IndexIntoMarkersTable,
+  IndexIntoRawMarkerTable,
   IndexIntoFuncTable,
   Pid,
 } from './profile';
@@ -20,8 +20,6 @@ import type {
   LocalTrack,
   TrackIndex,
 } from './profile-derived';
-import type { GetLabel } from '../profile-logic/labeling-strategies';
-import type { GetCategory } from '../profile-logic/color-categories';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
@@ -102,7 +100,7 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_SELECTED_MARKER',
       +threadIndex: ThreadIndex,
-      +selectedMarker: IndexIntoMarkersTable | -1,
+      +selectedMarker: IndexIntoRawMarkerTable | -1,
     |}
   | {|
       +type: 'UPDATE_PREVIEW_SELECTION',
@@ -178,7 +176,8 @@ type ProfileAction =
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
-    |};
+    |}
+  | {| +type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' |};
 
 type ReceiveProfileAction =
   | {|
@@ -222,11 +221,6 @@ type ReceiveProfileAction =
   | {| +type: 'WAITING_FOR_PROFILE_FROM_STORE' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_URL' |}
   | {| +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string |};
-
-type StackChartAction =
-  | {| +type: 'CHANGE_STACK_CHART_COLOR_STRATEGY', +getCategory: GetCategory |}
-  | {| +type: 'CHANGE_STACK_CHART_LABELING_STRATEGY', +getLabel: GetLabel |}
-  | {| +type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' |};
 
 type UrlEnhancerAction =
   | {| +type: 'URL_SETUP_DONE' |}
@@ -296,7 +290,6 @@ export type Action =
   | ProfileAction
   | ReceiveProfileAction
   | SidebarAction
-  | StackChartAction
   | UrlEnhancerAction
   | UrlStateAction
   | IconsAction;

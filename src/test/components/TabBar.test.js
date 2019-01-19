@@ -5,12 +5,10 @@
 // @flow
 
 import React from 'react';
-import { render, fireEvent, cleanup } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 import TabBar from '../../components/app/TabBar';
 
 describe('app/TabBar', () => {
-  afterEach(cleanup);
-
   it('renders the TabBar and handles clicks properly', () => {
     const handleTabSelection = jest.fn();
     const { getByText, container } = render(

@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { getProfileFromTextSamples } from '../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
   getCallTree,
   computeCallTreeCountsAndTimings,
@@ -12,10 +12,10 @@ import { getRootsAndChildren } from '../../profile-logic/flame-graph';
 import {
   getCallNodeInfo,
   invertCallstack,
-  resourceTypes,
   getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
 } from '../../profile-logic/profile-data';
+import { resourceTypes } from '../../profile-logic/data-structures';
 import { formatTree, formatTreeIncludeCategories } from '../fixtures/utils';
 
 import type { Profile } from '../../types/profile';

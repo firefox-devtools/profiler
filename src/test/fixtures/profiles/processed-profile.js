@@ -3,14 +3,21 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getEmptyProfile } from '../../../profile-logic/profile-data';
+import {
+  getEmptyProfile,
+  getEmptyThread,
+  getEmptyJsTracerTable,
+} from '../../../profile-logic/data-structures';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
+
 import type {
   Profile,
   Thread,
+  ThreadIndex,
   IndexIntoCategoryList,
   CategoryList,
   JsTracerTable,
+  Counter,
 } from '../../../types/profile';
 import type { MarkerPayload, NetworkPayload } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
@@ -59,8 +66,6 @@ function _refineMockPayload(
   return (payload: any);
 }
 
-export { getEmptyProfile } from '../../../profile-logic/profile-data';
-
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: Thread,
   markers: TestDefinedMarkers
@@ -81,10 +86,17 @@ export function addMarkersToThreadWithCorrespondingSamples(
     const endTime =
       data && typeof data.endTime === 'number' ? data.endTime : time;
 
-    // Push on the start and end time.
-    samples.time.push(startTime, endTime);
-    samples.stack.push(null, null);
-    samples.length += 2;
+    // Push on the start and end time if necessary
+    [startTime, endTime].forEach(time => {
+      if (!samples.time.includes(time)) {
+        samples.time.push(time);
+        samples.stack.push(null);
+        samples.rss.push(null);
+        samples.uss.push(null);
+        samples.responsiveness.push(null);
+        samples.length++;
+      }
+    });
   });
 
   samples.time.sort();
@@ -110,70 +122,6 @@ export function getProfileWithNamedThreads(threadNames: string[]): Profile {
   const profile = getEmptyProfile();
   profile.threads = threadNames.map(name => getEmptyThread({ name }));
   return profile;
-}
-
-export function getEmptyThread(overrides: ?Object): Thread {
-  return Object.assign(
-    {
-      processType: 'default',
-      name: 'Empty',
-      pid: 0,
-      tid: 0,
-      samples: {
-        responsiveness: [],
-        stack: [],
-        time: [],
-        rss: [],
-        uss: [],
-        length: 0,
-      },
-      markers: {
-        data: [],
-        name: [],
-        time: [],
-        length: 0,
-      },
-      stackTable: {
-        frame: [],
-        prefix: [],
-        category: [],
-        length: 0,
-      },
-      frameTable: {
-        address: [],
-        category: [],
-        func: [],
-        implementation: [],
-        line: [],
-        column: [],
-        optimizations: [],
-        length: 0,
-      },
-      stringTable: new UniqueStringArray(),
-      libs: [],
-      funcTable: {
-        address: [],
-        isJS: [],
-        relevantForJS: [],
-        name: [],
-        resource: [],
-        fileName: [],
-        lineNumber: [],
-        columnNumber: [],
-        length: 0,
-      },
-      resourceTable: {
-        addonId: [],
-        icon: [],
-        length: 0,
-        lib: [],
-        name: [],
-        host: [],
-        type: [],
-      },
-    },
-    overrides
-  );
 }
 
 /**
@@ -570,17 +518,6 @@ export function getScreenshotTrackProfile() {
   );
 }
 
-export function getEmptyJsTracerTable(): JsTracerTable {
-  return {
-    events: [],
-    timestamps: [],
-    durations: [],
-    lines: [],
-    columns: [],
-    length: 0,
-  };
-}
-
 export function getJsTracerTable(
   stringTable: UniqueStringArray,
   events: TestDefinedJsTracerEvent[]
@@ -644,4 +581,34 @@ export function getProfileWithJsTracerEvents(
     getThreadWithJsTracerEvents(events)
   );
   return profile;
+}
+
+/**
+ * Creates a Counter fixture for a given thread.
+ */
+export function getCounterForThread(
+  thread: Thread,
+  mainThreadIndex: ThreadIndex
+): Counter {
+  const counter: Counter = {
+    name: 'My Counter',
+    category: 'My Category',
+    description: 'My Description',
+    pid: thread.pid,
+    mainThreadIndex,
+    sampleGroups: {
+      id: 0,
+      samples: {
+        time: thread.samples.time.slice(),
+        // Create some arbitrary (positive integer) values for the number.
+        number: thread.samples.time.map((_, i) =>
+          Math.floor(50 * Math.sin(i) + 50)
+        ),
+        // Create some arbitrary values for the count.
+        count: thread.samples.time.map((_, i) => Math.sin(i)),
+        length: thread.samples.length,
+      },
+    },
+  };
+  return counter;
 }

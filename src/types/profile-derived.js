@@ -10,6 +10,7 @@ import type {
   ThreadIndex,
   Pid,
   IndexIntoJsTracerEvents,
+  CounterIndex,
 } from './profile';
 export type IndexIntoCallNodeTable = number;
 
@@ -70,7 +71,7 @@ export type CallNodeInfo = {
  */
 export type CallNodePath = IndexIntoFuncTable[];
 
-export type TracingMarker = {|
+export type Marker = {|
   start: Milliseconds,
   dur: Milliseconds,
   name: string,
@@ -79,7 +80,7 @@ export type TracingMarker = {|
   incomplete?: boolean,
 |};
 
-export type IndexIntoTracingMarkers = number;
+export type IndexIntoMarkers = number;
 
 export type CallNodeData = {
   funcName: string,
@@ -112,7 +113,7 @@ export type MarkerTiming = {
   start: number[],
   // End time in milliseconds.
   end: number[],
-  index: IndexIntoTracingMarkers[],
+  index: IndexIntoMarkers[],
   label: string[],
   name: string,
   length: number,
@@ -130,6 +131,20 @@ export type JsTracerTiming = {
   length: number,
 };
 
+/**
+ * The memory counter contains relative offsets of memory. This type provides a data
+ * structure that can be used to see the total range of change over all the samples.
+ */
+export type AccumulatedCounterSamples = {|
+  +minCount: number,
+  +maxCount: number,
+  +countRange: number,
+  // This value holds the accumulation of all the previous counts in the Counter samples.
+  // For a memory counter, this gives the relative offset of bytes in that range
+  // selection. The array will share the indexes of the range filtered counter samples.
+  +accumulatedCounts: number[],
+|};
+
 export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
@@ -139,7 +154,7 @@ export type GlobalTrack =
 export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}
   | {| +type: 'network', +threadIndex: ThreadIndex |}
-  | {| +type: 'memory', +threadIndex: ThreadIndex |};
+  | {| +type: 'memory', +counterIndex: CounterIndex |};
 
 export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;

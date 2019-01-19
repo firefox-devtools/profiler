@@ -3,42 +3,37 @@
 exports[`MarkerTable renders some basic markers 1`] = `
 <div
   aria-labelledby="marker-table-tab-button"
-  className="markerTable"
+  class="markerTable"
   id="marker-table-tab"
   role="tabpanel"
 >
   <div
-    className="markerSettings"
+    class="markerSettings"
   >
     <div
-      className="markerSettingsSpacer"
+      class="markerSettingsSpacer"
     />
     <div
-      className="markerSettingsSearchbar"
+      class="markerSettingsSearchbar"
     >
       <label
-        className="markerSettingsSearchbarLabel"
+        class="markerSettingsSearchbarLabel"
       >
         Filter Markers: 
         <form
-          className="idleSearchField markerSettingsSearchField"
-          onSubmit={[Function]}
+          class="idleSearchField markerSettingsSearchField"
         >
           <input
-            className="idleSearchFieldInput"
+            class="idleSearchFieldInput"
             name="search"
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-            required="required"
+            required=""
             title="Only display markers that match a certain name"
             type="search"
             value=""
           />
           <input
-            className="idleSearchFieldButton"
-            onClick={[Function]}
-            tabIndex={-1}
+            class="idleSearchFieldButton"
+            tabindex="-1"
             type="reset"
           />
         </form>
@@ -46,122 +41,92 @@ exports[`MarkerTable renders some basic markers 1`] = `
     </div>
   </div>
   <div
-    className="treeView"
+    class="treeView"
   >
     <div
-      className="treeViewHeader"
+      class="treeViewHeader"
     >
       <span
-        className="treeViewHeaderColumn treeViewFixedColumn start"
+        class="treeViewHeaderColumn treeViewFixedColumn start"
       >
         Start
       </span>
       <span
-        className="treeViewHeaderColumn treeViewFixedColumn duration"
+        class="treeViewHeaderColumn treeViewFixedColumn duration"
       >
         Duration
       </span>
       <span
-        className="treeViewHeaderColumn treeViewFixedColumn category"
+        class="treeViewHeaderColumn treeViewFixedColumn category"
       >
         Category
       </span>
       <span
-        className="treeViewHeaderColumn treeViewMainColumn name"
-      >
-        
-      </span>
+        class="treeViewHeaderColumn treeViewMainColumn name"
+      />
     </div>
     <div
-      className="react-contextmenu-wrapper treeViewContextMenu"
-      onContextMenu={[Function]}
-      onMouseDown={[Function]}
-      onMouseOut={[Function]}
-      onMouseUp={[Function]}
-      onTouchEnd={[Function]}
-      onTouchStart={[Function]}
+      class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
-        className="treeViewBody"
-        onKeyDown={[Function]}
-        tabIndex={0}
+        class="treeViewBody"
+        tabindex="0"
       >
         <div
-          className="treeViewBodyInnerWrapper"
+          class="treeViewBodyInnerWrapper"
         >
           <div
-            className="treeViewBodyInner treeViewBodyInner0"
-            style={
-              Object {
-                "height": "32px",
-                "width": undefined,
-              }
-            }
+            class="treeViewBodyInner treeViewBodyInner0"
+            style="height: 32px;"
           >
             <div
-              className="treeViewBodyInner treeViewBodyInner0TopSpacer"
-              style={
-                Object {
-                  "height": "0px",
-                }
-              }
+              class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+              style="height: 0px;"
             />
             <div
-              className="treeViewBodyInner treeViewBodyInner0InnerChunk"
+              class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                className="treeViewRow treeViewRowFixedColumns even "
-                onMouseDown={[Function]}
-                style={
-                  Object {
-                    "height": 16,
-                    "lineHeight": "16px",
-                  }
-                }
+                class="treeViewRow treeViewRowFixedColumns even "
+                style="height: 16px; line-height: 16px;"
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn start"
+                  class="treeViewRowColumn treeViewFixedColumn start"
                   title="0.000s"
                 >
                   0.000s
                 </span>
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn duration"
+                  class="treeViewRowColumn treeViewFixedColumn duration"
                   title="—"
                 >
                   —
                 </span>
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn category"
+                  class="treeViewRowColumn treeViewFixedColumn category"
                   title="UserTiming"
                 >
                   UserTiming
                 </span>
               </div>
               <div
-                className="treeViewRow treeViewRowFixedColumns odd "
-                onMouseDown={[Function]}
-                style={
-                  Object {
-                    "height": 16,
-                    "lineHeight": "16px",
-                  }
-                }
+                class="treeViewRow treeViewRowFixedColumns odd "
+                style="height: 16px; line-height: 16px;"
               >
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn start"
+                  class="treeViewRowColumn treeViewFixedColumn start"
                   title="0.002s"
                 >
                   0.002s
                 </span>
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn duration"
+                  class="treeViewRowColumn treeViewFixedColumn duration"
                   title="n/a"
                 >
                   n/a
                 </span>
                 <span
-                  className="treeViewRowColumn treeViewFixedColumn category"
+                  class="treeViewRowColumn treeViewFixedColumn category"
                   title="Paint"
                 >
                   Paint
@@ -170,77 +135,46 @@ exports[`MarkerTable renders some basic markers 1`] = `
             </div>
           </div>
           <div
-            className="treeViewBodyInner treeViewBodyInner1"
-            style={
-              Object {
-                "height": "32px",
-                "width": 3000,
-              }
-            }
+            class="treeViewBodyInner treeViewBodyInner1"
+            style="height: 32px; width: 3000px;"
           >
             <div
-              className="treeViewBodyInner treeViewBodyInner1TopSpacer"
-              style={
-                Object {
-                  "height": "0px",
-                }
-              }
+              class="treeViewBodyInner treeViewBodyInner1TopSpacer"
+              style="height: 0px;"
             />
             <div
-              className="treeViewBodyInner treeViewBodyInner1InnerChunk"
+              class="treeViewBodyInner treeViewBodyInner1InnerChunk"
             >
               <div
-                className="treeViewRow treeViewRowScrolledColumns even  "
-                onMouseDown={[Function]}
-                style={
-                  Object {
-                    "height": 16,
-                    "lineHeight": "16px",
-                  }
-                }
+                class="treeViewRow treeViewRowScrolledColumns even  "
+                style="height: 16px; line-height: 16px;"
               >
                 <span
-                  className="treeRowIndentSpacer"
-                  style={
-                    Object {
-                      "width": "0px",
-                    }
-                  }
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
                 />
                 <span
-                  className="treeRowToggleButton collapsed leaf"
-                  onClick={[Function]}
+                  class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  className="treeViewRowColumn treeViewMainColumn name"
+                  class="treeViewRowColumn treeViewMainColumn name"
                 >
                   foobar
                 </span>
               </div>
               <div
-                className="treeViewRow treeViewRowScrolledColumns odd  "
-                onMouseDown={[Function]}
-                style={
-                  Object {
-                    "height": 16,
-                    "lineHeight": "16px",
-                  }
-                }
+                class="treeViewRow treeViewRowScrolledColumns odd  "
+                style="height: 16px; line-height: 16px;"
               >
                 <span
-                  className="treeRowIndentSpacer"
-                  style={
-                    Object {
-                      "width": "0px",
-                    }
-                  }
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
                 />
                 <span
-                  className="treeRowToggleButton collapsed leaf"
-                  onClick={[Function]}
+                  class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  className="treeViewRowColumn treeViewMainColumn name"
+                  class="treeViewRowColumn treeViewMainColumn name"
                 >
                   NotifyDidPaint
                 </span>

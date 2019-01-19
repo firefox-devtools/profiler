@@ -11,7 +11,6 @@ import {
 } from '../../profile-logic/symbolication';
 import { processProfile } from '../../profile-logic/process-profile';
 import {
-  resourceTypes,
   getCallNodeInfo,
   filterThreadByImplementation,
   getCallNodePathFromIndex,
@@ -24,21 +23,20 @@ import {
   getTreeOrderComparator,
   getSamplesSelectedStates,
 } from '../../profile-logic/profile-data';
-import getGeckoProfile from '.././fixtures/profiles/gecko-profile';
-import profileWithJS from '.././fixtures/profiles/timings-with-js';
+import { resourceTypes } from '../../profile-logic/data-structures';
+import {
+  createGeckoProfile,
+  createGeckoProfileWithJsTimings,
+} from '.././fixtures/profiles/gecko-profile';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
 import { sortDataTable } from '../../utils/data-table-utils';
 import { ensureExists } from '../../utils/flow';
-import {
-  getCategoryByImplementation,
-  implementationCategoryMap,
-} from '../../profile-logic/color-categories';
 import getCallNodeProfile from '../fixtures/profiles/call-nodes';
 import {
   getProfileFromTextSamples,
   getJsTracerTable,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
@@ -115,7 +113,7 @@ describe('data-table-utils', function() {
 
 describe('process-profile', function() {
   describe('processProfile', function() {
-    const profile = processProfile(getGeckoProfile());
+    const profile = processProfile(createGeckoProfile());
     it('should have three threads', function() {
       expect(profile.threads.length).toEqual(3);
     });
@@ -276,19 +274,19 @@ describe('process-profile', function() {
 
   describe('JS tracer', function() {
     it('does not have JS tracer information by default', function() {
-      const profile = processProfile(getGeckoProfile());
+      const profile = processProfile(createGeckoProfile());
       expect(profile.threads[0].jsTracer).toBe(undefined);
     });
 
     it('processes JS tracer and offsets the timestamps', function() {
-      const geckoProfile = getGeckoProfile();
+      const geckoProfile = createGeckoProfile();
       const timestampOffsetMs = 33;
       const timestampOffsetMicro = timestampOffsetMs * 1000;
 
       {
         // Build the custom thread with JS tracer information. The startTime is offset
         // from the parent process.
-        const geckoSubprocess = getGeckoProfile();
+        const geckoSubprocess = createGeckoProfile();
         const childProcessThread = geckoSubprocess.threads[0];
         const stringTable = new UniqueStringArray();
         const jsTracer = getJsTracerTable(stringTable, [
@@ -339,7 +337,7 @@ describe('process-profile', function() {
         memory: null,
         ticks: null,
         allocations: null,
-        profile: getGeckoProfile(),
+        profile: createGeckoProfile(),
         configuration: null,
         systemHost: null,
         systemClient: null,
@@ -351,7 +349,7 @@ describe('process-profile', function() {
   });
   describe('extensions metadata', function() {
     it('should be processed correctly', function() {
-      const geckoProfile = getGeckoProfile();
+      const geckoProfile = createGeckoProfile();
       geckoProfile.meta.extensions = {
         schema: {
           id: 0,
@@ -384,7 +382,7 @@ describe('process-profile', function() {
       });
     });
     it('should be handled correctly if missing', function() {
-      const geckoProfile = getGeckoProfile();
+      const geckoProfile = createGeckoProfile();
       delete geckoProfile.meta.extensions;
 
       const profile = processProfile(geckoProfile);
@@ -400,7 +398,7 @@ describe('process-profile', function() {
 
 describe('profile-data', function() {
   describe('createCallNodeTableAndFixupSamples', function() {
-    const profile = processProfile(getGeckoProfile());
+    const profile = processProfile(createGeckoProfile());
     const defaultCategory = profile.meta.categories.findIndex(
       c => c.name === 'Other'
     );
@@ -582,7 +580,7 @@ describe('symbolication', function() {
     let symbolicatedProfile = null;
 
     beforeAll(function() {
-      unsymbolicatedProfile = processProfile(getGeckoProfile());
+      unsymbolicatedProfile = processProfile(createGeckoProfile());
       const symbolTable = new Map();
       symbolTable.set(0, 'first symbol');
       symbolTable.set(0xf00, 'second symbol');
@@ -651,31 +649,8 @@ describe('symbolication', function() {
   // TODO: check that functions are collapsed correctly
 });
 
-describe('color-categories', function() {
-  const profile = processProfile(getGeckoProfile());
-  const [thread] = profile.threads;
-  it('calculates the category for each frame', function() {
-    const categories = thread.samples.stack.map(stackIndex => {
-      const frameIndex =
-        stackIndex === null ? null : thread.stackTable.frame[stackIndex];
-      if (frameIndex === null) {
-        throw new Error('frameIndex cannot be null');
-      }
-      return getCategoryByImplementation(thread, frameIndex);
-    });
-    for (let i = 0; i < 6; i++) {
-      expect(categories[i].name).toEqual('Platform');
-      expect(categories[i].color).toEqual(implementationCategoryMap.Platform);
-    }
-    expect(categories[6].name).toEqual('JS Baseline');
-    expect(categories[6].color).toEqual(
-      implementationCategoryMap['JS Baseline']
-    );
-  });
-});
-
 describe('filter-by-implementation', function() {
-  const profile = processProfile(profileWithJS());
+  const profile = processProfile(createGeckoProfileWithJsTimings());
   const defaultCategory = profile.meta.categories.findIndex(
     c => c.name === 'Other'
   );
@@ -802,10 +777,10 @@ describe('convertStackToCallNodePath', function() {
 describe('getTimingsForPath in a non-inverted tree', function() {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A                  A             A             A  A
-      B                  B             B             B  B
-      Cjs                Cjs           Cjs           H  H
-      D                  D             F             I
+      A                  A             A             A              A
+      B                  B             B             B              B
+      Cjs                Cjs           Cjs           H[cat:Layout]  H[cat:Layout]
+      D                  D             F             I[cat:Idle]
       Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
     `);
 
@@ -825,7 +800,8 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         callNodeInfo,
         profile.meta.interval,
         false,
-        thread
+        thread,
+        profile.meta.categories
       );
 
     return {
@@ -841,17 +817,27 @@ describe('getTimingsForPath in a non-inverted tree', function() {
     const timings = getTimingsForPath([A]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
         totalTime: {
           value: 5,
           breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
+          breakdownByCategory: [1, 3, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
         },
       },
       forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
         totalTime: {
           value: 5,
           breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
+          breakdownByCategory: [1, 3, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
         },
       },
       rootTime: 5,
@@ -875,20 +861,24 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         selfTime: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
+          breakdownByCategory: [0, 2, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
         totalTime: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
+          breakdownByCategory: [0, 2, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
       },
       forFunc: {
         selfTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
+          breakdownByCategory: [0, 3, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
         totalTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
+          breakdownByCategory: [0, 3, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
       },
       rootTime: 5,
@@ -903,12 +893,29 @@ describe('getTimingsForPath in a non-inverted tree', function() {
     const timings = getTimingsForPath([A, B, H]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+        selfTime: {
+          value: 1,
+          breakdownByImplementation: { native: 1 },
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
+        },
+        totalTime: {
+          value: 2,
+          breakdownByImplementation: { native: 2 },
+
+          breakdownByCategory: [1, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
+        },
       },
       forFunc: {
-        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+        selfTime: {
+          value: 1,
+          breakdownByImplementation: { native: 1 },
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
+        },
+        totalTime: {
+          value: 2,
+          breakdownByImplementation: { native: 2 },
+          breakdownByCategory: [1, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
+        },
       },
       rootTime: 5,
     });
@@ -918,10 +925,10 @@ describe('getTimingsForPath in a non-inverted tree', function() {
 describe('getTimingsForPath for an inverted tree', function() {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A                  A             A             A  A
-      B                  B             B             B  B
-      Cjs                Cjs           Cjs           H  H
-      D                  D             F             I
+      A                  A             A             A              A
+      B                  B             B             B              B
+      Cjs                Cjs           Cjs           H[cat:Layout]  H[cat:Layout]
+      D                  D             F             I[cat:Idle]
       Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
     `);
     const defaultCategory = profile.meta.categories.findIndex(
@@ -930,9 +937,9 @@ describe('getTimingsForPath for an inverted tree', function() {
     const thread = invertCallstack(profile.threads[0], defaultCategory);
     // Now the profile should look like this:
     //
-    // Ejs  Ejs  Ejs  I H
-    // D    D    F    H B
-    // Cjs  Cjs  Cjs  B A
+    // Ejs  Ejs  Ejs  I[cat:Idle]    H[cat:Layout]
+    // D    D    F    H[cat:Layout]  B
+    // Cjs  Cjs  Cjs  B              A
     // B    B    B    A
     // A    A    A
 
@@ -948,7 +955,8 @@ describe('getTimingsForPath for an inverted tree', function() {
         callNodeInfo,
         profile.meta.interval,
         true,
-        thread
+        thread,
+        profile.meta.categories
       );
 
     return {
@@ -962,20 +970,27 @@ describe('getTimingsForPath for an inverted tree', function() {
     const timings = getTimingsForPath([Ejs]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 3, breakdownByImplementation: null },
+        selfTime: {
+          value: 3,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
         totalTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
+          breakdownByCategory: [0, 3, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
       },
       forFunc: {
         selfTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
+          breakdownByCategory: [0, 3, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
         totalTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
+          breakdownByCategory: [0, 3, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
       },
       rootTime: 5,
@@ -987,14 +1002,23 @@ describe('getTimingsForPath for an inverted tree', function() {
     const timings = getTimingsForPath([Ejs, D, Cjs, B]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
         totalTime: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
+          breakdownByCategory: [0, 2, 0, 0, 0, 0, 0, 0], // [Idle, Other, ...]
         },
       },
       forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
         totalTime: {
           value: 5,
           breakdownByImplementation: {
@@ -1002,6 +1026,7 @@ describe('getTimingsForPath for an inverted tree', function() {
             baseline: 1,
             native: 2,
           },
+          breakdownByCategory: [1, 3, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout, ...]
         },
       },
       rootTime: 5,
@@ -1015,12 +1040,28 @@ describe('getTimingsForPath for an inverted tree', function() {
     let timings = getTimingsForPath([H]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 1, breakdownByImplementation: null },
-        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        selfTime: {
+          value: 1,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
+        totalTime: {
+          value: 1,
+          breakdownByImplementation: { native: 1 },
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
+        },
       },
       forFunc: {
-        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+        selfTime: {
+          value: 1,
+          breakdownByImplementation: { native: 1 },
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
+        },
+        totalTime: {
+          value: 2,
+          breakdownByImplementation: { native: 2 },
+          breakdownByCategory: [1, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
+        },
       },
       rootTime: 5,
     });
@@ -1029,12 +1070,28 @@ describe('getTimingsForPath for an inverted tree', function() {
     timings = getTimingsForPath([I, H]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
+        totalTime: {
+          value: 1,
+          breakdownByImplementation: { native: 1 },
+          breakdownByCategory: [1, 0, 0, 0, 0, 0, 0, 0], // [Idle]
+        },
       },
       forFunc: {
-        selfTime: { value: 1, breakdownByImplementation: { native: 1 } },
-        totalTime: { value: 2, breakdownByImplementation: { native: 2 } },
+        selfTime: {
+          value: 1,
+          breakdownByImplementation: { native: 1 },
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
+        },
+        totalTime: {
+          value: 2,
+          breakdownByImplementation: { native: 2 },
+          breakdownByCategory: [1, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
+        },
       },
       rootTime: 5,
     });
@@ -1045,14 +1102,27 @@ describe('getTimingsForPath for an inverted tree', function() {
     const timings = getTimingsForPath([H, B, A]);
     expect(timings).toEqual({
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 1, breakdownByImplementation: { native: 1 } },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
+        totalTime: {
+          value: 1,
+          breakdownByImplementation: { native: 1 },
+          breakdownByCategory: [0, 0, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
+        },
       },
       forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
         totalTime: {
           value: 5,
           breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
+          breakdownByCategory: [1, 3, 1, 0, 0, 0, 0, 0], // [Idle, Other, Layout]
         },
       },
       rootTime: 5,

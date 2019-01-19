@@ -489,12 +489,14 @@ Object {
         "time": Array [],
       },
       "name": "Chrome Thread",
+      "pausedRanges": Array [],
       "pid": 88999,
+      "processShutdownTime": null,
+      "processStartupTime": 0,
       "processType": "default",
+      "registerTime": 0,
       "resourceTable": Object {
-        "addonId": Array [],
         "host": Array [],
-        "icon": Array [],
         "length": 0,
         "lib": Array [],
         "name": Array [],
@@ -5184,6 +5186,7 @@ Object {
         },
       },
       "tid": 31491,
+      "unregisterTime": null,
     },
     Object {
       "frameTable": Object {
@@ -5488,12 +5491,14 @@ Object {
         ],
       },
       "name": "CrGpuMain",
+      "pausedRanges": Array [],
       "pid": 88978,
+      "processShutdownTime": null,
+      "processStartupTime": 0,
       "processType": "default",
+      "registerTime": 0,
       "resourceTable": Object {
-        "addonId": Array [],
         "host": Array [],
-        "icon": Array [],
         "length": 0,
         "lib": Array [],
         "name": Array [],
@@ -5582,6 +5587,7 @@ Object {
         },
       },
       "tid": 775,
+      "unregisterTime": null,
     },
   ],
 }
@@ -5589,6 +5595,7 @@ Object {
 
 exports[`converting Linux perf profile should import a perf profile 1`] = `
 Object {
+  "counters": Array [],
   "meta": Object {
     "abi": undefined,
     "appBuildID": undefined,

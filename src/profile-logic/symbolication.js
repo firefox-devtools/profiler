@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { resourceTypes } from './profile-data';
+import { resourceTypes } from './data-structures';
 import { SymbolsNotFoundError } from './errors';
 
 import type {

@@ -4,17 +4,17 @@
 
 // @flow
 import * as React from 'react';
-import { TimelineTracingMarkersOverview } from '../../components/timeline/TracingMarkers';
-import renderer from 'react-test-renderer';
+import { TimelineMarkersOverview } from '../../components/timeline/Markers';
+import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../fixtures/profiles/make-profile';
+import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import ReactDOM from 'react-dom';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
-describe('TimelineTracingMarkersOverview', function() {
+describe('TimelineMarkersOverview', function() {
   beforeEach(() => {
     jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
       // findDOMNode uses nominal typing instead of structural (null | Element | Text), so
@@ -30,21 +30,12 @@ describe('TimelineTracingMarkersOverview', function() {
     const flushRafCalls = mockRaf();
     window.devicePixelRatio = 1;
     const ctx = mockCanvasContext();
-
-    /**
-     * Mock out any created refs for the components with relevant information.
-     */
-    function createNodeMock(element) {
-      // This is the canvas used to draw markers
-      if (element.type === 'canvas') {
-        return {
-          getBoundingClientRect: () => getBoundingBox(200, 300),
-          getContext: () => ctx,
-          style: {},
-        };
-      }
-      return null;
-    }
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(200, 300));
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => ctx);
 
     const profile = getProfileWithMarkers([
       ['GCMajor', 2, { startTime: 2, endTime: 12 }],
@@ -78,17 +69,16 @@ describe('TimelineTracingMarkersOverview', function() {
       ],
     ]);
 
-    const overview = renderer.create(
+    const { container } = render(
       <Provider store={storeWithProfile(profile)}>
-        <TimelineTracingMarkersOverview
-          className="timelineTracingMarkersOverview"
+        <TimelineMarkersOverview
+          className="timelineMarkersOverview"
           rangeStart={0}
           rangeEnd={15}
           threadIndex={0}
           onSelect={() => {}}
         />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
     // We need to flush twice since when the first flush is run, it
@@ -96,10 +86,9 @@ describe('TimelineTracingMarkersOverview', function() {
     flushRafCalls();
     flushRafCalls();
 
-    const tree = overview.toJSON();
     const drawCalls = ctx.__flushDrawLog();
 
-    expect(tree).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
 
     delete window.devicePixelRatio;

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { getProfileFromTextSamples } from '../../fixtures/profiles/make-profile';
+import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
 import { serializeProfile } from '../../../profile-logic/process-profile';
 import { receiveZipFile } from '../../../actions/receive-profile';
 import type { ZipFileTable } from '../../../profile-logic/zip-files';

@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import Home from '../../components/app/Home';
-import renderer from 'react-test-renderer';
+import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import createStore from '../../app-logic/create-store';
 
@@ -27,37 +27,37 @@ describe('app/Home', function() {
   it('renders the install screen for the extension', () => {
     userAgent = FIREFOX_WEBEXT;
 
-    const home = renderer.create(
+    const { container } = render(
       <Provider store={createStore()}>
         <Home specialMessage="This is a special message" />
       </Provider>
     );
 
-    expect(home.toJSON()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders the install screen for the legacy add-on', () => {
     userAgent = FIREFOX_LEGACY;
 
-    const home = renderer.create(
+    const { container } = render(
       <Provider store={createStore()}>
         <Home specialMessage="This is a special message" />
       </Provider>
     );
 
-    expect(home.toJSON()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders the information screen for other browsers', () => {
     userAgent = SAFARI;
 
-    const home = renderer.create(
+    const { container } = render(
       <Provider store={createStore()}>
         <Home specialMessage="This is a special message" />
       </Provider>
     );
 
-    expect(home.toJSON()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('renders the usage instructions for pages with the extension installed', () => {
@@ -65,13 +65,13 @@ describe('app/Home', function() {
 
     window.isGeckoProfilerAddonInstalled = true;
 
-    const home = renderer.create(
+    const { container } = render(
       <Provider store={createStore()}>
         <Home specialMessage="This is a special message" />
       </Provider>
     );
 
-    expect(home.toJSON()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     delete window.isGeckoProfilerAddonInstalled;
   });

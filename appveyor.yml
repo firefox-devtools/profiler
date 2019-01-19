@@ -20,7 +20,7 @@ test_script:
   - yarn lint
   - yarn flow --quiet
   # stop flow to recover some memory
-  - yarn flow stop
+  - yarn flow-stop
   - yarn test
   - yarn build-prod:quiet
 
@@ -29,4 +29,3 @@ cache:
 
 # Don't actually build.
 build: off
-

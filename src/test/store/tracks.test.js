@@ -4,9 +4,9 @@
 // @flow
 import {
   getScreenshotTrackProfile,
-  getEmptyThread,
   getNetworkTrackProfile,
-} from '../fixtures/profiles/make-profile';
+} from '../fixtures/profiles/processed-profile';
+import { getEmptyThread } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';

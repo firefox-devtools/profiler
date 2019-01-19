@@ -2,30 +2,28 @@
 
 exports[`shared/ButtonWithPanel renders a closed panel and opens it when asked 1`] = `
 <div
-  className="buttonWithPanel button"
+  class="buttonWithPanel button"
 >
   <div
-    className="buttonWithPanelButtonWrapper"
+    class="buttonWithPanelButtonWrapper"
   >
     <input
-      className="buttonWithPanelButton buttonButton"
-      disabled={false}
-      onClick={[Function]}
+      class="buttonWithPanelButton buttonButton"
       type="button"
       value="My Button"
     />
   </div>
   <div
-    className="arrowPanelAnchor"
+    class="arrowPanelAnchor"
   >
     <div
-      className="arrowPanel panel"
+      class="arrowPanel panel"
     >
       <div
-        className="arrowPanelArrow"
+        class="arrowPanelArrow"
       />
       <div
-        className="arrowPanelContent"
+        class="arrowPanelContent"
       >
         <div>
           Panel content
@@ -38,30 +36,28 @@ exports[`shared/ButtonWithPanel renders a closed panel and opens it when asked 1
 
 exports[`shared/ButtonWithPanel renders a closed panel and opens it when asked 2`] = `
 <div
-  className="buttonWithPanel button open"
+  class="buttonWithPanel button open"
 >
   <div
-    className="buttonWithPanelButtonWrapper"
+    class="buttonWithPanelButtonWrapper"
   >
     <input
-      className="buttonWithPanelButton buttonButton"
-      disabled={false}
-      onClick={[Function]}
+      class="buttonWithPanelButton buttonButton"
       type="button"
       value="My Button"
     />
   </div>
   <div
-    className="arrowPanelAnchor"
+    class="arrowPanelAnchor"
   >
     <div
-      className="arrowPanel panel"
+      class="arrowPanel panel"
     >
       <div
-        className="arrowPanelArrow"
+        class="arrowPanelArrow"
       />
       <div
-        className="arrowPanelContent"
+        class="arrowPanelContent"
       >
         <div>
           Panel content
@@ -74,30 +70,29 @@ exports[`shared/ButtonWithPanel renders a closed panel and opens it when asked 2
 
 exports[`shared/ButtonWithPanel renders a disabled button 1`] = `
 <div
-  className="buttonWithPanel button"
+  class="buttonWithPanel button"
 >
   <div
-    className="buttonWithPanelButtonWrapper"
+    class="buttonWithPanelButtonWrapper"
   >
     <input
-      className="buttonWithPanelButton buttonButton"
-      disabled={true}
-      onClick={[Function]}
+      class="buttonWithPanelButton buttonButton"
+      disabled=""
       type="button"
       value="My Button"
     />
   </div>
   <div
-    className="arrowPanelAnchor"
+    class="arrowPanelAnchor"
   >
     <div
-      className="arrowPanel panel"
+      class="arrowPanel panel"
     >
       <div
-        className="arrowPanelArrow"
+        class="arrowPanelArrow"
       />
       <div
-        className="arrowPanelContent"
+        class="arrowPanelContent"
       >
         <div>
           Panel content
@@ -110,30 +105,28 @@ exports[`shared/ButtonWithPanel renders a disabled button 1`] = `
 
 exports[`shared/ButtonWithPanel renders an opened panel 1`] = `
 <div
-  className="buttonWithPanel button open"
+  class="buttonWithPanel button open"
 >
   <div
-    className="buttonWithPanelButtonWrapper"
+    class="buttonWithPanelButtonWrapper"
   >
     <input
-      className="buttonWithPanelButton buttonButton"
-      disabled={false}
-      onClick={[Function]}
+      class="buttonWithPanelButton buttonButton"
       type="button"
       value="My Button"
     />
   </div>
   <div
-    className="arrowPanelAnchor"
+    class="arrowPanelAnchor"
   >
     <div
-      className="arrowPanel panel"
+      class="arrowPanel panel"
     >
       <div
-        className="arrowPanelArrow"
+        class="arrowPanelArrow"
       />
       <div
-        className="arrowPanelContent"
+        class="arrowPanelContent"
       >
         <div>
           Panel content

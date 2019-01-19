@@ -17,6 +17,7 @@ import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
+  WrapFunctionInDispatch,
 } from '../../utils/connect';
 
 require('./Home.css');
@@ -52,10 +53,12 @@ class InstallButton extends React.PureComponent<InstallButtonProps> {
   }
 }
 
-type ActionButtonsProps = {
-  retrieveProfileFromFile: typeof retrieveProfileFromFile,
-  triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
-};
+type ActionButtonsProps = {|
+  +retrieveProfileFromFile: WrapFunctionInDispatch<
+    typeof retrieveProfileFromFile
+  >,
+  +triggerLoadingFromUrl: typeof triggerLoadingFromUrl,
+|};
 
 type ActionButtonsState = {
   isLoadFromUrlPressed: boolean,
@@ -312,7 +315,10 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               Install the Gecko Profiler Add-on to start recording a performance
               profile in Firefox, then analyze it and share it with perf.html.
             </p>
-            <ActionButtons {...this.props} />
+            <ActionButtons
+              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
+              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+            />
           </div>
         </div>
       </InstructionTransition>
@@ -341,7 +347,10 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <kbd>Capture Profile</kbd> to load the data into perf.html.
             </p>
             {this._renderShortcuts()}
-            <ActionButtons {...this.props} />
+            <ActionButtons
+              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
+              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+            />
           </div>
         </div>
       </InstructionTransition>
@@ -374,7 +383,10 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               to load the data into perf.html.
             </p>
             {this._renderShortcuts()}
-            <ActionButtons {...this.props} />
+            <ActionButtons
+              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
+              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+            />
           </div>
         </div>
       </InstructionTransition>
@@ -402,7 +414,10 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <a href="https://www.mozilla.org/en-US/firefox/new/">Firefox</a>.
               However, existing profiles can be viewed in any modern browser.
             </p>
-            <ActionButtons {...this.props} />
+            <ActionButtons
+              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
+              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+            />
           </div>
         </div>
       </InstructionTransition>
@@ -411,18 +426,14 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
 
   _renderShortcuts() {
     return (
-      <p>
-        <div>
-          <p>
-            <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> Stop and start
-            profiling
-          </p>
-          <p>
-            <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd> Capture and load
-            profile
-          </p>
-        </div>
-      </p>
+      <div>
+        <p>
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>1</kbd> Stop and start profiling
+        </p>
+        <p>
+          <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>2</kbd> Capture and load profile
+        </p>
+      </div>
     );
   }
 

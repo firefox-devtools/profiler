@@ -5,6 +5,7 @@
 // @flow
 import { GREY_30 } from 'photon-colors';
 import * as React from 'react';
+import memoize from 'memoize-immutable';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
@@ -16,10 +17,12 @@ import {
 import ChartCanvas from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
-import { formatNumber } from '../../utils/format-numbers';
+import { formatMilliseconds } from '../../utils/format-numbers';
 import { updatePreviewSelection } from '../../actions/profile-view';
+import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
+import { TooltipCallNode } from '../tooltip/CallNode';
 
-import type { Thread } from '../../types/profile';
+import type { Thread, CategoryList } from '../../types/profile';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -35,9 +38,8 @@ import type {
   StackTimingDepth,
   IndexIntoStackTiming,
 } from '../../profile-logic/stack-timing';
-import type { GetCategory } from '../../profile-logic/color-categories';
-import type { GetLabel } from '../../profile-logic/labeling-strategies';
 import type { Viewport } from '../shared/chart/Viewport';
+import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {|
   +thread: Thread,
@@ -46,9 +48,10 @@ type OwnProps = {|
   +rangeEnd: Milliseconds,
   +stackTimingByDepth: StackTimingByDepth,
   +stackFrameHeight: CssPixels,
-  +getCategory: GetCategory,
-  +getLabel: GetLabel,
-  +updatePreviewSelection: typeof updatePreviewSelection,
+  +updatePreviewSelection: WrapFunctionInDispatch<
+    typeof updatePreviewSelection
+  >,
+  +categories: CategoryList,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
@@ -62,7 +65,7 @@ type Props = $ReadOnly<{|
 
 type HoveredStackTiming = {|
   +depth: StackTimingDepth,
-  +stackTableIndex: IndexIntoStackTiming,
+  +stackTimingIndex: IndexIntoStackTiming,
 |};
 
 require('./Canvas.css');
@@ -137,12 +140,11 @@ class StackChartCanvas extends React.PureComponent<Props> {
       thread,
       rangeStart,
       rangeEnd,
-      getLabel,
       stackTimingByDepth,
       stackFrameHeight,
-      getCategory,
       selectedCallNodeIndex,
-      callNodeInfo: { stackIndexToCallNodeIndex },
+      categories,
+      callNodeInfo: { callNodeTable },
       viewport: {
         containerWidth,
         containerHeight,
@@ -292,20 +294,27 @@ class StackChartCanvas extends React.PureComponent<Props> {
           );
 
           // Look up information about this stack frame.
-          const stackIndex = stackTiming.stack[i];
-          const callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
-          const frameIndex = thread.stackTable.frame[stackIndex];
-          const text = getLabel(thread, stackIndex);
-          const category = getCategory(thread, frameIndex);
+          const callNodeIndex = stackTiming.callNode[i];
+          const funcIndex = callNodeTable.func[callNodeIndex];
+          const funcNameIndex = thread.funcTable.name[funcIndex];
+          const text = thread.stringTable.getString(funcNameIndex);
+          const categoryIndex = callNodeTable.category[callNodeIndex];
+          const category = categories[categoryIndex];
+
           const isHovered =
             hoveredItem &&
             depth === hoveredItem.depth &&
-            i === hoveredItem.stackTableIndex;
+            i === hoveredItem.stackTimingIndex;
           const isSelected = selectedCallNodeIndex === callNodeIndex;
 
+          const colorStyles = this._mapCategoryColorNameToStyles(
+            category.color
+          );
           // Draw the box.
           fastFillStyle.set(
-            isHovered || isSelected ? 'Highlight' : category.color
+            isHovered || isSelected
+              ? colorStyles.selectedFillStyle
+              : colorStyles.unselectedFillStyle
           );
           ctx.fillRect(
             intX,
@@ -334,7 +343,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
             const fittedText = textMeasurement.getFittedText(text, textW);
             if (fittedText) {
               fastFillStyle.set(
-                isHovered || isSelected ? 'HighlightText' : '#000000'
+                isHovered || isSelected
+                  ? colorStyles.selectedTextColor
+                  : '#000000'
               );
               ctx.fillText(fittedText, textX, intY + textDevicePixelsOffsetTop);
             }
@@ -359,71 +370,35 @@ class StackChartCanvas extends React.PureComponent<Props> {
     );
   };
 
+  // Provide a memoized function that maps the category color names to specific color
+  // choices that are used across this project's charts.
+  _mapCategoryColorNameToStyles = memoize(
+    mapCategoryColorNameToStackChartStyles,
+    {
+      // Memoize every color that is seen.
+      limit: Infinity,
+    }
+  );
+
   _getHoveredStackInfo = ({
     depth,
-    stackTableIndex,
+    stackTimingIndex,
   }: HoveredStackTiming): React.Node => {
-    const { thread, getLabel, getCategory, stackTimingByDepth } = this.props;
+    const { thread, stackTimingByDepth, categories, callNodeInfo } = this.props;
+
     const stackTiming = stackTimingByDepth[depth];
-
+    const callNodeIndex = stackTiming.callNode[stackTimingIndex];
     const duration =
-      stackTiming.end[stackTableIndex] - stackTiming.start[stackTableIndex];
-
-    const stackIndex = stackTiming.stack[stackTableIndex];
-    const frameIndex = thread.stackTable.frame[stackIndex];
-    const label = getLabel(thread, stackIndex);
-    const category = getCategory(thread, frameIndex);
-    const funcIndex = thread.frameTable.func[frameIndex];
-
-    let resourceOrFileName = null;
-    // Only JavaScript functions have a filename.
-    const fileNameIndex = thread.funcTable.fileName[funcIndex];
-    if (fileNameIndex !== null) {
-      // Because of our use of Grid Layout, all our elements need to be direct
-      // children of the grid parent. That's why we use arrays here, to add
-      // the elements as direct children.
-      resourceOrFileName = [
-        <div className="tooltipLabel" key="file">
-          File:
-        </div>,
-        thread.stringTable.getString(fileNameIndex),
-      ];
-    } else {
-      const resourceIndex = thread.funcTable.resource[funcIndex];
-      if (resourceIndex !== -1) {
-        const resourceNameIndex = thread.resourceTable.name[resourceIndex];
-        if (resourceNameIndex !== -1) {
-          // Because of our use of Grid Layout, all our elements need to be direct
-          // children of the grid parent. That's why we use arrays here, to add
-          // the elements as direct children.
-          resourceOrFileName = [
-            <div className="tooltipLabel" key="resource">
-              Resource:
-            </div>,
-            thread.stringTable.getString(resourceNameIndex),
-          ];
-        }
-      }
-    }
+      stackTiming.end[stackTimingIndex] - stackTiming.start[stackTimingIndex];
 
     return (
-      <div className="stackChartCanvasTooltip">
-        <div className="tooltipOneLine tooltipHeader">
-          <div className="tooltipTiming">{formatNumber(duration)}ms</div>
-          <div className="tooltipTitle">{label}</div>
-        </div>
-        <div className="tooltipDetails">
-          <div className="tooltipLabel">Category:</div>
-          <div>
-            <div
-              className="tooltipSwatch"
-              style={{ backgroundColor: category.color }}
-            />
-            {category.name}
-          </div>
-          {resourceOrFileName}
-        </div>
-      </div>
+      <TooltipCallNode
+        thread={thread}
+        callNodeIndex={callNodeIndex}
+        callNodeInfo={callNodeInfo}
+        categories={categories}
+        durationText={formatMilliseconds(duration)}
+      />
     );
   };
 
@@ -431,13 +406,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
     if (hoveredItem === null) {
       return;
     }
-    const { depth, stackTableIndex } = hoveredItem;
+    const { depth, stackTimingIndex } = hoveredItem;
     const { stackTimingByDepth, updatePreviewSelection } = this.props;
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: stackTimingByDepth[depth].start[stackTableIndex],
-      selectionEnd: stackTimingByDepth[depth].end[stackTableIndex],
+      selectionStart: stackTimingByDepth[depth].start[stackTimingIndex],
+      selectionEnd: stackTimingByDepth[depth].end[stackTimingIndex],
     });
   };
 
@@ -446,11 +421,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
     // null) if there's nothing hovered.
     let callNodeIndex = null;
     if (hoveredItem !== null) {
-      const { depth, stackTableIndex } = hoveredItem;
+      const { depth, stackTimingIndex } = hoveredItem;
       const { stackTimingByDepth } = this.props;
-      const stackIndex = stackTimingByDepth[depth].stack[stackTableIndex];
-      const { stackIndexToCallNodeIndex } = this.props.callNodeInfo;
-      callNodeIndex = stackIndexToCallNodeIndex[stackIndex];
+      callNodeIndex = stackTimingByDepth[depth].callNode[stackTimingIndex];
     }
     this.props.onSelectionChange(callNodeIndex);
   };
@@ -483,7 +456,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
       const start = stackTiming.start[i];
       const end = stackTiming.end[i];
       if (start < time && end > time) {
-        return { depth, stackTableIndex: i };
+        return { depth, stackTimingIndex: i };
       }
     }
 
@@ -510,7 +483,6 @@ class StackChartCanvas extends React.PureComponent<Props> {
   }
 }
 
-//
 export default (withChartViewport: WithChartViewport<OwnProps, Props>)(
   StackChartCanvas
 );

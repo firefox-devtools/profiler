@@ -16,7 +16,7 @@ import type {
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { StartEndRange } from './units';
 import type {
-  IndexIntoMarkersTable,
+  IndexIntoRawMarkerTable,
   Profile,
   ThreadIndex,
   Pid,
@@ -29,8 +29,6 @@ import type {
   TrackIndex,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
-import type { GetLabel } from '../profile-logic/labeling-strategies';
-import type { GetCategory } from '../profile-logic/color-categories';
 import type { TransformStacksPerThread } from './transforms';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
@@ -42,7 +40,7 @@ export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
   +expandedCallNodePaths: PathSet,
-  +selectedMarker: IndexIntoMarkersTable | -1,
+  +selectedMarker: IndexIntoRawMarkerTable | -1,
 |};
 
 export type ProfileSharingStatus = {|
@@ -162,16 +160,10 @@ export type UrlState = {|
 
 export type IconState = Set<string>;
 
-export type StackChartState = {|
-  categoryColorStrategy: GetCategory,
-  labelingStrategy: GetLabel,
-|};
-
 export type State = {|
   +app: AppState,
   +profileView: ProfileViewState,
   +urlState: UrlState,
-  +stackChart: StackChartState,
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
 |};

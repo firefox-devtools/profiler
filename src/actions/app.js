@@ -73,6 +73,14 @@ export function invalidatePanelLayout(): Action {
 }
 
 /**
+ * The viewport component provides a hint to use shift to zoom scroll. The first
+ * time a user does this, the hint goes away.
+ */
+export function setHasZoomedViaMousewheel() {
+  return { type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' };
+}
+
+/**
  * This function is called when a browser navigation event happens. A new UrlState
  * is generated when the window.location is serialized, or the state is pulled out of
  * the history API.

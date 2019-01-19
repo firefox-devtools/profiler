@@ -9,7 +9,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import JsTracer from '../../components/js-tracer';
-import { mount } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
@@ -19,7 +19,7 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
-import { getProfileWithJsTracerEvents } from '../fixtures/profiles/make-profile';
+import { getProfileWithJsTracerEvents } from '../fixtures/profiles/processed-profile';
 import { getShowJsTracerSummary } from '../../selectors/url-state';
 jest.useFakeTimers();
 
@@ -55,11 +55,13 @@ describe('StackChart', function() {
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
 
-    const view = mount(
+    const renderResult = render(
       <Provider store={store}>
         <JsTracer />
       </Provider>
     );
+    const { container, getByText } = renderResult;
+
     if (skipLoadingScreen) {
       // Have React show the loading screen.
       flushRafCalls();
@@ -67,17 +69,16 @@ describe('StackChart', function() {
       flushRafCalls();
       // Now flush once more to actually draw to the screen.
       flushRafCalls();
-      view.update();
     }
 
-    const getJsTracerChartCanvas = () => view.find('canvas').first();
+    const getJsTracerChartCanvas = () => container.querySelector('canvas');
     const getChangeJsTracerSummaryCheckbox = () =>
-      view.find('.jsTracerSettingsCheckbox');
+      getByText(/Show only self time/);
 
     return {
+      ...renderResult,
       dispatch,
       getState,
-      view,
       ctx,
       flushRafCalls,
       getJsTracerChartCanvas,
@@ -92,40 +93,39 @@ describe('StackChart', function() {
   ];
 
   it('only computes the chart after the first tick', () => {
-    const { view, flushRafCalls } = setup({
+    const { getJsTracerChartCanvas, flushRafCalls } = setup({
       skipLoadingScreen: false,
       events: simpleTracerEvents,
     });
-    expect(view.find('canvas').length).toEqual(0);
+    expect(getJsTracerChartCanvas()).toBeFalsy();
     // Flush twice, as the canvas defers until after React updates.
     flushRafCalls();
     flushRafCalls();
-    view.update();
-    expect(view.find('canvas').length).toEqual(1);
+    expect(getJsTracerChartCanvas()).toBeTruthy();
   });
 
   it('matches the snapshot for the loading screen', () => {
-    const { view } = setup({
+    const { container } = setup({
       skipLoadingScreen: false,
       events: simpleTracerEvents,
     });
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshot for empty reasons screen', () => {
-    const { view } = setup({
+    const { container } = setup({
       skipLoadingScreen: true,
       events: [],
     });
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshot for the chart', () => {
-    const { view } = setup({
+    const { container } = setup({
       skipLoadingScreen: true,
       events: simpleTracerEvents,
     });
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshot a simple chart render', () => {
@@ -142,7 +142,7 @@ describe('StackChart', function() {
       events: simpleTracerEvents,
     });
     expect(getShowJsTracerSummary(getState())).toEqual(false);
-    getChangeJsTracerSummaryCheckbox().simulate('change');
+    fireEvent.click(getChangeJsTracerSummaryCheckbox());
     expect(getShowJsTracerSummary(getState())).toEqual(true);
   });
 
@@ -151,7 +151,7 @@ describe('StackChart', function() {
       skipLoadingScreen: true,
       events: simpleTracerEvents,
     });
-    getChangeJsTracerSummaryCheckbox().simulate('change');
+    fireEvent.click(getChangeJsTracerSummaryCheckbox());
     expect(ctx.__flushDrawLog()).toMatchSnapshot();
   });
 });

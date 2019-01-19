@@ -9,6 +9,7 @@ import Root from './components/app/Root';
 import createStore from './app-logic/create-store';
 import 'photon-colors/photon-colors.css';
 import '../res/css/style.css';
+import '../res/css/categories.css';
 import {
   addDataToWindowObject,
   logFriendlyPreamble,
