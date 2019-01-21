@@ -65,13 +65,11 @@ export function mergeProfiles(
     implementationFilters.push(profileSpecific.implementation);
 
     // We adjust the categories using the maps computed above.
-    // Here we're cheating a bit with flow here because we know that we
-    // can't have null values in this table.
-    thread.stackTable.category = ((adjustCategories(
+    thread.stackTable.category = adjustCategories(
       thread.stackTable.category,
       translationMapsForCategories[i]
-    ): any): IndexIntoCategoryList[]);
-    thread.frameTable.category = adjustCategories(
+    );
+    thread.frameTable.category = adjustNullableCategories(
       thread.frameTable.category,
       translationMapsForCategories[i]
     );
@@ -176,6 +174,30 @@ function mergeCategories(
  * Adjusts the category indices in a category list using a translation map.
  */
 function adjustCategories(
+  categories: $ReadOnlyArray<IndexIntoCategoryList>,
+  translationMap: TranslationMapForCategories
+): Array<IndexIntoCategoryList> {
+  return categories.map(category => {
+    const result = translationMap.get(category);
+    if (result === undefined) {
+      throw new Error(
+        stripIndent`
+          Category with index ${category} hasn't been found in the translation map.
+          This shouldn't happen and indicates a bug in perf-html's code.
+        `
+      );
+    }
+    return result;
+  });
+}
+
+/**
+ * Adjusts the category indices in a category list using a translation map.
+ * This is just like the previous function, except the input and output arrays
+ * can have null values. There are 2 different functions to keep our type
+ * safety.
+ */
+function adjustNullableCategories(
   categories: $ReadOnlyArray<IndexIntoCategoryList | null>,
   translationMap: TranslationMapForCategories
 ): Array<IndexIntoCategoryList | null> {
