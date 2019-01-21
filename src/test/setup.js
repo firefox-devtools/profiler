@@ -16,3 +16,12 @@ afterEach(function() {
 });
 
 afterEach(cleanup);
+
+afterEach(() => {
+  // The configuration to restore and reset all of the mocks in tests does not seem
+  // to be working correctly. Manually trigger this call here to ensure we
+  // don't get intermittents from one test's mocks affecting another test's mocks.
+  //
+  // See https://github.com/facebook/jest/issues/7654
+  jest.resetAllMocks();
+});
