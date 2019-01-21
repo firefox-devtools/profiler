@@ -160,6 +160,10 @@ describe('SymbolStore', function() {
   });
 
   it('should call requestSymbolsFromServer first', async function() {
+    // This test has some console output because of unrecognized mock data. This is
+    // fine, but hide it from the test runner.
+    jest.spyOn(console, 'log').mockImplementation(() => {});
+
     const symbolTable = new Map();
     symbolTable.set(0, 'first symbol');
     symbolTable.set(0xf00, 'second symbol');
