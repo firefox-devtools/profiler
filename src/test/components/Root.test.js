@@ -23,6 +23,7 @@ jest.mock('../../components/app/ProfileViewer', () => 'profile-viewer');
 // We mock <Home> as well because it brings too much noise in snapshots and it's
 // overly tested in another test file.
 jest.mock('../../components/app/Home', () => 'home');
+jest.mock('../../components/app/CompareHome', () => 'compare-home');
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
@@ -138,13 +139,13 @@ describe('app/ProfileViewWhenReady', function() {
     const { container, dispatch, navigateToCompareHome } = setup();
 
     navigateToCompareHome();
-    expect(container.firstChild).toMatchSnapshot();
+    expect(container.querySelector('compare-home')).toBeTruthy();
 
     const url1 = 'http://fake-url.com/hash/1';
     const url2 = 'http://fake-url.com/hash/2';
-
     dispatch(changeProfilesToCompare([url1, url2]));
-    expect(container.firstChild).toMatchSnapshot();
+
+    expect(container.querySelector('.loading')).toBeTruthy();
     expect(retrieveProfilesToCompare).toHaveBeenCalledWith([url1, url2]);
   });
 });
