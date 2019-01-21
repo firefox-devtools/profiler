@@ -473,10 +473,14 @@ class ProfileSharingCompositeButton extends React.PureComponent<
         return Promise.all([uploadPromise, shortenUrlPromise]);
       })
       .catch((error: Error) => {
-        this.setState({
-          state: 'error',
-          error,
-        });
+        // To avoid any interaction with running transitions, we delay setting
+        // the new state by 300ms.
+        setTimeout(() => {
+          this.setState({
+            state: 'error',
+            error,
+          });
+        }, 300);
         if (this._uploadErrorButton) {
           this._uploadErrorButton.openPanel();
         }
