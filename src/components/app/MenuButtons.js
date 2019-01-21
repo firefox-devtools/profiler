@@ -299,7 +299,6 @@ class ProfileMetaInfoButton extends React.PureComponent<
 const AnimateUpTransition = (props: {}) => (
   <CSSTransition
     {...props}
-    unmountOnExit
     timeout={200}
     classNames="menuButtonsTransitionUp"
   />
@@ -559,39 +558,37 @@ class ProfileSharingCompositeButton extends React.PureComponent<
           </AnimateUpTransition>
         )}
 
+        {state === 'uploading' && (
+          <AnimateUpTransition>
+            <UploadingStatus progress={uploadProgress} />
+          </AnimateUpTransition>
+        )}
+
         {/* The Permalink button is rendered when state === 'uploading' AND state === 'public'.
-       The Permalink button itself is hidden when uploading is in progress, 
+       The Permalink button itself is hidden when uploading is in progress,
        but the Permalink's ArrowPanel with the URL is always displayed. */}
         {(state === 'uploading' || state === 'public') && (
           <AnimateUpTransition>
-            <React.Fragment>
-              <AnimateUpTransition in={state === 'uploading'}>
-                <UploadingStatus progress={uploadProgress} />
-              </AnimateUpTransition>
-
-              <AnimateUpTransition in={true}>
-                <ButtonWithPanel
-                  className="menuButtonsPermalinkButton"
-                  ref={this._takePermalinkButtonRef}
-                  label="Permalink"
-                  panel={
-                    <ArrowPanel
-                      className="menuButtonsPermalinkPanel"
-                      onOpen={this._onPermalinkPanelOpen}
-                      onClose={this._onPermalinkPanelClose}
-                    >
-                      <input
-                        type="text"
-                        className="menuButtonsPermalinkTextField"
-                        value={shortUrl}
-                        readOnly="readOnly"
-                        ref={this._takePermalinkTextFieldRef}
-                      />
-                    </ArrowPanel>
-                  }
-                />
-              </AnimateUpTransition>
-            </React.Fragment>
+            <ButtonWithPanel
+              className="menuButtonsPermalinkButton"
+              ref={this._takePermalinkButtonRef}
+              label="Permalink"
+              panel={
+                <ArrowPanel
+                  className="menuButtonsPermalinkPanel"
+                  onOpen={this._onPermalinkPanelOpen}
+                  onClose={this._onPermalinkPanelClose}
+                >
+                  <input
+                    type="text"
+                    className="menuButtonsPermalinkTextField"
+                    value={shortUrl}
+                    readOnly="readOnly"
+                    ref={this._takePermalinkTextFieldRef}
+                  />
+                </ArrowPanel>
+              }
+            />
           </AnimateUpTransition>
         )}
 
@@ -616,6 +613,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
             />
           </AnimateUpTransition>
         )}
+
         {isSecondaryShareButtonVisible && (
           <AnimateUpTransition>
             <ProfileSharingButton

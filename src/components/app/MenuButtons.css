@@ -84,42 +84,42 @@
 }
 
 /* CSSTransition */
+.buttonWithPanelButton,
+.menuButtonsUploadingButtonInner {
+  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
+}
+
 .menuButtonsTransitionUp-enter .buttonWithPanelButton,
 .menuButtonsTransitionUp-enter .menuButtonsUploadingButtonInner {
   opacity: 0;
-  transform: translateY(100%)
+  transform: translateY(100%);
 }
 
 .menuButtonsTransitionUp-enter-active .buttonWithPanelButton,
 .menuButtonsTransitionUp-enter-active .menuButtonsUploadingButtonInner {
   opacity: 1;
   transform: translateY(0);
-  transition: all 200ms ease-in-out;
 }
 
 .menuButtonsTransitionUp-exit .buttonWithPanelButton,
 .menuButtonsTransitionUp-exit .menuButtonsUploadingButtonInner {
   opacity: 1;
-  transform: translateY(0)
+  transform: translateY(0);
 }
 
 .menuButtonsTransitionUp-exit-active .buttonWithPanelButton,
 .menuButtonsTransitionUp-exit-active .menuButtonsUploadingButtonInner {
   opacity: 0;
   transform: translateY(-100%);
-  transition: all 200ms ease-in-out;
 }
 /* end of CSSTransition */
 
-/* permalink button is "manually" moved whenever uploading is in progress  */
-.menuButtonsCompositeButtonContainer.currentButtonIsUploadingButton > .menuButtonsPermalinkButton > .buttonWithPanelButtonWrapper > .menuButtonsPermalinkButtonButton{
+/* permalink button is hidden whenever uploading is in progress, but is
+ * moved up when uploading is finished. */
+.currentButtonIsUploadingButton .menuButtonsPermalinkButtonButton {
   opacity: 0;
   transform: translateY(100%);
 } 
-
-.menuButtonsPermalinkButtonButton {
-  transition: transform 200ms ease-in-out;
-}
 
 /* The button width needs to be large enough so that the text "Share Without URLs" fits */
 .currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsPermalinkButton,
