@@ -309,13 +309,9 @@ class ProfileSharingCompositeButton extends React.PureComponent<
   ProfileSharingCompositeButtonState
 > {
   _permalinkButton: ButtonWithPanel | null;
-  _uploadErrorButton: ButtonWithPanel | null;
   _permalinkTextField: HTMLInputElement | null;
   _takePermalinkButtonRef = elem => {
     this._permalinkButton = elem;
-  };
-  _takeUploadErrorButtonRef = elem => {
-    this._uploadErrorButton = elem;
   };
   _takePermalinkTextFieldRef = elem => {
     this._permalinkTextField = elem;
@@ -481,9 +477,6 @@ class ProfileSharingCompositeButton extends React.PureComponent<
             error,
           });
         }, 300);
-        if (this._uploadErrorButton) {
-          this._uploadErrorButton.openPanel();
-        }
         sendAnalytics({
           hitType: 'event',
           eventCategory: 'profile upload',
@@ -600,8 +593,8 @@ class ProfileSharingCompositeButton extends React.PureComponent<
           <AnimateUpTransition>
             <ButtonWithPanel
               className="menuButtonsUploadErrorButton"
-              ref={this._takeUploadErrorButtonRef}
               label="Upload Error"
+              open
               panel={
                 <ArrowPanel
                   className="menuButtonsUploadErrorPanel"
