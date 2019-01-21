@@ -114,7 +114,7 @@
 /* permalink button is "manually" moved whenever uploading is in progress  */
 .menuButtonsCompositeButtonContainer.currentButtonIsUploadingButton > .menuButtonsPermalinkButton > .buttonWithPanelButtonWrapper > .menuButtonsPermalinkButtonButton{
   opacity: 0;
-  transform: translateY(-100%);
+  transform: translateY(100%);
 } 
 
 .menuButtonsPermalinkButtonButton {
