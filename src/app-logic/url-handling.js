@@ -118,6 +118,15 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     };
   }
 
+  // Special handling for CompareHome: we shouldn't append the default
+  // parameters when the user is on the comparison form.
+  if (dataSource === 'compare' && urlState.profilesToCompare === null) {
+    return {
+      pathParts: ['compare'],
+      query: {},
+    };
+  }
+
   const dataSourceDirs = getDataSourceDirs(urlState);
   const pathParts = [...dataSourceDirs, urlState.selectedTab];
   const { selectedThread } = urlState.profileSpecific;
