@@ -111,14 +111,16 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     };
   }
   const pathParts = [...dataSourceDirs(urlState), urlState.selectedTab];
+  const { selectedThread } = urlState.profileSpecific;
 
   // Start with the query parameters that are shown regardless of the active tab.
   const query: Object = {
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
-    thread: urlState.profileSpecific.selectedThread,
-    globalTrackOrder: urlState.profileSpecific.globalTrackOrder.join('-'),
+    thread: selectedThread === null ? undefined : selectedThread,
+    globalTrackOrder:
+      urlState.profileSpecific.globalTrackOrder.join('-') || undefined,
     file: urlState.pathInZipFile || undefined,
     v: CURRENT_URL_VERSION,
   };
@@ -148,7 +150,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     query.timelineType = 'stack';
   }
 
-  query.localTrackOrderByPid = '';
+  const localTrackOrderByPid = '';
   for (const [pid, trackOrder] of urlState.profileSpecific
     .localTrackOrderByPid) {
     if (trackOrder.length > 0) {
@@ -156,12 +158,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
         `${String(pid)}-` + trackOrder.join('-') + '~';
     }
   }
-
-  if (process.env.NODE_ENV === 'development') {
-    /* eslint-disable camelcase */
-    query.react_perf = null;
-    /* eslint-enable camelcase */
-  }
+  query.localTrackOrderByPid = localTrackOrderByPid || undefined;
 
   // Depending on which tab is active, also show tab-specific query parameters.
   const selectedTab = urlState.selectedTab;
@@ -177,7 +174,6 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
         urlState.profileSpecific.implementation === 'combined'
           ? undefined
           : urlState.profileSpecific.implementation;
-      const selectedThread = urlState.profileSpecific.selectedThread;
       if (selectedThread !== null) {
         query.transforms =
           stringifyTransforms(
@@ -188,12 +184,16 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     }
     case 'marker-table':
     case 'marker-chart':
-      query.markerSearch = urlState.profileSpecific.markersSearchString;
+      query.markerSearch =
+        urlState.profileSpecific.markersSearchString || undefined;
       break;
     case 'network-chart':
       break;
     case 'js-tracer':
-      query.summary = urlState.profileSpecific.showJsTracerSummary;
+      // `null` adds the parameter to the query, while `undefined` doesn't.
+      query.summary = urlState.profileSpecific.showJsTracerSummary
+        ? null
+        : undefined;
       break;
     default:
       assertExhaustiveCheck(selectedTab);
