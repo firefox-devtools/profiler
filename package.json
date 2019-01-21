@@ -146,6 +146,6 @@
     "restoreMocks": true,
     "resetMocks": true,
     "setupTestFrameworkScriptFile": "./src/test/setup.js",
-    "verbose": true
+    "verbose": false
   }
 }
