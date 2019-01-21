@@ -28,6 +28,7 @@ import {
 import UrlManager from './UrlManager';
 import ServiceWorkerManager from './ServiceWorkerManager';
 import FooterLinks from './FooterLinks';
+import { ErrorBoundary } from './ErrorBoundary';
 
 import type { Store } from '../../types/store';
 import type { AppViewState, State } from '../../types/state';
@@ -289,12 +290,14 @@ export default class Root extends PureComponent<RootProps> {
   render() {
     const { store } = this.props;
     return (
-      <Provider store={store}>
-        <UrlManager>
-          <ProfileViewWhenReady />
-          <FooterLinks />
-        </UrlManager>
-      </Provider>
+      <ErrorBoundary message="Uh oh, some error happened in perf.html.">
+        <Provider store={store}>
+          <UrlManager>
+            <ProfileViewWhenReady />
+            <FooterLinks />
+          </UrlManager>
+        </Provider>
+      </ErrorBoundary>
     );
   }
 }

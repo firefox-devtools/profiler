@@ -1,0 +1,45 @@
+.appErrorBoundary {
+  display: flex;
+  overflow: hidden;
+  box-sizing: border-box;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background-color: var(--grey-20);
+}
+
+.appErrorBoundaryContents {
+  display: flex;
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(100%);
+  box-sizing: border-box;
+  flex-direction: column;
+}
+
+@keyframes appErrorBoundaryDetailsFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.appErrorBoundaryDetails {
+  flex-shrink: 1;
+  padding: 25px;
+  margin: 12px 0;
+  animation-duration: 200ms;
+  animation-name: appErrorBoundaryDetailsFadeIn;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  color: var(--grey-70);
+  font-family: monospace;
+  line-height: 1.3;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}

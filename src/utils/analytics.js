@@ -33,11 +33,27 @@ type GATiming = {|
 
 export type GAPayload = GAEvent | GAPageView | GATiming;
 
-export type GoogleAnalytics = ('send', GAPayload) => void;
+// Prettier breaks with multiple arrow functions and intersections, so name the arrow
+// functions.
+type _Send = ('send', GAPayload) => void;
+type _Exception = ('send', 'exception', GAErrorPayload) => void;
+export type GoogleAnalytics = _Send & _Exception;
 
 export function sendAnalytics(payload: GAPayload) {
   const ga: ?GoogleAnalytics = self.ga;
   if (ga) {
     ga('send', payload);
+  }
+}
+
+export type GAErrorPayload = {|
+  +exDescription: string,
+  +exFatal: boolean,
+|};
+
+export function reportError(errorPayload: GAErrorPayload) {
+  const ga: ?GoogleAnalytics = self.ga;
+  if (ga) {
+    ga('send', 'exception', errorPayload);
   }
 }
