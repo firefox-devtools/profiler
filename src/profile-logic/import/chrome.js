@@ -281,8 +281,6 @@ async function processTracingEvents(
         samplesTable.responsiveness.push(null);
         samplesTable.stack.push(stackIndex);
         samplesTable.time.push(threadInfo.lastSampledTime);
-        samplesTable.rss.push(null);
-        samplesTable.uss.push(null);
         samplesTable.length++;
       }
     }

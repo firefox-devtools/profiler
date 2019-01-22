@@ -117,8 +117,6 @@ export default function getProfile(): Profile {
     responsiveness: [0, 0],
     stack: [4, 6],
     time: [0, 0],
-    rss: [0, 0],
-    uss: [0, 0],
     length: 2,
   };
 

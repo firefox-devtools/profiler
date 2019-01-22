@@ -681,8 +681,6 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
     responsiveness: geckoSamples.responsiveness,
     stack: geckoSamples.stack,
     time: geckoSamples.time,
-    rss: geckoSamples.rss,
-    uss: geckoSamples.uss,
     length: geckoSamples.length,
   };
 }

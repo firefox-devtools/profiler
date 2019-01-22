@@ -1011,8 +1011,6 @@ export function filterThreadSamplesToRange(
     time: samples.time.slice(sBegin, sEnd),
     stack: samples.stack.slice(sBegin, sEnd),
     responsiveness: samples.responsiveness.slice(sBegin, sEnd),
-    rss: samples.rss.slice(sBegin, sEnd),
-    uss: samples.uss.slice(sBegin, sEnd),
   };
   return Object.assign({}, thread, {
     samples: newSamples,

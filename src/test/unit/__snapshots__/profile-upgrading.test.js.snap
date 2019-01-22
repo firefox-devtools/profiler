@@ -53,7 +53,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 19,
+    "preprocessedProfileVersion": 20,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": undefined,
@@ -257,18 +257,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           1,
           1,
@@ -292,18 +280,6 @@ Object {
           2574592843.494,
           2574592843.502,
           2574592844.132,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -479,12 +455,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           2,
           2,
@@ -496,12 +466,6 @@ Object {
           2574592843.027,
           2574592843.035,
           2574592843.057,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -649,12 +613,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           2,
           2,
@@ -666,12 +624,6 @@ Object {
           2574592868.39,
           2574592868.3980002,
           2574592868.406,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -985,13 +937,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           8,
           8,
@@ -1005,13 +950,6 @@ Object {
           2574592869.3780003,
           2574592869.395,
           2574592870.224,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -1229,12 +1167,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           2,
           2,
@@ -1246,12 +1178,6 @@ Object {
           2574592877.474,
           2574592877.4830003,
           2574592877.49,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -1457,17 +1383,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           3,
           3,
@@ -1489,17 +1404,6 @@ Object {
           2574592880.005,
           2574592880.015,
           2574592880.252,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -1656,12 +1560,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           1,
           1,
@@ -1673,12 +1571,6 @@ Object {
           2574592938.827,
           2574592938.835,
           2574592938.8430004,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -1821,12 +1713,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           2,
           2,
@@ -1838,12 +1724,6 @@ Object {
           2574592945.4709997,
           2574592945.479,
           2574592945.4859996,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -1991,12 +1871,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           2,
           2,
@@ -2008,12 +1882,6 @@ Object {
           2574592945.79,
           2574592945.797,
           2574592945.803,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -2164,12 +2032,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           2,
           2,
@@ -2181,12 +2043,6 @@ Object {
           2574592946.069,
           2574592946.0769997,
           2574592946.085,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -2349,12 +2205,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           3,
           8,
@@ -2366,12 +2216,6 @@ Object {
           2574592948.128,
           2574592948.136,
           2574592948.142,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -2980,12 +2824,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           33,
           33,
@@ -2997,12 +2835,6 @@ Object {
           2574592948.32,
           2574592948.33,
           2574592948.337,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -3736,12 +3568,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           33,
           33,
@@ -3753,12 +3579,6 @@ Object {
           2574592948.3269997,
           2574592948.337,
           2574592948.342,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -4492,12 +4312,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           33,
           33,
@@ -4509,12 +4323,6 @@ Object {
           2574592948.391,
           2574592948.397,
           2574592948.403,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -5251,12 +5059,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           33,
           33,
@@ -5268,12 +5070,6 @@ Object {
           2574592948.4100003,
           2574592948.419,
           2574592948.428,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -5827,17 +5623,11 @@ Object {
         "responsiveness": Array [
           null,
         ],
-        "rss": Array [
-          null,
-        ],
         "stack": Array [
           19,
         ],
         "time": Array [
           2574592949.428,
-        ],
-        "uss": Array [
-          null,
         ],
       },
       "stackTable": Object {
@@ -7922,7 +7712,7 @@ Object {
     "networkURLsRemoved": false,
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 19,
+    "preprocessedProfileVersion": 20,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -8997,7 +8787,7 @@ Object {
     "networkURLsRemoved": false,
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 19,
+    "preprocessedProfileVersion": 20,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,

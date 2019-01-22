@@ -51,8 +51,6 @@ export type GeckoSamples = {
     stack: 0,
     time: 1,
     responsiveness: 2,
-    rss: 3,
-    uss: 4,
   },
   data: Array<
     [
@@ -61,8 +59,6 @@ export type GeckoSamples = {
       // milliseconds since the last event was processed in this
       // thread's event loop at the time that the sample was taken
       Milliseconds,
-      any, // TODO
-      any, // TODO
     ]
   >,
 };
@@ -71,8 +67,6 @@ export type GeckoSampleStruct = {
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   responsiveness: Array<?Milliseconds>,
-  rss: Array<null | Milliseconds>,
-  uss: Array<null | Milliseconds>,
   length: number,
 };
 
