@@ -4,27 +4,27 @@
 
 .markerTable {
   display: flex;
-  flex-flow: column nowrap;
   flex: 1;
+  flex-flow: column nowrap;
+  cursor: default;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  cursor: default;
 }
 
 .treeViewFixedColumn.start {
-  left: 0px;
+  left: 0;
   width: 80px;
-  text-align: right;
   padding-right: 5px;
+  text-align: right;
 }
 
 .treeViewFixedColumn.duration {
   left: 80px;
   width: 80px;
+  padding-right: 5px;
   border-right: none;
   text-align: right;
-  padding-right: 5px;
 }
 
 .treeViewFixedColumn.category {

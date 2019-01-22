@@ -11,33 +11,33 @@
  * left, and the scrollbar area on the right.
  */
 .timelineRuler::after {
-  content: '';
   position: absolute;
+  z-index: 3;
   top: 20px;
+  right: calc(var(--vertical-scrollbar-reserved-width) * -1);
   left: -150px;
-  right: calc(0px - var(--vertical-scrollbar-reserved-width));
   height: 1px;
   background: var(--grey-30);
-  z-index: 3;
+  content: '';
 }
 
 .timelineRulerContainer {
-  overflow: hidden;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: block;
   position: absolute;
   top: 0;
-  left: 0;
   right: 0;
+  left: 0;
+  display: block;
+  overflow: hidden;
   height: 20px;
-  -moz-user-select: none;
-  user-select: none;
-  line-height: 20px;
-  font-size: 9px;
+  padding: 0;
+  margin: 0;
   color: #888;
   cursor: default;
+  font-size: 9px;
+  line-height: 20px;
+  list-style: none;
+  -moz-user-select: none;
+  user-select: none;
 }
 
 /**
@@ -45,15 +45,20 @@
  * then overflows to the left of the line.
  */
 .timelineRulerNotch {
-  display: block;
   position: absolute;
   top: 0;
   bottom: 0;
+  display: block;
   width: 1px;
   margin-left: -1px;
-  white-space: nowrap;
+  background: linear-gradient(
+    transparent,
+    var(--grey-30) 19px,
+    var(--grey-30) 20px,
+    #d7d7db66 0
+  );
   text-align: right;
-  background: linear-gradient(transparent, var(--grey-30) 19px, var(--grey-30) 20px, #d7d7db66 0);
+  white-space: nowrap;
 }
 
 .timelineRulerNotchText {

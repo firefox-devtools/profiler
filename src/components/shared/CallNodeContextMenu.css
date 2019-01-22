@@ -1,11 +1,11 @@
 .callNodeContextMenuIcon {
+  position: relative;
+  top: 2px;
+  display: inline-block;
   width: 16px;
   height: 16px;
-  pointer-events: auto;
-  position: relative;
-  display: inline-block;
   margin-inline-end: 8px;
-  top: 2px;
+  pointer-events: auto;
 }
 .react-contextmenu-item--selected > .callNodeContextMenuIcon {
   filter: invert(1);
@@ -16,7 +16,8 @@
 }
 
 .callNodeContextMenuIconCollapse {
-  background: url(../../../res/img/svg/collapse-icon.svg) center center no-repeat;
+  background: url(../../../res/img/svg/collapse-icon.svg) center center
+    no-repeat;
 }
 
 .callNodeContextMenuIconFocus {

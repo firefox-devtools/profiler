@@ -4,71 +4,54 @@
 
 .networkChart {
   display: flex;
-  flex-flow: column nowrap;
   flex: 1;
+  flex-flow: column nowrap;
+  cursor: default;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  cursor: default;
 }
 
 .networkChart .treeViewBody .treeViewBodyInnerWrapper {
-  flex-flow: column nowrap;
   width: 100%;
+  flex-flow: column nowrap;
   border-top: 1px solid var(--grey-30);
 }
 
-
 .networkChartRowItem {
+  display: block;
   width: 100%;
   height: 16px;
-  display: block;
-}
-
-.networkChartRowItem.odd{
-  background-color: #f5f5f5;
-}
-
-.networkChartRowItem:hover {
-  background-color: #bbe0f6;
-}
-
-.networkChartRowItem:hover .networkChartRowItemBar{
-  opacity: 1;
-}
-
-.networkChartRowItem:hover .networkChartRowItemLabel{
-  opacity: .4;
 }
 
 .networkChartRowItemLabel {
-  width: 100%;
-  display: inline-block;
-  margin-left: 4px;
   z-index: 2;
+  display: inline-block;
+  overflow: hidden;
+  width: 100%;
+  max-height: 16px;
   flex-basis: 0;
   flex-shrink: 0;
-  overflow: hidden;
+  margin-left: 4px;
   white-space: nowrap;
-  max-height: 16px;
 }
 
 .networkChartRowItemBar {
-  background-color: white;
-  border: 1px solid var(--grey-40);
-  display: inline-block;
+  position: absolute;
   z-index: 3;
-  border-radius: 2px;
+  display: inline-block;
   height: 12px;
   flex-grow: 1;
-  position: absolute;
   margin-top: 2px;
+  border: 1px solid var(--grey-40);
+  background-color: white;
+  border-radius: 2px;
   opacity: 0.7;
 }
 
 .networkChartRowItemBarInner {
-  height: 12px;
   display: inline-block;
+  height: 12px;
   background-color: var(--grey-40);
 }
 
@@ -119,12 +102,12 @@
 }
 
 .networkChartRowItemUriOptional {
-  color: var(--grey-40);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 90px;
   display: inline-block;
+  overflow: hidden;
+  max-width: 90px;
+  color: var(--grey-40);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .networkChartRowItemUriRequired {
@@ -134,4 +117,20 @@
 
 .networkChartRowItemUriRequired:nth-child(1) {
   padding-right: 8px;
+}
+
+.networkChartRowItem.odd {
+  background-color: #f5f5f5;
+}
+
+.networkChartRowItem:hover {
+  background-color: #bbe0f6;
+}
+
+.networkChartRowItem:hover .networkChartRowItemBar {
+  opacity: 1;
+}
+
+.networkChartRowItem:hover .networkChartRowItemLabel {
+  opacity: 0.4;
 }

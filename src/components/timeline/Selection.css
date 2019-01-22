@@ -5,7 +5,11 @@
 .timelineSelection {
   --thread-label-column-width: 150px;
   --vertical-scrollbar-reserved-width: 15px;
-  --content-width: calc(100vw - var(--thread-label-column-width) - var(--vertical-scrollbar-reserved-width));
+  --content-width: calc(
+    100vw - var(--thread-label-column-width) -
+      var(--vertical-scrollbar-reserved-width)
+  );
+
   position: relative;
   width: var(--content-width);
   margin-left: calc(var(--thread-label-column-width) - 1px);
@@ -15,13 +19,13 @@
 
 .timelineSelectionHoverLine {
   position: absolute;
-  pointer-events: none;
-  display: none;
+  z-index: 1;
   top: 0;
   bottom: 0;
+  display: none;
   width: 1px;
-  background: rgba(0,0,0,0.4);
-  z-index: 1;
+  background: rgba(0, 0, 0, 0.4);
+  pointer-events: none;
 }
 
 .timelineSelection:hover > .timelineSelectionHoverLine {
@@ -31,22 +35,22 @@
 .timelineSelectionOverlay {
   position: absolute;
   z-index: 2;
-  display: flex;
-  flex-flow: row nowrap;
   top: 0;
-  left: 0;
   right: 0;
   bottom: 0;
-  pointer-events: none;
-  margin-left: -5px;
-  padding-left: 5px;
+  left: 0;
+  display: flex;
   overflow: hidden;
+  flex-flow: row nowrap;
+  padding-left: 5px;
+  margin-left: -5px;
+  pointer-events: none;
 }
 
 .timelineSelectionDimmerBefore,
 .timelineSelectionDimmerAfter {
-  background: rgba(12, 12, 13, .1);
   flex-shrink: 0;
+  background: rgba(12, 12, 13, 0.1);
 }
 
 .timelineSelectionDimmerAfter {
@@ -59,23 +63,23 @@
 }
 
 .timelineSelectionGrippy {
-  height: 20px;
-  pointer-events: auto;
   display: flex;
+  height: 20px;
   flex-flow: row nowrap;
+  pointer-events: auto;
 }
 
 .timelineSelectionGrippyRangeStart,
 .timelineSelectionGrippyRangeEnd {
-  width: 0px;
-  padding: 3px;
-  background: #AAA;
-  border: 1px solid white;
-  margin: 0 -4px;
-  cursor: ew-resize;
-  border-radius: 5px;
   position: relative;
   z-index: 3;
+  width: 0;
+  padding: 3px;
+  margin: 0 -4px;
+  border: 1px solid white;
+  background: #aaa;
+  border-radius: 5px;
+  cursor: ew-resize;
 }
 
 .timelineSelectionGrippyRangeStart:hover,
@@ -96,26 +100,25 @@
   cursor: grabbing;
 }
 
-
 .timelineSelectionOverlayInner {
-  flex: 1;
-  justify-content: center;
-  align-items: center;
   display: flex;
   min-width: 0;
   min-height: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
 }
 
 .timelineSelectionOverlayRange {
-  top: 20px;
   position: absolute;
+  top: 20px;
   padding: 4px 8px;
-  color: #fff;
   background-color: var(--blue-50);
   border-radius: 0 0 4px 4px;
   box-shadow: 0 2px 2px rgba(0, 0, 0, 0.2);
-  pointer-events: none;
+  color: #fff;
   opacity: 1;
+  pointer-events: none;
   transition: opacity 200ms;
 }
 
@@ -124,33 +127,34 @@
 }
 
 .timelineSelectionOverlayZoomButton {
+  position: relative;
   width: 30px;
   height: 30px;
-  pointer-events: auto;
   box-sizing: border-box;
-  border-radius: 100%;
   margin: -15px;
-  position: relative;
   border: 1px solid rgba(0, 0, 0, 0.2);
-  background: url(../../../res/img/svg/zoom-icon.svg) center center no-repeat rgba(255, 255, 255, 0.6);
+  background: url(../../../res/img/svg/zoom-icon.svg) center center no-repeat
+    rgba(255, 255, 255, 0.6);
+  border-radius: 100%;
+  opacity: 0.5;
+  pointer-events: auto;
   transition: opacity 200ms ease-in-out;
   will-change: opacity;
-  opacity: 0.5;
 }
 
 .timelineSelectionOverlayZoomButton.hidden {
-  opacity: 0.0 !important;
+  opacity: 0 !important;
   pointer-events: none;
   transition: unset;
 }
 
-.timelineSelection:hover .timelineSelectionOverlayZoomButton,
-.timelineSelectionOverlayZoomButton:active {
-  opacity: 1.0;
-}
-
 .timelineSelectionOverlayZoomButton:hover {
   background-color: rgba(255, 255, 255, 0.9);
+}
+
+.timelineSelectionOverlayZoomButton:active,
+.timelineSelection:hover .timelineSelectionOverlayZoomButton {
+  opacity: 1;
 }
 
 .timelineSelectionOverlayZoomButton:active:hover {
