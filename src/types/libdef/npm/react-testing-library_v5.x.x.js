@@ -1,6 +1,5 @@
-// flow-typed signature: 187ae8536dde5ccffcfaa74225e94ed0
-// flow-typed version: 8ecdf16799/react-testing-library_v5.x.x/flow_>=v0.67.1
-// @flow
+// flow-typed signature: 3701db256845a0030406fb19fa4d0547
+// flow-typed version: a73e7915bb/react-testing-library_v5.x.x/flow_>=v0.67.1
 
 declare module 'react-testing-library' {
   declare type TextMatch =
@@ -16,46 +15,86 @@ declare module 'react-testing-library' {
 
   declare type SelectorMatchOptions = { selector?: string } & TextMatchOptions;
 
-  declare type AllByText = (
+  declare type GetByText = (
     text: TextMatch,
-    options?: TextMatchOptions
-  ) => Array<HTMLElement>;
+    options?: SelectorMatchOptions
+  ) => HTMLElement;
 
   declare type QueryByText = (
+    text: TextMatch,
+    options?: SelectorMatchOptions
+  ) => ?HTMLElement;
+
+  declare type AllByText = (
+    text: TextMatch,
+    options?: SelectorMatchOptions
+  ) => Array<HTMLElement>;
+
+  declare type GetByBoundAttribute = (
+    text: TextMatch,
+    options?: TextMatchOptions
+  ) => HTMLElement;
+
+  declare type QueryByBoundAttribute = (
     text: TextMatch,
     options?: TextMatchOptions
   ) => ?HTMLElement;
 
+  declare type AllByBoundAttribute = (
+    text: TextMatch,
+    options?: TextMatchOptions
+  ) => Array<HTMLElement>;
+
   declare type GetsAndQueries = {|
-    getByTestId: (id: TextMatch, options?: TextMatchOptions) => HTMLElement,
-    getByText: (text: TextMatch, options?: SelectorMatchOptions) => HTMLElement,
-    getByPlaceholderText: (
-      text: TextMatch,
-      options?: TextMatchOptions
-    ) => HTMLElement,
-    getByLabelText: (
-      text: TextMatch,
-      options?: SelectorMatchOptions
-    ) => HTMLElement,
-    getByTitle: (
-      text: TextMatch,
-      options?: SelectorMatchOptions
-    ) => HTMLElement,
+    getByAltText: GetByBoundAttribute,
+    getAllByAltText: AllByBoundAttribute,
+    queryByAltText: QueryByBoundAttribute,
+    queryAllByAltText: AllByBoundAttribute,
+
+    getByDisplayValue: GetByBoundAttribute,
+    getAllByDisplayValue: AllByBoundAttribute,
+    queryByDisplayValue: QueryByBoundAttribute,
+    queryAllByDisplayValue: AllByBoundAttribute,
+
+    getByLabelText: GetByText,
     getAllByLabelText: AllByText,
-    getByAltText: (text: TextMatch, options?: TextMatchOptions) => HTMLElement,
-    getAll: (text: TextMatch, options?: TextMatchOptions) => Array<HTMLElement>,
-    getAllByText: AllByText,
-    getAllByTitle: AllByText,
-    queryByTestId: (id: TextMatch, options?: TextMatchOptions) => ?HTMLElement,
-    queryByText: (text: TextMatch, options?: TextMatchOptions) => ?HTMLElement,
-    queryByPlaceholderText: QueryByText,
     queryByLabelText: QueryByText,
-    queryByAltText: QueryByText,
-    queryByTitle: QueryByText,
-    queryAll: (
-      text: TextMatch,
-      options?: TextMatchOptions
-    ) => Array<HTMLElement>,
+    queryAllByLabelText: AllByText,
+
+    getByPlaceholderText: GetByBoundAttribute,
+    getAllByPlaceholderText: AllByBoundAttribute,
+    queryByPlaceholderText: QueryByBoundAttribute,
+    queryAllByPlaceholderText: AllByBoundAttribute,
+
+    getByRole: GetByBoundAttribute,
+    getAllByRole: AllByBoundAttribute,
+    queryByRole: QueryByBoundAttribute,
+    queryAllByRole: AllByBoundAttribute,
+
+    getBySelectText: GetByBoundAttribute,
+    getAllBySelectText: AllByBoundAttribute,
+    queryBySelectText: QueryByBoundAttribute,
+    queryAllBySelectText: AllByBoundAttribute,
+
+    getByTestId: GetByBoundAttribute,
+    getAllByTestId: AllByBoundAttribute,
+    queryByTestId: QueryByBoundAttribute,
+    queryAllByTestId: AllByBoundAttribute,
+
+    getByText: GetByText,
+    getAllByText: AllByText,
+    queryByText: QueryByText,
+    queryAllByText: AllByText,
+
+    getByTitle: GetByBoundAttribute,
+    getAllByTitle: AllByBoundAttribute,
+    queryByTitle: QueryByBoundAttribute,
+    queryAllByTitle: AllByBoundAttribute,
+
+    getByValue: GetByBoundAttribute,
+    getAllByValue: AllByBoundAttribute,
+    queryByValue: QueryByBoundAttribute,
+    queryAllByValue: AllByBoundAttribute,
   |};
 
   declare type RenderResult = {|
@@ -86,6 +125,12 @@ declare module 'react-testing-library' {
         interval?: number,
       }
     ) => Promise<void>,
+
+    waitForDomChange: <T>(options?: {
+      container?: HTMLElement,
+      timeout?: number,
+      mutationObserverOptions?: MutationObserverInit,
+    }) => Promise<T>,
 
     waitForElement: <T>(
       callback?: () => T,
