@@ -70,7 +70,7 @@ When working on a new feature and code changes, it's important that things work 
  * Locally when running
    - `yarn test-all` - Test all the things!
    - `yarn test` - Run the tests in [./src/test/].
-   - `yarn lint` - Run prettier and and eslint to check for correct code formatting.
+   - `yarn lint` - Run prettier, stylelint, and eslint to check for correct code formatting.
    - `yarn flow` - Check the [Flow types](https://flow.org/) for correctness.
    - `yarn license-check` - Check the dependencies' licenses.
  * `git push` and `git commit`
