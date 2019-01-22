@@ -1,14 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 exports[`shared/ButtonWithPanel opens the panel when the button is clicked and closes the panel by clicking outside the panel 1`] = `
-=======
-exports[`shared/ButtonWithPanel opens the panel when the button is clicked  1`] = `
->>>>>>> 8612dfdb... Adds tests for opening and closing the panel
-=======
-exports[`shared/ButtonWithPanel opens the panel when the button is clicked and closes the panel by clicking outside the panel 1`] = `
->>>>>>> c5cc1f91... change
 <div
   class="buttonWithPanel button open"
 >
@@ -42,13 +34,9 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
 </div>
 `;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> c5cc1f91... change
 exports[`shared/ButtonWithPanel opens the panel when the button is clicked and closes the panel by clicking outside the panel 2`] = `
 <div
-  class="buttonWithPanel button open"
+  class="buttonWithPanel button"
 >
   <div
     class="buttonWithPanelButtonWrapper"
@@ -63,7 +51,7 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
     class="arrowPanelAnchor"
   >
     <div
-      class="arrowPanel open panel"
+      class="arrowPanel panel"
     >
       <div
         class="arrowPanelArrow"
@@ -115,12 +103,6 @@ exports[`shared/ButtonWithPanel opens the panel when the button is clicked and c
 `;
 
 exports[`shared/ButtonWithPanel opens the panel when the button is clicked and closes the panel when the escape key is pressed 2`] = `
-<<<<<<< HEAD
-=======
-exports[`shared/ButtonWithPanel opens the panel when the button is clicked  2`] = `
->>>>>>> 8612dfdb... Adds tests for opening and closing the panel
-=======
->>>>>>> c5cc1f91... change
 <div
   class="buttonWithPanel button"
 >

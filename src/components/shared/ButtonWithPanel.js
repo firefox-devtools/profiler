@@ -46,11 +46,11 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   }
   // the panel can be closed by pressing the Esc key
   componentDidMount() {
-    window.addEventListener('keydown', this._onKeyDown, true);
+    window.addEventListener('keydown', this._onKeyDown);
   }
 
   componentWillUnmount() {
-    window.removeEventListener('keydown', this._onKeyDown, true);
+    window.removeEventListener('keydown', this._onKeyDown);
   }
 
   componentDidMount() {

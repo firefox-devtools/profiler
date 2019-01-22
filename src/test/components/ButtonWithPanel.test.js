@@ -4,9 +4,10 @@
 
 // @flow
 import * as React from 'react';
-import { render, fireEvent, cleanup } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 import ButtonWithPanel from '../../components/shared/ButtonWithPanel';
 import ArrowPanel from '../../components/shared/ArrowPanel';
+import { ensureExists } from '../../utils/flow';
 
 describe('shared/ButtonWithPanel', () => {
   // renders the button in its default state
@@ -23,7 +24,6 @@ describe('shared/ButtonWithPanel', () => {
       />
     );
   }
-  afterEach(cleanup);
 
   it('renders the ButtonWithPanel with a closed panel', () => {
     const { container } = setup();
@@ -84,8 +84,9 @@ describe('shared/ButtonWithPanel', () => {
     expect(container.firstChild).toMatchSnapshot();
 
     //it closes the panel when clicking outside the panel
-    const newDiv = document.createElement('div');
-    document.body.appendChild(newDiv);
+    const newDiv = ensureExists(document.body).appendChild(
+      document.createElement('div')
+    );
     fireEvent.mouseDown(newDiv);
 
     expect(container.firstChild).toMatchSnapshot();
