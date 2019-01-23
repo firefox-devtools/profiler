@@ -107,14 +107,15 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     Marker[]
   > = createSelector(getCommittedRangeFilteredMarkers, (markers): Marker[] =>
     markers.filter(
-      tm =>
-        tm.name !== 'GCMajor' &&
-        tm.name !== 'BHR-detected hang' &&
-        tm.name !== 'LongTask' &&
-        tm.name !== 'LongIdleTask' &&
-        tm.name !== 'Jank' &&
-        !MarkerData.isNetworkMarker(tm) &&
-        !MarkerData.isNavigationMarker(tm)
+      marker =>
+        marker.name !== 'GCMajor' &&
+        marker.name !== 'BHR-detected hang' &&
+        marker.name !== 'LongTask' &&
+        marker.name !== 'LongIdleTask' &&
+        marker.name !== 'Jank' &&
+        !MarkerData.isNetworkMarker(marker) &&
+        !MarkerData.isDiskIoMarker(marker) &&
+        !MarkerData.isNavigationMarker(marker)
     )
   );
 
@@ -190,6 +191,11 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     markers => markers.filter(MarkerData.isNetworkMarker)
   );
 
+  const getDiskIoMarkers: Selector<Marker[]> = createSelector(
+    getCommittedRangeFilteredMarkers,
+    markers => markers.filter(MarkerData.isDiskIoMarker)
+  );
+
   const getNetworkTrackTiming: Selector<MarkerTimingRows> = createSelector(
     getNetworkMarkers,
     MarkerTiming.getMarkerTiming
@@ -218,6 +224,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getCommittedRangeFilteredMarkers,
     getCommittedRangeFilteredMarkersForHeader,
     getTimelineVerticalMarkers,
+    getDiskIoMarkers,
     getNetworkMarkers,
     getNetworkTrackTiming,
     getMergedNetworkChartMarkers,

@@ -61,6 +61,7 @@ export type StateProps = {|
   +markers: Marker[],
   +isSelected: boolean,
   +isModifyingSelection: boolean,
+  +testId: string,
 |};
 
 type Props = {|
@@ -200,6 +201,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       isSelected,
       isModifyingSelection,
       threadIndex,
+      testId,
     } = this.props;
 
     const { mouseDownItem, hoveredItem, mouseX, mouseY } = this.state;
@@ -207,6 +209,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
 
     return (
       <div
+        data-testid={testId}
         className={classNames(
           'timelineMarkers',
           additionalClassName,
@@ -367,6 +370,7 @@ const jankOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
       markers: selectors.getJankMarkersForHeader(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
+      testId: 'TimelineMarkersJank',
     };
   },
   component: TimelineMarkers,
@@ -391,9 +395,31 @@ const markersOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
       markers,
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
+      testId: 'TimelineMarkersOverview',
     };
   },
   component: TimelineMarkers,
 };
 
 export const TimelineMarkersOverview = explicitConnect(markersOptions);
+
+/**
+ * Disk IO is an optional marker type. Only add these markers if they exist.
+ */
+const diskIoOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+  mapStateToProps: (state, props) => {
+    const { threadIndex } = props;
+    const selectors = getThreadSelectors(threadIndex);
+    const selectedThread = getSelectedThreadIndex(state);
+
+    return {
+      markers: selectors.getDiskIoMarkers(state),
+      isSelected: threadIndex === selectedThread,
+      isModifyingSelection: getPreviewSelection(state).isModifying,
+      testId: 'TimelineMarkersDiskIo',
+    };
+  },
+  component: TimelineMarkers,
+};
+
+export const TimelineMarkersDiskIo = explicitConnect(diskIoOptions);

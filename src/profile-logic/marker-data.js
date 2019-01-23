@@ -413,6 +413,10 @@ export function isNavigationMarker({ name, data }: Marker) {
   return false;
 }
 
+export function isDiskIoMarker(marker: Marker): boolean {
+  return !!(marker.data && marker.data.type === 'DiskIO');
+}
+
 export function filterForNetworkChart(markers: Marker[]) {
   return markers.filter(marker => isNetworkMarker(marker));
 }
