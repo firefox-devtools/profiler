@@ -70,7 +70,7 @@ When working on a new feature and code changes, it's important that things work 
  * Locally when running
    - `yarn test-all` - Test all the things!
    - `yarn test` - Run the tests in [./src/test/].
-   - `yarn lint` - Run prettier and and eslint to check for correct code formatting.
+   - `yarn lint` - Run prettier, stylelint, and eslint to check for correct code formatting.
    - `yarn flow` - Check the [Flow types](https://flow.org/) for correctness.
    - `yarn license-check` - Check the dependencies' licenses.
  * `git push` and `git commit`
@@ -78,6 +78,16 @@ When working on a new feature and code changes, it's important that things work 
    - Run git commands with `--no-verify` to skip this step. This is useful for submitting broken PRs for feedback.
  * Continuous integration for pull requests
    - We use CircleCI to run our tests for every PR that is submitted. This gives reviewers a great way to know if things are still working as expected.
+
+## Exposing the web application publicly
+
+If you'd like to use perf.html via URLs that are not `localhost` (e.g. live preview, proxy, other device...) you can expose the web application publicly like so:
+
+```bash
+PERFHTML_HOST="0.0.0.0" yarn start
+```
+
+You'll probably also want to add your non-localhost domains to the `allowedHosts` property in `server.js`.
 
 ## Finding something to work on
 

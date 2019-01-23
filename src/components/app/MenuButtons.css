@@ -3,23 +3,33 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .menuButtons {
-  --internal-share-button-background-color: var(--share-button-background-color, hsl(137,81%,44%));
-  --internal-uploading-button-background-color: var(--uploading-button-background-color, #38445f);
-  --internal-uploading-progress-fill-color: var(--uploading-progress-fill-color, #7990c8);
-  height: 100%;
+  --internal-share-button-background-color: var(
+    --share-button-background-color,
+    hsl(137, 81%, 44%)
+  );
+  --internal-uploading-button-background-color: var(
+    --uploading-button-background-color,
+    #38445f
+  );
+  --internal-uploading-progress-fill-color: var(
+    --uploading-progress-fill-color,
+    #7990c8
+  );
+
   display: flex;
+  height: 100%;
   flex-flow: row nowrap;
 }
 
 .menuButtonsLink {
-  height: 24px;
   position: relative;
+  height: 24px;
   padding: 0 10px;
   border-left: 1px solid var(--grey-30);
-  text-decoration: none;
-  line-height: 24px;
-  cursor: default;
   color: var(--grey-90);
+  cursor: default;
+  line-height: 24px;
+  text-decoration: none;
 }
 
 .menuButtonsLink:hover {
@@ -29,8 +39,8 @@
 .menuButtonsCompositeButtonContainer {
   display: flex;
   flex-flow: column nowrap;
-  border-left: 1px solid var(--grey-30);
   border-right: 1px solid var(--grey-30);
+  border-left: 1px solid var(--grey-30);
 }
 
 .menuButtonsShareButton,
@@ -48,28 +58,44 @@
 
 .menuButtonsUploadingButtonInner {
   display: flex;
+  overflow: hidden;
+  height: 100%;
   flex-flow: column nowrap;
   align-items: stretch;
-  height: 100%;
-  overflow: hidden;
 }
 
 .menuButtonsUploadingButtonLabel {
+  position: relative;
   padding: 0 10px;
+  color: hsla(0, 0%, 100%, 0.7);
+  cursor: default;
   line-height: 24px;
   text-align: center;
-  color: hsla(0,0%,100%,0.7);
-  position: relative;
   -moz-user-select: none;
-  cursor: default;
+}
+
+/* The button width needs to be large enough so that the text "Share Without URLs" fits */
+.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton
+  .menuButtonsPermalinkButton,
+.menuButtonsUploadingButtonInner,
+.menuButtonsPermalinkButtonButton,
+.menuButtonsUploadErrorButtonButton,
+.menuButtonsSecondaryShareButtonButton {
+  width: 115px;
+}
+
+/* The button will be larger during symbolication to fit the text:
+"Sharing will be enabled once symbolication is complete" */
+.menuButtonsShareButtonButton {
+  min-width: 115px;
 }
 
 .menuButtonsUploadingButtonProgress {
+  width: 100%;
   height: 24px;
   margin-bottom: -24px;
-  width: 100%;
-  background: var(--internal-uploading-button-background-color);
   border: 0;
+  background: var(--internal-uploading-button-background-color);
   transform-origin: bottom left;
 }
 
@@ -79,7 +105,7 @@
 
 .menuButtonsShareButtonButton:not([disabled]),
 .menuButtonsSecondaryShareButtonButton:not([disabled]) {
-  background-color: #0D8730;
+  background-color: #0d8730;
   color: white;
 }
 
@@ -112,6 +138,7 @@
   opacity: 0;
   transform: translateY(-100%);
 }
+
 /* end of CSSTransition */
 
 /* permalink button is hidden whenever uploading is in progress, but is
@@ -119,24 +146,10 @@
 .currentButtonIsUploadingButton .menuButtonsPermalinkButtonButton {
   opacity: 0;
   transform: translateY(100%);
-} 
-
-/* The button width needs to be large enough so that the text "Share Without URLs" fits */
-.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsPermalinkButton,
-.menuButtonsUploadingButtonInner,
-.menuButtonsPermalinkButtonButton,
-.menuButtonsUploadErrorButtonButton,
-.menuButtonsSecondaryShareButtonButton {
-  width: 115px;
 }
 
-/* The button will be larger during symbolication to fit the text: 
-"Sharing will be enabled once symbolication is complete" */
-.menuButtonsShareButtonButton {
-  min-width: 115px;
-}
-
-.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton .menuButtonsSecondaryShareButton {
+.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton
+  .menuButtonsSecondaryShareButton {
   margin-left: 115px;
 }
 
@@ -166,9 +179,9 @@
 }
 
 .menuButtonsShareNetworkUrlsCheckbox {
-  vertical-align: middle;
   position: relative;
   bottom: 1px;
+  vertical-align: middle;
 }
 
 .menuButtonsOpenMetaInfoButtonBox,
@@ -180,34 +193,38 @@
 
 .menuButtonsOpenMetaInfoButtonBox {
   display: flex;
-  padding: 0;
+
   /* Let this box shrink down to the size of the three dots and a bit of text. */
   min-width: 75px;
+
   /* Shrink down twice as fast as the range selection labels. */
   flex-shrink: 2;
+  padding: 0;
 }
 
 .menuButtonsOpenMetaInfoButtonLabel {
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: stretch;
   position: relative;
-  padding: 5px 10px;
+  display: flex;
+
   /* Let this box shrink down to the size of the three dots. */
   min-width: 0;
+
   /* Make sure the padding doesn't contribute to the height, which is 100% */
   box-sizing: border-box;
+  flex-flow: column nowrap;
+  align-items: stretch;
+  padding: 5px 10px;
 }
 
 .menuButtonsOpenMetaInfoButtonLabelOverflow {
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .menuButtonsOpenMetaInfoButtonBox .buttonWithPanelButton,
 .menuButtonsOpenMetaInfoButtonBox .buttonWithPanel:hover,
 .menuButtonsOpenMetaInfoButtonBox .buttonWithPanel.open {
-  background: url(../../../res/img/svg/meatball.svg) 50% 50% no-repeat;
   width: 40px;
+  background: url(../../../res/img/svg/meatball.svg) 50% 50% no-repeat;
 }

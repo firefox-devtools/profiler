@@ -3,41 +3,46 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .serviceworker-ready-notice-wrapper {
+  /* Position */
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-
   z-index: 4;
+  top: 0;
+  right: 0;
+  left: 0;
 
+  /* Box */
   display: flex;
 }
 .serviceworker-ready-notice {
-  margin: 0 auto;
-  padding: 0 4px;
-
+  /* Box */
   display: flex;
   align-items: center;
+  padding: 0 4px;
+  margin: 0 auto;
 
+  /* Other */
   background: var(--grey-20);
-  color: var(--grey-90);
   border-radius: 0 0 4px 4px;
   box-shadow: 0 0 0 0.5px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.1);
+  color: var(--grey-90);
 }
 
 .serviceworker-ready-notice-close-button {
-  flex: none;
-
-  padding: 4px;
+  /* Position */
   width: 16px;
   height: 16px;
+
+  /* Box */
+  flex: none;
+  padding: 4px;
   margin-left: 8px;
 
-  border-radius: 4px;
+  /* Other */
   background-image: url(../../../res/img/svg/close-icon.svg);
-  background-repeat: no-repeat;
   background-position: center center;
+  background-repeat: no-repeat;
   background-size: 16px 16px;
+  border-radius: 4px;
 }
 
 .serviceworker-ready-notice-action-button {
@@ -46,7 +51,8 @@
 
 .serviceworker-ready-notice p {
   flex: auto;
-  padding: .5em .5em .5em 24px;
+  padding: 0.5em 0.5em 0.5em 24px;
   margin: 0;
-  background: url(../../../res/img/svg/info-icon.svg) no-repeat left center / 16px 16px;
+  background: url(../../../res/img/svg/info-icon.svg) no-repeat left center /
+    16px 16px;
 }
