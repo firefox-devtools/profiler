@@ -33,7 +33,7 @@ describe('converting Google Chrome profile', function() {
   it('successfully imports', async function() {
     // Mock out image loading behavior as the screenshots rely on the Image loading
     // behavior.
-    const spy = jest
+    jest
       .spyOn(Image.prototype, 'addEventListener')
       .mockImplementation((name: string, callback: Function) => {
         if (name === 'load') {
@@ -51,13 +51,5 @@ describe('converting Google Chrome profile', function() {
       throw new Error('Unable to parse the profile.');
     }
     expect(profile).toMatchSnapshot();
-
-    // This is really odd behavior, but this spy was showing up in stack traces in
-    // an intermittent test failure. Adding this manually mock restore made the error
-    // go away. Generally spies should be removed with automatically because of the
-    // "resetMocks" configuration option.
-    //
-    // See https://github.com/facebook/jest/issues/7654
-    spy.mockRestore();
   });
 });

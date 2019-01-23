@@ -44,6 +44,12 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     this.state = { open: !!props.open };
   }
 
+  componentDidMount() {
+    if (this.props.open) {
+      this.openPanel();
+    }
+  }
+
   componentWillReceiveProps(props: Props) {
     if (props.open !== this.props.open) {
       this.setState({ open: !!props.open });
