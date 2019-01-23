@@ -12,6 +12,7 @@
   /* photon styles */
   background-color: var(--grey-90-a10);
   border-radius: 2px;
+  color: var(--grey-90);
   font: inherit;
 }
 
@@ -34,6 +35,15 @@
   background-color: var(--grey-90-a20);
 }
 
+.photon-message-bar-error .photon-button {
+  background-color: var(--red-70);
+  color: #fff;
+}
+
+.photon-message-bar .photon-button {
+  margin-left: 8px;
+}
+
 .photon-button:hover:active {
   background-color: var(--grey-90-a30);
 }
@@ -50,6 +60,10 @@
 
 .photon-button-ghost:hover:active {
   background-color: var(--grey-90-a20);
+}
+
+.photon-button-micro {
+  height: 24px;
 }
 
 /* --- Inputs --- */
@@ -80,7 +94,9 @@
   box-shadow: 0 0 0 1px var(--red-60), 0 0 0 4px rgba(251, 0, 34, 0.3);
 }
 
-/* https://design.firefox.com/photon/components/message-bars.html */
+/* --- Message bars --- */
+
+/* See https://design.firefox.com/photon/components/message-bars.html */
 .photon-message-bar {
   display: flex;
   width: 100%;
@@ -95,32 +111,22 @@
 }
 
 .photon-message-bar-error {
-  background-color: var(--red-60);
+  /* Note: 32px is: 4px (left padding for the message bar) + 4px (left padding
+   * for the icon) + 16px (icon width) + 4px (right padding for the icon) + 4px
+   * (space between icon and text) */
+  padding: 4px 4px 4px 32px;
+
+  /* Note: 8px is: 4px (left padding for the message bar) + 4px (left padding
+   * for the icon) */
+  background: url(../img/svg/error.svg) no-repeat 8px center / 16px 16px
+    var(--red-60);
   color: #fff;
 }
 
-.photon-message-bar-error > * {
-  margin: 0 4px;
-}
-
-.photon-message-bar-error-icon {
-  display: inline-block;
-  width: 15px;
-  height: 15px;
-  flex-shrink: 0;
-  background-image: url(../img/svg/error.svg);
-}
-
-.photon-message-bar-error-action {
-  padding: 6px;
-  margin-left: 8px;
-  border: none;
-  background-color: var(--red-70);
-  border-radius: 4px;
-  color: #fff;
-  font-size: 11px;
-}
-
-.photon-message-bar-error-action:hover {
+.photon-message-bar-error .photon-button:hover {
   background-color: var(--red-80);
+}
+
+.photon-message-bar-error .photon-button:hover:active {
+  background-color: var(--red-90);
 }

@@ -54,10 +54,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
         <div className="appErrorBoundary">
           <div className="appErrorBoundaryContents">
             <div className="photon-message-bar photon-message-bar-error">
-              <span className="photon-message-bar-error-icon" />
               {this.props.message}
               <button
-                className="photon-message-bar-error-action"
+                className="photon-button photon-button-micro"
                 type="button"
                 onClick={this._toggleErrorDetails}
               >
