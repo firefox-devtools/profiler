@@ -2,7 +2,7 @@
 
 exports[`TimelineMarkersOverview renders correctly 1`] = `
 <div
-  class="timelineMarkersOverview selected"
+  class="timelineMarkers selected"
 >
   <canvas
     class="timelineMarkersCanvas"

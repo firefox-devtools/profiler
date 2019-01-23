@@ -19,25 +19,3 @@
   padding-left: 1px;
   background-color: #fff;
 }
-
-.timelineTrackThreadMarkerOverview {
-  position: relative;
-  display: block;
-  overflow: hidden;
-  height: 6px;
-  margin: 0;
-  list-style: none;
-  opacity: 0.75;
-}
-
-.timelineTrackThreadMarkerOverviewContainerJank {
-  border-bottom: 1px solid var(--grey-30);
-}
-
-.timelineTrackThreadMarkerOverview.selected {
-  opacity: 1;
-}
-
-.timelineTrackThreadMarkerOverviewThreadGeckoMain {
-  height: 18px;
-}

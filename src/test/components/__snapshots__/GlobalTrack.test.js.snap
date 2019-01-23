@@ -26,17 +26,14 @@ process: \\"tab\\" (222)"
         class="timelineTrackThread"
       >
         <div
-          class="timelineTrackThreadMarkerOverview"
+          class="timelineMarkers"
         >
           <canvas
             class="timelineMarkersCanvas"
           />
         </div>
         <div
-          class="
-              timelineTrackThreadMarkerOverview
-              timelineTrackThreadMarkerOverviewThreadGeckoMain
-            "
+          class="timelineMarkers timelineMarkersGeckoMain"
         >
           <canvas
             class="timelineMarkersCanvas"
@@ -85,7 +82,7 @@ process: \\"tab\\" (222)"
             class="timelineTrackThread"
           >
             <div
-              class="timelineTrackThreadMarkerOverview selected"
+              class="timelineMarkers selected"
             >
               <canvas
                 class="timelineMarkersCanvas"
@@ -132,7 +129,7 @@ process: \\"tab\\" (222)"
             class="timelineTrackThread"
           >
             <div
-              class="timelineTrackThreadMarkerOverview"
+              class="timelineMarkers"
             >
               <canvas
                 class="timelineMarkersCanvas"

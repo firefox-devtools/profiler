@@ -109,7 +109,7 @@ describe('timeline/TrackThread', function() {
     const markerCanvas = () =>
       ensureExists(
         container.querySelector(oneLine`
-          .timelineTrackThreadMarkerOverviewThreadGeckoMain
+          .timelineMarkersGeckoMain
           .timelineMarkersCanvas
         `),
         `Couldn't find the marker canvas`

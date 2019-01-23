@@ -72,7 +72,6 @@ describe('TimelineMarkersOverview', function() {
     const { container } = render(
       <Provider store={storeWithProfile(profile)}>
         <TimelineMarkersOverview
-          className="timelineMarkersOverview"
           rangeStart={0}
           rangeEnd={15}
           threadIndex={0}
