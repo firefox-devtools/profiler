@@ -476,12 +476,16 @@ describe('URL serialization of the transform stack', function() {
 });
 
 describe('urlFromState', function() {
-  it('outputs the current URL version', function() {
+  it('outputs no default parameters besides the current URL version', function() {
+    const pathname =
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree';
     const newUrlState = stateFromLocation({
-      pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
+      pathname: pathname,
       search: '',
       hash: '',
     });
-    expect(urlFromState(newUrlState)).toMatch(`v=${CURRENT_URL_VERSION}`);
+    expect(urlFromState(newUrlState)).toEqual(
+      `${pathname}/?v=${CURRENT_URL_VERSION}`
+    );
   });
 });
