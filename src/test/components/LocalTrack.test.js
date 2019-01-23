@@ -34,6 +34,7 @@ import {
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 // In getProfileWithNiceTracks, the two pids are 111 and 222 for the
 // "GeckoMain process" and "GeckoMain tab" respectively. Use 222 since it has
@@ -144,12 +145,12 @@ function setup(
   dispatch(changeSelectedThread(threadIndex + 1));
 
   // Some child components render to canvas.
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => mockCanvasContext());
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(400, 400));
+  mockPrototype(HTMLCanvasElement.prototype, 'getContext', () =>
+    mockCanvasContext()
+  );
+  mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+    getBoundingBox(400, 400)
+  );
 
   const renderResult = render(
     <Provider store={store}>

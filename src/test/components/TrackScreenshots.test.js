@@ -20,6 +20,7 @@ import TrackScreenshots, {
 import Timeline from '../../components/timeline';
 import { ensureExists } from '../../utils/flow';
 
+import { mockPrototype } from '../fixtures/mocks/prototype';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -142,22 +143,18 @@ function setup(
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => {
-      const rect = getBoundingBox(TRACK_WIDTH, TRACK_HEIGHT);
-      // Add some arbitrary X offset.
-      rect.left += LEFT;
-      rect.right += LEFT;
-      rect.x += LEFT;
-      rect.y += TOP;
-      rect.top += TOP;
-      rect.bottom += TOP;
-      return rect;
-    });
+  mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
+  mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () => {
+    const rect = getBoundingBox(TRACK_WIDTH, TRACK_HEIGHT);
+    // Add some arbitrary X offset.
+    rect.left += LEFT;
+    rect.right += LEFT;
+    rect.x += LEFT;
+    rect.y += TOP;
+    rect.top += TOP;
+    rect.bottom += TOP;
+    return rect;
+  });
 
   const renderResult = render(<Provider store={store}>{component}</Provider>);
   const { container } = renderResult;

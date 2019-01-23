@@ -7,6 +7,7 @@ import { cleanup } from 'react-testing-library';
 
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
+import { cleanupPrototypeSpies } from './fixtures/mocks/prototype';
 
 afterEach(function() {
   // This `__shutdownWorkers` function only exists in the mocked test environment,
@@ -16,6 +17,7 @@ afterEach(function() {
 });
 
 afterEach(cleanup);
+afterEach(cleanupPrototypeSpies);
 
 afterEach(() => {
   // The configuration to restore and reset all of the mocks in tests does not seem

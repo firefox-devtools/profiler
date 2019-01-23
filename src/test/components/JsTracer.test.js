@@ -21,6 +21,8 @@ import {
 } from '../fixtures/utils';
 import { getProfileWithJsTracerEvents } from '../fixtures/profiles/processed-profile';
 import { getShowJsTracerSummary } from '../../selectors/url-state';
+import { mockPrototype } from '../fixtures/mocks/prototype';
+
 jest.useFakeTimers();
 
 const GRAPH_BASE_WIDTH = 200;
@@ -42,13 +44,10 @@ describe('StackChart', function() {
     const flushRafCalls = mockRaf();
     const ctx = mockCanvasContext();
 
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
+    mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT)
+    );
 
     const profile = getProfileWithJsTracerEvents(events);
 

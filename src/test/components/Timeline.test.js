@@ -13,6 +13,7 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getBoundingBox } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 import type { Profile } from '../../types/profile';
 
@@ -74,18 +75,16 @@ describe('Timeline', function() {
       return mockEl;
     });
 
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(200, 300));
+    mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(200, 300)
+    );
   });
 
   it('renders the header', () => {
     const flushRafCalls = mockRaf();
     window.devicePixelRatio = 1;
     const ctx = mockCanvasContext();
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
 
     const profile = _getProfileWithDroppedSamples();
 

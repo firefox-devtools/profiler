@@ -13,6 +13,7 @@ import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import ReactDOM from 'react-dom';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 describe('TimelineMarkersOverview', function() {
   beforeEach(() => {
@@ -30,12 +31,10 @@ describe('TimelineMarkersOverview', function() {
     const flushRafCalls = mockRaf();
     window.devicePixelRatio = 1;
     const ctx = mockCanvasContext();
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(200, 300));
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
+    mockPrototype(HTMLCanvasElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(200, 300)
+    );
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
 
     const profile = getProfileWithMarkers([
       ['GCMajor', 2, { startTime: 2, endTime: 12 }],

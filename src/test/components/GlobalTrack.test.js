@@ -20,6 +20,7 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 const LEFT_CLICK = 0;
 const RIGHT_CLICK = 2;
@@ -50,12 +51,12 @@ describe('timeline/GlobalTrack', function() {
     }
 
     // Some child components render to canvas.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(400, 400));
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () =>
+      mockCanvasContext()
+    );
+    mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(400, 400)
+    );
 
     // The assertions are simpler if this thread is not already selected.
     dispatch(changeSelectedThread(threadIndex + 1));

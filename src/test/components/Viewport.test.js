@@ -23,6 +23,7 @@ import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 import type { Milliseconds } from '../../types/units';
 
@@ -608,13 +609,10 @@ function setup(profileOverrides: Object = {}) {
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
 
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
-
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBoxForViewport());
+  mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
+  mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+    getBoundingBoxForViewport()
+  );
 
   // Hook up a dummy chart with a viewport.
   const DummyChart = jest.fn(() => <div id="dummy-chart" />);

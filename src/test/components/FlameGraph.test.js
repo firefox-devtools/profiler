@@ -13,58 +13,60 @@ import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { changeInvertCallstack } from '../../actions/profile-view';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
-it('renders FlameGraph correctly', () => {
-  const flushRafCalls = mockRaf();
-  window.devicePixelRatio = 1;
-  const ctx = mockCanvasContext();
+describe('FlameGraph', function() {
+  it('renders FlameGraph correctly', () => {
+    const flushRafCalls = mockRaf();
+    window.devicePixelRatio = 1;
+    const ctx = mockCanvasContext();
 
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(200, 300));
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
+    mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(200, 300)
+    );
 
-  const { profile } = getProfileFromTextSamples(`
-    A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
-    B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
-    C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
-    D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
-    E[cat:Graphics]  G[cat:Graphics]
-  `);
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
 
-  const store = storeWithProfile(profile);
+    const { profile } = getProfileFromTextSamples(`
+      A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
+      B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
+      C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
+      D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
+      E[cat:Graphics]  G[cat:Graphics]
+    `);
 
-  const { container } = render(
-    <Provider store={store}>
-      <FlameGraph />
-    </Provider>
-  );
+    const store = storeWithProfile(profile);
 
-  flushRafCalls();
+    const { container } = render(
+      <Provider store={store}>
+        <FlameGraph />
+      </Provider>
+    );
 
-  const drawCalls = ctx.__flushDrawLog();
+    flushRafCalls();
 
-  expect(container.firstChild).toMatchSnapshot();
-  expect(drawCalls).toMatchSnapshot();
+    const drawCalls = ctx.__flushDrawLog();
 
-  delete window.devicePixelRatio;
-});
+    expect(container.firstChild).toMatchSnapshot();
+    expect(drawCalls).toMatchSnapshot();
 
-it('renders a message instead of FlameGraph when call stack is inverted', () => {
-  const { profile } = getProfileFromTextSamples(`
-    A  B
-  `);
+    delete window.devicePixelRatio;
+  });
 
-  const store = storeWithProfile(profile);
-  store.dispatch(changeInvertCallstack(true));
+  it('renders a message instead of FlameGraph when call stack is inverted', () => {
+    const { profile } = getProfileFromTextSamples(`
+      A  B
+    `);
 
-  const { container } = render(
-    <Provider store={store}>
-      <FlameGraph />
-    </Provider>
-  );
+    const store = storeWithProfile(profile);
+    store.dispatch(changeInvertCallstack(true));
 
-  expect(container.firstChild).toMatchSnapshot();
+    const { container } = render(
+      <Provider store={store}>
+        <FlameGraph />
+      </Provider>
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
 });

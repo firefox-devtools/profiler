@@ -15,7 +15,7 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
-
+import { mockPrototype } from '../fixtures/mocks/prototype';
 import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock, and the graph height
@@ -56,13 +56,10 @@ function setup() {
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
-
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
+  mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
+  mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+    getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT)
+  );
 
   const renderResult = render(
     <Provider store={store}>

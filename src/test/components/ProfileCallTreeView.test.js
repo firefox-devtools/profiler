@@ -23,6 +23,7 @@ import {
   changeInvertCallstack,
   commitRange,
 } from '../../actions/profile-view';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 describe('calltree/ProfileCallTreeView', function() {
   const { profile } = getProfileFromTextSamples(`
@@ -35,9 +36,9 @@ describe('calltree/ProfileCallTreeView', function() {
 
   beforeEach(() => {
     // Mock out the 2d canvas for the loupe view.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () =>
+      mockCanvasContext()
+    );
   });
 
   it('renders an unfiltered call tree', () => {
@@ -117,9 +118,9 @@ describe('calltree/ProfileCallTreeView', function() {
 describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   beforeEach(() => {
     // Mock out the 2d canvas for the loupe view.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () =>
+      mockCanvasContext()
+    );
   });
 
   const { profile } = getProfileFromTextSamples(`
@@ -163,19 +164,17 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
 });
 
 describe('calltree/ProfileCallTreeView navigation keys', () => {
-  beforeEach(() => {
-    // Mock out the 2d canvas for the loupe view.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
-  });
-
   function setup(profileString: string, expectedRowsLength: number) {
+    // Mock out the 2d canvas for the loupe view.
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () =>
+      mockCanvasContext()
+    );
+
     // This makes the bounding box large enough so that we don't trigger
     // VirtualList's virtualization. We assert this above.
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(1000, 2000));
+    mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(1000, 2000)
+    );
 
     const { profile } = getProfileFromTextSamples(profileString);
     const store = storeWithProfile(profile);

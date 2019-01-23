@@ -20,7 +20,7 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
-
+import { mockPrototype } from '../fixtures/mocks/prototype';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 // The following constants determine the size of the drawn graph.
@@ -58,13 +58,11 @@ describe('SelectedThreadActivityGraph', function() {
     const flushRafCalls = mockRaf();
     const ctx = mockCanvasContext();
 
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
 
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
+    mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT)
+    );
 
     const viewport: Viewport = {
       containerWidth: GRAPH_WIDTH,

@@ -26,7 +26,7 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
-
+import { mockPrototype } from '../fixtures/mocks/prototype';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
@@ -78,13 +78,10 @@ describe('timeline/TrackThread', function() {
     const threadIndex = 0;
     const flushRafCalls = mockRaf();
     const ctx = mockCanvasContext();
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
+    mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT)
+    );
 
     // Note: These tests were first written with the timeline using the ThreadStackGraph.
     // This is not the default view, so dispatch an action to change to the older default

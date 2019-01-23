@@ -14,6 +14,7 @@ import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { waitUntilState } from '../fixtures/utils';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 describe('calltree/ZipFileTree', function() {
   async function setup() {
@@ -24,9 +25,9 @@ describe('calltree/ZipFileTree', function() {
     ]);
 
     // Some child components render to canvas.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () =>
+      mockCanvasContext()
+    );
 
     const renderResult = render(
       <Provider store={store}>

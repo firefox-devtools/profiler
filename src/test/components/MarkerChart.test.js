@@ -26,6 +26,7 @@ import {
   removeRootOverlayElement,
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 const MARKERS = [
   ['Marker A', 0, { startTime: 0, endTime: 10 }],
@@ -65,17 +66,13 @@ const MARKERS = [
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
+  mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
 
   // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
   // a lot easier to mock this everywhere.
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() =>
-      getBoundingBox(200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT, 300)
-    );
+  mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+    getBoundingBox(200 + TIMELINE_MARGIN_LEFT + TIMELINE_MARGIN_RIGHT, 300)
+  );
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('marker-chart'));

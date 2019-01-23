@@ -13,6 +13,7 @@ import {
 } from '../fixtures/utils';
 
 import { ensureExists } from '../../utils/flow';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 import Tooltip, { MOUSE_OFFSET } from '../../components/shared/Tooltip';
 
@@ -97,12 +98,8 @@ function setup({ box, mouse }: Setup) {
   // 1024x768. It wouldn't be so easy to mock, because given it's a simple value
   // in `window` we can't use Jest's `spyOn` on it and rely on Jest's easy mock
   // restore.
-  jest
-    .spyOn(HTMLElement.prototype, 'offsetWidth', 'get')
-    .mockImplementation(() => box.width);
-  jest
-    .spyOn(HTMLElement.prototype, 'offsetHeight', 'get')
-    .mockImplementation(() => box.height);
+  mockPrototype(HTMLElement.prototype, 'offsetWidth', () => box.width, 'get');
+  mockPrototype(HTMLElement.prototype, 'offsetHeight', () => box.height, 'get');
 
   const { rerender } = render(
     <Tooltip mouseX={mouse.x} mouseY={mouse.y}>

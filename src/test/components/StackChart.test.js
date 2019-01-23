@@ -26,6 +26,7 @@ import {
   removeRootOverlayElement,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 jest.useFakeTimers();
 
@@ -42,13 +43,11 @@ describe('StackChart', function() {
     const flushRafCalls = mockRaf();
     const ctx = mockCanvasContext();
 
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
 
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
+    mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT)
+    );
 
     const {
       profile,

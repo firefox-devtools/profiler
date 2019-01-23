@@ -10,13 +10,14 @@ import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
+import { mockPrototype } from '../fixtures/mocks/prototype';
 
 describe('MarkerTable', function() {
   it('renders some basic markers', () => {
     // Set an arbitrary size that will not kick in any virtualization behavior.
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(2000, 1000));
+    mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(2000, 1000)
+    );
 
     // These were all taken from real-world values.
     const profile = getProfileWithMarkers(

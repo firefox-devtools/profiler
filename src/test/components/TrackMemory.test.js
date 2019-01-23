@@ -22,7 +22,7 @@ import {
   removeRootOverlayElement,
   getMouseEvent,
 } from '../fixtures/utils';
-
+import { mockPrototype } from '../fixtures/mocks/prototype';
 import {
   getProfileFromTextSamples,
   getCounterForThread,
@@ -59,13 +59,10 @@ describe('TrackMemory', function() {
     const flushRafCalls = mockRaf();
     const ctx = mockCanvasContext();
 
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
+    mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
+    mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+      getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT)
+    );
 
     const renderResult = render(
       <Provider store={store}>

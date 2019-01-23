@@ -19,6 +19,8 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { mockPrototype } from '../fixtures/mocks/prototype';
+
 import { type NetworkPayload } from '../../types/markers';
 
 const NETWORK_MARKERS = Array(10)
@@ -28,15 +30,13 @@ const NETWORK_MARKERS = Array(10)
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
+  mockPrototype(HTMLCanvasElement.prototype, 'getContext', () => ctx);
 
   // Ideally we'd want this only on the Canvas and on ChartViewport, but this is
   // a lot easier to mock this everywhere.
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(200, 300));
+  mockPrototype(HTMLElement.prototype, 'getBoundingClientRect', () =>
+    getBoundingBox(200, 300)
+  );
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('network-chart'));
