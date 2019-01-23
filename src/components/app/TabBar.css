@@ -1,8 +1,8 @@
 /* Removing styling from the button */
-.tabBarTabButton{
-  background: none;
-  border: none;
-  margin: 0;
+.tabBarTabButton {
   padding: 0;
-  font: inherit
+  margin: 0;
+  border: none;
+  background: none;
+  font: inherit;
 }

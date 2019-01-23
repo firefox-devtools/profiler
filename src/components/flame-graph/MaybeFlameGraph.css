@@ -1,11 +1,11 @@
 .flameGraphDisabledMessage {
-  flex: 1;
   display: flex;
+  flex: 1;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex-direction: column;
+  padding: 10px;
   background-color: var(--grey-20);
   box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.1);
-  padding: 10px;
   font-size: 120%;
 }

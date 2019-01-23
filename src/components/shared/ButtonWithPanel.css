@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .buttonWithPanel {
+  position: relative;
   display: flex;
   flex-flow: column nowrap;
   align-items: stretch;
-  position: relative;
 }
 
 /**
@@ -17,26 +17,26 @@
  * .buttonWithPanel because the latter would clip the panel. */
 .buttonWithPanelButtonWrapper {
   display: flex;
+  overflow: hidden;
+  height: 100%;
   flex-flow: column nowrap;
   align-items: stretch;
-  height: 100%;
-  overflow: hidden;
 }
 
 .buttonWithPanelButton {
-  border: 0;
-  margin: 0;
-  padding: 0 10px;
-  background: none;
   height: 100%;
+  padding: 0 10px;
+  margin: 0;
+  border: 0;
+  background: none;
   font-size: 100%;
 }
 
 .buttonWithPanelButton:not([disabled]):hover {
-  background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1));
+  background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
 }
 
 .buttonWithPanel.open > * > .buttonWithPanelButton,
 .buttonWithPanelButton:not([disabled]):hover:active {
-  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2));
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
 }
