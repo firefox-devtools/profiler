@@ -14,7 +14,7 @@ import ReactDOM from 'react-dom';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
-describe('TimelineMarkersOverview', function() {
+describe('TimelineMarkers', function() {
   beforeEach(() => {
     jest.spyOn(ReactDOM, 'findDOMNode').mockImplementation(() => {
       // findDOMNode uses nominal typing instead of structural (null | Element | Text), so

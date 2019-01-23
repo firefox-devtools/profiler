@@ -4,10 +4,12 @@
 // @flow
 import * as colors from 'photon-colors';
 
+import type { CssPixels } from '../types/units';
+
 type MarkerStyles = {
   +[styleName: string]: {|
-    +top: number,
-    +height: number,
+    +top: CssPixels,
+    +height: CssPixels,
     +background: string,
     +squareCorners: boolean,
     +borderLeft: null | string,

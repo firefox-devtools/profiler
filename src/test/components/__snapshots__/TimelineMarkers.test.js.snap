@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`TimelineMarkersOverview renders correctly 1`] = `
+exports[`TimelineMarkers renders correctly 1`] = `
 <div
   class="timelineMarkers selected"
 >
@@ -12,7 +12,7 @@ exports[`TimelineMarkersOverview renders correctly 1`] = `
 </div>
 `;
 
-exports[`TimelineMarkersOverview renders correctly 2`] = `
+exports[`TimelineMarkers renders correctly 2`] = `
 Array [
   Array [
     "clearRect",
