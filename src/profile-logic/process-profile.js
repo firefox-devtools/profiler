@@ -1122,16 +1122,9 @@ function _unserializeProfile(profile: Object): Profile {
   // stringArray -> stringTable
   const newProfile = Object.assign({}, profile, {
     threads: profile.threads.map(thread => {
-      const { stringArray, jsTracer, ...newThread } = thread;
+      const { stringArray, ...newThread } = thread;
 
       newThread.stringTable = new UniqueStringArray(stringArray);
-
-      if (jsTracer) {
-        const newJsTracer = { ...jsTracer };
-        newJsTracer.stringTable = new UniqueStringArray(jsTracer.stringArray);
-        delete newJsTracer.stringArray;
-        newThread.jsTracer = newJsTracer;
-      }
 
       return newThread;
     }),
