@@ -101,7 +101,7 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_SELECTED_MARKER',
       +threadIndex: ThreadIndex,
-      +selectedMarker: IndexIntoRawMarkerTable | -1,
+      +selectedMarker: IndexIntoRawMarkerTable | null,
     |}
   | {|
       +type: 'UPDATE_PREVIEW_SELECTION',

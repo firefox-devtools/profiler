@@ -26,7 +26,7 @@ type StateProps = {|
   +markers: Marker[],
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +selectedMarker: IndexIntoMarkers,
+  +selectedMarker: IndexIntoMarkers | null,
 |};
 
 type DispatchProps = {|
@@ -44,6 +44,10 @@ class MarkersContextMenu extends PureComponent<Props> {
       previewSelection,
       committedRange,
     } = this.props;
+
+    if (selectedMarker === null) {
+      return;
+    }
 
     const selectionEnd = previewSelection.hasSelection
       ? previewSelection.selectionEnd
@@ -66,6 +70,10 @@ class MarkersContextMenu extends PureComponent<Props> {
       previewSelection,
     } = this.props;
 
+    if (selectedMarker === null) {
+      return;
+    }
+
     const selectionStart = previewSelection.hasSelection
       ? previewSelection.selectionStart
       : committedRange.start;
@@ -83,15 +91,29 @@ class MarkersContextMenu extends PureComponent<Props> {
 
   copyMarkerJSON = () => {
     const { selectedMarker, markers } = this.props;
+
+    if (selectedMarker === null) {
+      return;
+    }
+
     copy(JSON.stringify(markers[selectedMarker]));
   };
 
   copyMarkerName = () => {
     const { selectedMarker, markers } = this.props;
+
+    if (selectedMarker === null) {
+      return;
+    }
+
     copy(markers[selectedMarker].name);
   };
 
   render() {
+    if (this.props.selectedMarker === null) {
+      return null;
+    }
+
     return (
       <ContextMenu id="MarkersContextMenu">
         <MenuItem onClick={this.setStartRange}>

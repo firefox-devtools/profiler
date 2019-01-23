@@ -845,7 +845,7 @@ export function changeExpandedCallNodes(
 
 export function changeSelectedMarker(
   threadIndex: ThreadIndex,
-  selectedMarker: IndexIntoRawMarkerTable | -1
+  selectedMarker: IndexIntoRawMarkerTable | null
 ): Action {
   return {
     type: 'CHANGE_SELECTED_MARKER',
