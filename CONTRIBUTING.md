@@ -87,7 +87,7 @@ If you'd like to use perf.html via URLs that are not `localhost` (e.g. live prev
 PERFHTML_HOST="0.0.0.0" yarn start
 ```
 
-You'll probably also want to add you non-localhost domains to the `allowedHosts` in `server.js`.
+You'll probably also want to add your non-localhost domains to the `allowedHosts` property in `server.js`.
 
 ## Finding something to work on
 

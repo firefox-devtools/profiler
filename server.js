@@ -68,7 +68,7 @@ new WebpackDevServer(webpack(config), serverConfig).listen(port, host, function(
     '------------------------------------------------------------------------------------------';
 
   console.log(barAscii);
-  console.log(`> perf.html is available at: http://${host}:${port}\n`);
+  console.log(`> perf.html is listening at: http://${host}:${port}\n`);
   if (port === 4242) {
     console.log(
       '> You can change this default port with the environment variable PERFHTML_PORT.\n'
