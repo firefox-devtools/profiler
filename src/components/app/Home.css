@@ -161,8 +161,8 @@
   padding: 0.3em 1em;
 } 
 
-.homeSectionButton:hover , 
-.homeSectionButtonPressed{
+.homeSectionButton:hover ,
+.homeSectionButton[aria-expanded="true"] {
   color: #fff;
   background-color: var(--blue-60);
 }

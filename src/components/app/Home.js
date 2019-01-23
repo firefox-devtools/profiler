@@ -69,7 +69,6 @@ type LoadFromUrlProps = {
 };
 
 type LoadFromUrlState = {
-  isLoadButtonPressed: boolean,
   value: string,
 };
 
@@ -117,11 +116,12 @@ class ActionButtons extends React.PureComponent<
             type="button"
             className={classNames({
               homeSectionButton: true,
-              homeSectionButtonPressed: this.state.isLoadFromUrlPressed,
             })}
             onClick={this._loadFromUrlPressed}
+            // when the button is clicked it expands to the URL input
+            aria-expanded={this.state.isLoadFromUrlPressed}
           >
-            Load a profile from an URL
+            Load a profile from a URL
           </button>
         </div>
         {this.state.isLoadFromUrlPressed ? (
@@ -137,14 +137,12 @@ class LoadFromUrl extends React.PureComponent<
   LoadFromUrlState
 > {
   state = {
-    isLoadButtonPressed: false,
     value: '',
   };
 
   handleChange = (event: SyntheticEvent<HTMLInputElement>) => {
     event.preventDefault();
     this.setState({
-      isLoadButtonPressed: true,
       value: event.currentTarget.value,
     });
   };
@@ -170,7 +168,6 @@ class LoadFromUrl extends React.PureComponent<
           type="submit"
           className="homeSectionButton homeSectionLoadFromUrlSubmitButton"
           value="Load"
-          disabled={!this.state.isLoadButtonPressed}
         />
       </form>
     );
