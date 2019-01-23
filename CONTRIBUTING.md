@@ -79,6 +79,16 @@ When working on a new feature and code changes, it's important that things work 
  * Continuous integration for pull requests
    - We use CircleCI to run our tests for every PR that is submitted. This gives reviewers a great way to know if things are still working as expected.
 
+## Exposing the web application publicly
+
+If you'd like to use perf.html via URLs that are not `localhost` (e.g. live preview, proxy, other device...) you can expose the web application publicly like so:
+
+```bash
+PERFHTML_HOST="0.0.0.0" yarn start
+```
+
+You'll probably also want to add your non-localhost domains to the `allowedHosts` property in `server.js`.
+
 ## Finding something to work on
 
 If this is your first time here, check out the label [Good First Issue](https://github.com/devtools-html/perf.html/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22). We will mentor you through the process of completing a first bug, and these are usually pretty good self-contained problems. After leveling up on a few good first issues, we also have the [Polish](https://github.com/devtools-html/perf.html/issues?q=is%3Aopen+is%3Aissue+label%3Apolish) tag for bugs that no one is actively working on, but are well-scoped and ready to be tackled!
