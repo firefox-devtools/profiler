@@ -1,3 +1,5 @@
+/* --- Buttons --- */
+/* See https://design.firefox.com/photon/components/buttons.html for the spec */
 .photon-button {
   /* reset default styles */
   background: none;
@@ -47,4 +49,31 @@
 
 .photon-button-ghost:hover:active {
   background-color: var(--grey-90-a20);
+}
+
+/* --- Inputs --- */
+/* See https://design.firefox.com/photon/components/input-fields.html for the spec */
+.photon-input {
+  box-shadow: none; /* remove the default Firefox style */
+  border: 1px solid var(--grey-90-a20);
+  border-radius: 2px;
+  padding: 0 8px;
+  height: 32px;
+}
+
+.photon-input:hover {
+  border-color: var(--grey-90-a30);
+}
+
+.photon-input:invalid:not(:placeholder-shown) {
+  box-shadow: 0 0 0 1px var(--red-60), 0 0 0 4px rgba(251, 0, 34, 0.3);
+  border: 1px solid var(--red-60);
+}
+
+/* The second selector is only here to have a specificity higher of the one in
+ * the previous rule. */
+.photon-input:focus,
+.photon-input:focus:invalid {
+  box-shadow: 0 0 0 1px var(--blue-50), 0 0 0 4px var(--blue-50-a30);
+  border: 1px solid var(--blue-50);
 }

@@ -11,6 +11,7 @@ import {
 import { SymbolStore } from '../profile-logic/symbol-store';
 import { symbolicateProfile } from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
+import { mergeProfiles } from '../profile-logic/comparison';
 import { decompress } from '../utils/gz';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
@@ -24,6 +25,7 @@ import {
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
 } from '../selectors/url-state';
+import { stateFromLocation } from '../app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -39,7 +41,9 @@ import type {
   FunctionsUpdatePerThread,
   FuncToFuncMap,
   RequestedLib,
+  ImplementationFilter,
 } from '../types/actions';
+import type { TransformStacksPerThread } from '../types/transforms';
 import type { Action, ThunkAction, Dispatch } from '../types/store';
 import type {
   Profile,
@@ -76,7 +80,11 @@ export function waitingForProfileFromAddon(): Action {
  */
 export function viewProfile(
   profile: Profile,
-  pathInZipFile: ?string
+  config: $Shape<{|
+    pathInZipFile: string,
+    implementationFilter: ImplementationFilter,
+    transformStacks: TransformStacksPerThread,
+  |}> = {}
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     if (profile.threads.length === 0) {
@@ -160,7 +168,9 @@ export function viewProfile(
       localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
-      pathInZipFile,
+      pathInZipFile: config.pathInZipFile,
+      implementationFilter: config.implementationFilter,
+      transformStacks: config.transformStacks,
       dataSource: getDataSource(getState()),
     });
   };
@@ -661,12 +671,14 @@ async function _extractJsonFromResponse(
   }
 }
 
+function getProfileUrlForHash(hash: string): string {
+  return `https://profile-store.commondatastorage.googleapis.com/${hash}`;
+}
+
 export function retrieveProfileFromStore(
   hash: string
 ): ThunkAction<Promise<void>> {
-  return retrieveProfileOrZipFromUrl(
-    `https://profile-store.commondatastorage.googleapis.com/${hash}`
-  );
+  return retrieveProfileOrZipFromUrl(getProfileUrlForHash(hash));
 }
 
 /**
@@ -797,6 +809,79 @@ export function retrieveProfileFromFile(
           dispatch(viewProfile(profile));
         }
       }
+    } catch (error) {
+      dispatch(fatalError(error));
+    }
+  };
+}
+
+/**
+ * This action retrieves several profiles and push them into 1 profile using the
+ * information contained in the query.
+ */
+export function retrieveProfilesToCompare(
+  profileViewUrls: string[]
+): ThunkAction<Promise<void>> {
+  return async dispatch => {
+    dispatch(waitingForProfileFromUrl());
+
+    try {
+      // First we get a state from each URL. From these states we'll get all the
+      // data we need to fetch and process the profiles.
+      const profileStates = profileViewUrls.map(url =>
+        stateFromLocation(new URL(url))
+      );
+      const hasSupportedDatasources = profileStates.every(
+        state => state.dataSource === 'public'
+      );
+      if (!hasSupportedDatasources) {
+        throw new Error(
+          'Only public uploaded profiles are supported by the comparison function.'
+        );
+      }
+
+      // Then we retrieve the profiles from the online store, and unserialize
+      // and process them if needed.
+      const promises = profileStates.map(async ({ hash }) => {
+        const profileUrl = getProfileUrlForHash(hash);
+        const response = await _fetchProfile({
+          url: profileUrl,
+          onTemporaryError: (e: TemporaryError) => {
+            dispatch(temporaryError(e));
+          },
+        });
+        const serializedProfile = response.profile;
+        if (!serializedProfile) {
+          throw new Error('Expected to receive a profile from _fetchProfile');
+        }
+
+        const profile = unserializeProfileOfArbitraryFormat(serializedProfile);
+        return profile;
+      });
+
+      // Once all profiles have been fetched and unserialized, we can start
+      // pushing them to a brand new profile. This resulting profile will keep
+      // only the 2 selected threads from the 2 profiles.
+      const profiles = await Promise.all(promises);
+
+      const {
+        profile: resultProfile,
+        implementationFilters,
+        transformStacks,
+      } = mergeProfiles(profiles, profileStates);
+
+      // We define an implementationFilter if both profiles agree with the value.
+      let implementationFilter;
+      if (implementationFilters[0] === implementationFilters[1]) {
+        implementationFilter = implementationFilters[0];
+      }
+
+      dispatch(
+        viewProfile(resultProfile, {
+          transformStacks,
+          implementationFilter,
+        })
+      );
     } catch (error) {
       dispatch(fatalError(error));
     }

@@ -12,6 +12,7 @@ import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
+import * as UrlStateSelectors from '../../selectors/url-state';
 import { getView } from '../../selectors/app';
 import {
   viewProfile,
@@ -19,6 +20,7 @@ import {
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
   retrieveProfileFromFile,
+  retrieveProfilesToCompare,
   _fetchProfile,
 } from '../../actions/receive-profile';
 
@@ -899,6 +901,155 @@ describe('actions/receive-profile', function() {
         // Coerce into the object to access the error property.
         (view: Object).error
       ).toMatchSnapshot();
+    });
+  });
+
+  describe('retrieveProfilesToCompare', function() {
+    function fetch200Response(profile: string) {
+      return {
+        ok: true,
+        status: 200,
+        headers: {
+          get: () => 'application/json',
+        },
+        json: () => Promise.resolve(JSON.parse(profile)),
+      };
+    }
+
+    async function setup(urlSearch1: string, urlSearch2: string): * {
+      const { profile: profile1 } = getProfileFromTextSamples(
+        `A  B  C  D  E`,
+        `G  H  I  J  K`
+      );
+      const { profile: profile2 } = getProfileFromTextSamples(
+        `L  M  N  O  P  Ex  Ex  Ex  Ex`,
+        `Q  R  S  T  U  Ex  Ex  Ex  Ex`
+      );
+
+      profile1.threads.forEach(thread =>
+        addMarkersToThreadWithCorrespondingSamples(thread, [
+          ['A', 1, { startTime: 1, endTime: 3 }],
+          ['B', 2, null],
+          ['C', 3, null],
+          ['D', 4, null],
+          ['E', 5, null],
+        ])
+      );
+      profile2.threads.forEach(thread =>
+        addMarkersToThreadWithCorrespondingSamples(thread, [
+          ['F', 1, { startTime: 1, endTime: 3 }],
+          ['G', 2, null],
+          ['H', 3, null],
+          ['I', 4, null],
+          ['J', 5, null],
+        ])
+      );
+
+      window.fetch
+        .mockResolvedValueOnce(fetch200Response(serializeProfile(profile1)))
+        .mockResolvedValueOnce(fetch200Response(serializeProfile(profile2)));
+
+      const fakeUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
+      const fakeUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
+
+      const { dispatch, getState } = blankStore();
+      await dispatch(retrieveProfilesToCompare([fakeUrl1, fakeUrl2]));
+
+      // To find stupid mistakes more easily, check that we didn't get a fatal
+      // error here. If we got one, let's rethrow the error.
+      const view = getView(getState());
+      if (view.phase === 'FATAL_ERROR') {
+        throw view.error;
+      }
+
+      const resultProfile = ProfileViewSelectors.getProfile(getState());
+      const globalTracks = ProfileViewSelectors.getGlobalTracks(getState());
+      const rootRange = ProfileViewSelectors.getProfileRootRange(getState());
+      return {
+        profile1,
+        profile2,
+        dispatch,
+        getState,
+        resultProfile,
+        globalTracks,
+        rootRange,
+      };
+    }
+
+    beforeEach(function() {
+      // The stub makes it easy to return different values for different
+      // arguments. Here we define the default return value because there is no
+      // argument specified.
+      window.fetch = jest.fn();
+      window.fetch.mockImplementation(() =>
+        Promise.reject(new Error('No more answers have been configured.'))
+      );
+    });
+
+    afterEach(function() {
+      delete window.fetch;
+    });
+
+    it('retrieves profiles and put them in the same view', async function() {
+      const {
+        profile1,
+        profile2,
+        resultProfile,
+        globalTracks,
+        rootRange,
+      } = await setup('thread=0', 'thread=1');
+
+      const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
+        (thread, i) => ({
+          ...thread,
+          pid: `${thread.pid} from profile ${i + 1}`,
+          processName: `Profile ${i + 1}: ${thread.name}`,
+          unregisterTime: thread.samples.length,
+        })
+      );
+      expect(resultProfile.threads).toEqual(expectedThreads);
+      expect(globalTracks).toHaveLength(2);
+      expect(rootRange).toEqual({ start: 0, end: 9 });
+    });
+
+    it('filters samples, but not markers, according to the URL', async function() {
+      const { resultProfile } = await setup(
+        'thread=0&range=0.0011_0.0043',
+        'thread=1'
+      );
+      expect(resultProfile.threads[0].samples).toMatchSnapshot();
+      expect(resultProfile.threads[0].markers).toMatchSnapshot();
+    });
+
+    it('reuses the implementation information if both profiles used it', async function() {
+      const { getState } = await setup(
+        'thread=0&implementation=js',
+        'thread=1&implementation=js'
+      );
+
+      expect(UrlStateSelectors.getImplementationFilter(getState())).toBe('js');
+    });
+
+    it('does not reuse the implementation information if one profile used it', async function() {
+      const { getState } = await setup(
+        'thread=0&implementation=js',
+        'thread=1'
+      );
+
+      expect(UrlStateSelectors.getImplementationFilter(getState())).not.toBe(
+        'js'
+      );
+    });
+
+    it('reuses transforms', async function() {
+      const { getState } = await setup('thread=0&transforms=ff-42', 'thread=1');
+
+      expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
+        {
+          type: 'focus-function',
+          funcIndex: 42,
+        },
+      ]);
     });
   });
 });

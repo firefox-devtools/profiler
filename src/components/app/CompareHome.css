@@ -1,0 +1,32 @@
+.compareHome {
+  width: 75%;
+  margin: auto;
+  padding: 8em;
+
+  border: 1px solid #CCC;
+  border-radius: 3px;
+  box-shadow: 0 5px 25px #0b1f50;
+  background: #fff;
+}
+
+.compareHomeForm {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-gap: 1em;
+  align-items: center;
+}
+
+.compareHomeSubmitButton {
+  grid-column-start: span 2
+}
+
+.compareHomeFormLabel {
+  white-space: nowrap;
+}
+
+@media (max-width: 450px) {
+  .compareHome {
+    width: auto;
+    padding: 1em;
+  }
+}

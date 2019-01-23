@@ -41,6 +41,13 @@ export function setProfileSharingStatus(
   };
 }
 
+export function changeProfilesToCompare(profiles: string[]): Action {
+  return {
+    type: 'CHANGE_PROFILES_TO_COMPARE',
+    profiles,
+  };
+}
+
 export function urlSetupDone(): ThunkAction<void> {
   return (dispatch, getState) => {
     dispatch({ type: 'URL_SETUP_DONE' });
