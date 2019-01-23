@@ -153,7 +153,7 @@ exports[`shared/ButtonWithPanel renders a button with a panel 1`] = `
     class="arrowPanelAnchor"
   >
     <div
-      class="arrowPanel panel"
+      class="arrowPanel open panel"
     >
       <div
         class="arrowPanelArrow"
@@ -222,7 +222,7 @@ exports[`shared/ButtonWithPanel renders the ButtonWithPanel with a closed panel 
     class="arrowPanelAnchor"
   >
     <div
-      class="arrowPanel open panel"
+      class="arrowPanel panel"
     >
       <div
         class="arrowPanelArrow"
