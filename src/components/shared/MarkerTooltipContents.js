@@ -366,6 +366,25 @@ function getMarkerDetails(
 
   if (data) {
     switch (data.type) {
+      case 'DiskIO': {
+        return [
+          <div className="tooltipDetails" key="details">
+            {_markerDetailNullable('name', 'Operation', data.operation)}
+            {_markerDetailNullable('name', 'Source', data.source)}
+            {_markerDetailNullable('name', 'Filename', data.filename)}
+          </div>,
+          data.cause ? (
+            <div className="tooltipDetailsBackTrace" key="backtrace">
+              <Backtrace
+                maxHeight="30em"
+                stackIndex={data.cause.stack}
+                thread={thread}
+                implementationFilter={implementationFilter}
+              />
+            </div>
+          ) : null,
+        ];
+      }
       case 'UserTiming': {
         return (
           <div className="tooltipDetails">

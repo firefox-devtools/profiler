@@ -107,6 +107,12 @@ class MarkerTree {
             category = name;
             name = data.name;
             break;
+          case 'DiskIO':
+            category = data.type;
+            name = data.filename
+              ? `${data.operation} – ${data.filename}`
+              : data.operation;
+            break;
           case 'Bailout':
             category = 'Bailout';
             break;

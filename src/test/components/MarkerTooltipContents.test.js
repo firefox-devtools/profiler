@@ -394,6 +394,22 @@ describe('MarkerTooltipContents', function() {
           interval: 'end',
         },
       ],
+      [
+        'DiskIO',
+        114,
+        {
+          type: 'DiskIO',
+          startTime: 114,
+          endTime: 115,
+          source: 'PoisonOIInterposer',
+          filename: '/foo/bar',
+          operation: 'create/open',
+          cause: {
+            time: 17.0,
+            stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
+          },
+        },
+      ],
     ]);
     const store = storeWithProfile(profile);
     const state = store.getState();
