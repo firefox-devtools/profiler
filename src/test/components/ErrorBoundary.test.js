@@ -13,69 +13,64 @@ describe('app/ErrorBoundary', function() {
   const childComponentText = 'This is a child component';
   const friendlyErrorMessage = 'Oops, there was an error';
   const technicalErrorMessage = 'This is an error.';
-  const technicalErrorMatcher = /This is an error./;
   const ThrowingComponent = () => {
     throw new Error(technicalErrorMessage);
   };
 
-  it('shows the component children when there is no error', () => {
-    const { getByText } = render(
+  function setupComponent(childComponent) {
+    const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    const results = render(
       <ErrorBoundary message={friendlyErrorMessage}>
-        {childComponentText}
+        {childComponent}
       </ErrorBoundary>
     );
+    return { spy, ...results };
+  }
+
+  it('shows the component children when there is no error', () => {
+    const { getByText } = setupComponent(childComponentText);
     expect(getByText(childComponentText)).toBeTruthy();
   });
 
   it('shows the error message children when the component throws error', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    const { getByText } = render(
-      <ErrorBoundary message={friendlyErrorMessage}>
-        <ThrowingComponent />
-      </ErrorBoundary>
-    );
+    const { getByText } = setupComponent(<ThrowingComponent />);
     expect(getByText(friendlyErrorMessage)).toBeTruthy();
   });
 
+  it('surfaces the error via console.error', () => {
+    const { spy } = setupComponent(<ThrowingComponent />);
+    expect(spy).toHaveBeenCalled();
+  });
+
   it('can click the component to view the full details', () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
-    const { getByText } = render(
-      <ErrorBoundary message={friendlyErrorMessage}>
-        <ThrowingComponent />
-      </ErrorBoundary>
-    );
-    // The technical error doesn't exist
-    expect(() => getByText(technicalErrorMatcher)).toThrow();
+    const { getByText, getByTestId } = setupComponent(<ThrowingComponent />);
+
+    // The technical error isn't visible yet.
+    expect(
+      getByTestId('error-technical-details').classList.contains('hide')
+    ).toBe(true);
 
     // Click the button to expand the details.
     getByText('View full error details').click();
 
     // The technical error now exists.
-    expect(getByText(technicalErrorMatcher)).toBeTruthy();
+    expect(
+      getByTestId('error-technical-details').classList.contains('hide')
+    ).toBe(false);
   });
 
   it('reports errors to the analytics', () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
     withAnalyticsMock(() => {
-      render(
-        <ErrorBoundary message={friendlyErrorMessage}>
-          <ThrowingComponent />
-        </ErrorBoundary>
-      );
-      expect(self.ga.mock.calls).toEqual([
-        [
-          'send',
-          'exception',
-          {
-            exDescription: [
-              '',
-              '    in ThrowingComponent',
-              '    in ErrorBoundary',
-            ].join('\n'),
-            exFatal: true,
-          },
-        ],
-      ]);
+      setupComponent(<ThrowingComponent />);
+      expect(self.ga).toHaveBeenCalledWith('send', 'exception', {
+        exDescription: [
+          '',
+          '    in ThrowingComponent',
+          '    in ErrorBoundary',
+        ].join('\n'),
+        exFatal: true,
+      });
     });
   });
 });

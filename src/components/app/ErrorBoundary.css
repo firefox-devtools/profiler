@@ -19,27 +19,29 @@
   flex-direction: column;
 }
 
-@keyframes appErrorBoundaryDetailsFadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
 .appErrorBoundaryDetails {
-  flex-shrink: 1;
   padding: 25px;
   margin: 12px 0;
-  animation-duration: 200ms;
-  animation-name: appErrorBoundaryDetailsFadeIn;
   background: #fff;
   border-radius: 4px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   color: var(--grey-70);
   font-family: monospace;
   line-height: 1.3;
+  opacity: 1;
   overflow-y: auto;
+
+  /* Transition opacity, but do not delay changing the visibility. */
+  transition: opacity 200ms, visibility 0s;
+  visibility: visible;
   white-space: pre-wrap;
+}
+
+.appErrorBoundaryDetails.hide {
+  opacity: 0;
+
+  /* Transition opacity, and create a delay on hiding the visibility to allow
+     time for the fade out. */
+  transition: opacity 200ms, visibility 0s linear 200ms;
+  visibility: hidden;
 }

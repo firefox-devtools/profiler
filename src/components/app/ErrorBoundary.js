@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import React from 'react';
+import * as React from 'react';
 import { reportError } from '../../utils/analytics';
 import './ErrorBoundary.css';
 
@@ -15,8 +15,8 @@ type State = {|
 |};
 
 type Props = {|
-  children: *,
-  message: string,
+  +children: React.Node,
+  +message: string,
 |};
 
 /**
@@ -32,11 +32,15 @@ export class ErrorBoundary extends React.Component<Props, State> {
   };
 
   componentDidCatch(
-    error: any,
+    error: mixed,
     { componentStack }: { componentStack: string }
   ) {
-    console.error(error, componentStack);
-    this.setState({ hasError: true, error, componentStack });
+    console.error(
+      'An unhandled error was thrown in a React component.',
+      error,
+      componentStack
+    );
+    this.setState({ hasError: true, componentStack });
     reportError({
       exDescription: componentStack,
       exFatal: true,
@@ -59,16 +63,18 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 className="photon-button photon-button-micro"
                 type="button"
                 onClick={this._toggleErrorDetails}
+                aria-expanded={showDetails ? 'true' : 'false'}
               >
                 {showDetails ? 'Hide error details' : 'View full error details'}
               </button>
             </div>
-            {showDetails ? (
-              <div className="appErrorBoundaryDetails">
-                {error ? <div>{error.toString()}</div> : null}
-                {componentStack ? <div>{componentStack}</div> : null}
-              </div>
-            ) : null}
+            <div
+              data-testid="error-technical-details"
+              className={`appErrorBoundaryDetails ${showDetails ? '' : 'hide'}`}
+            >
+              {error ? <div>{error.toString()}</div> : null}
+              {componentStack ? <div>{componentStack}</div> : null}
+            </div>
           </div>
         </div>
       );
