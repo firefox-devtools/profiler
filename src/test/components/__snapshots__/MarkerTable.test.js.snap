@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MarkerTable renders some basic markers 1`] = `
+exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
 <div
   aria-labelledby="marker-table-tab-button"
   class="markerTable"

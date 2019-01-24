@@ -4,15 +4,18 @@
 
 // @flow
 import * as React from 'react';
-import Markers from '../../components/marker-table';
 import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
+
+import MarkerTable from '../../components/marker-table';
+import { updatePreviewSelection } from '../../actions/profile-view';
+
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('MarkerTable', function() {
-  it('renders some basic markers', () => {
+  function setup() {
     // Set an arbitrary size that will not kick in any virtualization behavior.
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -56,12 +59,45 @@ describe('MarkerTable', function() {
         .sort((a, b) => a[1] - b[1])
     );
 
-    const { container } = render(
-      <Provider store={storeWithProfile(profile)}>
-        <Markers />
+    const store = storeWithProfile(profile);
+    const renderResult = render(
+      <Provider store={store}>
+        <MarkerTable />
       </Provider>
     );
+    const { container } = renderResult;
 
+    const fixedRows = () =>
+      Array.from(container.querySelectorAll('.treeViewRowFixedColumns'));
+    const scrolledRows = () =>
+      Array.from(container.querySelectorAll('.treeViewRowScrolledColumns'));
+
+    return {
+      ...renderResult,
+      ...store,
+      fixedRows,
+      scrolledRows,
+    };
+  }
+
+  it('renders some basic markers and updates when needed', () => {
+    const { container, fixedRows, scrolledRows, dispatch } = setup();
+
+    expect(fixedRows()).toHaveLength(3);
+    expect(scrolledRows()).toHaveLength(3);
     expect(container.firstChild).toMatchSnapshot();
+
+    /* Check that the table updates properly despite the memoisation. */
+    dispatch(
+      updatePreviewSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 10,
+        selectionEnd: 20,
+      })
+    );
+
+    expect(fixedRows()).toHaveLength(2);
+    expect(scrolledRows()).toHaveLength(2);
   });
 });
