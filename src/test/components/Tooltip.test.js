@@ -5,7 +5,7 @@
 // @flow
 
 import React from 'react';
-import { render, cleanup } from 'react-testing-library';
+import { render } from 'react-testing-library';
 
 import {
   addRootOverlayElement,
@@ -19,7 +19,6 @@ import Tooltip, { MOUSE_OFFSET } from '../../components/shared/Tooltip';
 describe('shared/Tooltip', () => {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
-  afterEach(cleanup);
 
   it('is rendered appropriately', () => {
     const { getTooltip } = setup({
@@ -112,7 +111,10 @@ function setup({ box, mouse }: Setup) {
   );
 
   function getTooltip() {
-    return ensureExists(document.querySelector('.tooltip'));
+    return ensureExists(
+      document.querySelector('.tooltip'),
+      `Couldn't find the tooltip element, with selector .tooltip`
+    );
   }
 
   function getTooltipStyle() {

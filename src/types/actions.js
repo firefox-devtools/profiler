@@ -21,7 +21,7 @@ import type {
   TrackIndex,
 } from './profile-derived';
 import type { TemporaryError } from '../utils/errors';
-import type { Transform } from './transforms';
+import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { ProfileSharingStatus, UrlState } from '../types/state';
@@ -32,7 +32,8 @@ export type DataSource =
   | 'from-addon'
   | 'local'
   | 'public'
-  | 'from-url';
+  | 'from-url'
+  | 'compare';
 export type TimelineType = 'stack' | 'category';
 export type PreviewSelection =
   | {| +hasSelection: false, +isModifying: false |}
@@ -206,6 +207,8 @@ type ReceiveProfileAction =
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
       +pathInZipFile: ?string,
+      +implementationFilter: ?ImplementationFilter,
+      +transformStacks: ?TransformStacksPerThread,
       +dataSource: DataSource,
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
@@ -274,7 +277,8 @@ type UrlStateAction =
       +type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
       +showSummary: boolean,
     |}
-  | {| +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string |};
+  | {| +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string |}
+  | {| +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] |};
 
 type IconsAction =
   | {| +type: 'ICON_HAS_LOADED', +icon: string |}

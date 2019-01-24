@@ -2,231 +2,151 @@
 
 exports[`calltree/CallNodeContextMenu basic rendering renders a blank context menu (with only 1 div) before it is open 1`] = `
 <nav
-  className="react-contextmenu"
-  onContextMenu={[Function]}
-  onMouseLeave={[Function]}
+  class="react-contextmenu"
   role="menu"
-  style={
-    Object {
-      "opacity": 0,
-      "pointerEvents": "none",
-      "position": "fixed",
-    }
-  }
-  tabIndex="-1"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
 >
-  <div
-    key=".0"
-  />
+  <div />
 </nav>
 `;
 
 exports[`calltree/CallNodeContextMenu basic rendering renders a full context menu when open, with many nav items 1`] = `
 <nav
-  className="react-contextmenu"
-  onContextMenu={[Function]}
-  onMouseLeave={[Function]}
+  class="react-contextmenu"
   role="menu"
-  style={
-    Object {
-      "opacity": 0,
-      "pointerEvents": "none",
-      "position": "fixed",
-    }
-  }
-  tabIndex="-1"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
 >
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     <span
-      className="callNodeContextMenuIcon callNodeContextMenuIconMerge"
+      class="callNodeContextMenuIcon callNodeContextMenuIconMerge"
     />
     Merge node into calling function
   </div>
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     <span
-      className="callNodeContextMenuIcon callNodeContextMenuIconMerge"
+      class="callNodeContextMenuIcon callNodeContextMenuIconMerge"
     />
     Merge function into caller across the entire tree
   </div>
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     <span
-      className="callNodeContextMenuIcon callNodeContextMenuIconFocus"
+      class="callNodeContextMenuIcon callNodeContextMenuIconFocus"
     />
     Focus on subtree
   </div>
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     <span
-      className="callNodeContextMenuIcon callNodeContextMenuIconFocus"
+      class="callNodeContextMenuIcon callNodeContextMenuIconFocus"
     />
     Focus on function
   </div>
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     <span
-      className="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
+      class="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
     />
     Collapse function’s subtree across the entire tree
   </div>
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     <span
-      className="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
+      class="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
     />
     Collapse functions in
      
     <span
-      className="callNodeContextMenuLabel"
+      class="callNodeContextMenuLabel"
     >
       library
     </span>
   </div>
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     <span
-      className="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
+      class="callNodeContextMenuIcon callNodeContextMenuIconCollapse"
     />
     Collapse direct recursion
   </div>
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     <span
-      className="callNodeContextMenuIcon callNodeContextMenuIconDrop"
+      class="callNodeContextMenuIcon callNodeContextMenuIconDrop"
     />
     Drop samples with this function
   </div>
   <div
-    className="react-contextmenu-separator"
-    key=".8"
+    class="react-contextmenu-separator"
   />
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     Expand all
   </div>
   <div
-    className="react-contextmenu-separator"
-    key=".1"
+    class="react-contextmenu-separator"
   />
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     Look up the function name on Searchfox
   </div>
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     Copy function name
   </div>
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     Copy stack
   </div>

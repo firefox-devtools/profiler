@@ -3,12 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import Enzyme from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import { createSerializer } from 'enzyme-to-json';
-
-Enzyme.configure({ adapter: new Adapter() });
-expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
+import { cleanup } from 'react-testing-library';
 
 jest.mock('../utils/worker-factory');
 import * as WorkerFactory from '../utils/worker-factory';
@@ -18,4 +13,15 @@ afterEach(function() {
   // do not use flow typing on it.
   const { __shutdownWorkers } = (WorkerFactory: Object);
   __shutdownWorkers();
+});
+
+afterEach(cleanup);
+
+afterEach(() => {
+  // The configuration to restore and reset all of the mocks in tests does not seem
+  // to be working correctly. Manually trigger this call here to ensure we
+  // don't get intermittents from one test's mocks affecting another test's mocks.
+  //
+  // See https://github.com/facebook/jest/issues/7654
+  jest.resetAllMocks();
 });

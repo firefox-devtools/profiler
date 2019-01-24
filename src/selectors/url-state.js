@@ -37,6 +37,8 @@ export const getDataSource: Selector<DataSource> = state =>
 export const getHash: Selector<string> = state => getUrlState(state).hash;
 export const getProfileUrl: Selector<string> = state =>
   getUrlState(state).profileUrl;
+export const getProfilesToCompare: Selector<string[] | null> = state =>
+  getUrlState(state).profilesToCompare;
 export const getAllCommittedRanges: Selector<StartEndRange[]> = state =>
   getProfileSpecificState(state).committedRanges;
 export const getImplementationFilter: Selector<ImplementationFilter> = state =>

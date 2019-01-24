@@ -17,6 +17,19 @@ import type {
 import type { UrlState, Reducer } from '../types/state';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
+/*
+ * This state file governs the state that comes from, and alters, the window
+ * location. The location itself is changed in `src/components/app/UrlManager`,
+ * and the computations are handled in `src/app-logic/url-handling`.
+ *
+ * All reducers in this state can be circumvented and the state reset
+ * completely using the action `UPDATE_URL_STATE`. This action is dispatched
+ * from the URL, either at the first load or when it changes when the user
+ * navigates.
+ * That's why the individual reducers might look incomplete at times.
+ * See below the function `wrapReducerInResetter`.
+ */
+
 const dataSource: Reducer<DataSource> = (state = 'none', action) => {
   switch (action.type) {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
@@ -43,6 +56,15 @@ const profileUrl: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'TRIGGER_LOADING_FROM_URL':
       return action.profileUrl;
+    default:
+      return state;
+  }
+};
+
+const profilesToCompare: Reducer<string[] | null> = (state = null, action) => {
+  switch (action.type) {
+    case 'CHANGE_PROFILES_TO_COMPARE':
+      return action.profiles;
     default:
       return state;
   }
@@ -108,6 +130,8 @@ const markersSearchString: Reducer<string> = (state = '', action) => {
 
 const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
   switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.transformStacks || state;
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadIndex, transform } = action;
       const transforms = state[threadIndex] || [];
@@ -145,6 +169,8 @@ const implementation: Reducer<ImplementationFilter> = (
   action
 ) => {
   switch (action.type) {
+    case 'VIEW_PROFILE':
+      return action.implementationFilter || state;
     case 'CHANGE_IMPLEMENTATION_FILTER':
       return action.implementation;
     default:
@@ -330,6 +356,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     dataSource,
     hash,
     profileUrl,
+    profilesToCompare,
     selectedTab,
     pathInZipFile,
     profileSpecific,

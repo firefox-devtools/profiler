@@ -2,7 +2,7 @@
 
 exports[`EmptyReasons shows a reason when a profile's network markers have been filtered out 1`] = `
 <div
-  className="EmptyReasons"
+  class="EmptyReasons"
 >
   <h3>
     The 
@@ -20,42 +20,37 @@ exports[`EmptyReasons shows a reason when a profile's network markers have been 
 exports[`NetworkChart renders NetworkChart correctly 1`] = `
 <div
   aria-labelledby="network-chart-tab-button"
-  className="networkChart"
+  class="networkChart"
   id="network-chart-tab"
   role="tabpanel"
 >
   <div
-    className="markerSettings"
+    class="markerSettings"
   >
     <div
-      className="markerSettingsSpacer"
+      class="markerSettingsSpacer"
     />
     <div
-      className="markerSettingsSearchbar"
+      class="markerSettingsSearchbar"
     >
       <label
-        className="markerSettingsSearchbarLabel"
+        class="markerSettingsSearchbarLabel"
       >
         Filter Markers: 
         <form
-          className="idleSearchField markerSettingsSearchField"
-          onSubmit={[Function]}
+          class="idleSearchField markerSettingsSearchField"
         >
           <input
-            className="idleSearchFieldInput"
+            class="idleSearchFieldInput"
             name="search"
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-            required="required"
+            required=""
             title="Only display markers that match a certain name"
             type="search"
             value=""
           />
           <input
-            className="idleSearchFieldButton"
-            onClick={[Function]}
-            tabIndex={-1}
+            class="idleSearchFieldButton"
+            tabindex="-1"
             type="reset"
           />
         </form>
@@ -63,101 +58,69 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
     </div>
   </div>
   <div
-    className="treeViewBody"
-    onKeyDown={[Function]}
-    tabIndex={0}
+    class="treeViewBody"
+    tabindex="0"
   >
     <div
-      className="treeViewBodyInnerWrapper"
+      class="treeViewBodyInnerWrapper"
     >
       <div
-        className="treeViewBodyInner treeViewBodyInner0"
-        style={
-          Object {
-            "height": "16px",
-            "width": undefined,
-          }
-        }
+        class="treeViewBodyInner treeViewBodyInner0"
+        style="height: 16px;"
       >
         <div
-          className="treeViewBodyInner treeViewBodyInner0TopSpacer"
-          key="-1"
-          style={
-            Object {
-              "height": "0px",
-            }
-          }
+          class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+          style="height: 0px;"
         />
         <div
-          className="treeViewBodyInner treeViewBodyInner0InnerChunk"
+          class="treeViewBodyInner treeViewBodyInner0InnerChunk"
         >
           <section
-            className="even networkChartRowItem "
+            class="even networkChartRowItem "
           >
             <div
-              className="networkChartRowItemLabel"
+              class="networkChartRowItemLabel"
             >
               <span>
                 <span
-                  className="networkChartRowItemUriOptional"
+                  class="networkChartRowItemUriOptional"
                 >
                   https://
                 </span>
                 <span
-                  className="networkChartRowItemUriRequired"
+                  class="networkChartRowItemUriRequired"
                 >
                   mozilla.org
                 </span>
                 <span
-                  className="networkChartRowItemUriRequired"
+                  class="networkChartRowItemUriRequired"
                 >
                   /
                 </span>
               </span>
             </div>
             <div
-              className="networkChartRowItemBar"
-              onMouseEnter={[Function]}
-              onMouseLeave={[Function]}
-              style={
-                Object {
-                  "left": 0,
-                  "width": 2.5,
-                }
-              }
+              class="networkChartRowItemBar"
+              style="left: 160.86206896551724px; width: 12.068965517241395px;"
             >
-              Array [
-                <span
-                  className="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                  style={
-                    Object {
-                      "width": "0%",
-                    }
-                  }
-                >
-                   
-                </span>,
-                <span
-                  className="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                  style={
-                    Object {
-                      "width": "0%",
-                    }
-                  }
-                >
-                   
-                </span>,
-                <span
-                  className="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                  style={
-                    Object {
-                      "width": "100%",
-                    }
-                  }
-                >
-                   
-                </span>,
-              ]
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                style="width: 100%;"
+              >
+                 
+              </span>
             </div>
           </section>
         </div>

@@ -11,16 +11,19 @@ import {
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
+  retrieveProfilesToCompare,
 } from '../../actions/receive-profile';
 import ProfileViewer from './ProfileViewer';
 import ZipFileViewer from './ZipFileViewer';
 import Home from './Home';
+import CompareHome from './CompareHome';
 import { getView } from '../../selectors/app';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import {
   getDataSource,
   getHash,
   getProfileUrl,
+  getProfilesToCompare,
 } from '../../selectors/url-state';
 import UrlManager from './UrlManager';
 import ServiceWorkerManager from './ServiceWorkerManager';
@@ -42,6 +45,7 @@ const LOADING_MESSAGES: { [string]: string } = Object.freeze({
   local: 'Not implemented yet.',
   public: 'Downloading and processing the profile...',
   'from-url': 'Downloading and processing the profile...',
+  compare: 'Reading and processing profiles...',
 });
 
 const ERROR_MESSAGES: { [string]: string } = Object.freeze({
@@ -50,6 +54,7 @@ const ERROR_MESSAGES: { [string]: string } = Object.freeze({
   local: 'Not implemented yet.',
   public: 'Could not download the profile.',
   'from-url': 'Could not download the profile.',
+  compare: 'Could not retrieve the profile',
 });
 
 // TODO Switch to a proper i18n library
@@ -74,6 +79,7 @@ type ProfileViewStateProps = {|
   +dataSource: DataSource,
   +hash: string,
   +profileUrl: string,
+  +profilesToCompare: string[] | null,
   +hasZipFile: boolean,
 |};
 
@@ -81,6 +87,7 @@ type ProfileViewDispatchProps = {|
   +retrieveProfileFromAddon: typeof retrieveProfileFromAddon,
   +retrieveProfileFromStore: typeof retrieveProfileFromStore,
   +retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
+  +retrieveProfilesToCompare: typeof retrieveProfilesToCompare,
 |};
 
 type ProfileViewProps = ConnectedProps<
@@ -95,9 +102,11 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       dataSource,
       hash,
       profileUrl,
+      profilesToCompare,
       retrieveProfileFromAddon,
       retrieveProfileFromStore,
       retrieveProfileOrZipFromUrl,
+      retrieveProfilesToCompare,
     } = this.props;
     switch (dataSource) {
       case 'from-addon':
@@ -114,6 +123,11 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       case 'from-url':
         retrieveProfileOrZipFromUrl(profileUrl).catch(e => console.error(e));
         break;
+      case 'compare':
+        if (profilesToCompare) {
+          retrieveProfilesToCompare(profilesToCompare);
+        }
+        break;
       case 'none':
         // nothing to do
         break;
@@ -129,6 +143,12 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
   componentDidUpdate(prevProps) {
     if (prevProps.dataSource === 'none' && this.props.dataSource !== 'none') {
       this._retrieveProfileFromDataSource();
+    } else if (
+      this.props.dataSource === 'compare' &&
+      !prevProps.profilesToCompare &&
+      this.props.profilesToCompare
+    ) {
+      this.props.retrieveProfilesToCompare(this.props.profilesToCompare);
     }
   }
 
@@ -168,10 +188,14 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
   }
 
   renderAppropriateComponents() {
-    const { view, dataSource, hasZipFile } = this.props;
+    const { view, dataSource, profilesToCompare, hasZipFile } = this.props;
     const phase = view.phase;
     if (dataSource === 'none') {
       return <Home />;
+    }
+
+    if (dataSource === 'compare' && profilesToCompare === null) {
+      return <CompareHome />;
     }
     switch (phase) {
       case 'INITIALIZING': {
@@ -244,12 +268,14 @@ const options: ExplicitConnectOptions<
     dataSource: getDataSource(state),
     hash: getHash(state),
     profileUrl: getProfileUrl(state),
+    profilesToCompare: getProfilesToCompare(state),
     hasZipFile: getHasZipFile(state),
   }),
   mapDispatchToProps: {
     retrieveProfileFromStore,
     retrieveProfileOrZipFromUrl,
     retrieveProfileFromAddon,
+    retrieveProfilesToCompare,
   },
   component: ProfileViewWhenReadyImpl,
 };

@@ -150,8 +150,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={{ trackIndex }}
         onClick={this._toggleGlobalTrackVisibility}
         attributes={{
-          // The following id is used to select this item in tests.
-          'data-test-id': 'global-track-' + trackIndex,
           className: classNames({ checkable: true, checked: !isHidden }),
         }}
       >
@@ -193,7 +191,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={{ pid, trackIndex }}
         onClick={this._toggleLocalTrackVisibility}
         attributes={{
-          'data-test-id': `local-track-${pid}-${trackIndex}`,
           className: classNames('checkable indented', {
             checked: !hiddenLocalTracks.has(trackIndex),
           }),
@@ -275,12 +272,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     }
 
     return (
-      <MenuItem
-        // This attribute is used to identify this element in tests.
-        data-test-id="isolate-track-process"
-        onClick={this._isolateProcess}
-        disabled={isDisabled}
-      >
+      <MenuItem onClick={this._isolateProcess} disabled={isDisabled}>
         Only show this process
       </MenuItem>
     );
@@ -325,11 +317,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       globalTracks.length - hiddenGlobalTracks.size === 1;
 
     return (
-      <MenuItem
-        data-test-id="isolate-process-main-thread"
-        onClick={this._isolateProcessMainThread}
-        disabled={isDisabled}
-      >
+      <MenuItem onClick={this._isolateProcessMainThread} disabled={isDisabled}>
         Only show {`"${this.getRightClickedTrackName()}"`}
       </MenuItem>
     );
@@ -365,12 +353,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       localTrackOrder.length - hiddenLocalTracks.size === 1;
 
     return (
-      <MenuItem
-        // This attribute is used to identify this element in tests.
-        data-test-id="isolate-local-track"
-        onClick={this._isolateLocalTrack}
-        disabled={isDisabled}
-      >
+      <MenuItem onClick={this._isolateLocalTrack} disabled={isDisabled}>
         Only show {`"${this.getRightClickedTrackName()}"`}
       </MenuItem>
     );

@@ -17,9 +17,10 @@ import {
 import ChartCanvas from '../shared/chart/Canvas';
 import { FastFillStyle } from '../../utils';
 import TextMeasurement from '../../utils/text-measurement';
-import { formatNumber } from '../../utils/format-numbers';
+import { formatMilliseconds } from '../../utils/format-numbers';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
+import { TooltipCallNode } from '../tooltip/CallNode';
 
 import type { Thread, CategoryList } from '../../types/profile';
 import type {
@@ -369,7 +370,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
     );
   };
 
-  // Re-use the colors from the ThreadActivityGraph,
+  // Provide a memoized function that maps the category color names to specific color
+  // choices that are used across this project's charts.
   _mapCategoryColorNameToStyles = memoize(
     mapCategoryColorNameToStackChartStyles,
     {
@@ -382,72 +384,21 @@ class StackChartCanvas extends React.PureComponent<Props> {
     depth,
     stackTimingIndex,
   }: HoveredStackTiming): React.Node => {
-    const {
-      thread,
-      stackTimingByDepth,
-      categories,
-      callNodeInfo: { callNodeTable },
-    } = this.props;
-    const stackTiming = stackTimingByDepth[depth];
+    const { thread, stackTimingByDepth, categories, callNodeInfo } = this.props;
 
+    const stackTiming = stackTimingByDepth[depth];
+    const callNodeIndex = stackTiming.callNode[stackTimingIndex];
     const duration =
       stackTiming.end[stackTimingIndex] - stackTiming.start[stackTimingIndex];
 
-    const callNodeIndex = stackTiming.callNode[stackTimingIndex];
-    const categoryIndex = callNodeTable.category[callNodeIndex];
-    const category = categories[categoryIndex];
-    const funcIndex = callNodeTable.func[callNodeIndex];
-    const funcStringIndex = thread.funcTable.name[funcIndex];
-    const funcName = thread.stringTable.getString(funcStringIndex);
-
-    let resourceOrFileName = null;
-    // Only JavaScript functions have a filename.
-    const fileNameIndex = thread.funcTable.fileName[funcIndex];
-    if (fileNameIndex !== null) {
-      // Because of our use of Grid Layout, all our elements need to be direct
-      // children of the grid parent. That's why we use arrays here, to add
-      // the elements as direct children.
-      resourceOrFileName = [
-        <div className="tooltipLabel" key="file">
-          File:
-        </div>,
-        thread.stringTable.getString(fileNameIndex),
-      ];
-    } else {
-      const resourceIndex = thread.funcTable.resource[funcIndex];
-      if (resourceIndex !== -1) {
-        const resourceNameIndex = thread.resourceTable.name[resourceIndex];
-        if (resourceNameIndex !== -1) {
-          // Because of our use of Grid Layout, all our elements need to be direct
-          // children of the grid parent. That's why we use arrays here, to add
-          // the elements as direct children.
-          resourceOrFileName = [
-            <div className="tooltipLabel" key="resource">
-              Resource:
-            </div>,
-            thread.stringTable.getString(resourceNameIndex),
-          ];
-        }
-      }
-    }
-
     return (
-      <div className="stackChartCanvasTooltip">
-        <div className="tooltipOneLine tooltipHeader">
-          <div className="tooltipTiming">{formatNumber(duration)}ms</div>
-          <div className="tooltipTitle">{funcName}</div>
-        </div>
-        <div className="tooltipDetails">
-          <div className="tooltipLabel">Category:</div>
-          <div>
-            <span
-              className={`category-swatch category-color-${category.color}`}
-            />
-            {category.name}
-          </div>
-        </div>
-        <div className="tooltipDetails">{resourceOrFileName}</div>
-      </div>
+      <TooltipCallNode
+        thread={thread}
+        callNodeIndex={callNodeIndex}
+        callNodeInfo={callNodeInfo}
+        categories={categories}
+        durationText={formatMilliseconds(duration)}
+      />
     );
   };
 

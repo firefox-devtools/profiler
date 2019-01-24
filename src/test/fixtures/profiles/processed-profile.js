@@ -190,13 +190,17 @@ export function getProfileFromTextSamples(
   profile.threads = allTextSamples.map(textSamples => {
     // Process the text.
     const textOnlyStacks = _parseTextSamples(textSamples);
-    const funcNames = textOnlyStacks
-      // Flatten the arrays.
-      .reduce((memo, row) => [...memo, ...row], [])
-      // remove modifiers
-      .map(func => func.replace(/\[.*/, ''))
-      // Make the list unique.
-      .filter((item, index, array) => array.indexOf(item) === index);
+
+    // Flatten the textOnlyStacks into into a list of function names.
+    const funcNamesSet = new Set();
+    const removeModifiers = /\[.*/;
+    for (let i = 0; i < textOnlyStacks.length; i++) {
+      const textOnlyStack = textOnlyStacks[i];
+      for (let j = 0; j < textOnlyStack.length; j++) {
+        funcNamesSet.add(textOnlyStack[j].replace(removeModifiers, ''));
+      }
+    }
+    const funcNames = [...funcNamesSet];
 
     const funcNamesDict = funcNames.reduce((result, item, index) => {
       result[item] = index;

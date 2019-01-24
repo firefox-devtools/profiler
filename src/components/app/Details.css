@@ -1,17 +1,14 @@
 .Details {
-  flex: auto;
-
   display: flex;
+  flex: auto;
   flex-direction: column;
 }
 
 .sidebar-open-close-button {
-  flex: none;
-
-  height: 24px;
   width: 24px;
+  height: 24px;
+  flex: none;
   margin: 0 4px;
-
   background-position: center;
   background-repeat: no-repeat;
 }

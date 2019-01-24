@@ -8,7 +8,7 @@ import type { NetworkPayload } from '../../types/markers';
 import React from 'react';
 import { Provider } from 'react-redux';
 import MarkersTooltipContents from '../../components/shared/MarkerTooltipContents';
-import renderer from 'react-test-renderer';
+import { render } from 'react-testing-library';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   addMarkersToThreadWithCorrespondingSamples,
@@ -282,6 +282,15 @@ describe('MarkerTooltipContents', function() {
         },
       ],
       [
+        'Log',
+        21.7,
+        {
+          type: 'Log',
+          name: 'Random log message',
+          module: 'RandomModule',
+        },
+      ],
+      [
         'Styles',
         20.5,
         {
@@ -392,22 +401,24 @@ describe('MarkerTooltipContents', function() {
     const markers = selectedThreadSelectors.getMarkers(state);
 
     markers.forEach((marker, i) => {
-      expect(
-        renderer.create(
-          <Provider store={store}>
-            <MarkersTooltipContents
-              key={i}
-              marker={marker}
-              threadIndex={threadIndex}
-              className="propClass"
-            />
-          </Provider>
-        )
-      ).toMatchSnapshot(`${marker.name}-${marker.start}`);
-      // Markers are ordered by start time, but for markers with the same start
-      // time the order is implementation-dependent. As a result we use a unique
-      // name for snapshots so that we don't depend on the resulting order in
-      // this test, as this isn't important.
+      const { container } = render(
+        <Provider store={store}>
+          <MarkersTooltipContents
+            key={i}
+            marker={marker}
+            threadIndex={threadIndex}
+            className="propClass"
+          />
+        </Provider>
+      );
+
+      expect(container.firstChild).toMatchSnapshot(
+        // Markers are ordered by start time, but for markers with the same start
+        // time the order is implementation-dependent. As a result we use a unique
+        // name for snapshots so that we don't depend on the resulting order in
+        // this test, as this isn't important.
+        `${marker.name}-${marker.start}`
+      );
     });
   });
 });

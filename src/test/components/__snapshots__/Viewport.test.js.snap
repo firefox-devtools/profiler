@@ -2,27 +2,23 @@
 
 exports[`Viewport matches the component snapshot 1`] = `
 <div
-  className="chartViewport"
-  onKeyDown={[Function]}
-  onKeyUp={[Function]}
-  onMouseDown={[Function]}
-  onWheel={[Function]}
-  tabIndex={0}
+  class="chartViewport"
+  tabindex="0"
 >
   <div
     id="dummy-chart"
   />
   <div
-    className="chartViewportShiftScroll hidden"
+    class="chartViewportShiftScroll hidden"
   >
     Zoom Chart:
     <kbd
-      className="chartViewportShiftScrollKbd"
+      class="chartViewportShiftScrollKbd"
     >
       Shift
     </kbd>
     <kbd
-      className="chartViewportShiftScrollKbd"
+      class="chartViewportShiftScrollKbd"
     >
       Scroll
     </kbd>

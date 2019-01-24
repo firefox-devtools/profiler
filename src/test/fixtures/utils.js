@@ -20,28 +20,83 @@ export function getBoundingBox(width: number, height: number) {
   };
 }
 
-export function getMouseEvent(values: Object = {}): $Shape<MouseEvent> {
-  return {
-    altKey: false,
-    button: 0,
-    buttons: 1,
-    clientX: 0,
-    clientY: 0,
-    ctrlKey: false,
-    metaKey: false,
-    movementX: 0,
-    movementY: 0,
-    nativeEvent: {
-      offsetX: 0,
-      offsetY: 0,
-    },
-    pageX: 0,
-    pageY: 0,
-    screenX: 0,
-    screenY: 0,
-    shiftKey: false,
+/**
+ * jsdom's MouseEvent object is incomplete (see
+ * https://github.com/jsdom/jsdom/issues/1911) and we use some of the
+ * missing properties in our app code. This fake MouseEvent allows the test code
+ * to supply these properties.
+ */
+
+type FakeMouseEventInit = $Shape<{
+  bubbles: boolean,
+  cancelable: boolean,
+  composed: boolean,
+  altKey: boolean,
+  button: 0 | 1 | 2 | 3 | 4,
+  buttons: number,
+  clientX: number,
+  clientY: number,
+  ctrlKey: boolean,
+  metaKey: boolean,
+  movementX: number,
+  movementY: number,
+  offsetX: number,
+  offsetY: number,
+  pageX: number,
+  pageY: number,
+  screenX: number,
+  screenY: number,
+  shiftKey: boolean,
+  x: number,
+  y: number,
+}>;
+
+class FakeMouseEvent extends MouseEvent {
+  offsetX: number;
+  offsetY: number;
+  pageX: number;
+  pageY: number;
+  x: number;
+  y: number;
+
+  constructor(type: string, values: FakeMouseEventInit) {
+    const { pageX, pageY, offsetX, offsetY, x, y, ...mouseValues } = values;
+    super(type, (mouseValues: Object));
+
+    Object.assign(this, {
+      offsetX: offsetX || 0,
+      offsetY: offsetY || 0,
+      pageX: pageX || 0,
+      pageY: pageY || 0,
+      x: x || 0,
+      y: y || 0,
+    });
+  }
+}
+
+/**
+ * Use this function to retrieve a fake MouseEvent instance. This is really only
+ * necessary when we need to use some of the properties unsupported by jsdom,
+ * like `clientX` and `clientY` or `pageX` and `pageY`.
+ * This is to be used directly by `fireEvent`, not `fireEvent.mouseXXX`, eg:
+ *
+ *   fireEvent(target, getMouseEvent('mousemove', { pageX: 5 });
+ *
+ * For other cases it's not necessary to use `getMouseEvent`, eg:
+ *
+ *   fireEvent.mouseDown(target, { clientX: 5 });
+ *
+ */
+export function getMouseEvent(
+  type: string,
+  values: FakeMouseEventInit = {}
+): FakeMouseEvent {
+  values = {
+    bubbles: true,
+    cancelable: true,
     ...values,
   };
+  return new FakeMouseEvent(type, values);
 }
 
 /**

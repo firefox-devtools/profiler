@@ -3,15 +3,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .flameGraph {
-  flex: 1;
   display: flex;
-  flex-flow: column;
   overflow: hidden;
+  flex: 1;
+  flex-flow: column;
 }
 
 .flameGraphContent {
   display: flex;
-  flex-direction: row;
   flex: 1;
+  flex-direction: row;
   border-top: 1px solid var(--grey-30);
 }

@@ -8,12 +8,12 @@
 
 .overflowEdgeIndicatorEdge {
   position: absolute;
-  pointer-events: none;
-  visibility: hidden;
   z-index: 3;
   opacity: 0;
+  pointer-events: none;
   transition: 150ms ease-in-out;
   transition-property: opacity, visibility;
+  visibility: hidden;
 }
 
 .overflowEdgeIndicatorEdge.topEdge,
@@ -50,26 +50,43 @@
   height: 15px;
 }
 
-.overflowEdgeIndicator.overflowsOnTop > .overflowEdgeIndicatorEdge.topEdge,
-.overflowEdgeIndicator.overflowsOnRight > .overflowEdgeIndicatorEdge.rightEdge,
-.overflowEdgeIndicator.overflowsOnBottom > .overflowEdgeIndicatorEdge.bottomEdge,
-.overflowEdgeIndicator.overflowsOnLeft > .overflowEdgeIndicatorEdge.leftEdge {
-  visibility: visible;
-  opacity: 1;
-}
-
 .overflowEdgeIndicatorEdge.topEdge {
-  background: radial-gradient(ellipse at center top, rgba(0,0,0,0.4), transparent 60%)
+  background: radial-gradient(
+    ellipse at center top,
+    rgba(0, 0, 0, 0.4),
+    transparent 60%
+  );
 }
 
 .overflowEdgeIndicatorEdge.rightEdge {
-  background: radial-gradient(ellipse at right center, rgba(0,0,0,0.4), transparent 60%)
+  background: radial-gradient(
+    ellipse at right center,
+    rgba(0, 0, 0, 0.4),
+    transparent 60%
+  );
 }
 
 .overflowEdgeIndicatorEdge.bottomEdge {
-  background: radial-gradient(ellipse at center bottom, rgba(0,0,0,0.4), transparent 60%)
+  background: radial-gradient(
+    ellipse at center bottom,
+    rgba(0, 0, 0, 0.4),
+    transparent 60%
+  );
 }
 
 .overflowEdgeIndicatorEdge.leftEdge {
-  background: radial-gradient(ellipse at left center, rgba(0,0,0,0.4), transparent 60%)
+  background: radial-gradient(
+    ellipse at left center,
+    rgba(0, 0, 0, 0.4),
+    transparent 60%
+  );
+}
+
+.overflowEdgeIndicator.overflowsOnTop > .overflowEdgeIndicatorEdge.topEdge,
+.overflowEdgeIndicator.overflowsOnRight > .overflowEdgeIndicatorEdge.rightEdge,
+.overflowEdgeIndicator.overflowsOnBottom
+  > .overflowEdgeIndicatorEdge.bottomEdge,
+.overflowEdgeIndicator.overflowsOnLeft > .overflowEdgeIndicatorEdge.leftEdge {
+  opacity: 1;
+  visibility: visible;
 }

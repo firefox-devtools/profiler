@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
 
 import {
   changeSelectedThread,
@@ -15,10 +15,11 @@ import {
 import GlobalTrack from '../../components/timeline/GlobalTrack';
 import { getGlobalTracks, getRightClickedTrack } from '../../selectors/profile';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
-import { getMouseEvent } from '../fixtures/utils';
+import { getBoundingBox } from '../fixtures/utils';
 
 const LEFT_CLICK = 0;
 const RIGHT_CLICK = 2;
@@ -52,26 +53,37 @@ describe('timeline/GlobalTrack', function() {
     jest
       .spyOn(HTMLCanvasElement.prototype, 'getContext')
       .mockImplementation(() => mockCanvasContext());
+    jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(400, 400));
 
     // The assertions are simpler if this thread is not already selected.
     dispatch(changeSelectedThread(threadIndex + 1));
 
-    const view = mount(
+    const renderResult = render(
       <Provider store={store}>
         <GlobalTrack trackIndex={trackIndex} trackReference={trackReference} />
       </Provider>
     );
+    const { container } = renderResult;
 
-    const getGlobalTrackLabel = () => view.find('.timelineTrackLabel').first();
+    const getGlobalTrackLabel = () =>
+      ensureExists(
+        container.querySelector('.timelineTrackLabel'),
+        `Couldn't find the track label with selector .timelineTrackLabel`
+      );
     const getGlobalTrackRow = () =>
-      view.find('.timelineTrackGlobalRow').first();
+      ensureExists(
+        container.querySelector('.timelineTrackGlobalRow'),
+        `Couldn't find the track global row with selector .timelineTrackGlobalRow`
+      );
 
     return {
+      ...renderResult,
       dispatch,
       getState,
       profile,
       store,
-      view,
       trackReference,
       trackIndex,
       threadIndex,
@@ -81,14 +93,14 @@ describe('timeline/GlobalTrack', function() {
   }
 
   it('matches the snapshot of a global track', () => {
-    const { view } = setup();
-    expect(view).toMatchSnapshot();
+    const { container } = setup();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('has the correct selectors into useful parts of the component', function() {
     const { getGlobalTrackLabel, getGlobalTrackRow } = setup();
-    expect(getGlobalTrackLabel().text()).toBe('Content Process');
-    expect(getGlobalTrackRow().exists()).toBe(true);
+    expect(getGlobalTrackLabel().textContent).toBe('Content Process');
+    expect(getGlobalTrackRow()).toBeTruthy();
   });
 
   it('starts out not being selected', function() {
@@ -100,7 +112,7 @@ describe('timeline/GlobalTrack', function() {
     } = setup();
     expect(getRightClickedTrack(getState())).not.toEqual(trackReference);
     expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    expect(getGlobalTrackRow().hasClass('selected')).toBe(false);
+    expect(getGlobalTrackRow().classList.contains('selected')).toBe(false);
   });
 
   it('can select a thread by clicking the label', () => {
@@ -111,12 +123,9 @@ describe('timeline/GlobalTrack', function() {
       threadIndex,
     } = setup();
     expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    getGlobalTrackLabel().simulate(
-      'mousedown',
-      getMouseEvent({ button: LEFT_CLICK })
-    );
+    fireEvent.mouseDown(getGlobalTrackLabel(), { button: LEFT_CLICK });
     expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
-    expect(getGlobalTrackRow().hasClass('selected')).toBe(true);
+    expect(getGlobalTrackRow().classList.contains('selected')).toBe(true);
   });
 
   it('can right click a thread', () => {
@@ -127,10 +136,7 @@ describe('timeline/GlobalTrack', function() {
       trackReference,
     } = setup();
 
-    getGlobalTrackLabel().simulate(
-      'mousedown',
-      getMouseEvent({ button: RIGHT_CLICK })
-    );
+    fireEvent.mouseDown(getGlobalTrackLabel(), { button: RIGHT_CLICK });
     expect(getRightClickedTrack(getState())).toEqual(trackReference);
     expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
   });
@@ -138,15 +144,14 @@ describe('timeline/GlobalTrack', function() {
   it('can select a thread by clicking the row', () => {
     const { getState, getGlobalTrackRow, threadIndex } = setup();
     expect(getSelectedThreadIndex(getState())).not.toBe(threadIndex);
-    getGlobalTrackRow().simulate('click');
+    fireEvent.click(getGlobalTrackRow());
     expect(getSelectedThreadIndex(getState())).toBe(threadIndex);
   });
 
   it('will render a stub div if the track is hidden', () => {
-    const { view, trackIndex, dispatch } = setup();
+    const { container, trackIndex, dispatch } = setup();
     dispatch(hideGlobalTrack(trackIndex));
-    view.update();
-    expect(view.find('.timelineTrackHidden').exists()).toBe(true);
-    expect(view.find('.timelineTrack').exists()).toBe(false);
+    expect(container.querySelector('.timelineTrackHidden')).toBeTruthy();
+    expect(container.querySelector('.timelineTrack')).toBeFalsy();
   });
 });

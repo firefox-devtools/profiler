@@ -4,39 +4,40 @@
 
 .timelineTrackScreenshot {
   position: relative;
-  background: var(--grey-20);
   overflow: hidden;
+  background: var(--grey-20);
 }
 
 .timelineTrackScreenshotImgContainer {
   /* This positioning is defined through JavaScript */
   position: absolute;
-  overflow: hidden;
   display: flex;
+  overflow: hidden;
   justify-content: center;
 }
 
 .timelineTrackScreenshotImgContainer::after {
-  /* Create a border on the right of the container */
-  content: "";
   position: absolute;
   top: 0;
+  right: 0;
   width: 1px;
   height: 100%;
   background: var(--grey-30);
-  right: 0;
+
+  /* Create a border on the right of the container */
+  content: '';
 }
 
 .timelineTrackScreenshotHover {
   /* This positioning is defined through JavaScript */
   position: absolute;
-  pointer-events: none;
   z-index: 4; /* Ensure this is higher than any other timeline element. */
+  pointer-events: none;
 }
 
 .timelineTrackScreenshotHoverImg {
-  border-radius: 5px;
   padding: 0.5px;
-  border: 0.5px solid rgba(0,0,0,.2);
-  box-shadow:0 2px 4px rgba(0,0,0,.2);
+  border: 0.5px solid rgba(0, 0, 0, 0.2);
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }

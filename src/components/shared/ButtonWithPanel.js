@@ -16,6 +16,7 @@ type PanelProps = {
 
 interface Panel {
   open(): mixed;
+  close(): mixed;
 }
 
 /**
@@ -42,6 +43,18 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { open: !!props.open };
+  }
+
+  componentDidMount() {
+    // the panel can be closed by pressing the Esc key
+    window.addEventListener('keydown', this._onKeyDown);
+    if (this.props.open) {
+      this.openPanel();
+    }
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this._onKeyDown);
   }
 
   componentWillReceiveProps(props: Props) {
@@ -73,9 +86,20 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
       this._panel.open();
     }
   }
+  closePanel() {
+    if (this._panel && this.state.open) {
+      this._panel.close();
+    }
+  }
 
   _onButtonClick = () => {
     this.openPanel();
+  };
+
+  _onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      this.closePanel();
+    }
   };
 
   render() {
