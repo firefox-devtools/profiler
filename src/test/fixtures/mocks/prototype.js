@@ -40,7 +40,7 @@ export function mockPrototype<Prototype: Object, MockImplementation: Function>(
 
   const spy = getterSetter
     ? jest
-        .spyOn(prototype, methodName, 'get')
+        .spyOn(prototype, methodName, getterSetter)
         .mockImplementation(mockImplementation)
     : jest.spyOn(prototype, methodName).mockImplementation(mockImplementation);
 
