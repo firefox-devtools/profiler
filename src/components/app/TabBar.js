@@ -22,6 +22,9 @@ type Props = {|
 class TabBar extends React.PureComponent<Props> {
   _onClickListener = (e: SyntheticMouseEvent<HTMLElement>) => {
     this.props.onSelectTab(e.currentTarget.dataset.name);
+  };
+
+  _onMouseDown = (e: SyntheticMouseEvent<>) => {
     // Prevent focusing the tab so that actual content like the
     // calltree can perform its own focusing.
     e.preventDefault();
@@ -50,6 +53,7 @@ class TabBar extends React.PureComponent<Props> {
               key={tabSlug}
               data-name={tabSlug}
               onClick={this._onClickListener}
+              onMouseDown={this._onMouseDown}
             >
               {/* adding a button for better keyboard navigation and
               adding ARIA attributes for screen reader support.*/}

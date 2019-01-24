@@ -1,0 +1,23 @@
+/* the box shadow is taken from photon-button primary button focus styling
+https://design.firefox.com/photon/components/buttons.html */
+
+/* removes the default Firefox focus indicator,
+so that we can add a custom indicator */
+input::-moz-focus-inner,
+button::-moz-focus-inner {
+  border: 0;
+}
+
+a:focus,
+input[type='radio']:focus,
+input[type='checkbox']:focus,
+input[type='button']:focus,
+input[type='submit']:focus,
+input[type='reset']:focus,
+input[type='image']:focus,
+input[type='range']:focus,
+button:focus {
+  box-shadow: 0 0 0 1px var(--blue-50) inset, 0 0 0 1px var(--blue-50),
+    0 0 0 4px var(--blue-50-a30);
+  outline: 0;
+}

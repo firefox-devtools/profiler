@@ -79,8 +79,9 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -211,8 +212,9 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -343,8 +345,9 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -475,8 +478,9 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -1712,8 +1716,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -2281,8 +2286,9 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -2850,8 +2856,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -3419,8 +3426,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -3951,8 +3959,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -4483,8 +4492,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -4907,8 +4917,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -5331,8 +5342,9 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"

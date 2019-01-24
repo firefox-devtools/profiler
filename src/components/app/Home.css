@@ -252,11 +252,11 @@
   margin: 0;
 }
 
+/* because the button is hidden, the focus indicator styling
+is applied to the parent label */
 label.homeSectionButton:focus-within {
-  outline: 1px dotted black;
-
-  /* This is a trick to display the default outline in webkit- and blink-based browsers */
-  outline: -webkit-focus-ring-color auto 5px;
+  box-shadow: 0 0 0 1px var(--blue-50) inset, 0 0 0 1px var(--blue-50),
+    0 0 0 4px var(--blue-50-a30);
 }
 
 @media (max-width: 1300px) {

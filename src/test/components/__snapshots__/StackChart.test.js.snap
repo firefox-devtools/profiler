@@ -79,8 +79,9 @@ exports[`StackChart matches the snapshot 1`] = `
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"

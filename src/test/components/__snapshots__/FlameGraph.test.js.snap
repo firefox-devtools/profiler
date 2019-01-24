@@ -65,8 +65,9 @@ exports[`renders FlameGraph correctly 1`] = `
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
@@ -558,8 +559,9 @@ exports[`renders a message instead of FlameGraph when call stack is inverted 1`]
           class="idleSearchField stackSearchFieldInput"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display stacks which contain a function whose name matches this substring"
             type="search"
