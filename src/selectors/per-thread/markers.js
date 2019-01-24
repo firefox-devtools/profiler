@@ -11,12 +11,10 @@ import * as ProfileSelectors from '../profile';
 
 import { unsafeTransmute } from '../../utils/flow';
 
-import type {
-  RawMarkerTable,
-  IndexIntoRawMarkerTable,
-} from '../../types/profile';
+import type { RawMarkerTable } from '../../types/profile';
 import type {
   IndexedMarker,
+  IndexIntoMarkers,
   Marker,
   MarkerTimingRows,
 } from '../../types/profile-derived';
@@ -218,7 +216,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerData.groupScreenshotsById
   );
 
-  const getSelectedMarkerIndex: Selector<IndexIntoRawMarkerTable | null> = state =>
+  const getSelectedMarkerIndex: Selector<IndexIntoMarkers | null> = state =>
     threadSelectors.getViewOptions(state).selectedMarker;
 
   return {

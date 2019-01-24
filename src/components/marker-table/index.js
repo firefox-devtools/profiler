@@ -38,22 +38,24 @@ type MarkerDisplayData = {|
 |};
 
 class MarkerTree {
-  _markers: IndexedMarker[];
+  _filteredMarkers: IndexedMarker[];
+  _allMarkers: IndexedMarker[];
   _zeroAt: Milliseconds;
   _displayDataByIndex: Map<IndexIntoMarkers, MarkerDisplayData>;
 
-  constructor(markers: IndexedMarker[], zeroAt: Milliseconds) {
-    this._markers = markers;
+  constructor(
+    filteredMarkers: IndexedMarker[],
+    allMarkers: IndexedMarker[],
+    zeroAt: Milliseconds
+  ) {
+    this._filteredMarkers = filteredMarkers;
+    this._allMarkers = allMarkers;
     this._zeroAt = zeroAt;
     this._displayDataByIndex = new Map();
   }
 
   getRoots(): IndexIntoMarkers[] {
-    const markerIndices = [];
-    for (let i = 0; i < this._markers.length; i++) {
-      markerIndices.push(i);
-    }
-    return markerIndices;
+    return this._filteredMarkers.map(({ markerIndex }) => markerIndex);
   }
 
   getChildren(markerIndex: IndexIntoMarkers): IndexIntoMarkers[] {
@@ -78,13 +80,13 @@ class MarkerTree {
   }
 
   hasSameNodeIds(tree) {
-    return this._markers === tree._markers;
+    return this._filteredMarkers === tree._filteredMarkers;
   }
 
   getDisplayData(markerIndex: IndexIntoMarkers): MarkerDisplayData {
     let displayData = this._displayDataByIndex.get(markerIndex);
     if (displayData === undefined) {
-      const marker = this._markers[markerIndex];
+      const marker = this._allMarkers[markerIndex];
       let category = 'unknown';
       let name = marker.name;
       if (marker.data) {
@@ -156,7 +158,8 @@ function _formatDuration(duration: number): string {
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
-  +markers: IndexedMarker[],
+  +filteredMarkers: IndexedMarker[],
+  +allMarkers: IndexedMarker[],
   +selectedMarker: IndexIntoMarkers | null,
   +zeroAt: Milliseconds,
   +scrollToSelectionGeneration: number,
@@ -208,8 +211,8 @@ class MarkerTable extends PureComponent<Props> {
   };
 
   render() {
-    const { markers, zeroAt, selectedMarker } = this.props;
-    const tree = new MarkerTree(markers, zeroAt);
+    const { filteredMarkers, allMarkers, zeroAt, selectedMarker } = this.props;
+    const tree = new MarkerTree(filteredMarkers, allMarkers, zeroAt);
     return (
       <div
         className="markerTable"
@@ -241,7 +244,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    markers: selectedThreadSelectors.getPreviewFilteredMarkers(state),
+    filteredMarkers: selectedThreadSelectors.getPreviewFilteredMarkers(state),
+    allMarkers: selectedThreadSelectors.getReferenceMarkerTable(state),
     selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
     zeroAt: getZeroAt(state),
   }),

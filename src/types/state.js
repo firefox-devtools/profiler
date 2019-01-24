@@ -15,18 +15,14 @@ import type {
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { StartEndRange } from './units';
-import type {
-  IndexIntoRawMarkerTable,
-  Profile,
-  ThreadIndex,
-  Pid,
-} from './profile';
+import type { Profile, ThreadIndex, Pid } from './profile';
 
 import type {
   CallNodePath,
   GlobalTrack,
   LocalTrack,
   TrackIndex,
+  IndexIntoMarkers,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -40,7 +36,7 @@ export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
   +expandedCallNodePaths: PathSet,
-  +selectedMarker: IndexIntoRawMarkerTable | null,
+  +selectedMarker: IndexIntoMarkers | null,
 |};
 
 export type ProfileSharingStatus = {|

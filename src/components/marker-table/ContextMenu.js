@@ -134,7 +134,7 @@ class MarkersContextMenu extends PureComponent<Props> {
 
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
-    markers: selectedThreadSelectors.getPreviewFilteredMarkers(state),
+    markers: selectedThreadSelectors.getReferenceMarkerTable(state),
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
     selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
