@@ -9,6 +9,7 @@ import classNames from 'classnames';
 
 import explicitConnect from '../../utils/connect';
 import TabBar from './TabBar';
+import { ErrorBoundary } from './ErrorBoundary';
 import ProfileCallTreeView from '../calltree/ProfileCallTreeView';
 import MarkerTable from '../marker-table';
 import StackChart from '../stack-chart/';
@@ -91,17 +92,22 @@ class ProfileViewer extends PureComponent<Props> {
           onSelectTab={this._onSelectTab}
           extraElements={extraButton}
         />
-        {
+        <ErrorBoundary
+          key={selectedTab}
+          message="Uh oh, some unknown error happened in this panel."
+        >
           {
-            calltree: <ProfileCallTreeView />,
-            'flame-graph': <FlameGraph />,
-            'stack-chart': <StackChart />,
-            'marker-chart': <MarkerChart />,
-            'marker-table': <MarkerTable />,
-            'network-chart': <NetworkChart />,
-            'js-tracer': <JsTracer />,
-          }[selectedTab]
-        }
+            {
+              calltree: <ProfileCallTreeView />,
+              'flame-graph': <FlameGraph />,
+              'stack-chart': <StackChart />,
+              'marker-chart': <MarkerChart />,
+              'marker-table': <MarkerTable />,
+              'network-chart': <NetworkChart />,
+              'js-tracer': <JsTracer />,
+            }[selectedTab]
+          }
+        </ErrorBoundary>
         <CallNodeContextMenu />
         <MarkerTableContextMenu />
         <TimelineTrackContextMenu />

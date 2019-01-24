@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/ErrorBoundary matches the snapshot 1`] = `
+<div
+  class="appErrorBoundary"
+>
+  <div
+    class="appErrorBoundaryContents"
+  >
+    <div
+      class="photon-message-bar photon-message-bar-error"
+    >
+      Oops, there was an error
+      <button
+        aria-expanded="false"
+        class="photon-button photon-button-micro"
+        type="button"
+      >
+        View full error details
+      </button>
+    </div>
+    <div
+      class="appErrorBoundaryDetails hide"
+      data-testid="error-technical-details"
+    >
+      <div>
+        Error: This is an error.
+      </div>
+      <div>
+        
+    in ThrowingComponent
+    in ErrorBoundary
+      </div>
+    </div>
+  </div>
+</div>
+`;
