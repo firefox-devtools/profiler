@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 19; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 20; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -899,6 +899,11 @@ const _upgraders = {
         }
       }
     }
+  },
+  [20]: _profile => {
+    // rss and uss was removed from the SamplesTable. The version number was bumped
+    // to help catch errors of using an outdated version of perf.html with a newer
+    // profile. There's no good reason to remove the values for upgrading profiles though.
   },
 };
 /* eslint-enable no-useless-computed-key */

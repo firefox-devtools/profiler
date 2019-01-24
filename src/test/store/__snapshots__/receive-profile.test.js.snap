@@ -118,11 +118,6 @@ Object {
     0,
     0,
   ],
-  "rss": Array [
-    null,
-    null,
-    null,
-  ],
   "stack": Array [
     2,
     3,
@@ -132,11 +127,6 @@ Object {
     0,
     1,
     2,
-  ],
-  "uss": Array [
-    null,
-    null,
-    null,
   ],
 }
 `;

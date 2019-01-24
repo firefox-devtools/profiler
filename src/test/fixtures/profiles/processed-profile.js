@@ -91,8 +91,6 @@ export function addMarkersToThreadWithCorrespondingSamples(
       if (!samples.time.includes(time)) {
         samples.time.push(time);
         samples.stack.push(null);
-        samples.rss.push(null);
-        samples.uss.push(null);
         samples.responsiveness.push(null);
         samples.length++;
       }
@@ -468,8 +466,6 @@ function _buildThreadFromTextOnlyStacks(
     // Add a single sample for each column.
     samples.length++;
     samples.responsiveness.push(0);
-    samples.rss.push(null);
-    samples.uss.push(null);
     samples.stack.push(prefix);
     samples.time.push(columnIndex);
   });
@@ -569,8 +565,6 @@ export function getThreadWithJsTracerEvents(
     time: Array(endOfEvents)
       .fill(0)
       .map((_, i) => i),
-    rss: Array(endOfEvents).fill(null),
-    uss: Array(endOfEvents).fill(null),
     length: endOfEvents,
   };
 

@@ -47,8 +47,6 @@ export function getEmptySamplesTable(): SamplesTable {
     responsiveness: [],
     stack: [],
     time: [],
-    rss: [],
-    uss: [],
     length: 0,
   };
 }
