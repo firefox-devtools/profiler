@@ -27,20 +27,24 @@ describe('app/ErrorBoundary', function() {
     return { spy, ...results };
   }
 
+  it('matches the snapshot', () => {
+    const { container } = setupComponent(<ThrowingComponent />);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
   it('shows the component children when there is no error', () => {
     const { getByText } = setupComponent(childComponentText);
     expect(getByText(childComponentText)).toBeTruthy();
   });
 
   it('shows the error message children when the component throws error', () => {
-    jest.spyOn(console, 'error').mockImplementation(() => {});
     const { getByText } = setupComponent(<ThrowingComponent />);
     expect(getByText(friendlyErrorMessage)).toBeTruthy();
   });
 
   it('surfaces the error via console.error', () => {
-    const { spy } = setupComponent(<ThrowingComponent />);
-    expect(spy).toHaveBeenCalled();
+    setupComponent(<ThrowingComponent />);
+    expect(console.error).toHaveBeenCalled();
   });
 
   it('can click the component to view the full details', () => {
@@ -65,6 +69,7 @@ describe('app/ErrorBoundary', function() {
       setupComponent(<ThrowingComponent />);
       expect(self.ga).toHaveBeenCalledWith('send', 'exception', {
         exDescription: [
+          'Error: This is an error.',
           '',
           '    in ThrowingComponent',
           '    in ErrorBoundary',

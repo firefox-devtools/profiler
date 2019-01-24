@@ -32,7 +32,7 @@
   overflow-y: auto;
 
   /* Transition opacity, but do not delay changing the visibility. */
-  transition: opacity 200ms, visibility 0s;
+  transition: opacity 150ms, visibility 0s;
   visibility: visible;
   white-space: pre-wrap;
 }
@@ -42,6 +42,6 @@
 
   /* Transition opacity, and create a delay on hiding the visibility to allow
      time for the fade out. */
-  transition: opacity 200ms, visibility 0s linear 200ms;
+  transition: opacity 150ms, visibility 0s 150ms;
   visibility: hidden;
 }

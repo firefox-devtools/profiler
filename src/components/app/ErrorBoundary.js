@@ -10,7 +10,7 @@ import './ErrorBoundary.css';
 type State = {|
   hasError: boolean,
   showDetails: boolean,
-  error?: Error,
+  errorString: string | null,
   componentStack?: string,
 |};
 
@@ -29,6 +29,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
   state = {
     hasError: false,
     showDetails: false,
+    errorString: null,
   };
 
   componentDidCatch(
@@ -40,9 +41,22 @@ export class ErrorBoundary extends React.Component<Props, State> {
       error,
       componentStack
     );
-    this.setState({ hasError: true, componentStack });
+    let errorString = null;
+    if (
+      error &&
+      typeof error === 'object' &&
+      typeof error.toString === 'function'
+    ) {
+      const result = error.toString();
+      if (typeof result === 'string') {
+        errorString = result;
+      }
+    }
+    this.setState({ hasError: true, errorString, componentStack });
     reportError({
-      exDescription: componentStack,
+      exDescription: errorString
+        ? errorString + '\n' + componentStack
+        : componentStack,
       exFatal: true,
     });
   }
@@ -53,7 +67,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      const { error, componentStack, showDetails } = this.state;
+      const { errorString, componentStack, showDetails } = this.state;
       return (
         <div className="appErrorBoundary">
           <div className="appErrorBoundaryContents">
@@ -72,7 +86,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
               data-testid="error-technical-details"
               className={`appErrorBoundaryDetails ${showDetails ? '' : 'hide'}`}
             >
-              {error ? <div>{error.toString()}</div> : null}
+              {errorString ? <div>{errorString}</div> : null}
               {componentStack ? <div>{componentStack}</div> : null}
             </div>
           </div>
