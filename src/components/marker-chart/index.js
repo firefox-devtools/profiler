@@ -103,7 +103,7 @@ class MarkerChart extends React.PureComponent<Props> {
         aria-labelledby="marker-chart-tab-button"
       >
         <MarkerSettings />
-        {markers.length === 0 ? (
+        {markerTimingRows.length === 0 ? (
           <MarkerChartEmptyReasons />
         ) : (
           <MarkerChartCanvas
@@ -150,7 +150,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       state
     );
     return {
-      markers: selectedThreadSelectors.getMarkerChartMarkers(state),
+      markers: selectedThreadSelectors.getReferenceMarkerTable(state),
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
       timeRange: getCommittedRange(state),

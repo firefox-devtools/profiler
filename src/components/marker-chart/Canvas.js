@@ -24,7 +24,7 @@ import type { ThreadIndex } from '../../types/profile';
 import type {
   IndexedMarker,
   MarkerTimingRows,
-  IndexIntoMarkerTiming,
+  IndexIntoMarkers,
 } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
@@ -43,7 +43,7 @@ type OwnProps = {|
   +rangeEnd: Milliseconds,
   +markerTimingRows: MarkerTimingRows,
   +rowHeight: CssPixels,
-  +markers: IndexedMarker[],
+  +markers: IndexedMarker[], // This needs to be the full marker table
   +threadIndex: ThreadIndex,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection
@@ -72,7 +72,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoMarkerTiming | null
+    hoveredItem: IndexIntoMarkers | null
   ) => {
     const {
       rowHeight,
@@ -148,7 +148,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
   drawMarkers(
     ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoMarkerTiming | null,
+    hoveredItem: IndexIntoMarkers | null,
     startRow: number,
     endRow: number
   ) {
@@ -295,7 +295,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     }
   }
 
-  hitTest = (x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null => {
+  hitTest = (x: CssPixels, y: CssPixels): IndexIntoMarkers | null => {
     const {
       rangeStart,
       rangeEnd,
@@ -338,7 +338,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     return null;
   };
 
-  onDoubleClickMarker = (markerIndex: IndexIntoMarkerTiming | null) => {
+  onDoubleClickMarker = (markerIndex: IndexIntoMarkers | null) => {
     if (markerIndex === null) {
       return;
     }
@@ -368,7 +368,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo = (hoveredItem: IndexIntoMarkerTiming): React.Node => {
+  getHoveredMarkerInfo = (hoveredItem: IndexIntoMarkers): React.Node => {
     const marker = this.props.markers[hoveredItem];
     return (
       <MarkerTooltipContents

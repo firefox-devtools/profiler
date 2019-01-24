@@ -65,8 +65,8 @@ export function getMarkerTiming(markers: IndexedMarker[]): MarkerTimingRows {
   const markerTimingsMap: Map<string, MarkerTiming[]> = new Map();
 
   // Go through all of the markers.
-  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-    const marker = markers[markerIndex];
+  for (let i = 0; i < markers.length; i++) {
+    const marker = markers[i];
     let markerTimingsByName = markerTimingsMap.get(marker.name);
     if (markerTimingsByName === undefined) {
       markerTimingsByName = [];
@@ -74,9 +74,9 @@ export function getMarkerTiming(markers: IndexedMarker[]): MarkerTimingRows {
     }
 
     // Place the marker in the closest row that is empty.
-    for (let i = 0; i < MAX_STACKING_DEPTH; i++) {
+    for (let j = 0; j < MAX_STACKING_DEPTH; j++) {
       // Get or create a row for marker timings.
-      let markerTimingsRow = markerTimingsByName[i];
+      let markerTimingsRow = markerTimingsByName[j];
       if (!markerTimingsRow) {
         markerTimingsRow = {
           start: [],
@@ -96,7 +96,7 @@ export function getMarkerTiming(markers: IndexedMarker[]): MarkerTimingRows {
         markerTimingsRow.start.push(marker.start);
         markerTimingsRow.end.push(marker.start + marker.dur);
         markerTimingsRow.label.push(computeMarkerLabel(marker.data));
-        markerTimingsRow.index.push(markerIndex);
+        markerTimingsRow.index.push(marker.markerIndex);
         markerTimingsRow.length++;
         break;
       }

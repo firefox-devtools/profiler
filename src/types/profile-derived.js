@@ -127,8 +127,6 @@ export type CallNodeDisplayData = $Exact<
   }>
 >;
 
-export type IndexIntoMarkerTiming = number;
-
 export type MarkerTiming = {
   // Start time in milliseconds.
   start: number[],
