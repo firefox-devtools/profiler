@@ -149,6 +149,7 @@ describe('MarkerTooltipContents', function() {
           timings: {
             added_chunks: 50,
             allocated_bytes: 48377856,
+            post_heap_size: 38051840,
             major_gc_number: 1,
             max_pause: 74.026,
             minor_gc_number: 16,
