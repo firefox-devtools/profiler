@@ -4,8 +4,8 @@
 
 .tooltipCallNodeImplementation {
   display: grid;
-  grid-template-columns: repeat(4, min-content);
   grid-gap: 2px;
+  grid-template-columns: repeat(4, min-content);
 }
 
 .tooltipCallNodeImplementationHeader {
@@ -67,8 +67,8 @@
 
 .tooltipCallNodeDetailsLeft {
   min-width: 150px;
-  margin-top: 10px;
   padding: 10px;
   padding-bottom: 5px;
+  margin-top: 10px;
   border-top: 1px solid var(--grey-30);
 }

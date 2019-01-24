@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { ensureIsValidTabSlug, objectEntriesExact } from '../utils/flow';
+import { ensureIsValidTabSlug, objectEntries } from '../utils/flow';
 import type JSZip, { JSZipFile } from 'jszip';
 export type IndexIntoZipFileTable = number;
 
@@ -28,7 +28,7 @@ export type ZipDisplayData = {|
 |};
 
 export function createZipTable(zipEntries: JSZip): ZipFileTable {
-  const fullPaths = objectEntriesExact(zipEntries.files)
+  const fullPaths = objectEntries(zipEntries.files)
     .filter(([_fileName, file]) => !file.dir)
     .map(([fileName, _file]) => fileName);
 

@@ -52,6 +52,25 @@ export function formatNumber(
   });
 }
 
+/**
+ * When the interval is an integer, then there will never be fractions for timing
+ * information in the call tree. In this case it's nice to display integers. If the
+ * interval is fractional, then timing information could be nicer with more precise
+ * numbers. This function handles this formatting method.
+ *
+ * e.g. (true, 6.0) => "6"
+ * e.g. (false, 6.0) => "6.0"
+ * e.g. (true, 6.555) => "6"
+ * e.g. (false, 6.555) => "6.6"
+ */
+export function formatNumberDependingOnInterval(
+  isIntegerInterval: boolean,
+  number: number
+): string {
+  const maxFractionalDigits = isIntegerInterval ? 0 : 1;
+  return formatNumber(number, 3, maxFractionalDigits);
+}
+
 export function formatPercent(value: number): string {
   return formatNumber(
     value,

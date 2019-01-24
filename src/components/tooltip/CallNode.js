@@ -5,9 +5,10 @@
 import * as React from 'react';
 
 import { getStackType } from '../../profile-logic/transforms';
-import { objectEntriesMap, assertExhaustiveCheck } from '../../utils/flow';
-import { formatMilliseconds } from '../../utils/format-numbers';
+import { objectEntries } from '../../utils/flow';
+import { formatNumberDependingOnInterval } from '../../utils/format-numbers';
 import NodeIcon from '../shared/NodeIcon';
+import { getFriendlyStackTypeName } from '../../profile-logic/profile-data';
 
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { Thread, CategoryList } from '../../types/profile';
@@ -16,10 +17,8 @@ import type {
   CallNodeDisplayData,
   CallNodeInfo,
 } from '../../types/profile-derived';
-import type {
-  TimingsForPath,
-  StackImplementation,
-} from '../../profile-logic/profile-data';
+import type { TimingsForPath } from '../../profile-logic/profile-data';
+import type { Milliseconds } from '../../types/units';
 
 import './CallNode.css';
 
@@ -31,30 +30,13 @@ type Props = {|
   callNodeIndex: IndexIntoCallNodeTable,
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
+  interval: Milliseconds,
   // Since this tooltip can be used in different context, provide some kind of duration
   // label, e.g. "100ms" or "33%".
   durationText: string,
   callTree?: CallTree,
   timings?: TimingsForPath,
 |};
-
-function _getFriendlyStackTypeName(
-  implementation: StackImplementation
-): string {
-  switch (implementation) {
-    case 'ion':
-    case 'baseline':
-      return `JS JIT (${implementation})`;
-    case 'interpreter':
-      return 'JS interpreter';
-    case 'native':
-      return 'Native code';
-    case 'unknown':
-      return implementation;
-    default:
-      throw assertExhaustiveCheck(implementation);
-  }
-}
 
 /**
  * This class collects the tooltip rendering for anything that cares about call nodes.
@@ -68,20 +50,17 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     if (!maybeTimings || !maybeDisplayData) {
       return null;
     }
-    const timings = maybeTimings;
+    const { totalTime, selfTime } = maybeTimings.forPath;
     const displayData = maybeDisplayData;
-    const { breakdownByImplementation } = timings.forPath.totalTime;
-    if (!breakdownByImplementation) {
+    if (!totalTime.breakdownByImplementation) {
       return null;
     }
-    const sortedBreakdown = objectEntriesMap(breakdownByImplementation).sort(
-      (a, b) => b[1] - a[1]
-    );
 
-    const totalTime = sortedBreakdown.reduce(
-      (memo, [, value]) => memo + value,
-      0
-    );
+    const sortedTotalBreakdownByImplementation = objectEntries(
+      totalTime.breakdownByImplementation
+    ).sort((a, b) => b[1] - a[1]);
+    const { interval } = this.props;
+    const isIntegerInterval = Math.floor(interval) === interval;
 
     return (
       <div className="tooltipCallNodeImplementation">
@@ -106,49 +85,55 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           <div
             className="tooltipCallNodeImplementationGraphSelf"
             style={{
-              width: GRAPH_WIDTH * displayData.selfTimeNumeric / totalTime,
+              width: GRAPH_WIDTH * selfTime.value / totalTime.value,
             }}
           />
         </div>
         <div>{displayData.totalTimeWithUnit}</div>
         <div>{displayData.selfTimeWithUnit}</div>
         {/* grid row -------------------------------------------------- */}
-        {sortedBreakdown.map(([implementation, time], index) => {
-          let selfTime = 0;
-          const selfBreakdownMap =
-            timings.forPath.selfTime.breakdownByImplementation;
-          if (selfBreakdownMap) {
-            selfTime = selfBreakdownMap[implementation] || 0;
-          }
+        {sortedTotalBreakdownByImplementation.map(
+          ([implementation, time], index) => {
+            let selfTimeValue = 0;
+            if (selfTime.breakdownByImplementation) {
+              selfTimeValue =
+                selfTime.breakdownByImplementation[implementation] || 0;
+            }
 
-          return (
-            <React.Fragment key={index}>
-              <div className="tooltipCallNodeImplementationName tooltipLabel">
-                {_getFriendlyStackTypeName(implementation)}
-              </div>
-              <div className="tooltipCallNodeImplementationGraph">
-                <div
-                  className="tooltipCallNodeImplementationGraphRunning"
-                  style={{
-                    width: GRAPH_WIDTH * time / totalTime,
-                  }}
-                />
-                <div
-                  className="tooltipCallNodeImplementationGraphSelf"
-                  style={{
-                    width: GRAPH_WIDTH * selfTime / totalTime,
-                  }}
-                />
-              </div>
-              <div className="tooltipCallNodeImplementationTiming">
-                {formatMilliseconds(time)}
-              </div>
-              <div className="tooltipCallNodeImplementationTiming">
-                {selfTime === 0 ? '—' : formatMilliseconds(selfTime)}
-              </div>
-            </React.Fragment>
-          );
-        })}
+            return (
+              <React.Fragment key={index}>
+                <div className="tooltipCallNodeImplementationName tooltipLabel">
+                  {getFriendlyStackTypeName(implementation)}
+                </div>
+                <div className="tooltipCallNodeImplementationGraph">
+                  <div
+                    className="tooltipCallNodeImplementationGraphRunning"
+                    style={{
+                      width: GRAPH_WIDTH * time / totalTime.value,
+                    }}
+                  />
+                  <div
+                    className="tooltipCallNodeImplementationGraphSelf"
+                    style={{
+                      width: GRAPH_WIDTH * selfTimeValue / totalTime.value,
+                    }}
+                  />
+                </div>
+                <div className="tooltipCallNodeImplementationTiming">
+                  {formatNumberDependingOnInterval(isIntegerInterval, time)}ms
+                </div>
+                <div className="tooltipCallNodeImplementationTiming">
+                  {selfTimeValue === 0
+                    ? '—'
+                    : `${formatNumberDependingOnInterval(
+                        isIntegerInterval,
+                        selfTimeValue
+                      )}ms`}
+                </div>
+              </React.Fragment>
+            );
+          }
+        )}
       </div>
     );
   }

@@ -32,6 +32,7 @@ import {
   cloneFrameTable,
   cloneFuncTable,
 } from './data-structures';
+import { assertExhaustiveCheck } from '../utils/flow';
 
 import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
@@ -1763,4 +1764,22 @@ export function getSampleCategories(
   stackTable: StackTable
 ): Array<IndexIntoSamplesTable | null> {
   return samples.stack.map(s => (s !== null ? stackTable.category[s] : null));
+}
+
+export function getFriendlyStackTypeName(
+  implementation: StackImplementation
+): string {
+  switch (implementation) {
+    case 'ion':
+    case 'baseline':
+      return `JS JIT (${implementation})`;
+    case 'interpreter':
+      return 'JS interpreter';
+    case 'native':
+      return 'Native code';
+    case 'unknown':
+      return implementation;
+    default:
+      throw assertExhaustiveCheck(implementation);
+  }
 }

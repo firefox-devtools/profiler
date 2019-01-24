@@ -14,7 +14,7 @@ import {
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { getCategories } from '../../selectors/profile';
 import { getFunctionName } from '../../profile-logic/function-info';
-import { assertExhaustiveCheck } from '../../utils/flow';
+import { getFriendlyStackTypeName } from '../../profile-logic/profile-data';
 import CanSelectContent from './CanSelectContent';
 
 import type {
@@ -74,22 +74,6 @@ class ImplementationBreakdown extends React.PureComponent<
     'unknown',
   ];
 
-  _labelizeImplementation(implementation: StackImplementation): string {
-    switch (implementation) {
-      case 'ion':
-      case 'baseline':
-        return `JavaScript JIT (${implementation})`;
-      case 'interpreter':
-        return 'JavaScript interpreter';
-      case 'native':
-        return 'Native code';
-      case 'unknown':
-        return implementation;
-      default:
-        throw assertExhaustiveCheck(implementation);
-    }
-  }
-
   render() {
     const { breakdown } = this.props;
     const data = [];
@@ -101,7 +85,7 @@ class ImplementationBreakdown extends React.PureComponent<
       }
 
       data.push({
-        group: this._labelizeImplementation(implementation),
+        group: getFriendlyStackTypeName(implementation),
         value: value || 0,
       });
     }

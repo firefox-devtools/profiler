@@ -269,6 +269,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       // doesn't over-render.
       <TooltipCallNode
         thread={thread}
+        interval={interval}
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}
         categories={categories}

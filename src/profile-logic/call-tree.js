@@ -23,7 +23,10 @@ import type {
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
-import { formatNumber, formatPercent } from '../utils/format-numbers';
+import {
+  formatNumberDependingOnInterval,
+  formatPercent,
+} from '../utils/format-numbers';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
@@ -209,21 +212,18 @@ export class CallTree {
         icon = ExtensionIcon;
       }
 
-      const maxFractionalDigits = this._isIntegerInterval ? 0 : 1;
-
-      const formattedTotalTime = formatNumber(
-        totalTime,
-        3,
-        maxFractionalDigits
+      const formattedTotalTime = formatNumberDependingOnInterval(
+        this._isIntegerInterval,
+        totalTime
+      );
+      const formattedSelfTime = formatNumberDependingOnInterval(
+        this._isIntegerInterval,
+        selfTime
       );
 
-      const formattedSelfTime = formatNumber(selfTime, 3, maxFractionalDigits);
-
       displayData = {
-        totalTimeNumeric: totalTime,
         totalTime: formattedTotalTime,
         totalTimeWithUnit: formattedTotalTime + 'ms',
-        selfTimeNumeric: selfTime,
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
         selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
         totalTimePercent: `${formatPercent(totalTimeRelative)}`,
