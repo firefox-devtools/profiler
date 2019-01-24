@@ -7,3 +7,21 @@
   width: 100%;
   height: 100%;
 }
+
+.timelineMarkers {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  height: 6px;
+  margin: 0;
+  list-style: none;
+  opacity: 0.75;
+}
+
+.timelineMarkers.selected {
+  opacity: 1;
+}
+
+.timelineMarkersGeckoMain {
+  height: 18px;
+}

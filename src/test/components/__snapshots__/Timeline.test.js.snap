@@ -166,7 +166,7 @@ process: \\"default\\" (0)"
                       class="timelineTrackThread"
                     >
                       <div
-                        class="timelineTrackThreadMarkerOverview selected"
+                        class="timelineMarkers selected"
                       >
                         <canvas
                           class="timelineMarkersCanvas"
@@ -215,7 +215,7 @@ process: \\"default\\" (0)"
                       class="timelineTrackThread"
                     >
                       <div
-                        class="timelineTrackThreadMarkerOverview"
+                        class="timelineMarkers"
                       >
                         <canvas
                           class="timelineMarkersCanvas"
@@ -277,7 +277,7 @@ process: \\"default\\" (0)"
                       class="timelineTrackThread"
                     >
                       <div
-                        class="timelineTrackThreadMarkerOverview"
+                        class="timelineMarkers"
                       >
                         <canvas
                           class="timelineMarkersCanvas"

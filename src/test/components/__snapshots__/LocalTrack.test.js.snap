@@ -96,7 +96,7 @@ process: \\"tab\\" (222)"
         class="timelineTrackThread"
       >
         <div
-          class="timelineTrackThreadMarkerOverview"
+          class="timelineMarkers"
         >
           <canvas
             class="timelineMarkersCanvas"
