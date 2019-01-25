@@ -81,7 +81,7 @@ type ProfileSharingButtonProps = {|
   +buttonClassName: string,
   +shareLabel: string,
   +symbolicationStatus: string,
-  +okButtonClickEvent: () => void,
+  +okButtonClickEvent: () => mixed,
   +panelOpenEvent?: () => void,
   +shareNetworkUrlCheckboxChecked: boolean,
   +shareNetworkUrlCheckboxOnChange?: (SyntheticEvent<HTMLInputElement>) => void,
@@ -387,7 +387,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
    * them. We check the current state before attempting to share depending
    * on that flag.
    */
-  _attemptToShare = (isSecondaryShare: boolean = false) => {
+  _attemptToShare = async (isSecondaryShare: boolean = false) => {
     if (
       ((!isSecondaryShare && this.state.state !== 'local') ||
         (isSecondaryShare && this.state.state !== 'public')) &&
@@ -399,10 +399,11 @@ class ProfileSharingCompositeButton extends React.PureComponent<
 
     const { profile, predictUrl, profileSharingStatus } = this.props;
 
-    new Promise(resolve => {
+    try {
       if (!profile) {
         throw new Error('profile is null');
       }
+
       const jsonString = serializeProfile(profile, this.state.shareNetworkUrls);
       if (!jsonString) {
         throw new Error('profile serialization failed');
@@ -417,73 +418,75 @@ class ProfileSharingCompositeButton extends React.PureComponent<
       };
       this.props.setProfileSharingStatus(newProfileSharingStatus);
       this.setState({ state: 'uploading', uploadProgress: 0 });
-      resolve(jsonString);
-    })
-      .then((s: string) => new TextEncoder().encode(s))
-      .then((typedArray: Uint8Array) => {
-        return Promise.all([compress(typedArray.slice(0)), sha1(typedArray)]);
-      })
-      .then(([gzipData, hash]: [string, string]) => {
-        const predictedUrl = url.resolve(
-          window.location.href,
-          predictUrl(actions.profilePublished(hash))
-        );
-        this.setState({
-          fullUrl: predictedUrl,
-          shortUrl: predictedUrl,
+
+      const typedArray = new TextEncoder().encode(jsonString);
+
+      const [gzipData, hash]: [string, string] = await Promise.all([
+        compress(typedArray.slice(0)),
+        sha1(typedArray),
+      ]);
+
+      const predictedUrl = url.resolve(
+        window.location.href,
+        predictUrl(actions.profilePublished(hash))
+      );
+      this.setState({
+        fullUrl: predictedUrl,
+        shortUrl: predictedUrl,
+      });
+
+      const uploadPromise = uploadBinaryProfileData(
+        gzipData,
+        uploadProgress => {
+          this.setState({ uploadProgress });
+        }
+      ).then((hash: string) => {
+        const { onProfilePublished } = this.props;
+        onProfilePublished(hash);
+
+        this.setState(prevState => {
+          const newShortUrl =
+            prevState.fullUrl === window.location.href
+              ? prevState.shortUrl
+              : window.location.href;
+
+          return {
+            state: 'public',
+            fullUrl: window.location.href,
+            shortUrl: newShortUrl,
+          };
         });
-        const uploadPromise = uploadBinaryProfileData(
-          gzipData,
-          uploadProgress => {
-            this.setState({ uploadProgress });
-          }
-        ).then((hash: string) => {
-          const { onProfilePublished } = this.props;
-          onProfilePublished(hash);
 
-          this.setState(prevState => {
-            const newShortUrl =
-              prevState.fullUrl === window.location.href
-                ? prevState.shortUrl
-                : window.location.href;
+        if (this._permalinkButton) {
+          this._permalinkButton.openPanel();
+        }
 
-            return {
-              state: 'public',
-              fullUrl: window.location.href,
-              shortUrl: newShortUrl,
-            };
-          });
-
-          if (this._permalinkButton) {
-            this._permalinkButton.openPanel();
-          }
-
-          sendAnalytics({
-            hitType: 'event',
-            eventCategory: 'profile upload',
-            eventAction: 'succeeded',
-          });
-        });
-        return Promise.all([
-          uploadPromise,
-          this._shortenUrlAndFocusTextFieldOnCompletion(),
-        ]);
-      })
-      .catch((error: Error) => {
-        // To avoid any interaction with running transitions, we delay setting
-        // the new state by 300ms.
-        setTimeout(() => {
-          this.setState({
-            state: 'error',
-            error,
-          });
-        }, 300);
         sendAnalytics({
           hitType: 'event',
           eventCategory: 'profile upload',
-          eventAction: 'failed',
+          eventAction: 'succeeded',
         });
       });
+
+      await Promise.all([
+        uploadPromise,
+        this._shortenUrlAndFocusTextFieldOnCompletion(),
+      ]);
+    } catch (error) {
+      // To avoid any interaction with running transitions, we delay setting
+      // the new state by 300ms.
+      setTimeout(() => {
+        this.setState({
+          state: 'error',
+          error,
+        });
+      }, 300);
+      sendAnalytics({
+        hitType: 'event',
+        eventCategory: 'profile upload',
+        eventAction: 'failed',
+      });
+    }
   };
 
   _onChangeShareNetworkUrls = (event: SyntheticEvent<HTMLInputElement>) => {
