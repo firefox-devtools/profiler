@@ -5,8 +5,8 @@
 .arrowPanelAnchor {
   position: absolute;
   z-index: 10;
-  left: 50%;
   top: 75%;
+  left: 50%;
 }
 
 .arrowPanel {
@@ -16,105 +16,113 @@
   --internal-button-height: 30px;
   --internal-ok-button-background: var(--ok-button-background, #7990c8);
   --internal-ok-button-color: var(--ok-button-color, white);
+
   position: absolute;
   top: var(--internal-offset-from-top);
-  right: calc(0px - var(--internal-offset-from-right));
+  right: calc(var(--internal-offset-from-right) * -1);
   min-width: var(--internal-width);
-  filter: drop-shadow(0 0 0.5px rgba(0,0,0,0.4)) drop-shadow(0 4px 5px rgba(0,0,0,0.4));
-  filter: url(../../../res/img/svg/shadowfilter.svg#menushadow);
-  color: black;
-  text-align: left;
-  line-height: 1.3;
   background: hsla(0, 0%, 97%, 0.95);
   border-radius: 5px;
+  color: black;
+  filter: drop-shadow(0 0 0.5px rgba(0, 0, 0, 0.4))
+    drop-shadow(0 4px 5px rgba(0, 0, 0, 0.4));
+  filter: url(../../../res/img/svg/shadowfilter.svg#menushadow);
+  line-height: 1.3;
+  text-align: left;
   transform-origin: calc(100% - var(--internal-offset-from-right))
-                    calc(0px - var(--internal-offset-from-top));
+    calc(var(--internal-offset-from-top) * -1);
 }
 
 .arrowPanel:not(.open) {
-  pointer-events: none;
   opacity: 0;
-  /* visibility: hidden hides the panel from the accessibility tree when it's closed */
-  visibility: hidden;
+  pointer-events: none;
+
   /* The visibility is set to hidden after the panel closing transition. */
   transition: opacity 200ms ease-out, visibility 0s 200ms;
+
+  /* visibility: hidden hides the panel from the accessibility tree when it's closed */
+  visibility: hidden;
 }
 
 .arrowPanel.open {
-  transition: none;
   animation: arrowPanelAppear 400ms;
   opacity: 1;
+  transition: none;
 }
 
 @keyframes arrowPanelAppear {
   from {
+    animation-timing-function: ease-out;
     opacity: 0;
     transform: scale(0);
-    animation-timing-function: ease-out;
   }
 
   40% {
+    animation-timing-function: ease-in-out;
     opacity: 0.6;
     transform: scale(1);
-    animation-timing-function: ease-in-out;
   }
 
   60% {
+    animation-timing-function: cubic-bezier(0.3, 0, 0.3, 1);
     opacity: 0.9;
     transform: scale(0.96);
-    animation-timing-function: cubic-bezier(.3,0,0.3,1);
   }
 }
 
 .arrowPanelArrow {
   position: absolute;
-  left: 0;
+  top: calc(var(--internal-offset-from-top) * -1);
   right: 0;
-  top: calc(0px - var(--internal-offset-from-top));
-  height: var(--internal-offset-from-top);
+  left: 0;
   overflow: hidden;
+  height: var(--internal-offset-from-top);
 }
 
 .arrowPanelArrow::before {
-  content: '';
-  display: block;
   position: absolute;
+  z-index: -1;
   top: 0;
   left: calc(100% - var(--internal-offset-from-right));
+  display: block;
   width: calc(1.42 * var(--internal-offset-from-top));
   height: calc(1.42 * var(--internal-offset-from-top));
   background: hsla(0, 0%, 97%, 0.95);
+  content: '';
   transform: rotate(45deg);
   transform-origin: top left;
-  z-index: -1;
 }
 
 .arrowPanelTitle,
 .arrowPanelSubTitle {
-  font-size: 1.2em;
   padding: 10px;
   margin: 0;
+  font-size: 1.2em;
 }
 
 .arrowPanelSubTitle {
-  border-bottom: 1px solid rgba(0,0,0,0.05);
   padding: 5px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .arrowPanelContent {
-  padding: 0 10px;
   overflow: auto;
+  max-height: calc(
+    100vh - var(--internal-approx-distance-from-top) -
+      var(--internal-button-height) - var(--internal-approx-distance-to-bottom)
+  );
+  padding: 0 10px;
+
   --internal-approx-distance-from-top: 60px;
   --internal-approx-distance-to-bottom: 100px;
-  max-height: calc(100vh - var(--internal-approx-distance-from-top) - var(--internal-button-height) - var(--internal-approx-distance-to-bottom));
 }
 
 .arrowPanel.hasTitle > .arrowPanelContent {
-  border-top: 1px solid rgba(0,0,0,0.05);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .arrowPanel.hasButtons > .arrowPanelContent {
-  border-bottom: 1px solid rgba(0,0,0,0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .arrowPanel ul {
@@ -122,27 +130,27 @@
 }
 
 .arrowPanelButtons {
-  height: 35px;
-  line-height: 35px;
   display: flex;
+  height: 35px;
   flex-flow: row nowrap;
   align-items: stretch;
+  line-height: 35px;
 }
 
 .arrowPanelOkButton,
 .arrowPanelCancelButton {
-  border: 0;
-  background: none;
+  flex: 1;
   padding: 0;
   margin: 0;
-  flex: 1;
-  text-align: center;
+  border: 0;
+  background: none;
   font-size: 1.2em;
+  text-align: center;
 }
 
 .arrowPanelOkButton {
-  border-bottom-right-radius: 5px;
   background: var(--internal-ok-button-background);
+  border-bottom-right-radius: 5px;
   color: var(--internal-ok-button-color);
 }
 
@@ -152,19 +160,19 @@
 
 .arrowPanelOkButton:hover,
 .arrowPanelCancelButton:hover {
-  background-image: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1));
+  background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
 }
 
 .arrowPanelOkButton:hover:active,
 .arrowPanelCancelButton:hover:active {
-  background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2));
+  background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
 }
 
 .arrowPanelOpenMetaInfo {
   width: 350px;
+  padding-top: 5px;
   font-size: 12px;
   line-height: 20px;
-  padding-top: 5px;
 }
 
 .arrowPanelOpenMetaInfo,
@@ -178,9 +186,9 @@
 }
 
 .metaInfoLabel {
+  display: inline-block;
   width: 120px;
   color: var(--grey-40);
-  display: inline-block;
 }
 
 .metaInfoList {

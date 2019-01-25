@@ -9,7 +9,7 @@ import { timeCode } from '../../utils/time-code';
 import { withSize } from '../shared/WithSize';
 import Tooltip from '../shared/Tooltip';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
-import { styles, overlayFills } from '../../profile-logic/marker-styles';
+import { markerStyles, overlayFills } from '../../profile-logic/marker-styles';
 import explicitConnect from '../../utils/connect';
 import { getPreviewSelection } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
@@ -50,7 +50,6 @@ type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
  */
 
 export type OwnProps = {|
-  +className: string,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +threadIndex: ThreadIndex,
@@ -58,13 +57,9 @@ export type OwnProps = {|
 |};
 
 export type StateProps = {|
+  +additionalClassName?: ?string,
   +markers: Marker[],
   +isSelected: boolean,
-  +styles: any,
-  +overlayFills: {
-    +HOVERED: string,
-    +PRESSED: string,
-  },
   +isModifyingSelection: boolean,
 |};
 
@@ -112,7 +107,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     }
 
     const r = c.getBoundingClientRect();
-    const { width, rangeStart, rangeEnd, markers, styles } = this.props;
+    const { width, rangeStart, rangeEnd, markers } = this.props;
     const x = e.pageX - r.left;
     const y = e.pageY - r.top;
     const time = rangeStart + x / width * (rangeEnd - rangeStart);
@@ -126,8 +121,9 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       if (time < start || time >= start + dur) {
         continue;
       }
-      const style = name in styles ? styles[name] : styles.default;
-      if (y >= style.top && y < style.top + style.height) {
+      const markerStyle =
+        name in markerStyles ? markerStyles[name] : markerStyles.default;
+      if (y >= markerStyle.top && y < markerStyle.top + markerStyle.height) {
         return markers[i];
       }
     }
@@ -200,7 +196,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
 
   render() {
     const {
-      className,
+      additionalClassName,
       isSelected,
       isModifyingSelection,
       threadIndex,
@@ -210,7 +206,13 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     const shouldShowTooltip = !isModifyingSelection && !mouseDownItem;
 
     return (
-      <div className={classNames(className, isSelected ? 'selected' : null)}>
+      <div
+        className={classNames(
+          'timelineMarkers',
+          additionalClassName,
+          isSelected ? 'selected' : null
+        )}
+      >
         <canvas
           className="timelineMarkersCanvas"
           ref={this._takeCanvasRef}
@@ -248,14 +250,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
   }
 
   drawCanvas(c: HTMLCanvasElement) {
-    const {
-      rangeStart,
-      rangeEnd,
-      width,
-      markers,
-      styles,
-      overlayFills,
-    } = this.props;
+    const { rangeStart, rangeEnd, width, markers } = this.props;
 
     const devicePixelRatio = c.ownerDocument
       ? c.ownerDocument.defaultView.devicePixelRatio
@@ -282,40 +277,46 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       const itemWidth = Number.isFinite(dur)
         ? dur / (rangeEnd - rangeStart) * width
         : Number.MAX_SAFE_INTEGER;
-      const style = name in styles ? styles[name] : styles.default;
-      ctx.fillStyle = style.background;
-      if (style.squareCorners) {
-        ctx.fillRect(pos, style.top, itemWidth, style.height);
+      const markerStyle =
+        name in markerStyles ? markerStyles[name] : markerStyles.default;
+      ctx.fillStyle = markerStyle.background;
+      if (markerStyle.squareCorners) {
+        ctx.fillRect(pos, markerStyle.top, itemWidth, markerStyle.height);
       } else {
         this._drawRoundedRect(
           ctx,
           pos,
-          style.top,
+          markerStyle.top,
           itemWidth,
-          style.height,
+          markerStyle.height,
           1 / devicePixelRatio
         );
       }
-      if (style.borderLeft !== null) {
-        ctx.fillStyle = style.borderLeft;
-        ctx.fillRect(pos, style.top, 1, style.height);
+      if (markerStyle.borderLeft !== null) {
+        ctx.fillStyle = markerStyle.borderLeft;
+        ctx.fillRect(pos, markerStyle.top, 1, markerStyle.height);
       }
-      if (style.borderRight !== null) {
-        ctx.fillStyle = style.borderRight;
-        ctx.fillRect(pos + itemWidth - 1, style.top, 1, style.height);
+      if (markerStyle.borderRight !== null) {
+        ctx.fillStyle = markerStyle.borderRight;
+        ctx.fillRect(
+          pos + itemWidth - 1,
+          markerStyle.top,
+          1,
+          markerStyle.height
+        );
       }
       const markerState = this._getMarkerState(marker);
       if (markerState === 'HOVERED' || markerState === 'PRESSED') {
         ctx.fillStyle = overlayFills[markerState];
-        if (style.squareCorners) {
-          ctx.fillRect(pos, style.top, itemWidth, style.height);
+        if (markerStyle.squareCorners) {
+          ctx.fillRect(pos, markerStyle.top, itemWidth, markerStyle.height);
         } else {
           this._drawRoundedRect(
             ctx,
             pos,
-            style.top,
+            markerStyle.top,
             itemWidth,
-            style.height,
+            markerStyle.height,
             1 / devicePixelRatio
           );
         }
@@ -357,8 +358,6 @@ const jankOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     return {
       markers: selectors.getJankMarkers(state),
       isSelected: threadIndex === selectedThread,
-      styles: styles,
-      overlayFills: overlayFills,
       isModifyingSelection: getPreviewSelection(state).isModifying,
     };
   },
@@ -377,10 +376,12 @@ const markersOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     const selectedThread = getSelectedThreadIndex(state);
     const markers = selectors.getCommittedRangeFilteredMarkersForHeader(state);
     return {
+      additionalClassName:
+        selectors.getThread(state).name === 'GeckoMain'
+          ? 'timelineMarkersGeckoMain'
+          : null,
       markers,
       isSelected: threadIndex === selectedThread,
-      styles,
-      overlayFills,
       isModifyingSelection: getPreviewSelection(state).isModifying,
     };
   },

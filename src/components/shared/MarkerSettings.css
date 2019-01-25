@@ -3,11 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .markerSettings {
+  display: flex;
   height: 25px;
+  flex-flow: row nowrap;
   padding: 0;
   line-height: 25px;
-  display: flex;
-  flex-flow: row nowrap;
 }
 
 .markerSettingsSpacer {
@@ -15,13 +15,13 @@
 }
 
 .markerSettingsLabel {
+  display: inline-flex;
+  height: 25px;
+  flex-flow: row nowrap;
+  align-items: center;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  display: inline-flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  height: 25px;
 }
 
 .markerSettingsSearchbar {

@@ -3,15 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-/**
- * @jest-environment jsdom
- */
+
+import { oneLineTrim } from 'common-tags';
 import * as urlStateReducers from '../selectors/url-state';
 import {
   changeCallTreeSearchString,
   changeMarkersSearchString,
 } from '../actions/profile-view';
-import { changeSelectedTab } from '../actions/app';
+import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
   stateFromLocation,
   urlStateToUrlObject,
@@ -39,7 +38,7 @@ function _getStoreWithURL(
     hash?: string,
     v?: number | false, // If v is false, do not add a v parameter to the search string.
   } = {},
-  profile: Profile = getProfile()
+  profile: Profile | null = getProfile()
 ) {
   const { pathname, hash, search, v } = Object.assign(
     {
@@ -59,12 +58,12 @@ function _getStoreWithURL(
       // Ensure there is a thread index.
       thread: 0,
     },
-    queryString.parse(search.substr(1))
+    queryString.parse(search.substr(1), { arrayFormat: 'bracket' })
   );
 
   const newUrlState = stateFromLocation({
     pathname,
-    search: '?' + queryString.stringify(query),
+    search: '?' + queryString.stringify(query, { arrayFormat: 'bracket' }),
     hash,
   });
 
@@ -73,7 +72,10 @@ function _getStoreWithURL(
     type: 'UPDATE_URL_STATE',
     newUrlState,
   });
-  store.dispatch(viewProfile(profile));
+
+  if (profile) {
+    store.dispatch(viewProfile(profile));
+  }
   return store;
 }
 
@@ -476,12 +478,58 @@ describe('URL serialization of the transform stack', function() {
 });
 
 describe('urlFromState', function() {
-  it('outputs the current URL version', function() {
+  it('outputs no default parameters besides the current URL version', function() {
+    const pathname =
+      '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree';
     const newUrlState = stateFromLocation({
-      pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
+      pathname: pathname,
       search: '',
       hash: '',
     });
-    expect(urlFromState(newUrlState)).toMatch(`v=${CURRENT_URL_VERSION}`);
+    expect(urlFromState(newUrlState)).toEqual(
+      `${pathname}/?v=${CURRENT_URL_VERSION}`
+    );
+  });
+});
+
+describe('compare', function() {
+  const url1 = 'http://fake-url.com/hash/1';
+  const url2 = 'http://fake-url.com/hash/2';
+
+  it('unserializes profiles URL properly', function() {
+    const store = _getStoreWithURL(
+      {
+        pathname: '/compare/',
+        search: oneLineTrim`
+          ?profiles[]=${encodeURIComponent(url1)}
+          &profiles[]=${encodeURIComponent(url2)}
+        `,
+      },
+      /* no profile */ null
+    );
+
+    expect(urlStateReducers.getProfilesToCompare(store.getState())).toEqual([
+      url1,
+      url2,
+    ]);
+  });
+
+  it('serializes profiles URL properly', function() {
+    const store = _getStoreWithURL(
+      { pathname: '/compare/' },
+      /* no profile */ null
+    );
+
+    const initialUrl = urlFromState(
+      urlStateReducers.getUrlState(store.getState())
+    );
+    expect(initialUrl).toEqual('/compare/');
+
+    store.dispatch(changeProfilesToCompare([url1, url2]));
+    const resultingUrl = urlFromState(
+      urlStateReducers.getUrlState(store.getState())
+    );
+    expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url1)}`);
+    expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url2)}`);
   });
 });

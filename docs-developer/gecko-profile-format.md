@@ -164,8 +164,6 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
           stack: 0,
           time: 1,
           responsiveness: 2,
-          rss: 3,
-          uss: 4,
         },
         data: [
           [
@@ -173,7 +171,6 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
             37067.409299,  // milliseconds since since profile.meta.startTime
             1.437998,      // milliseconds since the last event was processed in this
                            // thread's event loop at the time that the sample was taken
-            ...            // TODO
           ]
         ]
       },

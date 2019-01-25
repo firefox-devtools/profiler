@@ -2,27 +2,28 @@
   position: absolute;
   top: 0;
   left: 0;
+  display: flex;
   width: 100%;
   height: 100%;
-  display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .rootMessage {
-  background-color: #fff;
-  max-width: 600px;
-  width: 80%;
-  padding: 3em;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  font-size: 130%;
-  box-shadow: 0 5px 25px #0b1f50;
   overflow: hidden;
+  width: 80%;
+  max-width: 600px;
+  box-sizing: border-box;
+  padding: 3em;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 3px;
+  box-shadow: 0 5px 25px #0b1f50;
+  font-size: 130%;
 }
 
-.rootMessageText, .rootMessageAdditional {
+.rootMessageText,
+.rootMessageAdditional {
   line-height: 1.5;
 }
 
@@ -31,9 +32,9 @@
 }
 
 .rootMessageAdditional {
-  border-top: 1px solid #ccc;
   padding-top: 1em;
   margin-top: 1em;
+  border-top: 1px solid #ccc;
   font-size: 12px;
 }
 
@@ -46,11 +47,10 @@
 .loading-div {
   position: absolute;
   height: 8px;
-  border-radius: 2px;
-  animation-name: loadingdiv;
-
   animation-duration: 4000ms;
   animation-iteration-count: infinite;
+  animation-name: loadingdiv;
+  border-radius: 2px;
 }
 
 .loading-row-1 {
@@ -70,97 +70,97 @@
 }
 
 .loading-div-1 {
+  width: 100%;
   animation-delay: -900ms;
   background-color: var(--red-50);
-  width: 100%;
 }
 
 .loading-div-2 {
-  animation-delay: -800ms;
-  background-color: var(--blue-50);
   left: 1%;
   width: 97%;
+  animation-delay: -800ms;
+  background-color: var(--blue-50);
 }
 
 .loading-div-3 {
-  animation-delay: -700ms;
-  width: 30%;
   left: 5%;
+  width: 30%;
+  animation-delay: -700ms;
   background-color: var(--orange-50);
 }
 
 .loading-div-4 {
-  animation-delay: -600ms;
-  width: 53%;
   left: 43%;
+  width: 53%;
+  animation-delay: -600ms;
   background-color: var(--purple-50);
 }
 
 .loading-div-5 {
-  animation-delay: -500ms;
-  width: 14%;
   left: 8%;
+  width: 14%;
+  animation-delay: -500ms;
   background-color: var(--purple-50);
 }
 
 .loading-div-6 {
-  animation-delay: -400ms;
-  width: 11%;
   left: 23%;
+  width: 11%;
+  animation-delay: -400ms;
   background-color: var(--green-50);
 }
 
 .loading-div-7 {
-  animation-delay: -300ms;
-  width: 15%;
   left: 44%;
+  width: 15%;
+  animation-delay: -300ms;
   background-color: var(--orange-50);
 }
 
 .loading-div-8 {
-  animation-delay: -200ms;
-  width: 17%;
   left: 60%;
+  width: 17%;
+  animation-delay: -200ms;
   background-color: var(--orange-50);
 }
 
 .loading-div-9 {
-  animation-delay: -100ms;
-  width: 2%;
   left: 78%;
+  width: 2%;
+  animation-delay: -100ms;
   background-color: var(--blue-50);
 }
 
 .loading-div-10 {
-  animation-delay: 0ms;
-  width: 11%;
   left: 81%;
+  width: 11%;
+  animation-delay: 0ms;
   background-color: var(--green-60);
 }
 
 @keyframes loadingdiv {
   0% {
-    transform: translateX(100px);
     opacity: 0;
+    transform: translateX(100px);
   }
 
   20% {
-    transform: translateX(100px);
     opacity: 0;
+    transform: translateX(100px);
   }
 
   45% {
-    transform: translateX(0);
     opacity: 1;
+    transform: translateX(0);
   }
 
   65% {
-    transform: translateX(0);
     opacity: 1;
+    transform: translateX(0);
   }
 
   100% {
-    transform: translateX(-100px);
     opacity: 0;
+    transform: translateX(-100px);
   }
 }

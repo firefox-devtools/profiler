@@ -54,7 +54,13 @@ export function withSize<
 
       // Wrapping the first update in a requestAnimationFrame to defer the
       // calculation until the full render is done.
-      requestAnimationFrame(() => this._updateWidth(container));
+      requestAnimationFrame(() => {
+        // This component could have already been unmounted, check for the existence
+        // of the container.
+        if (this._container) {
+          this._updateWidth(this._container);
+        }
+      });
     }
     // The size is only updated when the document is visible.
     // In other cases resizing is registered in _isSizeInfoDirty.
@@ -84,6 +90,7 @@ export function withSize<
     };
 
     componentWillUnmount() {
+      this._container = null;
       window.removeEventListener('resize', this._resizeListener);
       window.removeEventListener(
         'visibilitychange',

@@ -127,7 +127,6 @@ class TimelineTrackThread extends PureComponent<Props> {
       <div className="timelineTrackThread">
         {displayJank ? (
           <TimelineMarkersJank
-            className="timelineTrackThreadMarkerOverview"
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             threadIndex={threadIndex}
@@ -136,14 +135,6 @@ class TimelineTrackThread extends PureComponent<Props> {
         ) : null}
         {displayMarkers ? (
           <TimelineMarkersOverview
-            // Feed in the thread name to the class. This is used for conditional
-            // sizing rules, for instance with GeckoMain threads.
-            // TODO - This seems kind of brittle, and should probably done through
-            // JavaScript and props instead.
-            className={`
-              timelineTrackThreadMarkerOverview
-              timelineTrackThreadMarkerOverviewThread${filteredThread.name}
-            `}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
             threadIndex={threadIndex}

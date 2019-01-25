@@ -91,8 +91,6 @@ export function addMarkersToThreadWithCorrespondingSamples(
       if (!samples.time.includes(time)) {
         samples.time.push(time);
         samples.stack.push(null);
-        samples.rss.push(null);
-        samples.uss.push(null);
         samples.responsiveness.push(null);
         samples.length++;
       }
@@ -190,13 +188,17 @@ export function getProfileFromTextSamples(
   profile.threads = allTextSamples.map(textSamples => {
     // Process the text.
     const textOnlyStacks = _parseTextSamples(textSamples);
-    const funcNames = textOnlyStacks
-      // Flatten the arrays.
-      .reduce((memo, row) => [...memo, ...row], [])
-      // remove modifiers
-      .map(func => func.replace(/\[.*/, ''))
-      // Make the list unique.
-      .filter((item, index, array) => array.indexOf(item) === index);
+
+    // Flatten the textOnlyStacks into into a list of function names.
+    const funcNamesSet = new Set();
+    const removeModifiers = /\[.*/;
+    for (let i = 0; i < textOnlyStacks.length; i++) {
+      const textOnlyStack = textOnlyStacks[i];
+      for (let j = 0; j < textOnlyStack.length; j++) {
+        funcNamesSet.add(textOnlyStack[j].replace(removeModifiers, ''));
+      }
+    }
+    const funcNames = [...funcNamesSet];
 
     const funcNamesDict = funcNames.reduce((result, item, index) => {
       result[item] = index;
@@ -464,8 +466,6 @@ function _buildThreadFromTextOnlyStacks(
     // Add a single sample for each column.
     samples.length++;
     samples.responsiveness.push(0);
-    samples.rss.push(null);
-    samples.uss.push(null);
     samples.stack.push(prefix);
     samples.time.push(columnIndex);
   });
@@ -565,8 +565,6 @@ export function getThreadWithJsTracerEvents(
     time: Array(endOfEvents)
       .fill(0)
       .map((_, i) => i),
-    rss: Array(endOfEvents).fill(null),
-    uss: Array(endOfEvents).fill(null),
     length: endOfEvents,
   };
 

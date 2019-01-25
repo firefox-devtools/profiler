@@ -66,7 +66,7 @@ export function viewProfileFromZip(
         zipFileState.pathInZipFile === pathInZipFile &&
         zipFileState.phase === 'PROCESS_PROFILE_FROM_ZIP_FILE'
       ) {
-        dispatch(viewProfile(profile, pathInZipFile));
+        dispatch(viewProfile(profile, { pathInZipFile }));
       }
     } catch (error) {
       console.error(

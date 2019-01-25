@@ -117,10 +117,11 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
                 Load a profile from file
               </label>
               <button
+                aria-expanded="false"
                 class="homeSectionButton"
                 type="button"
               >
-                Load a profile from an URL
+                Load a profile from a URL
               </button>
             </div>
           </div>
@@ -258,10 +259,11 @@ exports[`app/Home renders the install screen for the extension 1`] = `
                 Load a profile from file
               </label>
               <button
+                aria-expanded="false"
                 class="homeSectionButton"
                 type="button"
               >
-                Load a profile from an URL
+                Load a profile from a URL
               </button>
             </div>
           </div>
@@ -430,10 +432,11 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
                 Load a profile from file
               </label>
               <button
+                aria-expanded="false"
                 class="homeSectionButton"
                 type="button"
               >
-                Load a profile from an URL
+                Load a profile from a URL
               </button>
             </div>
           </div>
@@ -592,10 +595,11 @@ exports[`app/Home renders the usage instructions for pages with the extension in
                 Load a profile from file
               </label>
               <button
+                aria-expanded="false"
                 class="homeSectionButton"
                 type="button"
               >
-                Load a profile from an URL
+                Load a profile from a URL
               </button>
             </div>
           </div>
