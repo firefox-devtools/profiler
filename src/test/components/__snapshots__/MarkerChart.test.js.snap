@@ -335,7 +335,7 @@ Array [
   ],
   Array [
     "fillText",
-    "Maker H with no start",
+    "Marker H with no start",
     5,
     43,
   ],
@@ -365,7 +365,7 @@ Array [
   ],
   Array [
     "fillText",
-    "Maker H with no end",
+    "Marker H with no end",
     5,
     123,
   ],
@@ -805,11 +805,11 @@ Array [
   ],
   Array [
     "measureText",
-    "Maker H with no start",
+    "Marker H with no start",
   ],
   Array [
     "fillText",
-    "Maker H with no start",
+    "Marker H with no start",
     5,
     43,
   ],
@@ -855,11 +855,11 @@ Array [
   ],
   Array [
     "measureText",
-    "Maker H with no end",
+    "Marker H with no end",
   ],
   Array [
     "fillText",
-    "Maker H with no end",
+    "Marker H with no end",
     5,
     123,
   ],

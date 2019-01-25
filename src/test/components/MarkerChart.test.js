@@ -61,7 +61,7 @@ const MARKERS = [
     },
   ],
   [
-    'Maker H with no start',
+    'Marker H with no start',
     3,
     {
       type: 'tracing',
@@ -70,7 +70,7 @@ const MARKERS = [
     },
   ],
   [
-    'Maker H with no end',
+    'Marker H with no end',
     9,
     {
       type: 'tracing',
