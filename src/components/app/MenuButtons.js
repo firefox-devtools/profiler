@@ -454,19 +454,20 @@ class ProfileSharingCompositeButton extends React.PureComponent<
             };
           });
 
+          if (this._permalinkButton) {
+            this._permalinkButton.openPanel();
+          }
+
           sendAnalytics({
             hitType: 'event',
             eventCategory: 'profile upload',
             eventAction: 'succeeded',
           });
         });
-        const shortenUrlPromise = this._shortenUrlAndFocusTextFieldOnCompletion();
-        Promise.race([uploadPromise, shortenUrlPromise]).then(() => {
-          if (this._permalinkButton) {
-            this._permalinkButton.openPanel();
-          }
-        });
-        return Promise.all([uploadPromise, shortenUrlPromise]);
+        return Promise.all([
+          uploadPromise,
+          this._shortenUrlAndFocusTextFieldOnCompletion(),
+        ]);
       })
       .catch((error: Error) => {
         // To avoid any interaction with running transitions, we delay setting
