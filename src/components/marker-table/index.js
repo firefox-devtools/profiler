@@ -119,7 +119,7 @@ class MarkerTree {
 
       displayData = {
         start: _formatStart(marker.start, this._zeroAt),
-        duration: _formatDuration(marker.dur),
+        duration: marker.incomplete ? 'unknown' : _formatDuration(marker.dur),
         name,
         category,
       };

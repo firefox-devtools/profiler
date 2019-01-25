@@ -60,6 +60,24 @@ const MARKERS = [
       phase: 2,
     },
   ],
+  [
+    'Marker H with no start',
+    3,
+    {
+      type: 'tracing',
+      category: 'Paint',
+      interval: 'end',
+    },
+  ],
+  [
+    'Marker H with no end',
+    9,
+    {
+      type: 'tracing',
+      category: 'Paint',
+      interval: 'start',
+    },
+  ],
 ];
 
 function setupWithProfile(profile) {
