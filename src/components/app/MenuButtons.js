@@ -539,6 +539,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
           currentButtonIsUploadErrorButton: state === 'error',
           currentButtonIsSecondaryShareButton: isSecondaryShareButtonVisible,
         })}
+        data-testid="menuButtonsCompositeButtonContainer"
       >
         {/* the buttons are conditionally rendered (depending on the state) */}
         {state === 'local' && (
