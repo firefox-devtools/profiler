@@ -6,6 +6,8 @@
 import {
   extractFuncsAndResourcesFromFrameLocations,
   processProfile,
+  serializeProfile,
+  unserializeProfileOfArbitraryFormat,
 } from '../../profile-logic/process-profile';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import {
@@ -227,5 +229,62 @@ describe('gecko counters processing', function() {
 
     // The subprocess times are offset when processed:
     expect(processedCounters[1].sampleGroups.samples.time).toEqual(offsetTime);
+  });
+});
+
+describe('serializeProfile', function() {
+  it('should produce the same profile in a roundtrip', async function() {
+    const profile = processProfile(createGeckoProfile());
+    const serialized = serializeProfile(profile);
+    const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
+    // FIXME: Uncomment this line after resolving `undefined` serialization issue
+    // See: https://github.com/devtools-html/perf.html/issues/1599
+    // expect(profile).toEqual(roundtrip);
+
+    const secondSerialized = serializeProfile(roundtrip);
+    const secondRountrip = await unserializeProfileOfArbitraryFormat(
+      secondSerialized
+    );
+    expect(roundtrip).toEqual(secondRountrip);
+  });
+
+  describe('removing network urls', function() {
+    it('should remove all pages information', async function() {
+      const profile = processProfile(createGeckoProfile());
+
+      for (const page of ensureExists(profile.pages)) {
+        expect(page.url.includes('http')).toBe(true);
+      }
+
+      const serialized = serializeProfile(profile, false);
+      const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
+
+      for (const page of ensureExists(roundtrip.pages)) {
+        expect(page.url.includes('http')).toBe(false);
+      }
+    });
+
+    it('should remove all URLs of network markers', async function() {
+      const profile = processProfile(createGeckoProfile());
+      const serialized = serializeProfile(profile, false);
+      const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
+
+      for (const thread of roundtrip.threads) {
+        const stringArray = thread.stringTable.serializeToArray();
+        for (let i = 0; i < thread.markers.length; i++) {
+          const currentMarker = thread.markers.data[i];
+          if (
+            currentMarker &&
+            currentMarker.type &&
+            currentMarker.type === 'Network'
+          ) {
+            expect(currentMarker.URI).toBeFalsy();
+            expect(currentMarker.RedirectURI).toBeFalsy();
+            const stringIndex = thread.markers.name[i];
+            expect(stringArray[stringIndex].includes('http')).toBe(false);
+          }
+        }
+      }
+    });
   });
 });
