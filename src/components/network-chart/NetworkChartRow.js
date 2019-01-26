@@ -6,6 +6,7 @@
 import * as React from 'react';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import Tooltip from '../shared/Tooltip';
+import { formatMilliseconds } from '../../utils/format-numbers';
 
 import type { CssPixels } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
@@ -101,26 +102,38 @@ const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
   const requestQueueWidth = requestQueue;
   const requestWidth = request;
   const responseWidth = response;
+  const responseQueueWidth = 100 - requestQueue - request - response;
 
   return (
     <React.Fragment>
       <span
-        className="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-        style={{ width: `${requestQueueWidth}%` }}
+        className="networkChartRowItemBarOuter networkChartRowItemBarRequestQueue"
+        style={{
+          width: `${requestQueueWidth}%`,
+        }}
       >
         &nbsp;
       </span>
       <span
         className="networkChartRowItemBarInner networkChartRowItemBarRequest"
-        style={{ width: `${requestWidth}%` }}
+        style={{ left: `${requestQueueWidth}%`, width: `${requestWidth}%` }}
       >
         &nbsp;
       </span>
       <span
         className="networkChartRowItemBarInner networkChartRowItemBarResponse"
-        style={{ width: `${responseWidth}%` }}
+        style={{ left: `${requestQueueWidth + requestWidth}%`, width: `${responseWidth}%` }}
       >
         &nbsp;
+      </span>
+      <span
+        className="networkChartRowItemBarOuter networkChartRowItemBarResponseQueue"
+        style={{ width: `${responseQueueWidth}%` }}
+      >
+        &nbsp;
+      </span>
+      <span className="networkChartRowItemBarDuration">
+        {formatMilliseconds(dur)}
       </span>
     </React.Fragment>
   );
@@ -186,22 +199,32 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
       const uriPath = uri.pathname.replace(uriFilename, '');
 
       return (
-        <span>
-          <span className="networkChartRowItemUriOptional">
+        <React.Fragment>
+          <span key="protocol" className="networkChartRowItemUriOptional">
             {uri.protocol + '//'}
           </span>
-          <span className="networkChartRowItemUriRequired">{uri.hostname}</span>
+          <span key="hostname" className="networkChartRowItemUriRequired">
+            {uri.hostname}
+          </span>
           {uriPath !== uriFilename && uriPath.length > 0 ? (
-            <span className="networkChartRowItemUriOptional">{uriPath}</span>
+            <span key="path" className="networkChartRowItemUriOptional">
+              {uriPath}
+            </span>
           ) : null}
-          <span className="networkChartRowItemUriRequired">{uriFilename}</span>
+          <span key="name" className="networkChartRowItemUriRequired">
+            {uriFilename}
+          </span>
           {uri.search ? (
-            <span className="networkChartRowItemUriOptional">{uri.search}</span>
+            <span key="search" className="networkChartRowItemUriOptional">
+              {uri.search}
+            </span>
           ) : null}
           {uri.hash ? (
-            <span className="networkChartRowItemUriOptional">{uri.hash}</span>
+            <span key="hash" className="networkChartRowItemUriOptional">
+              {uri.hash}
+            </span>
           ) : null}
-        </span>
+        </React.Fragment>
       );
     }
     return name;
@@ -238,6 +261,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
   render() {
     const { index, marker, markerStyle, networkPayload } = this.props;
+    console.log(markerStyle);
 
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
 
@@ -250,7 +274,12 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
       this._identifyType(marker.name);
     return (
       <section className={itemClassName}>
-        <div className="networkChartRowItemLabel">
+        <div
+          className="networkChartRowItemLabel"
+          style={{
+            width: markerStyle.left > 0 ? (markerStyle.left - 8) : null,
+          }}
+        >
           {this._splitsURI(marker.name)}
         </div>
         <div

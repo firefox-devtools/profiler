@@ -150,7 +150,7 @@ function _makePriorityHumanReadable(
     return null;
   }
 
-  prioLabel = prioLabel + '(' + priority + ')';
+  prioLabel = prioLabel + ' (' + priority + ')';
   return _markerDetail(key, label, prioLabel);
 }
 
