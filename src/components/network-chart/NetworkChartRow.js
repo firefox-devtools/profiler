@@ -122,7 +122,10 @@ const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
       </span>
       <span
         className="networkChartRowItemBarInner networkChartRowItemBarResponse"
-        style={{ left: `${requestQueueWidth + requestWidth}%`, width: `${responseWidth}%` }}
+        style={{
+          left: `${requestQueueWidth + requestWidth}%`,
+          width: `${responseWidth}%`,
+        }}
       >
         &nbsp;
       </span>
@@ -261,7 +264,6 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
 
   render() {
     const { index, marker, markerStyle, networkPayload } = this.props;
-    console.log(markerStyle);
 
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
 
@@ -277,7 +279,10 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
         <div
           className="networkChartRowItemLabel"
           style={{
-            width: markerStyle.left > 0 ? (markerStyle.left - 8) : null,
+            width:
+              parseFloat(markerStyle.left) > 0
+                ? parseFloat(markerStyle.left) - 8
+                : null,
           }}
         >
           {this._splitsURI(marker.name)}
