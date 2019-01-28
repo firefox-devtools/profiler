@@ -20,6 +20,12 @@ export type GPUMarkerPayload = {|
   gpuend: Milliseconds, // The time the GPU took to execute the command.
 |};
 
+/**
+ * Markers can include a stack. These are converted to a cause backtrace, which includes
+ * the time the stack was taken. Sometimes this cause can be async, and triggered before
+ * the marker, or it can be synchronous, and the time is contained within the marker's
+ * start and end time.
+ */
 export type CauseBacktrace = {|
   time: Milliseconds,
   stack: IndexIntoStackTable,
