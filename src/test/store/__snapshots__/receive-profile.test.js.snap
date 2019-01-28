@@ -109,3 +109,55 @@ exports[`actions/receive-profile retrieveProfileFromFile will be an error to vie
 exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to decompress a zipped profile 1`] = `[Error: Can't find end of central directory : is this a zip file ? If it is, see https://stuk.github.io/jszip/documentation/howto/read_zip.html]`;
 
 exports[`actions/receive-profile retrieveProfileFromFile will give an error when unable to parse json 1`] = `[Error: Unserializing the profile failed: TypeError: Cannot read property 'version' of undefined]`;
+
+exports[`actions/receive-profile retrieveProfilesToCompare filters samples, but not markers, according to the URL 1`] = `
+Object {
+  "length": 3,
+  "responsiveness": Array [
+    0,
+    0,
+    0,
+  ],
+  "stack": Array [
+    2,
+    3,
+    4,
+  ],
+  "time": Array [
+    0,
+    1,
+    2,
+  ],
+}
+`;
+
+exports[`actions/receive-profile retrieveProfilesToCompare filters samples, but not markers, according to the URL 2`] = `
+Object {
+  "data": Array [
+    Object {
+      "endTime": 1,
+      "startTime": -1,
+      "type": "DummyForTests",
+    },
+    null,
+    null,
+    null,
+    null,
+  ],
+  "length": 5,
+  "name": Array [
+    0,
+    1,
+    2,
+    3,
+    4,
+  ],
+  "time": Array [
+    -1,
+    0,
+    1,
+    2,
+    3,
+  ],
+}
+`;

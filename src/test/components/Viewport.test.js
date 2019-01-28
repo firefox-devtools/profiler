@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
 
 import { withChartViewport } from '../../components/shared/chart/Viewport';
 import {
@@ -16,10 +16,12 @@ import {
 import { changeSidebarOpenState } from '../../actions/app';
 
 import explicitConnect from '../../utils/connect';
+import { ensureExists } from '../../utils/flow';
+
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
+import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 import type { Milliseconds } from '../../types/units';
@@ -43,16 +45,16 @@ const SMALL_MAX_VIEWPORT_HEIGHT = BOUNDING_BOX_HEIGHT * 0.2;
 
 describe('Viewport', function() {
   it('matches the component snapshot', () => {
-    const { view } = setup();
-    expect(view).toMatchSnapshot();
+    const { container, unmount } = setup();
+    expect(container.firstChild).toMatchSnapshot();
     // Trigger any unmounting behavior handlers, just make sure it doesn't
     // throw any errors.
-    view.unmount();
+    unmount();
   });
 
   it('renders the wrapped chart component', () => {
-    const { view } = setup();
-    expect(view.find('#dummy-chart').length).toBe(1);
+    const { container } = setup();
+    expect(container.querySelector('#dummy-chart')).toBeTruthy();
   });
 
   it('provides a viewport', () => {
@@ -75,9 +77,9 @@ describe('Viewport', function() {
   describe('scrolling hint', function() {
     it('can show a shift scrolling hint', function() {
       jest.useFakeTimers();
-      const { view, scroll } = setup();
+      const { getByText, scroll } = setup();
       const isTimerVisible = () =>
-        !view.find('.chartViewportShiftScroll').hasClass('hidden');
+        !getByText(/Zoom Chart/).classList.contains('hidden');
 
       // No hint is shown.
       expect(isTimerVisible()).toBe(false);
@@ -88,14 +90,13 @@ describe('Viewport', function() {
 
       // Run the setTimeout, the menu should disappear.
       jest.runAllTimers();
-      view.update();
       expect(isTimerVisible()).toBe(false);
     });
 
     it('will not show a shift scrolling hint after zooming once', function() {
-      const { view, scroll } = setup();
+      const { getByText, scroll } = setup();
       const isTimerVisible = () =>
-        !view.find('.chartViewportShiftScroll').hasClass('hidden');
+        !getByText(/Zoom Chart/).classList.contains('hidden');
 
       // No hint is shown at the beginning.
       expect(isTimerVisible()).toBe(false);
@@ -177,6 +178,9 @@ describe('Viewport', function() {
             marginLeft,
             marginRight,
           });
+
+          // Note that clientX will get rounded, so it won't be _exactly_ at the
+          // center, which is why we do some approximations later.
           const viewport = scrollAndGetViewport({
             deltaY: -100,
             shiftKey: true,
@@ -186,10 +190,7 @@ describe('Viewport', function() {
           // Assert that this zooms in equally.
           expect(viewport.viewportLeft).toBeGreaterThan(0);
           expect(viewport.viewportRight).toBeLessThan(1);
-          expect(1 - viewport.viewportRight).toBeCloseTo(
-            viewport.viewportLeft,
-            7
-          );
+          expect(viewport.viewportLeft + viewport.viewportRight).toBeCloseTo(1);
 
           // Only do an additional viewport top/bottom check here.
           expect(viewport).toMatchObject({
@@ -546,7 +547,6 @@ describe('Viewport', function() {
       setBoundingBoxMock,
       getChartViewport,
       flushRafCalls,
-      view,
     } = setup();
 
     expect(getChartViewport()).toMatchObject({
@@ -562,7 +562,6 @@ describe('Viewport', function() {
     setBoundingBoxMock({ width: BOUNDING_BOX_WIDTH - boundingWidthDiff });
     dispatch(changeSidebarOpenState('calltree', true));
     flushRafCalls();
-    view.update();
 
     expect(getChartViewport()).toMatchObject({
       containerWidth: BOUNDING_BOX_WIDTH - boundingWidthDiff,
@@ -618,7 +617,9 @@ function setup(profileOverrides: Object = {}) {
     .mockImplementation(() => getBoundingBoxForViewport());
 
   // Hook up a dummy chart with a viewport.
-  const DummyChart = () => <div id="dummy-chart" />;
+  const DummyChart = jest.fn(() => <div id="dummy-chart" />);
+  // Flow's internal structures for React don't recognize our mock function as a
+  // valid stateless component. $FlowExpectError
   const ChartWithViewport = withChartViewport(DummyChart);
 
   // The viewport component started out as an unconnected component, but then it
@@ -656,35 +657,37 @@ function setup(profileOverrides: Object = {}) {
   });
 
   const store = storeWithProfile(getProfileFromTextSamples('A').profile);
-  const view = mount(
+  const renderResult = render(
     <Provider store={store}>
       <ConnectedChartWithViewport />
     </Provider>
   );
+  const { container } = renderResult;
 
   // WithSize uses requestAnimationFrame.
   flushRafCalls();
-  view.update();
 
   // The following functions are helpers for the tests, to provide a nicer functional
   // interface to drive changes to the components.
 
-  function moveMouseAndGetLeft(pageX: number): number {
-    view.simulate('mousemove', { pageX });
-    view.update();
-    return view.find('.timelineTrackScreenshotHover').prop('style').left;
+  /**
+   * This helper function returns the last `viewport` prop passed to DummyChart.
+   */
+  function getChartViewport() {
+    const calls = DummyChart.mock.calls;
+    return calls[calls.length - 1][0].viewport;
   }
 
-  function getChartViewport() {
-    return view.find(DummyChart).props().viewport;
+  function viewportContainer() {
+    return ensureExists(
+      container.querySelector('.chartViewport'),
+      `Couldn't find the viewport container, with the selector .chartViewport`
+    );
   }
 
   function scroll(eventOverrides) {
-    view
-      .find('.chartViewport')
-      .simulate('wheel', getMouseEvent(eventOverrides));
+    fireEvent.wheel(viewportContainer(), eventOverrides);
     flushRafCalls();
-    view.update();
   }
 
   /**
@@ -697,11 +700,10 @@ function setup(profileOverrides: Object = {}) {
    */
   function depressKey(code: string, duration: Milliseconds) {
     jest.spyOn(performance, 'now').mockReturnValue(0);
-    view.simulate('keydown', { nativeEvent: { code } });
+    fireEvent.keyDown(viewportContainer(), { code });
     flushRafCalls([duration]);
-    view.simulate('keyup', { nativeEvent: { code } });
+    fireEvent.keyUp(viewportContainer(), { code });
     flushRafCalls();
-    view.update();
   }
 
   function scrollAndGetViewport(eventOverrides) {
@@ -709,27 +711,16 @@ function setup(profileOverrides: Object = {}) {
     return getChartViewport();
   }
 
-  // Dispatch events to the window, which isn't available through the enzyme
-  // simulate interface. Instead use JSDOM.
-  function _dispatchToJsdomWindow(eventType: string, overrides: Object) {
-    window.dispatchEvent(
-      // Flow doesn't like us adding unknown mouse properties to Event, and also
-      // doesn't like us modifying a MouseEvent, so opt out of type checks here.
-      Object.assign((new Event(eventType): Object), getMouseEvent(overrides))
-    );
-  }
-
   function clickAndDrag(fromX, fromY, toX, toY) {
     const from = { clientX: fromX, clientY: fromY };
     const to = { clientX: toX, clientY: toY };
 
-    view.find('.chartViewport').simulate('mousedown', getMouseEvent(from));
-    _dispatchToJsdomWindow('mousemove', from);
-    _dispatchToJsdomWindow('mousemove', to);
-    _dispatchToJsdomWindow('mouseup', to);
+    fireEvent.mouseDown(viewportContainer(), from);
+    fireEvent.mouseMove(viewportContainer(), from);
+    fireEvent.mouseMove(viewportContainer(), to);
+    fireEvent.mouseUp(viewportContainer(), to);
     // Flush any batched updates.
     flushRafCalls();
-    view.update();
   }
 
   function setBoundingBoxMock(override: $Shape<BoundingBoxOverride>): void {
@@ -739,8 +730,7 @@ function setup(profileOverrides: Object = {}) {
   }
 
   return {
-    view,
-    moveMouseAndGetLeft,
+    ...renderResult,
     flushRafCalls,
     getChartViewport,
     scrollAndGetViewport,

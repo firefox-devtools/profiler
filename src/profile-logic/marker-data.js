@@ -218,7 +218,8 @@ export function extractMarkerDataFromName(
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
   stringTable: UniqueStringArray,
-  firstSampleTime: number
+  firstSampleTime: number,
+  lastSampleTime: number
 ): Marker[] {
   const matchedMarkers: Marker[] = [];
   // This map is used to track start and end raw markers for the time-matched markers.
@@ -333,7 +334,7 @@ export function deriveMarkersFromRawMarkerTable(
   // Loop over "start" markers without any "end" markers
   for (const markerBucket of openMarkers.values()) {
     for (const marker of markerBucket) {
-      marker.dur = Infinity;
+      marker.dur = Math.max(lastSampleTime - marker.start, 0);
       marker.incomplete = true;
       matchedMarkers.push(marker);
     }

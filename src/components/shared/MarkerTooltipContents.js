@@ -378,6 +378,14 @@ function getMarkerDetails(
           </div>
         );
       }
+      case 'Log': {
+        return (
+          <div className="tooltipDetails">
+            {_markerDetail('module', 'Module', data.module)}
+            {_markerDetail('name', 'Name', data.name)}
+          </div>
+        );
+      }
       case 'GCMinor': {
         if (data.nursery) {
           const nursery = data.nursery;
@@ -553,6 +561,24 @@ function getMarkerDetails(
               timings.phase_times,
               6
             );
+            let gcsize;
+            const post_heap_size = timings.post_heap_size;
+            if (post_heap_size !== undefined) {
+              gcsize = _markerDetail(
+                'gcsize',
+                'Heap size (pre - post)',
+                formatBytes(timings.allocated_bytes) +
+                  ' - ' +
+                  formatBytes(post_heap_size)
+              );
+            } else {
+              gcsize = _markerDetail(
+                'gcsizepre',
+                'Heap size (pre)',
+                timings.allocated_bytes,
+                formatBytes
+              );
+            }
             return (
               <div className="tooltipDetails">
                 {_markerDetail('gcreason', 'Reason', timings.reason)}
@@ -579,12 +605,7 @@ function getMarkerDetails(
                       /* maxFractionalDigits */ 2
                     )
                 )}
-                {_markerDetail(
-                  'gcusage',
-                  'Heap size',
-                  timings.allocated_bytes,
-                  formatBytes
-                )}
+                {gcsize}
                 {_markerDetail(
                   'gcmmu20ms',
                   'MMU 20ms',
@@ -646,7 +667,7 @@ function getMarkerDetails(
             {_markerDetail('gcbudget', 'Budget', timings.budget)}
             {_markerDetail(
               'gcstate',
-              'States',
+              'States (pre - post)',
               timings.initial_state + ' – ' + timings.final_state
             )}
             {triggers}

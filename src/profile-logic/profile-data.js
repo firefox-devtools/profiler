@@ -11,6 +11,7 @@ import type {
   FrameTable,
   FuncTable,
   ResourceTable,
+  CategoryList,
   IndexIntoCategoryList,
   IndexIntoFuncTable,
   IndexIntoSamplesTable,
@@ -278,16 +279,19 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
 export type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
 export type StackImplementation = 'native' | JsImplementation;
 export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
+export type BreakdownByCategory = Milliseconds[]; // { [IndexIntoCategoryList]: Milliseconds }
 type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
     value: Milliseconds,
     breakdownByImplementation: BreakdownByImplementation | null,
+    breakdownByCategory: BreakdownByCategory | null,
   |},
   totalTime: {|
     // time spent including children
     value: Milliseconds,
     breakdownByImplementation: BreakdownByImplementation | null,
+    breakdownByCategory: BreakdownByCategory | null,
   |},
 |};
 
@@ -333,7 +337,8 @@ export function getTimingsForPath(
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   interval: number,
   isInvertedTree: boolean,
-  thread: Thread
+  thread: Thread,
+  categories: CategoryList
 ): TimingsForPath {
   if (!needlePath.length) {
     // If the path is empty, which shouldn't usually happen, we return an empty
@@ -341,12 +346,28 @@ export function getTimingsForPath(
     // The rest of this function's code assumes a non-empty path.
     return {
       forPath: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 0, breakdownByImplementation: null },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
+        totalTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
       },
       forFunc: {
-        selfTime: { value: 0, breakdownByImplementation: null },
-        totalTime: { value: 0, breakdownByImplementation: null },
+        selfTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
+        totalTime: {
+          value: 0,
+          breakdownByImplementation: null,
+          breakdownByCategory: null,
+        },
       },
       rootTime: 0,
     };
@@ -357,12 +378,28 @@ export function getTimingsForPath(
   const needleFuncIndex = getLeafFuncIndex(needlePath);
 
   const pathTimings: ItemTimings = {
-    selfTime: { value: 0, breakdownByImplementation: null },
-    totalTime: { value: 0, breakdownByImplementation: null },
+    selfTime: {
+      value: 0,
+      breakdownByImplementation: null,
+      breakdownByCategory: null,
+    },
+    totalTime: {
+      value: 0,
+      breakdownByImplementation: null,
+      breakdownByCategory: null,
+    },
   };
   const funcTimings: ItemTimings = {
-    selfTime: { value: 0, breakdownByImplementation: null },
-    totalTime: { value: 0, breakdownByImplementation: null },
+    selfTime: {
+      value: 0,
+      breakdownByImplementation: null,
+      breakdownByCategory: null,
+    },
+    totalTime: {
+      value: 0,
+      breakdownByImplementation: null,
+      breakdownByCategory: null,
+    },
   };
   let rootTime = 0;
 
@@ -374,6 +411,7 @@ export function getTimingsForPath(
   function accumulateDataToTimings(
     timings: {
       breakdownByImplementation: BreakdownByImplementation | null,
+      breakdownByCategory: BreakdownByCategory | null,
       value: number,
     },
     stackIndex: IndexIntoStackTable,
@@ -395,6 +433,15 @@ export function getTimingsForPath(
       timings.breakdownByImplementation[implementation] = 0;
     }
     timings.breakdownByImplementation[implementation] += interval;
+
+    // step 4: find the category value for this stack
+    const categoryIndex = stackTable.category[stackIndex];
+
+    // step 5: increment the right value in the category breakdown
+    if (timings.breakdownByCategory === null) {
+      timings.breakdownByCategory = Array(categories.length).fill(0);
+    }
+    timings.breakdownByCategory[categoryIndex] += interval;
   }
 
   // Loop over each sample and accumulate the self time, running time, and
@@ -526,7 +573,7 @@ export function getTimingsForPath(
   return { forPath: pathTimings, forFunc: funcTimings, rootTime };
 }
 
-function _getTimeRangeForThread(
+export function getTimeRangeForThread(
   thread: Thread,
   interval: number
 ): StartEndRange {
@@ -544,7 +591,7 @@ export function getTimeRangeIncludingAllThreads(
 ): StartEndRange {
   const completeRange = { start: Infinity, end: -Infinity };
   profile.threads.forEach(thread => {
-    const threadRange = _getTimeRangeForThread(thread, profile.meta.interval);
+    const threadRange = getTimeRangeForThread(thread, profile.meta.interval);
     completeRange.start = Math.min(completeRange.start, threadRange.start);
     completeRange.end = Math.max(completeRange.end, threadRange.end);
   });
@@ -964,8 +1011,6 @@ export function filterThreadSamplesToRange(
     time: samples.time.slice(sBegin, sEnd),
     stack: samples.stack.slice(sBegin, sEnd),
     responsiveness: samples.responsiveness.slice(sBegin, sEnd),
-    rss: samples.rss.slice(sBegin, sEnd),
-    uss: samples.uss.slice(sBegin, sEnd),
   };
   return Object.assign({}, thread, {
     samples: newSamples,

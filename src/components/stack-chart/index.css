@@ -3,10 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .stackChart {
-  flex: 1;
   display: flex;
-  flex-flow: column;
   overflow: hidden;
+  flex: 1;
+  flex-flow: column;
 }
 
 .stackChartContent {

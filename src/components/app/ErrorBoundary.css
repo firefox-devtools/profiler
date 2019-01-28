@@ -1,0 +1,47 @@
+.appErrorBoundary {
+  display: flex;
+  overflow: hidden;
+  box-sizing: border-box;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  background-color: var(--grey-20);
+}
+
+.appErrorBoundaryContents {
+  display: flex;
+  width: 100%;
+  max-width: 600px;
+  max-height: calc(100%);
+  box-sizing: border-box;
+  flex-direction: column;
+}
+
+.appErrorBoundaryDetails {
+  padding: 25px;
+  margin: 12px 0;
+  background: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  color: var(--grey-70);
+  font-family: monospace;
+  line-height: 1.3;
+  opacity: 1;
+  overflow-y: auto;
+
+  /* Transition opacity, but do not delay changing the visibility. */
+  transition: opacity 150ms, visibility 0s;
+  visibility: visible;
+  white-space: pre-wrap;
+}
+
+.appErrorBoundaryDetails.hide {
+  opacity: 0;
+
+  /* Transition opacity, and create a delay on hiding the visibility to allow
+     time for the fade out. */
+  transition: opacity 150ms, visibility 0s 150ms;
+  visibility: hidden;
+}

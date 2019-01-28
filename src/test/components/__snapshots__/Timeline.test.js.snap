@@ -2,112 +2,88 @@
 
 exports[`Timeline renders the header 1`] = `
 <div
-  className="timelineSelection"
-  onMouseDown={[Function]}
-  onMouseMove={[Function]}
+  class="timelineSelection"
 >
   <form>
     <div
-      className="timelineToggle"
+      class="timelineToggle"
     >
       <label
-        className="timelineToggleLabel"
+        class="timelineToggleLabel"
       >
         <input
-          checked={true}
-          className="timelineToggleInput"
+          class="timelineToggleInput"
           name="timelineToggle"
-          onChange={[Function]}
           type="radio"
+          value="on"
         />
         Categories
       </label>
       <label
-        className="timelineToggleLabel"
+        class="timelineToggleLabel"
       >
         <input
-          checked={false}
-          className="timelineToggleInput"
+          class="timelineToggleInput"
           name="timelineToggle"
-          onChange={[Function]}
           type="radio"
+          value="on"
         />
         Stack height
       </label>
     </div>
   </form>
   <div
-    className="timelineRuler"
+    class="timelineRuler"
   >
     <ol
-      className="timelineRulerContainer"
+      class="timelineRulerContainer"
     >
       <li
-        className="timelineRulerNotch"
-        style={
-          Object {
-            "left": "0px",
-          }
-        }
+        class="timelineRulerNotch"
+        style="left: 0px;"
       >
         <span
-          className="timelineRulerNotchText"
+          class="timelineRulerNotchText"
         >
           0.000s
         </span>
       </li>
       <li
-        className="timelineRulerNotch"
-        style={
-          Object {
-            "left": "66.66666666666667px",
-          }
-        }
+        class="timelineRulerNotch"
+        style="left: 66.66666666666667px;"
       >
         <span
-          className="timelineRulerNotchText"
+          class="timelineRulerNotchText"
         >
           0.002s
         </span>
       </li>
       <li
-        className="timelineRulerNotch"
-        style={
-          Object {
-            "left": "133.33333333333334px",
-          }
-        }
+        class="timelineRulerNotch"
+        style="left: 133.33333333333334px;"
       >
         <span
-          className="timelineRulerNotchText"
+          class="timelineRulerNotchText"
         >
           0.004s
         </span>
       </li>
       <li
-        className="timelineRulerNotch"
-        style={
-          Object {
-            "left": "200px",
-          }
-        }
+        class="timelineRulerNotch"
+        style="left: 200px;"
       >
         <span
-          className="timelineRulerNotchText"
+          class="timelineRulerNotchText"
         >
           0.006s
         </span>
       </li>
       <li
-        className="timelineRulerNotch"
-        style={
-          Object {
-            "left": "266.6666666666667px",
-          }
-        }
+        class="timelineRulerNotch"
+        style="left: 266.6666666666667px;"
       >
         <span
-          className="timelineRulerNotchText"
+          class="timelineRulerNotchText"
         >
           0.008s
         </span>
@@ -115,213 +91,161 @@ exports[`Timeline renders the header 1`] = `
     </ol>
   </div>
   <div
-    className="overflowEdgeIndicator timelineOverflowEdgeIndicator"
+    class="overflowEdgeIndicator timelineOverflowEdgeIndicator"
   >
     <div
-      className="overflowEdgeIndicatorEdge topEdge"
+      class="overflowEdgeIndicatorEdge topEdge"
     />
     <div
-      className="overflowEdgeIndicatorEdge rightEdge"
+      class="overflowEdgeIndicatorEdge rightEdge"
     />
     <div
-      className="overflowEdgeIndicatorEdge bottomEdge"
+      class="overflowEdgeIndicatorEdge bottomEdge"
     />
     <div
-      className="overflowEdgeIndicatorEdge leftEdge"
+      class="overflowEdgeIndicatorEdge leftEdge"
     />
     <div
-      className="overflowEdgeIndicatorScrollbox timelineOverflowEdgeIndicatorScrollbox"
-      onScroll={[Function]}
+      class="overflowEdgeIndicatorScrollbox timelineOverflowEdgeIndicatorScrollbox"
     >
       <div
-        className="overflowEdgeIndicatorContentsWrapper"
+        class="overflowEdgeIndicatorContentsWrapper"
       >
         <ol
-          className="timelineThreadList"
-          onMouseDown={[Function]}
+          class="timelineThreadList"
         >
           <li
-            className="timelineTrack"
+            class="timelineTrack"
           >
             <div
-              className="timelineTrackRow timelineTrackGlobalRow"
-              onClick={[Function]}
+              class="timelineTrackRow timelineTrackGlobalRow"
             >
               <div
-                className="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
-                onContextMenu={[Function]}
-                onMouseDown={[Function]}
-                onMouseOut={[Function]}
-                onMouseUp={[Function]}
-                onTouchEnd={[Function]}
-                onTouchStart={[Function]}
-                title={null}
+                class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
               >
                 <button
-                  className="timelineTrackNameButton"
+                  class="timelineTrackNameButton"
                   type="button"
                 >
                   Process 0
                 </button>
               </div>
               <div
-                className="timelineTrackTrack"
+                class="timelineTrackTrack"
               >
                 <div
-                  className="timelineTrackThreadBlank"
+                  class="timelineTrackThreadBlank"
                 />
               </div>
             </div>
             <ol
-              className="timelineTrackLocalTracks"
-              onMouseDown={[Function]}
+              class="timelineTrackLocalTracks"
             >
               <li
-                className="timelineTrack timelineTrackLocal"
+                class="timelineTrack timelineTrackLocal"
               >
                 <div
-                  className="timelineTrackRow timelineTrackLocalRow selected"
-                  onClick={[Function]}
+                  class="timelineTrackRow timelineTrackLocalRow selected"
                 >
                   <div
-                    className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-                    onContextMenu={[Function]}
-                    onMouseDown={[Function]}
-                    onMouseOut={[Function]}
-                    onMouseUp={[Function]}
-                    onTouchEnd={[Function]}
-                    onTouchStart={[Function]}
+                    class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
                     title="thread: \\"Main Thread\\" (0)
 process: \\"default\\" (0)"
                   >
                     <button
-                      className="timelineTrackNameButton"
+                      class="timelineTrackNameButton"
                       type="button"
                     >
                       Main Thread
                     </button>
                   </div>
                   <div
-                    className="timelineTrackTrack"
+                    class="timelineTrackTrack"
                   >
                     <div
-                      className="timelineTrackThread"
+                      class="timelineTrackThread"
                     >
                       <div
-                        className="timelineTrackThreadMarkerOverview selected"
+                        class="timelineMarkers selected"
                       >
                         <canvas
-                          className="timelineMarkersCanvas"
-                          onMouseDown={[Function]}
-                          onMouseMove={[Function]}
-                          onMouseOut={[Function]}
-                          onMouseUp={[Function]}
+                          class="timelineMarkersCanvas"
+                          height="300"
+                          width="300"
                         />
                       </div>
                       <div
-                        className="threadActivityGraph"
-                        onMouseLeave={[Function]}
-                        onMouseMove={[Function]}
+                        class="threadActivityGraph"
                       >
                         <canvas
-                          className="threadActivityGraphCanvas threadActivityGraphCanvas"
-                          onMouseUp={[Function]}
+                          class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                          height="300"
+                          width="200"
                         />
                       </div>
                       <div
-                        className="timelineEmptyThreadIndicator"
+                        class="timelineEmptyThreadIndicator"
                       />
                     </div>
                   </div>
                 </div>
               </li>
               <li
-                className="timelineTrack timelineTrackLocal"
+                class="timelineTrack timelineTrackLocal"
               >
                 <div
-                  className="timelineTrackRow timelineTrackLocalRow"
-                  onClick={[Function]}
+                  class="timelineTrackRow timelineTrackLocalRow"
                 >
                   <div
-                    className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-                    onContextMenu={[Function]}
-                    onMouseDown={[Function]}
-                    onMouseOut={[Function]}
-                    onMouseUp={[Function]}
-                    onTouchEnd={[Function]}
-                    onTouchStart={[Function]}
+                    class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
                     title="thread: \\"Thread with dropped samples\\" (0)
 process: \\"default\\" (0)"
                   >
                     <button
-                      className="timelineTrackNameButton"
+                      class="timelineTrackNameButton"
                       type="button"
                     >
                       Thread with dropped samples
                     </button>
                   </div>
                   <div
-                    className="timelineTrackTrack"
+                    class="timelineTrackTrack"
                   >
                     <div
-                      className="timelineTrackThread"
+                      class="timelineTrackThread"
                     >
                       <div
-                        className="timelineTrackThreadMarkerOverview"
+                        class="timelineMarkers"
                       >
                         <canvas
-                          className="timelineMarkersCanvas"
-                          onMouseDown={[Function]}
-                          onMouseMove={[Function]}
-                          onMouseOut={[Function]}
-                          onMouseUp={[Function]}
+                          class="timelineMarkersCanvas"
+                          height="300"
+                          width="300"
                         />
                       </div>
                       <div
-                        className="threadActivityGraph"
-                        onMouseLeave={[Function]}
-                        onMouseMove={[Function]}
+                        class="threadActivityGraph"
                       >
                         <canvas
-                          className="threadActivityGraphCanvas threadActivityGraphCanvas"
-                          onMouseUp={[Function]}
+                          class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                          height="300"
+                          width="200"
                         />
                       </div>
                       <div
-                        className="timelineEmptyThreadIndicator"
+                        class="timelineEmptyThreadIndicator"
                       >
                         <div
-                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
-                          onMouseEnter={[Function]}
-                          onMouseLeave={[Function]}
-                          style={
-                            Object {
-                              "left": 0,
-                              "width": 66.66666666666667,
-                            }
-                          }
+                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
+                          style="left: 0px; width: 66.66666666666667px;"
                         />
                         <div
-                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
-                          onMouseEnter={[Function]}
-                          onMouseLeave={[Function]}
-                          style={
-                            Object {
-                              "right": 0,
-                              "width": 66.66666666666667,
-                            }
-                          }
+                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
+                          style="right: 0px; width: 66.66666666666667px;"
                         />
                         <div
-                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
-                          onMouseEnter={[Function]}
-                          onMouseLeave={[Function]}
-                          style={
-                            Object {
-                              "left": 66.66666666666667,
-                              "width": 66.66666666666667,
-                            }
-                          }
+                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
+                          style="left: 66.66666666666667px; width: 66.66666666666667px;"
                         />
                       </div>
                     </div>
@@ -329,92 +253,61 @@ process: \\"default\\" (0)"
                 </div>
               </li>
               <li
-                className="timelineTrack timelineTrackLocal"
+                class="timelineTrack timelineTrackLocal"
               >
                 <div
-                  className="timelineTrackRow timelineTrackLocalRow"
-                  onClick={[Function]}
+                  class="timelineTrackRow timelineTrackLocalRow"
                 >
                   <div
-                    className="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-                    onContextMenu={[Function]}
-                    onMouseDown={[Function]}
-                    onMouseOut={[Function]}
-                    onMouseUp={[Function]}
-                    onTouchEnd={[Function]}
-                    onTouchStart={[Function]}
+                    class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
                     title="thread: \\"Thread with dropped samples\\" (0)
 process: \\"default\\" (0)"
                   >
                     <button
-                      className="timelineTrackNameButton"
+                      class="timelineTrackNameButton"
                       type="button"
                     >
                       Thread with dropped samples
                     </button>
                   </div>
                   <div
-                    className="timelineTrackTrack"
+                    class="timelineTrackTrack"
                   >
                     <div
-                      className="timelineTrackThread"
+                      class="timelineTrackThread"
                     >
                       <div
-                        className="timelineTrackThreadMarkerOverview"
+                        class="timelineMarkers"
                       >
                         <canvas
-                          className="timelineMarkersCanvas"
-                          onMouseDown={[Function]}
-                          onMouseMove={[Function]}
-                          onMouseOut={[Function]}
-                          onMouseUp={[Function]}
+                          class="timelineMarkersCanvas"
+                          height="300"
+                          width="300"
                         />
                       </div>
                       <div
-                        className="threadActivityGraph"
-                        onMouseLeave={[Function]}
-                        onMouseMove={[Function]}
+                        class="threadActivityGraph"
                       >
                         <canvas
-                          className="threadActivityGraphCanvas threadActivityGraphCanvas"
-                          onMouseUp={[Function]}
+                          class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                          height="300"
+                          width="200"
                         />
                       </div>
                       <div
-                        className="timelineEmptyThreadIndicator"
+                        class="timelineEmptyThreadIndicator"
                       >
                         <div
-                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
-                          onMouseEnter={[Function]}
-                          onMouseLeave={[Function]}
-                          style={
-                            Object {
-                              "left": 0,
-                              "width": 66.66666666666667,
-                            }
-                          }
+                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
+                          style="left: 0px; width: 66.66666666666667px;"
                         />
                         <div
-                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
-                          onMouseEnter={[Function]}
-                          onMouseLeave={[Function]}
-                          style={
-                            Object {
-                              "right": 0,
-                              "width": 66.66666666666667,
-                            }
-                          }
+                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
+                          style="right: 0px; width: 66.66666666666667px;"
                         />
                         <div
-                          className="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
-                          onMouseEnter={[Function]}
-                          onMouseLeave={[Function]}
-                          style={
-                            Object {
-                              "left": 66.66666666666667,
-                              "width": 66.66666666666667,
-                            }
-                          }
+                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
+                          style="left: 66.66666666666667px; width: 66.66666666666667px;"
                         />
                       </div>
                     </div>
@@ -428,13 +321,8 @@ process: \\"default\\" (0)"
     </div>
   </div>
   <div
-    className="timelineSelectionHoverLine"
-    style={
-      Object {
-        "left": "0",
-        "visibility": "hidden",
-      }
-    }
+    class="timelineSelectionHoverLine"
+    style="visibility: hidden; left: 0px;"
   />
 </div>
 `;
@@ -442,12 +330,138 @@ process: \\"default\\" (0)"
 exports[`Timeline renders the header 2`] = `
 Array [
   Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -458,12 +472,138 @@ Array [
     "repeat",
   ],
   Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#d7d7db60",
+          ],
+          Array [
+            0.25,
+            "#d7d7db60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#d7d7db60",
+          ],
+          Array [
+            0.75,
+            "#d7d7db60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -474,12 +614,138 @@ Array [
     "repeat",
   ],
   Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -490,12 +756,706 @@ Array [
     "repeat",
   ],
   Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ffe90060",
+          ],
+          Array [
+            0.25,
+            "#ffe90060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ffe90060",
+          ],
+          Array [
+            0.75,
+            "#ffe90060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
     "createPattern",
     <canvas
       height="4"
       width="4"
     />,
     "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -2612,12 +3572,138 @@ Array [
     Object {},
   ],
   Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -2628,12 +3714,138 @@ Array [
     "repeat",
   ],
   Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#d7d7db60",
+          ],
+          Array [
+            0.25,
+            "#d7d7db60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#d7d7db60",
+          ],
+          Array [
+            0.75,
+            "#d7d7db60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -2644,12 +3856,138 @@ Array [
     "repeat",
   ],
   Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -2660,12 +3998,706 @@ Array [
     "repeat",
   ],
   Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ffe90060",
+          ],
+          Array [
+            0.25,
+            "#ffe90060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ffe90060",
+          ],
+          Array [
+            0.75,
+            "#ffe90060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
     "createPattern",
     <canvas
       height="4"
       width="4"
     />,
     "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -3642,12 +5674,138 @@ Array [
     Object {},
   ],
   Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -3658,12 +5816,138 @@ Array [
     "repeat",
   ],
   Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#d7d7db60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#d7d7db60",
+          ],
+          Array [
+            0.25,
+            "#d7d7db60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#d7d7db60",
+          ],
+          Array [
+            0.75,
+            "#d7d7db60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -3674,12 +5958,138 @@ Array [
     "repeat",
   ],
   Array [
-    "createPattern",
-    <canvas
-      height="4"
-      width="4"
-    />,
-    "repeat",
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#6200a460",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "#6200a460",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "#6200a460",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",
@@ -3690,12 +6100,706 @@ Array [
     "repeat",
   ],
   Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ffe90060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ffe90060",
+          ],
+          Array [
+            0.25,
+            "#ffe90060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ffe90060",
+          ],
+          Array [
+            0.75,
+            "#ffe90060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
     "createPattern",
     <canvas
       height="4"
       width="4"
     />,
     "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#ff940060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "#ff940060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "#ff940060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#45a1ff60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "#45a1ff60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "#45a1ff60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#12bc0060",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "#12bc0060",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "#12bc0060",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "createPattern",
+    <canvas
+      height="4"
+      width="4"
+    />,
+    "repeat",
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "createLinearGradient",
+    0,
+    0,
+    4,
+    4,
+  ],
+  Array [
+    "addColorStop",
+    0,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.25,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    0.5,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "#0060df60",
+  ],
+  Array [
+    "addColorStop",
+    0.75,
+    "transparent",
+  ],
+  Array [
+    "addColorStop",
+    1,
+    "transparent",
+  ],
+  Array [
+    "set fillStyle",
+    Object {
+      "addColorStop": [MockFunction] {
+        "calls": Array [
+          Array [
+            0,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "#0060df60",
+          ],
+          Array [
+            0.25,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "transparent",
+          ],
+          Array [
+            0.5,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "#0060df60",
+          ],
+          Array [
+            0.75,
+            "transparent",
+          ],
+          Array [
+            1,
+            "transparent",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+          Object {
+            "isThrow": false,
+            "value": undefined,
+          },
+        ],
+      },
+    },
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    4,
+    4,
   ],
   Array [
     "createPattern",

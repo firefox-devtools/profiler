@@ -5,84 +5,195 @@
 // @flow
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
-import renderer from 'react-test-renderer';
+import { render, fireEvent, waitForDomChange } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   startSymbolicating,
   doneSymbolicating,
 } from '../../actions/receive-profile';
-import { createGeckoProfileWithJsTimings } from '../fixtures/profiles/gecko-profile';
-import { processProfile } from '../../profile-logic/process-profile';
+import { TextEncoder } from 'util';
+import * as ProfileViewSelectors from '../../selectors/profile';
+
+// Mocking SymbolStoreDB
+import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
+jest.mock('../../profile-logic/profile-store');
+
+// Mocking sha1
+import sha1 from '../../utils/sha1';
+jest.mock('../../utils/sha1');
+
+// Mocking compress
+jest.mock('../../utils/gz');
+
+// Mocking shortenUrl
+import shortenUrl from '../../utils/shorten-url';
+jest.mock('../../utils/shorten-url');
 
 describe('app/MenuButtons', function() {
-  /**
-   * Mock out any created refs for the components with relevant information.
-   */
-  function createNodeMock(element) {
-    if (element.type === 'input') {
-      return {
-        focus() {},
-        select() {},
-        blur() {},
-      };
-    }
-    return null;
+  function setup(profile) {
+    const store = storeWithProfile(profile);
+    const renderResult = render(
+      <Provider store={store}>
+        <MenuButtons />
+      </Provider>
+    );
+
+    const { getByTestId, getByValue } = renderResult;
+    const getShareButton = () => getByValue('Share...');
+    const getInnerShareButton = () => getByValue('Share');
+    const getShareWithUrlsButton = () => getByValue('Share with URLs');
+    const getInnerShareWithUrlsButton = (): null | HTMLElement => {
+      const shareWithUrlsButton = getShareWithUrlsButton();
+      if (
+        shareWithUrlsButton.parentElement !== undefined &&
+        shareWithUrlsButton.parentElement !== null &&
+        shareWithUrlsButton.parentElement.nextElementSibling !== undefined &&
+        shareWithUrlsButton.parentElement.nextElementSibling !== null
+      ) {
+        return shareWithUrlsButton.parentElement.nextElementSibling.getElementsByClassName(
+          'arrowPanelOkButton'
+        )[0];
+      }
+      return null;
+    };
+
+    const getMenuButtonsContainer = () =>
+      getByTestId('menuButtonsCompositeButtonContainer');
+    const getPermalinkButton = () => getByValue('Permalink');
+
+    return {
+      store,
+      ...renderResult,
+      getShareButton,
+      getInnerShareButton,
+      getShareWithUrlsButton,
+      getInnerShareWithUrlsButton,
+      getMenuButtonsContainer,
+      getPermalinkButton,
+    };
   }
 
-  // profile.meta.networkURLsRemoved flag is set to false as a default.
-  it('renders the MenuButtons buttons', () => {
-    const store = storeWithProfile();
-    store.dispatch(startSymbolicating());
+  describe('share and save buttons', function() {
+    // Mock hash
+    const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
 
-    const profileSharing = renderer.create(
-      <Provider store={store}>
-        <MenuButtons />
-      </Provider>,
-      { createNodeMock }
-    );
+    beforeAll(function() {
+      if ((window: any).TextEncoder) {
+        throw new Error('A TextEncoder was already on the window object.');
+      }
+      (window: any).TextEncoder = TextEncoder;
+    });
 
-    expect(profileSharing).toMatchSnapshot();
+    afterAll(async function() {
+      delete (window: any).TextEncoder;
+    });
 
-    store.dispatch(doneSymbolicating());
-    expect(profileSharing).toMatchSnapshot();
-  });
+    beforeEach(function() {
+      // Flow doesn't know uploadBinaryProfileData is a jest mock.
+      (uploadBinaryProfileData: any).mockImplementation(() =>
+        Promise.resolve(hash)
+      );
+      // Flow doesn't know sha1 is a jest mock.
+      (sha1: any).mockImplementation((_data: Uint8Array) =>
+        Promise.resolve(hash)
+      );
+      // Flow doesn't know shortenUrl is a jest mock.
+      (shortenUrl: any).mockImplementation(() =>
+        Promise.resolve('https://perf-html.io/')
+      );
+    });
 
-  it('renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to true', () => {
-    const profile = processProfile(createGeckoProfileWithJsTimings());
-    profile.meta.networkURLsRemoved = true;
-    const store = storeWithProfile(profile);
-    store.dispatch(startSymbolicating());
+    it('matches the snapshot when starting to symbolicate', () => {
+      const { store, container } = setup();
+      store.dispatch(startSymbolicating());
 
-    const profileSharing = renderer.create(
-      <Provider store={store}>
-        <MenuButtons />
-      </Provider>,
-      { createNodeMock }
-    );
+      // MenuButtons is rendering a fragment with several children. We need to
+      // check all children to assess that the component renders properly.
+      expect(Array.from(container.children)).toMatchSnapshot();
+    });
 
-    expect(profileSharing).toMatchSnapshot();
+    it('matches the snapshot when done symbolicating', () => {
+      const { store, container } = setup();
+      store.dispatch(startSymbolicating());
+      store.dispatch(doneSymbolicating());
+      expect(Array.from(container.children)).toMatchSnapshot();
+    });
 
-    store.dispatch(doneSymbolicating());
-    expect(profileSharing).toMatchSnapshot();
-  });
+    it('should share the profile when Share button is clicked', async () => {
+      const {
+        store,
+        getShareButton,
+        getShareWithUrlsButton,
+        getInnerShareButton,
+        getInnerShareWithUrlsButton,
+        getMenuButtonsContainer,
+      } = setup();
+      // Sharing without URLs
+      fireEvent.click(getShareButton());
+      fireEvent.click(getInnerShareButton());
 
-  it('renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to undefined', () => {
-    const profile = processProfile(createGeckoProfileWithJsTimings());
-    profile.meta.networkURLsRemoved = undefined;
-    const store = storeWithProfile(profile);
-    store.dispatch(startSymbolicating());
+      // This part touches the implementation logic by getting the menu buttons
+      // container and checking its class list. The ideal way is not to touch
+      // the implementation logic of component and test the things user can see
+      // and interract with `waitForElement`. But since sharing is async and we
+      // can't catch other visual DOM changes here, we had to do this.
+      await waitForDomChange({ container: getMenuButtonsContainer() }).then(
+        mutationsList => {
+          const mutation = mutationsList[0];
+          expect(
+            mutation.target.classList.contains('currentButtonIsPermalinkButton')
+          ).toEqual(true);
+          expect(
+            mutation.target.classList.contains('currentButtonIsShareButton')
+          ).toEqual(false);
+          expect(
+            mutation.target.classList.contains(
+              'currentButtonIsSecondaryShareButton'
+            )
+          ).toEqual(true);
+        }
+      );
 
-    const profileSharing = renderer.create(
-      <Provider store={store}>
-        <MenuButtons />
-      </Provider>,
-      { createNodeMock }
-    );
+      const profileSharingStatus = ProfileViewSelectors.getProfileSharingStatus(
+        store.getState()
+      );
+      expect(profileSharingStatus).toEqual({
+        sharedWithUrls: false,
+        sharedWithoutUrls: true,
+      });
 
-    expect(profileSharing).toMatchSnapshot();
+      // Sharing with URLs this time
+      const innerShareButton = getInnerShareWithUrlsButton();
+      if (innerShareButton !== null) {
+        fireEvent.click(getShareWithUrlsButton());
+        fireEvent.click(innerShareButton);
+      }
 
-    store.dispatch(doneSymbolicating());
-    expect(profileSharing).toMatchSnapshot();
+      await waitForDomChange({ container: getMenuButtonsContainer() }).then(
+        mutationsList => {
+          const mutation = mutationsList[0];
+          expect(
+            mutation.target.classList.contains('currentButtonIsPermalinkButton')
+          ).toEqual(true);
+          expect(
+            mutation.target.classList.contains('currentButtonIsShareButton')
+          ).toEqual(false);
+          expect(
+            mutation.target.classList.contains(
+              'currentButtonIsSecondaryShareButton'
+            )
+          ).toEqual(false);
+        }
+      );
+
+      const newProfileSharingStatus = ProfileViewSelectors.getProfileSharingStatus(
+        store.getState()
+      );
+      expect(newProfileSharingStatus).toEqual({
+        sharedWithUrls: true,
+        sharedWithoutUrls: true,
+      });
+    });
   });
 });

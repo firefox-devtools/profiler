@@ -25,7 +25,7 @@ export type CounterIndex = number;
  * If a pid is a number, then it is the int value that came from the profiler.
  * However, if it is a string, then it is an unique value generated during
  * the profile processing. This happens for older profiles before the pid was
- * collected.
+ * collected, or for merged profiles.
  */
 export type Pid = number | string;
 
@@ -90,8 +90,6 @@ export type SamplesTable = {
   responsiveness: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
-  rss: Array<null | number>,
-  uss: Array<null | number>,
   length: number,
 };
 
@@ -286,8 +284,6 @@ export type Thread = {
   pausedRanges: PausedRange[],
   name: string,
   processName?: string,
-  // An undefined pid is a valid value. An undefined value will key
-  // properly on Map<pid, T>.
   pid: Pid,
   tid: number | void,
   samples: SamplesTable,

@@ -45,15 +45,13 @@ Array [
 
 exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
 <div
-  className="timelineTrackNetwork"
-  style={
-    Object {
-      "height": 25,
-    }
-  }
+  class="timelineTrackNetwork"
+  style="height: 25px;"
 >
   <canvas
-    className="timelineTrackNetworkCanvas"
+    class="timelineTrackNetworkCanvas"
+    height="25"
+    width="0"
   />
 </div>
 `;

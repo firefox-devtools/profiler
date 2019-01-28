@@ -3,9 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import Worker from './worker-factory';
+// This worker is imported as WebWorker since it's conflicting with the Worker
+// global type.
+import WebWorker from './worker-factory';
 
-const zeeWorker = new Worker('zee-worker');
 const zeeCallbacks = [];
 
 type ZeeWorkerData = {
@@ -14,20 +15,25 @@ type ZeeWorkerData = {
   data: any,
 };
 
-zeeWorker.onmessage = function(msg: MessageEvent) {
-  const data = ((msg.data: any): ZeeWorkerData);
-  const callbacks = zeeCallbacks[data.callbackID];
-  if (callbacks) {
-    callbacks[data.type](data.data);
-    zeeCallbacks[data.callbackID] = null;
-  }
-};
+function workerOnMessage(zeeWorker: Worker) {
+  zeeWorker.onmessage = function(msg: MessageEvent) {
+    const data = ((msg.data: any): ZeeWorkerData);
+    const callbacks = zeeCallbacks[data.callbackID];
+    if (callbacks) {
+      callbacks[data.type](data.data);
+      zeeCallbacks[data.callbackID] = null;
+    }
+  };
+}
 
 // Neuters data's buffer, if data is a typed array.
 export function compress(
   data: string | Uint8Array,
   compressionLevel?: number
 ): Promise<string> {
+  const zeeWorker = new WebWorker('zee-worker');
+  workerOnMessage(zeeWorker);
+
   const arrayData =
     typeof data === 'string' ? new TextEncoder().encode(data) : data;
   return new Promise(function(resolve, reject) {
@@ -50,6 +56,8 @@ export function compress(
 // Neuters data's buffer, if data is a typed array.
 export function decompress(data: Uint8Array): Promise<Uint8Array> {
   return new Promise(function(resolve, reject) {
+    const zeeWorker = new Worker('zee-worker');
+    workerOnMessage(zeeWorker);
     zeeWorker.postMessage(
       {
         request: 'decompress',

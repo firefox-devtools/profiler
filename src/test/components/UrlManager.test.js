@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
+import { render } from 'react-testing-library';
 
 import { getIsUrlSetupDone } from '../../selectors/app';
 import UrlManager from '../../components/app/UrlManager';
@@ -23,7 +23,7 @@ describe('UrlManager', function() {
     const { dispatch, getState } = store;
 
     const createUrlManager = () =>
-      mount(
+      render(
         <Provider store={store}>
           <UrlManager>Contents</UrlManager>
         </Provider>

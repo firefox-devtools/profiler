@@ -314,10 +314,10 @@ Array [
 
 exports[`StackChart matches the snapshot for empty reasons screen 1`] = `
 <div
-  className="jsTracer"
+  class="jsTracer"
 >
   <div
-    className="EmptyReasons"
+    class="EmptyReasons"
   >
     <h3>
       The 
@@ -335,25 +335,24 @@ exports[`StackChart matches the snapshot for empty reasons screen 1`] = `
 
 exports[`StackChart matches the snapshot for the chart 1`] = `
 <div
-  className="jsTracer"
+  class="jsTracer"
 >
   <div
-    className="jsTracerSettings"
+    class="jsTracerSettings"
   >
     <ul
-      className="jsTracerSettingsList"
+      class="jsTracerSettingsList"
     >
       <li
-        className="jsTracerSettingsListItem"
+        class="jsTracerSettingsListItem"
       >
         <label
-          className="jsTracerSettingsLabel"
+          class="jsTracerSettingsLabel"
         >
           <input
-            checked={false}
-            className="jsTracerSettingsCheckbox"
-            onChange={[Function]}
+            class="jsTracerSettingsCheckbox"
             type="checkbox"
+            value="on"
           />
            Show only self time
         </label>
@@ -361,34 +360,28 @@ exports[`StackChart matches the snapshot for the chart 1`] = `
     </ul>
   </div>
   <div
-    className="chartViewport"
-    onKeyDown={[Function]}
-    onKeyUp={[Function]}
-    onMouseDown={[Function]}
-    onWheel={[Function]}
-    tabIndex={0}
+    class="chartViewport"
+    tabindex="0"
   >
     <div>
       <canvas
-        className="chartCanvas jsTracerCanvasFadeIn jsTracerCanvas jsTracerCanvasDrawn"
-        onDoubleClick={[Function]}
-        onMouseDown={[Function]}
-        onMouseMove={[Function]}
-        onMouseOut={[Function]}
-        onMouseUp={[Function]}
+        class="chartCanvas jsTracerCanvasFadeIn jsTracerCanvas jsTracerCanvasDrawn"
+        height="300"
+        style="width: 365px; height: 300px;"
+        width="365"
       />
     </div>
     <div
-      className="chartViewportShiftScroll hidden"
+      class="chartViewportShiftScroll hidden"
     >
       Zoom Chart:
       <kbd
-        className="chartViewportShiftScrollKbd"
+        class="chartViewportShiftScrollKbd"
       >
         Shift
       </kbd>
       <kbd
-        className="chartViewportShiftScrollKbd"
+        class="chartViewportShiftScrollKbd"
       >
         Scroll
       </kbd>
@@ -399,25 +392,24 @@ exports[`StackChart matches the snapshot for the chart 1`] = `
 
 exports[`StackChart matches the snapshot for the loading screen 1`] = `
 <div
-  className="jsTracer"
+  class="jsTracer"
 >
   <div
-    className="jsTracerSettings"
+    class="jsTracerSettings"
   >
     <ul
-      className="jsTracerSettingsList"
+      class="jsTracerSettingsList"
     >
       <li
-        className="jsTracerSettingsListItem"
+        class="jsTracerSettingsListItem"
       >
         <label
-          className="jsTracerSettingsLabel"
+          class="jsTracerSettingsLabel"
         >
           <input
-            checked={false}
-            className="jsTracerSettingsCheckbox"
-            onChange={[Function]}
+            class="jsTracerSettingsCheckbox"
             type="checkbox"
+            value="on"
           />
            Show only self time
         </label>
@@ -425,7 +417,7 @@ exports[`StackChart matches the snapshot for the loading screen 1`] = `
     </ul>
   </div>
   <div
-    className="jsTracerLoader"
+    class="jsTracerLoader"
   >
     Re-constructing tracing information from
      

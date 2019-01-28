@@ -13,6 +13,7 @@ jest.mock('../../actions/receive-profile', () => ({
   // See https://github.com/facebook/jest/issues/7573 for more info.
   retrieveProfileFromAddon: jest.fn(),
   retrieveProfileFromStore: jest.fn(),
+  retrieveProfilesToCompare: jest.fn(),
 }));
 
 // We mock <ProfileViewer> because it's complex and we should really test it
@@ -22,13 +23,14 @@ jest.mock('../../components/app/ProfileViewer', () => 'profile-viewer');
 // We mock <Home> as well because it brings too much noise in snapshots and it's
 // overly tested in another test file.
 jest.mock('../../components/app/Home', () => 'home');
+jest.mock('../../components/app/CompareHome', () => 'compare-home');
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render, cleanup } from 'react-testing-library';
+import { render } from 'react-testing-library';
 
 import { ProfileViewWhenReady } from '../../components/app/Root';
-import { updateUrlState } from '../../actions/app';
+import { updateUrlState, changeProfilesToCompare } from '../../actions/app';
 // Because this module is mocked but we want the real actions in the test, we
 // use `jest.requireActual` here.
 const {
@@ -42,6 +44,7 @@ const {
 import {
   retrieveProfileFromStore,
   retrieveProfileFromAddon,
+  retrieveProfilesToCompare,
 } from '../../actions/receive-profile';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { TemporaryError } from '../../utils/errors';
@@ -49,7 +52,6 @@ import { TemporaryError } from '../../utils/errors';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-afterEach(cleanup);
 describe('app/ProfileViewWhenReady', function() {
   it('renders an initial home', function() {
     const { container } = setup();
@@ -132,15 +134,29 @@ describe('app/ProfileViewWhenReady', function() {
     navigateBackToHome();
     expect(container.firstChild).toMatchSnapshot();
   });
+
+  it('renders a compare home when navigating to /compare/, then loads when changing profiles', () => {
+    const { container, dispatch, navigateToCompareHome } = setup();
+
+    navigateToCompareHome();
+    expect(container.querySelector('compare-home')).toBeTruthy();
+
+    const url1 = 'http://fake-url.com/hash/1';
+    const url2 = 'http://fake-url.com/hash/2';
+    dispatch(changeProfilesToCompare([url1, url2]));
+
+    expect(container.querySelector('.loading')).toBeTruthy();
+    expect(retrieveProfilesToCompare).toHaveBeenCalledWith([url1, url2]);
+  });
 });
 
 function setup() {
   // Let's silence the error output to the console
   jest.spyOn(console, 'error').mockImplementation(() => {});
-  // Flow doesn't know retrieveProfileFromAddon is a jest mock.
+  // Flow doesn't know these actions are jest mocks.
   (retrieveProfileFromAddon: any).mockImplementation(() => async () => {});
-  // Flow doesn't know retrieveProfileFromStore is a jest mock.
   (retrieveProfileFromStore: any).mockImplementation(() => async () => {});
+  (retrieveProfilesToCompare: any).mockImplementation(() => async () => {});
 
   const store = blankStore();
   const renderResult = render(
@@ -176,11 +192,21 @@ function setup() {
     store.dispatch(updateUrlState(newUrlState));
   }
 
+  function navigateToCompareHome() {
+    const newUrlState = stateFromLocation({
+      pathname: '/compare/',
+      hash: '',
+      search: '',
+    });
+    store.dispatch(updateUrlState(newUrlState));
+  }
+
   return {
     ...renderResult,
     dispatch: store.dispatch,
     navigateToStoreLoadingPage,
     navigateToAddonLoadingPage,
     navigateBackToHome,
+    navigateToCompareHome,
   };
 }

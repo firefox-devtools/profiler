@@ -73,6 +73,7 @@ export function createGeckoProfile(): GeckoProfile {
 
   const parentProcessMeta: GeckoProfileMeta = {
     abi: 'x86_64-gcc3',
+    appBuildID: '20181126165837',
     interval: 1,
     misc: 'rv:48.0',
     oscpu: 'Intel Mac OS X 10.11',
@@ -84,6 +85,9 @@ export function createGeckoProfile(): GeckoProfile {
     shutdownTime: 1560221352723,
     toolkit: 'cocoa',
     version: CURRENT_VERSION,
+    logicalCPUs: 8,
+    physicalCPUs: 4,
+    sourceURL: '',
     categories: [
       {
         name: 'Other',
@@ -103,7 +107,14 @@ export function createGeckoProfile(): GeckoProfile {
     meta: contentProcessMeta,
     pausedRanges: [],
     libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the Gecko profile
-    pages: [],
+    pages: [
+      {
+        docshellId: '{e18794dd-3960-3543-b101-e5ed287ab617}',
+        historyId: 1,
+        url: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
+        isSubFrame: false,
+      },
+    ],
     threads: [
       {
         ..._createGeckoThread(),
@@ -150,17 +161,15 @@ function _createGeckoThread(): GeckoThread {
         stack: 0,
         time: 1,
         responsiveness: 2,
-        rss: 3,
-        uss: 4,
       },
       data: [
-        [1, 0, 0, null, null], // (root), 0x100000f84
-        [2, 1, 0, null, null], // (root), 0x100000f84, 0x100001a45
-        [2, 2, 0, null, null], // (root), 0x100000f84, 0x100001a45
-        [3, 3, 0, null, null], // (root), 0x100000f84, Startup::XRE_Main
-        [0, 4, 0, null, null], // (root)
-        [1, 5, 0, null, null], // (root), 0x100000f84
-        [4, 6, 0, null, null], // (root), 0x100000f84, frobnicate
+        [1, 0, 0], // (root), 0x100000f84
+        [2, 1, 0], // (root), 0x100000f84, 0x100001a45
+        [2, 2, 0], // (root), 0x100000f84, 0x100001a45
+        [3, 3, 0], // (root), 0x100000f84, Startup::XRE_Main
+        [0, 4, 0], // (root)
+        [1, 5, 0], // (root), 0x100000f84
+        [4, 6, 0], // (root), 0x100000f84, frobnicate
       ],
     },
     stackTable: {
@@ -228,12 +237,8 @@ function _createGeckoThread(): GeckoThread {
                   stack: 0,
                   time: 1,
                   responsiveness: 2,
-                  rss: 3,
-                  uss: 4,
-                  frameNumber: 5,
-                  power: 6,
                 },
-                data: [[2, 1, 0, null, null]], // (root), 0x100000f84, 0x100001a45
+                data: [[2, 1, 0]], // (root), 0x100000f84, 0x100001a45
               },
             }: GeckoMarkerStack),
             type: 'tracing',
@@ -333,12 +338,8 @@ function _createGeckoThread(): GeckoThread {
                   stack: 0,
                   time: 1,
                   responsiveness: 2,
-                  rss: 3,
-                  uss: 4,
-                  frameNumber: 5,
-                  power: 6,
                 },
-                data: [[2, 1, 0, null, null]], // (root), 0x100000f84, 0x100001a45
+                data: [[2, 1, 0]], // (root), 0x100000f84, 0x100001a45
               },
             },
             type: 'tracing',
@@ -363,12 +364,8 @@ function _createGeckoThread(): GeckoThread {
                   stack: 0,
                   time: 1,
                   responsiveness: 2,
-                  rss: 3,
-                  uss: 4,
-                  frameNumber: 5,
-                  power: 6,
                 },
-                data: [[2, 1, 0, null, null]], // (root), 0x100000f84, 0x100001a45
+                data: [[2, 1, 0]], // (root), 0x100000f84, 0x100001a45
               },
             },
             type: 'tracing',
@@ -489,18 +486,18 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
     tid: 1111,
     pid: 2222,
     samples: {
-      schema: { stack: 0, time: 1, responsiveness: 2, rss: 3, uss: 4 },
+      schema: { stack: 0, time: 1, responsiveness: 2 },
       data: [
-        [1, 0, 0, null, null], // (root), 0x100000f84
-        [2, 10, 0, null, null], // (root), 0x100000f84, 0x100001a45
-        [2, 20, 0, null, null], // (root), 0x100000f84, 0x100001a45
-        [3, 30, 0, null, null], // (root), 0x100000f84, Startup::XRE_Main
-        [0, 40, 0, null, null], // (root)
-        [1, 50, 0, null, null], // (root), 0x100000f84
-        [4, 60, 0, null, null], // (root), 0x100000f84, javascriptOne
-        [5, 70, 0, null, null], // (root), 0x100000f84, javascriptOne, javascriptTwo
-        [8, 80, 0, null, null], // (root), 0x100000f84, javascriptOne, javascriptTwo, 0x10000f0f0, 0x100fefefe, javascriptThree
-        [4, 90, 0, null, null], // (root), 0x100000f84, javascriptOne
+        [1, 0, 0], // (root), 0x100000f84
+        [2, 10, 0], // (root), 0x100000f84, 0x100001a45
+        [2, 20, 0], // (root), 0x100000f84, 0x100001a45
+        [3, 30, 0], // (root), 0x100000f84, Startup::XRE_Main
+        [0, 40, 0], // (root)
+        [1, 50, 0], // (root), 0x100000f84
+        [4, 60, 0], // (root), 0x100000f84, javascriptOne
+        [5, 70, 0], // (root), 0x100000f84, javascriptOne, javascriptTwo
+        [8, 80, 0], // (root), 0x100000f84, javascriptOne, javascriptTwo, 0x10000f0f0, 0x100fefefe, javascriptThree
+        [4, 90, 0], // (root), 0x100000f84, javascriptOne
       ],
     },
     stackTable: {

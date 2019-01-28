@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { mount } from 'enzyme';
+import { render } from 'react-testing-library';
 
 import CallTreeSidebar from '../../components/sidebar/CallTreeSidebar';
 import {
@@ -21,10 +21,10 @@ import type { CallNodePath } from '../../types/profile-derived';
 describe('CallTreeSidebar', function() {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A    A    A  A
-      B    B    B  B
-      Cjs  Cjs  H  H
-      D    F    I
+      A    A    A              A
+      B    B    B              B
+      Cjs  Cjs  H[cat:Layout]  H[cat:Layout]
+      D    F    I[cat:Idle]
       Ejs  Ejs
     `);
 
@@ -36,17 +36,17 @@ describe('CallTreeSidebar', function() {
 
     const invertCallstack = () => store.dispatch(changeInvertCallstack(true));
 
-    const view = mount(
+    const renderResult = render(
       <Provider store={store}>
         <CallTreeSidebar />
       </Provider>
     );
     return {
+      ...renderResult,
       store,
       funcNamesDict: funcNamesDictPerThread[0],
       selectNode,
       invertCallstack,
-      view,
     };
   }
 
@@ -54,28 +54,24 @@ describe('CallTreeSidebar', function() {
     const {
       selectNode,
       funcNamesDict: { A, B, Cjs, D, H, Ejs },
-      view,
+      container,
     } = setup();
 
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     // Cjs is a JS node, but has no self time, so we shouldn't see the
     // implementation information.
     selectNode([A, B, Cjs]);
-    view.update();
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     selectNode([A, B, Cjs, D]);
-    view.update();
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     selectNode([A, B, H]);
-    view.update();
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     selectNode([A, B, Cjs, D, Ejs]);
-    view.update();
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshots when displaying data about the currently selected node in an inverted tree', () => {
@@ -83,27 +79,22 @@ describe('CallTreeSidebar', function() {
       selectNode,
       invertCallstack,
       funcNamesDict: { A, B, H, Ejs, I },
-      view,
+      container,
     } = setup();
 
     invertCallstack();
-    view.update();
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     selectNode([Ejs]);
-    view.update();
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     selectNode([H]);
-    view.update();
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     selectNode([I, H]);
-    view.update();
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
 
     selectNode([H, B, A]);
-    view.update();
-    expect(view).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

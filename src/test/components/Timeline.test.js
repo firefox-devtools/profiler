@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import Timeline from '../../components/timeline';
-import renderer from 'react-test-renderer';
+import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -74,37 +74,25 @@ describe('Timeline', function() {
       return mockEl;
     });
 
-    // Mock out the 2d canvas for the loupe view.
     jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(200, 300));
   });
+
   it('renders the header', () => {
     const flushRafCalls = mockRaf();
     window.devicePixelRatio = 1;
     const ctx = mockCanvasContext();
-    /**
-     * Mock out any created refs for the components with relevant information.
-     */
-    function createNodeMock(element) {
-      // <TimelineCanvas><canvas /></TimelineCanvas>
-      if (element.type === 'canvas') {
-        return {
-          getBoundingClientRect: () => getBoundingBox(200, 300),
-          getContext: () => ctx,
-          style: {},
-        };
-      }
-      return null;
-    }
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => ctx);
 
     const profile = _getProfileWithDroppedSamples();
 
-    const header = renderer.create(
+    const { container } = render(
       <Provider store={storeWithProfile(profile)}>
         <Timeline />
-      </Provider>,
-      { createNodeMock }
+      </Provider>
     );
 
     // We need to flush twice since when the first flush is run, it
@@ -114,7 +102,7 @@ describe('Timeline', function() {
 
     const drawCalls = ctx.__flushDrawLog();
 
-    expect(header.toJSON()).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
 
     delete window.devicePixelRatio;

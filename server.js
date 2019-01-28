@@ -4,6 +4,7 @@ const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config');
 const { oneLine, stripIndent } = require('common-tags');
 const port = process.env.PERFHTML_PORT || 4242;
+const host = process.env.PERFHTML_HOST || 'localhost';
 const fs = require('fs');
 const path = require('path');
 const localConfigExists = fs.existsSync(
@@ -11,6 +12,7 @@ const localConfigExists = fs.existsSync(
 );
 
 const serverConfig = {
+  allowedHosts: ['localhost'],
   contentBase: config.output.path,
   publicPath: config.output.publicPath,
   hot: process.env.NODE_ENV === 'development' ? true : false,
@@ -56,34 +58,32 @@ if (localConfigExists) {
   }
 }
 
-new WebpackDevServer(webpack(config), serverConfig).listen(
-  port,
-  'localhost',
-  function(err) {
-    if (err) {
-      console.log(err);
-    }
-    const barAscii =
-      '------------------------------------------------------------------------------------------';
+new WebpackDevServer(webpack(config), serverConfig).listen(port, host, function(
+  err
+) {
+  if (err) {
+    console.log(err);
+  }
+  const barAscii =
+    '------------------------------------------------------------------------------------------';
 
-    console.log(barAscii);
-    console.log(`> perf.html is available at: http://localhost:${port}\n`);
-    if (port === 4242) {
-      console.log(
-        '> You can change this default port with the environment variable PERFHTML_PORT.\n'
-      );
-    }
-    if (localConfigExists) {
-      console.log(
-        '> We used your local file "webpack.local-config.js" to mutate webpack’s config values.'
-      );
-    } else {
-      console.log(stripIndent`
+  console.log(barAscii);
+  console.log(`> perf.html is listening at: http://${host}:${port}\n`);
+  if (port === 4242) {
+    console.log(
+      '> You can change this default port with the environment variable PERFHTML_PORT.\n'
+    );
+  }
+  if (localConfigExists) {
+    console.log(
+      '> We used your local file "webpack.local-config.js" to mutate webpack’s config values.'
+    );
+  } else {
+    console.log(stripIndent`
       > You can customize the webpack dev server by creating a webpack.local-config.js
       > file that exports a single function that mutates the config values:
       >  (webpackConfig, serverConfig) => void
     `);
-    }
-    console.log(barAscii);
   }
-);
+  console.log(barAscii);
+});

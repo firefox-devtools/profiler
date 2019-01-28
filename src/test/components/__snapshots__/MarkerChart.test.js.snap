@@ -2,7 +2,7 @@
 
 exports[`MarkerChart EmptyReasons shows a reason when a profile has no markers 1`] = `
 <div
-  className="EmptyReasons"
+  class="EmptyReasons"
 >
   <h3>
     The 
@@ -19,7 +19,7 @@ exports[`MarkerChart EmptyReasons shows a reason when a profile has no markers 1
 
 exports[`MarkerChart EmptyReasons shows a reason when a profile's markers have been filtered out 1`] = `
 <div
-  className="EmptyReasons"
+  class="EmptyReasons"
 >
   <h3>
     The 
@@ -59,21 +59,21 @@ Array [
     "fillRect",
     151,
     1,
-    248,
+    198,
     1,
   ],
   Array [
     "fillRect",
     150,
     2,
-    250,
+    200,
     11,
   ],
   Array [
     "fillRect",
     151,
     13,
-    248,
+    198,
     1,
   ],
   Array [
@@ -88,21 +88,50 @@ Array [
     "fillRect",
     151,
     17,
-    248,
+    198,
     1,
   ],
   Array [
     "fillRect",
     150,
     18,
-    250,
+    200,
     11,
   ],
   Array [
     "fillRect",
     151,
     29,
-    248,
+    198,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    151,
+    33,
+    58,
+    1,
+  ],
+  Array [
+    "fillRect",
+    150,
+    34,
+    60,
+    11,
+  ],
+  Array [
+    "fillRect",
+    151,
+    45,
+    58,
     1,
   ],
   Array [
@@ -118,8 +147,8 @@ Array [
   ],
   Array [
     "arc",
-    255,
-    39.5,
+    235,
+    55.5,
     3.75,
     0,
     6.283185307179586,
@@ -133,23 +162,23 @@ Array [
   ],
   Array [
     "fillRect",
-    276,
-    49,
-    248,
+    251,
+    65,
+    198,
     1,
   ],
   Array [
     "fillRect",
-    275,
-    50,
     250,
+    66,
+    200,
     11,
   ],
   Array [
     "fillRect",
-    276,
-    61,
-    248,
+    251,
+    77,
+    198,
     1,
   ],
   Array [
@@ -162,23 +191,23 @@ Array [
   ],
   Array [
     "fillRect",
-    276,
-    65,
-    123,
+    251,
+    81,
+    98,
     1,
   ],
   Array [
     "fillRect",
-    275,
-    66,
-    125,
+    250,
+    82,
+    100,
     11,
   ],
   Array [
     "fillRect",
-    276,
-    77,
-    123,
+    251,
+    93,
+    98,
     1,
   ],
   Array [
@@ -188,8 +217,8 @@ Array [
   Array [
     "fillText",
     "click",
-    278,
-    75,
+    253,
+    91,
   ],
   Array [
     "set fillStyle",
@@ -200,8 +229,26 @@ Array [
   ],
   Array [
     "arc",
-    330,
-    87.5,
+    295,
+    103.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    335,
+    119.5,
     3.75,
     0,
     6.283185307179586,
@@ -263,6 +310,20 @@ Array [
     1,
   ],
   Array [
+    "fillRect",
+    0,
+    111,
+    365,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    127,
+    365,
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -274,70 +335,117 @@ Array [
   ],
   Array [
     "fillText",
-    "Dot marker E",
+    "Marker H with no start",
     5,
     43,
   ],
   Array [
     "fillText",
-    "Very very very very very ver…",
+    "Dot marker E",
     5,
     59,
   ],
   Array [
     "fillText",
-    "Marker G type DOMEvent",
+    "Very very very very very ver…",
     5,
     75,
   ],
   Array [
     "fillText",
-    "Non-interval marker F withou…",
+    "Marker G type DOMEvent",
     5,
     91,
   ],
+  Array [
+    "fillText",
+    "Non-interval marker F withou…",
+    5,
+    107,
+  ],
+  Array [
+    "fillText",
+    "Marker H with no end",
+    5,
+    123,
+  ],
 ]
+`;
+
+exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
+<div
+  class="tooltip"
+  style="left: 61px; top: 16px;"
+>
+  <div
+    class="tooltipMarker"
+  >
+    <div
+      class=""
+    >
+      <div
+        class="tooltipOneLine"
+      >
+        <div
+          class="tooltipTiming"
+        >
+          10ms
+        </div>
+        <div
+          class="tooltipTitle"
+        >
+          Marker A
+        </div>
+      </div>
+      <div
+        class="tooltipDetails"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Thread:
+        </div>
+        Empty
+      </div>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`] = `
 <div
   aria-labelledby="marker-chart-tab-button"
-  className="markerChart"
+  class="markerChart"
   id="marker-chart-tab"
   role="tabpanel"
 >
   <div
-    className="markerSettings"
+    class="markerSettings"
   >
     <div
-      className="markerSettingsSpacer"
+      class="markerSettingsSpacer"
     />
     <div
-      className="markerSettingsSearchbar"
+      class="markerSettingsSearchbar"
     >
       <label
-        className="markerSettingsSearchbarLabel"
+        class="markerSettingsSearchbarLabel"
       >
         Filter Markers: 
         <form
-          className="idleSearchField markerSettingsSearchField"
-          onSubmit={[Function]}
+          class="idleSearchField markerSettingsSearchField"
         >
           <input
-            className="idleSearchFieldInput"
+            class="idleSearchFieldInput"
             name="search"
-            onBlur={[Function]}
-            onChange={[Function]}
-            onFocus={[Function]}
-            required="required"
+            required=""
             title="Only display markers that match a certain name"
             type="search"
             value=""
           />
           <input
-            className="idleSearchFieldButton"
-            onClick={[Function]}
-            tabIndex={-1}
+            class="idleSearchFieldButton"
+            tabindex="-1"
             type="reset"
           />
         </form>
@@ -345,34 +453,28 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
     </div>
   </div>
   <div
-    className="chartViewport"
-    onKeyDown={[Function]}
-    onKeyUp={[Function]}
-    onMouseDown={[Function]}
-    onWheel={[Function]}
-    tabIndex={0}
+    class="chartViewport"
+    tabindex="0"
   >
     <div>
       <canvas
-        className="chartCanvas markerChartCanvas"
-        onDoubleClick={[Function]}
-        onMouseDown={[Function]}
-        onMouseMove={[Function]}
-        onMouseOut={[Function]}
-        onMouseUp={[Function]}
+        class="chartCanvas markerChartCanvas"
+        height="300"
+        style="width: 365px; height: 300px;"
+        width="365"
       />
     </div>
     <div
-      className="chartViewportShiftScroll hidden"
+      class="chartViewportShiftScroll hidden"
     >
       Zoom Chart:
       <kbd
-        className="chartViewportShiftScrollKbd"
+        class="chartViewportShiftScrollKbd"
       >
         Shift
       </kbd>
       <kbd
-        className="chartViewportShiftScrollKbd"
+        class="chartViewportShiftScrollKbd"
       >
         Scroll
       </kbd>
@@ -419,21 +521,21 @@ Array [
     "fillRect",
     151,
     1,
-    248,
+    198,
     1,
   ],
   Array [
     "fillRect",
     150,
     2,
-    250,
+    200,
     11,
   ],
   Array [
     "fillRect",
     151,
     13,
-    248,
+    198,
     1,
   ],
   Array [
@@ -448,21 +550,50 @@ Array [
     "fillRect",
     151,
     17,
-    248,
+    198,
     1,
   ],
   Array [
     "fillRect",
     150,
     18,
-    250,
+    200,
     11,
   ],
   Array [
     "fillRect",
     151,
     29,
-    248,
+    198,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    151,
+    33,
+    58,
+    1,
+  ],
+  Array [
+    "fillRect",
+    150,
+    34,
+    60,
+    11,
+  ],
+  Array [
+    "fillRect",
+    151,
+    45,
+    58,
     1,
   ],
   Array [
@@ -478,8 +609,8 @@ Array [
   ],
   Array [
     "arc",
-    255,
-    39.5,
+    235,
+    55.5,
     3.75,
     0,
     6.283185307179586,
@@ -493,23 +624,23 @@ Array [
   ],
   Array [
     "fillRect",
-    276,
-    49,
-    248,
+    251,
+    65,
+    198,
     1,
   ],
   Array [
     "fillRect",
-    275,
-    50,
     250,
+    66,
+    200,
     11,
   ],
   Array [
     "fillRect",
-    276,
-    61,
-    248,
+    251,
+    77,
+    198,
     1,
   ],
   Array [
@@ -522,23 +653,23 @@ Array [
   ],
   Array [
     "fillRect",
-    276,
-    65,
-    123,
+    251,
+    81,
+    98,
     1,
   ],
   Array [
     "fillRect",
-    275,
-    66,
-    125,
+    250,
+    82,
+    100,
     11,
   ],
   Array [
     "fillRect",
-    276,
-    77,
-    123,
+    251,
+    93,
+    98,
     1,
   ],
   Array [
@@ -552,8 +683,8 @@ Array [
   Array [
     "fillText",
     "click",
-    278,
-    75,
+    253,
+    91,
   ],
   Array [
     "set fillStyle",
@@ -564,8 +695,26 @@ Array [
   ],
   Array [
     "arc",
-    330,
-    87.5,
+    295,
+    103.5,
+    3.75,
+    0,
+    6.283185307179586,
+  ],
+  Array [
+    "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "beginPath",
+  ],
+  Array [
+    "arc",
+    335,
+    119.5,
     3.75,
     0,
     6.283185307179586,
@@ -627,6 +776,20 @@ Array [
     1,
   ],
   Array [
+    "fillRect",
+    0,
+    111,
+    365,
+    1,
+  ],
+  Array [
+    "fillRect",
+    0,
+    127,
+    365,
+    1,
+  ],
+  Array [
     "set fillStyle",
     "#000000",
   ],
@@ -642,13 +805,23 @@ Array [
   ],
   Array [
     "measureText",
+    "Marker H with no start",
+  ],
+  Array [
+    "fillText",
+    "Marker H with no start",
+    5,
+    43,
+  ],
+  Array [
+    "measureText",
     "Dot marker E",
   ],
   Array [
     "fillText",
     "Dot marker E",
     5,
-    43,
+    59,
   ],
   Array [
     "measureText",
@@ -658,7 +831,7 @@ Array [
     "fillText",
     "Very very very very very ver…",
     5,
-    59,
+    75,
   ],
   Array [
     "measureText",
@@ -668,7 +841,7 @@ Array [
     "fillText",
     "Marker G type DOMEvent",
     5,
-    75,
+    91,
   ],
   Array [
     "measureText",
@@ -678,7 +851,17 @@ Array [
     "fillText",
     "Non-interval marker F withou…",
     5,
-    91,
+    107,
+  ],
+  Array [
+    "measureText",
+    "Marker H with no end",
+  ],
+  Array [
+    "fillText",
+    "Marker H with no end",
+    5,
+    123,
   ],
 ]
 `;

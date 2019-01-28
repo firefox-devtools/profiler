@@ -51,7 +51,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 19,
+    "preprocessedProfileVersion": 20,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -313,17 +313,6 @@ Object {
           0,
           0,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           4,
           4,
@@ -345,17 +334,6 @@ Object {
           6,
           7,
           8,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -522,17 +500,6 @@ Object {
           null,
           null,
         ],
-        "rss": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-        ],
         "stack": Array [
           null,
           null,
@@ -554,17 +521,6 @@ Object {
           6,
           7,
           8,
-        ],
-        "uss": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
       },
       "stackTable": Object {
@@ -853,17 +809,6 @@ Array [
         0,
         0,
       ],
-      "rss": Array [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-      ],
       "stack": Array [
         4,
         4,
@@ -885,17 +830,6 @@ Array [
         6,
         7,
         8,
-      ],
-      "uss": Array [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
       ],
     },
     "stackTable": Object {
@@ -1062,17 +996,6 @@ Array [
         null,
         null,
       ],
-      "rss": Array [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-      ],
       "stack": Array [
         null,
         null,
@@ -1094,17 +1017,6 @@ Array [
         6,
         7,
         8,
-      ],
-      "uss": Array [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
       ],
     },
     "stackTable": Object {
@@ -1143,10 +1055,21 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedN
 Object {
   "forFunc": Object {
     "selfTime": Object {
+      "breakdownByCategory": null,
       "breakdownByImplementation": null,
       "value": 0,
     },
     "totalTime": Object {
+      "breakdownByCategory": Array [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
       "breakdownByImplementation": Object {
         "native": 2,
       },
@@ -1155,10 +1078,21 @@ Object {
   },
   "forPath": Object {
     "selfTime": Object {
+      "breakdownByCategory": null,
       "breakdownByImplementation": null,
       "value": 0,
     },
     "totalTime": Object {
+      "breakdownByCategory": Array [
+        0,
+        2,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
       "breakdownByImplementation": Object {
         "native": 2,
       },
@@ -1784,12 +1718,6 @@ Object {
       0,
       0,
     ],
-    "rss": Array [
-      null,
-      null,
-      null,
-      null,
-    ],
     "stack": Array [
       5,
       5,
@@ -1801,12 +1729,6 @@ Object {
       4,
       5,
       6,
-    ],
-    "uss": Array [
-      null,
-      null,
-      null,
-      null,
     ],
   },
   "stackTable": Object {
@@ -2346,10 +2268,6 @@ Object {
       100,
       0,
     ],
-    "rss": Array [
-      null,
-      null,
-    ],
     "stack": Array [
       5,
       5,
@@ -2357,10 +2275,6 @@ Object {
     "time": Array [
       4,
       5,
-    ],
-    "uss": Array [
-      null,
-      null,
     ],
   },
   "stackTable": Object {
@@ -2726,12 +2640,6 @@ Object {
       0,
       0,
     ],
-    "rss": Array [
-      null,
-      null,
-      null,
-      null,
-    ],
     "stack": Array [
       5,
       5,
@@ -2743,12 +2651,6 @@ Object {
       4,
       5,
       6,
-    ],
-    "uss": Array [
-      null,
-      null,
-      null,
-      null,
     ],
   },
   "stackTable": Object {
@@ -3060,12 +2962,6 @@ Object {
       0,
       0,
     ],
-    "rss": Array [
-      null,
-      null,
-      null,
-      null,
-    ],
     "stack": Array [
       6,
       6,
@@ -3077,12 +2973,6 @@ Object {
       4,
       5,
       6,
-    ],
-    "uss": Array [
-      null,
-      null,
-      null,
-      null,
     ],
   },
   "stackTable": Object {

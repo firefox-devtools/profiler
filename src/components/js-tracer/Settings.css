@@ -3,37 +3,37 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .jsTracerSettings {
-  height: 25px;
-  padding: 0;
   display: flex;
-  border-bottom: 1px solid var(--grey-30);
-  line-height: 25px;
+  height: 25px;
   flex-flow: row nowrap;
+  padding: 0;
+  border-bottom: 1px solid var(--grey-30);
   color: var(--ink-70);
+  line-height: 25px;
 }
 
 .jsTracerSettingsList {
-  margin: 0;
-  padding: 0;
   display: flex;
   flex: 1;
-  list-style: none;
   align-items: flex-start;
+  padding: 0;
+  margin: 0;
+  list-style: none;
 }
 
 .jsTracerSettingsListItem {
-  margin: 0 5px;
   padding: 0;
+  margin: 0 5px;
 }
 
 .jsTracerSettingsLabel {
-  height: 25px;
   display: inline-flex;
+  height: 25px;
+  flex-flow: row nowrap;
+  align-items: center;
   -webkit-user-select: none;
   -moz-user-select: none;
   user-select: none;
-  flex-flow: row nowrap;
-  align-items: center;
 }
 
 .jsTracerSettingsCheckbox {
@@ -41,15 +41,15 @@
 }
 
 .jsTracerSettingsFilter {
-  border-right: 1px solid var(--grey-20);
   padding-right: 10px;
+  border-right: 1px solid var(--grey-20);
   white-space: nowrap;
 }
 
 .jsTracerSettingsFilterLabel {
-  padding-right: 5px;
   display: inline-flex;
   align-items: center;
+  padding-right: 5px;
 }
 
 .jsTracerSettingsFilterInput {

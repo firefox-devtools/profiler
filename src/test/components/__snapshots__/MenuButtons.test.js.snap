@@ -1,68 +1,66 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/MenuButtons renders the MenuButtons buttons 1`] = `
+exports[`app/MenuButtons share and save buttons matches the snapshot when done symbolicating 1`] = `
 Array [
   <div
-    className="menuButtonsOpenMetaInfoButtonBox"
+    class="menuButtonsOpenMetaInfoButtonBox"
   >
     <div
-      className="menuButtonsOpenMetaInfoButtonLabel"
+      class="menuButtonsOpenMetaInfoButtonLabel"
     >
       <span
-        className="menuButtonsOpenMetaInfoButtonLabelOverflow"
+        class="menuButtonsOpenMetaInfoButtonLabelOverflow"
       >
         Firefox (48.0) Intel Mac OS X 10.11
       </span>
     </div>
     <div
-      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
+      class="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
     >
       <div
-        className="buttonWithPanelButtonWrapper"
+        class="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
-          disabled={false}
-          onClick={[Function]}
+          class="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
           type="button"
           value=" "
         />
       </div>
       <div
-        className="arrowPanelAnchor"
+        class="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel arrowPanelOpenMetaInfo"
+          class="arrowPanel arrowPanelOpenMetaInfo"
         >
           <div
-            className="arrowPanelArrow"
+            class="arrowPanelArrow"
           />
           <div
-            className="arrowPanelContent"
+            class="arrowPanelContent"
           >
             <h2
-              className="arrowPanelSubTitle"
+              class="arrowPanelSubTitle"
             >
               Timing
             </h2>
             <div
-              className="arrowPanelSection"
+              class="arrowPanelSection"
             >
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Recording started:
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
               </div>
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Interval:
                 </span>
@@ -70,80 +68,90 @@ Array [
                 ms
               </div>
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Profile Version:
                 </span>
-                19
+                20
               </div>
             </div>
             <h2
-              className="arrowPanelSubTitle"
+              class="arrowPanelSubTitle"
             >
               Application
             </h2>
             <div
-              className="arrowPanelSection"
+              class="arrowPanelSection"
             >
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Name:
                 </span>
                 Firefox
               </div>
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Version:
                 </span>
                 48.0
               </div>
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
+                >
+                  Build ID:
+                </span>
+                20181126165837
+              </div>
+              <div
+                class="metaInfoRow"
+              >
+                <span
+                  class="metaInfoLabel"
                 >
                   Extensions:
                 </span>
                 <ul
-                  className="metaInfoList"
+                  class="metaInfoList"
                 />
               </div>
             </div>
             <h2
-              className="arrowPanelSubTitle"
+              class="arrowPanelSubTitle"
             >
               Platform
             </h2>
             <div
-              className="arrowPanelSection"
+              class="arrowPanelSection"
             >
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Platform:
                 </span>
                 Macintosh
               </div>
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   OS:
                 </span>
@@ -156,543 +164,43 @@ Array [
     </div>
   </div>,
   <div
-    className="menuButtons"
+    class="menuButtons"
   >
     <div
-      className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
+      class="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
+      data-testid="menuButtonsCompositeButtonContainer"
     >
       <div
-        className="buttonWithPanel menuButtonsShareButton"
+        class="buttonWithPanel menuButtonsShareButton"
       >
         <div
-          className="buttonWithPanelButtonWrapper"
+          class="buttonWithPanelButtonWrapper"
         >
           <input
-            className="buttonWithPanelButton menuButtonsShareButtonButton"
-            disabled={true}
-            onClick={[Function]}
-            type="button"
-            value="Sharing will be enabled once symbolication is complete"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <section
-                className="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                className="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={false}
-                    onChange={[Function]}
-                    type="checkbox"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="menuButtonsUploadingButton"
-      >
-        <div
-          className="menuButtonsUploadingButtonInner"
-        >
-          <progress
-            className="menuButtonsUploadingButtonProgress"
-            value={0}
-          />
-          <div
-            className="menuButtonsUploadingButtonLabel"
-          >
-            Uploading...
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsPermalinkButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Permalink"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel menuButtonsPermalinkPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <div
-              className="arrowPanelContent"
-            >
-              <input
-                className="menuButtonsPermalinkTextField"
-                readOnly="readOnly"
-                type="text"
-                value="http://localhost/"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsUploadErrorButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Upload Error"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Error
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <p>
-                An error occurred during upload:
-              </p>
-              <pre />
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Try Again"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsSecondaryShareButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
-            disabled={true}
-            onClick={[Function]}
-            type="button"
-            value="Share with URLs"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <section
-                className="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                className="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={true}
-                    type="checkbox"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      className="buttonWithPanel menuButtonsProfileDownloadButton"
-    >
-      <div
-        className="buttonWithPanelButtonWrapper"
-      >
-        <input
-          className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-          value="Save as file…"
-        />
-      </div>
-      <div
-        className="arrowPanelAnchor"
-      >
-        <div
-          className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
-        >
-          <div
-            className="arrowPanelArrow"
-          />
-          <h1
-            className="arrowPanelTitle"
-          >
-            Save Profile to a Local File
-          </h1>
-          <div
-            className="arrowPanelContent"
-          >
-            <section />
-          </div>
-        </div>
-      </div>
-    </div>
-    <a
-      className="menuButtonsLink"
-      href="/docs/"
-      target="_blank"
-      title="Open the documentation in a new window"
-    >
-      Docs…
-    </a>
-  </div>,
-]
-`;
-
-exports[`app/MenuButtons renders the MenuButtons buttons 2`] = `
-Array [
-  <div
-    className="menuButtonsOpenMetaInfoButtonBox"
-  >
-    <div
-      className="menuButtonsOpenMetaInfoButtonLabel"
-    >
-      <span
-        className="menuButtonsOpenMetaInfoButtonLabelOverflow"
-      >
-        Firefox (48.0) Intel Mac OS X 10.11
-      </span>
-    </div>
-    <div
-      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
-    >
-      <div
-        className="buttonWithPanelButtonWrapper"
-      >
-        <input
-          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-          value=" "
-        />
-      </div>
-      <div
-        className="arrowPanelAnchor"
-      >
-        <div
-          className="arrowPanel arrowPanelOpenMetaInfo"
-        >
-          <div
-            className="arrowPanelArrow"
-          />
-          <div
-            className="arrowPanelContent"
-          >
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Timing
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Recording started:
-                </span>
-                Sat, 09 Apr 2016 17:02:32 GMT
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Interval:
-                </span>
-                1
-                ms
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Profile Version:
-                </span>
-                19
-              </div>
-            </div>
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Application
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Name:
-                </span>
-                Firefox
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Version:
-                </span>
-                48.0
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Extensions:
-                </span>
-                <ul
-                  className="metaInfoList"
-                />
-              </div>
-            </div>
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Platform
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Platform:
-                </span>
-                Macintosh
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  OS:
-                </span>
-                Intel Mac OS X 10.11
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>,
-  <div
-    className="menuButtons"
-  >
-    <div
-      className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
-    >
-      <div
-        className="buttonWithPanel menuButtonsShareButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsShareButtonButton"
-            disabled={false}
-            onClick={[Function]}
+            class="buttonWithPanelButton menuButtonsShareButtonButton"
             type="button"
             value="Share..."
           />
         </div>
         <div
-          className="arrowPanelAnchor"
+          class="arrowPanelAnchor"
         >
           <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+            class="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
           >
             <div
-              className="arrowPanelArrow"
+              class="arrowPanelArrow"
             />
             <h1
-              className="arrowPanelTitle"
+              class="arrowPanelTitle"
             >
               Upload Profile – Privacy Notice
             </h1>
             <div
-              className="arrowPanelContent"
+              class="arrowPanelContent"
             >
               <section
-                className="privacyNotice"
+                class="privacyNotice"
               >
                 <p>
                   You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
@@ -718,230 +226,28 @@ Array [
                 </p>
               </section>
               <p
-                className="menuButtonsShareNetworkUrlsContainer"
+                class="menuButtonsShareNetworkUrlsContainer"
               >
                 <label>
                   <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={false}
-                    onChange={[Function]}
+                    class="menuButtonsShareNetworkUrlsCheckbox"
                     type="checkbox"
+                    value="on"
                   />
                   Share the URLs of all network requests
                 </label>
               </p>
             </div>
             <div
-              className="arrowPanelButtons"
+              class="arrowPanelButtons"
             >
               <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
+                class="arrowPanelCancelButton"
                 type="button"
                 value="Cancel"
               />
               <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="menuButtonsUploadingButton"
-      >
-        <div
-          className="menuButtonsUploadingButtonInner"
-        >
-          <progress
-            className="menuButtonsUploadingButtonProgress"
-            value={0}
-          />
-          <div
-            className="menuButtonsUploadingButtonLabel"
-          >
-            Uploading...
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsPermalinkButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Permalink"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel menuButtonsPermalinkPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <div
-              className="arrowPanelContent"
-            >
-              <input
-                className="menuButtonsPermalinkTextField"
-                readOnly="readOnly"
-                type="text"
-                value="http://localhost/"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsUploadErrorButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Upload Error"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Error
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <p>
-                An error occurred during upload:
-              </p>
-              <pre />
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Try Again"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsSecondaryShareButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Share with URLs"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <section
-                className="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                className="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={true}
-                    type="checkbox"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
+                class="arrowPanelOkButton"
                 type="button"
                 value="Share"
               />
@@ -951,35 +257,33 @@ Array [
       </div>
     </div>
     <div
-      className="buttonWithPanel menuButtonsProfileDownloadButton"
+      class="buttonWithPanel menuButtonsProfileDownloadButton"
     >
       <div
-        className="buttonWithPanelButtonWrapper"
+        class="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
-          disabled={false}
-          onClick={[Function]}
+          class="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
           type="button"
           value="Save as file…"
         />
       </div>
       <div
-        className="arrowPanelAnchor"
+        class="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
+          class="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
         >
           <div
-            className="arrowPanelArrow"
+            class="arrowPanelArrow"
           />
           <h1
-            className="arrowPanelTitle"
+            class="arrowPanelTitle"
           >
             Save Profile to a Local File
           </h1>
           <div
-            className="arrowPanelContent"
+            class="arrowPanelContent"
           >
             <section />
           </div>
@@ -987,7 +291,7 @@ Array [
       </div>
     </div>
     <a
-      className="menuButtonsLink"
+      class="menuButtonsLink"
       href="/docs/"
       target="_blank"
       title="Open the documentation in a new window"
@@ -998,69 +302,67 @@ Array [
 ]
 `;
 
-exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to true 1`] = `
+exports[`app/MenuButtons share and save buttons matches the snapshot when starting to symbolicate 1`] = `
 Array [
   <div
-    className="menuButtonsOpenMetaInfoButtonBox"
+    class="menuButtonsOpenMetaInfoButtonBox"
   >
     <div
-      className="menuButtonsOpenMetaInfoButtonLabel"
+      class="menuButtonsOpenMetaInfoButtonLabel"
     >
       <span
-        className="menuButtonsOpenMetaInfoButtonLabelOverflow"
+        class="menuButtonsOpenMetaInfoButtonLabelOverflow"
       >
         Firefox (48.0) Intel Mac OS X 10.11
       </span>
     </div>
     <div
-      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
+      class="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
     >
       <div
-        className="buttonWithPanelButtonWrapper"
+        class="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
-          disabled={false}
-          onClick={[Function]}
+          class="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
           type="button"
           value=" "
         />
       </div>
       <div
-        className="arrowPanelAnchor"
+        class="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel arrowPanelOpenMetaInfo"
+          class="arrowPanel arrowPanelOpenMetaInfo"
         >
           <div
-            className="arrowPanelArrow"
+            class="arrowPanelArrow"
           />
           <div
-            className="arrowPanelContent"
+            class="arrowPanelContent"
           >
             <h2
-              className="arrowPanelSubTitle"
+              class="arrowPanelSubTitle"
             >
               Timing
             </h2>
             <div
-              className="arrowPanelSection"
+              class="arrowPanelSection"
             >
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Recording started:
                 </span>
                 Sat, 09 Apr 2016 17:02:32 GMT
               </div>
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Interval:
                 </span>
@@ -1068,80 +370,90 @@ Array [
                 ms
               </div>
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Profile Version:
                 </span>
-                19
+                20
               </div>
             </div>
             <h2
-              className="arrowPanelSubTitle"
+              class="arrowPanelSubTitle"
             >
               Application
             </h2>
             <div
-              className="arrowPanelSection"
+              class="arrowPanelSection"
             >
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Name:
                 </span>
                 Firefox
               </div>
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Version:
                 </span>
                 48.0
               </div>
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
+                >
+                  Build ID:
+                </span>
+                20181126165837
+              </div>
+              <div
+                class="metaInfoRow"
+              >
+                <span
+                  class="metaInfoLabel"
                 >
                   Extensions:
                 </span>
                 <ul
-                  className="metaInfoList"
+                  class="metaInfoList"
                 />
               </div>
             </div>
             <h2
-              className="arrowPanelSubTitle"
+              class="arrowPanelSubTitle"
             >
               Platform
             </h2>
             <div
-              className="arrowPanelSection"
+              class="arrowPanelSection"
             >
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   Platform:
                 </span>
                 Macintosh
               </div>
               <div
-                className="metaInfoRow"
+                class="metaInfoRow"
               >
                 <span
-                  className="metaInfoLabel"
+                  class="metaInfoLabel"
                 >
                   OS:
                 </span>
@@ -1154,44 +466,44 @@ Array [
     </div>
   </div>,
   <div
-    className="menuButtons"
+    class="menuButtons"
   >
     <div
-      className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
+      class="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
+      data-testid="menuButtonsCompositeButtonContainer"
     >
       <div
-        className="buttonWithPanel menuButtonsShareButton"
+        class="buttonWithPanel menuButtonsShareButton"
       >
         <div
-          className="buttonWithPanelButtonWrapper"
+          class="buttonWithPanelButtonWrapper"
         >
           <input
-            className="buttonWithPanelButton menuButtonsShareButtonButton"
-            disabled={true}
-            onClick={[Function]}
+            class="buttonWithPanelButton menuButtonsShareButtonButton"
+            disabled=""
             type="button"
             value="Sharing will be enabled once symbolication is complete"
           />
         </div>
         <div
-          className="arrowPanelAnchor"
+          class="arrowPanelAnchor"
         >
           <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
+            class="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
           >
             <div
-              className="arrowPanelArrow"
+              class="arrowPanelArrow"
             />
             <h1
-              className="arrowPanelTitle"
+              class="arrowPanelTitle"
             >
               Upload Profile – Privacy Notice
             </h1>
             <div
-              className="arrowPanelContent"
+              class="arrowPanelContent"
             >
               <section
-                className="privacyNotice"
+                class="privacyNotice"
               >
                 <p>
                   You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
@@ -1217,230 +529,28 @@ Array [
                 </p>
               </section>
               <p
-                className="menuButtonsShareNetworkUrlsContainer"
+                class="menuButtonsShareNetworkUrlsContainer"
               >
                 <label>
                   <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={false}
-                    onChange={[Function]}
+                    class="menuButtonsShareNetworkUrlsCheckbox"
                     type="checkbox"
+                    value="on"
                   />
                   Share the URLs of all network requests
                 </label>
               </p>
             </div>
             <div
-              className="arrowPanelButtons"
+              class="arrowPanelButtons"
             >
               <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
+                class="arrowPanelCancelButton"
                 type="button"
                 value="Cancel"
               />
               <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="menuButtonsUploadingButton"
-      >
-        <div
-          className="menuButtonsUploadingButtonInner"
-        >
-          <progress
-            className="menuButtonsUploadingButtonProgress"
-            value={0}
-          />
-          <div
-            className="menuButtonsUploadingButtonLabel"
-          >
-            Uploading...
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsPermalinkButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Permalink"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel menuButtonsPermalinkPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <div
-              className="arrowPanelContent"
-            >
-              <input
-                className="menuButtonsPermalinkTextField"
-                readOnly="readOnly"
-                type="text"
-                value="http://localhost/"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsUploadErrorButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Upload Error"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Error
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <p>
-                An error occurred during upload:
-              </p>
-              <pre />
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Try Again"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsSecondaryShareButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
-            disabled={true}
-            onClick={[Function]}
-            type="button"
-            value="Share with URLs"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <section
-                className="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                className="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={true}
-                    type="checkbox"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
+                class="arrowPanelOkButton"
                 type="button"
                 value="Share"
               />
@@ -1450,35 +560,33 @@ Array [
       </div>
     </div>
     <div
-      className="buttonWithPanel menuButtonsProfileDownloadButton"
+      class="buttonWithPanel menuButtonsProfileDownloadButton"
     >
       <div
-        className="buttonWithPanelButtonWrapper"
+        class="buttonWithPanelButtonWrapper"
       >
         <input
-          className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
-          disabled={false}
-          onClick={[Function]}
+          class="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
           type="button"
           value="Save as file…"
         />
       </div>
       <div
-        className="arrowPanelAnchor"
+        class="arrowPanelAnchor"
       >
         <div
-          className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
+          class="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
         >
           <div
-            className="arrowPanelArrow"
+            class="arrowPanelArrow"
           />
           <h1
-            className="arrowPanelTitle"
+            class="arrowPanelTitle"
           >
             Save Profile to a Local File
           </h1>
           <div
-            className="arrowPanelContent"
+            class="arrowPanelContent"
           >
             <section />
           </div>
@@ -1486,1504 +594,7 @@ Array [
       </div>
     </div>
     <a
-      className="menuButtonsLink"
-      href="/docs/"
-      target="_blank"
-      title="Open the documentation in a new window"
-    >
-      Docs…
-    </a>
-  </div>,
-]
-`;
-
-exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to true 2`] = `
-Array [
-  <div
-    className="menuButtonsOpenMetaInfoButtonBox"
-  >
-    <div
-      className="menuButtonsOpenMetaInfoButtonLabel"
-    >
-      <span
-        className="menuButtonsOpenMetaInfoButtonLabelOverflow"
-      >
-        Firefox (48.0) Intel Mac OS X 10.11
-      </span>
-    </div>
-    <div
-      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
-    >
-      <div
-        className="buttonWithPanelButtonWrapper"
-      >
-        <input
-          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-          value=" "
-        />
-      </div>
-      <div
-        className="arrowPanelAnchor"
-      >
-        <div
-          className="arrowPanel arrowPanelOpenMetaInfo"
-        >
-          <div
-            className="arrowPanelArrow"
-          />
-          <div
-            className="arrowPanelContent"
-          >
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Timing
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Recording started:
-                </span>
-                Sat, 09 Apr 2016 17:02:32 GMT
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Interval:
-                </span>
-                1
-                ms
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Profile Version:
-                </span>
-                19
-              </div>
-            </div>
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Application
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Name:
-                </span>
-                Firefox
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Version:
-                </span>
-                48.0
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Extensions:
-                </span>
-                <ul
-                  className="metaInfoList"
-                />
-              </div>
-            </div>
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Platform
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Platform:
-                </span>
-                Macintosh
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  OS:
-                </span>
-                Intel Mac OS X 10.11
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>,
-  <div
-    className="menuButtons"
-  >
-    <div
-      className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
-    >
-      <div
-        className="buttonWithPanel menuButtonsShareButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsShareButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Share..."
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <section
-                className="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                className="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={false}
-                    onChange={[Function]}
-                    type="checkbox"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="menuButtonsUploadingButton"
-      >
-        <div
-          className="menuButtonsUploadingButtonInner"
-        >
-          <progress
-            className="menuButtonsUploadingButtonProgress"
-            value={0}
-          />
-          <div
-            className="menuButtonsUploadingButtonLabel"
-          >
-            Uploading...
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsPermalinkButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Permalink"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel menuButtonsPermalinkPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <div
-              className="arrowPanelContent"
-            >
-              <input
-                className="menuButtonsPermalinkTextField"
-                readOnly="readOnly"
-                type="text"
-                value="http://localhost/"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsUploadErrorButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Upload Error"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Error
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <p>
-                An error occurred during upload:
-              </p>
-              <pre />
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Try Again"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsSecondaryShareButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Share with URLs"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <section
-                className="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                className="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={true}
-                    type="checkbox"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      className="buttonWithPanel menuButtonsProfileDownloadButton"
-    >
-      <div
-        className="buttonWithPanelButtonWrapper"
-      >
-        <input
-          className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-          value="Save as file…"
-        />
-      </div>
-      <div
-        className="arrowPanelAnchor"
-      >
-        <div
-          className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
-        >
-          <div
-            className="arrowPanelArrow"
-          />
-          <h1
-            className="arrowPanelTitle"
-          >
-            Save Profile to a Local File
-          </h1>
-          <div
-            className="arrowPanelContent"
-          >
-            <section />
-          </div>
-        </div>
-      </div>
-    </div>
-    <a
-      className="menuButtonsLink"
-      href="/docs/"
-      target="_blank"
-      title="Open the documentation in a new window"
-    >
-      Docs…
-    </a>
-  </div>,
-]
-`;
-
-exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to undefined 1`] = `
-Array [
-  <div
-    className="menuButtonsOpenMetaInfoButtonBox"
-  >
-    <div
-      className="menuButtonsOpenMetaInfoButtonLabel"
-    >
-      <span
-        className="menuButtonsOpenMetaInfoButtonLabelOverflow"
-      >
-        Firefox (48.0) Intel Mac OS X 10.11
-      </span>
-    </div>
-    <div
-      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
-    >
-      <div
-        className="buttonWithPanelButtonWrapper"
-      >
-        <input
-          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-          value=" "
-        />
-      </div>
-      <div
-        className="arrowPanelAnchor"
-      >
-        <div
-          className="arrowPanel arrowPanelOpenMetaInfo"
-        >
-          <div
-            className="arrowPanelArrow"
-          />
-          <div
-            className="arrowPanelContent"
-          >
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Timing
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Recording started:
-                </span>
-                Sat, 09 Apr 2016 17:02:32 GMT
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Interval:
-                </span>
-                1
-                ms
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Profile Version:
-                </span>
-                19
-              </div>
-            </div>
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Application
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Name:
-                </span>
-                Firefox
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Version:
-                </span>
-                48.0
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Extensions:
-                </span>
-                <ul
-                  className="metaInfoList"
-                />
-              </div>
-            </div>
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Platform
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Platform:
-                </span>
-                Macintosh
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  OS:
-                </span>
-                Intel Mac OS X 10.11
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>,
-  <div
-    className="menuButtons"
-  >
-    <div
-      className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
-    >
-      <div
-        className="buttonWithPanel menuButtonsShareButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsShareButtonButton"
-            disabled={true}
-            onClick={[Function]}
-            type="button"
-            value="Sharing will be enabled once symbolication is complete"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <section
-                className="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                className="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={false}
-                    onChange={[Function]}
-                    type="checkbox"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="menuButtonsUploadingButton"
-      >
-        <div
-          className="menuButtonsUploadingButtonInner"
-        >
-          <progress
-            className="menuButtonsUploadingButtonProgress"
-            value={0}
-          />
-          <div
-            className="menuButtonsUploadingButtonLabel"
-          >
-            Uploading...
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsPermalinkButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Permalink"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel menuButtonsPermalinkPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <div
-              className="arrowPanelContent"
-            >
-              <input
-                className="menuButtonsPermalinkTextField"
-                readOnly="readOnly"
-                type="text"
-                value="http://localhost/"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsUploadErrorButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Upload Error"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Error
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <p>
-                An error occurred during upload:
-              </p>
-              <pre />
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Try Again"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsSecondaryShareButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
-            disabled={true}
-            onClick={[Function]}
-            type="button"
-            value="Share with URLs"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <section
-                className="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                className="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={true}
-                    type="checkbox"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      className="buttonWithPanel menuButtonsProfileDownloadButton"
-    >
-      <div
-        className="buttonWithPanelButtonWrapper"
-      >
-        <input
-          className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-          value="Save as file…"
-        />
-      </div>
-      <div
-        className="arrowPanelAnchor"
-      >
-        <div
-          className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
-        >
-          <div
-            className="arrowPanelArrow"
-          />
-          <h1
-            className="arrowPanelTitle"
-          >
-            Save Profile to a Local File
-          </h1>
-          <div
-            className="arrowPanelContent"
-          >
-            <section />
-          </div>
-        </div>
-      </div>
-    </div>
-    <a
-      className="menuButtonsLink"
-      href="/docs/"
-      target="_blank"
-      title="Open the documentation in a new window"
-    >
-      Docs…
-    </a>
-  </div>,
-]
-`;
-
-exports[`app/MenuButtons renders the MenuButtons buttons with profile.meta.networkURLsRemoved set to undefined 2`] = `
-Array [
-  <div
-    className="menuButtonsOpenMetaInfoButtonBox"
-  >
-    <div
-      className="menuButtonsOpenMetaInfoButtonLabel"
-    >
-      <span
-        className="menuButtonsOpenMetaInfoButtonLabelOverflow"
-      >
-        Firefox (48.0) Intel Mac OS X 10.11
-      </span>
-    </div>
-    <div
-      className="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
-    >
-      <div
-        className="buttonWithPanelButtonWrapper"
-      >
-        <input
-          className="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-          value=" "
-        />
-      </div>
-      <div
-        className="arrowPanelAnchor"
-      >
-        <div
-          className="arrowPanel arrowPanelOpenMetaInfo"
-        >
-          <div
-            className="arrowPanelArrow"
-          />
-          <div
-            className="arrowPanelContent"
-          >
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Timing
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Recording started:
-                </span>
-                Sat, 09 Apr 2016 17:02:32 GMT
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Interval:
-                </span>
-                1
-                ms
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Profile Version:
-                </span>
-                19
-              </div>
-            </div>
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Application
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Name:
-                </span>
-                Firefox
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Version:
-                </span>
-                48.0
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Extensions:
-                </span>
-                <ul
-                  className="metaInfoList"
-                />
-              </div>
-            </div>
-            <h2
-              className="arrowPanelSubTitle"
-            >
-              Platform
-            </h2>
-            <div
-              className="arrowPanelSection"
-            >
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  Platform:
-                </span>
-                Macintosh
-              </div>
-              <div
-                className="metaInfoRow"
-              >
-                <span
-                  className="metaInfoLabel"
-                >
-                  OS:
-                </span>
-                Intel Mac OS X 10.11
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>,
-  <div
-    className="menuButtons"
-  >
-    <div
-      className="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
-    >
-      <div
-        className="buttonWithPanel menuButtonsShareButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsShareButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Share..."
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <section
-                className="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                className="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={false}
-                    onChange={[Function]}
-                    type="checkbox"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="menuButtonsUploadingButton"
-      >
-        <div
-          className="menuButtonsUploadingButtonInner"
-        >
-          <progress
-            className="menuButtonsUploadingButtonProgress"
-            value={0}
-          />
-          <div
-            className="menuButtonsUploadingButtonLabel"
-          >
-            Uploading...
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsPermalinkButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsPermalinkButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Permalink"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel menuButtonsPermalinkPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <div
-              className="arrowPanelContent"
-            >
-              <input
-                className="menuButtonsPermalinkTextField"
-                readOnly="readOnly"
-                type="text"
-                value="http://localhost/"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsUploadErrorButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsUploadErrorButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Upload Error"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsUploadErrorPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Error
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <p>
-                An error occurred during upload:
-              </p>
-              <pre />
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Try Again"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        className="buttonWithPanel menuButtonsSecondaryShareButton"
-      >
-        <div
-          className="buttonWithPanelButtonWrapper"
-        >
-          <input
-            className="buttonWithPanelButton menuButtonsSecondaryShareButtonButton"
-            disabled={false}
-            onClick={[Function]}
-            type="button"
-            value="Share with URLs"
-          />
-        </div>
-        <div
-          className="arrowPanelAnchor"
-        >
-          <div
-            className="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              className="arrowPanelArrow"
-            />
-            <h1
-              className="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              className="arrowPanelContent"
-            >
-              <section
-                className="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                className="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    checked={false}
-                    className="menuButtonsShareNetworkUrlsCheckbox"
-                    disabled={true}
-                    type="checkbox"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              className="arrowPanelButtons"
-            >
-              <input
-                className="arrowPanelCancelButton"
-                onClick={[Function]}
-                type="button"
-                value="Cancel"
-              />
-              <input
-                className="arrowPanelOkButton"
-                onClick={[Function]}
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      className="buttonWithPanel menuButtonsProfileDownloadButton"
-    >
-      <div
-        className="buttonWithPanelButtonWrapper"
-      >
-        <input
-          className="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
-          disabled={false}
-          onClick={[Function]}
-          type="button"
-          value="Save as file…"
-        />
-      </div>
-      <div
-        className="arrowPanelAnchor"
-      >
-        <div
-          className="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
-        >
-          <div
-            className="arrowPanelArrow"
-          />
-          <h1
-            className="arrowPanelTitle"
-          >
-            Save Profile to a Local File
-          </h1>
-          <div
-            className="arrowPanelContent"
-          >
-            <section />
-          </div>
-        </div>
-      </div>
-    </div>
-    <a
-      className="menuButtonsLink"
+      class="menuButtonsLink"
       href="/docs/"
       target="_blank"
       title="Open the documentation in a new window"

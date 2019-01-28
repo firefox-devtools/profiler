@@ -7,6 +7,7 @@ import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import FlameGraphCanvas from './Canvas';
 import {
+  getCategories,
   getCommittedRange,
   getProfileViewOptions,
   getPreviewSelection,
@@ -20,7 +21,7 @@ import { changeSelectedCallNode } from '../../actions/profile-view';
 import { getIconsWithClassNames } from '../../selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
-import type { Thread } from '../../types/profile';
+import type { Thread, CategoryList } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
 import type { PreviewSelection } from '../../types/actions';
@@ -53,6 +54,7 @@ type StateProps = {|
   +isCallNodeContextMenuVisible: boolean,
   +scrollToSelectionGeneration: number,
   +icons: IconWithClassName[],
+  +categories: CategoryList,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -100,6 +102,7 @@ class FlameGraph extends React.PureComponent<Props> {
       isCallNodeContextMenuVisible,
       scrollToSelectionGeneration,
       icons,
+      categories,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -141,6 +144,7 @@ class FlameGraph extends React.PureComponent<Props> {
               flameGraphTiming,
               callTree,
               callNodeInfo,
+              categories,
               selectedCallNodeIndex,
               scrollToSelectionGeneration,
               stackFrameHeight: STACK_FRAME_HEIGHT,
@@ -174,6 +178,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       timeRange: getCommittedRange(state),
       previewSelection: getPreviewSelection(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+      categories: getCategories(state),
       threadIndex: getSelectedThreadIndex(state),
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state

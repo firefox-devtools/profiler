@@ -8,32 +8,36 @@
 }
 
 .profileViewer {
-  background-color: #fff;
-  animation-name: profileViewerFadeIn;
   animation-duration: 200ms;
+  animation-name: profileViewerFadeIn;
+  background-color: #fff;
 }
 
 .profileViewerName {
   height: 24px;
   padding: 0 6px 0 2px;
   border-right: 1px solid var(--grey-30);
-  line-height: 24px;
-  font-weight: bold;
   color: var(--grey-60);
+  font-weight: bold;
+  line-height: 24px;
 }
 
 .profileViewerZipButton {
+  /* Position */
   width: 18px;
   height: 18px;
 
-  margin: 3px;
-  padding: 0;
-  border: 1px solid var(--green-60);
-  background: var(--green-50) url(../../../res/img/svg/back-arrow.svg) center center no-repeat;
+  /* Box */
   flex: none;
-  
-  color: #000;
+  padding: 0;
+  margin: 3px;
+  border: 1px solid var(--green-60);
+
+  /* Other */
+  background: var(--green-50) url(../../../res/img/svg/back-arrow.svg) center
+    center no-repeat;
   border-radius: 3px;
+  color: #000;
 }
 
 .profileViewerZipButton:hover {

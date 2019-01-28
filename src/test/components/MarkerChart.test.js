@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { mount } from 'enzyme';
+import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 
 import { changeMarkersSearchString } from '../../actions/profile-view';
@@ -14,13 +14,14 @@ import {
 } from '../../app-logic/constants';
 import MarkerChart from '../../components/marker-chart';
 import { changeSelectedTab } from '../../actions/app';
+import { ensureExists } from '../../utils/flow';
 
-import EmptyReasons from '../../components/shared/EmptyReasons';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import {
   getBoundingBox,
+  getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
@@ -59,6 +60,24 @@ const MARKERS = [
       phase: 2,
     },
   ],
+  [
+    'Marker H with no start',
+    3,
+    {
+      type: 'tracing',
+      category: 'Paint',
+      interval: 'end',
+    },
+  ],
+  [
+    'Marker H with no end',
+    9,
+    {
+      type: 'tracing',
+      category: 'Paint',
+      interval: 'start',
+    },
+  ],
 ];
 
 function setupWithProfile(profile) {
@@ -79,14 +98,14 @@ function setupWithProfile(profile) {
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('marker-chart'));
 
-  const markerChart = mount(
+  const renderResult = render(
     <Provider store={store}>
       <MarkerChart />
     </Provider>
   );
 
   return {
-    markerChart,
+    ...renderResult,
     flushRafCalls,
     dispatch: store.dispatch,
     flushDrawLog: () => ctx.__flushDrawLog(),
@@ -102,18 +121,17 @@ describe('MarkerChart', function() {
 
     const profile = getProfileWithMarkers([...MARKERS]);
     const {
+      container,
       flushRafCalls,
       dispatch,
-      markerChart,
       flushDrawLog,
     } = setupWithProfile(profile);
 
     dispatch(changeSelectedTab('marker-chart'));
-    markerChart.update();
     flushRafCalls();
 
     const drawCalls = flushDrawLog();
-    expect(markerChart).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
 
     delete window.devicePixelRatio;
@@ -126,32 +144,38 @@ describe('MarkerChart', function() {
     const {
       flushRafCalls,
       dispatch,
-      markerChart,
+      container,
       flushDrawLog,
     } = setupWithProfile(profile);
 
     dispatch(changeSelectedTab('marker-chart'));
-    markerChart.update();
     flushRafCalls();
     flushDrawLog();
 
     // No tooltip displayed yet
-    expect(markerChart.find('Tooltip').exists()).toEqual(false);
+    expect(document.querySelector('.tooltip')).toBeFalsy();
 
     // Move the mouse on top of an item.
-    markerChart.find('canvas').simulate('mousemove', {
-      nativeEvent: { offsetX: 50 + TIMELINE_MARGIN_LEFT, offsetY: 5 },
-      pageX: 50,
-      pageY: 5,
-    });
-    markerChart.update();
+    fireEvent(
+      ensureExists(
+        container.querySelector('canvas'),
+        `Couldn't find the canvas element`
+      ),
+      getMouseEvent('mousemove', {
+        offsetX: 50 + TIMELINE_MARGIN_LEFT,
+        offsetY: 5,
+        pageX: 50,
+        pageY: 5,
+      })
+    );
+
     flushRafCalls();
 
     const drawCalls = flushDrawLog();
     expect(drawCalls).toMatchSnapshot();
 
     // The tooltip should be displayed
-    expect(markerChart.find('Tooltip').exists()).toEqual(true);
+    expect(document.querySelector('.tooltip')).toMatchSnapshot();
   });
 
   describe('with search strings', function() {
@@ -176,12 +200,9 @@ describe('MarkerChart', function() {
 
     it('renders only the marker that was searched for', function() {
       const profile = getProfileWithMarkers(MARKERS);
-      const {
-        flushRafCalls,
-        dispatch,
-        flushDrawLog,
-        markerChart,
-      } = setupWithProfile(profile);
+      const { flushRafCalls, dispatch, flushDrawLog } = setupWithProfile(
+        profile
+      );
 
       // Flush out any existing draw calls.
       flushRafCalls();
@@ -189,7 +210,6 @@ describe('MarkerChart', function() {
 
       // Update the chart with a search string.
       dispatch(changeMarkersSearchString(searchString));
-      markerChart.update();
       flushRafCalls();
 
       const text = getFillTextCalls(flushDrawLog());
@@ -201,21 +221,19 @@ describe('MarkerChart', function() {
   describe('EmptyReasons', () => {
     it('shows a reason when a profile has no markers', () => {
       const profile = getProfileWithMarkers([]);
-      const { dispatch, markerChart } = setupWithProfile(profile);
+      const { dispatch, container } = setupWithProfile(profile);
 
       dispatch(changeSelectedTab('marker-chart'));
-      markerChart.update();
-      expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
 
     it("shows a reason when a profile's markers have been filtered out", () => {
       const profile = getProfileWithMarkers(MARKERS);
-      const { dispatch, markerChart } = setupWithProfile(profile);
+      const { dispatch, container } = setupWithProfile(profile);
 
       dispatch(changeSelectedTab('marker-chart'));
       dispatch(changeMarkersSearchString('MATCH_NOTHING'));
-      markerChart.update();
-      expect(markerChart.find(EmptyReasons)).toMatchSnapshot();
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
   });
 });

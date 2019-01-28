@@ -9,6 +9,11 @@ declare module 'common-tags' {
     ...expressions: string[]
   ): string;
 
+  declare function oneLineTrim(
+    template: string[],
+    ...expressions: string[]
+  ): string;
+
   declare function stripIndent(
     template: string[],
     ...expressions: string[]

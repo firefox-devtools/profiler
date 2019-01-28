@@ -2,110 +2,63 @@
 
 exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global track 1`] = `
 <nav
-  className="react-contextmenu timeline-context-menu"
-  onContextMenu={[Function]}
-  onMouseLeave={[Function]}
+  class="react-contextmenu timeline-context-menu"
   role="menu"
-  style={
-    Object {
-      "opacity": 0,
-      "pointerEvents": "none",
-      "position": "fixed",
-    }
-  }
-  tabIndex="-1"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
 >
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     Only show 
     "Content Process"
   </div>
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     Only show this process
   </div>
   <div
-    className="react-contextmenu-separator"
-    key=".3"
+    class="react-contextmenu-separator"
   />
-  <div
-    key=".4:$0"
-  >
+  <div>
     <div
       aria-disabled="false"
-      aria-orientation={null}
-      className="react-contextmenu-item checkable checked"
-      data-test-id="global-track-0"
-      onClick={[Function]}
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
-      onTouchEnd={[Function]}
+      class="react-contextmenu-item checkable checked"
       role="menuitem"
-      tabIndex="-1"
+      tabindex="-1"
     >
       GeckoMain
     </div>
   </div>
-  <div
-    key=".4:$1"
-  >
+  <div>
     <div
       aria-disabled="false"
-      aria-orientation={null}
-      className="react-contextmenu-item checkable checked"
-      data-test-id="global-track-1"
-      onClick={[Function]}
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
-      onTouchEnd={[Function]}
+      class="react-contextmenu-item checkable checked"
       role="menuitem"
-      tabIndex="-1"
+      tabindex="-1"
     >
       Content Process
     </div>
     <div
       aria-disabled="false"
-      aria-orientation={null}
-      className="react-contextmenu-item checkable indented checked"
-      data-test-id="local-track-222-0"
-      onClick={[Function]}
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
-      onTouchEnd={[Function]}
+      class="react-contextmenu-item checkable indented checked"
       role="menuitem"
-      tabIndex="-1"
+      tabindex="-1"
     >
       DOM Worker
     </div>
     <div
       aria-disabled="false"
-      aria-orientation={null}
-      className="react-contextmenu-item checkable indented checked"
-      data-test-id="local-track-222-1"
-      onClick={[Function]}
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
-      onTouchEnd={[Function]}
+      class="react-contextmenu-item checkable indented checked"
       role="menuitem"
-      tabIndex="-1"
+      tabindex="-1"
     >
       Style
     </div>
@@ -115,97 +68,55 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
 
 exports[`timeline/TrackContextMenu selected local track matches the snapshot of a local track 1`] = `
 <nav
-  className="react-contextmenu timeline-context-menu"
-  onContextMenu={[Function]}
-  onMouseLeave={[Function]}
+  class="react-contextmenu timeline-context-menu"
   role="menu"
-  style={
-    Object {
-      "opacity": 0,
-      "pointerEvents": "none",
-      "position": "fixed",
-    }
-  }
-  tabIndex="-1"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
 >
   <div
     aria-disabled="false"
-    aria-orientation={null}
-    className="react-contextmenu-item"
-    onClick={[Function]}
-    onMouseLeave={[Function]}
-    onMouseMove={[Function]}
-    onTouchEnd={[Function]}
+    class="react-contextmenu-item"
     role="menuitem"
-    tabIndex="-1"
+    tabindex="-1"
   >
     Only show 
     "DOM Worker"
   </div>
   <div
-    className="react-contextmenu-separator"
-    key=".3"
+    class="react-contextmenu-separator"
   />
-  <div
-    key=".4:$0"
-  >
+  <div>
     <div
       aria-disabled="false"
-      aria-orientation={null}
-      className="react-contextmenu-item checkable checked"
-      data-test-id="global-track-0"
-      onClick={[Function]}
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
-      onTouchEnd={[Function]}
+      class="react-contextmenu-item checkable checked"
       role="menuitem"
-      tabIndex="-1"
+      tabindex="-1"
     >
       GeckoMain
     </div>
   </div>
-  <div
-    key=".4:$1"
-  >
+  <div>
     <div
       aria-disabled="false"
-      aria-orientation={null}
-      className="react-contextmenu-item checkable checked"
-      data-test-id="global-track-1"
-      onClick={[Function]}
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
-      onTouchEnd={[Function]}
+      class="react-contextmenu-item checkable checked"
       role="menuitem"
-      tabIndex="-1"
+      tabindex="-1"
     >
       Content Process
     </div>
     <div
       aria-disabled="false"
-      aria-orientation={null}
-      className="react-contextmenu-item checkable indented checked"
-      data-test-id="local-track-222-0"
-      onClick={[Function]}
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
-      onTouchEnd={[Function]}
+      class="react-contextmenu-item checkable indented checked"
       role="menuitem"
-      tabIndex="-1"
+      tabindex="-1"
     >
       DOM Worker
     </div>
     <div
       aria-disabled="false"
-      aria-orientation={null}
-      className="react-contextmenu-item checkable indented checked"
-      data-test-id="local-track-222-1"
-      onClick={[Function]}
-      onMouseLeave={[Function]}
-      onMouseMove={[Function]}
-      onTouchEnd={[Function]}
+      class="react-contextmenu-item checkable indented checked"
       role="menuitem"
-      tabIndex="-1"
+      tabindex="-1"
     >
       Style
     </div>

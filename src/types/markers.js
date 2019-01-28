@@ -125,6 +125,7 @@ type GCMajorCompleted_Shared = {|
 
   // The allocated space for the whole heap before the GC started.
   allocated_bytes: number,
+  post_heap_size?: number,
 
   // Only present if non-zero.
   added_chunks?: number,
@@ -335,6 +336,16 @@ export type TextMarkerPayload = {|
   name: string,
 |};
 
+/**
+ * Gecko includes rich log information. This marker payload is used to mirror that
+ * log information in the profile.
+ */
+export type LogMarkerPayload = {|
+  type: 'Log',
+  name: string,
+  module: string,
+|};
+
 export type DOMEventMarkerPayload = {|
   type: 'tracing',
   category: 'DOMEvent',
@@ -429,6 +440,7 @@ export type MarkerPayload =
   | NetworkPayload
   | UserTimingMarkerPayload
   | TextMarkerPayload
+  | LogMarkerPayload
   | PaintProfilerMarkerTracing
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
@@ -448,6 +460,7 @@ export type MarkerPayload_Gecko =
   | NetworkPayload
   | UserTimingMarkerPayload
   | TextMarkerPayload
+  | LogMarkerPayload
   | PaintProfilerMarkerTracing_Gecko
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload

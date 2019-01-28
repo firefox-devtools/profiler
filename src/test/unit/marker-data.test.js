@@ -14,12 +14,14 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   const markers = deriveMarkersFromRawMarkerTable(
     thread.markers,
     thread.stringTable,
-    thread.samples.time[0]
+    thread.samples.time[0],
+    thread.samples.time.slice(-1)[0]
   );
   const contentMarkers = deriveMarkersFromRawMarkerTable(
     contentThread.markers,
     contentThread.stringTable,
-    thread.samples.time[0]
+    thread.samples.time[0],
+    thread.samples.time.slice(-1)[0]
   );
 
   it('creates a reasonable processed profile', function() {
@@ -99,7 +101,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   it('should handle markers without an end', function() {
     expect(markers[9]).toMatchObject({
       start: 20,
-      dur: Infinity,
+      dur: 0,
       name: 'Rasterize',
       title: null,
     });
