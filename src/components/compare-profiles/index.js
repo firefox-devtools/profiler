@@ -311,8 +311,8 @@ class CompareProfiles extends PureComponent<Props> {
             case 'DOMEvent':
               return {
                 type: 'eventHandler',
-                identifier: `${marker.data.eventType} event handler`,
-                displayText: `${marker.data.eventType} event handler`,
+                identifier: `${marker.data.eventType} event handler on ${marker.data.eventTargetDescription || 'unknown target'}`,
+                displayText: `${marker.data.eventType} event handler on ${marker.data.eventTargetDescription || 'unknown target'}`,
                 startTime: marker.start,
                 endTime: marker.start + marker.dur,
                 shouldDisplay: marker.dur >= kMinDurationForDisplayMs,
