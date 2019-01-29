@@ -316,7 +316,7 @@ class SingleThread extends PureComponent<SingleThreadProps> {
                     executionOrderItemTypeForMarker(m)
                   )}
                   key={i}
-                  title={`${Math.round(m.dur)}ms`}
+                  title={`${m.dur.toFixed(2)}ms`}
                   style={{
                     top: `${timeScale.mapTimeToPx(
                       m.start - range.startTime
