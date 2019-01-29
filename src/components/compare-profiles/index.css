@@ -83,3 +83,28 @@
   padding: 2px 10px;
   font-weight: bold;
 }
+
+.executionItemConnection {
+  mix-blend-mode: multiply;
+}
+
+.executionItemConnection.scriptExecution {
+  fill: rgba(255, 238, 163, 0.4);
+}
+
+.executionItemConnection.timeoutCallback {
+  fill: rgba(255, 163, 206, 0.4);
+}
+
+.executionItemConnection.eventHandler {
+  fill: rgba(163, 203, 255, 0.4);
+}
+
+.executionItemConnection.paintRasterization {
+  fill: rgba(163, 255, 163, 0.4);
+}
+
+.executionItemConnection.firstContentfulPaint,
+.executionItemConnection.documentLoad {
+  fill: rgba(0, 0, 0, 0.15);
+}

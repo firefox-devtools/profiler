@@ -63,6 +63,10 @@ class NonLinearTimeScale {
     return this._totalDuration;
   }
 
+  getTotalPxLength(): number {
+    return this.mapTimeToPx(this.getTotalDuration());
+  }
+
   addFlatSection(time, paddingInPx) {
     const insertionIndex = bisection(this._flatSectionTimes, time);
     this._flatSectionTimes.splice(insertionIndex, 0, time);
@@ -91,23 +95,7 @@ class NonLinearTimeScale {
 }
 
 class PairComparator extends PureComponent<any> {
-  _canvas: null | HTMLCanvasElement = null;
-  _resizeListener: () => void;
-  _takeCanvasRef = (canvas: HTMLCanvasElement | null) => {
-    if (canvas !== this._canvas) {
-      this._canvas = canvas;
-      this._renderCanvas();
-    }
-  };
-
-  _renderCanvas() {
-    const canvas = this._canvas;
-    if (canvas !== null) {
-      this.drawCanvas(canvas);
-    }
-  }
-
-  drawCanvas(c: HTMLCanvasElement) {
+  render() {
     const { left, right, timeScale } = this.props;
     const leftItemMap = new Map();
     for (const item of left.executionItems) {
@@ -143,36 +131,7 @@ class PairComparator extends PureComponent<any> {
       }
     }
 
-    const devicePixelRatio = c.ownerDocument
-      ? c.ownerDocument.defaultView.devicePixelRatio
-      : 1;
-    const width = c.getBoundingClientRect().width;
-    const height = c.getBoundingClientRect().height;
-    const pixelWidth = Math.round(width * devicePixelRatio);
-    const pixelHeight = Math.round(height * devicePixelRatio);
-
-    if (c.width !== pixelWidth || c.height !== pixelHeight) {
-      c.width = pixelWidth;
-      c.height = pixelHeight;
-    }
-    const ctx = c.getContext('2d');
-    if (ctx === null || ctx === undefined) {
-      return;
-    }
-
-    ctx.clearRect(0, 0, pixelWidth, pixelHeight);
-    ctx.scale(devicePixelRatio, devicePixelRatio);
-
-    const fillStyles = {
-      scriptExecution: 'rgba(255, 238, 163, 0.4)',
-      timeoutCallback: 'rgba(255, 163, 206, 0.4)',
-      eventHandler: 'rgba(163, 203, 255, 0.4)',
-      paintRasterization: 'rgba(163, 255, 163, 0.4)',
-      firstContentfulPaint: 'rgba(0, 0, 0, 0.15)',
-      documentLoad: 'rgba(0, 0, 0, 0.15)',
-    };
-
-    ctx.globalCompositeOperation = 'multiply';
+    const width = 200;
 
     function lerp(a, b, t) {
       return (1 - t) * a + t * b;
@@ -188,48 +147,40 @@ class PairComparator extends PureComponent<any> {
       weights[i] = wavy(i / kWeightSpan);
     }
 
-    for (const shape of shapes) {
-      const { left, right, itemType } = shape;
-      ctx.fillStyle = fillStyles[itemType];
-      ctx.beginPath();
-      ctx.moveTo(0, timeScale.mapTimeToPx(left.startTime));
-      for (let i = 0; i <= kWeightSpan; i++) {
-        ctx.lineTo(
-          width * i / kWeightSpan,
-          lerp(
-            timeScale.mapTimeToPx(left.startTime),
-            timeScale.mapTimeToPx(right.startTime),
-            weights[i]
-          )
-        );
-      }
-      for (let i = kWeightSpan; i >= 0; i--) {
-        ctx.lineTo(
-          width * i / kWeightSpan,
-          lerp(
-            timeScale.mapTimeToPx(left.endTime),
-            timeScale.mapTimeToPx(right.endTime),
-            weights[i]
-          )
-        );
-      }
-      ctx.closePath();
-      ctx.fill();
-    }
-
-    ctx.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
-  }
-
-  render() {
-    this._renderCanvas();
     return (
-      <canvas
+      <svg
         className="pairComparatorCanvas"
-        width="200"
-        height="1000"
-        style={{ width: '200px', height: '10000px' }}
-        ref={this._takeCanvasRef}
-      />
+        style={{
+          width: `${width}px`,
+          height: `${timeScale.getTotalPxLength()}px`,
+        }}
+      >
+        {shapes.map(shape => {
+          const { left, right, itemType } = shape;
+          let pathString = `M0 ${timeScale.mapTimeToPx(left.startTime)}`;
+          for (let i = 0; i <= kWeightSpan; i++) {
+            pathString += `L${width * i / kWeightSpan} ${lerp(
+              timeScale.mapTimeToPx(left.startTime),
+              timeScale.mapTimeToPx(right.startTime),
+              weights[i]
+            )}`;
+          }
+          for (let i = kWeightSpan; i >= 0; i--) {
+            pathString += `L${width * i / kWeightSpan} ${lerp(
+              timeScale.mapTimeToPx(left.endTime),
+              timeScale.mapTimeToPx(right.endTime),
+              weights[i]
+            )}`;
+          }
+          pathString += 'Z';
+          return (
+            <path
+              d={pathString}
+              className={classNames('executionItemConnection', itemType)}
+            />
+          );
+        })}
+      </svg>
     );
   }
 }
@@ -281,9 +232,7 @@ class SingleThread extends PureComponent<SingleThreadProps> {
           className="executionOrder"
           onClick={this._onExecutionItemClick}
           style={{
-            minHeight: `${timeScale.mapTimeToPx(
-              timeScale.getTotalDuration()
-            )}px`,
+            minHeight: `${timeScale.getTotalPxLength()}px`,
           }}
         >
           {executionItems.map(
@@ -358,7 +307,7 @@ class CompareProfiles extends PureComponent<Props> {
       const chosenDocumentLoad = documentLoadMarkers[chosenDocumentLoadIndex];
       const range = {
         startTime: chosenDocumentLoad.data.startTime,
-        endTime: chosenDocumentLoad.data.endTime,
+        endTime: chosenDocumentLoad.data.endTime + 0.01,
       };
       const filteredMarkers = markers.filter(
         m => m.start >= range.startTime && m.start + m.dur <= range.endTime
