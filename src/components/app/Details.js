@@ -17,6 +17,7 @@ import MarkerChart from '../marker-chart/';
 import NetworkChart from '../network-chart/';
 import FlameGraph from '../flame-graph/';
 import JsTracer from '../js-tracer/';
+import CompareProfiles from '../compare-profiles/';
 import selectSidebar from '../sidebar';
 
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
@@ -105,6 +106,7 @@ class ProfileViewer extends PureComponent<Props> {
               'marker-table': <MarkerTable />,
               'network-chart': <NetworkChart />,
               'js-tracer': <JsTracer />,
+              'compare-profiles': <CompareProfiles />,
             }[selectedTab]
           }
         </ErrorBoundary>

@@ -214,6 +214,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
         ? null
         : undefined;
       break;
+    case 'compare-profiles':
+      break;
     default:
       assertExhaustiveCheck(selectedTab);
   }
