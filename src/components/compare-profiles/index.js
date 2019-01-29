@@ -94,58 +94,23 @@ class NonLinearTimeScale {
   }
 }
 
+function lerp(a, b, t) {
+  return (1 - t) * a + t * b;
+}
+
+function wavy(t) {
+  return (Math.sin((t * 2 - 1) * Math.PI / 2) + 1) / 2;
+}
+
+const kWeightSpan = 100;
+const kWavyWeights = new Float32Array(kWeightSpan + 1);
+for (let i = 0; i <= kWeightSpan; i++) {
+  kWavyWeights[i] = wavy(i / kWeightSpan);
+}
+
 class PairComparator extends PureComponent<any> {
   render() {
-    const { left, right, timeScale } = this.props;
-    const leftItemMap = new Map();
-    for (const item of left.executionItems) {
-      const s = item.identifier;
-      let itemListForString = leftItemMap.get(s);
-      if (itemListForString === undefined) {
-        itemListForString = [];
-        leftItemMap.set(s, itemListForString);
-      }
-      itemListForString.push(item);
-    }
-    const shapes = [];
-    for (const item of right.executionItems) {
-      const s = item.identifier;
-      const itemListForString = leftItemMap.get(s);
-      if (itemListForString !== undefined) {
-        const correspondingItem = itemListForString.shift();
-        if (correspondingItem !== undefined) {
-          if (item.shouldDisplay || correspondingItem.shouldDisplay) {
-            shapes.push({
-              left: {
-                startTime: correspondingItem.startTime - left.range.startTime,
-                endTime: correspondingItem.endTime - left.range.startTime,
-              },
-              right: {
-                startTime: item.startTime - right.range.startTime,
-                endTime: item.endTime - right.range.startTime,
-              },
-              itemType: item.type,
-            });
-          }
-        }
-      }
-    }
-
-    const width = 200;
-
-    function lerp(a, b, t) {
-      return (1 - t) * a + t * b;
-    }
-
-    function wavy(t) {
-      return (Math.sin((t * 2 - 1) * Math.PI / 2) + 1) / 2;
-    }
-
-    const kWeightSpan = 100;
-    const weights = new Float32Array(kWeightSpan + 1);
-    for (let i = 0; i <= kWeightSpan; i++) {
-      weights[i] = wavy(i / kWeightSpan);
-    }
+    const { itemConnections, timeScale, width } = this.props;
 
     return (
       <svg
@@ -155,21 +120,21 @@ class PairComparator extends PureComponent<any> {
           height: `${timeScale.getTotalPxLength()}px`,
         }}
       >
-        {shapes.map(shape => {
-          const { left, right, itemType } = shape;
+        {itemConnections.map(connection => {
+          const { left, right, itemType } = connection;
           let pathString = `M0 ${timeScale.mapTimeToPx(left.startTime)}`;
           for (let i = 0; i <= kWeightSpan; i++) {
             pathString += `L${width * i / kWeightSpan} ${lerp(
               timeScale.mapTimeToPx(left.startTime),
               timeScale.mapTimeToPx(right.startTime),
-              weights[i]
+              kWavyWeights[i]
             )}`;
           }
           for (let i = kWeightSpan; i >= 0; i--) {
             pathString += `L${width * i / kWeightSpan} ${lerp(
               timeScale.mapTimeToPx(left.endTime),
               timeScale.mapTimeToPx(right.endTime),
-              weights[i]
+              kWavyWeights[i]
             )}`;
           }
           pathString += 'Z';
@@ -299,18 +264,42 @@ class CompareProfiles extends PureComponent<Props> {
     const threadInfos = threads.map((thread, threadIndex) => {
       const markers = threadMarkers[threadIndex];
       const friendlyThreadName = friendlyThreadNames[threadIndex];
-      const stringTable = thread.stringTable;
       const documentLoadMarkers = markers.filter(
         m => m.name === 'DocumentLoad' && m.data && m.data.type === 'Text'
       );
       const chosenDocumentLoadIndex = 0;
       const chosenDocumentLoad = documentLoadMarkers[chosenDocumentLoadIndex];
+      return {
+        friendlyThreadName,
+        documentLoadMarkers,
+        chosenDocumentLoad,
+      };
+    });
+
+    const timeScale = new NonLinearTimeScale(
+      2,
+      Math.max(
+        ...threadInfos.map(
+          ({ chosenDocumentLoad }) =>
+            chosenDocumentLoad.data.endTime - chosenDocumentLoad.data.startTime + 0.001
+        )
+      )
+    );
+
+    const threadDatas = threadInfos.map((threadInfo, threadIndex) => {
+      const {
+        friendlyThreadName,
+        documentLoadMarkers,
+        chosenDocumentLoad,
+      } = threadInfo;
+      const markers = threadMarkers[threadIndex];
       const range = {
         startTime: chosenDocumentLoad.data.startTime,
-        endTime: chosenDocumentLoad.data.endTime + 0.01,
+        endTime:
+          chosenDocumentLoad.data.startTime + timeScale.getTotalDuration(),
       };
       const filteredMarkers = markers.filter(
-        m => m.start >= range.startTime && m.start + m.dur <= range.endTime
+        m => m.start >= range.startTime && m.start + m.dur <= range.endTime + 5000
       );
       const fcpMarker = markers.find(
         m =>
@@ -327,6 +316,7 @@ class CompareProfiles extends PureComponent<Props> {
                 startTime: marker.start,
                 endTime: marker.start + marker.dur,
                 shouldDisplay: marker.dur >= kMinDurationForDisplayMs,
+                shouldAttemptToConnect: true,
               };
             case 'Script':
               return {
@@ -336,6 +326,7 @@ class CompareProfiles extends PureComponent<Props> {
                 startTime: marker.start,
                 endTime: marker.start + marker.dur,
                 shouldDisplay: marker.dur >= kMinDurationForDisplayMs,
+                shouldAttemptToConnect: true,
               };
             case 'setTimeout callback':
               return {
@@ -345,6 +336,7 @@ class CompareProfiles extends PureComponent<Props> {
                 startTime: marker.start,
                 endTime: marker.start + marker.dur,
                 shouldDisplay: marker.dur >= kMinDurationForDisplayMs,
+                shouldAttemptToConnect: true,
               };
             case 'Rasterize':
               return {
@@ -354,11 +346,13 @@ class CompareProfiles extends PureComponent<Props> {
                 startTime: marker.start,
                 endTime: marker.start + marker.dur,
                 shouldDisplay: marker.dur >= kMinDurationForDisplayMs,
+                shouldAttemptToConnect: false,
               };
           }
           return null;
         })
         .filter(item => item !== null);
+
       if (fcpMarker) {
         executionItems.push({
           type: 'firstContentfulPaint',
@@ -367,6 +361,7 @@ class CompareProfiles extends PureComponent<Props> {
           startTime: fcpMarker.data.endTime,
           endTime: fcpMarker.data.endTime + 0.0001,
           shouldDisplay: true,
+          shouldAttemptToConnect: true,
         });
       }
       executionItems.push({
@@ -376,6 +371,7 @@ class CompareProfiles extends PureComponent<Props> {
         startTime: chosenDocumentLoad.data.endTime,
         endTime: chosenDocumentLoad.data.endTime + 0.0001,
         shouldDisplay: true,
+        shouldAttemptToConnect: true,
       });
 
       return {
@@ -387,22 +383,64 @@ class CompareProfiles extends PureComponent<Props> {
       };
     });
 
-    const timeScale = new NonLinearTimeScale(
-      2,
-      Math.max(
-        ...threadInfos.map(({ range }) => range.endTime - range.startTime)
-      )
-    );
+    const leftExecutionItems = threadDatas[0].executionItems;
+    const leftRangeStartTime = threadDatas[0].range.startTime;
+    const rightExecutionItems = threadDatas[1].executionItems;
+    const rightRangeStartTime = threadDatas[1].range.startTime;
+    const leftItemMap = new Map();
+    for (const leftItem of leftExecutionItems) {
+      if (!leftItem.shouldAttemptToConnect) {
+        continue;
+      }
+      const ident = leftItem.identifier;
+      let itemListForString = leftItemMap.get(ident);
+      if (itemListForString === undefined) {
+        itemListForString = [];
+        leftItemMap.set(ident, itemListForString);
+      }
+      itemListForString.push(leftItem);
+    }
+    const itemConnections = [];
+    for (const rightItem of rightExecutionItems) {
+      if (!rightItem.shouldAttemptToConnect) {
+        continue;
+      }
+      const ident = rightItem.identifier;
+      const itemListForString = leftItemMap.get(ident);
+      if (itemListForString !== undefined) {
+        const leftItem = itemListForString.shift();
+        if (leftItem !== undefined) {
+          if (leftItem.shouldDisplay || rightItem.shouldDisplay) {
+            leftItem.shouldDisplay = true;
+            rightItem.shouldDisplay = true;
+            itemConnections.push({
+              left: {
+                startTime: leftItem.startTime - leftRangeStartTime,
+                endTime: leftItem.endTime - leftRangeStartTime,
+              },
+              right: {
+                startTime: rightItem.startTime - rightRangeStartTime,
+                endTime: rightItem.endTime - rightRangeStartTime,
+              },
+              itemType: rightItem.type,
+            });
+          }
+        }
+      }
+    }
 
-    for (const threadInfo of threadInfos) {
-      const { executionItems, range } = threadInfo;
+    for (const threadData of threadDatas) {
+      const { executionItems, range } = threadData;
       for (const executionItem of executionItems) {
+        if (executionItem.startTime >= range.endTime) {
+          executionItem.shouldDisplay = false;
+        }
         if (executionItem.shouldDisplay) {
           timeScale.addFlatSection(
             executionItem.startTime - range.startTime,
-            20
+            24
           );
-          timeScale.addFlatSection(executionItem.endTime - range.startTime, 5);
+          timeScale.addFlatSection(executionItem.endTime - range.startTime, 2);
         }
       }
     }
@@ -418,31 +456,31 @@ class CompareProfiles extends PureComponent<Props> {
           <li className="compare-profiles-thread" key={0}>
             <SingleThread
               threadIndex={0}
-              friendlyThreadName={threadInfos[0].friendlyThreadName}
-              documentLoadMarkers={threadInfos[0].documentLoadMarkers}
-              chosenDocumentLoad={threadInfos[0].chosenDocumentLoad}
-              range={threadInfos[0].range}
+              friendlyThreadName={threadDatas[0].friendlyThreadName}
+              documentLoadMarkers={threadDatas[0].documentLoadMarkers}
+              chosenDocumentLoad={threadDatas[0].chosenDocumentLoad}
+              range={threadDatas[0].range}
               timeScale={timeScale}
-              executionItems={threadInfos[0].executionItems}
+              executionItems={threadDatas[0].executionItems}
               onExecutionItemClick={this._onExecutionItemClick}
             />
           </li>
           <li className="compare-profiles-thread-gap" key="gap 0/1">
             <PairComparator
-              left={threadInfos[0]}
-              right={threadInfos[1]}
+              width={200}
+              itemConnections={itemConnections}
               timeScale={timeScale}
             />
           </li>
           <li className="compare-profiles-thread" key={1}>
             <SingleThread
               threadIndex={1}
-              friendlyThreadName={threadInfos[1].friendlyThreadName}
-              documentLoadMarkers={threadInfos[1].documentLoadMarkers}
-              chosenDocumentLoad={threadInfos[1].chosenDocumentLoad}
-              range={threadInfos[1].range}
+              friendlyThreadName={threadDatas[1].friendlyThreadName}
+              documentLoadMarkers={threadDatas[1].documentLoadMarkers}
+              chosenDocumentLoad={threadDatas[1].chosenDocumentLoad}
+              range={threadDatas[1].range}
               timeScale={timeScale}
-              executionItems={threadInfos[1].executionItems}
+              executionItems={threadDatas[1].executionItems}
               onExecutionItemClick={this._onExecutionItemClick}
             />
           </li>
