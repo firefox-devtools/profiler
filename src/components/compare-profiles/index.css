@@ -29,10 +29,14 @@
   min-width: 0;
 }
 
+.stuffAboveCanvas {
+  height: 140px;
+}
+
 .executionOrder {
   display: block;
   position: relative;
-  margin: 20px 0;
+  margin: 0;
 }
 
 .executionOrderItem {
@@ -51,7 +55,7 @@
 
 .compare-profiles-thread-gap {
   width: 200px;
-  padding-top: 128px;
+  padding-top: 140px;
   display: flex;
   flex-flow: column nowrap;
 }
@@ -70,4 +74,12 @@
 
 .executionOrderItem.paintRasterization {
   background: rgb(163, 255, 163);
+}
+
+.executionOrderItem.firstContentfulPaint,
+.executionOrderItem.documentLoad {
+  background: rgba(0, 0, 0, 0.15);
+  border: 0;
+  padding: 2px 10px;
+  font-weight: bold;
 }

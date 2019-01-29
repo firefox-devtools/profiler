@@ -8,10 +8,14 @@ import React, { PureComponent } from 'react';
 import bisection from 'bisection';
 import classNames from 'classnames';
 
+import './index.css';
+
 import explicitConnect from '../../utils/connect';
 import { getProfile } from '../../selectors/profile';
-
-import './index.css';
+import {
+  changeSelectedThread,
+  updatePreviewSelection,
+} from '../../actions/profile-view';
 
 import type { ThreadIndex, Profile, Thread } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
@@ -22,7 +26,7 @@ import type {
 } from '../../utils/connect';
 import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
 
-const kMinDurationForDisplayMs = 2;
+const kMinDurationForDisplayMs = 3;
 
 /**
  * Y axis is time
@@ -86,33 +90,6 @@ class NonLinearTimeScale {
   }
 }
 
-function identifyingStringForMarker(marker: Marker) {
-  switch (marker.name) {
-    case 'DOMEvent':
-      return `${marker.data.eventType} event handler`;
-    case 'Script':
-    case 'setTimeout callback':
-      return marker.data.name;
-    case 'Rasterize':
-      return 'Paint';
-  }
-  return '<unknown marker type>';
-}
-
-function executionOrderItemTypeForMarker(marker: Marker) {
-  switch (marker.name) {
-    case 'Script':
-      return 'scriptExecution';
-    case 'setTimeout callback':
-      return 'timeoutCallback';
-    case 'DOMEvent':
-      return 'eventHandler';
-    case 'Rasterize':
-      return 'paintRasterization';
-  }
-  return undefined;
-}
-
 class PairComparator extends PureComponent<any> {
   _canvas: null | HTMLCanvasElement = null;
   _resizeListener: () => void;
@@ -132,40 +109,34 @@ class PairComparator extends PureComponent<any> {
 
   drawCanvas(c: HTMLCanvasElement) {
     const { left, right, timeScale } = this.props;
-    const leftMarkerMap = new Map();
-    for (const m of left.interestingMarkers) {
-      const s = identifyingStringForMarker(m);
-      let markerListForString = leftMarkerMap.get(s);
-      if (markerListForString === undefined) {
-        markerListForString = [];
-        leftMarkerMap.set(s, markerListForString);
+    const leftItemMap = new Map();
+    for (const item of left.executionItems) {
+      const s = item.identifier;
+      let itemListForString = leftItemMap.get(s);
+      if (itemListForString === undefined) {
+        itemListForString = [];
+        leftItemMap.set(s, itemListForString);
       }
-      markerListForString.push(m);
+      itemListForString.push(item);
     }
     const shapes = [];
-    for (const m of right.interestingMarkers) {
-      const s = identifyingStringForMarker(m);
-      const markerListForString = leftMarkerMap.get(s);
-      if (markerListForString !== undefined) {
-        const correspondingMarker = markerListForString.shift();
-        if (correspondingMarker !== undefined) {
-          if (
-            m.dur >= kMinDurationForDisplayMs ||
-            correspondingMarker.dur >= kMinDurationForDisplayMs
-          ) {
+    for (const item of right.executionItems) {
+      const s = item.identifier;
+      const itemListForString = leftItemMap.get(s);
+      if (itemListForString !== undefined) {
+        const correspondingItem = itemListForString.shift();
+        if (correspondingItem !== undefined) {
+          if (item.shouldDisplay || correspondingItem.shouldDisplay) {
             shapes.push({
               left: {
-                startTime: correspondingMarker.start - left.range.startTime,
-                endTime:
-                  correspondingMarker.start -
-                  left.range.startTime +
-                  correspondingMarker.dur,
+                startTime: correspondingItem.startTime - left.range.startTime,
+                endTime: correspondingItem.endTime - left.range.startTime,
               },
               right: {
-                startTime: m.start - right.range.startTime,
-                endTime: m.start - right.range.startTime + m.dur,
+                startTime: item.startTime - right.range.startTime,
+                endTime: item.endTime - right.range.startTime,
               },
-              itemType: executionOrderItemTypeForMarker(m),
+              itemType: item.type,
             });
           }
         }
@@ -198,6 +169,8 @@ class PairComparator extends PureComponent<any> {
       timeoutCallback: 'rgba(255, 163, 206, 0.4)',
       eventHandler: 'rgba(163, 203, 255, 0.4)',
       paintRasterization: 'rgba(163, 255, 163, 0.4)',
+      firstContentfulPaint: 'rgba(0, 0, 0, 0.15)',
+      documentLoad: 'rgba(0, 0, 0, 0.15)',
     };
 
     ctx.globalCompositeOperation = 'multiply';
@@ -272,61 +245,78 @@ class PairComparator extends PureComponent<any> {
 }
 
 type SingleThreadProps = {|
+  +threadIndex: number,
   +friendlyThreadName: string,
   +documentLoadMarkers: Marker[],
   +chosenDocumentLoad: Marker,
   +range: {| +startTime: Milliseconds, +endTime: Milliseconds |},
-  +interestingMarkers: Marker[],
+  +executionItems: Marker[],
   +timeScale: NonLinearTimeScale,
+  +onExecutionItemClick: (threadIndex, Marker) => void,
 |};
 
 class SingleThread extends PureComponent<SingleThreadProps> {
+  _onExecutionItemClick = e => {
+    if (!e.target.hasAttribute('data-executionitemindex')) {
+      return;
+    }
+    const indexAsStringIfPresent = e.target.getAttribute(
+      'data-executionitemindex'
+    );
+    const { onExecutionItemClick, executionItems, threadIndex } = this.props;
+    onExecutionItemClick(threadIndex, executionItems[+indexAsStringIfPresent]);
+  };
+
   render() {
     const {
       friendlyThreadName,
       documentLoadMarkers,
       chosenDocumentLoad,
       range,
-      interestingMarkers,
+      executionItems,
       timeScale,
     } = this.props;
     return (
       <React.Fragment>
-        <h2>{friendlyThreadName}</h2>
-        <select>
-          {documentLoadMarkers.map((m, i) => (
-            <option key={i}>{m.data.name}</option>
-          ))}
-        </select>
-        <h3>{'Execution order'}</h3>
+        <div className='stuffAboveCanvas'>
+          <h2>{friendlyThreadName}</h2>
+          <select>
+            {documentLoadMarkers.map((m, i) => (
+              <option key={i}>{m.data.name}</option>
+            ))}
+          </select>
+          <h3>{'Execution order'}</h3>
+        </div>
         <ol
           className="executionOrder"
+          onClick={this._onExecutionItemClick}
           style={{
             minHeight: `${timeScale.mapTimeToPx(
               timeScale.getTotalDuration()
             )}px`,
           }}
         >
-          {interestingMarkers.map(
-            (m, i) =>
-              m.dur >= kMinDurationForDisplayMs ? (
+          {executionItems.map(
+            (item, i) =>
+              item.shouldDisplay ? (
                 <li
-                  className={classNames(
-                    'executionOrderItem',
-                    executionOrderItemTypeForMarker(m)
-                  )}
+                  className={classNames('executionOrderItem', item.type)}
                   key={i}
-                  title={`${m.dur.toFixed(2)}ms`}
+                  data-executionitemindex={i}
+                  title={`${(item.endTime - item.startTime).toFixed(2)}ms`}
                   style={{
                     top: `${timeScale.mapTimeToPx(
-                      m.start - range.startTime
+                      item.startTime - range.startTime
                     )}px`,
                     height: `${timeScale.mapTimeToPx(
-                      m.start - range.startTime + m.dur
-                    ) - timeScale.mapTimeToPx(m.start - range.startTime)}px`,
+                      item.endTime - range.startTime
+                    ) -
+                      timeScale.mapTimeToPx(
+                        item.startTime - range.startTime
+                      )}px`,
                   }}
                 >
-                  {identifyingStringForMarker(m)}
+                  {item.displayText}
                 </li>
               ) : null
           )}
@@ -342,11 +332,25 @@ type StateProps = {|
   +friendlyThreadNames: string[],
 |};
 
-type DispatchProps = {||};
+type DispatchProps = {|
+  +changeSelectedThread: any,
+  +updatePreviewSelection: any,
+|};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class CompareProfiles extends PureComponent<Props> {
+  _onExecutionItemClick = (threadIndex, executionItem) => {
+    const { changeSelectedThread, updatePreviewSelection } = this.props;
+    changeSelectedThread(threadIndex);
+    updatePreviewSelection({
+      hasSelection: true,
+      isModifying: false,
+      selectionStart: executionItem.startTime,
+      selectionEnd: executionItem.endTime,
+    });
+  };
+
   render() {
     window.NonLinearTimeScale = NonLinearTimeScale;
     const threads = this.props.profile.threads;
@@ -369,20 +373,70 @@ class CompareProfiles extends PureComponent<Props> {
       const filteredMarkers = markers.filter(
         m => m.start >= range.startTime && m.start + m.dur <= range.endTime
       );
-      const interestingMarkers = filteredMarkers.filter(m => {
-        if (m.name === 'Script') {
-          return true;
-        }
-        if (m.name === 'setTimeout callback') {
-          return true;
-        }
-        if (m.name === 'DOMEvent') {
-          return true;
-        }
-        if (m.name === 'Rasterize') {
-          return true;
-        }
-        return false;
+      const fcpMarker = markers.find(
+        m =>
+          m.name === 'FirstContentfulPaint' && m.data && m.data.type === 'Text'
+      );
+      const executionItems = filteredMarkers
+        .map(marker => {
+          switch (marker.name) {
+            case 'DOMEvent':
+              return {
+                type: 'eventHandler',
+                identifier: `${marker.data.eventType} event handler`,
+                displayText: `${marker.data.eventType} event handler`,
+                startTime: marker.start,
+                endTime: marker.start + marker.dur,
+                shouldDisplay: marker.dur >= kMinDurationForDisplayMs,
+              };
+            case 'Script':
+              return {
+                type: 'scriptExecution',
+                identifier: marker.data.name,
+                displayText: marker.data.name,
+                startTime: marker.start,
+                endTime: marker.start + marker.dur,
+                shouldDisplay: marker.dur >= kMinDurationForDisplayMs,
+              };
+            case 'setTimeout callback':
+              return {
+                type: 'timeoutCallback',
+                identifier: marker.data.name,
+                displayText: marker.data.name,
+                startTime: marker.start,
+                endTime: marker.start + marker.dur,
+                shouldDisplay: marker.dur >= kMinDurationForDisplayMs,
+              };
+            case 'Rasterize':
+              return {
+                type: 'paintRasterization',
+                identifier: 'Rasterization',
+                displayText: 'Paint',
+                startTime: marker.start,
+                endTime: marker.start + marker.dur,
+                shouldDisplay: marker.dur >= kMinDurationForDisplayMs,
+              };
+          }
+          return null;
+        })
+        .filter(item => item !== null);
+      if (fcpMarker) {
+        executionItems.push({
+          type: 'firstContentfulPaint',
+          identifier: 'First Contentful Paint',
+          displayText: fcpMarker.data.name,
+          startTime: fcpMarker.data.endTime,
+          endTime: fcpMarker.data.endTime + 0.0001,
+          shouldDisplay: true,
+        });
+      }
+      executionItems.push({
+        type: 'documentLoad',
+        identifier: 'DocumentLoad',
+        displayText: chosenDocumentLoad.data.name,
+        startTime: chosenDocumentLoad.data.endTime,
+        endTime: chosenDocumentLoad.data.endTime + 0.0001,
+        shouldDisplay: true,
       });
 
       return {
@@ -390,7 +444,7 @@ class CompareProfiles extends PureComponent<Props> {
         documentLoadMarkers,
         chosenDocumentLoad,
         range,
-        interestingMarkers,
+        executionItems,
       };
     });
 
@@ -402,14 +456,14 @@ class CompareProfiles extends PureComponent<Props> {
     );
 
     for (const threadInfo of threadInfos) {
-      const { interestingMarkers, range } = threadInfo;
-      for (const marker of interestingMarkers) {
-        if (marker.dur >= kMinDurationForDisplayMs) {
-          timeScale.addFlatSection(marker.start - range.startTime, 20);
+      const { executionItems, range } = threadInfo;
+      for (const executionItem of executionItems) {
+        if (executionItem.shouldDisplay) {
           timeScale.addFlatSection(
-            marker.start - range.startTime + marker.dur,
-            5
+            executionItem.startTime - range.startTime,
+            20
           );
+          timeScale.addFlatSection(executionItem.endTime - range.startTime, 5);
         }
       }
     }
@@ -424,12 +478,14 @@ class CompareProfiles extends PureComponent<Props> {
         <ol className="compare-profiles-threads-list">
           <li className="compare-profiles-thread" key={0}>
             <SingleThread
+              threadIndex={0}
               friendlyThreadName={threadInfos[0].friendlyThreadName}
               documentLoadMarkers={threadInfos[0].documentLoadMarkers}
               chosenDocumentLoad={threadInfos[0].chosenDocumentLoad}
               range={threadInfos[0].range}
               timeScale={timeScale}
-              interestingMarkers={threadInfos[0].interestingMarkers}
+              executionItems={threadInfos[0].executionItems}
+              onExecutionItemClick={this._onExecutionItemClick}
             />
           </li>
           <li className="compare-profiles-thread-gap" key="gap 0/1">
@@ -441,12 +497,14 @@ class CompareProfiles extends PureComponent<Props> {
           </li>
           <li className="compare-profiles-thread" key={1}>
             <SingleThread
+              threadIndex={1}
               friendlyThreadName={threadInfos[1].friendlyThreadName}
               documentLoadMarkers={threadInfos[1].documentLoadMarkers}
               chosenDocumentLoad={threadInfos[1].chosenDocumentLoad}
               range={threadInfos[1].range}
               timeScale={timeScale}
-              interestingMarkers={threadInfos[1].interestingMarkers}
+              executionItems={threadInfos[1].executionItems}
+              onExecutionItemClick={this._onExecutionItemClick}
             />
           </li>
         </ol>
@@ -471,6 +529,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       ),
     };
   },
+  mapDispatchToProps: { changeSelectedThread, updatePreviewSelection },
   component: CompareProfiles,
 };
 export default explicitConnect(options);
