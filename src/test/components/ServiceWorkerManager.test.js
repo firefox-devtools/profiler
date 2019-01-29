@@ -28,7 +28,17 @@ describe('app/ServiceWorkerManager', () => {
 
   function setup() {
     jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(window.location, 'reload').mockImplementation(() => {});
+
+    // Because of how window.location is implemented in browsers and jsdom, we
+    // can't easily spy on `window.location.reload`. That's why we replace the
+    // full property 'location' instead. This is fine to do it on `window`
+    // without reverting it because `window` is a new object for each test.
+    // $FlowExpectError because the value we pass isn't a proper Location object.
+    Object.defineProperty(window, 'location', {
+      value: { reload: jest.fn() },
+      writable: true,
+      configurable: true,
+    });
 
     function navigateToStoreLoadingPage() {
       const newUrlState = stateFromLocation({

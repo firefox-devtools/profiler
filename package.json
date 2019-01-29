@@ -115,6 +115,7 @@
     "http-server": "^0.11.1",
     "husky": "^0.14.3",
     "jest": "^23.5.0",
+    "jest-environment-jsdom-thirteen": "^0.0.2",
     "json-loader": "^0.5.7",
     "local-web-server": "^2.6.0",
     "mkdirp": "^0.5.1",
@@ -140,7 +141,7 @@
       "!**/node_modules/**",
       "!src/types/libdef/**"
     ],
-    "testEnvironment": "jsdom",
+    "testEnvironment": "jest-environment-jsdom-thirteen",
     "moduleFileExtensions": [
       "js",
       "jsx"
