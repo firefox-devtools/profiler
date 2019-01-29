@@ -368,7 +368,7 @@ class CompareProfiles extends PureComponent<Props> {
       const chosenDocumentLoad = documentLoadMarkers[chosenDocumentLoadIndex];
       const range = {
         startTime: chosenDocumentLoad.data.startTime,
-        endTime: chosenDocumentLoad.data.endTime + 10000,
+        endTime: chosenDocumentLoad.data.endTime,
       };
       const filteredMarkers = markers.filter(
         m => m.start >= range.startTime && m.start + m.dur <= range.endTime
