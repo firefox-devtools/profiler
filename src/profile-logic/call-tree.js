@@ -226,7 +226,7 @@ export class CallTree {
         selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
         totalTimePercent: `${formatPercent(totalTimeRelative)}`,
         name: funcName,
-        lib: libName,
+        lib: libName.slice(0, 1000),
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
         categoryName: this._categories[categoryIndex].name,
