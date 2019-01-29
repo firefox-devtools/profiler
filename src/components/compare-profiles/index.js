@@ -142,7 +142,6 @@ class PairComparator extends PureComponent<any> {
         }
       }
     }
-    console.log(shapes);
 
     const devicePixelRatio = c.ownerDocument
       ? c.ownerDocument.defaultView.devicePixelRatio
@@ -175,25 +174,18 @@ class PairComparator extends PureComponent<any> {
 
     ctx.globalCompositeOperation = 'multiply';
 
-    function lerp(t, start, end) {
-      return (1 - t) * start + t * end;
+    function lerp(a, b, t) {
+      return (1 - t) * a + t * b;
     }
 
     function wavy(t) {
       return (Math.sin((t * 2 - 1) * Math.PI / 2) + 1) / 2;
     }
 
-    const weights = [];
-    for (let x = 0; x <= 100; x++) {
-      let t = x / 100;
-      t = wavy(t);
-      let t2 = 0; //wavy(t * 2) * 0.2;
-      weights.push({
-        l0: (1 - t2) * (1 - t),
-        r0: (1 - t2) * t,
-        l1: t2 * (1 - t),
-        r1: t2 * t,
-      });
+    const kWeightSpan = 100;
+    const weights = new Float32Array(kWeightSpan + 1);
+    for (let i = 0; i <= kWeightSpan; i++) {
+      weights[i] = wavy(i / kWeightSpan);
     }
 
     for (const shape of shapes) {
@@ -201,26 +193,24 @@ class PairComparator extends PureComponent<any> {
       ctx.fillStyle = fillStyles[itemType];
       ctx.beginPath();
       ctx.moveTo(0, timeScale.mapTimeToPx(left.startTime));
-      for (let i = 0; i < weights.length; i++) {
-        const x = width * i / (weights.length - 1);
-        const w = weights[i];
+      for (let i = 0; i <= kWeightSpan; i++) {
         ctx.lineTo(
-          x,
-          w.l0 * timeScale.mapTimeToPx(left.startTime) +
-            w.r0 * timeScale.mapTimeToPx(right.startTime) +
-            w.l1 * timeScale.mapTimeToPx(left.endTime) +
-            w.r1 * timeScale.mapTimeToPx(right.endTime)
+          width * i / kWeightSpan,
+          lerp(
+            timeScale.mapTimeToPx(left.startTime),
+            timeScale.mapTimeToPx(right.startTime),
+            weights[i]
+          )
         );
       }
-      for (let i = weights.length - 1; i >= 0; i--) {
-        const x = width * i / (weights.length - 1);
-        const w = weights[i];
+      for (let i = kWeightSpan; i >= 0; i--) {
         ctx.lineTo(
-          x,
-          w.l1 * timeScale.mapTimeToPx(left.startTime) +
-            w.r1 * timeScale.mapTimeToPx(right.startTime) +
-            w.l0 * timeScale.mapTimeToPx(left.endTime) +
-            w.r0 * timeScale.mapTimeToPx(right.endTime)
+          width * i / kWeightSpan,
+          lerp(
+            timeScale.mapTimeToPx(left.endTime),
+            timeScale.mapTimeToPx(right.endTime),
+            weights[i]
+          )
         );
       }
       ctx.closePath();
@@ -278,7 +268,7 @@ class SingleThread extends PureComponent<SingleThreadProps> {
     } = this.props;
     return (
       <React.Fragment>
-        <div className='stuffAboveCanvas'>
+        <div className="stuffAboveCanvas">
           <h2>{friendlyThreadName}</h2>
           <select>
             {documentLoadMarkers.map((m, i) => (
