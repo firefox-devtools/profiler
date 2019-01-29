@@ -157,13 +157,13 @@ function _makePriorityHumanReadable(
 function _dataStatusReplace(str: string): string {
   switch (str) {
     case 'STATUS_START': {
-      return 'Start of request';
+      return 'Waiting for response';
     }
     case 'STATUS_READ': {
       return 'Reading request';
     }
     case 'STATUS_STOP': {
-      return 'End of request';
+      return 'Response received';
     }
     case 'STATUS_REDIRECT': {
       return 'Redirecting request';
