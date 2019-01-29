@@ -214,7 +214,7 @@ class PairComparator extends PureComponent<any> {
     for (let x = 0; x <= 100; x++) {
       let t = x / 100;
       t = wavy(t);
-      let t2 = wavy(t * 2) * 0.2;
+      let t2 = 0; //wavy(t * 2) * 0.2;
       weights.push({
         l0: (1 - t2) * (1 - t),
         r0: (1 - t2) * t,
