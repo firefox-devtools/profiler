@@ -87,9 +87,16 @@ class NonLinearTimeScale {
 }
 
 function identifyingStringForMarker(marker: Marker) {
-  return marker.name === 'DOMEvent'
-    ? `${marker.data.eventType} event handler`
-    : marker.data.name;
+  switch (marker.name) {
+    case 'DOMEvent':
+      return `${marker.data.eventType} event handler`;
+    case 'Script':
+    case 'setTimeout callback':
+      return marker.data.name;
+    case 'Rasterize':
+      return 'Paint';
+  }
+  return '<unknown marker type>';
 }
 
 function executionOrderItemTypeForMarker(marker: Marker) {
@@ -100,6 +107,8 @@ function executionOrderItemTypeForMarker(marker: Marker) {
       return 'timeoutCallback';
     case 'DOMEvent':
       return 'eventHandler';
+    case 'Rasterize':
+      return 'paintRasterization';
   }
   return undefined;
 }
@@ -188,6 +197,7 @@ class PairComparator extends PureComponent<any> {
       scriptExecution: 'rgba(255, 238, 163, 0.4)',
       timeoutCallback: 'rgba(255, 163, 206, 0.4)',
       eventHandler: 'rgba(163, 203, 255, 0.4)',
+      paintRasterization: 'rgba(163, 255, 163, 0.4)',
     };
 
     ctx.globalCompositeOperation = 'multiply';
@@ -366,7 +376,10 @@ class CompareProfiles extends PureComponent<Props> {
         if (m.name === 'setTimeout callback') {
           return true;
         }
-        if (m.name === 'DOMEvent' && m.data.eventType === 'load') {
+        if (m.name === 'DOMEvent') {
+          return true;
+        }
+        if (m.name === 'Rasterize') {
           return true;
         }
         return false;

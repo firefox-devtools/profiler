@@ -67,3 +67,7 @@
 .executionOrderItem.eventHandler {
   background: rgb(163, 203, 255);
 }
+
+.executionOrderItem.paintRasterization {
+  background: rgb(163, 255, 163);
+}
