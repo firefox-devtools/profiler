@@ -22,7 +22,6 @@ import { ensureExists } from '../../utils/flow';
 describe('FlameGraph', function() {
   function setup() {
     const flushRafCalls = mockRaf();
-    window.devicePixelRatio = 1;
     const ctx = mockCanvasContext();
 
     jest
