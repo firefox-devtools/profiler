@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import { Provider } from 'react-redux';
-import { render } from 'react-testing-library';
+import { render, getByTestId, fireEvent } from 'react-testing-library';
 
 import TrackNetwork, {
   ROW_HEIGHT,
@@ -14,9 +14,15 @@ import TrackNetwork, {
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
-
+import {
+  getBoundingBox,
+  getMouseEvent,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+} from '../fixtures/utils';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
+import { ensureExists } from '../../utils/flow';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock, and the graph height
 // mimicks what is computed by the actual component.
@@ -50,6 +56,39 @@ describe('timeline/TrackNetwork', function() {
   });
 });
 
+describe('VerticalIndicators', function() {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
+  it('creates the vertical indicators', function() {
+    const { getIndicatorLines, getState } = setup();
+    const markers = selectedThreadSelectors.getTimelineVerticalMarkers(
+      getState()
+    );
+    const markerCount = 5;
+    expect(markers).toHaveLength(markerCount);
+    expect(getIndicatorLines()).toHaveLength(markerCount);
+  });
+
+  it('displays tooltips', function() {
+    const { getIndicatorLines } = setup();
+    const [firstIndicator] = getIndicatorLines();
+    fireEvent.mouseOver(firstIndicator);
+    fireEvent(
+      firstIndicator,
+      getMouseEvent('mousemove', {
+        pageX: 11,
+        pageY: 22,
+      })
+    );
+    const tooltip = ensureExists(
+      document.querySelector('[data-testid="tooltip"'),
+      'Unable to find the root overlay element'
+    );
+    expect(tooltip).toMatchSnapshot();
+  });
+});
+
 function setup() {
   const profile = getNetworkTrackProfile();
   const store = storeWithProfile(profile);
@@ -71,6 +110,16 @@ function setup() {
     </Provider>
   );
 
+  const verticalIndicators = getByTestId(
+    renderResult.container,
+    'vertical-indicators'
+  );
+
+  const getIndicatorLines = () =>
+    verticalIndicators.querySelectorAll(
+      '[data-testid="vertical-indicator-line"]'
+    );
+
   // WithSize uses requestAnimationFrame
   flushRafCalls();
 
@@ -89,5 +138,7 @@ function setup() {
     thread: profile.threads[0],
     store,
     getContextDrawCalls,
+    verticalIndicators,
+    getIndicatorLines,
   };
 }

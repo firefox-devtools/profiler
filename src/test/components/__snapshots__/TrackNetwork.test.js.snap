@@ -1,5 +1,37 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`VerticalIndicators displays tooltips 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 22px; top: 33px;"
+>
+  <div>
+    <span
+      class="timelineVerticalIndicatorsSwatch"
+    />
+     
+    Load
+    <span
+      class="timelineVerticalIndicatorsDim"
+    >
+       at 
+    </span>
+    <span
+      class="timelineVerticalIndicatorsTime"
+    >
+      0.001s
+    </span>
+     
+  </div>
+  <div
+    class="timelineVerticalIndicatorsUrl"
+  >
+    https://developer.mozilla.org/en-US/
+  </div>
+</div>
+`;
+
 exports[`timeline/TrackNetwork matches the 2d context snapshot 1`] = `
 Array [
   Array [
