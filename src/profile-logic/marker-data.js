@@ -9,8 +9,7 @@ import type {
   IndexIntoStringTable,
 } from '../types/profile';
 import type { Marker } from '../types/profile-derived';
-import type { BailoutPayload, ScreenshotPayload } from '../types/markers';
-import type { StartEndRange } from '../types/units';
+import type { BailoutPayload } from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import { getNumberPropertyOrNull } from '../utils/flow';
 
@@ -219,11 +218,18 @@ export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
   stringTable: UniqueStringArray,
   firstSampleTime: number,
-  lastSampleTime: number
+  lastSampleTime: number,
+  interval: number
 ): Marker[] {
+  // This is the resulting array.
   const matchedMarkers: Marker[] = [];
+
   // This map is used to track start and end raw markers for the time-matched markers.
   const openMarkers: Map<IndexIntoStringTable, Marker[]> = new Map();
+
+  // This variable keeps a screenshot marker until we can compute its duration.
+  let previousScreenshotMarker: Marker | null = null;
+
   for (let i = 0; i < rawMarkers.length; i++) {
     const data = rawMarkers.data[i];
     if (!data) {
@@ -298,6 +304,22 @@ export function deriveMarkersFromRawMarkerTable(
         }
         matchedMarkers.push(marker);
       }
+    } else if (data.type === 'CompositorScreenshot') {
+      // Screenshot markers are already ordered. We compute their duration using the
+      // following marker of the same type.
+      if (previousScreenshotMarker !== null) {
+        previousScreenshotMarker.dur =
+          rawMarkers.time[i] - previousScreenshotMarker.start;
+        matchedMarkers.push(previousScreenshotMarker);
+      }
+
+      previousScreenshotMarker = {
+        start: rawMarkers.time[i],
+        dur: 0,
+        title: null,
+        name: 'CompositorScreenshot',
+        data,
+      };
     } else {
       // `data` here is a union of different shaped objects, that may or not have
       // certain properties. Flow doesn't like us arbitrarily accessing properties
@@ -331,13 +353,21 @@ export function deriveMarkersFromRawMarkerTable(
     }
   }
 
+  const endOfThread = lastSampleTime + interval;
+
   // Loop over "start" markers without any "end" markers
   for (const markerBucket of openMarkers.values()) {
     for (const marker of markerBucket) {
-      marker.dur = Math.max(lastSampleTime - marker.start, 0);
+      marker.dur = Math.max(endOfThread - marker.start, 0);
       marker.incomplete = true;
       matchedMarkers.push(marker);
     }
+  }
+
+  // Compute the last screenshot marker's duration using the last sample time.
+  if (previousScreenshotMarker) {
+    previousScreenshotMarker.dur = endOfThread - previousScreenshotMarker.start;
+    matchedMarkers.push(previousScreenshotMarker);
   }
 
   return matchedMarkers;
@@ -459,47 +489,20 @@ export function mergeStartAndEndNetworkMarker(markers: Marker[]): Marker[] {
   return filteredMarkers;
 }
 
-export function extractScreenshotsById(
-  rawMarkers: RawMarkerTable,
-  stringTable: UniqueStringArray,
-  rootRange: StartEndRange
-): Map<string, Marker[]> {
+export function groupScreenshotsById(markers: Marker[]): Map<string, Marker[]> {
   const idToScreenshotMarkers = new Map();
-  const name = 'CompositorScreenshot';
-  const nameIndex = stringTable.indexForString(name);
-  for (let markerIndex = 0; markerIndex < rawMarkers.length; markerIndex++) {
-    if (rawMarkers.name[markerIndex] === nameIndex) {
-      // Coerce the payload to a screenshot one. Don't do a runtime check that
-      // this is correct.
-      const data: ScreenshotPayload = (rawMarkers.data[markerIndex]: any);
-
+  for (let i = 0; i < markers.length; i++) {
+    const marker = markers[i];
+    const { data } = marker;
+    if (data && data.type === 'CompositorScreenshot') {
       let markers = idToScreenshotMarkers.get(data.windowID);
       if (markers === undefined) {
         markers = [];
         idToScreenshotMarkers.set(data.windowID, markers);
       }
 
-      markers.push({
-        start: rawMarkers.time[markerIndex],
-        dur: 0,
-        title: null,
-        name,
-        data,
-      });
-
-      if (markers.length > 1) {
-        // Set the duration
-        const prevMarker = markers[markers.length - 2];
-        const nextMarker = markers[markers.length - 1];
-        prevMarker.dur = nextMarker.start - prevMarker.start;
-      }
+      markers.push(marker);
     }
-  }
-
-  for (const [, markers] of idToScreenshotMarkers) {
-    // This last marker must exist.
-    const lastMarker = markers[markers.length - 1];
-    lastMarker.dur = rootRange.end - lastMarker.start;
   }
 
   return idToScreenshotMarkers;

@@ -76,6 +76,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     threadSelectors.getStringTable,
     _getFirstSampleTime,
     _getLastSampleTime,
+    ProfileSelectors.getProfileInterval,
     MarkerData.deriveMarkersFromRawMarkerTable
   );
 
@@ -194,28 +195,11 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerTiming.getMarkerTiming
   );
 
-  const getScreenshotsById = createSelector(
-    _getRawMarkerTable,
-    threadSelectors.getStringTable,
-    ProfileSelectors.getProfileRootRange,
-    MarkerData.extractScreenshotsById
-  );
-
   const getRangeFilteredScreenshotsById: Selector<
     Map<string, Marker[]>
   > = createSelector(
-    getScreenshotsById,
-    ProfileSelectors.getCommittedRange,
-    (screenshotsById, { start, end }) => {
-      const newMap = new Map();
-      for (const [id, screenshots] of screenshotsById) {
-        newMap.set(
-          id,
-          MarkerData.filterMarkersToRange(screenshots, start, end)
-        );
-      }
-      return newMap;
-    }
+    getCommittedRangeFilteredMarkers,
+    MarkerData.groupScreenshotsById
   );
 
   const getSelectedMarkerIndex: Selector<
