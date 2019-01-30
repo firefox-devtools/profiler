@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders FlameGraph correctly 1`] = `
+exports[`FlameGraph matches the snapshot 1`] = `
 <div
   aria-labelledby="flame-graph-tab-button"
   class="flameGraph"
@@ -140,7 +140,7 @@ exports[`renders FlameGraph correctly 1`] = `
 </div>
 `;
 
-exports[`renders FlameGraph correctly 2`] = `
+exports[`FlameGraph matches the snapshot 2`] = `
 Array [
   Array [
     "scale",
@@ -493,7 +493,7 @@ Array [
 ]
 `;
 
-exports[`renders a message instead of FlameGraph when call stack is inverted 1`] = `
+exports[`FlameGraph renders a message instead when call stack is inverted 1`] = `
 <div
   aria-labelledby="flame-graph-tab-button"
   class="flameGraph"

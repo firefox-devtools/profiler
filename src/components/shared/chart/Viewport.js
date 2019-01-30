@@ -80,16 +80,12 @@ const BARE_KEYMAP: { [string]: NavigationKey } = {
   KeyU: 'zoomOut',
   KeyW: 'up',
   KeyK: 'up',
-  ArrowUp: 'up',
   KeyS: 'down',
   KeyJ: 'down',
-  ArrowDown: 'down',
   KeyA: 'left',
   KeyH: 'left',
-  ArrowLeft: 'left',
   KeyD: 'right',
   KeyL: 'right',
-  ArrowRight: 'right',
 };
 /**
  * Mapping from keycode to navigation key when the ctrl modifier is down.

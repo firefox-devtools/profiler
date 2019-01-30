@@ -84,6 +84,61 @@ class FlameGraph extends React.PureComponent<Props> {
     }
   };
 
+  _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
+    const {
+      threadIndex,
+      flameGraphTiming,
+      callTree,
+      callNodeInfo: { callNodeTable },
+      selectedCallNodeIndex,
+      changeSelectedCallNode,
+    } = this.props;
+
+    if (selectedCallNodeIndex === null) {
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown': {
+        const prefix = callNodeTable.prefix[selectedCallNodeIndex];
+        if (prefix !== -1) {
+          changeSelectedCallNode(
+            threadIndex,
+            getCallNodePathFromIndex(prefix, callNodeTable)
+          );
+        }
+        break;
+      }
+      case 'ArrowUp': {
+        const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
+        if (callNodeIndex !== undefined) {
+          changeSelectedCallNode(
+            threadIndex,
+            getCallNodePathFromIndex(callNodeIndex, callNodeTable)
+          );
+        }
+        break;
+      }
+      case 'ArrowLeft':
+      case 'ArrowRight': {
+        const direction = event.key === 'ArrowLeft' ? -1 : 1;
+        const depth = callNodeTable.depth[selectedCallNodeIndex];
+        const row = flameGraphTiming[depth];
+        const rowIndex = row.callNode.indexOf(selectedCallNodeIndex);
+        const callNodeIndex = row.callNode[rowIndex + direction];
+        if (callNodeIndex !== undefined) {
+          changeSelectedCallNode(
+            threadIndex,
+            getCallNodePathFromIndex(callNodeIndex, callNodeTable)
+          );
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  };
+
   componentDidMount() {
     this._focusViewport();
   }
@@ -108,7 +163,7 @@ class FlameGraph extends React.PureComponent<Props> {
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
-      <div className="flameGraphContent">
+      <div className="flameGraphContent" onKeyDown={this._handleKeyDown}>
         {icons.map(({ className, icon }) => (
           <BackgroundImageStyleDef
             className={className}

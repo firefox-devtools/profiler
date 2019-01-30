@@ -5,28 +5,37 @@
 // @flow
 import * as React from 'react';
 import FlameGraph from '../../components/flame-graph';
-import { render } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { changeInvertCallstack } from '../../actions/profile-view';
+import {
+  changeInvertCallstack,
+  changeSelectedCallNode,
+} from '../../actions/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { ensureExists } from '../../utils/flow';
 
-it('renders FlameGraph correctly', () => {
-  const flushRafCalls = mockRaf();
-  window.devicePixelRatio = 1;
-  const ctx = mockCanvasContext();
+describe('FlameGraph', function() {
+  function setup() {
+    const flushRafCalls = mockRaf();
+    window.devicePixelRatio = 1;
+    const ctx = mockCanvasContext();
 
-  jest
-    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(200, 300));
-  jest
-    .spyOn(HTMLCanvasElement.prototype, 'getContext')
-    .mockImplementation(() => ctx);
+    jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(200, 300));
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => ctx);
 
-  const { profile } = getProfileFromTextSamples(`
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
     A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
     B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
     C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
@@ -34,37 +43,77 @@ it('renders FlameGraph correctly', () => {
     E[cat:Graphics]  G[cat:Graphics]
   `);
 
-  const store = storeWithProfile(profile);
+    const store = storeWithProfile(profile);
+    const { getState, dispatch } = store;
 
-  const { container } = render(
-    <Provider store={store}>
-      <FlameGraph />
-    </Provider>
-  );
+    const { container } = render(
+      <Provider store={store}>
+        <FlameGraph />
+      </Provider>
+    );
 
-  flushRafCalls();
+    flushRafCalls();
 
-  const drawCalls = ctx.__flushDrawLog();
+    const getContentDiv = () =>
+      ensureExists(
+        container.querySelector('.flameGraphContent'),
+        `Couldn't find the content div with selector .flameGraphContent`
+      );
 
-  expect(container.firstChild).toMatchSnapshot();
-  expect(drawCalls).toMatchSnapshot();
+    return {
+      getState,
+      dispatch,
+      container,
+      ctx,
+      getContentDiv,
+      funcNames,
+    };
+  }
 
-  delete window.devicePixelRatio;
-});
+  it('matches the snapshot', () => {
+    const { container, ctx } = setup();
+    const drawCalls = ctx.__flushDrawLog();
+    expect(container.firstChild).toMatchSnapshot();
+    expect(drawCalls).toMatchSnapshot();
+  });
 
-it('renders a message instead of FlameGraph when call stack is inverted', () => {
-  const { profile } = getProfileFromTextSamples(`
-    A  B
-  `);
+  it('renders a message instead when call stack is inverted', () => {
+    const { container, dispatch } = setup();
 
-  const store = storeWithProfile(profile);
-  store.dispatch(changeInvertCallstack(true));
+    dispatch(changeInvertCallstack(true));
 
-  const { container } = render(
-    <Provider store={store}>
-      <FlameGraph />
-    </Provider>
-  );
+    expect(container.firstChild).toMatchSnapshot();
+  });
 
-  expect(container.firstChild).toMatchSnapshot();
+  it('can be navigated with the keyboard', () => {
+    const { getState, dispatch, getContentDiv, funcNames } = setup();
+    const div = getContentDiv();
+
+    function selectedNode() {
+      const callNodeIndex = selectedThreadSelectors.getSelectedCallNodeIndex(
+        getState()
+      );
+      return callNodeIndex && funcNames[callNodeIndex];
+    }
+
+    dispatch(changeSelectedCallNode(0, [0, 1] /* B */));
+
+    expect(selectedNode()).toBe('B');
+
+    fireEvent.keyDown(div, { key: 'ArrowUp' });
+
+    expect(selectedNode()).toBe('C');
+
+    fireEvent.keyDown(div, { key: 'ArrowRight' });
+
+    expect(selectedNode()).toBe('H');
+
+    fireEvent.keyDown(div, { key: 'ArrowLeft' });
+
+    expect(selectedNode()).toBe('C');
+
+    fireEvent.keyDown(div, { key: 'ArrowDown' });
+
+    expect(selectedNode()).toBe('B');
+  });
 });
