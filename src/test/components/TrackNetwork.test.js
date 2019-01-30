@@ -52,7 +52,8 @@ describe('timeline/TrackNetwork', function() {
 
 function setup() {
   const profile = getNetworkTrackProfile();
-  const store = storeWithProfile();
+  const store = storeWithProfile(profile);
+
   const { getState, dispatch } = store;
   const flushRafCalls = mockRaf();
   const ctx = mockCanvasContext();
