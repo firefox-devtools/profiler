@@ -4,7 +4,10 @@
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileWithMarkers,
+  getNetworkTrackProfile,
+} from '../fixtures/profiles/processed-profile';
 
 describe('selectors/getMarkerChartTiming', function() {
   function getMarkerChartTiming(testMarkers) {
@@ -197,5 +200,19 @@ describe('getProcessedRawMarkerTable', function() {
         endTime: 20,
       },
     ]);
+  });
+});
+
+describe('getTimelineVerticalMarkers', function() {
+  it('gets the appropriate markers', function() {
+    const { getState } = storeWithProfile(getNetworkTrackProfile());
+    const markers = selectedThreadSelectors.getTimelineVerticalMarkers(
+      getState()
+    );
+    const allMarkers = selectedThreadSelectors.getMarkers(getState());
+
+    expect(allMarkers.length).toBeGreaterThan(markers.length);
+    expect(markers).toHaveLength(5);
+    expect(markers).toMatchSnapshot();
   });
 });
