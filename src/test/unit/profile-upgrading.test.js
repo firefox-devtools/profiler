@@ -50,7 +50,8 @@ describe('upgrading old cleopatra profiles', function() {
     const { markers } = thread;
 
     const markerWithCauseIndex = markers.data.findIndex(
-      marker => marker !== null && marker.type === 'tracing' && marker.cause
+      marker =>
+        marker !== null && marker.type === 'tracing' && 'cause' in marker
     );
 
     if (markerWithCauseIndex < -1) {

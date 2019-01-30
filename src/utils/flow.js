@@ -163,3 +163,16 @@ export function getNumberPropertyOrNull<T: Object>(
   const maybeNumber = (data: Object)[property];
   return typeof maybeNumber === 'number' ? maybeNumber : null;
 }
+
+/**
+ * Flow doesn't want us to access potentitally non-existent properties on unions of
+ * of objects. This function creates a safe interface to access string properties
+ * if they might exist.
+ */
+export function getStringPropertyOrNull<T: Object>(
+  data: T,
+  property: string
+): string | null {
+  const maybeString = (data: Object)[property];
+  return typeof maybeString === 'string' ? maybeString : null;
+}

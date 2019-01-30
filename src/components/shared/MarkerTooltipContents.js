@@ -31,6 +31,7 @@ import type {
   DOMEventMarkerPayload,
   FrameConstructionMarkerPayload,
   PaintProfilerMarkerTracing,
+  NavigationMarkerPayload,
   PhaseTimes,
   StyleMarkerPayload,
 } from '../../types/markers';
@@ -307,7 +308,8 @@ function _markerBacktrace(
     | StyleMarkerPayload
     | PaintProfilerMarkerTracing
     | DOMEventMarkerPayload
-    | FrameConstructionMarkerPayload,
+    | FrameConstructionMarkerPayload
+    | NavigationMarkerPayload,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {

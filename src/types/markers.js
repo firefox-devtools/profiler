@@ -356,6 +356,15 @@ export type DOMEventMarkerPayload = {|
   cause?: CauseBacktrace,
 |};
 
+export type NavigationMarkerPayload = {|
+  type: 'tracing',
+  category: 'Navigation',
+  interval: 'start' | 'end',
+  eventType?: string,
+  docShellId?: string,
+  docshellHistoryId?: number,
+|};
+
 type StyleMarkerPayload_Shared = {|
   type: 'Styles',
   category: 'Paint',
@@ -453,6 +462,7 @@ export type MarkerPayload =
   | ScreenshotPayload
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
+  | NavigationMarkerPayload
   | null;
 
 export type MarkerPayload_Gecko =
@@ -471,4 +481,5 @@ export type MarkerPayload_Gecko =
   | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
   | ArbitraryEventTracing
+  | NavigationMarkerPayload
   | null;

@@ -8,10 +8,15 @@ import React, { PureComponent } from 'react';
 import clamp from 'clamp';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
-import { getCommittedRange } from '../../selectors/profile';
+import {
+  getCommittedRange,
+  getZeroAt,
+  getPageList,
+} from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
+import VerticalIndicators from './VerticalIndicators';
 
-import type { ThreadIndex } from '../../types/profile';
+import type { ThreadIndex, PageList } from '../../types/profile';
 import type {} from '../../types/markers';
 import type { Milliseconds } from '../../types/units';
 import type { SizeProps } from '../shared/WithSize';
@@ -19,6 +24,7 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
+import type { Marker } from '../../types/profile-derived';
 
 import './TrackNetwork.css';
 
@@ -28,11 +34,14 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
+  +pages: PageList | null,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
+  +zeroAt: Milliseconds,
   +networkMarkers: *,
   +networkTiming: *,
   +containerHeight: number,
+  +verticalMarkers: Marker[],
 |};
 type DispatchProps = {||};
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -114,7 +123,14 @@ class Network extends PureComponent<Props, State> {
   }
 
   render() {
-    const { containerHeight } = this.props;
+    const {
+      pages,
+      containerHeight,
+      rangeStart,
+      rangeEnd,
+      verticalMarkers,
+      zeroAt,
+    } = this.props;
     this._scheduleDraw();
 
     return (
@@ -127,6 +143,13 @@ class Network extends PureComponent<Props, State> {
         <canvas
           className="timelineTrackNetworkCanvas"
           ref={this._takeCanvasRef}
+        />
+        <VerticalIndicators
+          verticalMarkers={verticalMarkers}
+          pages={pages}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          zeroAt={zeroAt}
         />
       </div>
     );
@@ -141,11 +164,14 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const networkTiming = selectors.getNetworkTrackTiming(state);
     return {
       networkMarkers: selectors.getNetworkMarkers(state),
+      pages: getPageList(state),
       networkTiming: networkTiming,
       rangeStart: start,
       rangeEnd: end,
+      zeroAt: getZeroAt(state),
       containerHeight:
         ROW_HEIGHT * clamp(networkTiming.length, MIN_ROW_REPEAT, ROW_REPEAT),
+      verticalMarkers: selectors.getTimelineVerticalMarkers(state),
     };
   },
   component: Network,

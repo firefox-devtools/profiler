@@ -21,6 +21,7 @@ import type {
   Pid,
   Counter,
   CounterIndex,
+  PageList,
 } from '../types/profile';
 import type {
   LocalTrack,
@@ -91,6 +92,8 @@ export const getProfile: Selector<Profile> = state =>
   );
 export const getProfileInterval: Selector<Milliseconds> = state =>
   getProfile(state).meta.interval;
+export const getPageList = (state: State): PageList | null =>
+  getProfile(state).pages || null;
 export const getCategories: Selector<CategoryList> = state =>
   getProfile(state).meta.categories;
 export const getDefaultCategory: Selector<IndexIntoCategoryList> = state =>
