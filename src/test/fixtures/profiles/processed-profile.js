@@ -76,7 +76,8 @@ export function addMarkersToThreadWithCorrespondingSamples(
 ) {
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
-  const samples = thread.samples;
+
+  const allTimes = new Set();
 
   markers.forEach(([name, time, data]) => {
     markersTable.name.push(stringTable.indexForString(name));
@@ -84,24 +85,42 @@ export function addMarkersToThreadWithCorrespondingSamples(
     markersTable.data.push(_refineMockPayload(data));
     markersTable.length++;
 
-    // Try to get a consistent profile with a sample for each marker.
-    const startTime = time;
-    // If we have no data, endTime is the same as startTime.
-    const endTime =
-      data && typeof data.endTime === 'number' ? data.endTime : time;
-
-    // Push on the start and end time if necessary
-    [startTime, endTime].forEach(time => {
-      if (!samples.time.includes(time)) {
-        samples.time.push(time);
-        samples.stack.push(null);
-        samples.responsiveness.push(null);
-        samples.length++;
-      }
-    });
+    // Try to get a consistent profile containing all markers
+    allTimes.add(time);
+    if (data && typeof data.endTime === 'number') {
+      allTimes.add(data.endTime);
+    }
   });
 
-  samples.time.sort();
+  const firstMarkerTime = Math.min(...allTimes);
+  const lastMarkerTime = Math.max(...allTimes);
+
+  const { samples } = thread;
+
+  // The first marker time should be added if there's no sample before this time.
+  const shouldAddFirstMarkerTime =
+    samples.length === 0 || samples.time[0] > firstMarkerTime;
+
+  // The last marker time should be added if there's no sample after this time,
+  // but only if it's different than the other time.
+  const shouldAddLastMarkerTime =
+    (samples.length === 0 ||
+      samples.time[samples.length - 1] < lastMarkerTime) &&
+    firstMarkerTime !== lastMarkerTime;
+
+  if (shouldAddFirstMarkerTime) {
+    samples.time.unshift(firstMarkerTime);
+    samples.stack.unshift(null);
+    samples.responsiveness.unshift(null);
+    samples.length++;
+  }
+
+  if (shouldAddLastMarkerTime) {
+    samples.time.push(lastMarkerTime);
+    samples.stack.push(null);
+    samples.responsiveness.push(null);
+    samples.length++;
+  }
 }
 
 export function getThreadWithMarkers(markers: TestDefinedMarkers) {
