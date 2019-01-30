@@ -34,7 +34,7 @@ import { getNumberPropertyOrNull } from '../utils/flow';
  *     but under 50ms,      responsiveness was
  *     no jank.             reset from 71 to 3.
  */
-export function getJankMarkers(
+export function deriveJankMarkers(
   samples: SamplesTable,
   thresholdInMs: number
 ): Marker[] {
@@ -340,7 +340,6 @@ export function deriveMarkersFromRawMarkerTable(
     }
   }
 
-  matchedMarkers.sort((a, b) => a.start - b.start);
   return matchedMarkers;
 }
 

@@ -10,7 +10,6 @@ import * as MarkerTiming from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
 
 import type {
-  SamplesTable,
   RawMarkerTable,
   IndexIntoRawMarkerTable,
 } from '../../types/profile';
@@ -35,16 +34,6 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   const _getRawMarkerTable: Selector<RawMarkerTable> = state =>
     threadSelectors.getThread(state).markers;
 
-  const _getRangeFilteredThreadSamples: Selector<SamplesTable> = createSelector(
-    threadSelectors.getRangeFilteredThread,
-    thread => thread.samples
-  );
-
-  const getJankMarkers: Selector<Marker[]> = createSelector(
-    _getRangeFilteredThreadSamples,
-    (samples): Marker[] => MarkerData.getJankMarkers(samples, 50)
-  );
-
   /**
    * Similar to thread filtering, the markers can be filtered as well, and it's
    * important to use the right type of filtering for the view. The steps for filtering
@@ -57,10 +46,16 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * 2. getProcessedRawMarkerTable - Process marker payloads out of raw strings, and other
    *                                 future processing needs. This returns a
    *                                 RawMarkerTable still.
-   * 3. getMarkers - Match up start/end markers, and start returning the Marker[] type.
-   * 4. getCommittedRangeFilteredMarkers - Apply the committed range.
-   * 5. getSearchFilteredMarkers - Apply the search string
-   * 6. getPreviewFilteredMarkers - Apply the preview range
+   * 3a. _getDerivedMarkers - Match up start/end markers, and start returning
+   *                          the Marker[] type.
+   * 3b. _getDerivedJankMarkers - Jank markers come from our samples data, and
+   *                              this selector returns Marker structures out of
+   *                              the samples structure.
+   * 4. getReferenceMarkerTable - Concatenates and sorts all markers coming from
+   *                              different origin structures.
+   * 5. getCommittedRangeFilteredMarkers - Apply the committed range.
+   * 6. getSearchFilteredMarkers - Apply the search string
+   * 7. getPreviewFilteredMarkers - Apply the preview range
    */
   const getProcessedRawMarkerTable: Selector<RawMarkerTable> = createSelector(
     _getRawMarkerTable,
@@ -73,7 +68,10 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   const _getLastSampleTime: Selector<Milliseconds> = state =>
     threadSelectors.getThread(state).samples.time.slice(-1)[0] || 0;
 
-  const getMarkers: Selector<Marker[]> = createSelector(
+  /* This selector exposes the result of the processing of the raw marker table
+   * into our Marker structure that we use in the rest of our code. This is the
+   * very start of our marker pipeline. */
+  const _getDerivedMarkers: Selector<Marker[]> = createSelector(
     getProcessedRawMarkerTable,
     threadSelectors.getStringTable,
     _getFirstSampleTime,
@@ -81,8 +79,22 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerData.deriveMarkersFromRawMarkerTable
   );
 
+  const _getDerivedJankMarkers: Selector<Marker[]> = createSelector(
+    threadSelectors.getSamplesTable,
+    samples => MarkerData.deriveJankMarkers(samples, 50)
+  );
+
+  const getReferenceMarkerTable: Selector<Marker[]> = createSelector(
+    _getDerivedMarkers,
+    _getDerivedJankMarkers,
+    (derivedMarkers, derivedJankMarkers) =>
+      [...derivedMarkers, ...derivedJankMarkers].sort(
+        (a, b) => a.start - b.start
+      )
+  );
+
   const getCommittedRangeFilteredMarkers: Selector<Marker[]> = createSelector(
-    getMarkers,
+    getReferenceMarkerTable,
     ProfileSelectors.getCommittedRange,
     (markers, range): Marker[] => {
       const { start, end } = range;
@@ -99,6 +111,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
         tm.name !== 'BHR-detected hang' &&
         tm.name !== 'LongTask' &&
         tm.name !== 'LongIdleTask' &&
+        tm.name !== 'Jank' &&
         !MarkerData.isNetworkMarker(tm) &&
         !MarkerData.isNavigationMarker(tm)
     )
@@ -107,6 +120,11 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   const getTimelineVerticalMarkers = createSelector(
     getCommittedRangeFilteredMarkers,
     (markers): Marker[] => markers.filter(MarkerData.isNavigationMarker)
+  );
+
+  const getJankMarkersForHeader: Selector<Marker[]> = createSelector(
+    getCommittedRangeFilteredMarkers,
+    markers => markers.filter(marker => marker.name === 'Jank')
   );
 
   const getSearchFilteredMarkers: Selector<Marker[]> = createSelector(
@@ -132,7 +150,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   const getIsNetworkChartEmptyInFullRange: Selector<boolean> = createSelector(
-    getMarkers,
+    getReferenceMarkerTable,
     markers => markers.filter(MarkerData.isNetworkMarker).length === 0
   );
 
@@ -147,7 +165,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   const getIsMarkerChartEmptyInFullRange: Selector<boolean> = createSelector(
-    getMarkers,
+    getReferenceMarkerTable,
     markers => MarkerData.filterForMarkerChart(markers).length === 0
   );
 
@@ -205,9 +223,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = state => threadSelectors.getViewOptions(state).selectedMarker;
 
   return {
-    getJankMarkers,
+    getJankMarkersForHeader,
     getProcessedRawMarkerTable,
-    getMarkers,
+    getReferenceMarkerTable,
     getNetworkChartMarkers,
     getIsMarkerChartEmptyInFullRange,
     getMarkerChartMarkers,
