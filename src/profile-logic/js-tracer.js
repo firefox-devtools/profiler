@@ -206,7 +206,8 @@ export function getJsTracerLeafTiming(
     const currentStart = jsTracer.timestamps[currentEventIndex];
     const durationRaw = jsTracer.durations[currentEventIndex];
     const duration = durationRaw === null ? 0 : durationRaw;
-    const currentEnd = currentStart + duration;
+    // The end needs to be adjustable in case there are precision errors.
+    let currentEnd = currentStart + duration;
 
     if (prefixesTip === -1) {
       // Nothing has been added yet, add this "current" event to the stack of prefixes.
@@ -221,6 +222,22 @@ export function getJsTracerLeafTiming(
       const prefixStart = prefixesStarts[prefixesTip];
       const prefixEnd = prefixesEnds[prefixesTip];
       const prefixEventIndex = prefixesEventIndexes[prefixesTip];
+
+      if (
+        prefixStart <= currentStart &&
+        prefixEnd > currentStart &&
+        prefixEnd < currentEnd
+      ) {
+        // This check handles precision errors that creates timing like so:
+        //    [prefix=======]
+        //       [current========]
+        //
+        // It reformats the current as:
+        //
+        //    [prefix=======]
+        //       [current===]
+        currentEnd = prefixEnd;
+      }
 
       // The following if/else blocks go through every potential case of timing for the
       // the data, and finally throw if those cases weren't handled. Each block should
@@ -336,7 +353,7 @@ export function getJsTracerLeafTiming(
           `Current (child) times for "${currentName}": ${currentStart}ms to ${currentEnd}ms`
         );
         throw new Error(
-          'The JS Tracer information was malformed. Some event lasted longer than its parent event.'
+          'The JS Tracer algorithm encountered some data it could not handle.'
         );
       }
     }
