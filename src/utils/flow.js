@@ -163,3 +163,12 @@ export function getNumberPropertyOrNull<T: Object>(
   const maybeNumber = (data: Object)[property];
   return typeof maybeNumber === 'number' ? maybeNumber : null;
 }
+
+/**
+ * This function is inherently unsafe but is sometimes necessary when we want to
+ * mutate objects instead of going the immutable way, and we're mutating their
+ * type in the process.
+ */
+export function unsafeTransmute<T1, T2>(input: T1): T2 {
+  return ((input: any): T2);
+}

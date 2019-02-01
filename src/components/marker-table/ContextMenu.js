@@ -14,7 +14,10 @@ import {
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import copy from 'copy-to-clipboard';
 
-import type { Marker, IndexIntoMarkers } from '../../types/profile-derived';
+import type {
+  IndexedMarker,
+  IndexIntoMarkers,
+} from '../../types/profile-derived';
 import type { StartEndRange } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
 import type {
@@ -23,7 +26,7 @@ import type {
 } from '../../utils/connect';
 
 type StateProps = {|
-  +markers: Marker[],
+  +markers: IndexedMarker[],
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
   +selectedMarker: IndexIntoMarkers | null,

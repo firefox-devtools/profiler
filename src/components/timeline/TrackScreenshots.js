@@ -16,7 +16,7 @@ import { createPortal } from 'react-dom';
 
 import type { ScreenshotPayload } from '../../types/markers';
 import type { ThreadIndex, Thread } from '../../types/profile';
-import type { Marker } from '../../types/profile-derived';
+import type { IndexedMarker } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -35,7 +35,7 @@ type StateProps = {|
   +thread: Thread,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +screenshots: Marker[],
+  +screenshots: IndexedMarker[],
   +threadName: string,
   +isMakingPreviewSelection: boolean,
 |};
@@ -142,7 +142,7 @@ type HoverPreviewProps = {|
   +thread: Thread,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +screenshots: Marker[],
+  +screenshots: IndexedMarker[],
   +isMakingPreviewSelection: boolean,
   +offsetX: null | number,
   +pageX: null | number,
@@ -239,7 +239,7 @@ type ScreenshotStripProps = {|
   +thread: Thread,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +screenshots: Marker[],
+  +screenshots: IndexedMarker[],
   +width: number,
 |};
 

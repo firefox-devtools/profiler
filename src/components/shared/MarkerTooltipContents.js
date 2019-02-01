@@ -23,7 +23,7 @@ import Backtrace from './Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 import type { Microseconds } from '../../types/units';
-import type { Marker } from '../../types/profile-derived';
+import type { IndexedMarker } from '../../types/profile-derived';
 import type { NotVoidOrNull } from '../../types/utils';
 import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex } from '../../types/profile';
@@ -303,7 +303,7 @@ function _sumMaybeEntries(
 }
 
 function _markerBacktrace(
-  marker: Marker,
+  marker: IndexedMarker,
   data:
     | StyleMarkerPayload
     | PaintProfilerMarkerTracing
@@ -358,7 +358,7 @@ function _markerBacktrace(
 }
 
 function getMarkerDetails(
-  marker: Marker,
+  marker: IndexedMarker,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {
@@ -810,7 +810,7 @@ function getMarkerDetails(
 }
 
 type OwnProps = {|
-  +marker: Marker,
+  +marker: IndexedMarker,
   +threadIndex: ThreadIndex,
   +className?: string,
 |};

@@ -8,7 +8,7 @@ import type {
   RawMarkerTable,
   IndexIntoStringTable,
 } from '../types/profile';
-import type { Marker } from '../types/profile-derived';
+import type { Marker, IndexedMarker } from '../types/profile-derived';
 import type { BailoutPayload } from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import { getNumberPropertyOrNull } from '../utils/flow';
@@ -74,14 +74,14 @@ export function deriveJankMarkers(
 }
 
 export function getSearchFilteredMarkers(
-  markers: Marker[],
+  markers: IndexedMarker[],
   searchString: string
-): Marker[] {
+): IndexedMarker[] {
   if (!searchString) {
     return markers;
   }
   const lowerCaseSearchString = searchString.toLowerCase();
-  const newMarkers: Marker[] = [];
+  const newMarkers: IndexedMarker[] = [];
   for (const marker of markers) {
     const { data, name } = marker;
     const lowerCaseName = name.toLowerCase();
@@ -373,21 +373,21 @@ export function deriveMarkersFromRawMarkerTable(
   return matchedMarkers;
 }
 
-export function filterMarkersToRange(
-  markers: Marker[],
+export function filterMarkersToRange<T: { start: number, dur: number }>(
+  markers: T[],
   rangeStart: number,
   rangeEnd: number
-): Marker[] {
+): T[] {
   return markers.filter(
     tm => tm.start < rangeEnd && tm.start + tm.dur >= rangeStart
   );
 }
 
-export function isNetworkMarker(marker: Marker): boolean {
+export function isNetworkMarker(marker: IndexedMarker): boolean {
   return !!(marker.data && marker.data.type === 'Network');
 }
 
-export function isNavigationMarker({ name, data }: Marker) {
+export function isNavigationMarker({ name, data }: IndexedMarker) {
   if (name === 'TTI') {
     // TTI is only selectable by name, as it doesn't have a structured payload.
     return true;
@@ -413,11 +413,15 @@ export function isNavigationMarker({ name, data }: Marker) {
   return false;
 }
 
-export function filterForNetworkChart(markers: Marker[]) {
+export function filterForNetworkChart(
+  markers: IndexedMarker[]
+): IndexedMarker[] {
   return markers.filter(marker => isNetworkMarker(marker));
 }
 
-export function filterForMarkerChart(markers: Marker[]) {
+export function filterForMarkerChart(
+  markers: IndexedMarker[]
+): IndexedMarker[] {
   return markers.filter(marker => !isNetworkMarker(marker));
 }
 // Firefox emits separate start and end markers for each load. It does this so that,
@@ -426,9 +430,11 @@ export function filterForMarkerChart(markers: Marker[]) {
 // information about requests that were in progress at profile collection time.
 // For requests that have finished, we want to merge the request's start and end
 // markers into one marker.
-export function mergeStartAndEndNetworkMarker(markers: Marker[]): Marker[] {
-  const sortedMarkers: Marker[] = markers.slice(0);
-  const filteredMarkers: Marker[] = [];
+export function mergeStartAndEndNetworkMarker(
+  markers: IndexedMarker[]
+): IndexedMarker[] {
+  const sortedMarkers = markers.slice(0);
+  const filteredMarkers: IndexedMarker[] = [];
 
   // Sort markers, alphabetized by name to filter for markers with the same name
   sortedMarkers.sort((a, b) => {
@@ -475,6 +481,7 @@ export function mergeStartAndEndNetworkMarker(markers: Marker[]): Marker[] {
             name: endMarker.name,
             title: endMarker.title,
             start: startMarker.start,
+            markerIndex: startMarker.markerIndex,
           };
           filteredMarkers.push(mergedMarker);
           i++;
@@ -489,7 +496,9 @@ export function mergeStartAndEndNetworkMarker(markers: Marker[]): Marker[] {
   return filteredMarkers;
 }
 
-export function groupScreenshotsById(markers: Marker[]): Map<string, Marker[]> {
+export function groupScreenshotsById(
+  markers: IndexedMarker[]
+): Map<string, IndexedMarker[]> {
   const idToScreenshotMarkers = new Map();
   for (let i = 0; i < markers.length; i++) {
     const marker = markers[i];

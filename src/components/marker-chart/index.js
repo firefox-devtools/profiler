@@ -22,7 +22,10 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
-import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
+import type {
+  IndexedMarker,
+  MarkerTimingRows,
+} from '../../types/profile-derived';
 import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
@@ -42,7 +45,7 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
-  +markers: Marker[],
+  +markers: IndexedMarker[],
   +markerTimingRows: MarkerTimingRows,
   +maxMarkerRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },

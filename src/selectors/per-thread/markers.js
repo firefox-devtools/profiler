@@ -9,11 +9,17 @@ import * as MarkerData from '../../profile-logic/marker-data';
 import * as MarkerTiming from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
 
+import { unsafeTransmute } from '../../utils/flow';
+
 import type {
   RawMarkerTable,
   IndexIntoRawMarkerTable,
 } from '../../types/profile';
-import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
+import type {
+  IndexedMarker,
+  Marker,
+  MarkerTimingRows,
+} from '../../types/profile-derived';
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
 import type { Milliseconds } from '../../types/units';
@@ -85,27 +91,35 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     samples => MarkerData.deriveJankMarkers(samples, 50)
   );
 
-  const getReferenceMarkerTable: Selector<Marker[]> = createSelector(
+  const getReferenceMarkerTable: Selector<IndexedMarker[]> = createSelector(
     _getDerivedMarkers,
     _getDerivedJankMarkers,
-    (derivedMarkers, derivedJankMarkers) =>
-      [...derivedMarkers, ...derivedJankMarkers].sort(
+    (derivedMarkers, derivedJankMarkers) => {
+      const allMarkers = [...derivedMarkers, ...derivedJankMarkers].sort(
         (a, b) => a.start - b.start
-      )
+      );
+
+      // Magic Flow Transmutation
+      const resultMarkers: IndexedMarker[] = unsafeTransmute(allMarkers);
+      resultMarkers.forEach((marker, i) => (marker.markerIndex = i));
+      return resultMarkers;
+    }
   );
 
-  const getCommittedRangeFilteredMarkers: Selector<Marker[]> = createSelector(
+  const getCommittedRangeFilteredMarkers: Selector<
+    IndexedMarker[]
+  > = createSelector(
     getReferenceMarkerTable,
     ProfileSelectors.getCommittedRange,
-    (markers, range): Marker[] => {
+    (markers, range) => {
       const { start, end } = range;
       return MarkerData.filterMarkersToRange(markers, start, end);
     }
   );
 
   const getCommittedRangeFilteredMarkersForHeader: Selector<
-    Marker[]
-  > = createSelector(getCommittedRangeFilteredMarkers, (markers): Marker[] =>
+    IndexedMarker[]
+  > = createSelector(getCommittedRangeFilteredMarkers, markers =>
     markers.filter(
       tm =>
         tm.name !== 'GCMajor' &&
@@ -118,23 +132,23 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     )
   );
 
-  const getTimelineVerticalMarkers = createSelector(
+  const getTimelineVerticalMarkers: Selector<IndexedMarker[]> = createSelector(
     getCommittedRangeFilteredMarkers,
-    (markers): Marker[] => markers.filter(MarkerData.isNavigationMarker)
+    markers => markers.filter(MarkerData.isNavigationMarker)
   );
 
-  const getJankMarkersForHeader: Selector<Marker[]> = createSelector(
+  const getJankMarkersForHeader: Selector<IndexedMarker[]> = createSelector(
     getCommittedRangeFilteredMarkers,
     markers => markers.filter(marker => marker.name === 'Jank')
   );
 
-  const getSearchFilteredMarkers: Selector<Marker[]> = createSelector(
+  const getSearchFilteredMarkers: Selector<IndexedMarker[]> = createSelector(
     getCommittedRangeFilteredMarkers,
     UrlState.getMarkersSearchString,
     MarkerData.getSearchFilteredMarkers
   );
 
-  const getPreviewFilteredMarkers: Selector<Marker[]> = createSelector(
+  const getPreviewFilteredMarkers: Selector<IndexedMarker[]> = createSelector(
     getSearchFilteredMarkers,
     ProfileSelectors.getPreviewSelection,
     (markers, previewSelection) => {
@@ -155,12 +169,14 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     markers => markers.filter(MarkerData.isNetworkMarker).length === 0
   );
 
-  const getNetworkChartMarkers: Selector<Marker[]> = createSelector(
+  const getNetworkChartMarkers: Selector<IndexedMarker[]> = createSelector(
     getSearchFilteredMarkers,
     markers => markers.filter(MarkerData.isNetworkMarker)
   );
 
-  const getMergedNetworkChartMarkers: Selector<Marker[]> = createSelector(
+  const getMergedNetworkChartMarkers: Selector<
+    IndexedMarker[]
+  > = createSelector(
     getNetworkChartMarkers,
     MarkerData.mergeStartAndEndNetworkMarker
   );
@@ -170,7 +186,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     markers => MarkerData.filterForMarkerChart(markers).length === 0
   );
 
-  const getMarkerChartMarkers: Selector<Marker[]> = createSelector(
+  const getMarkerChartMarkers: Selector<IndexedMarker[]> = createSelector(
     getSearchFilteredMarkers,
     MarkerData.filterForMarkerChart
   );
@@ -185,7 +201,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerTiming.getMarkerTiming
   );
 
-  const getNetworkMarkers: Selector<Marker[]> = createSelector(
+  const getNetworkMarkers: Selector<IndexedMarker[]> = createSelector(
     getCommittedRangeFilteredMarkers,
     markers => markers.filter(MarkerData.isNetworkMarker)
   );
@@ -196,7 +212,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   const getRangeFilteredScreenshotsById: Selector<
-    Map<string, Marker[]>
+    Map<string, IndexedMarker[]>
   > = createSelector(
     getCommittedRangeFilteredMarkers,
     MarkerData.groupScreenshotsById

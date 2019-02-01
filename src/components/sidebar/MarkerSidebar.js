@@ -16,11 +16,11 @@ import type {
   ExplicitConnectOptions,
 } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
-import type { Marker } from '../../types/profile-derived';
+import type { IndexedMarker } from '../../types/profile-derived';
 
 type StateProps = {|
   +selectedThreadIndex: ThreadIndex,
-  +marker: Marker | null,
+  +marker: IndexedMarker | null,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;

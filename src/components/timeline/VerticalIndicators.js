@@ -11,13 +11,13 @@ import { formatSeconds } from '../../utils/format-numbers';
 
 import type { SizeProps } from '../shared/WithSize';
 import type { PageList } from '../../types/profile';
-import type { Marker } from '../../types/profile-derived';
+import type { IndexedMarker } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 
 import './VerticalIndicators.css';
 
 type OwnProps = {|
-  +verticalMarkers: Marker[],
+  +verticalMarkers: IndexedMarker[],
   +pages: PageList | null,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,

@@ -20,7 +20,10 @@ import { formatSeconds } from '../../utils/format-numbers';
 import './index.css';
 
 import type { ThreadIndex } from '../../types/profile';
-import type { Marker, IndexIntoMarkers } from '../../types/profile-derived';
+import type {
+  IndexedMarker,
+  IndexIntoMarkers,
+} from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -35,11 +38,11 @@ type MarkerDisplayData = {|
 |};
 
 class MarkerTree {
-  _markers: Marker[];
+  _markers: IndexedMarker[];
   _zeroAt: Milliseconds;
   _displayDataByIndex: Map<IndexIntoMarkers, MarkerDisplayData>;
 
-  constructor(markers: Marker[], zeroAt: Milliseconds) {
+  constructor(markers: IndexedMarker[], zeroAt: Milliseconds) {
     this._markers = markers;
     this._zeroAt = zeroAt;
     this._displayDataByIndex = new Map();
@@ -153,7 +156,7 @@ function _formatDuration(duration: number): string {
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
-  +markers: Marker[],
+  +markers: IndexedMarker[],
   +selectedMarker: IndexIntoMarkers | null,
   +zeroAt: Milliseconds,
   +scrollToSelectionGeneration: number,

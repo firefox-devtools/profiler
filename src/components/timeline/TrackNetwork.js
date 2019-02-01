@@ -24,7 +24,7 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
-import type { Marker } from '../../types/profile-derived';
+import type { IndexedMarker } from '../../types/profile-derived';
 
 import './TrackNetwork.css';
 
@@ -41,7 +41,7 @@ type StateProps = {|
   +networkMarkers: *,
   +networkTiming: *,
   +containerHeight: number,
-  +verticalMarkers: Marker[],
+  +verticalMarkers: IndexedMarker[],
 |};
 type DispatchProps = {||};
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;

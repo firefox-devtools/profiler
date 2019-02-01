@@ -12,6 +12,7 @@ Array [
       "type": "tracing",
     },
     "dur": 1,
+    "markerIndex": 10,
     "name": "Load",
     "start": 4,
     "title": null,
@@ -19,6 +20,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
+    "markerIndex": 11,
     "name": "TTI",
     "start": 6,
     "title": null,
@@ -32,6 +34,7 @@ Array [
       "type": "tracing",
     },
     "dur": 1,
+    "markerIndex": 12,
     "name": "DOMContentLoaded",
     "start": 6,
     "title": null,
@@ -39,6 +42,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
+    "markerIndex": 13,
     "name": "Navigation::Start",
     "start": 7,
     "title": null,
@@ -46,6 +50,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
+    "markerIndex": 14,
     "name": "Contentful paint at something",
     "start": 8,
     "title": null,

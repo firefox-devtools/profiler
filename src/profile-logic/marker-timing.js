@@ -5,7 +5,7 @@ import type {
   MarkerPayload,
 } from '../types/markers';
 import type {
-  Marker,
+  IndexedMarker,
   MarkerTiming,
   MarkerTimingRows,
 } from '../types/profile-derived';
@@ -59,7 +59,7 @@ const MAX_STACKING_DEPTH = 300;
  *   | User Timings |       *--*     *---*        |
  *   |______________|_____________________________|
  */
-export function getMarkerTiming(markers: Marker[]): MarkerTimingRows {
+export function getMarkerTiming(markers: IndexedMarker[]): MarkerTimingRows {
   // Each marker type will have it's own timing information, later collapse these into
   // a single array.
   const markerTimingsMap: Map<string, MarkerTiming[]> = new Map();

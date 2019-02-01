@@ -17,7 +17,7 @@ import { getSelectedThreadIndex } from '../../selectors/url-state';
 import './Markers.css';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
-import type { Marker } from '../../types/profile-derived';
+import type { IndexedMarker } from '../../types/profile-derived';
 import type { SizeProps } from '../shared/WithSize';
 import type {
   ExplicitConnectOptions,
@@ -58,7 +58,7 @@ export type OwnProps = {|
 
 export type StateProps = {|
   +additionalClassName?: ?string,
-  +markers: Marker[],
+  +markers: IndexedMarker[],
   +isSelected: boolean,
   +isModifyingSelection: boolean,
 |};
@@ -69,8 +69,8 @@ type Props = {|
 |};
 
 type State = {
-  hoveredItem: Marker | null,
-  mouseDownItem: Marker | null,
+  hoveredItem: IndexedMarker | null,
+  mouseDownItem: IndexedMarker | null,
   mouseX: CssPixels,
   mouseY: CssPixels,
 };
@@ -100,7 +100,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     });
   }
 
-  _hitTest(e): Marker | null {
+  _hitTest(e): IndexedMarker | null {
     const c = this._canvas;
     if (c === null) {
       return null;

@@ -9,12 +9,12 @@ import Tooltip from '../shared/Tooltip';
 
 import type { CssPixels } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
-import type { Marker } from '../../types/profile-derived';
+import type { IndexedMarker } from '../../types/profile-derived';
 import type { NetworkPayload } from '../../types/markers';
 
 export type NetworkChartRowProps = {
   +index: number,
-  +marker: Marker,
+  +marker: IndexedMarker,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload | null,
@@ -31,7 +31,7 @@ type State = {
 };
 
 export type NetworkChartRowBarProps = {
-  +marker: Marker,
+  +marker: IndexedMarker,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload,

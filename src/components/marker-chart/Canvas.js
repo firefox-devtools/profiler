@@ -22,7 +22,7 @@ import type {
 } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
 import type {
-  Marker,
+  IndexedMarker,
   MarkerTimingRows,
   IndexIntoMarkerTiming,
 } from '../../types/profile-derived';
@@ -43,7 +43,7 @@ type OwnProps = {|
   +rangeEnd: Milliseconds,
   +markerTimingRows: MarkerTimingRows,
   +rowHeight: CssPixels,
-  +markers: Marker[],
+  +markers: IndexedMarker[],
   +threadIndex: ThreadIndex,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection

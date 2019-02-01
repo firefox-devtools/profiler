@@ -26,7 +26,10 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
 import type { NetworkPayload } from '../../types/markers';
-import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
+import type {
+  IndexedMarker,
+  MarkerTimingRows,
+} from '../../types/profile-derived';
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -46,7 +49,7 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
-  +markers: Marker[],
+  +markers: IndexedMarker[],
   +networkTimingRows: MarkerTimingRows,
   +maxNetworkRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
@@ -144,7 +147,9 @@ function _renderRow(rowProps: NetworkChartRowProps): React.Node {
  * the union of all payloads to one specific payload through the type definition.
  * This function does a runtime check to do so.
  */
-function _getNetworkPayloadOrNull(marker: Marker): null | NetworkPayload {
+function _getNetworkPayloadOrNull(
+  marker: IndexedMarker
+): null | NetworkPayload {
   if (!marker.data || marker.data.type !== 'Network') {
     return null;
   }
