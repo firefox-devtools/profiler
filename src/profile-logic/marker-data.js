@@ -442,7 +442,7 @@ export function mergeStartAndEndNetworkMarker(markers: Marker[]): Marker[] {
               : [markerNext, marker];
           const mergedMarker = {
             data: endMarker.data,
-            dur: endMarker.dur,
+            dur: startMarker.dur + endMarker.dur,
             name: endMarker.name,
             title: endMarker.title,
             start: startMarker.start,
