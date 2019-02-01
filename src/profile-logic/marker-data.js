@@ -10,11 +10,11 @@ import type {
   SamplesTable,
   RawMarkerTable,
   IndexIntoStringTable,
-  IndexIntoRawMarkerTable,
 } from '../types/profile';
 import type { Marker, IndexIntoMarkers } from '../types/profile-derived';
 import type { BailoutPayload, NetworkPayload } from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { StartEndRange } from '../types/units';
 
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler
@@ -379,11 +379,6 @@ export function deriveMarkersFromRawMarkerTable(
 /**
  * This function filters markers from a thread's raw marker table using the
  * range specified as parameter.
- * It especially takes care of the markers that need a special handling because
- * of how the rest of the code handles them.
- *
- * There's more explanations about this special handling in the switch block
- * below.
  */
 export function filterRawMarkerTableToRange(
   markers: RawMarkerTable,
@@ -392,7 +387,7 @@ export function filterRawMarkerTableToRange(
 ): RawMarkerTable {
   const newMarkerTable = getEmptyRawMarkerTable();
 
-  const filteredMarkerIndexesIter = filterRawMarkerTableIndexesToRange(
+  const filteredMarkerIndexesIter = filterRawMarkerTableToRangeIndexGenerator(
     markers,
     rangeStart,
     rangeEnd
@@ -407,11 +402,25 @@ export function filterRawMarkerTableToRange(
   return newMarkerTable;
 }
 
-export function* filterRawMarkerTableIndexesToRange(
+/**
+ * This function filters marker indexes from a thread's raw marker table using
+ * the range specified as parameter.
+ * It especially takes care of the markers that need a special handling because
+ * of how the rest of the code handles them.
+ *
+ * There's more explanations about this special handling in the switch block
+ * below.
+ *
+ * This is a generator function and it returns a IndexIntoMarkers every step.
+ * You can use that function inside a for..of or use it with `.next()` function.
+ * The reason to use generator function is avoiding creating an intermediate
+ * markers array on some consumers.
+ */
+export function* filterRawMarkerTableToRangeIndexGenerator(
   markers: RawMarkerTable,
   rangeStart: number,
   rangeEnd: number
-): Generator<number, void, void> {
+): Generator<IndexIntoMarkers, void, void> {
   const isTimeInRange = (time: number): boolean =>
     time < rangeEnd && time >= rangeStart;
   const intersectsRange = (start: number, end: number): boolean =>
@@ -614,6 +623,52 @@ export function* filterRawMarkerTableIndexesToRange(
   }
 }
 
+/**
+ * This function filters markers from a thread's raw marker table using the
+ * range and marker indexes array specified as parameters.
+ *
+ * Uses `filterRawMarkerTableToRangeIndexGenerator` function and excludes
+ * markers in `markersToDelete` array.
+ */
+export function filterRawMarkerTableToRangeWithMarkersToDelete(
+  markerTable: RawMarkerTable,
+  markersToDelete: number[],
+  filterRange: StartEndRange | null
+): RawMarkerTable {
+  const oldMarkers = markerTable;
+  const newMarkerTable = getEmptyRawMarkerTable();
+  const addMarkerIndexIfIncluded = (index: number) => {
+    if (markersToDelete.includes(index)) {
+      return;
+    }
+    newMarkerTable.name.push(oldMarkers.name[index]);
+    newMarkerTable.time.push(oldMarkers.time[index]);
+    newMarkerTable.data.push(oldMarkers.data[index]);
+    newMarkerTable.length++;
+  };
+
+  // If user wants to remove full time range, filter all the markers and accordingly.
+  if (filterRange !== null) {
+    const { start, end } = filterRange;
+    const filteredMarkerIndexIter = filterRawMarkerTableToRangeIndexGenerator(
+      oldMarkers,
+      start,
+      end
+    );
+
+    for (const index of filteredMarkerIndexIter) {
+      addMarkerIndexIfIncluded(index);
+    }
+  } else {
+    // If user doesn't want to filter out the full time range, remove only
+    // markers that we want to remove.
+    for (let i = 0; i < oldMarkers.length; i++) {
+      addMarkerIndexIfIncluded(i);
+    }
+  }
+  return newMarkerTable;
+}
+
 export function filterMarkersToRange(
   markers: Marker[],
   rangeStart: number,
@@ -756,4 +811,9 @@ export function groupScreenshotsById(markers: Marker[]): Map<string, Marker[]> {
   }
 
   return idToScreenshotMarkers;
+}
+
+export function removeNetworkMarkerURLs(payload: NetworkPayload) {
+  payload.URI = '';
+  payload.RedirectURI = '';
 }

@@ -232,6 +232,11 @@ type UrlEnhancerAction =
 type UrlStateAction =
   | {| +type: 'WAITING_FOR_PROFILE_FROM_FILE' |}
   | {| +type: 'PROFILE_PUBLISHED', +hash: string |}
+  | {|
+      +type: 'HIDDEN_GLOBAL_TRACKS_REMOVED',
+      +hiddenTracks: Set<TrackIndex>,
+    |}
+  | {| +type: 'FULL_TIME_RANGE_REMOVED' |}
   | {| +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug |}
   | {| +type: 'COMMIT_RANGE', +start: number, +end: number |}
   | {| +type: 'POP_COMMITTED_RANGES', +firstPoppedFilterIndex: number |}

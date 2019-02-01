@@ -492,6 +492,7 @@ export type MarkerPayload_Gecko =
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
+  | ScreenshotPayload
   | ArbitraryEventTracing
   | NavigationMarkerPayload
   // The following payloads come in with a stack property. During the profile processing

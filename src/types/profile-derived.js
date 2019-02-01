@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Milliseconds } from './units';
+import type { Milliseconds, StartEndRange } from './units';
 import type { MarkerPayload } from './markers';
 import type {
   IndexIntoFuncTable,
@@ -158,3 +158,22 @@ export type LocalTrack =
 
 export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
+
+/**
+ * Type that holds the values of personally identifiable information that user
+ * wants to remove.
+ */
+export type RemoveProfileInformation = {
+  // Remove the given hidden threads if they are provided.
+  shouldRemoveThreads: ThreadIndex[],
+  // Remove the screenshots if they are provided.
+  shouldRemoveThreadsWithScreenshots: ThreadIndex[],
+  // Remove the full time range if StartEndRange is provided.
+  shouldFilterToCommittedRange: StartEndRange | null,
+  // Remove all the network URLs if it's true.
+  shouldRemoveNetworkUrls: boolean,
+  // Remove all the URLs inside string table if it's true.
+  shouldRemoveAllUrls: boolean,
+  // Remove the extension list if it's true.
+  shouldRemoveExtensions: boolean,
+};

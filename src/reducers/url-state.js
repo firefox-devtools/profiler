@@ -88,6 +88,10 @@ const committedRanges: Reducer<StartEndRange[]> = (state = [], action) => {
     }
     case 'POP_COMMITTED_RANGES':
       return state.slice(0, action.firstPoppedFilterIndex);
+    case 'FULL_TIME_RANGE_REMOVED':
+      // Removing all committed ranges if we deleted the full range
+      // because of PII sanitization.
+      return [];
     default:
       return state;
   }
@@ -105,6 +109,19 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
     case 'ISOLATE_LOCAL_TRACK':
       // Only switch to non-null selected threads.
       return (action.selectedThreadIndex: ThreadIndex);
+    case 'HIDDEN_GLOBAL_TRACKS_REMOVED': {
+      if (state === null) {
+        return null;
+      }
+
+      let reduceBy = 0;
+      for (const hiddenTrackIndex of action.hiddenTracks) {
+        if (state > hiddenTrackIndex) {
+          reduceBy++;
+        }
+      }
+      return state - reduceBy;
+    }
     default:
       return state;
   }
@@ -205,6 +222,27 @@ const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
     case 'VIEW_PROFILE':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
       return action.globalTrackOrder;
+    case 'HIDDEN_GLOBAL_TRACKS_REMOVED': {
+      // After removing some of the global tracks, we neeed to adjust the old
+      // track indexes to still point to the correct tracks.
+      const globalTrackOrder = [...state].filter(
+        trackIndex => !action.hiddenTracks.has(trackIndex)
+      );
+
+      for (let i = 0; i < globalTrackOrder.length; i++) {
+        let reduceBy = 0;
+        for (const hiddenTrackIndex of action.hiddenTracks) {
+          if (globalTrackOrder[i] > hiddenTrackIndex) {
+            reduceBy++;
+          }
+        }
+        if (reduceBy > 0) {
+          globalTrackOrder[i] -= reduceBy;
+        }
+      }
+
+      return globalTrackOrder;
+    }
     default:
       return state;
   }
@@ -228,6 +266,15 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
     case 'SHOW_GLOBAL_TRACK': {
       const hiddenGlobalTracks = new Set(state);
       hiddenGlobalTracks.delete(action.trackIndex);
+      return hiddenGlobalTracks;
+    }
+    case 'HIDDEN_GLOBAL_TRACKS_REMOVED': {
+      // At this point we don't know if all or some of the tracks are removed.
+      // That's why we are iterating through the hiddenTracks and deleting them.
+      const hiddenGlobalTracks = new Set(state);
+      for (const hiddenThread of action.hiddenTracks) {
+        hiddenGlobalTracks.delete(hiddenThread);
+      }
       return hiddenGlobalTracks;
     }
     default:
