@@ -3,6 +3,7 @@
 exports[`shared/Tooltip is rendered appropriately 1`] = `
 <div
   class="tooltip"
+  data-testid="tooltip"
   style="left: 11px; top: 11px;"
 >
   <p>

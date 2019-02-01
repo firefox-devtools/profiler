@@ -99,8 +99,14 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
         tm.name !== 'BHR-detected hang' &&
         tm.name !== 'LongTask' &&
         tm.name !== 'LongIdleTask' &&
-        !MarkerData.isNetworkMarker(tm)
+        !MarkerData.isNetworkMarker(tm) &&
+        !MarkerData.isNavigationMarker(tm)
     )
+  );
+
+  const getTimelineVerticalMarkers = createSelector(
+    getCommittedRangeFilteredMarkers,
+    (markers): Marker[] => markers.filter(MarkerData.isNavigationMarker)
   );
 
   const getSearchFilteredMarkers: Selector<Marker[]> = createSelector(
@@ -209,6 +215,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getNetworkChartTiming,
     getCommittedRangeFilteredMarkers,
     getCommittedRangeFilteredMarkersForHeader,
+    getTimelineVerticalMarkers,
     getNetworkMarkers,
     getNetworkTrackTiming,
     getMergedNetworkChartMarkers,

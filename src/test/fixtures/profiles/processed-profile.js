@@ -19,7 +19,11 @@ import type {
   JsTracerTable,
   Counter,
 } from '../../../types/profile';
-import type { MarkerPayload, NetworkPayload } from '../../../types/markers';
+import type {
+  MarkerPayload,
+  NetworkPayload,
+  NavigationMarkerPayload,
+} from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
 // Array<[MarkerName, Milliseconds, Data]>
@@ -493,11 +497,81 @@ export function getNetworkMarker(startTime: number, id: number) {
  * This generates 10 network markers ranged 3-4 ms on their start times.
  */
 export function getNetworkTrackProfile() {
-  return getProfileWithMarkers(
+  const profile = getProfileWithMarkers(
     Array(10)
       .fill()
       .map((_, i) => getNetworkMarker(3 + 0.1 * i, i))
   );
+
+  const docShellId = '{c03a6ebd-2430-7949-b25b-95ba9776bdbf}';
+  const docshellHistoryId = 1;
+
+  profile.pages = [
+    {
+      docshellId: docShellId,
+      historyId: docshellHistoryId,
+      url: 'https://developer.mozilla.org/en-US/',
+      isSubFrame: false,
+    },
+  ];
+
+  const thread = profile.threads[0];
+
+  const loadPayloadBase = {
+    type: 'tracing',
+    category: 'Navigation',
+    eventType: 'load',
+    docShellId,
+    docshellHistoryId,
+  };
+
+  const domContentLoadedBase = {
+    type: 'tracing',
+    category: 'Navigation',
+    interval: 'start',
+    docShellId,
+    docshellHistoryId,
+  };
+
+  addMarkersToThreadWithCorrespondingSamples(thread, [
+    [
+      'Load',
+      4,
+      ({
+        ...loadPayloadBase,
+        interval: 'start',
+      }: NavigationMarkerPayload),
+    ],
+    [
+      'Load',
+      5,
+      ({
+        ...loadPayloadBase,
+        interval: 'end',
+      }: NavigationMarkerPayload),
+    ],
+    ['TTI', 6, null],
+    ['Navigation::Start', 7, null],
+    ['Contentful paint at something', 8, null],
+    [
+      'DOMContentLoaded',
+      6,
+      ({
+        ...domContentLoadedBase,
+        interval: 'start',
+      }: NavigationMarkerPayload),
+    ],
+    [
+      'DOMContentLoaded',
+      7,
+      ({
+        ...domContentLoadedBase,
+        interval: 'end',
+      }: NavigationMarkerPayload),
+    ],
+  ]);
+
+  return profile;
 }
 
 export function getScreenshotTrackProfile() {

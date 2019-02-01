@@ -1,0 +1,65 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.timelineVerticalIndicators {
+  --active-area-width: 4px;
+
+  /* Setting the width to 1.5 makes it so that these indicators have slightly more visual
+   * weight on high DPI displays. With a device pixel ratio of 2, this value creates a box
+   * that is 3 device pixels wide. */
+  --visible-width: 1.5px;
+
+  position: absolute;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+}
+
+.timelineVerticalIndicatorsLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--active-area-width);
+  margin-left: calc(var(--active-area-width) * -0.5);
+}
+
+.timelineVerticalIndicatorsLine::after {
+  position: absolute;
+  top: 0;
+  left: calc(
+    var(--active-area-width) * 0.5 - var(--visible-width) * 0.5
+  );
+  width: var(--visible-width);
+  height: 100%;
+  background-color: var(--vertical-indicator-color);
+  content: "";
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.timelineVerticalIndicatorsSwatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-bottom: -3px;
+  border: 1px solid var(--grey-30);
+  background-color: var(--vertical-indicator-color);
+}
+
+.timelineVerticalIndicatorsDim {
+  color: var(--grey-50);
+}
+
+.timelineVerticalIndicatorsTime {
+  color: var(--grey-70);
+  font-weight: bold;
+}
+
+.timelineVerticalIndicatorsUrl {
+  overflow: hidden;
+  margin-top: 6px;
+  color: var(--grey-60);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

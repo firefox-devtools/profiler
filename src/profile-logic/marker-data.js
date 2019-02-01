@@ -358,6 +358,32 @@ export function isNetworkMarker(marker: Marker): boolean {
   return !!(marker.data && marker.data.type === 'Network');
 }
 
+export function isNavigationMarker({ name, data }: Marker) {
+  if (name === 'TTI') {
+    // TTI is only selectable by name, as it doesn't have a structured payload.
+    return true;
+  }
+  if (!data) {
+    // This marker has no payload, only consider the name.
+    if (name === 'Navigation::Start') {
+      return true;
+    }
+    if (name.startsWith('Contentful paint ')) {
+      // This is a long plaintext marker.
+      // e.g. "Contentful paint after 322ms for URL https://developer.mozilla.org/en-US/, foreground tab"
+      return true;
+    }
+    return false;
+  }
+  if (data.category === 'Navigation') {
+    // Filter by payloads.
+    if (name === 'Load' || name === 'DOMContentLoaded') {
+      return true;
+    }
+  }
+  return false;
+}
+
 export function filterForNetworkChart(markers: Marker[]) {
   return markers.filter(marker => isNetworkMarker(marker));
 }

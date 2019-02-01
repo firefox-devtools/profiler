@@ -46,3 +46,15 @@ export function objectShallowEquals(a: Object, b: Object): boolean {
   }
   return aLength === bLength;
 }
+
+/**
+ * Don't completely trust URLs that get displayed to the screen. These could
+ * be extraordinarily long data-uris. This function could also be updated to
+ * return a nicely formatted React span.
+ */
+export function displayNiceUrl(rawUrl: string): string {
+  if (rawUrl.length < 200) {
+    return rawUrl;
+  }
+  return `${rawUrl.slice(0, 150)}...${rawUrl.slice(-20)}`;
+}

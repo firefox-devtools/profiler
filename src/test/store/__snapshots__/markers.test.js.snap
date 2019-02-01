@@ -1,0 +1,54 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getTimelineVerticalMarkers gets the appropriate markers 1`] = `
+Array [
+  Object {
+    "data": Object {
+      "category": "Navigation",
+      "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+      "docshellHistoryId": 1,
+      "eventType": "load",
+      "interval": "start",
+      "type": "tracing",
+    },
+    "dur": 1,
+    "name": "Load",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "TTI",
+    "start": 6,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "category": "Navigation",
+      "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+      "docshellHistoryId": 1,
+      "interval": "start",
+      "type": "tracing",
+    },
+    "dur": 1,
+    "name": "DOMContentLoaded",
+    "start": 6,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "Navigation::Start",
+    "start": 7,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "Contentful paint at something",
+    "start": 8,
+    "title": null,
+  },
+]
+`;
