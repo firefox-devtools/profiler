@@ -80,6 +80,27 @@ export type Marker = {|
   incomplete?: boolean,
 |};
 
+export type IndexedMarker = {|
+  ...Marker,
+  markerIndex: IndexIntoMarkers,
+|};
+
+/* IndexIntoMarkers are used for indexes to the complete derived marker
+ * array. It can be used throughout the application to point to a specific
+ * marker. Note it can point to different marker arrays, namely:
+ * - the main markers array
+ * - the screenshots array
+ * - the jank markers array
+ * But it's really only used with the main array for now.
+ *
+ * The IndexedMarker type above contains a reference to the index in the main
+ * reference table as returned by the `getReferenceMarkerTable` selector. In
+ * doubt this is the index all code should refer to.
+ *
+ * Note that Flow has no mechanism to enforce this is used correctly and with
+ * the right array, this is the responsibility of the developer to take care of
+ * these subtilities.
+ */
 export type IndexIntoMarkers = number;
 
 export type CallNodeData = {
