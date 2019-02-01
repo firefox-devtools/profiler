@@ -14,7 +14,7 @@ import {
   getPageList,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
-import VerticalIndicators from './VerticalIndicators';
+import { VerticalIndicators } from './VerticalIndicators';
 
 import type { ThreadIndex, PageList } from '../../types/profile';
 import type {} from '../../types/markers';

@@ -6,11 +6,8 @@
 import * as React from 'react';
 import DivWithTooltip from '../shared/DivWithTooltip';
 import { withSize } from '../shared/WithSize';
-import {
-  getStringPropertyOrNull,
-  getNumberPropertyOrNull,
-} from '../../utils/flow';
 import { displayNiceUrl } from '../../utils';
+import { formatSeconds } from '../../utils/format-numbers';
 
 import type { SizeProps } from '../shared/WithSize';
 import type { PageList } from '../../types/profile';
@@ -33,10 +30,10 @@ type Props = {|
 |};
 
 /**
- * This component draws vertical indicators from TracingMarkers for a track in the
- * timeline.
+ * This component draws vertical indicators from navigation related markers for a track
+ * in the timeline.
  */
-const VerticalIndicators = ({
+const VerticalIndicatorsImpl = ({
   verticalMarkers,
   pages,
   rangeStart,
@@ -76,9 +73,14 @@ const VerticalIndicators = ({
         // Optionally compute a url.
         let url = null;
         const { data } = marker;
-        if (pages && data) {
-          const docshellId = getStringPropertyOrNull(data, 'docShellId');
-          const historyId = getNumberPropertyOrNull(data, 'docshellHistoryId');
+        if (
+          pages &&
+          data &&
+          data.type === 'tracing' &&
+          data.category === 'Navigation'
+        ) {
+          const docshellId = data.docShellId;
+          const historyId = data.docshellHistoryId;
           if (docshellId) {
             const page = pages.find(
               page =>
@@ -113,7 +115,7 @@ const VerticalIndicators = ({
                     {' at '}
                   </span>
                   <span className="timelineVerticalIndicatorsTime">
-                    {_getFormattedTime(marker.start - zeroAt)}
+                    {formatSeconds(marker.start - zeroAt)}
                   </span>{' '}
                 </div>
                 {url}
@@ -126,9 +128,7 @@ const VerticalIndicators = ({
   );
 };
 
-function _getFormattedTime(length: number): string {
-  return `${(length / 1000).toFixed(3)}s`;
-}
-
 // The withSize type coercion is not happening correctly.
-export default (withSize(VerticalIndicators): React.ComponentType<OwnProps>);
+export const VerticalIndicators = (withSize(
+  VerticalIndicatorsImpl
+): React.ComponentType<OwnProps>);

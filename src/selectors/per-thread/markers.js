@@ -99,40 +99,14 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
         tm.name !== 'BHR-detected hang' &&
         tm.name !== 'LongTask' &&
         tm.name !== 'LongIdleTask' &&
-        !MarkerData.isNetworkMarker(tm)
+        !MarkerData.isNetworkMarker(tm) &&
+        !MarkerData.isNavigationMarker(tm)
     )
   );
 
   const getTimelineVerticalMarkers = createSelector(
     getCommittedRangeFilteredMarkers,
-    (markers): Marker[] => {
-      return markers.filter(({ name, data }) => {
-        if (name === 'TTI') {
-          // TTI has untrustworthy payloads.
-          // See: https://bugzilla.mozilla.org/show_bug.cgi?id=1508837
-          return true;
-        }
-        if (!data) {
-          // This marker has no payload, only consider the name.
-          if (name === 'Navigation::Start') {
-            return true;
-          }
-          if (name.startsWith('Contentful paint ')) {
-            // This is a long plaintext marker.
-            // e.g. "Contentful paint after 322ms for URL https://developer.mozilla.org/en-US/, foreground tab"
-            return true;
-          }
-          return false;
-        }
-        if (data.category === 'Navigation') {
-          // Filter by payloads.
-          if (name === 'Load' || name === 'DOMContentLoaded') {
-            return true;
-          }
-        }
-        return false;
-      });
-    }
+    (markers): Marker[] => markers.filter(MarkerData.isNavigationMarker)
   );
 
   const getSearchFilteredMarkers: Selector<Marker[]> = createSelector(

@@ -81,10 +81,8 @@ describe('VerticalIndicators', function() {
         pageY: 22,
       })
     );
-    const tooltip = ensureExists(
-      document.querySelector('[data-testid="tooltip"'),
-      'Unable to find the root overlay element'
-    );
+    // The tooltip is rendered in a portal, so it is not a child of the container.
+    const tooltip = getByTestId(ensureExists(document.body), 'tooltip');
     expect(tooltip).toMatchSnapshot();
   });
 });
@@ -110,15 +108,10 @@ function setup() {
     </Provider>
   );
 
-  const verticalIndicators = getByTestId(
-    renderResult.container,
-    'vertical-indicators'
-  );
+  const verticalIndicators = renderResult.getByTestId('vertical-indicators');
 
   const getIndicatorLines = () =>
-    verticalIndicators.querySelectorAll(
-      '[data-testid="vertical-indicator-line"]'
-    );
+    renderResult.getAllByTestId('vertical-indicator-line');
 
   // WithSize uses requestAnimationFrame
   flushRafCalls();
