@@ -219,6 +219,14 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   const getSelectedMarkerIndex: Selector<IndexIntoMarkers | null> = state =>
     threadSelectors.getViewOptions(state).selectedMarker;
 
+  const getSelectedMarker: Selector<IndexedMarker | null> = state => {
+    const filteredMarkers = getReferenceMarkerTable(state);
+    const selectedMarkerIndex = getSelectedMarkerIndex(state);
+    return selectedMarkerIndex === null
+      ? null
+      : filteredMarkers[selectedMarkerIndex] || null;
+  };
+
   return {
     getJankMarkersForHeader,
     getProcessedRawMarkerTable,
@@ -238,6 +246,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getSearchFilteredMarkers,
     getPreviewFilteredMarkers,
     getSelectedMarkerIndex,
+    getSelectedMarker,
     getIsNetworkChartEmptyInFullRange,
   };
 }

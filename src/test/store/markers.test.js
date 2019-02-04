@@ -2,8 +2,11 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { storeWithProfile } from '../fixtures/stores';
+
+import { changeSelectedMarker, commitRange } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+
+import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithMarkers,
   getNetworkTrackProfile,
@@ -216,5 +219,41 @@ describe('getTimelineVerticalMarkers', function() {
     expect(allMarkers.length).toBeGreaterThan(markers.length);
     expect(markers).toHaveLength(5);
     expect(markers).toMatchSnapshot();
+  });
+});
+
+describe('getSelectedMarker', function() {
+  function setup(testMarkers) {
+    const profile = getProfileWithMarkers(testMarkers);
+    const store = storeWithProfile(profile);
+    return store;
+  }
+
+  it('returns the expected marker for all selection ranges', function() {
+    const markers = [
+      ['0', 0, null],
+      ['1', 1, null],
+      ['2', 2, null],
+      ['3', 3, null],
+      ['4', 4, null],
+      ['5', 5, null],
+      ['6', 6, null],
+      ['7', 7, null],
+    ];
+
+    const { getState, dispatch } = setup(markers);
+    dispatch(changeSelectedMarker(0, 5));
+    expect(selectedThreadSelectors.getSelectedMarker(getState())).toMatchObject(
+      {
+        name: '5',
+      }
+    );
+
+    dispatch(commitRange(3, 6));
+    expect(selectedThreadSelectors.getSelectedMarker(getState())).toMatchObject(
+      {
+        name: '5',
+      }
+    );
   });
 });
