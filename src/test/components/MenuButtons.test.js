@@ -138,22 +138,23 @@ describe('app/MenuButtons', function() {
       // the implementation logic of component and test the things user can see
       // and interract with `waitForElement`. But since sharing is async and we
       // can't catch other visual DOM changes here, we had to do this.
-      await waitForDomChange({ container: getMenuButtonsContainer() }).then(
-        mutationsList => {
-          const mutation = mutationsList[0];
-          expect(
-            mutation.target.classList.contains('currentButtonIsPermalinkButton')
-          ).toEqual(true);
-          expect(
-            mutation.target.classList.contains('currentButtonIsShareButton')
-          ).toEqual(false);
-          expect(
-            mutation.target.classList.contains(
-              'currentButtonIsSecondaryShareButton'
-            )
-          ).toEqual(true);
-        }
-      );
+      await waitForDomChange({
+        container: getMenuButtonsContainer(),
+        mutationObserverOptions: { attributes: true },
+      }).then(mutationsList => {
+        const mutation = mutationsList[0];
+        expect(
+          mutation.target.classList.contains('currentButtonIsPermalinkButton')
+        ).toEqual(true);
+        expect(
+          mutation.target.classList.contains('currentButtonIsShareButton')
+        ).toEqual(false);
+        expect(
+          mutation.target.classList.contains(
+            'currentButtonIsSecondaryShareButton'
+          )
+        ).toEqual(true);
+      });
 
       const profileSharingStatus = ProfileViewSelectors.getProfileSharingStatus(
         store.getState()
@@ -170,22 +171,23 @@ describe('app/MenuButtons', function() {
         fireEvent.click(innerShareButton);
       }
 
-      await waitForDomChange({ container: getMenuButtonsContainer() }).then(
-        mutationsList => {
-          const mutation = mutationsList[0];
-          expect(
-            mutation.target.classList.contains('currentButtonIsPermalinkButton')
-          ).toEqual(true);
-          expect(
-            mutation.target.classList.contains('currentButtonIsShareButton')
-          ).toEqual(false);
-          expect(
-            mutation.target.classList.contains(
-              'currentButtonIsSecondaryShareButton'
-            )
-          ).toEqual(false);
-        }
-      );
+      await waitForDomChange({
+        container: getMenuButtonsContainer(),
+        mutationObserverOptions: { attributes: true },
+      }).then(mutationsList => {
+        const mutation = mutationsList[0];
+        expect(
+          mutation.target.classList.contains('currentButtonIsPermalinkButton')
+        ).toEqual(true);
+        expect(
+          mutation.target.classList.contains('currentButtonIsShareButton')
+        ).toEqual(false);
+        expect(
+          mutation.target.classList.contains(
+            'currentButtonIsSecondaryShareButton'
+          )
+        ).toEqual(false);
+      });
 
       const newProfileSharingStatus = ProfileViewSelectors.getProfileSharingStatus(
         store.getState()
