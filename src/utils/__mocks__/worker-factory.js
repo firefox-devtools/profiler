@@ -3,18 +3,56 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import Worker from 'workerjs';
+import { readFileSync } from 'fs';
+import { runInNewContext } from 'vm';
 
-const workerFiles = {
-  // Paths are relative to workerjs' requireworker.js file
-  'zee-worker': '../../res/zee-worker.js',
+class FakeWorker {
+  _sandbox: Object;
+  onmessage: MessageEvent => mixed;
+
+  constructor(filename: string) {
+    this._sandbox = {
+      importScripts: function() {},
+      postMessage: this.onMessage,
+      onmessage: function() {},
+      console,
+    };
+    const scriptContent = readFileSync(filename, 'utf8');
+    runInNewContext(scriptContent, this._sandbox, { filename });
+  }
+
+  postMessage(
+    message: mixed,
+    _transfer?: Array<ArrayBuffer | MessagePort | ImageBitmap>
+  ) {
+    process.nextTick(() => {
+      if (this._sandbox.onmessage) {
+        this._sandbox.onmessage.call(null, { data: message });
+      }
+    });
+  }
+
+  onMessage = (message: Object) => {
+    process.nextTick(() => {
+      if (this.onmessage) {
+        this.onmessage(new MessageEvent('message', { data: message }));
+      }
+    });
+  };
+
+  terminate() {}
+}
+
+const workerConfigs = {
+  'zee-worker': './res/zee-worker.js',
 };
 
 const workerInstances = [];
 
 export default class {
   constructor(file: string) {
-    const worker = new Worker(workerFiles[file]);
+    const path = workerConfigs[file];
+    const worker = new FakeWorker(path);
     workerInstances.push(worker);
     return worker;
   }

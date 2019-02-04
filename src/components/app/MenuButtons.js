@@ -421,7 +421,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
 
       const typedArray = new TextEncoder().encode(jsonString);
 
-      const [gzipData, hash]: [string, string] = await Promise.all([
+      const [gzipData, hash]: [Uint8Array, string] = await Promise.all([
         compress(typedArray.slice(0)),
         sha1(typedArray),
       ]);
