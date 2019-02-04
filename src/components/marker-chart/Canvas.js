@@ -43,7 +43,7 @@ type OwnProps = {|
   +rangeEnd: Milliseconds,
   +markerTimingRows: MarkerTimingRows,
   +rowHeight: CssPixels,
-  +markers: IndexedMarker[], // This needs to be the full marker table
+  +unfilteredMarkers: IndexedMarker[],
   +threadIndex: ThreadIndex,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection
@@ -342,8 +342,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     if (markerIndex === null) {
       return;
     }
-    const { markers, updatePreviewSelection } = this.props;
-    const marker = markers[markerIndex];
+    const { unfilteredMarkers, updatePreviewSelection } = this.props;
+    const marker = unfilteredMarkers[markerIndex];
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
@@ -369,7 +369,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   }
 
   getHoveredMarkerInfo = (hoveredItem: IndexIntoMarkers): React.Node => {
-    const marker = this.props.markers[hoveredItem];
+    const marker = this.props.unfilteredMarkers[hoveredItem];
     return (
       <MarkerTooltipContents
         marker={marker}

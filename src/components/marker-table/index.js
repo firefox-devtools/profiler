@@ -39,17 +39,17 @@ type MarkerDisplayData = {|
 
 class MarkerTree {
   _filteredMarkers: IndexedMarker[];
-  _allMarkers: IndexedMarker[];
+  _unfilteredMarkers: IndexedMarker[];
   _zeroAt: Milliseconds;
   _displayDataByIndex: Map<IndexIntoMarkers, MarkerDisplayData>;
 
   constructor(
     filteredMarkers: IndexedMarker[],
-    allMarkers: IndexedMarker[],
+    unfilteredMarkers: IndexedMarker[],
     zeroAt: Milliseconds
   ) {
     this._filteredMarkers = filteredMarkers;
-    this._allMarkers = allMarkers;
+    this._unfilteredMarkers = unfilteredMarkers;
     this._zeroAt = zeroAt;
     this._displayDataByIndex = new Map();
   }
@@ -86,7 +86,7 @@ class MarkerTree {
   getDisplayData(markerIndex: IndexIntoMarkers): MarkerDisplayData {
     let displayData = this._displayDataByIndex.get(markerIndex);
     if (displayData === undefined) {
-      const marker = this._allMarkers[markerIndex];
+      const marker = this._unfilteredMarkers[markerIndex];
       let category = 'unknown';
       let name = marker.name;
       if (marker.data) {
@@ -159,7 +159,7 @@ function _formatDuration(duration: number): string {
 type StateProps = {|
   +threadIndex: ThreadIndex,
   +filteredMarkers: IndexedMarker[],
-  +allMarkers: IndexedMarker[],
+  +unfilteredMarkers: IndexedMarker[],
   +selectedMarker: IndexIntoMarkers | null,
   +zeroAt: Milliseconds,
   +scrollToSelectionGeneration: number,
@@ -211,8 +211,13 @@ class MarkerTable extends PureComponent<Props> {
   };
 
   render() {
-    const { filteredMarkers, allMarkers, zeroAt, selectedMarker } = this.props;
-    const tree = new MarkerTree(filteredMarkers, allMarkers, zeroAt);
+    const {
+      filteredMarkers,
+      unfilteredMarkers,
+      zeroAt,
+      selectedMarker,
+    } = this.props;
+    const tree = new MarkerTree(filteredMarkers, unfilteredMarkers, zeroAt);
     return (
       <div
         className="markerTable"
@@ -245,7 +250,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     filteredMarkers: selectedThreadSelectors.getPreviewFilteredMarkers(state),
-    allMarkers: selectedThreadSelectors.getReferenceMarkerTable(state),
+    unfilteredMarkers: selectedThreadSelectors.getReferenceMarkerTable(state),
     selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
     zeroAt: getZeroAt(state),
   }),

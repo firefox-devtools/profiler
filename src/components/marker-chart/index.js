@@ -45,7 +45,7 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
-  +markers: IndexedMarker[],
+  +unfilteredMarkers: IndexedMarker[],
   +markerTimingRows: MarkerTimingRows,
   +maxMarkerRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
@@ -86,7 +86,7 @@ class MarkerChart extends React.PureComponent<Props> {
       timeRange,
       threadIndex,
       markerTimingRows,
-      markers,
+      unfilteredMarkers,
       previewSelection,
       updatePreviewSelection,
     } = this.props;
@@ -120,7 +120,7 @@ class MarkerChart extends React.PureComponent<Props> {
             }}
             chartProps={{
               markerTimingRows,
-              markers,
+              unfilteredMarkers,
               updatePreviewSelection,
               rangeStart: timeRange.start,
               rangeEnd: timeRange.end,
@@ -150,7 +150,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       state
     );
     return {
-      markers: selectedThreadSelectors.getReferenceMarkerTable(state),
+      unfilteredMarkers: selectedThreadSelectors.getReferenceMarkerTable(state),
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
       timeRange: getCommittedRange(state),
