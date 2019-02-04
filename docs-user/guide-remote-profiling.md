@@ -96,7 +96,7 @@ Once you have connected to the phone browser successfully, read on.
 
 Select *Performance* from the action list on the right sidebar.
 
-Make any necessary adjustments in the presented options, like threads to sample or profiler features to enable, and then click *Start recording*. Perform the interactions you intend to profile on the Android device and then click *Stop and grab the recording* in the Performance panel. A new tab will open in [https://perf-html.io/](https://perf-html.io/) with the collected profile ready for inspection.
+Make any necessary adjustments in the presented options, like threads to sample or profiler features to enable, and then click *Start recording*. Perform the interactions you intend to profile on the Android device and then click *Stop and grab the recording* in the Performance panel. A new tab will open in [https://profiler.firefox.com/](https://profiler.firefox.com/) with the collected profile ready for inspection.
 
 ![A screenshot of the new performance panel](./images/new-performance-panel.png)
 

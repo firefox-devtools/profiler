@@ -12,9 +12,9 @@ _This project was previously called [Cleopatra]._
 
 ### Usage
 
-> Visit [perf-html.io](https://perf-html.io/) :rocket:
+> Visit [profiler.firefox.com](https://profiler.firefox.com/) :rocket:
 
-This project is live on [https://perf-html.io/](https://perf-html.io/). The website includes instructions on how to get going to start recording and viewing performance profiles.
+This project is live on [https://profiler.firefox.com/](https://profiler.firefox.com/). The website includes instructions on how to get going to start recording and viewing performance profiles.
 
 ### Development
 
@@ -32,7 +32,7 @@ chmod a+x install.sh
 To download and build perf.html run:
 
 ```bash
-git clone git@github.com:devtools-html/perf.html.git
+git clone git@github.com:devtools-html/firefox-profiler.git
 cd perf.html
 yarn install
 yarn start
@@ -63,7 +63,7 @@ Some permissive software licenses request but do not require an acknowledgement 
 
 [slack-badge]: https://devtools-html-slack.herokuapp.com/badge.svg
 [slack]: https://devtools-html-slack.herokuapp.com/
-[perf.html]:https://perf-html.io/
+[perf.html]:https://profiler.firefox.com/
 [React]:https://facebook.github.io/react/
 [Redux]:http://redux.js.org/
 [Mozilla]:https://www.mozilla.org/

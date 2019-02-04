@@ -6,11 +6,11 @@ Mozilla is investing in performance tools to understand the performance characte
 
 ## Top Line Goal: Support Quantum Flow
 
-Quantum Flow is an internal Mozilla project to find where Firefox is slow, and make it faster. More information about this project is available on the [Mozilla Wiki](https://wiki.mozilla.org/Quantum/Flow). Features that help engineers diagnose performance problems are high priority, as many engineers are using this tool every day. There is a direct benefit of resolving a Quantum Flow issue, with improving Firefox end user's experiences. These issues can be found with the [Quantum Flow label](https://github.com/devtools-html/perf.html/issues?q=is%3Aopen+is%3Aissue+label%3A%22quantum+flow%22).
+Quantum Flow is an internal Mozilla project to find where Firefox is slow, and make it faster. More information about this project is available on the [Mozilla Wiki](https://wiki.mozilla.org/Quantum/Flow). Features that help engineers diagnose performance problems are high priority, as many engineers are using this tool every day. There is a direct benefit of resolving a Quantum Flow issue, with improving Firefox end user's experiences. These issues can be found with the [Quantum Flow label](https://github.com/devtools-html/firefox-profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22quantum+flow%22).
 
 ## Data transformations and the call tree
 
-Many platform engineers are working with the call tree and have feature requests for better being able to filter and transform the data to find performance bottlenecks. The primary tracking issue for this is [Issue #435](https://github.com/devtools-html/perf.html/issues/435)
+Many platform engineers are working with the call tree and have feature requests for better being able to filter and transform the data to find performance bottlenecks. The primary tracking issue for this is [Issue #435](https://github.com/devtools-html/firefox-profiler/issues/435)
 
 ## Marker information
 

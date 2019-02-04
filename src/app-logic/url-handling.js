@@ -275,10 +275,10 @@ export function stateFromLocation(location: Location): UrlState {
   const dataSource = getDataSourceFromPathParts(pathParts);
   const selectedThread = query.thread !== undefined ? +query.thread : null;
 
-  // https://perf-html.io/public/{hash}/calltree/
+  // https://profiler.firefox.com/public/{hash}/calltree/
   const hasProfileHash = ['local', 'public'].includes(dataSource);
 
-  // https://perf-html.io/from-url/{url}/calltree/
+  // https://profiler.firefox.com/from-url/{url}/calltree/
   const hasProfileUrl = ['from-url'].includes(dataSource);
 
   // The selected tab is the last path part in the URL.

@@ -4,7 +4,7 @@
 // @flow
 
 // Disabling the call tree's sidebar until it's useful
-// https://github.com/devtools-html/perf.html/issues/914
+// https://github.com/devtools-html/firefox-profiler/issues/914
 import * as React from 'react';
 
 import CallTreeSidebar from './CallTreeSidebar';

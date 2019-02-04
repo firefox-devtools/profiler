@@ -134,7 +134,7 @@ export interface IDBIndex<K, L, V> extends EventTarget {
 }
 
 // TODO - Investigate for correctness, see:
-// https://github.com/devtools-html/perf.html/issues/718
+// https://github.com/devtools-html/firefox-profiler/issues/718
 export interface IDBKeyRange<K> {
   bound<J>(
     lower: J,

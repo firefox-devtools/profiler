@@ -77,10 +77,10 @@ export function logFriendlyPreamble() {
       %cwindow.callTree%c - The call tree of the current filtered thread
 
       The profile format is documented here:
-      %chttps://github.com/devtools-html/perf.html/blob/master/docs-developer/processed-profile-format.md%c
+      %chttps://github.com/devtools-html/firefox-profiler/blob/master/docs-developer/processed-profile-format.md%c
 
       The CallTree class's source code is available here:
-      %chttps://github.com/devtools-html/perf.html/blob/master/src/profile-logic/call-tree.js%c
+      %chttps://github.com/devtools-html/firefox-profiler/blob/master/src/profile-logic/call-tree.js%c
     `,
     intro,
     reset,

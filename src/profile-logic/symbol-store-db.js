@@ -129,7 +129,7 @@ export default class SymbolStoreDB {
         reject(
           new Error(
             'The symbol store database could not be upgraded because it is ' +
-              'open in another tab. Please close all your other perf-html.io ' +
+              'open in another tab. Please close all your other profiler.firefox.com ' +
               'tabs and refresh.'
           )
         );

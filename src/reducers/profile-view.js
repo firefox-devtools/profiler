@@ -275,7 +275,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
     }
     case 'POP_TRANSFORMS_FROM_STACK': {
       // Simply reset the selected and expanded paths until this bug is fixed:
-      // https://github.com/devtools-html/perf.html/issues/882
+      // https://github.com/devtools-html/firefox-profiler/issues/882
       const { threadIndex } = action;
       return [
         ...state.slice(0, threadIndex),

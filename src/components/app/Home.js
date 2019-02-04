@@ -456,7 +456,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               </span>
               <a
                 className="homeTitleGithubIcon"
-                href="https://github.com/devtools-html/perf.html"
+                href="https://github.com/devtools-html/firefox-profiler"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Go to our git repository (this opens in a new window)"

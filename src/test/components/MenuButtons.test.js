@@ -100,7 +100,7 @@ describe('app/MenuButtons', function() {
       );
       // Flow doesn't know shortenUrl is a jest mock.
       (shortenUrl: any).mockImplementation(() =>
-        Promise.resolve('https://perf-html.io/')
+        Promise.resolve('https://profiler.firefox.com/')
       );
     });
 

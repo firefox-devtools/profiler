@@ -28,7 +28,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
         </span>
         <a
           class="homeTitleGithubIcon"
-          href="https://github.com/devtools-html/perf.html"
+          href="https://github.com/devtools-html/firefox-profiler"
           rel="noopener noreferrer"
           target="_blank"
           title="Go to our git repository (this opens in a new window)"
@@ -169,7 +169,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
         </span>
         <a
           class="homeTitleGithubIcon"
-          href="https://github.com/devtools-html/perf.html"
+          href="https://github.com/devtools-html/firefox-profiler"
           rel="noopener noreferrer"
           target="_blank"
           title="Go to our git repository (this opens in a new window)"
@@ -311,7 +311,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
         </span>
         <a
           class="homeTitleGithubIcon"
-          href="https://github.com/devtools-html/perf.html"
+          href="https://github.com/devtools-html/firefox-profiler"
           rel="noopener noreferrer"
           target="_blank"
           title="Go to our git repository (this opens in a new window)"
@@ -484,7 +484,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
         </span>
         <a
           class="homeTitleGithubIcon"
-          href="https://github.com/devtools-html/perf.html"
+          href="https://github.com/devtools-html/firefox-profiler"
           rel="noopener noreferrer"
           target="_blank"
           title="Go to our git repository (this opens in a new window)"

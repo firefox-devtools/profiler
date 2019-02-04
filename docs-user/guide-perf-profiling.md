@@ -2,9 +2,9 @@
 
 Linux has a native profiler called 'perf' that can profile any application. This profiler has a built-in profile viewer in the form of the `perf report` command, but you may not like its UI.
 
-[perf.html](https://perf-html.io/) provides an alternative UI for these profiles; it knows how to display profiles from perf.
+[perf.html](https://profiler.firefox.com/) provides an alternative UI for these profiles; it knows how to display profiles from perf.
 
-(Importing other profile sources is being investigated, such as in [issue #1138](https://github.com/devtools-html/perf.html/issues/1138), [PR #1065](https://github.com/devtools-html/perf.html/pull/1065) and [PR #1260](https://github.com/devtools-html/perf.html/pull/1260).)
+(Importing other profile sources is being investigated, such as in [issue #1138](https://github.com/devtools-html/firefox-profiler/issues/1138), [PR #1065](https://github.com/devtools-html/firefox-profiler/pull/1065) and [PR #1260](https://github.com/devtools-html/firefox-profiler/pull/1260).)
 
 There are three major differences between the Gecko profiler and perf:
 

@@ -39,7 +39,7 @@
                 </text>
                 <text id="unprivileged-webpage" font-family="Helvetica" font-size="12" font-weight="normal">
                     <tspan x="39.6230469" y="142" fill="#000000">unprivileged webpage</tspan>
-                    <tspan x="49.9824219" y="156" fill="#0A84FF" text-decoration="underline">https://perf-html.io</tspan>
+                    <tspan x="49.9824219" y="156" fill="#0A84FF" text-decoration="underline">https://profiler.firefox.com</tspan>
                     <tspan x="146.017578" y="156" fill="#000000"></tspan>
                 </text>
                 <text id="Opens-up-a-new-windo" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold" fill="#0A84FF">

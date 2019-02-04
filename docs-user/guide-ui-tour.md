@@ -54,4 +54,4 @@ One of the most powerful and useful features of perf.html is the ability to save
 
 The current view and all of the filters applied to the profile will be encoded into the URL. After initially sharing the profile, the *Share...* button will change into a *Permalink* button that can then be used to provide a handy shortened URL to the current view.
 
-Profiles can also be saved to file, although the current view into the UI will not be saved. The file can be reloaded through the [perf-html.io](https://perf-html.io) interface by either drag and drop, or the file upload interface.
+Profiles can also be saved to file, although the current view into the UI will not be saved. The file can be reloaded through the [profiler.firefox.com](https://profiler.firefox.com) interface by either drag and drop, or the file upload interface.

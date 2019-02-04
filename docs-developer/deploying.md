@@ -5,17 +5,17 @@ Our hosting service is [Netlify](netlify.com).
 ## Deploy to production
 
 The `production` branch is configured to be automatically deployed to
-<https://perf-html.io>.
+<https://profiler.firefox.com>.
 
 In addition to this pushes to the `master` branch deploys to the domain
-https://master.perf-html.io. Every pull request will be deployed as well to a
+https://master.profiler.firefox.com. Every pull request will be deployed as well to a
 separate domain, whose link will be added automatically to the PR:
 ![The link to the preview deployment is in the sections where checks are](images/netlify-link.png)
 
 ## How to deploy master to production
 
 The easiest by far is to
-[create a pull request on GitHub](https://github.com/devtools-html/perf.html/compare/production...master?expand=1).
+[create a pull request on GitHub](https://github.com/devtools-html/firefox-profiler/compare/production...master?expand=1).
 It would be nice to write down the main changes in the PR description.
 
 After the PR is created all checks should run. When it's ready the PR can be

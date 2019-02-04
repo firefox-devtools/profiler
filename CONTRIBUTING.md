@@ -43,7 +43,7 @@ chmod a+x install.sh
 
 To get started clone the repo and get the web application started.
 
- 1. Run `git clone git@github.com:devtools-html/perf.html.git`
+ 1. Run `git clone git@github.com:devtools-html/firefox-profiler.git`
  2. Run `cd perf.html`
  3. Run `yarn install`, this will install all of the dependencies.
  4. Run `yarn start`, this will start up the webpack server.
@@ -54,13 +54,13 @@ To get started clone the repo and get the web application started.
 
 The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running perf.html, and then try one of the following:
 
- * Use an existing profile from the web: replace the `https://perf-html.io` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
+ * Use an existing profile from the web: replace the `https://profiler.firefox.com` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
  * Drag in a saved profile to the loading screen (this makes refreshing hard).
  * Record a new profile.
-   - Install the Gecko Profiler addon from the [perf-html.io](https://perf-html.io) loading screen.
+   - Install the Gecko Profiler addon from the [profiler.firefox.com](https://profiler.firefox.com) loading screen.
    - Go to `about:addons` in your URL bar.
    - Click [Preferences button](https://cloud.githubusercontent.com/assets/2134/23817941/ea20d800-05ab-11e7-8e0f-aa4558fe2b1b.png) next to the Gecko Profiler addon.
-   - Change the [Profile viewer URL](https://user-images.githubusercontent.com/167767/27658883-70068388-5c06-11e7-831e-14ed1438e9a3.png) from `https://perf-html.io` to `http://localhost:4242`.
+   - Change the [Profile viewer URL](https://user-images.githubusercontent.com/167767/27658883-70068388-5c06-11e7-831e-14ed1438e9a3.png) from `https://profiler.firefox.com` to `http://localhost:4242`.
    - Record a profile following the directions on the perf.html loading screen, and the profile should open in the local development version.
 
 ## Running the tests
@@ -91,7 +91,7 @@ You'll probably also want to add your non-localhost domains to the `allowedHosts
 
 ## Finding something to work on
 
-If this is your first time here, check out the label [Good First Issue](https://github.com/devtools-html/perf.html/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22). We will mentor you through the process of completing a first bug, and these are usually pretty good self-contained problems. After leveling up on a few good first issues, we also have the [Polish](https://github.com/devtools-html/perf.html/issues?q=is%3Aopen+is%3Aissue+label%3Apolish) tag for bugs that no one is actively working on, but are well-scoped and ready to be tackled!
+If this is your first time here, check out the label [Good First Issue](https://github.com/devtools-html/firefox-profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22). We will mentor you through the process of completing a first bug, and these are usually pretty good self-contained problems. After leveling up on a few good first issues, we also have the [Polish](https://github.com/devtools-html/firefox-profiler/issues?q=is%3Aopen+is%3Aissue+label%3Apolish) tag for bugs that no one is actively working on, but are well-scoped and ready to be tackled!
 
 Make sure and comment on the issue letting someone know you are interested in working on an issue. Feel free to [chat with us on slack](https://devtools-html-slack.herokuapp.com/) if you need help finding something you might be interested to work on.
 

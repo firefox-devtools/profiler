@@ -9,11 +9,11 @@ import url from 'url';
 
 export default function shortenUrl(urlToShorten: string): Promise<string> {
   let longUrl = urlToShorten;
-  if (!longUrl.startsWith('https://perf-html.io/')) {
+  if (!longUrl.startsWith('https://profile.firefox.com/')) {
     const parsedUrl = url.parse(longUrl);
     const parsedUrlOnCanonicalHost = Object.assign({}, parsedUrl, {
       protocol: 'https:',
-      host: 'perf-html.io',
+      host: 'profiler.firefox.com',
     });
     longUrl = url.format(parsedUrlOnCanonicalHost);
   }
