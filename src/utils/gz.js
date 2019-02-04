@@ -30,7 +30,7 @@ function workerOnMessage(zeeWorker: Worker) {
 export function compress(
   data: string | Uint8Array,
   compressionLevel?: number
-): Promise<string> {
+): Promise<Uint8Array> {
   const zeeWorker = new WebWorker('zee-worker');
   workerOnMessage(zeeWorker);
 

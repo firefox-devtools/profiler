@@ -3,18 +3,56 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import Worker from 'workerjs';
+// $FlowExpectError Flow doesn't know about this util
+import { Worker } from 'worker_threads'; // eslint-disable-line import/no-unresolved
 
-const workerFiles = {
-  // Paths are relative to workerjs' requireworker.js file
-  'zee-worker': '../../res/zee-worker.js',
+class NodeWorker {
+  _instance: Worker;
+  onmessage: MessageEvent => mixed;
+
+  constructor(file: string) {
+    const worker = new Worker(__dirname + '/node-worker-contents.js', {
+      workerData: file,
+    });
+    worker.on('message', this.onMessage);
+    worker.on('error', this.onError);
+    this._instance = worker;
+  }
+
+  postMessage(
+    message: mixed,
+    transfer?: Array<ArrayBuffer | MessagePort | ImageBitmap>
+  ) {
+    this._instance.postMessage({ data: message }, transfer);
+  }
+
+  onMessage = (message: Object) => {
+    if (this.onmessage) {
+      this.onmessage(new MessageEvent('message', { data: message }));
+    }
+  };
+
+  onError = (error: Error) => {
+    console.error(error);
+  };
+
+  terminate() {
+    this._instance.terminate();
+    this._instance.unref();
+    this._instance = null;
+  }
+}
+
+const workerConfigs = {
+  'zee-worker': './res/zee-worker.js',
 };
 
 const workerInstances = [];
 
 export default class {
   constructor(file: string) {
-    const worker = new Worker(workerFiles[file]);
+    const path = workerConfigs[file];
+    const worker = new NodeWorker(path);
     workerInstances.push(worker);
     return worker;
   }
