@@ -170,6 +170,15 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
     ctx.lineWidth = 1;
 
+    // Decide which samples to actually draw
+    const timeAtViewportLeft: Milliseconds =
+      rangeStart + rangeLength * viewportLeft;
+    const timeAtViewportRightPlusMargin: Milliseconds =
+      rangeStart +
+      rangeLength * viewportRight +
+      // This represents the amount of seconds in the right margin:
+      marginRight * (viewportLength * rangeLength / markerContainerWidth);
+
     // Only draw the stack frames that are vertically within view.
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // Get the timing information for a row of stack frames.
@@ -179,20 +188,12 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         continue;
       }
 
-      // Decide which samples to actually draw
-      const timeAtViewportLeft: Milliseconds =
-        rangeStart + rangeLength * viewportLeft;
-      const timeAtViewportRightPlusMargin: Milliseconds =
-        rangeStart +
-        rangeLength * viewportRight +
-        // This represents the amount of seconds in the right margin:
-        marginRight * (viewportLength * rangeLength / markerContainerWidth);
-
       let hoveredElement: MarkerDrawingInformation | null = null;
+      let previousDrawnPixel: number = -1;
       for (let i = 0; i < markerTiming.length; i++) {
         // Only draw samples that are in bounds.
         if (
-          markerTiming.end[i] > timeAtViewportLeft &&
+          markerTiming.end[i] >= timeAtViewportLeft &&
           markerTiming.start[i] < timeAtViewportRightPlusMargin
         ) {
           const startTime: UnitIntervalOfProfileRange =
@@ -220,12 +221,15 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
             w = 10;
           }
 
+          x = Math.round(x);
+
           const markerIndex = markerTiming.index[i];
           const isHovered = hoveredItem === markerIndex;
           const text = markerTiming.label[i];
           if (isHovered) {
             hoveredElement = { x, y, w, h, uncutWidth, text };
-          } else {
+          } else if (x !== previousDrawnPixel) {
+            previousDrawnPixel = x;
             this.drawOneMarker(ctx, x, y, w, h, uncutWidth, text);
           }
         }

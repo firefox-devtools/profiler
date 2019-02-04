@@ -108,6 +108,7 @@ function setupWithProfile(profile) {
     ...renderResult,
     flushRafCalls,
     dispatch: store.dispatch,
+    getState: store.getState,
     flushDrawLog: () => ctx.__flushDrawLog(),
   };
 }
@@ -133,6 +134,41 @@ describe('MarkerChart', function() {
     const drawCalls = flushDrawLog();
     expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
+
+    delete window.devicePixelRatio;
+  });
+
+  it('does not render several dot markers on the same pixel', () => {
+    window.devicePixelRatio = 1;
+    const markers = [
+      // 'Marker first' and 'Marker last' define our range.
+      ['Marker first', 0, null],
+      // Then 2 very close dot markers with the same name. They shouldn't be
+      // drawn both together.
+      ['Marker A', 5000, null],
+      ['Marker A', 5001, null],
+      [
+        'Marker last',
+        15000,
+        null,
+      ] /* add a marker that's quite far away to have a big range */,
+    ];
+
+    const profile = getProfileWithMarkers(markers);
+    const { flushRafCalls, flushDrawLog } = setupWithProfile(profile);
+    flushRafCalls();
+
+    const drawCalls = flushDrawLog();
+
+    // Check that we have 3 arc operations
+    const arcOperations = drawCalls.filter(
+      ([operation]) => operation === 'arc'
+    );
+    expect(arcOperations).toHaveLength(3);
+
+    // Check that all X values are different
+    const arcOperationsX = new Set(arcOperations.map(([, x]) => Math.round(x)));
+    expect(arcOperationsX.size).toBe(3);
 
     delete window.devicePixelRatio;
   });
