@@ -625,7 +625,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: ht
       Status
       :
     </div>
-    Start of request
+    Waiting for response
     <div
       class="tooltipLabel"
     >
@@ -819,7 +819,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: 
       Status
       :
     </div>
-    End of request
+    Response received
     <div
       class="tooltipLabel"
     >
