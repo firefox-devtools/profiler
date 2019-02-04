@@ -20,7 +20,7 @@ const serverConfig = {
     disableDotRule: true,
   },
   headers: {
-    // See res/.htaccess for more information about all these headers.
+    // See res/_headers for more information about all these headers.
     // /!\ Don't forget to keep it sync-ed with the headers here /!\
     'X-Content-Type-Options': 'nosniff',
     'X-XSS-Protection': '1; mode=block',
