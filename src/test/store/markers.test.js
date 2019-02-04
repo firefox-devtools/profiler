@@ -115,7 +115,7 @@ describe('selectors/getMarkerChartTiming', function() {
         {
           name: 'Rasterize',
           start: [20],
-          end: [20], // Truncated to the time of the last sample.
+          end: [21], // Truncated using the time of the last sample.
           index: [0],
           label: [''],
           length: 1,
@@ -209,7 +209,9 @@ describe('getTimelineVerticalMarkers', function() {
     const markers = selectedThreadSelectors.getTimelineVerticalMarkers(
       getState()
     );
-    const allMarkers = selectedThreadSelectors.getMarkers(getState());
+    const allMarkers = selectedThreadSelectors.getReferenceMarkerTable(
+      getState()
+    );
 
     expect(allMarkers.length).toBeGreaterThan(markers.length);
     expect(markers).toHaveLength(5);

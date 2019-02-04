@@ -1365,6 +1365,13 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Array [
   Object {
     "data": null,
+    "dur": 100,
+    "name": "Jank",
+    "start": -96,
+    "title": "100.00ms event processing delay",
+  },
+  Object {
+    "data": null,
     "dur": 0,
     "name": "D",
     "start": 3,
@@ -1816,7 +1823,7 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankMarkers 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankMarkersForHeader 1`] = `
 Array [
   Object {
     "data": null,
@@ -1832,10 +1839,26 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Array [
   Object {
     "end": Array [
-      3,
+      4,
     ],
     "index": Array [
       0,
+    ],
+    "label": Array [
+      "",
+    ],
+    "length": 1,
+    "name": "Jank",
+    "start": Array [
+      -96,
+    ],
+  },
+  Object {
+    "end": Array [
+      3,
+    ],
+    "index": Array [
+      1,
     ],
     "label": Array [
       "",
@@ -1851,7 +1874,7 @@ Array [
       4,
     ],
     "index": Array [
-      1,
+      2,
     ],
     "label": Array [
       "",
@@ -1867,7 +1890,7 @@ Array [
       5,
     ],
     "index": Array [
-      2,
+      3,
     ],
     "label": Array [
       "",
@@ -1883,6 +1906,13 @@ Array [
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getMarkers 1`] = `
 Array [
+  Object {
+    "data": null,
+    "dur": 100,
+    "name": "Jank",
+    "start": -96,
+    "title": "100.00ms event processing delay",
+  },
   Object {
     "data": null,
     "dur": 0,
@@ -3000,6 +3030,13 @@ Object {
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers 1`] = `
 Array [
+  Object {
+    "data": null,
+    "dur": 100,
+    "name": "Jank",
+    "start": -96,
+    "title": "100.00ms event processing delay",
+  },
   Object {
     "data": null,
     "dur": 0,

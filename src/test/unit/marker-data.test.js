@@ -3,37 +3,43 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { deriveMarkersFromRawMarkerTable } from '../../profile-logic/marker-data';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import { processProfile } from '../../profile-logic/process-profile';
 import { createGeckoProfile } from '.././fixtures/profiles/gecko-profile';
+import { storeWithProfile } from '../fixtures/stores';
 
 describe('deriveMarkersFromRawMarkerTable', function() {
-  const profile = processProfile(createGeckoProfile());
-  const thread = profile.threads[0]; // This is the parent process main thread
-  const contentThread = profile.threads[2]; // This is the content process main thread
-  const markers = deriveMarkersFromRawMarkerTable(
-    thread.markers,
-    thread.stringTable,
-    thread.samples.time[0],
-    thread.samples.time.slice(-1)[0]
-  );
-  const contentMarkers = deriveMarkersFromRawMarkerTable(
-    contentThread.markers,
-    contentThread.stringTable,
-    thread.samples.time[0],
-    thread.samples.time.slice(-1)[0]
-  );
+  function setup() {
+    const profile = processProfile(createGeckoProfile());
+    const thread = profile.threads[0]; // This is the parent process main thread
+    const contentThread = profile.threads[2]; // This is the content process main thread
+
+    const store = storeWithProfile(profile);
+    const state = store.getState();
+
+    return {
+      profile,
+      markers: getThreadSelectors(0).getReferenceMarkerTable(state),
+      thread,
+      contentThread,
+      contentMarkers: getThreadSelectors(2).getReferenceMarkerTable(state),
+    };
+  }
 
   it('creates a reasonable processed profile', function() {
+    const { thread, contentThread } = setup();
     expect(thread.name).toBe('GeckoMain');
     expect(thread.processType).toBe('default');
     expect(contentThread.name).toBe('GeckoMain');
     expect(contentThread.processType).toBe('tab');
   });
+
   it('creates 12 markers given the test data', function() {
+    const { markers } = setup();
     expect(markers.length).toEqual(12);
   });
   it('creates a marker even if there is no start or end time', function() {
+    const { markers } = setup();
     expect(markers[1]).toMatchObject({
       start: 2,
       dur: 0,
@@ -42,6 +48,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should create a marker', function() {
+    const { markers } = setup();
     expect(markers[2]).toMatchObject({
       start: 3,
       dur: 5,
@@ -50,6 +57,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should fold the two reflow markers into one marker', function() {
+    const { markers } = setup();
     expect(markers.length).toEqual(12);
     expect(markers[2]).toMatchObject({
       start: 3,
@@ -59,6 +67,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should fold the two Rasterize markers into one marker, after the reflow marker', function() {
+    const { markers } = setup();
     expect(markers[3]).toMatchObject({
       start: 4,
       dur: 1,
@@ -67,6 +76,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should create a marker for the MinorGC startTime/endTime marker', function() {
+    const { markers } = setup();
     expect(markers[5]).toMatchObject({
       start: 11,
       dur: 1,
@@ -75,6 +85,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should create a marker for the DOMEvent marker', function() {
+    const { markers } = setup();
     expect(markers[4]).toMatchObject({
       dur: 1,
       name: 'DOMEvent',
@@ -83,6 +94,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should create a marker for the marker UserTiming', function() {
+    const { markers } = setup();
     expect(markers[6]).toMatchObject({
       dur: 1,
       name: 'UserTiming',
@@ -91,6 +103,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should handle markers without a start', function() {
+    const { markers } = setup();
     expect(markers[0]).toMatchObject({
       start: 0, // Truncated to the time of the first captured sample.
       dur: 1,
@@ -99,6 +112,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should handle markers without an end', function() {
+    const { markers } = setup();
     expect(markers[9]).toMatchObject({
       start: 20,
       dur: 0,
@@ -107,6 +121,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should handle nested markers correctly', function() {
+    const { markers } = setup();
     expect(markers[7]).toMatchObject({
       start: 13,
       dur: 5,
@@ -121,6 +136,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should handle arbitrary event markers correctly', function() {
+    const { markers } = setup();
     expect(markers[10]).toMatchObject({
       start: 21,
       dur: 0,
@@ -130,6 +146,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('shifts content process marker times correctly', function() {
+    const { thread, contentThread, markers, contentMarkers } = setup();
     expect(thread.processStartupTime).toBe(0);
     expect(contentThread.processStartupTime).toBe(1000);
     expect(markers[11]).toEqual({

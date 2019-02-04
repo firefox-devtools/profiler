@@ -356,7 +356,7 @@ const jankOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     const selectedThread = getSelectedThreadIndex(state);
 
     return {
-      markers: selectors.getJankMarkers(state),
+      markers: selectors.getJankMarkersForHeader(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
     };
