@@ -409,9 +409,9 @@ export function upgradeLocationToCurrentVersion(
 
   if (urlVersion > CURRENT_URL_VERSION) {
     throw new Error(
-      `Unable to parse a url of version ${urlVersion} - are you running an outdated version of perf.html? ` +
-        `The most recent version understood by this version of perf.html is version ${CURRENT_URL_VERSION}.\n` +
-        'You can try refreshing this page in case perf.html has updated in the meantime.'
+      `Unable to parse a url of version ${urlVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
+        `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_URL_VERSION}.\n` +
+        'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
     );
   }
   // Convert to CURRENT_URL_VERSION, one step at a time.

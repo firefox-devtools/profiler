@@ -5,7 +5,7 @@
 // @flow
 /**
  * This file deals with old versions of the "processed" profile format,
- * i.e. the format that perf.html uses internally. Profiles in this format
+ * i.e. the format that profiler.firefox.com uses internally. Profiles in this format
  * can be saved out to files or uploaded to the profile store server, and we
  * want to be able to display profiles that were saved at any point in the
  * past, regardless of their version. So this file upgrades old profiles to
@@ -58,9 +58,9 @@ export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
 
   if (profileVersion > CURRENT_VERSION) {
     throw new Error(
-      `Unable to parse a processed profile of version ${profileVersion} - are you running an outdated version of perf.html? ` +
-        `The most recent version understood by this version of perf.html is version ${CURRENT_VERSION}.\n` +
-        'You can try refreshing this page in case perf.html has updated in the meantime.'
+      `Unable to parse a processed profile of version ${profileVersion} - does profiler.firefox.com need to be refreshed? ` +
+        `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_VERSION}.\n` +
+        'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
     );
   }
 
@@ -368,7 +368,7 @@ const _upgraders = {
     // the thread.processStartupTime which is the delta to
     // meta.startTime.
     // Only the timeStamp property is updated because it's new and
-    // perf.html wasn't updated to handle it when it appeared in
+    // profiler.firefox.com wasn't updated to handle it when it appeared in
     // Firefox.
     for (const thread of profile.threads) {
       if (thread.processType === 'default') {
@@ -906,7 +906,7 @@ const _upgraders = {
   },
   [20]: _profile => {
     // rss and uss was removed from the SamplesTable. The version number was bumped
-    // to help catch errors of using an outdated version of perf.html with a newer
+    // to help catch errors of using an outdated version of profiler.firefox.com with a newer
     // profile. There's no good reason to remove the values for upgrading profiles though.
   },
   [21]: profile => {

@@ -97,9 +97,9 @@ export default class SymbolStoreDB {
         if (openReq.error.name === 'VersionError') {
           // This error fires if the database already exists, and the existing
           // database has a higher version than what we requested. So either
-          // this version of perf.html is outdated, or somebody briefly tried
+          // this version of profiler.firefox.com is outdated, or somebody briefly tried
           // to change this database format (and increased the version number)
-          // and then downgraded to a version of perf.html without those
+          // and then downgraded to a version of profiler.firefox.com without those
           // changes.
           // We delete the database and try again.
           const deleteDBReq = indexedDB.deleteDatabase(dbName);

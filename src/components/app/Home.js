@@ -294,7 +294,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <img
                 className="homeSectionScreenshot"
                 src={PerfScreenshot}
-                alt="screenshot of perf.html"
+                alt="screenshot of profiler.firefox.com"
               />
             </div>
           </div>
@@ -310,7 +310,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <DocsButton />
             <p>
               Install the Gecko Profiler Add-on to start recording a performance
-              profile in Firefox, then analyze it and share it with perf.html.
+              profile in Firefox, then analyze it and share it with
+              profiler.firefox.com.
             </p>
             <ActionButtons
               retrieveProfileFromFile={this.props.retrieveProfileFromFile}
@@ -341,7 +342,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               To start profiling, click on the profiling button, or use the
               keyboard shortcuts. The icon is blue when a profile is recording.
               Hit
-              <kbd>Capture Profile</kbd> to load the data into perf.html.
+              <kbd>Capture Profile</kbd> to load the data into
+              profiler.firefox.com.
             </p>
             {this._renderShortcuts()}
             <ActionButtons
@@ -363,7 +365,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <img
                 className="homeSectionScreenshot"
                 src={PerfScreenshot}
-                alt="screenshot of perf.html"
+                alt="screenshot of profiler.firefox.com"
               />
             </div>
           </div>
@@ -377,7 +379,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               </InstallButton>. Then use the button added to the browser, or use
               the following shortcuts to record a profile. The button’s icon is
               blue when a profile is recording. Hit <kbd>Capture Profile</kbd>{' '}
-              to load the data into perf.html.
+              to load the data into profiler.firefox.com.
             </p>
             {this._renderShortcuts()}
             <ActionButtons
@@ -399,7 +401,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <img
                 className="homeSectionScreenshot"
                 src={PerfScreenshot}
-                alt="screenshot of perf.html"
+                alt="screenshot of profiler.firefox.com"
               />
             </div>
           </div>
@@ -448,7 +450,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           <header>
             <h1 className="homeTitle">
               <span className="homeTitleSlogan">
-                <span className="homeTitleText">perf.html</span>
+                <span className="homeTitleText">Firefox Profiler</span>
                 <span className="homeTitleSubtext">
                   {' '}
                   &mdash; Web app for Firefox performance analysis
