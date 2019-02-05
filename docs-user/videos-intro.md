@@ -1,6 +1,6 @@
-# perf.html intro
+# Firefox Profiler intro
 
-This intro video explains how to get set up and start profiling. It explains a little bit of how the architecture works to better understand the relationship of the various tools and data sources.
+This intro video explains how to get set up and start profiling. It explains a little bit of how the architecture works to better understand the relationship of the various tools and data sources. Please note that the video still refers to the Firefox Profiler by its previous name, the Firefox Profiler.
 
 [Watch the full series on YouTube](https://www.youtube.com/watch?v=MxgWOTqxOTg&list=PLxaZqnd-OQM620EZ_6eT8qurOnZ4eu6dz&index=1)
 

@@ -1,6 +1,6 @@
 # Remote profiling on Android
 
-You can use perf.html to investigate performance issues on Android, not just Windows, macOS and Linux.
+You can use the Firefox Profiler to investigate performance issues on Android, not just Windows, macOS and Linux.
 
 ## Pick your target
 
@@ -113,7 +113,7 @@ There are other types of builds you may want to profile:
 
 ### Try builds
 
-If you want to profile an Android build that the tryserver created for you, you have to kick off a "Sym" job on treeherder: Using treeherder's *Add new jobs* UI, schedule a "Sym" job for each platform whose "B" job you want symbols for. (And "SymN" if you have an "N" job you want symbols for, i.e. a build job with the "nightly configuration.) These jobs gather symbol information from the corresponding build job and upload it to the Mozilla symbol server so that perf.html can use it.
+If you want to profile an Android build that the tryserver created for you, you have to kick off a "Sym" job on treeherder: Using treeherder's *Add new jobs* UI, schedule a "Sym" job for each platform whose "B" job you want symbols for. (And "SymN" if you have an "N" job you want symbols for, i.e. a build job with the "nightly configuration.) These jobs gather symbol information from the corresponding build job and upload it to the Mozilla symbol server so that the Firefox Profiler can use it.
 
 ### Local builds
 

@@ -1,12 +1,12 @@
 # UI Tour
 
-Get to know perf.html UI a bit better with a tour that highlights various features. The screenshots are all taken from [this profile](https://perfht.ml/2GsIL3E).
+Get to know Firefox Profiler UI a bit better with a tour that highlights various features. The screenshots are all taken from [this profile](https://perfht.ml/2GsIL3E).
 
 ## Timeline
 
 ![A screenshot of the UI, selecting the top portion with threads](images/ui-tour-timeline.jpg)
 
-perf.html visualizes multi-threaded profiles. Each thread gets a row in the timeline. Clicking on the name of the thread selects the thread for the selected panel below the timeline. Threads can be hidden and shown by right clicking the thread name.
+The Firefox Profiler visualizes multi-threaded profiles. Each thread gets a row in the timeline. Clicking on the name of the thread selects the thread for the selected panel below the timeline. Threads can be hidden and shown by right clicking the thread name.
 
 ## The panels
 
@@ -50,7 +50,7 @@ Only certain markers are broken out and colored in the timeline. A similar but m
 
 ![A screenshot highlighting the toolbar's share and save as file buttons.](images/ui-tour-share.jpg)
 
-One of the most powerful and useful features of perf.html is the ability to save and share profiles. The first step is to hit the *Share...* button. After accepting the privacy prompt, the profile will be uploaded to online storage. This profile can then be shared in online chat, emails, and bug reports.
+One of the most powerful and useful features of the Firefox Profiler is the ability to save and share profiles. The first step is to hit the *Share...* button. After accepting the privacy prompt, the profile will be uploaded to online storage. This profile can then be shared in online chat, emails, and bug reports.
 
 The current view and all of the filters applied to the profile will be encoded into the URL. After initially sharing the profile, the *Share...* button will change into a *Permalink* button that can then be used to provide a handy shortened URL to the current view.
 

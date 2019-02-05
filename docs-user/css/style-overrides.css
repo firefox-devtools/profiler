@@ -47,7 +47,7 @@ body {
   font-weight: bold !important; /* Override the .active class */
 }
 
-/* Modify the perf.html title in the sidebar. */
+/* Modify the profiler.firefox.com title in the sidebar. */
 .sidebar > h1 {
   margin-left: 15px;
   margin-bottom: 30px;

@@ -2,7 +2,7 @@
 
 Linux has a native profiler called 'perf' that can profile any application. This profiler has a built-in profile viewer in the form of the `perf report` command, but you may not like its UI.
 
-[perf.html](https://profiler.firefox.com/) provides an alternative UI for these profiles; it knows how to display profiles from perf.
+[The Firefox Profiler](https://profiler.firefox.com/) provides an alternative UI for these profiles; it knows how to display profiles from perf.
 
 (Importing other profile sources is being investigated, such as in [issue #1138](https://github.com/devtools-html/firefox-profiler/issues/1138), [PR #1065](https://github.com/devtools-html/firefox-profiler/pull/1065) and [PR #1260](https://github.com/devtools-html/firefox-profiler/pull/1260).)
 
@@ -18,11 +18,11 @@ As a consequence of point 2, perf has far lower overhead than the Gecko Profiler
 
 (This assumes you've installed perf.)
 
-There are three steps to obtaining a perf profile and loading it in perf.html:
+There are three steps to obtaining a perf profile and loading it in the Firefox Profiler:
 
  1. Capture a profile with perf.
  2. Convert it into a text form.
- 3. Load the text file in perf.html.
+ 3. Load the text file in [profiler.firefox.com](https://profiler.firefox.com).
 
 ### Step 1: Capture the profile
 
@@ -52,7 +52,7 @@ The `perf record` command writes the profile into a file called `perf.data` in t
 
 ### Step 2: Convert the profile
 
-After exiting perf, convert the perf data into something perf.html can read:
+After exiting perf, convert the perf data into something the Firefox Profiler can read:
 
 ```bash
 perf script -F +pid > /tmp/test.perf
@@ -60,9 +60,9 @@ perf script -F +pid > /tmp/test.perf
 
 The `perf script` command takes the `perf.data` file that was written by the `perf record` command as its implicit input.
 
-### Step 3: View the profile in perf.html
+### Step 3: View the profile in profiler.firefox.com
 
-You can now load the .perf file into perf.html: just tell perf.html to open the file and it should be auto-identified and loaded.
+You can now load the .perf file into [profiler.firefox.com](https://profiler.firefox.com): just tell the Firefox Profiler to open the file and it should be auto-identified and loaded.
 Note that there will be no markers and no categories.  Many stack frames will say `[unknown]`.  There will be no JavaScript stacks, unless you do extra work as described below.  Symbols might be mangled.
 
 ## Analyzing perf traces and tips
