@@ -1,10 +1,10 @@
-# perf.html development docs
+# Firefox Profiler development docs
 
-This project is a client for reading profiles from the Gecko Profiler and potentially other sources in the future. It is written using JavaScript and [Flow types](https://flow.org/) using [React](https://facebook.github.io/react/) for the UI components and [Redux](http://redux.js.org/) for the state management. The perf.html client interacts with Firefox using the [Gecko Profiler add-on](https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi). This add-on is the glue between the HTML client of perf.html, and the internal profiler interface in Gecko.
+[profiler.firefox.com](https://profiler.firefox.com) is a client for reading profiles from the profiler component built inside of Firefox, known as the Gecko Profiler. It also can read in formats from [a variety of sources](./loading-in-profiles.md). The front-end client is written using JavaScript and [Flow types](https://flow.org/) using [React](https://facebook.github.io/react/) for the UI components and [Redux](http://redux.js.org/) for the state management. This client interacts with Firefox using the [Gecko Profiler add-on](https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi). This add-on is the glue between [profiler.firefox.com](https://profiler.firefox.com), and the internal profiler interface in Gecko.
 
 ## The Docs
 
- * [perf.html src docs](../src)
+ * [Firefox Profiler src docs](../src)
    - [Redux action creators - `/src/actions`](../src/actions)
    - [React components - `/src/components`](../src/components)
    - [Manipulating and processing profiles - `/src/profile-logic`](../src/profile-logic)

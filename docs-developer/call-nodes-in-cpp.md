@@ -1,6 +1,6 @@
 # Frames, funcs, stacks and CallNodes in C++
 
-This document pertains to how C++ samples are captured, and how they are processed for reporting in perf.html. Specifically the profiler samples capture memory addresses for frames in C++ functions, and there can be many different frame addresses per single function.
+This document pertains to how C++ samples are captured, and how they are processed for reporting in the Firefox Profiler. Specifically the profiler samples capture memory addresses for frames in C++ functions, and there can be many different frame addresses per single function.
 
 ## Example code
 
@@ -115,7 +115,7 @@ When we display a profile without any symbolication information, all we have is 
 
 The takeaway here is: The symbolication process doesn't only give us strings, it can also completely change the shape of the call tree.
 
-In perf.html, we want to be fully interactive before any symbol information has arrived, and stay interactive while it's arriving. That means that we need to handle collapsing of funcs gracefully without destroying any state, as far as that can be done. Here's how this works:
+In the Firefox Profiler, we want to be fully interactive before any symbol information has arrived, and stay interactive while it's arriving. That means that we need to handle collapsing of funcs gracefully without destroying any state, as far as that can be done. Here's how this works:
 
  1. When loading a Gecko profile, we naively create a func for every single frame.
  2. When a symbol table arrives:

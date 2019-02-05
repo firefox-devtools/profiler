@@ -1,4 +1,4 @@
-# Deploying perf.html
+# Deploying to profiler.firefox.com
 
 Our hosting service is [Netlify](netlify.com).
 

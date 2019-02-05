@@ -1,6 +1,6 @@
 # Loading in profiles from various sources
 
-Profiles can be loaded in perf.html from many different sources.
+Profiles can be loaded into the Firefox Profiler from many different sources.
 
 ### Online Storage
 
@@ -21,12 +21,12 @@ uploadprofile /path/to/profile.js
 
 > `https://profiler.firefox.com/from-url/{URL}`
 
-Profiles can also be loaded in from arbitrary URLs. In addition, you can then upload it to the online storage directly from perf.html's interface. The profile needs to be served from https, and have the appropriate `Access-Control-Allow-Origin` header set to either `*` or `https://profiler.firefox.com`.
+Profiles can also be loaded in from arbitrary URLs. In addition, you can then upload it to the online storage directly from The Firefox Profiler's interface. The profile needs to be served from https, and have the appropriate `Access-Control-Allow-Origin` header set to either `*` or `https://profiler.firefox.com`.
 
-See the function below for an easy utility for converting to the proper URL format. Here is a simple utility function to turn a profile URL into a perf.html URL to view it:
+See the function below for an easy utility for converting to the proper URL format. Here is a simple utility function to turn a profile URL into a [profiler.firefox.com](https://profiler.firefox.com) URL to view it:
 
 ```js
-function getPerfHtmlUrl (profileUrl) {
+function getProfilerUrl (profileUrl) {
   return "https://profiler.firefox.com/from-url/" + encodeURIComponent(profileUrl)};
 }
 ```
@@ -36,7 +36,7 @@ Or in Python:
 ```python
 import urllib
 
-def get_perf_html_url(url):
+def get_profiler_url(url):
     return "https://profiler.firefox.com/from-url/" + urllib.quote(url, safe="")
 ```
 
@@ -51,7 +51,7 @@ const querystring = require('querystring');
 const PORT = 3000;
 
 // If loading in a self-signed certificate, you must first manually add an exception
-// to it in the browser, or else perf.html will throw a NetworkError error.
+// to it in the browser, or else profiler.firefox.com will throw a NetworkError error.
 const options = {
   key: fs.readFileSync(path.join(__dirname, 'server.key')),
   cert: fs.readFileSync(path.join(__dirname, 'server.crt')),
@@ -59,7 +59,7 @@ const options = {
 
 // The server must be "https"
 const server = https.createServer(options, (request, response) => {
-  // You must give access to perf.html
+  // You must give access to profiler.firefox.com
   response.setHeader('Access-Control-Allow-Origin', 'https://profiler.firefox.com');
 
   // You could also do * to allow anyone to load it:
@@ -84,11 +84,11 @@ server.listen(PORT, err => {
   // This is the URL to profiler.firefox.com, it should look like the following when
   // properly encoded:
   // https://profiler.firefox.com/from-url/https%3A%2F%2Flocalhost%3A3000%2Fprofile.json
-  const perfHtmlUrl =
+  const firefoxProfilerUrl =
     'https://profiler.firefox.com/from-url/' + querystring.escape(profileUrl);
 
   console.log('Serving the profile from: ' + profileUrl);
-  console.log('View it on perf.html: ' + perfHtmlUrl);
+  console.log('View it on profiler.firefox.com: ' + firefoxProfilerUrl);
 });
 ```
 
@@ -102,6 +102,6 @@ The [Gecko Profiler Addon][Gecko Profiler Addon] injects the profile into the pa
 
 > `https://profiler.firefox.com/from-file/`
 
-When you're on [the home page](https://profiler.firefox.com) files can be loaded by either dragging over the perf.html client, or using the file upload input.
+When you're on [the home page](https://profiler.firefox.com) files can be loaded by either dragging over the profiler.firefox.com client, or using the file upload input.
 
 [Gecko Profiler Addon]: https://github.com/devtools-html/Gecko-Profiler-Addon

@@ -68,18 +68,18 @@
                 <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-6"></use>
                 <rect stroke="#979797" stroke-width="1" x="53.5" y="326.5" width="167" height="77" rx="8"></rect>
             </g>
-            <text id="perf.html" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
-                <tspan x="101.138428" y="350">perf.html</tspan>
+            <text id="profiler.firefox.com" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                <tspan x="60" y="350">profiler.firefox.com</tspan>
             </text>
             <text id="unprivileged-webpage" font-family="Helvetica" font-size="12" font-weight="normal">
                 <tspan x="77.6230469" y="375" fill="#000000">unprivileged webpage</tspan>
-                <tspan x="87.9824219" y="389" fill="#0A84FF" text-decoration="underline">https://profiler.firefox.com</tspan>
+                <tspan x="70" y="389" fill="#0A84FF" text-decoration="underline">https://profiler.firefox.com</tspan>
                 <tspan x="184.017578" y="389" fill="#000000"></tspan>
             </text>
             <text id="Opens-up-a-new-windo" font-family="Helvetica" font-size="12" font-weight="normal" fill="#000000">
                 <tspan x="102" y="255">Opens up a new window</tspan>
-                <tspan x="102" y="269">with perf.html. Then injects the JSON</tspan>
-                <tspan x="102" y="283">profile content via a content script.</tspan>
+                <tspan x="102" y="269">with profiler.firefox.com. Then injects the</tspan>
+                <tspan x="102" y="283">JSON profile content via a content script.</tspan>
             </text>
             <path d="M587.5,205.5 L587.5,242.5" id="Line-Copy-7" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
             <path id="Line-Copy-7-decoration-1" d="M587.5,242.5 L590.5,231.7 L584.5,231.7 L587.5,242.5 Z" stroke="#4A4A4A" fill="#4A4A4A" stroke-linecap="square"></path>
