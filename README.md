@@ -1,14 +1,14 @@
-# perf.html
+# Firefox Profiler
 
 [![slack-badge]][slack]
 
-[perf.html] visualizes performance data recorded from web browsers. It is a tool designed to consume performance profiles from the Gecko Profiler but can visualize data from any profiler able to output in JSON. The interface is a web application built using [React] and [Redux] and runs entirely client-side.
+The [Firefox Profiler] visualizes performance data recorded from web browsers. It is a tool designed to consume performance profiles from the Gecko Profiler but can visualize data from any profiler able to output in JSON. The interface is a web application built using [React] and [Redux] and runs entirely client-side.
 
 [Mozilla] develops this tool to help make [Firefox] silky smooth and fast for millions of its users, and to help make sites and apps faster across the web.
 
-![Screenshot of perf.html](./docs-user/images/screenshot.png?raw=true)
+![Screenshot of the Firefox Profiler](./docs-user/images/screenshot.png?raw=true)
 
-_This project was previously called [Cleopatra]._
+_This project was previously called perf.html and [Cleopatra]._
 
 ### Usage
 
@@ -29,11 +29,11 @@ chmod a+x install.sh
 ./install.sh
 ```
 
-To download and build perf.html run:
+To download and build the Firefox Profiler web app run:
 
 ```bash
 git clone git@github.com:devtools-html/firefox-profiler.git
-cd perf.html
+cd firefox-profiler
 yarn install
 yarn start
 ```
@@ -47,7 +47,7 @@ For more detailed information on getting started contributing. We have plenty of
 |[Developer Documentation](./docs-developer)| Want to know how this whole thing works? Get started here. |
 |[Roadmap](./ROADMAP.md)| Get more information about why we are building this tool, and what we have planned. |
 |[Source Files](./src)| Dive into the inner workings of the code. Most folders have a `README.md` providing more information. |
-|[Gecko Profiler Addon][Gecko Profiler]| perf.html can record profiles directly in the browser using an add-on, development takes place in another repo. |
+|[Gecko Profiler Addon][Gecko Profiler]| The Firefox Profiler can record profiles directly in the browser using an add-on, development takes place in another repo. |
 
 ### Discussion
 
@@ -63,7 +63,7 @@ Some permissive software licenses request but do not require an acknowledgement 
 
 [slack-badge]: https://devtools-html-slack.herokuapp.com/badge.svg
 [slack]: https://devtools-html-slack.herokuapp.com/
-[perf.html]:https://profiler.firefox.com/
+[Firefox Profiler]:https://profiler.firefox.com/
 [React]:https://facebook.github.io/react/
 [Redux]:http://redux.js.org/
 [Mozilla]:https://www.mozilla.org/
