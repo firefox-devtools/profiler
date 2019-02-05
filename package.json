@@ -1,7 +1,7 @@
 {
-  "name": "perf.html",
+  "name": "firefox-profiler",
   "version": "0.0.1",
-  "description": "perf.html, the gecko profiler UI",
+  "description": "Firefox Profiler",
   "main": "src/index.js",
   "scripts": {
     "build:clean": "rimraf dist && mkdirp dist",

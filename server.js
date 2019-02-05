@@ -3,8 +3,8 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config');
 const { oneLine, stripIndent } = require('common-tags');
-const port = process.env.PERFHTML_PORT || 4242;
-const host = process.env.PERFHTML_HOST || 'localhost';
+const port = process.env.FX_PROFILER_PORT || 4242;
+const host = process.env.FX_PROFILER_HOST || 'localhost';
 const fs = require('fs');
 const path = require('path');
 const localConfigExists = fs.existsSync(
@@ -68,10 +68,10 @@ new WebpackDevServer(webpack(config), serverConfig).listen(port, host, function(
     '------------------------------------------------------------------------------------------';
 
   console.log(barAscii);
-  console.log(`> perf.html is listening at: http://${host}:${port}\n`);
+  console.log(`> Firefox Profiler is listening at: http://${host}:${port}\n`);
   if (port === 4242) {
     console.log(
-      '> You can change this default port with the environment variable PERFHTML_PORT.\n'
+      '> You can change this default port with the environment variable FX_PROFILER_PORT.\n'
     );
   }
   if (localConfigExists) {

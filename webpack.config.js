@@ -62,7 +62,7 @@ const config = {
       'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
     }),
     new HtmlWebpackPlugin({
-      title: 'perf.html',
+      title: 'Firefox Profiler',
       template: 'res/index.html',
       favicon: 'res/img/favicon.png',
     }),
