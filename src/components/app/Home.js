@@ -7,8 +7,8 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
-import AddonScreenshot from '../../../res/img/png/gecko-profiler-screenshot-2018-01-18.png';
-import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2017-09-08.jpg';
+import AddonScreenshot from '../../../res/img/jpg/gecko-profiler-screenshot-2019-02-05.jpg';
+import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2019-02-05.jpg';
 import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
