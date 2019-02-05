@@ -148,7 +148,7 @@ describe('call node paths on implementation filter change', function() {
   });
 });
 
-describe('getJankMarkers', function() {
+describe('getJankMarkersForHeader', function() {
   function setup({ sampleCount, responsiveness }) {
     const { profile } = getProfileFromTextSamples(
       Array(sampleCount)
@@ -157,7 +157,7 @@ describe('getJankMarkers', function() {
     );
     profile.threads[0].samples.responsiveness = responsiveness;
     const { getState } = storeWithProfile(profile);
-    return selectedThreadSelectors.getJankMarkers(getState());
+    return selectedThreadSelectors.getJankMarkersForHeader(getState());
   }
 
   it('will not create any jank markers for undefined responsiveness', function() {
@@ -1037,10 +1037,10 @@ describe('snapshots of selectors/profile', function() {
       selectedThreadSelectors.getRangeAndTransformFilteredThread(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getJankMarkers', function() {
+  it('matches the last stored run of selectedThreadSelector.getJankMarkersForHeader', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getJankMarkers(getState())
+      selectedThreadSelectors.getJankMarkersForHeader(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getProcessedRawMarkerTable', function() {
@@ -1051,7 +1051,9 @@ describe('snapshots of selectors/profile', function() {
   });
   it('matches the last stored run of selectedThreadSelector.getMarkers', function() {
     const { getState } = setupStore();
-    expect(selectedThreadSelectors.getMarkers(getState())).toMatchSnapshot();
+    expect(
+      selectedThreadSelectors.getReferenceMarkerTable(getState())
+    ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getMarkerChartTiming', function() {
     const { getState } = setupStore();

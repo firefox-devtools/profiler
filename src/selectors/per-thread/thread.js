@@ -12,7 +12,12 @@ import * as ProfileData from '../../profile-logic/profile-data';
 import * as ProfileSelectors from '../profile';
 import * as JsTracer from '../../profile-logic/js-tracer';
 
-import type { Thread, ThreadIndex, JsTracerTable } from '../../types/profile';
+import type {
+  Thread,
+  ThreadIndex,
+  JsTracerTable,
+  SamplesTable,
+} from '../../types/profile';
 import type { Selector } from '../../types/store';
 import type { ThreadViewOptions } from '../../types/state';
 import type { TransformStack } from '../../types/transforms';
@@ -38,6 +43,8 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     ProfileSelectors.getProfile(state).threads[threadIndex];
   const getStringTable: Selector<UniqueStringArray> = state =>
     getThread(state).stringTable;
+  const getSamplesTable: Selector<SamplesTable> = state =>
+    getThread(state).samples;
 
   /**
    * The first per-thread selectors filter out and transform a thread based on user's
@@ -190,11 +197,12 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
 
   return {
     getThread,
+    getStringTable,
+    getSamplesTable,
     getFilteredThread,
     getRangeFilteredThread,
     getRangeAndTransformFilteredThread,
     getPreviewFilteredThread,
-    getStringTable,
     getFriendlyThreadName,
     getThreadProcessDetails,
     getTransformLabels,

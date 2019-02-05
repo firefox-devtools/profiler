@@ -488,38 +488,17 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "length": 9,
+        "length": 2,
         "responsiveness": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
           null,
           null,
         ],
         "stack": Array [
           null,
           null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
         ],
         "time": Array [
           0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
           8,
         ],
       },
@@ -984,38 +963,17 @@ Array [
       "type": Array [],
     },
     "samples": Object {
-      "length": 9,
+      "length": 2,
       "responsiveness": Array [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
         null,
         null,
       ],
       "stack": Array [
         null,
         null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
       ],
       "time": Array [
         0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
         8,
       ],
     },
@@ -1405,6 +1363,13 @@ CallTree {
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkers 1`] = `
 Array [
+  Object {
+    "data": null,
+    "dur": 100,
+    "name": "Jank",
+    "start": -96,
+    "title": "100.00ms event processing delay",
+  },
   Object {
     "data": null,
     "dur": 0,
@@ -1858,7 +1823,7 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankMarkers 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankMarkersForHeader 1`] = `
 Array [
   Object {
     "data": null,
@@ -1874,10 +1839,26 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Array [
   Object {
     "end": Array [
-      3,
+      4,
     ],
     "index": Array [
       0,
+    ],
+    "label": Array [
+      "",
+    ],
+    "length": 1,
+    "name": "Jank",
+    "start": Array [
+      -96,
+    ],
+  },
+  Object {
+    "end": Array [
+      3,
+    ],
+    "index": Array [
+      1,
     ],
     "label": Array [
       "",
@@ -1893,7 +1874,7 @@ Array [
       4,
     ],
     "index": Array [
-      1,
+      2,
     ],
     "label": Array [
       "",
@@ -1909,7 +1890,7 @@ Array [
       5,
     ],
     "index": Array [
-      2,
+      3,
     ],
     "label": Array [
       "",
@@ -1925,6 +1906,13 @@ Array [
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getMarkers 1`] = `
 Array [
+  Object {
+    "data": null,
+    "dur": 100,
+    "name": "Jank",
+    "start": -96,
+    "title": "100.00ms event processing delay",
+  },
   Object {
     "data": null,
     "dur": 0,
@@ -3042,6 +3030,13 @@ Object {
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers 1`] = `
 Array [
+  Object {
+    "data": null,
+    "dur": 100,
+    "name": "Jank",
+    "start": -96,
+    "title": "100.00ms event processing delay",
+  },
   Object {
     "data": null,
     "dur": 0,

@@ -22,13 +22,35 @@ jest.mock('@mstange/offline-plugin/runtime', () => ({
 }));
 
 describe('app/ServiceWorkerManager', () => {
+  // Opt out of Flow checking for this variable because we're doing
+  // unconventional things with it.
+  let nativeLocation: any;
+  beforeEach(() => {
+    // Because of how window.location is implemented in browsers and jsdom, we
+    // can't easily spy on `window.location.reload`. That's why we replace the
+    // full property 'location' instead.
+
+    nativeLocation = Object.getOwnPropertyDescriptor(window, 'location');
+
+    // It seems node v8 doesn't let us change the value unless we delete it before.
+    delete window.location;
+    // $FlowExpectError because the value we pass isn't a proper Location object.
+    Object.defineProperty(window, 'location', {
+      value: { reload: jest.fn() },
+      writable: true,
+      configurable: true,
+    });
+  });
+
   afterEach(() => {
     process.env.NODE_ENV = 'development';
+
+    Object.defineProperty(window, 'location', nativeLocation);
+    nativeLocation = null;
   });
 
   function setup() {
     jest.spyOn(console, 'log').mockImplementation(() => {});
-    jest.spyOn(window.location, 'reload').mockImplementation(() => {});
 
     function navigateToStoreLoadingPage() {
       const newUrlState = stateFromLocation({

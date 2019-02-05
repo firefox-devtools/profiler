@@ -115,6 +115,30 @@ describe('selectors/getJsTracerTiming', function() {
       ]);
     });
 
+    it('handles float precision errors where the child event outlasts the parent', function() {
+      //    0  1  2  3  4  5
+      //    [prefix--]
+      //       [current-]
+
+      //    0  1  2  3  4  5
+      //    [A-------]
+      //       [B-------]
+      expect(
+        getHumanReadableJsTracerTiming({
+          useSelfTime: true,
+          events: [
+            // This comment makes the formatting "prettier".
+            ['A', 0, 3],
+            ['B', 1, 4],
+          ],
+        })
+      ).toEqual([
+        // This comment makes the formatting "prettier".
+        'A (0:1)',
+        'B (1:3)',
+      ]);
+    });
+
     it('can split a prefix stack if the ending time matches', function() {
       // This test is checking a specific if branch of the timing function:
       //
