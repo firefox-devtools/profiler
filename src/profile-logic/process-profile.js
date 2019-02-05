@@ -56,16 +56,14 @@ import type {
   GeckoStackStruct,
 } from '../types/gecko-profile';
 import type {
-  DOMEventMarkerPayload,
-  FrameConstructionMarkerPayload,
+  GCSliceMarkerPayload,
+  GCMajorMarkerPayload,
   MarkerPayload,
   MarkerPayload_Gecko,
-  PaintProfilerMarkerTracing,
   GCSliceData_Gecko,
   GCMajorCompleted,
   GCMajorCompleted_Gecko,
   GCMajorAborted,
-  StyleMarkerPayload,
 } from '../types/markers';
 
 type RegExpResult = null | string[];
@@ -558,30 +556,44 @@ function _processStackTable(
 }
 
 /**
- * Convert stack field to cause field for the given payload.
+ * Convert stack field to cause field for the given payload. A cause field includes
+ * both an IndexIntoStackTable, and the time the stack was captured. If the stack
+ * was captured within the the start and end time of the marker, this was a synchronous
+ * stack. Otherwise, if it happened before, it was an async stack, and is most likely
+ * some event that happened in the past that triggered the marker.
  */
-function _convertStackToCause(data: Object) {
+function _convertStackToCause(data: Object): Object {
   if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
-    const stack = data.stack;
-    delete data.stack;
+    const { stack, ...newData } = data;
     const stackIndex = stack.samples.data[0][stack.samples.schema.stack];
     const time = stack.samples.data[0][stack.samples.schema.time];
     if (stackIndex !== null) {
-      data.cause = { time, stack: stackIndex };
+      newData.cause = { time, stack: stackIndex };
     }
+    return newData;
   }
+  return data;
 }
 
 /**
- * Explicitly recreate the markers here to help enforce our assumptions about types.
+ * Process the markers by either converting stacks to causes, process the GC markers.
  */
 function _processMarkers(geckoMarkers: GeckoMarkerStruct): RawMarkerTable {
   return {
-    data: geckoMarkers.data.map(function(
-      m: MarkerPayload_Gecko
-    ): MarkerPayload {
-      if (m) {
-        switch (m.type) {
+    data: geckoMarkers.data.map(
+      (geckoPayload: MarkerPayload_Gecko): MarkerPayload => {
+        if (!geckoPayload) {
+          return null;
+        }
+
+        // If there is a "stack" field, convert it to a "cause" field. This is
+        // pre-emptively done for every single marker payload.
+        //
+        // Warning: This function converts the payload into an Object type, which is
+        // about as bad as an any.
+        const payload = _convertStackToCause(geckoPayload);
+
+        switch (payload.type) {
           /*
            * We want to improve the format of these markers to make them
            * easier to understand and work with, but we can't do that by
@@ -590,83 +602,61 @@ function _processMarkers(geckoMarkers: GeckoMarkerStruct): RawMarkerTable {
            * improvements while we process a gecko profile.
            */
           case 'GCSlice': {
-            const mt: GCSliceData_Gecko = m.timings;
-            const { times, ...partialMt } = mt;
-            const timings = {
-              ...partialMt,
-              phase_times: times ? convertPhaseTimes(times) : {},
-            };
-            return {
+            const {
+              times,
+              ...partialTimings
+            }: GCSliceData_Gecko = payload.timings;
+
+            return ({
               type: 'GCSlice',
-              startTime: m.startTime,
-              endTime: m.endTime,
-              timings: timings,
-            };
+              startTime: payload.startTime,
+              endTime: payload.endTime,
+              timings: {
+                ...partialTimings,
+                phase_times: times ? convertPhaseTimes(times) : {},
+              },
+            }: GCSliceMarkerPayload);
           }
           case 'GCMajor': {
-            const mt: GCMajorAborted | GCMajorCompleted_Gecko = m.timings;
-            switch (mt.status) {
+            const geckoTimings: GCMajorAborted | GCMajorCompleted_Gecko =
+              payload.timings;
+            switch (geckoTimings.status) {
               case 'completed': {
-                const { totals, ...partialMt } = mt;
+                const { totals, ...partialMt } = geckoTimings;
                 const timings: GCMajorCompleted = {
                   ...partialMt,
                   phase_times: convertPhaseTimes(totals),
-                  mmu_20ms: mt.mmu_20ms / 100,
-                  mmu_50ms: mt.mmu_50ms / 100,
+                  mmu_20ms: geckoTimings.mmu_20ms / 100,
+                  mmu_50ms: geckoTimings.mmu_50ms / 100,
                 };
-                return {
+                return ({
                   type: 'GCMajor',
-                  startTime: m.startTime,
-                  endTime: m.endTime,
+                  startTime: payload.startTime,
+                  endTime: payload.endTime,
                   timings: timings,
-                };
+                }: GCMajorMarkerPayload);
               }
               case 'aborted':
-                return {
+                return ({
                   type: 'GCMajor',
-                  startTime: m.startTime,
-                  endTime: m.endTime,
+                  startTime: payload.startTime,
+                  endTime: payload.endTime,
                   timings: { status: 'aborted' },
-                };
+                }: GCMajorMarkerPayload);
               default:
                 // Flow cannot detect that this switch is complete.
                 console.log('Unknown GCMajor status');
                 throw new Error('Unknown GCMajor status');
             }
           }
-          /*
-           * This type exists in profiles from newer gecko only, while
-           * profiles from older gecko will be of type "tracing".
-           */
-          case 'Styles': {
-            const newData = { ...m };
-            _convertStackToCause(newData);
-            // We had to use any here because _convertStackToCause is not
-            // providing the type system with information how it's operating
-            const result: StyleMarkerPayload = (newData: any);
-            return result;
-          }
-          case 'tracing': {
-            const newData = immutableUpdate(m);
-            _convertStackToCause(newData);
-            // We had to use any here because _convertStackToCause is not
-            // providing the type system with information how it's operating
-            switch (newData.category) {
-              case 'DOMEvent':
-                return ((newData: any): DOMEventMarkerPayload);
-              case 'FrameConstruction':
-                return ((newData: any): FrameConstructionMarkerPayload);
-              default:
-                return ((newData: any): PaintProfilerMarkerTracing);
-            }
-          }
           default:
-            return m;
+            // Coerce the payload into a MarkerPayload. This doesn't really provide
+            // any more type safety, but it shows the intent of going from an object
+            // without much type safety, to a specific type definition.
+            return (payload: MarkerPayload);
         }
-      } else {
-        return null;
       }
-    }),
+    ),
     name: geckoMarkers.name,
     time: geckoMarkers.time,
     length: geckoMarkers.length,

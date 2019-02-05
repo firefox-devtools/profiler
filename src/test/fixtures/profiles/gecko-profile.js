@@ -420,6 +420,35 @@ function _createGeckoThread(): GeckoThread {
             responseEnd: 22.9,
           },
         ],
+        [
+          14, // create/open
+          24,
+          {
+            type: 'io',
+            startTime: 22,
+            endTime: 24,
+            source: 'PoisionOIInterposer',
+            filename: '/foo/bar/',
+            stack: {
+              markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+              name: 'SyncProfile',
+              registerTime: null,
+              unregisterTime: null,
+              processType: 'default',
+              tid: 1111,
+              pid: 2222,
+              samples: {
+                schema: {
+                  stack: 0,
+                  time: 1,
+                  responsiveness: 2,
+                },
+                data: [[2, 1, 0]], // (root), 0x100000f84, 0x100001a45
+              },
+            },
+          },
+        ],
+
         // INSERT NEW MARKERS HERE
 
         // Start a tracing marker but never finish it.
@@ -452,6 +481,7 @@ function _createGeckoThread(): GeckoThread {
       'UserTiming', // 11
       'ArbitraryName', // 12
       'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5', // 13
+      'create/open', // 14
     ],
   };
 }
