@@ -43,6 +43,7 @@ import type {
   SymbolicationStatus,
   ProfileSharingStatus,
 } from '../types/state';
+import type { $ReturnType } from '../types/utils';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
   state.profileView;
@@ -109,8 +110,10 @@ export const getPreviewSelection: Selector<PreviewSelection> = state =>
 export const getCounter: Selector<Counter[] | null> = state =>
   getProfile(state).counters || null;
 
+type CounterSelectors = $ReturnType<typeof _createCounterSelectors>;
+
 const _counterSelectors = {};
-export const getCounterSelectors = (index: CounterIndex) => {
+export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
   let selectors = _counterSelectors[index];
   if (!selectors) {
     selectors = _createCounterSelectors(index);
