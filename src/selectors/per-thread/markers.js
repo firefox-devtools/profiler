@@ -14,7 +14,7 @@ import { unsafeTransmute } from '../../utils/flow';
 import type { RawMarkerTable } from '../../types/profile';
 import type {
   IndexedMarker,
-  IndexIntoMarkers,
+  MarkerRef,
   Marker,
   MarkerTimingRows,
 } from '../../types/profile-derived';
@@ -99,7 +99,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
 
       // Magic Flow Transmutation
       const resultMarkers: IndexedMarker[] = unsafeTransmute(allMarkers);
-      resultMarkers.forEach((marker, i) => (marker.markerIndex = i));
+      resultMarkers.forEach((marker, i) => (marker.markerRef = i));
       return resultMarkers;
     }
   );
@@ -216,15 +216,15 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerData.groupScreenshotsById
   );
 
-  const getSelectedMarkerIndex: Selector<IndexIntoMarkers | null> = state =>
+  const getSelectedMarkerRef: Selector<MarkerRef | null> = state =>
     threadSelectors.getViewOptions(state).selectedMarker;
 
   const getSelectedMarker: Selector<IndexedMarker | null> = state => {
     const filteredMarkers = getReferenceMarkerTable(state);
-    const selectedMarkerIndex = getSelectedMarkerIndex(state);
-    return selectedMarkerIndex === null
+    const selectedMarkerRef = getSelectedMarkerRef(state);
+    return selectedMarkerRef === null
       ? null
-      : filteredMarkers[selectedMarkerIndex] || null;
+      : filteredMarkers[selectedMarkerRef] || null;
   };
 
   return {
@@ -245,7 +245,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getRangeFilteredScreenshotsById,
     getSearchFilteredMarkers,
     getPreviewFilteredMarkers,
-    getSelectedMarkerIndex,
+    getSelectedMarkerRef,
     getSelectedMarker,
     getIsNetworkChartEmptyInFullRange,
   };

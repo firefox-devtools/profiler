@@ -481,7 +481,7 @@ export function mergeStartAndEndNetworkMarker(
             name: endMarker.name,
             title: endMarker.title,
             start: startMarker.start,
-            markerIndex: startMarker.markerIndex,
+            markerRef: startMarker.markerRef,
           };
           filteredMarkers.push(mergedMarker);
           i++;

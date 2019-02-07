@@ -46,7 +46,7 @@ const VerticalIndicatorsImpl = ({
       data-testid="vertical-indicators"
       className="timelineVerticalIndicators"
     >
-      {verticalMarkers.map((marker, markerIndex) => {
+      {verticalMarkers.map(marker => {
         // Decide on the indicator color.
         let color = '#000';
         switch (marker.name) {
@@ -99,7 +99,7 @@ const VerticalIndicatorsImpl = ({
         // Create the div with a tooltip.
         return (
           <DivWithTooltip
-            key={markerIndex}
+            key={marker.markerRef}
             data-testid="vertical-indicator-line"
             style={{ '--vertical-indicator-color': color, left }}
             className="timelineVerticalIndicatorsLine"

@@ -82,10 +82,10 @@ export type Marker = {|
 
 export type IndexedMarker = {|
   ...Marker,
-  markerIndex: IndexIntoMarkers,
+  markerRef: MarkerRef,
 |};
 
-/* IndexIntoMarkers are used for indexes to the complete derived marker
+/* MarkerRef is used for indexes to the complete derived marker
  * array. It can be used throughout the application to point to a specific
  * marker. Note it can point to different marker arrays, namely:
  * - the main markers array
@@ -101,7 +101,7 @@ export type IndexedMarker = {|
  * the right array, this is the responsibility of the developer to take care of
  * these subtilities.
  */
-export type IndexIntoMarkers = number;
+export type MarkerRef = number;
 
 export type CallNodeData = {
   funcName: string,
@@ -127,16 +127,16 @@ export type CallNodeDisplayData = $Exact<
   }>
 >;
 
-export type MarkerTiming = {
+export type MarkerTiming = {|
   // Start time in milliseconds.
   start: number[],
   // End time in milliseconds.
   end: number[],
-  index: IndexIntoMarkers[],
+  ref: MarkerRef[],
   label: string[],
   name: string,
   length: number,
-};
+|};
 export type MarkerTimingRows = Array<MarkerTiming>;
 
 export type JsTracerTiming = {

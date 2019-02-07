@@ -1366,7 +1366,7 @@ Array [
   Object {
     "data": null,
     "dur": 100,
-    "markerIndex": 0,
+    "markerRef": 0,
     "name": "Jank",
     "start": -96,
     "title": "100.00ms event processing delay",
@@ -1374,7 +1374,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 4,
+    "markerRef": 4,
     "name": "D",
     "start": 3,
     "title": null,
@@ -1382,7 +1382,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 5,
+    "markerRef": 5,
     "name": "E",
     "start": 4,
     "title": null,
@@ -1390,7 +1390,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 6,
+    "markerRef": 6,
     "name": "F",
     "start": 5,
     "title": null,
@@ -1407,7 +1407,7 @@ Array [
       "type": "Network",
     },
     "dur": 1,
-    "markerIndex": 7,
+    "markerRef": 7,
     "name": "G",
     "start": 6,
     "title": null,
@@ -1420,7 +1420,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 4,
+    "markerRef": 4,
     "name": "D",
     "start": 3,
     "title": null,
@@ -1428,7 +1428,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 5,
+    "markerRef": 5,
     "name": "E",
     "start": 4,
     "title": null,
@@ -1436,7 +1436,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 6,
+    "markerRef": 6,
     "name": "F",
     "start": 5,
     "title": null,
@@ -1836,7 +1836,7 @@ Array [
   Object {
     "data": null,
     "dur": 100,
-    "markerIndex": 0,
+    "markerRef": 0,
     "name": "Jank",
     "start": -96,
     "title": "100.00ms event processing delay",
@@ -1850,14 +1850,14 @@ Array [
     "end": Array [
       4,
     ],
-    "index": Array [
-      0,
-    ],
     "label": Array [
       "",
     ],
     "length": 1,
     "name": "Jank",
+    "ref": Array [
+      0,
+    ],
     "start": Array [
       -96,
     ],
@@ -1866,14 +1866,14 @@ Array [
     "end": Array [
       3,
     ],
-    "index": Array [
-      4,
-    ],
     "label": Array [
       "",
     ],
     "length": 1,
     "name": "D",
+    "ref": Array [
+      4,
+    ],
     "start": Array [
       3,
     ],
@@ -1882,14 +1882,14 @@ Array [
     "end": Array [
       4,
     ],
-    "index": Array [
-      5,
-    ],
     "label": Array [
       "",
     ],
     "length": 1,
     "name": "E",
+    "ref": Array [
+      5,
+    ],
     "start": Array [
       4,
     ],
@@ -1898,14 +1898,14 @@ Array [
     "end": Array [
       5,
     ],
-    "index": Array [
-      6,
-    ],
     "label": Array [
       "",
     ],
     "length": 1,
     "name": "F",
+    "ref": Array [
+      6,
+    ],
     "start": Array [
       5,
     ],
@@ -1918,7 +1918,7 @@ Array [
   Object {
     "data": null,
     "dur": 100,
-    "markerIndex": 0,
+    "markerRef": 0,
     "name": "Jank",
     "start": -96,
     "title": "100.00ms event processing delay",
@@ -1926,7 +1926,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 1,
+    "markerRef": 1,
     "name": "A",
     "start": 0,
     "title": null,
@@ -1934,7 +1934,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 2,
+    "markerRef": 2,
     "name": "B",
     "start": 1,
     "title": null,
@@ -1942,7 +1942,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 3,
+    "markerRef": 3,
     "name": "C",
     "start": 2,
     "title": null,
@@ -1950,7 +1950,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 4,
+    "markerRef": 4,
     "name": "D",
     "start": 3,
     "title": null,
@@ -1958,7 +1958,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 5,
+    "markerRef": 5,
     "name": "E",
     "start": 4,
     "title": null,
@@ -1966,7 +1966,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 6,
+    "markerRef": 6,
     "name": "F",
     "start": 5,
     "title": null,
@@ -1983,7 +1983,7 @@ Array [
       "type": "Network",
     },
     "dur": 1,
-    "markerIndex": 7,
+    "markerRef": 7,
     "name": "G",
     "start": 6,
     "title": null,
@@ -2000,7 +2000,7 @@ Array [
       "type": "Network",
     },
     "dur": 1,
-    "markerIndex": 8,
+    "markerRef": 8,
     "name": "G",
     "start": 7,
     "title": null,
@@ -2014,14 +2014,14 @@ Array [
     "end": Array [
       7,
     ],
-    "index": Array [
-      7,
-    ],
     "label": Array [
       "",
     ],
     "length": 1,
     "name": "G",
+    "ref": Array [
+      7,
+    ],
     "start": Array [
       6,
     ],
@@ -3051,7 +3051,7 @@ Array [
   Object {
     "data": null,
     "dur": 100,
-    "markerIndex": 0,
+    "markerRef": 0,
     "name": "Jank",
     "start": -96,
     "title": "100.00ms event processing delay",
@@ -3059,7 +3059,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 4,
+    "markerRef": 4,
     "name": "D",
     "start": 3,
     "title": null,
@@ -3067,7 +3067,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 5,
+    "markerRef": 5,
     "name": "E",
     "start": 4,
     "title": null,
@@ -3075,7 +3075,7 @@ Array [
   Object {
     "data": null,
     "dur": 0,
-    "markerIndex": 6,
+    "markerRef": 6,
     "name": "F",
     "start": 5,
     "title": null,
@@ -3092,7 +3092,7 @@ Array [
       "type": "Network",
     },
     "dur": 1,
-    "markerIndex": 7,
+    "markerRef": 7,
     "name": "G",
     "start": 6,
     "title": null,

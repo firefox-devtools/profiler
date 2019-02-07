@@ -45,7 +45,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       dur: 0,
       name: 'VsyncTimestamp',
       title: null,
-      markerIndex: 1,
+      markerRef: 1,
     });
   });
   it('should create a marker', function() {
@@ -55,7 +55,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       dur: 5,
       name: 'Reflow',
       title: null,
-      markerIndex: 2,
+      markerRef: 2,
     });
   });
   it('should fold the two reflow markers into one marker', function() {
@@ -66,7 +66,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       dur: 5,
       name: 'Reflow',
       title: null,
-      markerIndex: 2,
+      markerRef: 2,
     });
   });
   it('should fold the two Rasterize markers into one marker, after the reflow marker', function() {
@@ -76,7 +76,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       dur: 1,
       name: 'Rasterize',
       title: null,
-      markerIndex: 3,
+      markerRef: 3,
     });
   });
   it('should create a marker for the MinorGC startTime/endTime marker', function() {
@@ -86,7 +86,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       dur: 1,
       name: 'MinorGC',
       title: null,
-      markerIndex: 5,
+      markerRef: 5,
     });
   });
   it('should create a marker for the DOMEvent marker', function() {
@@ -96,7 +96,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'DOMEvent',
       start: 9,
       title: null,
-      markerIndex: 4,
+      markerRef: 4,
     });
   });
   it('should create a marker for the marker UserTiming', function() {
@@ -106,7 +106,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'UserTiming',
       start: 12,
       title: null,
-      markerIndex: 6,
+      markerRef: 6,
     });
   });
   it('should handle markers without a start', function() {
@@ -116,7 +116,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       dur: 1,
       name: 'Rasterize',
       title: null,
-      markerIndex: 0,
+      markerRef: 0,
     });
   });
   it('should handle markers without an end', function() {
@@ -126,7 +126,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       dur: 0,
       name: 'Rasterize',
       title: null,
-      markerIndex: 9,
+      markerRef: 9,
     });
   });
   it('should handle nested markers correctly', function() {
@@ -136,14 +136,14 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       dur: 5,
       name: 'Reflow',
       title: null,
-      markerIndex: 7,
+      markerRef: 7,
     });
     expect(markers[8]).toMatchObject({
       start: 14,
       dur: 1,
       name: 'Reflow',
       title: null,
-      markerIndex: 8,
+      markerRef: 8,
     });
   });
   it('should handle arbitrary event markers correctly', function() {
@@ -154,7 +154,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'ArbitraryName',
       title: null,
       data: { category: 'ArbitraryCategory', type: 'tracing' },
-      markerIndex: 10,
+      markerRef: 10,
     });
   });
   it('shifts content process marker times correctly', function() {
@@ -185,7 +185,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       start: 22,
       title: null,
-      markerIndex: 11,
+      markerRef: 11,
     });
     expect(contentMarkers[11]).toEqual({
       data: {
@@ -211,7 +211,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       start: 1022,
       title: null,
-      markerIndex: 11,
+      markerRef: 11,
     });
     expect(contentMarkers[12]).toEqual({
       data: {
@@ -230,7 +230,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'create/open',
       start: 1022,
       title: null,
-      markerIndex: 12,
+      markerRef: 12,
     });
   });
 });

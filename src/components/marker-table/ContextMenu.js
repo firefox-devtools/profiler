@@ -14,10 +14,7 @@ import {
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import copy from 'copy-to-clipboard';
 
-import type {
-  IndexedMarker,
-  IndexIntoMarkers,
-} from '../../types/profile-derived';
+import type { IndexedMarker, MarkerRef } from '../../types/profile-derived';
 import type { StartEndRange } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
 import type {
@@ -29,7 +26,7 @@ type StateProps = {|
   +markers: IndexedMarker[],
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +selectedMarker: IndexIntoMarkers | null,
+  +selectedMarker: MarkerRef | null,
 |};
 
 type DispatchProps = {|
@@ -137,7 +134,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     markers: selectedThreadSelectors.getReferenceMarkerTable(state),
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
-    selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
+    selectedMarker: selectedThreadSelectors.getSelectedMarkerRef(state),
   }),
   mapDispatchToProps: { updatePreviewSelection },
   component: MarkersContextMenu,

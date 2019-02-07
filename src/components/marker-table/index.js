@@ -20,10 +20,7 @@ import { formatSeconds } from '../../utils/format-numbers';
 import './index.css';
 
 import type { ThreadIndex } from '../../types/profile';
-import type {
-  IndexedMarker,
-  IndexIntoMarkers,
-} from '../../types/profile-derived';
+import type { IndexedMarker, MarkerRef } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -41,7 +38,7 @@ class MarkerTree {
   _filteredMarkers: IndexedMarker[];
   _unfilteredMarkers: IndexedMarker[];
   _zeroAt: Milliseconds;
-  _displayDataByIndex: Map<IndexIntoMarkers, MarkerDisplayData>;
+  _displayDataByIndex: Map<MarkerRef, MarkerDisplayData>;
 
   constructor(
     filteredMarkers: IndexedMarker[],
@@ -54,15 +51,15 @@ class MarkerTree {
     this._displayDataByIndex = new Map();
   }
 
-  getRoots(): IndexIntoMarkers[] {
-    return this._filteredMarkers.map(({ markerIndex }) => markerIndex);
+  getRoots(): MarkerRef[] {
+    return this._filteredMarkers.map(({ markerRef }) => markerRef);
   }
 
-  getChildren(markerIndex: IndexIntoMarkers): IndexIntoMarkers[] {
-    return markerIndex === -1 ? this.getRoots() : [];
+  getChildren(markerRef: MarkerRef): MarkerRef[] {
+    return markerRef === -1 ? this.getRoots() : [];
   }
 
-  hasChildren(_markerIndex: IndexIntoMarkers): boolean {
+  hasChildren(_markerRef: MarkerRef): boolean {
     return false;
   }
 
@@ -70,7 +67,7 @@ class MarkerTree {
     return new Set();
   }
 
-  getParent(): IndexIntoMarkers {
+  getParent(): MarkerRef {
     // -1 isn't used, but needs to be compatible with the call tree.
     return -1;
   }
@@ -83,10 +80,10 @@ class MarkerTree {
     return this._filteredMarkers === tree._filteredMarkers;
   }
 
-  getDisplayData(markerIndex: IndexIntoMarkers): MarkerDisplayData {
-    let displayData = this._displayDataByIndex.get(markerIndex);
+  getDisplayData(markerRef: MarkerRef): MarkerDisplayData {
+    let displayData = this._displayDataByIndex.get(markerRef);
     if (displayData === undefined) {
-      const marker = this._unfilteredMarkers[markerIndex];
+      const marker = this._unfilteredMarkers[markerRef];
       let category = 'unknown';
       let name = marker.name;
       if (marker.data) {
@@ -128,7 +125,7 @@ class MarkerTree {
         name,
         category,
       };
-      this._displayDataByIndex.set(markerIndex, displayData);
+      this._displayDataByIndex.set(markerRef, displayData);
     }
     return displayData;
   }
@@ -160,7 +157,7 @@ type StateProps = {|
   +threadIndex: ThreadIndex,
   +filteredMarkers: IndexedMarker[],
   +unfilteredMarkers: IndexedMarker[],
-  +selectedMarker: IndexIntoMarkers | null,
+  +selectedMarker: MarkerRef | null,
   +zeroAt: Milliseconds,
   +scrollToSelectionGeneration: number,
 |};
@@ -178,7 +175,7 @@ class MarkerTable extends PureComponent<Props> {
     { propName: 'category', title: 'Category' },
   ];
   _mainColumn = { propName: 'name', title: '' };
-  _expandedNodeIds: Array<IndexIntoMarkers | null> = [];
+  _expandedNodeIds: Array<MarkerRef | null> = [];
   _onExpandedNodeIdsChange = () => {};
   _treeView: ?TreeView<MarkerDisplayData>;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
@@ -205,7 +202,7 @@ class MarkerTable extends PureComponent<Props> {
     }
   }
 
-  _onSelectionChange = (selectedMarker: IndexIntoMarkers) => {
+  _onSelectionChange = (selectedMarker: MarkerRef) => {
     const { threadIndex, changeSelectedMarker } = this.props;
     changeSelectedMarker(threadIndex, selectedMarker);
   };
@@ -251,7 +248,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     filteredMarkers: selectedThreadSelectors.getPreviewFilteredMarkers(state),
     unfilteredMarkers: selectedThreadSelectors.getReferenceMarkerTable(state),
-    selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
+    selectedMarker: selectedThreadSelectors.getSelectedMarkerRef(state),
     zeroAt: getZeroAt(state),
   }),
   mapDispatchToProps: { changeSelectedMarker },

@@ -25,21 +25,21 @@ const MAX_STACKING_DEPTH = 300;
  *      name: "A",
  *      start: [0, 23, 35, 65, 75],
  *      end: [1, 25, 37, 67, 77],
- *      index: [0, 2, 5, 6, 8],
+ *      ref: [0, 2, 5, 6, 8],
  *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"]
  *    }
  *    {
  *      name: "B",
  *      start: [1, 28, 39, 69, 70],
  *      end: [2, 29, 49, 70, 77],
- *      index: [1, 3, 7, 9, 10],
+ *      ref: [1, 3, 7, 9, 10],
  *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"]
  *    }
  *    {
  *      name: "C",
  *      start: [10, 33, 45, 75, 85],
  *      end: [11, 35, 47, 77, 87],
- *      index: [4, 11, 12, 13, 14],
+ *      ref: [4, 11, 12, 13, 14],
  *      label: ["Sea", "Sea", "Sea", "Sea", "Sea"]
  *    }
  *  ]
@@ -81,7 +81,7 @@ export function getMarkerTiming(markers: IndexedMarker[]): MarkerTimingRows {
         markerTimingsRow = {
           start: [],
           end: [],
-          index: [],
+          ref: [],
           label: [],
           name: marker.name,
           length: 0,
@@ -96,7 +96,7 @@ export function getMarkerTiming(markers: IndexedMarker[]): MarkerTimingRows {
         markerTimingsRow.start.push(marker.start);
         markerTimingsRow.end.push(marker.start + marker.dur);
         markerTimingsRow.label.push(computeMarkerLabel(marker.data));
-        markerTimingsRow.index.push(marker.markerIndex);
+        markerTimingsRow.ref.push(marker.markerRef);
         markerTimingsRow.length++;
         break;
       }

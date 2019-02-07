@@ -24,7 +24,7 @@ import type { ThreadIndex } from '../../types/profile';
 import type {
   IndexedMarker,
   MarkerTimingRows,
-  IndexIntoMarkers,
+  MarkerRef,
 } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
@@ -72,7 +72,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoMarkers | null
+    hoveredItem: MarkerRef | null
   ) => {
     const {
       rowHeight,
@@ -148,7 +148,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
   drawMarkers(
     ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoMarkers | null,
+    hoveredItem: MarkerRef | null,
     startRow: number,
     endRow: number
   ) {
@@ -220,8 +220,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
             w = 10;
           }
 
-          const markerIndex = markerTiming.index[i];
-          const isHovered = hoveredItem === markerIndex;
+          const markerRef = markerTiming.ref[i];
+          const isHovered = hoveredItem === markerRef;
           const text = markerTiming.label[i];
           if (isHovered) {
             hoveredElement = { x, y, w, h, uncutWidth, text };
@@ -295,7 +295,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     }
   }
 
-  hitTest = (x: CssPixels, y: CssPixels): IndexIntoMarkers | null => {
+  hitTest = (x: CssPixels, y: CssPixels): MarkerRef | null => {
     const {
       rangeStart,
       rangeEnd,
@@ -332,18 +332,18 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       // Ensure that really small markers are hoverable with a minDuration.
       const end = Math.max(start + minDuration, markerTiming.end[i]);
       if (start < time && end > time) {
-        return markerTiming.index[i];
+        return markerTiming.ref[i];
       }
     }
     return null;
   };
 
-  onDoubleClickMarker = (markerIndex: IndexIntoMarkers | null) => {
-    if (markerIndex === null) {
+  onDoubleClickMarker = (markerRef: MarkerRef | null) => {
+    if (markerRef === null) {
       return;
     }
     const { unfilteredMarkers, updatePreviewSelection } = this.props;
-    const marker = unfilteredMarkers[markerIndex];
+    const marker = unfilteredMarkers[markerRef];
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
@@ -368,7 +368,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo = (hoveredItem: IndexIntoMarkers): React.Node => {
+  getHoveredMarkerInfo = (hoveredItem: MarkerRef): React.Node => {
     const marker = this.props.unfilteredMarkers[hoveredItem];
     return (
       <MarkerTooltipContents

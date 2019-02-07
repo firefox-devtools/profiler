@@ -22,7 +22,7 @@ import type {
   GlobalTrack,
   LocalTrack,
   TrackIndex,
-  IndexIntoMarkers,
+  MarkerRef,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -36,7 +36,7 @@ export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
   +expandedCallNodePaths: PathSet,
-  +selectedMarker: IndexIntoMarkers | null,
+  +selectedMarker: MarkerRef | null,
 |};
 
 export type ProfileSharingStatus = {|

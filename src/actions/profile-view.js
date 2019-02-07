@@ -49,7 +49,7 @@ import type {
   CallNodePath,
   CallNodeInfo,
   IndexIntoCallNodeTable,
-  IndexIntoMarkers,
+  MarkerRef,
   TrackIndex,
 } from '../types/profile-derived';
 import type { Transform } from '../types/transforms';
@@ -841,7 +841,7 @@ export function changeExpandedCallNodes(
 
 export function changeSelectedMarker(
   threadIndex: ThreadIndex,
-  selectedMarker: IndexIntoMarkers | null
+  selectedMarker: MarkerRef | null
 ): Action {
   return {
     type: 'CHANGE_SELECTED_MARKER',

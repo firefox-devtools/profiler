@@ -99,7 +99,7 @@ describe('selectors/getMarkerChartTiming', function() {
           // marker will start at that same point.
           start: [1],
           end: [1],
-          index: [0],
+          ref: [0],
           label: [''],
           length: 1,
         },
@@ -119,7 +119,7 @@ describe('selectors/getMarkerChartTiming', function() {
           name: 'Rasterize',
           start: [20],
           end: [21], // Truncated using the time of the last sample.
-          index: [0],
+          ref: [0],
           label: [''],
           length: 1,
         },
