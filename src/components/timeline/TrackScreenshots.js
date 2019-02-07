@@ -263,9 +263,10 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
     const timeToPixel = time =>
       outerContainerWidth * (time - rangeStart) / rangeLength;
 
+    const leftmostPixel = Math.max(timeToPixel(screenshots[0].start), 0);
     let screenshotIndex = 0;
     for (
-      let left = timeToPixel(screenshots[0].start);
+      let left = leftmostPixel;
       left < outerContainerWidth;
       left += imageContainerWidth
     ) {
