@@ -162,6 +162,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
     } = this.props;
 
+    const { devicePixelRatio } = window;
     const markerContainerWidth = containerWidth - marginLeft - marginRight;
 
     const rangeLength: Milliseconds = rangeEnd - rangeStart;
@@ -189,7 +190,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       }
 
       let hoveredElement: MarkerDrawingInformation | null = null;
-      let previousDrawnPixel: number = -1;
+      let previousDrawnPixel: number | null = null;
       for (let i = 0; i < markerTiming.length; i++) {
         // Only draw samples that are in bounds.
         if (
@@ -221,14 +222,15 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
             w = 10;
           }
 
-          x = Math.round(x);
+          x = Math.round(x * devicePixelRatio) / devicePixelRatio;
 
           const markerIndex = markerTiming.index[i];
           const isHovered = hoveredItem === markerIndex;
           const text = markerTiming.label[i];
           if (isHovered) {
             hoveredElement = { x, y, w, h, uncutWidth, text };
-          } else if (x !== previousDrawnPixel) {
+          } else if (x !== previousDrawnPixel || uncutWidth > 0) {
+            // We avoid to draw several dot markers in the same place.
             previousDrawnPixel = x;
             this.drawOneMarker(ctx, x, y, w, h, uncutWidth, text);
           }
