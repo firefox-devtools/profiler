@@ -147,6 +147,9 @@ describe('MarkerChart', function() {
       // drawn both together.
       ['Marker A', 5000, null],
       ['Marker A', 5001, null],
+      // This is a longer marker, it should always be drawn even if it starts at
+      // the same location as a dot marker
+      ['Marker A', 5001, { startTime: 5001, endTime: 7000 }],
       [
         'Marker last',
         15000,
@@ -160,7 +163,8 @@ describe('MarkerChart', function() {
 
     const drawCalls = flushDrawLog();
 
-    // Check that we have 3 arc operations
+    // Check that we have 3 arc operations (first marker, one of the 2 dot
+    // markers in the middle, and last marker)
     const arcOperations = drawCalls.filter(
       ([operation]) => operation === 'arc'
     );
@@ -169,6 +173,14 @@ describe('MarkerChart', function() {
     // Check that all X values are different
     const arcOperationsX = new Set(arcOperations.map(([, x]) => Math.round(x)));
     expect(arcOperationsX.size).toBe(3);
+
+    // Check that we have a fillRect operation for the longer marker.
+    // We filter on the height to get only 1 relevant fillRect operation per marker
+    const fillRectOperations = drawCalls.filter(
+      ([operation, , , , height]) =>
+        operation === 'fillRect' && height > 1 && height < 16
+    );
+    expect(fillRectOperations).toHaveLength(1);
 
     delete window.devicePixelRatio;
   });

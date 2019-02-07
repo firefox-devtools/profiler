@@ -108,6 +108,8 @@ describe('TimelineMarkers', function() {
       // 2 very close dot markers. They shouldn't be drawn both together.
       ['Marker A', 5000, null],
       ['Marker B', 5001, null],
+      // This is a longer marker starting at the same place, it should always be drawn
+      ['Marker C', 5001, { startTime: 5001, endTime: 7000 }],
     ];
     const profile = getProfileWithMarkers(markers);
 
@@ -128,12 +130,14 @@ describe('TimelineMarkers', function() {
     flushRafCalls();
 
     const drawCalls = ctx.__flushDrawLog();
+
+    // We filter on height to get only 1 relevant fillRect operation for each marker.
     const fillRectOperations = drawCalls.filter(
-      ([operation]) => operation === 'fillRect'
+      ([operation, , , , height]) => operation === 'fillRect' && height > 1
     );
 
-    // There are 3 fillRect operations for each marker
-    expect(fillRectOperations).toHaveLength(3);
+    // Here 2 markers should be drawn: the first dot, and the long marker.
+    expect(fillRectOperations).toHaveLength(2);
 
     delete window.devicePixelRatio;
   });
