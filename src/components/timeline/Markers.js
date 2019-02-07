@@ -283,7 +283,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       }
       previousPos = pos;
       const itemWidth = Number.isFinite(dur)
-        ? dur / (rangeEnd - rangeStart) * width
+        ? Math.max(dur / (rangeEnd - rangeStart) * width, 1 / devicePixelRatio)
         : Number.MAX_SAFE_INTEGER;
       const markerStyle =
         name in markerStyles ? markerStyles[name] : markerStyles.default;
