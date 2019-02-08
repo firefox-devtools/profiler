@@ -271,11 +271,19 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     ctx.clearRect(0, 0, pixelWidth, pixelHeight);
     ctx.scale(devicePixelRatio, devicePixelRatio);
 
+    let previousPos = null;
     markers.forEach(marker => {
       const { start, dur, name } = marker;
-      const pos = (start - rangeStart) / (rangeEnd - rangeStart) * width;
+      let pos = (start - rangeStart) / (rangeEnd - rangeStart) * width;
+      pos = Math.round(pos * devicePixelRatio) / devicePixelRatio;
+
+      if (previousPos === pos && dur === 0) {
+        // This position has already been drawn, let's move to the next marker!
+        return;
+      }
+      previousPos = pos;
       const itemWidth = Number.isFinite(dur)
-        ? dur / (rangeEnd - rangeStart) * width
+        ? Math.max(dur / (rangeEnd - rangeStart) * width, 1 / devicePixelRatio)
         : Number.MAX_SAFE_INTEGER;
       const markerStyle =
         name in markerStyles ? markerStyles[name] : markerStyles.default;

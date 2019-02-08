@@ -92,4 +92,58 @@ describe('TimelineMarkers', function() {
 
     delete window.devicePixelRatio;
   });
+
+  it('does not render several dot markers in the same position', () => {
+    const flushRafCalls = mockRaf();
+    window.devicePixelRatio = 2;
+    const ctx = mockCanvasContext();
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(200, 300));
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => ctx);
+
+    const markers = [
+      // 2 very close dot markers. They shouldn't be drawn both together.
+      ['Marker A', 5000, null],
+      ['Marker B', 5001, null],
+      // This is a longer marker starting at the same place, it should always be drawn
+      ['Marker C', 5001, { startTime: 5001, endTime: 7000 }],
+    ];
+    const profile = getProfileWithMarkers(markers);
+
+    render(
+      <Provider store={storeWithProfile(profile)}>
+        <TimelineMarkersOverview
+          rangeStart={0}
+          rangeEnd={15000}
+          threadIndex={0}
+          onSelect={() => {}}
+        />
+      </Provider>
+    );
+
+    // We need to flush twice since when the first flush is run, it
+    // will request more code to be run in later animation frames.
+    flushRafCalls();
+    flushRafCalls();
+
+    const drawCalls = ctx.__flushDrawLog();
+
+    // We filter on height to get only 1 relevant fillRect operation for each marker.
+    const fillRectOperations = drawCalls.filter(
+      ([operation, , , , height]) => operation === 'fillRect' && height > 1
+    );
+
+    // Here 2 markers should be drawn: the first dot, and the long marker.
+    expect(fillRectOperations).toHaveLength(2);
+    expect(
+      fillRectOperations.every(
+        ([, , , width]) => width >= 1 / window.devicePixelRatio
+      )
+    ).toBe(true);
+
+    delete window.devicePixelRatio;
+  });
 });
