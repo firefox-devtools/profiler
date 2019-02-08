@@ -95,7 +95,7 @@ describe('TimelineMarkers', function() {
 
   it('does not render several dot markers in the same position', () => {
     const flushRafCalls = mockRaf();
-    window.devicePixelRatio = 1;
+    window.devicePixelRatio = 2;
     const ctx = mockCanvasContext();
     jest
       .spyOn(HTMLCanvasElement.prototype, 'getBoundingClientRect')
@@ -138,6 +138,11 @@ describe('TimelineMarkers', function() {
 
     // Here 2 markers should be drawn: the first dot, and the long marker.
     expect(fillRectOperations).toHaveLength(2);
+    expect(
+      fillRectOperations.every(
+        ([, , , width]) => width >= 1 / window.devicePixelRatio
+      )
+    ).toBe(true);
 
     delete window.devicePixelRatio;
   });

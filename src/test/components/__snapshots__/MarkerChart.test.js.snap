@@ -500,9 +500,9 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
     <div>
       <canvas
         class="chartCanvas markerChartCanvas"
-        height="300"
+        height="600"
         style="width: 365px; height: 300px;"
-        width="365"
+        width="730"
       />
     </div>
     <div
@@ -530,6 +530,11 @@ Array [
     "scale",
     1,
     1,
+  ],
+  Array [
+    "scale",
+    2,
+    2,
   ],
   Array [
     "set fillStyle",
@@ -589,21 +594,21 @@ Array [
   ],
   Array [
     "fillRect",
-    289,
+    288.5,
     1,
     48,
     1,
   ],
   Array [
     "fillRect",
-    288,
+    287.5,
     2,
     50,
     11,
   ],
   Array [
     "fillRect",
-    289,
+    288.5,
     13,
     48,
     1,
@@ -694,21 +699,21 @@ Array [
   ],
   Array [
     "fillRect",
-    214,
+    213.5,
     65,
     123,
     1,
   ],
   Array [
     "fillRect",
-    213,
+    212.5,
     66,
     125,
     11,
   ],
   Array [
     "fillRect",
-    214,
+    213.5,
     77,
     123,
     1,
@@ -723,21 +728,21 @@ Array [
   ],
   Array [
     "fillRect",
-    214,
+    213.5,
     81,
     60.5,
     1,
   ],
   Array [
     "fillRect",
-    213,
+    212.5,
     82,
     62.5,
     11,
   ],
   Array [
     "fillRect",
-    214,
+    213.5,
     93,
     60.5,
     1,
@@ -753,7 +758,7 @@ Array [
   Array [
     "fillText",
     "click",
-    216,
+    215.5,
     91,
   ],
   Array [
@@ -765,7 +770,7 @@ Array [
   ],
   Array [
     "arc",
-    243,
+    242.5,
     103.5,
     3.75,
     0,
@@ -780,21 +785,21 @@ Array [
   ],
   Array [
     "fillRect",
-    264,
+    263.5,
     113,
     85.5,
     1,
   ],
   Array [
     "fillRect",
-    263,
+    262.5,
     114,
     87.5,
     11,
   ],
   Array [
     "fillRect",
-    264,
+    263.5,
     125,
     85.5,
     1,

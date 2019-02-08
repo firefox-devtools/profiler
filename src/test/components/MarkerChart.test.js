@@ -118,7 +118,7 @@ describe('MarkerChart', function() {
   afterEach(removeRootOverlayElement);
 
   it('renders the normal marker chart and matches the snapshot', () => {
-    window.devicePixelRatio = 1;
+    window.devicePixelRatio = 2;
 
     const profile = getProfileWithMarkers([...MARKERS]);
     const {
