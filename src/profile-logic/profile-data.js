@@ -1247,7 +1247,7 @@ export function convertStackToCallNodePath(
   ) {
     path.push(frameTable.func[stackTable.frame[stackIndex]]);
   }
-  return path;
+  return path.reverse();
 }
 
 /**
@@ -1508,6 +1508,27 @@ export function getOriginAnnotationForFunc(
   }
 
   return '';
+}
+
+/**
+ * From a valid call node path, this function returns a list of information
+ * about each function in this path: their names and their origins.
+ */
+export function getFuncNamesAndOriginsForPath(
+  path: CallNodePath,
+  thread: Thread
+): Array<{ funcName: string, origin: string }> {
+  const { funcTable, stringTable, resourceTable } = thread;
+
+  return path.map(func => ({
+    funcName: stringTable.getString(funcTable.name[func]),
+    origin: getOriginAnnotationForFunc(
+      func,
+      funcTable,
+      resourceTable,
+      stringTable
+    ),
+  }));
 }
 
 /**

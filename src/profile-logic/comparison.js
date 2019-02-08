@@ -39,6 +39,9 @@ export function mergeProfiles(
   implementationFilters: ImplementationFilter[],
 |} {
   const resultProfile = getEmptyProfile();
+  resultProfile.meta.interval = Math.min(
+    ...profiles.map(profile => profile.meta.interval)
+  );
 
   // First let's merge categories. We'll use the resulting maps when
   // handling the thread data later.
