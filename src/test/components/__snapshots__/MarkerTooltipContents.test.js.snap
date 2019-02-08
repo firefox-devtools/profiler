@@ -224,7 +224,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: DiskIO-114 
       Source
       :
     </div>
-    PoisonOIInterposer
+    PoisonIOInterposer
     <div
       class="tooltipLabel"
     >

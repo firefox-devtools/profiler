@@ -109,9 +109,19 @@ class MarkerTree {
             break;
           case 'DiskIO':
             category = data.type;
-            name = data.filename
-              ? `${data.operation} – ${data.filename}`
-              : data.operation;
+            if (data.source) {
+              name = `(${data.source}) `;
+              // e.g. "(PoisonIOInterposer) "
+            }
+            name += data.operation;
+            if (data.filename) {
+              // Name is now:
+              // "(PoisonIOInterposer) "
+              // "(PoisonIOInterposer) create/open"
+              name = data.operation
+                ? `${name} — ${data.filename}`
+                : data.filename;
+            }
             break;
           case 'Bailout':
             category = 'Bailout';

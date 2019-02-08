@@ -401,7 +401,7 @@ describe('MarkerTooltipContents', function() {
           type: 'DiskIO',
           startTime: 114,
           endTime: 115,
-          source: 'PoisonOIInterposer',
+          source: 'PoisonIOInterposer',
           filename: '/foo/bar',
           operation: 'create/open',
           cause: {
