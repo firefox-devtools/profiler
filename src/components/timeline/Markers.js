@@ -25,6 +25,9 @@ import type {
 } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
 
+// Exported for tests.
+export const MIN_MARKER_WIDTH = 0.3;
+
 type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 
 /**
@@ -289,7 +292,10 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       }
       previousPos = pos;
       const itemWidth = Number.isFinite(dur)
-        ? Math.max(dur / (rangeEnd - rangeStart) * width, 1 / devicePixelRatio)
+        ? Math.max(
+            dur / (rangeEnd - rangeStart) * width,
+            MIN_MARKER_WIDTH / devicePixelRatio
+          )
         : Number.MAX_SAFE_INTEGER;
       const markerStyle =
         name in markerStyles ? markerStyles[name] : markerStyles.default;
