@@ -97,7 +97,12 @@ describe('timeline/TrackScreenshots', function() {
         thread.markers.time[markerIndexB]
       )
     );
-    expect(container.querySelector('.timelineTrackScreenshotImg')).toBeTruthy();
+
+    const firstImage = ensureExists(
+      container.querySelector('.timelineTrackScreenshotImgContainer'),
+      `Couldn't find at least one screenshot image.`
+    );
+    expect(parseInt(firstImage.style.left)).toBeGreaterThanOrEqual(0);
   });
 
   it('renders a no images when zooming into a range before screenshots', () => {
