@@ -334,11 +334,12 @@ export type NetworkPayload = {|
 |};
 
 export type DiskIoPayload = {|
-  type: 'io',
+  type: 'DiskIO',
   startTime: number,
   endTime: number,
   cause?: CauseBacktrace,
   source: string,
+  operation: string,
   filename: string,
 |};
 

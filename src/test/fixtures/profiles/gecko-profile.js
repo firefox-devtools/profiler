@@ -421,14 +421,15 @@ function _createGeckoThread(): GeckoThread {
           },
         ],
         [
-          14, // create/open
+          14, // DiskIO
           24,
           {
-            type: 'io',
+            type: 'DiskIO',
             startTime: 22,
             endTime: 24,
             source: 'PoisionOIInterposer',
             filename: '/foo/bar/',
+            operation: 'create/open',
             stack: {
               markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
               name: 'SyncProfile',
@@ -481,7 +482,7 @@ function _createGeckoThread(): GeckoThread {
       'UserTiming', // 11
       'ArbitraryName', // 12
       'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5', // 13
-      'create/open', // 14
+      'DiskIO', // 14
     ],
   };
 }
