@@ -38,20 +38,24 @@
   box-sizing: border-box;
   flex-flow: row nowrap;
   align-items: center;
-  padding-left: 14px;
   border-right: 1px solid var(--grey-30);
   cursor: default;
 }
 
 .timelineTrackNameButton {
   overflow: hidden;
-  padding: 0;
-  margin: 0;
+
+  /* The 8px are used by the box-shadow when the button receives focus */
+  width: calc(100% - 8px);
+  height: calc(100% - 8px);
+  padding: 0 0 0 10px;
+  margin: auto;
   border: none;
   background: none;
   font: message-box;
   font-size: 100%;
   font-weight: normal;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }

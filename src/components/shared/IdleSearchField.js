@@ -110,7 +110,8 @@ class IdleSearchField extends PureComponent<Props, State> {
         <input
           type="search"
           name="search"
-          className="idleSearchFieldInput"
+          placeholder="Enter filter terms"
+          className="idleSearchFieldInput photon-input"
           required="required"
           title={title}
           value={this.state.value}

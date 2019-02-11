@@ -583,7 +583,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
                 >
                   <input
                     type="text"
-                    className="menuButtonsPermalinkTextField"
+                    className="menuButtonsPermalinkTextField photon-input"
                     value={shortUrl}
                     readOnly="readOnly"
                     ref={this._takePermalinkTextFieldRef}
