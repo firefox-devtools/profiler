@@ -158,7 +158,7 @@ class LoadFromUrl extends React.PureComponent<
     return (
       <form className="homeSectionLoadFromUrl" onSubmit={this._upload}>
         <input
-          className="homeSectionLoadFromUrlInput"
+          className="homeSectionLoadFromUrlInput photon-input"
           type="url"
           placeholder="https://"
           value={this.state.value}
