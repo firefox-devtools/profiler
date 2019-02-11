@@ -222,6 +222,25 @@ class TreeViewRowScrolledColumns<
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     const RenderComponent = mainColumn.component;
 
+    // ariaExpanded is null by default
+    let ariaExpanded = null;
+
+    // if a node can be expanded (has children), and is not expanded yet,
+    // aria-expanded is false
+    if (canBeExpanded) {
+      ariaExpanded = false;
+    }
+
+    // if a node is expanded, ariaExpanded is true
+    if (isExpanded) {
+      ariaExpanded = true;
+    }
+    // cleaning up self time display so we can use it in aria-label below
+    let selfTimeDisplay = displayData.selfTimeWithUnit;
+    if (selfTimeDisplay === '—') {
+      selfTimeDisplay = '0ms';
+    }
+
     return (
       <div
         className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${
@@ -229,6 +248,16 @@ class TreeViewRowScrolledColumns<
         } ${displayData.dim ? 'dim' : ''}`}
         style={rowHeightStyle}
         onMouseDown={this._onMouseDown}
+        // making the call tree more accessible by adding aria attributes
+        aria-expanded={ariaExpanded}
+        aria-level={depth}
+        aria-selected={selected}
+        aria-label={`Name: ${displayData.name}, running time: ${
+          displayData.totalTimeWithUnit
+        }, running time in percentage: ${
+          displayData.totalTimePercent
+        }, self time: ${selfTimeDisplay}`}
+        role="treeitem"
       >
         <span
           className="treeRowIndentSpacer"
@@ -382,6 +411,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     }
     const canBeExpanded = tree.hasChildren(nodeId);
     const isExpanded = !this._isCollapsed(nodeId);
+
     return (
       <TreeViewRowScrolledColumns
         rowHeightStyle={rowHeightStyle}
@@ -639,6 +669,8 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
         >
           <VirtualList
             className="treeViewBody"
+            role="tree"
+            ariaLabel="Call tree"
             items={this._visibleRows}
             renderItem={this._renderRow}
             itemHeight={rowHeight}

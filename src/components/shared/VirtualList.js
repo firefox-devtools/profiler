@@ -172,6 +172,8 @@ type VirtualListProps = {|
   +disableOverscan: boolean,
   +columnCount: number,
   +containerWidth: CssPixels,
+  +role?: string,
+  +ariaLabel?: string,
 |};
 
 type Geometry = {
@@ -308,6 +310,8 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
       specialItems,
       onKeyDown,
       containerWidth,
+      role,
+      ariaLabel,
     } = this.props;
     const columnCount = this.props.columnCount || 1;
     const { visibleRangeStart, visibleRangeEnd } = this.computeVisibleRange();
@@ -317,6 +321,9 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
         ref={this._takeContainerRef}
         tabIndex={focusable ? 0 : -1}
         onKeyDown={onKeyDown}
+        // making the call tree more accessible
+        role={role}
+        aria-label={ariaLabel}
       >
         <div className={`${className}InnerWrapper`}>
           {range(columnCount).map(columnIndex => (
