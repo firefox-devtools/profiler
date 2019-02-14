@@ -2,12 +2,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-// $FlowExpectError Flow doesn't know about this module
+//
 const { parentPort, workerData } = require('worker_threads');
 const fs = require('fs');
 const vm = require('vm');
 
-if (!workerData) {
+if (typeof workerData !== 'string') {
   throw new Error(`Please pass a file name using the 'workerData' property.`);
 }
 
