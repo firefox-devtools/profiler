@@ -1,5 +1,8 @@
-# Headers for the entire site. The /* represents matching all routes, NOT a comment.
+# Clear out old service workers for renaming to profiler.firefox.com
+https://perf-html.io/*
+  Clear-Site-Data: "*"
 
+# Headers for the entire site. The /* represents matching all routes, NOT a comment.
 /*
   # Do not try to guess the content-type for JS and CSS files served with a wrong mime-type.
   X-Content-Type-Options: nosniff
