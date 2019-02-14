@@ -25,6 +25,9 @@ import type {
 } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
 
+// Exported for tests.
+export const MIN_MARKER_WIDTH = 0.3;
+
 type MarkerState = 'PRESSED' | 'HOVERED' | 'NONE';
 
 /**
@@ -111,7 +114,9 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     const { width, rangeStart, rangeEnd, markers } = this.props;
     const x = e.pageX - r.left;
     const y = e.pageY - r.top;
-    const time = rangeStart + x / width * (rangeEnd - rangeStart);
+    const rangeLength = rangeEnd - rangeStart;
+    const time = rangeStart + x / width * rangeLength;
+    const onePixelTime = rangeLength / width * window.devicePixelRatio;
 
     // Markers are drawn in array order; the one drawn last is on top. So if
     // there are multiple markers under the mouse, we want to find the one
@@ -119,7 +124,8 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     // from high index to low index, which is front to back in z-order.
     for (let i = markers.length - 1; i >= 0; i--) {
       const { start, dur, name } = markers[i];
-      if (time < start || time >= start + dur) {
+      const duration = Math.max(dur, onePixelTime);
+      if (time < start || time >= start + duration) {
         continue;
       }
       const markerStyle =
@@ -286,7 +292,10 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       }
       previousPos = pos;
       const itemWidth = Number.isFinite(dur)
-        ? Math.max(dur / (rangeEnd - rangeStart) * width, 1 / devicePixelRatio)
+        ? Math.max(
+            dur / (rangeEnd - rangeStart) * width,
+            MIN_MARKER_WIDTH / devicePixelRatio
+          )
         : Number.MAX_SAFE_INTEGER;
       const markerStyle =
         name in markerStyles ? markerStyles[name] : markerStyles.default;
