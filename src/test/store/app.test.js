@@ -13,7 +13,7 @@ import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
-  getNetworkMarker,
+  getNetworkMarkers,
   getProfileWithJsTracerEvents,
 } from '../fixtures/profiles/processed-profile';
 
@@ -78,7 +78,7 @@ describe('app actions', function() {
     });
 
     it('shows the network chart when network markers are present in the thread', function() {
-      const profile = getProfileWithMarkers([getNetworkMarker(10, 0)]);
+      const profile = getProfileWithMarkers(getNetworkMarkers(10, 0));
       const { getState } = storeWithProfile(profile);
       expect(AppSelectors.getVisibleTabs(getState())).toEqual([
         'calltree',

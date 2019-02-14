@@ -236,55 +236,10 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
-        "data": Array [
-          null,
-          null,
-          null,
-          null,
-          null,
-          null,
-          Object {
-            "RedirectURI": "https://mozilla.org",
-            "URI": "https://mozilla.org",
-            "endTime": 7,
-            "id": 6,
-            "pri": 0,
-            "startTime": 6,
-            "status": "STOP",
-            "type": "Network",
-          },
-          Object {
-            "RedirectURI": "https://mozilla.org",
-            "URI": "https://mozilla.org",
-            "endTime": 8,
-            "id": 7,
-            "pri": 0,
-            "startTime": 7,
-            "status": "STOP",
-            "type": "Network",
-          },
-        ],
-        "length": 8,
-        "name": Array [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          6,
-        ],
-        "time": Array [
-          0,
-          1,
-          2,
-          3,
-          4,
-          5,
-          6,
-          7,
-        ],
+        "data": Array [],
+        "length": 0,
+        "name": Array [],
+        "time": Array [],
       },
       "name": "Thread with samples",
       "pausedRanges": Array [],
@@ -433,11 +388,31 @@ Object {
           Object {
             "RedirectURI": "https://mozilla.org",
             "URI": "https://mozilla.org",
-            "endTime": 7,
+            "endTime": 6.5,
             "id": 6,
             "pri": 0,
             "startTime": 6,
-            "status": "STOP",
+            "status": "STATUS_START",
+            "type": "Network",
+          },
+          Object {
+            "RedirectURI": "https://mozilla.org",
+            "URI": "https://mozilla.org",
+            "endTime": 7,
+            "id": 6,
+            "pri": 0,
+            "startTime": 6.5,
+            "status": "STATUS_STOP",
+            "type": "Network",
+          },
+          Object {
+            "RedirectURI": "https://mozilla.org",
+            "URI": "https://mozilla.org",
+            "endTime": 7.5,
+            "id": 7,
+            "pri": 0,
+            "startTime": 7,
+            "status": "STATUS_START",
             "type": "Network",
           },
           Object {
@@ -446,12 +421,12 @@ Object {
             "endTime": 8,
             "id": 7,
             "pri": 0,
-            "startTime": 7,
-            "status": "STOP",
+            "startTime": 7.5,
+            "status": "STATUS_STOP",
             "type": "Network",
           },
         ],
-        "length": 8,
+        "length": 10,
         "name": Array [
           0,
           1,
@@ -461,6 +436,8 @@ Object {
           5,
           6,
           6,
+          7,
+          7,
         ],
         "time": Array [
           0,
@@ -470,7 +447,9 @@ Object {
           4,
           5,
           6,
+          6.5,
           7,
+          7.5,
         ],
       },
       "name": "Thread with markers",
@@ -516,7 +495,8 @@ Object {
           "D",
           "E",
           "F",
-          "Load 123: https://mozilla.org",
+          "Load 6: https://mozilla.org",
+          "Load 7: https://mozilla.org",
         ],
         "_stringToIndex": Map {
           "A" => 0,
@@ -525,7 +505,8 @@ Object {
           "D" => 3,
           "E" => 4,
           "F" => 5,
-          "Load 123: https://mozilla.org" => 6,
+          "Load 6: https://mozilla.org" => 6,
+          "Load 7: https://mozilla.org" => 7,
         },
       },
       "tid": 0,
@@ -711,55 +692,10 @@ Array [
     },
     "libs": Array [],
     "markers": Object {
-      "data": Array [
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        Object {
-          "RedirectURI": "https://mozilla.org",
-          "URI": "https://mozilla.org",
-          "endTime": 7,
-          "id": 6,
-          "pri": 0,
-          "startTime": 6,
-          "status": "STOP",
-          "type": "Network",
-        },
-        Object {
-          "RedirectURI": "https://mozilla.org",
-          "URI": "https://mozilla.org",
-          "endTime": 8,
-          "id": 7,
-          "pri": 0,
-          "startTime": 7,
-          "status": "STOP",
-          "type": "Network",
-        },
-      ],
-      "length": 8,
-      "name": Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        6,
-      ],
-      "time": Array [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7,
-      ],
+      "data": Array [],
+      "length": 0,
+      "name": Array [],
+      "time": Array [],
     },
     "name": "Thread with samples",
     "pausedRanges": Array [],
@@ -908,11 +844,31 @@ Array [
         Object {
           "RedirectURI": "https://mozilla.org",
           "URI": "https://mozilla.org",
-          "endTime": 7,
+          "endTime": 6.5,
           "id": 6,
           "pri": 0,
           "startTime": 6,
-          "status": "STOP",
+          "status": "STATUS_START",
+          "type": "Network",
+        },
+        Object {
+          "RedirectURI": "https://mozilla.org",
+          "URI": "https://mozilla.org",
+          "endTime": 7,
+          "id": 6,
+          "pri": 0,
+          "startTime": 6.5,
+          "status": "STATUS_STOP",
+          "type": "Network",
+        },
+        Object {
+          "RedirectURI": "https://mozilla.org",
+          "URI": "https://mozilla.org",
+          "endTime": 7.5,
+          "id": 7,
+          "pri": 0,
+          "startTime": 7,
+          "status": "STATUS_START",
           "type": "Network",
         },
         Object {
@@ -921,12 +877,12 @@ Array [
           "endTime": 8,
           "id": 7,
           "pri": 0,
-          "startTime": 7,
-          "status": "STOP",
+          "startTime": 7.5,
+          "status": "STATUS_STOP",
           "type": "Network",
         },
       ],
-      "length": 8,
+      "length": 10,
       "name": Array [
         0,
         1,
@@ -936,6 +892,8 @@ Array [
         5,
         6,
         6,
+        7,
+        7,
       ],
       "time": Array [
         0,
@@ -945,7 +903,9 @@ Array [
         4,
         5,
         6,
+        6.5,
         7,
+        7.5,
       ],
     },
     "name": "Thread with markers",
@@ -991,7 +951,8 @@ Array [
         "D",
         "E",
         "F",
-        "Load 123: https://mozilla.org",
+        "Load 6: https://mozilla.org",
+        "Load 7: https://mozilla.org",
       ],
       "_stringToIndex": Map {
         "A" => 0,
@@ -1000,11 +961,421 @@ Array [
         "D" => 3,
         "E" => 4,
         "F" => 5,
-        "Load 123: https://mozilla.org" => 6,
+        "Load 6: https://mozilla.org" => 6,
+        "Load 7: https://mozilla.org" => 7,
       },
     },
     "tid": 0,
     "unregisterTime": null,
+  },
+]
+`;
+
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkers 1`] = `
+Array [
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "D",
+    "start": 3,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "E",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "F",
+    "start": 5,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 6.5,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6,
+      "status": "STATUS_START",
+      "type": "Network",
+    },
+    "dur": 0.5,
+    "name": "Load 6: https://mozilla.org",
+    "start": 6,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 7,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6.5,
+      "status": "STATUS_STOP",
+      "type": "Network",
+    },
+    "dur": 0.5,
+    "name": "Load 6: https://mozilla.org",
+    "start": 6.5,
+    "title": null,
+  },
+]
+`;
+
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkersForHeader 1`] = `
+Array [
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "D",
+    "start": 3,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "E",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "F",
+    "start": 5,
+    "title": null,
+  },
+]
+`;
+
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getMarkerChartTiming 1`] = `
+Array [
+  Object {
+    "end": Array [
+      3,
+    ],
+    "index": Array [
+      0,
+    ],
+    "label": Array [
+      "",
+    ],
+    "length": 1,
+    "name": "D",
+    "start": Array [
+      3,
+    ],
+  },
+  Object {
+    "end": Array [
+      4,
+    ],
+    "index": Array [
+      1,
+    ],
+    "label": Array [
+      "",
+    ],
+    "length": 1,
+    "name": "E",
+    "start": Array [
+      4,
+    ],
+  },
+  Object {
+    "end": Array [
+      5,
+    ],
+    "index": Array [
+      2,
+    ],
+    "label": Array [
+      "",
+    ],
+    "length": 1,
+    "name": "F",
+    "start": Array [
+      5,
+    ],
+  },
+]
+`;
+
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getNetworkChartTiming 1`] = `
+Array [
+  Object {
+    "end": Array [
+      6.5,
+      7,
+    ],
+    "index": Array [
+      0,
+      1,
+    ],
+    "label": Array [
+      "",
+      "",
+    ],
+    "length": 2,
+    "name": "Load 6: https://mozilla.org",
+    "start": Array [
+      6,
+      6.5,
+    ],
+  },
+]
+`;
+
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getProcessedRawMarkerTable 1`] = `
+Object {
+  "data": Array [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 6.5,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6,
+      "status": "STATUS_START",
+      "type": "Network",
+    },
+    Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 7,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6.5,
+      "status": "STATUS_STOP",
+      "type": "Network",
+    },
+    Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 7.5,
+      "id": 7,
+      "pri": 0,
+      "startTime": 7,
+      "status": "STATUS_START",
+      "type": "Network",
+    },
+    Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 8,
+      "id": 7,
+      "pri": 0,
+      "startTime": 7.5,
+      "status": "STATUS_STOP",
+      "type": "Network",
+    },
+  ],
+  "length": 10,
+  "name": Array [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    6,
+    7,
+    7,
+  ],
+  "time": Array [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    6.5,
+    7,
+    7.5,
+  ],
+}
+`;
+
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getReferenceMarkerTable 1`] = `
+Array [
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "A",
+    "start": 0,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "B",
+    "start": 1,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "C",
+    "start": 2,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "D",
+    "start": 3,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "E",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "F",
+    "start": 5,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 6.5,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6,
+      "status": "STATUS_START",
+      "type": "Network",
+    },
+    "dur": 0.5,
+    "name": "Load 6: https://mozilla.org",
+    "start": 6,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 7,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6.5,
+      "status": "STATUS_STOP",
+      "type": "Network",
+    },
+    "dur": 0.5,
+    "name": "Load 6: https://mozilla.org",
+    "start": 6.5,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 7.5,
+      "id": 7,
+      "pri": 0,
+      "startTime": 7,
+      "status": "STATUS_START",
+      "type": "Network",
+    },
+    "dur": 0.5,
+    "name": "Load 7: https://mozilla.org",
+    "start": 7,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 8,
+      "id": 7,
+      "pri": 0,
+      "startTime": 7.5,
+      "status": "STATUS_STOP",
+      "type": "Network",
+    },
+    "dur": 0.5,
+    "name": "Load 7: https://mozilla.org",
+    "start": 7.5,
+    "title": null,
+  },
+]
+`;
+
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getSearchFilteredMarkers 1`] = `
+Array [
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "D",
+    "start": 3,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "E",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "F",
+    "start": 5,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 6.5,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6,
+      "status": "STATUS_START",
+      "type": "Network",
+    },
+    "dur": 0.5,
+    "name": "Load 6: https://mozilla.org",
+    "start": 6,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "RedirectURI": "https://mozilla.org",
+      "URI": "https://mozilla.org",
+      "endTime": 7,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6.5,
+      "status": "STATUS_STOP",
+      "type": "Network",
+    },
+    "dur": 0.5,
+    "name": "Load 6: https://mozilla.org",
+    "start": 6.5,
+    "title": null,
   },
 ]
 `;
@@ -1361,81 +1732,6 @@ CallTree {
 }
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkers 1`] = `
-Array [
-  Object {
-    "data": null,
-    "dur": 100,
-    "name": "Jank",
-    "start": -96,
-    "title": "100.00ms event processing delay",
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "D",
-    "start": 3,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "E",
-    "start": 4,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "F",
-    "start": 5,
-    "title": null,
-  },
-  Object {
-    "data": Object {
-      "RedirectURI": "https://mozilla.org",
-      "URI": "https://mozilla.org",
-      "endTime": 7,
-      "id": 6,
-      "pri": 0,
-      "startTime": 6,
-      "status": "STOP",
-      "type": "Network",
-    },
-    "dur": 1,
-    "name": "G",
-    "start": 6,
-    "title": null,
-  },
-]
-`;
-
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkersForHeader 1`] = `
-Array [
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "D",
-    "start": 3,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "E",
-    "start": 4,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "F",
-    "start": 5,
-    "title": null,
-  },
-]
-`;
-
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getFilteredThread 1`] = `
 Object {
   "frameTable": Object {
@@ -1611,55 +1907,10 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
-    "data": Array [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      Object {
-        "RedirectURI": "https://mozilla.org",
-        "URI": "https://mozilla.org",
-        "endTime": 7,
-        "id": 6,
-        "pri": 0,
-        "startTime": 6,
-        "status": "STOP",
-        "type": "Network",
-      },
-      Object {
-        "RedirectURI": "https://mozilla.org",
-        "URI": "https://mozilla.org",
-        "endTime": 8,
-        "id": 7,
-        "pri": 0,
-        "startTime": 7,
-        "status": "STOP",
-        "type": "Network",
-      },
-    ],
-    "length": 8,
-    "name": Array [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      6,
-    ],
-    "time": Array [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-    ],
+    "data": Array [],
+    "length": 0,
+    "name": Array [],
+    "time": Array [],
   },
   "name": "Thread with samples",
   "pausedRanges": Array [],
@@ -1831,182 +2082,6 @@ Array [
     "name": "Jank",
     "start": -96,
     "title": "100.00ms event processing delay",
-  },
-]
-`;
-
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getMarkerChartTiming 1`] = `
-Array [
-  Object {
-    "end": Array [
-      4,
-    ],
-    "index": Array [
-      0,
-    ],
-    "label": Array [
-      "",
-    ],
-    "length": 1,
-    "name": "Jank",
-    "start": Array [
-      -96,
-    ],
-  },
-  Object {
-    "end": Array [
-      3,
-    ],
-    "index": Array [
-      1,
-    ],
-    "label": Array [
-      "",
-    ],
-    "length": 1,
-    "name": "D",
-    "start": Array [
-      3,
-    ],
-  },
-  Object {
-    "end": Array [
-      4,
-    ],
-    "index": Array [
-      2,
-    ],
-    "label": Array [
-      "",
-    ],
-    "length": 1,
-    "name": "E",
-    "start": Array [
-      4,
-    ],
-  },
-  Object {
-    "end": Array [
-      5,
-    ],
-    "index": Array [
-      3,
-    ],
-    "label": Array [
-      "",
-    ],
-    "length": 1,
-    "name": "F",
-    "start": Array [
-      5,
-    ],
-  },
-]
-`;
-
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getMarkers 1`] = `
-Array [
-  Object {
-    "data": null,
-    "dur": 100,
-    "name": "Jank",
-    "start": -96,
-    "title": "100.00ms event processing delay",
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "A",
-    "start": 0,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "B",
-    "start": 1,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "C",
-    "start": 2,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "D",
-    "start": 3,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "E",
-    "start": 4,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "F",
-    "start": 5,
-    "title": null,
-  },
-  Object {
-    "data": Object {
-      "RedirectURI": "https://mozilla.org",
-      "URI": "https://mozilla.org",
-      "endTime": 7,
-      "id": 6,
-      "pri": 0,
-      "startTime": 6,
-      "status": "STOP",
-      "type": "Network",
-    },
-    "dur": 1,
-    "name": "G",
-    "start": 6,
-    "title": null,
-  },
-  Object {
-    "data": Object {
-      "RedirectURI": "https://mozilla.org",
-      "URI": "https://mozilla.org",
-      "endTime": 8,
-      "id": 7,
-      "pri": 0,
-      "startTime": 7,
-      "status": "STOP",
-      "type": "Network",
-    },
-    "dur": 1,
-    "name": "G",
-    "start": 7,
-    "title": null,
-  },
-]
-`;
-
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getNetworkChartTiming 1`] = `
-Array [
-  Object {
-    "end": Array [
-      7,
-    ],
-    "index": Array [
-      0,
-    ],
-    "label": Array [
-      "",
-    ],
-    "length": 1,
-    "name": "G",
-    "start": Array [
-      6,
-    ],
   },
 ]
 `;
@@ -2186,55 +2261,10 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
-    "data": Array [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      Object {
-        "RedirectURI": "https://mozilla.org",
-        "URI": "https://mozilla.org",
-        "endTime": 7,
-        "id": 6,
-        "pri": 0,
-        "startTime": 6,
-        "status": "STOP",
-        "type": "Network",
-      },
-      Object {
-        "RedirectURI": "https://mozilla.org",
-        "URI": "https://mozilla.org",
-        "endTime": 8,
-        "id": 7,
-        "pri": 0,
-        "startTime": 7,
-        "status": "STOP",
-        "type": "Network",
-      },
-    ],
-    "length": 8,
-    "name": Array [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      6,
-    ],
-    "time": Array [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-    ],
+    "data": Array [],
+    "length": 0,
+    "name": Array [],
+    "time": Array [],
   },
   "name": "Thread with samples",
   "pausedRanges": Array [],
@@ -2324,60 +2354,6 @@ Object {
   },
   "tid": 0,
   "unregisterTime": null,
-}
-`;
-
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getProcessedRawMarkerTable 1`] = `
-Object {
-  "data": Array [
-    null,
-    null,
-    null,
-    null,
-    null,
-    null,
-    Object {
-      "RedirectURI": "https://mozilla.org",
-      "URI": "https://mozilla.org",
-      "endTime": 7,
-      "id": 6,
-      "pri": 0,
-      "startTime": 6,
-      "status": "STOP",
-      "type": "Network",
-    },
-    Object {
-      "RedirectURI": "https://mozilla.org",
-      "URI": "https://mozilla.org",
-      "endTime": 8,
-      "id": 7,
-      "pri": 0,
-      "startTime": 7,
-      "status": "STOP",
-      "type": "Network",
-    },
-  ],
-  "length": 8,
-  "name": Array [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    6,
-  ],
-  "time": Array [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-  ],
 }
 `;
 
@@ -2556,55 +2532,10 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
-    "data": Array [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      Object {
-        "RedirectURI": "https://mozilla.org",
-        "URI": "https://mozilla.org",
-        "endTime": 7,
-        "id": 6,
-        "pri": 0,
-        "startTime": 6,
-        "status": "STOP",
-        "type": "Network",
-      },
-      Object {
-        "RedirectURI": "https://mozilla.org",
-        "URI": "https://mozilla.org",
-        "endTime": 8,
-        "id": 7,
-        "pri": 0,
-        "startTime": 7,
-        "status": "STOP",
-        "type": "Network",
-      },
-    ],
-    "length": 8,
-    "name": Array [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      6,
-    ],
-    "time": Array [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-    ],
+    "data": Array [],
+    "length": 0,
+    "name": Array [],
+    "time": Array [],
   },
   "name": "Thread with samples",
   "pausedRanges": Array [],
@@ -2878,55 +2809,10 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
-    "data": Array [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      Object {
-        "RedirectURI": "https://mozilla.org",
-        "URI": "https://mozilla.org",
-        "endTime": 7,
-        "id": 6,
-        "pri": 0,
-        "startTime": 6,
-        "status": "STOP",
-        "type": "Network",
-      },
-      Object {
-        "RedirectURI": "https://mozilla.org",
-        "URI": "https://mozilla.org",
-        "endTime": 8,
-        "id": 7,
-        "pri": 0,
-        "startTime": 7,
-        "status": "STOP",
-        "type": "Network",
-      },
-    ],
-    "length": 8,
-    "name": Array [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      6,
-    ],
-    "time": Array [
-      0,
-      1,
-      2,
-      3,
-      4,
-      5,
-      6,
-      7,
-    ],
+    "data": Array [],
+    "length": 0,
+    "name": Array [],
+    "time": Array [],
   },
   "name": "Thread with samples",
   "pausedRanges": Array [],
@@ -3026,55 +2912,6 @@ Object {
   "tid": 0,
   "unregisterTime": null,
 }
-`;
-
-exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers 1`] = `
-Array [
-  Object {
-    "data": null,
-    "dur": 100,
-    "name": "Jank",
-    "start": -96,
-    "title": "100.00ms event processing delay",
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "D",
-    "start": 3,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "E",
-    "start": 4,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "F",
-    "start": 5,
-    "title": null,
-  },
-  Object {
-    "data": Object {
-      "RedirectURI": "https://mozilla.org",
-      "URI": "https://mozilla.org",
-      "endTime": 7,
-      "id": 6,
-      "pri": 0,
-      "startTime": 6,
-      "status": "STOP",
-      "type": "Network",
-    },
-    "dur": 1,
-    "name": "G",
-    "start": 6,
-    "title": null,
-  },
-]
 `;
 
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getThreadProcessDetails 1`] = `
