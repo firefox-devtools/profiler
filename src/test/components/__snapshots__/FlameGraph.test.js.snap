@@ -228,11 +228,12 @@ exports[`FlameGraph matches the snapshot 1`] = `
       data-index="0"
       title="Complete \\"Empty\\""
     >
-      <span
+      <button
         class="filterNavigatorBarItemContent"
+        type="button"
       >
         Complete "Empty"
-      </span>
+      </button>
     </li>
   </ol>
   <div

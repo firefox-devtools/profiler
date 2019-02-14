@@ -38,6 +38,14 @@
 
 .filterNavigatorBarItemContent {
   overflow: hidden;
+
+  /* The 8px are used by the box-shadow when the button receives focus */
+  height: calc(100% - 8px);
+  padding: 0;
+  margin: auto;
+  border: none;
+  background: none;
+  color: inherit;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
