@@ -127,6 +127,7 @@ process: \\"tab\\" (222)"
       >
         <div
           class="timelineMarkers"
+          data-testid="TimelineMarkersJank"
         >
           <canvas
             class="timelineMarkersCanvas"
