@@ -1,6 +1,6 @@
-# Contributing to perf.html
+# Contributing to the Firefox Profiler
 
-First off, thanks for taking the time to contribute to Mozilla and perf.html! Beyond making the web a faster and smoother experience for Firefox users and the entire open web, we want to build a community of contributors around performance. This guide is an introduction to joining our community. We would love to have you. As a first step to contributing we encourage you to check out our [Code of Conduct](./CODE_OF_CONDUCT.md) to see how we're building an open and inclusive community.
+First off, thanks for taking the time to contribute to Mozilla and the Firefox Profiler! Beyond making the web a faster and smoother experience for Firefox users and the entire open web, we want to build a community of contributors around performance. This guide is an introduction to joining our community. We would love to have you. As a first step to contributing we encourage you to check out our [Code of Conduct](./CODE_OF_CONDUCT.md) to see how we're building an open and inclusive community.
 
 ## Who we are
 
@@ -28,7 +28,7 @@ We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-s
 
 ## Getting started with development
 
-perf.html is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including from the [Gecko Profiler Addon](https://github.com/devtools-html/Gecko-Profiler-Addon), online storage, and from local files.
+[profiler.firefox.com](https://profiler.firefox.com) is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including from the [Gecko Profiler Addon](https://github.com/firefox-devtools/Gecko-Profiler-Addon), online storage, and from local files.
 
 You will need a recent enough version of [Yarn](http://yarnpkg.com/),
 version 1.0.1 is known to work correctly.
@@ -43,25 +43,25 @@ chmod a+x install.sh
 
 To get started clone the repo and get the web application started.
 
- 1. Run `git clone git@github.com:devtools-html/perf.html.git`
- 2. Run `cd perf.html`
+ 1. Run `git clone git@github.com:firefox-devtools/profiler.git`
+ 2. Run `cd firefox-profiler`
  3. Run `yarn install`, this will install all of the dependencies.
  4. Run `yarn start`, this will start up the webpack server.
  5. Point your browser to [http://localhost:4242](http://localhost:4242).
- 6. If port `4242` is taken, then you can run the web app on a different port: `PERFHTML_PORT=1234 yarn start`
+ 6. If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
 
 ## Loading in profiles for development
 
-The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running perf.html, and then try one of the following:
+The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running, and then try one of the following:
 
- * Use an existing profile from the web: replace the `https://perf-html.io` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
+ * Use an existing profile from the web: replace the `https://profiler.firefox.com` with `http://localhost:4242` (be careful: the leading `https` changes to `http`!).
  * Drag in a saved profile to the loading screen (this makes refreshing hard).
  * Record a new profile.
-   - Install the Gecko Profiler addon from the [perf-html.io](https://perf-html.io) loading screen.
+   - Install the Gecko Profiler addon from the [profiler.firefox.com](https://profiler.firefox.com) loading screen.
    - Go to `about:addons` in your URL bar.
    - Click [Preferences button](https://cloud.githubusercontent.com/assets/2134/23817941/ea20d800-05ab-11e7-8e0f-aa4558fe2b1b.png) next to the Gecko Profiler addon.
-   - Change the [Profile viewer URL](https://user-images.githubusercontent.com/167767/27658883-70068388-5c06-11e7-831e-14ed1438e9a3.png) from `https://perf-html.io` to `http://localhost:4242`.
-   - Record a profile following the directions on the perf.html loading screen, and the profile should open in the local development version.
+   - Change the [Profile viewer URL](https://user-images.githubusercontent.com/167767/27658883-70068388-5c06-11e7-831e-14ed1438e9a3.png) from `https://profiler.firefox.com` to `http://localhost:4242`.
+   - Record a profile following the directions on the loading screen, and the profile should open in the local development version.
 
 ## Running the tests
 
@@ -81,17 +81,17 @@ When working on a new feature and code changes, it's important that things work 
 
 ## Exposing the web application publicly
 
-If you'd like to use perf.html via URLs that are not `localhost` (e.g. live preview, proxy, other device...) you can expose the web application publicly like so:
+If you'd like to use [profiler.firefox.com](https://profiler.firefox.com) via URLs that are not `localhost` (e.g. live preview, proxy, other device...) you can expose the web application publicly like so:
 
 ```bash
-PERFHTML_HOST="0.0.0.0" yarn start
+FX_PROFILER_HOST="0.0.0.0" yarn start
 ```
 
 You'll probably also want to add your non-localhost domains to the `allowedHosts` property in `server.js`.
 
 ## Finding something to work on
 
-If this is your first time here, check out the label [Good First Issue](https://github.com/devtools-html/perf.html/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22). We will mentor you through the process of completing a first bug, and these are usually pretty good self-contained problems. After leveling up on a few good first issues, we also have the [Polish](https://github.com/devtools-html/perf.html/issues?q=is%3Aopen+is%3Aissue+label%3Apolish) tag for bugs that no one is actively working on, but are well-scoped and ready to be tackled!
+If this is your first time here, check out the label [Good First Issue](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22). We will mentor you through the process of completing a first bug, and these are usually pretty good self-contained problems. After leveling up on a few good first issues, we also have the [Polish](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3Apolish) tag for bugs that no one is actively working on, but are well-scoped and ready to be tackled!
 
 Make sure and comment on the issue letting someone know you are interested in working on an issue. Feel free to [chat with us on slack](https://devtools-html-slack.herokuapp.com/) if you need help finding something you might be interested to work on.
 

@@ -17,7 +17,7 @@ describe('UrlManager', function() {
     if (typeof urlPath === 'string') {
       // jsdom doesn't allow us to rewrite window.location. Instead, use the
       // History API to properly set the current location.
-      window.history.pushState(undefined, 'perf.html', urlPath);
+      window.history.pushState(undefined, 'profiler.firefox.com', urlPath);
     }
     const store = blankStore();
     const { dispatch, getState } = store;

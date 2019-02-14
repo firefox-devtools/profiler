@@ -1,6 +1,6 @@
-# perf.html `/src`
+# Firefox Profiler `/src`
 
-Welcome to the perf.html source code. Each main folder has a `README.md` file describing the contents of the folder. For higher level documentation on profile formats and other things, check out the [`/docs-developer`](../docs-developer) folder.
+Welcome to the source code for [profiler.firefox.com](https://profiler.firefox.com). Each main folder has a `README.md` file describing the contents of the folder. For higher level documentation on profile formats and other things, check out the [`/docs-developer`](../docs-developer) folder.
 
 | Folder                                  | Description                                            |
 | --------------------------------------- | ------------------------------------------------------ |

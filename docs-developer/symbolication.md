@@ -80,15 +80,15 @@ For local Firefox builds, symbol information can be extracted the following ways
 
 ## How the profiler does symbolication
 
-When perf.html receives the profile from the gecko profiler add-on, it is unsymbolicated. It does however, include the library information and memory offsets. The method for gathering this information is platform specific, and the Gecko Profiler handles it differently on [Linux](https://searchfox.org/mozilla-central/rev/b80994a43e5d92c2f79160ece176127eed85dcc9/tools/profiler/core/shared-libraries-linux.cc), [macOS](https://searchfox.org/mozilla-central/rev/b80994a43e5d92c2f79160ece176127eed85dcc9/tools/profiler/core/shared-libraries-macos.cc), and [Windows](https://searchfox.org/mozilla-central/rev/b80994a43e5d92c2f79160ece176127eed85dcc9/tools/profiler/core/shared-libraries-win32.cc).
+When [profiler.firefox.com] receives the profile from the gecko profiler add-on, it is unsymbolicated. It does however, include the library information and memory offsets. The method for gathering this information is platform specific, and the Gecko Profiler handles it differently on [Linux](https://searchfox.org/mozilla-central/rev/b80994a43e5d92c2f79160ece176127eed85dcc9/tools/profiler/core/shared-libraries-linux.cc), [macOS](https://searchfox.org/mozilla-central/rev/b80994a43e5d92c2f79160ece176127eed85dcc9/tools/profiler/core/shared-libraries-macos.cc), and [Windows](https://searchfox.org/mozilla-central/rev/b80994a43e5d92c2f79160ece176127eed85dcc9/tools/profiler/core/shared-libraries-win32.cc).
 
-perf.html has an IndexedDB table which contains full symbol tables for some libraries. (This table starts out empty.)
+[profiler.firefox.com] has an IndexedDB table which contains full symbol tables for some libraries. (This table starts out empty.)
 
 Then, the following things happen:
 
- 1. perf.html iterates over all addresses in the profile's call stacks, finds which binary they came from by comparing them to the library information stored in the profile, and converts them into binary-relative offsets.
+ 1. [profiler.firefox.com] iterates over all addresses in the profile's call stacks, finds which binary they came from by comparing them to the library information stored in the profile, and converts them into binary-relative offsets.
 
- 2. perf.html checks for which of these libraries it has cached symbol tables in IndexedDB.
+ 2. [profiler.firefox.com] checks for which of these libraries it has cached symbol tables in IndexedDB.
 
     1. For libraries with cached symbol tables, it uses those symbol tables to map the addresses to symbols.
 
@@ -96,7 +96,7 @@ Then, the following things happen:
 
     1. The Mozilla symbolication API will be able to symbolicate any libraries for which there exist breakpad symbol files on the Mozilla symbol server, so: official Firefox builds, most of Windows system libraries, some macOS system libraries.
 
- 4. For any libraries which the Mozilla symbolication API was not able to find symbols, perf.html requests a symbol table from the add-on, which will forward the request to the geckoProfiler WebExtension API.
+ 4. For any libraries which the Mozilla symbolication API was not able to find symbols, [profiler.firefox.com] requests a symbol table from the add-on, which will forward the request to the geckoProfiler WebExtension API.
 
      1. The WebExtension API will try multiple methods to obtain symbol information. The code for this is at https://searchfox.org/mozilla-central/rev/7e663b9fa578d425684ce2560e5fa2464f504b34/browser/components/extensions/ext-geckoProfiler.js#409-473 .
 
@@ -108,6 +108,8 @@ Then, the following things happen:
 
         4. On Windows, if this is a local build, it'll try to find "dump_syms.exe" in the objdir and run it on the pdb file.
 
- 5. Symbol tables that were obtained in step 4 are sent to perf.html and perf.html caches them in the IndexedDB table. The relevant addresses are symbolicated using the symbol table.
+ 5. Symbol tables that were obtained in step 4 are sent to [profiler.firefox.com] and the page caches them in the IndexedDB table. The relevant addresses are symbolicated using the symbol table.
 
  6. Libraries for which no symbol information could be obtained stay unsymbolicated.
+
+[profiler.firefox.com]: https://profiler.firefox.com

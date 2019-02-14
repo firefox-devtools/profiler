@@ -18,7 +18,7 @@ declare type GeckoProfiler = {
 declare class Window extends EventTarget {
   // Google Analytics
   ga?: GoogleAnalytics;
-  // perf.html and Gecko Profiler Addon
+  // profiler.firefox.com and Gecko Profiler Addon
   geckoProfilerPromise: Promise<GeckoProfiler>;
   connectToGeckoProfiler: GeckoProfiler => void;
   geckoProfilerAddonInstalled?: () => void;

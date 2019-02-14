@@ -204,7 +204,7 @@ export function extractMarkerDataFromName(
     if (matchFound && markers.data[markerIndex]) {
       console.error(
         "A marker's payload was rewritten based off the text content of the marker. " +
-          "perf.html assumed that the payload was empty, but it turns out it wasn't. " +
+          "profiler.firefox.com assumed that the payload was empty, but it turns out it wasn't. " +
           'This is most likely an error and should be fixed. The marker name is:',
         name
       );

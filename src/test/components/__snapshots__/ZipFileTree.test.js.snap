@@ -13,7 +13,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
       class="zipFileViewerHeader"
     >
       <h1>
-        perf.html
+        Firefox Profiler
       </h1>
       <p>
         Choose a profile from this zip file

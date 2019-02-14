@@ -214,7 +214,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
       <section className="zipFileViewer">
         <div className="zipFileViewerSection">
           <header className="zipFileViewerHeader">
-            <h1>perf.html</h1>
+            <h1>Firefox Profiler</h1>
             <p>Choose a profile from this zip file</p>
           </header>
           <div className="zipFileViewerMessage">{message}</div>
@@ -270,7 +270,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
           <section className="zipFileViewer">
             <div className="zipFileViewerSection">
               <header className="zipFileViewerHeader">
-                <h1>perf.html</h1>
+                <h1>Firefox Profiler</h1>
                 <p>Choose a profile from this zip file</p>
               </header>
               <TreeView

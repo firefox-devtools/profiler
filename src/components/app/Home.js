@@ -7,8 +7,8 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
-import AddonScreenshot from '../../../res/img/png/gecko-profiler-screenshot-2018-01-18.png';
-import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2017-09-08.jpg';
+import AddonScreenshot from '../../../res/img/jpg/gecko-profiler-screenshot-2019-02-05.jpg';
+import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2019-02-05.jpg';
 import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
@@ -23,9 +23,9 @@ import type {
 require('./Home.css');
 
 const ADDON_URL =
-  'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
+  'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
 const LEGACY_ADDON_URL =
-  'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
+  'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
 
 type InstallButtonProps = {
   name: string,
@@ -294,7 +294,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <img
                 className="homeSectionScreenshot"
                 src={PerfScreenshot}
-                alt="screenshot of perf.html"
+                alt="screenshot of profiler.firefox.com"
               />
             </div>
           </div>
@@ -310,7 +310,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             <DocsButton />
             <p>
               Install the Gecko Profiler Add-on to start recording a performance
-              profile in Firefox, then analyze it and share it with perf.html.
+              profile in Firefox, then analyze it and share it with
+              profiler.firefox.com.
             </p>
             <ActionButtons
               retrieveProfileFromFile={this.props.retrieveProfileFromFile}
@@ -341,7 +342,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               To start profiling, click on the profiling button, or use the
               keyboard shortcuts. The icon is blue when a profile is recording.
               Hit
-              <kbd>Capture Profile</kbd> to load the data into perf.html.
+              <kbd>Capture Profile</kbd> to load the data into
+              profiler.firefox.com.
             </p>
             {this._renderShortcuts()}
             <ActionButtons
@@ -363,7 +365,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <img
                 className="homeSectionScreenshot"
                 src={PerfScreenshot}
-                alt="screenshot of perf.html"
+                alt="screenshot of profiler.firefox.com"
               />
             </div>
           </div>
@@ -377,7 +379,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               </InstallButton>. Then use the button added to the browser, or use
               the following shortcuts to record a profile. The button’s icon is
               blue when a profile is recording. Hit <kbd>Capture Profile</kbd>{' '}
-              to load the data into perf.html.
+              to load the data into profiler.firefox.com.
             </p>
             {this._renderShortcuts()}
             <ActionButtons
@@ -399,7 +401,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               <img
                 className="homeSectionScreenshot"
                 src={PerfScreenshot}
-                alt="screenshot of perf.html"
+                alt="screenshot of profiler.firefox.com"
               />
             </div>
           </div>
@@ -448,7 +450,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           <header>
             <h1 className="homeTitle">
               <span className="homeTitleSlogan">
-                <span className="homeTitleText">perf.html</span>
+                <span className="homeTitleText">Firefox Profiler</span>
                 <span className="homeTitleSubtext">
                   {' '}
                   &mdash; Web app for Firefox performance analysis
@@ -456,7 +458,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               </span>
               <a
                 className="homeTitleGithubIcon"
-                href="https://github.com/devtools-html/perf.html"
+                href="https://github.com/firefox-devtools/profiler"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Go to our git repository (this opens in a new window)"

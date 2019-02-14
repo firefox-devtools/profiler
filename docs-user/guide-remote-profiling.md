@@ -1,6 +1,6 @@
 # Remote profiling on Android
 
-You can use perf.html to investigate performance issues on Android, not just Windows, macOS and Linux.
+You can use the Firefox Profiler to investigate performance issues on Android, not just Windows, macOS and Linux.
 
 ## Pick your target
 
@@ -96,7 +96,7 @@ Once you have connected to the phone browser successfully, read on.
 
 Select *Performance* from the action list on the right sidebar.
 
-Make any necessary adjustments in the presented options, like threads to sample or profiler features to enable, and then click *Start recording*. Perform the interactions you intend to profile on the Android device and then click *Stop and grab the recording* in the Performance panel. A new tab will open in [https://perf-html.io/](https://perf-html.io/) with the collected profile ready for inspection.
+Make any necessary adjustments in the presented options, like threads to sample or profiler features to enable, and then click *Start recording*. Perform the interactions you intend to profile on the Android device and then click *Stop and grab the recording* in the Performance panel. A new tab will open in [https://profiler.firefox.com/](https://profiler.firefox.com/) with the collected profile ready for inspection.
 
 ![A screenshot of the new performance panel](./images/new-performance-panel.png)
 
@@ -113,7 +113,7 @@ There are other types of builds you may want to profile:
 
 ### Try builds
 
-If you want to profile an Android build that the tryserver created for you, you have to kick off a "Sym" job on treeherder: Using treeherder's *Add new jobs* UI, schedule a "Sym" job for each platform whose "B" job you want symbols for. (And "SymN" if you have an "N" job you want symbols for, i.e. a build job with the "nightly configuration.) These jobs gather symbol information from the corresponding build job and upload it to the Mozilla symbol server so that perf.html can use it.
+If you want to profile an Android build that the tryserver created for you, you have to kick off a "Sym" job on treeherder: Using treeherder's *Add new jobs* UI, schedule a "Sym" job for each platform whose "B" job you want symbols for. (And "SymN" if you have an "N" job you want symbols for, i.e. a build job with the "nightly configuration.) These jobs gather symbol information from the corresponding build job and upload it to the Mozilla symbol server so that the Firefox Profiler can use it.
 
 ### Local builds
 
