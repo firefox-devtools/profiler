@@ -77,6 +77,6 @@ When the processed profile format changes (e.g. because a different data format 
 At all times, `processProfile` only has code that converts the latest version
 of the Gecko profile format into the latest version of the processed profile
 format. All compatibility code is hosted outside of process-profile.js, in
-the respective *-profile-versioning.js file.
+the respective `*-profile-versioning.js` file.
 
 [profiler.firefox.com]: https://profiler.firefox.com

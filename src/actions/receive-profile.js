@@ -356,6 +356,8 @@ async function getProfileFromAddon(dispatch, geckoProfiler) {
 }
 
 async function getSymbolStore(dispatch, geckoProfiler) {
+  // Note, the database name still references the old project name, "perf.html". It was
+  // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {
     requestSymbolsFromServer: requests => {
       for (const { lib } of requests) {

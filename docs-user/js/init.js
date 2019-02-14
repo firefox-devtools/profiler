@@ -1,5 +1,5 @@
 window.$docsify = {
-  name: 'Firefox Profiler docs',
+  name: 'Firefox Profiler',
   // Automatically scroll back to the top when switching between articles.
   auto2top: true,
   loadSidebar: '_sidebar',

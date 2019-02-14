@@ -36,7 +36,7 @@ export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
 
   if (profileVersion > CURRENT_VERSION) {
     throw new Error(
-      `Unable to parse a Gecko profile of version ${profileVersion} - does profiler.firefox.com need to be refreshed? ` +
+      `Unable to parse a Gecko profile of version ${profileVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
         `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_VERSION}.\n` +
         'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
     );
