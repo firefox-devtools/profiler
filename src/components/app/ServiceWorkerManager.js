@@ -71,10 +71,29 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
     });
   }
 
+  async _removePerfHtmlServiceWorkers() {
+    if (window.location.host === 'perf-html.io') {
+      const { serviceWorker } = navigator;
+      if (!serviceWorker) {
+        return;
+      }
+      const registrations = await serviceWorker.getRegistrations();
+      for (const registration of registrations) {
+        registration.unregister();
+      }
+      window.location.replace(
+        'https://profiler.firefox.com' +
+          window.location.pathname +
+          window.location.search
+      );
+    }
+  }
+
   componentWillMount() {
     if (process.env.NODE_ENV === 'production') {
       this._installServiceWorker();
     }
+    this._removePerfHtmlServiceWorkers();
   }
 
   componentDidUpdate() {
