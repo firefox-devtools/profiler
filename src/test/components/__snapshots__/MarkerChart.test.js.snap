@@ -57,21 +57,21 @@ Array [
   ],
   Array [
     "fillRect",
-    288.5,
+    289,
     1,
     48,
     1,
   ],
   Array [
     "fillRect",
-    287.5,
+    288,
     2,
     50,
     11,
   ],
   Array [
     "fillRect",
-    288.5,
+    289,
     13,
     48,
     1,
@@ -191,21 +191,21 @@ Array [
   ],
   Array [
     "fillRect",
-    213.5,
+    214,
     65,
     123,
     1,
   ],
   Array [
     "fillRect",
-    212.5,
+    213,
     66,
     125,
     11,
   ],
   Array [
     "fillRect",
-    213.5,
+    214,
     77,
     123,
     1,
@@ -220,21 +220,21 @@ Array [
   ],
   Array [
     "fillRect",
-    213.5,
+    214,
     81,
     60.5,
     1,
   ],
   Array [
     "fillRect",
-    212.5,
+    213,
     82,
     62.5,
     11,
   ],
   Array [
     "fillRect",
-    213.5,
+    214,
     93,
     60.5,
     1,
@@ -246,7 +246,7 @@ Array [
   Array [
     "fillText",
     "click",
-    215.5,
+    216,
     91,
   ],
   Array [
@@ -258,7 +258,7 @@ Array [
   ],
   Array [
     "arc",
-    242.5,
+    243,
     103.5,
     3.75,
     0,
@@ -273,21 +273,21 @@ Array [
   ],
   Array [
     "fillRect",
-    263.5,
+    264,
     113,
     85.5,
     1,
   ],
   Array [
     "fillRect",
-    262.5,
+    263,
     114,
     87.5,
     11,
   ],
   Array [
     "fillRect",
-    263.5,
+    264,
     125,
     85.5,
     1,
@@ -477,8 +477,9 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
           class="idleSearchField markerSettingsSearchField"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display markers that match a certain name"
             type="search"
@@ -500,9 +501,9 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
     <div>
       <canvas
         class="chartCanvas markerChartCanvas"
-        height="300"
+        height="600"
         style="width: 365px; height: 300px;"
-        width="365"
+        width="730"
       />
     </div>
     <div
@@ -530,6 +531,11 @@ Array [
     "scale",
     1,
     1,
+  ],
+  Array [
+    "scale",
+    2,
+    2,
   ],
   Array [
     "set fillStyle",

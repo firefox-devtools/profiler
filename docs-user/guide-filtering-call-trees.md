@@ -1,6 +1,6 @@
 # Filtering call trees
 
-Call trees can grow to be quite large, especially when profiling a browser engine. Typically, only portions of the tree are actually useful for any given analysis. perf.html provides a variety of tools for filtering and transforming a tree in order to only show the relevant parts. It's important when filtering to know the difference between filtering out samples and transforming stacks. When removing samples, the tree will essentially be the same shape, but may be missing certain branches that were only present in certain samples. When transforming the tree, the shape of the sample's stacks will be modified. Samples will only be dropped if their stacks are completely removed during the transformation operation.
+Call trees can grow to be quite large, especially when profiling a browser engine. Typically, only portions of the tree are actually useful for any given analysis. The Firefox Profiler provides a variety of tools for filtering and transforming a tree in order to only show the relevant parts. It's important when filtering to know the difference between filtering out samples and transforming stacks. When removing samples, the tree will essentially be the same shape, but may be missing certain branches that were only present in certain samples. When transforming the tree, the shape of the sample's stacks will be modified. Samples will only be dropped if their stacks are completely removed during the transformation operation.
 
 The following are the different types of filtering operations that are supported.
 
@@ -62,7 +62,7 @@ Inversion is most useful in surfacing the functions where time is actually being
 
 ## Transforms
 
-Call tree transforms provide a finer grain control over how to modify the call tree. They modify the stack in different operations. They can operate at individual call nodes on the tree, or across the entire tree for a given function. Different programs use different terms to describe these operations, but perf.html has defined certain operations.
+Call tree transforms provide a finer grain control over how to modify the call tree. They modify the stack in different operations. They can operate at individual call nodes on the tree, or across the entire tree for a given function. Different programs use different terms to describe these operations, but the Firefox Profiler has defined certain operations.
 
 ### Merge
 

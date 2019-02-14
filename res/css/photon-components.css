@@ -22,15 +22,6 @@
   border: none;
 }
 
-/* Using -moz-focusring to target Firefox only, as a result of the style above */
-.photon-button:-moz-focusring {
-  outline: 1px dotted black;
-
-  /* This should be eventually the default behavior.
-   * See https://bugzilla.mozilla.org/show_bug.cgi?id=315209 */
-  -moz-outline-radius: 2px;
-}
-
 .photon-button:hover {
   background-color: var(--grey-90-a20);
 }

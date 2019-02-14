@@ -6,9 +6,9 @@
 /**
  * This file deals with old versions of the Gecko profile format, i.e. the
  * format that the Gecko profiler platform outputs. We want to be able to
- * run perf.html on non-Nightly versions of Firefox, and we want to be able
- * to load old saved profiles, so this file upgrades old profiles to the
- * current format.
+ * run profiler.firefox.com on non-Nightly versions of Firefox, and we want
+ * to be able to load old saved profiles, so this file upgrades old profiles
+ * to the current format.
  */
 
 import {
@@ -36,9 +36,9 @@ export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
 
   if (profileVersion > CURRENT_VERSION) {
     throw new Error(
-      `Unable to parse a Gecko profile of version ${profileVersion} - are you running an outdated version of perf.html? ` +
-        `The most recent version understood by this version of perf.html is version ${CURRENT_VERSION}.\n` +
-        'You can try refreshing this page in case perf.html has updated in the meantime.'
+      `Unable to parse a Gecko profile of version ${profileVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
+        `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_VERSION}.\n` +
+        'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
     );
   }
 

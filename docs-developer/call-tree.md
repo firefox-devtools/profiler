@@ -157,9 +157,9 @@ This would be a surprising result, and many other assumptions would shake out th
 
 # Call trees as stacks of functions (CallNodes), and referring to CallNodes with function paths
 
-What we really care about in the call tree is the execution time of a given function, and its relationship to other functions. Since there can be multiple frames and stacks per function in a call tree, the logical step is to combine all of these stacks and frames together in terms of what function they point to. This combined representation is known in perf.html as CallNodes.
+What we really care about in the call tree is the execution time of a given function, and its relationship to other functions. Since there can be multiple frames and stacks per function in a call tree, the logical step is to combine all of these stacks and frames together in terms of what function they point to. This combined representation is known in the Firefox Profiler as CallNodes.
 
-However once this happens, it starts to become quite difficult to explain relationships and refer to specific CallNodes within this modified view. Whenever we apply any type of data transformation, these CallNodes need to be regenerated, and the indexes into the CallNodesTable will be different. The only unique identifier that exists is the function, and where it exists in the call tree. So in order refer to a specific CallNode, we need a different way to store a reference to the tree. This structure in perf.html is called the CallNodePath.
+However once this happens, it starts to become quite difficult to explain relationships and refer to specific CallNodes within this modified view. Whenever we apply any type of data transformation, these CallNodes need to be regenerated, and the indexes into the CallNodesTable will be different. The only unique identifier that exists is the function, and where it exists in the call tree. So in order refer to a specific CallNode, we need a different way to store a reference to the tree. This structure in the Firefox Profiler is called the CallNodePath.
 
 ```
               A
@@ -177,7 +177,7 @@ However once this happens, it starts to become quite difficult to explain relati
       E       G
 ```
 
-Given the above call tree, the indexes of the CallNodes in the CallNodesTable are rather random, and will change as we further modify the structure of the call tree. So to refer to the CallNodes at function C it is useful to provide a path of functions that shows how to get there. In our case this would be the list of functions `A ➡ B ➡ C`. The `CallNodePath` in perf.html would then be stored as an array of function indexes.
+Given the above call tree, the indexes of the CallNodes in the CallNodesTable are rather random, and will change as we further modify the structure of the call tree. So to refer to the CallNodes at function C it is useful to provide a path of functions that shows how to get there. In our case this would be the list of functions `A ➡ B ➡ C`. The `CallNodePath` in the Firefox Profiler would then be stored as an array of function indexes.
 
 # Modifying the tree
 

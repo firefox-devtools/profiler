@@ -68,7 +68,7 @@
 
   /**
    * Make the max width 50% so that some random user can't spam a bunch of misleading
-   * content into an error message on perf.html.
+   * content into an error message on profiler.firefox.com.
    */
   max-width: 70%;
   padding: 0 5px;

@@ -39,6 +39,9 @@ export function mergeProfiles(
   implementationFilters: ImplementationFilter[],
 |} {
   const resultProfile = getEmptyProfile();
+  resultProfile.meta.interval = Math.min(
+    ...profiles.map(profile => profile.meta.interval)
+  );
 
   // First let's merge categories. We'll use the resulting maps when
   // handling the thread data later.
@@ -183,7 +186,7 @@ function adjustCategories(
       throw new Error(
         stripIndent`
           Category with index ${category} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in perf-html's code.
+          This shouldn't happen and indicates a bug in the profiler's code.
         `
       );
     }
@@ -210,7 +213,7 @@ function adjustNullableCategories(
       throw new Error(
         stripIndent`
           Category with index ${category} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in perf-html's code.
+          This shouldn't happen and indicates a bug in the profiler's code.
         `
       );
     }

@@ -34,9 +34,9 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     expect(contentThread.processType).toBe('tab');
   });
 
-  it('creates 12 markers given the test data', function() {
+  it('creates 13 markers given the test data', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(12);
+    expect(markers.length).toEqual(13);
   });
   it('creates a marker even if there is no start or end time', function() {
     const { markers } = setup();
@@ -58,7 +58,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   });
   it('should fold the two reflow markers into one marker', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(12);
+    expect(markers.length).toEqual(13);
     expect(markers[2]).toMatchObject({
       start: 3,
       dur: 5,
@@ -196,6 +196,25 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       },
       dur: 2,
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
+      start: 1022,
+      title: null,
+    });
+    expect(contentMarkers[12]).toEqual({
+      data: {
+        // Stack property is converted to a cause.
+        cause: {
+          stack: 2,
+          time: 1,
+        },
+        endTime: 1024,
+        filename: '/foo/bar/',
+        operation: 'create/open',
+        source: 'PoisionOIInterposer',
+        startTime: 1022,
+        type: 'DiskIO',
+      },
+      dur: 2,
+      name: 'DiskIO',
       start: 1022,
       title: null,
     });

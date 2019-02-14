@@ -1321,7 +1321,10 @@ describe('counter selectors', function() {
   it('can accumulate samples', function() {
     const { getState, counterA } = setup();
     counterA.sampleGroups.samples.count = [
-      1,
+      // The first value gets zeroed out due to a work-around for Bug 1520587. It
+      // can be much larger than all the rest of the values, as it doesn't ever
+      // get reset.
+      10000,
       -2,
       3,
       -5,
@@ -1335,10 +1338,10 @@ describe('counter selectors', function() {
     expect(
       getCounterSelectors(0).getAccumulateCounterSamples(getState())
     ).toEqual({
-      accumulatedCounts: [1, -1, 2, -3, 4, -7, 6, -11, 8, 31],
+      accumulatedCounts: [0, -2, 1, -4, 3, -8, 5, -12, 7, 30],
       countRange: 42,
-      maxCount: 31,
-      minCount: -11,
+      maxCount: 30,
+      minCount: -12,
     });
   });
 });

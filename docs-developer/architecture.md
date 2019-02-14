@@ -12,7 +12,7 @@ This document provides an overall look at the architecture of the profiler, and 
 
 ## DevTools Recording Panel
 
-Please note, this is the diagram for the new recording panel in DevTools that is off by default. This is the path forward for integrating perf.html into DevTools. It can be enabled using `devtools.performance.new-panel-enabled`. There is no architecture doc for the current Firefox DevTools panel.
+Please note, this is the diagram for the new recording panel in DevTools that is off by default. This is the path forward for integrating [profiler.firefox.com](https://profiler.firefox.com) into DevTools. It can be enabled using `devtools.performance.new-panel-enabled`. There is no architecture doc for the current Firefox DevTools panel.
 
 ![DevTools Recording Panel diagram](images/devtools-recording-panel.svg)
 

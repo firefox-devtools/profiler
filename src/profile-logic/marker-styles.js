@@ -145,6 +145,10 @@ export const markerStyles: MarkerStyles = {
     ...defaultStyle,
     background: colors.ORANGE_50,
   },
+  DiskIO: {
+    ...defaultStyle,
+    background: colors.BLUE_50,
+  },
 };
 
 export const overlayFills = {

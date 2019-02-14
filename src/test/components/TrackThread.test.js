@@ -32,6 +32,8 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 
+import type { DiskIoPayload } from '../../types/markers';
+
 // The graph is 400 pixels wide based on the getBoundingBox mock. Each stack is 100
 // pixels wide. Use the value 50 to click in the middle of this stack, and
 // incrementing by steps of 100 pixels to get to the next stack.
@@ -59,13 +61,15 @@ describe('timeline/TrackThread', function() {
     `).profile;
   }
 
-  function getMarkersProfile() {
-    const profile = getProfileWithMarkers([
+  function getMarkersProfile(
+    testMarkers = [
       ['Marker A', 0, { startTime: 0, endTime: 1 }],
       ['Marker B', 1, { startTime: 1, endTime: 2 }],
       ['Marker C', 2, { startTime: 2, endTime: 3 }],
       ['Marker D', 3, { startTime: 3, endTime: 4 }],
-    ]);
+    ]
+  ) {
+    const profile = getProfileWithMarkers(testMarkers);
     const [thread] = profile.threads;
     thread.name = 'GeckoMain';
     thread.processType = 'default';
@@ -187,5 +191,30 @@ describe('timeline/TrackThread', function() {
       selectionStart: 1,
       selectionEnd: 2,
     });
+  });
+
+  it('does not add disk io markers if none are present', function() {
+    const noMarkers = [];
+    const { queryByTestId } = setup(getMarkersProfile(noMarkers));
+    expect(queryByTestId('TimelineMarkersDiskIo')).toBeFalsy();
+  });
+
+  it('adds disk io markers if they are present', function() {
+    const diskIoMarker = [
+      [
+        'DiskIO',
+        2,
+        ({
+          type: 'DiskIO',
+          startTime: 2,
+          endTime: 3,
+          source: 'PoisionOIInterposer',
+          filename: '/foo/bar/',
+          operation: 'read/write',
+        }: DiskIoPayload),
+      ],
+    ];
+    const { getByTestId } = setup(getMarkersProfile(diskIoMarker));
+    expect(getByTestId('TimelineMarkersDiskIo')).toBeTruthy();
   });
 });

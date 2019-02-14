@@ -1038,14 +1038,30 @@ export function filterCounterToRange(
     sEnd++;
   }
 
+  const count = samples.count.slice(sBegin, sEnd);
+  const number = samples.number.slice(sBegin, sEnd);
+
+  if (sBegin === 0) {
+    // These lines zero out the first values of the counters, as they are unreliable. In
+    // addition, there are probably some missed counts in the memory counters, so the
+    // first memory number slowly creeps up over time, and becomes very unrealistic.
+    // In order to not be affected by these platform limitations, zero out the first
+    // counter values.
+    //
+    // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
+    count[0] = 0;
+    number[0] = 0;
+  }
+
   return {
     ...counter,
     sampleGroups: {
       ...counter.sampleGroups,
       samples: {
         time: samples.time.slice(sBegin, sEnd),
-        number: samples.number.slice(sBegin, sEnd),
-        count: samples.count.slice(sBegin, sEnd),
+        number,
+        count,
         length: sEnd - sBegin,
       },
     },
@@ -1247,7 +1263,7 @@ export function convertStackToCallNodePath(
   ) {
     path.push(frameTable.func[stackTable.frame[stackIndex]]);
   }
-  return path;
+  return path.reverse();
 }
 
 /**
@@ -1508,6 +1524,27 @@ export function getOriginAnnotationForFunc(
   }
 
   return '';
+}
+
+/**
+ * From a valid call node path, this function returns a list of information
+ * about each function in this path: their names and their origins.
+ */
+export function getFuncNamesAndOriginsForPath(
+  path: CallNodePath,
+  thread: Thread
+): Array<{ funcName: string, origin: string }> {
+  const { funcTable, stringTable, resourceTable } = thread;
+
+  return path.map(func => ({
+    funcName: stringTable.getString(funcTable.name[func]),
+    origin: getOriginAnnotationForFunc(
+      func,
+      funcTable,
+      resourceTable,
+      stringTable
+    ),
+  }));
 }
 
 /**

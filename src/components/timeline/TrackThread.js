@@ -19,7 +19,11 @@ import {
   getSelectedThreadIndex,
   getTimelineType,
 } from '../../selectors/url-state';
-import { TimelineMarkersJank, TimelineMarkersOverview } from './Markers';
+import {
+  TimelineMarkersJank,
+  TimelineMarkersDiskIo,
+  TimelineMarkersOverview,
+} from './Markers';
 import {
   updatePreviewSelection,
   changeRightClickedTrack,
@@ -63,6 +67,7 @@ type StateProps = {|
   +rangeEnd: Milliseconds,
   +categories: CategoryList,
   +timelineType: TimelineType,
+  +hasDiskIoMarkers: boolean,
 |};
 
 type DispatchProps = {|
@@ -113,6 +118,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       unfilteredSamplesRange,
       categories,
       timelineType,
+      hasDiskIoMarkers,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -125,6 +131,14 @@ class TimelineTrackThread extends PureComponent<Props> {
 
     return (
       <div className="timelineTrackThread">
+        {hasDiskIoMarkers ? (
+          <TimelineMarkersDiskIo
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            threadIndex={threadIndex}
+            onSelect={this._onMarkerSelect}
+          />
+        ) : null}
         {displayJank ? (
           <TimelineMarkersJank
             rangeStart={rangeStart}
@@ -196,6 +210,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       rangeEnd: committedRange.end,
       categories: getCategories(state),
       timelineType: getTimelineType(state),
+      hasDiskIoMarkers: selectors.getDiskIoMarkers(state).length !== 0,
     };
   },
   mapDispatchToProps: {

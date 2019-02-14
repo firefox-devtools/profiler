@@ -8,6 +8,31 @@ import type { GeckoMarkerStack } from './gecko-profile';
 import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
 
 /**
+ * Markers can include a stack. These are converted to a cause backtrace, which includes
+ * the time the stack was taken. Sometimes this cause can be async, and triggered before
+ * the marker, or it can be synchronous, and the time is contained within the marker's
+ * start and end time.
+ */
+export type CauseBacktrace = {|
+  time: Milliseconds,
+  stack: IndexIntoStackTable,
+|};
+
+/**
+ * This utility type removes the "cause" property from a payload, and replaces it with
+ * a stack. This effectively converts it from a processed payload to a Gecko payload.
+ */
+export type $ReplaceCauseWithStack<T: Object> = {|
+  ...$Diff<
+    T,
+    // Remove the cause property.
+    {| cause: any |}
+  >,
+  // Add on the stack property:
+  stack?: GeckoMarkerStack,
+|};
+
+/**
  * Measurement for how long draw calls take for the compositor.
  */
 export type GPUMarkerPayload = {|
@@ -20,22 +45,11 @@ export type GPUMarkerPayload = {|
   gpuend: Milliseconds, // The time the GPU took to execute the command.
 |};
 
-export type CauseBacktrace = {|
-  time: Milliseconds,
-  stack: IndexIntoStackTable,
-|};
-
 /**
  * These markers don't have a start and end time. They work in pairs, one
  * specifying the start, the other specifying the end of a specific tracing
  * marker.
  */
-export type PaintProfilerMarkerTracing_Gecko = {|
-  type: 'tracing',
-  category: 'Paint',
-  stack?: GeckoMarkerStack,
-  interval: 'start' | 'end',
-|};
 
 export type PaintProfilerMarkerTracing = {|
   type: 'tracing',
@@ -319,6 +333,16 @@ export type NetworkPayload = {|
   responseEnd?: Milliseconds,
 |};
 
+export type DiskIoPayload = {|
+  type: 'DiskIO',
+  startTime: number,
+  endTime: number,
+  cause?: CauseBacktrace,
+  source: string,
+  operation: string,
+  filename: string,
+|};
+
 /**
  * The payload for the UserTimings API. These are added through performance.measure()
  * and performance.mark(). https://developer.mozilla.org/en-US/docs/Web/API/Performance
@@ -365,20 +389,6 @@ export type NavigationMarkerPayload = {|
   docshellHistoryId?: number,
 |};
 
-type StyleMarkerPayload_Shared = {|
-  type: 'Styles',
-  category: 'Paint',
-  startTime: Milliseconds,
-  endTime: Milliseconds,
-
-  // Counts
-  elementsTraversed: number,
-  elementsStyled: number,
-  elementsMatched: number,
-  stylesShared: number,
-  stylesReused: number,
-|};
-
 type VsyncTimestampPayload = {|
   type: 'VsyncTimestamp',
 |};
@@ -396,17 +406,19 @@ export type ScreenshotPayload = {|
   windowHeight: number,
 |};
 
-/**
- * The payload for Styles.
- */
-export type StyleMarkerPayload_Gecko = {|
-  ...StyleMarkerPayload_Shared,
-  stack?: GeckoMarkerStack,
-|};
-
 export type StyleMarkerPayload = {|
-  ...StyleMarkerPayload_Shared,
+  type: 'Styles',
+  category: 'Paint',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
   cause?: CauseBacktrace,
+
+  // Counts
+  elementsTraversed: number,
+  elementsStyled: number,
+  elementsMatched: number,
+  stylesShared: number,
+  stylesReused: number,
 |};
 
 export type BHRMarkerPayload = {|
@@ -439,10 +451,12 @@ export type DummyForTestsMarkerPayload = {|
 |};
 
 /**
- * The union of all the different marker payloads that perf.html knows about, this is
- * not guaranteed to be all the payloads that we actually get from the profiler.
+ * The union of all the different marker payloads that profiler.firefox.com knows about,
+ * this is not guaranteed to be all the payloads that we actually get from the Gecko
+ * profiler.
  */
 export type MarkerPayload =
+  | DiskIoPayload
   | GPUMarkerPayload
   | BailoutPayload
   | InvalidationPayload
@@ -471,15 +485,20 @@ export type MarkerPayload_Gecko =
   | UserTimingMarkerPayload
   | TextMarkerPayload
   | LogMarkerPayload
-  | PaintProfilerMarkerTracing_Gecko
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload_Gecko
   | GCSliceMarkerPayload_Gecko
-  | StyleMarkerPayload_Gecko
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
   | ArbitraryEventTracing
   | NavigationMarkerPayload
+  // The following payloads come in with a stack property. During the profile processing
+  // the "stack" property is are converted into a "cause". See the CauseBacktrace type
+  // for more information.
+  | $ReplaceCauseWithStack<DiskIoPayload>
+  | $ReplaceCauseWithStack<PaintProfilerMarkerTracing>
+  | $ReplaceCauseWithStack<StyleMarkerPayload>
+  // Payloads can be null.
   | null;

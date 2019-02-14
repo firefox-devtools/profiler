@@ -7,7 +7,7 @@
 import React from 'react';
 import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
 import {
-  getOriginAnnotationForFunc,
+  getFuncNamesAndOriginsForPath,
   convertStackToCallNodePath,
 } from '../../profile-logic/profile-data';
 
@@ -25,27 +25,23 @@ type Props = {|
 
 function Backtrace(props: Props) {
   const { stackIndex, thread, implementationFilter, maxHeight } = props;
-  const { funcTable, stringTable } = thread;
   const callNodePath = filterCallNodePathByImplementation(
     thread,
     implementationFilter,
     convertStackToCallNodePath(thread, stackIndex)
   );
+  const funcNamesAndOrigins = getFuncNamesAndOriginsForPath(
+    callNodePath,
+    thread
+  ).reverse();
 
   return (
     <ol className="backtrace" style={{ '--max-height': maxHeight }}>
-      {callNodePath.length > 0 ? (
-        callNodePath.map((func, i) => (
+      {funcNamesAndOrigins.length > 0 ? (
+        funcNamesAndOrigins.map(({ funcName, origin }, i) => (
           <li key={i} className="backtraceStackFrame">
-            {stringTable.getString(funcTable.name[func])}
-            <em className="backtraceStackFrameOrigin">
-              {getOriginAnnotationForFunc(
-                func,
-                thread.funcTable,
-                thread.resourceTable,
-                thread.stringTable
-              )}
-            </em>
+            {funcName}
+            <em className="backtraceStackFrameOrigin">{origin}</em>
           </li>
         ))
       ) : (

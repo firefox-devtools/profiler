@@ -1,3 +1,3 @@
-* [perf.html](https://perf-html.io/)
-* [GitHub](https://github.com/devtools-html/perf.html)
+* [Firefox Profiler](https://profiler.firefox.com/)
+* [GitHub](https://github.com/firefox-devtools/profiler)
 * [#perf on Slack](http://devtools-html-slack.herokuapp.com/)

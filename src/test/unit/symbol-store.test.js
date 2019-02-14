@@ -18,7 +18,7 @@ describe('SymbolStore', function() {
   function deleteDatabase() {
     return new Promise((resolve, reject) => {
       const req = fakeIndexedDB.deleteDatabase(
-        'perf-html-async-storage-symbol-tables'
+        'profiler-async-storage-symbol-tables'
       );
       req.onsuccess = () => resolve();
       req.onerror = () => reject(req.error);
@@ -64,7 +64,7 @@ describe('SymbolStore', function() {
         Promise.resolve(exampleSymbolTable)
       ),
     };
-    symbolStore = new SymbolStore('perf-html-async-storage', symbolProvider);
+    symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
 
     expect(symbolProvider.requestSymbolTableFromAddon).not.toHaveBeenCalled();
 
@@ -134,7 +134,7 @@ describe('SymbolStore', function() {
         Promise.resolve(exampleSymbolTable)
       ),
     };
-    symbolStore = new SymbolStore('perf-html-async-storage', symbolProvider);
+    symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
 
     const lib = { debugName: 'firefox', breakpadId: 'dont-care' };
     await symbolStore.getSymbols(
@@ -147,7 +147,7 @@ describe('SymbolStore', function() {
     // Due to https://github.com/dumbmatter/fakeIndexedDB/issues/22 we need to
     // take care to sequence the DB open requests.
     await symbolStore.closeDb().catch(() => {});
-    symbolStore = new SymbolStore('perf-html-async-storage', symbolProvider);
+    symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
 
     await symbolStore.getSymbols(
       [{ lib: lib, addresses: new Set([0x1]) }],
@@ -193,7 +193,7 @@ describe('SymbolStore', function() {
         .fn()
         .mockResolvedValue(exampleSymbolTable),
     };
-    symbolStore = new SymbolStore('perf-html-async-storage', symbolProvider);
+    symbolStore = new SymbolStore('profiler-async-storage', symbolProvider);
 
     const lib1 = {
       debugName: 'available-for-addresses',
@@ -248,7 +248,7 @@ describe('SymbolStore', function() {
     // Due to https://github.com/dumbmatter/fakeIndexedDB/issues/22 we need to
     // take care to sequence the DB open requests.
     const symbolStore2 = new SymbolStore(
-      'perf-html-async-storage',
+      'profiler-async-storage',
       symbolProvider
     );
 

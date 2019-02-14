@@ -17,7 +17,7 @@ Startup profiling does not use the settings that you configured in the add-on's 
 ---
 **NOTE**
 
-A recorded Firefox shutdown profile won't be symbolicated, so when loading it into [perf-html.io](https://perf-html.io) it will be of limited use. [Issue #1458](https://github.com/devtools-html/perf.html/issues/1458) addresses this.
+A recorded Firefox shutdown profile won't be symbolicated, so when loading it into [profiler.firefox.com](https://profiler.firefox.com) it will be of limited use. [Issue #1458](https://github.com/firefox-devtools/profiler/issues/1458) addresses this.
 
 ---
 
@@ -25,4 +25,4 @@ A recorded Firefox shutdown profile won't be symbolicated, so when loading it in
 
 2. Start the profiler using the add-on, then close Firefox.
 
-3. The file you specified will contain the recorded profile. Load it through the [perf-html.io](https://perf-html.io) interface by either drag and drop or the file upload interface.
+3. The file you specified will contain the recorded profile. Load it through the [profiler.firefox.com](https://profiler.firefox.com) interface by either drag and drop or the file upload interface.

@@ -4,7 +4,7 @@
 // @flow
 
 export function uploadBinaryProfileData(
-  data: string,
+  data: $TypedArray,
   progressChangeCallback?: number => mixed
 ): Promise<string> {
   return new Promise((resolve, reject) => {

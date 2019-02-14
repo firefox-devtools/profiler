@@ -5,7 +5,7 @@
 // @flow
 import React from 'react';
 
-const PROFILER_URL = 'https://github.com/devtools-html/Gecko-Profiler-Addon';
+const PROFILER_URL = 'https://github.com/firefox-devtools/Gecko-Profiler-Addon';
 
 export default function Initializing() {
   return (

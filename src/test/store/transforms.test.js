@@ -888,7 +888,7 @@ describe('"collapse-function-subtree" transform', function() {
     );
 
     // Popping transforms resets the selected path
-    // see https://github.com/devtools-html/perf.html/issues/882
+    // see https://github.com/firefox-devtools/profiler/issues/882
     dispatch(popTransformsFromStack(0));
     expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
       []
@@ -927,7 +927,7 @@ describe('"collapse-function-subtree" transform', function() {
     );
 
     // Popping transforms resets the expanded paths
-    // see https://github.com/devtools-html/perf.html/issues/882
+    // see https://github.com/firefox-devtools/profiler/issues/882
     dispatch(popTransformsFromStack(0));
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),

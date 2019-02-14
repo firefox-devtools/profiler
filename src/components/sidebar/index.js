@@ -3,8 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-// Disabling the call tree's sidebar until it's useful
-// https://github.com/devtools-html/perf.html/issues/914
 import * as React from 'react';
 
 import CallTreeSidebar from './CallTreeSidebar';

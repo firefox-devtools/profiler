@@ -108,6 +108,7 @@ function setupWithProfile(profile) {
     ...renderResult,
     flushRafCalls,
     dispatch: store.dispatch,
+    getState: store.getState,
     flushDrawLog: () => ctx.__flushDrawLog(),
   };
 }
@@ -117,7 +118,7 @@ describe('MarkerChart', function() {
   afterEach(removeRootOverlayElement);
 
   it('renders the normal marker chart and matches the snapshot', () => {
-    window.devicePixelRatio = 1;
+    window.devicePixelRatio = 2;
 
     const profile = getProfileWithMarkers([...MARKERS]);
     const {
@@ -133,6 +134,53 @@ describe('MarkerChart', function() {
     const drawCalls = flushDrawLog();
     expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
+
+    delete window.devicePixelRatio;
+  });
+
+  it('does not render several dot markers on the same pixel', () => {
+    window.devicePixelRatio = 1;
+    const markers = [
+      // 'Marker first' and 'Marker last' define our range.
+      ['Marker first', 0, null],
+      // Then 2 very close dot markers with the same name. They shouldn't be
+      // drawn both together.
+      ['Marker A', 5000, null],
+      ['Marker A', 5001, null],
+      // This is a longer marker, it should always be drawn even if it starts at
+      // the same location as a dot marker
+      ['Marker A', 5001, { startTime: 5001, endTime: 7000 }],
+      [
+        'Marker last',
+        15000,
+        null,
+      ] /* add a marker that's quite far away to have a big range */,
+    ];
+
+    const profile = getProfileWithMarkers(markers);
+    const { flushRafCalls, flushDrawLog } = setupWithProfile(profile);
+    flushRafCalls();
+
+    const drawCalls = flushDrawLog();
+
+    // Check that we have 3 arc operations (first marker, one of the 2 dot
+    // markers in the middle, and last marker)
+    const arcOperations = drawCalls.filter(
+      ([operation]) => operation === 'arc'
+    );
+    expect(arcOperations).toHaveLength(3);
+
+    // Check that all X values are different
+    const arcOperationsX = new Set(arcOperations.map(([, x]) => Math.round(x)));
+    expect(arcOperationsX.size).toBe(3);
+
+    // Check that we have a fillRect operation for the longer marker.
+    // We filter on the height to get only 1 relevant fillRect operation per marker
+    const fillRectOperations = drawCalls.filter(
+      ([operation, , , , height]) =>
+        operation === 'fillRect' && height > 1 && height < 16
+    );
+    expect(fillRectOperations).toHaveLength(1);
 
     delete window.devicePixelRatio;
   });

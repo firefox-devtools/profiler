@@ -24,8 +24,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
           class="idleSearchField markerSettingsSearchField"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display markers that match a certain name"
             type="search"
