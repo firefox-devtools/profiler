@@ -1,6 +1,6 @@
-# Redirect everything to index.html, and allow the URL handling to decide what to show.
-/*    /index.html   200
-
 # redirect old links to profiler.firefox.com
 https://cleopatra.io/* https://profiler.firefox.com/:splat 301!
 https://perf-html.io/* https://profiler.firefox.com/:splat 301!
+
+# Redirect everything to index.html, and allow the URL handling to decide what to show.
+/*    /index.html   200
