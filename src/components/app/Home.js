@@ -23,9 +23,9 @@ import type {
 require('./Home.css');
 
 const ADDON_URL =
-  'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
+  'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
 const LEGACY_ADDON_URL =
-  'https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
+  'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
 
 type InstallButtonProps = {
   name: string,
@@ -458,7 +458,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               </span>
               <a
                 className="homeTitleGithubIcon"
-                href="https://github.com/devtools-html/firefox-profiler"
+                href="https://github.com/firefox-devtools/profiler"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Go to our git repository (this opens in a new window)"

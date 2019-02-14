@@ -17,7 +17,7 @@ Startup profiling does not use the settings that you configured in the add-on's 
 ---
 **NOTE**
 
-A recorded Firefox shutdown profile won't be symbolicated, so when loading it into [profiler.firefox.com](https://profiler.firefox.com) it will be of limited use. [Issue #1458](https://github.com/devtools-html/firefox-profiler/issues/1458) addresses this.
+A recorded Firefox shutdown profile won't be symbolicated, so when loading it into [profiler.firefox.com](https://profiler.firefox.com) it will be of limited use. [Issue #1458](https://github.com/firefox-devtools/profiler/issues/1458) addresses this.
 
 ---
 

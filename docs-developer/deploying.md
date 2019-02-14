@@ -15,7 +15,7 @@ separate domain, whose link will be added automatically to the PR:
 ## How to deploy master to production
 
 The easiest by far is to
-[create a pull request on GitHub](https://github.com/devtools-html/firefox-profiler/compare/production...master?expand=1).
+[create a pull request on GitHub](https://github.com/firefox-devtools/profiler/compare/production...master?expand=1).
 It would be nice to write down the main changes in the PR description.
 
 After the PR is created all checks should run. When it's ready the PR can be

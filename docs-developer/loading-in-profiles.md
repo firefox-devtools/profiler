@@ -104,4 +104,4 @@ The [Gecko Profiler Addon][Gecko Profiler Addon] injects the profile into the pa
 
 When you're on [the home page](https://profiler.firefox.com) files can be loaded by either dragging over the profiler.firefox.com client, or using the file upload input.
 
-[Gecko Profiler Addon]: https://github.com/devtools-html/Gecko-Profiler-Addon
+[Gecko Profiler Addon]: https://github.com/firefox-devtools/Gecko-Profiler-Addon

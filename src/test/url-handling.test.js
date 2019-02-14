@@ -191,7 +191,7 @@ describe('url handling tracks', function() {
       ]);
     });
 
-    // This is a test for issue https://github.com/devtools-html/firefox-profiler/issues/1389
+    // This is a test for issue https://github.com/firefox-devtools/profiler/issues/1389
     it('can select a local track without mixing track and thread indexes', function() {
       // We're building a very specific profile, where local track indexes and
       // thread indexes could be confused. This is easier if we have local

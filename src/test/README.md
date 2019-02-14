@@ -18,7 +18,7 @@ when Jest's mocking capabilities are falling short. This should be used as a las
 
 ## Code coverage
 
-The aim of all new code is to have good test coverage. A handy way to do this is to run a code coverage report. This can be done by running `yarn test-coverage`. This will build the coverage report, and serve it locally. All new code can be manually scanned to see where there is no coverage. Alternately [codecov.io](https://codecov.io/gh/devtools-html/firefox-profiler) provides a full coverage report for each PR, and the master branch.
+The aim of all new code is to have good test coverage. A handy way to do this is to run a code coverage report. This can be done by running `yarn test-coverage`. This will build the coverage report, and serve it locally. All new code can be manually scanned to see where there is no coverage. Alternately [codecov.io](https://codecov.io/gh/firefox-devtools/profiler) provides a full coverage report for each PR, and the master branch.
 
 ## Flow type tests
 

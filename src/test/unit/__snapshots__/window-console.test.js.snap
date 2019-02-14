@@ -21,10 +21,10 @@ Array [
 %cwindow.callTree%c - The call tree of the current filtered thread
 
 The profile format is documented here:
-%chttps://github.com/devtools-html/firefox-profiler/blob/master/docs-developer/processed-profile-format.md%c
+%chttps://github.com/firefox-devtools/profiler/blob/master/docs-developer/processed-profile-format.md%c
 
 The CallTree class's source code is available here:
-%chttps://github.com/devtools-html/firefox-profiler/blob/master/src/profile-logic/call-tree.js%c",
+%chttps://github.com/firefox-devtools/profiler/blob/master/src/profile-logic/call-tree.js%c",
     "font-size: 130%;",
     "",
     "font-weight: bold;",

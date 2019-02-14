@@ -238,7 +238,7 @@ describe('serializeProfile', function() {
     const serialized = serializeProfile(profile);
     const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
     // FIXME: Uncomment this line after resolving `undefined` serialization issue
-    // See: https://github.com/devtools-html/firefox-profiler/issues/1599
+    // See: https://github.com/firefox-devtools/profiler/issues/1599
     // expect(profile).toEqual(roundtrip);
 
     const secondSerialized = serializeProfile(roundtrip);

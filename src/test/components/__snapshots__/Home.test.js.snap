@@ -28,7 +28,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
         </span>
         <a
           class="homeTitleGithubIcon"
-          href="https://github.com/devtools-html/firefox-profiler"
+          href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
           title="Go to our git repository (this opens in a new window)"
@@ -169,7 +169,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
         </span>
         <a
           class="homeTitleGithubIcon"
-          href="https://github.com/devtools-html/firefox-profiler"
+          href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
           title="Go to our git repository (this opens in a new window)"
@@ -222,7 +222,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
         >
           <a
             class="homeSectionButton"
-            href="https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler.xpi"
+            href="https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi"
           >
             <span
               class="homeSectionPlus"
@@ -311,7 +311,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
         </span>
         <a
           class="homeTitleGithubIcon"
-          href="https://github.com/devtools-html/firefox-profiler"
+          href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
           title="Go to our git repository (this opens in a new window)"
@@ -375,7 +375,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
             To start recording a performance profile in Firefox, first install the
              
             <a
-              href="https://raw.githubusercontent.com/devtools-html/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi"
+              href="https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi"
             >
               Gecko Profiler Add-on
             </a>
@@ -484,7 +484,7 @@ exports[`app/Home renders the usage instructions for pages with the extension in
         </span>
         <a
           class="homeTitleGithubIcon"
-          href="https://github.com/devtools-html/firefox-profiler"
+          href="https://github.com/firefox-devtools/profiler"
           rel="noopener noreferrer"
           target="_blank"
           title="Go to our git repository (this opens in a new window)"

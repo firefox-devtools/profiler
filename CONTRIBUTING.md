@@ -28,7 +28,7 @@ We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-s
 
 ## Getting started with development
 
-[profiler.firefox.com](https://profiler.firefox.com) is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including from the [Gecko Profiler Addon](https://github.com/devtools-html/Gecko-Profiler-Addon), online storage, and from local files.
+[profiler.firefox.com](https://profiler.firefox.com) is a web application that loads in performance profiles for analysis. The profiles are loaded in from a variety of sources including from the [Gecko Profiler Addon](https://github.com/firefox-devtools/Gecko-Profiler-Addon), online storage, and from local files.
 
 You will need a recent enough version of [Yarn](http://yarnpkg.com/),
 version 1.0.1 is known to work correctly.
@@ -43,7 +43,7 @@ chmod a+x install.sh
 
 To get started clone the repo and get the web application started.
 
- 1. Run `git clone git@github.com:devtools-html/firefox-profiler.git`
+ 1. Run `git clone git@github.com:firefox-devtools/profiler.git`
  2. Run `cd firefox-profiler`
  3. Run `yarn install`, this will install all of the dependencies.
  4. Run `yarn start`, this will start up the webpack server.
@@ -91,7 +91,7 @@ You'll probably also want to add your non-localhost domains to the `allowedHosts
 
 ## Finding something to work on
 
-If this is your first time here, check out the label [Good First Issue](https://github.com/devtools-html/firefox-profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22). We will mentor you through the process of completing a first bug, and these are usually pretty good self-contained problems. After leveling up on a few good first issues, we also have the [Polish](https://github.com/devtools-html/firefox-profiler/issues?q=is%3Aopen+is%3Aissue+label%3Apolish) tag for bugs that no one is actively working on, but are well-scoped and ready to be tackled!
+If this is your first time here, check out the label [Good First Issue](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22). We will mentor you through the process of completing a first bug, and these are usually pretty good self-contained problems. After leveling up on a few good first issues, we also have the [Polish](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3Apolish) tag for bugs that no one is actively working on, but are well-scoped and ready to be tackled!
 
 Make sure and comment on the issue letting someone know you are interested in working on an issue. Feel free to [chat with us on slack](https://devtools-html-slack.herokuapp.com/) if you need help finding something you might be interested to work on.
 

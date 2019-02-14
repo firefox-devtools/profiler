@@ -32,7 +32,7 @@ chmod a+x install.sh
 To download and build the Firefox Profiler web app run:
 
 ```bash
-git clone git@github.com:devtools-html/firefox-profiler.git
+git clone git@github.com:firefox-devtools/profiler.git
 cd firefox-profiler
 yarn install
 yarn start
@@ -68,5 +68,5 @@ Some permissive software licenses request but do not require an acknowledgement 
 [Mozilla]:https://www.mozilla.org/
 [Firefox]:https://www.mozilla.org/firefox/
 [Cleopatra]: https://github.com/mozilla/cleopatra
-[Gecko Profiler]: https://github.com/devtools-html/Gecko-Profiler-Addon
+[Gecko Profiler]: https://github.com/firefox-devtools/Gecko-Profiler-Addon
 [zlib]: http://www.zlib.net/

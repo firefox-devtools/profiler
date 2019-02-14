@@ -166,7 +166,7 @@ export type ResourceTable = {
   length: number,
   // lib SHOULD be void in this case, but some profiles in the store have null or -1
   // here. We should investigate and provide an upgrader.
-  // See https://github.com/devtools-html/firefox-profiler/issues/652
+  // See https://github.com/firefox-devtools/profiler/issues/652
   lib: Array<IndexIntoLibs | void | null | -1>,
   name: Array<IndexIntoStringTable | -1>,
   host: Array<IndexIntoStringTable | void>,
