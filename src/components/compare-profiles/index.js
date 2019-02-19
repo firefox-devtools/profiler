@@ -499,7 +499,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     return {
       profile,
       threadMarkers: threadSelectors.map(selectors =>
-        selectors.getMarkers(state)
+        selectors.getMarkerChartMarkers(state)
       ),
       friendlyThreadNames: threadSelectors.map(selectors =>
         selectors.getFriendlyThreadName(state)
