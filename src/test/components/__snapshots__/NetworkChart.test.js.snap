@@ -67,7 +67,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
     >
       <div
         class="treeViewBodyInner treeViewBodyInner0"
-        style="height: 16px;"
+        style="height: 160px;"
       >
         <div
           class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -78,6 +78,438 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
         >
           <section
             class="even networkChartRowItem "
+          >
+            <div
+              class="networkChartRowItemLabel"
+            >
+              <span>
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </span>
+            </div>
+            <div
+              class="networkChartRowItemBar"
+              style="left: 150px; width: 12.068965517241367px;"
+            >
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                style="width: 100%;"
+              >
+                 
+              </span>
+            </div>
+          </section>
+          <section
+            class="odd networkChartRowItem "
+          >
+            <div
+              class="networkChartRowItemLabel"
+            >
+              <span>
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </span>
+            </div>
+            <div
+              class="networkChartRowItemBar"
+              style="left: 151.20689655172413px; width: 12.068965517241395px;"
+            >
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                style="width: 100%;"
+              >
+                 
+              </span>
+            </div>
+          </section>
+          <section
+            class="even networkChartRowItem "
+          >
+            <div
+              class="networkChartRowItemLabel"
+            >
+              <span>
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </span>
+            </div>
+            <div
+              class="networkChartRowItemBar"
+              style="left: 152.41379310344828px; width: 12.068965517241367px;"
+            >
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                style="width: 100%;"
+              >
+                 
+              </span>
+            </div>
+          </section>
+          <section
+            class="odd networkChartRowItem "
+          >
+            <div
+              class="networkChartRowItemLabel"
+            >
+              <span>
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </span>
+            </div>
+            <div
+              class="networkChartRowItemBar"
+              style="left: 153.6206896551724px; width: 12.068965517241367px;"
+            >
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                style="width: 100%;"
+              >
+                 
+              </span>
+            </div>
+          </section>
+          <section
+            class="even networkChartRowItem "
+          >
+            <div
+              class="networkChartRowItemLabel"
+            >
+              <span>
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </span>
+            </div>
+            <div
+              class="networkChartRowItemBar"
+              style="left: 154.82758620689654px; width: 12.068965517241395px;"
+            >
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                style="width: 100%;"
+              >
+                 
+              </span>
+            </div>
+          </section>
+          <section
+            class="odd networkChartRowItem "
+          >
+            <div
+              class="networkChartRowItemLabel"
+            >
+              <span>
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </span>
+            </div>
+            <div
+              class="networkChartRowItemBar"
+              style="left: 156.0344827586207px; width: 12.068965517241367px;"
+            >
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                style="width: 100%;"
+              >
+                 
+              </span>
+            </div>
+          </section>
+          <section
+            class="even networkChartRowItem "
+          >
+            <div
+              class="networkChartRowItemLabel"
+            >
+              <span>
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </span>
+            </div>
+            <div
+              class="networkChartRowItemBar"
+              style="left: 157.24137931034483px; width: 12.068965517241367px;"
+            >
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                style="width: 100%;"
+              >
+                 
+              </span>
+            </div>
+          </section>
+          <section
+            class="odd networkChartRowItem "
+          >
+            <div
+              class="networkChartRowItemLabel"
+            >
+              <span>
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </span>
+            </div>
+            <div
+              class="networkChartRowItemBar"
+              style="left: 158.44827586206895px; width: 12.068965517241395px;"
+            >
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                style="width: 100%;"
+              >
+                 
+              </span>
+            </div>
+          </section>
+          <section
+            class="even networkChartRowItem "
+          >
+            <div
+              class="networkChartRowItemLabel"
+            >
+              <span>
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </span>
+            </div>
+            <div
+              class="networkChartRowItemBar"
+              style="left: 159.6551724137931px; width: 12.068965517241367px;"
+            >
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
+                style="width: 0%;"
+              >
+                 
+              </span>
+              <span
+                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
+                style="width: 100%;"
+              >
+                 
+              </span>
+            </div>
+          </section>
+          <section
+            class="odd networkChartRowItem "
           >
             <div
               class="networkChartRowItemLabel"

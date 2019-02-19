@@ -9,7 +9,7 @@ import type {
   IndexIntoStringTable,
 } from '../types/profile';
 import type { Marker } from '../types/profile-derived';
-import type { BailoutPayload } from '../types/markers';
+import type { BailoutPayload, NetworkPayload } from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import { getNumberPropertyOrNull } from '../utils/flow';
 
@@ -473,9 +473,14 @@ export function mergeStartAndEndNetworkMarker(markers: Marker[]): Marker[] {
             marker.data.status === 'STATUS_START'
               ? [marker, markerNext]
               : [markerNext, marker];
+          const startData: NetworkPayload = (startMarker.data: any);
+          const endData: NetworkPayload = (endMarker.data: any);
           const mergedMarker = {
-            data: endMarker.data,
-            dur: endMarker.dur,
+            data: {
+              ...endData,
+              startTime: startData.startTime,
+            },
+            dur: startMarker.dur + endMarker.dur,
             name: endMarker.name,
             title: endMarker.title,
             start: startMarker.start,
