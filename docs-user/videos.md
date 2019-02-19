@@ -9,7 +9,7 @@ These videos go through an introduction of how to use the Firefox Profiler and s
 | [Firefox Profiler intro][intro] | This intro video explains how to get set up and start profiling. It explains a little bit of how the architecture works to better understand the relationship of the various tools and data sources. |
 | [Samples and markers][samples] |  Profilers have two main different types of data they collect. Thinking of the profile in terms of samples and markers is a useful way to understand what is going on with the underlying data. |
 | [Call Tree (Part 1) - The basics][calltree1] | Call trees are one of the most useful reports on understanding profiles. This video walks through some very simplified examples and explains how the call tree is constructed and what it represents. |
-| [Call Tree (Part 2) - Real recording][calltree2] | Take the theory of call stack and call trees to the interface of profile.firefox.com |
+| [Call Tree (Part 2) - Real recording][calltree2] | Take the theory of call stack and call trees to the interface of profiler.firefox.com |
 | [Call Tree (Part 3) - Branching][calltree3] | Real code branches and this demonstration walk you through how call trees are affected by branching and show how to understand them in a simplified code example. |
 | [Multiple threads and async code][threads] | Walk through the steps of understanding and looking at a multi-process profile. |
 

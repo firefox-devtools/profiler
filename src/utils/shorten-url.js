@@ -9,7 +9,7 @@ import url from 'url';
 
 export default function shortenUrl(urlToShorten: string): Promise<string> {
   let longUrl = urlToShorten;
-  if (!longUrl.startsWith('https://profile.firefox.com/')) {
+  if (!longUrl.startsWith('https://profiler.firefox.com/')) {
     const parsedUrl = url.parse(longUrl);
     const parsedUrlOnCanonicalHost = Object.assign({}, parsedUrl, {
       protocol: 'https:',
