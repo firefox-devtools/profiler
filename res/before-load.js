@@ -2,6 +2,26 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 {
+  if (window.location.host === 'perf-html.io') {
+    // Unregister service workers, and redirect. This can't be done with a 301 redirect
+    // because the service worker will only show the old page.
+    (async () => {
+      const { serviceWorker } = navigator;
+      if (serviceWorker) {
+        // Remove the service worker.
+        const registrations = await serviceWorker.getRegistrations();
+        for (const registration of registrations) {
+          registration.unregister();
+        }
+      }
+      if (window.location.pathname.split('/')[0] !== 'from-addon') {
+        // Redirect on everything except "from-addon" which can cause breakage.
+        window.location.replace('https://profiler.firefox.com');
+      }
+    })();
+  }
+
+  // Register the analytics.
   const doNotTrack =
     (navigator.doNotTrack || window.doNotTrack || navigator.msDoNotTrack) === '1';
 

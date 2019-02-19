@@ -1,10 +1,2 @@
-# Redirect old links to profiler.firefox.com, where it won't lose data. We need
-# to keep /from-addon links.
-https://perf-html.io/from-url/* https://profiler.firefox.com/from-url/:splat 301!
-https://perf-html.io/compare/* https://profiler.firefox.com/compare/:splat 301!
-https://perf-html.io/public/* https://profiler.firefox.com/public/:splat 301!
-https://perf-html.io/docs/* https://profiler.firefox.com/docs/:splat 301!
-https://perf-html.io/ https://profiler.firefox.com/ 301!
-
 # Redirect everything to index.html, and allow the URL handling to decide what to show.
 /*    /index.html   200
