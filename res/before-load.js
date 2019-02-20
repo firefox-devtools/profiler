@@ -15,8 +15,16 @@
         }
       }
       if (window.location.pathname.split('/')[0] !== 'from-addon') {
+        // This "from-addon" check can be removed after Bug 1525358 lands, and there has
+        // been a reasonable amount of time for folks to upgrade their Gecko Profiler
+        // Add-on.
+
+        const url = new URL('https://profiler.firefox.com')
+        url.pathname = window.location.pathname
+        url.search = window.location.search
+
         // Redirect on everything except "from-addon" which can cause breakage.
-        window.location.replace('https://profiler.firefox.com');
+        window.location.replace(url.href);
       }
     })();
   }
