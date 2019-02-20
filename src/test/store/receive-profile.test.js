@@ -929,6 +929,7 @@ describe('actions/receive-profile', function() {
       profile1.threads.forEach(thread =>
         addMarkersToThreadWithCorrespondingSamples(thread, [
           ['A', 1, { startTime: 1, endTime: 3 }],
+          ['A', 1, null],
           ['B', 2, null],
           ['C', 3, null],
           ['D', 4, null],
@@ -1012,13 +1013,13 @@ describe('actions/receive-profile', function() {
       expect(rootRange).toEqual({ start: 0, end: 9 });
     });
 
-    it('filters samples, but not markers, according to the URL', async function() {
+    it('filters samples and markers, according to the URL', async function() {
       const { resultProfile } = await setup(
         'thread=0&range=0.0011_0.0043',
         'thread=1'
       );
-      expect(resultProfile.threads[0].samples).toMatchSnapshot();
-      expect(resultProfile.threads[0].markers).toMatchSnapshot();
+      expect(resultProfile.threads[0].samples).toHaveLength(3);
+      expect(resultProfile.threads[0].markers).toHaveLength(4);
     });
 
     it('reuses the implementation information if both profiles used it', async function() {

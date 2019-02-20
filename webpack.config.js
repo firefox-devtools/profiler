@@ -71,7 +71,7 @@ const config = {
       { from: 'res/_redirects' },
       { from: 'docs-user', to: 'docs' },
       { from: 'res/zee-worker.js' },
-      { from: 'res/analytics.js' },
+      { from: 'res/before-load.js' },
     ]),
   ],
   entry: ['./src/index'],

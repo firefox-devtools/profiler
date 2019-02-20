@@ -196,8 +196,8 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
       };
     }
     // Compute the positioning of the network markers.
-    const startPosition = _timeToCssPixels(props, networkPayload.startTime);
-    const endPosition = _timeToCssPixels(props, networkPayload.endTime);
+    const startPosition = _timeToCssPixels(props, marker.start);
+    const endPosition = _timeToCssPixels(props, marker.start + marker.dur);
 
     // Set min-width for marker bar.
     let markerWidth = endPosition - startPosition;

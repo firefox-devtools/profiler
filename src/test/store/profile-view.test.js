@@ -11,7 +11,7 @@ import {
   getProfileWithMarkers,
   getNetworkTrackProfile,
   getScreenshotTrackProfile,
-  getNetworkMarker,
+  getNetworkMarkers,
   getCounterForThread,
 } from '../fixtures/profiles/processed-profile';
 import {
@@ -945,14 +945,13 @@ describe('snapshots of selectors/profile', function() {
       ['D', 3, null],
       ['E', 4, null],
       ['F', 5, null],
-      getNetworkMarker(6, 6),
-      getNetworkMarker(7, 7),
+      ...getNetworkMarkers(6, 6),
+      ...getNetworkMarkers(7, 7),
     ]);
     profile.threads.push(markersThread);
     const { getState, dispatch } = storeWithProfile(profile);
     samplesThread.name = 'Thread with samples';
     markersThread.name = 'Thread with markers';
-    samplesThread.markers = markersThread.markers;
     // This is a jank sample:
     samplesThread.samples.responsiveness[4] = 100;
     const mergeFunction = {
@@ -972,7 +971,16 @@ describe('snapshots of selectors/profile', function() {
         selectionEnd: 6,
       })
     );
-    return { getState, dispatch, samplesThread, mergeFunction, A, B, C };
+    return {
+      getState,
+      dispatch,
+      samplesThread,
+      mergeFunction,
+      markerThreadSelectors: getThreadSelectors(1),
+      A,
+      B,
+      C,
+    };
   }
   it('matches the last stored run of getProfile', function() {
     const { getState } = setupStore();
@@ -1043,40 +1051,40 @@ describe('snapshots of selectors/profile', function() {
       selectedThreadSelectors.getJankMarkersForHeader(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getProcessedRawMarkerTable', function() {
-    const { getState } = setupStore();
+  it('matches the last stored run of markerThreadSelectors.getProcessedRawMarkerTable', function() {
+    const { getState, markerThreadSelectors } = setupStore();
     expect(
-      selectedThreadSelectors.getProcessedRawMarkerTable(getState())
+      markerThreadSelectors.getProcessedRawMarkerTable(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getMarkers', function() {
-    const { getState } = setupStore();
+  it('matches the last stored run of markerThreadSelectors.getReferenceMarkerTable', function() {
+    const { getState, markerThreadSelectors } = setupStore();
     expect(
-      selectedThreadSelectors.getReferenceMarkerTable(getState())
+      markerThreadSelectors.getReferenceMarkerTable(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getMarkerChartTiming', function() {
-    const { getState } = setupStore();
+  it('matches the last stored run of markerThreadSelectors.getMarkerChartTiming', function() {
+    const { getState, markerThreadSelectors } = setupStore();
     expect(
-      selectedThreadSelectors.getMarkerChartTiming(getState())
+      markerThreadSelectors.getMarkerChartTiming(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getNetworkChartTiming', function() {
-    const { getState } = setupStore();
+  it('matches the last stored run of markerThreadSelectors.getNetworkChartTiming', function() {
+    const { getState, markerThreadSelectors } = setupStore();
     expect(
-      selectedThreadSelectors.getNetworkChartTiming(getState())
+      markerThreadSelectors.getNetworkChartTiming(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkers', function() {
-    const { getState } = setupStore();
+  it('matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkers', function() {
+    const { getState, markerThreadSelectors } = setupStore();
     expect(
-      selectedThreadSelectors.getCommittedRangeFilteredMarkers(getState())
+      markerThreadSelectors.getCommittedRangeFilteredMarkers(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getCommittedRangeFilteredMarkersForHeader', function() {
-    const { getState } = setupStore();
+  it('matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkersForHeader', function() {
+    const { getState, markerThreadSelectors } = setupStore();
     expect(
-      selectedThreadSelectors.getCommittedRangeFilteredMarkersForHeader(
+      markerThreadSelectors.getCommittedRangeFilteredMarkersForHeader(
         getState()
       )
     ).toMatchSnapshot();
@@ -1150,10 +1158,10 @@ describe('snapshots of selectors/profile', function() {
       selectedThreadSelectors.getThreadProcessDetails(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of selectedThreadSelector.getSearchFilteredMarkers', function() {
-    const { getState } = setupStore();
+  it('matches the last stored run of markerThreadSelectors.getSearchFilteredMarkers', function() {
+    const { getState, markerThreadSelectors } = setupStore();
     expect(
-      selectedThreadSelectors.getSearchFilteredMarkers(getState())
+      markerThreadSelectors.getSearchFilteredMarkers(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.unfilteredSamplesRange', function() {
