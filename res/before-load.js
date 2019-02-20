@@ -14,7 +14,7 @@
           registration.unregister();
         }
       }
-      if (window.location.pathname.split('/')[0] !== 'from-addon') {
+      if (window.location.pathname.split('/')[1] !== 'from-addon') {
         // This "from-addon" check can be removed after Bug 1525358 lands, and there has
         // been a reasonable amount of time for folks to upgrade their Gecko Profiler
         // Add-on.
