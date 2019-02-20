@@ -145,7 +145,7 @@ export const markerStyles: MarkerStyles = {
     ...defaultStyle,
     background: colors.ORANGE_50,
   },
-  DiskIO: {
+  FileIO: {
     ...defaultStyle,
     background: colors.BLUE_50,
   },

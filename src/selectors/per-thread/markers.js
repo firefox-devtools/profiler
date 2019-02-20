@@ -114,7 +114,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
         marker.name !== 'LongIdleTask' &&
         marker.name !== 'Jank' &&
         !MarkerData.isNetworkMarker(marker) &&
-        !MarkerData.isDiskIoMarker(marker) &&
+        !MarkerData.isFileIoMarker(marker) &&
         !MarkerData.isNavigationMarker(marker)
     )
   );
@@ -191,9 +191,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     markers => markers.filter(MarkerData.isNetworkMarker)
   );
 
-  const getDiskIoMarkers: Selector<Marker[]> = createSelector(
+  const getFileIoMarkers: Selector<Marker[]> = createSelector(
     getCommittedRangeFilteredMarkers,
-    markers => markers.filter(MarkerData.isDiskIoMarker)
+    markers => markers.filter(MarkerData.isFileIoMarker)
   );
 
   const getNetworkTrackTiming: Selector<MarkerTimingRows> = createSelector(
@@ -224,7 +224,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getCommittedRangeFilteredMarkers,
     getCommittedRangeFilteredMarkersForHeader,
     getTimelineVerticalMarkers,
-    getDiskIoMarkers,
+    getFileIoMarkers,
     getNetworkMarkers,
     getNetworkTrackTiming,
     getMergedNetworkChartMarkers,

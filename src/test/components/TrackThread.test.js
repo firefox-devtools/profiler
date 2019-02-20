@@ -32,7 +32,7 @@ import {
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 
-import type { DiskIoPayload } from '../../types/markers';
+import type { FileIoPayload } from '../../types/markers';
 
 // The graph is 400 pixels wide based on the getBoundingBox mock. Each stack is 100
 // pixels wide. Use the value 50 to click in the middle of this stack, and
@@ -196,25 +196,25 @@ describe('timeline/TrackThread', function() {
   it('does not add disk io markers if none are present', function() {
     const noMarkers = [];
     const { queryByTestId } = setup(getMarkersProfile(noMarkers));
-    expect(queryByTestId('TimelineMarkersDiskIo')).toBeFalsy();
+    expect(queryByTestId('TimelineMarkersFileIo')).toBeFalsy();
   });
 
   it('adds disk io markers if they are present', function() {
-    const diskIoMarker = [
+    const fileIoMarker = [
       [
-        'DiskIO',
+        'FileIO',
         2,
         ({
-          type: 'DiskIO',
+          type: 'FileIO',
           startTime: 2,
           endTime: 3,
           source: 'PoisionOIInterposer',
           filename: '/foo/bar/',
           operation: 'read/write',
-        }: DiskIoPayload),
+        }: FileIoPayload),
       ],
     ];
-    const { getByTestId } = setup(getMarkersProfile(diskIoMarker));
-    expect(getByTestId('TimelineMarkersDiskIo')).toBeTruthy();
+    const { getByTestId } = setup(getMarkersProfile(fileIoMarker));
+    expect(getByTestId('TimelineMarkersFileIo')).toBeTruthy();
   });
 });

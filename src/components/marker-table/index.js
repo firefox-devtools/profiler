@@ -107,7 +107,7 @@ class MarkerTree {
             category = name;
             name = data.name;
             break;
-          case 'DiskIO':
+          case 'FileIO':
             category = data.type;
             if (data.source) {
               name = `(${data.source}) `;

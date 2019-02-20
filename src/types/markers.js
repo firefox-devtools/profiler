@@ -333,8 +333,8 @@ export type NetworkPayload = {|
   responseEnd?: Milliseconds,
 |};
 
-export type DiskIoPayload = {|
-  type: 'DiskIO',
+export type FileIoPayload = {|
+  type: 'FileIO',
   startTime: number,
   endTime: number,
   cause?: CauseBacktrace,
@@ -456,7 +456,7 @@ export type DummyForTestsMarkerPayload = {|
  * profiler.
  */
 export type MarkerPayload =
-  | DiskIoPayload
+  | FileIoPayload
   | GPUMarkerPayload
   | BailoutPayload
   | InvalidationPayload
@@ -497,7 +497,7 @@ export type MarkerPayload_Gecko =
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.
-  | $ReplaceCauseWithStack<DiskIoPayload>
+  | $ReplaceCauseWithStack<FileIoPayload>
   | $ReplaceCauseWithStack<PaintProfilerMarkerTracing>
   | $ReplaceCauseWithStack<StyleMarkerPayload>
   // Payloads can be null.
