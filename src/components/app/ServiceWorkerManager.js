@@ -71,23 +71,8 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
     });
   }
 
-  async _removeAllServiceWorkers() {
-    const { serviceWorker } = navigator;
-    if (!serviceWorker) {
-      return;
-    }
-    const registrations = await serviceWorker.getRegistrations();
-    for (const registration of registrations) {
-      registration.unregister();
-    }
-  }
-
   componentWillMount() {
-    if (window.location.host === 'perf-html.io') {
-      // We migrated to profiler.firefox.com from perf-html.io, and the old domain's
-      // service workers interfere with redirect rules. Go ahead and remove them.
-      this._removeAllServiceWorkers();
-    } else if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === 'production') {
       this._installServiceWorker();
     }
   }
