@@ -13,6 +13,7 @@ import { symbolicateProfile } from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { mergeProfiles } from '../profile-logic/comparison';
 import { decompress } from '../utils/gz';
+import { expandUrl } from '../utils/shorten-url';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
 import {
@@ -830,9 +831,18 @@ export function retrieveProfilesToCompare(
     try {
       // First we get a state from each URL. From these states we'll get all the
       // data we need to fetch and process the profiles.
-      const profileStates = profileViewUrls.map(url =>
-        stateFromLocation(new URL(url))
+      const profileStates = await Promise.all(
+        profileViewUrls.map(async url => {
+          if (
+            url.startsWith('https://perfht.ml/') ||
+            url.startsWith('https://bit.ly/')
+          ) {
+            url = await expandUrl(url);
+          }
+          return stateFromLocation(new URL(url));
+        })
       );
+
       const hasSupportedDatasources = profileStates.every(
         state => state.dataSource === 'public'
       );
