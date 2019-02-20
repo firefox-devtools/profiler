@@ -3,15 +3,18 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import { getEmptyRawMarkerTable } from './data-structures';
+import { getNumberPropertyOrNull } from '../utils/flow';
+
 import type {
   SamplesTable,
   RawMarkerTable,
   IndexIntoStringTable,
+  IndexIntoRawMarkerTable,
 } from '../types/profile';
-import type { Marker } from '../types/profile-derived';
+import type { Marker, IndexIntoMarkers } from '../types/profile-derived';
 import type { BailoutPayload, NetworkPayload } from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
-import { getNumberPropertyOrNull } from '../utils/flow';
 
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler
@@ -371,6 +374,232 @@ export function deriveMarkersFromRawMarkerTable(
   }
 
   return matchedMarkers;
+}
+
+/**
+ * This function filters markers from a thread's raw marker table using the
+ * range specified as parameter.
+ * It especially takes care of the markers that need a special handling because
+ * of how the rest of the code handles them.
+ *
+ * There's more explanations about this special handling in the switch block
+ * below.
+ */
+export function filterRawMarkerTableToRange(
+  markers: RawMarkerTable,
+  rangeStart: number,
+  rangeEnd: number
+): RawMarkerTable {
+  const newMarkerTable = getEmptyRawMarkerTable();
+
+  const isTimeInRange = (time: number): boolean =>
+    time < rangeEnd && time >= rangeStart;
+  const intersectsRange = (start: number, end: number): boolean =>
+    start < rangeEnd && end >= rangeStart;
+  const copyIndexToNewTable = (i: IndexIntoRawMarkerTable) => {
+    newMarkerTable.time.push(markers.time[i]);
+    newMarkerTable.name.push(markers.name[i]);
+    newMarkerTable.data.push(markers.data[i]);
+    newMarkerTable.length++;
+  };
+
+  // These maps contain the start markers we find while looping the marker
+  // table.
+  // The first map contains the start markers for tracing markers. They can be
+  // nested and that's why we use an array structure as value.
+  const openTracingMarkers: Map<
+    IndexIntoStringTable,
+    IndexIntoMarkers[]
+  > = new Map();
+
+  // The second map contains the start markers for network markers.
+  // Note that we don't have more than 2 network markers with the same name as
+  // the name contains an incremented index. Therefore we don't need to use an
+  // array as value like for tracing markers.
+  const openNetworkMarkers: Map<
+    IndexIntoStringTable,
+    IndexIntoMarkers
+  > = new Map();
+
+  let previousScreenshotMarker = null;
+
+  for (let i = 0; i < markers.length; i++) {
+    const name = markers.name[i];
+    const time = markers.time[i];
+    const data = markers.data[i];
+
+    const addCurrentMarkerIfInRange = () => {
+      if (isTimeInRange(time)) {
+        copyIndexToNewTable(i);
+      }
+    };
+
+    if (!data) {
+      addCurrentMarkerIfInRange();
+      continue;
+    }
+
+    // Depending on the type we have to do some special handling.
+    switch (data.type) {
+      case 'tracing': {
+        // Tracing markers are pairs of start/end markers. To retain their
+        // duration if we have it, we keep both markers of the pair if they
+        // represent a marker that's partially in the range.
+
+        if (data.interval === 'start') {
+          let openMarkersForName = openTracingMarkers.get(name);
+          if (!openMarkersForName) {
+            openMarkersForName = [];
+            openTracingMarkers.set(name, openMarkersForName);
+          }
+          openMarkersForName.push(i);
+
+          // We're not inserting anything to newMarkerTable yet. We wait for the
+          // end marker to decide whether we should add this start marker, as we
+          // will add start markers from before the range if the end marker is
+          // in or after the range.
+          //
+          // We'll loop at all open markers after the main loop, to add them to
+          // the new marker table if they're in the range.
+        } else if (data.interval === 'end') {
+          const openMarkersForName = openTracingMarkers.get(name);
+          let startIndex;
+          if (openMarkersForName) {
+            startIndex = openMarkersForName.pop();
+          }
+          if (startIndex !== undefined) {
+            // A start marker matches this end marker.
+            if (intersectsRange(markers.time[startIndex], time)) {
+              // This couple of markers define a marker that's at least partially
+              // in the range.
+              copyIndexToNewTable(startIndex);
+              copyIndexToNewTable(i);
+            }
+          } else {
+            // No start marker matches this end marker, then we'll add it only if
+            // it's in or after the time range.
+            if (time >= rangeStart) {
+              copyIndexToNewTable(i);
+            }
+          }
+        } else {
+          console.error(
+            `'data.interval' holds the invalid value '${
+              data.interval
+            }' in marker index ${i}. This should not normally happen.`
+          );
+          addCurrentMarkerIfInRange();
+        }
+        break;
+      }
+
+      case 'Network': {
+        // Network markers are similar to tracing markers in that they also
+        // normally exist in pairs of start/stop markers. Just like tracing
+        // markers we keep both markers of the pair if they're partially in the
+        // range so that we keep all the useful data. But unlike tracing markers
+        // they have a duration and "startTime/endTime" properties like more
+        // generic markers. Lastly they're always adjacent.
+
+        if (data.status === 'STATUS_START') {
+          openNetworkMarkers.set(name, i);
+        } else {
+          // End status can be any status other than 'STATUS_START'
+          const startIndex = openNetworkMarkers.get(name);
+          if (startIndex !== undefined) {
+            // A start marker matches this end marker.
+            openNetworkMarkers.delete(name);
+
+            // We know this startIndex points to a Network marker.
+            const startData: NetworkPayload = (markers.data[startIndex]: any);
+            const endData = data;
+            if (intersectsRange(startData.startTime, endData.endTime)) {
+              // This couple of markers define a network marker that's at least
+              // partially in the range.
+              copyIndexToNewTable(startIndex);
+              copyIndexToNewTable(i);
+            }
+          } else {
+            // There's no start marker matching this end marker. This means an
+            // abstract marker exists before the start of the profile.
+            // Then we add it if it ends after the start of the range.
+            if (data.endTime >= rangeStart) {
+              copyIndexToNewTable(i);
+            }
+          }
+        }
+
+        break;
+      }
+
+      case 'CompositorScreenshot': {
+        // Between two screenshot markers, we keep on displaying the previous
+        // screenshot. this is why we always keep the last screenshot marker
+        // before the start of the range, if it exists.  These markers are
+        // ordered by time and the rest of our code rely on it, so this
+        // invariant is also kept here.
+
+        if (time < rangeStart) {
+          previousScreenshotMarker = i;
+          continue;
+        }
+
+        if (time < rangeEnd) {
+          if (previousScreenshotMarker !== null) {
+            copyIndexToNewTable(previousScreenshotMarker);
+            previousScreenshotMarker = null;
+          }
+
+          copyIndexToNewTable(i);
+        }
+
+        // If previousScreenshotMarker isn't null after the loop, it will be
+        // considered for addition to the marker table.
+
+        break;
+      }
+
+      default:
+        if (
+          typeof data.startTime === 'number' &&
+          typeof data.endTime === 'number'
+        ) {
+          if (intersectsRange(data.startTime, data.endTime)) {
+            copyIndexToNewTable(i);
+          }
+        } else {
+          addCurrentMarkerIfInRange();
+        }
+    }
+  }
+
+  // Loop over "start" markers without any "end" markers. We add one only if
+  // it's in or before the specified range.
+  // Note: doing it at the end, we change the order of markers compared to the
+  // source, but it's OK because the only important invariant is that pairs of
+  // start/end come in order.
+  for (const markerBucket of openTracingMarkers.values()) {
+    for (const startIndex of markerBucket) {
+      if (markers.time[startIndex] < rangeEnd) {
+        copyIndexToNewTable(startIndex);
+      }
+    }
+  }
+
+  for (const startIndex of openNetworkMarkers.values()) {
+    const data: NetworkPayload = (markers.data[startIndex]: any);
+    if (data.startTime < rangeEnd) {
+      copyIndexToNewTable(startIndex);
+    }
+  }
+
+  // And we should add the "last screenshot marker before the range" if it
+  // hadn't been added yet.
+  if (previousScreenshotMarker !== null) {
+    copyIndexToNewTable(previousScreenshotMarker);
+  }
+
+  return newMarkerTable;
 }
 
 export function filterMarkersToRange(
