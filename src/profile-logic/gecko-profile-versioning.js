@@ -17,7 +17,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 14; // The current version of the Gecko profile format.
+export const CURRENT_VERSION = 15; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -536,6 +536,38 @@ const _upgraders = {
       }
     }
     convertToVersionFourteenRecursive(profile);
+  },
+  [15]: profile => {
+    // The type field for DOMEventMarkerPayload was renamed to eventType.
+    function convertToVersion15Recursive(p) {
+      for (const thread of p.threads) {
+        if (thread.stringTable.indexOf('DiskIO') === -1) {
+          // There are no DiskIO markers.
+          continue;
+        }
+
+        let fileIoStringIndex = thread.stringTable.indexOf('FileIO');
+        if (fileIoStringIndex === -1) {
+          fileIoStringIndex = thread.stringTable.length;
+          thread.stringTable.push('FileIO');
+        }
+
+        const nameIndex = thread.markers.schema.name;
+        const dataIndex = thread.markers.schema.data;
+        for (let i = 0; i < thread.markers.data.length; i++) {
+          const markerData = thread.markers.data[i];
+          const payload = markerData[dataIndex];
+          if (payload && payload.type === 'DiskIO') {
+            markerData[nameIndex] = fileIoStringIndex;
+            payload.type = 'FileIO';
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersion15Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion15Recursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */
