@@ -392,16 +392,30 @@ export function filterRawMarkerTableToRange(
 ): RawMarkerTable {
   const newMarkerTable = getEmptyRawMarkerTable();
 
+  const filteredMarkerIndexesIter = filterRawMarkerTableIndexesToRange(
+    markers,
+    rangeStart,
+    rangeEnd
+  );
+
+  for (const index of filteredMarkerIndexesIter) {
+    newMarkerTable.time.push(markers.time[index]);
+    newMarkerTable.name.push(markers.name[index]);
+    newMarkerTable.data.push(markers.data[index]);
+    newMarkerTable.length++;
+  }
+  return newMarkerTable;
+}
+
+export function* filterRawMarkerTableIndexesToRange(
+  markers: RawMarkerTable,
+  rangeStart: number,
+  rangeEnd: number
+): Generator<number, void, void> {
   const isTimeInRange = (time: number): boolean =>
     time < rangeEnd && time >= rangeStart;
   const intersectsRange = (start: number, end: number): boolean =>
     start < rangeEnd && end >= rangeStart;
-  const copyIndexToNewTable = (i: IndexIntoRawMarkerTable) => {
-    newMarkerTable.time.push(markers.time[i]);
-    newMarkerTable.name.push(markers.name[i]);
-    newMarkerTable.data.push(markers.data[i]);
-    newMarkerTable.length++;
-  };
 
   // These maps contain the start markers we find while looping the marker
   // table.
@@ -428,14 +442,10 @@ export function filterRawMarkerTableToRange(
     const time = markers.time[i];
     const data = markers.data[i];
 
-    const addCurrentMarkerIfInRange = () => {
-      if (isTimeInRange(time)) {
-        copyIndexToNewTable(i);
-      }
-    };
-
     if (!data) {
-      addCurrentMarkerIfInRange();
+      if (isTimeInRange(time)) {
+        yield i;
+      }
       continue;
     }
 
@@ -472,14 +482,14 @@ export function filterRawMarkerTableToRange(
             if (intersectsRange(markers.time[startIndex], time)) {
               // This couple of markers define a marker that's at least partially
               // in the range.
-              copyIndexToNewTable(startIndex);
-              copyIndexToNewTable(i);
+              yield startIndex;
+              yield i;
             }
           } else {
             // No start marker matches this end marker, then we'll add it only if
             // it's in or after the time range.
             if (time >= rangeStart) {
-              copyIndexToNewTable(i);
+              yield i;
             }
           }
         } else {
@@ -488,7 +498,9 @@ export function filterRawMarkerTableToRange(
               data.interval
             }' in marker index ${i}. This should not normally happen.`
           );
-          addCurrentMarkerIfInRange();
+          if (isTimeInRange(time)) {
+            yield i;
+          }
         }
         break;
       }
@@ -516,15 +528,15 @@ export function filterRawMarkerTableToRange(
             if (intersectsRange(startData.startTime, endData.endTime)) {
               // This couple of markers define a network marker that's at least
               // partially in the range.
-              copyIndexToNewTable(startIndex);
-              copyIndexToNewTable(i);
+              yield startIndex;
+              yield i;
             }
           } else {
             // There's no start marker matching this end marker. This means an
             // abstract marker exists before the start of the profile.
             // Then we add it if it ends after the start of the range.
             if (data.endTime >= rangeStart) {
-              copyIndexToNewTable(i);
+              yield i;
             }
           }
         }
@@ -546,11 +558,11 @@ export function filterRawMarkerTableToRange(
 
         if (time < rangeEnd) {
           if (previousScreenshotMarker !== null) {
-            copyIndexToNewTable(previousScreenshotMarker);
+            yield previousScreenshotMarker;
             previousScreenshotMarker = null;
           }
 
-          copyIndexToNewTable(i);
+          yield i;
         }
 
         // If previousScreenshotMarker isn't null after the loop, it will be
@@ -565,10 +577,12 @@ export function filterRawMarkerTableToRange(
           typeof data.endTime === 'number'
         ) {
           if (intersectsRange(data.startTime, data.endTime)) {
-            copyIndexToNewTable(i);
+            yield i;
           }
         } else {
-          addCurrentMarkerIfInRange();
+          if (isTimeInRange(time)) {
+            yield i;
+          }
         }
     }
   }
@@ -581,7 +595,7 @@ export function filterRawMarkerTableToRange(
   for (const markerBucket of openTracingMarkers.values()) {
     for (const startIndex of markerBucket) {
       if (markers.time[startIndex] < rangeEnd) {
-        copyIndexToNewTable(startIndex);
+        yield startIndex;
       }
     }
   }
@@ -589,17 +603,15 @@ export function filterRawMarkerTableToRange(
   for (const startIndex of openNetworkMarkers.values()) {
     const data: NetworkPayload = (markers.data[startIndex]: any);
     if (data.startTime < rangeEnd) {
-      copyIndexToNewTable(startIndex);
+      yield startIndex;
     }
   }
 
   // And we should add the "last screenshot marker before the range" if it
   // hadn't been added yet.
   if (previousScreenshotMarker !== null) {
-    copyIndexToNewTable(previousScreenshotMarker);
+    yield previousScreenshotMarker;
   }
-
-  return newMarkerTable;
 }
 
 export function filterMarkersToRange(
