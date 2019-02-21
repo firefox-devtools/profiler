@@ -4,7 +4,10 @@
 
 // @flow
 import * as React from 'react';
-import { TimelineMarkersOverview } from '../../components/timeline/Markers';
+import {
+  TimelineMarkersOverview,
+  MIN_MARKER_WIDTH,
+} from '../../components/timeline/Markers';
 import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -140,7 +143,7 @@ describe('TimelineMarkers', function() {
     expect(fillRectOperations).toHaveLength(2);
     expect(
       fillRectOperations.every(
-        ([, , , width]) => width >= 1 / window.devicePixelRatio
+        ([, , , width]) => width >= MIN_MARKER_WIDTH / window.devicePixelRatio
       )
     ).toBe(true);
 

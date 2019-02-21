@@ -1,5 +1,2 @@
 # Redirect everything to index.html, and allow the URL handling to decide what to show.
 /*    /index.html   200
-
-# redirect cleopatra links to perf-html
-https://cleopatra.io/* https://perf-html.io/:splat 301!

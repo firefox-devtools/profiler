@@ -6,6 +6,7 @@ exports[`timeline/TrackThread matches the snapshot 1`] = `
 >
   <div
     class="timelineMarkers selected"
+    data-testid="TimelineMarkersJank"
   >
     <canvas
       class="timelineMarkersCanvas"

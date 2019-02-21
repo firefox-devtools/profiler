@@ -5,7 +5,7 @@ include_warnings=true
 
 [ignore]
 .*node_modules/.*
-res/analytics.js
+res/before-load.js
 
 [libs]
 src/types/libdef

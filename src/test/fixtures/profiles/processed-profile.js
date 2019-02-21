@@ -495,18 +495,30 @@ function _buildThreadFromTextOnlyStacks(
   return thread;
 }
 
-export function getNetworkMarker(startTime: number, id: number) {
-  const payload: NetworkPayload = {
+export function getNetworkMarkers(startTime: number, id: number) {
+  const name = `Load ${id}: https://mozilla.org`;
+  const startPayload: NetworkPayload = {
     type: 'Network',
     id,
     pri: 0,
-    status: 'STOP',
+    status: 'STATUS_START',
     startTime,
-    endTime: startTime + 1,
+    endTime: startTime + 0.5,
     URI: 'https://mozilla.org',
     RedirectURI: 'https://mozilla.org',
   };
-  return ['Load 123: https://mozilla.org', startTime, payload];
+
+  const stopPayload: NetworkPayload = {
+    ...startPayload,
+    status: 'STATUS_STOP',
+    startTime: startPayload.endTime,
+    endTime: startPayload.endTime + 0.5,
+  };
+
+  return [
+    [name, startPayload.startTime, startPayload],
+    [name, stopPayload.startTime, stopPayload],
+  ];
 }
 
 /**
@@ -516,11 +528,10 @@ export function getNetworkMarker(startTime: number, id: number) {
  * This generates 10 network markers ranged 3-4 ms on their start times.
  */
 export function getNetworkTrackProfile() {
-  const profile = getProfileWithMarkers(
-    Array(10)
-      .fill()
-      .map((_, i) => getNetworkMarker(3 + 0.1 * i, i))
-  );
+  const arrayOfNetworkMarkers = Array(10)
+    .fill()
+    .map((_, i) => getNetworkMarkers(3 + 0.1 * i, i));
+  const profile = getProfileWithMarkers([].concat(...arrayOfNetworkMarkers));
 
   const docShellId = '{c03a6ebd-2430-7949-b25b-95ba9776bdbf}';
   const docshellHistoryId = 1;

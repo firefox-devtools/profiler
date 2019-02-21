@@ -1,5 +1,4 @@
 # Headers for the entire site. The /* represents matching all routes, NOT a comment.
-
 /*
   # Do not try to guess the content-type for JS and CSS files served with a wrong mime-type.
   X-Content-Type-Options: nosniff

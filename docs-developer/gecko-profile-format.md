@@ -1,6 +1,6 @@
 # Gecko profile format
 
-Profile data visualized in perf.html is obtained from the [Gecko Profiler][nsIProfiler], a C++ component inside of Gecko. perf.html assumes that the Gecko Profiler add-on will activate the Gecko Profiler, gather the data, and then provide it to the client. This document talks about the Gecko profile format, which is distinct from the format that the perf.html client uses. The plan is to migrate the Gecko profile format closer and closer perf.html's desired processed profile format.
+Profile data visualized in the Firefox Profiler is obtained from the [Gecko Profiler][nsIProfiler], a C++ component inside of Gecko. The [profiler.firefox.com] web app assumes that the Gecko Profiler add-on will activate the Gecko Profiler, gather the data, and then provide it to the client. This document talks about the Gecko profile format, which is distinct from the format that [profiler.firefox.com] uses. The plan is to migrate the Gecko profile format closer and closer [profiler.firefox.com]'s desired processed profile format.
 
 ## Running the Gecko Profiler independently from the add-on and client
 
@@ -258,7 +258,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
 }
 ```
 
-The problem with this provided format for the use in perf.html is that it creates a lot of little objects. Because of this GC pauses become a real issue. So rather than have a bunch of small objects that get passed around, the data is mapped into a new form. For instance looking at markers the data goes through the following mapping.
+The problem with this provided format for the use in [profiler.firefox.com] is that it creates a lot of little objects. Because of this GC pauses become a real issue. So rather than have a bunch of small objects that get passed around, the data is mapped into a new form. For instance looking at markers the data goes through the following mapping.
 
 ### Original data
 
@@ -284,7 +284,7 @@ markers: {
 }
 ```
 
-While this format is a little more difficult to work with compared to mapping into the shape of `[{name, time, data}, {name, time, data}, ...]`, it has benefits in the speed of the perf.html client and the lack of GC pauses.
+While this format is a little more difficult to work with compared to mapping into the shape of `[{name, time, data}, {name, time, data}, ...]`, it has benefits in the speed of the [profiler.firefox.com] web app and the lack of GC pauses.
 
 ### Processed Profile Format
 
@@ -309,7 +309,7 @@ Miscellaneous data:
  * libs
  * tid
 
-Different frames can be created from the same function, and thus do not represent the unique set of functions. This function table is generated during perf.html's pre-processing step. Frames can provide additional information about the various ways the function was executed, while it's also useful to have a list of only the functions, so both types of information are retained.
+Different frames can be created from the same function, and thus do not represent the unique set of functions. This function table is generated during [profiler.firefox.com]'s pre-processing step. Frames can provide additional information about the various ways the function was executed, while it's also useful to have a list of only the functions, so both types of information are retained.
 
 ```js
 funcTable: {
@@ -323,3 +323,4 @@ funcTable: {
 
 [nsIProfiler]: https://dxr.mozilla.org/mozilla-central/source/tools/profiler/gecko/nsIProfiler.idl
 [ProfileBufferEntry.h]: https://dxr.mozilla.org/mozilla-central/rev/b043233ec04f06768d59dcdfb9e928142280f3cc/tools/profiler/core/ProfileBufferEntry.h#322-411
+[profiler.firefox.com]: https://profiler.firefox.com

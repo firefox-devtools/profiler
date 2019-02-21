@@ -20,7 +20,7 @@ The payloads are defined in [ProfilerMarkerPayload.h] and
 [GeckoProfiler.h]: http://searchfox.org/mozilla-central/source/tools/profiler/public/GeckoProfiler.h
 [profiler_add_marker]: http://searchfox.org/mozilla-central/rev/5e1e8d2f244bd8c210a578ff1f65c3b720efe34e/tools/profiler/public/GeckoProfiler.h#368-378
 
-## Marker Chart in perf.html
+## Marker Chart
 
 Coming soon
 

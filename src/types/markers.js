@@ -451,8 +451,9 @@ export type DummyForTestsMarkerPayload = {|
 |};
 
 /**
- * The union of all the different marker payloads that perf.html knows about, this is
- * not guaranteed to be all the payloads that we actually get from the profiler.
+ * The union of all the different marker payloads that profiler.firefox.com knows about,
+ * this is not guaranteed to be all the payloads that we actually get from the Gecko
+ * profiler.
  */
 export type MarkerPayload =
   | DiskIoPayload

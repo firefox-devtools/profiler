@@ -167,6 +167,7 @@ process: \\"default\\" (0)"
                     >
                       <div
                         class="timelineMarkers selected"
+                        data-testid="TimelineMarkersJank"
                       >
                         <canvas
                           class="timelineMarkersCanvas"
@@ -216,6 +217,7 @@ process: \\"default\\" (0)"
                     >
                       <div
                         class="timelineMarkers"
+                        data-testid="TimelineMarkersJank"
                       >
                         <canvas
                           class="timelineMarkersCanvas"
@@ -278,6 +280,7 @@ process: \\"default\\" (0)"
                     >
                       <div
                         class="timelineMarkers"
+                        data-testid="TimelineMarkersJank"
                       >
                         <canvas
                           class="timelineMarkersCanvas"

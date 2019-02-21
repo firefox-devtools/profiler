@@ -15,15 +15,18 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
   getProfileWithMarkers,
-  getNetworkMarker,
+  getNetworkMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { type NetworkPayload } from '../../types/markers';
 
-const NETWORK_MARKERS = Array(10)
-  .fill()
-  .map((_, i) => getNetworkMarker(3 + 0.1 * i, i));
+const NETWORK_MARKERS = (function() {
+  const arrayOfNetworkMarkers = Array(10)
+    .fill()
+    .map((_, i) => getNetworkMarkers(3 + 0.1 * i, i));
+  return [].concat(...arrayOfNetworkMarkers);
+})();
 
 function setupWithProfile(profile) {
   const flushRafCalls = mockRaf();
