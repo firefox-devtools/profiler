@@ -54,7 +54,7 @@ To get started clone the repo and get the web application started.
 
 Alternatively, you can also develop the Firefox Profiler online in a pre-configured development environment:
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/devtools-html/profiler)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/firefox-devtools/profiler)
 
 Gitpod will automatically install all dependencies; start the webpack server for you; and open the web app in a new browser tab.
 

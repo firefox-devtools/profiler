@@ -3,6 +3,6 @@ ports:
 tasks:
 - before: nvm install 10
   init: yarn install
-  command: PERFHTML_HOST="0.0.0.0" yarn start
+  command: FX_PROFILER_HOST="0.0.0.0" yarn start
 - openMode: split-right
   command: printf "\nFirefox Profiler ❤ Gitpod\nWelcome to this virtual environment.\nYou can type your commands in this terminal.\n\n"
