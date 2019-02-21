@@ -421,10 +421,10 @@ function _createGeckoThread(): GeckoThread {
           },
         ],
         [
-          14, // DiskIO
+          14, // FileIO
           24,
           {
-            type: 'DiskIO',
+            type: 'FileIO',
             startTime: 22,
             endTime: 24,
             source: 'PoisionOIInterposer',
@@ -482,7 +482,7 @@ function _createGeckoThread(): GeckoThread {
       'UserTiming', // 11
       'ArbitraryName', // 12
       'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5', // 13
-      'DiskIO', // 14
+      'FileIO', // 14
     ],
   };
 }

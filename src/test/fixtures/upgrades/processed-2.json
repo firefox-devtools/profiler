@@ -88,8 +88,8 @@
       },
       "markers": {
         "length": 8,
-        "name": [4, 5, 10, 10, 5, 8, 9, 14],
-        "time": [0, 2, 4, 5, 8, 9, 11, 13],
+        "name": [4, 5, 10, 10, 5, 8, 9, 14, 15],
+        "time": [0, 2, 4, 5, 8, 9, 11, 13, 14],
         "data": [
           {
             "category": "VsyncTimestamp",
@@ -167,6 +167,18 @@
             "requestStart": 10,
             "responseStart": 11,
             "responseEnd": 12
+          },
+          {
+            "type": "DiskIO",
+            "startTime": 13.5,
+            "endTime": 14,
+            "operation": "stat",
+            "source": "NSPRIOInterposer",
+            "filename": "",
+            "cause": {
+              "time": 13.5,
+              "stack": 0
+            }
           }
         ]
       },
@@ -193,7 +205,8 @@
         "firefox",
         "chrome://blargh",
         "frobnicate",
-        "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/3"
+        "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/3",
+        "DiskIO"
       ]
     },
     {

@@ -366,7 +366,7 @@ function getMarkerDetails(
 
   if (data) {
     switch (data.type) {
-      case 'DiskIO': {
+      case 'FileIO': {
         return [
           <div className="tooltipDetails" key="details">
             {_markerDetailNullable('name', 'Operation', data.operation)}
