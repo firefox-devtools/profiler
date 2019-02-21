@@ -222,6 +222,29 @@ class TreeViewRowScrolledColumns<
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     const RenderComponent = mainColumn.component;
 
+    // By default there's no 'aria-expanded' attribute.
+    let ariaExpanded = null;
+
+    // if a node can be expanded (has children), and is not expanded yet,
+    // aria-expanded is false
+    if (canBeExpanded) {
+      ariaExpanded = false;
+    }
+
+    // if a node is expanded, ariaExpanded is true
+    if (isExpanded) {
+      ariaExpanded = true;
+    }
+    // cleaning up self time display so we can use it in aria-label below
+    let selfTimeDisplay = displayData.selfTimeWithUnit;
+    if (selfTimeDisplay === '—') {
+      selfTimeDisplay = '0ms';
+    }
+
+    const ariaLabel = `${displayData.name}, running time is ${
+      displayData.totalTimeWithUnit
+    } (${displayData.totalTimePercent}), self time is ${selfTimeDisplay}`;
+
     return (
       <div
         className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${
@@ -229,6 +252,12 @@ class TreeViewRowScrolledColumns<
         } ${displayData.dim ? 'dim' : ''}`}
         style={rowHeightStyle}
         onMouseDown={this._onMouseDown}
+        // making the call tree more accessible by adding aria attributes
+        aria-expanded={ariaExpanded}
+        aria-level={depth + 1}
+        aria-selected={selected}
+        aria-label={ariaLabel}
+        role="treeitem"
       >
         <span
           className="treeRowIndentSpacer"
@@ -380,8 +409,10 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
         />
       );
     }
+
     const canBeExpanded = tree.hasChildren(nodeId);
-    const isExpanded = !this._isCollapsed(nodeId);
+    const isExpanded = canBeExpanded && !this._isCollapsed(nodeId);
+
     return (
       <TreeViewRowScrolledColumns
         rowHeightStyle={rowHeightStyle}
@@ -639,6 +670,8 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
         >
           <VirtualList
             className="treeViewBody"
+            role="tree"
+            ariaLabel="Call tree"
             items={this._visibleRows}
             renderItem={this._renderRow}
             itemHeight={rowHeight}
