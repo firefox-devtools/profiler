@@ -321,7 +321,6 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
         ref={this._takeContainerRef}
         tabIndex={focusable ? 0 : -1}
         onKeyDown={onKeyDown}
-        // making the call tree more accessible
         role={role}
         aria-label={ariaLabel}
       >

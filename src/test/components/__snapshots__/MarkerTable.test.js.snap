@@ -149,8 +149,8 @@ exports[`MarkerTable renders some basic markers 1`] = `
               class="treeViewBodyInner treeViewBodyInner1InnerChunk"
             >
               <div
-                aria-label="Name: foobar, running time: undefined, running time in percentage: undefined, self time: undefined"
-                aria-level="0"
+                aria-label="foobar, running time is undefined (undefined), self time is undefined"
+                aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
                 role="treeitem"
@@ -170,8 +170,8 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
               </div>
               <div
-                aria-label="Name: NotifyDidPaint, running time: undefined, running time in percentage: undefined, self time: undefined"
-                aria-level="0"
+                aria-label="NotifyDidPaint, running time is undefined (undefined), self time is undefined"
+                aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
                 role="treeitem"

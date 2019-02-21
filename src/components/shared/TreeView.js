@@ -222,7 +222,7 @@ class TreeViewRowScrolledColumns<
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     const RenderComponent = mainColumn.component;
 
-    // ariaExpanded is null by default
+    // By default there's no 'aria-expanded' attribute.
     let ariaExpanded = null;
 
     // if a node can be expanded (has children), and is not expanded yet,
@@ -241,6 +241,10 @@ class TreeViewRowScrolledColumns<
       selfTimeDisplay = '0ms';
     }
 
+    const ariaLabel = `${displayData.name}, running time is ${
+      displayData.totalTimeWithUnit
+    } (${displayData.totalTimePercent}), self time is ${selfTimeDisplay}`;
+
     return (
       <div
         className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${
@@ -250,13 +254,9 @@ class TreeViewRowScrolledColumns<
         onMouseDown={this._onMouseDown}
         // making the call tree more accessible by adding aria attributes
         aria-expanded={ariaExpanded}
-        aria-level={depth}
+        aria-level={depth + 1}
         aria-selected={selected}
-        aria-label={`Name: ${displayData.name}, running time: ${
-          displayData.totalTimeWithUnit
-        }, running time in percentage: ${
-          displayData.totalTimePercent
-        }, self time: ${selfTimeDisplay}`}
+        aria-label={ariaLabel}
         role="treeitem"
       >
         <span
@@ -409,8 +409,9 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
         />
       );
     }
+
     const canBeExpanded = tree.hasChildren(nodeId);
-    const isExpanded = !this._isCollapsed(nodeId);
+    const isExpanded = canBeExpanded && !this._isCollapsed(nodeId);
 
     return (
       <TreeViewRowScrolledColumns
