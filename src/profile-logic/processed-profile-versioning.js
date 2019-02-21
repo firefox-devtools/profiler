@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 21; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 22; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -921,6 +921,28 @@ const _upgraders = {
     // The profile processing was changed in version 21 to include the cause for all
     // markers. This upgrader upgrades profiles from case 2 above.
     _mutateProfileToEnsureCauseBacktraces(profile);
+  },
+  [22]: profile => {
+    // FileIO was originally called DiskIO. This profile upgrade performs the rename.
+    for (const thread of profile.threads) {
+      if (thread.stringArray.indexOf('DiskIO') === -1) {
+        // There are no DiskIO markers.
+        continue;
+      }
+      let fileIoStringIndex = thread.stringArray.indexOf('FileIO');
+      if (fileIoStringIndex === -1) {
+        fileIoStringIndex = thread.stringArray.length;
+        thread.stringArray.push('FileIO');
+      }
+
+      for (let i = 0; i < thread.markers.length; i++) {
+        const data = thread.markers.data[i];
+        if (data && data.type === 'DiskIO') {
+          data.type = 'FileIO';
+          thread.markers.name[i] = fileIoStringIndex;
+        }
+      }
+    }
   },
 };
 /* eslint-enable no-useless-computed-key */

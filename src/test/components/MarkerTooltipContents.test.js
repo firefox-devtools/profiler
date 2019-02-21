@@ -395,10 +395,10 @@ describe('MarkerTooltipContents', function() {
         },
       ],
       [
-        'DiskIO',
+        'FileIO',
         114,
         {
-          type: 'DiskIO',
+          type: 'FileIO',
           startTime: 114,
           endTime: 115,
           source: 'PoisonIOInterposer',

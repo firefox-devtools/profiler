@@ -156,6 +156,7 @@ describe('upgrading processed profiles', function() {
   it('should upgrade processed-2.json all the way to the current version', async function() {
     // This tests:
     //  - upgrading the DOMEventMarkerPayload.timeStamp field
+    //  - Renaming DiskIO markers to FileIO markers
     await testProfileUpgrading(
       require('../fixtures/upgrades/processed-2.json')
     );

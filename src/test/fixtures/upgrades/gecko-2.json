@@ -99,7 +99,8 @@
             "Rasterize",
             "AutoEntryScript Promise resolution or rejection",
             "get CSSStyleRule.selectorText",
-            "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/1"
+            "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/1",
+            "DiskIO"
           ],
           "unregisterTime": null,
           "name": "GeckoMain",
@@ -191,29 +192,45 @@
                   "phase": 3
                 }
               ],
-            [
-              11,
-              13,
-              {
-                "type": "Network",
-                "startTime": 3,
-                "endTime": 13,
-                "id": 388634410746504,
-                "status": "STATUS_STOP",
-                "pri": -20,
-                "count": 37838,
-                "URI": "https://github.com/rustwasm/wasm-bindgen/issues/1",
-                "domainLookupStart": 4,
-                "domainLookupEnd": 5,
-                "connectStart": 6,
-                "tcpConnectEnd": 7,
-                "secureConnectionStart": 8,
-                "connectEnd": 9,
-                "requestStart": 10,
-                "responseStart": 11,
-                "responseEnd": 12
-              }
-            ]
+              [
+                11,
+                13,
+                {
+                  "type": "Network",
+                  "startTime": 3,
+                  "endTime": 13,
+                  "id": 388634410746504,
+                  "status": "STATUS_STOP",
+                  "pri": -20,
+                  "count": 37838,
+                  "URI": "https://github.com/rustwasm/wasm-bindgen/issues/1",
+                  "domainLookupStart": 4,
+                  "domainLookupEnd": 5,
+                  "connectStart": 6,
+                  "tcpConnectEnd": 7,
+                  "secureConnectionStart": 8,
+                  "connectEnd": 9,
+                  "requestStart": 10,
+                  "responseStart": 11,
+                  "responseEnd": 12
+                }
+              ],
+              [
+                11,
+                14,
+                {
+                  "type": "DiskIO",
+                  "startTime": 13.5,
+                  "endTime": 14,
+                  "operation": "stat",
+                  "source": "NSPRIOInterposer",
+                  "filename": "",
+                  "cause": {
+                    "time": 13.5,
+                    "stack": 0
+                  }
+                }
+              ]
             ],
             "schema": { "name": 0, "data": 2, "time": 1 }
           }

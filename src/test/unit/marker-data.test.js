@@ -221,10 +221,10 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         operation: 'create/open',
         source: 'PoisionOIInterposer',
         startTime: 1022,
-        type: 'DiskIO',
+        type: 'FileIO',
       },
       dur: 2,
-      name: 'DiskIO',
+      name: 'FileIO',
       start: 1022,
       title: null,
     });

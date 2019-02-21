@@ -176,7 +176,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: DOMEvent-10
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: DiskIO-114 1`] = `
+exports[`MarkerTooltipContents renders tooltips for various markers: FileIO-114 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -194,7 +194,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: DiskIO-114 
       <div
         class="tooltipTitle"
       >
-        DiskIO
+        FileIO
       </div>
     </div>
     <div
