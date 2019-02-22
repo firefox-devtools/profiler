@@ -345,7 +345,10 @@ function _unpackGeckoProfileFromAddon(profile) {
   return profile;
 }
 
-async function getProfileFromAddon(dispatch, geckoProfiler) {
+async function getProfileFromAddon(
+  dispatch: Dispatch,
+  geckoProfiler: $GeckoProfiler
+): Promise<Profile> {
   dispatch(waitingForProfileFromAddon());
 
   // XXX update state to show that we're connected to the profiler addon
@@ -356,7 +359,10 @@ async function getProfileFromAddon(dispatch, geckoProfiler) {
   return profile;
 }
 
-async function getSymbolStore(dispatch, geckoProfiler) {
+async function getSymbolStore(
+  dispatch: Dispatch,
+  geckoProfiler?: $GeckoProfiler
+): Promise<SymbolStore> {
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {
@@ -424,7 +430,7 @@ export async function doSymbolicateProfile(
   dispatch(doneSymbolicating());
 }
 
-export function fatalError(error: Error) {
+export function fatalError(error: Error): Action {
   return {
     type: 'FATAL_ERROR',
     error,
@@ -487,7 +493,7 @@ export function temporaryError(error: TemporaryError): Action {
   };
 }
 
-function _wait(delayMs) {
+function _wait(delayMs: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, delayMs));
 }
 
