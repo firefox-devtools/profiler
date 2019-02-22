@@ -309,9 +309,9 @@ describe('actions/receive-profile', function() {
       ok: true,
       status: 200,
       headers: {
-        get: () => 'appliciation/json',
+        get: () => 'application/json',
       },
-      json: () => Promise.resolve(createGeckoProfile()),
+      json: () => Promise.resolve(_getSimpleProfile()),
     };
 
     beforeEach(function() {
@@ -341,9 +341,9 @@ describe('actions/receive-profile', function() {
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1007,
+        end: 1,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
     it('requests several times in case of 403', async function() {
@@ -376,9 +376,9 @@ describe('actions/receive-profile', function() {
       const state = store.getState();
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1007,
+        end: 1,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
     it('fails in case the profile cannot be found after several tries', async function() {
@@ -426,7 +426,7 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () => Promise.resolve(createGeckoProfile()),
+      json: () => Promise.resolve(_getSimpleProfile()),
     };
 
     beforeEach(function() {
@@ -455,9 +455,9 @@ describe('actions/receive-profile', function() {
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1007,
+        end: 1,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
     it('requests several times in case of 403', async function() {
@@ -489,9 +489,9 @@ describe('actions/receive-profile', function() {
       const state = store.getState();
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1007,
+        end: 1,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
     it('fails in case the profile cannot be found after several tries', async function() {
