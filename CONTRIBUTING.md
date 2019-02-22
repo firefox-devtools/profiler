@@ -50,6 +50,14 @@ To get started clone the repo and get the web application started.
  5. Point your browser to [http://localhost:4242](http://localhost:4242).
  6. If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
 
+## Using Gitpod
+
+Alternatively, you can also develop the Firefox Profiler online in a pre-configured development environment:
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/firefox-devtools/profiler)
+
+Gitpod will automatically install all dependencies; start the webpack server for you; and open the web app in a new browser tab.
+
 ## Loading in profiles for development
 
 The web app doesn't include any performance profiles by default, so you'll need to load some in. Make sure the local Webpack web server is running, and then try one of the following:
