@@ -218,6 +218,7 @@ class TreeViewRowScrolledColumns<
       highlightRegExp,
       rowHeightStyle,
       indentWidth,
+      nodeId,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     const RenderComponent = mainColumn.component;
@@ -258,6 +259,8 @@ class TreeViewRowScrolledColumns<
         aria-selected={selected}
         aria-label={ariaLabel}
         role="treeitem"
+        tabIndex={-1}
+        id={`tree-item-${nodeId}`}
       >
         <span
           className="treeRowIndentSpacer"
@@ -652,6 +655,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
       icons,
       maxNodeDepth,
       rowHeight,
+      selectedNodeId,
     } = this.props;
     return (
       <div className="treeView">
@@ -672,6 +676,11 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
             className="treeViewBody"
             role="tree"
             ariaLabel="Call tree"
+            // this attribute exposes the current active child element,
+            // while keeping focus on the parent (call tree)
+            ariaActiveDescendant={
+              selectedNodeId ? `tree-item-${selectedNodeId}` : null
+            }
             items={this._visibleRows}
             renderItem={this._renderRow}
             itemHeight={rowHeight}

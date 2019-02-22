@@ -545,6 +545,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-activedescendant="tree-item-17"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -1176,8 +1177,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1205,8 +1208,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1234,8 +1239,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1263,8 +1270,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1292,8 +1301,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="5"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1321,8 +1332,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="6"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1350,8 +1363,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="7"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1379,8 +1394,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="8"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1408,8 +1425,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="9"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-8"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1437,8 +1456,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="10"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-9"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1466,8 +1487,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="11"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-10"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1495,8 +1518,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="12"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-11"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1524,8 +1549,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="13"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-12"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1553,8 +1580,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="14"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-13"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1582,8 +1611,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="15"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-14"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1611,8 +1642,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="16"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-15"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1644,8 +1677,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="17"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-16"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1673,8 +1708,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="18"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns odd selected "
+                id="tree-item-17"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1702,8 +1739,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-level="19"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-18"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1880,6 +1919,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-activedescendant="tree-item-9"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -2135,8 +2175,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2164,8 +2206,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2193,8 +2237,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2222,8 +2268,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-8"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2250,8 +2298,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even selected "
+                id="tree-item-9"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2279,8 +2329,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-10"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2308,8 +2360,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2486,6 +2540,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-activedescendant="tree-item-4"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -2741,8 +2796,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2770,8 +2827,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2799,8 +2858,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2828,8 +2889,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2856,8 +2919,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even selected "
+                id="tree-item-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2885,8 +2950,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2914,8 +2981,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3092,6 +3161,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-activedescendant="tree-item-4"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -3347,8 +3417,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3376,8 +3448,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3405,8 +3479,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3434,8 +3510,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3462,8 +3540,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even selected "
+                id="tree-item-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3491,8 +3571,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3520,8 +3602,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3698,6 +3782,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-activedescendant="tree-item-4"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -3922,8 +4007,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3953,8 +4040,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3984,8 +4073,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4021,8 +4112,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4051,8 +4144,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even selected "
+                id="tree-item-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4082,8 +4177,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4262,6 +4359,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-activedescendant="tree-item-4"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -4486,8 +4584,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4517,8 +4617,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4548,8 +4650,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4585,8 +4689,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4615,8 +4721,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even selected "
+                id="tree-item-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4646,8 +4754,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4826,6 +4936,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-activedescendant="tree-item-4"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -4988,8 +5099,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5019,8 +5132,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5050,8 +5165,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5087,8 +5204,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5273,6 +5392,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-activedescendant="tree-item-4"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -5435,8 +5555,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5466,8 +5588,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5497,8 +5621,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5534,8 +5660,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5720,6 +5848,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-activedescendant="tree-item-4"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -5944,8 +6073,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5975,8 +6106,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="2"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -6006,8 +6139,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -6043,8 +6178,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -6073,8 +6210,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="5"
                 aria-selected="true"
                 class="treeViewRow treeViewRowScrolledColumns even selected "
+                id="tree-item-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -6110,8 +6249,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"

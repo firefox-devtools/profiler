@@ -174,6 +174,7 @@ type VirtualListProps = {|
   +containerWidth: CssPixels,
   +role?: string,
   +ariaLabel?: string,
+  +ariaActiveDescendant?: null | string,
 |};
 
 type Geometry = {
@@ -312,6 +313,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
       containerWidth,
       role,
       ariaLabel,
+      ariaActiveDescendant,
     } = this.props;
     const columnCount = this.props.columnCount || 1;
     const { visibleRangeStart, visibleRangeEnd } = this.computeVisibleRange();
@@ -323,6 +325,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
         onKeyDown={onKeyDown}
         role={role}
         aria-label={ariaLabel}
+        aria-activedescendant={ariaActiveDescendant}
       >
         <div className={`${className}InnerWrapper`}>
           {range(columnCount).map(columnIndex => (

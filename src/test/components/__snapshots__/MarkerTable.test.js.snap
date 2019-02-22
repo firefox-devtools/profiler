@@ -70,6 +70,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-activedescendant="tree-item--1"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
@@ -153,8 +154,10 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="tree-item-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -174,8 +177,10 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="tree-item-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
+                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
