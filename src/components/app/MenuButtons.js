@@ -20,7 +20,7 @@ import { compress } from '../../utils/gz';
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
 import ArrowPanel from '../shared/ArrowPanel';
 import ButtonWithPanel from '../shared/ButtonWithPanel';
-import shortenUrl from '../../utils/shorten-url';
+import { shortenUrl } from '../../utils/shorten-url';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import prettyBytes from '../../utils/pretty-bytes';
 import sha1 from '../../utils/sha1';
