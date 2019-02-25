@@ -72,6 +72,7 @@ const config = {
       { from: 'docs-user', to: 'docs' },
       { from: 'res/zee-worker.js' },
       { from: 'res/before-load.js' },
+      { from: 'res/contribute.json' }
     ]),
   ],
   entry: ['./src/index'],

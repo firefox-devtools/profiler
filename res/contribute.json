@@ -1,0 +1,36 @@
+{
+    "name": "Firefox profiler",
+      "description": "Web app for Firefox performance analysis",
+      "repository": {
+        "url": "https://github.com/firefox-devtools/profiler",
+        "license": "MPL2",
+        "tests": "https://circleci.com/gh/firefox-devtools/profiler"
+      },
+      "participate": {
+        "home": "https://github.com/firefox-devtools/profiler/blob/master/CONTRIBUTING.md",
+        "docs": "https://github.com/firefox-devtools/profiler/tree/master/docs-developer",
+        "irc": "irc://irc.mozilla.org/#devtools",
+        "slack": "https://devtools-html-slack.herokuapp.com/",
+        "irc-contacts": [
+          "gregtatum",
+          "julienw",
+          "florian",
+          "canaltinova",
+          "gerald"
+        ]
+      },
+      "bugs": {
+        "list": "https://github.com/firefox-devtools/profiler/issues",
+        "report": "https://github.com/firefox-devtools/profiler/issues/new",
+        "mentored": "https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22"
+      },
+      "urls": {
+        "prod": "https://profiler.firefox.com",
+        "stage": "https://master--perf-html.netlify.com/"
+      },
+      "keywords": [
+        "performance",
+        "firefox",
+        "web"
+      ]
+  }
