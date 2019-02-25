@@ -333,16 +333,16 @@ export function getJsImplementationForStack(
  * This function is the same as getTimingsForPath, but accepts an IndexIntoCallNodeTable
  * instead of a CallNodePath.
  */
-export function getTimingsForCallNodeIndex(
-  callNodeIndex: IndexIntoCallNodeTable,
+export function getTimingsForPath(
+  needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
   interval: number,
   isInvertedTree: boolean,
   thread: Thread,
   categories: CategoryList
 ) {
-  return getTimingsForPath(
-    getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable),
+  return getTimingsForCallNodeIndex(
+    getCallNodeIndexFromPath(needlePath, callNodeInfo.callNodeTable),
     callNodeInfo,
     interval,
     isInvertedTree,
@@ -355,50 +355,15 @@ export function getTimingsForCallNodeIndex(
  * This function returns the timings for a specific path. The algorithm is
  * adjusted when the call tree is inverted.
  */
-export function getTimingsForPath(
-  needlePath: CallNodePath,
+export function getTimingsForCallNodeIndex(
+  needleNodeIndex: IndexIntoCallNodeTable | null,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   interval: number,
   isInvertedTree: boolean,
   thread: Thread,
   categories: CategoryList
 ): TimingsForPath {
-  if (!needlePath.length) {
-    // If the path is empty, which shouldn't usually happen, we return an empty
-    // structure right away.
-    // The rest of this function's code assumes a non-empty path.
-    return {
-      forPath: {
-        selfTime: {
-          value: 0,
-          breakdownByImplementation: null,
-          breakdownByCategory: null,
-        },
-        totalTime: {
-          value: 0,
-          breakdownByImplementation: null,
-          breakdownByCategory: null,
-        },
-      },
-      forFunc: {
-        selfTime: {
-          value: 0,
-          breakdownByImplementation: null,
-          breakdownByCategory: null,
-        },
-        totalTime: {
-          value: 0,
-          breakdownByImplementation: null,
-          breakdownByCategory: null,
-        },
-      },
-      rootTime: 0,
-    };
-  }
-
   const { samples, stackTable, funcTable } = thread;
-  const needleNodeIndex = getCallNodeIndexFromPath(needlePath, callNodeTable);
-  const needleFuncIndex = getLeafFuncIndex(needlePath);
 
   const pathTimings: ItemTimings = {
     selfTime: {
@@ -425,6 +390,13 @@ export function getTimingsForPath(
     },
   };
   let rootTime = 0;
+
+  if (needleNodeIndex === null) {
+    // No index was provided, return empty timing information.
+    return { forPath: pathTimings, forFunc: funcTimings, rootTime };
+  }
+
+  const needleFuncIndex = callNodeTable.func[needleNodeIndex];
 
   /**
    * This is a small utility function to more easily add data to breakdowns.

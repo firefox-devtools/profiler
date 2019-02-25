@@ -60,7 +60,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       totalTime.breakdownByImplementation
     ).sort((a, b) => b[1] - a[1]);
     const { interval } = this.props;
-    const isIntegerInterval = Math.floor(interval) === interval;
+    const isIntegerInterval = Number.isInteger(interval);
 
     return (
       <div className="tooltipCallNodeImplementation">
