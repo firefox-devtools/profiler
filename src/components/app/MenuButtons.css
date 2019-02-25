@@ -170,6 +170,8 @@
 .menuButtonsPermalinkTextField {
   width: 14em;
   margin: 5px -5px;
+  height: 19px;
+  padding: 0 4px;
 }
 
 .menuButtonsShareNetworkUrlsContainer {
