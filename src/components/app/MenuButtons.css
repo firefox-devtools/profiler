@@ -169,6 +169,8 @@
 
 .menuButtonsPermalinkTextField {
   width: 14em;
+  height: 19px;
+  padding: 0 4px;
   margin: 5px -5px;
 }
 
