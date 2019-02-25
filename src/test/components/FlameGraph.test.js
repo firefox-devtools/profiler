@@ -5,23 +5,73 @@
 // @flow
 import * as React from 'react';
 import FlameGraph from '../../components/flame-graph';
-import { render } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+  getMouseEvent,
+} from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { changeInvertCallstack } from '../../actions/profile-view';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+import { getInvertCallstack } from '../../selectors/url-state';
+import { ensureExists } from '../../utils/flow';
 
-it('renders FlameGraph correctly', () => {
+const GRAPH_WIDTH = 200;
+const GRAPH_HEIGHT = 300;
+
+describe('FlameGraph', function() {
+  afterEach(removeRootOverlayElement);
+  beforeEach(addRootOverlayElement);
+
+  it('matches the snapshot', () => {
+    const { ctx, container } = setupFlameGraph();
+    const drawCalls = ctx.__flushDrawLog();
+
+    expect(container.firstChild).toMatchSnapshot();
+    expect(drawCalls).toMatchSnapshot();
+  });
+
+  it('renders a message instead of the graph when call stack is inverted', () => {
+    const { getByText, dispatch } = setupFlameGraph();
+    dispatch(changeInvertCallstack(true));
+    expect(getByText(/The Flame Graph is not available/)).toBeDefined();
+  });
+
+  it('switches back to uninverted mode when clicking the button', () => {
+    const { getByText, dispatch, getState } = setupFlameGraph();
+    dispatch(changeInvertCallstack(true));
+    expect(getInvertCallstack(getState())).toBe(true);
+    fireEvent.click(getByText(/Switch to the normal call stack/));
+    expect(getInvertCallstack(getState())).toBe(false);
+  });
+
+  it('shows a tooltip when hovering', () => {
+    const { getTooltip, moveMouse } = setupFlameGraph();
+    expect(getTooltip()).toBe(null);
+    moveMouse(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    expect(getTooltip()).toBeTruthy();
+  });
+
+  it('has a tooltip that matches the screenshot', () => {
+    const { getTooltip, moveMouse } = setupFlameGraph();
+    moveMouse(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    expect(getTooltip()).toMatchSnapshot();
+  });
+});
+
+function setupFlameGraph() {
   const flushRafCalls = mockRaf();
-  window.devicePixelRatio = 1;
   const ctx = mockCanvasContext();
 
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(200, 300));
+    .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
+
   jest
     .spyOn(HTMLCanvasElement.prototype, 'getContext')
     .mockImplementation(() => ctx);
@@ -36,7 +86,7 @@ it('renders FlameGraph correctly', () => {
 
   const store = storeWithProfile(profile);
 
-  const { container } = render(
+  const { container, getByText } = render(
     <Provider store={store}>
       <FlameGraph />
     </Provider>
@@ -44,27 +94,29 @@ it('renders FlameGraph correctly', () => {
 
   flushRafCalls();
 
-  const drawCalls = ctx.__flushDrawLog();
+  function moveMouse(x, y) {
+    fireEvent(
+      ensureExists(
+        container.querySelector('canvas'),
+        'The container should contain a canvas element.'
+      ),
+      getMouseEvent('mousemove', {
+        pageX: x,
+        pageY: y,
+        clientX: x,
+        clientY: y,
+        offsetX: x,
+        offsetY: y,
+      })
+    );
+  }
 
-  expect(container.firstChild).toMatchSnapshot();
-  expect(drawCalls).toMatchSnapshot();
+  /**
+   * The tooltip is in a portal, and created in the root overlay elements.
+   */
+  function getTooltip() {
+    return document.querySelector('#root-overlay .tooltip');
+  }
 
-  delete window.devicePixelRatio;
-});
-
-it('renders a message instead of FlameGraph when call stack is inverted', () => {
-  const { profile } = getProfileFromTextSamples(`
-    A  B
-  `);
-
-  const store = storeWithProfile(profile);
-  store.dispatch(changeInvertCallstack(true));
-
-  const { container } = render(
-    <Provider store={store}>
-      <FlameGraph />
-    </Provider>
-  );
-
-  expect(container.firstChild).toMatchSnapshot();
-});
+  return { container, getByText, ctx, moveMouse, getTooltip, ...store };
+}
