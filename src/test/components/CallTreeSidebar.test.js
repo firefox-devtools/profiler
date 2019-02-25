@@ -13,6 +13,8 @@ import {
   changeSelectedCallNode,
   changeInvertCallstack,
 } from '../../actions/profile-view';
+import { ensureExists } from '../../utils/flow';
+
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
@@ -96,5 +98,35 @@ describe('CallTreeSidebar', function() {
 
     selectNode([H, B, A]);
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('rounds properly the displayed values', () => {
+    const itemsCount = 25;
+    const interval = 0.7;
+
+    const profileString = Array(itemsCount)
+      .fill('A')
+      .join('  ');
+
+    const {
+      profile,
+      funcNamesDictPerThread: [{ A }],
+    } = getProfileFromTextSamples(profileString);
+    // This is lazy but this works good enough for what we're doing here.
+    profile.meta.interval = interval;
+
+    const store = storeWithProfile(profile);
+
+    const { getByText } = render(
+      <Provider store={store}>
+        <CallTreeSidebar />
+      </Provider>
+    );
+
+    store.dispatch(changeSelectedCallNode(0, [A]));
+
+    const categoryLabel = getByText(/Other/);
+    const categoryValue = ensureExists(categoryLabel.nextElementSibling);
+    expect(categoryValue.textContent).toEqual('17.5ms (100%)');
   });
 });
