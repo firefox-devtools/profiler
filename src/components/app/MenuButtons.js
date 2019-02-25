@@ -13,15 +13,24 @@ import {
   getProfileRootRange,
   getProfileSharingStatus,
   getSymbolicationStatus,
+  getGlobalTracks,
+  getCommittedRange,
 } from '../../selectors/profile';
-import { getDataSource, getUrlPredictor } from '../../selectors/url-state';
+import {
+  getDataSource,
+  getUrlPredictor,
+  getHiddenGlobalTracks,
+} from '../../selectors/url-state';
 import actions from '../../actions';
 import { compress } from '../../utils/gz';
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
 import ArrowPanel from '../shared/ArrowPanel';
 import ButtonWithPanel from '../shared/ButtonWithPanel';
 import shortenUrl from '../../utils/shorten-url';
-import { serializeProfile } from '../../profile-logic/process-profile';
+import {
+  serializeProfile,
+  sanitizePII,
+} from '../../profile-logic/process-profile';
 import prettyBytes from '../../utils/pretty-bytes';
 import sha1 from '../../utils/sha1';
 import { sendAnalytics } from '../../utils/analytics';
@@ -29,6 +38,11 @@ import url from 'url';
 
 import type { StartEndRange } from '../../types/units';
 import type { Profile, ProfileMeta } from '../../types/profile';
+import type {
+  TrackIndex,
+  GlobalTrack,
+  RemoveProfileInformation,
+} from '../../types/profile-derived';
 import type { Action, DataSource } from '../../types/actions';
 import type {
   ProfileSharingStatus,
@@ -59,9 +73,9 @@ type ProfileSharingButtonProps = {|
   +symbolicationStatus: string,
   +okButtonClickEvent: () => mixed,
   +panelOpenEvent?: () => void,
-  +shareNetworkUrlCheckboxChecked: boolean,
-  +shareNetworkUrlCheckboxOnChange?: (SyntheticEvent<HTMLInputElement>) => void,
-  +checkboxDisabled: boolean,
+  +PIIListToBeRemoved: Set<string>,
+  +PIICheckboxesOnChange?: (SyntheticEvent<HTMLInputElement>) => void,
+  // +checkboxDisabled: boolean,
 |};
 
 const ProfileSharingButton = ({
@@ -70,9 +84,8 @@ const ProfileSharingButton = ({
   symbolicationStatus,
   okButtonClickEvent,
   panelOpenEvent,
-  shareNetworkUrlCheckboxChecked,
-  shareNetworkUrlCheckboxOnChange,
-  checkboxDisabled,
+  PIIListToBeRemoved,
+  PIICheckboxesOnChange,
 }: ProfileSharingButtonProps) => (
   <ButtonWithPanel
     className={buttonClassName}
@@ -109,26 +122,70 @@ const ProfileSharingButton = ({
             <div className="menuButtonsPrivacyDataColumns">
               <div className="menuButtonsPrivacyDataColumn">
                 <label className="menuButtonsPrivacyDataLabel">
-                  <input type="checkbox" value="screenshots" />
+                  <input
+                    type="checkbox"
+                    checked={!PIIListToBeRemoved.has('hiddenThreads')}
+                    // eslint-disable-next-line react/jsx-no-bind
+                    onChange={event =>
+                      PIICheckboxesOnChange(event, 'hiddenThreads')
+                    }
+                  />
                   Include hidden threads
                 </label>
                 <label className="menuButtonsPrivacyDataLabel">
-                  <input type="checkbox" value="screenshots" />
+                  <input
+                    type="checkbox"
+                    checked={!PIIListToBeRemoved.has('timeRange')}
+                    // eslint-disable-next-line react/jsx-no-bind
+                    onChange={event =>
+                      PIICheckboxesOnChange(event, 'timeRange')
+                    }
+                  />
                   Include full time range
                 </label>
                 <label className="menuButtonsPrivacyDataLabel">
-                  <input type="checkbox" value="screenshots" />
-                  Screenshots
+                  <input
+                    type="checkbox"
+                    checked={!PIIListToBeRemoved.has('screenshots')}
+                    // eslint-disable-next-line react/jsx-no-bind
+                    onChange={event =>
+                      PIICheckboxesOnChange(event, 'screenshots')
+                    }
+                  />
+                  Include screenshots
                 </label>
               </div>
               <div className="menuButtonsPrivacyDataColumn">
                 <label className="menuButtonsPrivacyDataLabel">
-                  <input type="checkbox" value="screenshots" />
-                  Network traffic URLs
+                  <input
+                    type="checkbox"
+                    checked={!PIIListToBeRemoved.has('networkUrls')}
+                    // eslint-disable-next-line react/jsx-no-bind
+                    onChange={event =>
+                      PIICheckboxesOnChange(event, 'networkUrls')
+                    }
+                  />
+                  Include network traffic URLs
                 </label>
                 <label className="menuButtonsPrivacyDataLabel">
-                  <input type="checkbox" value="screenshots" />
-                  All profile URLs
+                  <input
+                    type="checkbox"
+                    checked={!PIIListToBeRemoved.has('allUrls')}
+                    // eslint-disable-next-line react/jsx-no-bind
+                    onChange={event => PIICheckboxesOnChange(event, 'allUrls')}
+                  />
+                  Include All profile URLs
+                </label>
+                <label className="menuButtonsPrivacyDataLabel">
+                  <input
+                    type="checkbox"
+                    checked={!PIIListToBeRemoved.has('extensions')}
+                    // eslint-disable-next-line react/jsx-no-bind
+                    onChange={event =>
+                      PIICheckboxesOnChange(event, 'extensions')
+                    }
+                  />
+                  Include Extensions
                 </label>
               </div>
             </div>
@@ -137,6 +194,8 @@ const ProfileSharingButton = ({
             <div
               aria-role="button"
               className="menuButtonsPrivacyButton menuButtonsPrivacyButtonsUpload"
+              // eslint-disable-next-line react/jsx-no-bind
+              onClick={() => okButtonClickEvent()}
             >
               <span className="menuButtonsPrivacyButtonsSvg menuButtonsPrivacyButtonsSvgUpload" />
               Upload
@@ -174,6 +233,9 @@ type ProfileSharingCompositeButtonProps = {
   onProfilePublished: typeof actions.profilePublished,
   profileSharingStatus: ProfileSharingStatus,
   setProfileSharingStatus: typeof actions.setProfileSharingStatus,
+  globalTracks: GlobalTrack[],
+  hiddenGlobalTracks: Set<TrackIndex>,
+  timeRange: StartEndRange,
 };
 
 type ProfileSharingCompositeButtonState = {
@@ -182,7 +244,7 @@ type ProfileSharingCompositeButtonState = {
   error: Error | null,
   fullUrl: string,
   shortUrl: string,
-  shareNetworkUrls: boolean,
+  PIIListToBeRemoved: Set<string>,
 };
 
 function _mapMetaInfoExtensionNames(data: string[]): React.DOM {
@@ -360,7 +422,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
       error: null,
       fullUrl: window.location.href,
       shortUrl: window.location.href,
-      shareNetworkUrls: false,
+      PIIListToBeRemoved: new Set(),
     };
   }
 
@@ -382,8 +444,9 @@ class ProfileSharingCompositeButton extends React.PureComponent<
     this._shortenUrlAndFocusTextFieldOnCompletion();
   };
 
-  _shortenUrlAndFocusTextFieldOnCompletion(): Promise<void> {
-    return shortenUrl(this.state.fullUrl)
+  _shortenUrlAndFocusTextFieldOnCompletion(fullUrl?: string): Promise<void> {
+    fullUrl = fullUrl || this.state.fullUrl;
+    return shortenUrl(fullUrl)
       .then(shortUrl => {
         this.setState({ shortUrl });
         const textField = this._permalinkTextField;
@@ -430,14 +493,57 @@ class ProfileSharingCompositeButton extends React.PureComponent<
     }
     this._notifyAnalytics();
 
-    const { profile, predictUrl, profileSharingStatus } = this.props;
+    const {
+      profile,
+      predictUrl,
+      profileSharingStatus,
+      hiddenGlobalTracks,
+      globalTracks,
+    } = this.props;
 
     try {
       if (!profile) {
         throw new Error('profile is null');
       }
 
-      const jsonString = serializeProfile(profile, this.state.shareNetworkUrls);
+      const globalHiddenThreads = [];
+      const hiddenScreenshots = [];
+      for (let i = 0; i < globalTracks.length; i++) {
+        if (hiddenGlobalTracks.has(i)) {
+          const track = globalTracks[i];
+          if (track.type === 'process') {
+            if (track.mainThreadIndex !== null) {
+              globalHiddenThreads.push(track.mainThreadIndex);
+            }
+          } else if (track.type === 'screenshots') {
+            hiddenScreenshots.push(track.threadIndex);
+          } else {
+            throw new Error(
+              'There is no other track type currently. Please update this code if new one is added.'
+            );
+          }
+        }
+      }
+
+      const piiList = this.state.PIIListToBeRemoved;
+      const piiToBeRemoved: RemoveProfileInformation = {
+        shouldRemoveThreads: piiList.has('hiddenThreads')
+          ? globalHiddenThreads
+          : [],
+        shouldRemoveThreadsWithScreenshots: piiList.has('screenshots')
+          ? (globalTracks.filter(
+              track => track.type === 'screenshots'
+            ): any).map(track => track.threadIndex)
+          : piiList.has('hiddenThreads') ? hiddenScreenshots : [],
+        shouldRemoveNetworkUrls: piiList.has('networkUrls'),
+        shouldRemoveAllUrls: piiList.has('allUrls'),
+        shouldFilterToCommittedRange: piiList.has('timeRange')
+          ? this.props.timeRange
+          : null,
+        shouldRemoveExtensions: piiList.has('extensions'),
+      };
+      const sanitizedProfile = sanitizePII(profile, piiToBeRemoved);
+      const jsonString = serializeProfile(sanitizedProfile);
       if (!jsonString) {
         throw new Error('profile serialization failed');
       }
@@ -459,10 +565,24 @@ class ProfileSharingCompositeButton extends React.PureComponent<
         sha1(typedArray),
       ]);
 
+      // If we removed something that will affect url, we should update the
+      // URL respectfully and update the permalink input.
+      const actionList = [actions.profilePublished(hash)];
+      if (
+        piiToBeRemoved.shouldRemoveThreads !== null ||
+        piiToBeRemoved.shouldRemoveThreadsWithScreenshots !== false
+      ) {
+        actionList.push(actions.hiddenTracksRemoved(hiddenGlobalTracks));
+      }
+      if (piiToBeRemoved.shouldFilterToCommittedRange !== null) {
+        actionList.push(actions.fullTimeRangeRemoved());
+      }
+
       const predictedUrl = url.resolve(
         window.location.href,
-        predictUrl(actions.profilePublished(hash))
+        predictUrl(actionList)
       );
+
       this.setState({
         fullUrl: predictedUrl,
         shortUrl: predictedUrl,
@@ -474,21 +594,21 @@ class ProfileSharingCompositeButton extends React.PureComponent<
           this.setState({ uploadProgress });
         }
       ).then((hash: string) => {
-        const { onProfilePublished } = this.props;
-        onProfilePublished(hash);
+        // const { onProfilePublished } = this.props;
+        // onProfilePublished(hash);
 
-        this.setState(prevState => {
-          const newShortUrl =
-            prevState.fullUrl === window.location.href
-              ? prevState.shortUrl
-              : window.location.href;
+        // this.setState(prevState => {
+        //   const newShortUrl =
+        //     prevState.fullUrl === window.location.href
+        //       ? prevState.shortUrl
+        //       : window.location.href;
 
-          return {
-            state: 'public',
-            fullUrl: window.location.href,
-            shortUrl: newShortUrl,
-          };
-        });
+        //   return {
+        //     state: 'public',
+        //     fullUrl: window.location.href,
+        //     shortUrl: newShortUrl,
+        //   };
+        // });
 
         if (this._permalinkButton) {
           this._permalinkButton.openPanel();
@@ -522,9 +642,18 @@ class ProfileSharingCompositeButton extends React.PureComponent<
     }
   };
 
-  _onChangeShareNetworkUrls = (event: SyntheticEvent<HTMLInputElement>) => {
-    this.setState({
-      shareNetworkUrls: event.currentTarget.checked,
+  _onChangePIICheckbox = (
+    event: SyntheticEvent<HTMLInputElement>,
+    piiField: string
+  ) => {
+    this.setState((prevState, _props) => {
+      const newSet = new Set(prevState.PIIListToBeRemoved);
+      if (newSet.has(piiField)) {
+        newSet.delete(piiField);
+      } else {
+        newSet.add(piiField);
+      }
+      return { PIIListToBeRemoved: newSet };
     });
   };
 
@@ -586,9 +715,9 @@ class ProfileSharingCompositeButton extends React.PureComponent<
               shareLabel={shareLabel}
               symbolicationStatus={symbolicationStatus}
               okButtonClickEvent={this._attemptToShare}
-              shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
-              shareNetworkUrlCheckboxOnChange={this._onChangeShareNetworkUrls}
-              checkboxDisabled={false}
+              PIIListToBeRemoved={this.state.PIIListToBeRemoved}
+              PIICheckboxesOnChange={this._onChangePIICheckbox}
+              // checkboxDisabled={false}
             />
           </AnimateUpTransition>
         )}
@@ -657,8 +786,8 @@ class ProfileSharingCompositeButton extends React.PureComponent<
               symbolicationStatus={symbolicationStatus}
               okButtonClickEvent={this._attemptToSecondaryShare}
               panelOpenEvent={this._onSecondarySharePanelOpen}
-              shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
-              checkboxDisabled={true}
+              PIIListToBeRemoved={this.state.PIIListToBeRemoved}
+              // checkboxDisabled={true}
             />
           </AnimateUpTransition>
         )}
@@ -785,6 +914,9 @@ type MenuButtonsStateProps = {|
   +symbolicationStatus: SymbolicationStatus,
   +profileSharingStatus: ProfileSharingStatus,
   +predictUrl: (Action | Action[]) => string,
+  +globalTracks: GlobalTrack[],
+  +hiddenGlobalTracks: Set<TrackIndex>,
+  +timeRange: StartEndRange,
 |};
 
 type MenuButtonsDispatchProps = {|
@@ -807,6 +939,9 @@ const MenuButtons = ({
   profileSharingStatus,
   setProfileSharingStatus,
   predictUrl,
+  globalTracks,
+  hiddenGlobalTracks,
+  timeRange,
 }: MenuButtonsProps) => (
   <>
     {/* Place the info button outside of the menu buttons to allow it to shrink. */}
@@ -820,6 +955,9 @@ const MenuButtons = ({
         profileSharingStatus={profileSharingStatus}
         setProfileSharingStatus={setProfileSharingStatus}
         predictUrl={predictUrl}
+        globalTracks={globalTracks}
+        hiddenGlobalTracks={hiddenGlobalTracks}
+        timeRange={timeRange}
       />
       <ProfileDownloadButton profile={profile} rootRange={rootRange} />
       <a
@@ -846,6 +984,9 @@ const options: ExplicitConnectOptions<
     symbolicationStatus: getSymbolicationStatus(state),
     profileSharingStatus: getProfileSharingStatus(state),
     predictUrl: getUrlPredictor(state),
+    globalTracks: getGlobalTracks(state),
+    hiddenGlobalTracks: getHiddenGlobalTracks(state),
+    timeRange: getCommittedRange(state),
   }),
   mapDispatchToProps: {
     profilePublished: actions.profilePublished,
