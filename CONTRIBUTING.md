@@ -10,19 +10,19 @@ This project is made up of a cross section of different parts of Mozilla, includ
 | - | ---- | ------------- | -------- |
 | ![][digitarald] | Harald Kirschner | [@digitarald](https://github.com/digitarald) | Firefox DevTools Product Manager |
 | <img src="https://avatars.githubusercontent.com/mstange?size=56" width="56" height="56" /> | Markus Stange | [@mstange](https://github.com/mstange) | Firefox Platform Engineer |
-| ![][gregtatum] | Greg Tatum | [@gregtatum](https://github.com/gregtatum) | Firefox DevTools Engineer |
-| ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox DevTools Engineer |
+| ![][gregtatum] | Greg Tatum | [@gregtatum](https://github.com/gregtatum) | Firefox Frontend Engineer |
+| ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox Frontend Engineer |
 | ![][brisad] | Michael Hoffmann | [@brisad](https://github.com/brisad) | Engineer and Contributor |
-| ![][zoepage] | Ola Gasidlo | [@zoepage](https://github.com/zoepage) | Firefox DevTools Engineer |
-| ![][violasong] | Victoria Wang | [@violasong](https://github.com/violasong) | Firefox DevTools UX Designer |
+| ![][squelart] | Gérald Squelart | [@squelart](https://github.com/squelart) | Firefox Platform Engineer |
+| ![][canaltinova] | Nazim Can Altinova| [@canaltinova](https://github.com/canaltinova) | Firefox Platform and Frontend Engineer |
 
 [digitarald]:https://avatars.githubusercontent.com/digitarald?size=56
 [mstange]:https://avatars.githubusercontent.com/mstange?size=56
 [gregtatum]:https://avatars.githubusercontent.com/gregtatum?size=56
 [julienw]:https://avatars.githubusercontent.com/julienw?size=56
-[violasong]:https://avatars.githubusercontent.com/violasong?size=56
 [brisad]:https://avatars.githubusercontent.com/brisad?size=56
-[zoepage]:https://avatars.githubusercontent.com/zoepage?size=56
+[squelart]:https://avatars.githubusercontent.com/squelart?size=56
+[canaltinova]:https://avatars.githubusercontent.com/canaltinova?size=56
 
 We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-slack.herokuapp.com/) in the #perf channel. Come chat with us if you have any questions about the project.
 
@@ -99,9 +99,29 @@ You'll probably also want to add your non-localhost domains to the `allowedHosts
 
 ## Finding something to work on
 
-If this is your first time here, check out the label [Good First Issue](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22). We will mentor you through the process of completing a first bug, and these are usually pretty good self-contained problems. After leveling up on a few good first issues, we also have the [Polish](https://github.com/firefox-devtools/profiler/issues?q=is%3Aopen+is%3Aissue+label%3Apolish) tag for bugs that no one is actively working on, but are well-scoped and ready to be tackled!
+If this is your first time here, check out the label
+[good first issue](https://github.com/firefox-devtools/profiler/issues?utf8=%E2%9C%93&q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22+-label%3Aassigned).
+We will mentor you through the process of completing a first bug, and these are
+usually pretty good self-contained problems.
 
-Make sure and comment on the issue letting someone know you are interested in working on an issue. Feel free to [chat with us on slack](https://devtools-html-slack.herokuapp.com/) if you need help finding something you might be interested to work on.
+After leveling up on a few good first issues, we also have the
+[help wanted](https://github.com/firefox-devtools/profiler/issues?utf8=%E2%9C%93&q=is%3Aopen+is%3Aissue+label%3A%22help+wanted%22+-label%3A%22good+first+issue%22+-label%3Aassigned+)
+tag for bugs that no one is actively working on, but are well-scoped and ready
+to be tackled!
+
+We know how stimulating working on our project can be, but
+please refrain claiming several issues at once. Instead please decide on the one
+issue you're interested in and leave a comment to let someone know. Take
+especially care that no other contributor already asked for it. Then someone from
+the team will answer and assign the issue to you. If you're commenting during
+week-ends be aware that our team is working mostly on week days,
+therefore please be patient :-)
+
+
+Feel free to [chat with us on
+slack](https://devtools-html-slack.herokuapp.com/) if you need help finding
+something you might be interested to work on or have any question. You can also
+leave message on our special [issue #1785](https://github.com/firefox-devtools/profiler/issues/1785).
 
 ## Submitting changes with a pull request (PR)
 
