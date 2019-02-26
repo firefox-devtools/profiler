@@ -12,7 +12,7 @@ const localConfigExists = fs.existsSync(
 );
 
 const serverConfig = {
-  allowedHosts: ['localhost'],
+  allowedHosts: ['localhost', '.gitpod.io'],
   contentBase: config.output.path,
   publicPath: config.output.publicPath,
   hot: process.env.NODE_ENV === 'development' ? true : false,

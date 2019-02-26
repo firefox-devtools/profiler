@@ -27,7 +27,7 @@ jest.mock('../../utils/sha1');
 jest.mock('../../utils/gz');
 
 // Mocking shortenUrl
-import shortenUrl from '../../utils/shorten-url';
+import { shortenUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
 describe('app/MenuButtons', function() {

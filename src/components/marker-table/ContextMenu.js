@@ -36,7 +36,7 @@ type StateProps = {|
   +markers: Marker[],
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +selectedMarker: IndexIntoMarkers,
+  +selectedMarker: IndexIntoMarkers | null,
   +thread: Thread,
   +implementationFilter: ImplementationFilter,
 |};
@@ -56,6 +56,10 @@ class MarkersContextMenu extends PureComponent<Props> {
       previewSelection,
       committedRange,
     } = this.props;
+
+    if (selectedMarker === null) {
+      return;
+    }
 
     const selectionEnd = previewSelection.hasSelection
       ? previewSelection.selectionEnd
@@ -78,6 +82,10 @@ class MarkersContextMenu extends PureComponent<Props> {
       previewSelection,
     } = this.props;
 
+    if (selectedMarker === null) {
+      return;
+    }
+
     const selectionStart = previewSelection.hasSelection
       ? previewSelection.selectionStart
       : committedRange.start;
@@ -92,6 +100,30 @@ class MarkersContextMenu extends PureComponent<Props> {
       selectionEnd: marker.start + (marker.dur || 0.0001),
     });
   };
+
+  setRangeByDuration = () => {
+    const { selectedMarker, markers, updatePreviewSelection } = this.props;
+
+    if (selectedMarker === null) {
+      return;
+    }
+
+    const marker = markers[selectedMarker];
+    if (this._isZeroDurationMarker(marker)) {
+      return;
+    }
+
+    updatePreviewSelection({
+      hasSelection: true,
+      isModifying: false,
+      selectionStart: marker.start,
+      selectionEnd: marker.start + marker.dur,
+    });
+  };
+
+  _isZeroDurationMarker(marker: ?Marker): boolean {
+    return !marker || !marker.dur;
+  }
 
   _convertStackToString(stack: IndexIntoStackTable): string {
     const { thread, implementationFilter } = this.props;
@@ -113,16 +145,31 @@ class MarkersContextMenu extends PureComponent<Props> {
 
   copyMarkerJSON = () => {
     const { selectedMarker, markers } = this.props;
+
+    if (selectedMarker === null) {
+      return;
+    }
+
     copy(JSON.stringify(markers[selectedMarker]));
   };
 
   copyMarkerName = () => {
     const { selectedMarker, markers } = this.props;
+
+    if (selectedMarker === null) {
+      return;
+    }
+
     copy(markers[selectedMarker].name);
   };
 
   copyMarkerCause = () => {
     const { markers, selectedMarker } = this.props;
+
+    if (selectedMarker === null) {
+      return;
+    }
+
     const marker = markers[selectedMarker];
     if (marker && marker.data && marker.data.cause) {
       const stack = this._convertStackToString(marker.data.cause.stack);
@@ -132,6 +179,11 @@ class MarkersContextMenu extends PureComponent<Props> {
 
   render() {
     const { markers, selectedMarker } = this.props;
+
+    if (selectedMarker === null) {
+      return null;
+    }
+
     const marker = markers[selectedMarker];
 
     return (
@@ -141,6 +193,12 @@ class MarkersContextMenu extends PureComponent<Props> {
         </MenuItem>
         <MenuItem onClick={this.setEndRange}>
           Set selection end time here
+        </MenuItem>
+        <MenuItem
+          onClick={this.setRangeByDuration}
+          disabled={this._isZeroDurationMarker(marker)}
+        >
+          Set selection from duration
         </MenuItem>
         <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
         <MenuItem onClick={this.copyMarkerName}>Copy marker name</MenuItem>

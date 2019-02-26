@@ -40,7 +40,7 @@ export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
   +expandedCallNodePaths: PathSet,
-  +selectedMarker: IndexIntoRawMarkerTable | -1,
+  +selectedMarker: IndexIntoRawMarkerTable | null,
 |};
 
 export type ProfileSharingStatus = {|

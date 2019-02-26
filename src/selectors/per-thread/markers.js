@@ -208,9 +208,8 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerData.groupScreenshotsById
   );
 
-  const getSelectedMarkerIndex: Selector<
-    IndexIntoRawMarkerTable | -1
-  > = state => threadSelectors.getViewOptions(state).selectedMarker;
+  const getSelectedMarkerIndex: Selector<IndexIntoRawMarkerTable | null> = state =>
+    threadSelectors.getViewOptions(state).selectedMarker;
 
   return {
     getJankMarkersForHeader,

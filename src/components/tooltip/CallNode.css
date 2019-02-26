@@ -1,0 +1,74 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.tooltipCallNodeImplementation {
+  display: grid;
+  grid-gap: 2px;
+  grid-template-columns: repeat(4, min-content);
+}
+
+.tooltipCallNodeImplementationHeader {
+  padding-right: 5px;
+  border-right: 1px solid var(--grey-30);
+  color: var(--grey-50);
+  white-space: nowrap;
+}
+
+.tooltipCallNodeImplementationName {
+  white-space: nowrap;
+}
+
+.tooltipCallNodeImplementationGraph {
+  position: relative;
+  width: var(--graph-width);
+  height: var(--graph-height);
+  margin-top: 2px;
+  background-color: var(--grey-30);
+  border-radius: 2px;
+}
+
+.tooltipCallNodeImplementationGraphRunning {
+  height: var(--graph-height);
+  background-color: var(--blue-40);
+  border-radius: 2px;
+}
+
+.tooltipCallNodeImplementationGraphSelf {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: var(--graph-height);
+  background-color: var(--blue-60);
+  border-radius: 2px;
+}
+
+.tooltipCallNodeImplementationTiming {
+  white-space: nowrap;
+}
+
+.tooltipCallNodeImplementationHeaderSwatchRunning,
+.tooltipCallNodeImplementationHeaderSwatchSelf {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  box-sizing: border-box;
+  margin-right: 3px;
+  border: .5px solid rgba(0,0,0,.1);
+}
+
+.tooltipCallNodeImplementationHeaderSwatchRunning {
+  background-color: var(--blue-40);
+}
+
+.tooltipCallNodeImplementationHeaderSwatchSelf {
+  background-color: var(--blue-60);
+}
+
+.tooltipCallNodeDetailsLeft {
+  min-width: 150px;
+  padding: 10px;
+  padding-bottom: 5px;
+  margin-top: 10px;
+  border-top: 1px solid var(--grey-30);
+}

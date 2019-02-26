@@ -170,7 +170,7 @@ function _formatDuration(duration: number): string {
 type StateProps = {|
   +threadIndex: ThreadIndex,
   +markers: Marker[],
-  +selectedMarker: IndexIntoMarkers,
+  +selectedMarker: IndexIntoMarkers | null,
   +zeroAt: Milliseconds,
   +scrollToSelectionGeneration: number,
 |};
