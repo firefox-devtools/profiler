@@ -172,8 +172,13 @@ type VirtualListProps = {|
   +disableOverscan: boolean,
   +columnCount: number,
   +containerWidth: CssPixels,
-  +role?: string,
+  // by using these props we are effectively telling screen readers that
+  // the browser (and our code) will take care of all accessibilty issues (like focus, navigation)
+  // aria-label is used when there's no visible label/name for the component
   +ariaLabel?: string,
+  // the container gets the role of "tree" and it's children are "tree items"
+  +role?: string,
+  // aria-activedescendant manages the children's "virtual" focus
   +ariaActiveDescendant?: null | string,
 |};
 

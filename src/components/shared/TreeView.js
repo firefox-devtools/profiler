@@ -259,8 +259,13 @@ class TreeViewRowScrolledColumns<
         aria-selected={selected}
         aria-label={ariaLabel}
         role="treeitem"
+        // When tabIndex is set to -1, the element becomes focusable by script,
+        // but it does not become part of the tab key keyboard sequence.
+        // Here we are managing the "virtual" focus with aria-activedescendant
+        // that is set on the container (call tree).
+        // The "virtual" focus changes with the arrow keys.
         tabIndex={-1}
-        id={`tree-item-${nodeId}`}
+        id={`treeViewRow-${nodeId}`}
       >
         <span
           className="treeRowIndentSpacer"
@@ -679,7 +684,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
             // this attribute exposes the current active child element,
             // while keeping focus on the parent (call tree)
             ariaActiveDescendant={
-              selectedNodeId ? `tree-item-${selectedNodeId}` : null
+              selectedNodeId ? `treeViewRow-${selectedNodeId}` : null
             }
             items={this._visibleRows}
             renderItem={this._renderRow}
