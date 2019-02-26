@@ -1,6 +1,138 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders FlameGraph correctly 1`] = `
+exports[`FlameGraph has a tooltip that matches the screenshot 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 111px; top: 308px;"
+>
+  <div
+    class="tooltipCallNode"
+  >
+    <div
+      class="tooltipOneLine tooltipHeader"
+    >
+      <div
+        class="tooltipTiming"
+      >
+        100.00%
+      </div>
+      <div
+        class="tooltipTitle"
+      >
+        A
+      </div>
+      <div
+        class="tooltipIcon"
+      />
+    </div>
+    <div
+      class="tooltipCallNodeDetails"
+    >
+      <div
+        class="tooltipCallNodeImplementation"
+      >
+        <div />
+        <div
+          class="tooltipCallNodeImplementationHeader"
+        />
+        <div
+          class="tooltipCallNodeImplementationHeader"
+        >
+          <span
+            class="tooltipCallNodeImplementationHeaderSwatchRunning"
+          />
+          Running
+        </div>
+        <div
+          class="tooltipCallNodeImplementationHeader"
+        >
+          <span
+            class="tooltipCallNodeImplementationHeaderSwatchSelf"
+          />
+          Self
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Overall
+        </div>
+        <div
+          class="tooltipCallNodeImplementationGraph"
+        >
+          <div
+            class="tooltipCallNodeImplementationGraphRunning"
+            style="width: 150px;"
+          />
+          <div
+            class="tooltipCallNodeImplementationGraphSelf"
+            style="width: 0px;"
+          />
+        </div>
+        <div>
+          3ms
+        </div>
+        <div>
+          —
+        </div>
+        <div
+          class="tooltipCallNodeImplementationName tooltipLabel"
+        >
+          Native code
+        </div>
+        <div
+          class="tooltipCallNodeImplementationGraph"
+        >
+          <div
+            class="tooltipCallNodeImplementationGraphRunning"
+            style="width: 150px;"
+          />
+          <div
+            class="tooltipCallNodeImplementationGraphSelf"
+            style="width: 0px;"
+          />
+        </div>
+        <div
+          class="tooltipCallNodeImplementationTiming"
+        >
+          3
+          ms
+        </div>
+        <div
+          class="tooltipCallNodeImplementationTiming"
+        >
+          —
+        </div>
+      </div>
+      <div
+        class="tooltipDetails tooltipCallNodeDetailsLeft"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Stack Type:
+        </div>
+        <div>
+          Native
+        </div>
+        <div
+          class="tooltipLabel"
+        >
+          Category:
+        </div>
+        <div>
+          <span
+            class="category-swatch category-color-blue"
+          />
+          DOM
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FlameGraph matches the snapshot 1`] = `
 <div
   aria-labelledby="flame-graph-tab-button"
   class="flameGraph"
@@ -141,7 +273,7 @@ exports[`renders FlameGraph correctly 1`] = `
 </div>
 `;
 
-exports[`renders FlameGraph correctly 2`] = `
+exports[`FlameGraph matches the snapshot 2`] = `
 Array [
   Array [
     "scale",
@@ -492,125 +624,4 @@ Array [
     231,
   ],
 ]
-`;
-
-exports[`renders a message instead of FlameGraph when call stack is inverted 1`] = `
-<div
-  aria-labelledby="flame-graph-tab-button"
-  class="flameGraph"
-  id="flame-graph-tab"
-  role="tabpanel"
->
-  <div
-    class="stackSettings"
-  >
-    <ul
-      class="stackSettingsList"
-    >
-      <li
-        class="stackSettingsListItem stackSettingsFilter"
-      >
-        <label
-          class="stackSettingsFilterLabel"
-        >
-          <input
-            class="stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="combined"
-          />
-          All stacks
-        </label>
-        <label
-          class="stackSettingsFilterLabel"
-        >
-          <input
-            class="stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="js"
-          />
-          JavaScript
-        </label>
-        <label
-          class="stackSettingsFilterLabel"
-        >
-          <input
-            class="stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="cpp"
-          />
-          Native
-        </label>
-      </li>
-    </ul>
-    <div
-      class="stackSearchField stackSettingsSearchField"
-    >
-      <label
-        class="stackSearchFieldLabel"
-      >
-        Filter stacks: 
-        <form
-          class="idleSearchField stackSearchFieldInput"
-        >
-          <input
-            class="idleSearchFieldInput photon-input"
-            name="search"
-            placeholder="Enter filter terms"
-            required=""
-            title="Only display stacks which contain a function whose name matches this substring"
-            type="search"
-            value=""
-          />
-          <input
-            class="idleSearchFieldButton"
-            tabindex="-1"
-            type="reset"
-          />
-        </form>
-        <div
-          class="stackSearchFieldIntroduction isHidden"
-        >
-          Did you know you can use the comma (,) to search using several terms?
-        </div>
-      </label>
-    </div>
-  </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
-  >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
-      data-index="0"
-      title="Complete \\"Empty\\""
-    >
-      <span
-        class="filterNavigatorBarItemContent"
-      >
-        Complete "Empty"
-      </span>
-    </li>
-  </ol>
-  <div
-    class="flameGraphDisabledMessage"
-  >
-    <h3>
-      The Flame Graph is not available for inverted call stacks
-    </h3>
-    <p>
-      <button
-        type="button"
-      >
-        Switch to the normal call stack
-      </button>
-       
-      to show the Flame Graph.
-    </p>
-  </div>
-</div>
 `;
