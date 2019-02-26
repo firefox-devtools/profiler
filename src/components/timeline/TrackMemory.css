@@ -37,6 +37,6 @@
 }
 
 .timelineMarkersMemory {
-  height: var(--markers-height);
+  height: var(--markers-height, 15px);
   opacity: 1;
 }

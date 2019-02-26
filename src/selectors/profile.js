@@ -245,6 +245,22 @@ export const getLocalTrackFromReference: DangerousSelectorWithArguments<
 > = (state, trackReference) =>
   getLocalTracks(state, trackReference.pid)[trackReference.trackIndex];
 
+/**
+ * Memory markers are collected in the memory track, but in the case of profiles
+ * with no memory tracks, go ahead and place them in the parent process.
+ */
+export const getHasMemoryTracks: Selector<boolean> = createSelector(
+  getLocalTracksByPid,
+  localTracksByPid => {
+    for (const [, localTracks] of localTracksByPid.entries()) {
+      if (localTracks.some(track => track.type === 'memory')) {
+        return true;
+      }
+    }
+    return false;
+  }
+);
+
 export const getRightClickedThreadIndex: Selector<null | ThreadIndex> = createSelector(
   getRightClickedTrack,
   getGlobalTracks,

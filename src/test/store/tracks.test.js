@@ -13,6 +13,7 @@ import * as UrlStateSelectors from '../../selectors/url-state';
 import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,
+  getStoreWithMemoryTrack,
 } from '../fixtures/profiles/tracks';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import {
@@ -619,5 +620,17 @@ describe('ordering and hiding', function() {
         ).toEqual(userFacingSortOrder);
       });
     });
+  });
+});
+
+describe('ProfileViewSelectors.getHasMemoryTrack', function() {
+  it('knows when a profile does not have a memory track', function() {
+    const { getState } = storeWithProfile(getProfileWithNiceTracks());
+    expect(ProfileViewSelectors.getHasMemoryTracks(getState())).toEqual(false);
+  });
+
+  it('knows when a profile has a memory track', function() {
+    const { getState } = getStoreWithMemoryTrack();
+    expect(ProfileViewSelectors.getHasMemoryTracks(getState())).toEqual(true);
   });
 });

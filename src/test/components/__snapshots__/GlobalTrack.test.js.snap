@@ -26,6 +26,14 @@ process: \\"tab\\" (222)"
         class="timelineTrackThread"
       >
         <div
+          class="timelineMarkers timelineMarkersMemory"
+          data-testid="TimelineMarkersMemory"
+        >
+          <canvas
+            class="timelineMarkersCanvas"
+          />
+        </div>
+        <div
           class="timelineMarkers"
           data-testid="TimelineMarkersJank"
         >
