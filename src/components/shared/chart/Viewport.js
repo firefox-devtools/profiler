@@ -167,7 +167,7 @@ type State = {|
   dragX: CssPixels,
   dragY: CssPixels,
   isDragging: boolean,
-  isShiftScrollHintVisible: boolean,
+  isCtrlScrollHintVisible: boolean,
   isSizeSet: boolean,
 |};
 
@@ -209,7 +209,7 @@ export const withChartViewport: WithChartViewport<*, *> =
     >;
 
     class ChartViewport extends React.PureComponent<ViewportProps, State> {
-      shiftScrollId: number = 0;
+      ctrlScrollId: number = 0;
       _pendingPreviewSelectionUpdates: Array<
         (HorizontalViewport) => PreviewSelection
       > = [];
@@ -264,7 +264,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           dragX: 0,
           dragY: 0,
           isDragging: false,
-          isShiftScrollHintVisible: false,
+          isCtrlScrollHintVisible: false,
           isSizeSet: false,
         };
       }
@@ -272,19 +272,19 @@ export const withChartViewport: WithChartViewport<*, *> =
       /**
        * Let the viewport know when we are actively scrolling.
        */
-      showShiftScrollingHint() {
+      showCtrlScrollingHint() {
         // Only show this message if we haven't shift zoomed yet.
         if (this.props.hasZoomedViaMousewheel) {
           return;
         }
 
-        const scrollId = ++this.shiftScrollId;
-        if (!this.state.isShiftScrollHintVisible) {
-          this.setState({ isShiftScrollHintVisible: true });
+        const scrollId = ++this.ctrlScrollId;
+        if (!this.state.isCtrlScrollHintVisible) {
+          this.setState({ isCtrlScrollHintVisible: true });
         }
         setTimeout(() => {
-          if (scrollId === this.shiftScrollId) {
-            this.setState({ isShiftScrollHintVisible: false });
+          if (scrollId === this.ctrlScrollId) {
+            this.setState({ isCtrlScrollHintVisible: false });
           }
         }, 1000);
       }
@@ -353,7 +353,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         event.preventDefault();
 
         const { disableHorizontalMovement } = this.props.viewportProps;
-        if (event.shiftKey) {
+        if (event.ctrlKey) {
           if (!disableHorizontalMovement) {
             this.zoomWithMouseWheel(event);
           }
@@ -361,7 +361,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
 
         if (!disableHorizontalMovement) {
-          this.showShiftScrollingHint();
+          this.showCtrlScrollingHint();
         }
 
         // Do the work to move the viewport.
@@ -740,7 +740,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           viewportBottom,
           horizontalViewport: { viewportLeft, viewportRight },
           isDragging,
-          isShiftScrollHintVisible,
+          isCtrlScrollHintVisible,
           isSizeSet,
         } = this.state;
 
@@ -752,9 +752,9 @@ export const withChartViewport: WithChartViewport<*, *> =
           className
         );
 
-        const shiftScrollClassName = classNames({
-          chartViewportShiftScroll: true,
-          hidden: hasZoomedViaMousewheel || !isShiftScrollHintVisible,
+        const ctrlScrollClassName = classNames({
+          chartViewportCtrlScroll: true,
+          hidden: hasZoomedViaMousewheel || !isCtrlScrollHintVisible,
         });
 
         const viewport: Viewport = {
@@ -780,10 +780,10 @@ export const withChartViewport: WithChartViewport<*, *> =
             tabIndex={0}
           >
             <ChartComponent {...chartProps} viewport={viewport} />
-            <div className={shiftScrollClassName}>
+            <div className={ctrlScrollClassName}>
               Zoom Chart:
-              <kbd className="chartViewportShiftScrollKbd">Shift</kbd>
-              <kbd className="chartViewportShiftScrollKbd">Scroll</kbd>
+              <kbd className="chartViewportCtrlScrollKbd">Ctrl</kbd>
+              <kbd className="chartViewportCtrlScrollKbd">Scroll</kbd>
             </div>
           </div>
         );

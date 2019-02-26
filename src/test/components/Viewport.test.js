@@ -75,7 +75,7 @@ describe('Viewport', function() {
   });
 
   describe('scrolling hint', function() {
-    it('can show a shift scrolling hint', function() {
+    it('can show a ctrl scrolling hint', function() {
       jest.useFakeTimers();
       const { getByText, scroll } = setup();
       const isTimerVisible = () =>
@@ -93,7 +93,7 @@ describe('Viewport', function() {
       expect(isTimerVisible()).toBe(false);
     });
 
-    it('will not show a shift scrolling hint after zooming once', function() {
+    it('will not show a ctrl scrolling hint after zooming once', function() {
       const { getByText, scroll } = setup();
       const isTimerVisible = () =>
         !getByText(/Zoom Chart/).classList.contains('hidden');
@@ -102,7 +102,7 @@ describe('Viewport', function() {
       expect(isTimerVisible()).toBe(false);
 
       // Zoom in a bit.
-      scroll({ deltaY: 10, shiftKey: true });
+      scroll({ deltaY: 10, ctrlKey: true });
       expect(isTimerVisible()).toBe(false);
 
       // Now scroll, no hint should show.
@@ -150,7 +150,7 @@ describe('Viewport', function() {
     });
   });
 
-  describe('mousewheel zooming using shift + mousewheel', function() {
+  describe('mousewheel zooming using ctrl + mousewheel', function() {
     // These series of tests are very particular to margin differences, so check
     // different margin combinations separately.
     const marginTests = [
@@ -183,7 +183,7 @@ describe('Viewport', function() {
           // center, which is why we do some approximations later.
           const viewport = scrollAndGetViewport({
             deltaY: -100,
-            shiftKey: true,
+            ctrlKey: true,
             clientX: BOUNDING_BOX_LEFT + innerComponentWidth * 0.5 + marginLeft,
           });
 
@@ -210,7 +210,7 @@ describe('Viewport', function() {
           });
           const viewport = scrollAndGetViewport({
             deltaY: -10,
-            shiftKey: true,
+            ctrlKey: true,
             clientX:
               BOUNDING_BOX_LEFT + innerComponentWidth * 0.75 + marginLeft,
           });
@@ -234,7 +234,7 @@ describe('Viewport', function() {
           });
           const viewport = scrollAndGetViewport({
             deltaY: -10,
-            shiftKey: true,
+            ctrlKey: true,
             clientX:
               BOUNDING_BOX_LEFT + innerComponentWidth * 0.25 + marginLeft,
           });
@@ -258,7 +258,7 @@ describe('Viewport', function() {
           });
           const viewport = scrollAndGetViewport({
             deltaY: -10,
-            shiftKey: true,
+            ctrlKey: true,
             clientX: BOUNDING_BOX_LEFT + marginLeft,
           });
           expect(viewport.viewportLeft).toBe(0);
@@ -276,7 +276,7 @@ describe('Viewport', function() {
           });
           const viewport = scrollAndGetViewport({
             deltaY: -10,
-            shiftKey: true,
+            ctrlKey: true,
             clientX: BOUNDING_BOX_LEFT + innerComponentWidth + marginLeft,
           });
           expect(viewport.viewportLeft).toBeGreaterThan(0);
@@ -290,7 +290,7 @@ describe('Viewport', function() {
           });
           const viewport = scrollAndGetViewport({
             deltaY: 100,
-            shiftKey: true,
+            ctrlKey: true,
             clientX: BOUNDING_BOX_LEFT + innerComponentWidth * 0.5 + marginLeft,
           });
           expect(viewport).toMatchObject({
@@ -425,7 +425,7 @@ describe('Viewport', function() {
       const { viewportLeft, viewportRight } = scrollAndGetViewport({
         // Zoom in some large arbitrary amount:
         deltaY: -5000,
-        shiftKey: true,
+        ctrlKey: true,
         clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
       });
 
@@ -449,7 +449,7 @@ describe('Viewport', function() {
       scroll({
         // Zoom in some large arbitrary amount:
         deltaY: -5000,
-        shiftKey: true,
+        ctrlKey: true,
         clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
       });
 
@@ -465,7 +465,7 @@ describe('Viewport', function() {
       scroll({
         // Zoom in some large arbitrary amount:
         deltaY: -5000,
-        shiftKey: true,
+        ctrlKey: true,
         clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
       });
 
