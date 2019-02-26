@@ -26,6 +26,12 @@ const defaultStyle = {
   borderRight: null,
 };
 
+const memoryStyle = {
+  ...defaultStyle,
+  top: 6,
+  background: colors.ORANGE_50,
+};
+
 export const markerStyles: MarkerStyles = {
   default: defaultStyle,
   RefreshDriverTick: {
@@ -121,30 +127,20 @@ export const markerStyles: MarkerStyles = {
     borderRight: colors.RED_50,
     squareCorners: true,
   },
-  GCSlice: {
+  // Memory:
+  GCMajor: {
     ...defaultStyle,
+    squareCorners: true,
     background: colors.ORANGE_50,
   },
-  GCMinor: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
-  },
-  ForgetSkippable: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
-  },
-  IdleForgetSkippable: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
-  },
-  CCSlice: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
-  },
-  IdleCCSlice: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
-  },
+  GCSlice: memoryStyle,
+  GCMinor: memoryStyle,
+  CCSlice: memoryStyle,
+  /** CC */ IdleCCSlice: memoryStyle,
+  /** CC */ IdleForgetSkippable: memoryStyle,
+  /** CC */ ForgetSkippable: memoryStyle,
+
+  // IO:
   FileIO: {
     ...defaultStyle,
     background: colors.BLUE_50,

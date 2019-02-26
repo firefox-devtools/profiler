@@ -83,31 +83,6 @@ Array [
   ],
   Array [
     "fillRect",
-    28,
-    0,
-    131.33333333333331,
-    1,
-  ],
-  Array [
-    "fillRect",
-    27,
-    1,
-    133.33333333333331,
-    4,
-  ],
-  Array [
-    "fillRect",
-    28,
-    5,
-    131.33333333333331,
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "black",
-  ],
-  Array [
-    "fillRect",
     68,
     0,
     131.33333333333331,
