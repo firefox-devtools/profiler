@@ -2618,16 +2618,16 @@ exports[`SelectedThreadActivityGraph matches the component snapshot 1`] = `
     </div>
   </div>
   <div
-    class="chartViewportShiftScroll hidden"
+    class="chartViewportCtrlScroll hidden"
   >
     Zoom Chart:
     <kbd
-      class="chartViewportShiftScrollKbd"
+      class="chartViewportCtrlScrollKbd"
     >
-      Shift
+      Ctrl
     </kbd>
     <kbd
-      class="chartViewportShiftScrollKbd"
+      class="chartViewportCtrlScrollKbd"
     >
       Scroll
     </kbd>

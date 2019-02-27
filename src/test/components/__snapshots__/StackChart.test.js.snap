@@ -117,16 +117,16 @@ exports[`StackChart matches the snapshot 1`] = `
         />
       </div>
       <div
-        class="chartViewportShiftScroll hidden"
+        class="chartViewportCtrlScroll hidden"
       >
         Zoom Chart:
         <kbd
-          class="chartViewportShiftScrollKbd"
+          class="chartViewportCtrlScrollKbd"
         >
-          Shift
+          Ctrl
         </kbd>
         <kbd
-          class="chartViewportShiftScrollKbd"
+          class="chartViewportCtrlScrollKbd"
         >
           Scroll
         </kbd>
