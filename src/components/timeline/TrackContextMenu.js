@@ -290,7 +290,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     return (
       <MenuItem onClick={this._isolateProcess} disabled={isDisabled}>
-        Only show this process
+        Only show this process group
       </MenuItem>
     );
   }
@@ -387,6 +387,14 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   render() {
     const { globalTrackOrder, globalTracks } = this.props;
 
+    const isolateProcessMainThread = this.renderIsolateProcessMainThread();
+    const isolateProcess = this.renderIsolateProcess();
+    const isolateLocalTrack = this.renderIsolateLocalTrack();
+    const separator =
+      isolateProcessMainThread || isolateProcess || isolateLocalTrack ? (
+        <div className="react-contextmenu-separator" />
+      ) : null;
+
     return (
       <ContextMenu
         id="TimelineTrackContextMenu"
@@ -396,10 +404,10 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           // The menu items header items to isolate tracks may or may not be
           // visible depending on the current state.
         }
-        {this.renderIsolateProcessMainThread()}
-        {this.renderIsolateProcess()}
-        {this.renderIsolateLocalTrack()}
-        <div className="react-contextmenu-separator" />
+        {isolateProcessMainThread}
+        {isolateProcess}
+        {isolateLocalTrack}
+        {separator}
         {globalTrackOrder.map(globalTrackIndex => {
           const globalTrack = globalTracks[globalTrackIndex];
           return (
