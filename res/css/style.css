@@ -574,3 +574,19 @@ body,
 .react-contextmenu-item.checked:hover {
   border-color: #fff;
 }
+
+.react-contextmenu-item--selected {
+  background-color: var(--blue-60);
+  color: #fff;
+}
+
+.react-contextmenu-item--disabled.react-contextmenu-item--selected {
+  /* This color is a lightened blue-40 */
+  background-color: #d1e8ff;
+}
+
+.react-contextmenu-item--selected.checked:not(.react-contextmenu-item--disabled)::before,
+.react-contextmenu-item:hover.checked:not(.react-contextmenu-item--disabled)::before {
+  /* Invert the colors of the checkmark when selected */
+  border-color: #fff;
+}
