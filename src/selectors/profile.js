@@ -103,7 +103,7 @@ export const getThreads: Selector<Thread[]> = state =>
   getProfile(state).threads;
 export const getThreadNames: Selector<string[]> = state =>
   getProfile(state).threads.map(t => t.name);
-export const getRightClickedTrack: Selector<TrackReference> = state =>
+export const getRightClickedTrack: Selector<TrackReference | null> = state =>
   getProfileViewOptions(state).rightClickedTrack;
 export const getPreviewSelection: Selector<PreviewSelection> = state =>
   getProfileViewOptions(state).previewSelection;
@@ -267,6 +267,9 @@ export const getRightClickedThreadIndex: Selector<null | ThreadIndex> = createSe
   getGlobalTracks,
   getLocalTracksByPid,
   (rightClickedTrack, globalTracks, localTracksByPid) => {
+    if (rightClickedTrack === null) {
+      return null;
+    }
     if (rightClickedTrack.type === 'global') {
       const track = globalTracks[rightClickedTrack.trackIndex];
       return track.type === 'process' ? track.mainThreadIndex : null;

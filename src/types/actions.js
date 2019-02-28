@@ -241,7 +241,10 @@ type UrlStateAction =
       +selectedThreadIndex: ThreadIndex,
       +selectedTab: TabSlug,
     |}
-  | {| +type: 'CHANGE_RIGHT_CLICKED_TRACK', +trackReference: TrackReference |}
+  | {|
+      +type: 'CHANGE_RIGHT_CLICKED_TRACK',
+      +trackReference: TrackReference | null,
+    |}
   | {| +type: 'CHANGE_CALL_TREE_SEARCH_STRING', +searchString: string |}
   | {|
       +type: 'ADD_TRANSFORM_TO_STACK',
