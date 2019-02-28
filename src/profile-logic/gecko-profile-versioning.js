@@ -6,9 +6,9 @@
 /**
  * This file deals with old versions of the Gecko profile format, i.e. the
  * format that the Gecko profiler platform outputs. We want to be able to
- * run perf.html on non-Nightly versions of Firefox, and we want to be able
- * to load old saved profiles, so this file upgrades old profiles to the
- * current format.
+ * run profiler.firefox.com on non-Nightly versions of Firefox, and we want
+ * to be able to load old saved profiles, so this file upgrades old profiles
+ * to the current format.
  */
 
 import {
@@ -17,7 +17,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 
-export const CURRENT_VERSION = 14; // The current version of the Gecko profile format.
+export const CURRENT_VERSION = 15; // The current version of the Gecko profile format.
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -36,9 +36,9 @@ export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
 
   if (profileVersion > CURRENT_VERSION) {
     throw new Error(
-      `Unable to parse a Gecko profile of version ${profileVersion} - are you running an outdated version of perf.html? ` +
-        `The most recent version understood by this version of perf.html is version ${CURRENT_VERSION}.\n` +
-        'You can try refreshing this page in case perf.html has updated in the meantime.'
+      `Unable to parse a Gecko profile of version ${profileVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
+        `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_VERSION}.\n` +
+        'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
     );
   }
 
@@ -536,6 +536,38 @@ const _upgraders = {
       }
     }
     convertToVersionFourteenRecursive(profile);
+  },
+  [15]: profile => {
+    // The type field for DOMEventMarkerPayload was renamed to eventType.
+    function convertToVersion15Recursive(p) {
+      for (const thread of p.threads) {
+        if (thread.stringTable.indexOf('DiskIO') === -1) {
+          // There are no DiskIO markers.
+          continue;
+        }
+
+        let fileIoStringIndex = thread.stringTable.indexOf('FileIO');
+        if (fileIoStringIndex === -1) {
+          fileIoStringIndex = thread.stringTable.length;
+          thread.stringTable.push('FileIO');
+        }
+
+        const nameIndex = thread.markers.schema.name;
+        const dataIndex = thread.markers.schema.data;
+        for (let i = 0; i < thread.markers.data.length; i++) {
+          const markerData = thread.markers.data[i];
+          const payload = markerData[dataIndex];
+          if (payload && payload.type === 'DiskIO') {
+            markerData[nameIndex] = fileIoStringIndex;
+            payload.type = 'FileIO';
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersion15Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion15Recursive(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */

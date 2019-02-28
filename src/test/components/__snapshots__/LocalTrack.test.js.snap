@@ -64,6 +64,36 @@ exports[`timeline/LocalTrack with a network track matches the snapshot of the ne
         <canvas
           class="timelineTrackNetworkCanvas"
         />
+        <div
+          class="timelineVerticalIndicators"
+          data-testid="vertical-indicators"
+        >
+          <div
+            class="timelineVerticalIndicatorsLine"
+            data-testid="vertical-indicator-line"
+            style="left: 0px;"
+          />
+          <div
+            class="timelineVerticalIndicatorsLine"
+            data-testid="vertical-indicator-line"
+            style="left: 0px;"
+          />
+          <div
+            class="timelineVerticalIndicatorsLine"
+            data-testid="vertical-indicator-line"
+            style="left: 0px;"
+          />
+          <div
+            class="timelineVerticalIndicatorsLine"
+            data-testid="vertical-indicator-line"
+            style="left: 0px;"
+          />
+          <div
+            class="timelineVerticalIndicatorsLine"
+            data-testid="vertical-indicator-line"
+            style="left: 0px;"
+          />
+        </div>
       </div>
     </div>
   </div>
@@ -97,6 +127,7 @@ process: \\"tab\\" (222)"
       >
         <div
           class="timelineMarkers"
+          data-testid="TimelineMarkersJank"
         >
           <canvas
             class="timelineMarkersCanvas"

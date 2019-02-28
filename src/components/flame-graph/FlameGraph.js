@@ -12,9 +12,13 @@ import {
   getProfileViewOptions,
   getPreviewSelection,
   getScrollToSelectionGeneration,
+  getProfileInterval,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import {
+  getSelectedThreadIndex,
+  getInvertCallstack,
+} from '../../selectors/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import { changeSelectedCallNode } from '../../actions/profile-view';
@@ -55,6 +59,8 @@ type StateProps = {|
   +scrollToSelectionGeneration: number,
   +icons: IconWithClassName[],
   +categories: CategoryList,
+  +interval: Milliseconds,
+  +isInverted: boolean,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -158,6 +164,8 @@ class FlameGraph extends React.PureComponent<Props> {
       scrollToSelectionGeneration,
       icons,
       categories,
+      interval,
+      isInverted,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -205,6 +213,8 @@ class FlameGraph extends React.PureComponent<Props> {
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
               disableTooltips: isCallNodeContextMenuVisible,
+              interval,
+              isInverted,
             }}
           />
         </ContextMenuTrigger>
@@ -242,6 +252,8 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
         .isCallNodeContextMenuVisible,
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       icons: getIconsWithClassNames(state),
+      interval: getProfileInterval(state),
+      isInverted: getInvertCallstack(state),
     };
   },
   mapDispatchToProps: {

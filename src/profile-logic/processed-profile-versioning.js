@@ -5,7 +5,7 @@
 // @flow
 /**
  * This file deals with old versions of the "processed" profile format,
- * i.e. the format that perf.html uses internally. Profiles in this format
+ * i.e. the format that profiler.firefox.com uses internally. Profiles in this format
  * can be saved out to files or uploaded to the profile store server, and we
  * want to be able to display profiles that were saved at any point in the
  * past, regardless of their version. So this file upgrades old profiles to
@@ -22,7 +22,7 @@ import {
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
 
-export const CURRENT_VERSION = 20; // The current version of the "processed" profile format.
+export const CURRENT_VERSION = 22; // The current version of the "processed" profile format.
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -58,9 +58,9 @@ export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
 
   if (profileVersion > CURRENT_VERSION) {
     throw new Error(
-      `Unable to parse a processed profile of version ${profileVersion} - are you running an outdated version of perf.html? ` +
-        `The most recent version understood by this version of perf.html is version ${CURRENT_VERSION}.\n` +
-        'You can try refreshing this page in case perf.html has updated in the meantime.'
+      `Unable to parse a processed profile of version ${profileVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
+        `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_VERSION}.\n` +
+        'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
     );
   }
 
@@ -91,6 +91,36 @@ function _getRealScriptURI(url) {
     return urls[urls.length - 1];
   }
   return url;
+}
+
+function _mutateProfileToEnsureCauseBacktraces(profile) {
+  for (const thread of profile.threads) {
+    for (let i = 0; i < thread.markers.length; i++) {
+      const marker = thread.markers.data[i];
+      const adjustTimestampBy =
+        thread.processType === 'default' ? 0 : thread.processStartupTime;
+      if (marker) {
+        if (
+          'stack' in marker &&
+          marker.stack &&
+          marker.stack.samples.data.length > 0
+        ) {
+          const syncProfile = marker.stack;
+          const stackIndex =
+            syncProfile.samples.data[0][syncProfile.samples.schema.stack];
+          const timeRelativeToProcess =
+            syncProfile.samples.data[0][syncProfile.samples.schema.time];
+          if (stackIndex !== null) {
+            marker.cause = {
+              time: timeRelativeToProcess + adjustTimestampBy,
+              stack: stackIndex,
+            };
+          }
+        }
+        delete marker.stack;
+      }
+    }
+  }
 }
 
 // _upgraders[i] converts from version i - 1 to version i.
@@ -338,7 +368,7 @@ const _upgraders = {
     // the thread.processStartupTime which is the delta to
     // meta.startTime.
     // Only the timeStamp property is updated because it's new and
-    // perf.html wasn't updated to handle it when it appeared in
+    // profiler.firefox.com wasn't updated to handle it when it appeared in
     // Firefox.
     for (const thread of profile.threads) {
       if (thread.processType === 'default') {
@@ -405,33 +435,7 @@ const _upgraders = {
     // Starting with version 10, this is replaced with the CauseBacktrace type
     // which just has a "time" and a "stack" field, where the stack field is
     // a simple number, the stack index.
-    for (const thread of profile.threads) {
-      for (let i = 0; i < thread.markers.length; i++) {
-        const marker = thread.markers.data[i];
-        const adjustTimestampBy =
-          thread.processType === 'default' ? 0 : thread.processStartupTime;
-        if (marker) {
-          if (
-            'stack' in marker &&
-            marker.stack &&
-            marker.stack.samples.data.length > 0
-          ) {
-            const syncProfile = marker.stack;
-            const stackIndex =
-              syncProfile.samples.data[0][syncProfile.samples.schema.stack];
-            const timeRelativeToProcess =
-              syncProfile.samples.data[0][syncProfile.samples.schema.time];
-            if (stackIndex !== null) {
-              marker.cause = {
-                time: timeRelativeToProcess + adjustTimestampBy,
-                stack: stackIndex,
-              };
-            }
-          }
-          delete marker.stack;
-        }
-      }
-    }
+    _mutateProfileToEnsureCauseBacktraces(profile);
   },
   [11]: profile => {
     // Removed the startTime and endTime from DOMEventMarkerPayload and
@@ -902,8 +906,43 @@ const _upgraders = {
   },
   [20]: _profile => {
     // rss and uss was removed from the SamplesTable. The version number was bumped
-    // to help catch errors of using an outdated version of perf.html with a newer
+    // to help catch errors of using an outdated version of profiler.firefox.com with a newer
     // profile. There's no good reason to remove the values for upgrading profiles though.
+  },
+  [21]: profile => {
+    // Before version 21, during the profile processing step, only certain markers had
+    // their stacks converted to causes. However, in version 10, an upgrader was written
+    // that would convert every single marker's stack to a cause. This created two types
+    // of profiles:
+    //
+    //   1. Before version 10 - Profiles with causes added for every marker.
+    //   2. After version 10 - Profiles that would only have causes for certain markers.
+    //
+    // The profile processing was changed in version 21 to include the cause for all
+    // markers. This upgrader upgrades profiles from case 2 above.
+    _mutateProfileToEnsureCauseBacktraces(profile);
+  },
+  [22]: profile => {
+    // FileIO was originally called DiskIO. This profile upgrade performs the rename.
+    for (const thread of profile.threads) {
+      if (thread.stringArray.indexOf('DiskIO') === -1) {
+        // There are no DiskIO markers.
+        continue;
+      }
+      let fileIoStringIndex = thread.stringArray.indexOf('FileIO');
+      if (fileIoStringIndex === -1) {
+        fileIoStringIndex = thread.stringArray.length;
+        thread.stringArray.push('FileIO');
+      }
+
+      for (let i = 0; i < thread.markers.length; i++) {
+        const data = thread.markers.data[i];
+        if (data && data.type === 'DiskIO') {
+          data.type = 'FileIO';
+          thread.markers.name[i] = fileIoStringIndex;
+        }
+      }
+    }
   },
 };
 /* eslint-enable no-useless-computed-key */

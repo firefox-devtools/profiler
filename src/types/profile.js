@@ -95,7 +95,8 @@ export type SamplesTable = {
 
 /**
  * This is the base abstract class that marker payloads inherit from. This probably isn't
- * used directly in perf.html, but is provided here for mainly documentation purposes.
+ * used directly in profiler.firefox.com, but is provided here for mainly documentation
+ * purposes.
  */
 export type ProfilerMarkerPayload = {
   type: string,
@@ -109,7 +110,7 @@ export type ProfilerMarkerPayload = {
  * name, time, and potentially a JSON data payload. These can come from all over the
  * system. For instance Paint markers instrument the rendering and layout process.
  * Engineers can easily add arbitrary markers to their code without coordinating with
- * perf.html to instrument their code.
+ * profiler.firefox.com to instrument their code.
  *
  * In the profile, these markers are raw and unprocessed. In the marker selectors, we
  * can run them through a processing pipeline to match up start and end markers to
@@ -165,7 +166,7 @@ export type ResourceTable = {
   length: number,
   // lib SHOULD be void in this case, but some profiles in the store have null or -1
   // here. We should investigate and provide an upgrader.
-  // See https://github.com/devtools-html/perf.html/issues/652
+  // See https://github.com/firefox-devtools/profiler/issues/652
   lib: Array<IndexIntoLibs | void | null | -1>,
   name: Array<IndexIntoStringTable | -1>,
   host: Array<IndexIntoStringTable | void>,

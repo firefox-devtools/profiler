@@ -768,9 +768,9 @@ describe('convertStackToCallNodePath', function() {
       throw new Error("stack shouldn't be null");
     }
     let callNodePath = convertStackToCallNodePath(thread, stack1);
-    expect(callNodePath).toEqual([4, 3, 2, 1, 0]);
+    expect(callNodePath).toEqual([0, 1, 2, 3, 4]);
     callNodePath = convertStackToCallNodePath(thread, stack2);
-    expect(callNodePath).toEqual([5, 3, 2, 1, 0]);
+    expect(callNodePath).toEqual([0, 1, 2, 3, 5]);
   });
 });
 

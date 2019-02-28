@@ -114,6 +114,7 @@ class Screenshots extends PureComponent<Props, State> {
   }
 }
 
+const EMPTY_SCREENSHOTS_TRACK = [];
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state, ownProps) => {
     const { threadIndex, windowId } = ownProps;
@@ -122,10 +123,9 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     const previewSelection = getPreviewSelection(state);
     return {
       thread: selectors.getRangeFilteredThread(state),
-      screenshots: ensureExists(
-        selectors.getRangeFilteredScreenshotsById(state).get(windowId),
-        'Expected to find screenshots for the given pid'
-      ),
+      screenshots:
+        selectors.getRangeFilteredScreenshotsById(state).get(windowId) ||
+        EMPTY_SCREENSHOTS_TRACK,
       threadName: selectors.getFriendlyThreadName(state),
       rangeStart: start,
       rangeEnd: end,
@@ -263,9 +263,10 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
     const timeToPixel = time =>
       outerContainerWidth * (time - rangeStart) / rangeLength;
 
+    const leftmostPixel = Math.max(timeToPixel(screenshots[0].start), 0);
     let screenshotIndex = 0;
     for (
-      let left = timeToPixel(screenshots[0].start);
+      let left = leftmostPixel;
       left < outerContainerWidth;
       left += imageContainerWidth
     ) {

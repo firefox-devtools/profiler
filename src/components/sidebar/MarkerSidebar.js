@@ -20,7 +20,7 @@ import type { Marker } from '../../types/profile-derived';
 
 type StateProps = {|
   +selectedThreadIndex: ThreadIndex,
-  +marker: ?Marker,
+  +marker: Marker | null,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
@@ -29,7 +29,7 @@ class MarkerSidebar extends React.PureComponent<Props> {
   render() {
     const { marker, selectedThreadIndex } = this.props;
 
-    if (marker === null || marker === undefined) {
+    if (marker === null) {
       return (
         <div className="sidebar sidebar-marker-table">
           Select a marker to display some information about it.
@@ -51,12 +51,21 @@ class MarkerSidebar extends React.PureComponent<Props> {
 }
 
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
-  mapStateToProps: state => ({
-    marker: selectedThreadSelectors.getPreviewFilteredMarkers(state)[
-      selectedThreadSelectors.getSelectedMarkerIndex(state)
-    ],
-    selectedThreadIndex: getSelectedThreadIndex(state),
-  }),
+  mapStateToProps: state => {
+    const filteredMarkers = selectedThreadSelectors.getPreviewFilteredMarkers(
+      state
+    );
+    const selectedMarkerIndex = selectedThreadSelectors.getSelectedMarkerIndex(
+      state
+    );
+    return {
+      marker:
+        selectedMarkerIndex === null
+          ? null
+          : filteredMarkers[selectedMarkerIndex] || null,
+      selectedThreadIndex: getSelectedThreadIndex(state),
+    };
+  },
   component: MarkerSidebar,
 };
 

@@ -65,7 +65,7 @@ const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
   // the gecko profile format. This is the reason why the start timestamp of a
   // marker can be after the start timestamp of the request.
   // To prevent false networkPayload visualization, we need this workaround.
-  // See https://github.com/devtools-html/perf.html/issues/1493 for more detail.
+  // See https://github.com/firefox-devtools/profiler/issues/1493 for more detail.
   if (
     networkPayload.requestStart &&
     start < networkPayload.requestStart &&

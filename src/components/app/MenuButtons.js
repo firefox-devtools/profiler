@@ -20,7 +20,7 @@ import { compress } from '../../utils/gz';
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
 import ArrowPanel from '../shared/ArrowPanel';
 import ButtonWithPanel from '../shared/ButtonWithPanel';
-import shortenUrl from '../../utils/shorten-url';
+import { shortenUrl } from '../../utils/shorten-url';
 import { serializeProfile } from '../../profile-logic/process-profile';
 import prettyBytes from '../../utils/pretty-bytes';
 import sha1 from '../../utils/sha1';
@@ -421,7 +421,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
 
       const typedArray = new TextEncoder().encode(jsonString);
 
-      const [gzipData, hash]: [string, string] = await Promise.all([
+      const [gzipData, hash]: [Uint8Array, string] = await Promise.all([
         compress(typedArray.slice(0)),
         sha1(typedArray),
       ]);
@@ -583,7 +583,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
                 >
                   <input
                     type="text"
-                    className="menuButtonsPermalinkTextField"
+                    className="menuButtonsPermalinkTextField photon-input"
                     value={shortUrl}
                     readOnly="readOnly"
                     ref={this._takePermalinkTextFieldRef}

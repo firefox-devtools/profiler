@@ -161,7 +161,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
     return (
       <div className="rootMessageContainer">
         <div className="rootMessage">
-          <h1 className="rootMessageTitle">perf.html</h1>
+          <h1 className="rootMessageTitle">Firefox Profiler</h1>
           <div className="rootMessageText">{message}</div>
           {additionalMessage ? (
             <div className="rootMessageAdditional">
@@ -290,7 +290,7 @@ export default class Root extends PureComponent<RootProps> {
   render() {
     const { store } = this.props;
     return (
-      <ErrorBoundary message="Uh oh, some error happened in perf.html.">
+      <ErrorBoundary message="Uh oh, some error happened in profiler.firefox.com.">
         <Provider store={store}>
           <UrlManager>
             <ProfileViewWhenReady />

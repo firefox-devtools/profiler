@@ -21,6 +21,7 @@ import type {
   Pid,
   Counter,
   CounterIndex,
+  PageList,
 } from '../types/profile';
 import type {
   LocalTrack,
@@ -42,6 +43,7 @@ import type {
   SymbolicationStatus,
   ProfileSharingStatus,
 } from '../types/state';
+import type { $ReturnType } from '../types/utils';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
   state.profileView;
@@ -91,6 +93,8 @@ export const getProfile: Selector<Profile> = state =>
   );
 export const getProfileInterval: Selector<Milliseconds> = state =>
   getProfile(state).meta.interval;
+export const getPageList = (state: State): PageList | null =>
+  getProfile(state).pages || null;
 export const getCategories: Selector<CategoryList> = state =>
   getProfile(state).meta.categories;
 export const getDefaultCategory: Selector<IndexIntoCategoryList> = state =>
@@ -106,8 +110,10 @@ export const getPreviewSelection: Selector<PreviewSelection> = state =>
 export const getCounter: Selector<Counter[] | null> = state =>
   getProfile(state).counters || null;
 
+type CounterSelectors = $ReturnType<typeof _createCounterSelectors>;
+
 const _counterSelectors = {};
-export const getCounterSelectors = (index: CounterIndex) => {
+export const getCounterSelectors = (index: CounterIndex): CounterSelectors => {
   let selectors = _counterSelectors[index];
   if (!selectors) {
     selectors = _createCounterSelectors(index);

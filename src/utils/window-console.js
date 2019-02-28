@@ -56,16 +56,23 @@ export function logFriendlyPreamble() {
   console.log(
     // This is gratuitous, I know:
     [
-      '%c                  __ _     _             _ ',
-      '                 / _| |   | |           | |',
-      ' _ __   ___ _ __| |_| |__ | |_ _ __ ___ | |',
-      "| '_ \\ / _ \\ '__|  _| '_ \\| __| '_ ` _ \\| |",
-      '| |_) |  __/ |  | |_| | | | |_| | | | | | |',
-      '| .__/ \\___|_|  |_(_)_| |_|\\__|_| |_| |_|_|',
-      '| |                                        ',
-      '|_|                                        ',
+      '%c  __ _           __                                  ',
+      ' / _(_)         / _|                                 ',
+      '| |_ _ _ __ ___| |_ _____  __                        ',
+      "|  _| | '__/ _ \\  _/ _ \\ \\/ /                        ",
+      '| | | | | |  __/ || (_) >  <       __ _ _            ',
+      '|_| |_|_|  \\___|_| \\___/_/\\_\\     / _(_) |           ',
+      '    ,.       ,.   _ __  _ __ ___ | |_ _| | ___ _ _   ',
+      "    | \\     / |  | '_ \\| '__/ _ \\|  _| | |/ _ \\ '_|  ",
+      '    |/ \\ _ / \\|  | |_) | | | (_) | | | | |  __/ |    ',
+      '    |         |  | .__/|_|  \\___/|_| |_|_|\\___|_|    ',
+      '    /  -    - \\  |_|                                     ',
+      '  ,-    V__V   -.                                     ',
+      ' -=  __-  * - .,=-                                    ',
+      '  `\\_    -   _/                                       ',
+      "      `-----'                                         ",
     ].join('\n'),
-    'font-family: monospace;'
+    'font-family: Menlo, monospace;'
   );
 
   console.log(
@@ -77,10 +84,10 @@ export function logFriendlyPreamble() {
       %cwindow.callTree%c - The call tree of the current filtered thread
 
       The profile format is documented here:
-      %chttps://github.com/devtools-html/perf.html/blob/master/docs-developer/processed-profile-format.md%c
+      %chttps://github.com/firefox-devtools/profiler/blob/master/docs-developer/processed-profile-format.md%c
 
       The CallTree class's source code is available here:
-      %chttps://github.com/devtools-html/perf.html/blob/master/src/profile-logic/call-tree.js%c
+      %chttps://github.com/firefox-devtools/profiler/blob/master/src/profile-logic/call-tree.js%c
     `,
     intro,
     reset,

@@ -44,8 +44,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       50
       %)
     </div>
@@ -76,8 +76,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -93,14 +93,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -119,8 +119,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       
+      (
       50
       %)
     </div>
@@ -145,14 +146,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -197,8 +198,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       25
       %)
     </div>
@@ -229,8 +230,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -246,14 +247,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -272,8 +273,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       
+      (
       25
       %)
     </div>
@@ -298,14 +300,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -350,8 +352,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       50
       %)
     </div>
@@ -382,8 +384,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       50
       %)
     </div>
@@ -400,8 +402,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       50
       %)
     </div>
@@ -423,8 +425,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -443,8 +445,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -463,8 +465,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       
+      (
       50
       %)
     </div>
@@ -495,8 +498,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -515,8 +518,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -561,8 +564,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       25
       %)
     </div>
@@ -593,8 +596,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -610,14 +613,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -630,14 +633,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -656,8 +659,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       
+      (
       50
       %)
     </div>
@@ -682,14 +686,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -702,14 +706,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -762,8 +766,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       50
       %)
     </div>
@@ -794,8 +798,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -811,14 +815,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -837,8 +841,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       
+      (
       50
       %)
     </div>
@@ -863,14 +868,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -883,14 +888,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -935,8 +940,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       25
       %)
     </div>
@@ -967,8 +972,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -990,8 +995,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -1010,8 +1015,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       
+      (
       50
       %)
     </div>
@@ -1042,8 +1048,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -1062,8 +1068,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -1108,8 +1114,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       25
       %)
     </div>
@@ -1140,8 +1146,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -1163,8 +1169,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -1183,8 +1189,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       
+      (
       50
       %)
     </div>
@@ -1215,8 +1222,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       100
       %)
     </div>
@@ -1235,8 +1242,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -1281,8 +1288,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       25
       %)
     </div>
@@ -1313,8 +1320,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -1336,8 +1343,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1
-      ms (
+      1ms
+       (
       100
       %)
     </div>
@@ -1356,8 +1363,9 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      4
-      ms (
+      4ms
+       
+      (
       100
       %)
     </div>
@@ -1388,8 +1396,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       50
       %)
     </div>
@@ -1397,14 +1405,14 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-label"
     >
-      JavaScript interpreter
+      JS interpreter
       :
     </div>
     <div
       class="sidebar-value"
     >
-      2
-      ms (
+      2ms
+       (
       50
       %)
     </div>

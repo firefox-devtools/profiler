@@ -384,7 +384,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
     depth,
     stackTimingIndex,
   }: HoveredStackTiming): React.Node => {
-    const { thread, stackTimingByDepth, categories, callNodeInfo } = this.props;
+    const {
+      thread,
+      stackTimingByDepth,
+      categories,
+      callNodeInfo,
+      interval,
+    } = this.props;
 
     const stackTiming = stackTimingByDepth[depth];
     const callNodeIndex = stackTiming.callNode[stackTimingIndex];
@@ -394,6 +400,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     return (
       <TooltipCallNode
         thread={thread}
+        interval={interval}
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}
         categories={categories}

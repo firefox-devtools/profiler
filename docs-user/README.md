@@ -2,6 +2,6 @@
 
 Capture a performance profile. Analyze it. Share it. Make the web faster.
 
-![Screenshot of perf.html](./images/screenshot.png)
+![Screenshot of profiler.firefox.com](./images/screenshot-2019-02-05.jpg)
 
-Welcome to the user docs for [perf.html](https://perf-html.io), a web app that analyzes profiles from Firefox. [Visit the web app](https://perf-html.io), and follow the instructions to get started profiling. This guide has various documents and videos demonstrating how to get started profiling. Looking to contribute? Check out [github.com/devtools-html/perf.html](https://github.com/devtools-html/perf.html).
+Welcome to the user docs for [profiler.firefox.com](https://profiler.firefox.com). This web app is the official Firefox Profiler for analyzing performance profiles of Firefox and the Gecko browser engine. Visit [profiler.firefox.com](https://profiler.firefox.com), and follow the instructions to get started profiling. This guide has various documents and videos demonstrating how to get started profiling. Looking to contribute? Check out [github.com/firefox-devtools/profiler](https://github.com/firefox-devtools/profiler).

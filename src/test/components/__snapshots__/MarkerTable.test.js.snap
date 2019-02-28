@@ -24,8 +24,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
           class="idleSearchField markerSettingsSearchField"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display markers that match a certain name"
             type="search"
@@ -69,7 +70,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
+        aria-label="Call tree"
         class="treeViewBody"
+        role="tree"
         tabindex="0"
       >
         <div
@@ -146,7 +149,11 @@ exports[`MarkerTable renders some basic markers 1`] = `
               class="treeViewBodyInner treeViewBodyInner1InnerChunk"
             >
               <div
+                aria-label="foobar, running time is undefined (undefined), self time is undefined"
+                aria-level="1"
+                aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                role="treeitem"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -163,7 +170,11 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
               </div>
               <div
+                aria-label="NotifyDidPaint, running time is undefined (undefined), self time is undefined"
+                aria-level="1"
+                aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                role="treeitem"
                 style="height: 16px; line-height: 16px;"
               >
                 <span

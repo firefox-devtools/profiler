@@ -32,6 +32,7 @@ import {
   cloneFrameTable,
   cloneFuncTable,
 } from './data-structures';
+import { assertExhaustiveCheck } from '../utils/flow';
 
 import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
@@ -329,53 +330,40 @@ export function getJsImplementationForStack(
 }
 
 /**
- * This function returns the timings for a specific path. The algorithm is
- * adjusted when the call tree is inverted.
+ * This function is the same as getTimingsForPath, but accepts an IndexIntoCallNodeTable
+ * instead of a CallNodePath.
  */
 export function getTimingsForPath(
   needlePath: CallNodePath,
+  callNodeInfo: CallNodeInfo,
+  interval: number,
+  isInvertedTree: boolean,
+  thread: Thread,
+  categories: CategoryList
+) {
+  return getTimingsForCallNodeIndex(
+    getCallNodeIndexFromPath(needlePath, callNodeInfo.callNodeTable),
+    callNodeInfo,
+    interval,
+    isInvertedTree,
+    thread,
+    categories
+  );
+}
+
+/**
+ * This function returns the timings for a specific path. The algorithm is
+ * adjusted when the call tree is inverted.
+ */
+export function getTimingsForCallNodeIndex(
+  needleNodeIndex: IndexIntoCallNodeTable | null,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   interval: number,
   isInvertedTree: boolean,
   thread: Thread,
   categories: CategoryList
 ): TimingsForPath {
-  if (!needlePath.length) {
-    // If the path is empty, which shouldn't usually happen, we return an empty
-    // structure right away.
-    // The rest of this function's code assumes a non-empty path.
-    return {
-      forPath: {
-        selfTime: {
-          value: 0,
-          breakdownByImplementation: null,
-          breakdownByCategory: null,
-        },
-        totalTime: {
-          value: 0,
-          breakdownByImplementation: null,
-          breakdownByCategory: null,
-        },
-      },
-      forFunc: {
-        selfTime: {
-          value: 0,
-          breakdownByImplementation: null,
-          breakdownByCategory: null,
-        },
-        totalTime: {
-          value: 0,
-          breakdownByImplementation: null,
-          breakdownByCategory: null,
-        },
-      },
-      rootTime: 0,
-    };
-  }
-
   const { samples, stackTable, funcTable } = thread;
-  const needleNodeIndex = getCallNodeIndexFromPath(needlePath, callNodeTable);
-  const needleFuncIndex = getLeafFuncIndex(needlePath);
 
   const pathTimings: ItemTimings = {
     selfTime: {
@@ -402,6 +390,13 @@ export function getTimingsForPath(
     },
   };
   let rootTime = 0;
+
+  if (needleNodeIndex === null) {
+    // No index was provided, return empty timing information.
+    return { forPath: pathTimings, forFunc: funcTimings, rootTime };
+  }
+
+  const needleFuncIndex = callNodeTable.func[needleNodeIndex];
 
   /**
    * This is a small utility function to more easily add data to breakdowns.
@@ -1038,14 +1033,30 @@ export function filterCounterToRange(
     sEnd++;
   }
 
+  const count = samples.count.slice(sBegin, sEnd);
+  const number = samples.number.slice(sBegin, sEnd);
+
+  if (sBegin === 0) {
+    // These lines zero out the first values of the counters, as they are unreliable. In
+    // addition, there are probably some missed counts in the memory counters, so the
+    // first memory number slowly creeps up over time, and becomes very unrealistic.
+    // In order to not be affected by these platform limitations, zero out the first
+    // counter values.
+    //
+    // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
+    count[0] = 0;
+    number[0] = 0;
+  }
+
   return {
     ...counter,
     sampleGroups: {
       ...counter.sampleGroups,
       samples: {
         time: samples.time.slice(sBegin, sEnd),
-        number: samples.number.slice(sBegin, sEnd),
-        count: samples.count.slice(sBegin, sEnd),
+        number,
+        count,
         length: sEnd - sBegin,
       },
     },
@@ -1247,7 +1258,7 @@ export function convertStackToCallNodePath(
   ) {
     path.push(frameTable.func[stackTable.frame[stackIndex]]);
   }
-  return path;
+  return path.reverse();
 }
 
 /**
@@ -1511,6 +1522,27 @@ export function getOriginAnnotationForFunc(
 }
 
 /**
+ * From a valid call node path, this function returns a list of information
+ * about each function in this path: their names and their origins.
+ */
+export function getFuncNamesAndOriginsForPath(
+  path: CallNodePath,
+  thread: Thread
+): Array<{ funcName: string, origin: string }> {
+  const { funcTable, stringTable, resourceTable } = thread;
+
+  return path.map(func => ({
+    funcName: stringTable.getString(funcTable.name[func]),
+    origin: getOriginAnnotationForFunc(
+      func,
+      funcTable,
+      resourceTable,
+      stringTable
+    ),
+  }));
+}
+
+/**
  * Return a function that can compare two samples' call nodes, and determine a sort order.
  *
  * The order is determined as follows:
@@ -1704,4 +1736,22 @@ export function getSampleCategories(
   stackTable: StackTable
 ): Array<IndexIntoSamplesTable | null> {
   return samples.stack.map(s => (s !== null ? stackTable.category[s] : null));
+}
+
+export function getFriendlyStackTypeName(
+  implementation: StackImplementation
+): string {
+  switch (implementation) {
+    case 'ion':
+    case 'baseline':
+      return `JS JIT (${implementation})`;
+    case 'interpreter':
+      return 'JS interpreter';
+    case 'native':
+      return 'Native code';
+    case 'unknown':
+      return implementation;
+    default:
+      throw assertExhaustiveCheck(implementation);
+  }
 }

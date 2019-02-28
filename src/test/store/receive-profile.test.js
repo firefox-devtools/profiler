@@ -38,6 +38,13 @@ import exampleSymbolTable from '../fixtures/example-symbol-table';
 import SymbolStoreDB from '../../profile-logic/symbol-store-db';
 jest.mock('../../profile-logic/symbol-store-db');
 
+// Mocking expandUrl
+// We mock this module because it's tested more properly in its unit
+// tests and it isn't necessary to run through it in this test file.  Moreover
+// it makes it easier to mock `fetch` calls that fetch a profile from a store.
+import { expandUrl } from '../../utils/shorten-url';
+jest.mock('../../utils/shorten-url');
+
 import { TextDecoder } from 'util';
 
 describe('actions/receive-profile', function() {
@@ -916,7 +923,42 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    async function setup(urlSearch1: string, urlSearch2: string): * {
+    function setupWithLongUrl(urlSearch1: string, urlSearch2: string): * {
+      const fakeUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
+      const fakeUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
+
+      return setup(fakeUrl1, fakeUrl2);
+    }
+
+    async function setupWithShortUrl(
+      urlSearch1: string,
+      urlSearch2: string
+    ): * {
+      const longUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
+      const longUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
+      const shortUrl1 = 'https://perfht.ml/FAKEBITLYHASH1';
+      const shortUrl2 = 'https://bit.ly/FAKEBITLYHASH2';
+
+      (expandUrl: any).mockImplementation(shortUrl => {
+        switch (shortUrl) {
+          case shortUrl1:
+            return longUrl1;
+          case shortUrl2:
+            return longUrl2;
+          default:
+            throw new Error(`The short url ${shortUrl} was not found.`);
+        }
+      });
+
+      const setupResult = await setup(shortUrl1, shortUrl2);
+      return {
+        ...setupResult,
+        shortUrl1,
+        shortUrl2,
+      };
+    }
+
+    async function setup(fakeUrl1: string, fakeUrl2: string): * {
       const { profile: profile1 } = getProfileFromTextSamples(
         `A  B  C  D  E`,
         `G  H  I  J  K`
@@ -929,6 +971,7 @@ describe('actions/receive-profile', function() {
       profile1.threads.forEach(thread =>
         addMarkersToThreadWithCorrespondingSamples(thread, [
           ['A', 1, { startTime: 1, endTime: 3 }],
+          ['A', 1, null],
           ['B', 2, null],
           ['C', 3, null],
           ['D', 4, null],
@@ -948,9 +991,6 @@ describe('actions/receive-profile', function() {
       window.fetch
         .mockResolvedValueOnce(fetch200Response(serializeProfile(profile1)))
         .mockResolvedValueOnce(fetch200Response(serializeProfile(profile2)));
-
-      const fakeUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
-      const fakeUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
 
       const { dispatch, getState } = blankStore();
       await dispatch(retrieveProfilesToCompare([fakeUrl1, fakeUrl2]));
@@ -997,7 +1037,7 @@ describe('actions/receive-profile', function() {
         resultProfile,
         globalTracks,
         rootRange,
-      } = await setup('thread=0', 'thread=1');
+      } = await setupWithLongUrl('thread=0', 'thread=1');
 
       const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
         (thread, i) => ({
@@ -1012,17 +1052,34 @@ describe('actions/receive-profile', function() {
       expect(rootRange).toEqual({ start: 0, end: 9 });
     });
 
-    it('filters samples, but not markers, according to the URL', async function() {
-      const { resultProfile } = await setup(
+    it('expands the URL if needed', async function() {
+      const {
+        shortUrl1,
+        shortUrl2,
+        globalTracks,
+        rootRange,
+      } = await setupWithShortUrl('thread=0', 'thread=1');
+
+      // Reuse some expectations from the previous test
+      expect(globalTracks).toHaveLength(2);
+      expect(rootRange).toEqual({ start: 0, end: 9 });
+
+      // Check that expandUrl has been called
+      expect(expandUrl).toHaveBeenCalledWith(shortUrl1);
+      expect(expandUrl).toHaveBeenCalledWith(shortUrl2);
+    });
+
+    it('filters samples and markers, according to the URL', async function() {
+      const { resultProfile } = await setupWithLongUrl(
         'thread=0&range=0.0011_0.0043',
         'thread=1'
       );
-      expect(resultProfile.threads[0].samples).toMatchSnapshot();
-      expect(resultProfile.threads[0].markers).toMatchSnapshot();
+      expect(resultProfile.threads[0].samples).toHaveLength(3);
+      expect(resultProfile.threads[0].markers).toHaveLength(4);
     });
 
     it('reuses the implementation information if both profiles used it', async function() {
-      const { getState } = await setup(
+      const { getState } = await setupWithLongUrl(
         'thread=0&implementation=js',
         'thread=1&implementation=js'
       );
@@ -1031,7 +1088,7 @@ describe('actions/receive-profile', function() {
     });
 
     it('does not reuse the implementation information if one profile used it', async function() {
-      const { getState } = await setup(
+      const { getState } = await setupWithLongUrl(
         'thread=0&implementation=js',
         'thread=1'
       );
@@ -1042,7 +1099,10 @@ describe('actions/receive-profile', function() {
     });
 
     it('reuses transforms', async function() {
-      const { getState } = await setup('thread=0&transforms=ff-42', 'thread=1');
+      const { getState } = await setupWithLongUrl(
+        'thread=0&transforms=ff-42',
+        'thread=1'
+      );
 
       expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
         {

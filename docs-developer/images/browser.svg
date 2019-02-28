@@ -34,18 +34,18 @@
                     <use fill="#FFFFFF" fill-rule="evenodd" xlink:href="#path-3"></use>
                     <rect stroke="#979797" stroke-width="1" x="15.5" y="93.5" width="167" height="77" rx="8"></rect>
                 </g>
-                <text id="perf.html" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
-                    <tspan x="62.6384277" y="117">perf.html</tspan>
+                <text id="profiler.firefox.com" font-family="Helvetica-Bold, Helvetica" font-size="17" font-weight="bold" fill="#0A84FF">
+                    <tspan x="23" y="117">profiler.firefox.com</tspan>
                 </text>
                 <text id="unprivileged-webpage" font-family="Helvetica" font-size="12" font-weight="normal">
                     <tspan x="39.6230469" y="142" fill="#000000">unprivileged webpage</tspan>
-                    <tspan x="49.9824219" y="156" fill="#0A84FF" text-decoration="underline">https://perf-html.io</tspan>
+                    <tspan x="35" y="156" fill="#0A84FF" text-decoration="underline">https://profiler.firefox.com</tspan>
                     <tspan x="146.017578" y="156" fill="#000000"></tspan>
                 </text>
                 <text id="Opens-up-a-new-windo" font-family="Helvetica-Bold, Helvetica" font-size="12" font-weight="bold" fill="#0A84FF">
                     <tspan x="0" y="11">Opens up a new window</tspan>
-                    <tspan x="0" y="25">with perf.html. Then injects the JSON</tspan>
-                    <tspan x="0" y="39">profile content via a content script.</tspan>
+                    <tspan x="0" y="25">with profiler.firefox.com. Then injects the</tspan>
+                    <tspan x="0" y="39"> JSON profile content via a content script.</tspan>
                 </text>
             </g>
             <g id="Group-4" transform="translate(64.000000, 408.000000)">

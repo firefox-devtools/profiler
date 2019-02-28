@@ -27,6 +27,7 @@ process: \\"tab\\" (222)"
       >
         <div
           class="timelineMarkers"
+          data-testid="TimelineMarkersJank"
         >
           <canvas
             class="timelineMarkersCanvas"
@@ -34,6 +35,7 @@ process: \\"tab\\" (222)"
         </div>
         <div
           class="timelineMarkers timelineMarkersGeckoMain"
+          data-testid="TimelineMarkersOverview"
         >
           <canvas
             class="timelineMarkersCanvas"
@@ -83,6 +85,7 @@ process: \\"tab\\" (222)"
           >
             <div
               class="timelineMarkers selected"
+              data-testid="TimelineMarkersJank"
             >
               <canvas
                 class="timelineMarkersCanvas"
@@ -130,6 +133,7 @@ process: \\"tab\\" (222)"
           >
             <div
               class="timelineMarkers"
+              data-testid="TimelineMarkersJank"
             >
               <canvas
                 class="timelineMarkersCanvas"

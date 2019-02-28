@@ -53,27 +53,56 @@ Array [
   ],
   Array [
     "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    289,
+    1,
+    48,
+    1,
+  ],
+  Array [
+    "fillRect",
+    288,
+    2,
+    50,
+    11,
+  ],
+  Array [
+    "fillRect",
+    289,
+    13,
+    48,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
     "Highlight",
   ],
   Array [
     "fillRect",
     151,
     1,
-    198,
+    123,
     1,
   ],
   Array [
     "fillRect",
     150,
     2,
-    200,
+    125,
     11,
   ],
   Array [
     "fillRect",
     151,
     13,
-    198,
+    123,
     1,
   ],
   Array [
@@ -88,21 +117,21 @@ Array [
     "fillRect",
     151,
     17,
-    198,
+    123,
     1,
   ],
   Array [
     "fillRect",
     150,
     18,
-    200,
+    125,
     11,
   ],
   Array [
     "fillRect",
     151,
     29,
-    198,
+    123,
     1,
   ],
   Array [
@@ -117,21 +146,21 @@ Array [
     "fillRect",
     151,
     33,
-    58,
+    35.5,
     1,
   ],
   Array [
     "fillRect",
     150,
     34,
-    60,
+    37.5,
     11,
   ],
   Array [
     "fillRect",
     151,
     45,
-    58,
+    35.5,
     1,
   ],
   Array [
@@ -147,7 +176,7 @@ Array [
   ],
   Array [
     "arc",
-    235,
+    205,
     55.5,
     3.75,
     0,
@@ -162,23 +191,23 @@ Array [
   ],
   Array [
     "fillRect",
-    251,
+    214,
     65,
-    198,
+    123,
     1,
   ],
   Array [
     "fillRect",
-    250,
+    213,
     66,
-    200,
+    125,
     11,
   ],
   Array [
     "fillRect",
-    251,
+    214,
     77,
-    198,
+    123,
     1,
   ],
   Array [
@@ -191,23 +220,23 @@ Array [
   ],
   Array [
     "fillRect",
-    251,
+    214,
     81,
-    98,
+    60.5,
     1,
   ],
   Array [
     "fillRect",
-    250,
+    213,
     82,
-    100,
+    62.5,
     11,
   ],
   Array [
     "fillRect",
-    251,
+    214,
     93,
-    98,
+    60.5,
     1,
   ],
   Array [
@@ -217,7 +246,7 @@ Array [
   Array [
     "fillText",
     "click",
-    253,
+    216,
     91,
   ],
   Array [
@@ -229,7 +258,7 @@ Array [
   ],
   Array [
     "arc",
-    295,
+    243,
     103.5,
     3.75,
     0,
@@ -243,18 +272,29 @@ Array [
     "#45a1ff",
   ],
   Array [
-    "beginPath",
+    "fillRect",
+    264,
+    113,
+    85.5,
+    1,
   ],
   Array [
-    "arc",
-    335,
-    119.5,
-    3.75,
-    0,
-    6.283185307179586,
+    "fillRect",
+    263,
+    114,
+    87.5,
+    11,
   ],
   Array [
-    "fill",
+    "fillRect",
+    264,
+    125,
+    85.5,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
   ],
   Array [
     "set fillStyle",
@@ -375,6 +415,7 @@ Array [
 exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
 <div
   class="tooltip"
+  data-testid="tooltip"
   style="left: 61px; top: 16px;"
 >
   <div
@@ -436,8 +477,9 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
           class="idleSearchField markerSettingsSearchField"
         >
           <input
-            class="idleSearchFieldInput"
+            class="idleSearchFieldInput photon-input"
             name="search"
+            placeholder="Enter filter terms"
             required=""
             title="Only display markers that match a certain name"
             type="search"
@@ -459,9 +501,9 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
     <div>
       <canvas
         class="chartCanvas markerChartCanvas"
-        height="300"
+        height="600"
         style="width: 365px; height: 300px;"
-        width="365"
+        width="730"
       />
     </div>
     <div
@@ -489,6 +531,11 @@ Array [
     "scale",
     1,
     1,
+  ],
+  Array [
+    "scale",
+    2,
+    2,
   ],
   Array [
     "set fillStyle",
@@ -521,21 +568,50 @@ Array [
     "fillRect",
     151,
     1,
-    198,
+    123,
     1,
   ],
   Array [
     "fillRect",
     150,
     2,
-    200,
+    125,
     11,
   ],
   Array [
     "fillRect",
     151,
     13,
-    198,
+    123,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "fillRect",
+    288.5,
+    1,
+    48,
+    1,
+  ],
+  Array [
+    "fillRect",
+    287.5,
+    2,
+    50,
+    11,
+  ],
+  Array [
+    "fillRect",
+    288.5,
+    13,
+    48,
     1,
   ],
   Array [
@@ -550,21 +626,21 @@ Array [
     "fillRect",
     151,
     17,
-    198,
+    123,
     1,
   ],
   Array [
     "fillRect",
     150,
     18,
-    200,
+    125,
     11,
   ],
   Array [
     "fillRect",
     151,
     29,
-    198,
+    123,
     1,
   ],
   Array [
@@ -579,21 +655,21 @@ Array [
     "fillRect",
     151,
     33,
-    58,
+    35.5,
     1,
   ],
   Array [
     "fillRect",
     150,
     34,
-    60,
+    37.5,
     11,
   ],
   Array [
     "fillRect",
     151,
     45,
-    58,
+    35.5,
     1,
   ],
   Array [
@@ -609,7 +685,7 @@ Array [
   ],
   Array [
     "arc",
-    235,
+    205,
     55.5,
     3.75,
     0,
@@ -624,23 +700,23 @@ Array [
   ],
   Array [
     "fillRect",
-    251,
+    213.5,
     65,
-    198,
+    123,
     1,
   ],
   Array [
     "fillRect",
-    250,
+    212.5,
     66,
-    200,
+    125,
     11,
   ],
   Array [
     "fillRect",
-    251,
+    213.5,
     77,
-    198,
+    123,
     1,
   ],
   Array [
@@ -653,23 +729,23 @@ Array [
   ],
   Array [
     "fillRect",
-    251,
+    213.5,
     81,
-    98,
+    60.5,
     1,
   ],
   Array [
     "fillRect",
-    250,
+    212.5,
     82,
-    100,
+    62.5,
     11,
   ],
   Array [
     "fillRect",
-    251,
+    213.5,
     93,
-    98,
+    60.5,
     1,
   ],
   Array [
@@ -683,7 +759,7 @@ Array [
   Array [
     "fillText",
     "click",
-    253,
+    215.5,
     91,
   ],
   Array [
@@ -695,7 +771,7 @@ Array [
   ],
   Array [
     "arc",
-    295,
+    242.5,
     103.5,
     3.75,
     0,
@@ -709,18 +785,29 @@ Array [
     "#45a1ff",
   ],
   Array [
-    "beginPath",
+    "fillRect",
+    263.5,
+    113,
+    85.5,
+    1,
   ],
   Array [
-    "arc",
-    335,
-    119.5,
-    3.75,
-    0,
-    6.283185307179586,
+    "fillRect",
+    262.5,
+    114,
+    87.5,
+    11,
   ],
   Array [
-    "fill",
+    "fillRect",
+    263.5,
+    125,
+    85.5,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
   ],
   Array [
     "set fillStyle",

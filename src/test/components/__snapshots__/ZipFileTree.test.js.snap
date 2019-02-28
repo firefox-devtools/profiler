@@ -13,7 +13,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
       class="zipFileViewerHeader"
     >
       <h1>
-        perf.html
+        Firefox Profiler
       </h1>
       <p>
         Choose a profile from this zip file
@@ -26,7 +26,9 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
         class="react-contextmenu-wrapper treeViewContextMenu"
       >
         <div
+          aria-label="Call tree"
           class="treeViewBody"
+          role="tree"
           tabindex="0"
         >
           <div
@@ -81,7 +83,12 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                 class="treeViewBodyInner treeViewBodyInner1InnerChunk"
               >
                 <div
+                  aria-expanded="true"
+                  aria-label="foo, running time is undefined (undefined), self time is undefined"
+                  aria-level="1"
+                  aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns even  "
+                  role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
@@ -98,7 +105,12 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
+                  aria-expanded="true"
+                  aria-label="bar, running time is undefined (undefined), self time is undefined"
+                  aria-level="2"
+                  aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns odd  "
+                  role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
@@ -115,7 +127,11 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
+                  aria-label="profile1.json, running time is undefined (undefined), self time is undefined"
+                  aria-level="3"
+                  aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns even  "
+                  role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
@@ -136,7 +152,11 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
+                  aria-label="profile2.json, running time is undefined (undefined), self time is undefined"
+                  aria-level="2"
+                  aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns odd  "
+                  role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
@@ -157,7 +177,12 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
+                  aria-expanded="true"
+                  aria-label="baz, running time is undefined (undefined), self time is undefined"
+                  aria-level="1"
+                  aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns even  "
+                  role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span
@@ -174,7 +199,11 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
+                  aria-label="profile3.json, running time is undefined (undefined), self time is undefined"
+                  aria-level="2"
+                  aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns odd  "
+                  role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
                   <span

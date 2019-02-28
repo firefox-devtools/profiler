@@ -130,7 +130,12 @@ export default class Tooltip extends React.PureComponent<Props, State> {
     };
 
     return ReactDOM.createPortal(
-      <div className="tooltip" style={style} ref={this._takeInteriorElementRef}>
+      <div
+        className="tooltip"
+        data-testid="tooltip"
+        style={style}
+        ref={this._takeInteriorElementRef}
+      >
         {children}
       </div>,
       this._overlayElement

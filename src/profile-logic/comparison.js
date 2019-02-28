@@ -20,9 +20,11 @@ import {
   getTimeRangeForThread,
   getTimeRangeIncludingAllThreads,
 } from './profile-data';
+import { filterRawMarkerTableToRange } from './marker-data';
 
 import type {
   Profile,
+  Thread,
   IndexIntoCategoryList,
   CategoryList,
 } from '../types/profile';
@@ -39,6 +41,9 @@ export function mergeProfiles(
   implementationFilters: ImplementationFilter[],
 |} {
   const resultProfile = getEmptyProfile();
+  resultProfile.meta.interval = Math.min(
+    ...profiles.map(profile => profile.meta.interval)
+  );
 
   // First let's merge categories. We'll use the resulting maps when
   // handling the thread data later.
@@ -78,13 +83,14 @@ export function mergeProfiles(
     const zeroAt = getTimeRangeIncludingAllThreads(profile).start;
     const committedRange =
       profileSpecific.committedRanges && profileSpecific.committedRanges.pop();
-    thread = committedRange
-      ? filterThreadSamplesToRange(
-          thread,
-          committedRange.start + zeroAt,
-          committedRange.end + zeroAt
-        )
-      : thread;
+
+    if (committedRange) {
+      thread = filterThreadToRange(
+        thread,
+        committedRange.start + zeroAt,
+        committedRange.end + zeroAt
+      );
+    }
 
     // We're reseting the thread's PID to make sure we don't have any collision.
     thread.pid = `${thread.pid} from profile ${i + 1}`;
@@ -128,6 +134,20 @@ export function mergeProfiles(
   }
 
   return { profile: resultProfile, implementationFilters, transformStacks };
+}
+
+function filterThreadToRange(
+  thread: Thread,
+  rangeStart: number,
+  rangeEnd: number
+): Thread {
+  thread = filterThreadSamplesToRange(thread, rangeStart, rangeEnd);
+  thread.markers = filterRawMarkerTableToRange(
+    thread.markers,
+    rangeStart,
+    rangeEnd
+  );
+  return thread;
 }
 
 type TranslationMapForCategories = Map<
@@ -183,7 +203,7 @@ function adjustCategories(
       throw new Error(
         stripIndent`
           Category with index ${category} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in perf-html's code.
+          This shouldn't happen and indicates a bug in the profiler's code.
         `
       );
     }
@@ -210,7 +230,7 @@ function adjustNullableCategories(
       throw new Error(
         stripIndent`
           Category with index ${category} hasn't been found in the translation map.
-          This shouldn't happen and indicates a bug in perf-html's code.
+          This shouldn't happen and indicates a bug in the profiler's code.
         `
       );
     }

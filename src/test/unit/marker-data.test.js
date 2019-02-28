@@ -3,37 +3,53 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { deriveMarkersFromRawMarkerTable } from '../../profile-logic/marker-data';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import { processProfile } from '../../profile-logic/process-profile';
-import { createGeckoProfile } from '.././fixtures/profiles/gecko-profile';
+import {
+  deriveMarkersFromRawMarkerTable,
+  filterRawMarkerTableToRange,
+  mergeStartAndEndNetworkMarker,
+} from '../../profile-logic/marker-data';
+
+import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
+import { getThreadWithMarkers } from '../fixtures/profiles/processed-profile';
+import { storeWithProfile } from '../fixtures/stores';
+
+import type { Thread } from '../../types/profile';
+import type { Milliseconds } from '../../types/units';
 
 describe('deriveMarkersFromRawMarkerTable', function() {
-  const profile = processProfile(createGeckoProfile());
-  const thread = profile.threads[0]; // This is the parent process main thread
-  const contentThread = profile.threads[2]; // This is the content process main thread
-  const markers = deriveMarkersFromRawMarkerTable(
-    thread.markers,
-    thread.stringTable,
-    thread.samples.time[0],
-    thread.samples.time.slice(-1)[0]
-  );
-  const contentMarkers = deriveMarkersFromRawMarkerTable(
-    contentThread.markers,
-    contentThread.stringTable,
-    thread.samples.time[0],
-    thread.samples.time.slice(-1)[0]
-  );
+  function setup() {
+    const profile = processProfile(createGeckoProfile());
+    const thread = profile.threads[0]; // This is the parent process main thread
+    const contentThread = profile.threads[2]; // This is the content process main thread
+
+    const store = storeWithProfile(profile);
+    const state = store.getState();
+
+    return {
+      profile,
+      markers: getThreadSelectors(0).getReferenceMarkerTable(state),
+      thread,
+      contentThread,
+      contentMarkers: getThreadSelectors(2).getReferenceMarkerTable(state),
+    };
+  }
 
   it('creates a reasonable processed profile', function() {
+    const { thread, contentThread } = setup();
     expect(thread.name).toBe('GeckoMain');
     expect(thread.processType).toBe('default');
     expect(contentThread.name).toBe('GeckoMain');
     expect(contentThread.processType).toBe('tab');
   });
-  it('creates 12 markers given the test data', function() {
-    expect(markers.length).toEqual(12);
+
+  it('creates 13 markers given the test data', function() {
+    const { markers } = setup();
+    expect(markers.length).toEqual(13);
   });
   it('creates a marker even if there is no start or end time', function() {
+    const { markers } = setup();
     expect(markers[1]).toMatchObject({
       start: 2,
       dur: 0,
@@ -42,6 +58,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should create a marker', function() {
+    const { markers } = setup();
     expect(markers[2]).toMatchObject({
       start: 3,
       dur: 5,
@@ -50,7 +67,8 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should fold the two reflow markers into one marker', function() {
-    expect(markers.length).toEqual(12);
+    const { markers } = setup();
+    expect(markers.length).toEqual(13);
     expect(markers[2]).toMatchObject({
       start: 3,
       dur: 5,
@@ -59,6 +77,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should fold the two Rasterize markers into one marker, after the reflow marker', function() {
+    const { markers } = setup();
     expect(markers[3]).toMatchObject({
       start: 4,
       dur: 1,
@@ -67,6 +86,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should create a marker for the MinorGC startTime/endTime marker', function() {
+    const { markers } = setup();
     expect(markers[5]).toMatchObject({
       start: 11,
       dur: 1,
@@ -75,6 +95,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should create a marker for the DOMEvent marker', function() {
+    const { markers } = setup();
     expect(markers[4]).toMatchObject({
       dur: 1,
       name: 'DOMEvent',
@@ -83,6 +104,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should create a marker for the marker UserTiming', function() {
+    const { markers } = setup();
     expect(markers[6]).toMatchObject({
       dur: 1,
       name: 'UserTiming',
@@ -91,6 +113,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should handle markers without a start', function() {
+    const { markers } = setup();
     expect(markers[0]).toMatchObject({
       start: 0, // Truncated to the time of the first captured sample.
       dur: 1,
@@ -99,6 +122,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should handle markers without an end', function() {
+    const { markers } = setup();
     expect(markers[9]).toMatchObject({
       start: 20,
       dur: 0,
@@ -107,6 +131,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should handle nested markers correctly', function() {
+    const { markers } = setup();
     expect(markers[7]).toMatchObject({
       start: 13,
       dur: 5,
@@ -121,6 +146,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('should handle arbitrary event markers correctly', function() {
+    const { markers } = setup();
     expect(markers[10]).toMatchObject({
       start: 21,
       dur: 0,
@@ -130,6 +156,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     });
   });
   it('shifts content process marker times correctly', function() {
+    const { thread, contentThread, markers, contentMarkers } = setup();
     expect(thread.processStartupTime).toBe(0);
     expect(contentThread.processStartupTime).toBe(1000);
     expect(markers[11]).toEqual({
@@ -182,5 +209,454 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       start: 1022,
       title: null,
     });
+    expect(contentMarkers[12]).toEqual({
+      data: {
+        // Stack property is converted to a cause.
+        cause: {
+          stack: 2,
+          time: 1,
+        },
+        endTime: 1024,
+        filename: '/foo/bar/',
+        operation: 'create/open',
+        source: 'PoisionOIInterposer',
+        startTime: 1022,
+        type: 'FileIO',
+      },
+      dur: 2,
+      name: 'FileIO',
+      start: 1022,
+      title: null,
+    });
+  });
+});
+
+describe('filterRawMarkerTableToRange', () => {
+  function setup(
+    markers: Array<[string, Milliseconds, null | Object]>
+  ): Thread {
+    markers = markers.map(([name, time, payload]) => {
+      if (payload) {
+        // Force a type 'DummyForTests' if it's inexistant
+        payload = { type: 'DummyForTests', ...payload };
+      }
+      return [name, time, payload];
+    });
+
+    // Our marker payload union type is too difficult to work with in a
+    // generic way here.
+    return getThreadWithMarkers((markers: any));
+  }
+
+  it('filters generic markers', () => {
+    const markers = [
+      ['0', 0, null],
+      ['1', 1, null],
+      ['2', 2, null],
+      ['3', 3, null],
+      ['4', 4, null],
+      ['5', 5, null],
+      ['6', 6, null],
+      ['7', 7, null],
+    ];
+    const { markers: markerTable } = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      markerTable,
+      2.3,
+      5.6
+    );
+    // Note: because the test fixture utility adds the strings in order, the
+    // string indices are actually the same as the name themselves, which make
+    // it possible to do an easy and readable assertion.
+    expect(filteredMarkerTable.name).toEqual([3, 4, 5]);
+  });
+
+  it('filters generic markers with payload', () => {
+    const markers = [
+      ['0', 0, {}],
+      ['1', 1, {}],
+      ['2', 2, {}],
+      ['3', 3, {}],
+      ['4', 4, {}],
+      ['5', 5, {}],
+      ['6', 6, {}],
+      ['7', 7, {}],
+    ];
+    const { markers: markerTable } = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      markerTable,
+      2.3,
+      5.6
+    );
+    expect(filteredMarkerTable.name).toEqual([3, 4, 5]);
+  });
+
+  it('filters markers with start/end in the payload', () => {
+    const markers = [
+      ['0', 0, { startTime: 0, endTime: 4 }],
+      ['1', 1, { startTime: 1, endTime: 7 }],
+      ['2', 2, { startTime: 2, endTime: 2.2 }],
+      ['3', 3, { startTime: 3, endTime: 4 }],
+      ['4', 4, { startTime: 4, endTime: 6 }],
+      ['5', 5, { startTime: 5, endTime: 5 }],
+      ['6', 6, { startTime: 6, endTime: 8 }],
+      ['7', 7, { startTime: 7, endTime: 7 }],
+    ];
+
+    const { markers: markerTable } = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      markerTable,
+      2.3,
+      5.6
+    );
+    expect(filteredMarkerTable.name).toEqual([0, 1, 3, 4, 5]);
+  });
+
+  it('filters tracing markers', () => {
+    // Note: these tracing markers define the same set of markers as in the
+    // previous test.
+    const markers = [
+      ['0', 0, { type: 'tracing', interval: 'start' }],
+      ['1', 1, { type: 'tracing', interval: 'start' }],
+      ['2', 2, { type: 'tracing', interval: 'start' }],
+      ['2', 2.2, { type: 'tracing', interval: 'end' }],
+      ['3', 3, { type: 'tracing', interval: 'start' }],
+      ['4', 4, { type: 'tracing', interval: 'start' }],
+      ['3', 4, { type: 'tracing', interval: 'end' }],
+      ['0', 4, { type: 'tracing', interval: 'end' }],
+      ['5', 5, { type: 'tracing', interval: 'start' }],
+      ['5', 5, { type: 'tracing', interval: 'end' }],
+      ['6', 6, { type: 'tracing', interval: 'start' }],
+      ['4', 6, { type: 'tracing', interval: 'end' }],
+      ['7', 7, { type: 'tracing', interval: 'start' }],
+      ['7', 7, { type: 'tracing', interval: 'end' }],
+      ['1', 7, { type: 'tracing', interval: 'end' }],
+      ['6', 8, { type: 'tracing', interval: 'end' }],
+    ];
+
+    const thread = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      thread.markers,
+      2.3,
+      5.6
+    );
+
+    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
+    // easier to assert the result for tracing markers.
+    const processedMarkers = deriveMarkersFromRawMarkerTable(
+      filteredMarkerTable,
+      thread.stringTable,
+      2.3 /* first sample time */,
+      5.6 /* last sample time */,
+      1 /* interval */
+    ).sort((markerA, markerB) => markerA.start - markerB.start);
+    expect(processedMarkers.map(marker => marker.name)).toEqual([
+      '0',
+      '1',
+      '3',
+      '4',
+      '5',
+    ]);
+  });
+
+  it('filters nested tracing markers', () => {
+    // In this test we're testing the more complex case of nested markers
+    const markers = [
+      ['0', 0, { type: 'tracing', interval: 'start' }],
+      ['0', 1, { type: 'tracing', interval: 'start' }],
+      ['0', 2, { type: 'tracing', interval: 'end' }],
+      ['0', 6, { type: 'tracing', interval: 'end' }],
+    ];
+
+    const thread = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      thread.markers,
+      2.3,
+      5.6
+    );
+
+    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
+    // easier to assert the result for tracing markers.
+    const processedMarkers = deriveMarkersFromRawMarkerTable(
+      filteredMarkerTable,
+      thread.stringTable,
+      2.3 /* first sample time */,
+      5.6 /* last sample time */,
+      1 /* interval */
+    ).sort((markerA, markerB) => markerA.start - markerB.start);
+    expect(processedMarkers).toHaveLength(1);
+    // Only the marker starting from 0 and ending at 6 is kept. The marker
+    // between 1 and 2 is filtered out.
+    expect(processedMarkers[0]).toMatchObject({ start: 0, dur: 6 });
+  });
+
+  it('filters markers without start/end items', () => {
+    const markers = [
+      ['1', 1, { type: 'tracing', interval: 'end' }],
+      ['2', 2, { type: 'tracing', interval: 'start' }],
+      ['3', 3, { type: 'tracing', interval: 'start' }],
+      ['4', 4, { type: 'tracing', interval: 'end' }],
+      ['6', 6, { type: 'tracing', interval: 'end' }],
+      ['7', 7, { type: 'tracing', interval: 'start' }],
+    ];
+
+    const thread = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      thread.markers,
+      2.3,
+      5.6
+    );
+
+    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
+    // easier to assert the result for tracing markers.
+    const processedMarkers = deriveMarkersFromRawMarkerTable(
+      filteredMarkerTable,
+      thread.stringTable,
+      2.3 /* first sample time */,
+      5.6 /* last sample time */,
+      1 /* interval */
+    ).sort((markerA, markerB) => markerA.start - markerB.start);
+
+    expect(processedMarkers.map(marker => marker.name)).toEqual([
+      '2',
+      '4',
+      '6',
+      '3',
+    ]);
+  });
+
+  it('filters screenshot markers', () => {
+    const markers = [
+      ['CompositorScreenshot', 0, { type: 'CompositorScreenshot', url: 0 }],
+      ['CompositorScreenshot', 3, { type: 'CompositorScreenshot', url: 3 }],
+      ['CompositorScreenshot', 7, { type: 'CompositorScreenshot', url: 7 }],
+    ];
+
+    const { markers: markerTable } = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      markerTable,
+      2.3,
+      5.6
+    );
+    expect(filteredMarkerTable.time).toEqual([0, 3]);
+  });
+
+  it('keeps a screenshot markers happening before the range if there is no other marker', () => {
+    const markers = [
+      ['CompositorScreenshot', 0, { type: 'CompositorScreenshot', url: 0 }],
+    ];
+
+    const { markers: markerTable } = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      markerTable,
+      2.3,
+      5.6
+    );
+    expect(filteredMarkerTable.time).toEqual([0]);
+  });
+
+  it('filters network markers', () => {
+    const markers = [
+      [
+        'Load 1',
+        0,
+        { type: 'Network', status: 'STATUS_START', startTime: 0, endTime: 1 },
+      ],
+      [
+        'Load 2',
+        0,
+        { type: 'Network', status: 'STATUS_START', startTime: 0, endTime: 1 },
+      ],
+      [
+        'Load 4 will be filtered',
+        0,
+        { type: 'Network', status: 'STATUS_START', startTime: 0, endTime: 1 },
+      ],
+      [
+        'Load 4 will be filtered',
+        1,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 1, endTime: 2 },
+      ],
+      [
+        'Load 1',
+        1,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 1, endTime: 3 },
+      ],
+      [
+        'Load 2',
+        1,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 1, endTime: 7 },
+      ],
+      [
+        'Load 3',
+        2,
+        { type: 'Network', status: 'STATUS_START', startTime: 2, endTime: 6 },
+      ],
+      [
+        'Load 3',
+        6,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 6, endTime: 7 },
+      ],
+      [
+        'Load 5 will be filtered',
+        6,
+        { type: 'Network', status: 'STATUS_START', startTime: 6, endTime: 7 },
+      ],
+      [
+        'Load 5 will be filtered',
+        7,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 7, endTime: 8 },
+      ],
+    ];
+
+    const thread = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      thread.markers,
+      2.3,
+      5.6
+    );
+
+    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
+    // easier to assert the result for network markers.
+    const processedMarkers = deriveMarkersFromRawMarkerTable(
+      filteredMarkerTable,
+      thread.stringTable,
+      2.3 /* first sample time */,
+      5.6 /* last sample time */,
+      1 /* interval */
+    );
+
+    const mergedMarkers = mergeStartAndEndNetworkMarker(processedMarkers);
+
+    expect(
+      mergedMarkers.map(marker => [
+        marker.name,
+        marker.data && (marker.data: any).status,
+        marker.start,
+        marker.start + marker.dur,
+      ])
+    ).toEqual([
+      ['Load 1', 'STATUS_STOP', 0, 3],
+      ['Load 2', 'STATUS_STOP', 0, 7],
+      ['Load 3', 'STATUS_STOP', 2, 7],
+    ]);
+  });
+
+  it('filters network markers with only a start marker', () => {
+    const markers = [
+      [
+        'Load 1',
+        0,
+        { type: 'Network', status: 'STATUS_START', startTime: 0, endTime: 1 },
+      ],
+      [
+        'Load 2',
+        2,
+        { type: 'Network', status: 'STATUS_START', startTime: 2, endTime: 4 },
+      ],
+      [
+        'Load 3',
+        2,
+        { type: 'Network', status: 'STATUS_START', startTime: 2, endTime: 6 },
+      ],
+      [
+        'Load 4',
+        3,
+        { type: 'Network', status: 'STATUS_START', startTime: 3, endTime: 5 },
+      ],
+      [
+        'Load 5',
+        3,
+        { type: 'Network', status: 'STATUS_START', startTime: 3, endTime: 7 },
+      ],
+      [
+        'Load 6',
+        6,
+        { type: 'Network', status: 'STATUS_START', startTime: 6, endTime: 7 },
+      ],
+    ];
+
+    const thread = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      thread.markers,
+      2.3,
+      5.6
+    );
+
+    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
+    // easier to assert the result for network markers.
+    const processedMarkers = deriveMarkersFromRawMarkerTable(
+      filteredMarkerTable,
+      thread.stringTable,
+      2.3 /* first sample time */,
+      5.6 /* last sample time */,
+      1 /* interval */
+    );
+    expect(processedMarkers.map(marker => marker.name)).toEqual([
+      'Load 1',
+      'Load 2',
+      'Load 3',
+      'Load 4',
+      'Load 5',
+    ]);
+  });
+
+  it('filters network markers with only an end marker', () => {
+    const markers = [
+      [
+        'Load 1',
+        0,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 0, endTime: 1 },
+      ],
+      [
+        'Load 2',
+        2,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 2, endTime: 4 },
+      ],
+      [
+        'Load 3',
+        2,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 2, endTime: 6 },
+      ],
+      [
+        'Load 4',
+        3,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 3, endTime: 5 },
+      ],
+      [
+        'Load 5',
+        3,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 3, endTime: 7 },
+      ],
+      [
+        'Load 6',
+        6,
+        { type: 'Network', status: 'STATUS_STOP', startTime: 6, endTime: 7 },
+      ],
+    ];
+
+    const thread = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRange(
+      thread.markers,
+      2.3,
+      5.6
+    );
+
+    // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
+    // easier to assert the result for network markers.
+    const processedMarkers = deriveMarkersFromRawMarkerTable(
+      filteredMarkerTable,
+      thread.stringTable,
+      2.3 /* first sample time */,
+      5.6 /* last sample time */,
+      1 /* interval */
+    );
+    expect(processedMarkers.map(marker => marker.name)).toEqual([
+      'Load 2',
+      'Load 3',
+      'Load 4',
+      'Load 5',
+      'Load 6',
+    ]);
   });
 });

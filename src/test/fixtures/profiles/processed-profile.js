@@ -19,7 +19,11 @@ import type {
   JsTracerTable,
   Counter,
 } from '../../../types/profile';
-import type { MarkerPayload, NetworkPayload } from '../../../types/markers';
+import type {
+  MarkerPayload,
+  NetworkPayload,
+  NavigationMarkerPayload,
+} from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
 // Array<[MarkerName, Milliseconds, Data]>
@@ -72,7 +76,8 @@ export function addMarkersToThreadWithCorrespondingSamples(
 ) {
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
-  const samples = thread.samples;
+
+  const allTimes = new Set();
 
   markers.forEach(([name, time, data]) => {
     markersTable.name.push(stringTable.indexForString(name));
@@ -80,24 +85,42 @@ export function addMarkersToThreadWithCorrespondingSamples(
     markersTable.data.push(_refineMockPayload(data));
     markersTable.length++;
 
-    // Try to get a consistent profile with a sample for each marker.
-    const startTime = time;
-    // If we have no data, endTime is the same as startTime.
-    const endTime =
-      data && typeof data.endTime === 'number' ? data.endTime : time;
-
-    // Push on the start and end time if necessary
-    [startTime, endTime].forEach(time => {
-      if (!samples.time.includes(time)) {
-        samples.time.push(time);
-        samples.stack.push(null);
-        samples.responsiveness.push(null);
-        samples.length++;
-      }
-    });
+    // Try to get a consistent profile containing all markers
+    allTimes.add(time);
+    if (data && typeof data.endTime === 'number') {
+      allTimes.add(data.endTime);
+    }
   });
 
-  samples.time.sort();
+  const firstMarkerTime = Math.min(...allTimes);
+  const lastMarkerTime = Math.max(...allTimes);
+
+  const { samples } = thread;
+
+  // The first marker time should be added if there's no sample before this time.
+  const shouldAddFirstMarkerTime =
+    samples.length === 0 || samples.time[0] > firstMarkerTime;
+
+  // The last marker time should be added if there's no sample after this time,
+  // but only if it's different than the other time.
+  const shouldAddLastMarkerTime =
+    (samples.length === 0 ||
+      samples.time[samples.length - 1] < lastMarkerTime) &&
+    firstMarkerTime !== lastMarkerTime;
+
+  if (shouldAddFirstMarkerTime) {
+    samples.time.unshift(firstMarkerTime);
+    samples.stack.unshift(null);
+    samples.responsiveness.unshift(null);
+    samples.length++;
+  }
+
+  if (shouldAddLastMarkerTime) {
+    samples.time.push(lastMarkerTime);
+    samples.stack.push(null);
+    samples.responsiveness.push(null);
+    samples.length++;
+  }
 }
 
 export function getThreadWithMarkers(markers: TestDefinedMarkers) {
@@ -472,18 +495,30 @@ function _buildThreadFromTextOnlyStacks(
   return thread;
 }
 
-export function getNetworkMarker(startTime: number, id: number) {
-  const payload: NetworkPayload = {
+export function getNetworkMarkers(startTime: number, id: number) {
+  const name = `Load ${id}: https://mozilla.org`;
+  const startPayload: NetworkPayload = {
     type: 'Network',
     id,
     pri: 0,
-    status: 'STOP',
+    status: 'STATUS_START',
     startTime,
-    endTime: startTime + 1,
+    endTime: startTime + 0.5,
     URI: 'https://mozilla.org',
     RedirectURI: 'https://mozilla.org',
   };
-  return ['Load 123: https://mozilla.org', startTime, payload];
+
+  const stopPayload: NetworkPayload = {
+    ...startPayload,
+    status: 'STATUS_STOP',
+    startTime: startPayload.endTime,
+    endTime: startPayload.endTime + 0.5,
+  };
+
+  return [
+    [name, startPayload.startTime, startPayload],
+    [name, stopPayload.startTime, stopPayload],
+  ];
 }
 
 /**
@@ -493,11 +528,80 @@ export function getNetworkMarker(startTime: number, id: number) {
  * This generates 10 network markers ranged 3-4 ms on their start times.
  */
 export function getNetworkTrackProfile() {
-  return getProfileWithMarkers(
-    Array(10)
-      .fill()
-      .map((_, i) => getNetworkMarker(3 + 0.1 * i, i))
-  );
+  const arrayOfNetworkMarkers = Array(10)
+    .fill()
+    .map((_, i) => getNetworkMarkers(3 + 0.1 * i, i));
+  const profile = getProfileWithMarkers([].concat(...arrayOfNetworkMarkers));
+
+  const docShellId = '{c03a6ebd-2430-7949-b25b-95ba9776bdbf}';
+  const docshellHistoryId = 1;
+
+  profile.pages = [
+    {
+      docshellId: docShellId,
+      historyId: docshellHistoryId,
+      url: 'https://developer.mozilla.org/en-US/',
+      isSubFrame: false,
+    },
+  ];
+
+  const thread = profile.threads[0];
+
+  const loadPayloadBase = {
+    type: 'tracing',
+    category: 'Navigation',
+    eventType: 'load',
+    docShellId,
+    docshellHistoryId,
+  };
+
+  const domContentLoadedBase = {
+    type: 'tracing',
+    category: 'Navigation',
+    interval: 'start',
+    docShellId,
+    docshellHistoryId,
+  };
+
+  addMarkersToThreadWithCorrespondingSamples(thread, [
+    [
+      'Load',
+      4,
+      ({
+        ...loadPayloadBase,
+        interval: 'start',
+      }: NavigationMarkerPayload),
+    ],
+    [
+      'Load',
+      5,
+      ({
+        ...loadPayloadBase,
+        interval: 'end',
+      }: NavigationMarkerPayload),
+    ],
+    ['TTI', 6, null],
+    ['Navigation::Start', 7, null],
+    ['Contentful paint at something', 8, null],
+    [
+      'DOMContentLoaded',
+      6,
+      ({
+        ...domContentLoadedBase,
+        interval: 'start',
+      }: NavigationMarkerPayload),
+    ],
+    [
+      'DOMContentLoaded',
+      7,
+      ({
+        ...domContentLoadedBase,
+        interval: 'end',
+      }: NavigationMarkerPayload),
+    ],
+  ]);
+
+  return profile;
 }
 
 export function getScreenshotTrackProfile() {

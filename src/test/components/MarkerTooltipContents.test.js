@@ -394,11 +394,27 @@ describe('MarkerTooltipContents', function() {
           interval: 'end',
         },
       ],
+      [
+        'FileIO',
+        114,
+        {
+          type: 'FileIO',
+          startTime: 114,
+          endTime: 115,
+          source: 'PoisonIOInterposer',
+          filename: '/foo/bar',
+          operation: 'create/open',
+          cause: {
+            time: 17.0,
+            stack: funcNames.indexOf('nsRefreshDriver::AddStyleFlushObserver'),
+          },
+        },
+      ],
     ]);
     const store = storeWithProfile(profile);
     const state = store.getState();
     const threadIndex = getSelectedThreadIndex(state);
-    const markers = selectedThreadSelectors.getMarkers(state);
+    const markers = selectedThreadSelectors.getReferenceMarkerTable(state);
 
     markers.forEach((marker, i) => {
       const { container } = render(

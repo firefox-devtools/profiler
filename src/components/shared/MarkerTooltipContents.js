@@ -31,6 +31,7 @@ import type {
   DOMEventMarkerPayload,
   FrameConstructionMarkerPayload,
   PaintProfilerMarkerTracing,
+  NavigationMarkerPayload,
   PhaseTimes,
   StyleMarkerPayload,
 } from '../../types/markers';
@@ -157,13 +158,13 @@ function _makePriorityHumanReadable(
 function _dataStatusReplace(str: string): string {
   switch (str) {
     case 'STATUS_START': {
-      return 'Start of request';
+      return 'Waiting for response';
     }
     case 'STATUS_READ': {
       return 'Reading request';
     }
     case 'STATUS_STOP': {
-      return 'End of request';
+      return 'Response received';
     }
     case 'STATUS_REDIRECT': {
       return 'Redirecting request';
@@ -307,7 +308,8 @@ function _markerBacktrace(
     | StyleMarkerPayload
     | PaintProfilerMarkerTracing
     | DOMEventMarkerPayload
-    | FrameConstructionMarkerPayload,
+    | FrameConstructionMarkerPayload
+    | NavigationMarkerPayload,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {
@@ -364,6 +366,25 @@ function getMarkerDetails(
 
   if (data) {
     switch (data.type) {
+      case 'FileIO': {
+        return [
+          <div className="tooltipDetails" key="details">
+            {_markerDetailNullable('name', 'Operation', data.operation)}
+            {_markerDetailNullable('name', 'Source', data.source)}
+            {_markerDetailNullable('name', 'Filename', data.filename)}
+          </div>,
+          data.cause ? (
+            <div className="tooltipDetailsBackTrace" key="backtrace">
+              <Backtrace
+                maxHeight="30em"
+                stackIndex={data.cause.stack}
+                thread={thread}
+                implementationFilter={implementationFilter}
+              />
+            </div>
+          ) : null,
+        ];
+      }
       case 'UserTiming': {
         return (
           <div className="tooltipDetails">

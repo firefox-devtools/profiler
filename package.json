@@ -1,7 +1,7 @@
 {
-  "name": "perf.html",
+  "name": "firefox-profiler",
   "version": "0.0.1",
-  "description": "perf.html, the gecko profiler UI",
+  "description": "Firefox Profiler",
   "main": "src/index.js",
   "scripts": {
     "build:clean": "rimraf dist && mkdirp dist",
@@ -34,7 +34,7 @@
     "start-prod": "yarn build-prod && yarn serve-static",
     "start-examples": "ws -d examples/ -s index.html -p 4242",
     "start-docs": "docsify serve ./docs-user",
-    "test": "cross-env NODE_ENV=test jest",
+    "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-worker jest",
     "test-all": "run-p flow license-check lint test",
     "test-build-coverage": "jest --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
@@ -44,7 +44,7 @@
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/devtools-html/perf.html"
+    "url": "https://github.com/firefox-devtools/profiler"
   },
   "dependencies": {
     "@mstange/offline-plugin": "^5.0.6",
@@ -115,6 +115,7 @@
     "http-server": "^0.11.1",
     "husky": "^0.14.3",
     "jest": "^23.5.0",
+    "jest-environment-jsdom-thirteen": "^0.0.2",
     "json-loader": "^0.5.7",
     "local-web-server": "^2.6.0",
     "mkdirp": "^0.5.1",
@@ -131,8 +132,7 @@
     "stylelint-config-standard": "^18.2.0",
     "webpack": "^4.26.1",
     "webpack-cli": "^3.1.0",
-    "webpack-dev-server": "^3.1.7",
-    "workerjs": "github:jasonLaster/workerjs"
+    "webpack-dev-server": "^3.1.7"
   },
   "jest": {
     "collectCoverageFrom": [
@@ -140,7 +140,7 @@
       "!**/node_modules/**",
       "!src/types/libdef/**"
     ],
-    "testEnvironment": "jsdom",
+    "testEnvironment": "jest-environment-jsdom-thirteen",
     "moduleFileExtensions": [
       "js",
       "jsx"

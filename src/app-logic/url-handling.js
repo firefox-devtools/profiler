@@ -275,10 +275,10 @@ export function stateFromLocation(location: Location): UrlState {
   const dataSource = getDataSourceFromPathParts(pathParts);
   const selectedThread = query.thread !== undefined ? +query.thread : null;
 
-  // https://perf-html.io/public/{hash}/calltree/
+  // https://profiler.firefox.com/public/{hash}/calltree/
   const hasProfileHash = ['local', 'public'].includes(dataSource);
 
-  // https://perf-html.io/from-url/{url}/calltree/
+  // https://profiler.firefox.com/from-url/{url}/calltree/
   const hasProfileUrl = ['from-url'].includes(dataSource);
 
   // The selected tab is the last path part in the URL.
@@ -409,9 +409,9 @@ export function upgradeLocationToCurrentVersion(
 
   if (urlVersion > CURRENT_URL_VERSION) {
     throw new Error(
-      `Unable to parse a url of version ${urlVersion} - are you running an outdated version of perf.html? ` +
-        `The most recent version understood by this version of perf.html is version ${CURRENT_URL_VERSION}.\n` +
-        'You can try refreshing this page in case perf.html has updated in the meantime.'
+      `Unable to parse a url of version ${urlVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
+        `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_URL_VERSION}.\n` +
+        'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
     );
   }
   // Convert to CURRENT_URL_VERSION, one step at a time.
