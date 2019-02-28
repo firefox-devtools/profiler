@@ -141,6 +141,7 @@ class FlameGraph extends React.PureComponent<Props> {
         break;
       }
       default:
+        // Other keys are ignored
         break;
     }
   };

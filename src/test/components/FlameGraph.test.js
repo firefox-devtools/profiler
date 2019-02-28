@@ -78,24 +78,24 @@ describe('FlameGraph', function() {
       return callNodeIndex && funcNames[callNodeIndex];
     }
 
+    // Start out with callnode B selected
     dispatch(changeSelectedCallNode(0, [0, 1] /* B */));
-
     expect(selectedNode()).toBe('B');
 
+    // Move one callnode up
     fireEvent.keyDown(div, { key: 'ArrowUp' });
-
     expect(selectedNode()).toBe('C');
 
+    // Move one callnode right
     fireEvent.keyDown(div, { key: 'ArrowRight' });
-
     expect(selectedNode()).toBe('H');
 
+    // Go back to left again
     fireEvent.keyDown(div, { key: 'ArrowLeft' });
-
     expect(selectedNode()).toBe('C');
 
+    // And down, back to our starting callnode again
     fireEvent.keyDown(div, { key: 'ArrowDown' });
-
     expect(selectedNode()).toBe('B');
   });
 });
