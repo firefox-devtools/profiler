@@ -353,7 +353,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         event.preventDefault();
 
         const { disableHorizontalMovement } = this.props.viewportProps;
-        if ((event.ctrlKey || event.shiftKey)) {
+        if (event.ctrlKey || event.shiftKey) {
           if (!disableHorizontalMovement) {
             this.zoomWithMouseWheel(event);
           }
