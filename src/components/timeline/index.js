@@ -72,29 +72,84 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class Timeline extends React.PureComponent<Props> {
+class TimelineSettingsGraphType extends React.PureComponent<{|
+  +timelineType: TimelineType,
+  +changeTimelineType: typeof changeTimelineType,
+|}> {
   _changeToCategories = () => this.props.changeTimelineType('category');
   _changeToStacks = () => this.props.changeTimelineType('stack');
 
+  render() {
+    const { timelineType } = this.props;
+
+    return (
+      <form>
+        <div className="timelineSettingsToggle">
+          Graph type:{' '}
+          <label className="timelineSettingsToggleLabel">
+            <input
+              type="radio"
+              name="timelineSettingsToggle"
+              className="timelineSettingsToggleInput"
+              checked={timelineType === 'category'}
+              onChange={this._changeToCategories}
+            />
+            Categories
+          </label>
+          <label className="timelineSettingsToggleLabel">
+            <input
+              type="radio"
+              name="timelineSettingsToggle"
+              className="timelineSettingsToggleInput"
+              checked={timelineType === 'stack'}
+              onChange={this._changeToStacks}
+            />
+            Stack height
+          </label>
+        </div>
+      </form>
+    );
+  }
+}
+
+class TimelineSettingsHiddenTracks extends React.PureComponent<{|
+  +hiddenTrackCount: HiddenTrackCount,
+  +changeRightClickedTrack: typeof changeRightClickedTrack,
+|}> {
   _showMenu = (event: SyntheticMouseEvent<HTMLElement>) => {
-    let x = event.clientX;
-    let y = event.clientY;
-    if (event.clientX === 0 && event.clientY === 0) {
-      // This is probably a keyboard event, position the context menu according to
-      // the element's position.
-      const rect = event.currentTarget.getBoundingClientRect();
-      x = rect.left;
-      y = rect.bottom;
-    }
+    const rect = event.currentTarget.getBoundingClientRect();
     changeRightClickedTrack(null);
     showMenu({
       data: null,
       id: 'TimelineTrackContextMenu',
-      position: { x, y },
+      position: { x: rect.left, y: rect.bottom },
       target: event.target,
     });
   };
 
+  render() {
+    const { hiddenTrackCount } = this.props;
+
+    return (
+      <button
+        type="button"
+        onClick={this._showMenu}
+        className="timelineSettingsHiddenTracks"
+      >
+        <span className="timelineSettingsHiddenTracksNumber">
+          {hiddenTrackCount.total - hiddenTrackCount.hidden}
+        </span>
+        {' / '}
+        <span className="timelineSettingsHiddenTracksNumber">
+          {hiddenTrackCount.total}{' '}
+        </span>
+        tracks visible
+      </button>
+    );
+  }
+}
+
+class Timeline extends React.PureComponent<Props> {
   render() {
     const {
       globalTracks,
@@ -107,50 +162,21 @@ class Timeline extends React.PureComponent<Props> {
       panelLayoutGeneration,
       timelineType,
       hiddenTrackCount,
+      changeTimelineType,
+      changeRightClickedTrack,
     } = this.props;
 
     return (
       <>
         <div className="timelineSettings">
-          <form>
-            <div className="timelineSettingsToggle">
-              Graph type:{' '}
-              <label className="timelineSettingsToggleLabel">
-                <input
-                  type="radio"
-                  name="timelineSettingsToggle"
-                  className="timelineSettingsToggleInput"
-                  checked={timelineType === 'category'}
-                  onChange={this._changeToCategories}
-                />
-                Categories
-              </label>
-              <label className="timelineSettingsToggleLabel">
-                <input
-                  type="radio"
-                  name="timelineSettingsToggle"
-                  className="timelineSettingsToggleInput"
-                  checked={timelineType === 'stack'}
-                  onChange={this._changeToStacks}
-                />
-                Stack height
-              </label>
-            </div>
-          </form>
-          <button
-            type="button"
-            onClick={this._showMenu}
-            className="timelineSettingsHiddenTracks"
-          >
-            <span className="timelineSettingsHiddenTracksNumber">
-              {hiddenTrackCount.total - hiddenTrackCount.hidden}
-            </span>
-            {' / '}
-            <span className="timelineSettingsHiddenTracksNumber">
-              {hiddenTrackCount.total}{' '}
-            </span>
-            tracks visible
-          </button>
+          <TimelineSettingsGraphType
+            timelineType={timelineType}
+            changeTimelineType={changeTimelineType}
+          />
+          <TimelineSettingsHiddenTracks
+            hiddenTrackCount={hiddenTrackCount}
+            changeRightClickedTrack={changeRightClickedTrack}
+          />
         </div>
         <TimelineSelection width={width}>
           <TimelineRuler

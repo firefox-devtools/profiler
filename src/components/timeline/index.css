@@ -56,6 +56,7 @@
 }
 
 .timelineSettingsHiddenTracks {
+  /* Make sure and override all rules that have to do with button defaults. */
   position: relative;
   height: 17px;
   padding: 0 7px 0 20px;
@@ -64,9 +65,19 @@
   background-color: var(--blue-60);
   border-radius: 12px;
   color: #fff;
+  font: inherit;
   line-height: 17px;
 }
 
+.timelineSettingsHiddenTracks:hover {
+  background-color: var(--blue-70);
+}
+
+.timelineSettingsHiddenTracks:active {
+  background-color: var(--blue-80);
+}
+
+/* This is the dropdown arrow on the left of the button. */
 .timelineSettingsHiddenTracks::before {
   position: absolute;
   top: 1px;
