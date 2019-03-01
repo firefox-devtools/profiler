@@ -273,7 +273,7 @@ export const withChartViewport: WithChartViewport<*, *> =
        * Let the viewport know when we are actively scrolling.
        */
       showScrollingHint() {
-        // Only show this message if we haven't ctrl zoomed yet.
+        // Only show this message if we haven't ctrl/shift zoomed yet.
         if (this.props.hasZoomedViaMousewheel) {
           return;
         }
