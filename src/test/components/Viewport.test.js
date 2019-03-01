@@ -75,7 +75,7 @@ describe('Viewport', function() {
   });
 
   describe('scrolling hint', function() {
-    it('can show a ctrl scrolling hint', function() {
+    it('can show a scrolling hint', function() {
       jest.useFakeTimers();
       const { getByText, scroll } = setup();
       const isTimerVisible = () =>
@@ -103,6 +103,23 @@ describe('Viewport', function() {
 
       // Zoom in a bit.
       scroll({ deltaY: 10, ctrlKey: true });
+      expect(isTimerVisible()).toBe(false);
+
+      // Now scroll, no hint should show.
+      scroll({ deltaY: 10 });
+      expect(isTimerVisible()).toBe(false);
+    });
+
+    it('will not show a shift scrolling hint after zooming once', function() {
+      const { getByText, scroll } = setup();
+      const isTimerVisible = () =>
+        !getByText(/Zoom Chart/).classList.contains('hidden');
+
+      // No hint is shown at the beginning.
+      expect(isTimerVisible()).toBe(false);
+
+      // Zoom in a bit.
+      scroll({ deltaY: 10, shiftKey: true });
       expect(isTimerVisible()).toBe(false);
 
       // Now scroll, no hint should show.
@@ -150,7 +167,7 @@ describe('Viewport', function() {
     });
   });
 
-  describe('mousewheel zooming using ctrl + mousewheel', function() {
+  describe('mousewheel zooming using ctrl/shift + mousewheel', function() {
     // These series of tests are very particular to margin differences, so check
     // different margin combinations separately.
     const marginTests = [
@@ -173,7 +190,7 @@ describe('Viewport', function() {
         // |-----------*------------|
         //             ^
         //             Mouse position
-        it('zooms the preview selection equally when the mouse is centered', () => {
+        it('ctrl zooms the preview selection equally when the mouse is centered', () => {
           const { scrollAndGetViewport } = setup({
             marginLeft,
             marginRight,
@@ -199,11 +216,37 @@ describe('Viewport', function() {
           });
         });
 
+        it('shift zooms the preview selection equally when the mouse is centered', () => {
+          const { scrollAndGetViewport } = setup({
+            marginLeft,
+            marginRight,
+          });
+
+          // Note that clientX will get rounded, so it won't be _exactly_ at the
+          // center, which is why we do some approximations later.
+          const viewport = scrollAndGetViewport({
+            deltaY: -100,
+            shiftKey: true,
+            clientX: BOUNDING_BOX_LEFT + innerComponentWidth * 0.5 + marginLeft,
+          });
+
+          // Assert that this zooms in equally.
+          expect(viewport.viewportLeft).toBeGreaterThan(0);
+          expect(viewport.viewportRight).toBeLessThan(1);
+          expect(viewport.viewportLeft + viewport.viewportRight).toBeCloseTo(1);
+
+          // Only do an additional viewport top/bottom check here.
+          expect(viewport).toMatchObject({
+            viewportTop: 0,
+            viewportBottom: BOUNDING_BOX_HEIGHT,
+          });
+        });
+
         // |        Viewport        |
         // |------------------*-----|
         //                    ^
         //                    Mouse position
-        it('zooms the preview selection in a direction when the mouse is to the right', () => {
+        it('ctrl zooms the preview selection in a direction when the mouse is to the right', () => {
           const { scrollAndGetViewport } = setup({
             marginLeft,
             marginRight,
@@ -223,11 +266,31 @@ describe('Viewport', function() {
           expect(changeInLeft).toBeGreaterThan(changeInRight);
         });
 
+        it('shift zooms the preview selection in a direction when the mouse is to the right', () => {
+          const { scrollAndGetViewport } = setup({
+            marginLeft,
+            marginRight,
+          });
+          const viewport = scrollAndGetViewport({
+            deltaY: -10,
+            shiftKey: true,
+            clientX:
+              BOUNDING_BOX_LEFT + innerComponentWidth * 0.75 + marginLeft,
+          });
+
+          // Assert that the left hand side zooms in more.
+          const changeInLeft = viewport.viewportLeft;
+          const changeInRight = 1 - viewport.viewportRight;
+          expect(viewport.viewportLeft).toBeGreaterThan(0);
+          expect(viewport.viewportRight).toBeLessThan(1);
+          expect(changeInLeft).toBeGreaterThan(changeInRight);
+        });
+
         // |        Viewport        |
         // |----*-------------------|
         //      ^
         //      Mouse position
-        it('zooms the preview selection in a direction when the mouse is to the left', () => {
+        it('ctrl zooms the preview selection in a direction when the mouse is to the left', () => {
           const { scrollAndGetViewport } = setup({
             marginLeft,
             marginRight,
@@ -247,11 +310,31 @@ describe('Viewport', function() {
           expect(changeInLeft).toBeLessThan(changeInRight);
         });
 
+        it('shift zooms the preview selection in a direction when the mouse is to the left', () => {
+          const { scrollAndGetViewport } = setup({
+            marginLeft,
+            marginRight,
+          });
+          const viewport = scrollAndGetViewport({
+            deltaY: -10,
+            shiftKey: true,
+            clientX:
+              BOUNDING_BOX_LEFT + innerComponentWidth * 0.25 + marginLeft,
+          });
+
+          // Assert that the left hand side zooms in more.
+          const changeInLeft = viewport.viewportLeft;
+          const changeInRight = 1 - viewport.viewportRight;
+          expect(viewport.viewportLeft).toBeGreaterThan(0);
+          expect(viewport.viewportRight).toBeLessThan(1);
+          expect(changeInLeft).toBeLessThan(changeInRight);
+        });
+
         // |        Viewport        |
         // |*-----------------------|
         //  ^
         //  Mouse position
-        it('does not scroll the viewport left when the mouse is centered on the left.', () => {
+        it('does not scroll the viewport left when the mouse is centered on the left with ctrl key pressed.', () => {
           const { scrollAndGetViewport } = setup({
             marginLeft,
             marginRight,
@@ -265,11 +348,25 @@ describe('Viewport', function() {
           expect(viewport.viewportRight).toBeLessThan(1);
         });
 
+        it('does not scroll the viewport left when the mouse is centered on the left with shift key pressed.', () => {
+          const { scrollAndGetViewport } = setup({
+            marginLeft,
+            marginRight,
+          });
+          const viewport = scrollAndGetViewport({
+            deltaY: -10,
+            shiftKey: true,
+            clientX: BOUNDING_BOX_LEFT + marginLeft,
+          });
+          expect(viewport.viewportLeft).toBe(0);
+          expect(viewport.viewportRight).toBeLessThan(1);
+        });
+
         // |        Viewport        |
         // |-----------------------*|
         //                         ^
         //                         Mouse position
-        it('does not scroll the viewport right when the mouse is centered on the right.', () => {
+        it('does not scroll the viewport right when the mouse is centered on the right with ctrl key pressed.', () => {
           const { scrollAndGetViewport } = setup({
             marginLeft,
             marginRight,
@@ -283,7 +380,21 @@ describe('Viewport', function() {
           expect(viewport.viewportRight).toBe(1);
         });
 
-        it('cannot zoom out beyond the bounds', () => {
+        it('does not scroll the viewport right when the mouse is centered on the right with shift key pressed.', () => {
+          const { scrollAndGetViewport } = setup({
+            marginLeft,
+            marginRight,
+          });
+          const viewport = scrollAndGetViewport({
+            deltaY: -10,
+            shiftKey: true,
+            clientX: BOUNDING_BOX_LEFT + innerComponentWidth + marginLeft,
+          });
+          expect(viewport.viewportLeft).toBeGreaterThan(0);
+          expect(viewport.viewportRight).toBe(1);
+        });
+
+        it('cannot zoom out beyond the bounds with ctrl key pressed', () => {
           const { scrollAndGetViewport } = setup({
             marginLeft,
             marginRight,
@@ -291,6 +402,22 @@ describe('Viewport', function() {
           const viewport = scrollAndGetViewport({
             deltaY: 100,
             ctrlKey: true,
+            clientX: BOUNDING_BOX_LEFT + innerComponentWidth * 0.5 + marginLeft,
+          });
+          expect(viewport).toMatchObject({
+            viewportLeft: 0,
+            viewportRight: 1,
+          });
+        });
+
+        it('cannot zoom out beyond the bounds with shift key pressed', () => {
+          const { scrollAndGetViewport } = setup({
+            marginLeft,
+            marginRight,
+          });
+          const viewport = scrollAndGetViewport({
+            deltaY: 100,
+            shiftKey: true,
             clientX: BOUNDING_BOX_LEFT + innerComponentWidth * 0.5 + marginLeft,
           });
           expect(viewport).toMatchObject({
@@ -444,7 +571,7 @@ describe('Viewport', function() {
       expect(getChartViewport().viewportRight).toBeGreaterThan(viewportRight);
     });
 
-    it('will not scroll off to the left of the viewport bounds', function() {
+    it('will not scroll off to the left of the viewport bounds with ctrl key pressed', function() {
       const { scroll, getChartViewport, clickAndDrag } = setup();
       scroll({
         // Zoom in some large arbitrary amount:
@@ -459,13 +586,44 @@ describe('Viewport', function() {
       expect(getChartViewport().viewportRight).toBeLessThan(0.4);
     });
 
-    it('will not scroll off to the right of the viewport bounds', function() {
+    it('will not scroll off to the left of the viewport bounds with shift key pressed', function() {
+      const { scroll, getChartViewport, clickAndDrag } = setup();
+      scroll({
+        // Zoom in some large arbitrary amount:
+        deltaY: -5000,
+        shiftKey: true,
+        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
+      });
+
+      // Perform the dragging action some arbitrarily large distance..
+      clickAndDrag(middleX, middleY, middleX + 10000, middleY);
+      expect(getChartViewport().viewportLeft).toBe(0);
+      expect(getChartViewport().viewportRight).toBeLessThan(0.4);
+    });
+
+    it('will not scroll off to the right of the viewport bounds with ctrl key pressed', function() {
       const { scroll, getChartViewport, clickAndDrag } = setup();
 
       scroll({
         // Zoom in some large arbitrary amount:
         deltaY: -5000,
         ctrlKey: true,
+        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
+      });
+
+      // Perform the dragging action some arbitrarily large distance.
+      clickAndDrag(middleX, middleY, middleX - 10000, middleY);
+      expect(getChartViewport().viewportLeft).toBeGreaterThan(0.6);
+      expect(getChartViewport().viewportRight).toBe(1);
+    });
+
+    it('will not scroll off to the right of the viewport bounds with shift key pressed', function() {
+      const { scroll, getChartViewport, clickAndDrag } = setup();
+
+      scroll({
+        // Zoom in some large arbitrary amount:
+        deltaY: -5000,
+        shiftKey: true,
         clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
       });
 

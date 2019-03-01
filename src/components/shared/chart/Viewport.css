@@ -36,7 +36,7 @@
   cursor: grabbing;
 }
 
-.chartViewportCtrlScroll {
+.chartViewportScroll {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -54,12 +54,12 @@
   will-change: opacity, transform;
 }
 
-.chartViewportCtrlScroll.hidden {
+.chartViewportScroll.hidden {
   opacity: 0;
   transform: translateY(30px);
 }
 
-.chartViewportCtrlScrollKbd {
+.chartViewportScrollKbd {
   position: relative;
   top: -1px;
   display: inline-block;

@@ -9,16 +9,16 @@ exports[`Viewport matches the component snapshot 1`] = `
     id="dummy-chart"
   />
   <div
-    class="chartViewportCtrlScroll hidden"
+    class="chartViewportScroll hidden"
   >
     Zoom Chart:
     <kbd
-      class="chartViewportCtrlScrollKbd"
+      class="chartViewportScrollKbd"
     >
-      Ctrl
+      Ctrl/Shift
     </kbd>
     <kbd
-      class="chartViewportCtrlScrollKbd"
+      class="chartViewportScrollKbd"
     >
       Scroll
     </kbd>
