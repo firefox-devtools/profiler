@@ -23,7 +23,7 @@ import {
   getGlobalTracks,
   getLocalTracks,
   getGlobalTrackName,
-  getHasMemoryTracks,
+  getProcessesWithMemoryTrack,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import './Track.css';
@@ -60,7 +60,7 @@ type StateProps = {|
   +localTracks: LocalTrack[],
   +pid: Pid | null,
   +selectedTab: TabSlug,
-  +hasMemoryTracks: boolean,
+  +processesWithMemoryTrack: Set<Pid>,
 |};
 
 type DispatchProps = {|
@@ -92,7 +92,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
   };
 
   renderTrack() {
-    const { globalTrack, hasMemoryTracks } = this.props;
+    const { globalTrack, processesWithMemoryTrack } = this.props;
     switch (globalTrack.type) {
       case 'process': {
         const { mainThreadIndex } = globalTrack;
@@ -102,7 +102,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
         return (
           <TimelineTrackThread
             threadIndex={mainThreadIndex}
-            showMemoryMarkers={!hasMemoryTracks}
+            showMemoryMarkers={!processesWithMemoryTrack.has(globalTrack.pid)}
           />
         );
       }
@@ -249,7 +249,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       pid,
       isHidden: getHiddenGlobalTracks(state).has(trackIndex),
       selectedTab,
-      hasMemoryTracks: getHasMemoryTracks(state),
+      processesWithMemoryTrack: getProcessesWithMemoryTrack(state),
     };
   },
   mapDispatchToProps: {

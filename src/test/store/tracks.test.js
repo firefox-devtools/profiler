@@ -623,14 +623,23 @@ describe('ordering and hiding', function() {
   });
 });
 
-describe('ProfileViewSelectors.getHasMemoryTrack', function() {
+describe('ProfileViewSelectors.getProcessesWithMemoryTrack', function() {
   it('knows when a profile does not have a memory track', function() {
-    const { getState } = storeWithProfile(getProfileWithNiceTracks());
-    expect(ProfileViewSelectors.getHasMemoryTracks(getState())).toEqual(false);
+    const profile = getProfileWithNiceTracks();
+    const [thread] = profile.threads;
+    const { getState } = storeWithProfile(profile);
+    const processesWithMemoryTrack = ProfileViewSelectors.getProcessesWithMemoryTrack(
+      getState()
+    );
+    expect(processesWithMemoryTrack.has(thread.pid)).toEqual(false);
   });
 
   it('knows when a profile has a memory track', function() {
-    const { getState } = getStoreWithMemoryTrack();
-    expect(ProfileViewSelectors.getHasMemoryTracks(getState())).toEqual(true);
+    const { getState, profile } = getStoreWithMemoryTrack();
+    const [thread] = profile.threads;
+    const processesWithMemoryTrack = ProfileViewSelectors.getProcessesWithMemoryTrack(
+      getState()
+    );
+    expect(processesWithMemoryTrack.has(thread.pid)).toEqual(true);
   });
 });

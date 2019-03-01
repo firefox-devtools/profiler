@@ -249,15 +249,16 @@ export const getLocalTrackFromReference: DangerousSelectorWithArguments<
  * Memory markers are collected in the memory track, but in the case of profiles
  * with no memory tracks, go ahead and place them in the parent process.
  */
-export const getHasMemoryTracks: Selector<boolean> = createSelector(
+export const getProcessesWithMemoryTrack: Selector<Set<Pid>> = createSelector(
   getLocalTracksByPid,
   localTracksByPid => {
-    for (const [, localTracks] of localTracksByPid.entries()) {
+    const processesWithMemoryTrack = new Set();
+    for (const [pid, localTracks] of localTracksByPid.entries()) {
       if (localTracks.some(track => track.type === 'memory')) {
-        return true;
+        processesWithMemoryTrack.add(pid);
       }
     }
-    return false;
+    return processesWithMemoryTrack;
   }
 );
 
