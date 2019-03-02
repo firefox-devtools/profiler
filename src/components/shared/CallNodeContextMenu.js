@@ -70,6 +70,11 @@ type State = {|
 require('./CallNodeContextMenu.css');
 
 class CallNodeContextMenu extends PureComponent<Props, State> {
+  _contextMenu: { menu: HTMLElement } | null = null;
+  _takeContextMenuRef = (contextMenu: ContextMenu | null) => {
+    this._contextMenu = contextMenu;
+  };
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -355,6 +360,19 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     }
   }
 
+  _mouseDownHandler(event: MouseEvent): void {
+    event.preventDefault();
+  }
+
+  componentDidUpdate() {
+    if (this.state.isShown && this._contextMenu && this._contextMenu.menu) {
+      this._contextMenu.menu.addEventListener(
+        'mousedown',
+        this._mouseDownHandler
+      );
+    }
+  }
+
   renderContextMenuContents() {
     const {
       selectedCallNodeIndex,
@@ -472,6 +490,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     return (
       <ContextMenu
         id="CallNodeContextMenu"
+        ref={this._takeContextMenuRef}
         onShow={this._showMenu}
         onHide={this._hideMenu}
       >
