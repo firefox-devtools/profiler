@@ -45,6 +45,13 @@ require('./FlameGraph.css');
 
 const STACK_FRAME_HEIGHT = 16;
 
+/**
+ * How "wide" a call node box needs to be for it to be able to be
+ * selected with keyboard navigation. This is relative to 1, where 1
+ * means the box spans the whole viewport.
+ */
+const SELECTABLE_THRESHOLD = 0.001;
+
 type StateProps = {|
   +thread: Thread,
   +maxStackDepth: number,
@@ -90,10 +97,49 @@ class FlameGraph extends React.PureComponent<Props> {
     }
   };
 
+  /**
+   * Is the box for this call node wide enough to be selected?
+   */
+  _wideEnough = callNodeIndex => {
+    const { flameGraphTiming, callNodeInfo: { callNodeTable } } = this.props;
+
+    const depth = callNodeTable.depth[callNodeIndex];
+    const row = flameGraphTiming[depth];
+    const rowIndex = row.callNode.indexOf(callNodeIndex);
+    return row.end[rowIndex] - row.start[rowIndex] > SELECTABLE_THRESHOLD;
+  };
+
+  /**
+   * Return next keyboard selectable callNodeIndex along one
+   * horizontal direction.
+   *
+   * `direction` should be either -1 (left) or 1 (right).
+   *
+   * Returns undefined if no selectable callNodeIndex can be found.
+   * This means we're already at the end, or the boxes of all
+   * candidate call nodes are too narrow to be selected.
+   */
+  _nextSelectableInRow = (startingCallNodeIndex, direction) => {
+    const { flameGraphTiming, callNodeInfo: { callNodeTable } } = this.props;
+
+    let callNodeIndex = startingCallNodeIndex;
+    while (callNodeIndex !== undefined) {
+      const depth = callNodeTable.depth[callNodeIndex];
+      const row = flameGraphTiming[depth];
+      const rowIndex = row.callNode.indexOf(callNodeIndex) + direction;
+      callNodeIndex = row.callNode[rowIndex];
+      if (row.end[rowIndex] - row.start[rowIndex] > SELECTABLE_THRESHOLD) {
+        // The box for this callNodeIndex is wide enough. We've found
+        // a candidate.
+        break;
+      }
+    }
+    return callNodeIndex;
+  };
+
   _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
     const {
       threadIndex,
-      flameGraphTiming,
       callTree,
       callNodeInfo: { callNodeTable },
       selectedCallNodeIndex,
@@ -101,6 +147,15 @@ class FlameGraph extends React.PureComponent<Props> {
     } = this.props;
 
     if (selectedCallNodeIndex === null) {
+      if (
+        ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)
+      ) {
+        // Just select the "root" node if we've got no prior selection.
+        changeSelectedCallNode(
+          threadIndex,
+          getCallNodePathFromIndex(0, callNodeTable)
+        );
+      }
       return;
     }
 
@@ -116,7 +171,12 @@ class FlameGraph extends React.PureComponent<Props> {
         break;
       }
       case 'ArrowUp': {
-        const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
+        const children = callTree.getChildren(selectedCallNodeIndex);
+        // The order of the children returned from getChildren does
+        // not correspond to the paint order in the flame graph, so
+        // the one chosen for selection might look rather arbitrary.
+        const callNodeIndex = children.find(this._wideEnough);
+
         if (callNodeIndex !== undefined) {
           changeSelectedCallNode(
             threadIndex,
@@ -127,11 +187,11 @@ class FlameGraph extends React.PureComponent<Props> {
       }
       case 'ArrowLeft':
       case 'ArrowRight': {
-        const direction = event.key === 'ArrowLeft' ? -1 : 1;
-        const depth = callNodeTable.depth[selectedCallNodeIndex];
-        const row = flameGraphTiming[depth];
-        const rowIndex = row.callNode.indexOf(selectedCallNodeIndex);
-        const callNodeIndex = row.callNode[rowIndex + direction];
+        const callNodeIndex = this._nextSelectableInRow(
+          selectedCallNodeIndex,
+          event.key === 'ArrowLeft' ? -1 : 1
+        );
+
         if (callNodeIndex !== undefined) {
           changeSelectedCallNode(
             threadIndex,
