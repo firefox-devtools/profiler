@@ -104,7 +104,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     const isJS = funcTable.isJS[funcIndex];
     const stringIndex = funcTable.name[funcIndex];
     const functionCall = stringTable.getString(stringIndex);
-    const name = isJS ? functionCall : getFunctionName(functionCall);
+    const name = isJS ? functionCall : getFunctionName(thread,funcIndex);
     return name;
   }
 

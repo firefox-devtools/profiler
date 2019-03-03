@@ -60,6 +60,15 @@ export function removeTemplateInformation(functionName: string) {
   return result;
 }
 
-export function getFunctionName(functionCall: string) {
-  return removeTemplateInformation(stripFunctionArguments(functionCall));
+export function getFunctionName(thread , funcIndex) {
+  const { stringTable, funcTable, resourceTable } = thread;
+  const fullFuncName = stringTable.getString(funcTable.name[funcIndex]);
+  const isJS = funcTable.isJS[funcIndex];
+  const resourceIndex = funcTable.resource[funcIndex];
+  const libIndex = resourceTable.lib[resourceIndex];
+  const hasLib = libIndex !== -1 && libIndex !== undefined && libIndex !== null;
+  if (isJS || !hasLib) {
+    return fullFuncName;
+  }
+  return removeTemplateInformation(stripFunctionArguments(fullFuncName));
 }
