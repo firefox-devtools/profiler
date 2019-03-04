@@ -26,6 +26,19 @@ const defaultStyle = {
   borderRight: null,
 };
 
+const gcStyle = {
+  ...defaultStyle,
+  top: 6,
+  // This color is a yellower ORANGE_50 to help distinguish GC as coming from scripts.
+  // It keeps it within a similar hue as the rest of the memory markers.
+  background: '#ffc600',
+};
+
+const ccStyle = {
+  ...gcStyle,
+  background: colors.ORANGE_50,
+};
+
 export const markerStyles: MarkerStyles = {
   default: defaultStyle,
   RefreshDriverTick: {
@@ -121,30 +134,20 @@ export const markerStyles: MarkerStyles = {
     borderRight: colors.RED_50,
     squareCorners: true,
   },
-  GCSlice: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
+  // Memory:
+  GCMajor: {
+    ...gcStyle,
+    squareCorners: true,
+    top: 0,
   },
-  GCMinor: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
-  },
-  ForgetSkippable: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
-  },
-  IdleForgetSkippable: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
-  },
-  CCSlice: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
-  },
-  IdleCCSlice: {
-    ...defaultStyle,
-    background: colors.ORANGE_50,
-  },
+  GCSlice: gcStyle,
+  GCMinor: gcStyle,
+  CCSlice: gcStyle,
+  IdleCCSlice: ccStyle,
+  IdleForgetSkippable: ccStyle,
+  ForgetSkippable: ccStyle,
+
+  // IO:
   FileIO: {
     ...defaultStyle,
     background: colors.BLUE_50,

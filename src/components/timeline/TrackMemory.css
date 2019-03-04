@@ -2,9 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.timelineTrackMemory {
+.timelineTrackMemoryGraph {
   position: relative;
   width: 100%;
+  height: var(--graph-height);
 }
 
 .timelineTrackMemoryCanvas {
@@ -13,7 +14,7 @@
   height: 100%;
 }
 
-.timelineTrackMemoryDot {
+.timelineTrackMemoryGraphDot {
   position: absolute;
   width: 6px;
   height: 6px;
@@ -33,4 +34,9 @@
   min-width: 60px;
   color: var(--grey-60);
   font-weight: bold;
+}
+
+.timelineMarkersMemory {
+  height: var(--markers-height, 15px);
+  opacity: 1;
 }

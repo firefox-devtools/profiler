@@ -646,6 +646,19 @@ export function isFileIoMarker(marker: Marker): boolean {
   return !!(marker.data && marker.data.type === 'FileIO');
 }
 
+export function isMemoryMarker(marker: Marker): boolean {
+  const { data } = marker;
+  if (!data) {
+    return false;
+  }
+  return (
+    data.type === 'GCMajor' ||
+    data.type === 'GCMinor' ||
+    data.type === 'GCSlice' ||
+    (data.type === 'tracing' && data.category === 'CC')
+  );
+}
+
 export function filterForNetworkChart(markers: Marker[]) {
   return markers.filter(marker => isNetworkMarker(marker));
 }
