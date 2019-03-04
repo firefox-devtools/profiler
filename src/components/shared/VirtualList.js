@@ -172,13 +172,11 @@ type VirtualListProps = {|
   +disableOverscan: boolean,
   +columnCount: number,
   +containerWidth: CssPixels,
-  // by using these props we are effectively telling screen readers that
-  // the browser (and our code) will take care of all accessibilty issues (like focus, navigation)
-  // aria-label is used when there's no visible label/name for the component
+  // The next 3 props will be applied to the underlying DOM element.
+  // They're important for accessibility (especially focus and navigation).
   +ariaLabel?: string,
-  // the container gets the role of "tree" and it's children are "tree items"
-  +role?: string,
-  // aria-activedescendant manages the children's "virtual" focus
+  +ariaRole?: string,
+  // Aria-activedescendant specifies the children's "virtual" focus.
   +ariaActiveDescendant?: null | string,
 |};
 
@@ -316,7 +314,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
       specialItems,
       onKeyDown,
       containerWidth,
-      role,
+      ariaRole,
       ariaLabel,
       ariaActiveDescendant,
     } = this.props;
@@ -328,7 +326,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
         ref={this._takeContainerRef}
         tabIndex={focusable ? 0 : -1}
         onKeyDown={onKeyDown}
-        role={role}
+        role={ariaRole}
         aria-label={ariaLabel}
         aria-activedescendant={ariaActiveDescendant}
       >

@@ -157,7 +157,6 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -180,7 +179,6 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"

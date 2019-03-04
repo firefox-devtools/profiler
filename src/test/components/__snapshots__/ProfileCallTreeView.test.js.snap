@@ -1180,7 +1180,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1211,7 +1210,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1242,7 +1240,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1273,7 +1270,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1304,7 +1300,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1335,7 +1330,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1366,7 +1360,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1397,7 +1390,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1428,7 +1420,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-8"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1459,7 +1450,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-9"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1490,7 +1480,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-10"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1521,7 +1510,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-11"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1552,7 +1540,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-12"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1583,7 +1570,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-13"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1614,7 +1600,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-14"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1645,7 +1630,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-15"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1680,7 +1664,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-16"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1711,7 +1694,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-17"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -1742,7 +1724,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 id="treeViewRow-18"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2178,7 +2159,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2209,7 +2189,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2240,7 +2219,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2271,7 +2249,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 id="treeViewRow-8"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2301,7 +2278,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 id="treeViewRow-9"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2332,7 +2308,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 id="treeViewRow-10"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2363,7 +2338,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2799,7 +2773,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2830,7 +2803,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2861,7 +2833,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2892,7 +2863,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2922,7 +2892,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2953,7 +2922,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -2984,7 +2952,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3420,7 +3387,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3451,7 +3417,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3482,7 +3447,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3513,7 +3477,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3543,7 +3506,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3574,7 +3536,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -3605,7 +3566,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4010,7 +3970,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4043,7 +4002,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4076,7 +4034,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4115,7 +4072,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4147,7 +4103,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4180,7 +4135,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4587,7 +4541,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4620,7 +4573,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4653,7 +4605,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4692,7 +4643,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4724,7 +4674,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -4757,7 +4706,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5102,7 +5050,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5135,7 +5082,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5168,7 +5114,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5207,7 +5152,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5558,7 +5502,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5591,7 +5534,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5624,7 +5566,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -5663,7 +5604,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -6076,7 +6016,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -6109,7 +6048,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -6142,7 +6080,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -6181,7 +6118,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -6213,7 +6149,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -6252,7 +6187,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
-                tabindex="-1"
               >
                 <span
                   class="treeRowIndentSpacer"

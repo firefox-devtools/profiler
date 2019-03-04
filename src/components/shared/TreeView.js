@@ -227,16 +227,16 @@ class TreeViewRowScrolledColumns<
     let ariaExpanded = null;
 
     // if a node can be expanded (has children), and is not expanded yet,
-    // aria-expanded is false
+    // aria-expanded is false.
     if (canBeExpanded) {
       ariaExpanded = false;
     }
 
-    // if a node is expanded, ariaExpanded is true
+    // If a node is expanded, ariaExpanded is true.
     if (isExpanded) {
       ariaExpanded = true;
     }
-    // cleaning up self time display so we can use it in aria-label below
+    // Cleaning up self time display so we can use it in aria-label below.
     let selfTimeDisplay = displayData.selfTimeWithUnit;
     if (selfTimeDisplay === '—') {
       selfTimeDisplay = '0ms';
@@ -253,18 +253,15 @@ class TreeViewRowScrolledColumns<
         } ${displayData.dim ? 'dim' : ''}`}
         style={rowHeightStyle}
         onMouseDown={this._onMouseDown}
-        // making the call tree more accessible by adding aria attributes
+        // The following attributes are important for accessibility.
         aria-expanded={ariaExpanded}
         aria-level={depth + 1}
         aria-selected={selected}
         aria-label={ariaLabel}
-        role="treeitem"
-        // When tabIndex is set to -1, the element becomes focusable by script,
-        // but it does not become part of the tab key keyboard sequence.
-        // Here we are managing the "virtual" focus with aria-activedescendant
-        // that is set on the container (call tree).
+        // The role and id attributes are used along with aria-activedescendant
+        // (set on the parent), to manage the virtual focus of the tree items.
         // The "virtual" focus changes with the arrow keys.
-        tabIndex={-1}
+        role="treeitem"
         id={`treeViewRow-${nodeId}`}
       >
         <span
@@ -679,10 +676,10 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
         >
           <VirtualList
             className="treeViewBody"
-            role="tree"
+            ariaRole="tree"
             ariaLabel="Call tree"
-            // this attribute exposes the current active child element,
-            // while keeping focus on the parent (call tree)
+            // This attribute exposes the current active child element,
+            // while keeping focus on the parent (call tree).
             ariaActiveDescendant={
               selectedNodeId ? `treeViewRow-${selectedNodeId}` : null
             }
