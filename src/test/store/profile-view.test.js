@@ -590,7 +590,7 @@ describe('actions/ProfileView', function() {
 
       expect(
         selectedThreadSelectors.getViewOptions(getState()).selectedMarker
-      ).toEqual(-1);
+      ).toEqual(null);
       dispatch(ProfileView.changeSelectedMarker(0, 0));
       expect(
         selectedThreadSelectors.getViewOptions(getState()).selectedMarker
