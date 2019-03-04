@@ -70,7 +70,6 @@ exports[`MarkerTable renders some basic markers 1`] = `
       class="react-contextmenu-wrapper treeViewContextMenu"
     >
       <div
-        aria-activedescendant="treeViewRow--1"
         aria-label="Call tree"
         class="treeViewBody"
         role="tree"
