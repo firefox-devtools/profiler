@@ -8,14 +8,14 @@ All actions in the Firefox Profiler are fully typed using [Flow](https://flow.or
 
 # Preferred practices for actions
 
-Actions in the profiler are kept relatively simple. There are two types of action creators in this project–action creators that return an `Action` or an action creator that returns a `ThunkAction` (see [Redux Thunk](https://github.com/gaearon/redux-thunk) for additional reading.) If an action creator needs access to different parts of the state, then it may be tempting to use the `getState` parameter from a `ThunkAction`. However, at this time we prefer not to directly access the state in a `ThunkAction`. Instead, the connected component should look up the value using a selector, then pass it into the action creator as a parameter.
+Actions in the profiler are kept relatively simple. There are two types of action creators in this project–action creators that return an `Action` or an action creator that returns a `ThunkAction` (see [Redux Thunk](https://github.com/gaearon/redux-thunk) for additional reading.) If an action creator needs access to different parts of the state, then you may use the `getState` parameter from a `ThunkAction`. An alternative to directly accessing the state in a `ThunkAction`, you can look up the value using a selector within the connected component, then pass it into the action creator as a parameter.
 
-### Don't access getState in ThunkAction creators
+### Accessing getState in ThunkAction creators
 
 ```js
 export function doThunkAction() {
   return (dispatch, getState) => {
-    // Don't do this!
+    // This is allowed
     const requiredData = getState().requiredData;
 
     myAction(requiredData).then(() => {
@@ -25,7 +25,7 @@ export function doThunkAction() {
 }
 ```
 
-### Instead pass in required data as an argument for ThunkAction creators
+### Alternatively you can pass in required data as an argument for ThunkAction creators
 
 ```js
 export function doThunkAction(requiredData) {
