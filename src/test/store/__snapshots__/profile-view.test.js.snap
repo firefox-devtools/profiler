@@ -494,6 +494,8 @@ Object {
           "F",
           "Load 6: https://mozilla.org",
           "Load 7: https://mozilla.org",
+          "Bailout",
+          "Invalidate",
         ],
         "_stringToIndex": Map {
           "A" => 0,
@@ -504,6 +506,8 @@ Object {
           "F" => 5,
           "Load 6: https://mozilla.org" => 6,
           "Load 7: https://mozilla.org" => 7,
+          "Bailout" => 8,
+          "Invalidate" => 9,
         },
       },
       "tid": 0,
@@ -946,6 +950,8 @@ Array [
         "F",
         "Load 6: https://mozilla.org",
         "Load 7: https://mozilla.org",
+        "Bailout",
+        "Invalidate",
       ],
       "_stringToIndex": Map {
         "A" => 0,
@@ -956,6 +962,8 @@ Array [
         "F" => 5,
         "Load 6: https://mozilla.org" => 6,
         "Load 7: https://mozilla.org" => 7,
+        "Bailout" => 8,
+        "Invalidate" => 9,
       },
     },
     "tid": 0,
@@ -964,7 +972,7 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkers 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexes 1`] = `
 Array [
   Object {
     "data": null,
@@ -1006,7 +1014,7 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkersForHeader 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexesForHeader 1`] = `
 Array [
   Object {
     "data": null,
@@ -1032,6 +1040,85 @@ Array [
 ]
 `;
 
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getFullMarkerListIndexes 1`] = `
+Array [
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "A",
+    "start": 0,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "B",
+    "start": 1,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "C",
+    "start": 2,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "D",
+    "start": 3,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "E",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "data": null,
+    "dur": 0,
+    "name": "F",
+    "start": 5,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "URI": "https://mozilla.org",
+      "endTime": 7,
+      "fetchStart": 6.5,
+      "id": 6,
+      "pri": 0,
+      "startTime": 6,
+      "status": "STATUS_STOP",
+      "type": "Network",
+    },
+    "dur": 1,
+    "name": "Load 6: https://mozilla.org",
+    "start": 6,
+    "title": null,
+  },
+  Object {
+    "data": Object {
+      "URI": "https://mozilla.org",
+      "endTime": 8,
+      "fetchStart": 7.5,
+      "id": 7,
+      "pri": 0,
+      "startTime": 7,
+      "status": "STATUS_STOP",
+      "type": "Network",
+    },
+    "dur": 1,
+    "name": "Load 7: https://mozilla.org",
+    "start": 7,
+    "title": null,
+  },
+]
+`;
+
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getMarkerChartTiming 1`] = `
 Array [
   Object {
@@ -1039,7 +1126,7 @@ Array [
       3,
     ],
     "index": Array [
-      0,
+      3,
     ],
     "label": Array [
       "",
@@ -1055,7 +1142,7 @@ Array [
       4,
     ],
     "index": Array [
-      1,
+      4,
     ],
     "label": Array [
       "",
@@ -1071,7 +1158,7 @@ Array [
       5,
     ],
     "index": Array [
-      2,
+      5,
     ],
     "label": Array [
       "",
@@ -1159,86 +1246,7 @@ Object {
 }
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getFullMarkerList 1`] = `
-Array [
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "A",
-    "start": 0,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "B",
-    "start": 1,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "C",
-    "start": 2,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "D",
-    "start": 3,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "E",
-    "start": 4,
-    "title": null,
-  },
-  Object {
-    "data": null,
-    "dur": 0,
-    "name": "F",
-    "start": 5,
-    "title": null,
-  },
-  Object {
-    "data": Object {
-      "URI": "https://mozilla.org",
-      "endTime": 7,
-      "fetchStart": 6.5,
-      "id": 6,
-      "pri": 0,
-      "startTime": 6,
-      "status": "STATUS_STOP",
-      "type": "Network",
-    },
-    "dur": 1,
-    "name": "Load 6: https://mozilla.org",
-    "start": 6,
-    "title": null,
-  },
-  Object {
-    "data": Object {
-      "URI": "https://mozilla.org",
-      "endTime": 8,
-      "fetchStart": 7.5,
-      "id": 7,
-      "pri": 0,
-      "startTime": 7,
-      "status": "STATUS_STOP",
-      "type": "Network",
-    },
-    "dur": 1,
-    "name": "Load 7: https://mozilla.org",
-    "start": 7,
-    "title": null,
-  },
-]
-`;
-
-exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getSearchFilteredMarkers 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getSearchFilteredMarkerIndexes 1`] = `
 Array [
   Object {
     "data": null,

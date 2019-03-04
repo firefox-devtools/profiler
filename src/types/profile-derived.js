@@ -80,7 +80,7 @@ export type Marker = {|
   incomplete?: boolean,
 |};
 
-export type IndexIntoMarkers = number;
+export type MarkerIndex = number;
 
 export type CallNodeData = {
   funcName: string,
@@ -106,14 +106,12 @@ export type CallNodeDisplayData = $Exact<
   }>
 >;
 
-export type IndexIntoMarkerTiming = number;
-
 export type MarkerTiming = {
   // Start time in milliseconds.
   start: number[],
   // End time in milliseconds.
   end: number[],
-  index: IndexIntoMarkers[],
+  index: MarkerIndex[],
   label: string[],
   name: string,
   length: number,

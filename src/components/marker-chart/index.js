@@ -22,7 +22,11 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
-import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
+import type {
+  Marker,
+  MarkerIndex,
+  MarkerTimingRows,
+} from '../../types/profile-derived';
 import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
@@ -39,7 +43,7 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
-  +markers: Marker[],
+  +getMarker: MarkerIndex => Marker,
   +markerTimingRows: MarkerTimingRows,
   +maxMarkerRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
@@ -83,7 +87,7 @@ class MarkerChart extends React.PureComponent<Props> {
       timeRange,
       threadIndex,
       markerTimingRows,
-      markers,
+      getMarker,
       previewSelection,
       updatePreviewSelection,
     } = this.props;
@@ -100,7 +104,7 @@ class MarkerChart extends React.PureComponent<Props> {
         aria-labelledby="marker-chart-tab-button"
       >
         <MarkerSettings />
-        {markers.length === 0 ? (
+        {maxMarkerRows === 0 ? (
           <MarkerChartEmptyReasons />
         ) : (
           <MarkerChartCanvas
@@ -117,7 +121,7 @@ class MarkerChart extends React.PureComponent<Props> {
             }}
             chartProps={{
               markerTimingRows,
-              markers,
+              getMarker,
               // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
               updatePreviewSelection,
               rangeStart: timeRange.start,
@@ -148,9 +152,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       state
     );
     return {
-      markers: selectedThreadSelectors.getSearchFilteredMarkerChartMarkers(
-        state
-      ),
+      getMarker: selectedThreadSelectors.getMarkerGetter(state),
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
       timeRange: getCommittedRange(state),

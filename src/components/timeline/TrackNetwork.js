@@ -16,11 +16,14 @@ import { getThreadSelectors } from '../../selectors/per-thread';
 import { VerticalIndicators } from './VerticalIndicators';
 
 import type { ThreadIndex, PageList } from '../../types/profile';
-import type {} from '../../types/markers';
+import type {
+  Marker,
+  MarkerIndex,
+  MarkerTiming,
+} from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 import type { SizeProps } from '../shared/WithSize';
 import type { ConnectedProps } from '../../utils/connect';
-import type { Marker } from '../../types/profile-derived';
 
 import './TrackNetwork.css';
 
@@ -33,9 +36,9 @@ type StateProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +zeroAt: Milliseconds,
-  +networkMarkers: *,
-  +networkTiming: *,
-  +verticalMarkers: Marker[],
+  +getMarker: MarkerIndex => Marker,
+  +networkTiming: MarkerTiming[],
+  +verticalMarkerIndexes: MarkerIndex[],
 |};
 type DispatchProps = {||};
 type Props = {|
@@ -120,7 +123,14 @@ class Network extends PureComponent<Props, State> {
   }
 
   render() {
-    const { pages, rangeStart, rangeEnd, verticalMarkers, zeroAt } = this.props;
+    const {
+      pages,
+      rangeStart,
+      rangeEnd,
+      getMarker,
+      verticalMarkerIndexes,
+      zeroAt,
+    } = this.props;
     this._scheduleDraw();
 
     return (
@@ -135,7 +145,8 @@ class Network extends PureComponent<Props, State> {
           ref={this._takeCanvasRef}
         />
         <VerticalIndicators
-          verticalMarkers={verticalMarkers}
+          verticalMarkerIndexes={verticalMarkerIndexes}
+          getMarker={getMarker}
           pages={pages}
           rangeStart={rangeStart}
           rangeEnd={rangeEnd}
@@ -153,13 +164,13 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     const { start, end } = getCommittedRange(state);
     const networkTiming = selectors.getNetworkTrackTiming(state);
     return {
-      networkMarkers: selectors.getNetworkMarkers(state),
+      getMarker: selectors.getMarkerGetter(state),
       pages: getPageList(state),
       networkTiming: networkTiming,
       rangeStart: start,
       rangeEnd: end,
       zeroAt: getZeroAt(state),
-      verticalMarkers: selectors.getTimelineVerticalMarkers(state),
+      verticalMarkerIndexes: selectors.getTimelineVerticalMarkerIndexes(state),
     };
   },
   component: withSize<Props>(Network),

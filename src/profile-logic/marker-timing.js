@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import type {
   DOMEventMarkerPayload,
@@ -7,6 +10,7 @@ import type {
 } from '../types/markers';
 import type {
   Marker,
+  MarkerIndex,
   MarkerTiming,
   MarkerTimingRows,
 } from '../types/profile-derived';
@@ -60,14 +64,17 @@ const MAX_STACKING_DEPTH = 300;
  *   | User Timings |       *--*     *---*        |
  *   |______________|_____________________________|
  */
-export function getMarkerTiming(markers: Marker[]): MarkerTimingRows {
+export function getMarkerTiming(
+  getMarker: MarkerIndex => Marker,
+  markerIndexes: MarkerIndex[]
+): MarkerTimingRows {
   // Each marker type will have it's own timing information, later collapse these into
   // a single array.
   const markerTimingsMap: Map<string, MarkerTiming[]> = new Map();
 
   // Go through all of the markers.
-  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-    const marker = markers[markerIndex];
+  for (const markerIndex of markerIndexes) {
+    const marker = getMarker(markerIndex);
     let markerTimingsByName = markerTimingsMap.get(marker.name);
     if (markerTimingsByName === undefined) {
       markerTimingsByName = [];

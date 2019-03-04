@@ -33,12 +33,21 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const store = storeWithProfile(profile);
     const state = store.getState();
 
+    const mainThreadSelectors = getThreadSelectors(0);
+    const contentThreadSelectors = getThreadSelectors(2);
+    const mainGetMarker = mainThreadSelectors.getMarkerGetter(state);
+    const contentGetMarker = contentThreadSelectors.getMarkerGetter(state);
+
     return {
       profile,
-      markers: getThreadSelectors(0).getFullMarkerList(state),
+      markers: mainThreadSelectors
+        .getFullMarkerListIndexes(state)
+        .map(mainGetMarker),
       thread,
       contentThread,
-      contentMarkers: getThreadSelectors(2).getFullMarkerList(state),
+      contentMarkers: contentThreadSelectors
+        .getFullMarkerListIndexes(state)
+        .map(contentGetMarker),
     };
   }
 

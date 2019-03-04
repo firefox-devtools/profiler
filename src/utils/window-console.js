@@ -46,7 +46,12 @@ export function addDataToWindowObject(
   defineProperty(target, 'filteredMarkers', {
     enumerable: true,
     get() {
-      return selectors.selectedThread.getPreviewFilteredMarkers(getState());
+      const state = getState();
+      const getMarker = selectors.selectedThread.getMarkerGetter(state);
+      const markerIndexes = selectors.selectedThread.getPreviewFilteredMarkerIndexes(
+        state
+      );
+      return markerIndexes.map(getMarker);
     },
   });
 
