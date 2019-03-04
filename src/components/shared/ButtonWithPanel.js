@@ -64,14 +64,12 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   }
 
   _onPanelOpen = () => {
-    this.setState({ open: true });
     if (this.props.panel.props.onOpen) {
       this.props.panel.props.onOpen();
     }
   };
 
   _onPanelClose = () => {
-    this.setState({ open: false });
     if (this.props.panel.props.onClose) {
       this.props.panel.props.onClose();
     }
@@ -84,16 +82,22 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   openPanel() {
     if (this._panel) {
       this._panel.open();
+      this.setState({ open: true });
     }
   }
   closePanel() {
     if (this._panel && this.state.open) {
       this._panel.close();
+      this.setState({ open: false });
     }
   }
 
   _onButtonClick = () => {
-    this.openPanel();
+    if (this._panel && this.state.open) {
+      this.closePanel();
+    } else {
+      this.openPanel();
+    }
   };
 
   _onKeyDown = (e: KeyboardEvent) => {
