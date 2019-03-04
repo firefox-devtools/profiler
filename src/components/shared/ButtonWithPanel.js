@@ -50,6 +50,8 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   }
 
   componentDidMount() {
+    // the panel can be closed by clicking anywhere on the window
+    window.addEventListener('click', this._onWindowClick);
     // the panel can be closed by pressing the Esc key
     window.addEventListener('keydown', this._onKeyDown);
     if (this.props.open || this.props.defaultOpen) {
@@ -59,6 +61,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
 
   componentWillUnmount() {
     window.removeEventListener('keydown', this._onKeyDown);
+    window.removeEventListener('click', this._onWindowClick);
   }
 
   componentWillReceiveProps(props: Props) {
@@ -90,14 +93,23 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
       this._panel.open();
     }
   }
+
   closePanel() {
     if (this._panel && this.state.open) {
       this._panel.close();
     }
   }
 
+  _onWindowClick = () => {
+    this.closePanel();
+  };
+
   _onButtonClick = () => {
-    this.openPanel();
+    if (!this.state.open) {
+      // We use a timeout so that we let the event bubble up to the handlers bound
+      // on `window`, closing all other panels, before opening this one.
+      setTimeout(() => this.openPanel());
+    }
   };
 
   _onKeyDown = (e: KeyboardEvent) => {

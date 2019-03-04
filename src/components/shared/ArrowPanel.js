@@ -50,7 +50,6 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     if (this.props.onOpen) {
       this.props.onOpen();
     }
-    window.addEventListener('mousedown', this._windowMouseDownListener, true);
   }
 
   close() {
@@ -65,12 +64,6 @@ class ArrowPanel extends React.PureComponent<Props, State> {
       if (this.props.onClose) {
         this.props.onClose();
       }
-
-      window.removeEventListener(
-        'mousedown',
-        this._windowMouseDownListener,
-        true
-      );
 
       return { open: false, isClosing: true, openGeneration };
     });
@@ -87,22 +80,14 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     };
   }
 
-  componentWillUnmount() {
-    window.removeEventListener(
-      'mousedown',
-      this._windowMouseDownListener,
-      true
-    );
-  }
-
-  _windowMouseDownListener = (e: MouseEvent) => {
-    const target: Node = (e.target: any); // make flow happy
-    if (
-      this.state.open &&
-      this._panelElement &&
-      !this._panelElement.contains(target)
-    ) {
-      this.close();
+  _onArrowPanelClick = (e: { target: HTMLElement } & SyntheticMouseEvent<>) => {
+    // The arrow panel element contains the element that has the top arrow,
+    // that is visually outside the panel. We still want to hide the panel
+    // when clicking in this area.
+    if (e.target.className !== 'arrowPanelArrow') {
+      // Stop the click propagation to reach the _onWindowClick event when the
+      // click is visually inside the panel.
+      e.stopPropagation();
     }
   };
 
@@ -139,6 +124,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
             { open, hasTitle, hasButtons },
             className
           )}
+          onClick={this._onArrowPanelClick}
           ref={this._takePanelElementRef}
         >
           <div className="arrowPanelArrow" />
