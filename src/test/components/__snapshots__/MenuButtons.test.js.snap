@@ -157,6 +157,16 @@ Array [
                 </span>
                 Intel Mac OS X 10.11
               </div>
+              <div
+                class="metaInfoRow"
+              >
+                <span
+                  class="metaInfoLabel"
+                >
+                  ABI:
+                </span>
+                x86_64-gcc3
+              </div>
             </div>
           </div>
         </div>
@@ -458,6 +468,16 @@ Array [
                   OS:
                 </span>
                 Intel Mac OS X 10.11
+              </div>
+              <div
+                class="metaInfoRow"
+              >
+                <span
+                  class="metaInfoLabel"
+                >
+                  ABI:
+                </span>
+                x86_64-gcc3
               </div>
             </div>
           </div>
