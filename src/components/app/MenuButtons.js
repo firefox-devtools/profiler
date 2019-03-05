@@ -285,6 +285,12 @@ class ProfileMetaInfoButton extends React.PureComponent<
                       {meta.oscpu}
                     </div>
                   ) : null}
+                  {meta.abi ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">ABI:</span>
+                      {meta.abi}
+                    </div>
+                  ) : null}
                 </div>
               </ArrowPanel>
             }
