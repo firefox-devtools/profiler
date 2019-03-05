@@ -255,6 +255,7 @@ export function getEmptyProfile(): Profile {
       sourceURL: '',
       physicalCPUs: 0,
       logicalCPUs: 0,
+      symbolicated: true,
     },
     pages: [],
     threads: [],

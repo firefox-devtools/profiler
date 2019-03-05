@@ -103,8 +103,8 @@
   background: var(--internal-uploading-progress-fill-color);
 }
 
-.menuButtonsShareButtonButton:not([disabled]),
-.menuButtonsSecondaryShareButtonButton:not([disabled]) {
+.menuButtonsShareButtonButton,
+.menuButtonsSecondaryShareButtonButton {
   background-color: #0d8730;
   color: white;
 }

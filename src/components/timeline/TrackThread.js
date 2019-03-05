@@ -23,6 +23,7 @@ import {
   TimelineMarkersJank,
   TimelineMarkersFileIo,
   TimelineMarkersOverview,
+  TimelineMarkersMemory,
 } from './Markers';
 import {
   updatePreviewSelection,
@@ -54,6 +55,7 @@ import type {
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
+  +showMemoryMarkers?: boolean,
 |};
 
 type StateProps = {|
@@ -119,6 +121,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       categories,
       timelineType,
       hasFileIoMarkers,
+      showMemoryMarkers,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -131,6 +134,14 @@ class TimelineTrackThread extends PureComponent<Props> {
 
     return (
       <div className="timelineTrackThread">
+        {showMemoryMarkers ? (
+          <TimelineMarkersMemory
+            rangeStart={rangeStart}
+            rangeEnd={rangeEnd}
+            threadIndex={threadIndex}
+            onSelect={this._onMarkerSelect}
+          />
+        ) : null}
         {hasFileIoMarkers ? (
           <TimelineMarkersFileIo
             rangeStart={rangeStart}

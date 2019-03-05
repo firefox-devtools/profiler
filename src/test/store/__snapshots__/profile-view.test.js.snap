@@ -57,6 +57,7 @@ Object {
     "sourceURL": "",
     "stackwalk": 0,
     "startTime": 0,
+    "symbolicated": true,
     "toolkit": "",
     "version": 15,
   },

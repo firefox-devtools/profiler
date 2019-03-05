@@ -413,7 +413,7 @@ const markersOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
 export const TimelineMarkersOverview = explicitConnect(markersOptions);
 
 /**
- * Disk IO is an optional marker type. Only add these markers if they exist.
+ * FileIO is an optional marker type. Only add these markers if they exist.
  */
 const fileIoOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   mapStateToProps: (state, props) => {
@@ -432,3 +432,25 @@ const fileIoOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
 };
 
 export const TimelineMarkersFileIo = explicitConnect(fileIoOptions);
+
+/**
+ * Create a component for memory-related markers.
+ */
+const memoryOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+  mapStateToProps: (state, props) => {
+    const { threadIndex } = props;
+    const selectors = getThreadSelectors(threadIndex);
+    const selectedThread = getSelectedThreadIndex(state);
+
+    return {
+      markers: selectors.getMemoryMarkers(state),
+      isSelected: threadIndex === selectedThread,
+      isModifyingSelection: getPreviewSelection(state).isModifying,
+      additionalClassName: 'timelineMarkersMemory',
+      testId: 'TimelineMarkersMemory',
+    };
+  },
+  component: TimelineMarkers,
+};
+
+export const TimelineMarkersMemory = explicitConnect(memoryOptions);

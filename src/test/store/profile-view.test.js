@@ -333,6 +333,7 @@ describe('actions/ProfileView', function() {
         );
       });
     });
+
     describe('with a network track', function() {
       const threadTrack: TrackReference = {
         type: 'local',
@@ -378,6 +379,63 @@ describe('actions/ProfileView', function() {
         expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'flame-graph'
+        );
+      });
+    });
+
+    describe('with a memory track', function() {
+      const memoryTrackReference = { type: 'local', trackIndex: 0, pid: 111 };
+
+      function setup() {
+        const profile = getProfileWithNiceTracks();
+
+        {
+          // Modify the profile to add a memory track.
+          const parentThreadIndex = profile.threads.findIndex(
+            thread =>
+              thread.name === 'GeckoMain' && thread.processType === 'process'
+          );
+          if (parentThreadIndex === -1) {
+            throw new Error('Could not find the parent process main thread.');
+          }
+          const parentThread = profile.threads[parentThreadIndex];
+
+          const counter = getCounterForThread(parentThread, parentThreadIndex);
+          counter.category = 'Memory';
+          profile.counters = [counter];
+        }
+
+        const store = storeWithProfile(profile);
+
+        {
+          // Verify the memory track reference is correct.
+          const memoryTrack = ProfileViewSelectors.getLocalTrackFromReference(
+            store.getState(),
+            memoryTrackReference
+          );
+          if (memoryTrack.type !== 'memory') {
+            throw new Error('Expected to get memory track.');
+          }
+        }
+
+        return store;
+      }
+
+      it('changes the thread index when selected', function() {
+        const { getState, dispatch } = setup();
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(1);
+        dispatch(ProfileView.selectTrack(memoryTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+      });
+
+      it('does not change the tab when selected', function() {
+        const { getState, dispatch } = setup();
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'calltree'
+        );
+        dispatch(ProfileView.selectTrack(memoryTrackReference));
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'calltree'
         );
       });
     });
@@ -590,7 +648,7 @@ describe('actions/ProfileView', function() {
 
       expect(
         selectedThreadSelectors.getViewOptions(getState()).selectedMarker
-      ).toEqual(-1);
+      ).toEqual(null);
       dispatch(ProfileView.changeSelectedMarker(0, 0));
       expect(
         selectedThreadSelectors.getViewOptions(getState()).selectedMarker

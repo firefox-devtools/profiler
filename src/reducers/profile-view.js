@@ -59,6 +59,21 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
       });
       return Object.assign({}, state, { threads });
     }
+    case 'DONE_SYMBOLICATING': {
+      if (state === null) {
+        throw new Error(
+          `Strangely we're done symbolicating a non-existent profile.`
+        );
+      }
+
+      return {
+        ...state,
+        meta: {
+          ...state.meta,
+          symbolicated: true,
+        },
+      };
+    }
     default:
       return state;
   }
@@ -117,7 +132,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
       return action.profile.threads.map(() => ({
         selectedCallNodePath: [],
         expandedCallNodePaths: new PathSet(),
-        selectedMarker: -1,
+        selectedMarker: null,
       }));
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;

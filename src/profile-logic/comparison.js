@@ -45,6 +45,18 @@ export function mergeProfiles(
     ...profiles.map(profile => profile.meta.interval)
   );
 
+  // If all profiles have an unknown symbolication status, we keep this unknown
+  // status for the combined profile. Otherwise, we mark the combined profile
+  // symbolicated only if all profiles are, so that a symbolication process will
+  // be kicked off if necessary.
+  if (profiles.every(profile => profile.meta.symbolicated === undefined)) {
+    delete resultProfile.meta.symbolicated;
+  } else {
+    resultProfile.meta.symbolicated = profiles.every(
+      profile => profile.meta.symbolicated
+    );
+  }
+
   // First let's merge categories. We'll use the resulting maps when
   // handling the thread data later.
   const {
