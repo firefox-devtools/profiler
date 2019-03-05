@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>Photon Styling Examples</title>
+    <style>
+      body, html {
+        font: message-box;
+        font-size: 11px;
+      }
+      .row {
+        border-left: 2px solid var(--grey-30);
+        padding: 0 3em 2em;
+        margin: 3em 0;
+      }
+      .row pre {
+        margin: 2em 0;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="row">
+      <pre>&lt;button type="button" class="photon-button"&gt;Photon Button&lt;/button&gt;</pre>
+      <button type="button" class="photon-button">Photon Button</button>
+    </div>
+    <br/>
+    <div class="row">
+      <pre>&lt;input type="text" class="photon-input" value="Example text" /&gt;</pre>
+      <input type="text" class="photon-input" value="Example text" />
+    </div>
+    <br/>
+    <div class="row">
+      <pre>
+&lt;div class="photon-message-bar photon-message-bar-error"&gt;
+  This is a message bar
+  &lt;button class="photon-button photon-button-micro" type="button"&gt;
+    Call to action
+  &lt;/button&gt;
+&lt;/div&gt;
+      </pre>
+      <div class="photon-message-bar photon-message-bar-error">
+        This is a message bar
+        <button class="photon-button photon-button-micro" type="button">
+          Call to action
+        </button>
+      </div>
+    </div>
+  </body>
+</html>
