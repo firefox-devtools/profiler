@@ -16,9 +16,11 @@ export function blankStore() {
   return createStore();
 }
 
-export function storeWithProfile(
-  profile: Profile = processProfile(createGeckoProfileWithJsTimings())
-): Store {
+export function storeWithProfile(profile?: Profile): Store {
+  if (!profile) {
+    profile = processProfile(createGeckoProfileWithJsTimings());
+    profile.meta.symbolicated = true;
+  }
   const store = createStore();
   store.dispatch(viewProfile(profile));
   return store;

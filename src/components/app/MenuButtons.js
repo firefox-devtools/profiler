@@ -12,7 +12,6 @@ import {
   getProfile,
   getProfileRootRange,
   getProfileSharingStatus,
-  getSymbolicationStatus,
 } from '../../selectors/profile';
 import { getDataSource, getUrlPredictor } from '../../selectors/url-state';
 import actions from '../../actions';
@@ -30,10 +29,7 @@ import url from 'url';
 import type { StartEndRange } from '../../types/units';
 import type { Profile, ProfileMeta } from '../../types/profile';
 import type { Action, DataSource } from '../../types/actions';
-import type {
-  ProfileSharingStatus,
-  SymbolicationStatus,
-} from '../../types/state';
+import type { ProfileSharingStatus } from '../../types/state';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -80,7 +76,6 @@ const UploadingStatus = ({ progress }: { progress: number }) => (
 type ProfileSharingButtonProps = {|
   +buttonClassName: string,
   +shareLabel: string,
-  +symbolicationStatus: string,
   +okButtonClickEvent: () => mixed,
   +panelOpenEvent?: () => void,
   +shareNetworkUrlCheckboxChecked: boolean,
@@ -91,7 +86,6 @@ type ProfileSharingButtonProps = {|
 const ProfileSharingButton = ({
   buttonClassName,
   shareLabel,
-  symbolicationStatus,
   okButtonClickEvent,
   panelOpenEvent,
   shareNetworkUrlCheckboxChecked,
@@ -101,7 +95,6 @@ const ProfileSharingButton = ({
   <ButtonWithPanel
     className={buttonClassName}
     label={shareLabel}
-    disabled={symbolicationStatus !== 'DONE'}
     panel={
       <ArrowPanel
         className="menuButtonsPrivacyPanel"
@@ -136,7 +129,6 @@ type ProfileMetaInfoButtonProps = {
 type ProfileSharingCompositeButtonProps = {
   profile: Profile,
   dataSource: DataSource,
-  symbolicationStatus: SymbolicationStatus,
   predictUrl: (Action | Action[]) => string,
   onProfilePublished: typeof actions.profilePublished,
   profileSharingStatus: ProfileSharingStatus,
@@ -514,12 +506,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
 
   render() {
     const { state, uploadProgress, error, shortUrl } = this.state;
-    const { profile, symbolicationStatus, profileSharingStatus } = this.props;
-
-    const shareLabel =
-      symbolicationStatus === 'DONE'
-        ? 'Share...'
-        : 'Sharing will be enabled once symbolication is complete';
+    const { profile, profileSharingStatus } = this.props;
 
     // We don't show the secondary button if any of these conditions is true:
     // 1. If we loaded a profile from a file or the public store that got its network URLs removed before.
@@ -556,8 +543,7 @@ class ProfileSharingCompositeButton extends React.PureComponent<
           <AnimateUpTransition>
             <ProfileSharingButton
               buttonClassName="menuButtonsShareButton"
-              shareLabel={shareLabel}
-              symbolicationStatus={symbolicationStatus}
+              shareLabel="Share…"
               okButtonClickEvent={this._attemptToShare}
               shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
               shareNetworkUrlCheckboxOnChange={this._onChangeShareNetworkUrls}
@@ -627,7 +613,6 @@ class ProfileSharingCompositeButton extends React.PureComponent<
             <ProfileSharingButton
               buttonClassName="menuButtonsSecondaryShareButton"
               shareLabel={secondaryShareLabel}
-              symbolicationStatus={symbolicationStatus}
               okButtonClickEvent={this._attemptToSecondaryShare}
               panelOpenEvent={this._onSecondarySharePanelOpen}
               shareNetworkUrlCheckboxChecked={this.state.shareNetworkUrls}
@@ -755,7 +740,6 @@ type MenuButtonsStateProps = {|
   +profile: Profile,
   +rootRange: StartEndRange,
   +dataSource: DataSource,
-  +symbolicationStatus: SymbolicationStatus,
   +profileSharingStatus: ProfileSharingStatus,
   +predictUrl: (Action | Action[]) => string,
 |};
@@ -775,7 +759,6 @@ const MenuButtons = ({
   profile,
   rootRange,
   dataSource,
-  symbolicationStatus,
   profilePublished,
   profileSharingStatus,
   setProfileSharingStatus,
@@ -788,7 +771,6 @@ const MenuButtons = ({
       <ProfileSharingCompositeButton
         profile={profile}
         dataSource={dataSource}
-        symbolicationStatus={symbolicationStatus}
         onProfilePublished={profilePublished}
         profileSharingStatus={profileSharingStatus}
         setProfileSharingStatus={setProfileSharingStatus}
@@ -816,7 +798,6 @@ const options: ExplicitConnectOptions<
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
-    symbolicationStatus: getSymbolicationStatus(state),
     profileSharingStatus: getProfileSharingStatus(state),
     predictUrl: getUrlPredictor(state),
   }),
