@@ -8255,9 +8255,10 @@ performance-now@^2.1.0:
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
 
-photon-colors@2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/photon-colors/-/photon-colors-2.0.1.tgz#44709f5ecf00ef7f2dcd9c89e24a8d95439404ab"
+photon-colors@3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/photon-colors/-/photon-colors-3.3.2.tgz#eaf2e5a8ba9368fcdee0607cc86a9f613e6d3417"
+  integrity sha512-xCeL7J2F8cjM00zQZEZawHAGnrSOM509RbanL4c8hvrV8n19V/wwdzydX6rSUEtLYj4nx4OvhmKC4/vujo9f/Q==
 
 pify@^2.0.0, pify@^2.3.0:
   version "2.3.0"
