@@ -11,7 +11,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 
-import TrackMemory from '../../components/timeline/TrackMemory';
+import { TrackMemory } from '../../components/timeline/TrackMemory';
 import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
@@ -84,7 +84,7 @@ describe('TrackMemory', function() {
     const getTooltipContents = () =>
       document.querySelector('.timelineTrackMemoryTooltip');
     const getMemoryDot = () =>
-      container.querySelector('.timelineTrackMemoryDot');
+      container.querySelector('.timelineTrackMemoryGraphDot');
     const moveMouseAtCounter = index =>
       fireEvent(
         canvas,
