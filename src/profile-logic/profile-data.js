@@ -8,7 +8,6 @@ import type {
   Thread,
   SamplesTable,
   StackTable,
-  FrameTable,
   FuncTable,
   ResourceTable,
   CategoryList,
@@ -56,16 +55,25 @@ import type { UniqueStringArray } from '../utils/unique-string-array';
  * See `docs-developer/call-trees.md` for a detailed explanation of CallNodes.
  */
 export function getCallNodeInfo(
-  stackTable: StackTable,
-  frameTable: FrameTable,
-  funcTable: FuncTable,
+  thread: Thread,
   defaultCategory: IndexIntoCategoryList
 ): CallNodeInfo {
   return timeCode('getCallNodeInfo', () => {
+    const { stackTable, frameTable, funcTable } = thread;
+    const implementationIndexes = {
+      native: 1,
+      interpreter: 2,
+      baseline: 3,
+      ion: 4,
+      unknown: 5,
+    };
+    const implCount = 5;
     const stackIndexToCallNodeIndex = new Uint32Array(stackTable.length);
     const funcCount = funcTable.length;
-    // Maps can't key off of two items, so combine the prefixCallNode and the funcIndex
-    // using the following formula: prefixCallNode * funcCount + funcIndex => callNode
+    const funcTimesImplCount = funcTable.length * implCount;
+    // Maps can't key off of multiple items, multiply together different terms to create
+    // a multi-key map, using the following formula:
+    //    prefixCallNode * funcTimesImplCount + funcIndex * implementationIndex
     const prefixCallNodeAndFuncToCallNodeMap = new Map();
 
     // The callNodeTable components.
@@ -80,14 +88,14 @@ export function getCallNodeInfo(
       funcIndex: IndexIntoFuncTable,
       categoryIndex: IndexIntoCategoryList
     ) {
-      const index = length++;
-      prefix[index] = prefixIndex;
-      func[index] = funcIndex;
-      category[index] = categoryIndex;
+      const callNodeIndex = length++;
+      prefix[callNodeIndex] = prefixIndex;
+      func[callNodeIndex] = funcIndex;
+      category[callNodeIndex] = categoryIndex;
       if (prefixIndex === -1) {
-        depth[index] = 0;
+        depth[callNodeIndex] = 0;
       } else {
-        depth[index] = depth[prefixIndex] + 1;
+        depth[callNodeIndex] = depth[prefixIndex] + 1;
       }
     }
 
@@ -102,7 +110,17 @@ export function getCallNodeInfo(
       const frameIndex = stackTable.frame[stackIndex];
       const categoryIndex = stackTable.category[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
-      const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
+      const implementationSlug: StackImplementation = funcTable.isJS[funcIndex]
+        ? getJsImplementationForStack(stackIndex, thread)
+        : 'native';
+      const implementationIndex = implementationIndexes[implementationSlug];
+
+      // This is the multi-encoded key for the Map.
+      const prefixCallNodeAndFuncIndex =
+        prefixCallNode * funcTimesImplCount +
+        implementationIndex * funcCount +
+        funcIndex;
+
       let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
         prefixCallNodeAndFuncIndex
       );

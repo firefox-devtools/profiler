@@ -320,6 +320,14 @@ describe('"merge-call-node" transform', function() {
        *                   b
        */
       const { getState } = storeWithProfile(profile);
+      console.log([
+        '- JS::RunScript.cpp (total: 3, self: —)',
+        '  - onLoad.js (total: 3, self: —)',
+        '    - a.js (total: 3, self: —)',
+        '      - a.js (total: 2, self: —)',
+        '        - b.js (total: 2, self: 2)',
+        '      - b.js (total: 1, self: 1)',
+      ]);
       expect(
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([

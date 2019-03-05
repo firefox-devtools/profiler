@@ -12,11 +12,7 @@ import * as CallTree from '../../profile-logic/call-tree';
 import { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
 
-import type {
-  IndexIntoCategoryList,
-  Thread,
-  IndexIntoSamplesTable,
-} from '../../types/profile';
+import type { IndexIntoSamplesTable } from '../../types/profile';
 import type {
   CallNodeInfo,
   CallNodePath,
@@ -62,17 +58,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getCallNodeInfo: Selector<CallNodeInfo> = createSelector(
     threadSelectors.getFilteredThread,
     ProfileSelectors.getDefaultCategory,
-    (
-      { stackTable, frameTable, funcTable }: Thread,
-      defaultCategory: IndexIntoCategoryList
-    ): CallNodeInfo => {
-      return ProfileData.getCallNodeInfo(
-        stackTable,
-        frameTable,
-        funcTable,
-        defaultCategory
-      );
-    }
+    ProfileData.getCallNodeInfo
   );
 
   const getCallNodeMaxDepth: Selector<number> = createSelector(

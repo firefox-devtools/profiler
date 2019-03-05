@@ -403,12 +403,7 @@ describe('profile-data', function() {
       c => c.name === 'Other'
     );
     const thread = profile.threads[0];
-    const { callNodeTable } = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      defaultCategory
-    );
+    const { callNodeTable } = getCallNodeInfo(thread, defaultCategory);
     it('should create one callNode per stack', function() {
       expect(thread.stackTable.length).toEqual(5);
       expect(callNodeTable.length).toEqual(5);
@@ -446,9 +441,7 @@ describe('profile-data', function() {
     const { meta, threads: [thread] } = getCallNodeProfile();
     const defaultCategory = meta.categories.findIndex(c => c.name === 'Other');
     const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
+      thread,
       defaultCategory
     );
     const stack0 = thread.samples.stack[0];
@@ -788,12 +781,7 @@ describe('getTimingsForPath in a non-inverted tree', function() {
       c => c.name === 'Other'
     );
     const thread = profile.threads[0];
-    const callNodeInfo = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      defaultCategory
-    );
+    const callNodeInfo = getCallNodeInfo(thread, defaultCategory);
     const curriedGetTimingsForPath = path =>
       getTimingsForPath(
         path,
@@ -943,12 +931,7 @@ describe('getTimingsForPath for an inverted tree', function() {
     // B    B    B    A
     // A    A    A
 
-    const callNodeInfo = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      defaultCategory
-    );
+    const callNodeInfo = getCallNodeInfo(thread, defaultCategory);
     const curriedGetTimingsForPath = path =>
       getTimingsForPath(
         path,
@@ -1141,9 +1124,7 @@ describe('getSamplesSelectedStates', function() {
   `);
   const thread = profile.threads[0];
   const { callNodeTable, stackIndexToCallNodeIndex } = getCallNodeInfo(
-    thread.stackTable,
-    thread.frameTable,
-    thread.funcTable,
+    thread,
     0
   );
   const sampleCallNodes = getSampleCallNodes(

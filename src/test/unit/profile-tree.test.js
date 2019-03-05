@@ -48,12 +48,7 @@ describe('unfiltered call tree', function() {
     const [thread] = profile.threads;
     const { interval, categories } = profile.meta;
     const defaultCategory = categories.findIndex(c => c.name === 'Other');
-    const callNodeInfo = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      defaultCategory
-    );
+    const callNodeInfo = getCallNodeInfo(thread, defaultCategory);
     const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
       thread,
       callNodeInfo,
@@ -80,12 +75,7 @@ describe('unfiltered call tree', function() {
     const defaultCategory = profile.meta.categories.findIndex(
       c => c.name === 'Other'
     );
-    const callNodeInfo = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      defaultCategory
-    );
+    const callNodeInfo = getCallNodeInfo(thread, defaultCategory);
 
     it('does', function() {
       expect(
@@ -113,12 +103,7 @@ describe('unfiltered call tree', function() {
     const defaultCategory = profile.meta.categories.findIndex(
       c => c.name === 'Other'
     );
-    const callNodeInfo = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      defaultCategory
-    );
+    const callNodeInfo = getCallNodeInfo(thread, defaultCategory);
 
     it('returns roots and children', function() {
       expect(
@@ -358,12 +343,7 @@ describe('unfiltered call tree', function() {
     const defaultCategory = profile.meta.categories.findIndex(
       c => c.name === 'Other'
     );
-    const { callNodeTable } = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      defaultCategory
-    );
+    const { callNodeTable } = getCallNodeInfo(thread, defaultCategory);
 
     // Helper to make the assertions a little less verbose.
     function checkStack(callNodePath, index, name) {
@@ -412,12 +392,7 @@ describe('inverted call tree', function() {
 
     // Check the non-inverted tree first.
     const thread = profile.threads[0];
-    const callNodeInfo = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      defaultCategory
-    );
+    const callNodeInfo = getCallNodeInfo(thread, defaultCategory);
     const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
       thread,
       callNodeInfo,
@@ -432,7 +407,7 @@ describe('inverted call tree', function() {
       'combined',
       callTreeCountsAndTimings
     );
-    it('computes an non-inverted call tree', function() {
+    it('computes a non-inverted call tree', function() {
       expect(formatTreeIncludeCategories(callTree)).toEqual([
         '- A [Other] (total: 3, self: 3)',
         '  - B [DOM] (total: 3, self: —)',
@@ -451,9 +426,7 @@ describe('inverted call tree', function() {
     // Now compute the inverted tree and check it.
     const invertedThread = invertCallstack(thread, defaultCategory);
     const invertedCallNodeInfo = getCallNodeInfo(
-      invertedThread.stackTable,
-      invertedThread.frameTable,
-      invertedThread.funcTable,
+      invertedThread,
       defaultCategory
     );
     const invertedCallTreeCountsAndTimings = computeCallTreeCountsAndTimings(
