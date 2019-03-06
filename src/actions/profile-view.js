@@ -312,7 +312,7 @@ export function focusCallTree(): Action {
  * used to display its context menu.
  */
 export function changeRightClickedTrack(
-  trackReference: TrackReference
+  trackReference: TrackReference | null
 ): Action {
   return {
     type: 'CHANGE_RIGHT_CLICKED_TRACK',

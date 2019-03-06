@@ -53,6 +53,14 @@ export type FunctionsUpdatePerThread = {
 };
 
 /**
+ * The counts for how many tracks are hidden in the timeline.
+ */
+export type HiddenTrackCount = {|
+  +hidden: number,
+  +total: number,
+|};
+
+/**
  * A TrackReference uniquely identifies a track.
  * Note that TrackIndexes aren't globally unique: they're unique among global
  * tracks, and they're unique among local tracks for a specific Pid.
@@ -241,7 +249,10 @@ type UrlStateAction =
       +selectedThreadIndex: ThreadIndex,
       +selectedTab: TabSlug,
     |}
-  | {| +type: 'CHANGE_RIGHT_CLICKED_TRACK', +trackReference: TrackReference |}
+  | {|
+      +type: 'CHANGE_RIGHT_CLICKED_TRACK',
+      +trackReference: TrackReference | null,
+    |}
   | {| +type: 'CHANGE_CALL_TREE_SEARCH_STRING', +searchString: string |}
   | {|
       +type: 'ADD_TRANSFORM_TO_STACK',
