@@ -35,7 +35,7 @@ const config = {
       },
       {
         test: /\.css?$/,
-        loaders: ['style-loader', 'css-loader?minimize'],
+        loaders: ['style-loader', 'css-loader'],
         include: includes.concat(
           path.join(__dirname, 'node_modules', 'photon-colors')
         ),
