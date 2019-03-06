@@ -35,7 +35,11 @@ const config = {
       },
       {
         test: /\.css?$/,
-        loaders: ['style-loader', 'css-loader'],
+        loaders: [
+          'style-loader',
+          { loader: 'css-loader', options: { importLoaders: 1 } },
+          'postcss-loader',
+        ],
         include: includes.concat(
           path.join(__dirname, 'node_modules', 'photon-colors')
         ),
