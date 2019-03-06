@@ -6,6 +6,7 @@
 import { oneLine } from 'common-tags';
 import { getLastVisibleThreadTabSlug } from '../selectors/app';
 import {
+  getCounterSelectors,
   getGlobalTracks,
   getGlobalTrackAndIndexByPid,
   getLocalTracks,
@@ -261,9 +262,15 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
           selectedThreadIndex = localTrack.threadIndex;
           selectedTab = 'network-chart';
           break;
-        case 'memory':
-          // TODO - Currently disable selecting memory.
-          return;
+        case 'memory': {
+          const { counterIndex } = localTrack;
+          const counterSelectors = getCounterSelectors(counterIndex);
+          const counter = counterSelectors.getCommittedRangeFilteredCounter(
+            getState()
+          );
+          selectedThreadIndex = counter.mainThreadIndex;
+          break;
+        }
         default:
           throw assertExhaustiveCheck(localTrack, `Unhandled LocalTrack type.`);
       }

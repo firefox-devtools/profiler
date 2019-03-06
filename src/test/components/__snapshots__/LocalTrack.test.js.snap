@@ -23,14 +23,26 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
     >
       <div
         class="timelineTrackMemory"
-        style="height: 25px;"
+        style="height: 40px;"
       >
-        <canvas
-          class="timelineTrackMemoryCanvas"
-        />
         <div
-          class="timelineEmptyThreadIndicator"
-        />
+          class="timelineMarkers timelineMarkersMemory"
+          data-testid="TimelineMarkersMemory"
+        >
+          <canvas
+            class="timelineMarkersCanvas"
+          />
+        </div>
+        <div
+          class="timelineTrackMemoryGraph"
+        >
+          <canvas
+            class="timelineTrackMemoryCanvas"
+          />
+          <div
+            class="timelineEmptyThreadIndicator"
+          />
+        </div>
       </div>
     </div>
   </div>

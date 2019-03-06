@@ -218,3 +218,63 @@ describe('getTimelineVerticalMarkers', function() {
     expect(markers).toMatchSnapshot();
   });
 });
+
+describe('memory markers', function() {
+  function setup() {
+    // GC markers have some complicated data structures that are just mocked here with
+    // this "any".
+    const any = (null: any);
+
+    return storeWithProfile(
+      getProfileWithMarkers([
+        ['A', 0, null],
+        ['B', 1, null],
+        ['C', 2, null],
+        [
+          'IdleForgetSkippable',
+          3,
+          { type: 'tracing', category: 'CC', interval: 'start' },
+        ],
+        [
+          'IdleForgetSkippable',
+          4,
+          { type: 'tracing', category: 'CC', interval: 'end' },
+        ],
+        [
+          'GCMinor',
+          5,
+          { type: 'GCMinor', startTime: 5, endTime: 5, nursery: any },
+        ],
+        [
+          'GCMajor',
+          6,
+          { type: 'GCMajor', startTime: 6, endTime: 6, timings: any },
+        ],
+        [
+          'GCSlice',
+          7,
+          { type: 'GCSlice', startTime: 7, endTime: 7, timings: any },
+        ],
+      ])
+    );
+  }
+
+  it('can get memory markers using getMemoryMarkers', function() {
+    const { getState } = setup();
+    const markers = selectedThreadSelectors.getMemoryMarkers(getState());
+    expect(markers.map(marker => marker.name)).toEqual([
+      'IdleForgetSkippable',
+      'GCMinor',
+      'GCMajor',
+      'GCSlice',
+    ]);
+  });
+
+  it('ignores memory markers in getCommittedRangeFilteredMarkersForHeader', function() {
+    const { getState } = setup();
+    const markers = selectedThreadSelectors.getCommittedRangeFilteredMarkersForHeader(
+      getState()
+    );
+    expect(markers.map(marker => marker.name)).toEqual(['A', 'B', 'C']);
+  });
+});

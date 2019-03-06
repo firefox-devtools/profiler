@@ -201,6 +201,11 @@ export type GeckoProfileMeta = {|
   sourceURL?: string,
   physicalCPUs?: number,
   logicalCPUs?: number,
+  // This boolean indicates whether this gecko profile includes already
+  // symbolicated frames. This will be missing for profiles coming from Gecko
+  // (which indicates that they'll need to be symbolicated) but may be specified
+  // for profiles imported from other formats (eg: linux perf).
+  presymbolicated?: boolean,
 |};
 
 export type GeckoProfile = {|
