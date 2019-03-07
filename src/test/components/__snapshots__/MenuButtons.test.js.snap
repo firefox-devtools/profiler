@@ -230,9 +230,7 @@ Array [
                   To view all the information you can download the full profile to a file and open the json structure with a text editor.
                 </p>
                 <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
+                  By default, the URLs of all network requests will be removed while sharing the profile but keeping the URLs may help to identify the problems. Please select the checkbox below to share the URLs of the network requests:
                 </p>
               </section>
               <p
