@@ -3,6 +3,7 @@ import type {
   DOMEventMarkerPayload,
   UserTimingMarkerPayload,
   MarkerPayload,
+  TextMarkerPayload,
 } from '../types/markers';
 import type {
   Marker,
