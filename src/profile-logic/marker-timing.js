@@ -119,6 +119,8 @@ function computeMarkerLabel(data: MarkerPayload): string {
           return (data: DOMEventMarkerPayload).eventType;
         }
         break;
+      case 'Text':
+        return (data: TextMarkerPayload).name;
       default:
     }
   }
