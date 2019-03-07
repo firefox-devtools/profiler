@@ -35,12 +35,3 @@
 .menuButtonsLink:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
-
-.menuButtonsProfileDownloadPanel {
-  --offset-from-right: 25px;
-  --width: 30em;
-}
-
-.menuButtonsDownloadLink {
-  white-space: nowrap;
-}
