@@ -22,7 +22,7 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
     role="menuitem"
     tabindex="-1"
   >
-    Only show this process
+    Only show this process group
   </div>
   <div
     class="react-contextmenu-separator"

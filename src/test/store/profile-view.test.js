@@ -491,10 +491,9 @@ describe('actions/ProfileView', function() {
       const { profile } = getProfileFromTextSamples('A', 'B');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
-        trackIndex: 0,
-        type: 'global',
-      });
+      expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual(
+        null
+      );
       dispatch(
         ProfileView.changeRightClickedTrack({ trackIndex: 1, type: 'global' })
       );
@@ -1061,10 +1060,7 @@ describe('snapshots of selectors/profile', function() {
   });
   it('matches the last stored run of getRightClickedTrack', function() {
     const { getState } = setupStore();
-    expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
-      trackIndex: 0,
-      type: 'global',
-    });
+    expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual(null);
   });
   it('matches the last stored run of selectedThreadSelector.getThread', function() {
     const { getState, samplesThread } = setupStore();
