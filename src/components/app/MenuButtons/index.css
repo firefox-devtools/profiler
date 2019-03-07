@@ -228,5 +228,5 @@
 .menuButtonsOpenMetaInfoButtonBox .buttonWithPanel:hover,
 .menuButtonsOpenMetaInfoButtonBox .buttonWithPanel.open {
   width: 40px;
-  background: url(../../../res/img/svg/meatball.svg) 50% 50% no-repeat;
+  background: url(../../../../res/img/svg/meatball.svg) 50% 50% no-repeat;
 }

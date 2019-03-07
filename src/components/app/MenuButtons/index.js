@@ -6,36 +6,36 @@
 
 import * as React from 'react';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
-import explicitConnect from '../../utils/connect';
+import explicitConnect from '../../../utils/connect';
 import classNames from 'classnames';
 import {
   getProfile,
   getProfileRootRange,
   getProfileSharingStatus,
-} from '../../selectors/profile';
-import { getDataSource, getUrlPredictor } from '../../selectors/url-state';
-import actions from '../../actions';
-import { compress } from '../../utils/gz';
-import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
-import ArrowPanel from '../shared/ArrowPanel';
-import ButtonWithPanel from '../shared/ButtonWithPanel';
-import { shortenUrl } from '../../utils/shorten-url';
-import { serializeProfile } from '../../profile-logic/process-profile';
-import prettyBytes from '../../utils/pretty-bytes';
-import sha1 from '../../utils/sha1';
-import { sendAnalytics } from '../../utils/analytics';
+} from '../../../selectors/profile';
+import { getDataSource, getUrlPredictor } from '../../../selectors/url-state';
+import actions from '../../../actions';
+import { compress } from '../../../utils/gz';
+import { uploadBinaryProfileData } from '../../../profile-logic/profile-store';
+import ArrowPanel from '../../shared/ArrowPanel';
+import ButtonWithPanel from '../../shared/ButtonWithPanel';
+import { shortenUrl } from '../../../utils/shorten-url';
+import { serializeProfile } from '../../../profile-logic/process-profile';
+import prettyBytes from '../../../utils/pretty-bytes';
+import sha1 from '../../../utils/sha1';
+import { sendAnalytics } from '../../../utils/analytics';
 import url from 'url';
 
-import type { StartEndRange } from '../../types/units';
-import type { Profile, ProfileMeta } from '../../types/profile';
-import type { Action, DataSource } from '../../types/actions';
-import type { ProfileSharingStatus } from '../../types/state';
+import type { StartEndRange } from '../../../types/units';
+import type { Profile, ProfileMeta } from '../../../types/profile';
+import type { Action, DataSource } from '../../../types/actions';
+import type { ProfileSharingStatus } from '../../../types/state';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
-} from '../../utils/connect';
+} from '../../../utils/connect';
 
-require('./MenuButtons.css');
+require('./index.css');
 
 const PrivacyNotice = () => (
   <section className="privacyNotice">
