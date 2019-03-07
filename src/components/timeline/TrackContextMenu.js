@@ -53,7 +53,7 @@ type StateProps = {|
   +hiddenGlobalTracks: Set<TrackIndex>,
   +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
   +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-  +rightClickedTrack: TrackReference,
+  +rightClickedTrack: TrackReference | null,
   +globalTracks: GlobalTrack[],
   +rightClickedThreadIndex: ThreadIndex | null,
   +globalTrackNames: string[],
@@ -110,6 +110,11 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
   _isolateProcess = () => {
     const { isolateProcess, rightClickedTrack } = this.props;
+    if (rightClickedTrack === null) {
+      throw new Error(
+        'Attempted to isolate the process with no right clicked track.'
+      );
+    }
     if (rightClickedTrack.type === 'local') {
       throw new Error(
         'Attempting to isolate a process track with a local track is selected.'
@@ -120,6 +125,12 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
   _isolateProcessMainThread = () => {
     const { isolateProcessMainThread, rightClickedTrack } = this.props;
+    if (rightClickedTrack === null) {
+      throw new Error(
+        'Attempted to isolate the process main thread with no right clicked track.'
+      );
+    }
+
     if (rightClickedTrack.type === 'local') {
       throw new Error(
         'Attempting to isolate a process track with a local track is selected.'
@@ -130,6 +141,12 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
   _isolateLocalTrack = () => {
     const { isolateLocalTrack, rightClickedTrack } = this.props;
+    if (rightClickedTrack === null) {
+      throw new Error(
+        'Attempted to isolate the local track with no right clicked track.'
+      );
+    }
+
     if (rightClickedTrack.type === 'global') {
       throw new Error(
         'Attempting to isolate a local track with a global track is selected.'
@@ -201,12 +218,8 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     ));
   }
 
-  getRightClickedTrackName() {
-    const {
-      globalTrackNames,
-      localTrackNamesByPid,
-      rightClickedTrack,
-    } = this.props;
+  getRightClickedTrackName(rightClickedTrack: TrackReference): string {
+    const { globalTrackNames, localTrackNamesByPid } = this.props;
 
     if (rightClickedTrack.type === 'global') {
       return globalTrackNames[rightClickedTrack.trackIndex];
@@ -228,6 +241,10 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       hiddenLocalTracksByPid,
       localTracksByPid,
     } = this.props;
+
+    if (rightClickedTrack === null) {
+      return null;
+    }
 
     if (rightClickedTrack.type !== 'global' || globalTracks.length === 1) {
       // This is not a valid candidate for isolating.
@@ -273,7 +290,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     return (
       <MenuItem onClick={this._isolateProcess} disabled={isDisabled}>
-        Only show this process
+        Only show this process group
       </MenuItem>
     );
   }
@@ -286,6 +303,10 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
     } = this.props;
+
+    if (rightClickedTrack === null) {
+      return null;
+    }
 
     if (rightClickedTrack.type !== 'global') {
       // This is not a valid candidate for isolating. Either there are not
@@ -318,7 +339,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     return (
       <MenuItem onClick={this._isolateProcessMainThread} disabled={isDisabled}>
-        Only show {`"${this.getRightClickedTrackName()}"`}
+        Only show {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
       </MenuItem>
     );
   }
@@ -331,6 +352,10 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
     } = this.props;
+
+    if (rightClickedTrack === null) {
+      return null;
+    }
 
     if (rightClickedTrack.type === 'global') {
       return null;
@@ -354,13 +379,21 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     return (
       <MenuItem onClick={this._isolateLocalTrack} disabled={isDisabled}>
-        Only show {`"${this.getRightClickedTrackName()}"`}
+        Only show {`"${this.getRightClickedTrackName(rightClickedTrack)}"`}
       </MenuItem>
     );
   }
 
   render() {
     const { globalTrackOrder, globalTracks } = this.props;
+
+    const isolateProcessMainThread = this.renderIsolateProcessMainThread();
+    const isolateProcess = this.renderIsolateProcess();
+    const isolateLocalTrack = this.renderIsolateLocalTrack();
+    const separator =
+      isolateProcessMainThread || isolateProcess || isolateLocalTrack ? (
+        <div className="react-contextmenu-separator" />
+      ) : null;
 
     return (
       <ContextMenu
@@ -371,10 +404,10 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
           // The menu items header items to isolate tracks may or may not be
           // visible depending on the current state.
         }
-        {this.renderIsolateProcessMainThread()}
-        {this.renderIsolateProcess()}
-        {this.renderIsolateLocalTrack()}
-        <div className="react-contextmenu-separator" />
+        {isolateProcessMainThread}
+        {isolateProcess}
+        {isolateLocalTrack}
+        {separator}
         {globalTrackOrder.map(globalTrackIndex => {
           const globalTrack = globalTracks[globalTrackIndex];
           return (
