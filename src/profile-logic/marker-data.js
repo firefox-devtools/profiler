@@ -94,6 +94,10 @@ export function getSearchFilteredMarkers(
       continue;
     }
     if (data && typeof data === 'object') {
+      if (data.type === 'FileIO') {
+        newMarkers.push(marker);
+        continue;
+      }
       if (
         typeof data.eventType === 'string' &&
         data.eventType.toLowerCase().includes(lowerCaseSearchString)
