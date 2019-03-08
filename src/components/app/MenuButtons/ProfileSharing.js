@@ -24,14 +24,14 @@ import type { ProfileSharingStatus } from '../../../types/state';
 
 require('./ProfileSharing.css');
 
-type Props = {
-  profile: Profile,
-  dataSource: DataSource,
-  predictUrl: (Action | Action[]) => string,
-  onProfilePublished: typeof actions.profilePublished,
-  profileSharingStatus: ProfileSharingStatus,
-  setProfileSharingStatus: typeof actions.setProfileSharingStatus,
-};
+type Props = {|
+  +profile: Profile,
+  +dataSource: DataSource,
+  +predictUrl: (Action | Action[]) => string,
+  +onProfilePublished: typeof actions.profilePublished,
+  +profileSharingStatus: ProfileSharingStatus,
+  +setProfileSharingStatus: typeof actions.setProfileSharingStatus,
+|};
 
 type State = {
   state: string,

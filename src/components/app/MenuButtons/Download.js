@@ -17,10 +17,10 @@ import type { Profile } from '../../../types/profile';
 
 require('./Download.css');
 
-type Props = {
-  profile: Profile,
-  rootRange: StartEndRange,
-};
+type Props = {|
+  +profile: Profile,
+  +rootRange: StartEndRange,
+|};
 
 type State = {|
   uncompressedBlobUrl: string,
