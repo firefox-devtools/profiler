@@ -27,6 +27,9 @@ module.exports = {
     new HtmlWebpackPlugin({
       title: 'Photon Styling',
       template: 'res/photon/index.html',
+      // Injecting the script into the head of the document stops the content from
+      // flashing once without any styles applied.
+      inject: 'head',
     }),
   ],
   entry: './res/photon/index.js',

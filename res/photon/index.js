@@ -3,4 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import '../css/photon-components.css';
+import '../css/focus.css';
 import 'photon-colors/photon-colors.css';
+import './style.css';

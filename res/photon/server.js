@@ -3,8 +3,8 @@ const WebpackDevServer = require('webpack-dev-server');
 const config = require('./webpack.config.js');
 const webpack = require('webpack');
 
-const port = process.env.FX_PROFILER_PORT || 4242;
-const host = process.env.FX_PROFILER_HOST || 'localhost';
+const port = process.env.FX_PROFILER_PHOTON_PORT || 4243;
+const host = process.env.FX_PROFILER_PHOTON_HOST || 'localhost';
 
 const serverConfig = {
   allowedHosts: ['localhost', '.gitpod.io'],

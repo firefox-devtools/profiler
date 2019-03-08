@@ -7,7 +7,7 @@
     "build:clean": "rimraf dist && mkdirp dist",
     "build:quiet": "yarn build:clean && cross-env NODE_ENV=development webpack",
     "build": "yarn build:quiet --progress",
-    "build-prod:quiet": "yarn build:clean && cross-env NODE_ENV=production webpack && yarn build-photon",
+    "build-prod:quiet": "yarn build:clean && yarn build-photon && cross-env NODE_ENV=production webpack",
     "build-prod": "yarn build-prod:quiet --progress",
     "build-photon": "webpack --config res/photon/webpack.config.js",
     "lint": "run-p lint-js lint-css",

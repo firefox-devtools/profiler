@@ -3,33 +3,26 @@
   <head>
     <meta charset="utf-8">
     <title>Photon Styling Examples</title>
-    <style>
-      body, html {
-        font: message-box;
-        font-size: 11px;
-      }
-      .row {
-        border-left: 2px solid var(--grey-30);
-        padding: 0 3em 2em;
-        margin: 3em 0;
-      }
-      .row pre {
-        margin: 2em 0;
-        display: block;
-      }
-    </style>
   </head>
   <body>
+    <h1>Photon Styling Examples</h1>
+    <p>This page has examples for the profiler’s implementation of the <a href="https://design.firefox.com/photon/">Photon design spec</a>.</p>
     <div class="row">
       <pre>&lt;button type="button" class="photon-button"&gt;Photon Button&lt;/button&gt;</pre>
       <button type="button" class="photon-button">Photon Button</button>
     </div>
-    <br/>
+    <div class="row">
+      <pre>&lt;button type="button" class="photon-button photon-button-micro"&gt;Photon Micro Button&lt;/button&gt;</pre>
+      <button type="button" class="photon-button photon-button-micro">Photon Micro Button</button>
+    </div>
+    <div class="row">
+      <pre>&lt;button type="button" class="photon-button photon-button-ghost photon-button-test-image"&gt;&lt;/button&gt;</pre>
+      <button type="button" class="photon-button photon-button-ghost photon-button-test-image"></button>
+    </div>
     <div class="row">
       <pre>&lt;input type="text" class="photon-input" value="Example text" /&gt;</pre>
       <input type="text" class="photon-input" value="Example text" />
     </div>
-    <br/>
     <div class="row">
       <pre>
 &lt;div class="photon-message-bar photon-message-bar-error"&gt;
