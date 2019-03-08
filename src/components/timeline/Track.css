@@ -60,6 +60,10 @@
   white-space: nowrap;
 }
 
+.timelineTrackNameButtonAdditionalDetails {
+  color: var(--grey-50);
+}
+
 .timelineTrackTrack {
   position: relative;
   display: flex;
