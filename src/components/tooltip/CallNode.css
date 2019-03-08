@@ -12,6 +12,7 @@
 
 .tooltipCallNodeImplementationHeader {
   padding-right: 5px;
+  margin-top: 5px;
   border-right: 1px solid var(--grey-30);
   color: var(--grey-50);
   white-space: nowrap;
