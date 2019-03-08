@@ -48,61 +48,60 @@ function getDataSourceDirs(
 // "null | void" in the query objects are flags which map to true for null, and false
 // for void. False flags do not show up the URL.
 type BaseQuery = {|
-  range?: string, //
-  thread?: string, // "3"
-  globalTrackOrder?: string, // "3-2-0-1"
-  hiddenGlobalTracks?: string, // "0-1"
-  hiddenLocalTracksByPid?: string,
-  localTrackOrderByPid?: string,
-  file?: string, // Path into a zip file.
-  react_perf?: null, // Flag to activate react's UserTimings profiler.
-  transforms?: string,
-  timelineType?: string,
+  range: string, //
+  thread: string, // "3"
+  globalTrackOrder: string, // "3-2-0-1"
+  hiddenGlobalTracks: string, // "0-1"
+  hiddenLocalTracksByPid: string,
+  localTrackOrderByPid: string,
+  file: string, // Path into a zip file.
+  transforms: string,
+  timelineType: string,
   // The following values are legacy, and will be converted to track-based values. These
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
-  threadOrder?: string, // "3-2-0-1"
-  hiddenThreads?: string, // "0-1"
-  profiles?: string[],
+  threadOrder: string, // "3-2-0-1"
+  hiddenThreads: string, // "0-1"
+  profiles: string[],
 |};
 
 type CallTreeQuery = {|
   ...BaseQuery,
-  search?: string, // "js::RunScript"
-  invertCallstack?: null | void,
-  implementation?: string,
+  search: string, // "js::RunScript"
+  invertCallstack: null | void,
+  implementation: string,
 |};
 
 type MarkersQuery = {|
   ...BaseQuery,
-  markerSearch?: string, // "DOMEvent"
+  markerSearch: string, // "DOMEvent"
 |};
 
 type StackChartQuery = {|
   ...BaseQuery,
-  search?: string, // "js::RunScript"
-  invertCallstack?: null | void,
-  implementation?: string,
+  search: string, // "js::RunScript"
+  invertCallstack: null | void,
+  implementation: string,
 |};
 
 type JsTracerQuery = {|
   ...BaseQuery,
-  summary?: null | void,
+  summary: null | void,
 |};
 
 // Use object type spread in the definition of Query rather than unions, so that they
 // are really easy to manipulate. This permissive definition makes it easy to not have
 // to refine the type down to the individual query types when working with them.
-type Query = {
+type Query = {|
   ...CallTreeQuery,
   ...MarkersQuery,
   ...StackChartQuery,
   ...JsTracerQuery,
-};
+|};
 
 type UrlObject = {|
   pathParts: string[],
-  query: Query,
+  query: $Shape<Query>,
 |};
 
 /**

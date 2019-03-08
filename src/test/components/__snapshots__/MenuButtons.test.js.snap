@@ -3,25 +3,25 @@
 exports[`app/MenuButtons share and save buttons matches the snapshot 1`] = `
 Array [
   <div
-    class="menuButtonsOpenMetaInfoButtonBox"
+    class="menuButtonsMetaInfoButtonBox"
   >
     <div
-      class="menuButtonsOpenMetaInfoButtonLabel"
+      class="menuButtonsMetaInfoButtonLabel"
     >
       <span
-        class="menuButtonsOpenMetaInfoButtonLabelOverflow"
+        class="menuButtonsMetaInfoButtonLabelOverflow"
       >
         Firefox (48.0) Intel Mac OS X 10.11
       </span>
     </div>
     <div
-      class="buttonWithPanel menuButtonsOpenMetaInfoButtonButton"
+      class="buttonWithPanel menuButtonsMetaInfoButtonButton"
     >
       <div
         class="buttonWithPanelButtonWrapper"
       >
         <input
-          class="buttonWithPanelButton menuButtonsOpenMetaInfoButtonButtonButton"
+          class="buttonWithPanelButton menuButtonsMetaInfoButtonButtonButton"
           type="button"
           value=" "
         />
@@ -230,9 +230,7 @@ Array [
                   To view all the information you can download the full profile to a file and open the json structure with a text editor.
                 </p>
                 <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile
-        but keeping the URLs may help to identify the problems. Please select the checkbox
-        below to share the URLs of the network requests:
+                  By default, the URLs of all network requests will be removed while sharing the profile but keeping the URLs may help to identify the problems. Please select the checkbox below to share the URLs of the network requests:
                 </p>
               </section>
               <p

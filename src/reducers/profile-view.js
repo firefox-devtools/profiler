@@ -433,11 +433,8 @@ const rootRange: Reducer<StartEndRange> = (
   }
 };
 
-const rightClickedTrack: Reducer<TrackReference> = (
-  // Make the initial value the first global track, which is assumed to exists.
-  // This makes the track reference always exist, which in turn makes it so that
-  // we do not have to check for a null TrackReference.
-  state = { type: 'global', trackIndex: 0 },
+const rightClickedTrack: Reducer<TrackReference | null> = (
+  state = null,
   action
 ) => {
   switch (action.type) {

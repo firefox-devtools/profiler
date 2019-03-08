@@ -11,10 +11,7 @@ import { getShowJsTracerSummary } from '../../selectors/url-state';
 
 import './Settings.css';
 
-import type { ImplementationFilter } from '../../types/actions';
-
 type Props = {|
-  +implementationFilter: ImplementationFilter,
   +showJsTracerSummary: boolean,
   +changeShowJsTracerSummary: typeof changeShowJsTracerSummary,
 |};

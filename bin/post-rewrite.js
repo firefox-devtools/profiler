@@ -1,6 +1,12 @@
 // @noflow
+
+// Older versions of husky use `GIT_PARAMS`, newer versions use `HUSKY_GIT_PARAMS`.
+// To make it easier to move between branches, we support both for now. We can
+// remove this thin compatibility layer later.
+const gitParams = process.env.GIT_PARAMS || process.env.HUSKY_GIT_PARAMS;
+
 // This is either 'rebase' or 'amend'.
-if (process.env.GIT_PARAMS !== 'rebase') {
+if (gitParams !== 'rebase') {
   process.exit();
 }
 
