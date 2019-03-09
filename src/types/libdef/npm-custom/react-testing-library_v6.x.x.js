@@ -1,6 +1,11 @@
 // flow-typed signature: 3701db256845a0030406fb19fa4d0547
 // flow-typed version: a73e7915bb/react-testing-library_v5.x.x/flow_>=v0.67.1
 
+// @flow
+
+// This file is just a renamed libdef for the library v5. It should be removed
+// once there's a libdef for v6.
+
 declare module 'react-testing-library' {
   declare type TextMatch =
     | string
