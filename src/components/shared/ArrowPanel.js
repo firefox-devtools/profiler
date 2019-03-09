@@ -49,7 +49,6 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     if (!this.state.open) {
       return;
     }
-
     this.setState({ open: false });
     if (this.props.onClose) {
       this.props.onClose();
@@ -74,7 +73,8 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     if (
       this.state.open &&
       this._panelElement &&
-      !this._panelElement.contains(target)
+      !this._panelElement.contains(target) &&
+      !this._buttonElement
     ) {
       this.close();
     }

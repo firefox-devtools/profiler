@@ -38,6 +38,7 @@ type State = {|
 |};
 
 class ButtonWithPanel extends React.PureComponent<Props, State> {
+  _buttonElement: HTMLElement | null = null;
   _panel: Panel | null = null;
 
   constructor(props: Props) {
@@ -55,6 +56,11 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
 
   componentWillUnmount() {
     window.removeEventListener('keydown', this._onKeyDown);
+    window.removeEventListener(
+      'mousedown',
+      this._windowMouseDownListener,
+      true
+    );
   }
 
   componentWillReceiveProps(props: Props) {
@@ -64,44 +70,68 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   }
 
   _onPanelOpen = () => {
+    this.setState({ open: true });
     if (this.props.panel.props.onOpen) {
       this.props.panel.props.onOpen();
     }
+    console.log('inside onPaneOpen');
+    window.addEventListener('mousedown', this._windowMouseDownListener, true);
   };
 
   _onPanelClose = () => {
+    this.setState({ open: false });
     if (this.props.panel.props.onClose) {
       this.props.panel.props.onClose();
     }
+    window.removeEventListener(
+      'mousedown',
+      this._windowMouseDownListener,
+      true
+    );
   };
 
   _takePanelRef = (panel: Panel | null) => {
     this._panel = panel;
   };
 
+  _takeButtonRef = (elem: HTMLElement | null) => {
+    this._buttonElement = elem;
+  };
+
   openPanel() {
     if (this._panel) {
       this._panel.open();
-      this.setState({ open: true });
     }
   }
+
   closePanel() {
     if (this._panel && this.state.open) {
       this._panel.close();
-      this.setState({ open: false });
     }
   }
 
   _onButtonClick = () => {
-    if (this._panel && this.state.open) {
-      this.closePanel();
-    } else {
+    if (!this.state.open) {
       this.openPanel();
+    } else {
+      this.closePanel();
     }
   };
 
   _onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
+      this.closePanel();
+    }
+  };
+
+  _windowMouseDownListener = (e: MouseEvent) => {
+    const target: Node = (e.target: any); // make flow happy
+    if (
+      this.state.open &&
+      this._panel &&
+      this._panel._panelElement &&
+      !this._buttonElement.contains(target)
+    ) {
       this.closePanel();
     }
   };
@@ -120,6 +150,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
             )}
             disabled={!!disabled}
             value={label}
+            ref={this._takeButtonRef}
             onClick={this._onButtonClick}
           />
         </div>
