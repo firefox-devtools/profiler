@@ -74,7 +74,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
       this.state.open &&
       this._panelElement &&
       !this._panelElement.contains(target) &&
-      !this._buttonElement
+      !this._buttonElement.contains(target)
     ) {
       this.close();
     }

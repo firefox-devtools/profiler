@@ -74,7 +74,6 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     if (this.props.panel.props.onOpen) {
       this.props.panel.props.onOpen();
     }
-    console.log('inside onPaneOpen');
     window.addEventListener('mousedown', this._windowMouseDownListener, true);
   };
 
