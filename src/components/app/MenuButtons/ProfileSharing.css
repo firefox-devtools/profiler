@@ -2,40 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.menuButtons {
-  --internal-share-button-background-color: var(
-    --share-button-background-color,
-    hsl(137, 81%, 44%)
-  );
-  --internal-uploading-button-background-color: var(
-    --uploading-button-background-color,
-    #38445f
-  );
-  --internal-uploading-progress-fill-color: var(
-    --uploading-progress-fill-color,
-    #7990c8
-  );
-
-  display: flex;
-  height: 100%;
-  flex-flow: row nowrap;
-}
-
-.menuButtonsLink {
-  position: relative;
-  height: 24px;
-  padding: 0 10px;
-  border-left: 1px solid var(--grey-30);
-  color: var(--grey-90);
-  cursor: default;
-  line-height: 24px;
-  text-decoration: none;
-}
-
-.menuButtonsLink:hover {
-  background-color: rgba(0, 0, 0, 0.1);
-}
-
 .menuButtonsCompositeButtonContainer {
   display: flex;
   flex-flow: column nowrap;
@@ -103,8 +69,8 @@
   background: var(--internal-uploading-progress-fill-color);
 }
 
-.menuButtonsShareButtonButton:not([disabled]),
-.menuButtonsSecondaryShareButtonButton:not([disabled]) {
+.menuButtonsShareButtonButton,
+.menuButtonsSecondaryShareButtonButton {
   background-color: #0d8730;
   color: white;
 }
@@ -158,15 +124,6 @@
   --width: 280px;
 }
 
-.menuButtonsProfileDownloadPanel {
-  --offset-from-right: 25px;
-  --width: 30em;
-}
-
-.menuButtonsDownloadLink {
-  white-space: nowrap;
-}
-
 .menuButtonsPermalinkTextField {
   width: 14em;
   height: 19px;
@@ -184,49 +141,4 @@
   position: relative;
   bottom: 1px;
   vertical-align: middle;
-}
-
-.menuButtonsOpenMetaInfoButtonBox,
-.menuButtonsOpenMetaInfoButtonLabel,
-.menuButtonsOpenMetaInfoButtonButton {
-  height: 100%;
-  font-size: 100%;
-}
-
-.menuButtonsOpenMetaInfoButtonBox {
-  display: flex;
-
-  /* Let this box shrink down to the size of the three dots and a bit of text. */
-  min-width: 75px;
-
-  /* Shrink down twice as fast as the range selection labels. */
-  flex-shrink: 2;
-  padding: 0;
-}
-
-.menuButtonsOpenMetaInfoButtonLabel {
-  position: relative;
-  display: flex;
-
-  /* Let this box shrink down to the size of the three dots. */
-  min-width: 0;
-
-  /* Make sure the padding doesn't contribute to the height, which is 100% */
-  box-sizing: border-box;
-  flex-flow: column nowrap;
-  align-items: stretch;
-  padding: 5px 10px;
-}
-
-.menuButtonsOpenMetaInfoButtonLabelOverflow {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.menuButtonsOpenMetaInfoButtonBox .buttonWithPanelButton,
-.menuButtonsOpenMetaInfoButtonBox .buttonWithPanel:hover,
-.menuButtonsOpenMetaInfoButtonBox .buttonWithPanel.open {
-  width: 40px;
-  background: url(../../../res/img/svg/meatball.svg) 50% 50% no-repeat;
 }

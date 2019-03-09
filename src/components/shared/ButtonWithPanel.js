@@ -30,7 +30,6 @@ type Props = {
     Class<Panel & React.Component<$Subtype<PanelProps>, any>>
   >,
   open?: boolean,
-  disabled?: boolean,
 };
 
 type State = {|
@@ -136,7 +135,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { className, label, panel, disabled } = this.props;
+    const { className, label, panel } = this.props;
     const { open } = this.state;
     return (
       <div className={classNames('buttonWithPanel', className, { open })}>
@@ -147,7 +146,6 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
               'buttonWithPanelButton',
               `${className}Button`
             )}
-            disabled={!!disabled}
             value={label}
             ref={this._takeButtonRef}
             onClick={this._onButtonClick}

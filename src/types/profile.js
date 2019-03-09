@@ -375,6 +375,12 @@ export type ProfileMeta = {|
   logicalCPUs?: number,
   // A boolean flag for whether or not the network URLs were stripped from the profile.
   networkURLsRemoved?: boolean,
+  // A boolean flag indicating whether we symbolicated this profile. If this is
+  // false we'll start a symbolication process when the profile is loaded.
+  // A missing property means that it's an older profile, it stands for an
+  // "unknown" state.  For now we don't do much with it but we may want to
+  // propose a manual symbolication in the future.
+  symbolicated?: boolean,
 |};
 
 /**

@@ -1040,6 +1040,12 @@ export function processProfile(
     logicalCPUs: geckoProfile.meta.logicalCPUs,
     // Gecko always sends the profile with URLs.
     networkURLsRemoved: false,
+    // `presymbolicated` indicates whether this gecko profile includes already
+    // symbolicated frames. This will be missing for profiles coming from Gecko
+    // but may be specified for profiles imported from other formats (eg: linux
+    // perf). If it's present and true, then we indicate that the process is
+    // already symbolicated, otherwise we indicate it needs to be symbolicated.
+    symbolicated: !!geckoProfile.meta.presymbolicated,
   };
 
   const result = {
