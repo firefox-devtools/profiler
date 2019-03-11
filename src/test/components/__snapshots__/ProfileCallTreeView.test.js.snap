@@ -17,10 +17,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -29,10 +29,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -41,10 +41,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -57,10 +57,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -150,10 +150,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -162,10 +162,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -174,10 +174,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -190,10 +190,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -283,10 +283,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -295,10 +295,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -307,10 +307,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -323,10 +323,10 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -416,10 +416,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -428,10 +428,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -440,10 +440,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -456,10 +456,10 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -1771,10 +1771,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -1783,10 +1783,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -1795,10 +1795,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -1811,10 +1811,10 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -2385,10 +2385,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -2397,10 +2397,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -2409,10 +2409,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -2425,10 +2425,10 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -2999,10 +2999,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3011,10 +3011,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3023,10 +3023,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3039,10 +3039,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -3613,10 +3613,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3625,10 +3625,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3637,10 +3637,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -3653,10 +3653,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -4184,10 +4184,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4196,10 +4196,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4208,10 +4208,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4224,10 +4224,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -4755,10 +4755,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4767,10 +4767,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4779,10 +4779,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -4795,10 +4795,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -5207,10 +5207,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -5219,10 +5219,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -5231,10 +5231,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -5247,10 +5247,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />
@@ -5659,10 +5659,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -5671,10 +5671,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -5683,10 +5683,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -5699,10 +5699,10 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
         class="stackSettingsListItem"
       >
         <label
-          class="stackSettingsLabel"
+          class="photon-label-micro stackSettingsLabel"
         >
           <input
-            class="stackSettingsCheckbox"
+            class="photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />

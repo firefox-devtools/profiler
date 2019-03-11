@@ -149,10 +149,10 @@ exports[`FlameGraph matches the snapshot 1`] = `
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -161,10 +161,10 @@ exports[`FlameGraph matches the snapshot 1`] = `
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -173,10 +173,10 @@ exports[`FlameGraph matches the snapshot 1`] = `
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
