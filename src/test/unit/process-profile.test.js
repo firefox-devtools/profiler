@@ -8,6 +8,7 @@ import {
   processProfile,
   serializeProfile,
   unserializeProfileOfArbitraryFormat,
+  sanitizePII,
 } from '../../profile-logic/process-profile';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import {
@@ -234,6 +235,12 @@ describe('gecko counters processing', function() {
 });
 
 describe('serializeProfile', function() {
+  it('should produce a parsable profile string', async function() {
+    const profile = processProfile(createGeckoProfile());
+    const serialized = serializeProfile(profile);
+    expect(JSON.parse.bind(null, serialized)).not.toThrow();
+  });
+
   it('should produce the same profile in a roundtrip', async function() {
     const profile = processProfile(createGeckoProfile());
     const serialized = serializeProfile(profile);
@@ -248,60 +255,167 @@ describe('serializeProfile', function() {
     );
     expect(roundtrip).toEqual(secondRountrip);
   });
+});
 
-  describe('removing network urls', function() {
-    it('should remove all pages information', async function() {
-      const profile = processProfile(createGeckoProfile());
+describe('sanitizePII', function() {
+  it('should sanitize the threads if they are provided', function() {
+    const profile = processProfile(createGeckoProfile());
+    // There are 3 threads in the beginning.
+    expect(profile.threads.length).toEqual(3);
+    const PIIToRemove: RemoveProfileInformation = {
+      shouldRemoveThreads: [0, 2], // testing this
+      shouldRemoveThreadsWithScreenshots: [],
+      shouldRemoveNetworkUrls: false,
+      shouldRemoveAllUrls: false,
+      shouldFilterToCommittedRange: null,
+      shouldRemoveExtensions: false,
+    };
 
-      for (const page of ensureExists(profile.pages)) {
-        expect(page.url.includes('http')).toBe(true);
-      }
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove);
+    // First and last threads are removed and now there are only 1 thread.
+    expect(sanitizedProfile.threads.length).toEqual(1);
+  });
 
-      const PIIToRemove: RemoveProfileInformation = {
-        shouldRemoveThreads: [],
-        shouldRemoveThreadsWithScreenshots: [],
-        shouldRemoveNetworkUrls: true,
-        shouldRemoveAllUrls: false,
-        shouldFilterToCommittedRange: null,
-        shouldRemoveExtensions: false,
-      };
-      const serialized = serializeProfile(profile, PIIToRemove);
-      const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
-
-      for (const page of ensureExists(roundtrip.pages)) {
-        expect(page.url.includes('http')).toBe(false);
-      }
-    });
-
-    it('should remove all URLs of network markers', async function() {
-      const profile = processProfile(createGeckoProfile());
-      const PIIToRemove: RemoveProfileInformation = {
-        shouldRemoveThreads: [],
-        shouldRemoveThreadsWithScreenshots: [],
-        shouldRemoveNetworkUrls: true,
-        shouldRemoveAllUrls: false,
-        shouldFilterToCommittedRange: null,
-        shouldRemoveExtensions: false,
-      };
-      const serialized = serializeProfile(profile, PIIToRemove);
-      const roundtrip = await unserializeProfileOfArbitraryFormat(serialized);
-
-      for (const thread of roundtrip.threads) {
-        const stringArray = thread.stringTable.serializeToArray();
-        for (let i = 0; i < thread.markers.length; i++) {
-          const currentMarker = thread.markers.data[i];
-          if (
-            currentMarker &&
-            currentMarker.type &&
-            currentMarker.type === 'Network'
-          ) {
-            expect(currentMarker.URI).toBeFalsy();
-            expect(currentMarker.RedirectURI).toBeFalsy();
-            const stringIndex = thread.markers.name[i];
-            expect(stringArray[stringIndex].includes('http')).toBe(false);
-          }
+  it('should sanitize the screenshots if they are provided', function() {
+    const profile = processProfile(createGeckoProfile());
+    // Checking if we have screenshot markers just in case.
+    let screenshotMarkerFound = false;
+    for (const thread of profile.threads) {
+      for (const data of thread.markers.data) {
+        if (data && data.type === 'CompositorScreenshot') {
+          screenshotMarkerFound = true;
+          break;
         }
       }
-    });
+    }
+    expect(screenshotMarkerFound).toEqual(true);
+
+    const PIIToRemove: RemoveProfileInformation = {
+      shouldRemoveThreads: [],
+      shouldRemoveThreadsWithScreenshots: [0, 1, 2], // testing this
+      shouldRemoveNetworkUrls: false,
+      shouldRemoveAllUrls: false,
+      shouldFilterToCommittedRange: null,
+      shouldRemoveExtensions: false,
+    };
+
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove);
+    screenshotMarkerFound = false;
+    for (const thread of sanitizedProfile.threads) {
+      for (const data of thread.markers.data) {
+        if (data && data.type === 'CompositorScreenshot') {
+          screenshotMarkerFound = true;
+          break;
+        }
+      }
+    }
+    expect(screenshotMarkerFound).toEqual(false);
+  });
+
+  it('should sanitize the pages information', function() {
+    const profile = processProfile(createGeckoProfile());
+
+    for (const page of ensureExists(profile.pages)) {
+      expect(page.url.includes('http')).toBe(true);
+    }
+
+    const PIIToRemove: RemoveProfileInformation = {
+      shouldRemoveThreads: [],
+      shouldRemoveThreadsWithScreenshots: [],
+      shouldRemoveNetworkUrls: true, // testing this
+      shouldRemoveAllUrls: false,
+      shouldFilterToCommittedRange: null,
+      shouldRemoveExtensions: false,
+    };
+
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove);
+    for (const page of ensureExists(sanitizedProfile.pages)) {
+      expect(page.url.includes('http')).toBe(false);
+    }
+  });
+
+  it('should sanitize the network URLS', function() {
+    const profile = processProfile(createGeckoProfile());
+    const PIIToRemove: RemoveProfileInformation = {
+      shouldRemoveThreads: [],
+      shouldRemoveThreadsWithScreenshots: [],
+      shouldRemoveNetworkUrls: true, // testing this
+      shouldRemoveAllUrls: false,
+      shouldFilterToCommittedRange: null,
+      shouldRemoveExtensions: false,
+    };
+
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove);
+    for (const thread of sanitizedProfile.threads) {
+      const stringArray = thread.stringTable.serializeToArray();
+      for (let i = 0; i < thread.markers.length; i++) {
+        const currentMarker = thread.markers.data[i];
+        if (
+          currentMarker &&
+          currentMarker.type &&
+          currentMarker.type === 'Network'
+        ) {
+          expect(currentMarker.URI).toBeFalsy();
+          expect(currentMarker.RedirectURI).toBeFalsy();
+          const stringIndex = thread.markers.name[i];
+          expect(stringArray[stringIndex].includes('http')).toBe(false);
+        }
+      }
+    }
+  });
+
+  it('should sanitize the network URLS', function() {
+    const profile = processProfile(createGeckoProfile());
+    const PIIToRemove: RemoveProfileInformation = {
+      shouldRemoveThreads: [],
+      shouldRemoveThreadsWithScreenshots: [],
+      shouldRemoveNetworkUrls: false,
+      shouldRemoveAllUrls: true, // testing this
+      shouldFilterToCommittedRange: null,
+      shouldRemoveExtensions: false,
+    };
+
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove);
+    for (const thread of sanitizedProfile.threads) {
+      const stringArray = thread.stringTable.serializeToArray();
+      for (const string of stringArray) {
+        // We are keeping the http(s) and removing the rest.
+        // That's why we can't test it with `includes('http')`.
+        // Tested `.com` here since all of the test urls have .com in it
+        expect(string.includes('.com')).toBe(false);
+      }
+    }
+  });
+
+  it('should sanitize extensions', function() {
+    const profile = processProfile(createGeckoProfile());
+    expect(profile.meta.extensions).not.toEqual(undefined);
+    // For flow
+    if (profile.meta.extensions !== undefined) {
+      const extensions = profile.meta.extensions;
+      expect(extensions.length).toEqual(3);
+      expect(extensions.id.length).toEqual(3);
+      expect(extensions.name.length).toEqual(3);
+      expect(extensions.baseURL.length).toEqual(3);
+    }
+    const PIIToRemove: RemoveProfileInformation = {
+      shouldRemoveThreads: [],
+      shouldRemoveThreadsWithScreenshots: [],
+      shouldRemoveNetworkUrls: false,
+      shouldRemoveAllUrls: false,
+      shouldFilterToCommittedRange: null,
+      shouldRemoveExtensions: true,
+    };
+
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove);
+    expect(sanitizedProfile.meta.extensions).not.toEqual(undefined);
+    // For flow
+    if (sanitizedProfile.meta.extensions !== undefined) {
+      const extensions = sanitizedProfile.meta.extensions;
+      expect(extensions.length).toEqual(0);
+      expect(extensions.id.length).toEqual(0);
+      expect(extensions.name.length).toEqual(0);
+      expect(extensions.baseURL.length).toEqual(0);
+    }
   });
 });
