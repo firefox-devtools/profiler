@@ -14,7 +14,6 @@ import type {
 } from '../../utils/connect';
 
 import './CompareHome.css';
-import '../../../res/css/photon-components.css';
 
 type DispatchProps = {|
   +changeProfilesToCompare: typeof changeProfilesToCompare,

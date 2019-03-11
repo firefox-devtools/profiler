@@ -9,6 +9,7 @@
   padding: 0;
   color: var(--ink-70);
   line-height: 25px;
+  white-space: nowrap;
 }
 
 .stackSettingsList {
@@ -29,11 +30,8 @@
 .stackSettingsLabel {
   display: inline-flex;
   height: 25px;
-  flex-flow: row nowrap;
   align-items: center;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
+  padding: 0;
 }
 
 .stackSettingsCheckbox {
@@ -43,13 +41,11 @@
 .stackSettingsFilter {
   padding-right: 10px;
   border-right: 1px solid var(--grey-20);
-  white-space: nowrap;
 }
 
 .stackSettingsFilterLabel {
-  display: inline-flex;
   align-items: center;
-  padding-right: 5px;
+  padding: 0 5px 0 0;
 }
 
 .stackSettingsFilterInput {

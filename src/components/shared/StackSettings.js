@@ -47,10 +47,10 @@ class StackSettings extends PureComponent<Props> {
     implementationFilter: ImplementationFilter
   ) {
     return (
-      <label className="stackSettingsFilterLabel">
+      <label className="photon-label-micro stackSettingsFilterLabel">
         <input
           type="radio"
-          className="stackSettingsFilterInput"
+          className="photon-radio-micro stackSettingsFilterInput"
           value={implementationFilter}
           name="stack-settings-filter"
           title="Filter stack frames to a type."
@@ -75,10 +75,10 @@ class StackSettings extends PureComponent<Props> {
           </li>
           {hideInvertCallstack ? null : (
             <li className="stackSettingsListItem">
-              <label className="stackSettingsLabel">
+              <label className="photon-label-micro stackSettingsLabel">
                 <input
                   type="checkbox"
-                  className="stackSettingsCheckbox"
+                  className="photon-checkbox-micro stackSettingsCheckbox"
                   onChange={this._onInvertCallstackClick}
                   checked={invertCallstack}
                 />
