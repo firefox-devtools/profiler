@@ -156,8 +156,13 @@ function _formatVersionNumber(version?: string): string | null {
 function _formatLabel(meta: ProfileMeta): string | null {
   const product = meta.product || '';
   const version = _formatVersionNumber(meta.misc) || '';
-  const os = meta.oscpu || '';
-
+  let os;
+  // To displaying Android Version instead of Linux for Android developers.
+  if (meta.platform !== undefined && meta.platform.match(/android/i)) {
+    os = meta.platform;
+  } else {
+    os = meta.oscpu || '';
+  }
   const labelTitle = product + ' (' + version + ') ' + os;
 
   if (labelTitle.length < 5) {
