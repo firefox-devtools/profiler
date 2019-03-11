@@ -263,12 +263,16 @@ describe('process-profile', function() {
     });
     it('should create one resource per used library', function() {
       const thread = profile.threads[0];
-      expect(thread.resourceTable.length).toEqual(2);
-      expect(thread.resourceTable.type[0]).toEqual(resourceTypes.library);
-      expect(thread.resourceTable.type[1]).toEqual(resourceTypes.url);
-      const [name0, name1] = thread.resourceTable.name;
-      expect(thread.stringTable.getString(name0)).toEqual('firefox');
-      expect(thread.stringTable.getString(name1)).toEqual('chrome://blargh');
+      expect(thread.resourceTable.length).toEqual(3);
+      expect(thread.resourceTable.type[0]).toEqual(resourceTypes.addon);
+      expect(thread.resourceTable.type[1]).toEqual(resourceTypes.library);
+      expect(thread.resourceTable.type[2]).toEqual(resourceTypes.url);
+      const [name0, name1, name2] = thread.resourceTable.name;
+      expect(thread.stringTable.getString(name0)).toEqual(
+        'Extension "Form Autofill" (ID: formautofill@mozilla.org)'
+      );
+      expect(thread.stringTable.getString(name1)).toEqual('firefox');
+      expect(thread.stringTable.getString(name2)).toEqual('chrome://blargh');
     });
   });
 
