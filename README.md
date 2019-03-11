@@ -22,11 +22,11 @@ The Profiler was tested with recent versions of the following assistive technolo
 
 [NVDA](https://www.nvaccess.org/) (Windows) on Firefox and Chrome browsers </br>
 [VoiceOver](https://www.apple.com/accessibility/mac/vision/) (Mac OS X) on Chrome</br>
-[Orca](https://wiki.gnome.org/action/show/Projects/Orca?action=show&redirect=Orca) (Linux) on Firefox 
+[Orca](https://wiki.gnome.org/action/show/Projects/Orca?action=show&redirect=Orca) (Linux) on Firefox
 
 If you experience problems using any of the above technologies, please file a bug.
 
-If you would like to help us test on other assistive technologies or improve the existing code, we would love your contributions! 
+If you would like to help us test on other assistive technologies or improve the existing code, we would love your contributions!
 
 ### Development
 
@@ -45,7 +45,7 @@ To download and build the Firefox Profiler web app run:
 
 ```bash
 git clone git@github.com:firefox-devtools/profiler.git
-cd firefox-profiler
+cd profiler
 yarn install
 yarn start
 ```
