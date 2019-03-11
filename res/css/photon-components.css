@@ -35,8 +35,41 @@
   margin-left: 8px;
 }
 
-.photon-button:hover:active {
+.photon-button:active {
   background-color: var(--grey-90-a30);
+}
+
+.photon-button-primary,
+.photon-button-default {
+  min-width: 132px;
+  height: 32px;
+  margin: 0 8px;
+  font-size: 13px;
+}
+
+.photon-button-default {
+  background-color: var(--grey-90-a10);
+}
+
+.photon-button-default:hover {
+  background-color: var(--grey-90-a20);
+}
+
+.photon-button-default:active {
+  background-color: var(--grey-90-a30);
+}
+
+.photon-button-primary {
+  background-color: var(--blue-60);
+  color: #fff;
+}
+
+.photon-button-primary:hover {
+  background-color: var(--blue-70);
+}
+
+.photon-button-primary:active {
+  background-color: var(--blue-80);
 }
 
 .photon-button-ghost {
@@ -120,4 +153,140 @@
 
 .photon-message-bar-error .photon-button:hover:active {
   background-color: var(--red-90);
+}
+
+/* Label */
+
+.photon-label,
+.photon-label-micro {
+  display: inline-flex;
+  color: var(--grey-90);
+}
+
+.photon-label {
+  padding: 3px 0;
+  font-size: 13px;
+}
+
+.photon-label-micro {
+  padding: 3px 0;
+  font-size: 11px;
+}
+
+/* Checkboxes */
+
+.photon-checkbox,
+.photon-checkbox-micro {
+  position: relative;
+  padding: 0;
+  border: 1px solid var(--grey-90-a30);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--grey-90-a10);
+  border-radius: 2px;
+}
+
+.photon-checkbox {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px;
+}
+
+.photon-checkbox-micro {
+  width: 13px;
+  height: 13px;
+  margin: 0 3px;
+}
+
+.photon-checkbox:hover,
+.photon-checkbox-micro:hover {
+  background-color: var(--grey-90-a20);
+}
+
+.photon-checkbox:active,
+.photon-checkbox-micro:active {
+  background-color: var(--grey-90-a30);
+}
+
+.photon-checkbox:checked,
+.photon-checkbox-micro:checked {
+  border: none;
+  background-color: var(--blue-60);
+}
+
+.photon-checkbox:checked {
+  background-image: url(../img/svg/checkbox-check-16.svg);
+}
+
+.photon-checkbox-micro:checked {
+  background-image: url(../img/svg/checkbox-check-13.svg);
+}
+
+.photon-checkbox:checked:hover,
+.photon-checkbox-micro:checked:hover {
+  background-color: var(--blue-70);
+}
+
+.photon-checkbox:checked:active,
+.photon-checkbox-micro:checked:active {
+  background-color: var(--blue-80);
+}
+
+/* Radio buttons */
+
+.photon-radio,
+.photon-radio-micro {
+  border: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: none;
+  background-color: var(--grey-90-a10);
+  border-radius: 8px;
+}
+
+.photon-radio {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px;
+}
+
+.photon-radio-micro {
+  width: 13px;
+  height: 13px;
+  margin: 0 3px;
+}
+
+.photon-radio:hover,
+.photon-radio-micro:hover {
+  background-color: var(--grey-90-a20);
+}
+
+.photon-radio:active,
+.photon-radio-micro:active {
+  background-color: var(--grey-90-a30);
+}
+
+.photon-radio:checked,
+.photon-radio-micro:checked {
+  background-color: var(--blue-60);
+}
+
+.photon-radio:checked {
+  background-image: url(../img/svg/radiobutton-marker-16.svg);
+}
+
+.photon-radio-micro:checked {
+  background-image: url(../img/svg/radiobutton-marker-13.svg);
+}
+
+.photon-radio:checked:hover,
+.photon-radio-micro:checked:hover {
+  background-color: var(--blue-70);
+}
+
+.photon-radio:checked:active,
+.photon-radio-micro:checked:active {
+  background-color: var(--blue-80);
 }
