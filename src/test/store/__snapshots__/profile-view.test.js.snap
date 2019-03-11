@@ -1113,22 +1113,18 @@ exports[`snapshots of selectors/profile matches the last stored run of markerThr
 Array [
   Object {
     "end": Array [
-      6.5,
       7,
     ],
     "index": Array [
       0,
-      1,
     ],
     "label": Array [
       "",
-      "",
     ],
-    "length": 2,
+    "length": 1,
     "name": "Load 6: https://mozilla.org",
     "start": Array [
       6,
-      6.5,
     ],
   },
 ]

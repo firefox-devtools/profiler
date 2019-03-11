@@ -1,0 +1,33 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+ .networkSettings {
+    display: flex;
+    height: 25px;
+    flex-flow: row nowrap;
+    padding: 0;
+    line-height: 25px;
+  }
+  
+  .networkSettingsSpacer {
+    flex: 1;
+  }
+  
+  .networkSettingsLabel {
+    display: inline-flex;
+    height: 25px;
+    flex-flow: row nowrap;
+    align-items: center;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+  }
+  
+  .networkSettingsSearchbar {
+    padding: 0 5px;
+  }
+  
+  .networkSettingsSearchField {
+    width: 250px;
+  }

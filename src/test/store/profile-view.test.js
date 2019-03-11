@@ -666,6 +666,17 @@ describe('actions/ProfileView', function() {
     });
   });
 
+  describe('changeNetworkSearchString', function() {
+    it('changes the search string', function() {
+      const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(UrlStateSelectors.getNetworkSearchString(getState())).toEqual('');
+      dispatch(ProfileView.changeNetworkSearchString('a'));
+      expect(UrlStateSelectors.getNetworkSearchString(getState())).toEqual('a');
+    });
+  });
+
   describe('changeImplementationFilter', function() {
     it('changes the implementation filter', function() {
       const { profile } = getProfileFromTextSamples('A');
