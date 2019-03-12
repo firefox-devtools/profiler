@@ -74,21 +74,21 @@ describe('Viewport', function() {
     });
   });
 
-  function testScrollingHint(eventOptions){
+  function testScrollingHint(eventOptions) {
     const { getByText, scroll } = setup();
-      const isTimerVisible = () =>
-        !getByText(/Zoom Chart/).classList.contains('hidden');
+    const isTimerVisible = () =>
+      !getByText(/Zoom Chart/).classList.contains('hidden');
 
-      // No hint is shown at the beginning.
-      expect(isTimerVisible()).toBe(false);
+    // No hint is shown at the beginning.
+    expect(isTimerVisible()).toBe(false);
 
-      // Zoom in a bit.
-      scroll({ deltaY: 10, ...eventOptions});
-      expect(isTimerVisible()).toBe(false);
+    // Zoom in a bit.
+    scroll({ deltaY: 10, ...eventOptions});
+    expect(isTimerVisible()).toBe(false);
 
-      // Now scroll, no hint should show.
-      scroll({ deltaY: 10 });
-      expect(isTimerVisible()).toBe(false);
+    // Now scroll, no hint should show.
+    scroll({ deltaY: 10 });
+    expect(isTimerVisible()).toBe(false);
   }
 
   describe('scrolling hint', function() {
