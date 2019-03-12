@@ -75,7 +75,6 @@ describe('Viewport', function() {
   });
 
   function testScrollingHint(eventOptions){
-
     const { getByText, scroll } = setup();
       const isTimerVisible = () =>
         !getByText(/Zoom Chart/).classList.contains('hidden');
@@ -112,11 +111,11 @@ describe('Viewport', function() {
     });
 
     it('will not show a ctrl scrolling hint after zooming once', function() {
-      testScrollingHint({ctrlKey: true});
+      testScrollingHint({ ctrlKey: true });
     });
 
     it('will not show a shift scrolling hint after zooming once', function() {
-      testScrollingHint({shiftKey: true});
+      testScrollingHint({ shiftKey: true });
     });
   });
 
