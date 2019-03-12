@@ -378,12 +378,13 @@ exports[`StackChart matches the snapshot for the chart 1`] = `
       <kbd
         class="chartViewportScrollKbd"
       >
-        Ctrl/Shift
+        Ctrl + Scroll
       </kbd>
+      or
       <kbd
         class="chartViewportScrollKbd"
       >
-        Scroll
+        Shift + Scroll
       </kbd>
     </div>
   </div>

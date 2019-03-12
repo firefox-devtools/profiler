@@ -2624,12 +2624,13 @@ exports[`SelectedThreadActivityGraph matches the component snapshot 1`] = `
     <kbd
       class="chartViewportScrollKbd"
     >
-      Ctrl/Shift
+      Ctrl + Scroll
     </kbd>
+    or
     <kbd
       class="chartViewportScrollKbd"
     >
-      Scroll
+      Shift + Scroll
     </kbd>
   </div>
 </div>
