@@ -317,6 +317,7 @@ describe('Viewport', function() {
   });
 
   describe('dragging around', function() {
+    const modifierKeys = [{ ctrlKey: true }, { shiftKey: true }];
     const middleX = BOUNDING_BOX_WIDTH * 0.5;
     const middleY = BOUNDING_BOX_HEIGHT * 0.5;
 
@@ -431,94 +432,68 @@ describe('Viewport', function() {
       clickAndDrag(middleX, middleY, middleX, middleY + 10);
       expect(getChartViewport()).toMatchObject(anchoredViewport);
     });
+    for (const modifierKey of modifierKeys) {
+      it('can click and drag left/right', function() {
+        const {
+          scrollAndGetViewport,
+          getChartViewport,
+          clickAndDrag,
+        } = setup();
 
-    it('can click and drag left/right', function() {
-      const { scrollAndGetViewport, getChartViewport, clickAndDrag } = setup();
+        // Assert the initial values.
+        const { viewportLeft, viewportRight } = scrollAndGetViewport({
+          // Zoom in some large arbitrary amount:
+          deltaY: -5000,
+          ...modifierKey,
+          clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
+        });
 
-      // Assert the initial values.
-      const { viewportLeft, viewportRight } = scrollAndGetViewport({
-        // Zoom in some large arbitrary amount:
-        deltaY: -5000,
-        ctrlKey: true,
-        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
+        // These values are arbitrary, but show that the viewport was zoomed in.
+        expect(viewportLeft).toBeGreaterThan(0.3);
+        expect(viewportRight).toBeLessThan(0.7);
+
+        // Perform the dragging action.
+        clickAndDrag(middleX, middleY, middleX + 500, middleY);
+        expect(getChartViewport().viewportLeft).toBeLessThan(viewportLeft);
+        expect(getChartViewport().viewportRight).toBeLessThan(viewportRight);
+
+        // Drag back the other way.
+        clickAndDrag(middleX, middleY, middleX - 1000, middleY);
+        expect(getChartViewport().viewportLeft).toBeGreaterThan(viewportLeft);
+        expect(getChartViewport().viewportRight).toBeGreaterThan(viewportRight);
       });
 
-      // These values are arbitrary, but show that the viewport was zoomed in.
-      expect(viewportLeft).toBeGreaterThan(0.3);
-      expect(viewportRight).toBeLessThan(0.7);
+      it('will not scroll off to the left of the viewport bounds with ctrl/shift key pressed', function() {
+        const { scroll, getChartViewport, clickAndDrag } = setup();
+        scroll({
+          // Zoom in some large arbitrary amount:
+          deltaY: -5000,
+          ...modifierKey,
+          clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
+        });
 
-      // Perform the dragging action.
-      clickAndDrag(middleX, middleY, middleX + 500, middleY);
-      expect(getChartViewport().viewportLeft).toBeLessThan(viewportLeft);
-      expect(getChartViewport().viewportRight).toBeLessThan(viewportRight);
-
-      // Drag back the other way.
-      clickAndDrag(middleX, middleY, middleX - 1000, middleY);
-      expect(getChartViewport().viewportLeft).toBeGreaterThan(viewportLeft);
-      expect(getChartViewport().viewportRight).toBeGreaterThan(viewportRight);
-    });
-
-    it('will not scroll off to the left of the viewport bounds with ctrl key pressed', function() {
-      const { scroll, getChartViewport, clickAndDrag } = setup();
-      scroll({
-        // Zoom in some large arbitrary amount:
-        deltaY: -5000,
-        ctrlKey: true,
-        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
+        // Perform the dragging action some arbitrarily large distance..
+        clickAndDrag(middleX, middleY, middleX + 10000, middleY);
+        expect(getChartViewport().viewportLeft).toBe(0);
+        expect(getChartViewport().viewportRight).toBeLessThan(0.4);
       });
 
-      // Perform the dragging action some arbitrarily large distance..
-      clickAndDrag(middleX, middleY, middleX + 10000, middleY);
-      expect(getChartViewport().viewportLeft).toBe(0);
-      expect(getChartViewport().viewportRight).toBeLessThan(0.4);
-    });
+      it('will not scroll off to the right of the viewport bounds with ctrl/shift key pressed', function() {
+        const { scroll, getChartViewport, clickAndDrag } = setup();
 
-    it('will not scroll off to the left of the viewport bounds with shift key pressed', function() {
-      const { scroll, getChartViewport, clickAndDrag } = setup();
-      scroll({
-        // Zoom in some large arbitrary amount:
-        deltaY: -5000,
-        shiftKey: true,
-        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
+        scroll({
+          // Zoom in some large arbitrary amount:
+          deltaY: -5000,
+          ...modifierKey,
+          clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
+        });
+
+        // Perform the dragging action some arbitrarily large distance.
+        clickAndDrag(middleX, middleY, middleX - 10000, middleY);
+        expect(getChartViewport().viewportLeft).toBeGreaterThan(0.6);
+        expect(getChartViewport().viewportRight).toBe(1);
       });
-
-      // Perform the dragging action some arbitrarily large distance..
-      clickAndDrag(middleX, middleY, middleX + 10000, middleY);
-      expect(getChartViewport().viewportLeft).toBe(0);
-      expect(getChartViewport().viewportRight).toBeLessThan(0.4);
-    });
-
-    it('will not scroll off to the right of the viewport bounds with ctrl key pressed', function() {
-      const { scroll, getChartViewport, clickAndDrag } = setup();
-
-      scroll({
-        // Zoom in some large arbitrary amount:
-        deltaY: -5000,
-        ctrlKey: true,
-        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
-      });
-
-      // Perform the dragging action some arbitrarily large distance.
-      clickAndDrag(middleX, middleY, middleX - 10000, middleY);
-      expect(getChartViewport().viewportLeft).toBeGreaterThan(0.6);
-      expect(getChartViewport().viewportRight).toBe(1);
-    });
-
-    it('will not scroll off to the right of the viewport bounds with shift key pressed', function() {
-      const { scroll, getChartViewport, clickAndDrag } = setup();
-
-      scroll({
-        // Zoom in some large arbitrary amount:
-        deltaY: -5000,
-        shiftKey: true,
-        clientX: BOUNDING_BOX_LEFT + BOUNDING_BOX_WIDTH * 0.5,
-      });
-
-      // Perform the dragging action some arbitrarily large distance.
-      clickAndDrag(middleX, middleY, middleX - 10000, middleY);
-      expect(getChartViewport().viewportLeft).toBeGreaterThan(0.6);
-      expect(getChartViewport().viewportRight).toBe(1);
-    });
+    }
   });
 
   describe('keyboard navigation', function() {
