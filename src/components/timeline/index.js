@@ -25,6 +25,11 @@ import {
   getGlobalTrackOrder,
   getTimelineType,
 } from '../../selectors/url-state';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
+
 import './index.css';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -166,6 +171,9 @@ class Timeline extends React.PureComponent<Props> {
       changeRightClickedTrack,
     } = this.props;
 
+    // Do not include the left and right margins when computing the timeline width.
+    const timelineWidth = width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+
     return (
       <>
         <div className="timelineSettings">
@@ -178,12 +186,12 @@ class Timeline extends React.PureComponent<Props> {
             changeRightClickedTrack={changeRightClickedTrack}
           />
         </div>
-        <TimelineSelection width={width}>
+        <TimelineSelection width={timelineWidth}>
           <TimelineRuler
             zeroAt={zeroAt}
             rangeStart={committedRange.start}
             rangeEnd={committedRange.end}
-            width={width}
+            width={timelineWidth}
           />
           <OverflowEdgeIndicator
             className="timelineOverflowEdgeIndicator"
