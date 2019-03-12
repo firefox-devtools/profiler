@@ -1,9 +1,6 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
-// @flow
+// flow-typed signature: c1b1289b492ef8e892f40a744b17a9dd
+// flow-typed version: 98d9b6a103/react-splitter-layout_v3.x.x/flow_>=v0.53.x
 
-// copied from https://github.com/flowtype/flow-typed/pull/2063
 declare type $$reactsplitterlayout$$Props = {|
   +customClassName?: string,
   +vertical?: boolean,

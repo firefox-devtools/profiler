@@ -374,6 +374,24 @@ describe('ordering and hiding', function() {
       ]);
     });
 
+    it('can count hidden local tracks', function() {
+      const { getState, dispatch, workerTrackIndex, tabPid } = init();
+      dispatch(hideLocalTrack(tabPid, workerTrackIndex));
+      expect(ProfileViewSelectors.getHiddenTrackCount(getState())).toEqual({
+        hidden: 1,
+        total: 4,
+      });
+    });
+
+    it('can count hidden global tracks and their hidden local tracks', function() {
+      const { getState, dispatch, tabTrackIndex } = init();
+      dispatch(hideGlobalTrack(tabTrackIndex));
+      expect(ProfileViewSelectors.getHiddenTrackCount(getState())).toEqual({
+        hidden: 3,
+        total: 4,
+      });
+    });
+
     it('will hide the global track if hiding the last visible thread', function() {
       const profile = getProfileWithoutAProcessMainThread();
       const {

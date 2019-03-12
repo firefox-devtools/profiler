@@ -1,0 +1,37 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.menuButtons {
+  --internal-share-button-background-color: var(
+    --share-button-background-color,
+    hsl(137, 81%, 44%)
+  );
+  --internal-uploading-button-background-color: var(
+    --uploading-button-background-color,
+    #38445f
+  );
+  --internal-uploading-progress-fill-color: var(
+    --uploading-progress-fill-color,
+    #7990c8
+  );
+
+  display: flex;
+  height: 100%;
+  flex-flow: row nowrap;
+}
+
+.menuButtonsLink {
+  position: relative;
+  height: 24px;
+  padding: 0 10px;
+  border-left: 1px solid var(--grey-30);
+  color: var(--grey-90);
+  cursor: default;
+  line-height: 24px;
+  text-decoration: none;
+}
+
+.menuButtonsLink:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
