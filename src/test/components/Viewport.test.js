@@ -74,6 +74,24 @@ describe('Viewport', function() {
     });
   });
 
+  function testScrollingHint(eventOptions){
+
+    const { getByText, scroll } = setup();
+      const isTimerVisible = () =>
+        !getByText(/Zoom Chart/).classList.contains('hidden');
+
+      // No hint is shown at the beginning.
+      expect(isTimerVisible()).toBe(false);
+
+      // Zoom in a bit.
+      scroll({ deltaY: 10, ...eventOptions});
+      expect(isTimerVisible()).toBe(false);
+
+      // Now scroll, no hint should show.
+      scroll({ deltaY: 10 });
+      expect(isTimerVisible()).toBe(false);
+  }
+
   describe('scrolling hint', function() {
     it('can show a scrolling hint', function() {
       jest.useFakeTimers();
@@ -94,37 +112,11 @@ describe('Viewport', function() {
     });
 
     it('will not show a ctrl scrolling hint after zooming once', function() {
-      const { getByText, scroll } = setup();
-      const isTimerVisible = () =>
-        !getByText(/Zoom Chart/).classList.contains('hidden');
-
-      // No hint is shown at the beginning.
-      expect(isTimerVisible()).toBe(false);
-
-      // Zoom in a bit.
-      scroll({ deltaY: 10, ctrlKey: true });
-      expect(isTimerVisible()).toBe(false);
-
-      // Now scroll, no hint should show.
-      scroll({ deltaY: 10 });
-      expect(isTimerVisible()).toBe(false);
+      testScrollingHint({ctrlKey: true});
     });
 
     it('will not show a shift scrolling hint after zooming once', function() {
-      const { getByText, scroll } = setup();
-      const isTimerVisible = () =>
-        !getByText(/Zoom Chart/).classList.contains('hidden');
-
-      // No hint is shown at the beginning.
-      expect(isTimerVisible()).toBe(false);
-
-      // Zoom in a bit.
-      scroll({ deltaY: 10, shiftKey: true });
-      expect(isTimerVisible()).toBe(false);
-
-      // Now scroll, no hint should show.
-      scroll({ deltaY: 10 });
-      expect(isTimerVisible()).toBe(false);
+      testScrollingHint({shiftKey: true});
     });
   });
 

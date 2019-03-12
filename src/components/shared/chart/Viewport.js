@@ -782,8 +782,8 @@ export const withChartViewport: WithChartViewport<*, *> =
             <ChartComponent {...chartProps} viewport={viewport} />
             <div className={scrollClassName}>
               Zoom Chart:
-              <kbd className="chartViewportScrollKbd">Ctrl/Shift</kbd>
-              <kbd className="chartViewportScrollKbd">Scroll</kbd>
+              <kbd className="chartViewportScrollKbd">Ctrl + Scroll</kbd>or
+              <kbd className="chartViewportScrollKbd">Shift + Scroll</kbd>
             </div>
           </div>
         );
