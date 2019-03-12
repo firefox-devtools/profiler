@@ -80,7 +80,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 32px;"
+            style="height: 48px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -135,11 +135,34 @@ exports[`MarkerTable renders some basic markers 1`] = `
                   Paint
                 </span>
               </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even "
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn start"
+                  title="0.153s"
+                >
+                  0.153s
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn duration"
+                  title="0.001ms"
+                >
+                  0.001ms
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn category"
+                  title="ipc:network:set-offline"
+                >
+                  ipc:network:set-offline
+                </span>
+              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 32px; width: 3000px;"
+            style="height: 48px; width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -191,6 +214,25 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 >
                   NotifyDidPaint
                 </span>
+              </div>
+              <div
+                aria-label="undefined, running time is undefined (undefined), self time is undefined"
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even  "
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                />
               </div>
             </div>
           </div>
