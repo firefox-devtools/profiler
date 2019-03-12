@@ -83,7 +83,7 @@ describe('Viewport', function() {
     expect(isTimerVisible()).toBe(false);
 
     // Zoom in a bit.
-    scroll({ deltaY: 10, ...eventOptions});
+    scroll({ deltaY: 10, ...eventOptions });
     expect(isTimerVisible()).toBe(false);
 
     // Now scroll, no hint should show.
