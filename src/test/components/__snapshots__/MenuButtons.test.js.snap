@@ -6,15 +6,6 @@ Array [
     class="menuButtonsMetaInfoButtonBox"
   >
     <div
-      class="menuButtonsMetaInfoButtonLabel"
-    >
-      <span
-        class="menuButtonsMetaInfoButtonLabelOverflow"
-      >
-        Firefox (48.0) Intel Mac OS X 10.11
-      </span>
-    </div>
-    <div
       class="buttonWithPanel menuButtonsMetaInfoButtonButton"
     >
       <div
@@ -23,7 +14,7 @@ Array [
         <input
           class="buttonWithPanelButton menuButtonsMetaInfoButtonButtonButton"
           type="button"
-          value=" "
+          value="Firefox (48.0) Intel Mac OS X 10.11"
         />
       </div>
       <div

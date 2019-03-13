@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .menuButtonsMetaInfoButtonBox,
-.menuButtonsMetaInfoButtonLabel,
 .menuButtonsMetaInfoButtonButton {
   height: 100%;
   font-size: 100%;
@@ -14,35 +13,15 @@
 
   /* Let this box shrink down to the size of the three dots and a bit of text. */
   min-width: 75px;
+  flex-flow: column nowrap;
 
   /* Shrink down twice as fast as the range selection labels. */
   flex-shrink: 2;
   padding: 0;
 }
 
-.menuButtonsMetaInfoButtonLabel {
-  position: relative;
-  display: flex;
-
-  /* Let this box shrink down to the size of the three dots. */
-  min-width: 0;
-
-  /* Make sure the padding doesn't contribute to the height, which is 100% */
-  box-sizing: border-box;
-  flex-flow: column nowrap;
-  align-items: stretch;
-  padding: 5px 10px;
-}
-
-.menuButtonsMetaInfoButtonLabelOverflow {
+.menuButtonsMetaInfoButtonBox .menuButtonsMetaInfoButtonButtonButton {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.menuButtonsMetaInfoButtonBox .buttonWithPanelButton,
-.menuButtonsMetaInfoButtonBox .buttonWithPanel:hover,
-.menuButtonsMetaInfoButtonBox .buttonWithPanel.open {
-  width: 40px;
-  background: url(../../../../res/img/svg/meatball.svg) 50% 50% no-repeat;
 }

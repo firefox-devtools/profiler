@@ -26,14 +26,9 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
     if (meta !== undefined && meta !== null) {
       return (
         <div className="menuButtonsMetaInfoButtonBox">
-          <div className="menuButtonsMetaInfoButtonLabel">
-            <span className="menuButtonsMetaInfoButtonLabelOverflow">
-              {_formatLabel(meta)}
-            </span>
-          </div>
           <ButtonWithPanel
             className="menuButtonsMetaInfoButtonButton"
-            label="&nbsp;"
+            label={_formatLabel(meta)}
             panel={
               <ArrowPanel className="arrowPanelOpenMetaInfo">
                 <h2 className="arrowPanelSubTitle">Timing</h2>
@@ -153,7 +148,7 @@ function _formatVersionNumber(version?: string): string | null {
   return null;
 }
 
-function _formatLabel(meta: ProfileMeta): string | null {
+function _formatLabel(meta: ProfileMeta): string {
   const product = meta.product || '';
   const version = _formatVersionNumber(meta.misc) || '';
   let os;
@@ -166,7 +161,7 @@ function _formatLabel(meta: ProfileMeta): string | null {
   const labelTitle = product + ' (' + version + ') ' + os;
 
   if (labelTitle.length < 5) {
-    return null;
+    return '';
   }
   return labelTitle;
 }
