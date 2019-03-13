@@ -9,6 +9,7 @@ import * as urlStateReducers from '../selectors/url-state';
 import {
   changeCallTreeSearchString,
   changeMarkersSearchString,
+  changeNetworkSearchString,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -323,6 +324,21 @@ describe('search strings', function() {
       const urlState = urlStateReducers.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
       expect(query.markerSearch).toBe(markerSearchString);
+    });
+  });
+
+  it('serializes the network search string in the URL', function() {
+    const { getState, dispatch } = _getStoreWithURL();
+
+    const networkSearchString = 'abc';
+
+    dispatch(changeNetworkSearchString(networkSearchString));
+
+    ['network-chart'].forEach(tabSlug => {
+      dispatch(changeSelectedTab(tabSlug));
+      const urlState = urlStateReducers.getUrlState(getState());
+      const { query } = urlStateToUrlObject(urlState);
+      expect(query.networkSearch).toBe(networkSearchString);
     });
   });
 });

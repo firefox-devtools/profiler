@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
- .networkSettings {
+.networkSettings {
     display: flex;
     height: 25px;
     flex-flow: row nowrap;
@@ -10,11 +10,11 @@
     line-height: 25px;
   }
   
-  .networkSettingsSpacer {
+.networkSettingsSpacer {
     flex: 1;
   }
   
-  .networkSettingsLabel {
+.networkSettingsLabel {
     display: inline-flex;
     height: 25px;
     flex-flow: row nowrap;
@@ -24,10 +24,10 @@
     user-select: none;
   }
   
-  .networkSettingsSearchbar {
+.networkSettingsSearchbar {
     padding: 0 5px;
   }
   
-  .networkSettingsSearchField {
+.networkSettingsSearchField {
     width: 250px;
   }

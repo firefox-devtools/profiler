@@ -668,7 +668,7 @@ describe('actions/ProfileView', function() {
 
   describe('changeNetworkSearchString', function() {
     it('changes the search string', function() {
-      const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
+      const profile = getNetworkTrackProfile();
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(UrlStateSelectors.getNetworkSearchString(getState())).toEqual('');
