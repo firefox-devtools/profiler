@@ -69,7 +69,7 @@ export class ProfileDownloadButton extends React.PureComponent<Props, State> {
     });
   };
 
-  render() {
+  _renderPanelContent = () => {
     const {
       filename,
       uncompressedBlobUrl,
@@ -77,6 +77,36 @@ export class ProfileDownloadButton extends React.PureComponent<Props, State> {
       uncompressedSize,
       compressedSize,
     } = this.state;
+
+    return (
+      <section>
+        {uncompressedBlobUrl ? (
+          <p>
+            <a
+              className="menuButtonsDownloadLink"
+              href={uncompressedBlobUrl}
+              download={filename}
+            >
+              {`${filename} (${prettyBytes(uncompressedSize)})`}
+            </a>
+          </p>
+        ) : null}
+        {compressedBlobUrl ? (
+          <p>
+            <a
+              className="menuButtonsDownloadLink"
+              href={compressedBlobUrl}
+              download={`${filename}.gz`}
+            >
+              {`${filename}.gz (${prettyBytes(compressedSize)})`}
+            </a>
+          </p>
+        ) : null}
+      </section>
+    );
+  };
+
+  render() {
     return (
       <ButtonWithPanel
         className="menuButtonsProfileDownloadButton"
@@ -86,32 +116,8 @@ export class ProfileDownloadButton extends React.PureComponent<Props, State> {
             className="menuButtonsProfileDownloadPanel"
             title="Save Profile to a Local File"
             onOpen={this._onPanelOpen}
-          >
-            <section>
-              {uncompressedBlobUrl ? (
-                <p>
-                  <a
-                    className="menuButtonsDownloadLink"
-                    href={uncompressedBlobUrl}
-                    download={filename}
-                  >
-                    {`${filename} (${prettyBytes(uncompressedSize)})`}
-                  </a>
-                </p>
-              ) : null}
-              {compressedBlobUrl ? (
-                <p>
-                  <a
-                    className="menuButtonsDownloadLink"
-                    href={compressedBlobUrl}
-                    download={`${filename}.gz`}
-                  >
-                    {`${filename}.gz (${prettyBytes(compressedSize)})`}
-                  </a>
-                </p>
-              ) : null}
-            </section>
-          </ArrowPanel>
+            content={this._renderPanelContent}
+          />
         }
       />
     );

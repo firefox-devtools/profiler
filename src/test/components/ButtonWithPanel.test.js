@@ -12,15 +12,12 @@ import { ensureExists } from '../../utils/flow';
 describe('shared/ButtonWithPanel', () => {
   // renders the button in its default state
   function setup() {
+    const content = () => <div>Panel content</div>;
     return render(
       <ButtonWithPanel
         className="button"
         label="My Button"
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
+        panel={<ArrowPanel className="panel" content={content} />}
       />
     );
   }
@@ -31,19 +28,48 @@ describe('shared/ButtonWithPanel', () => {
   });
 
   it('renders a button with a panel', () => {
+    const content = () => <div>Panel content</div>;
     const { container } = render(
       <ButtonWithPanel
         className="button"
         label="My Button"
         open={true}
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
+        panel={<ArrowPanel className="panel" content={content} />}
       />
     );
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  describe('protecting against expensive panel contents', function() {
+    it('does not render the contents when closed', function() {
+      const content = jest.fn(() => <div>Panel content</div>);
+      render(
+        <ButtonWithPanel
+          className="button"
+          label="My Button"
+          panel={<ArrowPanel className="panel" content={content} />}
+        />
+      );
+      expect(content).not.toHaveBeenCalled();
+    });
+
+    /**
+     * This test asserts that we don't try and render the contents of a panel, which
+     * would run the selector. This protects us from running expensive selectors
+     * when they are not needed.
+     */
+    it('only renders the contents when open', function() {
+      const content = jest.fn(() => <div>Panel content</div>);
+      render(
+        <ButtonWithPanel
+          className="button"
+          label="My Button"
+          open={true}
+          panel={<ArrowPanel className="panel" content={content} />}
+        />
+      );
+      expect(content).toHaveBeenCalled();
+    });
   });
 
   it('opens the panel when the button is clicked and closes the panel when the escape key is pressed', () => {

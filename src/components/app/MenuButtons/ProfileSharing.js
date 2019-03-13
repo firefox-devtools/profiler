@@ -242,8 +242,32 @@ export class MenuButtonsProfileSharing extends React.PureComponent<
     });
   };
 
+  _renderPermalinkTextField = () => {
+    const { shortUrl } = this.state;
+
+    return (
+      <input
+        type="text"
+        className="menuButtonsPermalinkTextField photon-input"
+        value={shortUrl}
+        readOnly="readOnly"
+        ref={this._takePermalinkTextFieldRef}
+      />
+    );
+  };
+
+  _renderUploadError = () => {
+    const { error } = this.state;
+    return (
+      <>
+        <p>An error occurred during upload:</p>
+        <pre>{error && error.toString()}</pre>
+      </>
+    );
+  };
+
   render() {
-    const { state, uploadProgress, error, shortUrl } = this.state;
+    const { state, uploadProgress } = this.state;
     const { profile, profileSharingStatus } = this.props;
 
     // We don't show the secondary button if any of these conditions is true:
@@ -310,15 +334,8 @@ export class MenuButtonsProfileSharing extends React.PureComponent<
                   className="menuButtonsPermalinkPanel"
                   onOpen={this._onPermalinkPanelOpen}
                   onClose={this._onPermalinkPanelClose}
-                >
-                  <input
-                    type="text"
-                    className="menuButtonsPermalinkTextField photon-input"
-                    value={shortUrl}
-                    readOnly="readOnly"
-                    ref={this._takePermalinkTextFieldRef}
-                  />
-                </ArrowPanel>
+                  content={this._renderPermalinkTextField}
+                />
               }
             />
           </AnimateUpTransition>
@@ -337,10 +354,8 @@ export class MenuButtonsProfileSharing extends React.PureComponent<
                   okButtonText="Try Again"
                   cancelButtonText="Cancel"
                   onOkButtonClick={this._attemptToShare}
-                >
-                  <p>An error occurred during upload:</p>
-                  <pre>{error && error.toString()}</pre>
-                </ArrowPanel>
+                  content={this._renderUploadError}
+                />
               }
             />
           </AnimateUpTransition>
@@ -418,27 +433,17 @@ type ProfileSharingButtonProps = {|
   +checkboxDisabled: boolean,
 |};
 
-const ProfileSharingButton = ({
-  buttonClassName,
-  shareLabel,
-  okButtonClickEvent,
-  panelOpenEvent,
-  shareNetworkUrlCheckboxChecked,
-  shareNetworkUrlCheckboxOnChange,
-  checkboxDisabled,
-}: ProfileSharingButtonProps) => (
-  <ButtonWithPanel
-    className={buttonClassName}
-    label={shareLabel}
-    panel={
-      <ArrowPanel
-        className="menuButtonsPrivacyPanel"
-        title="Upload Profile – Privacy Notice"
-        okButtonText="Share"
-        cancelButtonText="Cancel"
-        onOkButtonClick={okButtonClickEvent}
-        onOpen={panelOpenEvent ? panelOpenEvent : undefined}
-      >
+class ProfileSharingButton extends React.PureComponent<
+  ProfileSharingButtonProps
+> {
+  _renderPanelContent = () => {
+    const {
+      shareNetworkUrlCheckboxChecked,
+      shareNetworkUrlCheckboxOnChange,
+      checkboxDisabled,
+    } = this.props;
+    return (
+      <>
         <PrivacyNotice />
         <p className="menuButtonsShareNetworkUrlsContainer">
           <label>
@@ -452,7 +457,34 @@ const ProfileSharingButton = ({
             Share the URLs of all network requests
           </label>
         </p>
-      </ArrowPanel>
-    }
-  />
-);
+      </>
+    );
+  };
+
+  render() {
+    const {
+      buttonClassName,
+      shareLabel,
+      okButtonClickEvent,
+      panelOpenEvent,
+    } = this.props;
+
+    return (
+      <ButtonWithPanel
+        className={buttonClassName}
+        label={shareLabel}
+        panel={
+          <ArrowPanel
+            className="menuButtonsPrivacyPanel"
+            title="Upload Profile – Privacy Notice"
+            okButtonText="Share"
+            cancelButtonText="Cancel"
+            onOkButtonClick={okButtonClickEvent}
+            onOpen={panelOpenEvent ? panelOpenEvent : undefined}
+            content={this._renderPanelContent}
+          />
+        }
+      />
+    );
+  }
+}

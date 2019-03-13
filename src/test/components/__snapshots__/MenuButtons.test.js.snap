@@ -35,140 +35,6 @@ Array [
           <div
             class="arrowPanelArrow"
           />
-          <div
-            class="arrowPanelContent"
-          >
-            <h2
-              class="arrowPanelSubTitle"
-            >
-              Timing
-            </h2>
-            <div
-              class="arrowPanelSection"
-            >
-              <div
-                class="metaInfoRow"
-              >
-                <span
-                  class="metaInfoLabel"
-                >
-                  Recording started:
-                </span>
-                Sat, 09 Apr 2016 17:02:32 GMT
-              </div>
-              <div
-                class="metaInfoRow"
-              >
-                <span
-                  class="metaInfoLabel"
-                >
-                  Interval:
-                </span>
-                1
-                ms
-              </div>
-              <div
-                class="metaInfoRow"
-              >
-                <span
-                  class="metaInfoLabel"
-                >
-                  Profile Version:
-                </span>
-                22
-              </div>
-            </div>
-            <h2
-              class="arrowPanelSubTitle"
-            >
-              Application
-            </h2>
-            <div
-              class="arrowPanelSection"
-            >
-              <div
-                class="metaInfoRow"
-              >
-                <span
-                  class="metaInfoLabel"
-                >
-                  Name:
-                </span>
-                Firefox
-              </div>
-              <div
-                class="metaInfoRow"
-              >
-                <span
-                  class="metaInfoLabel"
-                >
-                  Version:
-                </span>
-                48.0
-              </div>
-              <div
-                class="metaInfoRow"
-              >
-                <span
-                  class="metaInfoLabel"
-                >
-                  Build ID:
-                </span>
-                20181126165837
-              </div>
-              <div
-                class="metaInfoRow"
-              >
-                <span
-                  class="metaInfoLabel"
-                >
-                  Extensions:
-                </span>
-                <ul
-                  class="metaInfoList"
-                />
-              </div>
-            </div>
-            <h2
-              class="arrowPanelSubTitle"
-            >
-              Platform
-            </h2>
-            <div
-              class="arrowPanelSection"
-            >
-              <div
-                class="metaInfoRow"
-              >
-                <span
-                  class="metaInfoLabel"
-                >
-                  Platform:
-                </span>
-                Macintosh
-              </div>
-              <div
-                class="metaInfoRow"
-              >
-                <span
-                  class="metaInfoLabel"
-                >
-                  OS:
-                </span>
-                Intel Mac OS X 10.11
-              </div>
-              <div
-                class="metaInfoRow"
-              >
-                <span
-                  class="metaInfoLabel"
-                >
-                  ABI:
-                </span>
-                x86_64-gcc3
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -206,46 +72,6 @@ Array [
             >
               Upload Profile – Privacy Notice
             </h1>
-            <div
-              class="arrowPanelContent"
-            >
-              <section
-                class="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile but keeping the URLs may help to identify the problems. Please select the checkbox below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                class="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    class="menuButtonsShareNetworkUrlsCheckbox"
-                    type="checkbox"
-                    value="on"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
             <div
               class="arrowPanelButtons"
             >
@@ -290,11 +116,6 @@ Array [
           >
             Save Profile to a Local File
           </h1>
-          <div
-            class="arrowPanelContent"
-          >
-            <section />
-          </div>
         </div>
       </div>
     </div>

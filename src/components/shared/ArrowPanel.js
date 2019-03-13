@@ -15,7 +15,10 @@ type Props = {
   onOkButtonClick?: () => mixed,
   onCancelButtonClick?: () => mixed,
   className: string,
-  children: React.Node,
+  // The content of the panel is inside of a function so that its rendering is deferred
+  // until only when the panel is open. This stops potentially expensive selectors
+  // from running when the panel is closed.
+  content: () => React.Node,
   title?: string,
   okButtonText?: string,
   cancelButtonText?: string,
@@ -23,11 +26,19 @@ type Props = {
 
 type State = {
   open: boolean,
+  isClosing: boolean,
+  openGeneration: number,
 };
 
 class ArrowPanel extends React.PureComponent<Props, State> {
   _panelElement: HTMLElement | null = null;
-  state = { open: false };
+  state = {
+    open: false,
+    isClosing: false,
+    // The open generation is mistakenly being tagged here as being unused.
+    // eslint-disable-next-line react/no-unused-state
+    openGeneration: 0,
+  };
 
   _takePanelElementRef = (elem: HTMLElement | null) => {
     this._panelElement = elem;
@@ -46,19 +57,28 @@ class ArrowPanel extends React.PureComponent<Props, State> {
   }
 
   close() {
-    if (!this.state.open) {
-      return;
-    }
+    this.setState(state => {
+      if (!state.open) {
+        return null;
+      }
+      const openGeneration = state.openGeneration + 1;
 
-    this.setState({ open: false });
-    if (this.props.onClose) {
-      this.props.onClose();
-    }
-    window.removeEventListener(
-      'mousedown',
-      this._windowMouseDownListener,
-      true
-    );
+      setTimeout(() => {
+        if (state.openGeneration === openGeneration) {
+          this.setState({ isClosing: false });
+        }
+      }, 400);
+
+      if (this.props.onClose) {
+        this.props.onClose();
+      }
+      window.removeEventListener(
+        'mousedown',
+        this._windowMouseDownListener,
+        true
+      );
+      return { open: false, isClosing: true, openGeneration };
+    });
   }
 
   componentWillUnmount() {
@@ -97,14 +117,14 @@ class ArrowPanel extends React.PureComponent<Props, State> {
   render() {
     const {
       className,
-      children,
+      content,
       title,
       okButtonText,
       cancelButtonText,
     } = this.props;
     const hasTitle = title !== undefined;
     const hasButtons = okButtonText || cancelButtonText;
-    const { open } = this.state;
+    const { open, isClosing } = this.state;
     return (
       <div className="arrowPanelAnchor">
         <div
@@ -117,7 +137,9 @@ class ArrowPanel extends React.PureComponent<Props, State> {
         >
           <div className="arrowPanelArrow" />
           {hasTitle ? <h1 className="arrowPanelTitle">{title}</h1> : null}
-          <div className="arrowPanelContent">{children}</div>
+          {open || isClosing ? (
+            <div className="arrowPanelContent">{content()}</div>
+          ) : null}
           {hasButtons ? (
             <div className="arrowPanelButtons">
               <input
