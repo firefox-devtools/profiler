@@ -5,10 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import type {
-  ConnectedProps,
-  ExplicitConnectOptions,
-} from '../../utils/connect';
 import explicitConnect from '../../utils/connect';
 import {
   getCommittedRange,
@@ -22,6 +18,10 @@ import type { ScreenshotPayload } from '../../types/markers';
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type { Marker } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
+import type {
+  ExplicitConnectOptions,
+  ConnectedProps,
+} from '../../utils/connect';
 
 import { ensureExists } from '../../utils/flow';
 import './TrackScreenshots.css';
