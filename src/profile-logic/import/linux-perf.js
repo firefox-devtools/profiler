@@ -233,6 +233,7 @@ export function convertPerfScriptProfile(profile: string): Object {
       stackwalk: 1,
       startTime: startTime,
       version: 4,
+      presymbolicated: true,
     },
     libs: [],
     threads: threadArray,
