@@ -11,11 +11,11 @@ import {
   getPreviewSelection,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
-import { type SizeProps, withSize } from '../shared/WithSize';
+import { withSize, type SizeProps } from '../shared/WithSize';
 import { createPortal } from 'react-dom';
 
 import type { ScreenshotPayload } from '../../types/markers';
-import type { Thread, ThreadIndex } from '../../types/profile';
+import type { ThreadIndex, Thread } from '../../types/profile';
 import type { Marker } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 import type {
