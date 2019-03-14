@@ -507,18 +507,19 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
       />
     </div>
     <div
-      class="chartViewportShiftScroll hidden"
+      class="chartViewportScroll hidden"
     >
       Zoom Chart:
       <kbd
-        class="chartViewportShiftScrollKbd"
+        class="chartViewportScrollKbd"
       >
-        Shift
+        Ctrl + Scroll
       </kbd>
+      or
       <kbd
-        class="chartViewportShiftScrollKbd"
+        class="chartViewportScrollKbd"
       >
-        Scroll
+        Shift + Scroll
       </kbd>
     </div>
   </div>
