@@ -34,7 +34,7 @@ import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 
 // Mock out the getBoundingBox to have a 400 pixel width.
 const TRACK_WIDTH = 400;
-const LEFT = 5;
+const LEFT = 200;
 const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {

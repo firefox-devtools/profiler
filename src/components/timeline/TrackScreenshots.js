@@ -204,7 +204,7 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     const { url, windowWidth, windowHeight } = payload;
     // Compute hover image size coefficients to ensure it does not exceed screen size
     const HOVER_MARGIN_Y = screen_height / 10;
-    const MAXIMUM_HEIGHT = screen_height - containerTop - HOVER_MARGIN_Y;
+    const MAXIMUM_HEIGHT = screen_height - HOVER_MARGIN_Y;
     const coefficient = Math.min(
       width / windowWidth,
       MAXIMUM_HEIGHT / windowHeight
