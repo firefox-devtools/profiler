@@ -5,23 +5,23 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import type {
+  ConnectedProps,
+  ExplicitConnectOptions,
+} from '../../utils/connect';
 import explicitConnect from '../../utils/connect';
 import {
   getCommittedRange,
   getPreviewSelection,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
-import { withSize, type SizeProps } from '../shared/WithSize';
+import { type SizeProps, withSize } from '../shared/WithSize';
 import { createPortal } from 'react-dom';
 
 import type { ScreenshotPayload } from '../../types/markers';
-import type { ThreadIndex, Thread } from '../../types/profile';
+import type { Thread, ThreadIndex } from '../../types/profile';
 import type { Marker } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
 
 import { ensureExists } from '../../utils/flow';
 import './TrackScreenshots.css';
@@ -83,6 +83,7 @@ class Screenshots extends PureComponent<Props, State> {
       rangeStart,
       rangeEnd,
     } = this.props;
+    const screen_height = window.innerHeight;
     const { pageX, offsetX, containerTop } = this.state;
     return (
       <div
@@ -103,6 +104,7 @@ class Screenshots extends PureComponent<Props, State> {
           thread={thread}
           isMakingPreviewSelection={isMakingPreviewSelection}
           width={width}
+          screen_height={screen_height}
           pageX={pageX}
           offsetX={offsetX}
           containerTop={containerTop}
@@ -148,9 +150,9 @@ type HoverPreviewProps = {|
   +pageX: null | number,
   +containerTop: null | number,
   +width: number,
+  +screen_height: number,
 |};
 
-const HOVER_HEIGHT = 100;
 const HOVER_MAX_WIDTH_RATIO = 1.75;
 
 class HoverPreview extends PureComponent<HoverPreviewProps> {
@@ -182,6 +184,7 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
       thread,
       isMakingPreviewSelection,
       width,
+      screen_height,
       pageX,
       offsetX,
       containerTop,
@@ -199,25 +202,38 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     // Coerce the payload into a screenshot one.
     const payload: ScreenshotPayload = (screenshots[screenshotIndex].data: any);
     const { url, windowWidth, windowHeight } = payload;
-
+    // Compute hover image size coefficients to ensure it does not exceed screen size
+    const HOVER_MARGIN_Y = screen_height / 10;
+    const MAXIMUM_HEIGHT = screen_height - containerTop - HOVER_MARGIN_Y;
+    const coefficient = Math.min(
+      width / windowWidth,
+      MAXIMUM_HEIGHT / windowHeight
+    );
     // Compute the hover image's thumbnail size.
-    let hoverHeight = HOVER_HEIGHT;
-    let hoverWidth = HOVER_HEIGHT / windowHeight * windowWidth;
+    let hoverHeight = windowHeight * coefficient;
+    let hoverWidth = windowWidth * coefficient;
 
-    if (hoverWidth > HOVER_HEIGHT * HOVER_MAX_WIDTH_RATIO) {
+    if (hoverWidth > hoverHeight * HOVER_MAX_WIDTH_RATIO) {
       // This is a really wide image, limit the height so it lays out reasonably.
-      hoverWidth = HOVER_HEIGHT * HOVER_MAX_WIDTH_RATIO;
+      hoverWidth = hoverHeight * HOVER_MAX_WIDTH_RATIO;
       hoverHeight = hoverWidth / windowWidth * windowHeight;
     }
 
     // Set the top so it centers around the track.
-    const top = containerTop + (TRACK_HEIGHT - hoverHeight) * 0.5;
-    const left =
-      offsetX + hoverWidth * 0.5 > width
-        ? // Stick the hover image on to the right side of the container.
-          pageX - offsetX + width - hoverWidth
-        : // Center the hover image around the mouse.
-          pageX - hoverWidth * 0.5;
+    let top = containerTop + (TRACK_HEIGHT - hoverHeight) * 0.5;
+    if (top < 0) {
+      // Stick the hover image on to the top side of the container
+      top = containerTop;
+    }
+    // Center the hover image around the mouse.
+    let left = pageX - hoverWidth * 0.5;
+    if (left < 0) {
+      // Stick the hover image on to the left side of the page.
+      left = 0;
+    } else if (offsetX + hoverWidth * 0.5 > width) {
+      // Stick the hover image on to the right side of the container.
+      left = pageX - offsetX + width - hoverWidth;
+    }
 
     return createPortal(
       <div className="timelineTrackScreenshotHover" style={{ left, top }}>
