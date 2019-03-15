@@ -132,4 +132,3 @@ class ArrowPanel extends React.PureComponent<Props, State> {
 }
 
 export default ArrowPanel;
-
