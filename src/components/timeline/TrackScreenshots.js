@@ -83,7 +83,6 @@ class Screenshots extends PureComponent<Props, State> {
       rangeStart,
       rangeEnd,
     } = this.props;
-    const screen_height = window.innerHeight;
     const { pageX, offsetX, containerTop } = this.state;
     return (
       <div
@@ -104,7 +103,6 @@ class Screenshots extends PureComponent<Props, State> {
           thread={thread}
           isMakingPreviewSelection={isMakingPreviewSelection}
           width={width}
-          screen_height={screen_height}
           pageX={pageX}
           offsetX={offsetX}
           containerTop={containerTop}
@@ -150,7 +148,6 @@ type HoverPreviewProps = {|
   +pageX: null | number,
   +containerTop: null | number,
   +width: number,
-  +screen_height: number,
 |};
 
 const HOVER_MAX_WIDTH_RATIO = 1.75;
@@ -184,7 +181,6 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
       thread,
       isMakingPreviewSelection,
       width,
-      screen_height,
       pageX,
       offsetX,
       containerTop,
@@ -203,12 +199,9 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     const payload: ScreenshotPayload = (screenshots[screenshotIndex].data: any);
     const { url, windowWidth, windowHeight } = payload;
     // Compute hover image size coefficients to ensure it does not exceed screen size
-    const HOVER_MARGIN_Y = screen_height / 10;
-    const MAXIMUM_HEIGHT = screen_height - HOVER_MARGIN_Y;
-    const coefficient = Math.min(
-      width / windowWidth,
-      MAXIMUM_HEIGHT / windowHeight
-    );
+    const MAXIMUM_HEIGHT = 2 * containerTop;
+    // If the image size is small do not resize it
+    const coefficient = Math.min(1, MAXIMUM_HEIGHT / windowHeight);
     // Compute the hover image's thumbnail size.
     let hoverHeight = windowHeight * coefficient;
     let hoverWidth = windowWidth * coefficient;
