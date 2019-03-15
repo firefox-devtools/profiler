@@ -30,6 +30,7 @@ type Props = {
     Class<Panel & React.Component<$Subtype<PanelProps>, any>>
   >,
   open?: boolean,
+  disabled?: boolean,
 };
 
 type State = {|
@@ -73,7 +74,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     if (this.props.panel.props.onOpen) {
       this.props.panel.props.onOpen();
     }
-    window.addEventListener('mousedown', this._windowMouseDownListener, true);
+    window.addEventListener('mousedown', this._windowMouseDownListener);
   };
 
   _onPanelClose = () => {
@@ -81,11 +82,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     if (this.props.panel.props.onClose) {
       this.props.panel.props.onClose();
     }
-    window.removeEventListener(
-      'mousedown',
-      this._windowMouseDownListener,
-      true
-    );
+    window.removeEventListener('mousedown', this._windowMouseDownListener);
   };
 
   _takePanelRef = (panel: Panel | null) => {
@@ -109,10 +106,10 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   }
 
   _onButtonClick = () => {
-    if (!this.state.open) {
-      this.openPanel();
-    } else {
+    if (this.state.open) {
       this.closePanel();
+    } else {
+      this.openPanel();
     }
   };
 
@@ -124,18 +121,13 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
 
   _windowMouseDownListener = (e: MouseEvent) => {
     const target: Node = (e.target: any); // make flow happy
-    if (
-      this.state.open &&
-      this._panel &&
-      this._panel._panelElement &&
-      !this._buttonElement.contains(target)
-    ) {
-      this.closePanel();
+    if (this.state.open && this._buttonElement === target) {
+      e.stopImmediatePropagation();
     }
   };
 
   render() {
-    const { className, label, panel } = this.props;
+    const { className, label, panel, disabled } = this.props;
     const { open } = this.state;
     return (
       <div className={classNames('buttonWithPanel', className, { open })}>
@@ -146,6 +138,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
               'buttonWithPanelButton',
               `${className}Button`
             )}
+            disabled={!!disabled}
             value={label}
             ref={this._takeButtonRef}
             onClick={this._onButtonClick}
