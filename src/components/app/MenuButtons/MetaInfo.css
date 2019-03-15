@@ -3,18 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .menuButtonsMetaInfoButton {
-  display: flex;
-
   /* Let this box shrink down to the size of the three dots and a bit of text. */
   min-width: 75px;
-  height: 100%;
-  flex-flow: column nowrap;
 
   /* Shrink down twice as fast as the range selection labels. */
   flex-shrink: 2;
-  padding: 0;
   border-left: 1px solid var(--grey-30);
-  font-size: 100%;
 }
 
 .menuButtonsMetaInfoButtonButton {
