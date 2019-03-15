@@ -42,7 +42,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     if (this.props.onOpen) {
       this.props.onOpen();
     }
-    window.addEventListener('mousedown', this._windowMouseDownListener, true);
+    window.addEventListener('mousedown', this._windowMouseDownListener);
   }
 
   close() {
@@ -53,19 +53,11 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     if (this.props.onClose) {
       this.props.onClose();
     }
-    window.removeEventListener(
-      'mousedown',
-      this._windowMouseDownListener,
-      true
-    );
+    window.removeEventListener('mousedown', this._windowMouseDownListener);
   }
 
   componentWillUnmount() {
-    window.removeEventListener(
-      'mousedown',
-      this._windowMouseDownListener,
-      true
-    );
+    window.removeEventListener('mousedown', this._windowMouseDownListener);
   }
 
   _windowMouseDownListener = (e: MouseEvent) => {
@@ -73,8 +65,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     if (
       this.state.open &&
       this._panelElement &&
-      !this._panelElement.contains(target) &&
-      !this._buttonElement.contains(target)
+      !this._panelElement.contains(target)
     ) {
       this.close();
     }
@@ -141,3 +132,4 @@ class ArrowPanel extends React.PureComponent<Props, State> {
 }
 
 export default ArrowPanel;
+
