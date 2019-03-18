@@ -122,7 +122,7 @@ class FlameGraph extends React.PureComponent<Props> {
   _nextSelectableInRow = (
     startingCallNodeIndex: IndexIntoCallNodeTable,
     direction: 1 | -1
-  ): ?IndexIntoCallNodeTable => {
+  ): IndexIntoCallNodeTable | void => {
     const { flameGraphTiming, callNodeInfo: { callNodeTable } } = this.props;
 
     let callNodeIndex = startingCallNodeIndex;
@@ -182,6 +182,11 @@ class FlameGraph extends React.PureComponent<Props> {
       }
       case 'ArrowUp': {
         const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
+        // The call nodes returned from getChildren are sorted by
+        // total time in descending order.  The first one in the
+        // array, which is the one we pick, has the longest time and
+        // thus the widest box.
+
         if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
           changeSelectedCallNode(
             threadIndex,
