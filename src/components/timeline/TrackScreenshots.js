@@ -205,7 +205,7 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     // To prevent blurring, do not scale up the hover image
     const coefficient = Math.min(
       1,
-      (TRACK_HEIGHT + 2 * containerTop) / windowHeight,
+      2 * (TRACK_HEIGHT / 2 + containerTop) / windowHeight,
       MAXIMUM_HEIGHT / windowHeight
     );
     // Compute the hover image's thumbnail size.
