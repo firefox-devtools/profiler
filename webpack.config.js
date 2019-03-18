@@ -35,7 +35,11 @@ const config = {
       },
       {
         test: /\.css?$/,
-        loaders: ['style-loader', 'css-loader?minimize'],
+        loaders: [
+          'style-loader',
+          { loader: 'css-loader', options: { importLoaders: 1 } },
+          'postcss-loader',
+        ],
         include: includes.concat(
           path.join(__dirname, 'node_modules', 'photon-colors')
         ),
@@ -109,7 +113,7 @@ if (process.env.NODE_ENV === 'production') {
       },
       /* Exclude the files used but not served by netlify. When trying to fetch
        * them we get a 404, and so the SW registration fails. */
-      excludes: ['_headers', '_redirects', 'docs/**'],
+      excludes: ['_headers', '_redirects', 'docs/**', 'photon/**'],
       cacheMaps: [
         {
           requestTypes: ['navigate'],
@@ -130,7 +134,12 @@ if (process.env.NODE_ENV === 'production') {
               // your browser and see the actual service worker script
               return null;
             }
-            if (url.pathname.startsWith('/docs/')) {
+            if (
+              url.pathname.startsWith('/docs/') ||
+              url.pathname === '/docs' ||
+              url.pathname.startsWith('/photon/') ||
+              url.pathname === '/photon'
+            ) {
               // 2. We exclude the /docs from being cached, but we still want
               // the user to be able to access them.
               return null;

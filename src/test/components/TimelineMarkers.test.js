@@ -41,7 +41,6 @@ describe('TimelineMarkers', function() {
       .mockImplementation(() => ctx);
 
     const profile = getProfileWithMarkers([
-      ['GCMajor', 2, { startTime: 2, endTime: 12 }],
       ['Marker A', 0, { startTime: 0, endTime: 10 }],
       ['Marker B', 0, { startTime: 0, endTime: 10 }],
       ['Marker C', 5, { startTime: 5, endTime: 15 }],

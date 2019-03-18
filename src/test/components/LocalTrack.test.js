@@ -26,12 +26,11 @@ import {
 import { ensureExists } from '../../utils/flow';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
+import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
 import {
-  getNetworkTrackProfile,
-  getCounterForThread,
-  getProfileFromTextSamples,
-} from '../fixtures/profiles/processed-profile';
-import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
+  getProfileWithNiceTracks,
+  getStoreWithMemoryTrack,
+} from '../fixtures/profiles/tracks';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 
@@ -236,36 +235,11 @@ function setupWithNetworkProfile() {
  * Set up a profile with a memory counter.
  */
 function setupWithMemory() {
-  const { profile } = getProfileFromTextSamples(
-    // Create a trivial profile with 10 samples, all of the function "A".
-    Array(10)
-      .fill('A')
-      .join('  ')
-  );
-  const threadIndex = 0;
-  const trackIndex = 0;
-  const trackReference = { type: 'local', pid: PID, trackIndex };
-
-  {
-    // Modify the thread to include the counter.
-    const thread = profile.threads[threadIndex];
-    thread.name = 'GeckoMain';
-    thread.processType = 'default';
-    thread.pid = PID;
-    const counter = getCounterForThread(thread, threadIndex);
-    counter.category = 'Memory';
-    profile.counters = [counter];
-  }
-
-  const store = storeWithProfile(profile);
-  const localTrack = getLocalTrackFromReference(
-    store.getState(),
-    trackReference
-  );
-
-  if (localTrack.type !== 'memory') {
-    throw new Error('Expected a memory track.');
-  }
-
+  const {
+    store,
+    trackReference,
+    localTrack,
+    threadIndex,
+  } = getStoreWithMemoryTrack(PID);
   return setup(store, trackReference, localTrack, threadIndex);
 }

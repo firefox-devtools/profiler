@@ -82,7 +82,7 @@
 
 .photon-input:invalid:not(:placeholder-shown) {
   border: 1px solid var(--red-60);
-  box-shadow: 0 0 0 1px var(--red-60), 0 0 0 4px rgba(251, 0, 34, 0.3);
+  box-shadow: 0 0 0 1px var(--red-60), 0 0 0 4px var(--red-60-a30);
 }
 
 /* --- Message bars --- */

@@ -5,7 +5,11 @@
 
 import * as profileViewSelectors from '../../../selectors/profile';
 import * as urlStateReducers from '../../../selectors/url-state';
-import { getProfileFromTextSamples } from './processed-profile';
+import {
+  getProfileFromTextSamples,
+  getCounterForThread,
+} from './processed-profile';
+import { storeWithProfile } from '../stores';
 import { oneLine } from 'common-tags';
 
 import type { Profile } from '../../../types/profile';
@@ -140,4 +144,38 @@ export function getProfileWithNiceTracks(): Profile {
   thread4.processType = 'tab';
   thread4.pid = 222;
   return profile;
+}
+
+export function getStoreWithMemoryTrack(pid: number = 222): * {
+  const { profile } = getProfileFromTextSamples(
+    // Create a trivial profile with 10 samples, all of the function "A".
+    Array(10)
+      .fill('A')
+      .join('  ')
+  );
+  const threadIndex = 0;
+  const trackIndex = 0;
+  const trackReference = { type: 'local', pid, trackIndex };
+
+  {
+    // Modify the thread to include the counter.
+    const thread = profile.threads[threadIndex];
+    thread.name = 'GeckoMain';
+    thread.processType = 'default';
+    thread.pid = pid;
+    const counter = getCounterForThread(thread, threadIndex);
+    counter.category = 'Memory';
+    profile.counters = [counter];
+  }
+
+  const store = storeWithProfile(profile);
+  const localTrack = profileViewSelectors.getLocalTrackFromReference(
+    store.getState(),
+    trackReference
+  );
+
+  if (localTrack.type !== 'memory') {
+    throw new Error('Expected a memory track.');
+  }
+  return { store, ...store, profile, trackReference, localTrack, threadIndex };
 }
