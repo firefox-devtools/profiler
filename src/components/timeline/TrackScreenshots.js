@@ -150,7 +150,7 @@ type HoverPreviewProps = {|
   +width: number,
 |};
 
-const MAXIMUM_HEIGHT = 350;
+const MAXIMUM_HOVER_HEIGHT = 350;
 
 const HOVER_MAX_WIDTH_RATIO = 1.75;
 
@@ -202,11 +202,11 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     const { url, windowWidth, windowHeight } = payload;
 
     // Compute hover image size coefficients to ensure it does not exceed top of screen
-    // To prevent blurring, do not scale up the hover image
+    // To prevent blurring, do not scale up the screenshots
     const coefficient = Math.min(
       1,
       2 * (TRACK_HEIGHT / 2 + containerTop) / windowHeight,
-      MAXIMUM_HEIGHT / windowHeight
+      MAXIMUM_HOVER_HEIGHT / windowHeight
     );
     // Compute the hover image's thumbnail size.
     let hoverHeight = windowHeight * coefficient;
