@@ -71,7 +71,7 @@ const MenuButtons = ({
         className="menuButtonsLink"
         title="Open the documentation in a new window"
       >
-        Docs…
+        Docs<img src="./res/img/svg/open-in-new.svg" />
       </a>
     </div>
   </>
