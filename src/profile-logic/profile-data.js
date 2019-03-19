@@ -1423,7 +1423,7 @@ export function getFriendlyThreadName(
             label = 'GPU Process';
             break;
           case 'rdd':
-            label = 'Remote Data Decoder Process';
+            label = 'Remote Data Decoder';
             break;
           case 'tab': {
             const contentThreads = threads.filter(thread => {
