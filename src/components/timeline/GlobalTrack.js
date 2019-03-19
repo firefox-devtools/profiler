@@ -186,7 +186,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
             <button type="button" className="timelineTrackNameButton">
               {trackName}
               <div className="timelineTrackNameButtonAdditionalDetails">
-                {pid}
+                PID: {pid}
               </div>
             </button>
           </ContextMenuTrigger>
