@@ -16,7 +16,11 @@ import {
   getMouseEvent,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { changeInvertCallstack } from '../../actions/profile-view';
+import {
+  changeInvertCallstack,
+  changeSelectedCallNode,
+} from '../../actions/profile-view';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getInvertCallstack } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
@@ -62,6 +66,38 @@ describe('FlameGraph', function() {
     moveMouse(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
     expect(getTooltip()).toMatchSnapshot();
   });
+
+  it('can be navigated with the keyboard', () => {
+    const { getState, dispatch, getContentDiv, funcNames } = setupFlameGraph();
+    const div = getContentDiv();
+
+    function selectedNode() {
+      const callNodeIndex = selectedThreadSelectors.getSelectedCallNodeIndex(
+        getState()
+      );
+      return callNodeIndex && funcNames[callNodeIndex];
+    }
+
+    // Start out with callnode B selected
+    dispatch(changeSelectedCallNode(0, [0, 1] /* B */));
+    expect(selectedNode()).toBe('B');
+
+    // Move one callnode up
+    fireEvent.keyDown(div, { key: 'ArrowUp' });
+    expect(selectedNode()).toBe('C');
+
+    // Move one callnode right
+    fireEvent.keyDown(div, { key: 'ArrowRight' });
+    expect(selectedNode()).toBe('H');
+
+    // Go back to left again
+    fireEvent.keyDown(div, { key: 'ArrowLeft' });
+    expect(selectedNode()).toBe('C');
+
+    // And down, back to our starting callnode again
+    fireEvent.keyDown(div, { key: 'ArrowDown' });
+    expect(selectedNode()).toBe('B');
+  });
 });
 
 function setupFlameGraph() {
@@ -76,7 +112,10 @@ function setupFlameGraph() {
     .spyOn(HTMLCanvasElement.prototype, 'getContext')
     .mockImplementation(() => ctx);
 
-  const { profile } = getProfileFromTextSamples(`
+  const {
+    profile,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(`
     A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
     B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
     C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
@@ -118,5 +157,24 @@ function setupFlameGraph() {
     return document.querySelector('#root-overlay .tooltip');
   }
 
-  return { container, getByText, ctx, moveMouse, getTooltip, ...store };
+  /**
+   * The content div is the one receiving keyboard events for navigation.
+   */
+  function getContentDiv() {
+    return ensureExists(
+      container.querySelector('.flameGraphContent'),
+      `Couldn't find the content div with selector .flameGraphContent`
+    );
+  }
+
+  return {
+    container,
+    funcNames,
+    getByText,
+    ctx,
+    moveMouse,
+    getTooltip,
+    getContentDiv,
+    ...store,
+  };
 }
