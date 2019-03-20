@@ -58,6 +58,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
     abi: "x86_64-gcc3",
     toolkit: "cocoa",
     product: "Firefox",
+    updateChannel: "nightly",
     extensions: {
       schema: {
         id: 0,

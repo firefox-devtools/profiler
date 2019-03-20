@@ -61,6 +61,7 @@ Object {
     "startTime": 2574592839.818,
     "symbolicated": true,
     "toolkit": undefined,
+    "updateChannel": undefined,
     "version": 15,
   },
   "pages": Array [],
