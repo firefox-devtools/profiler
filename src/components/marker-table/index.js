@@ -129,8 +129,8 @@ class MarkerTree {
             category = 'Network';
             break;
           case 'Text':
-            category = name;
-            name = data.name;
+            category = 'Text';
+            name += ` [${data.name}]`;
             break;
           default:
         }
