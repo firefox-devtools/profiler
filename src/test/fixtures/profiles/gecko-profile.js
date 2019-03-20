@@ -88,6 +88,7 @@ export function createGeckoProfile(): GeckoProfile {
     logicalCPUs: 8,
     physicalCPUs: 4,
     sourceURL: '',
+    updateChannel: 'nightly',
     categories: [
       {
         name: 'Other',

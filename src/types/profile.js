@@ -381,6 +381,18 @@ export type ProfileMeta = {|
   // "unknown" state.  For now we don't do much with it but we may want to
   // propose a manual symbolication in the future.
   symbolicated?: boolean,
+  // The Update channel for this build of the application.
+  // This property is landed in Firefox 67, and is optional because older
+  // processed profile versions may not have them. No upgrader was necessary.
+  updateChannel?:
+    | 'default' // Local builds
+    | 'nightly'
+    | 'nightly-try' // Nightly try builds for QA
+    | 'aurora' // Developer Edition channel
+    | 'beta'
+    | 'release'
+    | 'esr' // Extended Support Release channel
+    | string,
 |};
 
 /**

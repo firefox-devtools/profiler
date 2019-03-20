@@ -65,6 +65,12 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                     {_formatVersionNumber(meta.misc)}
                   </div>
                 ) : null}
+                {meta.updateChannel ? (
+                  <div className="metaInfoRow">
+                    <span className="metaInfoLabel">Update Channel:</span>
+                    {meta.updateChannel}
+                  </div>
+                ) : null}
                 {meta.appBuildID ? (
                   <div className="metaInfoRow">
                     <span className="metaInfoLabel">Build ID:</span>

@@ -1055,6 +1055,7 @@ export function processProfile(
     // perf). If it's present and true, then we indicate that the process is
     // already symbolicated, otherwise we indicate it needs to be symbolicated.
     symbolicated: !!geckoProfile.meta.presymbolicated,
+    updateChannel: geckoProfile.meta.updateChannel,
   };
 
   const result = {
