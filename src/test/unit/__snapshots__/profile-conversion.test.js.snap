@@ -3818,6 +3818,7 @@ Object {
         "name": "Network",
       },
     ],
+    "debug": false,
     "extensions": Object {
       "baseURL": Array [],
       "id": Array [],
