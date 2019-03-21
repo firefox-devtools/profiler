@@ -35,10 +35,10 @@ describe('deriveMarkersFromRawMarkerTable', function() {
 
     return {
       profile,
-      markers: getThreadSelectors(0).getReferenceMarkerTable(state),
+      markers: getThreadSelectors(0).getFullMarkerList(state),
       thread,
       contentThread,
-      contentMarkers: getThreadSelectors(2).getReferenceMarkerTable(state),
+      contentMarkers: getThreadSelectors(2).getFullMarkerList(state),
     };
   }
 

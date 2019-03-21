@@ -1159,7 +1159,7 @@ Object {
 }
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getReferenceMarkerTable 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getFullMarkerList 1`] = `
 Array [
   Object {
     "data": null,

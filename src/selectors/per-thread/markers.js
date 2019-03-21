@@ -51,8 +51,8 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * 3b. _getDerivedJankMarkers - Jank markers come from our samples data, and
    *                              this selector returns Marker structures out of
    *                              the samples structure.
-   * 4. getReferenceMarkerTable - Concatenates and sorts all markers coming from
-   *                              different origin structures.
+   * 4. getFullMarkerList - Concatenates and sorts all markers coming from
+   *                        different origin structures.
    * 5. getCommittedRangeFilteredMarkers - Apply the committed range.
    * 6. getSearchFilteredMarkers - Apply the search string
    * 7. getPreviewFilteredMarkers - Apply the preview range
@@ -85,7 +85,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     samples => MarkerData.deriveJankMarkers(samples, 50)
   );
 
-  const getReferenceMarkerTable: Selector<Marker[]> = createSelector(
+  const getFullMarkerList: Selector<Marker[]> = createSelector(
     _getDerivedMarkers,
     _getDerivedJankMarkers,
     (derivedMarkers, derivedJankMarkers) =>
@@ -95,7 +95,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   const getCommittedRangeFilteredMarkers: Selector<Marker[]> = createSelector(
-    getReferenceMarkerTable,
+    getFullMarkerList,
     ProfileSelectors.getCommittedRange,
     (markers, range): Marker[] => {
       const { start, end } = range;
@@ -154,7 +154,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   const getIsNetworkChartEmptyInFullRange: Selector<boolean> = createSelector(
-    getReferenceMarkerTable,
+    getFullMarkerList,
     markers => markers.filter(MarkerData.isNetworkMarker).length === 0
   );
 
@@ -172,7 +172,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   const getIsMarkerChartEmptyInFullRange: Selector<boolean> = createSelector(
-    getReferenceMarkerTable,
+    getFullMarkerList,
     markers => MarkerData.filterForMarkerChart(markers).length === 0
   );
 
@@ -227,7 +227,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   return {
     getJankMarkersForHeader,
     getProcessedRawMarkerTable,
-    getReferenceMarkerTable,
+    getFullMarkerList,
     getNetworkChartMarkers,
     getSearchFilteredNetworkChartMarkers,
     getIsMarkerChartEmptyInFullRange,

@@ -1170,10 +1170,10 @@ describe('snapshots of selectors/profile', function() {
       markerThreadSelectors.getProcessedRawMarkerTable(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of markerThreadSelectors.getReferenceMarkerTable', function() {
+  it('matches the last stored run of markerThreadSelectors.getFullMarkerList', function() {
     const { getState, markerThreadSelectors } = setupStore();
     expect(
-      markerThreadSelectors.getReferenceMarkerTable(getState())
+      markerThreadSelectors.getFullMarkerList(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of markerThreadSelectors.getMarkerChartTiming', function() {

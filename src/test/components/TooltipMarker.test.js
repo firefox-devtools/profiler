@@ -435,7 +435,7 @@ describe('TooltipMarker', function() {
     const store = storeWithProfile(profile);
     const state = store.getState();
     const threadIndex = getSelectedThreadIndex(state);
-    const markers = selectedThreadSelectors.getReferenceMarkerTable(state);
+    const markers = selectedThreadSelectors.getFullMarkerList(state);
 
     markers.forEach(marker => {
       const { container } = render(
