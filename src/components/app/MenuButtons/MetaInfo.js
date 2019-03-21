@@ -87,6 +87,12 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                     )}
                   </div>
                 ) : null}
+                {meta.debug !== undefined ? (
+                  <div className="metaInfoRow">
+                    <span className="metaInfoLabel">Build Type:</span>
+                    {meta.debug ? 'Debug' : 'Opt'}
+                  </div>
+                ) : null}
                 {meta.extensions ? (
                   <div className="metaInfoRow">
                     <span className="metaInfoLabel">Extensions:</span>

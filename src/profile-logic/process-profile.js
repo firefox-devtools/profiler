@@ -1038,6 +1038,7 @@ export function processProfile(
     processType: geckoProfile.meta.processType,
     product: geckoProfile.meta.product,
     stackwalk: geckoProfile.meta.stackwalk,
+    debug: !!geckoProfile.meta.debug,
     toolkit: geckoProfile.meta.toolkit,
     version: geckoProfile.meta.version,
     categories: geckoProfile.meta.categories,
