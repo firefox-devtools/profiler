@@ -206,6 +206,18 @@ export type GeckoProfileMeta = {|
   // (which indicates that they'll need to be symbolicated) but may be specified
   // for profiles imported from other formats (eg: linux perf).
   presymbolicated?: boolean,
+  // The Update channel for this build of the application.
+  // This property is landed in Firefox 67, and is optional because older
+  // Firefox versions may not have them. No upgrader was necessary.
+  updateChannel?:
+    | 'default' // Local builds
+    | 'nightly'
+    | 'nightly-try' // Nightly try builds for QA
+    | 'aurora' // Developer Edition channel
+    | 'beta'
+    | 'release'
+    | 'esr' // Extended Support Release channel
+    | string,
 |};
 
 export type GeckoProfile = {|
