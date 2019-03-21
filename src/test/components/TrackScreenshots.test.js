@@ -34,7 +34,7 @@ import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
 
 // Mock out the getBoundingBox to have a 400 pixel width.
 const TRACK_WIDTH = 400;
-const LEFT = 200;
+const LEFT = 100;
 const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {
@@ -80,6 +80,18 @@ describe('timeline/TrackScreenshots', function() {
     const { moveMouseAndGetLeft } = setup();
     const pageX = LEFT + TRACK_WIDTH - 1;
     expect(pageX > moveMouseAndGetLeft(pageX)).toBe(true);
+  });
+
+  it('makes sure the hover image does not go off the left side of screen', () => {
+    const { moveMouseAndGetLeft } = setup();
+    const pageX = LEFT;
+    expect(moveMouseAndGetLeft(pageX) >= 0).toBe(true);
+  });
+
+  it('makes sure the hover image does not go off the top side of screen', () => {
+    const { moveMouseAndGetTop } = setup();
+    const pageX = LEFT;
+    expect(moveMouseAndGetTop(pageX) >= 0).toBe(true);
   });
 
   it('renders a screenshot images when zooming into a range without a screenshot start time actually in the range', () => {
@@ -196,6 +208,11 @@ function setup(
     return parseInt(screenshotHover().style.left);
   }
 
+  function moveMouseAndGetTop(pageX: number): number {
+    moveMouse(pageX);
+    return parseInt(screenshotHover().style.left);
+  }
+
   return {
     ...renderResult,
     dispatch,
@@ -206,6 +223,7 @@ function setup(
     screenshotTrack,
     moveMouse,
     moveMouseAndGetLeft,
+    moveMouseAndGetTop,
   };
 }
 

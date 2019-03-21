@@ -150,7 +150,7 @@ type HoverPreviewProps = {|
   +width: number,
 |};
 
-const MAXIMUM_HOVER_HEIGHT = 350;
+const MAXIMUM_HOVER_SIZE = 350;
 
 const HOVER_MAX_WIDTH_RATIO = 1.75;
 
@@ -201,16 +201,21 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     const payload: ScreenshotPayload = (screenshots[screenshotIndex].data: any);
     const { url, windowWidth, windowHeight } = payload;
 
-    // Compute hover image size coefficients to ensure it does not exceed top of screen
-    // To prevent blurring, do not scale up the screenshots
-    const coefficient = Math.min(
-      1,
-      2 * (TRACK_HEIGHT / 2 + containerTop) / windowHeight,
-      MAXIMUM_HOVER_HEIGHT / windowHeight
-    );
     // Compute the hover image's thumbnail size.
+    // Coefficient should be according to bigger side.
+    const coefficient =
+      windowHeight > windowWidth
+        ? MAXIMUM_HOVER_SIZE / windowHeight
+        : MAXIMUM_HOVER_SIZE / windowWidth;
     let hoverHeight = windowHeight * coefficient;
     let hoverWidth = windowWidth * coefficient;
+
+    const distanceToTopFromTrackCenter = TRACK_HEIGHT / 2 + containerTop;
+    // If the hover height exceed the top of screen, set it just enough reach top of screen when it is centered.
+    if (hoverHeight > 2 * distanceToTopFromTrackCenter) {
+      hoverHeight = 2 * distanceToTopFromTrackCenter;
+      hoverWidth = hoverHeight * windowWidth / windowHeight;
+    }
 
     if (hoverWidth > hoverHeight * HOVER_MAX_WIDTH_RATIO) {
       // This is a really wide image, limit the height so it lays out reasonably.
@@ -220,19 +225,24 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
 
     // Set the top so it centers around the track.
     let top = containerTop + (TRACK_HEIGHT - hoverHeight) * 0.5;
+    // Round top value to integer.
+    top = Math.floor(top);
     if (top < 0) {
-      // Stick the hover image on to the top side of the container
-      top = containerTop;
+      // Stick the hover image on to the top side of the container.
+      top = 0;
     }
+
     // Center the hover image around the mouse.
     let left = pageX - hoverWidth * 0.5;
     if (left < 0) {
       // Stick the hover image on to the left side of the page.
       left = 0;
-    } else if (offsetX + hoverWidth * 0.5 > width) {
+    } else if (left + hoverWidth > width) {
       // Stick the hover image on to the right side of the container.
       left = pageX - offsetX + width - hoverWidth;
     }
+    // Round left value to integer.
+    left = Math.floor(left);
 
     return createPortal(
       <div className="timelineTrackScreenshotHover" style={{ left, top }}>
