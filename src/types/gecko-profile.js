@@ -195,7 +195,7 @@ export type GeckoProfileMeta = {|
   // This value represents a boolean, but for some reason is written out as an int
   // value as the previous field.
   // It's 0 for opt builds, and 1 for debug builds.
-  // This property is added to Firefox Profiler long time after it's been added to
+  // This property was added to Firefox Profiler a long time after it was added to
   // Firefox, that's why we don't need to make it optional for gecko profiles.
   debug: 0 | 1,
   toolkit: string,
