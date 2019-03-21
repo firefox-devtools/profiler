@@ -330,7 +330,7 @@ export type ProfileMeta = {|
   // It's 0 for the stack walking feature being turned off, and 1 for stackwalking being
   // turned on.
   stackwalk: 0 | 1,
-  // A boolean flag indicating whether the application is debug build.
+  // A boolean flag indicating whether the profiled application is using a debug build.
   // It's false for opt builds, and true for debug builds.
   // This property is optional because older processed profiles don't have this but
   // this property was added to Firefox long time ago. It should work on older Firefox
