@@ -237,7 +237,7 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     if (left < 0) {
       // Stick the hover image on to the left side of the page.
       left = 0;
-    } else if (left + hoverWidth > width) {
+    } else if (left + hoverWidth > width + (pageX - offsetX)) {
       // Stick the hover image on to the right side of the container.
       left = pageX - offsetX + width - hoverWidth;
     }
