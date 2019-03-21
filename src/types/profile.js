@@ -333,7 +333,7 @@ export type ProfileMeta = {|
   // A boolean flag indicating whether the profiled application is using a debug build.
   // It's false for opt builds, and true for debug builds.
   // This property is optional because older processed profiles don't have this but
-  // this property was added to Firefox long time ago. It should work on older Firefox
+  // this property was added to Firefox a long time ago. It should work on older Firefox
   // versions without any problem.
   debug?: boolean,
   // This is the Gecko profile format version (the unprocessed version received directly
