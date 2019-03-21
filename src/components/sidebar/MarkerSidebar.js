@@ -45,16 +45,9 @@ class MarkerSidebar extends React.PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, {||}>({
-  mapStateToProps: state => {
-    const getMarker = selectedThreadSelectors.getMarkerGetter(state);
-    const selectedMarkerIndex = selectedThreadSelectors.getSelectedMarkerIndex(
-      state
-    );
-    return {
-      marker:
-        selectedMarkerIndex === null ? null : getMarker(selectedMarkerIndex),
-      selectedThreadIndex: getSelectedThreadIndex(state),
-    };
-  },
+  mapStateToProps: state => ({
+    marker: selectedThreadSelectors.getSelectedMarker(state),
+    selectedThreadIndex: getSelectedThreadIndex(state),
+  }),
   component: MarkerSidebar,
 });

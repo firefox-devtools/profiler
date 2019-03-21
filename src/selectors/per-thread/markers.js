@@ -297,6 +297,27 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   const getSelectedMarkerIndex: Selector<MarkerIndex | null> = state =>
     threadSelectors.getViewOptions(state).selectedMarker;
 
+  const getSelectedMarker: Selector<Marker | null> = state => {
+    const getMarker = getMarkerGetter(state);
+    const selectedMarkerIndex = getSelectedMarkerIndex(state);
+
+    if (selectedMarkerIndex === null) {
+      return null;
+    }
+
+    const marker = getMarker(selectedMarkerIndex);
+    if (!marker) {
+      console.error(stripIndent`
+        Couldn't find the selected marker index ${selectedMarkerIndex} in the full marker list.
+        This shouldn't normally happen and is likely a programming error.
+      `);
+
+      return null;
+    }
+
+    return marker;
+  };
+
   return {
     getMarkerGetter,
     getJankMarkerIndexesForHeader,
@@ -319,6 +340,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getSearchFilteredMarkerIndexes,
     getPreviewFilteredMarkerIndexes,
     getSelectedMarkerIndex,
+    getSelectedMarker,
     getIsNetworkChartEmptyInFullRange,
   };
 }

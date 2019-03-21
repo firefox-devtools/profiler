@@ -200,22 +200,13 @@ class MarkersContextMenu extends PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    const getMarker = selectedThreadSelectors.getMarkerGetter(state);
-    const selectedMarkerIndex = selectedThreadSelectors.getSelectedMarkerIndex(
-      state
-    );
-    const selectedMarker =
-      selectedMarkerIndex === null ? null : getMarker(selectedMarkerIndex);
-
-    return {
-      previewSelection: getPreviewSelection(state),
-      committedRange: getCommittedRange(state),
-      thread: selectedThreadSelectors.getThread(state),
-      implementationFilter: getImplementationFilter(state),
-      selectedMarker,
-    };
-  },
+  mapStateToProps: state => ({
+    previewSelection: getPreviewSelection(state),
+    committedRange: getCommittedRange(state),
+    thread: selectedThreadSelectors.getThread(state),
+    implementationFilter: getImplementationFilter(state),
+    selectedMarker: selectedThreadSelectors.getSelectedMarker(state),
+  }),
   mapDispatchToProps: { updatePreviewSelection },
   component: MarkersContextMenu,
 });
