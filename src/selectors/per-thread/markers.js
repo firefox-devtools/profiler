@@ -116,6 +116,28 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     markers => markers.map((_, i) => i)
   );
 
+  /* This utility function makes it easy to write selectors that deal with list
+   * of marker indexes.
+   * It takes a filtering function as parameter. This filtering function takes a
+   * marker as parameter and returns a boolean deciding whether this marker
+   * should be kept.
+   * This function returns a function that does the actual filtering.
+   *
+   * It is typically used this way:
+   *  const filteredMarkerIndexes = createSelector(
+   *    getMarkerGetter,
+   *    getSourceMarkerIndexesSelector,
+   *    filterMarkerIndexesCreator(
+   *      marker => MarkerData.isNetworkMarker(marker)
+   *    )
+   *  );
+   */
+  const filterMarkerIndexesCreator = (filterFunc: Marker => boolean) => (
+    getMarker: MarkerIndex => Marker,
+    markerIndexes: MarkerIndex[]
+  ): MarkerIndex[] =>
+    MarkerData.filterMarkerIndexes(getMarker, markerIndexes, filterFunc);
+
   const getCommittedRangeFilteredMarkerIndexes: Selector<
     MarkerIndex[]
   > = createSelector(
@@ -138,20 +160,17 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    (markerList, markerIndexes): MarkerIndex[] =>
-      MarkerData.filterMarkerIndexes(
-        markerList,
-        markerIndexes,
-        marker =>
-          marker.name !== 'BHR-detected hang' &&
-          marker.name !== 'LongTask' &&
-          marker.name !== 'LongIdleTask' &&
-          marker.name !== 'Jank' &&
-          !MarkerData.isNetworkMarker(marker) &&
-          !MarkerData.isFileIoMarker(marker) &&
-          !MarkerData.isNavigationMarker(marker) &&
-          !MarkerData.isMemoryMarker(marker)
-      )
+    filterMarkerIndexesCreator(
+      marker =>
+        marker.name !== 'BHR-detected hang' &&
+        marker.name !== 'LongTask' &&
+        marker.name !== 'LongIdleTask' &&
+        marker.name !== 'Jank' &&
+        !MarkerData.isNetworkMarker(marker) &&
+        !MarkerData.isFileIoMarker(marker) &&
+        !MarkerData.isNavigationMarker(marker) &&
+        !MarkerData.isMemoryMarker(marker)
+    )
   );
 
   const getTimelineVerticalMarkerIndexes: Selector<
@@ -159,23 +178,13 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    (markerList, markerIndexes): MarkerIndex[] =>
-      MarkerData.filterMarkerIndexes(
-        markerList,
-        markerIndexes,
-        MarkerData.isNavigationMarker
-      )
+    filterMarkerIndexesCreator(MarkerData.isNavigationMarker)
   );
 
   const getJankMarkerIndexesForHeader: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    (markerList, markerIndexes) =>
-      MarkerData.filterMarkerIndexes(
-        markerList,
-        markerIndexes,
-        marker => marker.name === 'Jank'
-      )
+    filterMarkerIndexesCreator(marker => marker.name === 'Jank')
   );
 
   const getSearchFilteredMarkerIndexes: Selector<
@@ -215,12 +224,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   const getNetworkChartMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    (markerList, markerIndexes) =>
-      MarkerData.filterMarkerIndexes(
-        markerList,
-        markerIndexes,
-        MarkerData.isNetworkMarker
-      )
+    filterMarkerIndexesCreator(MarkerData.isNetworkMarker)
   );
 
   const getSearchFilteredNetworkChartMarkerIndexes: Selector<
@@ -261,34 +265,19 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   const getNetworkMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    (markerList, markerIndexes) =>
-      MarkerData.filterMarkerIndexes(
-        markerList,
-        markerIndexes,
-        MarkerData.isNetworkMarker
-      )
+    filterMarkerIndexesCreator(MarkerData.isNetworkMarker)
   );
 
   const getFileIoMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    (markerList, markerIndexes) =>
-      MarkerData.filterMarkerIndexes(
-        markerList,
-        markerIndexes,
-        MarkerData.isFileIoMarker
-      )
+    filterMarkerIndexesCreator(MarkerData.isFileIoMarker)
   );
 
   const getMemoryMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    (markerList, markerIndexes) =>
-      MarkerData.filterMarkerIndexes(
-        markerList,
-        markerIndexes,
-        MarkerData.isMemoryMarker
-      )
+    filterMarkerIndexesCreator(MarkerData.isMemoryMarker)
   );
 
   const getNetworkTrackTiming: Selector<MarkerTimingRows> = createSelector(
