@@ -120,6 +120,16 @@ Array [
               <span
                 class="metaInfoLabel"
               >
+                Build Type:
+              </span>
+              Debug
+            </div>
+            <div
+              class="metaInfoRow"
+            >
+              <span
+                class="metaInfoLabel"
+              >
                 Extensions:
               </span>
               <ul

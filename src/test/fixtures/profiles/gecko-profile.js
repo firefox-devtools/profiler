@@ -81,6 +81,7 @@ export function createGeckoProfile(): GeckoProfile {
     processType: 0,
     product: 'Firefox',
     stackwalk: 1,
+    debug: 1,
     startTime: 1460221352723.438,
     shutdownTime: 1560221352723,
     toolkit: 'cocoa',
