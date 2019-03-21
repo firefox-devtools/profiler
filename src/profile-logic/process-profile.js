@@ -11,7 +11,7 @@ import {
   getEmptyExtensions,
   getEmptyFuncTable,
   getEmptyResourceTable,
-  cloneRawMarkerTable,
+  shallowCloneRawMarkerTable,
 } from './data-structures';
 import { immutableUpdate } from '../utils/flow';
 import { removeURLs } from '../utils/string';
@@ -1189,7 +1189,7 @@ function sanitizeThreadPII(
   // current thread.
   // We need to update the stringTable. It's not possible with UniqueStringArray.
   const stringArray = thread.stringTable.serializeToArray();
-  let markerTable = cloneRawMarkerTable(thread.markers);
+  let markerTable = shallowCloneRawMarkerTable(thread.markers);
 
   // We iterate all the markers and remove/change data depending on the PII
   // status.
