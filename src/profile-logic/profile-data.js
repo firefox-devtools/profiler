@@ -29,8 +29,8 @@ import type {
 } from '../types/profile-derived';
 import {
   getEmptyStackTable,
-  cloneFrameTable,
-  cloneFuncTable,
+  shallowCloneFrameTable,
+  shallowCloneFuncTable,
 } from './data-structures';
 import { assertExhaustiveCheck } from '../utils/flow';
 
@@ -774,8 +774,8 @@ export function collapsePlatformStackFrames(thread: Thread): Thread {
 
     // Create new tables for the data.
     const newStackTable = getEmptyStackTable();
-    const newFrameTable = cloneFrameTable(frameTable);
-    const newFuncTable = cloneFuncTable(funcTable);
+    const newFrameTable = shallowCloneFrameTable(frameTable);
+    const newFuncTable = shallowCloneFuncTable(funcTable);
 
     // Create a Map that takes a prefix and frame as input, and maps it to the new stack
     // index. Since Maps can't be keyed off of two values, do a little math to key off
@@ -1421,6 +1421,9 @@ export function getFriendlyThreadName(
             break;
           case 'gpu':
             label = 'GPU Process';
+            break;
+          case 'rdd':
+            label = 'Remote Data Decoder';
             break;
           case 'tab': {
             const contentThreads = threads.filter(thread => {

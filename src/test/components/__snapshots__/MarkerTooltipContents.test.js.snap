@@ -13,7 +13,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Bailout-10 
       <div
         class="tooltipTiming"
       >
-        0.000ms
+        —
       </div>
       <div
         class="tooltipTitle"
@@ -449,7 +449,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMajor-16.
       <div
         class="tooltipTiming"
       >
-        0.000ms
+        —
       </div>
       <div
         class="tooltipTitle"
@@ -607,7 +607,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMinor-15.
       <div
         class="tooltipTiming"
       >
-        0.000ms
+        —
       </div>
       <div
         class="tooltipTitle"
@@ -730,7 +730,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCSlice-17.
       <div
         class="tooltipTiming"
       >
-        0.000ms
+        —
       </div>
       <div
         class="tooltipTitle"
@@ -804,7 +804,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Invalidate-
       <div
         class="tooltipTiming"
       >
-        0.000ms
+        —
       </div>
       <div
         class="tooltipTitle"
@@ -1132,7 +1132,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Log-21.7 1`
       <div
         class="tooltipTiming"
       >
-        0.000ms
+        —
       </div>
       <div
         class="tooltipTitle"
@@ -1743,7 +1743,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: TTFI-21.4 1
       <div
         class="tooltipTiming"
       >
-        0.000ms
+        —
       </div>
       <div
         class="tooltipTitle"
@@ -1789,7 +1789,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: UserTiming-
       <div
         class="tooltipTiming"
       >
-        0.000ms
+        —
       </div>
       <div
         class="tooltipTitle"

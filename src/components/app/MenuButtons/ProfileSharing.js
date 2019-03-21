@@ -13,12 +13,16 @@ import { uploadBinaryProfileData } from '../../../profile-logic/profile-store';
 import ArrowPanel from '../../shared/ArrowPanel';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
 import { shortenUrl } from '../../../utils/shorten-url';
-import { serializeProfile } from '../../../profile-logic/process-profile';
+import {
+  serializeProfile,
+  sanitizePII,
+} from '../../../profile-logic/process-profile';
 import sha1 from '../../../utils/sha1';
 import { sendAnalytics } from '../../../utils/analytics';
 import url from 'url';
 
 import type { Profile } from '../../../types/profile';
+import type { RemoveProfileInformation } from '../../../types/profile-derived';
 import type { Action, DataSource } from '../../../types/actions';
 import type { ProfileSharingStatus } from '../../../types/state';
 
@@ -140,7 +144,16 @@ export class MenuButtonsProfileSharing extends React.PureComponent<
         throw new Error('profile is null');
       }
 
-      const jsonString = serializeProfile(profile, this.state.shareNetworkUrls);
+      const piiToBeRemoved: RemoveProfileInformation = {
+        shouldRemoveThreads: new Set(),
+        shouldRemoveThreadsWithScreenshots: new Set(),
+        shouldRemoveNetworkUrls: !this.state.shareNetworkUrls,
+        shouldRemoveAllUrls: false,
+        shouldFilterToCommittedRange: null,
+        shouldRemoveExtensions: false,
+      };
+      const sanitizedProfile = sanitizePII(profile, piiToBeRemoved);
+      const jsonString = serializeProfile(sanitizedProfile);
       if (!jsonString) {
         throw new Error('profile serialization failed');
       }

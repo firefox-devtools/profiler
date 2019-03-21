@@ -68,7 +68,7 @@ export function getEmptyFrameTable(): FrameTable {
   };
 }
 
-export function cloneFrameTable(frameTable: FrameTable): FrameTable {
+export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -103,7 +103,7 @@ export function getEmptyFuncTable(): FuncTable {
   };
 }
 
-export function cloneFuncTable(funcTable: FuncTable): FuncTable {
+export function shallowCloneFuncTable(funcTable: FuncTable): FuncTable {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -145,6 +145,21 @@ export function getEmptyRawMarkerTable(): RawMarkerTable {
     name: [],
     time: [],
     length: 0,
+  };
+}
+
+export function shallowCloneRawMarkerTable(
+  markerTable: RawMarkerTable
+): RawMarkerTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    data: markerTable.data.slice(),
+    name: markerTable.name.slice(),
+    time: markerTable.time.slice(),
+    length: markerTable.length,
   };
 }
 

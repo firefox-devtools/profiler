@@ -31,6 +31,7 @@
 .timelineSettings {
   display: flex;
   height: 25px;
+  flex: none;
   flex-flow: row nowrap;
   padding: 0;
   border-bottom: 1px solid var(--grey-30);

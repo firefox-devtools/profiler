@@ -41,6 +41,13 @@ export function addDataToWindowObject(
       return selectedThreadSelectors.getCallTree(getState());
     },
   });
+
+  defineProperty(target, 'filteredMarkers', {
+    enumerable: true,
+    get() {
+      return selectedThreadSelectors.getPreviewFilteredMarkers(getState());
+    },
+  });
 }
 
 export function logFriendlyPreamble() {
@@ -81,6 +88,7 @@ export function logFriendlyPreamble() {
 
       %cwindow.profile%c - The currently loaded profile
       %cwindow.filteredThread%c - The current filtered thread
+      %cwindow.filteredMarkers%c - The current filtered and processed markers
       %cwindow.callTree%c - The call tree of the current filtered thread
 
       The profile format is documented here:
@@ -89,16 +97,25 @@ export function logFriendlyPreamble() {
       The CallTree class's source code is available here:
       %chttps://github.com/firefox-devtools/profiler/blob/master/src/profile-logic/call-tree.js%c
     `,
+    // "The following profiler..."
     intro,
     reset,
+    // "window.profile"
     bold,
     reset,
+    // "window.filteredThread"
     bold,
     reset,
+    // "window.filteredMarkers"
     bold,
     reset,
+    // "window.callTree"
+    bold,
+    reset,
+    // "processed-profile-format.md"
     link,
     reset,
+    // "call-tree.js"
     link,
     reset
   );

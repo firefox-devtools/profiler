@@ -330,6 +330,12 @@ export type ProfileMeta = {|
   // It's 0 for the stack walking feature being turned off, and 1 for stackwalking being
   // turned on.
   stackwalk: 0 | 1,
+  // A boolean flag indicating whether the profiled application is using a debug build.
+  // It's false for opt builds, and true for debug builds.
+  // This property is optional because older processed profiles don't have this but
+  // this property was added to Firefox a long time ago. It should work on older Firefox
+  // versions without any problem.
+  debug?: boolean,
   // This is the Gecko profile format version (the unprocessed version received directly
   // from the browser.)
   version: number,
@@ -381,6 +387,18 @@ export type ProfileMeta = {|
   // "unknown" state.  For now we don't do much with it but we may want to
   // propose a manual symbolication in the future.
   symbolicated?: boolean,
+  // The Update channel for this build of the application.
+  // This property is landed in Firefox 67, and is optional because older
+  // processed profile versions may not have them. No upgrader was necessary.
+  updateChannel?:
+    | 'default' // Local builds
+    | 'nightly'
+    | 'nightly-try' // Nightly try builds for QA
+    | 'aurora' // Developer Edition channel
+    | 'beta'
+    | 'release'
+    | 'esr' // Extended Support Release channel
+    | string,
 |};
 
 /**
