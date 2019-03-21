@@ -94,6 +94,26 @@ export function createGeckoProfile(): GeckoProfile {
         color: 'grey',
       },
     ],
+    extensions: {
+      schema: { id: 0, name: 1, baseURL: 2 },
+      data: [
+        [
+          'formautofill@mozilla.org',
+          'Form Autofill',
+          'moz-extension://259ec0ce-9df7-8e4a-ad30-3b67bed900f3/',
+        ],
+        [
+          'screenshots@mozilla.org',
+          'Firefox Screenshots',
+          'moz-extension://92d08b3e-de1d-024c-b10c-9a2570b1ac5a/',
+        ],
+        [
+          'geckoprofiler@mozilla.com',
+          'Gecko Profiler',
+          'moz-extension://7f56c8ad-cf1b-7346-949e-0ec79a77b35d/',
+        ],
+      ],
+    },
   };
 
   const contentProcessMeta: GeckoProfileMeta = {
@@ -449,6 +469,17 @@ function _createGeckoThread(): GeckoThread {
             },
           },
         ],
+        [
+          15, // CompositorScreenshot
+          25,
+          {
+            type: 'CompositorScreenshot',
+            url: 16, // data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUD
+            windowID: '0x136888400',
+            windowWidth: 1280,
+            windowHeight: 1000,
+          },
+        ],
 
         // INSERT NEW MARKERS HERE
 
@@ -483,6 +514,8 @@ function _createGeckoThread(): GeckoThread {
       'ArbitraryName', // 12
       'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5', // 13
       'FileIO', // 14
+      'CompositorScreenshot', // 15
+      'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUD', // 16
     ],
   };
 }

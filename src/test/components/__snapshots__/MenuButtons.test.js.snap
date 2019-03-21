@@ -114,7 +114,23 @@ Array [
               </span>
               <ul
                 class="metaInfoList"
-              />
+              >
+                <li
+                  class="metaInfoListItem"
+                >
+                  Form Autofill
+                </li>
+                <li
+                  class="metaInfoListItem"
+                >
+                  Firefox Screenshots
+                </li>
+                <li
+                  class="metaInfoListItem"
+                >
+                  Gecko Profiler
+                </li>
+              </ul>
             </div>
           </div>
           <h2

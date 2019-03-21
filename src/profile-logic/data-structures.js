@@ -148,6 +148,21 @@ export function getEmptyRawMarkerTable(): RawMarkerTable {
   };
 }
 
+export function cloneRawMarkerTable(
+  markerTable: RawMarkerTable
+): RawMarkerTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    data: markerTable.data.slice(),
+    name: markerTable.name.slice(),
+    time: markerTable.time.slice(),
+    length: markerTable.length,
+  };
+}
+
 export function getResourceTypes(): * {
   return {
     unknown: 0,
