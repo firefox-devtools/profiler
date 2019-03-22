@@ -6,10 +6,10 @@
 // Import all global css. Ensure that this is these CSS imports happen before any
 // JS imports happen, as this determines the rule order. Global CSS should be easy
 // to overwrite with a simple class name.
-import 'photon-colors/photon-colors.css';
-import '../res/css/photon-components.css';
-import '../res/css/style.css';
 import '../res/css/focus.css';
+import 'photon-colors/photon-colors.css';
+import '../res/css/photon/index.css';
+import '../res/css/style.css';
 import '../res/css/categories.css';
 
 // Now import the JS after the CSS.

@@ -1,0 +1,38 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* See https://design.firefox.com/photon/components/message-bars.html */
+.photon-message-bar {
+  display: flex;
+  width: 100%;
+  min-height: 32px;
+  box-sizing: border-box;
+  align-items: center;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.photon-message-bar-error {
+  /* Note: 32px is: 4px (left padding for the message bar) + 4px (left padding
+   * for the icon) + 16px (icon width) + 4px (right padding for the icon) + 4px
+   * (space between icon and text) */
+  padding: 4px 4px 4px 32px;
+
+  /* Note: 8px is: 4px (left padding for the message bar) + 4px (left padding
+   * for the icon) */
+  background: url(../../img/svg/error.svg) no-repeat 8px center / 16px 16px
+    var(--red-60);
+  color: #fff;
+}
+
+.photon-message-bar-error .photon-button:hover {
+  background-color: var(--red-80);
+}
+
+.photon-message-bar-error .photon-button:hover:active {
+  background-color: var(--red-90);
+}

@@ -1,0 +1,59 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.photon-radio,
+.photon-radio-micro {
+  border: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: none;
+  background-color: var(--grey-90-a10);
+  border-radius: 8px;
+}
+
+.photon-radio {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px;
+}
+
+.photon-radio-micro {
+  width: 13px;
+  height: 13px;
+  margin: 0 3px;
+}
+
+.photon-radio:hover,
+.photon-radio-micro:hover {
+  background-color: var(--grey-90-a20);
+}
+
+.photon-radio:active,
+.photon-radio-micro:active {
+  background-color: var(--grey-90-a30);
+}
+
+.photon-radio:checked,
+.photon-radio-micro:checked {
+  background-color: var(--blue-60);
+}
+
+.photon-radio:checked {
+  background-image: url(../../img/svg/radiobutton-marker-16.svg);
+}
+
+.photon-radio-micro:checked {
+  background-image: url(../../img/svg/radiobutton-marker-13.svg);
+}
+
+.photon-radio:checked:hover,
+.photon-radio-micro:checked:hover {
+  background-color: var(--blue-70);
+}
+
+.photon-radio:checked:active,
+.photon-radio-micro:checked:active {
+  background-color: var(--blue-80);
+}

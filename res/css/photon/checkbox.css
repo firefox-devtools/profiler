@@ -1,0 +1,61 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.photon-checkbox,
+.photon-checkbox-micro {
+  position: relative;
+  padding: 0;
+  border: 1px solid var(--grey-90-a30);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--grey-90-a10);
+  border-radius: 2px;
+}
+
+.photon-checkbox {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px;
+}
+
+.photon-checkbox-micro {
+  width: 13px;
+  height: 13px;
+  margin: 0 3px;
+}
+
+.photon-checkbox:hover,
+.photon-checkbox-micro:hover {
+  background-color: var(--grey-90-a20);
+}
+
+.photon-checkbox:active,
+.photon-checkbox-micro:active {
+  background-color: var(--grey-90-a30);
+}
+
+.photon-checkbox:checked,
+.photon-checkbox-micro:checked {
+  border: none;
+  background-color: var(--blue-60);
+}
+
+.photon-checkbox:checked {
+  background-image: url(../../img/svg/checkbox-check-16.svg);
+}
+
+.photon-checkbox-micro:checked {
+  background-image: url(../../img/svg/checkbox-check-13.svg);
+}
+
+.photon-checkbox:checked:hover,
+.photon-checkbox-micro:checked:hover {
+  background-color: var(--blue-70);
+}
+
+.photon-checkbox:checked:active,
+.photon-checkbox-micro:checked:active {
+  background-color: var(--blue-80);
+}

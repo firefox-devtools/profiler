@@ -1,0 +1,81 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* See https://design.firefox.com/photon/components/buttons.html for the spec */
+.photon-button {
+  padding: 0 8px;
+  margin: 0;
+  border: none;
+
+  /* reset default styles */
+  background: none;
+
+  /* photon styles */
+  background-color: var(--grey-90-a10);
+  border-radius: 2px;
+  color: var(--grey-90);
+  font: inherit;
+}
+
+/* This is a Firefox-specific style because Firefox adds a focusring at a bad
+ * position. We're adding our own below. */
+.photon-button::-moz-focus-inner {
+  border: none;
+}
+
+.photon-button:hover {
+  background-color: var(--grey-90-a20);
+}
+
+.photon-message-bar-error .photon-button {
+  background-color: var(--red-70);
+  color: #fff;
+}
+
+.photon-message-bar .photon-button {
+  margin-left: 8px;
+}
+
+.photon-button:active {
+  background-color: var(--grey-90-a30);
+}
+
+.photon-button-primary,
+.photon-button-default {
+  min-width: 132px;
+  height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+.photon-button-primary {
+  background-color: var(--blue-60);
+  color: #fff;
+}
+
+.photon-button-primary:hover {
+  background-color: var(--blue-70);
+}
+
+.photon-button-primary:active {
+  background-color: var(--blue-80);
+}
+
+.photon-button-ghost {
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+}
+
+.photon-button-ghost:hover {
+  background-color: var(--grey-90-a10);
+}
+
+.photon-button-ghost:hover:active {
+  background-color: var(--grey-90-a20);
+}
+
+.photon-button-micro {
+  height: 24px;
+}
