@@ -17,10 +17,10 @@ exports[`StackChart matches the snapshot 1`] = `
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -29,10 +29,10 @@ exports[`StackChart matches the snapshot 1`] = `
           All stacks
         </label>
         <label
-          class="photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -41,10 +41,10 @@ exports[`StackChart matches the snapshot 1`] = `
           JavaScript
         </label>
         <label
-          class="photon-label-micro stackSettingsFilterLabel"
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="photon-radio-micro stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -57,10 +57,10 @@ exports[`StackChart matches the snapshot 1`] = `
         class="stackSettingsListItem"
       >
         <label
-          class="photon-label-micro stackSettingsLabel"
+          class="photon-label photon-label-micro stackSettingsLabel"
         >
           <input
-            class="photon-checkbox-micro stackSettingsCheckbox"
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
             value="on"
           />

@@ -2,8 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.photon-checkbox,
-.photon-checkbox-micro {
+.photon-checkbox {
   position: relative;
   padding: 0;
   border: 1px solid var(--grey-90-a30);
@@ -14,35 +13,34 @@
   border-radius: 2px;
 }
 
-.photon-checkbox {
+/* Use this class with the photon-checkbox for the canonical photon styling. */
+.photon-checkbox-default {
   width: 16px;
   height: 16px;
   margin: 0 4px;
 }
 
+/* Use this class with the photon-checkbox for the custom micro variant. */
 .photon-checkbox-micro {
   width: 13px;
   height: 13px;
   margin: 0 3px;
 }
 
-.photon-checkbox:hover,
-.photon-checkbox-micro:hover {
+.photon-checkbox:hover {
   background-color: var(--grey-90-a20);
 }
 
-.photon-checkbox:active,
-.photon-checkbox-micro:active {
-  background-color: var(--grey-90-a30);
-}
-
-.photon-checkbox:checked,
-.photon-checkbox-micro:checked {
+.photon-checkbox:checked {
   border: none;
   background-color: var(--blue-60);
 }
 
-.photon-checkbox:checked {
+.photon-checkbox:hover:active {
+  background-color: var(--grey-90-a30);
+}
+
+.photon-checkbox-default:checked {
   background-image: url(../../img/svg/checkbox-check-16.svg);
 }
 
@@ -50,12 +48,10 @@
   background-image: url(../../img/svg/checkbox-check-13.svg);
 }
 
-.photon-checkbox:checked:hover,
-.photon-checkbox-micro:checked:hover {
+.photon-checkbox:checked:hover {
   background-color: var(--blue-70);
 }
 
-.photon-checkbox:checked:active,
-.photon-checkbox-micro:checked:active {
+.photon-checkbox:checked:hover:active {
   background-color: var(--blue-80);
 }

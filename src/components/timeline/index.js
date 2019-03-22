@@ -91,11 +91,11 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
       <form>
         <div className="timelineSettingsToggle">
           Graph type:{' '}
-          <label className="photon-label-micro timelineSettingsToggleLabel">
+          <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
             <input
               type="radio"
               name="timelineSettingsToggle"
-              className="photon-radio-micro timelineSettingsToggleInput"
+              className="photon-radio photon-radio-micro timelineSettingsToggleInput"
               checked={timelineType === 'category'}
               onChange={this._changeToCategories}
             />
@@ -105,7 +105,7 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
             <input
               type="radio"
               name="timelineSettingsToggle"
-              className="photon-radio-micro timelineSettingsToggleInput"
+              className="photon-radio photon-radio-micro timelineSettingsToggleInput"
               checked={timelineType === 'stack'}
               onChange={this._changeToStacks}
             />

@@ -2,8 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.photon-radio,
-.photon-radio-micro {
+.photon-radio {
   border: none;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -13,34 +12,33 @@
   border-radius: 8px;
 }
 
-.photon-radio {
+/* Use this class with the photon-radio for the canonical photon styling. */
+.photon-radio-default {
   width: 16px;
   height: 16px;
   margin: 0 4px;
 }
 
+/* Use this class with the photon-radio for the custom micro variant styling. */
 .photon-radio-micro {
   width: 13px;
   height: 13px;
   margin: 0 3px;
 }
 
-.photon-radio:hover,
-.photon-radio-micro:hover {
+.photon-radio:hover {
   background-color: var(--grey-90-a20);
 }
 
-.photon-radio:active,
-.photon-radio-micro:active {
-  background-color: var(--grey-90-a30);
-}
-
-.photon-radio:checked,
-.photon-radio-micro:checked {
+.photon-radio:checked {
   background-color: var(--blue-60);
 }
 
-.photon-radio:checked {
+.photon-radio:hover:active {
+  background-color: var(--grey-90-a30);
+}
+
+.photon-radio-default:checked {
   background-image: url(../../img/svg/radiobutton-marker-16.svg);
 }
 
@@ -48,12 +46,10 @@
   background-image: url(../../img/svg/radiobutton-marker-13.svg);
 }
 
-.photon-radio:checked:hover,
-.photon-radio-micro:checked:hover {
+.photon-radio:checked:hover {
   background-color: var(--blue-70);
 }
 
-.photon-radio:checked:active,
-.photon-radio-micro:checked:active {
+.photon-radio:checked:hover:active {
   background-color: var(--blue-80);
 }

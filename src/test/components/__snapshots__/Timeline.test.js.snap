@@ -11,10 +11,10 @@ exports[`Timeline renders the header 1`] = `
       Graph type:
        
       <label
-        class="photon-label-micro timelineSettingsToggleLabel"
+        class="photon-label photon-label-micro timelineSettingsToggleLabel"
       >
         <input
-          class="photon-radio-micro timelineSettingsToggleInput"
+          class="photon-radio photon-radio-micro timelineSettingsToggleInput"
           name="timelineSettingsToggle"
           type="radio"
           value="on"
@@ -25,7 +25,7 @@ exports[`Timeline renders the header 1`] = `
         class="photon-label-micro timelineSettingsToggleLabel"
       >
         <input
-          class="photon-radio-micro timelineSettingsToggleInput"
+          class="photon-radio photon-radio-micro timelineSettingsToggleInput"
           name="timelineSettingsToggle"
           type="radio"
           value="on"
