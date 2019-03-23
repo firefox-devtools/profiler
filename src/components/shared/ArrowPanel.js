@@ -42,7 +42,6 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     if (this.props.onOpen) {
       this.props.onOpen();
     }
-    window.addEventListener('mousedown', this._windowMouseDownListener);
   }
 
   close() {
@@ -53,22 +52,10 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     if (this.props.onClose) {
       this.props.onClose();
     }
-    window.removeEventListener('mousedown', this._windowMouseDownListener);
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('mousedown', this._windowMouseDownListener);
-  }
-
-  _windowMouseDownListener = (e: MouseEvent) => {
-    const target: Node = (e.target: any); // make flow happy
-    if (
-      this.state.open &&
-      this._panelElement &&
-      !this._panelElement.contains(target)
-    ) {
-      this.close();
-    }
+  _onArrowPanelClick = (e: SyntheticMouseEvent<>) => {
+    e.stopPropagation();
   };
 
   _onOkButtonClick = () => {
@@ -104,6 +91,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
             { open, hasTitle, hasButtons },
             className
           )}
+          onClick={this._onArrowPanelClick}
           ref={this._takePanelElementRef}
         >
           <div className="arrowPanelArrow" />
