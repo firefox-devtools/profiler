@@ -37,7 +37,6 @@ class ArrowPanel extends React.PureComponent<Props, State> {
     if (this.state.open) {
       return;
     }
-
     this.setState({ open: true });
     if (this.props.onOpen) {
       this.props.onOpen();
