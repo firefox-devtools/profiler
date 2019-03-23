@@ -282,6 +282,7 @@ body,
 .profileViewerTopBar {
   display: flex;
   height: 24px;
+  flex: none;
   flex-flow: row nowrap;
   padding: 0;
   margin: 0;

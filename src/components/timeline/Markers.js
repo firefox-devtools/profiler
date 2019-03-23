@@ -195,7 +195,8 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
   componentDidUpdate(prevProps: Props, prevState: State) {
     if (
       prevProps !== this.props ||
-      prevState.hoveredItem !== this.state.hoveredItem
+      prevState.hoveredItem !== this.state.hoveredItem ||
+      prevState.mouseDownItem !== this.state.mouseDownItem
     ) {
       this._scheduleDraw();
     }
