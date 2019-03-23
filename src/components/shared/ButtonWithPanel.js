@@ -101,9 +101,9 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   };
 
   _onButtonClick = () => {
-    // We use a timeout so that we let the event bubble up to the handlers bound
-    // on `window`, closing all other panels, before opening this one.
     if (!this.state.open) {
+      // We use a timeout so that we let the event bubble up to the handlers bound
+      // on `window`, closing all other panels, before opening this one.
       setTimeout(() => this.openPanel());
     }
   };
