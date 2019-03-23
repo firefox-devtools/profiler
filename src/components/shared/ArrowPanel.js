@@ -55,6 +55,7 @@ class ArrowPanel extends React.PureComponent<Props, State> {
   }
 
   _onArrowPanelClick = (e: SyntheticMouseEvent<>) => {
+    //stop the click propagation to reach the _onWindowClick event
     e.stopPropagation();
   };
 
