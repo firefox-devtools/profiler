@@ -38,7 +38,6 @@ type State = {|
 |};
 
 class ButtonWithPanel extends React.PureComponent<Props, State> {
-  _buttonElement: HTMLElement | null = null;
   _panel: Panel | null = null;
 
   constructor(props: Props) {
@@ -47,6 +46,8 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   }
 
   componentDidMount() {
+    // the panel can be closed by clicking anywhere on the window
+    window.addEventListener('click', this._onWindowClick);
     // the panel can be closed by pressing the Esc key
     window.addEventListener('keydown', this._onKeyDown);
     if (this.props.open) {
@@ -56,11 +57,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
 
   componentWillUnmount() {
     window.removeEventListener('keydown', this._onKeyDown);
-    window.removeEventListener(
-      'mousedown',
-      this._windowMouseDownListener,
-      true
-    );
+    window.removeEventListener('click', this._onWindowClick);
   }
 
   componentWillReceiveProps(props: Props) {
@@ -74,7 +71,6 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     if (this.props.panel.props.onOpen) {
       this.props.panel.props.onOpen();
     }
-    window.addEventListener('mousedown', this._windowMouseDownListener);
   };
 
   _onPanelClose = () => {
@@ -82,15 +78,10 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     if (this.props.panel.props.onClose) {
       this.props.panel.props.onClose();
     }
-    window.removeEventListener('mousedown', this._windowMouseDownListener);
   };
 
   _takePanelRef = (panel: Panel | null) => {
     this._panel = panel;
-  };
-
-  _takeButtonRef = (elem: HTMLElement | null) => {
-    this._buttonElement = elem;
   };
 
   openPanel() {
@@ -105,24 +96,21 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     }
   }
 
+  _onWindowClick = () => {
+    this.closePanel();
+  };
+
   _onButtonClick = () => {
-    if (this.state.open) {
-      this.closePanel();
-    } else {
-      this.openPanel();
+    // We use a timeout so that we let the event bubble up to the handlers bound
+    // on `window`, closing all other panels, before opening this one.
+    if (!this.state.open) {
+      setTimeout(() => this.openPanel());
     }
   };
 
   _onKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Escape') {
       this.closePanel();
-    }
-  };
-
-  _windowMouseDownListener = (e: MouseEvent) => {
-    const target: Node = (e.target: any); // make flow happy
-    if (this.state.open && this._buttonElement === target) {
-      e.stopImmediatePropagation();
     }
   };
 
@@ -140,7 +128,6 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
             )}
             disabled={!!disabled}
             value={label}
-            ref={this._takeButtonRef}
             onClick={this._onButtonClick}
           />
         </div>
