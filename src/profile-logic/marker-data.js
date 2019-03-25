@@ -95,8 +95,15 @@ export function getSearchFilteredMarkers(
     }
     if (data && typeof data === 'object') {
       if (data.type === 'FileIO') {
-        newMarkers.push(marker);
-        continue;
+        const { filename, operation, source } = data;
+        if (
+          filename.toLowerCase().includes(lowerCaseSearchString) ||
+          operation.toLowerCase().includes(lowerCaseSearchString) ||
+          source.toLowerCase().includes(lowerCaseSearchString)
+        ) {
+          newMarkers.push(marker);
+          continue;
+        }
       }
       if (
         typeof data.eventType === 'string' &&
