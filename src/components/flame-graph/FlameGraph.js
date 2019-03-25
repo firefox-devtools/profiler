@@ -45,6 +45,13 @@ require('./FlameGraph.css');
 
 const STACK_FRAME_HEIGHT = 16;
 
+/**
+ * How "wide" a call node box needs to be for it to be able to be
+ * selected with keyboard navigation. This is a fraction between 0 and
+ * 1, where 1 means the box spans the whole viewport.
+ */
+const SELECTABLE_THRESHOLD = 0.001;
+
 type StateProps = {|
   +thread: Thread,
   +maxStackDepth: number,
@@ -90,6 +97,125 @@ class FlameGraph extends React.PureComponent<Props> {
     }
   };
 
+  /**
+   * Is the box for this call node wide enough to be selected?
+   */
+  _wideEnough = (callNodeIndex: IndexIntoCallNodeTable): boolean => {
+    const { flameGraphTiming, callNodeInfo: { callNodeTable } } = this.props;
+
+    const depth = callNodeTable.depth[callNodeIndex];
+    const row = flameGraphTiming[depth];
+    const columnIndex = row.callNode.indexOf(callNodeIndex);
+    return row.end[columnIndex] - row.start[columnIndex] > SELECTABLE_THRESHOLD;
+  };
+
+  /**
+   * Return next keyboard selectable callNodeIndex along one
+   * horizontal direction.
+   *
+   * `direction` should be either -1 (left) or 1 (right).
+   *
+   * Returns undefined if no selectable callNodeIndex can be found.
+   * This means we're already at the end, or the boxes of all
+   * candidate call nodes are too narrow to be selected.
+   */
+  _nextSelectableInRow = (
+    startingCallNodeIndex: IndexIntoCallNodeTable,
+    direction: 1 | -1
+  ): IndexIntoCallNodeTable | void => {
+    const { flameGraphTiming, callNodeInfo: { callNodeTable } } = this.props;
+
+    let callNodeIndex = startingCallNodeIndex;
+
+    const depth = callNodeTable.depth[callNodeIndex];
+    const row = flameGraphTiming[depth];
+    let columnIndex = row.callNode.indexOf(callNodeIndex);
+
+    do {
+      columnIndex += direction;
+      callNodeIndex = row.callNode[columnIndex];
+      if (
+        row.end[columnIndex] - row.start[columnIndex] >
+        SELECTABLE_THRESHOLD
+      ) {
+        // The box for this callNodeIndex is wide enough. We've found
+        // a candidate.
+        break;
+      }
+    } while (callNodeIndex !== undefined);
+
+    return callNodeIndex;
+  };
+
+  _handleKeyDown = (event: SyntheticKeyboardEvent<HTMLElement>) => {
+    const {
+      threadIndex,
+      callTree,
+      callNodeInfo: { callNodeTable },
+      selectedCallNodeIndex,
+      changeSelectedCallNode,
+    } = this.props;
+
+    if (selectedCallNodeIndex === null) {
+      if (
+        ['ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight'].includes(event.key)
+      ) {
+        // Just select the "root" node if we've got no prior selection.
+        changeSelectedCallNode(
+          threadIndex,
+          getCallNodePathFromIndex(0, callNodeTable)
+        );
+      }
+      return;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown': {
+        const prefix = callNodeTable.prefix[selectedCallNodeIndex];
+        if (prefix !== -1) {
+          changeSelectedCallNode(
+            threadIndex,
+            getCallNodePathFromIndex(prefix, callNodeTable)
+          );
+        }
+        break;
+      }
+      case 'ArrowUp': {
+        const [callNodeIndex] = callTree.getChildren(selectedCallNodeIndex);
+        // The call nodes returned from getChildren are sorted by
+        // total time in descending order.  The first one in the
+        // array, which is the one we pick, has the longest time and
+        // thus the widest box.
+
+        if (callNodeIndex !== undefined && this._wideEnough(callNodeIndex)) {
+          changeSelectedCallNode(
+            threadIndex,
+            getCallNodePathFromIndex(callNodeIndex, callNodeTable)
+          );
+        }
+        break;
+      }
+      case 'ArrowLeft':
+      case 'ArrowRight': {
+        const callNodeIndex = this._nextSelectableInRow(
+          selectedCallNodeIndex,
+          event.key === 'ArrowLeft' ? -1 : 1
+        );
+
+        if (callNodeIndex !== undefined) {
+          changeSelectedCallNode(
+            threadIndex,
+            getCallNodePathFromIndex(callNodeIndex, callNodeTable)
+          );
+        }
+        break;
+      }
+      default:
+        // Other keys are ignored
+        break;
+    }
+  };
+
   componentDidMount() {
     this._focusViewport();
   }
@@ -116,7 +242,7 @@ class FlameGraph extends React.PureComponent<Props> {
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
 
     return (
-      <div className="flameGraphContent">
+      <div className="flameGraphContent" onKeyDown={this._handleKeyDown}>
         {icons.map(({ className, icon }) => (
           <BackgroundImageStyleDef
             className={className}

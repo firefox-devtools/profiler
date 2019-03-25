@@ -85,9 +85,10 @@ export function viewProfile(
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
+    geckoProfiler: $GeckoProfiler,
   |}> = {}
-): ThunkAction<void> {
-  return (dispatch, getState) => {
+): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
     if (profile.threads.length === 0) {
       console.error('This profile has no threads.', profile);
       dispatch(
@@ -174,6 +175,13 @@ export function viewProfile(
       transformStacks: config.transformStacks,
       dataSource: getDataSource(getState()),
     });
+
+    // Note we kick off symbolication only for the profiles we know for sure
+    // that they weren't symbolicated.
+    if (profile.meta.symbolicated === false) {
+      const symbolStore = getSymbolStore(dispatch, config.geckoProfiler);
+      await doSymbolicateProfile(dispatch, profile, symbolStore);
+    }
   };
 }
 
@@ -345,18 +353,24 @@ function _unpackGeckoProfileFromAddon(profile) {
   return profile;
 }
 
-async function getProfileFromAddon(dispatch, geckoProfiler) {
+async function getProfileFromAddon(
+  dispatch: Dispatch,
+  geckoProfiler: $GeckoProfiler
+): Promise<Profile> {
   dispatch(waitingForProfileFromAddon());
 
   // XXX update state to show that we're connected to the profiler addon
   const rawGeckoProfile = await geckoProfiler.getProfile();
   const profile = processProfile(_unpackGeckoProfileFromAddon(rawGeckoProfile));
-  dispatch(viewProfile(profile));
+  await dispatch(viewProfile(profile, { geckoProfiler }));
 
   return profile;
 }
 
-async function getSymbolStore(dispatch, geckoProfiler) {
+function getSymbolStore(
+  dispatch: Dispatch,
+  geckoProfiler?: $GeckoProfiler
+): SymbolStore {
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {
@@ -378,6 +392,10 @@ async function getSymbolStore(dispatch, geckoProfiler) {
       );
     },
     requestSymbolTableFromAddon: async lib => {
+      if (!geckoProfiler) {
+        throw new Error("There's no connection to the gecko profiler add-on.");
+      }
+
       const { debugName, breakpadId } = lib;
       dispatch(requestingSymbolTable(lib));
       try {
@@ -424,7 +442,7 @@ export async function doSymbolicateProfile(
   dispatch(doneSymbolicating());
 }
 
-export function fatalError(error: Error) {
+export function fatalError(error: Error): Action {
   return {
     type: 'FATAL_ERROR',
     error,
@@ -448,12 +466,7 @@ export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
       const geckoProfiler = await window.geckoProfilerPromise;
       clearTimeout(timeoutId);
 
-      const [profile, symbolStore] = await Promise.all([
-        getProfileFromAddon(dispatch, geckoProfiler),
-        getSymbolStore(dispatch, geckoProfiler),
-      ]);
-
-      await doSymbolicateProfile(dispatch, profile, symbolStore);
+      await getProfileFromAddon(dispatch, geckoProfiler);
     } catch (error) {
       dispatch(fatalError(error));
       throw error;
@@ -487,7 +500,7 @@ export function temporaryError(error: TemporaryError): Action {
   };
 }
 
-function _wait(delayMs) {
+function _wait(delayMs: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, delayMs));
 }
 
@@ -713,9 +726,9 @@ export function retrieveProfileOrZipFromUrl(
           throw new Error('Unable to parse the profile.');
         }
 
-        dispatch(viewProfile(profile));
+        await dispatch(viewProfile(profile));
       } else if (zip) {
-        dispatch(receiveZipFile(zip));
+        await dispatch(receiveZipFile(zip));
       } else {
         throw new Error(
           'Expected to receive a zip file or profile from _fetchProfile.'
@@ -787,7 +800,7 @@ export function retrieveProfileFromFile(
               throw new Error('Unable to parse the profile.');
             }
 
-            dispatch(viewProfile(profile));
+            await dispatch(viewProfile(profile));
           }
           break;
         case 'application/zip':
@@ -795,7 +808,7 @@ export function retrieveProfileFromFile(
           {
             const buffer = await fileReader(file).asArrayBuffer();
             const zip = await JSZip.loadAsync(buffer);
-            dispatch(receiveZipFile(zip));
+            await dispatch(receiveZipFile(zip));
           }
           break;
         default: {
@@ -809,7 +822,7 @@ export function retrieveProfileFromFile(
             throw new Error('Unable to parse the profile.');
           }
 
-          dispatch(viewProfile(profile));
+          await dispatch(viewProfile(profile));
         }
       }
     } catch (error) {
@@ -888,7 +901,7 @@ export function retrieveProfilesToCompare(
         implementationFilter = implementationFilters[0];
       }
 
-      dispatch(
+      await dispatch(
         viewProfile(resultProfile, {
           transformStacks,
           implementationFilter,

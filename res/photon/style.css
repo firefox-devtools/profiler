@@ -1,0 +1,23 @@
+body, html {
+  font: message-box;
+  font-size: 11px;
+}
+
+.row {
+  padding: 0 3em 2em;
+  margin: 3em 0;
+  border-left: 2px solid var(--grey-30);
+}
+
+.row pre {
+  display: block;
+  margin: 2em 0;
+}
+
+.photon-button-test-image {
+  width: 24px;
+  height: 24px;
+  background-image: url(../img/svg/pane-expand.svg);
+  background-position: 50%;
+  background-repeat: no-repeat;
+}

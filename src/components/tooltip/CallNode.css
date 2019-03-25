@@ -4,12 +4,15 @@
 
 .tooltipCallNodeImplementation {
   display: grid;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--grey-30);
   grid-gap: 2px;
   grid-template-columns: repeat(4, min-content);
 }
 
 .tooltipCallNodeImplementationHeader {
   padding-right: 5px;
+  margin-top: 5px;
   border-right: 1px solid var(--grey-30);
   color: var(--grey-50);
   white-space: nowrap;
@@ -69,6 +72,4 @@
   min-width: 150px;
   padding: 10px;
   padding-bottom: 5px;
-  margin-top: 10px;
-  border-top: 1px solid var(--grey-30);
 }

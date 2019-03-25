@@ -63,6 +63,12 @@ export type ArbitraryEventTracing = {|
   +category: string,
 |};
 
+export type CcMarkerTracing = {|
+  type: 'tracing',
+  category: 'CC',
+  interval: 'start' | 'end',
+|};
+
 export type PhaseTimes<Unit> = { [phase: string]: Unit };
 
 type GCSliceData_Shared = {|
@@ -465,6 +471,7 @@ export type MarkerPayload =
   | TextMarkerPayload
   | LogMarkerPayload
   | PaintProfilerMarkerTracing
+  | CcMarkerTracing
   | DOMEventMarkerPayload
   | GCMinorMarkerPayload
   | GCMajorMarkerPayload
@@ -492,6 +499,8 @@ export type MarkerPayload_Gecko =
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
+  | ScreenshotPayload
+  | CcMarkerTracing
   | ArbitraryEventTracing
   | NavigationMarkerPayload
   // The following payloads come in with a stack property. During the profile processing

@@ -218,6 +218,7 @@ class TreeViewRowScrolledColumns<
       highlightRegExp,
       rowHeightStyle,
       indentWidth,
+      nodeId,
     } = this.props;
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     const RenderComponent = mainColumn.component;
@@ -226,16 +227,16 @@ class TreeViewRowScrolledColumns<
     let ariaExpanded = null;
 
     // if a node can be expanded (has children), and is not expanded yet,
-    // aria-expanded is false
+    // aria-expanded is false.
     if (canBeExpanded) {
       ariaExpanded = false;
     }
 
-    // if a node is expanded, ariaExpanded is true
+    // If a node is expanded, ariaExpanded is true.
     if (isExpanded) {
       ariaExpanded = true;
     }
-    // cleaning up self time display so we can use it in aria-label below
+    // Cleaning up self time display so we can use it in aria-label below.
     let selfTimeDisplay = displayData.selfTimeWithUnit;
     if (selfTimeDisplay === '—') {
       selfTimeDisplay = '0ms';
@@ -252,12 +253,16 @@ class TreeViewRowScrolledColumns<
         } ${displayData.dim ? 'dim' : ''}`}
         style={rowHeightStyle}
         onMouseDown={this._onMouseDown}
-        // making the call tree more accessible by adding aria attributes
+        // The following attributes are important for accessibility.
         aria-expanded={ariaExpanded}
         aria-level={depth + 1}
         aria-selected={selected}
         aria-label={ariaLabel}
+        // The role and id attributes are used along with aria-activedescendant
+        // (set on the parent), to manage the virtual focus of the tree items.
+        // The "virtual" focus changes with the arrow keys.
         role="treeitem"
+        id={`treeViewRow-${nodeId}`}
       >
         <span
           className="treeRowIndentSpacer"
@@ -652,6 +657,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
       icons,
       maxNodeDepth,
       rowHeight,
+      selectedNodeId,
     } = this.props;
     return (
       <div className="treeView">
@@ -670,8 +676,13 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
         >
           <VirtualList
             className="treeViewBody"
-            role="tree"
+            ariaRole="tree"
             ariaLabel="Call tree"
+            // This attribute exposes the current active child element,
+            // while keeping focus on the parent (call tree).
+            ariaActiveDescendant={
+              selectedNodeId ? `treeViewRow-${selectedNodeId}` : null
+            }
             items={this._visibleRows}
             renderItem={this._renderRow}
             itemHeight={rowHeight}

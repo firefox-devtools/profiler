@@ -8,10 +8,6 @@ import MenuButtons from '../../components/app/MenuButtons';
 import { render, fireEvent, waitForDomChange } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
-import {
-  startSymbolicating,
-  doneSymbolicating,
-} from '../../actions/receive-profile';
 import { TextEncoder } from 'util';
 import * as ProfileViewSelectors from '../../selectors/profile';
 
@@ -40,7 +36,7 @@ describe('app/MenuButtons', function() {
     );
 
     const { getByTestId, getByValue } = renderResult;
-    const getShareButton = () => getByValue('Share...');
+    const getShareButton = () => getByValue('Share…');
     const getInnerShareButton = () => getByValue('Share');
     const getShareWithUrlsButton = () => getByValue('Share with URLs');
     const getInnerShareWithUrlsButton = (): null | HTMLElement => {
@@ -104,19 +100,8 @@ describe('app/MenuButtons', function() {
       );
     });
 
-    it('matches the snapshot when starting to symbolicate', () => {
-      const { store, container } = setup();
-      store.dispatch(startSymbolicating());
-
-      // MenuButtons is rendering a fragment with several children. We need to
-      // check all children to assess that the component renders properly.
-      expect(Array.from(container.children)).toMatchSnapshot();
-    });
-
-    it('matches the snapshot when done symbolicating', () => {
-      const { store, container } = setup();
-      store.dispatch(startSymbolicating());
-      store.dispatch(doneSymbolicating());
+    it('matches the snapshot', () => {
+      const { container } = setup();
       expect(Array.from(container.children)).toMatchSnapshot();
     });
 

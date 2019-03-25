@@ -2,7 +2,7 @@
 
 exports[`TrackMemory draws a dot that matches the snapshot 1`] = `
 <div
-  class="timelineTrackMemoryDot"
+  class="timelineTrackMemoryGraphDot"
   style="left: 20px; top: 2.697563250235465px;"
 />
 `;
@@ -36,6 +36,23 @@ exports[`TrackMemory has a tooltip that matches the snapshot 1`] = `
 
 exports[`TrackMemory matches the 2d canvas draw snapshot 1`] = `
 Array [
+  Array [
+    "clearRect",
+    0,
+    0,
+    80,
+    10,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
+  Array [
+    "scale",
+    1,
+    1,
+  ],
   Array [
     "clearRect",
     0,
@@ -125,13 +142,25 @@ Array [
 exports[`TrackMemory matches the component snapshot 1`] = `
 <div
   class="timelineTrackMemory"
-  style="height: 25px;"
+  style="height: 40px;"
 >
-  <canvas
-    class="timelineTrackMemoryCanvas"
-  />
   <div
-    class="timelineEmptyThreadIndicator"
-  />
+    class="timelineMarkers timelineMarkersMemory selected"
+    data-testid="TimelineMarkersMemory"
+  >
+    <canvas
+      class="timelineMarkersCanvas"
+    />
+  </div>
+  <div
+    class="timelineTrackMemoryGraph"
+  >
+    <canvas
+      class="timelineTrackMemoryCanvas"
+    />
+    <div
+      class="timelineEmptyThreadIndicator"
+    />
+  </div>
 </div>
 `;

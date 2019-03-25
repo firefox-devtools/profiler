@@ -4,7 +4,8 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
+import { showMenu } from 'react-contextmenu';
 import TimelineGlobalTrack from './GlobalTrack';
 import TimelineRuler from './Ruler';
 import TimelineSelection from './Selection';
@@ -18,11 +19,17 @@ import {
   getZeroAt,
   getGlobalTracks,
   getGlobalTrackReferences,
+  getHiddenTrackCount,
 } from '../../selectors/profile';
 import {
   getGlobalTrackOrder,
   getTimelineType,
 } from '../../selectors/url-state';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
+
 import './index.css';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -32,10 +39,15 @@ import {
   updatePreviewSelection,
   commitRange,
   changeTimelineType,
+  changeRightClickedTrack,
 } from '../../actions/profile-view';
 
 import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
-import type { GlobalTrackReference, TimelineType } from '../../types/actions';
+import type {
+  GlobalTrackReference,
+  TimelineType,
+  HiddenTrackCount,
+} from '../../types/actions';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   ExplicitConnectOptions,
@@ -52,6 +64,7 @@ type StateProps = {|
   +panelLayoutGeneration: number,
   +zeroAt: Milliseconds,
   +timelineType: TimelineType,
+  +hiddenTrackCount: HiddenTrackCount,
 |};
 
 type DispatchProps = {|
@@ -59,14 +72,89 @@ type DispatchProps = {|
   +commitRange: typeof commitRange,
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeTimelineType: typeof changeTimelineType,
+  +changeRightClickedTrack: typeof changeRightClickedTrack,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class Timeline extends PureComponent<Props> {
+class TimelineSettingsGraphType extends React.PureComponent<{|
+  +timelineType: TimelineType,
+  +changeTimelineType: typeof changeTimelineType,
+|}> {
   _changeToCategories = () => this.props.changeTimelineType('category');
   _changeToStacks = () => this.props.changeTimelineType('stack');
 
+  render() {
+    const { timelineType } = this.props;
+
+    return (
+      <form>
+        <div className="timelineSettingsToggle">
+          Graph type:{' '}
+          <label className="timelineSettingsToggleLabel">
+            <input
+              type="radio"
+              name="timelineSettingsToggle"
+              className="timelineSettingsToggleInput"
+              checked={timelineType === 'category'}
+              onChange={this._changeToCategories}
+            />
+            Categories
+          </label>
+          <label className="timelineSettingsToggleLabel">
+            <input
+              type="radio"
+              name="timelineSettingsToggle"
+              className="timelineSettingsToggleInput"
+              checked={timelineType === 'stack'}
+              onChange={this._changeToStacks}
+            />
+            Stack height
+          </label>
+        </div>
+      </form>
+    );
+  }
+}
+
+class TimelineSettingsHiddenTracks extends React.PureComponent<{|
+  +hiddenTrackCount: HiddenTrackCount,
+  +changeRightClickedTrack: typeof changeRightClickedTrack,
+|}> {
+  _showMenu = (event: SyntheticMouseEvent<HTMLElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    changeRightClickedTrack(null);
+    showMenu({
+      data: null,
+      id: 'TimelineTrackContextMenu',
+      position: { x: rect.left, y: rect.bottom },
+      target: event.target,
+    });
+  };
+
+  render() {
+    const { hiddenTrackCount } = this.props;
+
+    return (
+      <button
+        type="button"
+        onClick={this._showMenu}
+        className="timelineSettingsHiddenTracks"
+      >
+        <span className="timelineSettingsHiddenTracksNumber">
+          {hiddenTrackCount.total - hiddenTrackCount.hidden}
+        </span>
+        {' / '}
+        <span className="timelineSettingsHiddenTracksNumber">
+          {hiddenTrackCount.total}{' '}
+        </span>
+        tracks visible
+      </button>
+    );
+  }
+}
+
+class Timeline extends React.PureComponent<Props> {
   render() {
     const {
       globalTracks,
@@ -78,64 +166,58 @@ class Timeline extends PureComponent<Props> {
       globalTrackReferences,
       panelLayoutGeneration,
       timelineType,
+      hiddenTrackCount,
+      changeTimelineType,
+      changeRightClickedTrack,
     } = this.props;
 
+    // Do not include the left and right margins when computing the timeline width.
+    const timelineWidth = width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+
     return (
-      <TimelineSelection width={width}>
-        <form>
-          <div className="timelineToggle">
-            <label className="timelineToggleLabel">
-              <input
-                type="radio"
-                name="timelineToggle"
-                className="timelineToggleInput"
-                checked={timelineType === 'category'}
-                onChange={this._changeToCategories}
-              />
-              Categories
-            </label>
-            <label className="timelineToggleLabel">
-              <input
-                type="radio"
-                name="timelineToggle"
-                className="timelineToggleInput"
-                checked={timelineType === 'stack'}
-                onChange={this._changeToStacks}
-              />
-              Stack height
-            </label>
-          </div>
-        </form>
-        <TimelineRuler
-          zeroAt={zeroAt}
-          rangeStart={committedRange.start}
-          rangeEnd={committedRange.end}
-          width={width}
-        />
-        <OverflowEdgeIndicator
-          className="timelineOverflowEdgeIndicator"
-          panelLayoutGeneration={panelLayoutGeneration}
-        >
-          {
-            <Reorderable
-              tagName="ol"
-              className="timelineThreadList"
-              grippyClassName="timelineTrackGlobalGrippy"
-              order={globalTrackOrder}
-              orient="vertical"
-              onChangeOrder={changeGlobalTrackOrder}
-            >
-              {globalTracks.map((globalTrack, trackIndex) => (
-                <TimelineGlobalTrack
-                  key={trackIndex}
-                  trackIndex={trackIndex}
-                  trackReference={globalTrackReferences[trackIndex]}
-                />
-              ))}
-            </Reorderable>
-          }
-        </OverflowEdgeIndicator>
-      </TimelineSelection>
+      <>
+        <div className="timelineSettings">
+          <TimelineSettingsGraphType
+            timelineType={timelineType}
+            changeTimelineType={changeTimelineType}
+          />
+          <TimelineSettingsHiddenTracks
+            hiddenTrackCount={hiddenTrackCount}
+            changeRightClickedTrack={changeRightClickedTrack}
+          />
+        </div>
+        <TimelineSelection width={timelineWidth}>
+          <TimelineRuler
+            zeroAt={zeroAt}
+            rangeStart={committedRange.start}
+            rangeEnd={committedRange.end}
+            width={timelineWidth}
+          />
+          <OverflowEdgeIndicator
+            className="timelineOverflowEdgeIndicator"
+            panelLayoutGeneration={panelLayoutGeneration}
+          >
+            {
+              <Reorderable
+                tagName="ol"
+                className="timelineThreadList"
+                grippyClassName="timelineTrackGlobalGrippy"
+                order={globalTrackOrder}
+                orient="vertical"
+                onChangeOrder={changeGlobalTrackOrder}
+              >
+                {globalTracks.map((globalTrack, trackIndex) => (
+                  <TimelineGlobalTrack
+                    key={trackIndex}
+                    trackIndex={trackIndex}
+                    trackReference={globalTrackReferences[trackIndex]}
+                  />
+                ))}
+              </Reorderable>
+            }
+          </OverflowEdgeIndicator>
+        </TimelineSelection>
+      </>
     );
   }
 }
@@ -149,12 +231,14 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     zeroAt: getZeroAt(state),
     panelLayoutGeneration: getPanelLayoutGeneration(state),
     timelineType: getTimelineType(state),
+    hiddenTrackCount: getHiddenTrackCount(state),
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
     updatePreviewSelection,
     commitRange,
     changeTimelineType,
+    changeRightClickedTrack,
   },
   component: Timeline,
 };

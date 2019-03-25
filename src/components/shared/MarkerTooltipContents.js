@@ -32,6 +32,7 @@ import type {
   FrameConstructionMarkerPayload,
   PaintProfilerMarkerTracing,
   NavigationMarkerPayload,
+  CcMarkerTracing,
   PhaseTimes,
   StyleMarkerPayload,
 } from '../../types/markers';
@@ -309,7 +310,8 @@ function _markerBacktrace(
     | PaintProfilerMarkerTracing
     | DOMEventMarkerPayload
     | FrameConstructionMarkerPayload
-    | NavigationMarkerPayload,
+    | NavigationMarkerPayload
+    | CcMarkerTracing,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {
@@ -859,7 +861,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             <div className="tooltipTiming">
               {/* we don't know the duration if the marker is incomplete */}
               {!marker.incomplete
-                ? formatMilliseconds(marker.dur)
+                ? marker.dur ? formatMilliseconds(marker.dur) : '—'
                 : 'unknown duration'}
             </div>
             <div className="tooltipTitle">{marker.title || marker.name}</div>

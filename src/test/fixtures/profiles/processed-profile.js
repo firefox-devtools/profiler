@@ -7,6 +7,7 @@ import {
   getEmptyProfile,
   getEmptyThread,
   getEmptyJsTracerTable,
+  resourceTypes,
 } from '../../../profile-logic/data-structures';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 
@@ -396,12 +397,12 @@ function _buildThreadFromTextOnlyStacks(
           path: '/path/to/' + libraryName,
           debugName: libraryName,
           debugPath: '/path/to/' + libraryName,
-          breakpadId: '',
+          breakpadId: 'SOMETHING_FAKE',
         });
         resourceIndex = resourceTable.length++;
         resourceTable.lib.push(libIndex);
         resourceTable.name.push(stringTable.indexForString(libraryName));
-        resourceTable.type.push(0);
+        resourceTable.type.push(resourceTypes.library);
         resourceTable.host.push(undefined);
       } else {
         resourceIndex = -1;

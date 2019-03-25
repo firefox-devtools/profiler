@@ -153,6 +153,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
               >
@@ -174,6 +175,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd  "
+                id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
               >

@@ -25,7 +25,7 @@ import {
 import { getThreadSelectors } from '../../selectors/per-thread';
 import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';
-import TrackMemory from './TrackMemory';
+import { TrackMemory } from './TrackMemory';
 import type { TrackReference } from '../../types/actions';
 import type { Pid } from '../../types/profile';
 import type { TrackIndex, LocalTrack } from '../../types/profile-derived';

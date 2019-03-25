@@ -192,6 +192,12 @@ export type GeckoProfileMeta = {|
   processType: number,
   product: string,
   stackwalk: 0 | 1,
+  // This value represents a boolean, but for some reason is written out as an int
+  // value as the previous field.
+  // It's 0 for opt builds, and 1 for debug builds.
+  // This property was added to Firefox Profiler a long time after it was added to
+  // Firefox, that's why we don't need to make it optional for gecko profiles.
+  debug: 0 | 1,
   toolkit: string,
   version: number,
   // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
@@ -201,6 +207,23 @@ export type GeckoProfileMeta = {|
   sourceURL?: string,
   physicalCPUs?: number,
   logicalCPUs?: number,
+  // This boolean indicates whether this gecko profile includes already
+  // symbolicated frames. This will be missing for profiles coming from Gecko
+  // (which indicates that they'll need to be symbolicated) but may be specified
+  // for profiles imported from other formats (eg: linux perf).
+  presymbolicated?: boolean,
+  // The Update channel for this build of the application.
+  // This property is landed in Firefox 67, and is optional because older
+  // Firefox versions may not have them. No upgrader was necessary.
+  updateChannel?:
+    | 'default' // Local builds
+    | 'nightly'
+    | 'nightly-try' // Nightly try builds for QA
+    | 'aurora' // Developer Edition channel
+    | 'beta'
+    | 'release'
+    | 'esr' // Extended Support Release channel
+    | string,
 |};
 
 export type GeckoProfile = {|
