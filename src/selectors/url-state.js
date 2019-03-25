@@ -189,8 +189,8 @@ export const getProfileName: Selector<null | string> = createSelector(
     if (!pathInZipFile) {
       return null;
     }
-    const pathParts = pathInZipFile.split('%');
-    return pathParts[pathParts.length - 1];
+    const pathParts = pathInZipFile.split('/');
+    return pathParts[pathParts.length -2]+ '/' + pathParts[pathParts.length -1] ;
   }
 );
 
