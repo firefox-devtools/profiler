@@ -55,8 +55,12 @@ further defined and clarified by project maintainers.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the project team at [inclusion@mozilla.com](mailto:inclusion@mozilla.com). All
-complaints will be reviewed and investigated and will result in a response that
+reported by contacting one of the following addresses:
+* [inclusion@mozilla.com](mailto:inclusion@mozilla.com) is a generic email
+  that's not directly tied to this project team. Use this if you don't feel safe in contacting
+  a team member.
+* [gtatum@mozilla.com](mailto:gtatum@mozilla.com) is a member of this project.
+All complaints will be reviewed and investigated and will result in a response that
 is deemed necessary and appropriate to the circumstances. The project team is
 obligated to maintain confidentiality with regard to the reporter of an incident.
 Further details of specific enforcement policies may be posted separately.
