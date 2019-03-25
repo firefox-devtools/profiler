@@ -100,7 +100,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     this.closePanel();
   };
 
-  _onButtonClick = (e: SyntheticMouseEvent<>) => {
+  _onButtonClick = () => {
     if (!this.state.open) {
       // We use a timeout so that we let the event bubble up to the handlers bound
       // on `window`, closing all other panels, before opening this one.
