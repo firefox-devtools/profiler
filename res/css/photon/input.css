@@ -1,0 +1,29 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* See https://design.firefox.com/photon/components/input-fields.html for the spec */
+.photon-input {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--grey-90-a20);
+  border-radius: 2px;
+  box-shadow: none; /* remove the default Firefox style */
+}
+
+.photon-input:hover {
+  border-color: var(--grey-90-a30);
+}
+
+/* The second selector is only here to have a specificity higher than the one in
+ * `.photon-input:invalid:not(:placeholder-shown)`. */
+.photon-input:focus,
+.photon-input:focus:invalid {
+  border: 1px solid var(--blue-50);
+  box-shadow: 0 0 0 1px var(--blue-50), 0 0 0 4px var(--blue-50-a30);
+}
+
+.photon-input:invalid:not(:placeholder-shown) {
+  border: 1px solid var(--red-60);
+  box-shadow: 0 0 0 1px var(--red-60), 0 0 0 4px var(--red-60-a30);
+}

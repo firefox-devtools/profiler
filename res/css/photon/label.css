@@ -1,0 +1,19 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.photon-label {
+  display: inline-flex;
+  padding: 3px 0;
+  color: var(--grey-90);
+}
+
+/* Use this class with the photon-label for the canonical photon styling. */
+.photon-label-default {
+  font-size: 13px;
+}
+
+/* Use this class with the photon-label for the custom micro variant styling. */
+.photon-label-micro {
+  font-size: 11px;
+}
