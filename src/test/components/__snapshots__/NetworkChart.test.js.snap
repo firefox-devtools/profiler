@@ -25,27 +25,27 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
   role="tabpanel"
 >
   <div
-    class="markerSettings"
+    class="networkSettings"
   >
     <div
-      class="markerSettingsSpacer"
+      class="networkSettingsSpacer"
     />
     <div
-      class="markerSettingsSearchbar"
+      class="networkSettingsSearchbar"
     >
       <label
-        class="markerSettingsSearchbarLabel"
+        class="networkSettingsSearchbarLabel"
       >
-        Filter Markers: 
+        Filter Networks: 
         <form
-          class="idleSearchField markerSettingsSearchField"
+          class="idleSearchField networkSettingsSearchField"
         >
           <input
             class="idleSearchFieldInput photon-input"
             name="search"
             placeholder="Enter filter terms"
             required=""
-            title="Only display markers that match a certain name"
+            title="Only display network requests that match a certain name"
             type="search"
             value=""
           />

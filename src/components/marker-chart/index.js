@@ -147,7 +147,9 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
       state
     );
     return {
-      markers: selectedThreadSelectors.getMarkerChartMarkers(state),
+      markers: selectedThreadSelectors.getSearchFilteredMarkerChartMarkers(
+        state
+      ),
       markerTimingRows,
       maxMarkerRows: markerTimingRows.length,
       timeRange: getCommittedRange(state),

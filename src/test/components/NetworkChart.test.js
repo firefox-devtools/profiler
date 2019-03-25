@@ -7,7 +7,7 @@ import * as React from 'react';
 import { render } from 'react-testing-library';
 import { Provider } from 'react-redux';
 
-import { changeMarkersSearchString } from '../../actions/profile-view';
+import { changeNetworkSearchString } from '../../actions/profile-view';
 import NetworkChart from '../../components/network-chart';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
@@ -343,7 +343,7 @@ describe('EmptyReasons', () => {
     const { dispatch, container } = setupWithProfile(profile);
 
     dispatch(changeSelectedTab('network-chart'));
-    dispatch(changeMarkersSearchString('MATCH_NOTHING'));
+    dispatch(changeNetworkSearchString('MATCH_NOTHING'));
     expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
   });
 });

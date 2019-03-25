@@ -868,6 +868,13 @@ export function changeMarkersSearchString(searchString: string): Action {
   };
 }
 
+export function changeNetworkSearchString(searchString: string): Action {
+  return {
+    type: 'CHANGE_NETWORK_SEARCH_STRING',
+    searchString,
+  };
+}
+
 export function changeImplementationFilter(
   implementation: ImplementationFilter
 ): ThunkAction<void> {
