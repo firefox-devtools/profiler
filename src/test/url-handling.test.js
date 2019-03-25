@@ -333,13 +333,10 @@ describe('search strings', function() {
     const networkSearchString = 'abc';
 
     dispatch(changeNetworkSearchString(networkSearchString));
-
-    ['network-chart'].forEach(tabSlug => {
-      dispatch(changeSelectedTab(tabSlug));
-      const urlState = urlStateReducers.getUrlState(getState());
-      const { query } = urlStateToUrlObject(urlState);
-      expect(query.networkSearch).toBe(networkSearchString);
-    });
+    dispatch(changeSelectedTab('network-chart'));
+    const urlState = urlStateReducers.getUrlState(getState());
+    const { query } = urlStateToUrlObject(urlState);
+    expect(query.networkSearch).toBe(networkSearchString);
   });
 });
 
