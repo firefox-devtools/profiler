@@ -33,7 +33,6 @@ import type {
 } from '../../utils/connect';
 import type { TabSlug } from '../../app-logic/tabs-handling';
 
-import '../../../res/css/photon-components.css';
 import './Details.css';
 
 type StateProps = {|

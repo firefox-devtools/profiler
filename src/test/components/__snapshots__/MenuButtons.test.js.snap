@@ -100,9 +100,29 @@ Array [
               <span
                 class="metaInfoLabel"
               >
+                Update Channel:
+              </span>
+              nightly
+            </div>
+            <div
+              class="metaInfoRow"
+            >
+              <span
+                class="metaInfoLabel"
+              >
                 Build ID:
               </span>
               20181126165837
+            </div>
+            <div
+              class="metaInfoRow"
+            >
+              <span
+                class="metaInfoLabel"
+              >
+                Build Type:
+              </span>
+              Debug
             </div>
             <div
               class="metaInfoRow"
@@ -114,7 +134,23 @@ Array [
               </span>
               <ul
                 class="metaInfoList"
-              />
+              >
+                <li
+                  class="metaInfoListItem"
+                >
+                  Form Autofill
+                </li>
+                <li
+                  class="metaInfoListItem"
+                >
+                  Firefox Screenshots
+                </li>
+                <li
+                  class="metaInfoListItem"
+                >
+                  Gecko Profiler
+                </li>
+              </ul>
             </div>
           </div>
           <h2

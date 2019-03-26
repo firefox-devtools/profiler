@@ -51,6 +51,8 @@ export const getCurrentSearchString: Selector<string> = state =>
   getProfileSpecificState(state).callTreeSearchString;
 export const getMarkersSearchString: Selector<string> = state =>
   getProfileSpecificState(state).markersSearchString;
+export const getNetworkSearchString: Selector<string> = state =>
+  getProfileSpecificState(state).networkSearchString;
 export const getSelectedTab: Selector<TabSlug> = state =>
   getUrlState(state).selectedTab;
 export const getSelectedThreadIndexOrNull: Selector<ThreadIndex | null> = state =>

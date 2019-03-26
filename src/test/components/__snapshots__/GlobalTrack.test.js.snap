@@ -17,6 +17,12 @@ process: \\"tab\\" (222)"
         type="button"
       >
         Content Process
+        <div
+          class="timelineTrackNameButtonAdditionalDetails"
+        >
+          PID: 
+          222
+        </div>
       </button>
     </div>
     <div
