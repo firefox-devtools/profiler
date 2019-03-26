@@ -192,13 +192,6 @@ exports[`shared/ButtonWithPanel renders the ButtonWithPanel with a closed panel 
       <div
         class="arrowPanelArrow"
       />
-      <div
-        class="arrowPanelContent"
-      >
-        <div>
-          Panel content
-        </div>
-      </div>
     </div>
   </div>
 </div>
