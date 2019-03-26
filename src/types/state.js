@@ -12,6 +12,7 @@ import type {
   RequestedLib,
   TrackReference,
   TimelineType,
+  CheckedSharingOptions,
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { StartEndRange } from './units';
@@ -43,11 +44,6 @@ export type ThreadViewOptions = {|
   +selectedMarker: IndexIntoRawMarkerTable | null,
 |};
 
-export type ProfileSharingStatus = {|
-  +sharedWithUrls: boolean,
-  +sharedWithoutUrls: boolean,
-|};
-
 export type ProfileViewState = {|
   +viewOptions: {|
     perThread: ThreadViewOptions[],
@@ -59,7 +55,6 @@ export type ProfileViewState = {|
     rootRange: StartEndRange,
     rightClickedTrack: TrackReference | null,
     isCallNodeContextMenuVisible: boolean,
-    profileSharingStatus: ProfileSharingStatus,
   |},
   +globalTracks: GlobalTrack[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
@@ -124,6 +119,22 @@ export type AppState = {|
   +lastVisibleThreadTabSlug: TabSlug,
 |};
 
+export type UploadPhase = 'local' | 'uploading' | 'uploaded' | 'error';
+
+export type UploadState = {|
+  phase: UploadPhase,
+  uploadProgress: number,
+  error: Error | mixed,
+  url: string,
+  abortFunction: () => void,
+  generation: number,
+|};
+
+export type PublishState = {|
+  +checkedSharingOptions: CheckedSharingOptions,
+  +upload: UploadState,
+|};
+
 export type ZippedProfilesState = {
   zipFile: ZipFileState,
   error: Error | null,
@@ -171,6 +182,7 @@ export type State = {|
   +urlState: UrlState,
   +icons: IconState,
   +zippedProfiles: ZippedProfilesState,
+  +publish: PublishState,
 |};
 
 export type IconWithClassName = {|

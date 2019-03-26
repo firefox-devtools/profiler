@@ -42,7 +42,6 @@ import type {
   State,
   ProfileViewState,
   SymbolicationStatus,
-  ProfileSharingStatus,
 } from '../types/state';
 import type { $ReturnType } from '../types/utils';
 
@@ -58,8 +57,6 @@ export const getProfileRootRange: Selector<StartEndRange> = state =>
   getProfileViewOptions(state).rootRange;
 export const getSymbolicationStatus: Selector<SymbolicationStatus> = state =>
   getProfileViewOptions(state).symbolicationStatus;
-export const getProfileSharingStatus: Selector<ProfileSharingStatus> = state =>
-  getProfileViewOptions(state).profileSharingStatus;
 export const getScrollToSelectionGeneration: Selector<number> = state =>
   getProfileViewOptions(state).scrollToSelectionGeneration;
 export const getFocusCallTreeGeneration: Selector<number> = state =>

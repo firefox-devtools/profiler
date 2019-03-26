@@ -24,7 +24,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { ProfileSharingStatus, UrlState } from '../types/state';
+import type { UrlState, UploadState } from '../types/state';
 
 export type DataSource =
   | 'none'
@@ -81,6 +81,18 @@ export type RequestedLib = {|
   +breakpadId: string,
 |};
 export type ImplementationFilter = 'combined' | 'js' | 'cpp';
+
+/**
+ * This type determines what kind of information gets sanitized from published profiles.
+ */
+export type CheckedSharingOptions = {|
+  isFiltering: boolean,
+  hiddenThreads: boolean,
+  timeRange: boolean,
+  screenshots: boolean,
+  urls: boolean,
+  extension: boolean,
+|};
 
 type ProfileAction =
   | {|
@@ -178,10 +190,6 @@ type ProfileAction =
   | {|
       +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
-    |}
-  | {|
-      +type: 'SET_PROFILE_SHARING_STATUS',
-      +profileSharingStatus: ProfileSharingStatus,
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
@@ -302,10 +310,25 @@ type SidebarAction = {|
   +isOpen: boolean,
 |};
 
+type PublishAction =
+  | {|
+      +type: 'TOGGLE_CHECKED_SHARING_OPTION',
+      +slug: $Keys<CheckedSharingOptions>,
+    |}
+  | {|
+      +type: 'CHANGE_UPLOAD_STATE',
+      +changes: $Shape<UploadState>,
+    |}
+  | {|
+      +type: 'SAVE_ABORT_UPLOAD_FUNCTION',
+      +abort: () => void,
+    |};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
   | SidebarAction
   | UrlEnhancerAction
   | UrlStateAction
-  | IconsAction;
+  | IconsAction
+  | PublishAction;
