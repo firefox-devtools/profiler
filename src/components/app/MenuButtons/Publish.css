@@ -18,6 +18,10 @@
   margin-bottom: -24px;
 }
 
+.menuButtonsPermalinkButton {
+  border-left: 1px solid var(--grey-30);
+}
+
 .menuButtonsUploadingButton {
   overflow: hidden;
 }
@@ -119,7 +123,7 @@
   margin-left: 115px;
 }
 
-.menuButtonsPrivacyPanel,
+.menuButtonsPublishPanel,
 .menuButtonsUploadErrorPanel {
   --width: 500px;
 }
@@ -152,12 +156,12 @@
   white-space: nowrap;
 }
 
-.menuButtonsPrivacyContent {
+.menuButtonsPublishContent {
   position: relative;
   padding: 10px 0 10px 60px;
 }
 
-.menuButtonsPrivacyIcon {
+.menuButtonsPublishIcon {
   position: absolute;
   top: 32px;
   left: 5px;
@@ -166,27 +170,27 @@
   background: url(../../../../res/img/svg/info.svg) center center no-repeat;
 }
 
-.menuButtonsPrivacyInfoDescription {
+.menuButtonsPublishInfoDescription {
   flex: 1;
   margin-bottom: 1em;
   font-size: 13px;
   line-height: 1.5;
 }
 
-.menuButtonsPrivacyDataChoices {
+.menuButtonsPublishDataChoices {
   margin-left: 35px;
 }
 
-.menuButtonsPrivacyDataChoicesLabel {
+.menuButtonsPublishDataChoicesLabel {
   display: flex;
   margin: 4px 0;
 }
 
-.menuButtonsPrivacyDataChoicesLabel.disabled {
+.menuButtonsPublishDataChoicesLabel.disabled {
   opacity: 0.4;
 }
 
-.menuButtonsPrivacyDataSummary {
+.menuButtonsPublishDataSummary {
   margin: 20px 0;
   cursor: pointer;
   font-size: 14px;
@@ -196,29 +200,30 @@
   user-select: none;
 }
 
-.menuButtonsPrivacyDataLabel {
+.menuButtonsPublishDataLabel {
   display: block;
   line-height: 2.3;
 }
 
-.menuButtonsPrivacyButtons {
+.menuButtonsPublishButtons {
   display: flex;
   justify-content: right;
   margin-top: 20px;
 }
 
-.menuButtonsPrivacyButton {
+.menuButtonsPublishButton {
   display: inline-flex;
   min-width: 132px;
   align-items: center;
   justify-content: center;
   margin: 0 8px;
+  cursor: default;
   font-size: 13px;
   text-align: center;
   text-decoration: none;
 }
 
-.menuButtonsPrivacyButtonsSvg {
+.menuButtonsPublishButtonsSvg {
   position: relative;
   top: 4px;
   display: inline-block;
@@ -226,13 +231,13 @@
   margin-right: 5px;
 }
 
-.menuButtonsPrivacyButtonsSvgUpload {
+.menuButtonsPublishButtonsSvgUpload {
   width: 20px;
   height: 20px;
   background: url(../../../../res/img/svg/upload.svg) center center no-repeat;
 }
 
-.menuButtonsPrivacyButtonsSvgDownload {
+.menuButtonsPublishButtonsSvgDownload {
   width: 20px;
   height: 20px;
   background: url(../../../../res/img/svg/download.svg) center center no-repeat;
@@ -246,4 +251,85 @@
 .menuButtonsDownloadButton {
   animation-duration: 60ms;
   animation-name: menuButtonsDownloadButtonFadeIn;
+}
+
+.menuButtonsPublishUpload {
+  position: relative;
+  padding: 10px 0;
+}
+
+.menuButtonsPublishUploadTop {
+  margin: 10px;
+}
+
+.menuButtonsPublishUploadTitle {
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.menuButtonsPublishUploadPercentage {
+  margin: 10px 0;
+  color: var(--blue-60);
+  font-size: 13px;
+}
+
+.menuButtonsPublishUploadBar {
+  overflow: hidden;
+  height: 5px;
+  background-color: var(--grey-40);
+  border-radius: 2px;
+}
+
+.menuButtonsPublishUploadBarInner {
+  height: 5px;
+  animation: animate-stripes 1s linear infinite;
+  background-color: var(--blue-50);
+  background-image: linear-gradient(
+    135deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.4) 20%,
+    rgba(255, 255, 255, 0.4) 40%,
+    transparent 40%,
+    transparent 60%,
+    rgba(255, 255, 255, 0.4) 60%,
+    rgba(255, 255, 255, 0.4) 80%,
+    transparent 80%
+  );
+  background-size: 21px 20px, 100% 100%, 100% 100%;
+  border-radius: 2px;
+}
+
+@keyframes animate-stripes {
+  100% {
+    background-position: -21px 0;
+  }
+}
+
+.menuButtonsPublishUrl {
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid var(--grey-30);
+  background: #fff;
+  border-radius: 3px;
+}
+
+.menuButtonsPublishMessage {
+  margin: 14px 0;
+  font-size: 13px;
+}
+
+.menuButtonsPublishPreviousUrl {
+  margin: 17px 5px -15px;
+}
+
+.menuButtonsPublishPreviousUrlTitle {
+  margin-bottom: 10px;
+  color: var(--grey-70);
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.menuButtonsPublishError {
+  margin: 10px 0;
+  font-size: 13px;
 }
