@@ -42,12 +42,13 @@ describe('MarkerTable', function() {
           },
         ],
         [
-          'ipc:network:set-offline',
+          'setTimeout',
           165.87091900000001,
           {
             type: 'Text',
             startTime: 165.87091900000001,
             endTime: 165.871503,
+            name: '5.5',
           },
         ],
       ]

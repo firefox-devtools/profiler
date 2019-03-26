@@ -153,9 +153,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
                 <span
                   class="treeViewRowColumn treeViewFixedColumn category"
-                  title="ipc:network:set-offline"
+                  title="Text"
                 >
-                  ipc:network:set-offline
+                  Text
                 </span>
               </div>
             </div>
@@ -216,10 +216,11 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
               </div>
               <div
-                aria-label="undefined, running time is undefined (undefined), self time is undefined"
+                aria-label="setTimeout [5.5], running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
+                id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
               >
@@ -232,7 +233,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 />
                 <span
                   class="treeViewRowColumn treeViewMainColumn name"
-                />
+                >
+                  setTimeout [5.5]
+                </span>
               </div>
             </div>
           </div>
