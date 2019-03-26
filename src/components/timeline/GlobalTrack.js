@@ -185,9 +185,14 @@ class GlobalTrackComponent extends PureComponent<Props> {
           >
             <button type="button" className="timelineTrackNameButton">
               {trackName}
-              <div className="timelineTrackNameButtonAdditionalDetails">
-                PID: {pid}
-              </div>
+              {/* Only show the PID if it is a real number. A string PID is an
+                * artificially generated value that is not useful, and a null
+                * value does not exist. */}
+              {typeof pid === 'number' ? (
+                <div className="timelineTrackNameButtonAdditionalDetails">
+                  PID: {pid}
+                </div>
+              ) : null}
             </button>
           </ContextMenuTrigger>
           <div className="timelineTrackTrack">{this.renderTrack()}</div>
