@@ -279,6 +279,8 @@ describe('MarkerTooltipContents', function() {
         {
           type: 'Text',
           name: 'TTFI after 100.01ms (longTask was 100.001ms)',
+          startTime: 21.4,
+          endTime: 21.4,
         },
       ],
       [

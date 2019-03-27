@@ -364,6 +364,8 @@ export type UserTimingMarkerPayload = {|
 export type TextMarkerPayload = {|
   type: 'Text',
   name: string,
+  startTime: Milliseconds,
+  endTime: Milliseconds,
 |};
 
 /**
