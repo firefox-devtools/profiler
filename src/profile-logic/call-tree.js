@@ -131,7 +131,8 @@ export class CallTree {
       }
       children.sort(
         (a, b) =>
-          this._callNodeTimes.totalTime[b] - this._callNodeTimes.totalTime[a]
+          Math.abs(this._callNodeTimes.totalTime[b]) -
+          Math.abs(this._callNodeTimes.totalTime[a])
       );
       this._children[callNodeIndex] = children;
     }
