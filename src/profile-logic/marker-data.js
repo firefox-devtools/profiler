@@ -15,6 +15,7 @@ import type {
 import type { Marker, IndexIntoMarkers } from '../types/profile-derived';
 import type { BailoutPayload, NetworkPayload } from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { StartEndRange } from '../types/units';
 
 /**
  * Jank instances are created from responsiveness values. Responsiveness is a profiler
@@ -93,6 +94,17 @@ export function getSearchFilteredMarkers(
       continue;
     }
     if (data && typeof data === 'object') {
+      if (data.type === 'FileIO') {
+        const { filename, operation, source } = data;
+        if (
+          filename.toLowerCase().includes(lowerCaseSearchString) ||
+          operation.toLowerCase().includes(lowerCaseSearchString) ||
+          source.toLowerCase().includes(lowerCaseSearchString)
+        ) {
+          newMarkers.push(marker);
+          continue;
+        }
+      }
       if (
         typeof data.eventType === 'string' &&
         data.eventType.toLowerCase().includes(lowerCaseSearchString)
@@ -379,11 +391,6 @@ export function deriveMarkersFromRawMarkerTable(
 /**
  * This function filters markers from a thread's raw marker table using the
  * range specified as parameter.
- * It especially takes care of the markers that need a special handling because
- * of how the rest of the code handles them.
- *
- * There's more explanations about this special handling in the switch block
- * below.
  */
 export function filterRawMarkerTableToRange(
   markers: RawMarkerTable,
@@ -392,16 +399,44 @@ export function filterRawMarkerTableToRange(
 ): RawMarkerTable {
   const newMarkerTable = getEmptyRawMarkerTable();
 
+  const filteredMarkerIndexesIter = filterRawMarkerTableToRangeIndexGenerator(
+    markers,
+    rangeStart,
+    rangeEnd
+  );
+
+  for (const index of filteredMarkerIndexesIter) {
+    newMarkerTable.time.push(markers.time[index]);
+    newMarkerTable.name.push(markers.name[index]);
+    newMarkerTable.data.push(markers.data[index]);
+    newMarkerTable.length++;
+  }
+  return newMarkerTable;
+}
+
+/**
+ * This function filters marker indexes from a thread's raw marker table using
+ * the range specified as parameter.
+ * It especially takes care of the markers that need a special handling because
+ * of how the rest of the code handles them.
+ *
+ * There's more explanations about this special handling in the switch block
+ * below.
+ *
+ * This is a generator function and it returns a IndexIntoMarkers every step.
+ * You can use that function inside a for..of or use it with `.next()` function.
+ * The reason to use generator function is avoiding creating an intermediate
+ * markers array on some consumers.
+ */
+export function* filterRawMarkerTableToRangeIndexGenerator(
+  markers: RawMarkerTable,
+  rangeStart: number,
+  rangeEnd: number
+): Generator<IndexIntoMarkers, void, void> {
   const isTimeInRange = (time: number): boolean =>
     time < rangeEnd && time >= rangeStart;
   const intersectsRange = (start: number, end: number): boolean =>
     start < rangeEnd && end >= rangeStart;
-  const copyIndexToNewTable = (i: IndexIntoRawMarkerTable) => {
-    newMarkerTable.time.push(markers.time[i]);
-    newMarkerTable.name.push(markers.name[i]);
-    newMarkerTable.data.push(markers.data[i]);
-    newMarkerTable.length++;
-  };
 
   // These maps contain the start markers we find while looping the marker
   // table.
@@ -428,14 +463,10 @@ export function filterRawMarkerTableToRange(
     const time = markers.time[i];
     const data = markers.data[i];
 
-    const addCurrentMarkerIfInRange = () => {
-      if (isTimeInRange(time)) {
-        copyIndexToNewTable(i);
-      }
-    };
-
     if (!data) {
-      addCurrentMarkerIfInRange();
+      if (isTimeInRange(time)) {
+        yield i;
+      }
       continue;
     }
 
@@ -472,14 +503,14 @@ export function filterRawMarkerTableToRange(
             if (intersectsRange(markers.time[startIndex], time)) {
               // This couple of markers define a marker that's at least partially
               // in the range.
-              copyIndexToNewTable(startIndex);
-              copyIndexToNewTable(i);
+              yield startIndex;
+              yield i;
             }
           } else {
             // No start marker matches this end marker, then we'll add it only if
             // it's in or after the time range.
             if (time >= rangeStart) {
-              copyIndexToNewTable(i);
+              yield i;
             }
           }
         } else {
@@ -488,7 +519,9 @@ export function filterRawMarkerTableToRange(
               data.interval
             }' in marker index ${i}. This should not normally happen.`
           );
-          addCurrentMarkerIfInRange();
+          if (isTimeInRange(time)) {
+            yield i;
+          }
         }
         break;
       }
@@ -516,15 +549,15 @@ export function filterRawMarkerTableToRange(
             if (intersectsRange(startData.startTime, endData.endTime)) {
               // This couple of markers define a network marker that's at least
               // partially in the range.
-              copyIndexToNewTable(startIndex);
-              copyIndexToNewTable(i);
+              yield startIndex;
+              yield i;
             }
           } else {
             // There's no start marker matching this end marker. This means an
             // abstract marker exists before the start of the profile.
             // Then we add it if it ends after the start of the range.
             if (data.endTime >= rangeStart) {
-              copyIndexToNewTable(i);
+              yield i;
             }
           }
         }
@@ -546,11 +579,11 @@ export function filterRawMarkerTableToRange(
 
         if (time < rangeEnd) {
           if (previousScreenshotMarker !== null) {
-            copyIndexToNewTable(previousScreenshotMarker);
+            yield previousScreenshotMarker;
             previousScreenshotMarker = null;
           }
 
-          copyIndexToNewTable(i);
+          yield i;
         }
 
         // If previousScreenshotMarker isn't null after the loop, it will be
@@ -565,10 +598,12 @@ export function filterRawMarkerTableToRange(
           typeof data.endTime === 'number'
         ) {
           if (intersectsRange(data.startTime, data.endTime)) {
-            copyIndexToNewTable(i);
+            yield i;
           }
         } else {
-          addCurrentMarkerIfInRange();
+          if (isTimeInRange(time)) {
+            yield i;
+          }
         }
     }
   }
@@ -581,7 +616,7 @@ export function filterRawMarkerTableToRange(
   for (const markerBucket of openTracingMarkers.values()) {
     for (const startIndex of markerBucket) {
       if (markers.time[startIndex] < rangeEnd) {
-        copyIndexToNewTable(startIndex);
+        yield startIndex;
       }
     }
   }
@@ -589,17 +624,73 @@ export function filterRawMarkerTableToRange(
   for (const startIndex of openNetworkMarkers.values()) {
     const data: NetworkPayload = (markers.data[startIndex]: any);
     if (data.startTime < rangeEnd) {
-      copyIndexToNewTable(startIndex);
+      yield startIndex;
     }
   }
 
   // And we should add the "last screenshot marker before the range" if it
   // hadn't been added yet.
   if (previousScreenshotMarker !== null) {
-    copyIndexToNewTable(previousScreenshotMarker);
+    yield previousScreenshotMarker;
   }
+}
 
-  return newMarkerTable;
+/**
+ * This function filters markers from a thread's raw marker table using the
+ * range and marker indexes array specified as parameters.
+ *
+ * Uses `filterRawMarkerTableToRangeIndexGenerator` function and excludes
+ * markers in `markersToDelete` set.
+ */
+export function filterRawMarkerTableToRangeWithMarkersToDelete(
+  markerTable: RawMarkerTable,
+  markersToDelete: Set<IndexIntoRawMarkerTable>,
+  filterRange: StartEndRange | null
+): {
+  rawMarkerTable: RawMarkerTable,
+  oldMarkerIndexToNew: Map<IndexIntoRawMarkerTable, IndexIntoRawMarkerTable>,
+} {
+  const oldMarkers = markerTable;
+  const newMarkerTable = getEmptyRawMarkerTable();
+  const oldMarkerIndexToNew: Map<
+    IndexIntoRawMarkerTable,
+    IndexIntoRawMarkerTable
+  > = new Map();
+  const addMarkerIndexIfIncluded = (index: IndexIntoRawMarkerTable) => {
+    if (markersToDelete.has(index)) {
+      return;
+    }
+    oldMarkerIndexToNew.set(index, newMarkerTable.length);
+    newMarkerTable.name.push(oldMarkers.name[index]);
+    newMarkerTable.time.push(oldMarkers.time[index]);
+    newMarkerTable.data.push(oldMarkers.data[index]);
+    newMarkerTable.length++;
+  };
+
+  if (filterRange === null) {
+    // If user doesn't want to filter out the full time range, remove only
+    // markers that we want to remove.
+    for (let i = 0; i < oldMarkers.length; i++) {
+      addMarkerIndexIfIncluded(i);
+    }
+  } else {
+    // If user wants to remove full time range, filter all the markers
+    // accordingly.
+    const { start, end } = filterRange;
+    const filteredMarkerIndexIter = filterRawMarkerTableToRangeIndexGenerator(
+      oldMarkers,
+      start,
+      end
+    );
+
+    for (const index of filteredMarkerIndexIter) {
+      addMarkerIndexIfIncluded(index);
+    }
+  }
+  return {
+    rawMarkerTable: newMarkerTable,
+    oldMarkerIndexToNew,
+  };
 }
 
 export function filterMarkersToRange(
@@ -757,4 +848,9 @@ export function groupScreenshotsById(markers: Marker[]): Map<string, Marker[]> {
   }
 
   return idToScreenshotMarkers;
+}
+
+export function removeNetworkMarkerURLs(payload: NetworkPayload) {
+  payload.URI = '';
+  payload.RedirectURI = '';
 }

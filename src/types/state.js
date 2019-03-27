@@ -155,6 +155,7 @@ export type UrlState = {|
     committedRanges: StartEndRange[],
     callTreeSearchString: string,
     markersSearchString: string,
+    networkSearchString: string,
     transforms: TransformStacksPerThread,
     timelineType: TimelineType,
     legacyThreadOrder: ThreadIndex[] | null,

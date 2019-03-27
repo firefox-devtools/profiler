@@ -23,6 +23,8 @@ import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
 
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
+import { commitRange } from '../../actions/profile-view';
+
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
 const PIXELS_PER_SAMPLE = 10;
@@ -152,7 +154,7 @@ describe('SelectedThreadActivityGraph', function() {
    * as once it's connected to the Redux store in the SelectedActivityGraph.
    */
   describe('ThreadActivityGraph', function() {
-    it('can click a a best ancestor call node', function() {
+    it('can click a best ancestor call node', function() {
       const { clickActivityGraph, getCallNodePath } = setup();
 
       // The full call node at this sample is:
@@ -170,6 +172,20 @@ describe('SelectedThreadActivityGraph', function() {
       // As this is the most common ancestor with the same category.
       clickActivityGraph(1, 0.8);
       expect(getCallNodePath()).toEqual(['A', 'B', 'H']);
+    });
+
+    it('will redraw even when there are no samples in range', function() {
+      const { dispatch, ctx } = setup();
+      ctx.__flushDrawLog();
+
+      // Commit a thin range which contains no samples
+      dispatch(commitRange(0.5, 0.6));
+      const drawCalls = ctx.__flushDrawLog();
+      // We use the presence of 'globalCompositeOperation' to know
+      // whether the canvas was redrawn or not.
+      expect(drawCalls.map(([fn]) => fn)).toContain(
+        'set globalCompositeOperation'
+      );
     });
   });
 

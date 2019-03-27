@@ -501,6 +501,7 @@ export type MarkerPayload_Gecko =
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | VsyncTimestampPayload
+  | ScreenshotPayload
   | CcMarkerTracing
   | ArbitraryEventTracing
   | NavigationMarkerPayload
