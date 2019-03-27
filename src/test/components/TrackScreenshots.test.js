@@ -15,7 +15,7 @@ import { render, fireEvent } from 'react-testing-library';
 
 import { commitRange } from '../../actions/profile-view';
 import TrackScreenshots, {
-  TRACK_HEIGHT,
+  TRACK_SCREENSHOT_HEIGHT,
 } from '../../components/timeline/TrackScreenshots';
 import Timeline from '../../components/timeline';
 import { ensureExists } from '../../utils/flow';
@@ -165,7 +165,7 @@ function setup(
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => {
-      const rect = getBoundingBox(TRACK_WIDTH, TRACK_HEIGHT);
+      const rect = getBoundingBox(TRACK_WIDTH, TRACK_SCREENSHOT_HEIGHT);
       // Add some arbitrary X offset.
       rect.left += LEFT;
       rect.right += LEFT;

@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import clamp from 'clamp';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
 import {
@@ -40,7 +39,6 @@ type StateProps = {|
   +zeroAt: Milliseconds,
   +networkMarkers: *,
   +networkTiming: *,
-  +containerHeight: number,
   +verticalMarkers: Marker[],
 |};
 type DispatchProps = {||};
@@ -49,7 +47,7 @@ type State = void;
 
 export const ROW_HEIGHT = 5;
 export const ROW_REPEAT = 7;
-export const MIN_ROW_REPEAT = 5;
+export const TRACK_NETWORK_HEIGHT = ROW_HEIGHT * ROW_REPEAT;
 
 class Network extends PureComponent<Props, State> {
   _canvas: null | HTMLCanvasElement = null;
@@ -91,7 +89,6 @@ class Network extends PureComponent<Props, State> {
       rangeEnd,
       networkTiming,
       width: containerWidth,
-      containerHeight,
     } = this.props;
 
     const rangeLength = rangeEnd - rangeStart;
@@ -99,7 +96,7 @@ class Network extends PureComponent<Props, State> {
     const devicePixelRatio = window.devicePixelRatio;
     const rowHeight = ROW_HEIGHT * devicePixelRatio;
     canvas.width = Math.round(containerWidth * devicePixelRatio);
-    canvas.height = Math.round(containerHeight * devicePixelRatio);
+    canvas.height = Math.round(TRACK_NETWORK_HEIGHT * devicePixelRatio);
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.strokeStyle = 'rgba(0, 127, 255, 0.3)';
@@ -123,21 +120,14 @@ class Network extends PureComponent<Props, State> {
   }
 
   render() {
-    const {
-      pages,
-      containerHeight,
-      rangeStart,
-      rangeEnd,
-      verticalMarkers,
-      zeroAt,
-    } = this.props;
+    const { pages, rangeStart, rangeEnd, verticalMarkers, zeroAt } = this.props;
     this._scheduleDraw();
 
     return (
       <div
         className="timelineTrackNetwork"
         style={{
-          height: containerHeight,
+          height: TRACK_NETWORK_HEIGHT,
         }}
       >
         <canvas
@@ -169,8 +159,6 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       rangeStart: start,
       rangeEnd: end,
       zeroAt: getZeroAt(state),
-      containerHeight:
-        ROW_HEIGHT * clamp(networkTiming.length, MIN_ROW_REPEAT, ROW_REPEAT),
       verticalMarkers: selectors.getTimelineVerticalMarkers(state),
     };
   },
