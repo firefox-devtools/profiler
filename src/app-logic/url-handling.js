@@ -77,6 +77,11 @@ type MarkersQuery = {|
   markerSearch: string, // "DOMEvent"
 |};
 
+type NetworkQuery = {|
+  ...BaseQuery,
+  networkSearch?: string, // "DOMEvent"
+|};
+
 type StackChartQuery = {|
   ...BaseQuery,
   search: string, // "js::RunScript"
@@ -95,6 +100,7 @@ type JsTracerQuery = {|
 type Query = {|
   ...CallTreeQuery,
   ...MarkersQuery,
+  ...NetworkQuery,
   ...StackChartQuery,
   ...JsTracerQuery,
 |};
@@ -206,6 +212,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
         urlState.profileSpecific.markersSearchString || undefined;
       break;
     case 'network-chart':
+      query.networkSearch =
+        urlState.profileSpecific.networkSearchString || undefined;
       break;
     case 'js-tracer':
       // `null` adds the parameter to the query, while `undefined` doesn't.
@@ -326,6 +334,7 @@ export function stateFromLocation(location: Location): UrlState {
         ? parseLocalTrackOrder(query.localTrackOrderByPid)
         : new Map(),
       markersSearchString: query.markerSearch || '',
+      networkSearchString: query.networkSearch || '',
       transforms,
       timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
       legacyThreadOrder: query.threadOrder

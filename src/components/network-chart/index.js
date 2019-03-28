@@ -11,7 +11,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
-import MarkerSettings from '../shared/MarkerSettings';
+import NetworkSettings from '../shared/NetworkSettings';
 import VirtualList from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
 import NetworkChartEmptyReasons from './NetworkChartEmptyReasons';
@@ -84,7 +84,7 @@ class NetworkChart extends React.PureComponent<Props> {
         role="tabpanel"
         aria-labelledby="network-chart-tab-button"
       >
-        <MarkerSettings />
+        <NetworkSettings />
         {markers.length === 0 ? (
           <NetworkChartEmptyReasons />
         ) : (
@@ -113,7 +113,9 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       state
     );
     return {
-      markers: selectedThreadSelectors.getMergedNetworkChartMarkers(state),
+      markers: selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(
+        state
+      ),
       networkTimingRows,
       maxNetworkRows: networkTimingRows.length,
       timeRange: getCommittedRange(state),

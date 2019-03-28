@@ -157,7 +157,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   const getNetworkChartMarkers: Selector<Marker[]> = createSelector(
-    getSearchFilteredMarkers,
+    getCommittedRangeFilteredMarkers,
     markers => markers.filter(MarkerData.isNetworkMarker)
   );
 
@@ -166,23 +166,39 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerData.mergeStartAndEndNetworkMarker
   );
 
+  const getSearchFilteredNetworkChartMarkers: Selector<
+    Marker[]
+  > = createSelector(
+    getMergedNetworkChartMarkers,
+    UrlState.getNetworkSearchString,
+    MarkerData.getSearchFilteredMarkers
+  );
+
   const getIsMarkerChartEmptyInFullRange: Selector<boolean> = createSelector(
     getReferenceMarkerTable,
     markers => MarkerData.filterForMarkerChart(markers).length === 0
   );
 
   const getMarkerChartMarkers: Selector<Marker[]> = createSelector(
-    getSearchFilteredMarkers,
+    getCommittedRangeFilteredMarkers,
     MarkerData.filterForMarkerChart
   );
 
-  const getMarkerChartTiming: Selector<MarkerTimingRows> = createSelector(
+  const getSearchFilteredMarkerChartMarkers: Selector<
+    Marker[]
+  > = createSelector(
     getMarkerChartMarkers,
+    UrlState.getMarkersSearchString,
+    MarkerData.getSearchFilteredMarkers
+  );
+
+  const getMarkerChartTiming: Selector<MarkerTimingRows> = createSelector(
+    getSearchFilteredMarkerChartMarkers,
     MarkerTiming.getMarkerTiming
   );
 
   const getNetworkChartTiming: Selector<MarkerTimingRows> = createSelector(
-    getNetworkChartMarkers,
+    getSearchFilteredNetworkChartMarkers,
     MarkerTiming.getMarkerTiming
   );
 
@@ -221,8 +237,10 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getProcessedRawMarkerTable,
     getReferenceMarkerTable,
     getNetworkChartMarkers,
+    getSearchFilteredNetworkChartMarkers,
     getIsMarkerChartEmptyInFullRange,
     getMarkerChartMarkers,
+    getSearchFilteredMarkerChartMarkers,
     getMarkerChartTiming,
     getNetworkChartTiming,
     getCommittedRangeFilteredMarkers,

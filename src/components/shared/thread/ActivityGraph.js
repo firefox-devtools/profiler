@@ -132,12 +132,7 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
       treeOrderSampleComparator,
       categories,
     } = this.props;
-    const { samples } = fullThread;
 
-    if (samples.length === 0) {
-      // Do not attempt to render when there are no samples.
-      return;
-    }
     const rect = canvas.getBoundingClientRect();
     const ctx = canvas.getContext('2d');
     const canvasPixelWidth = Math.round(rect.width * window.devicePixelRatio);
