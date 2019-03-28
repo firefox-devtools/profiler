@@ -19,7 +19,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
       <label
         class="markerSettingsSearchbarLabel"
       >
-        Filter Markers: 
+        Filter Markers:
         <form
           class="idleSearchField markerSettingsSearchField"
         >
@@ -216,7 +216,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
               </div>
               <div
-                aria-label="setTimeout [5.5], running time is undefined (undefined), self time is undefined"
+                aria-label="setTimeout — [5.5], running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even  "
@@ -234,7 +234,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 <span
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
-                  setTimeout [5.5]
+                  setTimeout — [5.5]
                 </span>
               </div>
             </div>
