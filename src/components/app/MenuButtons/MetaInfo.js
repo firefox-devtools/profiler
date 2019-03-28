@@ -79,6 +79,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                         href={meta.sourceURL}
                         title={meta.sourceURL}
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
                         {meta.appBuildID}
                       </a>
