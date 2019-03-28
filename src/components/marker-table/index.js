@@ -102,7 +102,6 @@ class MarkerTree {
               name = data.eventType;
             }
             break;
-
           case 'UserTiming':
             category = name;
             name = data.name;
@@ -128,6 +127,10 @@ class MarkerTree {
             break;
           case 'Network':
             category = 'Network';
+            break;
+          case 'Text':
+            category = 'Text';
+            name += ` [${data.name}]`;
             break;
           default:
         }

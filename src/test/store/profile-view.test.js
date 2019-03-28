@@ -666,6 +666,37 @@ describe('actions/ProfileView', function() {
     });
   });
 
+  describe('changeNetworkSearchString', function() {
+    it('changes the search string', function() {
+      const profile = getNetworkTrackProfile();
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(UrlStateSelectors.getNetworkSearchString(getState())).toEqual('');
+      dispatch(ProfileView.changeNetworkSearchString('a'));
+      expect(UrlStateSelectors.getNetworkSearchString(getState())).toEqual('a');
+    });
+    it('filters the network markers', function() {
+      const profile = getNetworkTrackProfile();
+      const { dispatch, getState } = storeWithProfile(profile);
+      const networkSearchString = '3';
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(getState())
+          .length
+      ).toBe(10);
+      dispatch(ProfileView.changeNetworkSearchString(networkSearchString));
+      expect(
+        selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(getState())
+          .length
+      ).toBe(1);
+      expect(
+        selectedThreadSelectors
+          .getSearchFilteredNetworkChartMarkers(getState())[0]
+          .name.includes(networkSearchString)
+      ).toBeTruthy();
+    });
+  });
+
   describe('changeImplementationFilter', function() {
     it('changes the implementation filter', function() {
       const { profile } = getProfileFromTextSamples('A');

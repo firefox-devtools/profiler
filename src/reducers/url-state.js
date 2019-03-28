@@ -128,6 +128,15 @@ const markersSearchString: Reducer<string> = (state = '', action) => {
   }
 };
 
+const networkSearchString: Reducer<string> = (state = '', action) => {
+  switch (action.type) {
+    case 'CHANGE_NETWORK_SEARCH_STRING':
+      return action.searchString;
+    default:
+      return state;
+  }
+};
+
 const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
@@ -312,6 +321,7 @@ const profileSpecific = combineReducers({
   committedRanges,
   callTreeSearchString,
   markersSearchString,
+  networkSearchString,
   transforms,
   timelineType,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than

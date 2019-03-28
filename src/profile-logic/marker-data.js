@@ -94,6 +94,17 @@ export function getSearchFilteredMarkers(
       continue;
     }
     if (data && typeof data === 'object') {
+      if (data.type === 'FileIO') {
+        const { filename, operation, source } = data;
+        if (
+          filename.toLowerCase().includes(lowerCaseSearchString) ||
+          operation.toLowerCase().includes(lowerCaseSearchString) ||
+          source.toLowerCase().includes(lowerCaseSearchString)
+        ) {
+          newMarkers.push(marker);
+          continue;
+        }
+      }
       if (
         typeof data.eventType === 'string' &&
         data.eventType.toLowerCase().includes(lowerCaseSearchString)
