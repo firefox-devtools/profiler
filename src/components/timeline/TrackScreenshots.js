@@ -211,7 +211,8 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     let hoverWidth = windowWidth * coefficient;
 
     const distanceToTopFromTrackCenter = TRACK_HEIGHT / 2 + containerTop;
-    // If the hover height exceed the top of screen, set it just enough reach top of screen when it is centered.
+    // If the hover height exceeds the top of screen,
+    // set it to the value so that it reaches the top of screen when it is centered.
     if (hoverHeight > 2 * distanceToTopFromTrackCenter) {
       hoverHeight = 2 * distanceToTopFromTrackCenter;
       hoverWidth = hoverHeight * windowWidth / windowHeight;
@@ -222,6 +223,9 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
       hoverWidth = hoverHeight * HOVER_MAX_WIDTH_RATIO;
       hoverHeight = hoverWidth / windowWidth * windowHeight;
     }
+
+    hoverWidth = Math.round(hoverWidth);
+    hoverHeight = Math.round(hoverHeight);
 
     // Set the top so it centers around the track.
     let top = containerTop + (TRACK_HEIGHT - hoverHeight) * 0.5;
@@ -234,12 +238,17 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
 
     // Center the hover image around the mouse.
     let left = pageX - hoverWidth * 0.5;
+
+    // marginX is the amount of pixels between this screenshot track
+    // and the window's left edge.
+    const marginX = pageX - offsetX;
+
     if (left < 0) {
       // Stick the hover image on to the left side of the page.
       left = 0;
-    } else if (left + hoverWidth > width + (pageX - offsetX)) {
+    } else if (left + hoverWidth > width + marginX) {
       // Stick the hover image on to the right side of the container.
-      left = pageX - offsetX + width - hoverWidth;
+      left = marginX + width - hoverWidth;
     }
     // Round left value to integer.
     left = Math.floor(left);

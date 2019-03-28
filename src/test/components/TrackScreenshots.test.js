@@ -210,7 +210,7 @@ function setup(
 
   function moveMouseAndGetTop(pageX: number): number {
     moveMouse(pageX);
-    return parseInt(screenshotHover().style.left);
+    return parseInt(screenshotHover().style.top);
   }
 
   return {
