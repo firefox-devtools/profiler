@@ -19,7 +19,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
       <label
         class="markerSettingsSearchbarLabel"
       >
-        Filter Markers:
+        Filter Markers: 
         <form
           class="idleSearchField markerSettingsSearchField"
         >
