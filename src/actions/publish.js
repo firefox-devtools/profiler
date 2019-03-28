@@ -3,16 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { compress } from '../utils/gz';
 import { uploadBinaryProfileData } from '../profile-logic/profile-store';
-import { serializeProfile } from '../profile-logic/process-profile';
 import { sendAnalytics } from '../utils/analytics';
-import { getProfile } from '../selectors/profile';
 import { getUrlState } from '../selectors/url-state';
 import {
   getAbortFunction,
   getUploadPhase,
   getUploadGeneration,
+  getSanitizedProfileData,
 } from '../selectors/publish';
 import { urlFromState } from '../app-logic/url-handling';
 import { profilePublished } from './app';
@@ -64,10 +62,7 @@ export const attemptToPublish = (): ThunkAction<Promise<void>> => async (
       eventAction: 'start',
     });
 
-    const profile = getProfile(getState());
-    const jsonString = serializeProfile(profile);
-    const typedArray = new TextEncoder().encode(jsonString);
-    const gzipData: Uint8Array = await compress(typedArray.slice(0));
+    const gzipData: Uint8Array = await getSanitizedProfileData(getState());
 
     if (
       getUploadPhase(getState()) !== 'uploading' ||

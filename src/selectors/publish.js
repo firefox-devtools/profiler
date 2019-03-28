@@ -133,16 +133,23 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
   }
 );
 
-export const getSanitizedProfileBlob: Selector<Promise<Blob>> = createSelector(
+export const getSanitizedProfileData: Selector<
+  Promise<Uint8Array>
+> = createSelector(
   getRemoveProfileInformation,
   getProfile,
   async (removeProfileInformation, profile) => {
     const maybeSanitizedProfile = removeProfileInformation
       ? sanitizePII(profile, removeProfileInformation)
       : profile;
-    const data = await compress(serializeProfile(maybeSanitizedProfile));
-    return new Blob([data], { type: 'application/octet-binary' });
+    return compress(serializeProfile(maybeSanitizedProfile));
   }
+);
+
+export const getSanitizedProfileBlob: Selector<Promise<Blob>> = createSelector(
+  getSanitizedProfileData,
+  async profileData =>
+    new Blob([await profileData], { type: 'application/octet-binary' })
 );
 
 export const getCompressedProfileBlobUrl: Selector<
