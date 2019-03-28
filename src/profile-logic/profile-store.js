@@ -40,6 +40,8 @@ export function uploadBinaryProfileData(): * {
         xhr.onerror = () => {
           reject(
             new Error(
+              // The profile store does not give useful responses.
+              // See: https://github.com/firefox-devtools/profiler/issues/998
               xhr.statusText
                 ? oneLine`
                     There was an issue uploading the profile to the server. This is often

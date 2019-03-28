@@ -41,79 +41,78 @@ export const changeUploadState = (changes: $Shape<UploadState>): Action => ({
  * sharing without them. We check the current state before attempting to share depending
  * on that flag.
  */
-export const attemptToPublish = (): ThunkAction<Promise<void>> => async (
-  dispatch,
-  getState
-) => {
-  try {
-    const { abortFunction, startUpload } = uploadBinaryProfileData();
-    dispatch(
-      changeUploadState({
-        phase: 'uploading',
-        uploadProgress: 0,
-        abortFunction,
-      })
-    );
-    const uploadGeneration = getUploadGeneration(getState());
+export function attemptToPublish(): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    try {
+      const { abortFunction, startUpload } = uploadBinaryProfileData();
+      dispatch(
+        changeUploadState({
+          phase: 'uploading',
+          uploadProgress: 0,
+          abortFunction,
+        })
+      );
+      const uploadGeneration = getUploadGeneration(getState());
 
-    sendAnalytics({
-      hitType: 'event',
-      eventCategory: 'profile upload',
-      eventAction: 'start',
-    });
+      sendAnalytics({
+        hitType: 'event',
+        eventCategory: 'profile upload',
+        eventAction: 'start',
+      });
 
-    const gzipData: Uint8Array = await getSanitizedProfileData(getState());
+      const gzipData: Uint8Array = await getSanitizedProfileData(getState());
 
-    if (
-      getUploadPhase(getState()) !== 'uploading' ||
-      uploadGeneration !== getUploadGeneration(getState())
-    ) {
-      // The upload could have been aborted while we were compressing the data.
-      return;
-    }
+      if (
+        getUploadPhase(getState()) !== 'uploading' ||
+        uploadGeneration !== getUploadGeneration(getState())
+      ) {
+        // The upload could have been aborted while we were compressing the data.
+        return;
+      }
 
-    // Upload the profile, and notify it with the amount of data that has been
-    // uploaded.
-    const hash = await startUpload(gzipData, uploadProgress => {
-      dispatch(changeUploadState({ uploadProgress }));
-    });
+      // Upload the profile, and notify it with the amount of data that has been
+      // uploaded.
+      const hash = await startUpload(gzipData, uploadProgress => {
+        dispatch(changeUploadState({ uploadProgress }));
+      });
 
-    // Generate a url, and completely drop any of the existing URL state. In
-    // a future patch, we should handle this gracefully.
-    const url =
-      'https://profiler.firefox.com' +
-      urlFromState(
-        urlStateReducer(getUrlState(getState()), profilePublished(hash))
+      // Generate a url, and completely drop any of the existing URL state. In
+      // a future patch, we should handle this gracefully.
+      const url =
+        'https://profiler.firefox.com' +
+        urlFromState(
+          urlStateReducer(getUrlState(getState()), profilePublished(hash))
+        );
+
+      dispatch(
+        changeUploadState({
+          phase: 'uploaded',
+          url,
+        })
       );
 
-    dispatch(
-      changeUploadState({
-        phase: 'uploaded',
-        url,
-      })
-    );
+      sendAnalytics({
+        hitType: 'event',
+        eventCategory: 'profile upload',
+        eventAction: 'succeeded',
+      });
 
-    sendAnalytics({
-      hitType: 'event',
-      eventCategory: 'profile upload',
-      eventAction: 'succeeded',
-    });
-
-    window.open(url, '_blank');
-  } catch (error) {
-    dispatch(
-      changeUploadState({
-        phase: 'error',
-        error,
-      })
-    );
-    sendAnalytics({
-      hitType: 'event',
-      eventCategory: 'profile upload',
-      eventAction: 'failed',
-    });
-  }
-};
+      window.open(url, '_blank');
+    } catch (error) {
+      dispatch(
+        changeUploadState({
+          phase: 'error',
+          error,
+        })
+      );
+      sendAnalytics({
+        hitType: 'event',
+        eventCategory: 'profile upload',
+        eventAction: 'failed',
+      });
+    }
+  };
+}
 
 /**
  * Abort the attempt to publish.

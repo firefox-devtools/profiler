@@ -93,7 +93,7 @@ const abortFunction: Reducer<() => void> = (state = () => {}, action) => {
 const generation: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
     case 'CHANGE_UPLOAD_STATE':
-      // Incrememnt the generation value if starting to upload.
+      // Increment the generation value if starting to upload.
       return action.changes.phase === 'uploading' ? state + 1 : state;
     default:
       return state;

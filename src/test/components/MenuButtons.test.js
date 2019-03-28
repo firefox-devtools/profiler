@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
+import { ensureExists } from '../../utils/flow';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -68,10 +69,13 @@ describe('app/MenuButtons', function() {
       </Provider>
     );
 
-    const { getByTestId, getByValue } = renderResult;
-    const getPublishButton = () => getByValue('Publish…');
-    const getPanelPublishButton = () =>
-      getByTestId('MenuButtonsPublish-publish-button');
+    const { container, getByTestId, getByText } = renderResult;
+    const getPublishButton = () => getByText('Publish…');
+    const getPanelForm = () =>
+      ensureExists(
+        container.querySelector('form'),
+        'Could not find the form in the panel'
+      );
     const getPanel = () => getByTestId('MenuButtonsPublish-container');
 
     return {
@@ -79,7 +83,7 @@ describe('app/MenuButtons', function() {
       ...renderResult,
       getPanel,
       getPublishButton,
-      getPanelPublishButton,
+      getPanelForm,
       resolveUpload,
       rejectUpload,
     };
@@ -95,6 +99,7 @@ describe('app/MenuButtons', function() {
 
     afterAll(async function() {
       delete URL.createObjectURL;
+      delete URL.revokeObjectURL;
       delete (window: any).TextEncoder;
     });
 
@@ -107,8 +112,10 @@ describe('app/MenuButtons', function() {
       (shortenUrl: any).mockImplementation(() =>
         Promise.resolve('https://profiler.firefox.com/')
       );
-      // Node does not have URL.createObjectURL.
+      // jsdom does not have URL.createObjectURL.
+      // See https://github.com/jsdom/jsdom/issues/1721
       (URL: any).createObjectURL = () => 'mockCreateObjectUrl';
+      (URL: any).revokeObjectURL = () => {};
     });
 
     it('matches the snapshot for the closed state', () => {
@@ -123,9 +130,9 @@ describe('app/MenuButtons', function() {
     });
 
     it('matches the snapshot for the uploading panel', () => {
-      const { getPanel, getPublishButton, getPanelPublishButton } = setup();
+      const { getPanel, getPublishButton, getPanelForm } = setup();
       fireEvent.click(getPublishButton());
-      fireEvent.click(getPanelPublishButton());
+      fireEvent.submit(getPanelForm());
       expect(getPanel()).toMatchSnapshot();
     });
 
@@ -133,11 +140,11 @@ describe('app/MenuButtons', function() {
       const {
         getPanel,
         getPublishButton,
-        getPanelPublishButton,
+        getPanelForm,
         resolveUpload,
       } = setup();
       fireEvent.click(getPublishButton());
-      fireEvent.click(getPanelPublishButton());
+      fireEvent.submit(getPanelForm());
       resolveUpload();
       expect(getPanel()).toMatchSnapshot();
     });
@@ -146,11 +153,11 @@ describe('app/MenuButtons', function() {
       const {
         getPanel,
         getPublishButton,
-        getPanelPublishButton,
+        getPanelForm,
         rejectUpload,
       } = setup();
       fireEvent.click(getPublishButton());
-      fireEvent.click(getPanelPublishButton());
+      fireEvent.submit(getPanelForm());
       rejectUpload('This is a mock error');
       expect(getPanel()).toMatchSnapshot();
     });

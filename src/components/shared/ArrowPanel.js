@@ -9,7 +9,7 @@ import classNames from 'classnames';
 
 require('./ArrowPanel.css');
 
-type Props = {
+type Props = {|
   onOpen?: () => mixed,
   onClose?: () => mixed,
   onOkButtonClick?: () => mixed,
@@ -19,13 +19,13 @@ type Props = {
   title?: string,
   okButtonText?: string,
   cancelButtonText?: string,
-};
+|};
 
-type State = {
+type State = {|
   open: boolean,
   isClosing: boolean,
   openGeneration: number,
-};
+|};
 
 class ArrowPanel extends React.PureComponent<Props, State> {
   _panelElement: HTMLElement | null = null;

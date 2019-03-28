@@ -133,6 +133,15 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
   }
 );
 
+/**
+ * Computing the compressed data for a profile is a potentially slow operation. This
+ * selector and its consumers perform that operation asynchronously. It can be called
+ * multiple times while adjust the PII sanitization, but should happen in the background.
+ * It happens in the selector so that it can be shared across components and actions.
+ *
+ * Due to this memoization strategy, one copy of the data is retained in memory and
+ * never freed.
+ */
 export const getSanitizedProfileData: Selector<
   Promise<Uint8Array>
 > = createSelector(
@@ -146,17 +155,36 @@ export const getSanitizedProfileData: Selector<
   }
 );
 
+/**
+ * The blob is needed for both the download size, and the ObjectURL.
+ */
 export const getSanitizedProfileBlob: Selector<Promise<Blob>> = createSelector(
   getSanitizedProfileData,
   async profileData =>
     new Blob([await profileData], { type: 'application/octet-binary' })
 );
 
-export const getCompressedProfileBlobUrl: Selector<
+// URL.createObjectURL are not GCed, they must be cleaned up manually. Store a reference
+// to the previous object URL here. Only retain the latest one.
+let _previousObjectUrl;
+
+/**
+ * This selector generates the string that can be downloaded, or uploaded for persisting
+ * profiles.
+ */
+export const getCompressedProfileObjectUrl: Selector<
   Promise<string>
-> = createSelector(getSanitizedProfileBlob, blobPromise =>
-  blobPromise.then(blob => URL.createObjectURL(blob))
-);
+> = createSelector(getSanitizedProfileBlob, async blobPromise => {
+  const blob = await blobPromise;
+  if (_previousObjectUrl) {
+    // Make sure and clean up the previously created object URL so that we
+    // don't leak it.
+    // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
+    URL.revokeObjectURL(_previousObjectUrl);
+  }
+  _previousObjectUrl = URL.createObjectURL(blob);
+  return _previousObjectUrl;
+});
 
 export const getDownloadSize: Selector<Promise<string>> = createSelector(
   getSanitizedProfileBlob,
@@ -164,10 +192,10 @@ export const getDownloadSize: Selector<Promise<string>> = createSelector(
 );
 
 /**
- * In order to use React keyed components for a PII filtered profile, we need
- * an easy string or number to use for the key that represents the current version. This
- * selector creates a generation value that increases every time the remove profile
- * information or profile changes.
+ * The sanitized profile computation is async. In order to properly invalidate state
+ * in React components, use a generation value. This value is an integer that increments
+ * any time the PII filtering values change. The consuming component can then derive
+ * state from the props to correctly unwrap the promise and use it.
  */
 let _sanitizedProfileGeneration = 0;
 export const getSanitizedProfileGeneration: Selector<number> = createSelector(
