@@ -19,7 +19,7 @@ import { TRACK_NETWORK_HEIGHT } from '../components/timeline/TrackNetwork';
 import { TRACK_MEMORY_HEIGHT } from '../components/timeline/TrackMemory';
 import { TRACK_PROCESS_BLANK_HEIGHT } from '../components/timeline/GlobalTrack';
 import { TIMELINE_RULER_HEIGHT } from '../components/timeline/Ruler';
-import { TIMELINE_SETTINGS_OUTER_HEIGHT } from '../components/timeline/index';
+import { TIMELINE_SETTINGS_HEIGHT } from '../components/timeline';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { AppState, AppViewState } from '../types/state';
@@ -89,7 +89,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
     hiddenLocalTracksByPid,
     trackThreadHeights
   ) => {
-    let height = TIMELINE_RULER_HEIGHT + TIMELINE_SETTINGS_OUTER_HEIGHT;
+    let height = TIMELINE_RULER_HEIGHT + TIMELINE_SETTINGS_HEIGHT;
     const border = 1;
 
     for (const [trackIndex, globalTrack] of globalTracks.entries()) {

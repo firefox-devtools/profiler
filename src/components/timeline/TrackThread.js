@@ -113,6 +113,8 @@ class TimelineTrackThread extends PureComponent<Props> {
 
   componentDidUpdate() {
     const { threadIndex, height, reportTrackThreadHeight } = this.props;
+    // Most likely this track height shouldn't change, but if it does, report it.
+    // The action will only dispatch on changed values.
     reportTrackThreadHeight(threadIndex, height);
   }
 

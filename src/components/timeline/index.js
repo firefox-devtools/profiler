@@ -54,9 +54,7 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
-const TIMELINE_SETTINGS_HEIGHT = 25;
-// Account for the border in the outer height.
-export const TIMELINE_SETTINGS_OUTER_HEIGHT = TIMELINE_SETTINGS_HEIGHT + 1;
+export const TIMELINE_SETTINGS_HEIGHT = 26;
 
 type OwnProps = SizeProps;
 
@@ -183,7 +181,7 @@ class Timeline extends React.PureComponent<Props> {
         <div
           className="timelineSettings"
           style={{
-            '--timelineSettingsHeight': `${TIMELINE_SETTINGS_HEIGHT}px`,
+            '--timeline-settings-height': `${TIMELINE_SETTINGS_HEIGHT}px`,
           }}
         >
           <TimelineSettingsGraphType

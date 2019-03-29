@@ -33,6 +33,9 @@
 .timelineSettings {
   display: flex;
   height: var(--timeline-settings-height);
+  
+  /* Ensure the --timeline-settings-height defines the outer height of the component. */
+  box-sizing: border-box;
   flex: none;
   flex-flow: row nowrap;
   padding: 0;
