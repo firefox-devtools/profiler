@@ -43,3 +43,15 @@
 .profileViewerZipButton:hover {
   border-color: #000;
 }
+
+.profileViewerSplitter {
+  /* Reset the position: absolute that is set by the splitter-layout class */
+  position: unset;
+}
+
+.profileViewerSplitter .layout-pane:not(.layout-pane-primary) {
+  display: flex;
+  overflow: hidden;
+  max-height: var(--profile-viewer-splitter-max-height);
+  flex-direction: column;
+}

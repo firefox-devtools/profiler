@@ -71,6 +71,8 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
+export const TRACK_PROCESS_BLANK_HEIGHT = 30;
+
 class GlobalTrackComponent extends PureComponent<Props> {
   _onLabelMouseDown = (event: MouseEvent) => {
     const { changeRightClickedTrack, trackReference } = this.props;
@@ -97,7 +99,14 @@ class GlobalTrackComponent extends PureComponent<Props> {
       case 'process': {
         const { mainThreadIndex } = globalTrack;
         if (mainThreadIndex === null) {
-          return <div className="timelineTrackThreadBlank" />;
+          return (
+            <div
+              className="timelineTrackThreadBlank"
+              style={{
+                '--timeline-track-thread-blank-height': TRACK_PROCESS_BLANK_HEIGHT,
+              }}
+            />
+          );
         }
         return (
           <TimelineTrackThread

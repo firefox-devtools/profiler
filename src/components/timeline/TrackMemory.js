@@ -25,6 +25,7 @@ import './TrackMemory.css';
 
 export const GRAPH_HEIGHT = 25;
 export const MARKERS_HEIGHT = 15;
+export const TRACK_MEMORY_HEIGHT = GRAPH_HEIGHT + MARKERS_HEIGHT;
 export const LINE_WIDTH = 2;
 
 type OwnProps = {|
