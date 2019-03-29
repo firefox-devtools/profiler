@@ -6,21 +6,18 @@
 
 import * as React from 'react';
 import explicitConnect from '../../../utils/connect';
-import {
-  getProfile,
-  getProfileRootRange,
-  getProfileSharingStatus,
-} from '../../../selectors/profile';
-import { getDataSource, getUrlPredictor } from '../../../selectors/url-state';
-import actions from '../../../actions';
+import { getProfile, getProfileRootRange } from '../../../selectors/profile';
+import { getDataSource } from '../../../selectors/url-state';
 import { MenuButtonsMetaInfo } from './MetaInfo';
-import { MenuButtonsProfileSharing } from './ProfileSharing';
-import { ProfileDownloadButton } from './Download';
+import { MenuButtonsPublish } from './Publish';
+import { MenuButtonsPermalink } from './Permalink';
+import { assertExhaustiveCheck } from '../../../utils/flow';
+import ArrowPanel from '../../shared/ArrowPanel';
+import ButtonWithPanel from '../../shared/ButtonWithPanel';
 
 import type { StartEndRange } from '../../../types/units';
 import type { Profile } from '../../../types/profile';
-import type { Action, DataSource } from '../../../types/actions';
-import type { ProfileSharingStatus } from '../../../types/state';
+import type { DataSource } from '../../../types/actions';
 import type {
   ExplicitConnectOptions,
   ConnectedProps,
@@ -32,39 +29,16 @@ type StateProps = {|
   +profile: Profile,
   +rootRange: StartEndRange,
   +dataSource: DataSource,
-  +profileSharingStatus: ProfileSharingStatus,
-  +predictUrl: (Action | Action[]) => string,
 |};
 
-type DispatchProps = {|
-  +profilePublished: typeof actions.profilePublished,
-  +setProfileSharingStatus: typeof actions.setProfileSharingStatus,
-|};
+type Props = ConnectedProps<{||}, StateProps, {||}>;
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
-
-const MenuButtons = ({
-  profile,
-  rootRange,
-  dataSource,
-  profilePublished,
-  profileSharingStatus,
-  setProfileSharingStatus,
-  predictUrl,
-}: Props) => (
+const MenuButtons = ({ profile, dataSource }: Props) => (
   <>
     {/* Place the info button outside of the menu buttons to allow it to shrink. */}
     <MenuButtonsMetaInfo profile={profile} />
     <div className="menuButtons">
-      <MenuButtonsProfileSharing
-        profile={profile}
-        dataSource={dataSource}
-        onProfilePublished={profilePublished}
-        profileSharingStatus={profileSharingStatus}
-        setProfileSharingStatus={setProfileSharingStatus}
-        predictUrl={predictUrl}
-      />
-      <ProfileDownloadButton profile={profile} rootRange={rootRange} />
+      <PublishOrPermalinkButtons dataSource={dataSource} />
       <a
         href="/docs/"
         target="_blank"
@@ -77,18 +51,39 @@ const MenuButtons = ({
   </>
 );
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+const PublishOrPermalinkButtons = ({ dataSource }) => {
+  switch (dataSource) {
+    case 'from-addon':
+    case 'from-file':
+    case 'local':
+      return (
+        <ButtonWithPanel
+          className="menuButtonsShareButton"
+          label="Publish…"
+          panel={
+            <ArrowPanel className="menuButtonsPublishPanel">
+              <MenuButtonsPublish />
+            </ArrowPanel>
+          }
+        />
+      );
+    case 'public':
+    case 'from-url':
+    case 'compare':
+      return <MenuButtonsPermalink />;
+    case 'none':
+      return null;
+    default:
+      throw assertExhaustiveCheck(dataSource);
+  }
+};
+
+const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: state => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
-    profileSharingStatus: getProfileSharingStatus(state),
-    predictUrl: getUrlPredictor(state),
   }),
-  mapDispatchToProps: {
-    profilePublished: actions.profilePublished,
-    setProfileSharingStatus: actions.setProfileSharingStatus,
-  },
   component: MenuButtons,
 };
 export default explicitConnect(options);
