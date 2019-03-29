@@ -214,6 +214,7 @@
 .menuButtonsPublishButton {
   display: inline-flex;
   min-width: 132px;
+  box-sizing: content-box;
   align-items: center;
   justify-content: center;
   margin: 0 8px;
@@ -221,6 +222,15 @@
   font-size: 13px;
   text-align: center;
   text-decoration: none;
+}
+
+.menuButtonsPublishButtonDisabled {
+  opacity: 0.6;
+}
+
+.menuButtonsPublishButtonDisabled:hover,
+.menuButtonsPublishButtonDisabled:active:hover {
+  background-color: var(--grey-90-a10);
 }
 
 .menuButtonsPublishButtonsSvg {
@@ -243,14 +253,12 @@
   background: url(../../../../res/img/svg/download.svg) center center no-repeat;
 }
 
-@keyframes menuButtonsDownloadButtonFadeIn {
-  0% { opacity: 0; }
-  100% { opacity: 1; }
+.menuButtonsDownloadButton {
+  transition: color 100ms;
 }
 
-.menuButtonsDownloadButton {
-  animation-duration: 60ms;
-  animation-name: menuButtonsDownloadButtonFadeIn;
+.menuButtonsDownloadButtonIsLoading {
+  color: var(--grey-40);
 }
 
 .menuButtonsPublishUpload {

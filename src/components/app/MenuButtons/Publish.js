@@ -18,7 +18,6 @@ import {
   getFilenameString,
   getDownloadSize,
   getCompressedProfileObjectUrl,
-  getSanitizedProfileGeneration,
   getUploadPhase,
   getUploadProgressString,
   getUploadUrl,
@@ -46,7 +45,6 @@ type StateProps = {|
   +checkedSharingOptions: CheckedSharingOptions,
   +downloadSizePromise: Promise<string>,
   +compressedProfileObjectUrlPromise: Promise<string>,
-  +sanitizedProfileGeneration: number,
   +downloadFileName: string,
   +uploadPhase: UploadPhase,
   +uploadProgress: string,
@@ -106,7 +104,6 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       attemptToPublish,
       downloadFileName,
       compressedProfileObjectUrlPromise,
-      sanitizedProfileGeneration,
       uploadUrl,
     } = this.props;
 
@@ -134,10 +131,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
           <details className="menuButtonsPublishData">
             <summary className="menuButtonsPublishDataSummary">
               Adjust how much is shared{' '}
-              <DownloadSize
-                generation={sanitizedProfileGeneration}
-                downloadSizePromise={downloadSizePromise}
-              />
+              <DownloadSize downloadSizePromise={downloadSizePromise} />
             </summary>
             <label className="photon-label">
               <input
@@ -162,7 +156,6 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
           </details>
           <div className="menuButtonsPublishButtons">
             <DownloadButton
-              generation={sanitizedProfileGeneration}
               downloadFileName={downloadFileName}
               compressedProfileObjectUrlPromise={
                 compressedProfileObjectUrlPromise
@@ -202,7 +195,6 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       abortUpload,
       downloadFileName,
       compressedProfileObjectUrlPromise,
-      sanitizedProfileGeneration,
     } = this.props;
 
     return (
@@ -226,7 +218,6 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
         </div>
         <div className="menuButtonsPublishButtons">
           <DownloadButton
-            generation={sanitizedProfileGeneration}
             downloadFileName={downloadFileName}
             compressedProfileObjectUrlPromise={
               compressedProfileObjectUrlPromise
@@ -336,7 +327,6 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     downloadSizePromise: getDownloadSize(state),
     downloadFileName: getFilenameString(state),
     compressedProfileObjectUrlPromise: getCompressedProfileObjectUrl(state),
-    sanitizedProfileGeneration: getSanitizedProfileGeneration(state),
     uploadPhase: getUploadPhase(state),
     uploadProgress: getUploadProgressString(state),
     uploadUrl: getUploadUrl(state),
@@ -353,23 +343,17 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
 export const MenuButtonsPublish = explicitConnect(options);
 
 type DownloadSizeProps = {|
-  // The generation is a number that only increases, and does so each time a profile
-  // sanitization option changes, or a new profile is generated. It should be increased
-  // any time a new sanitized profile is generated. This is how we know to update
-  // this component.
-  +generation: number,
   +downloadSizePromise: Promise<string>,
 |};
 
 type DownloadSizeState = {|
-  prevGeneration: number | null,
+  prevDownloadSizePromise: Promise<string> | null,
   downloadSize: string | null,
+  isLoading: boolean,
 |};
 
 /**
- * The DownloadSize handles unpacking the downloadSizePromise. It does
- * so by deriving the state from the props, and utilizing a generation value.
- * See the generation props for a more detailed explanation.
+ * The DownloadSize handles unpacking the downloadSizePromise.
  */
 class DownloadSize extends React.PureComponent<
   DownloadSizeProps,
@@ -378,23 +362,20 @@ class DownloadSize extends React.PureComponent<
   _isMounted: boolean = true;
 
   state = {
-    prevGeneration: null,
     downloadSize: null,
+    isLoading: false,
+    prevDownloadSizePromise: null,
   };
 
-  /**
-   * The props changed, derive the new state from them. This function will invalidate
-   * the previous compressedProfileObjectUrl if the generation is different.
-   */
   static getDerivedStateFromProps(
     props: DownloadSizeProps,
     state: DownloadSizeState
-  ): null | DownloadSizeState {
-    if (props.generation !== state.prevGeneration) {
-      // The generation value changed, invalidate the download size.
+  ): $Shape<DownloadSizeState> | null {
+    if (state.prevDownloadSizePromise !== props.downloadSizePromise) {
       return {
-        prevGeneration: props.generation,
-        downloadSize: null,
+        // Invalidate the old download size.
+        isLoading: true,
+        prevDownloadSizePromise: props.downloadSizePromise,
       };
     }
     return null;
@@ -404,13 +385,13 @@ class DownloadSize extends React.PureComponent<
     const { downloadSizePromise } = this.props;
     downloadSizePromise.then(downloadSize => {
       if (this._isMounted) {
-        this.setState({ downloadSize });
+        this.setState({ downloadSize, isLoading: false });
       }
     });
   }
 
-  componentDidUpdate() {
-    if (this.state.downloadSize === null) {
+  componentDidUpdate(prevProps: DownloadSizeProps) {
+    if (prevProps.downloadSizePromise !== this.props.downloadSizePromise) {
       this._unwrapPromise();
     }
   }
@@ -425,33 +406,35 @@ class DownloadSize extends React.PureComponent<
   }
 
   render() {
-    const { downloadSize } = this.state;
+    const { downloadSize, isLoading } = this.state;
     if (downloadSize === null) {
       return null;
     }
-    return <span className="menuButtonsDownloadButton">({downloadSize})</span>;
+    return (
+      <span
+        className={classNames({
+          menuButtonsDownloadButtonIsLoading: isLoading,
+          menuButtonsDownloadButton: true,
+        })}
+      >
+        ({downloadSize})
+      </span>
+    );
   }
 }
 
 type DownloadButtonProps = {|
-  // The generation is a number that only increases, and does so each time a profile
-  // sanitization option changes, or a new profile is generated. It should be increased
-  // any time a new sanitized profile is generated. This is how we know to update
-  // this component.
-  +generation: number,
   +compressedProfileObjectUrlPromise: Promise<string>,
   +downloadFileName: string,
 |};
 
 type DownloadButtonState = {|
-  prevGeneration: null | number,
   compressedProfileObjectUrl: string | null,
+  prevPromise: Promise<string> | null,
 |};
 
 /**
- * The DownloadButton handles unpacking the compressed profile promise. It does
- * so by deriving the state from the props, and utilizing a generation value.
- * See the generation props for a more detailed explanation.
+ * The DownloadButton handles unpacking the compressed profile promise.
  */
 class DownloadButton extends React.PureComponent<
   DownloadButtonProps,
@@ -459,23 +442,19 @@ class DownloadButton extends React.PureComponent<
 > {
   _isMounted: boolean = false;
   state = {
-    prevGeneration: null,
     compressedProfileObjectUrl: null,
+    prevPromise: null,
   };
 
-  /**
-   * The props changed, derive the new state from them. This function will invalidate
-   * the previous compressedProfileObjectUrl if the generation is different.
-   */
   static getDerivedStateFromProps(
     props: DownloadButtonProps,
     state: DownloadButtonState
-  ): null | DownloadButtonState {
-    if (props.generation !== state.prevGeneration) {
-      // The generation value changed, invalidate the compressedProfileObjectUrl.
+  ): $Shape<DownloadButtonState> | null {
+    if (state.prevPromise !== props.compressedProfileObjectUrlPromise) {
       return {
-        prevGeneration: props.generation,
+        // Invalidate the old download size.
         compressedProfileObjectUrl: null,
+        prevPromise: props.compressedProfileObjectUrlPromise,
       };
     }
     return null;
@@ -495,8 +474,11 @@ class DownloadButton extends React.PureComponent<
     this._unwrapPromise();
   }
 
-  componentDidUpdate() {
-    if (this.state.compressedProfileObjectUrl === null) {
+  componentDidUpdate(prevProps: DownloadButtonProps) {
+    if (
+      prevProps.compressedProfileObjectUrlPromise !==
+      this.props.compressedProfileObjectUrlPromise
+    ) {
       this._unwrapPromise();
     }
   }
@@ -529,9 +511,12 @@ class DownloadButton extends React.PureComponent<
     return (
       // This component must be an <a> rather than a <button> as the download attribute
       // allows users to download the profile.
-      <a type="button" href="#" className={classNames(className, 'disabled')}>
+      <button
+        type="button"
+        className={classNames(className, 'menuButtonsPublishButtonDisabled')}
+      >
         Compressing…
-      </a>
+      </button>
     );
   }
 }

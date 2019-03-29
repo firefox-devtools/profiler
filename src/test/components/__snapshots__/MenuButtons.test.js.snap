@@ -30,13 +30,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
   <div
     class="menuButtonsPublishButtons"
   >
-    <a
-      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload disabled"
-      href="#"
+    <button
+      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
       type="button"
     >
       Compressing…
-    </a>
+    </button>
     <button
       class="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
       type="button"
@@ -142,13 +141,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the completed upload
   <div
     class="menuButtonsPublishButtons"
   >
-    <a
-      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload disabled"
-      href="#"
+    <button
+      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
       type="button"
     >
       Compressing…
-    </a>
+    </button>
     <button
       class="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
       type="button"
@@ -257,13 +255,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel 1`]
     <div
       class="menuButtonsPublishButtons"
     >
-      <a
-        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload disabled"
-        href="#"
+      <button
+        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
         type="button"
       >
         Compressing…
-      </a>
+      </button>
       <button
         class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
         type="submit"
@@ -308,13 +305,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the uploading panel 
   <div
     class="menuButtonsPublishButtons"
   >
-    <a
-      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload disabled"
-      href="#"
+    <button
+      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
       type="button"
     >
       Compressing…
-    </a>
+    </button>
     <button
       class="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
       type="button"

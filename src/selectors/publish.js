@@ -191,19 +191,6 @@ export const getDownloadSize: Selector<Promise<string>> = createSelector(
   blobPromise => blobPromise.then(blob => prettyBytes(blob.size))
 );
 
-/**
- * The sanitized profile computation is async. In order to properly invalidate state
- * in React components, use a generation value. This value is an integer that increments
- * any time the PII filtering values change. The consuming component can then derive
- * state from the props to correctly unwrap the promise and use it.
- */
-let _sanitizedProfileGeneration = 0;
-export const getSanitizedProfileGeneration: Selector<number> = createSelector(
-  getRemoveProfileInformation,
-  getProfile,
-  () => _sanitizedProfileGeneration++
-);
-
 export const getUploadState: Selector<UploadState> = state =>
   getPublishState(state).upload;
 

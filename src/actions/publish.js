@@ -20,17 +20,21 @@ import type { Action, ThunkAction } from '../types/store';
 import type { UploadState } from '../types/state';
 import type { CheckedSharingOptions } from '../types/actions';
 
-export const toggleCheckedSharingOptions = (
+export function toggleCheckedSharingOptions(
   slug: $Keys<CheckedSharingOptions>
-): Action => ({
-  type: 'TOGGLE_CHECKED_SHARING_OPTION',
-  slug,
-});
+): Action {
+  return {
+    type: 'TOGGLE_CHECKED_SHARING_OPTION',
+    slug,
+  };
+}
 
-export const changeUploadState = (changes: $Shape<UploadState>): Action => ({
-  type: 'CHANGE_UPLOAD_STATE',
-  changes,
-});
+export function changeUploadState(changes: $Shape<UploadState>) {
+  return {
+    type: 'CHANGE_UPLOAD_STATE',
+    changes,
+  };
+}
 
 /**
  * This function starts the profile sharing process. Takes an optional argument that
@@ -117,22 +121,22 @@ export function attemptToPublish(): ThunkAction<Promise<void>> {
 /**
  * Abort the attempt to publish.
  */
-export const abortUpload = (): ThunkAction<Promise<void>> => async (
-  dispatch,
-  getState
-) => {
-  const abort = getAbortFunction(getState());
-  abort();
-  dispatch(changeUploadState({ phase: 'local', uploadProgress: 0 }));
+export function abortUpload(): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    const abort = getAbortFunction(getState());
+    abort();
+    dispatch(changeUploadState({ phase: 'local', uploadProgress: 0 }));
 
-  sendAnalytics({
-    hitType: 'event',
-    eventCategory: 'profile upload',
-    eventAction: 'aborted',
-  });
-};
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile upload',
+      eventAction: 'aborted',
+    });
+  };
+}
 
-export const resetUploadState = (): Action =>
-  changeUploadState({
+export function resetUploadState(): Action {
+  return changeUploadState({
     phase: 'local',
   });
+}
