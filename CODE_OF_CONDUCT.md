@@ -7,9 +7,6 @@ For more details, please read the
 ## How to Report
 For more information on how to report violations of the CPG, please read our '[How to Report](https://www.mozilla.org/en-US/about/governance/policies/participation/reporting/)' page.
 
-If you prefer you may also (but you're not obliged to) contact our team member
-[Greg Tatum \<gtatum@mozilla.com\>](mailto:gtatum@mozilla.com).
-
 ## Project Specific Etiquette
 
 ### Our Responsibilities
@@ -26,3 +23,8 @@ threatening, offensive, or harmful.
 
 Project maintainers who do not follow or enforce Mozilla's Participation Guidelines in good
 faith may face temporary or permanent repercussions.
+
+## Report to a team member
+
+If you prefer you may also (but you're not obliged to) contact our team member
+[Greg Tatum \<gtatum@mozilla.com\>](mailto:gtatum@mozilla.com).
