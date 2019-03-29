@@ -130,7 +130,7 @@ class MarkerTree {
             break;
           case 'Text':
             category = 'Text';
-            name += ` [${data.name}]`;
+            name += ` — ${data.name}`;
             break;
           default:
         }
