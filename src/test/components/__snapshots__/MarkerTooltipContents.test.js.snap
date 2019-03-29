@@ -160,6 +160,12 @@ exports[`MarkerTooltipContents renders tooltips for various markers: DOMEvent-10
         Thread:
       </div>
       Main Thread
+      <div
+        class="tooltipLabel"
+      >
+        URL:
+      </div>
+      https://developer.mozilla.org/en-US/
     </div>
   </div>
   <div
