@@ -263,7 +263,6 @@ Array [
                   <input
                     class="menuButtonsShareNetworkUrlsCheckbox"
                     type="checkbox"
-                    value="on"
                   />
                   Share the URLs of all network requests
                 </label>

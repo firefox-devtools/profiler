@@ -20,6 +20,7 @@ exports[`StackChart matches the snapshot 1`] = `
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -62,7 +63,6 @@ exports[`StackChart matches the snapshot 1`] = `
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
