@@ -11,6 +11,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { ensureExists } from '../../utils/flow';
+import { getProfile } from '../../selectors/profile';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -50,8 +51,10 @@ describe('app/MenuButtons', function() {
     return { resolveUpload, rejectUpload };
   }
 
-  function setup(profile) {
-    const store = storeWithProfile(profile);
+  function setup(updateChannel = 'release') {
+    const store = storeWithProfile();
+    const profile = getProfile(store.getState());
+    profile.meta.updateChannel = updateChannel;
     const { resolveUpload, rejectUpload } = mockUpload();
 
     store.dispatch({
@@ -123,8 +126,14 @@ describe('app/MenuButtons', function() {
       expect(container).toMatchSnapshot();
     });
 
-    it('matches the snapshot for the opened panel', () => {
-      const { getPanel, getPublishButton } = setup();
+    it('matches the snapshot for the opened panel for a nightly profile', () => {
+      const { getPanel, getPublishButton } = setup('nightly');
+      fireEvent.click(getPublishButton());
+      expect(getPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot for the opened panel for a release profile', () => {
+      const { getPanel, getPublishButton } = setup('release');
       fireEvent.click(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });

@@ -1170,6 +1170,22 @@ export function sanitizePII(
 }
 
 /**
+ * We want to protect users from unknowingly uploading sensitive data, however
+ * this gets in the way of engineers profiling on nightly. For a compromise
+ * between good data sanitization practices, and not dropping useful information,
+ * do not sanitize on nightly and custom builds.
+ */
+export function getShouldSanitizeByDefault(profile: Profile): boolean {
+  switch (profile.meta.updateChannel) {
+    case 'default': // Custom builds.
+    case 'nightly':
+    case 'nightly-try':
+      return false;
+    default:
+      return true;
+  }
+}
+/**
  * Take a thread with PII that user wants to be removed and remove the thread
  * data depending on that PII status.
  */

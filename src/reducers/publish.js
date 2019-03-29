@@ -4,6 +4,8 @@
 
 // @flow
 import { combineReducers } from 'redux';
+import { getShouldSanitizeByDefault } from '../profile-logic/process-profile';
+
 import type { CheckedSharingOptions } from '../types/actions';
 import type {
   PublishState,
@@ -28,6 +30,11 @@ const checkedSharingOptions: Reducer<CheckedSharingOptions> = (
   action
 ) => {
   switch (action.type) {
+    case 'VIEW_PROFILE': {
+      const newState = _getDefaultSharingOptions();
+      newState.isFiltering = getShouldSanitizeByDefault(action.profile);
+      return newState;
+    }
     case 'TOGGLE_CHECKED_SHARING_OPTION':
       return {
         ...state,
