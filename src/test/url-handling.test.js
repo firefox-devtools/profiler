@@ -10,6 +10,7 @@ import {
   changeCallTreeSearchString,
   changeMarkersSearchString,
   changeNetworkSearchString,
+  changeProfileName,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -337,6 +338,18 @@ describe('search strings', function() {
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
     expect(query.networkSearch).toBe(networkSearchString);
+  });
+});
+
+describe('profileName', function() {
+  it('serializes the profileName in the URL ', function() {
+    const { getState, dispatch } = _getStoreWithURL();
+    const profileName = 'Good Pofile';
+
+    dispatch(changeProfileName(profileName));
+    const urlState = urlStateReducers.getUrlState(getState());
+    const { query } = urlStateToUrlObject(urlState);
+    expect(query.profileName).toBe(profileName);
   });
 });
 
