@@ -327,7 +327,7 @@ Array [
       target="_blank"
       title="Open the documentation in a new window"
     >
-      Docs…
+      Docs<i className="open-in-new"></i>
     </a>
   </div>,
 ]
