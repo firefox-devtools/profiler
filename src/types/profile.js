@@ -379,8 +379,6 @@ export type ProfileMeta = {|
   physicalCPUs?: number,
   // The amount of logically available CPU cores for the program.
   logicalCPUs?: number,
-  // A boolean flag for whether or not the network URLs were stripped from the profile.
-  networkURLsRemoved?: boolean,
   // A boolean flag indicating whether we symbolicated this profile. If this is
   // false we'll start a symbolication process when the profile is loaded.
   // A missing property means that it's an older profile, it stands for an
