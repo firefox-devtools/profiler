@@ -35,9 +35,10 @@
 .menuButtonsLink:hover {
   background-color: rgba(0, 0, 0, 0.1);
 }
-.open-in-new{
-  background-image: url(../../../../res/img/svg/open-in-new.svg);
-  background-repeat: no-repeat;
-  background-position: center;
+.open-in-new {
   padding: 10px;
+  background-image: url(../../../../res/img/svg/open-in-new.svg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 11px;
 }
