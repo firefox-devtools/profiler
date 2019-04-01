@@ -13,6 +13,7 @@ import type {
   IsSidebarOpenPerPanelState,
   Reducer,
 } from '../types/state';
+import type { ThreadIndex } from '../types/profile';
 
 const view: Reducer<AppViewState> = (
   state = { phase: 'INITIALIZING' },
@@ -145,6 +146,21 @@ const lastVisibleThreadTabSlug: Reducer<TabSlug> = (
   }
 };
 
+const trackThreadHeights: Reducer<Array<ThreadIndex | void>> = (
+  state = [],
+  action
+) => {
+  switch (action.type) {
+    case 'UPDATE_TRACK_THREAD_HEIGHT': {
+      const newState = state.slice();
+      newState[action.threadIndex] = action.height;
+      return newState;
+    }
+    default:
+      return state;
+  }
+};
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   isUrlSetupDone,
@@ -152,6 +168,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   isSidebarOpenPerPanel,
   panelLayoutGeneration,
   lastVisibleThreadTabSlug,
+  trackThreadHeights,
 });
 
 export default appStateReducer;

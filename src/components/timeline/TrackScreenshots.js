@@ -47,8 +47,9 @@ type State = {|
   containerTop: null | number,
 |};
 
-// Export the value for tests.
-export const TRACK_HEIGHT = 50;
+// Export the value for tests, and for computing the max height of the timeline
+// for the splitter.
+export const TRACK_SCREENSHOT_HEIGHT = 50;
 
 class Screenshots extends PureComponent<Props, State> {
   state = {
@@ -87,7 +88,7 @@ class Screenshots extends PureComponent<Props, State> {
     return (
       <div
         className="timelineTrackScreenshot"
-        style={{ height: TRACK_HEIGHT }}
+        style={{ height: TRACK_SCREENSHOT_HEIGHT }}
         onMouseLeave={this._handleMouseLeave}
         onMouseMove={this._handleMouseMove}
       >
@@ -210,7 +211,8 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     let hoverHeight = windowHeight * coefficient;
     let hoverWidth = windowWidth * coefficient;
 
-    const distanceToTopFromTrackCenter = TRACK_HEIGHT / 2 + containerTop;
+    const distanceToTopFromTrackCenter =
+      TRACK_SCREENSHOT_HEIGHT / 2 + containerTop;
     // If the hover height exceeds the top of screen,
     // set it to the value so that it reaches the top of screen when it is centered.
     if (hoverHeight > 2 * distanceToTopFromTrackCenter) {
@@ -228,7 +230,7 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     hoverHeight = Math.round(hoverHeight);
 
     // Set the top so it centers around the track.
-    let top = containerTop + (TRACK_HEIGHT - hoverHeight) * 0.5;
+    let top = containerTop + (TRACK_SCREENSHOT_HEIGHT - hoverHeight) * 0.5;
     // Round top value to integer.
     top = Math.floor(top);
     if (top < 0) {
@@ -293,7 +295,7 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
 
     const images = [];
     const rangeLength = rangeEnd - rangeStart;
-    const imageContainerWidth = TRACK_HEIGHT * 0.75;
+    const imageContainerWidth = TRACK_SCREENSHOT_HEIGHT * 0.75;
     const timeToPixel = time =>
       outerContainerWidth * (time - rangeStart) / rangeLength;
 
@@ -316,7 +318,8 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
       const payload: ScreenshotPayload = (screenshots[screenshotIndex]
         .data: any);
       const { url: urlStringIndex, windowWidth, windowHeight } = payload;
-      const scaledImageWidth = TRACK_HEIGHT * windowWidth / windowHeight;
+      const scaledImageWidth =
+        TRACK_SCREENSHOT_HEIGHT * windowWidth / windowHeight;
       images.push(
         <div
           className="timelineTrackScreenshotImgContainer"
@@ -329,7 +332,7 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
             src={thread.stringTable.getString(urlStringIndex)}
             style={{
               width: scaledImageWidth,
-              height: TRACK_HEIGHT,
+              height: TRACK_SCREENSHOT_HEIGHT,
             }}
           />
         </div>

@@ -6,6 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
+import { withSize, type SizeProps } from '../shared/WithSize';
 import ThreadStackGraph from '../shared/thread/StackGraph';
 import ThreadActivityGraph from '../shared/thread/ActivityGraph';
 import {
@@ -32,6 +33,7 @@ import {
   focusCallTree,
   selectLeafCallNode,
 } from '../../actions/profile-view';
+import { reportTrackThreadHeight } from '../../actions/app';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import './TrackThread.css';
 
@@ -56,6 +58,7 @@ import type {
 type OwnProps = {|
   +threadIndex: ThreadIndex,
   +showMemoryMarkers?: boolean,
+  ...SizeProps,
 |};
 
 type StateProps = {|
@@ -78,6 +81,7 @@ type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
   +selectLeafCallNode: typeof selectLeafCallNode,
+  +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -106,6 +110,13 @@ class TimelineTrackThread extends PureComponent<Props> {
       selectionEnd: Math.min(rangeEnd, end),
     });
   };
+
+  componentDidUpdate() {
+    const { threadIndex, height, reportTrackThreadHeight } = this.props;
+    // Most likely this track height shouldn't change, but if it does, report it.
+    // The action will only dispatch on changed values.
+    reportTrackThreadHeight(threadIndex, height);
+  }
 
   render() {
     const {
@@ -230,7 +241,8 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     changeSelectedCallNode,
     focusCallTree,
     selectLeafCallNode,
+    reportTrackThreadHeight,
   },
   component: TimelineTrackThread,
 };
-export default explicitConnect(options);
+export default withSize(explicitConnect(options));
