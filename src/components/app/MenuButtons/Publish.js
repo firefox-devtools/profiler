@@ -12,6 +12,7 @@ import {
   abortUpload,
   resetUploadState,
 } from '../../../actions/publish';
+import { getShouldSanitizeByDefault } from '../../../profile-logic/process-profile';
 import { getProfile, getProfileRootRange } from '../../../selectors/profile';
 import {
   getCheckedSharingOptions,
@@ -99,6 +100,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
 
   _renderPublishPanel() {
     const {
+      profile,
       checkedSharingOptions,
       downloadSizePromise,
       attemptToPublish,
@@ -106,6 +108,10 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       compressedProfileObjectUrlPromise,
       uploadUrl,
     } = this.props;
+
+    const sanitizeMessage = getShouldSanitizeByDefault(profile)
+      ? 'By default, the profile is stripped of much of the personally identifiable information.'
+      : 'In Nightly and custom builds, no information is stripped by default.';
 
     return (
       <div data-testid="MenuButtonsPublish-container">
@@ -125,10 +131,9 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
           <div className="menuButtonsPublishIcon" />
           <p className="menuButtonsPublishInfoDescription">
             You’re about to share your profile potentially where others have
-            public access to it. By default, the profile is stripped of much of
-            the personally identifiable information.
+            public access to it. {sanitizeMessage}
           </p>
-          <details className="menuButtonsPublishData">
+          <details className="menuButtonsPublishData" open={true}>
             <summary className="menuButtonsPublishDataSummary">
               Adjust how much is shared{' '}
               <DownloadSize downloadSizePromise={downloadSizePromise} />
