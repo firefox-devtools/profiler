@@ -31,6 +31,7 @@ import {
   convertStackToCallNodePath,
   getFuncNamesAndOriginsForPath,
 } from '../../profile-logic/profile-data';
+import { getMarkerName } from './index';
 
 type StateProps = {|
   +markers: Marker[],
@@ -160,45 +161,7 @@ class MarkersContextMenu extends PureComponent<Props> {
       return;
     }
     const marker = markers[selectedMarker];
-    let name = marker.name;
-
-    if (marker.data) {
-      const data = marker.data;
-      let category = 'unknown';
-      if (typeof data.category === 'string') {
-        category = data.category;
-      }
-      switch (data.type) {
-        case 'tracing':
-          if (category === 'log') {
-            if (name.length > 100) {
-              name = name.substring(0, 100) + '...';
-            }
-          } else if (data.category === 'DOMEvent') {
-            name = data.eventType;
-          }
-          break;
-        case 'UserTiming':
-          name = data.name;
-          break;
-        case 'FileIO':
-          if (data.source) {
-            name = `(${data.source}) `;
-          }
-          name += data.operation;
-          if (data.filename) {
-            name = data.operation
-              ? `${name} — ${data.filename}`
-              : data.filename;
-          }
-          break;
-        case 'Text':
-          name += ` — ${data.name}`;
-          break;
-        default:
-      }
-    }
-    copy(name);
+    copy(getMarkerName(marker));
   };
 
   copyMarkerCause = () => {
