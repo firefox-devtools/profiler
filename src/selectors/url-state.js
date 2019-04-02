@@ -194,11 +194,11 @@ export const getProfileName: Selector<null | string> = createSelector(
     if (profileName) {
       return profileName;
     }
-    if (!pathInZipFile) {
-      return '';
+    if (pathInZipFile) {
+      const pathParts = pathInZipFile.split('/');
+      return pathParts[pathParts.length - 1];
     }
-    const pathParts = pathInZipFile.split('/');
-    return pathParts[pathParts.length - 1];
+    return '';
   }
 );
 

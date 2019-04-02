@@ -15,7 +15,7 @@
 
 .profileViewerName {
   height: 24px;
-  padding: 0 6px 0 2px;
+  padding: 0 6px;
   border-right: 1px solid var(--grey-30);
   color: var(--grey-60);
   font-weight: bold;
@@ -30,7 +30,7 @@
   /* Box */
   flex: none;
   padding: 0;
-  margin: 3px;
+  margin: 3px 0 3px 3px;
   border: 1px solid var(--green-60);
 
   /* Other */
