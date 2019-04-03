@@ -26,7 +26,10 @@ import type {
   ExplicitConnectOptions,
   ConnectedProps,
 } from '../../utils/connect';
-import { getMarkerFullDescription, getMarkerCategory } from '../../profile-logic/marker-data';
+import {
+  getMarkerFullDescription,
+  getMarkerCategory,
+} from '../../profile-logic/marker-data';
 
 type MarkerDisplayData = {|
   start: string,
