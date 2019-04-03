@@ -183,19 +183,12 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
     // markers, extract the payload.
     const networkPayload = _getNetworkPayloadOrNull(marker);
     if (networkPayload === null) {
-      console.error(
+      throw new Error(
         oneLine`
           The NetworkChart is supposed to only receive Network markers, but some other
           kind of marker payload was passed in.
         `
       );
-      return {
-        index: markerIndex,
-        marker,
-        threadIndex,
-        networkPayload: null,
-        markerStyle: {},
-      };
     }
     // Compute the positioning of the network markers.
     const startPosition = _timeToCssPixels(props, marker.start);
@@ -212,10 +205,8 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
       marker,
       networkPayload,
       threadIndex,
-      markerStyle: {
-        left: startPosition,
-        width: markerWidth,
-      },
+      startPosition,
+      markerWidth,
     };
   });
 }

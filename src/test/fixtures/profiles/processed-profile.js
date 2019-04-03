@@ -88,8 +88,13 @@ export function addMarkersToThreadWithCorrespondingSamples(
 
     // Try to get a consistent profile containing all markers
     allTimes.add(time);
-    if (data && typeof data.endTime === 'number') {
-      allTimes.add(data.endTime);
+    if (data) {
+      if (typeof data.startTime === 'number') {
+        allTimes.add(data.startTime);
+      }
+      if (typeof data.endTime === 'number') {
+        allTimes.add(data.endTime);
+      }
     }
   });
 

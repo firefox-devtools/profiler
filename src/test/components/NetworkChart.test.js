@@ -11,6 +11,11 @@ import { changeNetworkSearchString } from '../../actions/profile-view';
 import NetworkChart from '../../components/network-chart';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
+
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -19,6 +24,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
+
 import { type NetworkPayload } from '../../types/markers';
 
 const NETWORK_MARKERS = (function() {
@@ -39,7 +45,11 @@ function setupWithProfile(profile) {
   // a lot easier to mock this everywhere.
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-    .mockImplementation(() => getBoundingBox(200, 300));
+    .mockImplementation(() =>
+      // We're adding the timeline margin to try to get some round numbers in
+      // the tests.
+      getBoundingBox(200 + TIMELINE_MARGIN_RIGHT + TIMELINE_MARGIN_LEFT, 300)
+    );
 
   const store = storeWithProfile(profile);
   store.dispatch(changeSelectedTab('network-chart'));
@@ -53,16 +63,15 @@ function setupWithProfile(profile) {
 
   function getUrlShorteningParts(): Array<[string, string]> {
     return Array.from(
-      container.querySelectorAll('.networkChartRowItemLabel span span')
+      container.querySelectorAll('.networkChartRowItemLabel span')
     ).map(node => [node.className, node.textContent]);
   }
 
-  function styleForClass(className: string): ?string {
-    return ensureExists(
-      container.querySelector(className),
-      `Couldn't find the element with selector ${className}`
-    ).getAttribute('style');
-  }
+  const getPhaseElements = () =>
+    Array.from(container.querySelectorAll('.networkChartRowItemBarPhase'));
+
+  const getPhaseElementStyles = () =>
+    getPhaseElements().map(element => element.getAttribute('style'));
 
   function rowItem() {
     return ensureExists(
@@ -77,7 +86,8 @@ function setupWithProfile(profile) {
     dispatch: store.dispatch,
     flushDrawLog: () => ctx.__flushDrawLog(),
     getUrlShorteningParts,
-    styleForClass,
+    getPhaseElements,
+    getPhaseElementStyles,
     rowItem,
   };
 }
@@ -115,7 +125,7 @@ describe('NetworkChart', function() {
 
 describe('NetworkChartRowBar phase calculations', function() {
   it('divides up the different phases of the request with full set of required information', () => {
-    const { styleForClass } = setupWithPayload(
+    const { getPhaseElementStyles } = setupWithPayload(
       'Load 100: https://test.mozilla.org',
       {
         type: 'Network',
@@ -124,27 +134,60 @@ describe('NetworkChartRowBar phase calculations', function() {
         pri: 20,
         count: 10,
         status: 'STATUS_REDIRECT',
-        connectStart: 20,
         startTime: 10,
-        endTime: 90,
+        // With an endTime at 99, the profile range goes until 100, which
+        // gives integer values for test results.
+        endTime: 99,
+        domainLookupStart: 20,
+        domainLookupEnd: 24,
+        connectStart: 25,
+        tcpConnectEnd: 26,
+        secureConnectionStart: 26,
+        connectEnd: 28,
+        requestStart: 30,
+        responseStart: 60,
+        responseEnd: 80,
+      }
+    );
+
+    expect(getPhaseElementStyles()).toEqual([
+      'left: 0px; width: 20px; opacity: 0;',
+      'left: 20px; width: 20px; opacity: 0.3333333333333333;',
+      'left: 40px; width: 60px; opacity: 0.6666666666666666;',
+      'left: 100px; width: 40px; opacity: 1;',
+      'left: 140px; width: 38px; opacity: 0;',
+    ]);
+  });
+
+  it('divides up the different phases of the request with subset of required information', () => {
+    const { getPhaseElementStyles } = setupWithPayload(
+      'Load 101: https://test.mozilla.org',
+      {
+        type: 'Network',
+        URI: 'https://mozilla.org/img/',
+        RedirectURI: 'https://mozilla.org/img/optimized',
+        id: 90001,
+        pri: 20,
+        count: 10,
+        status: 'STATUS_REDIRECT',
+        startTime: 10,
+        endTime: 99,
         requestStart: 20,
         responseStart: 60,
         responseEnd: 80,
       }
     );
-    expect(styleForClass('.networkChartRowItemBarRequestQueue')).toMatch(
-      'width: 12.5%'
-    );
-    expect(styleForClass('.networkChartRowItemBarRequest')).toMatch(
-      'width: 50%'
-    );
-    expect(styleForClass('.networkChartRowItemBarResponse')).toMatch(
-      'width: 25%'
-    );
+
+    expect(getPhaseElementStyles()).toEqual([
+      'left: 0px; width: 20px; opacity: 0;',
+      'left: 20px; width: 80px; opacity: 0.6666666666666666;',
+      'left: 100px; width: 40px; opacity: 1;',
+      'left: 140px; width: 38px; opacity: 0;',
+    ]);
   });
 
-  it('divides up the different phases of the request with subset of required information', () => {
-    const { styleForClass } = setupWithPayload(
+  it('takes the full width when there is no details in the payload', () => {
+    const { getPhaseElementStyles } = setupWithPayload(
       'Load 101: https://test.mozilla.org',
       {
         type: 'Network',
@@ -153,50 +196,14 @@ describe('NetworkChartRowBar phase calculations', function() {
         id: 90001,
         pri: 20,
         count: 10,
-        status: 'STATUS_REDIRECT',
-        connectStart: 20,
+        status: 'STATUS_STOP',
         startTime: 10,
-        endTime: 90,
-        responseStart: 60,
-        responseEnd: 80,
+        endTime: 99,
       }
     );
-
-    expect(styleForClass('.networkChartRowItemBarRequestQueue')).toMatch(
-      'width: 12.5%'
-    );
-    expect(styleForClass('.networkChartRowItemBarRequest')).toMatch(
-      'width: 0%'
-    );
-    expect(styleForClass('.networkChartRowItemBarResponse')).toMatch(
-      'width: 25%'
-    );
-  });
-
-  it('divides up the different phases of the request with no set of required information', () => {
-    const { styleForClass } = setupWithPayload(
-      'Load 101: https://test.mozilla.org',
-      {
-        type: 'Network',
-        URI: 'https://mozilla.org/img/',
-        RedirectURI: 'https://mozilla.org/img/optimized',
-        id: 90001,
-        pri: 20,
-        count: 10,
-        status: 'STATUS_REDIRECT',
-        startTime: 10,
-        endTime: 90,
-      }
-    );
-    expect(styleForClass('.networkChartRowItemBarRequestQueue')).toMatch(
-      'width: 0%'
-    );
-    expect(styleForClass('.networkChartRowItemBarRequest')).toMatch(
-      'width: 0%'
-    );
-    expect(styleForClass('.networkChartRowItemBarResponse')).toMatch(
-      'width: 100%'
-    );
+    expect(getPhaseElementStyles()).toEqual([
+      'left: 0px; width: 178px; opacity: 1;',
+    ]);
   });
 });
 
