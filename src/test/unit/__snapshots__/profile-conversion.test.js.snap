@@ -3828,7 +3828,6 @@ Object {
     "interval": 1,
     "logicalCPUs": undefined,
     "misc": undefined,
-    "networkURLsRemoved": false,
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
