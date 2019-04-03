@@ -31,7 +31,7 @@ import {
   convertStackToCallNodePath,
   getFuncNamesAndOriginsForPath,
 } from '../../profile-logic/profile-data';
-import { getMarkerName } from './index';
+import { getMarkerFullDescription } from '../../profile-logic/marker-data';
 
 type StateProps = {|
   +markers: Marker[],
@@ -161,7 +161,7 @@ class MarkersContextMenu extends PureComponent<Props> {
       return;
     }
     const marker = markers[selectedMarker];
-    copy(getMarkerName(marker));
+    copy(getMarkerFullDescription(marker));
   };
 
   copyMarkerCause = () => {
