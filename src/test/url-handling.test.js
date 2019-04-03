@@ -357,11 +357,13 @@ describe('profileName', function() {
       search: '?profileName=XXX',
     });
     expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('XXX');
+    expect(urlStateReducers.getProfileName(getState())).toBe('XXX');
   });
 
   it('returns empty string when profileName is not specified', function() {
     const { getState } = _getStoreWithURL();
     expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('');
+    expect(urlStateReducers.getProfileName(getState())).toBe('');
   });
 });
 
