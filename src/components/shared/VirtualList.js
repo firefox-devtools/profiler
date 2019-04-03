@@ -203,26 +203,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
   };
 
   componentDidMount() {
-    document.addEventListener('copy', this._onCopy, false);
-    const container = this._container;
-    if (!container) {
-      throw new Error(
-        'The container was assumed to exist while mounting The VirtualList.'
-      );
-    }
-    container.addEventListener('scroll', this._onScroll);
     this._onScroll(); // for initial size
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('copy', this._onCopy, false);
-    const container = this._container;
-    if (!container) {
-      throw new Error(
-        'The container was assumed to exist while unmounting The VirtualList.'
-      );
-    }
-    container.removeEventListener('scroll', this._onScroll);
   }
 
   _onScroll = () => {
@@ -326,6 +307,8 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
         ref={this._takeContainerRef}
         tabIndex={focusable ? 0 : -1}
         onKeyDown={onKeyDown}
+        onScroll={this._onScroll}
+        onCopy={this._onCopy}
         role={ariaRole}
         aria-label={ariaLabel}
         aria-activedescendant={ariaActiveDescendant}
