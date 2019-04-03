@@ -88,7 +88,7 @@ function checkYarn(agents /*: AgentsVersion */) {
 
   if (agents.yarn) {
     const version = agents.yarn;
-    if (versionCompare(version, '1.1') < 0) {
+    if (versionCompare(version, '1.10') < 0) {
       displayYarnVersionExplanation();
       displayInstallationInformation();
       return false;
