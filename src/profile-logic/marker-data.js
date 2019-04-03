@@ -854,3 +854,70 @@ export function removeNetworkMarkerURLs(payload: NetworkPayload) {
   payload.URI = '';
   payload.RedirectURI = '';
 }
+
+export function getMarkerFullDescription(marker: Marker) {
+  let name = marker.name;
+
+  if (marker.data) {
+    const data = marker.data;
+    switch (data.type) {
+      case 'tracing':
+        if (typeof data.category === 'string') {
+          if (data.category === 'log' && name.length > 100) {
+            name = name.substring(0, 100) + '...';
+          } else if (data.category === 'DOMEvent') {
+            name = data.eventType;
+          }
+        }
+        break;
+      case 'UserTiming':
+        name = data.name;
+        break;
+      case 'FileIO':
+        if (data.source) {
+          name = `(${data.source}) `;
+        }
+        name += data.operation;
+        if (data.filename) {
+          name = data.operation ? `${name} — ${data.filename}` : data.filename;
+        }
+        break;
+      case 'Text':
+        name += ` — ${data.name}`;
+        break;
+      default:
+    }
+  }
+  return name;
+}
+
+export function getMarkerCategory(marker: Marker) {
+  let category = 'unknown';
+  if (marker.data) {
+    const data = marker.data;
+
+    if (typeof data.category === 'string') {
+      category = data.category;
+    }
+
+    switch (data.type) {
+      case 'UserTiming':
+        category = marker.name;
+        break;
+      case 'FileIO':
+        category = data.type;
+        break;
+      case 'Bailout':
+        category = 'Bailout';
+        break;
+      case 'Network':
+        category = 'Network';
+        break;
+      case 'Text':
+        category = 'Text';
+        break;
+      default:
+    }
+  }
+  return category;
+}
