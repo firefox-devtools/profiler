@@ -12,8 +12,7 @@
 .menuButtonsShareButton,
 .menuButtonsUploadingButton,
 .menuButtonsPermalinkButton,
-.menuButtonsUploadErrorButton,
-.menuButtonsSecondaryShareButton {
+.menuButtonsUploadErrorButton {
   height: 24px;
   margin-bottom: -24px;
 }
@@ -45,12 +44,9 @@
 }
 
 /* The button width needs to be large enough so that the text "Share Without URLs" fits */
-.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton
-  .menuButtonsPermalinkButton,
 .menuButtonsUploadingButtonInner,
 .menuButtonsPermalinkButtonButton,
-.menuButtonsUploadErrorButtonButton,
-.menuButtonsSecondaryShareButtonButton {
+.menuButtonsUploadErrorButtonButton {
   width: 115px;
 }
 
@@ -58,6 +54,8 @@
 "Sharing will be enabled once symbolication is complete" */
 .menuButtonsShareButtonButton {
   min-width: 115px;
+  background-color: #0d8730;
+  color: white;
 }
 
 .menuButtonsUploadingButtonProgress {
@@ -71,12 +69,6 @@
 
 .menuButtonsUploadingButtonProgress::-moz-progress-bar {
   background: var(--internal-uploading-progress-fill-color);
-}
-
-.menuButtonsShareButtonButton,
-.menuButtonsSecondaryShareButtonButton {
-  background-color: #0d8730;
-  color: white;
 }
 
 /* CSSTransition */
@@ -116,11 +108,6 @@
 .currentButtonIsUploadingButton .menuButtonsPermalinkButtonButton {
   opacity: 0;
   transform: translateY(100%);
-}
-
-.currentButtonIsPermalinkButton.currentButtonIsSecondaryShareButton
-  .menuButtonsSecondaryShareButton {
-  margin-left: 115px;
 }
 
 .menuButtonsPublishPanel,
