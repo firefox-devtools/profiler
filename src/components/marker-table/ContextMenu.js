@@ -150,7 +150,7 @@ class MarkersContextMenu extends PureComponent<Props> {
       return;
     }
 
-    copy(JSON.stringify(markers[selectedMarker]));
+    copy(JSON.stringify(markers[selectedMarker], null, 2));
   };
 
   copyMarkerName = () => {
