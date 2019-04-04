@@ -157,7 +157,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the completed upload
 </div>
 `;
 
-exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel 1`] = `
+exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for a nightly profile 1`] = `
 <div
   data-testid="MenuButtonsPublish-container"
 >
@@ -170,10 +170,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel 1`]
     <p
       class="menuButtonsPublishInfoDescription"
     >
-      You’re about to share your profile potentially where others have public access to it. By default, the profile is stripped of much of the personally identifiable information.
+      You’re about to share your profile potentially where others have public access to it. 
+      In Nightly and custom builds, no information is stripped by default.
     </p>
     <details
       class="menuButtonsPublishData"
+      open=""
     >
       <summary
         class="menuButtonsPublishDataSummary"
@@ -185,7 +187,6 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel 1`]
         class="photon-label"
       >
         <input
-          checked=""
           class="photon-checkbox photon-checkbox-default"
           name="isFiltering"
           type="checkbox"
@@ -196,55 +197,184 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel 1`]
         class="menuButtonsPublishDataChoices"
       >
         <label
-          class="photon-label menuButtonsPublishDataChoicesLabel"
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
         >
           <input
             checked=""
             class="photon-checkbox photon-checkbox-default"
+            disabled=""
             name="hiddenThreads"
             type="checkbox"
           />
           Remove hidden threads
         </label>
         <label
-          class="photon-label menuButtonsPublishDataChoicesLabel"
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
         >
           <input
             checked=""
             class="photon-checkbox photon-checkbox-default"
+            disabled=""
             name="timeRange"
             type="checkbox"
           />
           Remove information out of the time range
         </label>
         <label
-          class="photon-label menuButtonsPublishDataChoicesLabel"
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
         >
           <input
             checked=""
             class="photon-checkbox photon-checkbox-default"
+            disabled=""
             name="screenshots"
             type="checkbox"
           />
           Remove screenshots
         </label>
         <label
-          class="photon-label menuButtonsPublishDataChoicesLabel"
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
         >
           <input
             checked=""
             class="photon-checkbox photon-checkbox-default"
+            disabled=""
             name="urls"
             type="checkbox"
           />
           Remove all URLs
         </label>
         <label
-          class="photon-label menuButtonsPublishDataChoicesLabel"
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
         >
           <input
             checked=""
             class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="extension"
+            type="checkbox"
+          />
+          Remove extensions
+        </label>
+      </div>
+    </details>
+    <div
+      class="menuButtonsPublishButtons"
+    >
+      <button
+        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
+        type="button"
+      >
+        Compressing…
+      </button>
+      <button
+        class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
+        type="submit"
+      >
+        <span
+          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
+        />
+        Publish
+      </button>
+    </div>
+  </form>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for a release profile 1`] = `
+<div
+  data-testid="MenuButtonsPublish-container"
+>
+  <form
+    class="menuButtonsPublishContent"
+  >
+    <div
+      class="menuButtonsPublishIcon"
+    />
+    <p
+      class="menuButtonsPublishInfoDescription"
+    >
+      You’re about to share your profile potentially where others have public access to it. 
+      By default, the profile is stripped of much of the personally identifiable information.
+    </p>
+    <details
+      class="menuButtonsPublishData"
+      open=""
+    >
+      <summary
+        class="menuButtonsPublishDataSummary"
+      >
+        Adjust how much is shared
+         
+      </summary>
+      <label
+        class="photon-label"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="isFiltering"
+          type="checkbox"
+        />
+        Filter out potentially identifying information
+      </label>
+      <div
+        class="menuButtonsPublishDataChoices"
+      >
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="hiddenThreads"
+            type="checkbox"
+          />
+          Remove hidden threads
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="timeRange"
+            type="checkbox"
+          />
+          Remove information out of the time range
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="screenshots"
+            type="checkbox"
+          />
+          Remove screenshots
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="urls"
+            type="checkbox"
+          />
+          Remove all URLs
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
             name="extension"
             type="checkbox"
           />

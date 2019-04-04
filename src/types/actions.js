@@ -25,6 +25,7 @@ import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { UrlState, UploadState } from '../types/state';
+import type { CssPixels } from '../types/units';
 
 export type DataSource =
   | 'none'
@@ -109,6 +110,11 @@ type ProfileAction =
       +threadIndex: ThreadIndex,
       +selectedCallNodePath: CallNodePath,
       +optionalExpandedToCallNodePath: ?CallNodePath,
+    |}
+  | {|
+      +type: 'UPDATE_TRACK_THREAD_HEIGHT',
+      +height: CssPixels,
+      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'FOCUS_CALL_TREE',

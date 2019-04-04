@@ -117,6 +117,7 @@ export type AppState = {|
   +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
   +panelLayoutGeneration: number,
   +lastVisibleThreadTabSlug: TabSlug,
+  +trackThreadHeights: Array<ThreadIndex | void>,
 |};
 
 export type UploadPhase = 'local' | 'uploading' | 'uploaded' | 'error';
