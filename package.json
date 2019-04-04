@@ -59,7 +59,7 @@
     "clamp": "^1.0.1",
     "classnames": "^2.2.6",
     "common-tags": "^1.8.0",
-    "copy-to-clipboard": "^3.0.8",
+    "copy-to-clipboard": "^3.1.0",
     "escape-string-regexp": "^1.0.5",
     "gecko-profiler-demangle": "^0.2.0",
     "jszip": "^3.1.5",
