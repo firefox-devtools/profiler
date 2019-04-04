@@ -304,7 +304,8 @@ type UrlStateAction =
     |}
   | {| +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string |}
   | {| +type: 'CHANGE_NETWORK_SEARCH_STRING', +searchString: string |}
-  | {| +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] |};
+  | {| +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] |}
+  | {| +type: 'CHANGE_PROFILE_NAME', +profileName: string |};
 
 type IconsAction =
   | {| +type: 'ICON_HAS_LOADED', +icon: string |}

@@ -155,6 +155,7 @@ export type UrlState = {|
   +profilesToCompare: string[] | null,
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
+  +profileName: string,
   +profileSpecific: {|
     selectedThread: ThreadIndex | null,
     globalTrackOrder: TrackIndex[],
