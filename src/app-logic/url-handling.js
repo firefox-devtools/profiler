@@ -63,6 +63,7 @@ type BaseQuery = {|
   threadOrder: string, // "3-2-0-1"
   hiddenThreads: string, // "0-1"
   profiles: string[],
+  profileName: string,
 |};
 
 type CallTreeQuery = {|
@@ -147,6 +148,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
     v: CURRENT_URL_VERSION,
+    profileName: urlState.profileName,
   };
 
   // Add the parameter hiddenGlobalTracks only when needed.
@@ -312,6 +314,7 @@ export function stateFromLocation(location: Location): UrlState {
     profilesToCompare: query.profiles || null,
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
+    profileName: query.profileName,
     profileSpecific: {
       implementation,
       invertCallstack: query.invertCallstack !== undefined,

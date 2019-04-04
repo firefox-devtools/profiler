@@ -47,6 +47,41 @@ describe('reducer zipFileState', function() {
     expect(profile1).toBeTruthy();
   });
 
+  describe('profileName handling', function() {
+    async function setup() {
+      const { dispatch, getState } = await storeWithZipFile([
+        'foo/bar/profile1.json',
+        'foo/profile2.json',
+        'baz/profile3.json',
+      ]);
+
+      await dispatch(
+        ZippedProfilesActions.viewProfileFromPathInZipFile(
+          'foo/bar/profile1.json'
+        )
+      );
+
+      return { getState, dispatch };
+    }
+
+    it('computes a profile name from the loaded file', async function() {
+      const { getState } = await setup();
+
+      const expectedName = 'profile1.json';
+      expect(UrlStateSelectors.getProfileName(getState())).toBe(expectedName);
+    });
+
+    it('prefers ProfileName if it is given in the URL', async function() {
+      const { getState, dispatch } = await setup();
+      const profileNameFromURL = 'good profile';
+
+      dispatch(ProfileViewActions.changeProfileName(profileNameFromURL));
+      expect(UrlStateSelectors.getProfileName(getState())).toBe(
+        profileNameFromURL
+      );
+    });
+  });
+
   it('will fail when trying to load an invalid profile', async function() {
     const store = createStore();
     const { getState, dispatch } = store;

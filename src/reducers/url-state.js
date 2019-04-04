@@ -327,6 +327,15 @@ const pathInZipFile: Reducer<string | null> = (state = null, action) => {
   }
 };
 
+const profileName: Reducer<string> = (state = '', action) => {
+  switch (action.type) {
+    case 'CHANGE_PROFILE_NAME':
+      return action.profileName;
+    default:
+      return state;
+  }
+};
+
 /**
  * These values are specific to an individual profile.
  */
@@ -391,6 +400,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     selectedTab,
     pathInZipFile,
     profileSpecific,
+    profileName,
   })
 );
 
