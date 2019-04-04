@@ -154,7 +154,7 @@ class MarkersContextMenu extends PureComponent<Props> {
     copy(JSON.stringify(markers[selectedMarker], null, 2));
   };
 
-  copyMarkerName = () => {
+  copyMarkerDescription = () => {
     const { selectedMarker, markers } = this.props;
 
     if (selectedMarker === null) {
@@ -202,7 +202,9 @@ class MarkersContextMenu extends PureComponent<Props> {
           Set selection from duration
         </MenuItem>
         <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
-        <MenuItem onClick={this.copyMarkerName}>Copy marker name</MenuItem>
+        <MenuItem onClick={this.copyMarkerDescription}>
+          Copy marker description
+        </MenuItem>
         {marker && marker.data && marker.data.cause ? (
           <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
         ) : null}
