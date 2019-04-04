@@ -63,7 +63,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
         Category
       </span>
       <span
-        class="treeViewHeaderColumn treeViewMainColumn name"
+        class="treeViewHeaderColumn treeViewMainColumn description"
       />
     </div>
     <div
@@ -188,10 +188,8 @@ exports[`MarkerTable renders some basic markers 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  foobar
-                </span>
+                  class="treeViewRowColumn treeViewMainColumn description"
+                />
               </div>
               <div
                 aria-label="NotifyDidPaint, running time is undefined (undefined), self time is undefined"
@@ -210,10 +208,8 @@ exports[`MarkerTable renders some basic markers 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  NotifyDidPaint
-                </span>
+                  class="treeViewRowColumn treeViewMainColumn description"
+                />
               </div>
               <div
                 aria-label="setTimeout — 5.5, running time is undefined (undefined), self time is undefined"
@@ -232,10 +228,8 @@ exports[`MarkerTable renders some basic markers 1`] = `
                   class="treeRowToggleButton collapsed leaf"
                 />
                 <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  setTimeout — 5.5
-                </span>
+                  class="treeViewRowColumn treeViewMainColumn description"
+                />
               </div>
             </div>
           </div>
