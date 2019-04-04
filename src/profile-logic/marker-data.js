@@ -856,39 +856,41 @@ export function removeNetworkMarkerURLs(payload: NetworkPayload) {
 }
 
 export function getMarkerFullDescription(marker: Marker) {
-  let name = marker.name;
+  let description = marker.name;
 
   if (marker.data) {
     const data = marker.data;
     switch (data.type) {
       case 'tracing':
         if (typeof data.category === 'string') {
-          if (data.category === 'log' && name.length > 100) {
-            name = name.substring(0, 100) + '...';
+          if (data.category === 'log' && description.length > 100) {
+            description = description.substring(0, 100) + '...';
           } else if (data.category === 'DOMEvent') {
-            name = data.eventType;
+            description = data.eventType;
           }
         }
         break;
       case 'UserTiming':
-        name = data.name;
+        description = data.name;
         break;
       case 'FileIO':
         if (data.source) {
-          name = `(${data.source}) `;
+          description = `(${data.source}) `;
         }
-        name += data.operation;
+        description += data.operation;
         if (data.filename) {
-          name = data.operation ? `${name} — ${data.filename}` : data.filename;
+          description = data.operation
+            ? `${description} — ${data.filename}`
+            : data.filename;
         }
         break;
       case 'Text':
-        name += ` — ${data.name}`;
+        description += ` — ${data.name}`;
         break;
       default:
     }
   }
-  return name;
+  return description;
 }
 
 export function getMarkerCategory(marker: Marker) {
