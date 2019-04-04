@@ -143,7 +143,7 @@ class MarkerTable extends PureComponent<Props> {
     { propName: 'duration', title: 'Duration' },
     { propName: 'category', title: 'Category' },
   ];
-  _mainColumn = { propName: 'description', title: '' };
+  _mainColumn = { propName: 'name', title: '' };
   _expandedNodeIds: Array<IndexIntoMarkers | null> = [];
   _onExpandedNodeIdsChange = () => {};
   _treeView: ?TreeView<MarkerDisplayData>;
