@@ -71,7 +71,7 @@ const MenuButtons = ({
         className="menuButtonsLink"
         title="Open the documentation in a new window"
       >
-        Docs<i className="open-in-new"></i>
+        Docs<i className="open-in-new" />
       </a>
     </div>
   </>
