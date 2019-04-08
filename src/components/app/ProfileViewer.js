@@ -9,6 +9,7 @@ import explicitConnect from '../../utils/connect';
 import DetailsContainer from './DetailsContainer';
 import ProfileFilterNavigator from './ProfileFilterNavigator';
 import MenuButtons from './MenuButtons';
+import WindowTitle from '../shared/WindowTitle';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import { returnToZipFileList } from '../../actions/zipped-profiles';
 import { getProfileName } from '../../selectors/url-state';
@@ -94,6 +95,7 @@ class ProfileViewer extends PureComponent<Props> {
           <Timeline />
           <DetailsContainer />
         </SplitterLayout>
+        <WindowTitle />
         <SymbolicationStatusOverlay />
       </div>
     );
