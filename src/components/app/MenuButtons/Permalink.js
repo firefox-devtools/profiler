@@ -7,14 +7,19 @@
 import * as React from 'react';
 import ArrowPanel from '../../shared/ArrowPanel';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
-import { shortenUrl } from '../../../utils/shorten-url';
+import * as UrlUtils from '../../../utils/shorten-url';
+
+type Props = {|
+  +isNewlyPublished: boolean,
+  +injectedUrlShortener?: typeof UrlUtils.shortenUrl | void,
+|};
 
 type State = {|
   fullUrl: string,
   shortUrl: string,
 |};
 
-export class MenuButtonsPermalink extends React.PureComponent<*, State> {
+export class MenuButtonsPermalink extends React.PureComponent<Props, State> {
   _permalinkButton: ButtonWithPanel | null;
   _permalinkTextField: HTMLInputElement | null;
   _takePermalinkButtonRef = (elem: any) => {
@@ -33,6 +38,7 @@ export class MenuButtonsPermalink extends React.PureComponent<*, State> {
     const { fullUrl } = this.state;
     const currentFullUrl = window.location.href;
     if (fullUrl !== currentFullUrl) {
+      const shortenUrl = this.props.injectedUrlShortener || UrlUtils.shortenUrl;
       try {
         const shortUrl = await shortenUrl(currentFullUrl);
         this.setState({ shortUrl, fullUrl: currentFullUrl });
@@ -63,6 +69,7 @@ export class MenuButtonsPermalink extends React.PureComponent<*, State> {
         className="menuButtonsPermalinkButton"
         ref={this._takePermalinkButtonRef}
         label="Permalink"
+        defaultOpen={this.props.isNewlyPublished}
         panel={
           <ArrowPanel
             className="menuButtonsPermalinkPanel"
@@ -70,6 +77,7 @@ export class MenuButtonsPermalink extends React.PureComponent<*, State> {
             onClose={this._onPermalinkPanelClose}
           >
             <input
+              data-testid="MenuButtonsPermalink-input"
               type="text"
               className="menuButtonsPermalinkTextField photon-input"
               value={this.state.shortUrl}

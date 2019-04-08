@@ -78,7 +78,7 @@ describe('shortenUrl', () => {
   });
 });
 
-describe('shortenUrl', () => {
+describe('expandUrl', () => {
   function mockFetchWith(returnedLongUrl) {
     window.fetch.mockImplementation(async urlString => {
       const url = new URL(urlString);
