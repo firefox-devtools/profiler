@@ -10,12 +10,14 @@ import {
   getCommittedRange,
   getGlobalTracks,
   getLocalTracksByPid,
+  getThreads,
 } from './profile';
 import { compress } from '../utils/gz';
+import { serializeProfile } from '../profile-logic/process-profile';
 import {
-  serializeProfile,
   sanitizePII,
-} from '../profile-logic/process-profile';
+  getNamesOfRemovedThreads as getNamesOfRemovedThreadsImpl,
+} from '../profile-logic/sanitization';
 import prettyBytes from '../utils/pretty-bytes';
 import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 import { ensureExists } from '../utils/flow';
@@ -24,6 +26,7 @@ import { formatNumber } from '../utils/format-numbers';
 import type { PublishState, UploadState, UploadPhase } from '../types/state';
 import type { Selector } from '../types/store';
 import type { CheckedSharingOptions } from '../types/actions';
+import type { ThreadIndex } from '../types/profile';
 import type { RemoveProfileInformation } from '../types/profile-derived';
 
 export const getPublishState: Selector<PublishState> = state => state.publish;
@@ -55,65 +58,66 @@ export const getFilenameString: Selector<string> = createSelector(
   }
 );
 
-export const getRemoveProfileInformation: Selector<RemoveProfileInformation | null> = createSelector(
-  getCheckedSharingOptions,
-  getProfile,
-  getCommittedRange,
+export const getHiddenThreadIndexes: Selector<
+  Set<ThreadIndex>
+> = createSelector(
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getGlobalTracks,
   getLocalTracksByPid,
   (
-    checkedSharingOptions,
-    profile,
-    committedRange,
     hiddenGlobalTracks,
     hiddenLocalTracksByPid,
     globalTracks,
     localTracksByPid
   ) => {
+    // Find all of the thread indexes that are hidden.
+    const hiddenThreadIndexes = new Set();
+    for (const globalTrackIndex of hiddenGlobalTracks) {
+      const globalTrack = globalTracks[globalTrackIndex];
+      if (
+        globalTrack.type === 'process' &&
+        globalTrack.mainThreadIndex !== null
+      ) {
+        // This is a process thread that has been hidden.
+        hiddenThreadIndexes.add(globalTrack.mainThreadIndex);
+        const localTracks = ensureExists(
+          localTracksByPid.get(globalTrack.pid),
+          'Expected to be able to get a local track by PID.'
+        );
+        // Also add all of the children threads, as they are hidden as well.
+        for (const localTrack of localTracks) {
+          if (localTrack.type === 'thread') {
+            hiddenThreadIndexes.add(localTrack.threadIndex);
+          }
+        }
+      }
+    }
+    // Add all of the local tracks that have been hidden.
+    for (const [pid, hiddenLocalTrackIndexes] of hiddenLocalTracksByPid) {
+      const localTracks = ensureExists(
+        localTracksByPid.get(pid),
+        'Expected to be able to get a local track by PID'
+      );
+      for (const hiddenLocalTrackIndex of hiddenLocalTrackIndexes) {
+        const localTrack = localTracks[hiddenLocalTrackIndex];
+        if (localTrack.type === 'thread') {
+          hiddenThreadIndexes.add(localTrack.threadIndex);
+        }
+      }
+    }
+    return hiddenThreadIndexes;
+  }
+);
+
+export const getRemoveProfileInformation: Selector<RemoveProfileInformation | null> = createSelector(
+  getCheckedSharingOptions,
+  getProfile,
+  getCommittedRange,
+  getHiddenThreadIndexes,
+  (checkedSharingOptions, profile, committedRange, hiddenThreadIndexes) => {
     if (!checkedSharingOptions.isFiltering) {
       return null;
-    }
-
-    // Find all of the thread indexes that are hidden.
-    const shouldRemoveThreads = new Set();
-    if (checkedSharingOptions.hiddenThreads) {
-      for (const globalTrackIndex of hiddenGlobalTracks) {
-        const globalTrack = globalTracks[globalTrackIndex];
-        if (
-          globalTrack.type === 'process' &&
-          globalTrack.mainThreadIndex !== null
-        ) {
-          // This is a process thread that has been hidden.
-          shouldRemoveThreads.add(globalTrack.mainThreadIndex);
-          const localTracks = ensureExists(
-            localTracksByPid.get(globalTrack.pid),
-            'Expected to be able to get a local track by PID.'
-          );
-
-          // Also add all of the children threads, as they are hidden as well.
-          for (const localTrack of localTracks) {
-            if (localTrack.type === 'thread') {
-              shouldRemoveThreads.add(localTrack.threadIndex);
-            }
-          }
-        }
-      }
-
-      // Add all of the local tracks that have been hidden.
-      for (const [pid, hiddenLocalTrackIndexes] of hiddenLocalTracksByPid) {
-        const localTracks = ensureExists(
-          localTracksByPid.get(pid),
-          'Expected to be able to get a local track by PID'
-        );
-        for (const hiddenLocalTrackIndex of hiddenLocalTrackIndexes) {
-          const localTrack = localTracks[hiddenLocalTrackIndex];
-          if (localTrack.type === 'thread') {
-            shouldRemoveThreads.add(localTrack.threadIndex);
-          }
-        }
-      }
     }
 
     return {
@@ -127,7 +131,9 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
           ? profile.threads.map((_, threadIndex) => threadIndex)
           : []
       ),
-      shouldRemoveThreads,
+      shouldRemoveThreads: checkedSharingOptions.hiddenThreads
+        ? hiddenThreadIndexes
+        : new Set(),
       shouldRemoveExtensions: checkedSharingOptions.extension,
     };
   }
@@ -216,3 +222,9 @@ export const getUploadProgressString: Selector<string> = createSelector(
 
 export const getAbortFunction: Selector<() => void> = state =>
   getUploadState(state).abortFunction;
+
+export const getNamesOfRemovedThreads: Selector<string[]> = createSelector(
+  getThreads,
+  getHiddenThreadIndexes,
+  getNamesOfRemovedThreadsImpl
+);

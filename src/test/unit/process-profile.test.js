@@ -8,8 +8,8 @@ import {
   processProfile,
   serializeProfile,
   unserializeProfileOfArbitraryFormat,
-  sanitizePII,
 } from '../../profile-logic/process-profile';
+import { sanitizePII } from '../../profile-logic/sanitization';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import {
   createGeckoProfile,

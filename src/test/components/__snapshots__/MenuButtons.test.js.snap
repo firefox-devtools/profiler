@@ -206,7 +206,18 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             name="hiddenThreads"
             type="checkbox"
           />
-          Remove hidden threads
+          <div
+            class="menuButtonsPublishLabelContent"
+          >
+            Remove hidden threads
+            <div
+              class="menuButtonsPublishLabelSubtext"
+              title="No threads are removed."
+            >
+              No threads are removed.
+            </div>
+          </div>
+           
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel disabled"
@@ -218,7 +229,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             name="timeRange"
             type="checkbox"
           />
-          Remove information out of the time range
+          <div
+            class="menuButtonsPublishLabelContent"
+          >
+            Remove information out of the time range
+          </div>
+           
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel disabled"
@@ -230,7 +246,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             name="screenshots"
             type="checkbox"
           />
-          Remove screenshots
+          <div
+            class="menuButtonsPublishLabelContent"
+          >
+            Remove screenshots
+          </div>
+           
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel disabled"
@@ -242,7 +263,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             name="urls"
             type="checkbox"
           />
-          Remove all URLs
+          <div
+            class="menuButtonsPublishLabelContent"
+          >
+            Remove all URLs
+          </div>
+           
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel disabled"
@@ -254,7 +280,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             name="extension"
             type="checkbox"
           />
-          Remove extensions
+          <div
+            class="menuButtonsPublishLabelContent"
+          >
+            Remove extensions
+          </div>
+           
         </label>
       </div>
     </details>
@@ -330,7 +361,18 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             name="hiddenThreads"
             type="checkbox"
           />
-          Remove hidden threads
+          <div
+            class="menuButtonsPublishLabelContent"
+          >
+            Remove hidden threads
+            <div
+              class="menuButtonsPublishLabelSubtext"
+              title="No threads are removed."
+            >
+              No threads are removed.
+            </div>
+          </div>
+           
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel disabled"
@@ -342,7 +384,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             name="timeRange"
             type="checkbox"
           />
-          Remove information out of the time range
+          <div
+            class="menuButtonsPublishLabelContent"
+          >
+            Remove information out of the time range
+          </div>
+           
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel disabled"
@@ -354,7 +401,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             name="screenshots"
             type="checkbox"
           />
-          Remove screenshots
+          <div
+            class="menuButtonsPublishLabelContent"
+          >
+            Remove screenshots
+          </div>
+           
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel disabled"
@@ -366,7 +418,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             name="urls"
             type="checkbox"
           />
-          Remove all URLs
+          <div
+            class="menuButtonsPublishLabelContent"
+          >
+            Remove all URLs
+          </div>
+           
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel disabled"
@@ -378,7 +435,12 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
             name="extension"
             type="checkbox"
           />
-          Remove extensions
+          <div
+            class="menuButtonsPublishLabelContent"
+          >
+            Remove extensions
+          </div>
+           
         </label>
       </div>
     </details>

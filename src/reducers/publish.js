@@ -4,7 +4,7 @@
 
 // @flow
 import { combineReducers } from 'redux';
-import { getShouldSanitizeByDefault } from '../profile-logic/process-profile';
+import { getShouldSanitizeByDefault } from '../profile-logic/sanitization';
 
 import type { CheckedSharingOptions } from '../types/actions';
 import type {
