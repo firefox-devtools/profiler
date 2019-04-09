@@ -5,10 +5,10 @@
 // @flow
 import * as React from 'react';
 import { render } from 'react-testing-library';
-import { BlobUrl } from '../../components/shared/BlobUrl';
+import { BlobUrlLink } from '../../components/shared/BlobUrlLink';
 import { ensureExists } from '../../utils/flow';
 
-describe('shared/BlobUrl', () => {
+describe('shared/BlobUrlLink', () => {
   beforeEach(async () => {
     // jsdom does not have URL.createObjectURL.
     // See https://github.com/jsdom/jsdom/issues/1721
@@ -25,9 +25,9 @@ describe('shared/BlobUrl', () => {
   it('injects a blob url into a link', () => {
     const blob = new Blob(['content']);
     const result = render(
-      <BlobUrl className="myClassName" blob={blob}>
+      <BlobUrlLink className="myClassName" blob={blob}>
         This is the text
-      </BlobUrl>
+      </BlobUrlLink>
     );
     const a = ensureExists(
       result.container.querySelector('a'),
@@ -42,9 +42,9 @@ describe('shared/BlobUrl', () => {
   it('revokes the object url', () => {
     const blob = new Blob(['content']);
     const result = render(
-      <BlobUrl className="myClassName" blob={blob}>
+      <BlobUrlLink className="myClassName" blob={blob}>
         This is the text
-      </BlobUrl>
+      </BlobUrlLink>
     );
     result.unmount();
     expect(URL.createObjectURL).toHaveBeenCalledTimes(1);
@@ -56,9 +56,9 @@ describe('shared/BlobUrl', () => {
     const blob1 = new Blob(['content']);
     const blob2 = new Blob(['content']);
     const result = render(
-      <BlobUrl className="myClassName" blob={blob1}>
+      <BlobUrlLink className="myClassName" blob={blob1}>
         This is the text
-      </BlobUrl>
+      </BlobUrlLink>
     );
     const a = ensureExists(
       result.container.querySelector('a'),
@@ -70,9 +70,9 @@ describe('shared/BlobUrl', () => {
     expect(a.getAttribute('href')).toEqual('mockCreateObjectUrl1');
 
     result.rerender(
-      <BlobUrl className="myClassName" blob={blob2}>
+      <BlobUrlLink className="myClassName" blob={blob2}>
         This is the text
-      </BlobUrl>
+      </BlobUrlLink>
     );
 
     expect(URL.createObjectURL).toHaveBeenCalledWith(blob2);

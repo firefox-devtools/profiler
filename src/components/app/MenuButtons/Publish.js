@@ -24,7 +24,7 @@ import {
   getUploadUrl,
   getUploadError,
 } from '../../../selectors/publish';
-import { BlobUrl } from '../../shared/BlobUrl';
+import { BlobUrlLink } from '../../shared/BlobUrlLink';
 import { assertExhaustiveCheck } from '../../../utils/flow';
 
 import explicitConnect, {
@@ -497,22 +497,18 @@ class DownloadButton extends React.PureComponent<
 
     if (compressedProfileBlob) {
       return (
-        // This component must be an <a> rather than a <button> as the download attribute
-        // allows users to download the profile.
-        <BlobUrl
+        <BlobUrlLink
           blob={compressedProfileBlob}
           download={`${downloadFileName}.gz`}
           className={className}
         >
           <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload" />
           Download
-        </BlobUrl>
+        </BlobUrlLink>
       );
     }
 
     return (
-      // This component must be an <a> rather than a <button> as the download attribute
-      // allows users to download the profile.
       <button
         type="button"
         className={classNames(className, 'menuButtonsPublishButtonDisabled')}

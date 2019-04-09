@@ -6,8 +6,6 @@
 
 import * as React from 'react';
 
-require('./Backtrace.css');
-
 type Props = {
   // Do not make these props exact, the extra props are passed to the anchor element.
   +blob: Blob,
@@ -25,7 +23,7 @@ type State = {|
  * does the proper thing of cleaning up after itself as the component
  * is mounted, updated, and unmounted.
  */
-export class BlobUrl extends React.PureComponent<Props, State> {
+export class BlobUrlLink extends React.PureComponent<Props, State> {
   state = {
     url: '',
     prevBlob: null,
@@ -56,6 +54,8 @@ export class BlobUrl extends React.PureComponent<Props, State> {
       ...rest
     } = this.props;
 
+    // This component must be an <a> rather than a <button> as the download attribute
+    // allows users to download the profile.
     return (
       <a href={this.state.url} {...rest}>
         {children}
