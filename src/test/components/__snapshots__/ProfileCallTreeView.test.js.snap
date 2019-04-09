@@ -109,12 +109,11 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
       data-index="0"
       title="Complete \\"Empty Thread\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Empty Thread"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -243,12 +242,11 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
       data-index="0"
       title="Complete \\"Thread with samples\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Thread with samples"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -377,12 +375,11 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
       data-index="0"
       title="Complete \\"Thread with samples\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Thread with samples"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -400,6 +397,60 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
     </p>
   </div>
 </div>
+`;
+
+exports[`calltree/ProfileCallTreeView TransformNavigator renders with multiple transforms applied 1`] = `
+<ol
+  class="filterNavigatorBar calltreeTransformNavigator"
+>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarRootItem"
+    data-index="0"
+    title="Complete \\"Thread with samples\\""
+  >
+    <button
+      class="filterNavigatorBarItemContent"
+      type="button"
+    >
+      Complete "Thread with samples"
+    </button>
+  </li>
+  <li
+    class="filterNavigatorBarItem"
+    data-index="1"
+    title="Focus Node: A"
+  >
+    <button
+      class="filterNavigatorBarItemContent"
+      type="button"
+    >
+      Focus Node: A
+    </button>
+  </li>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarBeforeSelectedItem"
+    data-index="2"
+    title="Focus Node: B"
+  >
+    <button
+      class="filterNavigatorBarItemContent"
+      type="button"
+    >
+      Focus Node: B
+    </button>
+  </li>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    data-index="3"
+    title="Focus Node: C"
+  >
+    <span
+      class="filterNavigatorBarItemContent"
+    >
+      Focus Node: C
+    </span>
+  </li>
+</ol>
 `;
 
 exports[`calltree/ProfileCallTreeView computes a width for a call tree of a really deep stack 1`] = `
@@ -511,12 +562,11 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
       data-index="0"
       title="Complete \\"Empty\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Empty"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -1868,12 +1918,11 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       data-index="0"
       title="Complete \\"Empty\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Empty"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -2483,12 +2532,11 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       data-index="0"
       title="Complete \\"Empty\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Empty"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -3098,12 +3146,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       data-index="0"
       title="Complete \\"Empty\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Empty"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -3713,12 +3760,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       data-index="0"
       title="Complete \\"Empty\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Empty"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -4285,12 +4331,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       data-index="0"
       title="Complete \\"Empty\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Empty"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -4857,12 +4902,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       data-index="0"
       title="Complete \\"Empty\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Empty"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -5310,12 +5354,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       data-index="0"
       title="Complete \\"Empty\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Empty"
-      </button>
+      </span>
     </li>
   </ol>
   <div
@@ -5763,12 +5806,11 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       data-index="0"
       title="Complete \\"Empty\\""
     >
-      <button
+      <span
         class="filterNavigatorBarItemContent"
-        type="button"
       >
         Complete "Empty"
-      </button>
+      </span>
     </li>
   </ol>
   <div

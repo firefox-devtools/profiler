@@ -48,9 +48,13 @@ class FilterNavigatorBar extends PureComponent<Props> {
               title={item}
               onClick={this._onLiClick}
             >
-              <button type="button" className="filterNavigatorBarItemContent">
-                {item}
-              </button>
+              {i === items.length - 1 ? (
+                <span className="filterNavigatorBarItemContent">{item}</span>
+              ) : (
+                <button type="button" className="filterNavigatorBarItemContent">
+                  {item}
+                </button>
+              )}
             </li>
           </CSSTransition>
         ))}
