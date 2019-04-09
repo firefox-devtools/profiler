@@ -119,8 +119,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     )
   );
 
-  // $FlowFixMe Error introduced by upgrading to v0.96.0.
-  const getTimelineVerticalMarkers = createSelector(
+  const getTimelineVerticalMarkers: Selector<Marker[]> = createSelector(
     getCommittedRangeFilteredMarkers,
     (markers): Marker[] => markers.filter(MarkerData.isNavigationMarker)
   );
