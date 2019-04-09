@@ -579,7 +579,7 @@ export async function _fetchProfile(
  */
 function _deduceContentType(
   url: string,
-  contentType: string
+  contentType: string | null
 ): 'application/json' | 'application/zip' | null {
   if (contentType === 'application/zip' || contentType === 'application/json') {
     return contentType;
@@ -604,7 +604,6 @@ async function _extractProfileOrZipFromResponse(
 ): Promise<ProfileOrZip> {
   const contentType = _deduceContentType(
     url,
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     response.headers.get('content-type')
   );
   switch (contentType) {
