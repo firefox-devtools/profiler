@@ -105,7 +105,10 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       target="_blank"
       title="Open the documentation in a new window"
     >
-      Docs…
+      Docs
+      <i
+        class="open-in-new"
+      />
     </a>
   </div>
 </div>
