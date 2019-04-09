@@ -100,7 +100,7 @@ class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
     if (this._container) {
       return this._container.getBoundingClientRect();
     }
-    return new window.DOMRect();
+    return new DOMRect(0, 0, 0, 0);
   }
 
   render() {

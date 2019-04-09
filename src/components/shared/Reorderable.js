@@ -8,9 +8,11 @@ import * as React from 'react';
 import bisection from 'bisection';
 import clamp from 'clamp';
 import arrayMove from 'array-move';
-import { getContentRect, getMarginRect } from '../../utils/css-geometry-tools';
-
-import type { DOMRectLiteral } from '../../utils/dom-rect';
+import {
+  getContentRect,
+  getMarginRect,
+  extractDomRectValue,
+} from '../../utils/css-geometry-tools';
 
 type Props = {|
   orient: 'horizontal' | 'vertical',
@@ -120,11 +122,14 @@ class Reorderable extends React.PureComponent<Props, State> {
     // Coerce the SyntheticMouseEvent and DOMRect instances into an object literals
     // to dynamically access certain properties.
     const mouseDownPos = event[xy.pageXY];
-    const elementRect: DOMRectLiteral = getMarginRect(element);
-    const containerRect: DOMRectLiteral = getContentRect(container);
-    const spaceBefore = elementRect[xy.lefttop] - containerRect[xy.lefttop];
+    const elementRect = getMarginRect(element);
+    const containerRect = getContentRect(container);
+    const spaceBefore =
+      extractDomRectValue(elementRect, xy.lefttop) -
+      extractDomRectValue(containerRect, xy.lefttop);
     const spaceAfter =
-      containerRect[xy.rightbottom] - elementRect[xy.rightbottom];
+      extractDomRectValue(containerRect, xy.rightbottom) -
+      extractDomRectValue(elementRect, xy.rightbottom);
 
     const children = Array.from(container.children);
     if (children.length < 2) {
@@ -139,10 +144,12 @@ class Reorderable extends React.PureComponent<Props, State> {
         isBefore = false;
         return 0;
       }
-      const childRect: DOMRectLiteral = getMarginRect(child);
+      const childRect = getMarginRect(child);
       return isBefore
-        ? childRect[xy.lefttop] - elementRect[xy.lefttop]
-        : childRect[xy.rightbottom] - elementRect[xy.rightbottom];
+        ? extractDomRectValue(childRect, xy.lefttop) -
+            extractDomRectValue(elementRect, xy.lefttop)
+        : extractDomRectValue(childRect, xy.rightbottom) -
+            extractDomRectValue(elementRect, xy.rightbottom);
     });
 
     if (elementIndex === -1) {
@@ -160,24 +167,29 @@ class Reorderable extends React.PureComponent<Props, State> {
 
     const nextEdgeAfterElement =
       elementIndex === children.length - 1
-        ? containerRect[xy.rightbottom]
-        : (getMarginRect(children[elementIndex + 1]): DOMRectLiteral)[
+        ? extractDomRectValue(containerRect, xy.rightbottom)
+        : extractDomRectValue(
+            getMarginRect(children[elementIndex + 1]),
             xy.lefttop
-          ];
+          );
 
     const nextEdgeBeforeElement =
       elementIndex === 0
-        ? containerRect[xy.lefttop]
-        : (getMarginRect(children[elementIndex - 1]): DOMRectLiteral)[
+        ? extractDomRectValue(containerRect, xy.lefttop)
+        : extractDomRectValue(
+            getMarginRect(children[elementIndex - 1]),
             xy.rightbottom
-          ];
+          );
 
     this.setState({
       manipulatingIndex: elementIndex,
       manipulationDelta: 0,
       destinationIndex: elementIndex,
-      adjustPrecedingBy: nextEdgeAfterElement - elementRect[xy.lefttop],
-      adjustSucceedingBy: nextEdgeBeforeElement - elementRect[xy.rightbottom],
+      adjustPrecedingBy:
+        nextEdgeAfterElement - extractDomRectValue(elementRect, xy.lefttop),
+      adjustSucceedingBy:
+        nextEdgeBeforeElement -
+        extractDomRectValue(elementRect, xy.rightbottom),
     });
 
     const mouseMoveListener = (event: EventWithPageProperties) => {
