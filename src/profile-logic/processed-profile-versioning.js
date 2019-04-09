@@ -683,7 +683,7 @@ const _upgraders = {
               const newCategory =
                 oldCategory in oldCategoryToNewCategory
                   ? oldCategoryToNewCategory[oldCategory]
-                  : 1 /* Other */;
+                  : 1; /* Other */
               frameTable.category[i] = newCategory;
             }
           }

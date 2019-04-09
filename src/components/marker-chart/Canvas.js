@@ -178,7 +178,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       rangeStart +
       rangeLength * viewportRight +
       // This represents the amount of seconds in the right margin:
-      marginRight * (viewportLength * rangeLength / markerContainerWidth);
+      marginRight * ((viewportLength * rangeLength) / markerContainerWidth);
 
     // Only draw the stack frames that are vertically within view.
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
@@ -203,11 +203,12 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
             (markerTiming.end[i] - rangeStart) / rangeLength;
 
           let x: CssPixels =
-            (startTime - viewportLeft) * markerContainerWidth / viewportLength +
+            ((startTime - viewportLeft) * markerContainerWidth) /
+              viewportLength +
             marginLeft;
           const y: CssPixels = rowIndex * rowHeight - viewportTop;
           const uncutWidth: CssPixels =
-            (endTime - startTime) * markerContainerWidth / viewportLength;
+            ((endTime - startTime) * markerContainerWidth) / viewportLength;
           const h: CssPixels = rowHeight - 1;
 
           let w = uncutWidth;
@@ -326,7 +327,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const minDuration =
       rangeLength *
       viewportLength *
-      (rowHeight * 2 * MARKER_DOT_RADIUS / markerContainerWidth);
+      ((rowHeight * 2 * MARKER_DOT_RADIUS) / markerContainerWidth);
     const markerTiming = markerTimingRows[rowIndex];
 
     if (!markerTiming) {

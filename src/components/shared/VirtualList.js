@@ -39,9 +39,7 @@ type VirtualListInnerChunkProps = {|
   +columnIndex: number,
 |};
 
-class VirtualListInnerChunk extends React.PureComponent<
-  VirtualListInnerChunkProps
-> {
+class VirtualListInnerChunk extends React.PureComponent<VirtualListInnerChunkProps> {
   render() {
     const {
       className,

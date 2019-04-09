@@ -159,7 +159,7 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
   findScreenshotAtMouse(offsetX: number): number | null {
     const { width, rangeStart, rangeEnd, screenshots } = this.props;
     const rangeLength = rangeEnd - rangeStart;
-    const mouseTime = offsetX / width * rangeLength + rangeStart;
+    const mouseTime = (offsetX / width) * rangeLength + rangeStart;
 
     // Loop backwards to find the latest screenshot that has a time less
     // than the current time at the mouse position.
@@ -217,13 +217,13 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     // set it to the value so that it reaches the top of screen when it is centered.
     if (hoverHeight > 2 * distanceToTopFromTrackCenter) {
       hoverHeight = 2 * distanceToTopFromTrackCenter;
-      hoverWidth = hoverHeight * windowWidth / windowHeight;
+      hoverWidth = (hoverHeight * windowWidth) / windowHeight;
     }
 
     if (hoverWidth > hoverHeight * HOVER_MAX_WIDTH_RATIO) {
       // This is a really wide image, limit the height so it lays out reasonably.
       hoverWidth = hoverHeight * HOVER_MAX_WIDTH_RATIO;
-      hoverHeight = hoverWidth / windowWidth * windowHeight;
+      hoverHeight = (hoverWidth / windowWidth) * windowHeight;
     }
 
     hoverWidth = Math.round(hoverWidth);
@@ -297,7 +297,7 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
     const rangeLength = rangeEnd - rangeStart;
     const imageContainerWidth = TRACK_SCREENSHOT_HEIGHT * 0.75;
     const timeToPixel = time =>
-      outerContainerWidth * (time - rangeStart) / rangeLength;
+      (outerContainerWidth * (time - rangeStart)) / rangeLength;
 
     const leftmostPixel = Math.max(timeToPixel(screenshots[0].start), 0);
     let screenshotIndex = 0;
@@ -319,7 +319,7 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
         .data: any);
       const { url: urlStringIndex, windowWidth, windowHeight } = payload;
       const scaledImageWidth =
-        TRACK_SCREENSHOT_HEIGHT * windowWidth / windowHeight;
+        (TRACK_SCREENSHOT_HEIGHT * windowWidth) / windowHeight;
       images.push(
         <div
           className="timelineTrackScreenshotImgContainer"

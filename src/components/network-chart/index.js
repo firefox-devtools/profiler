@@ -165,7 +165,7 @@ function _timeToCssPixels(props: Props, time: Milliseconds): CssPixels {
     width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
 
   const markerPosition =
-    (time - timeRange.start) / timeRangeTotal * innerContainerWidth +
+    ((time - timeRange.start) / timeRangeTotal) * innerContainerWidth +
     TIMELINE_MARGIN_LEFT;
 
   // Keep the value bounded to the available viewport area.

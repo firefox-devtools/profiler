@@ -73,7 +73,10 @@ class StackChartGraph extends React.PureComponent<Props> {
    * Determine the maximum amount available to zoom in.
    */
   getMaximumZoom(): UnitIntervalOfProfileRange {
-    const { timeRange: { start, end }, interval } = this.props;
+    const {
+      timeRange: { start, end },
+      interval,
+    } = this.props;
     return interval / (end - start);
   }
 

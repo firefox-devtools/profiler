@@ -70,7 +70,10 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
    * Determine the maximum zoom of the viewport.
    */
   getMaximumZoom(): UnitIntervalOfProfileRange {
-    const { timeRange: { start, end }, interval } = this.props;
+    const {
+      timeRange: { start, end },
+      interval,
+    } = this.props;
     return interval / (end - start);
   }
 

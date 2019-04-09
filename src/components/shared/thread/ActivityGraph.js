@@ -227,7 +227,7 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
     const rect = canvas.getBoundingClientRect();
     const x = event.pageX - rect.left;
     const y = event.pageY - rect.top;
-    const time = rangeStart + x / rect.width * (rangeEnd - rangeStart);
+    const time = rangeStart + (x / rect.width) * (rangeEnd - rangeStart);
 
     return fillsQuerier.getSampleAtClick(x, y, time, rect);
   }

@@ -28,9 +28,8 @@ import type { RemoveProfileInformation } from '../types/profile-derived';
 
 export const getPublishState: Selector<PublishState> = state => state.publish;
 
-export const getCheckedSharingOptions: Selector<
-  CheckedSharingOptions
-> = state => getPublishState(state).checkedSharingOptions;
+export const getCheckedSharingOptions: Selector<CheckedSharingOptions> = state =>
+  getPublishState(state).checkedSharingOptions;
 
 export const getFilenameString: Selector<string> = createSelector(
   getProfile,

@@ -101,7 +101,10 @@ class FlameGraph extends React.PureComponent<Props> {
    * Is the box for this call node wide enough to be selected?
    */
   _wideEnough = (callNodeIndex: IndexIntoCallNodeTable): boolean => {
-    const { flameGraphTiming, callNodeInfo: { callNodeTable } } = this.props;
+    const {
+      flameGraphTiming,
+      callNodeInfo: { callNodeTable },
+    } = this.props;
 
     const depth = callNodeTable.depth[callNodeIndex];
     const row = flameGraphTiming[depth];
@@ -123,7 +126,10 @@ class FlameGraph extends React.PureComponent<Props> {
     startingCallNodeIndex: IndexIntoCallNodeTable,
     direction: 1 | -1
   ): IndexIntoCallNodeTable | void => {
-    const { flameGraphTiming, callNodeInfo: { callNodeTable } } = this.props;
+    const {
+      flameGraphTiming,
+      callNodeInfo: { callNodeTable },
+    } = this.props;
 
     let callNodeIndex = startingCallNodeIndex;
 

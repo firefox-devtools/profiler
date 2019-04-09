@@ -469,7 +469,9 @@ export const withChartViewport: WithChartViewport<*, *> =
               viewportRight + deltaViewportLength * (1 - center)
             );
 
-            const { viewportProps: { timeRange } } = this.props;
+            const {
+              viewportProps: { timeRange },
+            } = this.props;
             if (newViewportLeft === 0 && newViewportRight === 1) {
               return {
                 hasSelection: false,
@@ -673,7 +675,7 @@ export const withChartViewport: WithChartViewport<*, *> =
                   isModifying: false,
                 };
               }
-              const unitOffsetX = viewportLength * offsetX / containerWidth;
+              const unitOffsetX = (viewportLength * offsetX) / containerWidth;
               let newViewportLeft = viewportLeft - unitOffsetX;
               let newViewportRight = viewportRight - unitOffsetX;
               if (newViewportLeft < 0) {

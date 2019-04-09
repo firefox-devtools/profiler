@@ -197,8 +197,8 @@ class GlobalTrackComponent extends PureComponent<Props> {
             <button type="button" className="timelineTrackNameButton">
               {trackName}
               {/* Only show the PID if it is a real number. A string PID is an
-                * artificially generated value that is not useful, and a null
-                * value does not exist. */}
+               * artificially generated value that is not useful, and a null
+               * value does not exist. */}
               {typeof pid === 'number' ? (
                 <div className="timelineTrackNameButtonAdditionalDetails">
                   PID: {pid}

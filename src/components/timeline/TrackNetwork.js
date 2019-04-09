@@ -107,9 +107,10 @@ class Network extends PureComponent<Props, State> {
       const timing = networkTiming[rowIndex];
       for (let timingIndex = 0; timingIndex < timing.length; timingIndex++) {
         const start =
-          canvas.width / rangeLength * (timing.start[timingIndex] - rangeStart);
+          (canvas.width / rangeLength) *
+          (timing.start[timingIndex] - rangeStart);
         const end =
-          canvas.width / rangeLength * (timing.end[timingIndex] - rangeStart);
+          (canvas.width / rangeLength) * (timing.end[timingIndex] - rangeStart);
         const y = (rowIndex % ROW_REPEAT) * rowHeight + rowHeight * 0.5;
         ctx.beginPath();
         ctx.moveTo(start, y);

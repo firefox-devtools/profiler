@@ -121,9 +121,7 @@ const ConnectedExampleComponent = explicitConnect(
   const exampleThunkActionWrapped = (string: string) => 5;
 
   (exampleAction: WrapFunctionInDispatch<ExampleActionCreator>);
-  (exampleThunkActionWrapped: WrapFunctionInDispatch<
-    ExampleThunkActionCreator
-  >);
+  (exampleThunkActionWrapped: WrapFunctionInDispatch<ExampleThunkActionCreator>);
   // $FlowExpectError
   (exampleThunkAction: WrapFunctionInDispatch<ExampleThunkActionCreator>);
 }

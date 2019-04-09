@@ -112,7 +112,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       for (let i = 0; i < samples.length; i++) {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
-        x = deviceWidth * (samples.time[i] - rangeStart) / rangeLength;
+        x = (deviceWidth * (samples.time[i] - rangeStart)) / rangeLength;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
         const unitGraphCount = (accumulatedCounts[i] - minCount) / countRange;
@@ -138,7 +138,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       // of the canvas.
       ctx.lineTo(x + interval, deviceHeight);
       ctx.lineTo(
-        deviceWidth * (samples.time[0] - rangeStart) / rangeLength + interval,
+        (deviceWidth * (samples.time[0] - rangeStart)) / rangeLength + interval,
         deviceHeight
       );
       ctx.fill();
@@ -220,7 +220,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     const { left } = event.currentTarget.getBoundingClientRect();
     const { width, rangeStart, rangeEnd, counter, interval } = this.props;
     const rangeLength = rangeEnd - rangeStart;
-    const timeAtMouse = rangeStart + (mouseX - left) / width * rangeLength;
+    const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
     const { samples } = counter.sampleGroups;
     if (
       timeAtMouse < samples.time[0] ||
@@ -287,7 +287,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     const { samples } = counter.sampleGroups;
     const rangeLength = rangeEnd - rangeStart;
     const left =
-      width * (samples.time[counterIndex] - rangeStart) / rangeLength;
+      (width * (samples.time[counterIndex] - rangeStart)) / rangeLength;
 
     const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
     const unitSampleCount =
