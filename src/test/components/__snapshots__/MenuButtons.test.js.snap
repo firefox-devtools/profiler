@@ -297,30 +297,27 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <p
       class="menuButtonsPublishInfoDescription"
     >
-      You’re about to share your profile potentially where others have public access to it. 
-      By default, the profile is stripped of much of the personally identifiable information.
+      You’re about to publicly share your profile, which can potentially contain personally identifiable information.
     </p>
+    <label
+      class="photon-label"
+    >
+      <input
+        checked=""
+        class="photon-checkbox photon-checkbox-default"
+        name="isFiltering"
+        type="checkbox"
+      />
+      Filter out potentially identifying information
+    </label>
     <details
       class="menuButtonsPublishData"
-      open=""
     >
       <summary
         class="menuButtonsPublishDataSummary"
       >
-        Adjust how much is shared
-         
+        Include additional data
       </summary>
-      <label
-        class="photon-label"
-      >
-        <input
-          checked=""
-          class="photon-checkbox photon-checkbox-default"
-          name="isFiltering"
-          type="checkbox"
-        />
-        Filter out potentially identifying information
-      </label>
       <div
         class="menuButtonsPublishDataChoices"
       >
@@ -328,56 +325,51 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
-            checked=""
             class="photon-checkbox photon-checkbox-default"
             name="hiddenThreads"
             type="checkbox"
           />
-          Remove hidden threads
+          Hidden threads
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
-            checked=""
             class="photon-checkbox photon-checkbox-default"
             name="timeRange"
             type="checkbox"
           />
-          Remove information out of the time range
+          Hidden time range
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
-            checked=""
             class="photon-checkbox photon-checkbox-default"
             name="screenshots"
             type="checkbox"
           />
-          Remove screenshots
+          Screenshots
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
-            checked=""
             class="photon-checkbox photon-checkbox-default"
             name="urls"
             type="checkbox"
           />
-          Remove all URLs
+          Resource URLs
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
-            checked=""
             class="photon-checkbox photon-checkbox-default"
             name="extension"
             type="checkbox"
           />
-          Remove extensions
+          Extension information
         </label>
       </div>
     </details>
