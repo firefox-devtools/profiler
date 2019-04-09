@@ -47,8 +47,10 @@ function DetailsContainer({
       secondaryInitialSize={20}
       onDragEnd={invalidatePanelLayout}
     >
-      <Details />
-      {Sidebar && <Sidebar />}
+      <>
+        <Details />
+        {Sidebar && <Sidebar />}
+      </>
     </SplitterLayout>
   );
 }
