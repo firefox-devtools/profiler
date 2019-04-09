@@ -252,6 +252,7 @@ function _getAllMatchRanges(regex, str): Array<{ start: number, end: number }> {
   const ranges = [];
   let match;
   while ((match = regex.exec(str)) !== null) {
+    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     ranges.push({ start: match.index, end: match.index + match[0].length });
   }
   return ranges;

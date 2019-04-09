@@ -66,6 +66,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +selectBestAncestorCallNodeAndExpandCallTree: typeof selectBestAncestorCallNodeAndExpandCallTree,
+  // $FlowFixMe Error introduced by upgrading to v0.96.0.
   +selectLeafCallNode: typeof selectLeafCallNode,
   +focusCallTree: typeof focusCallTree,
 |};
@@ -96,6 +97,7 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
       focusCallTree,
     } = this.props;
     selectLeafCallNode(selectedThreadIndex, sampleIndex);
+    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     focusCallTree();
   };
 
@@ -249,4 +251,5 @@ const options: ExplicitConnectOptions<*, *, *> = {
   },
   component: SelectedThreadActivityGraph,
 };
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default explicitConnect(options);

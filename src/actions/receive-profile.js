@@ -604,6 +604,7 @@ async function _extractProfileOrZipFromResponse(
 ): Promise<ProfileOrZip> {
   const contentType = _deduceContentType(
     url,
+    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     response.headers.get('content-type')
   );
   switch (contentType) {

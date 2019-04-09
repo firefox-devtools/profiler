@@ -386,6 +386,7 @@ const jankOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   component: TimelineMarkers,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export const TimelineMarkersJank = explicitConnect(jankOptions);
 
 /**
@@ -411,6 +412,7 @@ const markersOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   component: TimelineMarkers,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export const TimelineMarkersOverview = explicitConnect(markersOptions);
 
 /**
@@ -432,6 +434,7 @@ const fileIoOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   component: TimelineMarkers,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export const TimelineMarkersFileIo = explicitConnect(fileIoOptions);
 
 /**
@@ -454,4 +457,5 @@ const memoryOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
   component: TimelineMarkers,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export const TimelineMarkersMemory = explicitConnect(memoryOptions);

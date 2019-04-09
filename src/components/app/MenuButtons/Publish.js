@@ -181,6 +181,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   _closePanelAfterUpload = () => {
     const { resetUploadState } = this.props;
     // Only reset it after the panel animation disappears.
+    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     setTimeout(resetUploadState, 300);
 
     const { body } = document;
@@ -321,6 +322,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   }
 }
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     profile: getProfile(state),
@@ -342,6 +344,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   },
   component: MenuButtonsPublishImpl,
 };
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export const MenuButtonsPublish = explicitConnect(options);
 
 type DownloadSizeProps = {|

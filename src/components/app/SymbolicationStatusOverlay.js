@@ -76,4 +76,5 @@ const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   }),
   component: SymbolicationStatusOverlay,
 };
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default explicitConnect(options);

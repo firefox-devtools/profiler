@@ -104,4 +104,5 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   component: TrackMemoryImpl,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export const TrackMemory = explicitConnect(options);

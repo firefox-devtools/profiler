@@ -11,6 +11,7 @@ import zippedProfiles from './zipped-profiles';
 import publish from './publish';
 import { combineReducers } from 'redux';
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default combineReducers({
   app,
   profileView,

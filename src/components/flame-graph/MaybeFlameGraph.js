@@ -62,4 +62,5 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   component: MaybeFlameGraph,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default explicitConnect(options);

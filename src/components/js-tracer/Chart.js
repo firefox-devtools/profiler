@@ -145,6 +145,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   component: JsTracerExpensiveChartImpl,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 const JsTracerExpensiveChart = explicitConnect(options);
 
 type ChartLoaderProps = {|
@@ -183,6 +184,7 @@ class JsTracerChartLoader extends React.PureComponent<
   // will have already run. There is no need to fade the component in.
   _doFadeIn: boolean = false;
 
+  // $FlowFixMe Error introduced by upgrading to v0.96.0.
   constructor(props) {
     super(props);
     // Look up the seenChartKeys per-profile. If not found, create a new Set.

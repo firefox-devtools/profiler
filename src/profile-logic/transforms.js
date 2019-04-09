@@ -735,6 +735,7 @@ export function dropFunction(
   }
 
   // Regenerate the stacks for the samples table.
+  // $FlowFixMe Error introduced by upgrading to v0.96.0.
   const stack = samples.stack.map(
     stack => (stack !== null && stackContainsFunc[stack] ? null : stack)
   );

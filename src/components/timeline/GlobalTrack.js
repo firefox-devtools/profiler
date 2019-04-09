@@ -84,6 +84,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
     } else if (event.button === 2) {
       // This is needed to allow the context menu to know what was right clicked without
       // actually changing the current selection.
+      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       changeRightClickedTrack(trackReference);
     }
   };
@@ -131,6 +132,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
     const { globalTrack, changeLocalTrackOrder } = this.props;
     if (globalTrack.type === 'process') {
       // Only process tracks have local tracks.
+      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       changeLocalTrackOrder(globalTrack.pid, trackOrder);
     }
   };
@@ -218,6 +220,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
 const EMPTY_TRACK_ORDER = [];
 const EMPTY_LOCAL_TRACKS = [];
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getGlobalTracks(state);
@@ -277,4 +280,5 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   component: GlobalTrackComponent,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default explicitConnect(options);

@@ -93,7 +93,9 @@ class TimelineTrackThread extends PureComponent<Props> {
    */
   _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
     const { threadIndex, selectLeafCallNode, focusCallTree } = this.props;
+    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     selectLeafCallNode(threadIndex, sampleIndex);
+    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     focusCallTree();
   };
 
@@ -103,6 +105,7 @@ class TimelineTrackThread extends PureComponent<Props> {
     end: Milliseconds
   ) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
+    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
@@ -115,6 +118,7 @@ class TimelineTrackThread extends PureComponent<Props> {
     const { threadIndex, height, reportTrackThreadHeight } = this.props;
     // Most likely this track height shouldn't change, but if it does, report it.
     // The action will only dispatch on changed values.
+    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     reportTrackThreadHeight(threadIndex, height);
   }
 
@@ -212,6 +216,7 @@ class TimelineTrackThread extends PureComponent<Props> {
   }
 }
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadIndex } = ownProps;

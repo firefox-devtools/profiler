@@ -294,6 +294,7 @@ const _upgraders = {
               funcTable.name[funcIndex] = stringTable.indexForString(scriptURI);
             }
             fileName = stringTable.indexForString(scriptURI);
+            // $FlowFixMe Error introduced by upgrading to v0.96.0.
             lineNumber = match[3] | 0;
           }
         }

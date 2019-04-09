@@ -419,6 +419,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           viewportProps: { marginLeft, marginRight },
         } = this.props;
         if (!hasZoomedViaMousewheel && setHasZoomedViaMousewheel) {
+          // $FlowFixMe Error introduced by upgrading to v0.96.0.
           setHasZoomedViaMousewheel();
         }
 
@@ -792,6 +793,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       ViewportOwnProps<ChartOwnProps>,
       ViewportStateProps,
       ViewportDispatchProps
+      // $FlowFixMe Error introduced by upgrading to v0.96.0.
     > = {
       mapStateToProps: state => ({
         panelLayoutGeneration: getPanelLayoutGeneration(state),

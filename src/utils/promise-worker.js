@@ -69,6 +69,7 @@ export function provideWorkerSide(workerGlobal: Worker, theClass: Function) {
   let theObject = {};
   workerGlobal.onmessage = ({ data }) => {
     const message = ((data: any): WorkerMessage);
+    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     if (message.type === 'constructor') {
       theObject = new theClass(...message.constructorArguments);
     } else if (message.type === 'method') {

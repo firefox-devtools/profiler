@@ -264,4 +264,5 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapDispatchToProps: { changeSelectedMarker },
   component: MarkerTable,
 };
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default explicitConnect(options);

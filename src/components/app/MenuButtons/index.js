@@ -136,4 +136,5 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   },
   component: MenuButtons,
 };
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default explicitConnect(options);

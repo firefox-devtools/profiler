@@ -184,12 +184,15 @@ class Timeline extends React.PureComponent<Props> {
             '--timeline-settings-height': `${TIMELINE_SETTINGS_HEIGHT}px`,
           }}
         >
+          {/* $FlowFixMe Error introduced by upgrading to v0.96.0. */}
           <TimelineSettingsGraphType
             timelineType={timelineType}
+            // $FlowFixMe Error introduced by upgrading to v0.96.0.
             changeTimelineType={changeTimelineType}
           />
           <TimelineSettingsHiddenTracks
             hiddenTrackCount={hiddenTrackCount}
+            // $FlowFixMe Error introduced by upgrading to v0.96.0.
             changeRightClickedTrack={changeRightClickedTrack}
           />
         </div>
@@ -211,6 +214,7 @@ class Timeline extends React.PureComponent<Props> {
                 grippyClassName="timelineTrackGlobalGrippy"
                 order={globalTrackOrder}
                 orient="vertical"
+                // $FlowFixMe Error introduced by upgrading to v0.96.0.
                 onChangeOrder={changeGlobalTrackOrder}
               >
                 {globalTracks.map((globalTrack, trackIndex) => (
@@ -229,6 +233,7 @@ class Timeline extends React.PureComponent<Props> {
   }
 }
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     globalTracks: getGlobalTracks(state),

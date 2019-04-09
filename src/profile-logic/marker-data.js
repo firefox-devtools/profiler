@@ -751,10 +751,12 @@ export function isMemoryMarker(marker: Marker): boolean {
 }
 
 export function filterForNetworkChart(markers: Marker[]) {
+  // $FlowFixMe Error introduced by upgrading to v0.96.0.
   return markers.filter(marker => isNetworkMarker(marker));
 }
 
 export function filterForMarkerChart(markers: Marker[]) {
+  // $FlowFixMe Error introduced by upgrading to v0.96.0.
   return markers.filter(marker => !isNetworkMarker(marker));
 }
 // Firefox emits separate start and end markers for each load. It does this so that,

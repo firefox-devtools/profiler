@@ -93,6 +93,7 @@ class StackSettings extends PureComponent<Props> {
   }
 }
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default connect(
   state => ({
     invertCallstack: getInvertCallstack(state),

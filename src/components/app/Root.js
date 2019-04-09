@@ -111,6 +111,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
     } = this.props;
     switch (dataSource) {
       case 'from-addon':
+        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         retrieveProfileFromAddon().catch(e => console.error(e));
         break;
       case 'from-file':
@@ -119,13 +120,16 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       case 'local':
         break;
       case 'public':
+        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         retrieveProfileFromStore(hash).catch(e => console.error(e));
         break;
       case 'from-url':
+        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         retrieveProfileOrZipFromUrl(profileUrl).catch(e => console.error(e));
         break;
       case 'compare':
         if (profilesToCompare) {
+          // $FlowFixMe Error introduced by upgrading to v0.96.0.
           retrieveProfilesToCompare(profilesToCompare);
         }
         break;
@@ -149,6 +153,7 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
       !prevProps.profilesToCompare &&
       this.props.profilesToCompare
     ) {
+      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       this.props.retrieveProfilesToCompare(this.props.profilesToCompare);
     }
   }
@@ -263,6 +268,7 @@ const options: ExplicitConnectOptions<
   {||},
   ProfileViewStateProps,
   ProfileViewDispatchProps
+  // $FlowFixMe Error introduced by upgrading to v0.96.0.
 > = {
   mapStateToProps: (state: State) => ({
     view: getView(state),
@@ -280,6 +286,7 @@ const options: ExplicitConnectOptions<
   },
   component: ProfileViewWhenReadyImpl,
 };
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export const ProfileViewWhenReady = explicitConnect(options);
 
 type RootProps = {

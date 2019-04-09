@@ -82,6 +82,7 @@ class StackChartGraph extends React.PureComponent<Props> {
   ) => {
     const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
+      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       threadIndex,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
@@ -159,6 +160,7 @@ class StackChartGraph extends React.PureComponent<Props> {
   }
 }
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
@@ -187,6 +189,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   },
   component: StackChartGraph,
 };
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default explicitConnect(options);
 
 // This function is given the StackChartCanvas's chartProps.

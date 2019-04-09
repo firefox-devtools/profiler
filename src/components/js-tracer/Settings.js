@@ -43,6 +43,7 @@ class JsTracerSettings extends PureComponent<Props> {
   }
 }
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default connect(
   state => ({
     showJsTracerSummary: getShowJsTracerSummary(state),

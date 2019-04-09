@@ -84,6 +84,7 @@ describe('expandUrl', () => {
       const url = new URL(urlString);
       const params = new URLSearchParams(url.search);
       const shortUrl = params.get('shortUrl');
+      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       const hash = shortUrl.slice(shortUrl.lastIndexOf('/') + 1);
 
       return {

@@ -54,10 +54,13 @@ type StateProps = {|
 |};
 
 type DispatchProps = {|
+  // $FlowFixMe Error introduced by upgrading to v0.96.0.
   +changeSelectedZipFile: typeof changeSelectedZipFile,
+  // $FlowFixMe Error introduced by upgrading to v0.96.0.
   +changeExpandedZipFile: typeof changeExpandedZipFile,
   +viewProfileFromZip: typeof viewProfileFromZip,
   +returnToZipFileList: typeof returnToZipFileList,
+  // $FlowFixMe Error introduced by upgrading to v0.96.0.
   +showErrorForNoFileInZip: typeof showErrorForNoFileInZip,
 |};
 
@@ -186,6 +189,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
         if (zipFileIndex === -1) {
           showErrorForNoFileInZip(pathInZipFile);
         } else {
+          // $FlowFixMe Error introduced by upgrading to v0.96.0.
           viewProfileFromZip(zipFileIndex);
         }
       }
@@ -333,6 +337,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
   }
 }
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: state => {
     const zipFileTree = getZipFileTree(state);
@@ -368,4 +373,5 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   component: ZipFileViewer,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default explicitConnect(options);

@@ -271,6 +271,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     const { previewSelection, zeroAt, commitRange } = this.props;
     if (previewSelection.hasSelection) {
       commitRange(
+        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         previewSelection.selectionStart - zeroAt,
         previewSelection.selectionEnd - zeroAt
       );
@@ -374,6 +375,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   }
 }
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   mapStateToProps: state => ({
     previewSelection: getPreviewSelection(state),
@@ -388,4 +390,5 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   component: TimelineRulerAndSelection,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default explicitConnect(options);

@@ -102,6 +102,7 @@ export function withSize<
       if (typeof container.getBoundingClientRect !== 'function') {
         throw new Error('Cannot measure a Text node.');
       }
+      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       const { width, height } = container.getBoundingClientRect();
       this.setState({ width, height });
     }

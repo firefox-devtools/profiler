@@ -115,6 +115,7 @@ class CallTreeComponent extends PureComponent<Props> {
     const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadIndex,
+      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
   };
@@ -125,6 +126,7 @@ class CallTreeComponent extends PureComponent<Props> {
     const { callNodeInfo, threadIndex, changeExpandedCallNodes } = this.props;
     changeExpandedCallNodes(
       threadIndex,
+      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       newExpandedCallNodeIndexes.map(callNodeIndex =>
         getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
       )
@@ -190,6 +192,7 @@ class CallTreeComponent extends PureComponent<Props> {
   }
 }
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   mapStateToProps: (state: State) => ({
     threadIndex: getSelectedThreadIndex(state),
@@ -219,4 +222,5 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   component: CallTreeComponent,
 };
 
+// $FlowFixMe Error introduced by upgrading to v0.96.0.
 export default explicitConnect(options);
