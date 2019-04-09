@@ -8,7 +8,7 @@
 import WebWorker from './worker-factory';
 import { ensureExists } from './flow';
 
-type WorkerMessage =
+type MessageToHost =
   | {|
       +msgID: number,
       +type: 'error',
@@ -17,7 +17,19 @@ type WorkerMessage =
   | {|
       +msgID: number,
       +type: 'success',
-      +result: mixed,
+      +result: mixed[],
+    |};
+
+type MessageToWorker =
+  | {|
+      +type: 'constructor',
+      +constructorArguments: mixed,
+    |}
+  | {|
+      +type: 'method',
+      +msgID: number,
+      +method: string,
+      +paramArray: mixed[],
     |};
 
 export function provideHostSide<T: Object>(workerFilename: string, methods: T) {
@@ -27,7 +39,7 @@ export function provideHostSide<T: Object>(workerFilename: string, methods: T) {
     let nextMessageID = 0;
 
     worker.onmessage = ({ data }) => {
-      const message = ((data: any): WorkerMessage);
+      const message = ((data: any): MessageToHost);
       const { msgID } = message;
       const { resolve, reject } = ensureExists(
         callbacks.get(msgID),
@@ -68,8 +80,7 @@ export function provideHostSide<T: Object>(workerFilename: string, methods: T) {
 export function provideWorkerSide(workerGlobal: Worker, theClass: Function) {
   let theObject = {};
   workerGlobal.onmessage = ({ data }) => {
-    const message = ((data: any): WorkerMessage);
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
+    const message = ((data: any): MessageToWorker);
     if (message.type === 'constructor') {
       theObject = new theClass(...message.constructorArguments);
     } else if (message.type === 'method') {
