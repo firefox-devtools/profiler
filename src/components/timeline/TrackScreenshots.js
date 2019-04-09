@@ -18,10 +18,7 @@ import type { ScreenshotPayload } from '../../types/markers';
 import type { ThreadIndex, Thread } from '../../types/profile';
 import type { Marker } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import { ensureExists } from '../../utils/flow';
 import './TrackScreenshots.css';
@@ -116,28 +113,29 @@ class Screenshots extends PureComponent<Props, State> {
 }
 
 const EMPTY_SCREENSHOTS_TRACK = [];
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
-  mapStateToProps: (state, ownProps) => {
-    const { threadIndex, windowId } = ownProps;
-    const selectors = getThreadSelectors(threadIndex);
-    const { start, end } = getCommittedRange(state);
-    const previewSelection = getPreviewSelection(state);
-    return {
-      thread: selectors.getRangeFilteredThread(state),
-      screenshots:
-        selectors.getRangeFilteredScreenshotsById(state).get(windowId) ||
-        EMPTY_SCREENSHOTS_TRACK,
-      threadName: selectors.getFriendlyThreadName(state),
-      rangeStart: start,
-      rangeEnd: end,
-      isMakingPreviewSelection:
-        previewSelection.hasSelection && previewSelection.isModifying,
-    };
-  },
-  component: Screenshots,
-};
 
-export default withSize(explicitConnect(options));
+export default withSize(
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
+    mapStateToProps: (state, ownProps) => {
+      const { threadIndex, windowId } = ownProps;
+      const selectors = getThreadSelectors(threadIndex);
+      const { start, end } = getCommittedRange(state);
+      const previewSelection = getPreviewSelection(state);
+      return {
+        thread: selectors.getRangeFilteredThread(state),
+        screenshots:
+          selectors.getRangeFilteredScreenshotsById(state).get(windowId) ||
+          EMPTY_SCREENSHOTS_TRACK,
+        threadName: selectors.getFriendlyThreadName(state),
+        rangeStart: start,
+        rangeEnd: end,
+        isMakingPreviewSelection:
+          previewSelection.hasSelection && previewSelection.isModifying,
+      };
+    },
+    component: Screenshots,
+  })
+);
 
 type HoverPreviewProps = {|
   +thread: Thread,

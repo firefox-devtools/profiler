@@ -21,7 +21,7 @@ function subtractBorder(element: HTMLElement, rect: DOMRect): DOMRect {
   const borderBottom = getFloatStyle(element, 'border-bottom-width');
   const borderLeft = getFloatStyle(element, 'border-left-width');
 
-  // $FlowFixMe Error introduced by upgrading to v0.96.0.
+  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
   return new DOMRect(
     rect.left + borderLeft,
     rect.top + borderTop,
@@ -35,7 +35,7 @@ function subtractPadding(element: HTMLElement, rect: DOMRect): DOMRect {
   const paddingRight = getFloatStyle(element, 'padding-right');
   const paddingBottom = getFloatStyle(element, 'padding-bottom');
   const paddingLeft = getFloatStyle(element, 'padding-left');
-  // $FlowFixMe Error introduced by upgrading to v0.96.0.
+  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
   return new DOMRect(
     rect.left + paddingLeft,
     rect.top + paddingTop,
@@ -49,7 +49,7 @@ function addMargin(element: HTMLElement, rect: DOMRect): DOMRect {
   const marginRight = getFloatStyle(element, 'margin-right');
   const marginBottom = getFloatStyle(element, 'margin-bottom');
   const marginLeft = getFloatStyle(element, 'margin-left');
-  // $FlowFixMe Error introduced by upgrading to v0.96.0.
+  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
   return new DOMRect(
     rect.left - marginLeft,
     rect.top - marginTop,
@@ -65,7 +65,7 @@ function addMargin(element: HTMLElement, rect: DOMRect): DOMRect {
 export function getContentRect(element: HTMLElement): DOMRect {
   const clientRects = element.getClientRects();
   if (clientRects.length !== 1) {
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
+    // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
     return new DOMRect(0, 0, 0, 0);
   }
 
@@ -77,7 +77,7 @@ export function getContentRect(element: HTMLElement): DOMRect {
 }
 
 function clientRectToDomRect(clientRect: ClientRect): DOMRect {
-  // $FlowFixMe Error introduced by upgrading to v0.96.0.
+  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
   return new DOMRect(
     clientRect.left,
     clientRect.top,
@@ -93,7 +93,7 @@ function clientRectToDomRect(clientRect: ClientRect): DOMRect {
 export function getMarginRect(element: HTMLElement): DOMRect {
   const clientRects = element.getClientRects();
   if (clientRects.length !== 1) {
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
+    // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
     return new DOMRect(0, 0, 0, 0);
   }
 

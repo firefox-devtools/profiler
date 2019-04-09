@@ -26,10 +26,7 @@ import './Selection.css';
 import type { OnMove } from '../shared/Draggable';
 import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type MouseHandler = (event: MouseEvent) => void;
 
@@ -267,7 +264,6 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     const { previewSelection, zeroAt, commitRange } = this.props;
     if (previewSelection.hasSelection) {
       commitRange(
-        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         previewSelection.selectionStart - zeroAt,
         previewSelection.selectionEnd - zeroAt
       );
@@ -371,8 +367,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   }
 }
 
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
@@ -384,7 +379,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     commitRange,
   },
   component: TimelineRulerAndSelection,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

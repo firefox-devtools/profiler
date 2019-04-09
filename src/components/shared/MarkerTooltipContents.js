@@ -37,10 +37,7 @@ import type {
   PhaseTimes,
   StyleMarkerPayload,
 } from '../../types/markers';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 function _markerDetail<T: NotVoidOrNull>(
   key: string,
@@ -914,7 +911,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+export default explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
@@ -930,7 +927,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     };
   },
   component: MarkerTooltipContents,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

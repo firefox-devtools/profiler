@@ -49,10 +49,7 @@ import type {
   HiddenTrackCount,
 } from '../../types/actions';
 import type { Milliseconds, StartEndRange } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 export const TIMELINE_SETTINGS_HEIGHT = 26;
 
@@ -184,15 +181,12 @@ class Timeline extends React.PureComponent<Props> {
             '--timeline-settings-height': `${TIMELINE_SETTINGS_HEIGHT}px`,
           }}
         >
-          {/* $FlowFixMe Error introduced by upgrading to v0.96.0. */}
           <TimelineSettingsGraphType
             timelineType={timelineType}
-            // $FlowFixMe Error introduced by upgrading to v0.96.0.
             changeTimelineType={changeTimelineType}
           />
           <TimelineSettingsHiddenTracks
             hiddenTrackCount={hiddenTrackCount}
-            // $FlowFixMe Error introduced by upgrading to v0.96.0.
             changeRightClickedTrack={changeRightClickedTrack}
           />
         </div>
@@ -214,7 +208,6 @@ class Timeline extends React.PureComponent<Props> {
                 grippyClassName="timelineTrackGlobalGrippy"
                 order={globalTrackOrder}
                 orient="vertical"
-                // $FlowFixMe Error introduced by upgrading to v0.96.0.
                 onChangeOrder={changeGlobalTrackOrder}
               >
                 {globalTracks.map((globalTrack, trackIndex) => (
@@ -233,25 +226,25 @@ class Timeline extends React.PureComponent<Props> {
   }
 }
 
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
-  mapStateToProps: state => ({
-    globalTracks: getGlobalTracks(state),
-    globalTrackOrder: getGlobalTrackOrder(state),
-    globalTrackReferences: getGlobalTrackReferences(state),
-    committedRange: getCommittedRange(state),
-    zeroAt: getZeroAt(state),
-    panelLayoutGeneration: getPanelLayoutGeneration(state),
-    timelineType: getTimelineType(state),
-    hiddenTrackCount: getHiddenTrackCount(state),
-  }),
-  mapDispatchToProps: {
-    changeGlobalTrackOrder,
-    updatePreviewSelection,
-    commitRange,
-    changeTimelineType,
-    changeRightClickedTrack,
-  },
-  component: Timeline,
-};
-export default withSize(explicitConnect(options));
+export default withSize(
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
+    mapStateToProps: state => ({
+      globalTracks: getGlobalTracks(state),
+      globalTrackOrder: getGlobalTrackOrder(state),
+      globalTrackReferences: getGlobalTrackReferences(state),
+      committedRange: getCommittedRange(state),
+      zeroAt: getZeroAt(state),
+      panelLayoutGeneration: getPanelLayoutGeneration(state),
+      timelineType: getTimelineType(state),
+      hiddenTrackCount: getHiddenTrackCount(state),
+    }),
+    mapDispatchToProps: {
+      changeGlobalTrackOrder,
+      updatePreviewSelection,
+      commitRange,
+      changeTimelineType,
+      changeRightClickedTrack,
+    },
+    component: Timeline,
+  })
+);

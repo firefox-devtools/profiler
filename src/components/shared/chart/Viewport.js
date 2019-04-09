@@ -19,10 +19,7 @@ import type {
   StartEndRange,
 } from '../../../types/units';
 import type { PreviewSelection } from '../../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../../utils/connect';
+import type { ConnectedProps } from '../../../utils/connect';
 import {
   getObjectValuesAsUnion,
   assertExhaustiveCheck,
@@ -419,7 +416,6 @@ export const withChartViewport: WithChartViewport<*, *> =
           viewportProps: { marginLeft, marginRight },
         } = this.props;
         if (!hasZoomedViaMousewheel && setHasZoomedViaMousewheel) {
-          // $FlowFixMe Error introduced by upgrading to v0.96.0.
           setHasZoomedViaMousewheel();
         }
 
@@ -791,20 +787,18 @@ export const withChartViewport: WithChartViewport<*, *> =
 
     // Connect this component so that it knows whether or not to nag the user to use ctrl
     // for zooming on range selections.
-    const options: ExplicitConnectOptions<
+    return explicitConnect<
       ViewportOwnProps<ChartOwnProps>,
       ViewportStateProps,
       ViewportDispatchProps
-      // $FlowFixMe Error introduced by upgrading to v0.96.0.
-    > = {
+    >({
       mapStateToProps: state => ({
         panelLayoutGeneration: getPanelLayoutGeneration(state),
         hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
       }),
       mapDispatchToProps: { setHasZoomedViaMousewheel, updatePreviewSelection },
       component: ChartViewport,
-    };
-    return explicitConnect(options);
+    });
   };
 
 function clamp(min, max, value) {

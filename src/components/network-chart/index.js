@@ -28,10 +28,7 @@ import type { SizeProps } from '../shared/WithSize';
 import type { NetworkPayload } from '../../types/markers';
 import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
 import type { Milliseconds, CssPixels } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { NetworkChartRowProps } from './NetworkChartRow';
 
 require('./index.css');
@@ -107,30 +104,30 @@ class NetworkChart extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
-  mapStateToProps: state => {
-    const networkTimingRows = selectedThreadSelectors.getNetworkChartTiming(
-      state
-    );
-    return {
-      markers: selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(
-        state
-      ),
-      networkTimingRows,
-      maxNetworkRows: networkTimingRows.length,
-      timeRange: getCommittedRange(state),
-      interval: getProfileInterval(state),
-      threadIndex: getSelectedThreadIndex(state),
-    };
-  },
-  component: NetworkChart,
-};
-
 /**
  * Wrap the component in the WithSize higher order component, as well as the redux
  * connected component.
  */
-export default withSize(explicitConnect(options));
+export default withSize(
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
+    mapStateToProps: state => {
+      const networkTimingRows = selectedThreadSelectors.getNetworkChartTiming(
+        state
+      );
+      return {
+        markers: selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(
+          state
+        ),
+        networkTimingRows,
+        maxNetworkRows: networkTimingRows.length,
+        timeRange: getCommittedRange(state),
+        interval: getProfileInterval(state),
+        threadIndex: getSelectedThreadIndex(state),
+      };
+    },
+    component: NetworkChart,
+  })
+);
 
 /**
  * The VirtualListRow only re-renders when the props change, so pass in a pure function

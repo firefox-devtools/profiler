@@ -50,10 +50,7 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { State } from '../../types/state';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
@@ -93,9 +90,7 @@ class TimelineTrackThread extends PureComponent<Props> {
    */
   _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
     const { threadIndex, selectLeafCallNode, focusCallTree } = this.props;
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     selectLeafCallNode(threadIndex, sampleIndex);
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     focusCallTree();
   };
 
@@ -105,7 +100,6 @@ class TimelineTrackThread extends PureComponent<Props> {
     end: Milliseconds
   ) => {
     const { rangeStart, rangeEnd, updatePreviewSelection } = this.props;
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
@@ -118,7 +112,6 @@ class TimelineTrackThread extends PureComponent<Props> {
     const { threadIndex, height, reportTrackThreadHeight } = this.props;
     // Most likely this track height shouldn't change, but if it does, report it.
     // The action will only dispatch on changed values.
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     reportTrackThreadHeight(threadIndex, height);
   }
 
@@ -216,38 +209,38 @@ class TimelineTrackThread extends PureComponent<Props> {
   }
 }
 
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
-  mapStateToProps: (state: State, ownProps: OwnProps) => {
-    const { threadIndex } = ownProps;
-    const selectors = getThreadSelectors(threadIndex);
-    const selectedThread = getSelectedThreadIndex(state);
-    const committedRange = getCommittedRange(state);
-    return {
-      filteredThread: selectors.getFilteredThread(state),
-      fullThread: selectors.getRangeFilteredThread(state),
-      callNodeInfo: selectors.getCallNodeInfo(state),
-      selectedCallNodeIndex:
-        threadIndex === selectedThread
-          ? selectors.getSelectedCallNodeIndex(state)
-          : -1,
-      unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
-      interval: getProfileInterval(state),
-      rangeStart: committedRange.start,
-      rangeEnd: committedRange.end,
-      categories: getCategories(state),
-      timelineType: getTimelineType(state),
-      hasFileIoMarkers: selectors.getFileIoMarkers(state).length !== 0,
-    };
-  },
-  mapDispatchToProps: {
-    updatePreviewSelection,
-    changeRightClickedTrack,
-    changeSelectedCallNode,
-    focusCallTree,
-    selectLeafCallNode,
-    reportTrackThreadHeight,
-  },
-  component: TimelineTrackThread,
-};
-export default withSize(explicitConnect(options));
+export default withSize(
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
+    mapStateToProps: (state: State, ownProps: OwnProps) => {
+      const { threadIndex } = ownProps;
+      const selectors = getThreadSelectors(threadIndex);
+      const selectedThread = getSelectedThreadIndex(state);
+      const committedRange = getCommittedRange(state);
+      return {
+        filteredThread: selectors.getFilteredThread(state),
+        fullThread: selectors.getRangeFilteredThread(state),
+        callNodeInfo: selectors.getCallNodeInfo(state),
+        selectedCallNodeIndex:
+          threadIndex === selectedThread
+            ? selectors.getSelectedCallNodeIndex(state)
+            : -1,
+        unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
+        interval: getProfileInterval(state),
+        rangeStart: committedRange.start,
+        rangeEnd: committedRange.end,
+        categories: getCategories(state),
+        timelineType: getTimelineType(state),
+        hasFileIoMarkers: selectors.getFileIoMarkers(state).length !== 0,
+      };
+    },
+    mapDispatchToProps: {
+      updatePreviewSelection,
+      changeRightClickedTrack,
+      changeSelectedCallNode,
+      focusCallTree,
+      selectLeafCallNode,
+      reportTrackThreadHeight,
+    },
+    component: TimelineTrackThread,
+  })
+);

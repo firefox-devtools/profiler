@@ -27,10 +27,7 @@ import {
 import { BlobUrlLink } from '../../shared/BlobUrlLink';
 import { assertExhaustiveCheck } from '../../../utils/flow';
 
-import explicitConnect, {
-  type ExplicitConnectOptions,
-  type ConnectedProps,
-} from '../../../utils/connect';
+import explicitConnect, { type ConnectedProps } from '../../../utils/connect';
 
 import type { Profile } from '../../../types/profile';
 import type { CheckedSharingOptions } from '../../../types/actions';
@@ -181,7 +178,6 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   _closePanelAfterUpload = () => {
     const { resetUploadState } = this.props;
     // Only reset it after the panel animation disappears.
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     setTimeout(resetUploadState, 300);
 
     const { body } = document;
@@ -322,8 +318,11 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   }
 }
 
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export const MenuButtonsPublish = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
@@ -343,9 +342,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     resetUploadState,
   },
   component: MenuButtonsPublishImpl,
-};
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export const MenuButtonsPublish = explicitConnect(options);
+});
 
 type DownloadSizeProps = {|
   +downloadSizePromise: Promise<string>,

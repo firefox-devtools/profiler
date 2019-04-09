@@ -9,10 +9,7 @@ import EmptyReasons from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { oneLine } from 'common-tags';
 
-import explicitConnect, {
-  type ExplicitConnectOptions,
-  type ConnectedProps,
-} from '../../utils/connect';
+import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
 import type { State } from '../../types/store';
 
@@ -21,6 +18,7 @@ type StateProps = {|
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
+
 class MarkerChartEmptyReasons extends PureComponent<Props> {
   render() {
     const { threadName } = this.props;
@@ -42,12 +40,9 @@ class MarkerChartEmptyReasons extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
   }),
   component: MarkerChartEmptyReasons,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

@@ -12,10 +12,7 @@ import {
 import explicitConnect from '../../utils/connect';
 
 import type { RequestedLib } from '../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 function englishSgPlLibrary(count) {
   return count === 1 ? 'library' : 'libraries';
@@ -69,12 +66,10 @@ class SymbolicationStatusOverlay extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     symbolicationStatus: getSymbolicationStatus(state),
     waitingForLibs: getProfileViewOptions(state).waitingForLibs,
   }),
   component: SymbolicationStatusOverlay,
-};
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

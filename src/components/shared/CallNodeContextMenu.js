@@ -36,10 +36,7 @@ import type {
   CallNodePath,
 } from '../../types/profile-derived';
 import type { Thread, ThreadIndex } from '../../types/profile';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   forceOpenForTests?: boolean,
@@ -218,7 +215,6 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
 
     switch (type) {
       case 'focus-subtree':
-        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         addTransformToStack(threadIndex, {
           type: 'focus-subtree',
           callNodePath: selectedCallNodePath,
@@ -227,14 +223,12 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
         });
         break;
       case 'focus-function':
-        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         addTransformToStack(threadIndex, {
           type: 'focus-function',
           funcIndex: selectedFunc,
         });
         break;
       case 'merge-call-node':
-        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         addTransformToStack(threadIndex, {
           type: 'merge-call-node',
           callNodePath: selectedCallNodePath,
@@ -242,14 +236,12 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
         });
         break;
       case 'merge-function':
-        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         addTransformToStack(threadIndex, {
           type: 'merge-function',
           funcIndex: selectedFunc,
         });
         break;
       case 'drop-function':
-        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         addTransformToStack(threadIndex, {
           type: 'drop-function',
           funcIndex: selectedFunc,
@@ -261,7 +253,6 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
         // A new collapsed func will be inserted into the table at the end. Deduce
         // the index here.
         const collapsedFuncIndex = funcTable.length;
-        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         addTransformToStack(threadIndex, {
           type: 'collapse-resource',
           resourceIndex,
@@ -271,7 +262,6 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
         break;
       }
       case 'collapse-direct-recursion': {
-        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         addTransformToStack(threadIndex, {
           type: 'collapse-direct-recursion',
           funcIndex: selectedFunc,
@@ -280,7 +270,6 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
         break;
       }
       case 'collapse-function-subtree': {
-        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         addTransformToStack(threadIndex, {
           type: 'collapse-function-subtree',
           funcIndex: selectedFunc,
@@ -307,7 +296,6 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
 
     expandAllCallNodeDescendants(
       threadIndex,
-      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       selectedCallNodeIndex,
       callNodeInfo
     );
@@ -521,8 +509,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
   }
 }
 
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     threadIndex: getSelectedThreadIndex(state),
@@ -543,6 +530,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     setCallNodeContextMenuVisibility,
   },
   component: CallNodeContextMenu,
-};
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

@@ -18,10 +18,7 @@ import {
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { Profile, JsTracerTable, ThreadIndex } from '../../types/profile';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');
 
@@ -68,7 +65,7 @@ class JsTracer extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       profile: getProfile(state),
@@ -79,6 +76,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   },
   mapDispatchToProps: { updatePreviewSelection },
   component: JsTracer,
-};
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

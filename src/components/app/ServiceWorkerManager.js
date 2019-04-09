@@ -9,10 +9,7 @@ import explicitConnect from '../../utils/connect';
 import { getDataSource } from '../../selectors/url-state';
 import { getView } from '../../selectors/app';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { DataSource } from '../../types/actions';
 import type { Phase } from '../../types/state';
 
@@ -146,12 +143,10 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     phase: getView(state).phase,
     dataSource: getDataSource(state),
   }),
   component: ServiceWorkerManager,
-};
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

@@ -5,16 +5,21 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
 import { changeShowJsTracerSummary } from '../../actions/profile-view';
 import { getShowJsTracerSummary } from '../../selectors/url-state';
+import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
 import './Settings.css';
 
-type Props = {|
+type StateProps = {|
   +showJsTracerSummary: boolean,
+|};
+
+type DispatchProps = {|
   +changeShowJsTracerSummary: typeof changeShowJsTracerSummary,
 |};
+
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class JsTracerSettings extends PureComponent<Props> {
   _onCheckboxChange = () => {
@@ -43,12 +48,12 @@ class JsTracerSettings extends PureComponent<Props> {
   }
 }
 
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default connect(
-  state => ({
+export default explicitConnect<{||}, StateProps, DispatchProps>({
+  mapStateToProps: state => ({
     showJsTracerSummary: getShowJsTracerSummary(state),
   }),
-  {
+  mapDispatchToProps: {
     changeShowJsTracerSummary,
-  }
-)(JsTracerSettings);
+  },
+  component: JsTracerSettings,
+});

@@ -36,10 +36,7 @@ import type {
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { IconWithClassName } from '../../types/state';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 require('./FlameGraph.css');
 
@@ -308,7 +305,7 @@ function viewportNeedsUpdate() {
   return false;
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
@@ -337,7 +334,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     changeSelectedCallNode,
   },
   component: FlameGraph,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

@@ -10,7 +10,6 @@ import FilterNavigatorBar from './FilterNavigatorBar';
 import { popTransformsFromStack } from '../../actions/profile-view';
 
 import type { State } from '../../types/state';
-import type { ExplicitConnectOptions } from '../../utils/connect';
 import type { ElementProps } from 'react';
 
 import './TransformNavigator.css';
@@ -21,7 +20,7 @@ type DispatchProps = {|
 |};
 type StateProps = $Diff<Props, DispatchProps>;
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => {
     const items = selectedThreadSelectors.getTransformLabels(state);
     return {
@@ -32,7 +31,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   },
   mapDispatchToProps: { onPop: popTransformsFromStack },
   component: FilterNavigatorBar,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

@@ -27,10 +27,7 @@ import MarkerTableContextMenu from '../marker-table/ContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import './Details.css';
@@ -115,7 +112,7 @@ class ProfileViewer extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     visibleTabs: getVisibleTabs(state),
     selectedTab: getSelectedTab(state),
@@ -126,7 +123,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     changeSidebarOpenState,
   },
   component: ProfileViewer,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

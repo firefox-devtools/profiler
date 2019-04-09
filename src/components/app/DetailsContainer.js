@@ -15,10 +15,7 @@ import { getIsSidebarOpen } from '../../selectors/app';
 import explicitConnect from '../../utils/connect';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import './DetailsContainer.css';
 
@@ -55,7 +52,7 @@ function DetailsContainer({
   );
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
@@ -64,7 +61,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     invalidatePanelLayout,
   },
   component: DetailsContainer,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

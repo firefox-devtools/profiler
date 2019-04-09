@@ -42,10 +42,7 @@ import type {
 import type { State } from '../../types/state';
 import type { TrackReference } from '../../types/actions';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +threads: Thread[],
@@ -81,10 +78,8 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const { trackIndex } = data;
     const { hiddenGlobalTracks, hideGlobalTrack, showGlobalTrack } = this.props;
     if (hiddenGlobalTracks.has(trackIndex)) {
-      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       showGlobalTrack(trackIndex);
     } else {
-      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       hideGlobalTrack(trackIndex);
     }
   };
@@ -104,10 +99,8 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       'Expected to find hidden local tracks for the given pid'
     );
     if (hiddenLocalTracks.has(trackIndex)) {
-      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       showLocalTrack(pid, trackIndex);
     } else {
-      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       hideLocalTrack(pid, trackIndex);
     }
   };
@@ -124,7 +117,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         'Attempting to isolate a process track with a local track is selected.'
       );
     }
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     isolateProcess(rightClickedTrack.trackIndex);
   };
 
@@ -141,7 +133,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         'Attempting to isolate a process track with a local track is selected.'
       );
     }
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     isolateProcessMainThread(rightClickedTrack.trackIndex);
   };
 
@@ -159,7 +150,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       );
     }
     const { pid, trackIndex } = rightClickedTrack;
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     isolateLocalTrack(pid, trackIndex);
   };
 
@@ -431,8 +421,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   }
 }
 
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
     threads: getThreads(state),
     globalTrackOrder: getGlobalTrackOrder(state),
@@ -456,6 +445,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     showLocalTrack,
   },
   component: TimelineTrackContextMenu,
-};
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

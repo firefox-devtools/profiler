@@ -10,10 +10,7 @@ import { getIconClassNameForCallNode } from '../../selectors/icons';
 import { iconStartLoading } from '../../actions/icons';
 
 import type { CallNodeDisplayData } from '../../types/profile-derived';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +displayData: CallNodeDisplayData,
@@ -49,13 +46,11 @@ class NodeIcon extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, { displayData }) => ({
     className: getIconClassNameForCallNode(state, displayData),
     icon: displayData.icon,
   }),
   mapDispatchToProps: { iconStartLoading },
   component: NodeIcon,
-};
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

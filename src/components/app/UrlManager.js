@@ -10,10 +10,7 @@ import { getIsUrlSetupDone } from '../../selectors/app';
 import { updateUrlState, urlSetupDone, show404 } from '../../actions/app';
 import { urlFromState, stateFromLocation } from '../../app-logic/url-handling';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { UrlState } from '../../types/state';
 
 type StateProps = {|
@@ -44,7 +41,6 @@ class UrlManager extends React.PureComponent<Props> {
         urlState = stateFromLocation(window.location);
       } catch (e) {
         console.error(e);
-        // $FlowFixMe Error introduced by upgrading to v0.96.0.
         show404(window.location.pathname + window.location.search);
         return;
       }
@@ -55,7 +51,6 @@ class UrlManager extends React.PureComponent<Props> {
         urlState = null;
       }
     }
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
     updateUrlState(urlState);
   }
   componentDidMount() {
@@ -86,8 +81,7 @@ class UrlManager extends React.PureComponent<Props> {
   }
 }
 
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     urlState: state.urlState,
     isUrlSetupDone: getIsUrlSetupDone(state),
@@ -98,7 +92,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     show404,
   },
   component: UrlManager,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

@@ -10,10 +10,7 @@ import { changeMarkersSearchString } from '../../actions/profile-view';
 import { getMarkersSearchString } from '../../selectors/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import './MarkerSettings.css';
 
@@ -54,12 +51,10 @@ class Settings extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     searchString: getMarkersSearchString(state),
   }),
   mapDispatchToProps: { changeMarkersSearchString },
   component: Settings,
-};
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

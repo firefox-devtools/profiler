@@ -83,7 +83,7 @@ export type WrapFunctionInDispatch<Fn: Function> = $Call<
   Fn
 >;
 
-export type ExplicitConnectOptions<
+type ExplicitConnectOptions<
   OwnProps: Object,
   StateProps: Object,
   DispatchProps: Object
@@ -109,7 +109,7 @@ export type ConnectedProps<
 > = $ReadOnly<{|
   ...OwnProps,
   ...StateProps,
-  ...WrapDispatchProps<DispatchProps>,
+  ...DispatchProps,
 |}>;
 
 export type ConnectedComponent<

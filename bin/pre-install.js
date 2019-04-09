@@ -106,14 +106,13 @@ function parseExpectedNodeVersion() {
   });
   const expectedNodeVersion = /image: circleci\/node:([\d.]+)/.exec(
     circleConfig
-    // $FlowFixMe Error introduced by upgrading to v0.96.0.
-  )[1];
+  );
   if (!expectedNodeVersion) {
     throw new Error(
       `Couldn't extract the node version from .circleci/config.yml.`
     );
   }
-  return expectedNodeVersion;
+  return expectedNodeVersion[1];
 }
 
 function displayYarnVersionExplanation() {

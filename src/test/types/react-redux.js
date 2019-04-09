@@ -7,7 +7,6 @@ import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 
 import type {
-  ExplicitConnectOptions,
   ConnectedProps,
   WrapDispatchProps,
   WrapFunctionInDispatch,
@@ -62,7 +61,9 @@ class ExampleComponent extends React.PureComponent<Props> {
 
     // The action creators are properly wrapped by dispatch.
     (this.props.dispatchString: string => Action);
+    // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
     (this.props.dispatchThunk: string => number);
+    // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
     (this.props.dispatchThunk('foo'): number);
 
     return null;
@@ -86,13 +87,15 @@ declare var validDispatchToProps: {|
 
 // This value also serves as a test for the common case of creating a component
 // with valid values.
-const ConnectedExampleComponent = explicitConnect(
-  ({
-    mapStateToProps: validMapStateToProps,
-    mapDispatchToProps: validDispatchToProps,
-    component: ExampleComponent,
-  }: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps>)
-);
+const ConnectedExampleComponent = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
+  mapStateToProps: validMapStateToProps,
+  mapDispatchToProps: validDispatchToProps,
+  component: ExampleComponent,
+});
 
 {
   // Test that WrapDispatchProps modifies the ThunkActions.
@@ -128,7 +131,7 @@ const ConnectedExampleComponent = explicitConnect(
 
 {
   // Test that mapStateToProps will error out if provided an extra value.
-  const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
     // $FlowExpectError
     mapStateToProps: state => ({
       statePropString: 'string',
@@ -137,13 +140,12 @@ const ConnectedExampleComponent = explicitConnect(
     }),
     mapDispatchToProps: validDispatchToProps,
     component: ExampleComponent,
-  };
-  explicitConnect(options);
+  });
 }
 
 {
   // Test that mapStateToProps will error if provided an extra value.
-  const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
     mapStateToProps: state => ({
       statePropString: 'string',
       // $FlowExpectError
@@ -151,26 +153,24 @@ const ConnectedExampleComponent = explicitConnect(
     }),
     mapDispatchToProps: validDispatchToProps,
     component: ExampleComponent,
-  };
-  explicitConnect(options);
+  });
 }
 
 {
   // Test that mapDispatchToProps will error if a value is omitted.
-  const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
     mapStateToProps: validMapStateToProps,
     // $FlowExpectError
     mapDispatchToProps: (ANY_VALUE: {|
       +dispatchThunk: string => ThunkAction<number>,
     |}),
     component: ExampleComponent,
-  };
-  explicitConnect(options);
+  });
 }
 
 {
   // Test that mapDispatchToProps will error if a variable type definition is wrong.
-  const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
     mapStateToProps: validMapStateToProps,
     mapDispatchToProps: (ANY_VALUE: {|
       // $FlowExpectError
@@ -178,13 +178,12 @@ const ConnectedExampleComponent = explicitConnect(
       +dispatchThunk: string => ThunkAction<number>,
     |}),
     component: ExampleComponent,
-  };
-  explicitConnect(options);
+  });
 }
 
 {
   // Test that mapDispatchToProps will error if an extra property is given.
-  const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+  explicitConnect<OwnProps, StateProps, DispatchProps>({
     mapStateToProps: validMapStateToProps,
     // $FlowExpectError
     mapDispatchToProps: (ANY_VALUE: {|
@@ -192,8 +191,7 @@ const ConnectedExampleComponent = explicitConnect(
       +extraProperty: string => string,
     |}),
     component: ExampleComponent,
-  };
-  explicitConnect(options);
+  });
 }
 
 {

@@ -22,10 +22,7 @@ import './index.css';
 import type { ThreadIndex } from '../../types/profile';
 import type { Marker, IndexIntoMarkers } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type MarkerDisplayData = {|
   start: string,
@@ -253,7 +250,7 @@ class MarkerTable extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -263,6 +260,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   }),
   mapDispatchToProps: { changeSelectedMarker },
   component: MarkerTable,
-};
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

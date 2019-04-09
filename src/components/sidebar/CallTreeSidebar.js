@@ -17,10 +17,7 @@ import { getFunctionName } from '../../profile-logic/function-info';
 import { getFriendlyStackTypeName } from '../../profile-logic/profile-data';
 import CanSelectContent from './CanSelectContent';
 
-import type {
-  ConnectedProps,
-  ExplicitConnectOptions,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { ThreadIndex, CategoryList } from '../../types/profile';
 import type {
   CallNodeTable,
@@ -295,7 +292,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
     callNodeTable: selectedThreadSelectors.getCallNodeInfo(state).callNodeTable,
@@ -307,7 +304,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
     isIntervalInteger: Number.isInteger(getProfileInterval(state)),
   }),
   component: CallTreeSidebar,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

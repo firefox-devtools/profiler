@@ -8,10 +8,7 @@ import React, { PureComponent } from 'react';
 import EmptyReasons from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { oneLine } from 'common-tags';
-import explicitConnect, {
-  type ExplicitConnectOptions,
-  type ConnectedProps,
-} from '../../utils/connect';
+import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
 import type { Thread } from '../../types/profile';
 import type { State } from '../../types/store';
@@ -54,14 +51,11 @@ class CallTreeEmptyReasons extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
     thread: selectedThreadSelectors.getThread(state),
     rangeFilteredThread: selectedThreadSelectors.getRangeFilteredThread(state),
   }),
   component: CallTreeEmptyReasons,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

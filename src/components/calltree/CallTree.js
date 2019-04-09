@@ -38,10 +38,7 @@ import type {
   CallNodeDisplayData,
 } from '../../types/profile-derived';
 import type { Column } from '../shared/TreeView';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
@@ -115,7 +112,6 @@ class CallTreeComponent extends PureComponent<Props> {
     const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
       threadIndex,
-      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       getCallNodePathFromIndex(newSelectedCallNode, callNodeInfo.callNodeTable)
     );
   };
@@ -126,7 +122,6 @@ class CallTreeComponent extends PureComponent<Props> {
     const { callNodeInfo, threadIndex, changeExpandedCallNodes } = this.props;
     changeExpandedCallNodes(
       threadIndex,
-      // $FlowFixMe Error introduced by upgrading to v0.96.0.
       newExpandedCallNodeIndexes.map(callNodeIndex =>
         getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
       )
@@ -192,8 +187,7 @@ class CallTreeComponent extends PureComponent<Props> {
   }
 }
 
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -220,7 +214,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   },
   options: { withRef: true },
   component: CallTreeComponent,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export default explicitConnect(options);
+});

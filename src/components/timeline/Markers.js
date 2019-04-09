@@ -19,10 +19,7 @@ import './Markers.css';
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type { Marker } from '../../types/profile-derived';
 import type { SizeProps } from '../shared/WithSize';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
 
 // Exported for tests.
@@ -370,7 +367,7 @@ export const TimelineMarkers = withSize(TimelineMarkersImplementation);
 /**
  * Create a special connected component for Jank instances.
  */
-const jankOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+export const TimelineMarkersJank = explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
@@ -384,15 +381,16 @@ const jankOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     };
   },
   component: TimelineMarkers,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export const TimelineMarkersJank = explicitConnect(jankOptions);
+});
 
 /**
  * Create a connected component for all markers.
  */
-const markersOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+export const TimelineMarkersOverview = explicitConnect<
+  OwnProps,
+  StateProps,
+  {||}
+>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
@@ -410,15 +408,16 @@ const markersOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     };
   },
   component: TimelineMarkers,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export const TimelineMarkersOverview = explicitConnect(markersOptions);
+});
 
 /**
  * FileIO is an optional marker type. Only add these markers if they exist.
  */
-const fileIoOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+export const TimelineMarkersFileIo = explicitConnect<
+  OwnProps,
+  StateProps,
+  {||}
+>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
@@ -432,15 +431,16 @@ const fileIoOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     };
   },
   component: TimelineMarkers,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export const TimelineMarkersFileIo = explicitConnect(fileIoOptions);
+});
 
 /**
  * Create a component for memory-related markers.
  */
-const memoryOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+export const TimelineMarkersMemory = explicitConnect<
+  OwnProps,
+  StateProps,
+  {||}
+>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
@@ -455,7 +455,4 @@ const memoryOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     };
   },
   component: TimelineMarkers,
-};
-
-// $FlowFixMe Error introduced by upgrading to v0.96.0.
-export const TimelineMarkersMemory = explicitConnect(memoryOptions);
+});
