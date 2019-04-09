@@ -22,6 +22,7 @@ import {
   changeImplementationFilter,
   changeInvertCallstack,
   commitRange,
+  addTransformToStack,
 } from '../../actions/profile-view';
 
 describe('calltree/ProfileCallTreeView', function() {
@@ -249,5 +250,73 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     expect(selectedText()).toBe('name100');
     simulateKey({ key: 'ArrowUp', metaKey: true });
     expect(selectedText()).toBe('name1');
+  });
+});
+
+describe('calltree/ProfileCallTreeView TransformNavigator', () => {
+  beforeEach(() => {
+    // Mock out the 2d canvas for the loupe view.
+    jest
+      .spyOn(HTMLCanvasElement.prototype, 'getContext')
+      .mockImplementation(() => mockCanvasContext());
+
+    // This makes the bounding box large enough so that we don't trigger
+    // VirtualList's virtualization. We assert this above.
+    jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(1000, 2000));
+  });
+
+  it('renders with multiple transforms applied', () => {
+    const {
+      profile,
+      funcNamesPerThread: [funcNames],
+    } = getProfileFromTextSamples(`
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  E
+    `);
+    profile.threads[0].name = 'Thread with samples';
+    const store = storeWithProfile(profile);
+
+    // Applying some transforms
+    const A = funcNames.indexOf('A');
+    const B = funcNames.indexOf('B');
+    const C = funcNames.indexOf('C');
+    store.dispatch(
+      addTransformToStack(0, {
+        type: 'focus-subtree',
+        callNodePath: [A],
+        implementation: 'combined',
+        inverted: false,
+      })
+    );
+    store.dispatch(
+      addTransformToStack(0, {
+        type: 'focus-subtree',
+        callNodePath: [B],
+        implementation: 'combined',
+        inverted: false,
+      })
+    );
+    store.dispatch(
+      addTransformToStack(0, {
+        type: 'focus-subtree',
+        callNodePath: [C],
+        implementation: 'combined',
+        inverted: false,
+      })
+    );
+
+    const { container } = render(
+      <Provider store={store}>
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
+      </Provider>
+    );
+    expect(
+      container.querySelector('.calltreeTransformNavigator')
+    ).toMatchSnapshot();
   });
 });
