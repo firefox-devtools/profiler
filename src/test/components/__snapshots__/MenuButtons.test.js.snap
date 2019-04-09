@@ -314,6 +314,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         class="photon-label"
       >
         <input
+          checked=""
           class="photon-checkbox photon-checkbox-default"
           name="isFiltering"
           type="checkbox"
@@ -324,60 +325,55 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
         class="menuButtonsPublishDataChoices"
       >
         <label
-          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+          class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
             checked=""
             class="photon-checkbox photon-checkbox-default"
-            disabled=""
             name="hiddenThreads"
             type="checkbox"
           />
           Remove hidden threads
         </label>
         <label
-          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+          class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
             checked=""
             class="photon-checkbox photon-checkbox-default"
-            disabled=""
             name="timeRange"
             type="checkbox"
           />
           Remove information out of the time range
         </label>
         <label
-          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+          class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
             checked=""
             class="photon-checkbox photon-checkbox-default"
-            disabled=""
             name="screenshots"
             type="checkbox"
           />
           Remove screenshots
         </label>
         <label
-          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+          class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
             checked=""
             class="photon-checkbox photon-checkbox-default"
-            disabled=""
             name="urls"
             type="checkbox"
           />
           Remove all URLs
         </label>
         <label
-          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+          class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
             checked=""
             class="photon-checkbox photon-checkbox-default"
-            disabled=""
             name="extension"
             type="checkbox"
           />
