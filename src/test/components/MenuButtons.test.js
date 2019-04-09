@@ -5,11 +5,13 @@
 // @flow
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
-import { render, fireEvent, waitForDomChange } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
-import * as ProfileViewSelectors from '../../selectors/profile';
+import { stateFromLocation } from '../../app-logic/url-handling';
+import { ensureExists } from '../../utils/flow';
+import { getProfile } from '../../selectors/profile';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -26,54 +28,71 @@ jest.mock('../../utils/gz');
 import { shortenUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
+// Mock hash
+const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
+
 describe('app/MenuButtons', function() {
-  function setup(profile) {
-    const store = storeWithProfile(profile);
+  function mockUpload() {
+    // Create a promise with the resolve function outside of it.
+    let resolveUpload, rejectUpload;
+    const promise = new Promise((resolve, reject) => {
+      resolveUpload = resolve;
+      rejectUpload = reject;
+    });
+
+    // Flow doesn't know uploadBinaryProfileData is a jest mock.
+    (uploadBinaryProfileData: any).mockImplementation(
+      (() => ({
+        abortFunction: () => {},
+        startUpload: () => promise,
+      }): typeof uploadBinaryProfileData)
+    );
+
+    return { resolveUpload, rejectUpload };
+  }
+
+  function setup(updateChannel = 'release') {
+    const store = storeWithProfile();
+    const profile = getProfile(store.getState());
+    profile.meta.updateChannel = updateChannel;
+    const { resolveUpload, rejectUpload } = mockUpload();
+
+    store.dispatch({
+      type: 'UPDATE_URL_STATE',
+      newUrlState: stateFromLocation({
+        pathname: '/from-addon',
+        search: '',
+        hash: '',
+      }),
+    });
+
     const renderResult = render(
       <Provider store={store}>
         <MenuButtons />
       </Provider>
     );
 
-    const { getByTestId, getByValue } = renderResult;
-    const getShareButton = () => getByValue('Share…');
-    const getInnerShareButton = () => getByValue('Share');
-    const getShareWithUrlsButton = () => getByValue('Share with URLs');
-    const getInnerShareWithUrlsButton = (): null | HTMLElement => {
-      const shareWithUrlsButton = getShareWithUrlsButton();
-      if (
-        shareWithUrlsButton.parentElement !== undefined &&
-        shareWithUrlsButton.parentElement !== null &&
-        shareWithUrlsButton.parentElement.nextElementSibling !== undefined &&
-        shareWithUrlsButton.parentElement.nextElementSibling !== null
-      ) {
-        return shareWithUrlsButton.parentElement.nextElementSibling.getElementsByClassName(
-          'arrowPanelOkButton'
-        )[0];
-      }
-      return null;
-    };
-
-    const getMenuButtonsContainer = () =>
-      getByTestId('menuButtonsCompositeButtonContainer');
-    const getPermalinkButton = () => getByValue('Permalink');
+    const { container, getByTestId, getByText } = renderResult;
+    const getPublishButton = () => getByText('Publish…');
+    const getPanelForm = () =>
+      ensureExists(
+        container.querySelector('form'),
+        'Could not find the form in the panel'
+      );
+    const getPanel = () => getByTestId('MenuButtonsPublish-container');
 
     return {
       store,
       ...renderResult,
-      getShareButton,
-      getInnerShareButton,
-      getShareWithUrlsButton,
-      getInnerShareWithUrlsButton,
-      getMenuButtonsContainer,
-      getPermalinkButton,
+      getPanel,
+      getPublishButton,
+      getPanelForm,
+      resolveUpload,
+      rejectUpload,
     };
   }
 
-  describe('share and save buttons', function() {
-    // Mock hash
-    const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-
+  describe('<Publish>', function() {
     beforeAll(function() {
       if ((window: any).TextEncoder) {
         throw new Error('A TextEncoder was already on the window object.');
@@ -82,14 +101,12 @@ describe('app/MenuButtons', function() {
     });
 
     afterAll(async function() {
+      delete URL.createObjectURL;
+      delete URL.revokeObjectURL;
       delete (window: any).TextEncoder;
     });
 
     beforeEach(function() {
-      // Flow doesn't know uploadBinaryProfileData is a jest mock.
-      (uploadBinaryProfileData: any).mockImplementation(() =>
-        Promise.resolve(hash)
-      );
       // Flow doesn't know sha1 is a jest mock.
       (sha1: any).mockImplementation((_data: Uint8Array) =>
         Promise.resolve(hash)
@@ -98,89 +115,60 @@ describe('app/MenuButtons', function() {
       (shortenUrl: any).mockImplementation(() =>
         Promise.resolve('https://profiler.firefox.com/')
       );
+      // jsdom does not have URL.createObjectURL.
+      // See https://github.com/jsdom/jsdom/issues/1721
+      (URL: any).createObjectURL = () => 'mockCreateObjectUrl';
+      (URL: any).revokeObjectURL = () => {};
     });
 
-    it('matches the snapshot', () => {
+    it('matches the snapshot for the closed state', () => {
       const { container } = setup();
-      expect(Array.from(container.children)).toMatchSnapshot();
+      expect(container).toMatchSnapshot();
     });
 
-    it('should share the profile when Share button is clicked', async () => {
+    it('matches the snapshot for the opened panel for a nightly profile', () => {
+      const { getPanel, getPublishButton } = setup('nightly');
+      fireEvent.click(getPublishButton());
+      expect(getPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot for the opened panel for a release profile', () => {
+      const { getPanel, getPublishButton } = setup('release');
+      fireEvent.click(getPublishButton());
+      expect(getPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot for the uploading panel', () => {
+      const { getPanel, getPublishButton, getPanelForm } = setup();
+      fireEvent.click(getPublishButton());
+      fireEvent.submit(getPanelForm());
+      expect(getPanel()).toMatchSnapshot();
+    });
+
+    it('matches the snapshot for the completed upload panel', () => {
       const {
-        store,
-        getShareButton,
-        getShareWithUrlsButton,
-        getInnerShareButton,
-        getInnerShareWithUrlsButton,
-        getMenuButtonsContainer,
+        getPanel,
+        getPublishButton,
+        getPanelForm,
+        resolveUpload,
       } = setup();
-      // Sharing without URLs
-      fireEvent.click(getShareButton());
-      fireEvent.click(getInnerShareButton());
+      fireEvent.click(getPublishButton());
+      fireEvent.submit(getPanelForm());
+      resolveUpload();
+      expect(getPanel()).toMatchSnapshot();
+    });
 
-      // This part touches the implementation logic by getting the menu buttons
-      // container and checking its class list. The ideal way is not to touch
-      // the implementation logic of component and test the things user can see
-      // and interract with `waitForElement`. But since sharing is async and we
-      // can't catch other visual DOM changes here, we had to do this.
-      await waitForDomChange({
-        container: getMenuButtonsContainer(),
-        mutationObserverOptions: { attributes: true },
-      }).then(mutationsList => {
-        const mutation = mutationsList[0];
-        expect(
-          mutation.target.classList.contains('currentButtonIsPermalinkButton')
-        ).toEqual(true);
-        expect(
-          mutation.target.classList.contains('currentButtonIsShareButton')
-        ).toEqual(false);
-        expect(
-          mutation.target.classList.contains(
-            'currentButtonIsSecondaryShareButton'
-          )
-        ).toEqual(true);
-      });
-
-      const profileSharingStatus = ProfileViewSelectors.getProfileSharingStatus(
-        store.getState()
-      );
-      expect(profileSharingStatus).toEqual({
-        sharedWithUrls: false,
-        sharedWithoutUrls: true,
-      });
-
-      // Sharing with URLs this time
-      const innerShareButton = getInnerShareWithUrlsButton();
-      if (innerShareButton !== null) {
-        fireEvent.click(getShareWithUrlsButton());
-        fireEvent.click(innerShareButton);
-      }
-
-      await waitForDomChange({
-        container: getMenuButtonsContainer(),
-        mutationObserverOptions: { attributes: true },
-      }).then(mutationsList => {
-        const mutation = mutationsList[0];
-        expect(
-          mutation.target.classList.contains('currentButtonIsPermalinkButton')
-        ).toEqual(true);
-        expect(
-          mutation.target.classList.contains('currentButtonIsShareButton')
-        ).toEqual(false);
-        expect(
-          mutation.target.classList.contains(
-            'currentButtonIsSecondaryShareButton'
-          )
-        ).toEqual(false);
-      });
-
-      const newProfileSharingStatus = ProfileViewSelectors.getProfileSharingStatus(
-        store.getState()
-      );
-      expect(newProfileSharingStatus).toEqual({
-        sharedWithUrls: true,
-        sharedWithoutUrls: true,
-      });
+    it('matches the snapshot for an error', () => {
+      const {
+        getPanel,
+        getPublishButton,
+        getPanelForm,
+        rejectUpload,
+      } = setup();
+      fireEvent.click(getPublishButton());
+      fireEvent.submit(getPanelForm());
+      rejectUpload('This is a mock error');
+      expect(getPanel()).toMatchSnapshot();
     });
   });
 });

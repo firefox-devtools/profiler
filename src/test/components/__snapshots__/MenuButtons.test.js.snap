@@ -1,7 +1,53 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/MenuButtons share and save buttons matches the snapshot 1`] = `
-Array [
+exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
+<div
+  class="menuButtonsPublishUpload"
+  data-testid="MenuButtonsPublish-container"
+>
+  <div
+    class="menuButtonsPublishUploadTop"
+  >
+    <div
+      class="menuButtonsPublishUploadTitle"
+    >
+      Publishing profile…
+    </div>
+    <div
+      class="menuButtonsPublishUploadPercentage"
+    >
+      0%
+    </div>
+    <div
+      class="menuButtonsPublishUploadBar"
+    >
+      <div
+        class="menuButtonsPublishUploadBarInner"
+        style="width: 0%;"
+      />
+    </div>
+  </div>
+  <div
+    class="menuButtonsPublishButtons"
+  >
+    <button
+      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
+      type="button"
+    >
+      Compressing…
+    </button>
+    <button
+      class="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
+      type="button"
+    >
+      Cancel Upload
+    </button>
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`] = `
+<div>
   <div
     class="buttonWithPanel menuButtonsMetaInfoButton"
   >
@@ -23,301 +69,33 @@ Array [
         <div
           class="arrowPanelArrow"
         />
-        <div
-          class="arrowPanelContent"
-        >
-          <h2
-            class="arrowPanelSubTitle"
-          >
-            Timing
-          </h2>
-          <div
-            class="arrowPanelSection"
-          >
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Recording started:
-              </span>
-              Sat, 09 Apr 2016 17:02:32 GMT
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Interval:
-              </span>
-              1
-              ms
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Profile Version:
-              </span>
-              22
-            </div>
-          </div>
-          <h2
-            class="arrowPanelSubTitle"
-          >
-            Application
-          </h2>
-          <div
-            class="arrowPanelSection"
-          >
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Name:
-              </span>
-              Firefox
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Version:
-              </span>
-              48.0
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Update Channel:
-              </span>
-              nightly
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Build ID:
-              </span>
-              20181126165837
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Build Type:
-              </span>
-              Debug
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Extensions:
-              </span>
-              <ul
-                class="metaInfoList"
-              >
-                <li
-                  class="metaInfoListItem"
-                >
-                  Form Autofill
-                </li>
-                <li
-                  class="metaInfoListItem"
-                >
-                  Firefox Screenshots
-                </li>
-                <li
-                  class="metaInfoListItem"
-                >
-                  Gecko Profiler
-                </li>
-              </ul>
-            </div>
-          </div>
-          <h2
-            class="arrowPanelSubTitle"
-          >
-            Platform
-          </h2>
-          <div
-            class="arrowPanelSection"
-          >
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                Platform:
-              </span>
-              Macintosh
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                OS:
-              </span>
-              Intel Mac OS X 10.11
-            </div>
-            <div
-              class="metaInfoRow"
-            >
-              <span
-                class="metaInfoLabel"
-              >
-                ABI:
-              </span>
-              x86_64-gcc3
-            </div>
-          </div>
-        </div>
       </div>
     </div>
-  </div>,
+  </div>
   <div
     class="menuButtons"
   >
     <div
-      class="menuButtonsCompositeButtonContainer currentButtonIsShareButton"
-      data-testid="menuButtonsCompositeButtonContainer"
-    >
-      <div
-        class="buttonWithPanel menuButtonsShareButton"
-      >
-        <div
-          class="buttonWithPanelButtonWrapper"
-        >
-          <input
-            class="buttonWithPanelButton menuButtonsShareButtonButton"
-            type="button"
-            value="Share…"
-          />
-        </div>
-        <div
-          class="arrowPanelAnchor"
-        >
-          <div
-            class="arrowPanel hasTitle hasButtons menuButtonsPrivacyPanel"
-          >
-            <div
-              class="arrowPanelArrow"
-            />
-            <h1
-              class="arrowPanelTitle"
-            >
-              Upload Profile – Privacy Notice
-            </h1>
-            <div
-              class="arrowPanelContent"
-            >
-              <section
-                class="privacyNotice"
-              >
-                <p>
-                  You’re about to upload your profile publicly where anyone will be able to access it. To better diagnose performance problems profiles include the following information:
-                </p>
-                <ul>
-                  <li>
-                    The URLs of all painted tabs, and running scripts.
-                  </li>
-                  <li>
-                    The metadata of all your add-ons to identify slow add-ons.
-                  </li>
-                  <li>
-                    Firefox build and runtime configuration.
-                  </li>
-                </ul>
-                <p>
-                  To view all the information you can download the full profile to a file and open the json structure with a text editor.
-                </p>
-                <p>
-                  By default, the URLs of all network requests will be removed while sharing the profile but keeping the URLs may help to identify the problems. Please select the checkbox below to share the URLs of the network requests:
-                </p>
-              </section>
-              <p
-                class="menuButtonsShareNetworkUrlsContainer"
-              >
-                <label>
-                  <input
-                    class="menuButtonsShareNetworkUrlsCheckbox"
-                    type="checkbox"
-                    value="on"
-                  />
-                  Share the URLs of all network requests
-                </label>
-              </p>
-            </div>
-            <div
-              class="arrowPanelButtons"
-            >
-              <input
-                class="arrowPanelCancelButton"
-                type="button"
-                value="Cancel"
-              />
-              <input
-                class="arrowPanelOkButton"
-                type="button"
-                value="Share"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div
-      class="buttonWithPanel menuButtonsProfileDownloadButton"
+      class="buttonWithPanel menuButtonsShareButton"
     >
       <div
         class="buttonWithPanelButtonWrapper"
       >
         <input
-          class="buttonWithPanelButton menuButtonsProfileDownloadButtonButton"
+          class="buttonWithPanelButton menuButtonsShareButtonButton"
           type="button"
-          value="Save as file…"
+          value="Publish…"
         />
       </div>
       <div
         class="arrowPanelAnchor"
       >
         <div
-          class="arrowPanel hasTitle menuButtonsProfileDownloadPanel"
+          class="arrowPanel menuButtonsPublishPanel"
         >
           <div
             class="arrowPanelArrow"
           />
-          <h1
-            class="arrowPanelTitle"
-          >
-            Save Profile to a Local File
-          </h1>
-          <div
-            class="arrowPanelContent"
-          >
-            <section />
-          </div>
         </div>
       </div>
     </div>
@@ -332,6 +110,346 @@ Array [
         class="open-in-new"
       />
     </a>
-  </div>,
-]
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the completed upload panel 1`] = `
+<div
+  class="menuButtonsPublishUpload"
+  data-testid="MenuButtonsPublish-container"
+>
+  <div
+    class="menuButtonsPublishUploadTop"
+  >
+    <div
+      class="menuButtonsPublishUploadTitle"
+    >
+      Publishing profile…
+    </div>
+    <div
+      class="menuButtonsPublishUploadPercentage"
+    >
+      0%
+    </div>
+    <div
+      class="menuButtonsPublishUploadBar"
+    >
+      <div
+        class="menuButtonsPublishUploadBarInner"
+        style="width: 0%;"
+      />
+    </div>
+  </div>
+  <div
+    class="menuButtonsPublishButtons"
+  >
+    <button
+      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
+      type="button"
+    >
+      Compressing…
+    </button>
+    <button
+      class="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
+      type="button"
+    >
+      Cancel Upload
+    </button>
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for a nightly profile 1`] = `
+<div
+  data-testid="MenuButtonsPublish-container"
+>
+  <form
+    class="menuButtonsPublishContent"
+  >
+    <div
+      class="menuButtonsPublishIcon"
+    />
+    <p
+      class="menuButtonsPublishInfoDescription"
+    >
+      You’re about to share your profile potentially where others have public access to it. 
+      In Nightly and custom builds, no information is stripped by default.
+    </p>
+    <details
+      class="menuButtonsPublishData"
+      open=""
+    >
+      <summary
+        class="menuButtonsPublishDataSummary"
+      >
+        Adjust how much is shared
+         
+      </summary>
+      <label
+        class="photon-label"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="isFiltering"
+          type="checkbox"
+        />
+        Filter out potentially identifying information
+      </label>
+      <div
+        class="menuButtonsPublishDataChoices"
+      >
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="hiddenThreads"
+            type="checkbox"
+          />
+          Remove hidden threads
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="timeRange"
+            type="checkbox"
+          />
+          Remove information out of the time range
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="screenshots"
+            type="checkbox"
+          />
+          Remove screenshots
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="urls"
+            type="checkbox"
+          />
+          Remove all URLs
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="extension"
+            type="checkbox"
+          />
+          Remove extensions
+        </label>
+      </div>
+    </details>
+    <div
+      class="menuButtonsPublishButtons"
+    >
+      <button
+        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
+        type="button"
+      >
+        Compressing…
+      </button>
+      <button
+        class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
+        type="submit"
+      >
+        <span
+          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
+        />
+        Publish
+      </button>
+    </div>
+  </form>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for a release profile 1`] = `
+<div
+  data-testid="MenuButtonsPublish-container"
+>
+  <form
+    class="menuButtonsPublishContent"
+  >
+    <div
+      class="menuButtonsPublishIcon"
+    />
+    <p
+      class="menuButtonsPublishInfoDescription"
+    >
+      You’re about to share your profile potentially where others have public access to it. 
+      By default, the profile is stripped of much of the personally identifiable information.
+    </p>
+    <details
+      class="menuButtonsPublishData"
+      open=""
+    >
+      <summary
+        class="menuButtonsPublishDataSummary"
+      >
+        Adjust how much is shared
+         
+      </summary>
+      <label
+        class="photon-label"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="isFiltering"
+          type="checkbox"
+        />
+        Filter out potentially identifying information
+      </label>
+      <div
+        class="menuButtonsPublishDataChoices"
+      >
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="hiddenThreads"
+            type="checkbox"
+          />
+          Remove hidden threads
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="timeRange"
+            type="checkbox"
+          />
+          Remove information out of the time range
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="screenshots"
+            type="checkbox"
+          />
+          Remove screenshots
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="urls"
+            type="checkbox"
+          />
+          Remove all URLs
+        </label>
+        <label
+          class="photon-label menuButtonsPublishDataChoicesLabel disabled"
+        >
+          <input
+            checked=""
+            class="photon-checkbox photon-checkbox-default"
+            disabled=""
+            name="extension"
+            type="checkbox"
+          />
+          Remove extensions
+        </label>
+      </div>
+    </details>
+    <div
+      class="menuButtonsPublishButtons"
+    >
+      <button
+        class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
+        type="button"
+      >
+        Compressing…
+      </button>
+      <button
+        class="photon-button photon-button-primary menuButtonsPublishButton menuButtonsPublishButtonsUpload"
+        type="submit"
+      >
+        <span
+          class="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgUpload"
+        />
+        Publish
+      </button>
+    </div>
+  </form>
+</div>
+`;
+
+exports[`app/MenuButtons <Publish> matches the snapshot for the uploading panel 1`] = `
+<div
+  class="menuButtonsPublishUpload"
+  data-testid="MenuButtonsPublish-container"
+>
+  <div
+    class="menuButtonsPublishUploadTop"
+  >
+    <div
+      class="menuButtonsPublishUploadTitle"
+    >
+      Publishing profile…
+    </div>
+    <div
+      class="menuButtonsPublishUploadPercentage"
+    >
+      0%
+    </div>
+    <div
+      class="menuButtonsPublishUploadBar"
+    >
+      <div
+        class="menuButtonsPublishUploadBarInner"
+        style="width: 0%;"
+      />
+    </div>
+  </div>
+  <div
+    class="menuButtonsPublishButtons"
+  >
+    <button
+      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
+      type="button"
+    >
+      Compressing…
+    </button>
+    <button
+      class="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
+      type="button"
+    >
+      Cancel Upload
+    </button>
+  </div>
+</div>
 `;

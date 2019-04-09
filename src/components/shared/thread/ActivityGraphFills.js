@@ -197,6 +197,11 @@ export class ActivityGraphFillComputer {
       greyCategoryIndex,
     } = this.renderedComponentSettings;
 
+    if (samples.length === 0) {
+      // If we have no samples, there's nothing to do.
+      return;
+    }
+
     let prevSampleTime = samples.time[0] - interval;
     let sampleTime = samples.time[0];
 

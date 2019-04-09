@@ -3,7 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .timelineOverflowEdgeIndicatorScrollbox {
-  max-height: 250px;
+  position: absolute;
+  width: 100%;
+  height: 100%;
   padding-left: var(--thread-label-column-width);
   margin-right: calc(var(--vertical-scrollbar-reserved-width) * -1);
   margin-left: calc(var(--thread-label-column-width) * -1);
@@ -30,7 +32,10 @@
 
 .timelineSettings {
   display: flex;
-  height: 25px;
+  height: var(--timeline-settings-height);
+  
+  /* Ensure the --timeline-settings-height defines the outer height of the component. */
+  box-sizing: border-box;
   flex: none;
   flex-flow: row nowrap;
   padding: 0;
@@ -54,6 +59,7 @@
 .timelineSettingsToggleLabel {
   display: flex;
   align-items: center;
+  padding: 0;
 }
 
 .timelineSettingsHiddenTracks {

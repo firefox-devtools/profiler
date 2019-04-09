@@ -8,6 +8,7 @@ import app from './app';
 import urlState from './url-state';
 import icons from './icons';
 import zippedProfiles from './zipped-profiles';
+import publish from './publish';
 import { combineReducers } from 'redux';
 
 export default combineReducers({
@@ -16,4 +17,5 @@ export default combineReducers({
   urlState,
   icons,
   zippedProfiles,
+  publish,
 });

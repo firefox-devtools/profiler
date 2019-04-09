@@ -71,6 +71,8 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
+export const TRACK_PROCESS_BLANK_HEIGHT = 30;
+
 class GlobalTrackComponent extends PureComponent<Props> {
   _onLabelMouseDown = (event: MouseEvent) => {
     const { changeRightClickedTrack, trackReference } = this.props;
@@ -97,7 +99,14 @@ class GlobalTrackComponent extends PureComponent<Props> {
       case 'process': {
         const { mainThreadIndex } = globalTrack;
         if (mainThreadIndex === null) {
-          return <div className="timelineTrackThreadBlank" />;
+          return (
+            <div
+              className="timelineTrackThreadBlank"
+              style={{
+                '--timeline-track-thread-blank-height': TRACK_PROCESS_BLANK_HEIGHT,
+              }}
+            />
+          );
         }
         return (
           <TimelineTrackThread
@@ -185,6 +194,14 @@ class GlobalTrackComponent extends PureComponent<Props> {
           >
             <button type="button" className="timelineTrackNameButton">
               {trackName}
+              {/* Only show the PID if it is a real number. A string PID is an
+                * artificially generated value that is not useful, and a null
+                * value does not exist. */}
+              {typeof pid === 'number' ? (
+                <div className="timelineTrackNameButtonAdditionalDetails">
+                  PID: {pid}
+                </div>
+              ) : null}
             </button>
           </ContextMenuTrigger>
           <div className="timelineTrackTrack">{this.renderTrack()}</div>

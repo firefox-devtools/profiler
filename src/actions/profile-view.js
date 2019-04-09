@@ -868,6 +868,13 @@ export function changeMarkersSearchString(searchString: string): Action {
   };
 }
 
+export function changeNetworkSearchString(searchString: string): Action {
+  return {
+    type: 'CHANGE_NETWORK_SEARCH_STRING',
+    searchString,
+  };
+}
+
 export function changeImplementationFilter(
   implementation: ImplementationFilter
 ): ThunkAction<void> {
@@ -1017,5 +1024,12 @@ export function changeTimelineType(timelineType: TimelineType): Action {
   return {
     type: 'CHANGE_TIMELINE_TYPE',
     timelineType,
+  };
+}
+
+export function changeProfileName(profileName: string): Action {
+  return {
+    type: 'CHANGE_PROFILE_NAME',
+    profileName,
   };
 }

@@ -364,6 +364,8 @@ export type UserTimingMarkerPayload = {|
 export type TextMarkerPayload = {|
   type: 'Text',
   name: string,
+  startTime: Milliseconds,
+  endTime: Milliseconds,
 |};
 
 /**
@@ -384,6 +386,8 @@ export type DOMEventMarkerPayload = {|
   eventType: string,
   phase: 0 | 1 | 2 | 3,
   cause?: CauseBacktrace,
+  docShellId?: string,
+  docshellHistoryId?: number,
 |};
 
 export type NavigationMarkerPayload = {|

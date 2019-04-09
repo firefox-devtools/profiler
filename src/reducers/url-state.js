@@ -88,6 +88,9 @@ const committedRanges: Reducer<StartEndRange[]> = (state = [], action) => {
     }
     case 'POP_COMMITTED_RANGES':
       return state.slice(0, action.firstPoppedFilterIndex);
+    case 'PROFILE_PUBLISHED':
+      // This may no longer be valid because of PII sanitization.
+      return [];
     default:
       return state;
   }
@@ -105,6 +108,9 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
     case 'ISOLATE_LOCAL_TRACK':
       // Only switch to non-null selected threads.
       return (action.selectedThreadIndex: ThreadIndex);
+    case 'PROFILE_PUBLISHED':
+      // This may no longer be valid because of PII sanitization.
+      return null;
     default:
       return state;
   }
@@ -122,6 +128,15 @@ const callTreeSearchString: Reducer<string> = (state = '', action) => {
 const markersSearchString: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'CHANGE_MARKER_SEARCH_STRING':
+      return action.searchString;
+    default:
+      return state;
+  }
+};
+
+const networkSearchString: Reducer<string> = (state = '', action) => {
+  switch (action.type) {
+    case 'CHANGE_NETWORK_SEARCH_STRING':
       return action.searchString;
     default:
       return state;
@@ -146,6 +161,9 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
         [threadIndex]: transforms.slice(0, firstPoppedFilterIndex),
       });
     }
+    case 'PROFILE_PUBLISHED':
+      // This may no longer be valid because of PII sanitization.
+      return {};
     default:
       return state;
   }
@@ -205,6 +223,9 @@ const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
     case 'VIEW_PROFILE':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
       return action.globalTrackOrder;
+    case 'PROFILE_PUBLISHED':
+      // This may no longer be valid because of PII sanitization.
+      return [];
     default:
       return state;
   }
@@ -230,6 +251,9 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
       hiddenGlobalTracks.delete(action.trackIndex);
       return hiddenGlobalTracks;
     }
+    case 'PROFILE_PUBLISHED':
+      // This may no longer be valid because of PII sanitization.
+      return new Set();
     default:
       return state;
   }
@@ -262,6 +286,9 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
       hiddenLocalTracksByPid.set(action.pid, action.hiddenLocalTracks);
       return hiddenLocalTracksByPid;
     }
+    case 'PROFILE_PUBLISHED':
+      // This may no longer be valid because of PII sanitization.
+      return new Map();
     default:
       return state;
   }
@@ -279,6 +306,9 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
       localTrackOrderByPid.set(action.pid, action.localTrackOrder);
       return localTrackOrderByPid;
     }
+    case 'PROFILE_PUBLISHED':
+      // This may no longer be valid because of PII sanitization.
+      return new Map();
     default:
       return state;
   }
@@ -292,6 +322,15 @@ const pathInZipFile: Reducer<string | null> = (state = null, action) => {
       return action.pathInZipFile ? action.pathInZipFile : null;
     case 'RETURN_TO_ZIP_FILE_LIST':
       return null;
+    default:
+      return state;
+  }
+};
+
+const profileName: Reducer<string> = (state = '', action) => {
+  switch (action.type) {
+    case 'CHANGE_PROFILE_NAME':
+      return action.profileName;
     default:
       return state;
   }
@@ -312,6 +351,7 @@ const profileSpecific = combineReducers({
   committedRanges,
   callTreeSearchString,
   markersSearchString,
+  networkSearchString,
   transforms,
   timelineType,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
@@ -360,6 +400,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     selectedTab,
     pathInZipFile,
     profileSpecific,
+    profileName,
   })
 );
 

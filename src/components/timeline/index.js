@@ -54,6 +54,8 @@ import type {
   ConnectedProps,
 } from '../../utils/connect';
 
+export const TIMELINE_SETTINGS_HEIGHT = 26;
+
 type OwnProps = SizeProps;
 
 type StateProps = {|
@@ -91,21 +93,21 @@ class TimelineSettingsGraphType extends React.PureComponent<{|
       <form>
         <div className="timelineSettingsToggle">
           Graph type:{' '}
-          <label className="timelineSettingsToggleLabel">
+          <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
             <input
               type="radio"
               name="timelineSettingsToggle"
-              className="timelineSettingsToggleInput"
+              className="photon-radio photon-radio-micro timelineSettingsToggleInput"
               checked={timelineType === 'category'}
               onChange={this._changeToCategories}
             />
             Categories
           </label>
-          <label className="timelineSettingsToggleLabel">
+          <label className="photon-label-micro timelineSettingsToggleLabel">
             <input
               type="radio"
               name="timelineSettingsToggle"
-              className="timelineSettingsToggleInput"
+              className="photon-radio photon-radio-micro timelineSettingsToggleInput"
               checked={timelineType === 'stack'}
               onChange={this._changeToStacks}
             />
@@ -176,7 +178,12 @@ class Timeline extends React.PureComponent<Props> {
 
     return (
       <>
-        <div className="timelineSettings">
+        <div
+          className="timelineSettings"
+          style={{
+            '--timeline-settings-height': `${TIMELINE_SETTINGS_HEIGHT}px`,
+          }}
+        >
           <TimelineSettingsGraphType
             timelineType={timelineType}
             changeTimelineType={changeTimelineType}

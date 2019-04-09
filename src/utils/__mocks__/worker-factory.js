@@ -23,7 +23,19 @@ class NodeWorker {
     message: mixed,
     transfer?: Array<ArrayBuffer | MessagePort | ImageBitmap>
   ) {
-    this._instance.postMessage({ data: message }, transfer);
+    let payload = message;
+
+    // Starting with node v11.12, postMessage sends the payload using the same
+    // semantics than Web Workers. This code adds the support for older node
+    // versions. We can remove this thin compatibility layer when we stop
+    // supporting these node versions.
+    const nodeVersion = process.versions.node;
+    const [major, minor] = nodeVersion.split('.');
+
+    if (+major < 11 || (+major === 11 && +minor < 12)) {
+      payload = { data: message };
+    }
+    this._instance.postMessage(payload, transfer);
   }
 
   onMessage = (message: Object) => {

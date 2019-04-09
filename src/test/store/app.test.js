@@ -47,23 +47,6 @@ describe('app actions', function() {
     });
   });
 
-  describe('profilePublished', function() {
-    const hash = 'de0ecf545819a95caa4c4d55b7a9cedb';
-    it('changes the data source to public', function() {
-      const { dispatch, getState } = storeWithSimpleProfile();
-      expect(UrlStateSelectors.getDataSource(getState())).toBe('none');
-      dispatch(AppActions.profilePublished(hash));
-      expect(UrlStateSelectors.getDataSource(getState())).toBe('public');
-    });
-
-    it('changes the hash', function() {
-      const { dispatch, getState } = storeWithSimpleProfile();
-      expect(UrlStateSelectors.getHash(getState())).toBe('');
-      dispatch(AppActions.profilePublished(hash));
-      expect(UrlStateSelectors.getHash(getState())).toBe(hash);
-    });
-  });
-
   describe('visibleTabs', function() {
     it('hides the network chart and JS tracer when no data is in the thread', function() {
       const { profile } = getProfileFromTextSamples('A');

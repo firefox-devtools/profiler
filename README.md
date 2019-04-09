@@ -31,7 +31,7 @@ If you would like to help us test on other assistive technologies or improve the
 ### Development
 
 You will need a recent enough version of [Yarn](http://yarnpkg.com/),
-version 1.0.1 is known to work correctly.
+version 1.10 is known to work correctly.
 You can install it into your home directory on Linux and probably OS X with:
 
 ```bash

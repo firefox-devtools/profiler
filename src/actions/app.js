@@ -4,10 +4,13 @@
 
 // @flow
 import { getSelectedTab, getDataSource } from '../selectors/url-state';
+import { getTrackThreadHeights } from '../selectors/app';
 import { sendAnalytics } from '../utils/analytics';
+import type { ThreadIndex } from '../types/profile';
+import type { CssPixels } from '../types/units';
 import type { Action, ThunkAction } from '../types/store';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { ProfileSharingStatus, UrlState } from '../types/state';
+import type { UrlState } from '../types/state';
 
 export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -29,15 +32,6 @@ export function profilePublished(hash: string): Action {
   return {
     type: 'PROFILE_PUBLISHED',
     hash,
-  };
-}
-
-export function setProfileSharingStatus(
-  profileSharingStatus: ProfileSharingStatus
-): Action {
-  return {
-    type: 'SET_PROFILE_SHARING_STATUS',
-    profileSharingStatus,
   };
 }
 
@@ -95,3 +89,19 @@ export function setHasZoomedViaMousewheel() {
 export function updateUrlState(newUrlState: UrlState | null): Action {
   return { type: 'UPDATE_URL_STATE', newUrlState };
 }
+
+export const reportTrackThreadHeight = (
+  threadIndex: ThreadIndex,
+  height: CssPixels
+): ThunkAction<void> => (dispatch, getState) => {
+  const trackThreadHeights = getTrackThreadHeights(getState());
+  const previousHeight = trackThreadHeights[threadIndex];
+  if (previousHeight !== height) {
+    // Guard against unnecessary dispatches. This could happen frequently.
+    dispatch({
+      type: 'UPDATE_TRACK_THREAD_HEIGHT',
+      height,
+      threadIndex,
+    });
+  }
+};

@@ -11,24 +11,23 @@ exports[`Timeline renders the header 1`] = `
       Graph type:
        
       <label
-        class="timelineSettingsToggleLabel"
+        class="photon-label photon-label-micro timelineSettingsToggleLabel"
       >
         <input
-          class="timelineSettingsToggleInput"
+          checked=""
+          class="photon-radio photon-radio-micro timelineSettingsToggleInput"
           name="timelineSettingsToggle"
           type="radio"
-          value="on"
         />
         Categories
       </label>
       <label
-        class="timelineSettingsToggleLabel"
+        class="photon-label-micro timelineSettingsToggleLabel"
       >
         <input
-          class="timelineSettingsToggleInput"
+          class="photon-radio photon-radio-micro timelineSettingsToggleInput"
           name="timelineSettingsToggle"
           type="radio"
-          value="on"
         />
         Stack height
       </label>

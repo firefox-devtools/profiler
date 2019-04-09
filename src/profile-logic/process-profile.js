@@ -1048,8 +1048,6 @@ export function processProfile(
     sourceURL: geckoProfile.meta.sourceURL,
     physicalCPUs: geckoProfile.meta.physicalCPUs,
     logicalCPUs: geckoProfile.meta.logicalCPUs,
-    // Gecko always sends the profile with URLs.
-    networkURLsRemoved: false,
     // `presymbolicated` indicates whether this gecko profile includes already
     // symbolicated frames. This will be missing for profiles coming from Gecko
     // but may be specified for profiles imported from other formats (eg: linux
@@ -1122,9 +1120,6 @@ export function sanitizePII(
     ...profile,
     meta: {
       ...profile.meta,
-      // FIXME: We won't be needing this after PII frontend changes.
-      // See: https://github.com/firefox-devtools/profiler/issues/1863
-      networkURLsRemoved: PIIToBeRemoved.shouldRemoveNetworkUrls,
       extensions: PIIToBeRemoved.shouldRemoveExtensions
         ? getEmptyExtensions()
         : profile.meta.extensions,
@@ -1169,6 +1164,22 @@ export function sanitizePII(
   return newProfile;
 }
 
+/**
+ * We want to protect users from unknowingly uploading sensitive data, however
+ * this gets in the way of engineers profiling on nightly. For a compromise
+ * between good data sanitization practices, and not dropping useful information,
+ * do not sanitize on nightly and custom builds.
+ */
+export function getShouldSanitizeByDefault(profile: Profile): boolean {
+  switch (profile.meta.updateChannel) {
+    case 'default': // Custom builds.
+    case 'nightly':
+    case 'nightly-try':
+      return false;
+    default:
+      return true;
+  }
+}
 /**
  * Take a thread with PII that user wants to be removed and remove the thread
  * data depending on that PII status.

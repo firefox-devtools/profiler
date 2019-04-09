@@ -39,6 +39,8 @@ export const getProfileUrl: Selector<string> = state =>
   getUrlState(state).profileUrl;
 export const getProfilesToCompare: Selector<string[] | null> = state =>
   getUrlState(state).profilesToCompare;
+export const getProfileNameFromUrl: Selector<string> = state =>
+  getUrlState(state).profileName;
 export const getAllCommittedRanges: Selector<StartEndRange[]> = state =>
   getProfileSpecificState(state).committedRanges;
 export const getImplementationFilter: Selector<ImplementationFilter> = state =>
@@ -51,6 +53,8 @@ export const getCurrentSearchString: Selector<string> = state =>
   getProfileSpecificState(state).callTreeSearchString;
 export const getMarkersSearchString: Selector<string> = state =>
   getProfileSpecificState(state).markersSearchString;
+export const getNetworkSearchString: Selector<string> = state =>
+  getProfileSpecificState(state).networkSearchString;
 export const getSelectedTab: Selector<TabSlug> = state =>
   getUrlState(state).selectedTab;
 export const getSelectedThreadIndexOrNull: Selector<ThreadIndex | null> = state =>
@@ -184,13 +188,17 @@ export const getPathInZipFileFromUrl: Selector<string | null> = state =>
  * For now only provide a name for a profile if it came from a zip file.
  */
 export const getProfileName: Selector<null | string> = createSelector(
+  getProfileNameFromUrl,
   getPathInZipFileFromUrl,
-  pathInZipFile => {
-    if (!pathInZipFile) {
-      return null;
+  (profileName, pathInZipFile) => {
+    if (profileName) {
+      return profileName;
     }
-    const pathParts = pathInZipFile.split('/');
-    return pathParts[pathParts.length - 1];
+    if (pathInZipFile) {
+      const pathParts = pathInZipFile.split('/');
+      return pathParts[pathParts.length - 1];
+    }
+    return '';
   }
 );
 

@@ -24,7 +24,8 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { ProfileSharingStatus, UrlState } from '../types/state';
+import type { UrlState, UploadState } from '../types/state';
+import type { CssPixels } from '../types/units';
 
 export type DataSource =
   | 'none'
@@ -82,6 +83,18 @@ export type RequestedLib = {|
 |};
 export type ImplementationFilter = 'combined' | 'js' | 'cpp';
 
+/**
+ * This type determines what kind of information gets sanitized from published profiles.
+ */
+export type CheckedSharingOptions = {|
+  isFiltering: boolean,
+  hiddenThreads: boolean,
+  timeRange: boolean,
+  screenshots: boolean,
+  urls: boolean,
+  extension: boolean,
+|};
+
 type ProfileAction =
   | {|
       +type: 'ROUTE_NOT_FOUND',
@@ -97,6 +110,11 @@ type ProfileAction =
       +threadIndex: ThreadIndex,
       +selectedCallNodePath: CallNodePath,
       +optionalExpandedToCallNodePath: ?CallNodePath,
+    |}
+  | {|
+      +type: 'UPDATE_TRACK_THREAD_HEIGHT',
+      +height: CssPixels,
+      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'FOCUS_CALL_TREE',
@@ -178,10 +196,6 @@ type ProfileAction =
   | {|
       +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
-    |}
-  | {|
-      +type: 'SET_PROFILE_SHARING_STATUS',
-      +profileSharingStatus: ProfileSharingStatus,
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
@@ -289,7 +303,9 @@ type UrlStateAction =
       +showSummary: boolean,
     |}
   | {| +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string |}
-  | {| +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] |};
+  | {| +type: 'CHANGE_NETWORK_SEARCH_STRING', +searchString: string |}
+  | {| +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] |}
+  | {| +type: 'CHANGE_PROFILE_NAME', +profileName: string |};
 
 type IconsAction =
   | {| +type: 'ICON_HAS_LOADED', +icon: string |}
@@ -301,10 +317,25 @@ type SidebarAction = {|
   +isOpen: boolean,
 |};
 
+type PublishAction =
+  | {|
+      +type: 'TOGGLE_CHECKED_SHARING_OPTION',
+      +slug: $Keys<CheckedSharingOptions>,
+    |}
+  | {|
+      +type: 'CHANGE_UPLOAD_STATE',
+      +changes: $Shape<UploadState>,
+    |}
+  | {|
+      +type: 'SAVE_ABORT_UPLOAD_FUNCTION',
+      +abort: () => void,
+    |};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
   | SidebarAction
   | UrlEnhancerAction
   | UrlStateAction
-  | IconsAction;
+  | IconsAction
+  | PublishAction;

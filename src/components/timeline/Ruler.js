@@ -9,6 +9,8 @@ import './Ruler.css';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
 
+export const TIMELINE_RULER_HEIGHT = 20;
+
 type Props = {|
   +zeroAt: Milliseconds,
   +rangeStart: Milliseconds,
@@ -59,7 +61,10 @@ class TimelineRuler extends PureComponent<Props> {
   render() {
     const { notches, decimalPlaces } = this._getNotches();
     return (
-      <div className="timelineRuler">
+      <div
+        className="timelineRuler"
+        style={{ '--timeline-ruler-height': `${TIMELINE_RULER_HEIGHT}px` }}
+      >
         <ol className="timelineRulerContainer">
           {notches.map(({ time, pos }, i) => (
             <li
