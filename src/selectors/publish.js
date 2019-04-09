@@ -158,36 +158,14 @@ export const getSanitizedProfileData: Selector<
 /**
  * The blob is needed for both the download size, and the ObjectURL.
  */
-export const getSanitizedProfileBlob: Selector<Promise<Blob>> = createSelector(
+export const getCompressedProfileBlob: Selector<Promise<Blob>> = createSelector(
   getSanitizedProfileData,
   async profileData =>
     new Blob([await profileData], { type: 'application/octet-binary' })
 );
 
-// URL.createObjectURL are not GCed, they must be cleaned up manually. Store a reference
-// to the previous object URL here. Only retain the latest one.
-let _previousObjectUrl;
-
-/**
- * This selector generates the string that can be downloaded, or uploaded for persisting
- * profiles.
- */
-export const getCompressedProfileObjectUrl: Selector<
-  Promise<string>
-> = createSelector(getSanitizedProfileBlob, async blobPromise => {
-  const blob = await blobPromise;
-  if (_previousObjectUrl) {
-    // Make sure and clean up the previously created object URL so that we
-    // don't leak it.
-    // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
-    URL.revokeObjectURL(_previousObjectUrl);
-  }
-  _previousObjectUrl = URL.createObjectURL(blob);
-  return _previousObjectUrl;
-});
-
 export const getDownloadSize: Selector<Promise<string>> = createSelector(
-  getSanitizedProfileBlob,
+  getCompressedProfileBlob,
   blobPromise => blobPromise.then(blob => prettyBytes(blob.size))
 );
 
