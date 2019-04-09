@@ -45,7 +45,7 @@ const MenuButtons = ({ profile, dataSource }: Props) => (
         className="menuButtonsLink"
         title="Open the documentation in a new window"
       >
-        Docs…
+        Docs<i className="open-in-new" />
       </a>
     </div>
   </>
