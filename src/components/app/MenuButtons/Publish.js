@@ -73,12 +73,15 @@ class MenuButtonsPublishImpl extends React.PureComponent<
       this.setState({ isFilteringToggledOnce: true });
       this.props.toggleCheckedSharingOptions('isFiltering');
     },
-    hiddenThreads: () =>
-      this.props.toggleCheckedSharingOptions('hiddenThreads'),
-    timeRange: () => this.props.toggleCheckedSharingOptions('timeRange'),
-    screenshots: () => this.props.toggleCheckedSharingOptions('screenshots'),
-    urls: () => this.props.toggleCheckedSharingOptions('urls'),
-    extension: () => this.props.toggleCheckedSharingOptions('extension'),
+    includeHiddenThreads: () =>
+      this.props.toggleCheckedSharingOptions('includeHiddenThreads'),
+    includeFullTimeRange: () =>
+      this.props.toggleCheckedSharingOptions('includeFullTimeRange'),
+    includeScreenshots: () =>
+      this.props.toggleCheckedSharingOptions('includeScreenshots'),
+    includeUrls: () => this.props.toggleCheckedSharingOptions('includeUrls'),
+    includeExtension: () =>
+      this.props.toggleCheckedSharingOptions('includeExtension'),
   };
 
   state = {
@@ -95,7 +98,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
           className="photon-checkbox photon-checkbox-default"
           name={slug}
           onChange={toggle}
-          checked={!checkedSharingOptions[slug]}
+          checked={checkedSharingOptions[slug]}
         />
         {label}
       </label>
@@ -152,11 +155,17 @@ class MenuButtonsPublishImpl extends React.PureComponent<
                 Include additional data
               </summary>
               <div className="menuButtonsPublishDataChoices">
-                {this._renderCheckbox('hiddenThreads', 'Hidden threads')}
-                {this._renderCheckbox('timeRange', 'Hidden time range')}
-                {this._renderCheckbox('screenshots', 'Screenshots')}
-                {this._renderCheckbox('urls', 'Resource URLs')}
-                {this._renderCheckbox('extension', 'Extension information')}
+                {this._renderCheckbox('includeHiddenThreads', 'Hidden threads')}
+                {this._renderCheckbox(
+                  'includeFullTimeRange',
+                  'Hidden time range'
+                )}
+                {this._renderCheckbox('includeScreenshots', 'Screenshots')}
+                {this._renderCheckbox('includeUrls', 'Resource URLs')}
+                {this._renderCheckbox(
+                  'includeExtension',
+                  'Extension information'
+                )}
               </div>
             </details>
           ) : null}
