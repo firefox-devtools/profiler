@@ -11,6 +11,10 @@ import * as UrlUtils from '../../../utils/shorten-url';
 
 type Props = {|
   +isNewlyPublished: boolean,
+  // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
+  // that would mock out a local module, but I was having trouble getting it working
+  // correctly (perhaps due to ES6 modules), so I just went with dependency injection
+  // instead.
   +injectedUrlShortener?: typeof UrlUtils.shortenUrl | void,
 |};
 
