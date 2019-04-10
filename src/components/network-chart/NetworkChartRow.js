@@ -12,6 +12,23 @@ import type { ThreadIndex } from '../../types/profile';
 import type { Marker } from '../../types/profile-derived';
 import type { NetworkPayload } from '../../types/markers';
 
+// This regexp is used to split a pathname into a directory path and a filename.
+// On purpose, when there's no "real" filename, the filename will contain the
+// last part of the directory path.
+//
+// Here are some examples:
+// /assets/img/image.jpg -> (/assets/img) (/image.jpg)
+// /img/image.jpg        -> (/img)        (/image.jpg)
+// /assets/analytics/    -> (/assets)     (/analytics/)
+// /analytics/           -> ()            (/analytics/)
+// /index.html           -> ()            (/index.html)
+//
+// Note that this case isn't matched by the regexp:
+// /                     -> ()            (/)
+//
+// It's defined here so that its compilation can be reused.
+const PATH_SPLIT_RE = /(.*)(\/[^/]+\/?)$/;
+
 export type NetworkChartRowProps = {
   +index: number,
   +marker: Marker,
@@ -180,10 +197,15 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     // Extract URI from markers.name
     const uri = this._extractURI(name);
     if (uri !== null) {
-      // Extract filename from pathname
-      const uriFilename = uri.pathname.slice(uri.pathname.lastIndexOf('/')); // filename.xy
-      // Remove filename from pathname
-      const uriPath = uri.pathname.replace(uriFilename, '');
+      // Extract directory path and filename from pathname.
+      let uriFilename = uri.pathname;
+      let uriPath = '';
+
+      // See above for more information about this regexp.
+      const extractResult = PATH_SPLIT_RE.exec(uri.pathname);
+      if (extractResult) {
+        [, uriPath, uriFilename] = extractResult;
+      }
 
       return (
         <span>
@@ -191,10 +213,14 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
             {uri.protocol + '//'}
           </span>
           <span className="networkChartRowItemUriRequired">{uri.hostname}</span>
-          {uriPath !== uriFilename && uriPath.length > 0 ? (
+          {uriPath ? (
             <span className="networkChartRowItemUriOptional">{uriPath}</span>
           ) : null}
-          <span className="networkChartRowItemUriRequired">{uriFilename}</span>
+          {uriFilename ? (
+            <span className="networkChartRowItemUriRequired">
+              {uriFilename}
+            </span>
+          ) : null}
           {uri.search ? (
             <span className="networkChartRowItemUriOptional">{uri.search}</span>
           ) : null}

@@ -201,20 +201,22 @@ describe('NetworkChartRowBar phase calculations', function() {
 });
 
 describe('NetworkChartRowBar URL split', function() {
+  function setupForUrl(url: string) {
+    return setupWithPayload(`Load 101: ${url}`, {
+      type: 'Network',
+      URI: url,
+      id: 90001,
+      pri: 20,
+      count: 10,
+      status: 'STATUS_STOP',
+      startTime: 10,
+      endTime: 90,
+    });
+  }
+
   it('splits up the url by protocol / domain / path / filename / params / hash', function() {
-    const { getUrlShorteningParts } = setupWithPayload(
-      'Load 101: https://test.mozilla.org/img/optimized/test.gif?param1=123&param2=321#hashNode2',
-      {
-        type: 'Network',
-        URI: 'https://mozilla.org/img/',
-        RedirectURI: 'https://mozilla.org/img/optimized',
-        id: 90001,
-        pri: 20,
-        count: 10,
-        status: 'STATUS_REDIRECT',
-        startTime: 10,
-        endTime: 90,
-      }
+    const { getUrlShorteningParts } = setupForUrl(
+      'https://test.mozilla.org/img/optimized/test.gif?param1=123&param2=321#hashNode2'
     );
     expect(getUrlShorteningParts()).toEqual([
       // Then assert that it's broken up as expected
@@ -227,20 +229,72 @@ describe('NetworkChartRowBar URL split', function() {
     ]);
   });
 
+  it('splits properly a url without a path', function() {
+    const testUrl = 'https://mozilla.org/';
+    const { getUrlShorteningParts } = setupForUrl(testUrl);
+    expect(getUrlShorteningParts()).toEqual([
+      ['networkChartRowItemUriOptional', 'https://'],
+      ['networkChartRowItemUriRequired', 'mozilla.org'],
+      ['networkChartRowItemUriRequired', '/'],
+    ]);
+  });
+
+  it('splits properly a url without a directory', function() {
+    const testUrl = 'https://mozilla.org/index.html';
+    const { getUrlShorteningParts } = setupForUrl(testUrl);
+    expect(getUrlShorteningParts()).toEqual([
+      ['networkChartRowItemUriOptional', 'https://'],
+      ['networkChartRowItemUriRequired', 'mozilla.org'],
+      ['networkChartRowItemUriRequired', '/index.html'],
+    ]);
+  });
+
+  it('splits properly a url without a filename', function() {
+    const testUrl = 'https://mozilla.org/analytics/';
+    const { getUrlShorteningParts } = setupForUrl(testUrl);
+    expect(getUrlShorteningParts()).toEqual([
+      ['networkChartRowItemUriOptional', 'https://'],
+      ['networkChartRowItemUriRequired', 'mozilla.org'],
+      ['networkChartRowItemUriRequired', '/analytics/'],
+    ]);
+  });
+
+  it('splits properly a url without a filename and a long directory', function() {
+    const testUrl = 'https://mozilla.org/assets/analytics/';
+    const { getUrlShorteningParts } = setupForUrl(testUrl);
+    expect(getUrlShorteningParts()).toEqual([
+      ['networkChartRowItemUriOptional', 'https://'],
+      ['networkChartRowItemUriRequired', 'mozilla.org'],
+      ['networkChartRowItemUriOptional', '/assets'],
+      ['networkChartRowItemUriRequired', '/analytics/'],
+    ]);
+  });
+
+  it('splits properly a url with a short directory path', function() {
+    const testUrl = 'https://mozilla.org/img/image.jpg';
+    const { getUrlShorteningParts } = setupForUrl(testUrl);
+    expect(getUrlShorteningParts()).toEqual([
+      ['networkChartRowItemUriOptional', 'https://'],
+      ['networkChartRowItemUriRequired', 'mozilla.org'],
+      ['networkChartRowItemUriOptional', '/img'],
+      ['networkChartRowItemUriRequired', '/image.jpg'],
+    ]);
+  });
+
+  it('splits properly a url with a long directory path', function() {
+    const testUrl = 'https://mozilla.org/assets/img/image.jpg';
+    const { getUrlShorteningParts } = setupForUrl(testUrl);
+    expect(getUrlShorteningParts()).toEqual([
+      ['networkChartRowItemUriOptional', 'https://'],
+      ['networkChartRowItemUriRequired', 'mozilla.org'],
+      ['networkChartRowItemUriOptional', '/assets/img'],
+      ['networkChartRowItemUriRequired', '/image.jpg'],
+    ]);
+  });
+
   it('returns null with an invalid url', function() {
-    const { getUrlShorteningParts } = setupWithPayload(
-      'Load 101: test.mozilla.org/img/optimized/',
-      {
-        type: 'Network',
-        URI: 'https://mozilla.org/img/',
-        RedirectURI: 'https://mozilla.org/img/optimized',
-        id: 90001,
-        pri: 20,
-        count: 10,
-        status: 'STATUS_REDIRECT',
-        startTime: 10,
-        endTime: 90,
-      }
+    const { getUrlShorteningParts } = setupForUrl(
+      'test.mozilla.org/img/optimized/'
     );
     expect(getUrlShorteningParts()).toEqual([]);
   });
