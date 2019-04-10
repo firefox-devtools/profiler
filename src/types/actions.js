@@ -200,7 +200,8 @@ type ProfileAction =
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
     |}
-  | {| +type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' |};
+  | {| +type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' |}
+  | {| +type: 'DISMISS_NEWLY_PUBLISHED' |};
 
 type ReceiveProfileAction =
   | {|

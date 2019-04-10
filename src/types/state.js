@@ -156,6 +156,7 @@ export type UrlState = {|
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
   +profileName: string,
+  +isNewlyPublished: boolean,
   +profileSpecific: {|
     selectedThread: ThreadIndex | null,
     globalTrackOrder: TrackIndex[],

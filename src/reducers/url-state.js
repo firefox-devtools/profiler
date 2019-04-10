@@ -337,6 +337,21 @@ const profileName: Reducer<string> = (state = '', action) => {
 };
 
 /**
+ * This reducer holds the state for whether or not a profile was newly uploaded
+ * or not. This way we can show a friendly message to the user.
+ */
+const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'PROFILE_PUBLISHED':
+      return true;
+    case 'DISMISS_NEWLY_PUBLISHED':
+      return false;
+    default:
+      return state;
+  }
+};
+
+/**
  * These values are specific to an individual profile.
  */
 const profileSpecific = combineReducers({
@@ -401,6 +416,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     pathInZipFile,
     profileSpecific,
     profileName,
+    isNewlyPublished,
   })
 );
 

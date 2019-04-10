@@ -105,3 +105,11 @@ export const reportTrackThreadHeight = (
     });
   }
 };
+
+/**
+ * This action dismisses the newly published state. This happens when a user first
+ * uploads a profile. We only want to remember this when we fist open the profile.
+ */
+export function dismissNewlyPublished(): Action {
+  return { type: 'DISMISS_NEWLY_PUBLISHED' };
+}
