@@ -108,6 +108,6 @@ export function getMarginRect(element: HTMLElement): DOMRect {
 export function extractDomRectValue(
   rect: DOMRect,
   key: 'top' | 'left' | 'right' | 'bottom'
-) {
+): number {
   return (rect: Object)[key];
 }

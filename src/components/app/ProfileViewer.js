@@ -70,11 +70,11 @@ class ProfileViewer extends PureComponent<Props> {
             <div className="profileViewerName">{profileName}</div>
           ) : null}
           <ProfileFilterNavigator />
-          {/*
-           * Define a spacer in the middle that will shrink based on the availability
-           * of space in the top bar. It will shrink away before any of the items
-           * with actual content in them do.
-           */}
+          {
+            // Define a spacer in the middle that will shrink based on the availability
+            // of space in the top bar. It will shrink away before any of the items
+            // with actual content in them do.
+          }
           <div className="profileViewerSpacer" />
           <MenuButtons />
         </div>

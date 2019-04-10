@@ -44,7 +44,6 @@ declare class Window extends EventTarget {
     },
   };
   fetch: typeof fetch;
-  DOMRect: typeof DOMRect;
   requestIdleCallback: typeof requestIdleCallback;
   requestAnimationFrame: typeof requestAnimationFrame;
   devicePixelRatio: number;

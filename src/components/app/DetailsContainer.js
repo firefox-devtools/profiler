@@ -35,7 +35,7 @@ function DetailsContainer({
   isSidebarOpen,
   invalidatePanelLayout,
 }: Props) {
-  const Sidebar = isSidebarOpen && selectSidebar(selectedTab);
+  const Sidebar = selectSidebar(selectedTab);
 
   return (
     <SplitterLayout
@@ -44,10 +44,8 @@ function DetailsContainer({
       secondaryInitialSize={20}
       onDragEnd={invalidatePanelLayout}
     >
-      <>
-        <Details />
-        {Sidebar && <Sidebar />}
-      </>
+      <Details />
+      {Sidebar && isSidebarOpen ? <Sidebar /> : null}
     </SplitterLayout>
   );
 }
