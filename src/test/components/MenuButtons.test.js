@@ -132,7 +132,7 @@ describe('app/MenuButtons', function() {
       expect(getPanel()).toMatchSnapshot();
     });
 
-    fit('matches the snapshot for the opened panel for a release profile', () => {
+    it('matches the snapshot for the opened panel for a release profile', () => {
       const { getPanel, getPublishButton } = setup('release');
       fireEvent.click(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
