@@ -11,7 +11,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { ensureExists } from '../../utils/flow';
-import { getProfile } from '../../selectors/profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -52,9 +52,9 @@ describe('app/MenuButtons', function() {
   }
 
   function setup(updateChannel = 'release') {
-    const store = storeWithProfile();
-    const profile = getProfile(store.getState());
+    const { profile } = getProfileFromTextSamples('A');
     profile.meta.updateChannel = updateChannel;
+    const store = storeWithProfile(profile);
     const { resolveUpload, rejectUpload } = mockUpload();
 
     store.dispatch({

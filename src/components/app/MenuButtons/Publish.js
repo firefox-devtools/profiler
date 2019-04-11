@@ -12,7 +12,6 @@ import {
   abortUpload,
   resetUploadState,
 } from '../../../actions/publish';
-import { getShouldSanitizeByDefault } from '../../../profile-logic/process-profile';
 import { getProfile, getProfileRootRange } from '../../../selectors/profile';
 import {
   getCheckedSharingOptions,
@@ -60,34 +59,44 @@ type DispatchProps = {|
 
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
+type PublishState = {|
+  isFilteringToggledOnce: boolean,
+|};
+
+class MenuButtonsPublishImpl extends React.PureComponent<
+  PublishProps,
+  PublishState
+> {
   _toggles: { [$Keys<CheckedSharingOptions>]: () => mixed } = {
-    isFiltering: () => this.props.toggleCheckedSharingOptions('isFiltering'),
-    hiddenThreads: () =>
-      this.props.toggleCheckedSharingOptions('hiddenThreads'),
-    timeRange: () => this.props.toggleCheckedSharingOptions('timeRange'),
-    screenshots: () => this.props.toggleCheckedSharingOptions('screenshots'),
-    urls: () => this.props.toggleCheckedSharingOptions('urls'),
-    extension: () => this.props.toggleCheckedSharingOptions('extension'),
+    isFiltering: () => {
+      // Make it is that the details summary defaults to open.
+      this.setState({ isFilteringToggledOnce: true });
+      this.props.toggleCheckedSharingOptions('isFiltering');
+    },
+    includeHiddenThreads: () =>
+      this.props.toggleCheckedSharingOptions('includeHiddenThreads'),
+    includeFullTimeRange: () =>
+      this.props.toggleCheckedSharingOptions('includeFullTimeRange'),
+    includeScreenshots: () =>
+      this.props.toggleCheckedSharingOptions('includeScreenshots'),
+    includeUrls: () => this.props.toggleCheckedSharingOptions('includeUrls'),
+    includeExtension: () =>
+      this.props.toggleCheckedSharingOptions('includeExtension'),
+  };
+
+  state = {
+    isFilteringToggledOnce: false,
   };
 
   _renderCheckbox(slug: $Keys<CheckedSharingOptions>, label: string) {
     const { checkedSharingOptions } = this.props;
-    const isDisabled = !checkedSharingOptions.isFiltering;
     const toggle = this._toggles[slug];
     return (
-      <label
-        className={classNames({
-          'photon-label': true,
-          menuButtonsPublishDataChoicesLabel: true,
-          disabled: isDisabled,
-        })}
-      >
+      <label className="photon-label menuButtonsPublishDataChoicesLabel">
         <input
           type="checkbox"
           className="photon-checkbox photon-checkbox-default"
           name={slug}
-          disabled={isDisabled}
           onChange={toggle}
           checked={checkedSharingOptions[slug]}
         />
@@ -98,7 +107,6 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
 
   _renderPublishPanel() {
     const {
-      profile,
       checkedSharingOptions,
       downloadSizePromise,
       attemptToPublish,
@@ -106,10 +114,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       compressedProfileBlobPromise,
       uploadUrl,
     } = this.props;
-
-    const sanitizeMessage = getShouldSanitizeByDefault(profile)
-      ? 'By default, the profile is stripped of much of the personally identifiable information.'
-      : 'In Nightly and custom builds, no information is stripped by default.';
+    const { isFilteringToggledOnce } = this.state;
 
     return (
       <div data-testid="MenuButtonsPublish-container">
@@ -128,39 +133,47 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
         <form className="menuButtonsPublishContent" onSubmit={attemptToPublish}>
           <div className="menuButtonsPublishIcon" />
           <p className="menuButtonsPublishInfoDescription">
-            You’re about to share your profile potentially where others have
-            public access to it. {sanitizeMessage}
+            You’re about to publicly share your profile, which can potentially
+            contain personally identifiable information.
           </p>
-          <details className="menuButtonsPublishData" open={true}>
-            <summary className="menuButtonsPublishDataSummary">
-              Adjust how much is shared{' '}
-              <DownloadSize downloadSizePromise={downloadSizePromise} />
-            </summary>
-            <label className="photon-label">
-              <input
-                className="photon-checkbox photon-checkbox-default"
-                type="checkbox"
-                name="isFiltering"
-                onChange={this._toggles.isFiltering}
-                checked={checkedSharingOptions.isFiltering}
-              />
-              Filter out potentially identifying information
-            </label>
-            <div className="menuButtonsPublishDataChoices">
-              {this._renderCheckbox('hiddenThreads', 'Remove hidden threads')}
-              {this._renderCheckbox(
-                'timeRange',
-                'Remove information out of the time range'
-              )}
-              {this._renderCheckbox('screenshots', 'Remove screenshots')}
-              {this._renderCheckbox('urls', 'Remove all URLs')}
-              {this._renderCheckbox('extension', 'Remove extensions')}
-            </div>
-          </details>
+          <label className="photon-label">
+            <input
+              className="photon-checkbox photon-checkbox-default"
+              type="checkbox"
+              name="isFiltering"
+              onChange={this._toggles.isFiltering}
+              checked={checkedSharingOptions.isFiltering}
+            />
+            Filter out potentially identifying information
+          </label>
+          {checkedSharingOptions.isFiltering ? (
+            <details
+              className="menuButtonsPublishData"
+              open={isFilteringToggledOnce}
+            >
+              <summary className="menuButtonsPublishDataSummary">
+                Include additional data
+              </summary>
+              <div className="menuButtonsPublishDataChoices">
+                {this._renderCheckbox('includeHiddenThreads', 'Hidden threads')}
+                {this._renderCheckbox(
+                  'includeFullTimeRange',
+                  'Hidden time range'
+                )}
+                {this._renderCheckbox('includeScreenshots', 'Screenshots')}
+                {this._renderCheckbox('includeUrls', 'Resource URLs')}
+                {this._renderCheckbox(
+                  'includeExtension',
+                  'Extension information'
+                )}
+              </div>
+            </details>
+          ) : null}
           <div className="menuButtonsPublishButtons">
             <DownloadButton
               downloadFileName={downloadFileName}
               compressedProfileBlobPromise={compressedProfileBlobPromise}
+              downloadSizePromise={downloadSizePromise}
             />
             <button
               type="submit"
@@ -196,6 +209,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       abortUpload,
       downloadFileName,
       compressedProfileBlobPromise,
+      downloadSizePromise,
     } = this.props;
 
     return (
@@ -221,6 +235,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
           <DownloadButton
             downloadFileName={downloadFileName}
             compressedProfileBlobPromise={compressedProfileBlobPromise}
+            downloadSizePromise={downloadSizePromise}
           />
           <button
             type="button"
@@ -349,9 +364,7 @@ type DownloadSizeProps = {|
 |};
 
 type DownloadSizeState = {|
-  prevDownloadSizePromise: Promise<string> | null,
   downloadSize: string | null,
-  isLoading: boolean,
 |};
 
 /**
@@ -365,29 +378,13 @@ class DownloadSize extends React.PureComponent<
 
   state = {
     downloadSize: null,
-    isLoading: false,
-    prevDownloadSizePromise: null,
   };
-
-  static getDerivedStateFromProps(
-    props: DownloadSizeProps,
-    state: DownloadSizeState
-  ): $Shape<DownloadSizeState> | null {
-    if (state.prevDownloadSizePromise !== props.downloadSizePromise) {
-      return {
-        // Invalidate the old download size.
-        isLoading: true,
-        prevDownloadSizePromise: props.downloadSizePromise,
-      };
-    }
-    return null;
-  }
 
   _unwrapPromise() {
     const { downloadSizePromise } = this.props;
     downloadSizePromise.then(downloadSize => {
       if (this._isMounted) {
-        this.setState({ downloadSize, isLoading: false });
+        this.setState({ downloadSize });
       }
     });
   }
@@ -408,25 +405,17 @@ class DownloadSize extends React.PureComponent<
   }
 
   render() {
-    const { downloadSize, isLoading } = this.state;
+    const { downloadSize } = this.state;
     if (downloadSize === null) {
       return null;
     }
-    return (
-      <span
-        className={classNames({
-          menuButtonsDownloadButtonIsLoading: isLoading,
-          menuButtonsDownloadButton: true,
-        })}
-      >
-        ({downloadSize})
-      </span>
-    );
+    return <span className="menuButtonsDownloadSize">({downloadSize})</span>;
   }
 }
 
 type DownloadButtonProps = {|
   +compressedProfileBlobPromise: Promise<Blob>,
+  +downloadSizePromise: Promise<string>,
   +downloadFileName: string,
 |};
 
@@ -490,7 +479,7 @@ class DownloadButton extends React.PureComponent<
   }
 
   render() {
-    const { downloadFileName } = this.props;
+    const { downloadFileName, downloadSizePromise } = this.props;
     const { compressedProfileBlob } = this.state;
     const className =
       'photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload';
@@ -503,7 +492,7 @@ class DownloadButton extends React.PureComponent<
           className={className}
         >
           <span className="menuButtonsPublishButtonsSvg menuButtonsPublishButtonsSvgDownload" />
-          Download
+          Download <DownloadSize downloadSizePromise={downloadSizePromise} />
         </BlobUrlLink>
       );
     }

@@ -17,11 +17,11 @@ import type {
 function _getDefaultSharingOptions(): CheckedSharingOptions {
   return {
     isFiltering: true,
-    hiddenThreads: true,
-    timeRange: true,
-    screenshots: true,
-    urls: true,
-    extension: true,
+    includeHiddenThreads: false,
+    includeFullTimeRange: false,
+    includeScreenshots: false,
+    includeUrls: false,
+    includeExtension: false,
   };
 }
 

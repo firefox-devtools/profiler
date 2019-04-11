@@ -173,14 +173,10 @@
   margin: 4px 0;
 }
 
-.menuButtonsPublishDataChoicesLabel.disabled {
-  opacity: 0.4;
-}
-
 .menuButtonsPublishDataSummary {
-  margin: 20px 0;
+  margin: 13px 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: bold;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -240,12 +236,10 @@
   background: url(../../../../res/img/svg/download.svg) center center no-repeat;
 }
 
-.menuButtonsDownloadButton {
-  transition: color 100ms;
-}
-
-.menuButtonsDownloadButtonIsLoading {
-  color: var(--grey-40);
+.menuButtonsDownloadSize {
+  display: inline-block;
+  margin: 0 4px;
+  font-size: 11px;
 }
 
 .menuButtonsPublishUpload {
