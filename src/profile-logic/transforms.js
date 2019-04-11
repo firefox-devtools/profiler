@@ -735,8 +735,8 @@ export function dropFunction(
   }
 
   // Regenerate the stacks for the samples table.
-  const stack = samples.stack.map(
-    stack => (stack !== null && stackContainsFunc[stack] ? null : stack)
+  const stack: Array<null | IndexIntoStackTable> = samples.stack.map(stack =>
+    stack !== null && stackContainsFunc[stack] ? null : stack
   );
 
   // Return the thread with the replaced samples.

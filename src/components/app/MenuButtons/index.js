@@ -22,10 +22,7 @@ import { dismissNewlyPublished } from '../../../actions/app';
 import type { StartEndRange } from '../../../types/units';
 import type { Profile } from '../../../types/profile';
 import type { DataSource } from '../../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../../utils/connect';
+import type { ConnectedProps } from '../../../utils/connect';
 
 require('./index.css');
 
@@ -124,7 +121,7 @@ const PublishOrPermalinkButtons = ({
   }
 };
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
@@ -135,5 +132,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     dismissNewlyPublished,
   },
   component: MenuButtons,
-};
-export default explicitConnect(options);
+});

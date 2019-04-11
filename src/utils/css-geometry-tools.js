@@ -3,11 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import DOMRect from './dom-rect';
-// Imported interfaces incorrectly throw an error in eslint:
-// https://github.com/benmosher/eslint-plugin-import/issues/726
-import type { DOMRectInterface } from './dom-rect';
-
 /**
  * Return a float number for the number of CSS pixels from the computed style
  * of the supplied CSS property on the supplied element.
@@ -20,15 +15,13 @@ function getFloatStyle(element: HTMLElement, cssProperty: string): number {
   );
 }
 
-function subtractBorder(
-  element: HTMLElement,
-  rect: DOMRectInterface | ClientRect
-): DOMRectInterface {
+function subtractBorder(element: HTMLElement, rect: DOMRect): DOMRect {
   const borderTop = getFloatStyle(element, 'border-top-width');
   const borderRight = getFloatStyle(element, 'border-right-width');
   const borderBottom = getFloatStyle(element, 'border-bottom-width');
   const borderLeft = getFloatStyle(element, 'border-left-width');
 
+  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
   return new DOMRect(
     rect.left + borderLeft,
     rect.top + borderTop,
@@ -37,14 +30,12 @@ function subtractBorder(
   );
 }
 
-function subtractPadding(
-  element: HTMLElement,
-  rect: DOMRectInterface | ClientRect
-): DOMRectInterface {
+function subtractPadding(element: HTMLElement, rect: DOMRect): DOMRect {
   const paddingTop = getFloatStyle(element, 'padding-top');
   const paddingRight = getFloatStyle(element, 'padding-right');
   const paddingBottom = getFloatStyle(element, 'padding-bottom');
   const paddingLeft = getFloatStyle(element, 'padding-left');
+  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
   return new DOMRect(
     rect.left + paddingLeft,
     rect.top + paddingTop,
@@ -53,14 +44,12 @@ function subtractPadding(
   );
 }
 
-function addMargin(
-  element: HTMLElement,
-  rect: DOMRectInterface | ClientRect
-): DOMRectInterface {
+function addMargin(element: HTMLElement, rect: DOMRect): DOMRect {
   const marginTop = getFloatStyle(element, 'margin-top');
   const marginRight = getFloatStyle(element, 'margin-right');
   const marginBottom = getFloatStyle(element, 'margin-bottom');
   const marginLeft = getFloatStyle(element, 'margin-left');
+  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
   return new DOMRect(
     rect.left - marginLeft,
     rect.top - marginTop,
@@ -73,26 +62,52 @@ function addMargin(
  * Returns a DOMRect for the content rect of the element, in float CSS pixels.
  * Returns an empty rect if the object has zero or more than one client rects.
  */
-export function getContentRect(element: HTMLElement): DOMRectInterface {
+export function getContentRect(element: HTMLElement): DOMRect {
   const clientRects = element.getClientRects();
   if (clientRects.length !== 1) {
-    return new DOMRect();
+    // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
+    return new DOMRect(0, 0, 0, 0);
   }
 
   const borderRect = clientRects[0];
-  return subtractPadding(element, subtractBorder(element, borderRect));
+  return subtractPadding(
+    element,
+    subtractBorder(element, clientRectToDomRect(borderRect))
+  );
+}
+
+function clientRectToDomRect(clientRect: ClientRect): DOMRect {
+  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
+  return new DOMRect(
+    clientRect.left,
+    clientRect.top,
+    clientRect.width,
+    clientRect.height
+  );
 }
 
 /**
  * Returns a DOMRect for the margin rect of the element, in float CSS pixels.
  * Returns an empty rect if the object has zero or more than one client rects.
  */
-export function getMarginRect(element: HTMLElement): DOMRectInterface {
+export function getMarginRect(element: HTMLElement): DOMRect {
   const clientRects = element.getClientRects();
   if (clientRects.length !== 1) {
-    return new DOMRect();
+    // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1935
+    return new DOMRect(0, 0, 0, 0);
   }
 
-  const borderRect = clientRects[0];
-  return addMargin(element, borderRect);
+  return addMargin(element, clientRectToDomRect(clientRects[0]));
+}
+
+/**
+ * When upgrading to Flow v0.96.0, it started including a DOMRect implementation.
+ * This nominal class doesn't like accessing an object via indexer properties, so
+ * encapsulate this access in a function.
+ */
+export function extractDomRectValue(
+  rect: DOMRect,
+  key: 'top' | 'left' | 'right' | 'bottom'
+): number {
+  return (rect: Object)[key];
 }

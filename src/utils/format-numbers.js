@@ -29,9 +29,9 @@ export function formatNumber(
   style: 'decimal' | 'percent' = 'decimal'
 ): string {
   /*
-  * Note that numDigitsOnLeft can be negative when the first non-zero digit
-  * is on the right of the decimal point.  0.01 = -1
-  */
+   * Note that numDigitsOnLeft can be negative when the first non-zero digit
+   * is on the right of the decimal point.  0.01 = -1
+   */
   let numDigitsOnLeft = Math.floor(Math.log10(Math.abs(value))) + 1;
   if (style === 'percent') {
     // We receive percent values as `0.4` but display them as `40`, so we

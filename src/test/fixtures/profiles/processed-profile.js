@@ -250,10 +250,15 @@ export function getProfileFromTextSamples(
 
 function _getAllMatchRanges(regex, str): Array<{ start: number, end: number }> {
   const ranges = [];
+
   let match;
-  while ((match = regex.exec(str)) !== null) {
-    ranges.push({ start: match.index, end: match.index + match[0].length });
-  }
+  do {
+    match = regex.exec(str);
+    if (match) {
+      ranges.push({ start: match.index, end: match.index + match[0].length });
+    }
+  } while (match);
+
   return ranges;
 }
 

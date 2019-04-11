@@ -39,10 +39,7 @@ import type {
   GlobalTrack,
   LocalTrack,
 } from '../../types/profile-derived';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +trackReference: GlobalTrackReference,
@@ -194,9 +191,11 @@ class GlobalTrackComponent extends PureComponent<Props> {
           >
             <button type="button" className="timelineTrackNameButton">
               {trackName}
-              {/* Only show the PID if it is a real number. A string PID is an
-                * artificially generated value that is not useful, and a null
-                * value does not exist. */}
+              {
+                // Only show the PID if it is a real number. A string PID is an
+                // artificially generated value that is not useful, and a null
+                // value does not exist. */
+              }
               {typeof pid === 'number' ? (
                 <div className="timelineTrackNameButtonAdditionalDetails">
                   PID: {pid}
@@ -218,7 +217,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
 const EMPTY_TRACK_ORDER = [];
 const EMPTY_LOCAL_TRACKS = [];
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getGlobalTracks(state);
     const globalTrack = globalTracks[trackIndex];
@@ -275,6 +274,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     selectTrack,
   },
   component: GlobalTrackComponent,
-};
-
-export default explicitConnect(options);
+});

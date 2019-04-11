@@ -15,10 +15,7 @@ import { getIsSidebarOpen } from '../../selectors/app';
 import explicitConnect from '../../utils/connect';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import './DetailsContainer.css';
 
@@ -38,7 +35,7 @@ function DetailsContainer({
   isSidebarOpen,
   invalidatePanelLayout,
 }: Props) {
-  const Sidebar = isSidebarOpen && selectSidebar(selectedTab);
+  const Sidebar = selectSidebar(selectedTab);
 
   return (
     <SplitterLayout
@@ -48,12 +45,12 @@ function DetailsContainer({
       onDragEnd={invalidatePanelLayout}
     >
       <Details />
-      {Sidebar && <Sidebar />}
+      {Sidebar && isSidebarOpen ? <Sidebar /> : null}
     </SplitterLayout>
   );
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
@@ -62,6 +59,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     invalidatePanelLayout,
   },
   component: DetailsContainer,
-};
-
-export default explicitConnect(options);
+});

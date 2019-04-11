@@ -48,13 +48,13 @@ const example2 = (
   />
 );
 
-const ExampleComponentWithSize = withSize(ExampleComponent);
+const ExampleComponentWithSize = withSize<Props>(ExampleComponent);
 
 // This it the correct use
 const exampleWithSize1 = <ExampleComponentWithSize ownPropA="a" ownPropB="b" />;
 
 const exampleWithSize2 = (
-  // $FlowExpectError - The width and height are already provided by WithSize.
+  // $FlowExpectError - The width and height are already provided.
   <ExampleComponentWithSize ownPropA="a" ownPropB="b" width={10} height={10} />
 );
 
@@ -80,4 +80,4 @@ class NoSizing extends React.PureComponent<NoSizingProps> {
 }
 
 // $FlowExpectError - The component does not have sizing props.
-const exampleNoSizing = withSize(NoSizing);
+const exampleNoSizing = withSize<Props>(NoSizing);

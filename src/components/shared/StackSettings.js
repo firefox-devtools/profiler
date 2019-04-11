@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
 import {
   changeImplementationFilter,
   changeInvertCallstack,
@@ -16,18 +15,27 @@ import {
 } from '../../selectors/url-state';
 import StackSearchField from '../shared/StackSearchField';
 import { toValidImplementationFilter } from '../../profile-logic/profile-data';
+import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
 import './StackSettings.css';
 
 import type { ImplementationFilter } from '../../types/actions';
 
-type Props = {|
+type OwnProps = {|
+  +hideInvertCallstack?: boolean,
+|};
+
+type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +invertCallstack: boolean,
-  +hideInvertCallstack?: boolean,
+|};
+
+type DispatchProps = {|
   +changeImplementationFilter: typeof changeImplementationFilter,
   +changeInvertCallstack: typeof changeInvertCallstack,
 |};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class StackSettings extends PureComponent<Props> {
   _onImplementationFilterChange = (e: SyntheticEvent<HTMLInputElement>) => {
@@ -93,13 +101,14 @@ class StackSettings extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  state => ({
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+  mapStateToProps: state => ({
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
   }),
-  {
+  dispatchToProps: {
     changeImplementationFilter,
     changeInvertCallstack,
-  }
-)(StackSettings);
+  },
+  component: StackSettings,
+});

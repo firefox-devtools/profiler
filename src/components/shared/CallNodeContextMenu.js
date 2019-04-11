@@ -36,10 +36,7 @@ import type {
   CallNodePath,
 } from '../../types/profile-derived';
 import type { Thread, ThreadIndex } from '../../types/profile';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   forceOpenForTests?: boolean,
@@ -512,7 +509,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     threadIndex: getSelectedThreadIndex(state),
@@ -533,5 +530,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     setCallNodeContextMenuVisibility,
   },
   component: CallNodeContextMenu,
-};
-export default explicitConnect(options);
+});

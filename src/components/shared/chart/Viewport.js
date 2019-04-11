@@ -19,10 +19,7 @@ import type {
   StartEndRange,
 } from '../../../types/units';
 import type { PreviewSelection } from '../../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../../utils/connect';
+import type { ConnectedProps } from '../../../utils/connect';
 import {
   getObjectValuesAsUnion,
   assertExhaustiveCheck,
@@ -468,7 +465,9 @@ export const withChartViewport: WithChartViewport<*, *> =
               viewportRight + deltaViewportLength * (1 - center)
             );
 
-            const { viewportProps: { timeRange } } = this.props;
+            const {
+              viewportProps: { timeRange },
+            } = this.props;
             if (newViewportLeft === 0 && newViewportRight === 1) {
               return {
                 hasSelection: false,
@@ -672,7 +671,7 @@ export const withChartViewport: WithChartViewport<*, *> =
                   isModifying: false,
                 };
               }
-              const unitOffsetX = viewportLength * offsetX / containerWidth;
+              const unitOffsetX = (viewportLength * offsetX) / containerWidth;
               let newViewportLeft = viewportLeft - unitOffsetX;
               let newViewportRight = viewportRight - unitOffsetX;
               if (newViewportLeft < 0) {
@@ -788,19 +787,18 @@ export const withChartViewport: WithChartViewport<*, *> =
 
     // Connect this component so that it knows whether or not to nag the user to use ctrl
     // for zooming on range selections.
-    const options: ExplicitConnectOptions<
+    return explicitConnect<
       ViewportOwnProps<ChartOwnProps>,
       ViewportStateProps,
       ViewportDispatchProps
-    > = {
+    >({
       mapStateToProps: state => ({
         panelLayoutGeneration: getPanelLayoutGeneration(state),
         hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
       }),
       mapDispatchToProps: { setHasZoomedViaMousewheel, updatePreviewSelection },
       component: ChartViewport,
-    };
-    return explicitConnect(options);
+    });
   };
 
 function clamp(min, max, value) {

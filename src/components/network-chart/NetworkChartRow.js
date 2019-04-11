@@ -102,8 +102,8 @@ const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
     // that.
     const value = +networkPayload[property];
     barPhases.push({
-      left: (previousValue - start) / dur * markerWidth,
-      width: Math.max((value - previousValue) / dur * markerWidth, 1),
+      left: ((previousValue - start) / dur) * markerWidth,
+      width: Math.max(((value - previousValue) / dur) * markerWidth, 1),
       opacity: i === 0 ? 0 : PHASE_OPACITIES[property],
       name: property,
       previousName,
@@ -117,8 +117,8 @@ const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
   // The last part isn't generally colored (opacity is 0) unless it's the only
   // one, and in that case it covers the whole duration.
   barPhases.push({
-    left: (previousValue - start) / dur * markerWidth,
-    width: (start + dur - previousValue) / dur * markerWidth,
+    left: ((previousValue - start) / dur) * markerWidth,
+    width: ((start + dur - previousValue) / dur) * markerWidth,
     opacity: barPhases.length ? 0 : 1,
     name: 'endTime',
     previousName,

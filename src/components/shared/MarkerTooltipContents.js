@@ -37,10 +37,7 @@ import type {
   PhaseTimes,
   StyleMarkerPayload,
 } from '../../types/markers';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 function _markerDetail<T: NotVoidOrNull>(
   key: string,
@@ -894,7 +891,9 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             <div className="tooltipTiming">
               {/* we don't know the duration if the marker is incomplete */}
               {!marker.incomplete
-                ? marker.dur ? formatMilliseconds(marker.dur) : '—'
+                ? marker.dur
+                  ? formatMilliseconds(marker.dur)
+                  : '—'
                 : 'unknown duration'}
             </div>
             <div className="tooltipTitle">{marker.title || marker.name}</div>
@@ -912,7 +911,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+export default explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
@@ -928,6 +927,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     };
   },
   component: MarkerTooltipContents,
-};
-
-export default explicitConnect(options);
+});

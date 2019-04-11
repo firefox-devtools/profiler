@@ -68,10 +68,12 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         <div />
         <div className="tooltipCallNodeImplementationHeader" />
         <div className="tooltipCallNodeImplementationHeader">
-          <span className="tooltipCallNodeImplementationHeaderSwatchRunning" />Running
+          <span className="tooltipCallNodeImplementationHeaderSwatchRunning" />
+          Running
         </div>
         <div className="tooltipCallNodeImplementationHeader">
-          <span className="tooltipCallNodeImplementationHeaderSwatchSelf" />Self
+          <span className="tooltipCallNodeImplementationHeaderSwatchSelf" />
+          Self
         </div>
         {/* grid row -------------------------------------------------- */}
         <div className="tooltipLabel">Overall</div>
@@ -85,7 +87,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           <div
             className="tooltipCallNodeImplementationGraphSelf"
             style={{
-              width: GRAPH_WIDTH * selfTime.value / totalTime.value,
+              width: (GRAPH_WIDTH * selfTime.value) / totalTime.value,
             }}
           />
         </div>
@@ -109,13 +111,13 @@ export class TooltipCallNode extends React.PureComponent<Props> {
                   <div
                     className="tooltipCallNodeImplementationGraphRunning"
                     style={{
-                      width: GRAPH_WIDTH * time / totalTime.value,
+                      width: (GRAPH_WIDTH * time) / totalTime.value,
                     }}
                   />
                   <div
                     className="tooltipCallNodeImplementationGraphSelf"
                     style={{
-                      width: GRAPH_WIDTH * selfTimeValue / totalTime.value,
+                      width: (GRAPH_WIDTH * selfTimeValue) / totalTime.value,
                     }}
                   />
                 </div>

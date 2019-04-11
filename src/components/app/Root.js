@@ -33,10 +33,7 @@ import { ErrorBoundary } from './ErrorBoundary';
 import type { Store } from '../../types/store';
 import type { AppViewState, State } from '../../types/state';
 import type { DataSource } from '../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 require('./Root.css');
 
@@ -259,11 +256,11 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
   }
 }
 
-const options: ExplicitConnectOptions<
+export const ProfileViewWhenReady = explicitConnect<
   {||},
   ProfileViewStateProps,
   ProfileViewDispatchProps
-> = {
+>({
   mapStateToProps: (state: State) => ({
     view: getView(state),
     dataSource: getDataSource(state),
@@ -279,8 +276,7 @@ const options: ExplicitConnectOptions<
     retrieveProfilesToCompare,
   },
   component: ProfileViewWhenReadyImpl,
-};
-export const ProfileViewWhenReady = explicitConnect(options);
+});
 
 type RootProps = {
   store: Store,

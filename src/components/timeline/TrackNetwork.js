@@ -19,17 +19,13 @@ import type { ThreadIndex, PageList } from '../../types/profile';
 import type {} from '../../types/markers';
 import type { Milliseconds } from '../../types/units';
 import type { SizeProps } from '../shared/WithSize';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { Marker } from '../../types/profile-derived';
 
 import './TrackNetwork.css';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
-  ...SizeProps,
 |};
 
 type StateProps = {|
@@ -42,7 +38,10 @@ type StateProps = {|
   +verticalMarkers: Marker[],
 |};
 type DispatchProps = {||};
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+  ...SizeProps,
+|};
 type State = void;
 
 export const ROW_HEIGHT = 5;
@@ -107,9 +106,10 @@ class Network extends PureComponent<Props, State> {
       const timing = networkTiming[rowIndex];
       for (let timingIndex = 0; timingIndex < timing.length; timingIndex++) {
         const start =
-          canvas.width / rangeLength * (timing.start[timingIndex] - rangeStart);
+          (canvas.width / rangeLength) *
+          (timing.start[timingIndex] - rangeStart);
         const end =
-          canvas.width / rangeLength * (timing.end[timingIndex] - rangeStart);
+          (canvas.width / rangeLength) * (timing.end[timingIndex] - rangeStart);
         const y = (rowIndex % ROW_REPEAT) * rowHeight + rowHeight * 0.5;
         ctx.beginPath();
         ctx.moveTo(start, y);
@@ -146,7 +146,7 @@ class Network extends PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex } = ownProps;
     const selectors = getThreadSelectors(threadIndex);
@@ -162,7 +162,5 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       verticalMarkers: selectors.getTimelineVerticalMarkers(state),
     };
   },
-  component: Network,
-};
-
-export default withSize(explicitConnect(options));
+  component: withSize<Props>(Network),
+});

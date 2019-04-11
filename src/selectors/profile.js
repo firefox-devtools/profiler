@@ -143,10 +143,9 @@ function _createCounterSelectors(counterIndex: CounterIndex): * {
     (counters, range) => filterCounterToRange(counters, range.start, range.end)
   );
 
-  const getAccumulateCounterSamples: Selector<
-    AccumulatedCounterSamples
-  > = createSelector(getCommittedRangeFilteredCounter, counters =>
-    accumulateCounterSamples(counters.sampleGroups.samples)
+  const getAccumulateCounterSamples: Selector<AccumulatedCounterSamples> = createSelector(
+    getCommittedRangeFilteredCounter,
+    counters => accumulateCounterSamples(counters.sampleGroups.samples)
   );
 
   return {
@@ -172,11 +171,13 @@ export const getGlobalTracks: Selector<GlobalTrack[]> = state =>
  */
 export const getGlobalTrackReferences: Selector<
   GlobalTrackReference[]
-> = createSelector(getGlobalTracks, globalTracks =>
-  globalTracks.map((globalTrack, trackIndex) => ({
-    type: 'global',
-    trackIndex,
-  }))
+> = createSelector(
+  getGlobalTracks,
+  globalTracks =>
+    globalTracks.map((globalTrack, trackIndex) => ({
+      type: 'global',
+      trackIndex,
+    }))
 );
 
 /**

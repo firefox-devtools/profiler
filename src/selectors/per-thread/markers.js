@@ -105,21 +105,23 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
 
   const getCommittedRangeFilteredMarkersForHeader: Selector<
     Marker[]
-  > = createSelector(getCommittedRangeFilteredMarkers, (markers): Marker[] =>
-    markers.filter(
-      marker =>
-        marker.name !== 'BHR-detected hang' &&
-        marker.name !== 'LongTask' &&
-        marker.name !== 'LongIdleTask' &&
-        marker.name !== 'Jank' &&
-        !MarkerData.isNetworkMarker(marker) &&
-        !MarkerData.isFileIoMarker(marker) &&
-        !MarkerData.isNavigationMarker(marker) &&
-        !MarkerData.isMemoryMarker(marker)
-    )
+  > = createSelector(
+    getCommittedRangeFilteredMarkers,
+    (markers): Marker[] =>
+      markers.filter(
+        marker =>
+          marker.name !== 'BHR-detected hang' &&
+          marker.name !== 'LongTask' &&
+          marker.name !== 'LongIdleTask' &&
+          marker.name !== 'Jank' &&
+          !MarkerData.isNetworkMarker(marker) &&
+          !MarkerData.isFileIoMarker(marker) &&
+          !MarkerData.isNavigationMarker(marker) &&
+          !MarkerData.isMemoryMarker(marker)
+      )
   );
 
-  const getTimelineVerticalMarkers = createSelector(
+  const getTimelineVerticalMarkers: Selector<Marker[]> = createSelector(
     getCommittedRangeFilteredMarkers,
     (markers): Marker[] => markers.filter(MarkerData.isNavigationMarker)
   );

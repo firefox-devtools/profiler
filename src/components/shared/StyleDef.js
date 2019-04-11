@@ -57,9 +57,7 @@ type BackgroundImageStyleDefProps = {|
   +url: string,
 |};
 
-export class BackgroundImageStyleDef extends PureComponent<
-  BackgroundImageStyleDefProps
-> {
+export class BackgroundImageStyleDef extends PureComponent<BackgroundImageStyleDefProps> {
   render() {
     const content = `
       .${this.props.className} {

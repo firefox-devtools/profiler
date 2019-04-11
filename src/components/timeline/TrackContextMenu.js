@@ -42,10 +42,7 @@ import type {
 import type { State } from '../../types/state';
 import type { TrackReference } from '../../types/actions';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +threads: Thread[],
@@ -424,7 +421,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
     threads: getThreads(state),
     globalTrackOrder: getGlobalTrackOrder(state),
@@ -448,5 +445,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     showLocalTrack,
   },
   component: TimelineTrackContextMenu,
-};
-export default explicitConnect(options);
+});

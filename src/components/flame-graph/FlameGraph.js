@@ -36,10 +36,7 @@ import type {
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { IconWithClassName } from '../../types/state';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 require('./FlameGraph.css');
 
@@ -101,7 +98,10 @@ class FlameGraph extends React.PureComponent<Props> {
    * Is the box for this call node wide enough to be selected?
    */
   _wideEnough = (callNodeIndex: IndexIntoCallNodeTable): boolean => {
-    const { flameGraphTiming, callNodeInfo: { callNodeTable } } = this.props;
+    const {
+      flameGraphTiming,
+      callNodeInfo: { callNodeTable },
+    } = this.props;
 
     const depth = callNodeTable.depth[callNodeIndex];
     const row = flameGraphTiming[depth];
@@ -123,7 +123,10 @@ class FlameGraph extends React.PureComponent<Props> {
     startingCallNodeIndex: IndexIntoCallNodeTable,
     direction: 1 | -1
   ): IndexIntoCallNodeTable | void => {
-    const { flameGraphTiming, callNodeInfo: { callNodeTable } } = this.props;
+    const {
+      flameGraphTiming,
+      callNodeInfo: { callNodeTable },
+    } = this.props;
 
     let callNodeIndex = startingCallNodeIndex;
 
@@ -302,7 +305,7 @@ function viewportNeedsUpdate() {
   return false;
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
@@ -331,6 +334,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     changeSelectedCallNode,
   },
   component: FlameGraph,
-};
-
-export default explicitConnect(options);
+});

@@ -121,7 +121,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       if (scaleCtxToCssPixels) {
         // Make sure and multiply by the inverse of the previous ratio, as the scaling
         // operates off of the previous set scale.
-        const scale = 1 / this._devicePixelRatio * devicePixelRatio;
+        const scale = (1 / this._devicePixelRatio) * devicePixelRatio;
         ctx.scale(scale, scale);
       }
       this._devicePixelRatio = devicePixelRatio;

@@ -37,10 +37,7 @@ import type {
 } from '../../types/units';
 import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
 import type { PreviewSelection } from '../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');
 
@@ -73,7 +70,10 @@ class StackChartGraph extends React.PureComponent<Props> {
    * Determine the maximum amount available to zoom in.
    */
   getMaximumZoom(): UnitIntervalOfProfileRange {
-    const { timeRange: { start, end }, interval } = this.props;
+    const {
+      timeRange: { start, end },
+      interval,
+    } = this.props;
     return interval / (end - start);
   }
 
@@ -142,6 +142,7 @@ class StackChartGraph extends React.PureComponent<Props> {
               interval,
               thread,
               stackTimingByDepth,
+              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
               updatePreviewSelection,
               rangeStart: timeRange.start,
               rangeEnd: timeRange.end,
@@ -159,7 +160,7 @@ class StackChartGraph extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
       state
@@ -186,8 +187,7 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     updatePreviewSelection,
   },
   component: StackChartGraph,
-};
-export default explicitConnect(options);
+});
 
 // This function is given the StackChartCanvas's chartProps.
 function viewportNeedsUpdate(

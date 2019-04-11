@@ -28,10 +28,7 @@ import type { SizeProps } from '../shared/WithSize';
 import type { NetworkPayload } from '../../types/markers';
 import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
 import type { Milliseconds, CssPixels } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { NetworkChartRowProps } from './NetworkChartRow';
 
 require('./index.css');
@@ -39,8 +36,6 @@ require('./index.css');
 const ROW_HEIGHT = 16;
 
 // The SizeProps are injected by the WithSize higher order component.
-type OwnProps = SizeProps;
-
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
@@ -54,7 +49,10 @@ type StateProps = {|
   +threadIndex: number,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+|};
 
 /*
  * The VirtualListRows only re-render when their items have changed. This information
@@ -107,7 +105,11 @@ class NetworkChart extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+/**
+ * Wrap the component in the WithSize higher order component, as well as the redux
+ * connected component.
+ */
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const networkTimingRows = selectedThreadSelectors.getNetworkChartTiming(
       state
@@ -123,14 +125,8 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       threadIndex: getSelectedThreadIndex(state),
     };
   },
-  component: NetworkChart,
-};
-
-/**
- * Wrap the component in the WithSize higher order component, as well as the redux
- * connected component.
- */
-export default withSize(explicitConnect(options));
+  component: withSize<Props>(NetworkChart),
+});
 
 /**
  * The VirtualListRow only re-renders when the props change, so pass in a pure function
@@ -165,7 +161,7 @@ function _timeToCssPixels(props: Props, time: Milliseconds): CssPixels {
     width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
 
   const markerPosition =
-    (time - timeRange.start) / timeRangeTotal * innerContainerWidth +
+    ((time - timeRange.start) / timeRangeTotal) * innerContainerWidth +
     TIMELINE_MARGIN_LEFT;
 
   // Keep the value bounded to the available viewport area.

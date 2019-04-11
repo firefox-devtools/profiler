@@ -19,10 +19,7 @@ import { invalidatePanelLayout } from '../../actions/app';
 import { getTimelineHeight } from '../../selectors/app';
 
 import type { CssPixels } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 require('./ProfileViewer.css');
 
@@ -73,11 +70,11 @@ class ProfileViewer extends PureComponent<Props> {
             <div className="profileViewerName">{profileName}</div>
           ) : null}
           <ProfileFilterNavigator />
-          {/*
-            * Define a spacer in the middle that will shrink based on the availability
-            * of space in the top bar. It will shrink away before any of the items
-            * with actual content in them do.
-            */}
+          {
+            // Define a spacer in the middle that will shrink based on the availability
+            // of space in the top bar. It will shrink away before any of the items
+            // with actual content in them do.
+          }
           <div className="profileViewerSpacer" />
           <MenuButtons />
         </div>
@@ -100,7 +97,7 @@ class ProfileViewer extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     profileName: getProfileName(state),
     hasZipFile: getHasZipFile(state),
@@ -111,6 +108,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     invalidatePanelLayout,
   },
   component: ProfileViewer,
-};
-
-export default explicitConnect(options);
+});

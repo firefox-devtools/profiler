@@ -20,10 +20,7 @@ import type {
   PreviewSelection,
   ImplementationFilter,
 } from '../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import { getImplementationFilter } from '../../selectors/url-state';
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
 import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
@@ -210,7 +207,7 @@ class MarkersContextMenu extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     markers: selectedThreadSelectors.getPreviewFilteredMarkers(state),
     previewSelection: getPreviewSelection(state),
@@ -221,5 +218,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   }),
   mapDispatchToProps: { updatePreviewSelection },
   component: MarkersContextMenu,
-};
-export default explicitConnect(options);
+});

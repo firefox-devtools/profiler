@@ -28,10 +28,7 @@ import type {
   UnitIntervalOfProfileRange,
 } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');
 
@@ -59,7 +56,10 @@ class MarkerChart extends React.PureComponent<Props> {
    * Determine the maximum zoom of the viewport.
    */
   getMaximumZoom(): UnitIntervalOfProfileRange {
-    const { timeRange: { start, end }, interval } = this.props;
+    const {
+      timeRange: { start, end },
+      interval,
+    } = this.props;
     return interval / (end - start);
   }
 
@@ -118,6 +118,7 @@ class MarkerChart extends React.PureComponent<Props> {
             chartProps={{
               markerTimingRows,
               markers,
+              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
               updatePreviewSelection,
               rangeStart: timeRange.start,
               rangeEnd: timeRange.end,
@@ -141,7 +142,7 @@ function viewportNeedsUpdate(
   return prevProps.markerTimingRows !== newProps.markerTimingRows;
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const markerTimingRows = selectedThreadSelectors.getMarkerChartTiming(
       state
@@ -160,5 +161,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   },
   mapDispatchToProps: { updatePreviewSelection },
   component: MarkerChart,
-};
-export default explicitConnect(options);
+});

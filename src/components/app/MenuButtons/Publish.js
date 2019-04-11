@@ -27,10 +27,7 @@ import {
 import { BlobUrlLink } from '../../shared/BlobUrlLink';
 import { assertExhaustiveCheck } from '../../../utils/flow';
 
-import explicitConnect, {
-  type ExplicitConnectOptions,
-  type ConnectedProps,
-} from '../../../utils/connect';
+import explicitConnect, { type ConnectedProps } from '../../../utils/connect';
 
 import type { Profile } from '../../../types/profile';
 import type { CheckedSharingOptions } from '../../../types/actions';
@@ -321,7 +318,11 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export const MenuButtonsPublish = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: state => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
@@ -341,8 +342,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     resetUploadState,
   },
   component: MenuButtonsPublishImpl,
-};
-export const MenuButtonsPublish = explicitConnect(options);
+});
 
 type DownloadSizeProps = {|
   +downloadSizePromise: Promise<string>,
