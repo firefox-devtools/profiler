@@ -28,10 +28,7 @@ import type {
 import type { AccumulatedCounterSamples } from '../../types/profile-derived';
 import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
 import type { SizeProps } from '../shared/WithSize';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import './TrackMemory.css';
 
@@ -112,7 +109,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       for (let i = 0; i < samples.length; i++) {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
-        x = deviceWidth * (samples.time[i] - rangeStart) / rangeLength;
+        x = (deviceWidth * (samples.time[i] - rangeStart)) / rangeLength;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
         const unitGraphCount = (accumulatedCounts[i] - minCount) / countRange;
@@ -138,7 +135,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
       // of the canvas.
       ctx.lineTo(x + interval, deviceHeight);
       ctx.lineTo(
-        deviceWidth * (samples.time[0] - rangeStart) / rangeLength + interval,
+        (deviceWidth * (samples.time[0] - rangeStart)) / rangeLength + interval,
         deviceHeight
       );
       ctx.fill();
@@ -175,7 +172,6 @@ type OwnProps = {|
   +counterIndex: CounterIndex,
   +lineWidth: CssPixels,
   +graphHeight: CssPixels,
-  ...SizeProps,
 |};
 
 type StateProps = {|
@@ -191,7 +187,10 @@ type StateProps = {|
 
 type DispatchProps = {||};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+|};
 
 type State = {|
   hoveredCounter: null | number,
@@ -220,7 +219,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     const { left } = event.currentTarget.getBoundingClientRect();
     const { width, rangeStart, rangeEnd, counter, interval } = this.props;
     const rangeLength = rangeEnd - rangeStart;
-    const timeAtMouse = rangeStart + (mouseX - left) / width * rangeLength;
+    const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
     const { samples } = counter.sampleGroups;
     if (
       timeAtMouse < samples.time[0] ||
@@ -287,7 +286,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     const { samples } = counter.sampleGroups;
     const rangeLength = rangeEnd - rangeStart;
     const left =
-      width * (samples.time[counterIndex] - rangeStart) / rangeLength;
+      (width * (samples.time[counterIndex] - rangeStart)) / rangeLength;
 
     const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
     const unitSampleCount =
@@ -352,7 +351,11 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export const TrackMemoryGraph = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, ownProps) => {
     const { counterIndex } = ownProps;
     const counterSelectors = getCounterSelectors(counterIndex);
@@ -370,7 +373,5 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
     };
   },
-  component: TrackMemoryGraphImpl,
-};
-
-export const TrackMemoryGraph = withSize(explicitConnect(options));
+  component: withSize<Props>(TrackMemoryGraphImpl),
+});

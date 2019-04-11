@@ -1026,3 +1026,10 @@ export function changeTimelineType(timelineType: TimelineType): Action {
     timelineType,
   };
 }
+
+export function changeProfileName(profileName: string): Action {
+  return {
+    type: 'CHANGE_PROFILE_NAME',
+    profileName,
+  };
+}

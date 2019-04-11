@@ -14,10 +14,10 @@ exports[`Timeline renders the header 1`] = `
         class="photon-label photon-label-micro timelineSettingsToggleLabel"
       >
         <input
+          checked=""
           class="photon-radio photon-radio-micro timelineSettingsToggleInput"
           name="timelineSettingsToggle"
           type="radio"
-          value="on"
         />
         Categories
       </label>
@@ -28,7 +28,6 @@ exports[`Timeline renders the header 1`] = `
           class="photon-radio photon-radio-micro timelineSettingsToggleInput"
           name="timelineSettingsToggle"
           type="radio"
-          value="on"
         />
         Stack height
       </label>

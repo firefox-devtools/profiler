@@ -49,12 +49,9 @@ import type {
   HiddenTrackCount,
 } from '../../types/actions';
 import type { Milliseconds, StartEndRange } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
-type OwnProps = SizeProps;
+export const TIMELINE_SETTINGS_HEIGHT = 26;
 
 type StateProps = {|
   +committedRange: StartEndRange,
@@ -75,7 +72,10 @@ type DispatchProps = {|
   +changeRightClickedTrack: typeof changeRightClickedTrack,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+|};
 
 class TimelineSettingsGraphType extends React.PureComponent<{|
   +timelineType: TimelineType,
@@ -176,7 +176,12 @@ class Timeline extends React.PureComponent<Props> {
 
     return (
       <>
-        <div className="timelineSettings">
+        <div
+          className="timelineSettings"
+          style={{
+            '--timeline-settings-height': `${TIMELINE_SETTINGS_HEIGHT}px`,
+          }}
+        >
           <TimelineSettingsGraphType
             timelineType={timelineType}
             changeTimelineType={changeTimelineType}
@@ -222,7 +227,7 @@ class Timeline extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     globalTracks: getGlobalTracks(state),
     globalTrackOrder: getGlobalTrackOrder(state),
@@ -240,6 +245,5 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     changeTimelineType,
     changeRightClickedTrack,
   },
-  component: Timeline,
-};
-export default withSize(explicitConnect(options));
+  component: withSize<Props>(Timeline),
+});

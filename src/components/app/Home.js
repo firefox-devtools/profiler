@@ -15,7 +15,6 @@ import {
 } from '../../actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import type {
-  ExplicitConnectOptions,
   ConnectedProps,
   WrapFunctionInDispatch,
 } from '../../utils/connect';
@@ -177,7 +176,8 @@ class LoadFromUrl extends React.PureComponent<
 function DocsButton() {
   return (
     <a href="/docs/" className="homeSectionButton">
-      <span className="homeSectionDocsIcon" />Documentation
+      <span className="homeSectionDocsIcon" />
+      Documentation
     </a>
   );
 }
@@ -235,18 +235,17 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
 
   componentDidMount() {
     // Prevent dropping files on the document.
-    // Help Flow infer the correct type signature for document.addEventListener.
-    document.addEventListener(('drag': string), _preventDefault, false);
-    document.addEventListener(('dragover': string), _preventDefault, false);
-    document.addEventListener(('drop': string), _preventDefault, false);
+    document.addEventListener('drag', _dragPreventDefault, false);
+    document.addEventListener('dragover', _dragPreventDefault, false);
+    document.addEventListener('drop', _dragPreventDefault, false);
     // Let the Gecko Profiler Add-on let the home-page know when it's been installed.
     homeInstance = this;
   }
 
   componentWillUnmount() {
-    document.removeEventListener(('drag': string), _preventDefault, false);
-    document.removeEventListener(('dragover': string), _preventDefault, false);
-    document.removeEventListener(('drop': string), _preventDefault, false);
+    document.removeEventListener('drag', _dragPreventDefault, false);
+    document.removeEventListener('dragover', _dragPreventDefault, false);
+    document.removeEventListener('drop', _dragPreventDefault, false);
   }
 
   _startDragging = (event: Event) => {
@@ -314,6 +313,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               profiler.firefox.com.
             </p>
             <ActionButtons
+              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
               retrieveProfileFromFile={this.props.retrieveProfileFromFile}
               triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
             />
@@ -347,6 +347,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             </p>
             {this._renderShortcuts()}
             <ActionButtons
+              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
               retrieveProfileFromFile={this.props.retrieveProfileFromFile}
               triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
             />
@@ -376,13 +377,15 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               the{' '}
               <InstallButton name="Gecko Profiler" xpiUrl={LEGACY_ADDON_URL}>
                 Gecko Profiler Add-on
-              </InstallButton>. Then use the button added to the browser, or use
-              the following shortcuts to record a profile. The button’s icon is
-              blue when a profile is recording. Hit <kbd>Capture Profile</kbd>{' '}
-              to load the data into profiler.firefox.com.
+              </InstallButton>
+              . Then use the button added to the browser, or use the following
+              shortcuts to record a profile. The button’s icon is blue when a
+              profile is recording. Hit <kbd>Capture Profile</kbd> to load the
+              data into profiler.firefox.com.
             </p>
             {this._renderShortcuts()}
             <ActionButtons
+              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
               retrieveProfileFromFile={this.props.retrieveProfileFromFile}
               triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
             />
@@ -414,6 +417,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               However, existing profiles can be viewed in any modern browser.
             </p>
             <ActionButtons
+              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
               retrieveProfileFromFile={this.props.retrieveProfileFromFile}
               triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
             />
@@ -500,7 +504,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   }
 }
 
-function _preventDefault(event) {
+function _dragPreventDefault(event: DragEvent) {
   event.preventDefault();
 }
 
@@ -514,8 +518,7 @@ function _isFirefox(): boolean {
   return Boolean(navigator.userAgent.match(/Firefox\/\d+\.\d+/));
 }
 
-const options: ExplicitConnectOptions<OwnHomeProps, {||}, DispatchHomeProps> = {
+export default explicitConnect<OwnHomeProps, {||}, DispatchHomeProps>({
   mapDispatchToProps: { retrieveProfileFromFile, triggerLoadingFromUrl },
   component: Home,
-};
-export default explicitConnect(options);
+});

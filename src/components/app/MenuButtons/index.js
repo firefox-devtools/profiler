@@ -6,89 +6,130 @@
 
 import * as React from 'react';
 import explicitConnect from '../../../utils/connect';
+import { getProfile, getProfileRootRange } from '../../../selectors/profile';
 import {
-  getProfile,
-  getProfileRootRange,
-  getProfileSharingStatus,
-} from '../../../selectors/profile';
-import { getDataSource, getUrlPredictor } from '../../../selectors/url-state';
-import actions from '../../../actions';
+  getDataSource,
+  getIsNewlyPublished,
+} from '../../../selectors/url-state';
 import { MenuButtonsMetaInfo } from './MetaInfo';
-import { MenuButtonsProfileSharing } from './ProfileSharing';
-import { ProfileDownloadButton } from './Download';
+import { MenuButtonsPublish } from './Publish';
+import { MenuButtonsPermalink } from './Permalink';
+import { assertExhaustiveCheck } from '../../../utils/flow';
+import ArrowPanel from '../../shared/ArrowPanel';
+import ButtonWithPanel from '../../shared/ButtonWithPanel';
+import { dismissNewlyPublished } from '../../../actions/app';
 
 import type { StartEndRange } from '../../../types/units';
 import type { Profile } from '../../../types/profile';
-import type { Action, DataSource } from '../../../types/actions';
-import type { ProfileSharingStatus } from '../../../types/state';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../../utils/connect';
+import type { DataSource } from '../../../types/actions';
+import type { ConnectedProps } from '../../../utils/connect';
 
 require('./index.css');
+
+type OwnProps = {|
+  // This is for injecting a URL shortener for tests. Normally we would use a Jest mock
+  // that would mock out a local module, but I was having trouble getting it working
+  // correctly (perhaps due to ES6 modules), so I just went with dependency injection
+  // instead.
+  injectedUrlShortener?: string => Promise<string>,
+|};
 
 type StateProps = {|
   +profile: Profile,
   +rootRange: StartEndRange,
   +dataSource: DataSource,
-  +profileSharingStatus: ProfileSharingStatus,
-  +predictUrl: (Action | Action[]) => string,
+  +isNewlyPublished: boolean,
 |};
 
 type DispatchProps = {|
-  +profilePublished: typeof actions.profilePublished,
-  +setProfileSharingStatus: typeof actions.setProfileSharingStatus,
+  +dismissNewlyPublished: typeof dismissNewlyPublished,
 |};
 
-type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-const MenuButtons = ({
-  profile,
-  rootRange,
+class MenuButtons extends React.PureComponent<Props> {
+  componentDidMount() {
+    // Clear out the newly published notice from the URL.
+    this.props.dismissNewlyPublished();
+  }
+
+  render() {
+    const {
+      profile,
+      dataSource,
+      isNewlyPublished,
+      injectedUrlShortener,
+    } = this.props;
+    return (
+      <>
+        {/* Place the info button outside of the menu buttons to allow it to shrink. */}
+        <MenuButtonsMetaInfo profile={profile} />
+        <div className="menuButtons">
+          <PublishOrPermalinkButtons
+            dataSource={dataSource}
+            isNewlyPublished={isNewlyPublished}
+            injectedUrlShortener={injectedUrlShortener}
+          />
+          <a
+            href="/docs/"
+            target="_blank"
+            className="menuButtonsLink"
+            title="Open the documentation in a new window"
+          >
+            Docs
+            <i className="open-in-new" />
+          </a>
+        </div>
+      </>
+    );
+  }
+}
+
+const PublishOrPermalinkButtons = ({
   dataSource,
-  profilePublished,
-  profileSharingStatus,
-  setProfileSharingStatus,
-  predictUrl,
-}: Props) => (
-  <>
-    {/* Place the info button outside of the menu buttons to allow it to shrink. */}
-    <MenuButtonsMetaInfo profile={profile} />
-    <div className="menuButtons">
-      <MenuButtonsProfileSharing
-        profile={profile}
-        dataSource={dataSource}
-        onProfilePublished={profilePublished}
-        profileSharingStatus={profileSharingStatus}
-        setProfileSharingStatus={setProfileSharingStatus}
-        predictUrl={predictUrl}
-      />
-      <ProfileDownloadButton profile={profile} rootRange={rootRange} />
-      <a
-        href="/docs/"
-        target="_blank"
-        className="menuButtonsLink"
-        title="Open the documentation in a new window"
-      >
-        Docs…
-      </a>
-    </div>
-  </>
-);
+  isNewlyPublished,
+  injectedUrlShortener,
+}) => {
+  switch (dataSource) {
+    case 'from-addon':
+    case 'from-file':
+    case 'local':
+      return (
+        <ButtonWithPanel
+          className="menuButtonsShareButton"
+          label="Publish…"
+          panel={
+            <ArrowPanel className="menuButtonsPublishPanel">
+              <MenuButtonsPublish />
+            </ArrowPanel>
+          }
+        />
+      );
+    case 'public':
+    case 'from-url':
+    case 'compare':
+      return (
+        <MenuButtonsPermalink
+          isNewlyPublished={isNewlyPublished}
+          injectedUrlShortener={injectedUrlShortener}
+        />
+      );
+    case 'none':
+      return null;
+    default:
+      throw assertExhaustiveCheck(dataSource);
+  }
+};
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
-    profileSharingStatus: getProfileSharingStatus(state),
-    predictUrl: getUrlPredictor(state),
+    isNewlyPublished: getIsNewlyPublished(state),
   }),
   mapDispatchToProps: {
-    profilePublished: actions.profilePublished,
-    setProfileSharingStatus: actions.setProfileSharingStatus,
+    dismissNewlyPublished,
   },
   component: MenuButtons,
-};
-export default explicitConnect(options);
+});

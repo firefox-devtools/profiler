@@ -10,6 +10,7 @@ import {
   changeCallTreeSearchString,
   changeMarkersSearchString,
   changeNetworkSearchString,
+  changeProfileName,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -337,6 +338,32 @@ describe('search strings', function() {
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
     expect(query.networkSearch).toBe(networkSearchString);
+  });
+});
+
+describe('profileName', function() {
+  it('serializes the profileName in the URL ', function() {
+    const { getState, dispatch } = _getStoreWithURL();
+    const profileName = 'Good Profile';
+
+    dispatch(changeProfileName(profileName));
+    const urlState = urlStateReducers.getUrlState(getState());
+    const { query } = urlStateToUrlObject(urlState);
+    expect(query.profileName).toBe(profileName);
+  });
+
+  it('reflects in the state from URL', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?profileName=XXX',
+    });
+    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('XXX');
+    expect(urlStateReducers.getProfileName(getState())).toBe('XXX');
+  });
+
+  it('returns empty string when profileName is not specified', function() {
+    const { getState } = _getStoreWithURL();
+    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('');
+    expect(urlStateReducers.getProfileName(getState())).toBe('');
   });
 });
 

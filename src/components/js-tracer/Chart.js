@@ -30,10 +30,7 @@ import type {
   CssPixels,
 } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');
 
@@ -70,7 +67,10 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
    * Determine the maximum zoom of the viewport.
    */
   getMaximumZoom(): UnitIntervalOfProfileRange {
-    const { timeRange: { start, end }, interval } = this.props;
+    const {
+      timeRange: { start, end },
+      interval,
+    } = this.props;
     return interval / (end - start);
   }
 
@@ -104,6 +104,7 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
         chartProps={{
           jsTracerTimingRows,
           jsTracerTable,
+          // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
           updatePreviewSelection,
           rangeStart: timeRange.start,
           rangeEnd: timeRange.end,
@@ -127,7 +128,11 @@ function viewportNeedsUpdate(
 /**
  * This connect function is very expensive to run the first time.
  */
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+const JsTracerExpensiveChart = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
   mapStateToProps: (state, ownProps) => ({
     timeRange: getCommittedRange(state),
     stringTable: selectedThreadSelectors.getStringTable(state),
@@ -143,9 +148,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
   }),
   mapDispatchToProps: { updatePreviewSelection },
   component: JsTracerExpensiveChartImpl,
-};
-
-const JsTracerExpensiveChart = explicitConnect(options);
+});
 
 type ChartLoaderProps = {|
   +profile: Profile,
@@ -183,7 +186,7 @@ class JsTracerChartLoader extends React.PureComponent<
   // will have already run. There is no need to fade the component in.
   _doFadeIn: boolean = false;
 
-  constructor(props) {
+  constructor(props: ChartLoaderProps) {
     super(props);
     // Look up the seenChartKeys per-profile. If not found, create a new Set.
     let seenChartKeys = _seenChartKeysPerProfile.get(props.profile);

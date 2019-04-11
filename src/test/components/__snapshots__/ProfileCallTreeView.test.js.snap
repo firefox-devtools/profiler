@@ -20,6 +20,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -62,7 +63,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -153,6 +153,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -195,7 +196,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -298,6 +298,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -328,7 +329,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -399,6 +399,60 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
 </div>
 `;
 
+exports[`calltree/ProfileCallTreeView TransformNavigator renders with multiple transforms applied 1`] = `
+<ol
+  class="filterNavigatorBar calltreeTransformNavigator"
+>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarRootItem"
+    data-index="0"
+    title="Complete \\"Thread with samples\\""
+  >
+    <button
+      class="filterNavigatorBarItemContent"
+      type="button"
+    >
+      Complete "Thread with samples"
+    </button>
+  </li>
+  <li
+    class="filterNavigatorBarItem"
+    data-index="1"
+    title="Focus Node: A"
+  >
+    <button
+      class="filterNavigatorBarItemContent"
+      type="button"
+    >
+      Focus Node: A
+    </button>
+  </li>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarBeforeSelectedItem"
+    data-index="2"
+    title="Focus Node: B"
+  >
+    <button
+      class="filterNavigatorBarItemContent"
+      type="button"
+    >
+      Focus Node: B
+    </button>
+  </li>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    data-index="3"
+    title="Focus Node: C"
+  >
+    <span
+      class="filterNavigatorBarItemContent"
+    >
+      Focus Node: C
+    </span>
+  </li>
+</ol>
+`;
+
 exports[`calltree/ProfileCallTreeView computes a width for a call tree of a really deep stack 1`] = `
 <div
   aria-labelledby="calltree-tab-button"
@@ -419,6 +473,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -461,7 +516,6 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -1774,6 +1828,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -1814,9 +1869,9 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           class="photon-label photon-label-micro stackSettingsLabel"
         >
           <input
+            checked=""
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -2388,6 +2443,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -2430,7 +2486,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -3002,6 +3057,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -3044,7 +3100,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -3616,6 +3671,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -3658,7 +3714,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -4187,6 +4242,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -4229,7 +4285,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -4758,6 +4813,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -4800,7 +4856,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -5210,6 +5265,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -5252,7 +5308,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>
@@ -5662,6 +5717,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
+            checked=""
             class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
@@ -5704,7 +5760,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           <input
             class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Invert call stack
         </label>

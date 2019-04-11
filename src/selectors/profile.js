@@ -42,7 +42,6 @@ import type {
   State,
   ProfileViewState,
   SymbolicationStatus,
-  ProfileSharingStatus,
 } from '../types/state';
 import type { $ReturnType } from '../types/utils';
 
@@ -58,8 +57,6 @@ export const getProfileRootRange: Selector<StartEndRange> = state =>
   getProfileViewOptions(state).rootRange;
 export const getSymbolicationStatus: Selector<SymbolicationStatus> = state =>
   getProfileViewOptions(state).symbolicationStatus;
-export const getProfileSharingStatus: Selector<ProfileSharingStatus> = state =>
-  getProfileViewOptions(state).profileSharingStatus;
 export const getScrollToSelectionGeneration: Selector<number> = state =>
   getProfileViewOptions(state).scrollToSelectionGeneration;
 export const getFocusCallTreeGeneration: Selector<number> = state =>
@@ -146,10 +143,9 @@ function _createCounterSelectors(counterIndex: CounterIndex): * {
     (counters, range) => filterCounterToRange(counters, range.start, range.end)
   );
 
-  const getAccumulateCounterSamples: Selector<
-    AccumulatedCounterSamples
-  > = createSelector(getCommittedRangeFilteredCounter, counters =>
-    accumulateCounterSamples(counters.sampleGroups.samples)
+  const getAccumulateCounterSamples: Selector<AccumulatedCounterSamples> = createSelector(
+    getCommittedRangeFilteredCounter,
+    counters => accumulateCounterSamples(counters.sampleGroups.samples)
   );
 
   return {
@@ -175,11 +171,13 @@ export const getGlobalTracks: Selector<GlobalTrack[]> = state =>
  */
 export const getGlobalTrackReferences: Selector<
   GlobalTrackReference[]
-> = createSelector(getGlobalTracks, globalTracks =>
-  globalTracks.map((globalTrack, trackIndex) => ({
-    type: 'global',
-    trackIndex,
-  }))
+> = createSelector(
+  getGlobalTracks,
+  globalTracks =>
+    globalTracks.map((globalTrack, trackIndex) => ({
+      type: 'global',
+      trackIndex,
+    }))
 );
 
 /**

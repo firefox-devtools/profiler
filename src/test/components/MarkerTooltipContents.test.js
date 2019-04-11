@@ -51,6 +51,18 @@ describe('MarkerTooltipContents', function() {
       nsRefreshDriver::AddStyleFlushObserver
     `);
 
+    // Connect a page to one of the markers so that we render a URL in
+    // its tooltip.
+    const docShellId = '{c03a6ebd-2430-7949-b25b-95ba9776bdbf}';
+    const docshellHistoryId = 1;
+    profile.pages = [
+      {
+        docshellId: docShellId,
+        historyId: docshellHistoryId,
+        url: 'https://developer.mozilla.org/en-US/',
+        isSubFrame: false,
+      },
+    ];
     profile.threads[0].name = 'Main Thread';
 
     // Now add some markers to the profile.
@@ -65,6 +77,8 @@ describe('MarkerTooltipContents', function() {
           eventType: 'commandupdate',
           interval: 'start',
           phase: 2,
+          docShellId,
+          docshellHistoryId,
         },
       ],
       [

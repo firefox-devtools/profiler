@@ -19,86 +19,82 @@
 }
 
 .networkChartRowItem {
+  /* This color is overridden for specific mime types, see below. */
+  --marker-color: var(--grey-70);
+
   display: block;
   width: 100%;
   height: 16px;
 }
 
+.networkChartRowItem.odd {
+  background-color: #f5f5f5;
+}
+
+.networkChartRowItem:hover {
+  background-color: #bbe0f6;
+}
+
 .networkChartRowItemLabel {
-  z-index: 2;
   display: inline-block;
   overflow: hidden;
   width: 100%;
   max-height: 16px;
-  flex-basis: 0;
-  flex-shrink: 0;
   margin-left: 4px;
+
+  /* This is necessary so that the marker element gets the mouse events, because
+   * the label element is on top becaose of the :hover rule below. */
+  pointer-events: none;
   white-space: nowrap;
 }
 
+/* This rule is useful to make the label more visible on hover. */
+.networkChartRowItem:hover .networkChartRowItemLabel {
+  position: relative;
+  z-index: 1;
+}
+
 .networkChartRowItemBar {
-  position: absolute;
-  z-index: 3;
+  position: absolute; /* The bar will be positioned in JS. */
   display: inline-block;
-  height: 12px;
-  flex-grow: 1;
-  margin-top: 2px;
-  border: 1px solid var(--grey-40);
-  background-color: white;
+  overflow: hidden; /* This clips this element's children using its border-radius */
+  height: 14px;
+  margin: 1px 0; /* Because the line's height is 16px, this margin vertically centers the bar */
+
+  /* styling properties */
+  background-color: var(--grey-20);
   border-radius: 2px;
+  box-shadow: 0 0 0 1px inset var(--marker-color);
   opacity: 0.7;
 }
 
-.networkChartRowItemBarInner {
-  display: inline-block;
-  height: 12px;
-  background-color: var(--grey-40);
+.networkChartRowItem:hover .networkChartRowItemBar {
+  opacity: 0.4;
 }
 
-.networkChartRowItemCss .networkChartRowItemBar {
-  border-color: var(--purple-50);
-  opacity: 0.6;
+.networkChartRowItemBarPhase {
+  position: absolute;
+  height: 100%;
+  background-color: var(--marker-color);
 }
 
-.networkChartRowItemCss .networkChartRowItemBarInner {
-  background-color: var(--purple-50);
+/* These colors are quite bright and strong on purpose, because the marker has
+ * some transparency, and we need the marker to stand out, especially when only
+ * the border is displayed. */
+.networkChartRowItemCss {
+  --marker-color: var(--purple-70);
 }
 
-.networkChartRowItemJs .networkChartRowItemBar {
-  border-color: var(--yellow-50);
-  opacity: 0.6;
+.networkChartRowItemJs {
+  --marker-color: var(--yellow-60);
 }
 
-.networkChartRowItemJs .networkChartRowItemBarInner {
-  background-color: var(--yellow-50);
+.networkChartRowItemHtml {
+  --marker-color: var(--blue-70);
 }
 
-.networkChartRowItemHtml .networkChartRowItemBar {
-  border-color: var(--blue-60);
-  opacity: 0.6;
-}
-
-.networkChartRowItemHtml .networkChartRowItemBarInner {
-  background-color: var(--blue-60);
-}
-
-.networkChartRowItemImg .networkChartRowItemBar {
-  border-color: var(--green-60);
-  opacity: 0.6;
-}
-
-.networkChartRowItemImg .networkChartRowItemBarInner {
-  background-color: var(--green-60);
-}
-
-.networkChartRowItemBarRequestQueue {
-  opacity: 0;
-}
-.networkChartRowItemBarRequest {
-  opacity: 0.5;
-}
-.networkChartRowItemBarResponse {
-  opacity: 1;
+.networkChartRowItemImg {
+  --marker-color: var(--green-70);
 }
 
 .networkChartRowItemUriOptional {
@@ -119,18 +115,9 @@
   padding-right: 8px;
 }
 
-.networkChartRowItem.odd {
-  background-color: #f5f5f5;
+/* This makes the URI completely visible on hover */
+.networkChartRowItem:hover .networkChartRowItemUriOptional {
+  max-width: unset;
+  color: unset;
 }
 
-.networkChartRowItem:hover {
-  background-color: #bbe0f6;
-}
-
-.networkChartRowItem:hover .networkChartRowItemBar {
-  opacity: 1;
-}
-
-.networkChartRowItem:hover .networkChartRowItemLabel {
-  opacity: 0.4;
-}

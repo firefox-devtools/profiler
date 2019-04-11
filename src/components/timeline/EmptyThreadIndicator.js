@@ -144,4 +144,4 @@ export function getIndicatorPositions(
   return { startup, shutdown, emptyBufferStart };
 }
 
-export default withSize(EmptyThreadIndicator);
+export default withSize<Props>(EmptyThreadIndicator);

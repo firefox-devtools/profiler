@@ -6,6 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
+import { withSize, type SizeProps } from '../shared/WithSize';
 import ThreadStackGraph from '../shared/thread/StackGraph';
 import ThreadActivityGraph from '../shared/thread/ActivityGraph';
 import {
@@ -32,6 +33,7 @@ import {
   focusCallTree,
   selectLeafCallNode,
 } from '../../actions/profile-view';
+import { reportTrackThreadHeight } from '../../actions/app';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import './TrackThread.css';
 
@@ -48,10 +50,7 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { State } from '../../types/state';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
@@ -78,9 +77,13 @@ type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
   +selectLeafCallNode: typeof selectLeafCallNode,
+  +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+|};
 
 class TimelineTrackThread extends PureComponent<Props> {
   /**
@@ -106,6 +109,13 @@ class TimelineTrackThread extends PureComponent<Props> {
       selectionEnd: Math.min(rangeEnd, end),
     });
   };
+
+  componentDidUpdate() {
+    const { threadIndex, height, reportTrackThreadHeight } = this.props;
+    // Most likely this track height shouldn't change, but if it does, report it.
+    // The action will only dispatch on changed values.
+    reportTrackThreadHeight(threadIndex, height);
+  }
 
   render() {
     const {
@@ -201,7 +211,7 @@ class TimelineTrackThread extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadIndex } = ownProps;
     const selectors = getThreadSelectors(threadIndex);
@@ -230,7 +240,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     changeSelectedCallNode,
     focusCallTree,
     selectLeafCallNode,
+    reportTrackThreadHeight,
   },
-  component: TimelineTrackThread,
-};
-export default explicitConnect(options);
+  component: withSize<Props>(TimelineTrackThread),
+});

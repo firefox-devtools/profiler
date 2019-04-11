@@ -11,7 +11,6 @@ import { getCommittedRangeLabels } from '../../selectors/url-state';
 import { getFormattedTimeLength } from '../../profile-logic/committed-ranges';
 import FilterNavigatorBar from '../shared/FilterNavigatorBar';
 
-import type { ExplicitConnectOptions } from '../../utils/connect';
 import type { ElementProps } from 'react';
 
 type Props = ElementProps<typeof FilterNavigatorBar>;
@@ -20,7 +19,7 @@ type DispatchProps = {|
 |};
 type StateProps = $ReadOnly<$Exact<$Diff<Props, DispatchProps>>>;
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const items = getCommittedRangeLabels(state);
     const previewSelection = getPreviewSelection(state);
@@ -40,6 +39,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     onPop: popCommittedRanges,
   },
   component: FilterNavigatorBar,
-};
-
-export default explicitConnect(options);
+});

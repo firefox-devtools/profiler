@@ -187,8 +187,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
       devicePixelRatio *
       // The right hand side of this formula is all in CSS pixels.
       (TIMELINE_MARGIN_LEFT +
-        (viewportPosition - viewportLeft) *
-          innerContainerWidth /
+        ((viewportPosition - viewportLeft) * innerContainerWidth) /
           viewportLength);
 
     // Apply the device pixel ratio to various CssPixel constants.
@@ -254,8 +253,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
             (stackTiming.end[i] - rangeStart) / rangeLength;
           const floatX = pixelAtViewportPosition(viewportAtStartTime);
           const floatW: DevicePixels =
-            (viewportAtEndTime - viewportAtStartTime) *
-              innerDevicePixelsWidth /
+            ((viewportAtEndTime - viewportAtStartTime) *
+              innerDevicePixelsWidth) /
               viewportLength -
             1;
 

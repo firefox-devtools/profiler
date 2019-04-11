@@ -48,6 +48,7 @@ function getDataSourceDirs(
 // "null | void" in the query objects are flags which map to true for null, and false
 // for void. False flags do not show up the URL.
 type BaseQuery = {|
+  v: number,
   range: string, //
   thread: string, // "3"
   globalTrackOrder: string, // "3-2-0-1"
@@ -63,6 +64,10 @@ type BaseQuery = {|
   threadOrder: string, // "3-2-0-1"
   hiddenThreads: string, // "0-1"
   profiles: string[],
+  profileName: string,
+  // This value tracks whether a profile was newly published. Which in that case
+  // we will want to show a friendly message.
+  published: null | void,
 |};
 
 type CallTreeQuery = {|
@@ -105,9 +110,12 @@ type Query = {|
   ...JsTracerQuery,
 |};
 
+type $MakeOptional = <T>(T) => T | void;
+type QueryShape = $Shape<$ObjMap<Query, $MakeOptional>>;
+
 type UrlObject = {|
   pathParts: string[],
-  query: $Shape<Query>,
+  query: QueryShape,
 |};
 
 /**
@@ -137,16 +145,18 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   const { selectedThread } = urlState.profileSpecific;
 
   // Start with the query parameters that are shown regardless of the active tab.
-  const query: Object = {
+  const query: QueryShape = {
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
-    thread: selectedThread === null ? undefined : selectedThread,
+    thread: selectedThread === null ? undefined : selectedThread.toString(),
     globalTrackOrder:
       urlState.profileSpecific.globalTrackOrder.join('-') || undefined,
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
     v: CURRENT_URL_VERSION,
+    profileName: urlState.profileName,
+    published: urlState.isNewlyPublished === true ? null : undefined,
   };
 
   // Add the parameter hiddenGlobalTracks only when needed.
@@ -174,12 +184,11 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     query.timelineType = 'stack';
   }
 
-  const localTrackOrderByPid = '';
+  let localTrackOrderByPid = '';
   for (const [pid, trackOrder] of urlState.profileSpecific
     .localTrackOrderByPid) {
     if (trackOrder.length > 0) {
-      query.localTrackOrderByPid +=
-        `${String(pid)}-` + trackOrder.join('-') + '~';
+      localTrackOrderByPid += `${String(pid)}-` + trackOrder.join('-') + '~';
     }
   }
   query.localTrackOrderByPid = localTrackOrderByPid || undefined;
@@ -312,6 +321,8 @@ export function stateFromLocation(location: Location): UrlState {
     profilesToCompare: query.profiles || null,
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
+    profileName: query.profileName,
+    isNewlyPublished: query.published !== undefined,
     profileSpecific: {
       implementation,
       invertCallstack: query.invertCallstack !== undefined,

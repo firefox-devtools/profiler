@@ -326,16 +326,35 @@ export type NetworkPayload = {|
   count?: number, // Total size of transfer, if any
   status: string,
   cache?: string,
+
+  // NOTE: the following comments are valid for the merged markers. For the raw
+  // markers, startTime and endTime have different meanings. Please look
+  // `src/profile-logic/marker-data.js` for more information.
+
+  // startTime is when the channel opens. This happens on the process' main
+  // thread.
   startTime: Milliseconds,
+  // endTime is the time when the response is sent back to the caller, this
+  // happens on the process' main thread.
   endTime: Milliseconds,
+
+  // The following properties are present only in non-START markers.
+  // domainLookupStart, if present, should be the first timestamp for an event
+  // happening on the socket thread. However it's not present for persisted
+  // connections. This is also the case for `domainLookupEnd`, `connectStart`,
+  // `tcpConnectEnd`, `secureConnectionStart`, and `connectEnd`.
   domainLookupStart?: Milliseconds,
   domainLookupEnd?: Milliseconds,
   connectStart?: Milliseconds,
   tcpConnectEnd?: Milliseconds,
   secureConnectionStart?: Milliseconds,
   connectEnd?: Milliseconds,
+  // `requestStart`, `responseStart` and `responseEnd` should always be present
+  // for STOP markers.
   requestStart?: Milliseconds,
   responseStart?: Milliseconds,
+  // responseEnd is when we received the response from the server, this happens
+  // on the socket thread.
   responseEnd?: Milliseconds,
 |};
 
@@ -386,6 +405,8 @@ export type DOMEventMarkerPayload = {|
   eventType: string,
   phase: 0 | 1 | 2 | 3,
   cause?: CauseBacktrace,
+  docShellId?: string,
+  docshellHistoryId?: number,
 |};
 
 export type NavigationMarkerPayload = {|

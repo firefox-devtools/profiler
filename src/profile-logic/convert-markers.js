@@ -21,14 +21,14 @@ export function upgradeGCMinorMarker(marker8: Object): GCMinorMarkerPayload {
       return Object.assign(marker8);
     }
     /*
-       * This is the old format for GCMinor, rename some
-       * properties to the more sensible names in the newer
-       * format and set the status.
-       *
-       * Note that we don't delete certain properties such as
-       * promotion_rate, leave them so that anyone opening the
-       * raw json data can still see them in converted profiles.
-       */
+     * This is the old format for GCMinor, rename some
+     * properties to the more sensible names in the newer
+     * format and set the status.
+     *
+     * Note that we don't delete certain properties such as
+     * promotion_rate, leave them so that anyone opening the
+     * raw json data can still see them in converted profiles.
+     */
     const marker = Object.assign(marker8, {
       nursery: Object.assign(marker8.nursery, {
         status: 'complete',

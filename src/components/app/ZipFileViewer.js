@@ -26,10 +26,7 @@ import { getPathInZipFileFromUrl } from '../../selectors/url-state';
 import TreeView from '../shared/TreeView';
 import ProfileViewer from './ProfileViewer';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { ZipFileState } from '../../types/state';
 import type {
   ZipFileTable,
@@ -82,7 +79,10 @@ class ZipFileRowImpl extends React.PureComponent<ZipFileRowProps> {
       return;
     }
     event.preventDefault();
-    const { viewProfileFromZip, displayData: { zipTableIndex } } = this.props;
+    const {
+      viewProfileFromZip,
+      displayData: { zipTableIndex },
+    } = this.props;
     if (zipTableIndex !== null) {
       viewProfileFromZip(zipTableIndex);
     }
@@ -101,11 +101,11 @@ class ZipFileRowImpl extends React.PureComponent<ZipFileRowProps> {
   }
 }
 
-const zipFileRowConnectOptions: ExplicitConnectOptions<
+const ZipFileRow = explicitConnect<
   ZipFileRowOwnProps,
   {||},
   ZipFileRowDispatchProps
-> = {
+>({
   // ZipFileRow is implemented as a connected component, only to provide access to
   // dispatch-wrapped actions. Please consider the performance impact of using
   // mapStateToProps here.
@@ -113,8 +113,7 @@ const zipFileRowConnectOptions: ExplicitConnectOptions<
     viewProfileFromZip,
   },
   component: ZipFileRowImpl,
-};
-const ZipFileRow = explicitConnect(zipFileRowConnectOptions);
+});
 
 /**
  * This component is a viewer for zip files. It was built to load
@@ -299,7 +298,8 @@ class ZipFileViewer extends React.PureComponent<Props> {
         return this._renderMessage([
           <p key="message">Unable to load the profile at this path:</p>,
           <span className="zipFileViewerUntrustedFilePath" key="path">
-            /{
+            /
+            {
               // This is text that comes from the URL, make sure it looks visually
               // distinct for guarding against someone doing anything too funky
               // with it.
@@ -315,7 +315,8 @@ class ZipFileViewer extends React.PureComponent<Props> {
             Failed to find a file in the zip at the following path:
           </span>,
           <span className="zipFileViewerUntrustedFilePath" key="path">
-            /{
+            /
+            {
               // This is text that comes from the URL, make sure it looks visually
               // distinct for guarding against someone doing anything too funky
               // with it.
@@ -333,7 +334,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const zipFileTree = getZipFileTree(state);
     if (zipFileTree === null) {
@@ -366,6 +367,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     showErrorForNoFileInZip,
   },
   component: ZipFileViewer,
-};
-
-export default explicitConnect(options);
+});

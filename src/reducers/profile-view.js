@@ -23,7 +23,6 @@ import type {
 import type {
   Reducer,
   ProfileViewState,
-  ProfileSharingStatus,
   SymbolicationStatus,
   ThreadViewOptions,
 } from '../types/state';
@@ -457,33 +456,6 @@ const isCallNodeContextMenuVisible: Reducer<boolean> = (
   }
 };
 
-const profileSharingStatus: Reducer<ProfileSharingStatus> = (
-  state = {
-    sharedWithUrls: false,
-    sharedWithoutUrls: false,
-  },
-  action
-) => {
-  switch (action.type) {
-    case 'SET_PROFILE_SHARING_STATUS':
-      return action.profileSharingStatus;
-    case 'VIEW_PROFILE':
-      // Here are the possible cases:
-      // - older shared profiles, newly captured profiles, and profiles from a file don't
-      //   have the property `networkURLsRemoved`. We use the `dataSource` value
-      //   to distinguish between these cases.
-      // - newer profiles that have been shared do have this property.
-      return {
-        sharedWithUrls:
-          !action.profile.meta.networkURLsRemoved &&
-          action.dataSource === 'public',
-        sharedWithoutUrls: action.profile.meta.networkURLsRemoved === true,
-      };
-    default:
-      return state;
-  }
-};
-
 /**
  * Provide a mechanism to wrap the reducer in a special function that can reset
  * the state to the default values. This is useful when viewing multiple profiles
@@ -517,7 +489,6 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rootRange,
       rightClickedTrack,
       isCallNodeContextMenuVisible,
-      profileSharingStatus,
     }),
     globalTracks,
     localTracksByPid,

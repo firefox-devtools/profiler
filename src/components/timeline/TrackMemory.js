@@ -16,15 +16,13 @@ import { TrackMemoryGraph } from './TrackMemoryGraph';
 
 import type { CounterIndex, ThreadIndex } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import './TrackMemory.css';
 
 export const GRAPH_HEIGHT = 25;
 export const MARKERS_HEIGHT = 15;
+export const TRACK_MEMORY_HEIGHT = GRAPH_HEIGHT + MARKERS_HEIGHT;
 export const LINE_WIDTH = 2;
 
 type OwnProps = {|
@@ -87,20 +85,20 @@ export class TrackMemoryImpl extends React.PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
-  mapStateToProps: (state, ownProps) => {
-    const { counterIndex } = ownProps;
-    const counterSelectors = getCounterSelectors(counterIndex);
-    const counter = counterSelectors.getCommittedRangeFilteredCounter(state);
-    const { start, end } = getCommittedRange(state);
-    return {
-      threadIndex: counter.mainThreadIndex,
-      rangeStart: start,
-      rangeEnd: end,
-    };
-  },
-  mapDispatchToProps: { updatePreviewSelection },
-  component: TrackMemoryImpl,
-};
-
-export const TrackMemory = explicitConnect(options);
+export const TrackMemory = explicitConnect<OwnProps, StateProps, DispatchProps>(
+  {
+    mapStateToProps: (state, ownProps) => {
+      const { counterIndex } = ownProps;
+      const counterSelectors = getCounterSelectors(counterIndex);
+      const counter = counterSelectors.getCommittedRangeFilteredCounter(state);
+      const { start, end } = getCommittedRange(state);
+      return {
+        threadIndex: counter.mainThreadIndex,
+        rangeStart: start,
+        rangeEnd: end,
+      };
+    },
+    mapDispatchToProps: { updatePreviewSelection },
+    component: TrackMemoryImpl,
+  }
+);

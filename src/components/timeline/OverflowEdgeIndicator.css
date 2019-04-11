@@ -4,6 +4,10 @@
 
 .overflowEdgeIndicator {
   position: relative;
+  display: flex;
+  width: calc(100% + var(--vertical-scrollbar-reserved-width));
+  flex: 1;
+  flex-direction: column;
 }
 
 .overflowEdgeIndicatorEdge {

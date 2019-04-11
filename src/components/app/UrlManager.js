@@ -10,10 +10,7 @@ import { getIsUrlSetupDone } from '../../selectors/app';
 import { updateUrlState, urlSetupDone, show404 } from '../../actions/app';
 import { urlFromState, stateFromLocation } from '../../app-logic/url-handling';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { UrlState } from '../../types/state';
 
 type StateProps = {|
@@ -84,7 +81,7 @@ class UrlManager extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     urlState: state.urlState,
     isUrlSetupDone: getIsUrlSetupDone(state),
@@ -95,6 +92,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     show404,
   },
   component: UrlManager,
-};
-
-export default explicitConnect(options);
+});
