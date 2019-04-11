@@ -36,7 +36,7 @@ const example1 = (
   <ExampleComponent ownPropA="a" ownPropB="b" width={10} height={10} />
 );
 
-// Passing in an unknown prop provides an error.
+// Passing in an unknown prop triggers an error.
 const example2 = (
   // $FlowExpectError - There is no "ownPropC"
   <ExampleComponent
@@ -58,8 +58,26 @@ const exampleWithSize2 = (
   <ExampleComponentWithSize ownPropA="a" ownPropB="b" width={10} height={10} />
 );
 
-// Passing in an unknown prop provides an error.
+// Passing in an unknown prop triggers an error.
 const exampleWithSize3 = (
   // $FlowExpectError - The width and height are already provided.
   <ExampleComponentWithSize ownPropA="a" ownPropB="b" ownPropC="c" />
 );
+
+// $FlowExpectError - ownPropB was not passed in.
+const exampleWithSize4 = <ExampleComponentWithSize ownPropA="a" />;
+
+type NoSizingProps = {|
+  +ownPropA: 'a',
+  +ownPropB: 'b',
+  // The size props are omitted.
+|};
+
+class NoSizing extends React.PureComponent<NoSizingProps> {
+  render() {
+    return null;
+  }
+}
+
+// $FlowExpectError - The component does not have sizing props.
+const exampleNoSizing = withSize(NoSizing);
