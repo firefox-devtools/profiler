@@ -30,6 +30,9 @@ type Props = {
     Class<Panel & React.Component<$Subtype<PanelProps>, any>>
   >,
   open?: boolean,
+  // This prop tells the panel to be open by default, but the open/close state is fully
+  // managed by the ButtonWithPanel component.
+  defaultOpen?: boolean,
 };
 
 type State = {|
@@ -47,7 +50,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   componentDidMount() {
     // the panel can be closed by pressing the Esc key
     window.addEventListener('keydown', this._onKeyDown);
-    if (this.props.open) {
+    if (this.props.open || this.props.defaultOpen) {
       this.openPanel();
     }
   }
