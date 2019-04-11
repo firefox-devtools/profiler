@@ -23,6 +23,11 @@ export type SizeProps = $ReadOnly<State>;
  *
  * Note that the props are *not* updated if the size of the element changes
  * for reasons other than a window resize.
+ *
+ * Usage: withSize must be used with explicit type arguments.
+ *
+ * Correct: withSize<Props>(ComponentClass)
+ * Incorrect: withSize(ComponentClass)
  */
 export function withSize<
   // The SizeProps act as a bounds on the generic props. This ensures that the props

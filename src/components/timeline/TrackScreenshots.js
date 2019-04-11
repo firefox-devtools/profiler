@@ -26,7 +26,6 @@ import './TrackScreenshots.css';
 type OwnProps = {|
   +threadIndex: ThreadIndex,
   +windowId: string,
-  ...SizeProps,
 |};
 type StateProps = {|
   +thread: Thread,
@@ -37,7 +36,10 @@ type StateProps = {|
   +isMakingPreviewSelection: boolean,
 |};
 type DispatchProps = {||};
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+|};
 type State = {|
   offsetX: null | number,
   pageX: null | number,
@@ -114,28 +116,26 @@ class Screenshots extends PureComponent<Props, State> {
 
 const EMPTY_SCREENSHOTS_TRACK = [];
 
-export default withSize(
-  explicitConnect<OwnProps, StateProps, DispatchProps>({
-    mapStateToProps: (state, ownProps) => {
-      const { threadIndex, windowId } = ownProps;
-      const selectors = getThreadSelectors(threadIndex);
-      const { start, end } = getCommittedRange(state);
-      const previewSelection = getPreviewSelection(state);
-      return {
-        thread: selectors.getRangeFilteredThread(state),
-        screenshots:
-          selectors.getRangeFilteredScreenshotsById(state).get(windowId) ||
-          EMPTY_SCREENSHOTS_TRACK,
-        threadName: selectors.getFriendlyThreadName(state),
-        rangeStart: start,
-        rangeEnd: end,
-        isMakingPreviewSelection:
-          previewSelection.hasSelection && previewSelection.isModifying,
-      };
-    },
-    component: Screenshots,
-  })
-);
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+  mapStateToProps: (state, ownProps) => {
+    const { threadIndex, windowId } = ownProps;
+    const selectors = getThreadSelectors(threadIndex);
+    const { start, end } = getCommittedRange(state);
+    const previewSelection = getPreviewSelection(state);
+    return {
+      thread: selectors.getRangeFilteredThread(state),
+      screenshots:
+        selectors.getRangeFilteredScreenshotsById(state).get(windowId) ||
+        EMPTY_SCREENSHOTS_TRACK,
+      threadName: selectors.getFriendlyThreadName(state),
+      rangeStart: start,
+      rangeEnd: end,
+      isMakingPreviewSelection:
+        previewSelection.hasSelection && previewSelection.isModifying,
+    };
+  },
+  component: withSize<Props>(Screenshots),
+});
 
 type HoverPreviewProps = {|
   +thread: Thread,

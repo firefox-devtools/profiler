@@ -53,8 +53,6 @@ import type { ConnectedProps } from '../../utils/connect';
 
 export const TIMELINE_SETTINGS_HEIGHT = 26;
 
-type OwnProps = SizeProps;
-
 type StateProps = {|
   +committedRange: StartEndRange,
   +globalTracks: GlobalTrack[],
@@ -74,7 +72,10 @@ type DispatchProps = {|
   +changeRightClickedTrack: typeof changeRightClickedTrack,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+|};
 
 class TimelineSettingsGraphType extends React.PureComponent<{|
   +timelineType: TimelineType,
@@ -226,25 +227,23 @@ class Timeline extends React.PureComponent<Props> {
   }
 }
 
-export default withSize(
-  explicitConnect<OwnProps, StateProps, DispatchProps>({
-    mapStateToProps: state => ({
-      globalTracks: getGlobalTracks(state),
-      globalTrackOrder: getGlobalTrackOrder(state),
-      globalTrackReferences: getGlobalTrackReferences(state),
-      committedRange: getCommittedRange(state),
-      zeroAt: getZeroAt(state),
-      panelLayoutGeneration: getPanelLayoutGeneration(state),
-      timelineType: getTimelineType(state),
-      hiddenTrackCount: getHiddenTrackCount(state),
-    }),
-    mapDispatchToProps: {
-      changeGlobalTrackOrder,
-      updatePreviewSelection,
-      commitRange,
-      changeTimelineType,
-      changeRightClickedTrack,
-    },
-    component: Timeline,
-  })
-);
+export default explicitConnect<{||}, StateProps, DispatchProps>({
+  mapStateToProps: state => ({
+    globalTracks: getGlobalTracks(state),
+    globalTrackOrder: getGlobalTrackOrder(state),
+    globalTrackReferences: getGlobalTrackReferences(state),
+    committedRange: getCommittedRange(state),
+    zeroAt: getZeroAt(state),
+    panelLayoutGeneration: getPanelLayoutGeneration(state),
+    timelineType: getTimelineType(state),
+    hiddenTrackCount: getHiddenTrackCount(state),
+  }),
+  mapDispatchToProps: {
+    changeGlobalTrackOrder,
+    updatePreviewSelection,
+    commitRange,
+    changeTimelineType,
+    changeRightClickedTrack,
+  },
+  component: withSize<Props>(Timeline),
+});

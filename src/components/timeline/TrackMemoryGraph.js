@@ -172,7 +172,6 @@ type OwnProps = {|
   +counterIndex: CounterIndex,
   +lineWidth: CssPixels,
   +graphHeight: CssPixels,
-  ...SizeProps,
 |};
 
 type StateProps = {|
@@ -188,7 +187,10 @@ type StateProps = {|
 
 type DispatchProps = {||};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+|};
 
 type State = {|
   hoveredCounter: null | number,
@@ -349,25 +351,27 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   }
 }
 
-export const TrackMemoryGraph = withSize(
-  explicitConnect<OwnProps, StateProps, DispatchProps>({
-    mapStateToProps: (state, ownProps) => {
-      const { counterIndex } = ownProps;
-      const counterSelectors = getCounterSelectors(counterIndex);
-      const counter = counterSelectors.getCommittedRangeFilteredCounter(state);
-      const { start, end } = getCommittedRange(state);
-      const selectors = getThreadSelectors(counter.mainThreadIndex);
-      return {
-        counter,
-        threadIndex: counter.mainThreadIndex,
-        accumulatedSamples: counterSelectors.getAccumulateCounterSamples(state),
-        rangeStart: start,
-        rangeEnd: end,
-        interval: getProfileInterval(state),
-        filteredThread: selectors.getFilteredThread(state),
-        unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
-      };
-    },
-    component: TrackMemoryGraphImpl,
-  })
-);
+export const TrackMemoryGraph = explicitConnect<
+  OwnProps,
+  StateProps,
+  DispatchProps
+>({
+  mapStateToProps: (state, ownProps) => {
+    const { counterIndex } = ownProps;
+    const counterSelectors = getCounterSelectors(counterIndex);
+    const counter = counterSelectors.getCommittedRangeFilteredCounter(state);
+    const { start, end } = getCommittedRange(state);
+    const selectors = getThreadSelectors(counter.mainThreadIndex);
+    return {
+      counter,
+      threadIndex: counter.mainThreadIndex,
+      accumulatedSamples: counterSelectors.getAccumulateCounterSamples(state),
+      rangeStart: start,
+      rangeEnd: end,
+      interval: getProfileInterval(state),
+      filteredThread: selectors.getFilteredThread(state),
+      unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
+    };
+  },
+  component: withSize<Props>(TrackMemoryGraphImpl),
+});

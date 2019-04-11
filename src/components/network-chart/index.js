@@ -36,8 +36,6 @@ require('./index.css');
 const ROW_HEIGHT = 16;
 
 // The SizeProps are injected by the WithSize higher order component.
-type OwnProps = SizeProps;
-
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
@@ -51,7 +49,10 @@ type StateProps = {|
   +threadIndex: number,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+|};
 
 /*
  * The VirtualListRows only re-render when their items have changed. This information
@@ -108,26 +109,24 @@ class NetworkChart extends React.PureComponent<Props> {
  * Wrap the component in the WithSize higher order component, as well as the redux
  * connected component.
  */
-export default withSize(
-  explicitConnect<OwnProps, StateProps, DispatchProps>({
-    mapStateToProps: state => {
-      const networkTimingRows = selectedThreadSelectors.getNetworkChartTiming(
+export default explicitConnect<{||}, StateProps, DispatchProps>({
+  mapStateToProps: state => {
+    const networkTimingRows = selectedThreadSelectors.getNetworkChartTiming(
+      state
+    );
+    return {
+      markers: selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(
         state
-      );
-      return {
-        markers: selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(
-          state
-        ),
-        networkTimingRows,
-        maxNetworkRows: networkTimingRows.length,
-        timeRange: getCommittedRange(state),
-        interval: getProfileInterval(state),
-        threadIndex: getSelectedThreadIndex(state),
-      };
-    },
-    component: NetworkChart,
-  })
-);
+      ),
+      networkTimingRows,
+      maxNetworkRows: networkTimingRows.length,
+      timeRange: getCommittedRange(state),
+      interval: getProfileInterval(state),
+      threadIndex: getSelectedThreadIndex(state),
+    };
+  },
+  component: withSize<Props>(NetworkChart),
+});
 
 /**
  * The VirtualListRow only re-renders when the props change, so pass in a pure function

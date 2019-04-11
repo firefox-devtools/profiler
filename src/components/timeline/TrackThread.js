@@ -55,7 +55,6 @@ import type { ConnectedProps } from '../../utils/connect';
 type OwnProps = {|
   +threadIndex: ThreadIndex,
   +showMemoryMarkers?: boolean,
-  ...SizeProps,
 |};
 
 type StateProps = {|
@@ -81,7 +80,10 @@ type DispatchProps = {|
   +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+|};
 
 class TimelineTrackThread extends PureComponent<Props> {
   /**
@@ -209,38 +211,36 @@ class TimelineTrackThread extends PureComponent<Props> {
   }
 }
 
-export default withSize(
-  explicitConnect<OwnProps, StateProps, DispatchProps>({
-    mapStateToProps: (state: State, ownProps: OwnProps) => {
-      const { threadIndex } = ownProps;
-      const selectors = getThreadSelectors(threadIndex);
-      const selectedThread = getSelectedThreadIndex(state);
-      const committedRange = getCommittedRange(state);
-      return {
-        filteredThread: selectors.getFilteredThread(state),
-        fullThread: selectors.getRangeFilteredThread(state),
-        callNodeInfo: selectors.getCallNodeInfo(state),
-        selectedCallNodeIndex:
-          threadIndex === selectedThread
-            ? selectors.getSelectedCallNodeIndex(state)
-            : -1,
-        unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
-        interval: getProfileInterval(state),
-        rangeStart: committedRange.start,
-        rangeEnd: committedRange.end,
-        categories: getCategories(state),
-        timelineType: getTimelineType(state),
-        hasFileIoMarkers: selectors.getFileIoMarkers(state).length !== 0,
-      };
-    },
-    mapDispatchToProps: {
-      updatePreviewSelection,
-      changeRightClickedTrack,
-      changeSelectedCallNode,
-      focusCallTree,
-      selectLeafCallNode,
-      reportTrackThreadHeight,
-    },
-    component: TimelineTrackThread,
-  })
-);
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+  mapStateToProps: (state: State, ownProps: OwnProps) => {
+    const { threadIndex } = ownProps;
+    const selectors = getThreadSelectors(threadIndex);
+    const selectedThread = getSelectedThreadIndex(state);
+    const committedRange = getCommittedRange(state);
+    return {
+      filteredThread: selectors.getFilteredThread(state),
+      fullThread: selectors.getRangeFilteredThread(state),
+      callNodeInfo: selectors.getCallNodeInfo(state),
+      selectedCallNodeIndex:
+        threadIndex === selectedThread
+          ? selectors.getSelectedCallNodeIndex(state)
+          : -1,
+      unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
+      interval: getProfileInterval(state),
+      rangeStart: committedRange.start,
+      rangeEnd: committedRange.end,
+      categories: getCategories(state),
+      timelineType: getTimelineType(state),
+      hasFileIoMarkers: selectors.getFileIoMarkers(state).length !== 0,
+    };
+  },
+  mapDispatchToProps: {
+    updatePreviewSelection,
+    changeRightClickedTrack,
+    changeSelectedCallNode,
+    focusCallTree,
+    selectLeafCallNode,
+    reportTrackThreadHeight,
+  },
+  component: withSize<Props>(TimelineTrackThread),
+});

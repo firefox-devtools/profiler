@@ -362,7 +362,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
  * Combine the base implementation of the TimelineMarkers with the
  * WithSize component.
  */
-export const TimelineMarkers = withSize(TimelineMarkersImplementation);
+export const TimelineMarkers = withSize<Props>(TimelineMarkersImplementation);
 
 /**
  * Create a special connected component for Jank instances.

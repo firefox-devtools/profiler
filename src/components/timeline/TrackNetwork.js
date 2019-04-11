@@ -26,7 +26,6 @@ import './TrackNetwork.css';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
-  ...SizeProps,
 |};
 
 type StateProps = {|
@@ -39,7 +38,10 @@ type StateProps = {|
   +verticalMarkers: Marker[],
 |};
 type DispatchProps = {||};
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+  ...SizeProps,
+|};
 type State = void;
 
 export const ROW_HEIGHT = 5;
@@ -144,23 +146,21 @@ class Network extends PureComponent<Props, State> {
   }
 }
 
-export default withSize(
-  explicitConnect<OwnProps, StateProps, DispatchProps>({
-    mapStateToProps: (state, ownProps) => {
-      const { threadIndex } = ownProps;
-      const selectors = getThreadSelectors(threadIndex);
-      const { start, end } = getCommittedRange(state);
-      const networkTiming = selectors.getNetworkTrackTiming(state);
-      return {
-        networkMarkers: selectors.getNetworkMarkers(state),
-        pages: getPageList(state),
-        networkTiming: networkTiming,
-        rangeStart: start,
-        rangeEnd: end,
-        zeroAt: getZeroAt(state),
-        verticalMarkers: selectors.getTimelineVerticalMarkers(state),
-      };
-    },
-    component: Network,
-  })
-);
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+  mapStateToProps: (state, ownProps) => {
+    const { threadIndex } = ownProps;
+    const selectors = getThreadSelectors(threadIndex);
+    const { start, end } = getCommittedRange(state);
+    const networkTiming = selectors.getNetworkTrackTiming(state);
+    return {
+      networkMarkers: selectors.getNetworkMarkers(state),
+      pages: getPageList(state),
+      networkTiming: networkTiming,
+      rangeStart: start,
+      rangeEnd: end,
+      zeroAt: getZeroAt(state),
+      verticalMarkers: selectors.getTimelineVerticalMarkers(state),
+    };
+  },
+  component: withSize<Props>(Network),
+});
