@@ -101,8 +101,8 @@ function _toStructOfArrays(geckoTable: Object): Object {
         'fieldIndex must be a number in the Gecko profile table.'
       );
     }
-    result[fieldName] = geckoTable.data.map(
-      entry => (fieldIndex in entry ? entry[fieldIndex] : null)
+    result[fieldName] = geckoTable.data.map(entry =>
+      fieldIndex in entry ? entry[fieldIndex] : null
     );
   }
   return result;

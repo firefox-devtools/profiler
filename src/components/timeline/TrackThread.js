@@ -50,15 +50,11 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { State } from '../../types/state';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +threadIndex: ThreadIndex,
   +showMemoryMarkers?: boolean,
-  ...SizeProps,
 |};
 
 type StateProps = {|
@@ -84,7 +80,10 @@ type DispatchProps = {|
   +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+|};
 
 class TimelineTrackThread extends PureComponent<Props> {
   /**
@@ -212,7 +211,7 @@ class TimelineTrackThread extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state: State, ownProps: OwnProps) => {
     const { threadIndex } = ownProps;
     const selectors = getThreadSelectors(threadIndex);
@@ -243,6 +242,5 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     selectLeafCallNode,
     reportTrackThreadHeight,
   },
-  component: TimelineTrackThread,
-};
-export default withSize(explicitConnect(options));
+  component: withSize<Props>(TimelineTrackThread),
+});

@@ -28,9 +28,8 @@ import type { RemoveProfileInformation } from '../types/profile-derived';
 
 export const getPublishState: Selector<PublishState> = state => state.publish;
 
-export const getCheckedSharingOptions: Selector<
-  CheckedSharingOptions
-> = state => getPublishState(state).checkedSharingOptions;
+export const getCheckedSharingOptions: Selector<CheckedSharingOptions> = state =>
+  getPublishState(state).checkedSharingOptions;
 
 export const getFilenameString: Selector<string> = createSelector(
   getProfile,
@@ -78,7 +77,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
 
     // Find all of the thread indexes that are hidden.
     const shouldRemoveThreads = new Set();
-    if (checkedSharingOptions.hiddenThreads) {
+    if (!checkedSharingOptions.includeHiddenThreads) {
       for (const globalTrackIndex of hiddenGlobalTracks) {
         const globalTrack = globalTracks[globalTrackIndex];
         if (
@@ -117,18 +116,18 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     }
 
     return {
-      shouldFilterToCommittedRange: checkedSharingOptions.timeRange
-        ? committedRange
-        : null,
-      shouldRemoveNetworkUrls: checkedSharingOptions.urls,
-      shouldRemoveAllUrls: checkedSharingOptions.urls,
+      shouldFilterToCommittedRange: checkedSharingOptions.includeFullTimeRange
+        ? null
+        : committedRange,
+      shouldRemoveNetworkUrls: !checkedSharingOptions.includeUrls,
+      shouldRemoveAllUrls: !checkedSharingOptions.includeUrls,
       shouldRemoveThreadsWithScreenshots: new Set(
-        checkedSharingOptions.screenshots
-          ? profile.threads.map((_, threadIndex) => threadIndex)
-          : []
+        checkedSharingOptions.includeScreenshots
+          ? []
+          : profile.threads.map((_, threadIndex) => threadIndex)
       ),
       shouldRemoveThreads,
-      shouldRemoveExtensions: checkedSharingOptions.extension,
+      shouldRemoveExtensions: !checkedSharingOptions.includeExtension,
     };
   }
 );
@@ -158,36 +157,14 @@ export const getSanitizedProfileData: Selector<
 /**
  * The blob is needed for both the download size, and the ObjectURL.
  */
-export const getSanitizedProfileBlob: Selector<Promise<Blob>> = createSelector(
+export const getCompressedProfileBlob: Selector<Promise<Blob>> = createSelector(
   getSanitizedProfileData,
   async profileData =>
     new Blob([await profileData], { type: 'application/octet-binary' })
 );
 
-// URL.createObjectURL are not GCed, they must be cleaned up manually. Store a reference
-// to the previous object URL here. Only retain the latest one.
-let _previousObjectUrl;
-
-/**
- * This selector generates the string that can be downloaded, or uploaded for persisting
- * profiles.
- */
-export const getCompressedProfileObjectUrl: Selector<
-  Promise<string>
-> = createSelector(getSanitizedProfileBlob, async blobPromise => {
-  const blob = await blobPromise;
-  if (_previousObjectUrl) {
-    // Make sure and clean up the previously created object URL so that we
-    // don't leak it.
-    // https://developer.mozilla.org/en-US/docs/Web/API/URL/revokeObjectURL
-    URL.revokeObjectURL(_previousObjectUrl);
-  }
-  _previousObjectUrl = URL.createObjectURL(blob);
-  return _previousObjectUrl;
-});
-
 export const getDownloadSize: Selector<Promise<string>> = createSelector(
-  getSanitizedProfileBlob,
+  getCompressedProfileBlob,
   blobPromise => blobPromise.then(blob => prettyBytes(blob.size))
 );
 

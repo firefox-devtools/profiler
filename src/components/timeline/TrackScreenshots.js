@@ -18,10 +18,7 @@ import type { ScreenshotPayload } from '../../types/markers';
 import type { ThreadIndex, Thread } from '../../types/profile';
 import type { Marker } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import { ensureExists } from '../../utils/flow';
 import './TrackScreenshots.css';
@@ -29,7 +26,6 @@ import './TrackScreenshots.css';
 type OwnProps = {|
   +threadIndex: ThreadIndex,
   +windowId: string,
-  ...SizeProps,
 |};
 type StateProps = {|
   +thread: Thread,
@@ -40,7 +36,10 @@ type StateProps = {|
   +isMakingPreviewSelection: boolean,
 |};
 type DispatchProps = {||};
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<OwnProps, StateProps, DispatchProps>,
+|};
 type State = {|
   offsetX: null | number,
   pageX: null | number,
@@ -116,7 +115,8 @@ class Screenshots extends PureComponent<Props, State> {
 }
 
 const EMPTY_SCREENSHOTS_TRACK = [];
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, ownProps) => {
     const { threadIndex, windowId } = ownProps;
     const selectors = getThreadSelectors(threadIndex);
@@ -134,10 +134,8 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
         previewSelection.hasSelection && previewSelection.isModifying,
     };
   },
-  component: Screenshots,
-};
-
-export default withSize(explicitConnect(options));
+  component: withSize<Props>(Screenshots),
+});
 
 type HoverPreviewProps = {|
   +thread: Thread,
@@ -159,7 +157,7 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
   findScreenshotAtMouse(offsetX: number): number | null {
     const { width, rangeStart, rangeEnd, screenshots } = this.props;
     const rangeLength = rangeEnd - rangeStart;
-    const mouseTime = offsetX / width * rangeLength + rangeStart;
+    const mouseTime = (offsetX / width) * rangeLength + rangeStart;
 
     // Loop backwards to find the latest screenshot that has a time less
     // than the current time at the mouse position.
@@ -217,13 +215,13 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
     // set it to the value so that it reaches the top of screen when it is centered.
     if (hoverHeight > 2 * distanceToTopFromTrackCenter) {
       hoverHeight = 2 * distanceToTopFromTrackCenter;
-      hoverWidth = hoverHeight * windowWidth / windowHeight;
+      hoverWidth = (hoverHeight * windowWidth) / windowHeight;
     }
 
     if (hoverWidth > hoverHeight * HOVER_MAX_WIDTH_RATIO) {
       // This is a really wide image, limit the height so it lays out reasonably.
       hoverWidth = hoverHeight * HOVER_MAX_WIDTH_RATIO;
-      hoverHeight = hoverWidth / windowWidth * windowHeight;
+      hoverHeight = (hoverWidth / windowWidth) * windowHeight;
     }
 
     hoverWidth = Math.round(hoverWidth);
@@ -297,7 +295,7 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
     const rangeLength = rangeEnd - rangeStart;
     const imageContainerWidth = TRACK_SCREENSHOT_HEIGHT * 0.75;
     const timeToPixel = time =>
-      outerContainerWidth * (time - rangeStart) / rangeLength;
+      (outerContainerWidth * (time - rangeStart)) / rangeLength;
 
     const leftmostPixel = Math.max(timeToPixel(screenshots[0].start), 0);
     let screenshotIndex = 0;
@@ -319,7 +317,7 @@ class ScreenshotStrip extends PureComponent<ScreenshotStripProps> {
         .data: any);
       const { url: urlStringIndex, windowWidth, windowHeight } = payload;
       const scaledImageWidth =
-        TRACK_SCREENSHOT_HEIGHT * windowWidth / windowHeight;
+        (TRACK_SCREENSHOT_HEIGHT * windowWidth) / windowHeight;
       images.push(
         <div
           className="timelineTrackScreenshotImgContainer"

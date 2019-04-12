@@ -383,8 +383,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
             <kbd>
               Capture Profile
             </kbd>
-             
-            to load the data into profiler.firefox.com.
+             to load the data into profiler.firefox.com.
           </p>
           <div>
             <p>

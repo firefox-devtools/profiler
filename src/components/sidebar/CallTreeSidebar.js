@@ -17,10 +17,7 @@ import { getFunctionName } from '../../profile-logic/function-info';
 import { getFriendlyStackTypeName } from '../../profile-logic/profile-data';
 import CanSelectContent from './CanSelectContent';
 
-import type {
-  ConnectedProps,
-  ExplicitConnectOptions,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { ThreadIndex, CategoryList } from '../../types/profile';
 import type {
   CallNodeTable,
@@ -65,9 +62,7 @@ type ImplementationBreakdownProps = {|
 
 // This component is responsible for displaying the breakdown data specific to
 // the JavaScript engine and native code implementation.
-class ImplementationBreakdown extends React.PureComponent<
-  ImplementationBreakdownProps
-> {
+class ImplementationBreakdown extends React.PureComponent<ImplementationBreakdownProps> {
   _orderedImplementations: $ReadOnlyArray<StackImplementation> = [
     'native',
     'interpreter',
@@ -136,16 +131,18 @@ type BreakdownProps = {|
 function Breakdown({ data, isIntervalInteger }: BreakdownProps) {
   const totalTime = data.reduce((result, item) => result + item.value, 0);
 
-  return data.filter(({ value }) => value).map(({ group, color, value }) => {
-    const percentage = Math.round(value / totalTime * 100);
-    const maxFractionalDigits = isIntervalInteger ? 0 : 1;
+  return data
+    .filter(({ value }) => value)
+    .map(({ group, color, value }) => {
+      const percentage = Math.round((value / totalTime) * 100);
+      const maxFractionalDigits = isIntervalInteger ? 0 : 1;
 
-    return (
-      <SidebarDetail label={group} color={color} key={group}>
-        {formatMilliseconds(value, 3, maxFractionalDigits)} ({percentage}%)
-      </SidebarDetail>
-    );
-  });
+      return (
+        <SidebarDetail label={group} color={color} key={group}>
+          {formatMilliseconds(value, 3, maxFractionalDigits)} ({percentage}%)
+        </SidebarDetail>
+      );
+    });
 }
 
 type StateProps = {|
@@ -185,13 +182,13 @@ class CallTreeSidebar extends React.PureComponent<Props> {
       );
     }
 
-    const totalTimePercent = Math.round(totalTime.value / rootTime * 100);
-    const selfTimePercent = Math.round(selfTime.value / rootTime * 100);
+    const totalTimePercent = Math.round((totalTime.value / rootTime) * 100);
+    const selfTimePercent = Math.round((selfTime.value / rootTime) * 100);
     const totalTimeForFuncPercent = Math.round(
-      totalTimeForFunc.value / rootTime * 100
+      (totalTimeForFunc.value / rootTime) * 100
     );
     const selfTimeForFuncPercent = Math.round(
-      selfTimeForFunc.value / rootTime * 100
+      (selfTimeForFunc.value / rootTime) * 100
     );
 
     const maxFractionalDigits = isIntervalInteger ? 0 : 1;
@@ -215,9 +212,8 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </header>
           <h3 className="sidebar-title2">This selected call node</h3>
           <SidebarDetail label="Running Time">
-            {formatMilliseconds(totalTime.value, 3, maxFractionalDigits)} ({
-              totalTimePercent
-            }%)
+            {formatMilliseconds(totalTime.value, 3, maxFractionalDigits)} (
+            {totalTimePercent}%)
           </SidebarDetail>
           <SidebarDetail label="Self Time">
             {selfTime.value
@@ -296,7 +292,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
     callNodeTable: selectedThreadSelectors.getCallNodeInfo(state).callNodeTable,
@@ -308,6 +304,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
     isIntervalInteger: Number.isInteger(getProfileInterval(state)),
   }),
   component: CallTreeSidebar,
-};
-
-export default explicitConnect(options);
+});

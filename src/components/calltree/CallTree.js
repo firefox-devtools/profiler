@@ -38,10 +38,7 @@ import type {
   CallNodeDisplayData,
 } from '../../types/profile-derived';
 import type { Column } from '../shared/TreeView';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
@@ -190,7 +187,7 @@ class CallTreeComponent extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => ({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -217,6 +214,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   },
   options: { withRef: true },
   component: CallTreeComponent,
-};
-
-export default explicitConnect(options);
+});

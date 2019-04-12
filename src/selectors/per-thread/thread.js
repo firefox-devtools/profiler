@@ -97,9 +97,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     ProfileData.filterThreadByImplementation
   );
 
-  const _getImplementationAndSearchFilteredThread: Selector<
-    Thread
-  > = createSelector(
+  const _getImplementationAndSearchFilteredThread: Selector<Thread> = createSelector(
     _getImplementationFilteredThread,
     UrlState.getSearchStrings,
     (thread, searchStrings) => {

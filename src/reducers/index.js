@@ -10,8 +10,9 @@ import icons from './icons';
 import zippedProfiles from './zipped-profiles';
 import publish from './publish';
 import { combineReducers } from 'redux';
+import type { Reducer, State } from '../types/state';
 
-export default combineReducers({
+const rootReducer: Reducer<State> = combineReducers({
   app,
   profileView,
   urlState,
@@ -19,3 +20,5 @@ export default combineReducers({
   zippedProfiles,
   publish,
 });
+
+export default rootReducer;

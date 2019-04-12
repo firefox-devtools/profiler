@@ -191,7 +191,10 @@ async function processTracingEvents(
       chunk
     );
     const { thread, funcKeyToFuncId, nodeIdToStackId } = threadInfo;
-    const { cpuProfile: { nodes, samples }, timeDeltas } = chunk.args.data;
+    const {
+      cpuProfile: { nodes, samples },
+      timeDeltas,
+    } = chunk.args.data;
     const {
       funcTable,
       frameTable,

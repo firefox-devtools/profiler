@@ -10,10 +10,7 @@ import { changeNetworkSearchString } from '../../actions/profile-view';
 import { getNetworkSearchString } from '../../selectors/url-state';
 import IdleSearchField from '../shared/IdleSearchField';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import './NetworkSettings.css';
 
@@ -54,11 +51,10 @@ class Settings extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     searchString: getNetworkSearchString(state),
   }),
   mapDispatchToProps: { changeNetworkSearchString },
   component: Settings,
-};
-export default explicitConnect(options);
+});

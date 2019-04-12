@@ -34,10 +34,7 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../../types/profile-derived';
 import type { State } from '../../../types/state';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../../utils/connect';
+import type { ConnectedProps } from '../../../utils/connect';
 import type { Viewport } from '../chart/Viewport';
 
 type OwnProps = {|
@@ -210,7 +207,7 @@ class SelectedThreadActivityGraph extends PureComponent<*> {
   }
 }
 
-const options: ExplicitConnectOptions<*, *, *> = {
+export default explicitConnect<*, *, *>({
   mapStateToProps: (state: State) => {
     const committedRange = getCommittedRange(state);
     const previewSelection = getPreviewSelection(state);
@@ -248,5 +245,4 @@ const options: ExplicitConnectOptions<*, *, *> = {
     focusCallTree,
   },
   component: SelectedThreadActivityGraph,
-};
-export default explicitConnect(options);
+});

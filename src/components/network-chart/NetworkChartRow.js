@@ -6,11 +6,57 @@
 import * as React from 'react';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 import Tooltip from '../shared/Tooltip';
+import { formatNumber } from '../../utils/format-numbers';
 
 import type { CssPixels } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
 import type { Marker } from '../../types/profile-derived';
 import type { NetworkPayload } from '../../types/markers';
+
+// This regexp is used to split a pathname into a directory path and a filename.
+// On purpose, when there's no "real" filename, the filename will contain the
+// last part of the directory path.
+//
+// Here are some examples:
+// /assets/img/image.jpg -> (/assets/img) (/image.jpg)
+// /img/image.jpg        -> (/img)        (/image.jpg)
+// /assets/analytics/    -> (/assets)     (/analytics/)
+// /analytics/           -> ()            (/analytics/)
+// /index.html           -> ()            (/index.html)
+//
+// Note that this case isn't matched by the regexp:
+// /                     -> ()            (/)
+//
+// It's defined here so that its compilation can be reused.
+const PATH_SPLIT_RE = /(.*)(\/[^/]+\/?)$/;
+
+// This array holds the properties we're most interested in in this component:
+// - The first timestamp happening in the socket thread is either
+//   `domainLookupStart` or `requestStart`, as this depends whether the
+//   connection is reused.
+// - Between `domainLookupStart` and `requestStart`, both the DNS request and
+//   the connection happens.
+// - `responseStart` represents the first received information from the server.
+// - At last `responseEnd` represents the last received information from the
+//   server.
+// `responseEnd` isn't the last timestamp as the marker ends with `endTime`:
+// `endTime` is the timestamp when the response is delivered to the caller. It's
+// not present in this array as it's implicit in the component logic.
+// They may be all missing in a specific marker, that's fine.
+const PROPERTIES_IN_ORDER = [
+  'domainLookupStart',
+  'requestStart',
+  'responseStart',
+  'responseEnd',
+];
+
+const PHASE_OPACITIES = PROPERTIES_IN_ORDER.reduce(
+  (result, property, i, { length }) => {
+    result[property] = length > 1 ? i / (length - 1) : 0;
+    return result;
+  },
+  {}
+);
 
 export type NetworkChartRowProps = {
   +index: number,
@@ -18,111 +64,84 @@ export type NetworkChartRowProps = {
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload | null,
-  +markerStyle: {
-    [key: string]: string | number,
-  },
+  +markerWidth: CssPixels,
+  +startPosition: CssPixels,
   +threadIndex: ThreadIndex,
 };
 
-type State = {
+type State = {|
   pageX: CssPixels,
   pageY: CssPixels,
   hovered: ?boolean,
-};
+|};
 
 export type NetworkChartRowBarProps = {
   +marker: Marker,
+  +markerWidth: CssPixels,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload,
 };
 
-// This component splits a network marker duration in 4 different phases,
+// This component splits a network marker duration in different phases,
 // and renders each phase as a differently colored bar.
-// 1. request queue
-// 2. request
-// 3. response
-// 4. response queue (This is not calculated. We assume it is the rest of the duration.)
 const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
-  const { marker, networkPayload } = props;
+  const { marker, networkPayload, markerWidth } = props;
   const { start, dur } = marker;
 
-  // A marker does not always contain the same set of networkPayload on the start of
-  // the connection.
-  const queueStart =
-    networkPayload.secureConnectionStart ||
-    networkPayload.tcpConnectEnd ||
-    networkPayload.connectStart ||
-    networkPayload.domainLookupStart ||
-    0;
+  const barPhases = [];
+  let previousValue = start;
+  let previousName = 'startTime';
 
-  // The default for width of the phases is always zero.
-  let requestQueue: number = 0;
-  let request: number = 0;
-  let response: number = 0;
+  // In this loop we add the various phases to the array.
+  PROPERTIES_IN_ORDER.filter(
+    property => typeof networkPayload[property] === 'number'
+  ).forEach((property, i) => {
+    // We force-coerce the value into a number just to appease Flow. Indeed the
+    // previous filter ensures that all values are numbers but Flow can't know
+    // that.
+    const value = +networkPayload[property];
+    barPhases.push({
+      left: ((previousValue - start) / dur) * markerWidth,
+      width: Math.max(((value - previousValue) / dur) * markerWidth, 1),
+      opacity: i === 0 ? 0 : PHASE_OPACITIES[property],
+      name: property,
+      previousName,
+      value,
+      duration: value - previousValue,
+    });
+    previousValue = value;
+    previousName = property;
+  });
 
-  // Timestamps from network markers aren't adjusted when processing
-  // the gecko profile format. This is the reason why the start timestamp of a
-  // marker can be after the start timestamp of the request.
-  // To prevent false networkPayload visualization, we need this workaround.
-  // See https://github.com/firefox-devtools/profiler/issues/1493 for more detail.
-  if (
-    networkPayload.requestStart &&
-    start < networkPayload.requestStart &&
-    networkPayload.responseStart &&
-    start < networkPayload.responseStart
-  ) {
-    request =
-      (networkPayload.responseStart - networkPayload.requestStart) / dur * 100;
-  }
-
-  if (
-    networkPayload.responseEnd &&
-    start < networkPayload.responseEnd &&
-    networkPayload.responseStart &&
-    start < networkPayload.responseStart
-  ) {
-    response =
-      (networkPayload.responseEnd - networkPayload.responseStart) / dur * 100;
-  }
-
-  if (queueStart && start < queueStart && queueStart > 0) {
-    requestQueue = (queueStart - start) / dur * 100;
-  }
-
-  // When we keep the default values (=zero), the
-  // response takes the full width of the bar to be more visible.
-  if (requestQueue + request + response === 0) {
-    response = 100;
-  }
-
-  // Adding either the default value (=zero) as width or
-  // the new, calculated value that can be added.
-  const requestQueueWidth = requestQueue;
-  const requestWidth = request;
-  const responseWidth = response;
+  // The last part isn't generally colored (opacity is 0) unless it's the only
+  // one, and in that case it covers the whole duration.
+  barPhases.push({
+    left: ((previousValue - start) / dur) * markerWidth,
+    width: ((start + dur - previousValue) / dur) * markerWidth,
+    opacity: barPhases.length ? 0 : 1,
+    name: 'endTime',
+    previousName,
+    value: start + dur,
+    duration: start + dur - previousValue,
+  });
 
   return (
-    <React.Fragment>
-      <span
-        className="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-        style={{ width: `${requestQueueWidth}%` }}
-      >
-        &nbsp;
-      </span>
-      <span
-        className="networkChartRowItemBarInner networkChartRowItemBarRequest"
-        style={{ width: `${requestWidth}%` }}
-      >
-        &nbsp;
-      </span>
-      <span
-        className="networkChartRowItemBarInner networkChartRowItemBarResponse"
-        style={{ width: `${responseWidth}%` }}
-      >
-        &nbsp;
-      </span>
-    </React.Fragment>
+    <>
+      {barPhases.map(({ name, previousName, value, duration, ...style }) => (
+        // Specifying data attributes makes it easier to debug.
+        <div
+          className="networkChartRowItemBarPhase"
+          key={name}
+          data-name={name}
+          data-value={value}
+          style={style}
+          aria-label={`${previousName} to ${name}: ${formatNumber(
+            duration
+          )} milliseconds`}
+        />
+      ))}
+    </>
   );
 };
 
@@ -180,28 +199,37 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     // Extract URI from markers.name
     const uri = this._extractURI(name);
     if (uri !== null) {
-      // Extract filename from pathname
-      const uriFilename = uri.pathname.slice(uri.pathname.lastIndexOf('/')); // filename.xy
-      // Remove filename from pathname
-      const uriPath = uri.pathname.replace(uriFilename, '');
+      // Extract directory path and filename from pathname.
+      let uriFilename = uri.pathname;
+      let uriPath = '';
+
+      // See above for more information about this regexp.
+      const extractResult = PATH_SPLIT_RE.exec(uri.pathname);
+      if (extractResult) {
+        [, uriPath, uriFilename] = extractResult;
+      }
 
       return (
-        <span>
+        <>
           <span className="networkChartRowItemUriOptional">
             {uri.protocol + '//'}
           </span>
           <span className="networkChartRowItemUriRequired">{uri.hostname}</span>
-          {uriPath !== uriFilename && uriPath.length > 0 ? (
+          {uriPath ? (
             <span className="networkChartRowItemUriOptional">{uriPath}</span>
           ) : null}
-          <span className="networkChartRowItemUriRequired">{uriFilename}</span>
+          {uriFilename ? (
+            <span className="networkChartRowItemUriRequired">
+              {uriFilename}
+            </span>
+          ) : null}
           {uri.search ? (
             <span className="networkChartRowItemUriOptional">{uri.search}</span>
           ) : null}
           {uri.hash ? (
             <span className="networkChartRowItemUriOptional">{uri.hash}</span>
           ) : null}
-        </span>
+        </>
       );
     }
     return name;
@@ -237,7 +265,13 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   }
 
   render() {
-    const { index, marker, markerStyle, networkPayload } = this.props;
+    const {
+      index,
+      marker,
+      markerWidth,
+      startPosition,
+      networkPayload,
+    } = this.props;
 
     const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
 
@@ -255,14 +289,20 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
         </div>
         <div
           className="networkChartRowItemBar"
-          style={markerStyle}
+          style={{ width: markerWidth, left: startPosition }}
           onMouseEnter={this._hoverIn}
           onMouseLeave={this._hoverOut}
         >
-          <NetworkChartRowBar marker={marker} networkPayload={networkPayload} />
+          <NetworkChartRowBar
+            marker={marker}
+            networkPayload={networkPayload}
+            markerWidth={markerWidth}
+          />
         </div>
         {this.state.hovered ? (
-          <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY}>
+          // This magic value "5" avoids the tooltip of being too close of the
+          // row, especially when we mouseEnter the row from the top edge.
+          <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
             <MarkerTooltipContents
               marker={marker}
               threadIndex={this.props.threadIndex}

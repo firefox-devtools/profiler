@@ -9,10 +9,7 @@ import { getInvertCallstack } from '../../selectors/url-state';
 import { changeInvertCallstack } from '../../actions/profile-view';
 import FlameGraph from './FlameGraph';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 require('./MaybeFlameGraph.css');
 
@@ -50,7 +47,7 @@ class MaybeFlameGraph extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       invertCallstack: getInvertCallstack(state),
@@ -60,6 +57,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
     changeInvertCallstack,
   },
   component: MaybeFlameGraph,
-};
-
-export default explicitConnect(options);
+});

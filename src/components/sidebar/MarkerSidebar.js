@@ -11,10 +11,7 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import MarkerTooltipContents from '../shared/MarkerTooltipContents';
 
-import type {
-  ConnectedProps,
-  ExplicitConnectOptions,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
 import type { Marker } from '../../types/profile-derived';
 
@@ -50,7 +47,7 @@ class MarkerSidebar extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => {
     const filteredMarkers = selectedThreadSelectors.getPreviewFilteredMarkers(
       state
@@ -67,6 +64,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
     };
   },
   component: MarkerSidebar,
-};
-
-export default explicitConnect(options);
+});

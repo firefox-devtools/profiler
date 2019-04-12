@@ -16,20 +16,17 @@ import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { changeSelectedMarker } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
 import { formatSeconds } from '../../utils/format-numbers';
+import {
+  getMarkerFullDescription,
+  getMarkerCategory,
+} from '../../profile-logic/marker-data';
 
 import './index.css';
 
 import type { ThreadIndex } from '../../types/profile';
 import type { Marker, IndexIntoMarkers } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
-import {
-  getMarkerFullDescription,
-  getMarkerCategory,
-} from '../../profile-logic/marker-data';
+import type { ConnectedProps } from '../../utils/connect';
 
 type MarkerDisplayData = {|
   start: string,
@@ -206,7 +203,7 @@ class MarkerTable extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -216,5 +213,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   }),
   mapDispatchToProps: { changeSelectedMarker },
   component: MarkerTable,
-};
-export default explicitConnect(options);
+});
