@@ -27,13 +27,11 @@
 .timelineVerticalIndicatorsLine::after {
   position: absolute;
   top: 0;
-  left: calc(
-    var(--active-area-width) * 0.5 - var(--visible-width) * 0.5
-  );
+  left: calc(var(--active-area-width) * 0.5 - var(--visible-width) * 0.5);
   width: var(--visible-width);
   height: 100%;
   background-color: var(--vertical-indicator-color);
-  content: "";
+  content: '';
   opacity: 0.6;
   pointer-events: none;
 }

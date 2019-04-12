@@ -33,7 +33,7 @@
 .timelineSettings {
   display: flex;
   height: var(--timeline-settings-height);
-  
+
   /* Ensure the --timeline-settings-height defines the outer height of the component. */
   box-sizing: border-box;
   flex: none;
@@ -96,7 +96,7 @@
   border-right: 4px solid transparent;
   border-bottom: 0 solid transparent;
   border-left: 4px solid transparent;
-  content: "";
+  content: '';
 }
 
 .timelineSettingsHiddenTracksNumber {
