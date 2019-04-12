@@ -106,7 +106,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
   }),
-  dispatchToProps: {
+  mapDispatchToProps: {
     changeImplementationFilter,
     changeInvertCallstack,
   },
