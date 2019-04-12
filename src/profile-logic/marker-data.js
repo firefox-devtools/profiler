@@ -854,3 +854,72 @@ export function removeNetworkMarkerURLs(payload: NetworkPayload) {
   payload.URI = '';
   payload.RedirectURI = '';
 }
+
+export function getMarkerFullDescription(marker: Marker) {
+  let description = marker.name;
+
+  if (marker.data) {
+    const data = marker.data;
+    switch (data.type) {
+      case 'tracing':
+        if (typeof data.category === 'string') {
+          if (data.category === 'log' && description.length > 100) {
+            description = description.substring(0, 100) + '...';
+          } else if (data.category === 'DOMEvent') {
+            description = data.eventType;
+          }
+        }
+        break;
+      case 'UserTiming':
+        description = data.name;
+        break;
+      case 'FileIO':
+        if (data.source) {
+          description = `(${data.source}) `;
+        }
+        description += data.operation;
+        if (data.filename) {
+          description = data.operation
+            ? `${description} — ${data.filename}`
+            : data.filename;
+        }
+        break;
+      case 'Text':
+        description += ` — ${data.name}`;
+        break;
+      default:
+    }
+  }
+  return description;
+}
+
+export function getMarkerCategory(marker: Marker) {
+  let category = 'unknown';
+  if (marker.data) {
+    const data = marker.data;
+
+    if (typeof data.category === 'string') {
+      category = data.category;
+    }
+
+    switch (data.type) {
+      case 'UserTiming':
+        category = marker.name;
+        break;
+      case 'FileIO':
+        category = data.type;
+        break;
+      case 'Bailout':
+        category = 'Bailout';
+        break;
+      case 'Network':
+        category = 'Network';
+        break;
+      case 'Text':
+        category = 'Text';
+        break;
+      default:
+    }
+  }
+  return category;
+}

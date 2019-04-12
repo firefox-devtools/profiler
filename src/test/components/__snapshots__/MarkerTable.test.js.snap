@@ -64,7 +64,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
       </span>
       <span
         class="treeViewHeaderColumn treeViewMainColumn name"
-      />
+      >
+        Description
+      </span>
     </div>
     <div
       class="react-contextmenu-wrapper treeViewContextMenu"

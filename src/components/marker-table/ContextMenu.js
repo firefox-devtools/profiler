@@ -28,6 +28,7 @@ import {
   convertStackToCallNodePath,
   getFuncNamesAndOriginsForPath,
 } from '../../profile-logic/profile-data';
+import { getMarkerFullDescription } from '../../profile-logic/marker-data';
 
 type StateProps = {|
   +markers: Marker[],
@@ -150,14 +151,14 @@ class MarkersContextMenu extends PureComponent<Props> {
     copy(JSON.stringify(markers[selectedMarker], null, 2));
   };
 
-  copyMarkerName = () => {
+  copyMarkerDescription = () => {
     const { selectedMarker, markers } = this.props;
 
     if (selectedMarker === null) {
       return;
     }
-
-    copy(markers[selectedMarker].name);
+    const marker = markers[selectedMarker];
+    copy(getMarkerFullDescription(marker));
   };
 
   copyMarkerCause = () => {
@@ -198,7 +199,9 @@ class MarkersContextMenu extends PureComponent<Props> {
           Set selection from duration
         </MenuItem>
         <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
-        <MenuItem onClick={this.copyMarkerName}>Copy marker name</MenuItem>
+        <MenuItem onClick={this.copyMarkerDescription}>
+          Copy marker description
+        </MenuItem>
         {marker && marker.data && marker.data.cause ? (
           <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
         ) : null}
