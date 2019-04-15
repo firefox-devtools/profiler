@@ -35,34 +35,51 @@ describe('StackSettings', function() {
   });
 
   it('can change the implementation filter to JavaScript', function() {
-    const { getByText, getState } = setup();
+    const { getByLabelText, getState } = setup();
     expect(getImplementationFilter(getState())).toEqual('combined');
-    getByText('JavaScript').click();
+    const radioButton = getByLabelText(/JavaScript/);
+
+    radioButton.click();
+
+    expect(radioButton.hasAttribute('checked'));
     expect(getImplementationFilter(getState())).toEqual('js');
   });
 
   it('can change the implementation filter to Native', function() {
-    const { getByText, getState } = setup();
+    const { getByLabelText, getState } = setup();
     expect(getImplementationFilter(getState())).toEqual('combined');
-    getByText('Native').click();
+    const radioButton = getByLabelText(/Native/);
+
+    radioButton.click();
+
+    expect(radioButton.hasAttribute('checked'));
     expect(getImplementationFilter(getState())).toEqual('cpp');
   });
 
-  it('can change the implementation filter to Native', function() {
-    const { getByText, getState } = setup();
-    getByText('Native').click();
+  it('can change the implementation filter to All stacks', function() {
+    const { getByLabelText, getState } = setup();
+    getByLabelText(/Native/).click();
     expect(getImplementationFilter(getState())).toEqual('cpp');
-    getByText('All stacks').click();
+    const radioButton = getByLabelText(/All stacks/);
+
+    radioButton.click();
+
+    expect(radioButton.hasAttribute('checked'));
     expect(getImplementationFilter(getState())).toEqual('combined');
   });
 
   it('can change the search', function() {
     const { getByLabelText, getState } = setup();
     expect(getCurrentSearchString(getState())).toEqual('');
-    fireEvent.change(getByLabelText(/Filter stacks/), {
-      target: { value: 'some search' },
+    const searchText = 'some search';
+    const input: HTMLInputElement = (getByLabelText(/Filter stacks/): any);
+
+    fireEvent.change(input, {
+      target: { value: searchText },
     });
+
     jest.runAllTimers();
-    expect(getCurrentSearchString(getState())).toEqual('some search');
+    expect(getCurrentSearchString(getState())).toEqual(searchText);
+    expect(input.value).toEqual(searchText);
   });
 });
