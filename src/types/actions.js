@@ -348,6 +348,9 @@ type PublishAction =
       +type: 'UPLOAD_RESET',
     |}
   | {|
+      +type: 'UPLOAD_COMPRESSION_STARTED',
+    |}
+  | {|
       +type: 'CHANGE_UPLOAD_STATE',
       +changes: $Shape<UploadState>,
     |};

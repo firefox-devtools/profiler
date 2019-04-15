@@ -45,8 +45,19 @@ const checkedSharingOptions: Reducer<CheckedSharingOptions> = (
   }
 };
 
+// This is a diagram explaining the ordering of actions for uploading
+//
+//                              UPDATE_UPLOAD_PROGRESS
+//                                        ^ (fired many times)
+//                                        |
+// UPLOAD_COMPRESSION_STARTED  ->  UPLOAD_STARTED  ->  UPLOAD_FINISHED -> UPLOAD_RESET
+//                            \                   \
+//                             > UPLOAD_ABORTED    > UPLOAD_ABORTED
+
 const phase: Reducer<UploadPhase> = (state = 'local', action) => {
   switch (action.type) {
+    case 'UPLOAD_COMPRESSION_STARTED':
+      return 'compressing';
     case 'UPLOAD_STARTED':
       return 'uploading';
     case 'UPLOAD_FINISHED':
@@ -65,10 +76,14 @@ const uploadProgress: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
     case 'UPDATE_UPLOAD_PROGRESS':
       return action.uploadProgress;
+    // Not all of these upload actions really need to be here, but it's nice to
+    // explicitly list them all here.
     case 'UPLOAD_STARTED':
     case 'UPLOAD_ABORTED':
     case 'UPLOAD_RESET':
     case 'UPLOAD_FINISHED':
+    case 'UPLOAD_COMPRESSION_STARTED':
+    case 'UPLOAD_FAILED':
       return 0;
     default:
       return state;
@@ -79,6 +94,9 @@ const error: Reducer<Error | mixed> = (state = null, action) => {
   switch (action.type) {
     case 'UPLOAD_FAILED':
       return action.error;
+    case 'UPLOAD_COMPRESSION_STARTED':
+      // When starting out a new upload, clear out any old errors.
+      return null;
     default:
       return state;
   }
@@ -93,8 +111,13 @@ const url: Reducer<string> = (state = '', action) => {
   }
 };
 
-const abortFunction: Reducer<() => void> = (state = () => {}, action) => {
+const noop = () => {};
+const abortFunction: Reducer<() => void> = (state = noop, action) => {
   switch (action.type) {
+    case 'UPLOAD_ABORTED':
+    case 'UPLOAD_FINISHED':
+    case 'UPLOAD_FAILED':
+      return noop;
     case 'UPLOAD_STARTED':
       return action.abortFunction;
     default:
@@ -107,8 +130,10 @@ const abortFunction: Reducer<() => void> = (state = () => {}, action) => {
  */
 const generation: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
-    case 'UPLOAD_STARTED':
-      // Increment the generation value if starting to upload.
+    case 'UPLOAD_FINISHED':
+    case 'UPLOAD_ABORTED':
+    case 'UPLOAD_FAILED':
+      // Increment the generation value when exiting out of the profile uploading.
       return state + 1;
     default:
       return state;

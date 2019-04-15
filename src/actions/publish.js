@@ -28,6 +28,12 @@ export function toggleCheckedSharingOptions(
   };
 }
 
+export function startCompressingForUpload(): Action {
+  return {
+    type: 'UPLOAD_COMPRESSION_STARTED',
+  };
+}
+
 /**
  * Start uploading the profile, but save an abort function to be able to cancel it.
  */
@@ -75,17 +81,26 @@ export function uploadFailed(error: mixed): Action {
 export function attemptToPublish(): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
     try {
-      const { abortFunction, startUpload } = uploadBinaryProfileData();
-      dispatch(startUploading(abortFunction));
-      const uploadGeneration = getUploadGeneration(getState());
-
       sendAnalytics({
         hitType: 'event',
         eventCategory: 'profile upload',
         eventAction: 'start',
       });
 
+      // Get the current generation of this request. It can be aborted midway through.
+      // This way we can check inside this async function if we need to bail out early.
+      const uploadGeneration = getUploadGeneration(getState());
+
+      dispatch(startCompressingForUpload());
       const gzipData: Uint8Array = await getSanitizedProfileData(getState());
+
+      // The previous line was async, check to make sure that this request is still valid.
+      if (uploadGeneration !== getUploadGeneration(getState())) {
+        return;
+      }
+
+      const { abortFunction, startUpload } = uploadBinaryProfileData();
+      dispatch(startUploading(abortFunction));
 
       if (
         getUploadPhase(getState()) !== 'uploading' ||
@@ -100,6 +115,11 @@ export function attemptToPublish(): ThunkAction<Promise<void>> {
       const hash = await startUpload(gzipData, uploadProgress => {
         dispatch(updateUploadProgress(uploadProgress));
       });
+
+      // The previous line was async, check to make sure that this request is still valid.
+      if (uploadGeneration !== getUploadGeneration(getState())) {
+        return;
+      }
 
       // Generate a url, and completely drop any of the existing URL state. In
       // a future patch, we should handle this gracefully.
