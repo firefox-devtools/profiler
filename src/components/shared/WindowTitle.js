@@ -7,7 +7,7 @@
 import { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
-import { getProfileName } from '../../selectors/url-state';
+import { getProfileName, getDataSource } from '../../selectors/url-state';
 import { getProfile } from '../../selectors/profile';
 
 import type { Profile, ProfileMeta } from '../../types/profile';
@@ -19,6 +19,7 @@ import type {
 type StateProps = {|
   +profile: Profile,
   +profileName: string | null,
+  +dataSource: string,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
@@ -27,23 +28,23 @@ class WindowTitle extends PureComponent<Props> {
   // This component updates window title in the form of:
   // profile name - version - platform - date time - 'perf.html'
   componentDidUpdate() {
-    const { profile, profileName } = this.props;
+    const { profile, profileName, dataSource } = this.props;
     const { meta } = profile;
     let title = '';
 
     if (profileName) {
       title = title.concat(profileName, ' - ');
     }
-    if (meta) {
-      title = title.concat(_formatVersion(meta), ' - ');
-    }
-    if (meta && meta.oscpu) {
+    title = title.concat(_formatVersion(meta), ' - ');
+    if (meta.oscpu) {
       title = title.concat(_formatPlatform(meta), ' - ');
     }
-    if (meta && meta.startTime) {
-      title = title.concat(_formatDateTime(meta.startTime), ' - ');
+    title = title.concat(_formatDateTime(meta.startTime));
+    if (dataSource === 'public') {
+      title = title.concat(' (', dataSource, ')');
     }
-    title = title.concat('perf.html');
+    title = title.concat(' - ');
+    title = title.concat('Firefox profiler');
     document.title = title;
   }
 
@@ -85,35 +86,34 @@ function _formatPlatform(meta: ProfileMeta): string {
 }
 
 function _formatDateTime(timestamp: number): string {
-  const timestampDate = new Date(timestamp);
-  let month = timestampDate.getUTCMonth() + 1 + '';
-  let date = timestampDate.getUTCDate() + '';
-  const year = timestampDate.getUTCFullYear();
+  const dateOptions = {
+    timeZone: 'UTC',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  };
+  const timeOptions = {
+    timeZone: 'UTC',
+    hourCycle: 'h24',
+    hour: '2-digit',
+    minute: '2-digit',
+  };
+  const date = new Date(timestamp);
+  const dateLabel = date
+    .toLocaleString('en-GB', dateOptions)
+    .split('/')
+    .reverse()
+    .join('-');
+  const timeLabel = date.toLocaleString('en-GB', timeOptions);
 
-  if (month.length === 1) month = '0' + month;
-  if (date.length === 1) date = '0' + date;
-
-  const dateLabel = [year, month, date].join('-');
-  const time = _formatTime(timestamp);
-
-  return [dateLabel, time].join(' ');
-}
-
-function _formatTime(timestamp: number): string {
-  const timestampDate = new Date(timestamp);
-  let hours = timestampDate.getUTCHours() + '';
-  let minutes = timestampDate.getUTCMinutes() + '';
-
-  if (hours.length === 1) hours = '0' + hours;
-  if (minutes.length === 1) minutes = '0' + minutes;
-
-  return [hours, minutes].join(':');
+  return [dateLabel, timeLabel].join(' ');
 }
 
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
   mapStateToProps: state => ({
     profileName: getProfileName(state),
     profile: getProfile(state),
+    dataSource: getDataSource(state),
   }),
   component: WindowTitle,
 };
