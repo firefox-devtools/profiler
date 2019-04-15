@@ -47,8 +47,15 @@ const checkedSharingOptions: Reducer<CheckedSharingOptions> = (
 
 const phase: Reducer<UploadPhase> = (state = 'local', action) => {
   switch (action.type) {
-    case 'CHANGE_UPLOAD_STATE':
-      return 'phase' in action.changes ? action.changes.phase : state;
+    case 'UPLOAD_STARTED':
+      return 'uploading';
+    case 'UPLOAD_FINISHED':
+      return 'uploaded';
+    case 'UPLOAD_FAILED':
+      return 'error';
+    case 'UPLOAD_ABORTED':
+    case 'UPLOAD_RESET':
+      return 'local';
     default:
       return state;
   }
@@ -56,10 +63,13 @@ const phase: Reducer<UploadPhase> = (state = 'local', action) => {
 
 const uploadProgress: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
-    case 'CHANGE_UPLOAD_STATE':
-      return 'uploadProgress' in action.changes
-        ? action.changes.uploadProgress
-        : state;
+    case 'UPDATE_UPLOAD_PROGRESS':
+      return action.uploadProgress;
+    case 'UPLOAD_STARTED':
+    case 'UPLOAD_ABORTED':
+    case 'UPLOAD_RESET':
+    case 'UPLOAD_FINISHED':
+      return 0;
     default:
       return state;
   }
@@ -67,8 +77,8 @@ const uploadProgress: Reducer<number> = (state = 0, action) => {
 
 const error: Reducer<Error | mixed> = (state = null, action) => {
   switch (action.type) {
-    case 'CHANGE_UPLOAD_STATE':
-      return 'error' in action.changes ? action.changes.error : state;
+    case 'UPLOAD_FAILED':
+      return action.error;
     default:
       return state;
   }
@@ -76,8 +86,8 @@ const error: Reducer<Error | mixed> = (state = null, action) => {
 
 const url: Reducer<string> = (state = '', action) => {
   switch (action.type) {
-    case 'CHANGE_UPLOAD_STATE':
-      return 'url' in action.changes ? action.changes.url : state;
+    case 'UPLOAD_FINISHED':
+      return action.url;
     default:
       return state;
   }
@@ -85,10 +95,8 @@ const url: Reducer<string> = (state = '', action) => {
 
 const abortFunction: Reducer<() => void> = (state = () => {}, action) => {
   switch (action.type) {
-    case 'CHANGE_UPLOAD_STATE':
-      return 'abortFunction' in action.changes
-        ? action.changes.abortFunction
-        : state;
+    case 'UPLOAD_STARTED':
+      return action.abortFunction;
     default:
       return state;
   }
@@ -99,9 +107,9 @@ const abortFunction: Reducer<() => void> = (state = () => {}, action) => {
  */
 const generation: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
-    case 'CHANGE_UPLOAD_STATE':
+    case 'UPLOAD_STARTED':
       // Increment the generation value if starting to upload.
-      return action.changes.phase === 'uploading' ? state + 1 : state;
+      return state + 1;
     default:
       return state;
   }

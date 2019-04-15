@@ -17,7 +17,6 @@ import { profilePublished } from './app';
 import urlStateReducer from '../reducers/url-state';
 
 import type { Action, ThunkAction } from '../types/store';
-import type { UploadState } from '../types/state';
 import type { CheckedSharingOptions } from '../types/actions';
 
 export function toggleCheckedSharingOptions(
@@ -29,11 +28,39 @@ export function toggleCheckedSharingOptions(
   };
 }
 
-export function changeUploadState(changes: $Shape<UploadState>) {
+/**
+ * Start uploading the profile, but save an abort function to be able to cancel it.
+ */
+export function startUploading(abortFunction: () => void): Action {
   return {
-    type: 'CHANGE_UPLOAD_STATE',
-    changes,
+    type: 'UPLOAD_STARTED',
+    abortFunction,
   };
+}
+
+/**
+ * As the profile uploads, remember the amount that has been uploaded so that the UI
+ * can reflect the progress.
+ */
+export function updateUploadProgress(uploadProgress: number): Action {
+  return {
+    type: 'UPDATE_UPLOAD_PROGRESS',
+    uploadProgress,
+  };
+}
+
+/**
+ * A profile upload finished.
+ */
+export function uploadFinished(url: string): Action {
+  return { type: 'UPLOAD_FINISHED', url };
+}
+
+/**
+ * A profile upload failed.
+ */
+export function uploadFailed(error: mixed): Action {
+  return { type: 'UPLOAD_FAILED', error };
 }
 
 /**
@@ -49,13 +76,7 @@ export function attemptToPublish(): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
     try {
       const { abortFunction, startUpload } = uploadBinaryProfileData();
-      dispatch(
-        changeUploadState({
-          phase: 'uploading',
-          uploadProgress: 0,
-          abortFunction,
-        })
-      );
+      dispatch(startUploading(abortFunction));
       const uploadGeneration = getUploadGeneration(getState());
 
       sendAnalytics({
@@ -77,7 +98,7 @@ export function attemptToPublish(): ThunkAction<Promise<void>> {
       // Upload the profile, and notify it with the amount of data that has been
       // uploaded.
       const hash = await startUpload(gzipData, uploadProgress => {
-        dispatch(changeUploadState({ uploadProgress }));
+        dispatch(updateUploadProgress(uploadProgress));
       });
 
       // Generate a url, and completely drop any of the existing URL state. In
@@ -88,12 +109,7 @@ export function attemptToPublish(): ThunkAction<Promise<void>> {
           urlStateReducer(getUrlState(getState()), profilePublished(hash))
         );
 
-      dispatch(
-        changeUploadState({
-          phase: 'uploaded',
-          url,
-        })
-      );
+      dispatch(uploadFinished(url));
 
       sendAnalytics({
         hitType: 'event',
@@ -103,12 +119,7 @@ export function attemptToPublish(): ThunkAction<Promise<void>> {
 
       window.open(url, '_blank');
     } catch (error) {
-      dispatch(
-        changeUploadState({
-          phase: 'error',
-          error,
-        })
-      );
+      dispatch(uploadFailed(error));
       sendAnalytics({
         hitType: 'event',
         eventCategory: 'profile upload',
@@ -125,7 +136,7 @@ export function abortUpload(): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
     const abort = getAbortFunction(getState());
     abort();
-    dispatch(changeUploadState({ phase: 'local', uploadProgress: 0 }));
+    dispatch({ type: 'UPLOAD_ABORTED' });
 
     sendAnalytics({
       hitType: 'event',
@@ -136,7 +147,7 @@ export function abortUpload(): ThunkAction<Promise<void>> {
 }
 
 export function resetUploadState(): Action {
-  return changeUploadState({
-    phase: 'local',
-  });
+  return {
+    type: 'UPLOAD_RESET',
+  };
 }
