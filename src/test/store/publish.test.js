@@ -8,6 +8,7 @@ import {
   attemptToPublish,
   resetUploadState,
   abortUpload,
+  toggleCheckedSharingOptions,
 } from '../../actions/publish';
 import {
   getCheckedSharingOptions,
@@ -62,6 +63,27 @@ describe('getCheckedSharingOptions', function() {
     it('does filter with release', function() {
       expect(getDefaultsWith('release')).toMatchObject({
         isFiltering: true,
+      });
+    });
+  });
+  describe('toggleCheckedSharingOptions', function() {
+    it('can toggle options', function() {
+      const { profile } = getProfileFromTextSamples('A');
+      const { getState, dispatch } = storeWithProfile(profile);
+      expect(getCheckedSharingOptions(getState())).toMatchObject({
+        includeHiddenThreads: false,
+      });
+
+      dispatch(toggleCheckedSharingOptions('includeHiddenThreads'));
+
+      expect(getCheckedSharingOptions(getState())).toMatchObject({
+        includeHiddenThreads: true,
+      });
+
+      dispatch(toggleCheckedSharingOptions('includeHiddenThreads'));
+
+      expect(getCheckedSharingOptions(getState())).toMatchObject({
+        includeHiddenThreads: false,
       });
     });
   });
