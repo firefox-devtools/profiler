@@ -18,6 +18,7 @@ import {
 import explicitConnect from '../../utils/connect';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { getImplementationFilter } from '../../selectors/url-state';
+import { getPageList } from '../../selectors/profile';
 
 import Backtrace from './Backtrace';
 
@@ -26,19 +27,17 @@ import type { Microseconds } from '../../types/units';
 import type { Marker } from '../../types/profile-derived';
 import type { NotVoidOrNull } from '../../types/utils';
 import type { ImplementationFilter } from '../../types/actions';
-import type { Thread, ThreadIndex } from '../../types/profile';
+import type { Thread, ThreadIndex, PageList } from '../../types/profile';
 import type {
   DOMEventMarkerPayload,
   FrameConstructionMarkerPayload,
   PaintProfilerMarkerTracing,
   NavigationMarkerPayload,
+  CcMarkerTracing,
   PhaseTimes,
   StyleMarkerPayload,
 } from '../../types/markers';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 function _markerDetail<T: NotVoidOrNull>(
   key: string,
@@ -309,7 +308,8 @@ function _markerBacktrace(
     | PaintProfilerMarkerTracing
     | DOMEventMarkerPayload
     | FrameConstructionMarkerPayload
-    | NavigationMarkerPayload,
+    | NavigationMarkerPayload
+    | CcMarkerTracing,
   thread: Thread,
   implementationFilter: ImplementationFilter
 ): React.Node {
@@ -838,11 +838,27 @@ type StateProps = {|
   +threadName?: string,
   +thread: Thread,
   +implementationFilter: ImplementationFilter,
+  +pages: PageList | null,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
 
 class MarkerTooltipContents extends React.PureComponent<Props> {
+  _getUrl = (marker: Marker): string | null => {
+    const { pages } = this.props;
+
+    if (!(pages && marker.data && marker.data.docShellId)) {
+      return null;
+    }
+
+    const docshellId = marker.data.docShellId;
+    const historyId = marker.data.docshellHistoryId;
+    const page = pages.find(
+      page => page.docshellId === docshellId && page.historyId === historyId
+    );
+    return page ? page.url : null;
+  };
+
   render() {
     const {
       marker,
@@ -851,6 +867,22 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       thread,
       implementationFilter,
     } = this.props;
+
+    const threadNameDetail = threadName ? (
+      <>
+        <div className="tooltipLabel">Thread:</div>
+        {threadName}
+      </>
+    ) : null;
+
+    const url = this._getUrl(marker);
+    const urlDetail = url ? (
+      <>
+        <div className="tooltipLabel">URL:</div>
+        {url}
+      </>
+    ) : null;
+
     const details = getMarkerDetails(marker, thread, implementationFilter);
     return (
       <div className={classNames('tooltipMarker', className)}>
@@ -859,15 +891,17 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             <div className="tooltipTiming">
               {/* we don't know the duration if the marker is incomplete */}
               {!marker.incomplete
-                ? formatMilliseconds(marker.dur)
+                ? marker.dur
+                  ? formatMilliseconds(marker.dur)
+                  : '—'
                 : 'unknown duration'}
             </div>
             <div className="tooltipTitle">{marker.title || marker.name}</div>
           </div>
-          {threadName ? (
+          {threadNameDetail || urlDetail ? (
             <div className="tooltipDetails">
-              <div className="tooltipLabel">Thread:</div>
-              {threadName}
+              {threadNameDetail}
+              {urlDetail}
             </div>
           ) : null}
         </div>
@@ -877,20 +911,20 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+export default explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
     const threadName = selectors.getFriendlyThreadName(state);
     const thread = selectors.getThread(state);
     const implementationFilter = getImplementationFilter(state);
+    const pages = getPageList(state);
     return {
       threadName,
       thread,
       implementationFilter,
+      pages,
     };
   },
   component: MarkerTooltipContents,
-};
-
-export default explicitConnect(options);
+});

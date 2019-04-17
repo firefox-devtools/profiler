@@ -203,7 +203,7 @@ class StackGraph extends PureComponent<Props> {
       const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
-      const time = rangeStart + x / r.width * (rangeEnd - rangeStart);
+      const time = rangeStart + (x / r.width) * (rangeEnd - rangeStart);
 
       const sampleIndex = getSampleIndexClosestToTime(
         thread.samples,

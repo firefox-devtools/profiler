@@ -4,6 +4,7 @@
 
 // @flow
 import React, { PureComponent, Fragment } from 'react';
+import ReactDOM from 'react-dom';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
 import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -35,10 +36,7 @@ import type {
   CallNodePath,
 } from '../../types/profile-derived';
 import type { Thread, ThreadIndex } from '../../types/profile';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   forceOpenForTests?: boolean,
@@ -70,6 +68,11 @@ type State = {|
 require('./CallNodeContextMenu.css');
 
 class CallNodeContextMenu extends PureComponent<Props, State> {
+  _contextMenu: ContextMenu | null = null;
+  _takeContextMenuRef = (contextMenu: ContextMenu | null) => {
+    this._contextMenu = contextMenu;
+  };
+
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -355,6 +358,25 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     }
   }
 
+  _mouseDownHandler(event: MouseEvent): void {
+    event.preventDefault();
+  }
+
+  componentDidUpdate() {
+    if (this.state.isShown && this._contextMenu) {
+      // The context menu component does not expose a reference to its internal
+      // DOM node so using findDOMNode is currently unavoidable.
+      // eslint-disable-next-line react/no-find-dom-node
+      const contextMenuNode = ReactDOM.findDOMNode(this._contextMenu);
+      if (contextMenuNode) {
+        // There's no need to remove this event listener since the component is
+        // never unmounted. Duplicate event listeners will also be discarded
+        // automatically so we don't need to handle that.
+        contextMenuNode.addEventListener('mousedown', this._mouseDownHandler);
+      }
+    }
+  }
+
   renderContextMenuContents() {
     const {
       selectedCallNodeIndex,
@@ -472,6 +494,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     return (
       <ContextMenu
         id="CallNodeContextMenu"
+        ref={this._takeContextMenuRef}
         onShow={this._showMenu}
         onHide={this._hideMenu}
       >
@@ -486,7 +509,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     threadIndex: getSelectedThreadIndex(state),
@@ -507,5 +530,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     setCallNodeContextMenuVisibility,
   },
   component: CallNodeContextMenu,
-};
-export default explicitConnect(options);
+});

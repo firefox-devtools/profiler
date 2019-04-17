@@ -11,7 +11,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
-import MarkerSettings from '../shared/MarkerSettings';
+import NetworkSettings from '../shared/NetworkSettings';
 import VirtualList from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
 import NetworkChartEmptyReasons from './NetworkChartEmptyReasons';
@@ -28,10 +28,7 @@ import type { SizeProps } from '../shared/WithSize';
 import type { NetworkPayload } from '../../types/markers';
 import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
 import type { Milliseconds, CssPixels } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { NetworkChartRowProps } from './NetworkChartRow';
 
 require('./index.css');
@@ -39,8 +36,6 @@ require('./index.css');
 const ROW_HEIGHT = 16;
 
 // The SizeProps are injected by the WithSize higher order component.
-type OwnProps = SizeProps;
-
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
@@ -54,7 +49,10 @@ type StateProps = {|
   +threadIndex: number,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = {|
+  ...SizeProps,
+  ...ConnectedProps<{||}, StateProps, DispatchProps>,
+|};
 
 /*
  * The VirtualListRows only re-render when their items have changed. This information
@@ -84,7 +82,7 @@ class NetworkChart extends React.PureComponent<Props> {
         role="tabpanel"
         aria-labelledby="network-chart-tab-button"
       >
-        <MarkerSettings />
+        <NetworkSettings />
         {markers.length === 0 ? (
           <NetworkChartEmptyReasons />
         ) : (
@@ -107,13 +105,19 @@ class NetworkChart extends React.PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+/**
+ * Wrap the component in the WithSize higher order component, as well as the redux
+ * connected component.
+ */
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     const networkTimingRows = selectedThreadSelectors.getNetworkChartTiming(
       state
     );
     return {
-      markers: selectedThreadSelectors.getMergedNetworkChartMarkers(state),
+      markers: selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(
+        state
+      ),
       networkTimingRows,
       maxNetworkRows: networkTimingRows.length,
       timeRange: getCommittedRange(state),
@@ -121,14 +125,8 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       threadIndex: getSelectedThreadIndex(state),
     };
   },
-  component: NetworkChart,
-};
-
-/**
- * Wrap the component in the WithSize higher order component, as well as the redux
- * connected component.
- */
-export default withSize(explicitConnect(options));
+  component: withSize<Props>(NetworkChart),
+});
 
 /**
  * The VirtualListRow only re-renders when the props change, so pass in a pure function
@@ -163,7 +161,7 @@ function _timeToCssPixels(props: Props, time: Milliseconds): CssPixels {
     width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
 
   const markerPosition =
-    (time - timeRange.start) / timeRangeTotal * innerContainerWidth +
+    ((time - timeRange.start) / timeRangeTotal) * innerContainerWidth +
     TIMELINE_MARGIN_LEFT;
 
   // Keep the value bounded to the available viewport area.
@@ -181,19 +179,12 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
     // markers, extract the payload.
     const networkPayload = _getNetworkPayloadOrNull(marker);
     if (networkPayload === null) {
-      console.error(
+      throw new Error(
         oneLine`
           The NetworkChart is supposed to only receive Network markers, but some other
           kind of marker payload was passed in.
         `
       );
-      return {
-        index: markerIndex,
-        marker,
-        threadIndex,
-        networkPayload: null,
-        markerStyle: {},
-      };
     }
     // Compute the positioning of the network markers.
     const startPosition = _timeToCssPixels(props, marker.start);
@@ -210,10 +201,8 @@ function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
       marker,
       networkPayload,
       threadIndex,
-      markerStyle: {
-        left: startPosition,
-        width: markerWidth,
-      },
+      startPosition,
+      markerWidth,
     };
   });
 }

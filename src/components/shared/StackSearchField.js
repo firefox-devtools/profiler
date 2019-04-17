@@ -13,10 +13,7 @@ import {
   getSearchStrings,
 } from '../../selectors/url-state';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import './StackSearchField.css';
 
@@ -87,12 +84,11 @@ class StackSearchField extends React.PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     currentSearchString: getCurrentSearchString(state),
     searchStrings: getSearchStrings(state),
   }),
   mapDispatchToProps: { changeCallTreeSearchString },
   component: StackSearchField,
-};
-export default explicitConnect(options);
+});

@@ -9,6 +9,8 @@ import * as urlStateReducers from '../selectors/url-state';
 import {
   changeCallTreeSearchString,
   changeMarkersSearchString,
+  changeNetworkSearchString,
+  changeProfileName,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -18,8 +20,6 @@ import {
   CURRENT_URL_VERSION,
 } from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
-import { createGeckoProfile } from './fixtures/profiles/gecko-profile';
-import { processProfile } from '../profile-logic/process-profile';
 import { viewProfile } from '../actions/receive-profile';
 import type { Profile } from '../types/profile';
 import getProfile from './fixtures/profiles/call-nodes';
@@ -80,8 +80,7 @@ function _getStoreWithURL(
 }
 
 describe('selectedThread', function() {
-  function storeWithThread(threadIndex) {
-    const store = blankStore();
+  function dispatchUrlWithThread(store, threadIndex) {
     const newUrlState = stateFromLocation({
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
       search: `?thread=${threadIndex}`,
@@ -91,27 +90,41 @@ describe('selectedThread', function() {
       type: 'UPDATE_URL_STATE',
       newUrlState,
     });
+  }
+
+  function setup(threadIndex) {
+    const store = blankStore();
+    dispatchUrlWithThread(store, threadIndex);
+
+    const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
+    Object.assign(profile.threads[0], {
+      name: 'GeckoMain',
+      processType: 'default',
+    });
+    Object.assign(profile.threads[1], {
+      name: 'Compositor',
+      processType: 'default',
+    });
+    Object.assign(profile.threads[2], {
+      name: 'GeckoMain',
+      processType: 'tab',
+    });
+
+    store.dispatch(viewProfile(profile));
 
     return store;
   }
 
   it('selects the right thread when receiving a profile from web', function() {
-    const profile: Profile = processProfile(createGeckoProfile());
-
-    const store = storeWithThread(1);
-    store.dispatch(viewProfile(profile));
-
-    expect(urlStateReducers.getSelectedThreadIndex(store.getState())).toBe(1);
+    const { getState } = setup(1);
+    expect(urlStateReducers.getSelectedThreadIndex(getState())).toBe(1);
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
-    const profile: Profile = processProfile(createGeckoProfile());
-
-    const store = storeWithThread(100);
-    store.dispatch(viewProfile(profile));
+    const { getState } = setup(100);
 
     // "2" is the content process' main tab
-    expect(urlStateReducers.getSelectedThreadIndex(store.getState())).toBe(2);
+    expect(urlStateReducers.getSelectedThreadIndex(getState())).toBe(2);
   });
 });
 
@@ -313,6 +326,44 @@ describe('search strings', function() {
       const { query } = urlStateToUrlObject(urlState);
       expect(query.markerSearch).toBe(markerSearchString);
     });
+  });
+
+  it('serializes the network search string in the URL', function() {
+    const { getState, dispatch } = _getStoreWithURL();
+
+    const networkSearchString = 'abc';
+
+    dispatch(changeNetworkSearchString(networkSearchString));
+    dispatch(changeSelectedTab('network-chart'));
+    const urlState = urlStateReducers.getUrlState(getState());
+    const { query } = urlStateToUrlObject(urlState);
+    expect(query.networkSearch).toBe(networkSearchString);
+  });
+});
+
+describe('profileName', function() {
+  it('serializes the profileName in the URL ', function() {
+    const { getState, dispatch } = _getStoreWithURL();
+    const profileName = 'Good Profile';
+
+    dispatch(changeProfileName(profileName));
+    const urlState = urlStateReducers.getUrlState(getState());
+    const { query } = urlStateToUrlObject(urlState);
+    expect(query.profileName).toBe(profileName);
+  });
+
+  it('reflects in the state from URL', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?profileName=XXX',
+    });
+    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('XXX');
+    expect(urlStateReducers.getProfileName(getState())).toBe('XXX');
+  });
+
+  it('returns empty string when profileName is not specified', function() {
+    const { getState } = _getStoreWithURL();
+    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('');
+    expect(urlStateReducers.getProfileName(getState())).toBe('');
   });
 });
 

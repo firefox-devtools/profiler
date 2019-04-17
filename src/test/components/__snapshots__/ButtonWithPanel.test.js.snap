@@ -170,41 +170,6 @@ exports[`shared/ButtonWithPanel renders a button with a panel 1`] = `
 </div>
 `;
 
-exports[`shared/ButtonWithPanel renders a disabled button 1`] = `
-<div
-  class="buttonWithPanel button"
->
-  <div
-    class="buttonWithPanelButtonWrapper"
-  >
-    <input
-      class="buttonWithPanelButton buttonButton"
-      disabled=""
-      type="button"
-      value="My Button"
-    />
-  </div>
-  <div
-    class="arrowPanelAnchor"
-  >
-    <div
-      class="arrowPanel panel"
-    >
-      <div
-        class="arrowPanelArrow"
-      />
-      <div
-        class="arrowPanelContent"
-      >
-        <div>
-          Panel content
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-`;
-
 exports[`shared/ButtonWithPanel renders the ButtonWithPanel with a closed panel 1`] = `
 <div
   class="buttonWithPanel button"
@@ -227,13 +192,6 @@ exports[`shared/ButtonWithPanel renders the ButtonWithPanel with a closed panel 
       <div
         class="arrowPanelArrow"
       />
-      <div
-        class="arrowPanelContent"
-      >
-        <div>
-          Panel content
-        </div>
-      </div>
     </div>
   </div>
 </div>

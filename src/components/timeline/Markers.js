@@ -19,10 +19,7 @@ import './Markers.css';
 import type { Milliseconds, CssPixels } from '../../types/units';
 import type { Marker } from '../../types/profile-derived';
 import type { SizeProps } from '../shared/WithSize';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
 
 // Exported for tests.
@@ -115,8 +112,8 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     const x = e.pageX - r.left;
     const y = e.pageY - r.top;
     const rangeLength = rangeEnd - rangeStart;
-    const time = rangeStart + x / width * rangeLength;
-    const onePixelTime = rangeLength / width * window.devicePixelRatio;
+    const time = rangeStart + (x / width) * rangeLength;
+    const onePixelTime = (rangeLength / width) * window.devicePixelRatio;
 
     // Markers are drawn in array order; the one drawn last is on top. So if
     // there are multiple markers under the mouse, we want to find the one
@@ -195,7 +192,8 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
   componentDidUpdate(prevProps: Props, prevState: State) {
     if (
       prevProps !== this.props ||
-      prevState.hoveredItem !== this.state.hoveredItem
+      prevState.hoveredItem !== this.state.hoveredItem ||
+      prevState.mouseDownItem !== this.state.mouseDownItem
     ) {
       this._scheduleDraw();
     }
@@ -283,7 +281,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     let previousPos = null;
     markers.forEach(marker => {
       const { start, dur, name } = marker;
-      let pos = (start - rangeStart) / (rangeEnd - rangeStart) * width;
+      let pos = ((start - rangeStart) / (rangeEnd - rangeStart)) * width;
       pos = Math.round(pos * devicePixelRatio) / devicePixelRatio;
 
       if (previousPos === pos && dur === 0) {
@@ -293,7 +291,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       previousPos = pos;
       const itemWidth = Number.isFinite(dur)
         ? Math.max(
-            dur / (rangeEnd - rangeStart) * width,
+            (dur / (rangeEnd - rangeStart)) * width,
             MIN_MARKER_WIDTH / devicePixelRatio
           )
         : Number.MAX_SAFE_INTEGER;
@@ -364,12 +362,12 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
  * Combine the base implementation of the TimelineMarkers with the
  * WithSize component.
  */
-export const TimelineMarkers = withSize(TimelineMarkersImplementation);
+export const TimelineMarkers = withSize<Props>(TimelineMarkersImplementation);
 
 /**
  * Create a special connected component for Jank instances.
  */
-const jankOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+export const TimelineMarkersJank = explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
@@ -383,14 +381,16 @@ const jankOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     };
   },
   component: TimelineMarkers,
-};
-
-export const TimelineMarkersJank = explicitConnect(jankOptions);
+});
 
 /**
  * Create a connected component for all markers.
  */
-const markersOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+export const TimelineMarkersOverview = explicitConnect<
+  OwnProps,
+  StateProps,
+  {||}
+>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
@@ -408,14 +408,16 @@ const markersOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     };
   },
   component: TimelineMarkers,
-};
-
-export const TimelineMarkersOverview = explicitConnect(markersOptions);
+});
 
 /**
- * Disk IO is an optional marker type. Only add these markers if they exist.
+ * FileIO is an optional marker type. Only add these markers if they exist.
  */
-const fileIoOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
+export const TimelineMarkersFileIo = explicitConnect<
+  OwnProps,
+  StateProps,
+  {||}
+>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
@@ -429,6 +431,28 @@ const fileIoOptions: ExplicitConnectOptions<OwnProps, StateProps, {||}> = {
     };
   },
   component: TimelineMarkers,
-};
+});
 
-export const TimelineMarkersFileIo = explicitConnect(fileIoOptions);
+/**
+ * Create a component for memory-related markers.
+ */
+export const TimelineMarkersMemory = explicitConnect<
+  OwnProps,
+  StateProps,
+  {||}
+>({
+  mapStateToProps: (state, props) => {
+    const { threadIndex } = props;
+    const selectors = getThreadSelectors(threadIndex);
+    const selectedThread = getSelectedThreadIndex(state);
+
+    return {
+      markers: selectors.getMemoryMarkers(state),
+      isSelected: threadIndex === selectedThread,
+      isModifyingSelection: getPreviewSelection(state).isModifying,
+      additionalClassName: 'timelineMarkersMemory',
+      testId: 'TimelineMarkersMemory',
+    };
+  },
+  component: TimelineMarkers,
+});

@@ -201,6 +201,7 @@ export const getProfileName: Selector<null | string> = createSelector(
       return matchResult[0];
     }
     return null;
+
   }
 );
 

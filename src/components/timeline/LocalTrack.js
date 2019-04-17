@@ -25,14 +25,11 @@ import {
 import { getThreadSelectors } from '../../selectors/per-thread';
 import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';
-import TrackMemory from './TrackMemory';
+import { TrackMemory } from './TrackMemory';
 import type { TrackReference } from '../../types/actions';
 import type { Pid } from '../../types/profile';
 import type { TrackIndex, LocalTrack } from '../../types/profile-derived';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +pid: Pid,
@@ -131,7 +128,7 @@ class LocalTrackComponent extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, { pid, localTrack, trackIndex }) => {
     // These get assigned based on the track type.
     let titleText = null;
@@ -182,6 +179,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     selectTrack,
   },
   component: LocalTrackComponent,
-};
-
-export default explicitConnect(options);
+});

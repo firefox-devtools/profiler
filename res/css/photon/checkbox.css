@@ -1,0 +1,62 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.photon-checkbox {
+  position: relative;
+  padding: 0;
+  border: 1px solid var(--grey-90-a30);
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-color: var(--grey-90-a10);
+  border-radius: 2px;
+}
+
+/* Remove the border, as it compets with box-shadow styles applied with focus.css */
+.photon-checkbox:focus {
+  border: none;
+}
+
+/* Use this class with the photon-checkbox for the canonical photon styling. */
+.photon-checkbox-default {
+  width: 16px;
+  height: 16px;
+  margin: 0 4px;
+}
+
+/* Use this class with the photon-checkbox for the custom micro variant. */
+.photon-checkbox-micro {
+  width: 13px;
+  height: 13px;
+  margin: 0 3px;
+}
+
+.photon-checkbox:hover:not([disabled]) {
+  background-color: var(--grey-90-a20);
+}
+
+.photon-checkbox:checked:not([disabled]) {
+  border: none;
+  background-color: var(--blue-60);
+}
+
+.photon-checkbox:hover:active:not([disabled]) {
+  background-color: var(--grey-90-a30);
+}
+
+.photon-checkbox-default:checked:not([disabled]) {
+  background-image: url(../../img/svg/checkbox-check-16.svg);
+}
+
+.photon-checkbox-micro:checked:not([disabled]) {
+  background-image: url(../../img/svg/checkbox-check-13.svg);
+}
+
+.photon-checkbox:checked:hover:not([disabled]) {
+  background-color: var(--blue-70);
+}
+
+.photon-checkbox:checked:hover:active:not([disabled]) {
+  background-color: var(--blue-80);
+}

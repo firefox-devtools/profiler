@@ -9,6 +9,7 @@ import {
   deriveMarkersFromRawMarkerTable,
   filterRawMarkerTableToRange,
   mergeStartAndEndNetworkMarker,
+  filterRawMarkerTableToRangeWithMarkersToDelete,
 } from '../../profile-logic/marker-data';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
@@ -21,6 +22,7 @@ import type { Milliseconds } from '../../types/units';
 describe('deriveMarkersFromRawMarkerTable', function() {
   function setup() {
     const profile = processProfile(createGeckoProfile());
+    profile.meta.symbolicated = true; // avoid to kick off the symbolication process
     const thread = profile.threads[0]; // This is the parent process main thread
     const contentThread = profile.threads[2]; // This is the content process main thread
 
@@ -44,9 +46,9 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     expect(contentThread.processType).toBe('tab');
   });
 
-  it('creates 13 markers given the test data', function() {
+  it('creates 14 markers given the test data', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(13);
+    expect(markers.length).toEqual(14);
   });
   it('creates a marker even if there is no start or end time', function() {
     const { markers } = setup();
@@ -68,7 +70,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   });
   it('should fold the two reflow markers into one marker', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(13);
+    expect(markers.length).toEqual(14);
     expect(markers[2]).toMatchObject({
       start: 3,
       dur: 5,
@@ -226,6 +228,22 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       dur: 2,
       name: 'FileIO',
       start: 1022,
+      title: null,
+    });
+  });
+  it('should create a marker for the marker CompositorScreenshot', function() {
+    const { markers } = setup();
+    expect(markers[13]).toMatchObject({
+      data: {
+        type: 'CompositorScreenshot',
+        url: 16,
+        windowID: '0x136888400',
+        windowWidth: 1280,
+        windowHeight: 1000,
+      },
+      name: 'CompositorScreenshot',
+      start: 25,
+      dur: -18,
       title: null,
     });
   });
@@ -658,5 +676,99 @@ describe('filterRawMarkerTableToRange', () => {
       'Load 5',
       'Load 6',
     ]);
+  });
+});
+
+// We don't need to test with other marker types since they are already being
+// tested in `filterRawMarkerTableToRange` tests.
+describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
+  function setup(
+    markers: Array<[string, Milliseconds, null | Object]>
+  ): Thread {
+    markers = markers.map(([name, time, payload]) => {
+      if (payload) {
+        // Force a type 'DummyForTests' if it's inexistant
+        payload = { type: 'DummyForTests', ...payload };
+      }
+      return [name, time, payload];
+    });
+
+    // Our marker payload union type is too difficult to work with in a
+    // generic way here.
+    return getThreadWithMarkers((markers: any));
+  }
+
+  it('filters generic markers without markerToDelete', () => {
+    const markers = [
+      ['A', 0, null],
+      ['B', 1, null],
+      ['C', 2, null],
+      ['D', 3, null],
+      ['E', 4, null],
+      ['F', 5, null],
+      ['G', 6, null],
+      ['H', 7, null],
+    ];
+    const { markers: markerTable, stringTable } = setup(markers);
+    const filteredMarkerTable = filterRawMarkerTableToRangeWithMarkersToDelete(
+      markerTable,
+      new Set(),
+      { start: 2.3, end: 5.6 }
+    ).rawMarkerTable;
+    const filteredMarkerNames = filteredMarkerTable.name.map(stringIndex =>
+      stringTable.getString(stringIndex)
+    );
+    expect(filteredMarkerNames).toEqual(['D', 'E', 'F']);
+  });
+
+  it('filters generic markers with markerToDelete', () => {
+    const markers = [
+      ['A', 0, null],
+      ['B', 1, null],
+      ['C', 2, null],
+      ['D', 3, null],
+      ['E', 4, null],
+      ['F', 5, null],
+      ['G', 6, null],
+      ['H', 7, null],
+    ];
+
+    const { markers: markerTable, stringTable } = setup(markers);
+    const markersToDelete = new Set([3, 5]);
+    const filteredMarkerTable = filterRawMarkerTableToRangeWithMarkersToDelete(
+      markerTable,
+      markersToDelete,
+      { start: 2.3, end: 5.6 }
+    ).rawMarkerTable;
+
+    const filteredMarkerNames = filteredMarkerTable.name.map(stringIndex =>
+      stringTable.getString(stringIndex)
+    );
+    expect(filteredMarkerNames).toEqual(['E']);
+  });
+
+  it('filters generic markers with markerToDelete but without time range', () => {
+    const markers = [
+      ['A', 0, null],
+      ['B', 1, null],
+      ['C', 2, null],
+      ['D', 3, null],
+      ['E', 4, null],
+      ['F', 5, null],
+      ['G', 6, null],
+      ['H', 7, null],
+    ];
+    const { markers: markerTable, stringTable } = setup(markers);
+    const markersToDelete = new Set([2, 3, 5, 7]);
+    const filteredMarkerTable = filterRawMarkerTableToRangeWithMarkersToDelete(
+      markerTable,
+      markersToDelete,
+      null
+    ).rawMarkerTable;
+
+    const filteredMarkerNames = filteredMarkerTable.name.map(stringIndex =>
+      stringTable.getString(stringIndex)
+    );
+    expect(filteredMarkerNames).toEqual(['A', 'B', 'E', 'G']);
   });
 });

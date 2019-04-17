@@ -5,7 +5,6 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { connect } from 'react-redux';
 import {
   changeImplementationFilter,
   changeInvertCallstack,
@@ -16,18 +15,27 @@ import {
 } from '../../selectors/url-state';
 import StackSearchField from '../shared/StackSearchField';
 import { toValidImplementationFilter } from '../../profile-logic/profile-data';
+import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
 import './StackSettings.css';
 
 import type { ImplementationFilter } from '../../types/actions';
 
-type Props = {|
+type OwnProps = {|
+  +hideInvertCallstack?: boolean,
+|};
+
+type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +invertCallstack: boolean,
-  +hideInvertCallstack?: boolean,
+|};
+
+type DispatchProps = {|
   +changeImplementationFilter: typeof changeImplementationFilter,
   +changeInvertCallstack: typeof changeInvertCallstack,
 |};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class StackSettings extends PureComponent<Props> {
   _onImplementationFilterChange = (e: SyntheticEvent<HTMLInputElement>) => {
@@ -47,10 +55,10 @@ class StackSettings extends PureComponent<Props> {
     implementationFilter: ImplementationFilter
   ) {
     return (
-      <label className="stackSettingsFilterLabel">
+      <label className="photon-label photon-label-micro stackSettingsFilterLabel">
         <input
           type="radio"
-          className="stackSettingsFilterInput"
+          className="photon-radio photon-radio-micro stackSettingsFilterInput"
           value={implementationFilter}
           name="stack-settings-filter"
           title="Filter stack frames to a type."
@@ -75,10 +83,10 @@ class StackSettings extends PureComponent<Props> {
           </li>
           {hideInvertCallstack ? null : (
             <li className="stackSettingsListItem">
-              <label className="stackSettingsLabel">
+              <label className="photon-label photon-label-micro stackSettingsLabel">
                 <input
                   type="checkbox"
-                  className="stackSettingsCheckbox"
+                  className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
                   onChange={this._onInvertCallstackClick}
                   checked={invertCallstack}
                 />
@@ -93,13 +101,14 @@ class StackSettings extends PureComponent<Props> {
   }
 }
 
-export default connect(
-  state => ({
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+  mapStateToProps: state => ({
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
   }),
-  {
+  mapDispatchToProps: {
     changeImplementationFilter,
     changeInvertCallstack,
-  }
-)(StackSettings);
+  },
+  component: StackSettings,
+});

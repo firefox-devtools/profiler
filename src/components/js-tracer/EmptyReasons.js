@@ -8,10 +8,7 @@ import React, { PureComponent } from 'react';
 import EmptyReasons from '../shared/EmptyReasons';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 
-import explicitConnect, {
-  type ExplicitConnectOptions,
-  type ConnectedProps,
-} from '../../utils/connect';
+import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
 import type { State } from '../../types/store';
 
@@ -34,11 +31,9 @@ class MarkerChartEmptyReasons extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
   }),
   component: MarkerChartEmptyReasons,
-};
-
-export default explicitConnect(options);
+});

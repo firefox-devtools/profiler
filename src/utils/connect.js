@@ -83,11 +83,11 @@ export type WrapFunctionInDispatch<Fn: Function> = $Call<
   Fn
 >;
 
-export type ExplicitConnectOptions<
+type ExplicitConnectOptions<
   OwnProps: Object,
   StateProps: Object,
   DispatchProps: Object
-> = {
+> = {|
   mapStateToProps?: MapStateToProps<OwnProps, StateProps>,
   mapDispatchToProps?: MapDispatchToProps<OwnProps, DispatchProps>,
   mergeProps?: MergeProps<
@@ -100,7 +100,7 @@ export type ExplicitConnectOptions<
   component: React.ComponentType<
     ConnectedProps<OwnProps, StateProps, DispatchProps>
   >,
-};
+|};
 
 export type ConnectedProps<
   OwnProps: Object,
@@ -109,7 +109,7 @@ export type ConnectedProps<
 > = $ReadOnly<{|
   ...OwnProps,
   ...StateProps,
-  ...WrapDispatchProps<DispatchProps>,
+  ...DispatchProps,
 |}>;
 
 export type ConnectedComponent<

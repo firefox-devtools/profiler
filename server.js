@@ -31,7 +31,7 @@ const serverConfig = {
       script-src
         'self'
         'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw='
-        'sha256-AdiT28wTL5FNaRVHWQVFC0ic3E20Gu4/PiC9xukS9+E='
+        'sha256-vY1KJ1dyP9vvnuERKMiQAcoKKtMUXZUEWJ/dT1XqpKM='
         https://www.google-analytics.com;
       style-src 'self' 'unsafe-inline';
       img-src http: https: data:;

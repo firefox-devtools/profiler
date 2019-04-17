@@ -294,7 +294,7 @@ const _upgraders = {
               funcTable.name[funcIndex] = stringTable.indexForString(scriptURI);
             }
             fileName = stringTable.indexForString(scriptURI);
-            lineNumber = match[3] | 0;
+            lineNumber = Number(match[3]) | 0;
           }
         }
         funcTable.fileName[funcIndex] = fileName;
@@ -683,7 +683,7 @@ const _upgraders = {
               const newCategory =
                 oldCategory in oldCategoryToNewCategory
                   ? oldCategoryToNewCategory[oldCategory]
-                  : 1 /* Other */;
+                  : 1; /* Other */
               frameTable.category[i] = newCategory;
             }
           }

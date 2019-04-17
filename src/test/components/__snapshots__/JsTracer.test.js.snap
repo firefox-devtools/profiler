@@ -352,7 +352,6 @@ exports[`StackChart matches the snapshot for the chart 1`] = `
           <input
             class="jsTracerSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Show only self time
         </label>
@@ -372,18 +371,19 @@ exports[`StackChart matches the snapshot for the chart 1`] = `
       />
     </div>
     <div
-      class="chartViewportShiftScroll hidden"
+      class="chartViewportScroll hidden"
     >
       Zoom Chart:
       <kbd
-        class="chartViewportShiftScrollKbd"
+        class="chartViewportScrollKbd"
       >
-        Shift
+        Ctrl + Scroll
       </kbd>
+      or
       <kbd
-        class="chartViewportShiftScrollKbd"
+        class="chartViewportScrollKbd"
       >
-        Scroll
+        Shift + Scroll
       </kbd>
     </div>
   </div>
@@ -409,7 +409,6 @@ exports[`StackChart matches the snapshot for the loading screen 1`] = `
           <input
             class="jsTracerSettingsCheckbox"
             type="checkbox"
-            value="on"
           />
            Show only self time
         </label>

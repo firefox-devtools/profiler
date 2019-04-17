@@ -13,6 +13,7 @@ import * as UrlStateSelectors from '../../selectors/url-state';
 import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,
+  getStoreWithMemoryTrack,
 } from '../fixtures/profiles/tracks';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import {
@@ -373,6 +374,24 @@ describe('ordering and hiding', function() {
       ]);
     });
 
+    it('can count hidden local tracks', function() {
+      const { getState, dispatch, workerTrackIndex, tabPid } = init();
+      dispatch(hideLocalTrack(tabPid, workerTrackIndex));
+      expect(ProfileViewSelectors.getHiddenTrackCount(getState())).toEqual({
+        hidden: 1,
+        total: 4,
+      });
+    });
+
+    it('can count hidden global tracks and their hidden local tracks', function() {
+      const { getState, dispatch, tabTrackIndex } = init();
+      dispatch(hideGlobalTrack(tabTrackIndex));
+      expect(ProfileViewSelectors.getHiddenTrackCount(getState())).toEqual({
+        hidden: 3,
+        total: 4,
+      });
+    });
+
     it('will hide the global track if hiding the last visible thread', function() {
       const profile = getProfileWithoutAProcessMainThread();
       const {
@@ -619,5 +638,26 @@ describe('ordering and hiding', function() {
         ).toEqual(userFacingSortOrder);
       });
     });
+  });
+});
+
+describe('ProfileViewSelectors.getProcessesWithMemoryTrack', function() {
+  it('knows when a profile does not have a memory track', function() {
+    const profile = getProfileWithNiceTracks();
+    const [thread] = profile.threads;
+    const { getState } = storeWithProfile(profile);
+    const processesWithMemoryTrack = ProfileViewSelectors.getProcessesWithMemoryTrack(
+      getState()
+    );
+    expect(processesWithMemoryTrack.has(thread.pid)).toEqual(false);
+  });
+
+  it('knows when a profile has a memory track', function() {
+    const { getState, profile } = getStoreWithMemoryTrack();
+    const [thread] = profile.threads;
+    const processesWithMemoryTrack = ProfileViewSelectors.getProcessesWithMemoryTrack(
+      getState()
+    );
+    expect(processesWithMemoryTrack.has(thread.pid)).toEqual(true);
   });
 });

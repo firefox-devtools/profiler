@@ -162,8 +162,8 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
     this.drawEvents(renderPass, hoveredItem);
     this.drawSeparatorsAndLabels(renderPass);
 
-    this.setState(
-      state => (state.hasFirstDraw ? null : { hasFirstDraw: true })
+    this.setState(state =>
+      state.hasFirstDraw ? null : { hasFirstDraw: true }
     );
   };
 
@@ -286,7 +286,7 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
         rangeLength * viewportRight +
         // This represents the amount of seconds in the right margin:
         devicePixels.timelineMarginRight *
-          (viewportLength * rangeLength / devicePixels.containerWidth);
+          ((viewportLength * rangeLength) / devicePixels.containerWidth);
       const h: DevicePixels = devicePixels.rowHeight - devicePixels.oneCssPixel;
       const y: CssPixels =
         rowIndex * devicePixels.rowHeight - devicePixels.viewportTop;
@@ -330,16 +330,16 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
             (eventEndTime - rangeStart) / rangeLength;
 
           let x: DevicePixels =
-            (unitIntervalStartTime - viewportLeft) *
-              devicePixels.innerContainerWidth /
+            ((unitIntervalStartTime - viewportLeft) *
+              devicePixels.innerContainerWidth) /
               viewportLength +
             devicePixels.timelineMarginLeft;
           // If a viewport is smaller than the width of a box, it gets cut off so only
           // a smaller box is drawn. This variable holds the width of the event before
           // it is potentially "cut" by a smaller viewport.
           const uncutWidth: DevicePixels =
-            (unitIntervalEndTime - unitIntervalStartTime) *
-            devicePixels.innerContainerWidth /
+            ((unitIntervalEndTime - unitIntervalStartTime) *
+              devicePixels.innerContainerWidth) /
             viewportLength;
           const text = timing.label[i];
           const isHovered = hoveredItem === timing.index[i];
@@ -556,7 +556,7 @@ class JsTracerCanvas extends React.PureComponent<Props, State> {
     const rowIndex = Math.floor((y + viewportTop) / rowHeight);
     const timing = jsTracerTimingRows[rowIndex];
     const minDuration: Milliseconds =
-      rangeLength * viewportLength / innerContainerWidth;
+      (rangeLength * viewportLength) / innerContainerWidth;
 
     if (!timing) {
       return null;

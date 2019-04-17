@@ -8,13 +8,9 @@ import React, { PureComponent } from 'react';
 
 import { changeProfilesToCompare } from '../../actions/app';
 import explicitConnect from '../../utils/connect';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 import './CompareHome.css';
-import '../../../res/css/photon-components.css';
 
 type DispatchProps = {|
   +changeProfilesToCompare: typeof changeProfilesToCompare,
@@ -93,9 +89,7 @@ class CompareHome extends PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, {||}, DispatchProps> = {
+export default explicitConnect<{||}, {||}, DispatchProps>({
   mapDispatchToProps: { changeProfilesToCompare },
   component: CompareHome,
-};
-
-export default explicitConnect(options);
+});

@@ -2,331 +2,55 @@
 
 exports[`Timeline renders the header 1`] = `
 <div
-  class="timelineSelection"
+  class="timelineSettings"
 >
   <form>
     <div
-      class="timelineToggle"
+      class="timelineSettingsToggle"
     >
+      Graph type:
+       
       <label
-        class="timelineToggleLabel"
+        class="photon-label photon-label-micro timelineSettingsToggleLabel"
       >
         <input
-          class="timelineToggleInput"
-          name="timelineToggle"
+          checked=""
+          class="photon-radio photon-radio-micro timelineSettingsToggleInput"
+          name="timelineSettingsToggle"
           type="radio"
-          value="on"
         />
         Categories
       </label>
       <label
-        class="timelineToggleLabel"
+        class="photon-label-micro timelineSettingsToggleLabel"
       >
         <input
-          class="timelineToggleInput"
-          name="timelineToggle"
+          class="photon-radio photon-radio-micro timelineSettingsToggleInput"
+          name="timelineSettingsToggle"
           type="radio"
-          value="on"
         />
         Stack height
       </label>
     </div>
   </form>
-  <div
-    class="timelineRuler"
+  <button
+    class="timelineSettingsHiddenTracks"
+    type="button"
   >
-    <ol
-      class="timelineRulerContainer"
+    <span
+      class="timelineSettingsHiddenTracksNumber"
     >
-      <li
-        class="timelineRulerNotch"
-        style="left: 0px;"
-      >
-        <span
-          class="timelineRulerNotchText"
-        >
-          0.000s
-        </span>
-      </li>
-      <li
-        class="timelineRulerNotch"
-        style="left: 66.66666666666667px;"
-      >
-        <span
-          class="timelineRulerNotchText"
-        >
-          0.002s
-        </span>
-      </li>
-      <li
-        class="timelineRulerNotch"
-        style="left: 133.33333333333334px;"
-      >
-        <span
-          class="timelineRulerNotchText"
-        >
-          0.004s
-        </span>
-      </li>
-      <li
-        class="timelineRulerNotch"
-        style="left: 200px;"
-      >
-        <span
-          class="timelineRulerNotchText"
-        >
-          0.006s
-        </span>
-      </li>
-      <li
-        class="timelineRulerNotch"
-        style="left: 266.6666666666667px;"
-      >
-        <span
-          class="timelineRulerNotchText"
-        >
-          0.008s
-        </span>
-      </li>
-    </ol>
-  </div>
-  <div
-    class="overflowEdgeIndicator timelineOverflowEdgeIndicator"
-  >
-    <div
-      class="overflowEdgeIndicatorEdge topEdge"
-    />
-    <div
-      class="overflowEdgeIndicatorEdge rightEdge"
-    />
-    <div
-      class="overflowEdgeIndicatorEdge bottomEdge"
-    />
-    <div
-      class="overflowEdgeIndicatorEdge leftEdge"
-    />
-    <div
-      class="overflowEdgeIndicatorScrollbox timelineOverflowEdgeIndicatorScrollbox"
+      4
+    </span>
+     / 
+    <span
+      class="timelineSettingsHiddenTracksNumber"
     >
-      <div
-        class="overflowEdgeIndicatorContentsWrapper"
-      >
-        <ol
-          class="timelineThreadList"
-        >
-          <li
-            class="timelineTrack"
-          >
-            <div
-              class="timelineTrackRow timelineTrackGlobalRow"
-            >
-              <div
-                class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
-              >
-                <button
-                  class="timelineTrackNameButton"
-                  type="button"
-                >
-                  Process 0
-                </button>
-              </div>
-              <div
-                class="timelineTrackTrack"
-              >
-                <div
-                  class="timelineTrackThreadBlank"
-                />
-              </div>
-            </div>
-            <ol
-              class="timelineTrackLocalTracks"
-            >
-              <li
-                class="timelineTrack timelineTrackLocal"
-              >
-                <div
-                  class="timelineTrackRow timelineTrackLocalRow selected"
-                >
-                  <div
-                    class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-                    title="thread: \\"Main Thread\\" (0)
-process: \\"default\\" (0)"
-                  >
-                    <button
-                      class="timelineTrackNameButton"
-                      type="button"
-                    >
-                      Main Thread
-                    </button>
-                  </div>
-                  <div
-                    class="timelineTrackTrack"
-                  >
-                    <div
-                      class="timelineTrackThread"
-                    >
-                      <div
-                        class="timelineMarkers selected"
-                        data-testid="TimelineMarkersJank"
-                      >
-                        <canvas
-                          class="timelineMarkersCanvas"
-                          height="300"
-                          width="300"
-                        />
-                      </div>
-                      <div
-                        class="threadActivityGraph"
-                      >
-                        <canvas
-                          class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                          height="300"
-                          width="200"
-                        />
-                      </div>
-                      <div
-                        class="timelineEmptyThreadIndicator"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li
-                class="timelineTrack timelineTrackLocal"
-              >
-                <div
-                  class="timelineTrackRow timelineTrackLocalRow"
-                >
-                  <div
-                    class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-                    title="thread: \\"Thread with dropped samples\\" (0)
-process: \\"default\\" (0)"
-                  >
-                    <button
-                      class="timelineTrackNameButton"
-                      type="button"
-                    >
-                      Thread with dropped samples
-                    </button>
-                  </div>
-                  <div
-                    class="timelineTrackTrack"
-                  >
-                    <div
-                      class="timelineTrackThread"
-                    >
-                      <div
-                        class="timelineMarkers"
-                        data-testid="TimelineMarkersJank"
-                      >
-                        <canvas
-                          class="timelineMarkersCanvas"
-                          height="300"
-                          width="300"
-                        />
-                      </div>
-                      <div
-                        class="threadActivityGraph"
-                      >
-                        <canvas
-                          class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                          height="300"
-                          width="200"
-                        />
-                      </div>
-                      <div
-                        class="timelineEmptyThreadIndicator"
-                      >
-                        <div
-                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
-                          style="left: 0px; width: 66.66666666666667px;"
-                        />
-                        <div
-                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
-                          style="right: 0px; width: 66.66666666666667px;"
-                        />
-                        <div
-                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
-                          style="left: 66.66666666666667px; width: 66.66666666666667px;"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-              <li
-                class="timelineTrack timelineTrackLocal"
-              >
-                <div
-                  class="timelineTrackRow timelineTrackLocalRow"
-                >
-                  <div
-                    class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
-                    title="thread: \\"Thread with dropped samples\\" (0)
-process: \\"default\\" (0)"
-                  >
-                    <button
-                      class="timelineTrackNameButton"
-                      type="button"
-                    >
-                      Thread with dropped samples
-                    </button>
-                  </div>
-                  <div
-                    class="timelineTrackTrack"
-                  >
-                    <div
-                      class="timelineTrackThread"
-                    >
-                      <div
-                        class="timelineMarkers"
-                        data-testid="TimelineMarkersJank"
-                      >
-                        <canvas
-                          class="timelineMarkersCanvas"
-                          height="300"
-                          width="300"
-                        />
-                      </div>
-                      <div
-                        class="threadActivityGraph"
-                      >
-                        <canvas
-                          class="threadActivityGraphCanvas threadActivityGraphCanvas"
-                          height="300"
-                          width="200"
-                        />
-                      </div>
-                      <div
-                        class="timelineEmptyThreadIndicator"
-                      >
-                        <div
-                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorStartup"
-                          style="left: 0px; width: 66.66666666666667px;"
-                        />
-                        <div
-                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorShutdown"
-                          style="right: 0px; width: 66.66666666666667px;"
-                        />
-                        <div
-                          class="timelineEmptyThreadIndicatorBlock timelineEmptyThreadIndicatorEmptyBuffer"
-                          style="left: 66.66666666666667px; width: 66.66666666666667px;"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            </ol>
-          </li>
-        </ol>
-      </div>
-    </div>
-  </div>
-  <div
-    class="timelineSelectionHoverLine"
-    style="visibility: hidden; left: 0px;"
-  />
+      4
+       
+    </span>
+    tracks visible
+  </button>
 </div>
 `;
 
@@ -424,35 +148,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -566,35 +290,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -708,35 +432,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -850,35 +574,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -992,35 +716,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -1134,35 +858,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -1276,35 +1000,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -1418,35 +1142,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -3666,35 +3390,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -3808,35 +3532,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -3950,35 +3674,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -4092,35 +3816,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -4234,35 +3958,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -4376,35 +4100,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -4518,35 +4242,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -4660,35 +4384,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -5768,35 +5492,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -5910,35 +5634,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -6052,35 +5776,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -6194,35 +5918,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -6336,35 +6060,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -6478,35 +6202,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -6620,35 +6344,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],
@@ -6762,35 +6486,35 @@ Array [
         ],
         "results": Array [
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
           Object {
-            "isThrow": false,
+            "type": "return",
             "value": undefined,
           },
         ],

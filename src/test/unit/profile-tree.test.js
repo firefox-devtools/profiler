@@ -525,7 +525,9 @@ describe('inverted call tree', function() {
 
 describe('origin annotation', function() {
   const {
-    profile: { threads: [thread] },
+    profile: {
+      threads: [thread],
+    },
     funcNamesPerThread: [funcNames],
   } = getProfileFromTextSamples(`
     A

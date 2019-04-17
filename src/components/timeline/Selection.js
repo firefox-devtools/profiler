@@ -26,10 +26,7 @@ import './Selection.css';
 import type { OnMove } from '../shared/Draggable';
 import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type MouseHandler = (event: MouseEvent) => void;
 
@@ -97,8 +94,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
     const { committedRange, minSelectionStartWidth } = this.props;
     const mouseDownTime =
-      (event.pageX - rect.left) /
-        rect.width *
+      ((event.pageX - rect.left) / rect.width) *
         (committedRange.end - committedRange.start) +
       committedRange.start;
 
@@ -106,8 +102,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
 
     const mouseMoveHandler = event => {
       const mouseMoveTime =
-        (event.pageX - rect.left) /
-          rect.width *
+        ((event.pageX - rect.left) / rect.width) *
           (committedRange.end - committedRange.start) +
         committedRange.start;
       const selectionStart = clamp(
@@ -137,8 +132,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     const mouseUpHandler = event => {
       if (isRangeSelecting) {
         const mouseMoveTime =
-          (event.pageX - rect.left) /
-            rect.width *
+          ((event.pageX - rect.left) / rect.width) *
             (committedRange.end - committedRange.start) +
           committedRange.start;
         const selectionStart = clamp(
@@ -165,8 +159,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       const { previewSelection } = this.props;
       if (previewSelection.hasSelection) {
         const mouseUpTime =
-          (event.pageX - rect.left) /
-            rect.width *
+          ((event.pageX - rect.left) / rect.width) *
             (committedRange.end - committedRange.start) +
           committedRange.start;
         const { selectionStart, selectionEnd } = previewSelection;
@@ -228,7 +221,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     isModifying: boolean
   ) => {
     const { committedRange, width, updatePreviewSelection } = this.props;
-    const delta = dx / width * (committedRange.end - committedRange.start);
+    const delta = (dx / width) * (committedRange.end - committedRange.start);
     const selectionDeltas = fun(delta);
     const selectionStart = Math.max(
       committedRange.start,
@@ -286,12 +279,12 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     const { selectionStart, selectionEnd } = previewSelection;
 
     const beforeWidth =
-      (selectionStart - committedRange.start) /
-      (committedRange.end - committedRange.start) *
+      ((selectionStart - committedRange.start) /
+        (committedRange.end - committedRange.start)) *
       width;
     const selectionWidth =
-      (selectionEnd - selectionStart) /
-      (committedRange.end - committedRange.start) *
+      ((selectionEnd - selectionStart) /
+        (committedRange.end - committedRange.start)) *
       width;
 
     return (
@@ -374,7 +367,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
   }
 }
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
@@ -386,6 +379,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     commitRange,
   },
   component: TimelineRulerAndSelection,
-};
-
-export default explicitConnect(options);
+});

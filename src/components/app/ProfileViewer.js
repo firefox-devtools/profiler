@@ -14,30 +14,49 @@ import { returnToZipFileList } from '../../actions/zipped-profiles';
 import { getProfileName } from '../../selectors/url-state';
 import Timeline from '../timeline';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
+import SplitterLayout from 'react-splitter-layout';
+import { invalidatePanelLayout } from '../../actions/app';
+import { getTimelineHeight } from '../../selectors/app';
 
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { CssPixels } from '../../types/units';
+import type { ConnectedProps } from '../../utils/connect';
 
 require('./ProfileViewer.css');
 
 type StateProps = {|
   +profileName: string | null,
   +hasZipFile: boolean,
+  +timelineHeight: CssPixels | null,
 |};
 
 type DispatchProps = {|
   +returnToZipFileList: typeof returnToZipFileList,
+  +invalidatePanelLayout: typeof invalidatePanelLayout,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class ProfileViewer extends PureComponent<Props> {
   render() {
-    const { hasZipFile, profileName, returnToZipFileList } = this.props;
+    const {
+      hasZipFile,
+      profileName,
+      returnToZipFileList,
+      invalidatePanelLayout,
+      timelineHeight,
+    } = this.props;
+
     return (
-      <div className="profileViewer">
+      <div
+        className="profileViewer"
+        style={
+          timelineHeight === null
+            ? {}
+            : {
+                '--profile-viewer-splitter-max-height': `${timelineHeight}px`,
+              }
+        }
+      >
         <div className="profileViewerTopBar">
           {hasZipFile ? (
             <button
@@ -51,31 +70,42 @@ class ProfileViewer extends PureComponent<Props> {
             <div className="profileViewerName">{profileName}</div>
           ) : null}
           <ProfileFilterNavigator />
-          {/*
-            * Define a spacer in the middle that will shrink based on the availability
-            * of space in the top bar. It will shrink away before any of the items
-            * with actual content in them do.
-            */}
+          {
+            // Define a spacer in the middle that will shrink based on the availability
+            // of space in the top bar. It will shrink away before any of the items
+            // with actual content in them do.
+          }
           <div className="profileViewerSpacer" />
           <MenuButtons />
         </div>
-        <Timeline />
-        <DetailsContainer />
+        <SplitterLayout
+          customClassName="profileViewerSplitter"
+          vertical
+          percentage={false}
+          // The DetailsContainer is primary.
+          primaryIndex={1}
+          // The Timeline is secondary.
+          secondaryInitialSize={270}
+          onDragEnd={invalidatePanelLayout}
+        >
+          <Timeline />
+          <DetailsContainer />
+        </SplitterLayout>
         <SymbolicationStatusOverlay />
       </div>
     );
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     profileName: getProfileName(state),
     hasZipFile: getHasZipFile(state),
+    timelineHeight: getTimelineHeight(state),
   }),
   mapDispatchToProps: {
     returnToZipFileList,
+    invalidatePanelLayout,
   },
   component: ProfileViewer,
-};
-
-export default explicitConnect(options);
+});

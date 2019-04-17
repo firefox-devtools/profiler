@@ -6,6 +6,7 @@
 import { oneLine } from 'common-tags';
 import { getLastVisibleThreadTabSlug } from '../selectors/app';
 import {
+  getCounterSelectors,
   getGlobalTracks,
   getGlobalTrackAndIndexByPid,
   getLocalTracks,
@@ -261,9 +262,15 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
           selectedThreadIndex = localTrack.threadIndex;
           selectedTab = 'network-chart';
           break;
-        case 'memory':
-          // TODO - Currently disable selecting memory.
-          return;
+        case 'memory': {
+          const { counterIndex } = localTrack;
+          const counterSelectors = getCounterSelectors(counterIndex);
+          const counter = counterSelectors.getCommittedRangeFilteredCounter(
+            getState()
+          );
+          selectedThreadIndex = counter.mainThreadIndex;
+          break;
+        }
         default:
           throw assertExhaustiveCheck(localTrack, `Unhandled LocalTrack type.`);
       }
@@ -305,7 +312,7 @@ export function focusCallTree(): Action {
  * used to display its context menu.
  */
 export function changeRightClickedTrack(
-  trackReference: TrackReference
+  trackReference: TrackReference | null
 ): Action {
   return {
     type: 'CHANGE_RIGHT_CLICKED_TRACK',
@@ -861,6 +868,13 @@ export function changeMarkersSearchString(searchString: string): Action {
   };
 }
 
+export function changeNetworkSearchString(searchString: string): Action {
+  return {
+    type: 'CHANGE_NETWORK_SEARCH_STRING',
+    searchString,
+  };
+}
+
 export function changeImplementationFilter(
   implementation: ImplementationFilter
 ): ThunkAction<void> {
@@ -1010,5 +1024,12 @@ export function changeTimelineType(timelineType: TimelineType): Action {
   return {
     type: 'CHANGE_TIMELINE_TYPE',
     timelineType,
+  };
+}
+
+export function changeProfileName(profileName: string): Action {
+  return {
+    type: 'CHANGE_PROFILE_NAME',
+    profileName,
   };
 }

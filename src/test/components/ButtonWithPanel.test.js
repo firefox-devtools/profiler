@@ -46,20 +46,41 @@ describe('shared/ButtonWithPanel', () => {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('renders a disabled button', () => {
-    const { container } = render(
-      <ButtonWithPanel
-        className="button"
-        label="My Button"
-        disabled={true}
-        panel={
-          <ArrowPanel className="panel">
-            <div>Panel content</div>
-          </ArrowPanel>
-        }
-      />
-    );
-    expect(container.firstChild).toMatchSnapshot();
+  describe('protecting against mounting expensive panels', function() {
+    it('does not render the contents when closed', function() {
+      const { queryByTestId } = render(
+        <ButtonWithPanel
+          className="button"
+          label="My Button"
+          panel={
+            <ArrowPanel className="panel">
+              <div data-testid="panel-content">Panel content</div>
+            </ArrowPanel>
+          }
+        />
+      );
+      expect(queryByTestId('panel-content')).toBeFalsy();
+    });
+
+    /**
+     * This test asserts that we don't try and mount the contents of a panel if it's
+     * not open.
+     */
+    it('only renders the contents when open', function() {
+      const { queryByTestId } = render(
+        <ButtonWithPanel
+          className="button"
+          label="My Button"
+          open={true}
+          panel={
+            <ArrowPanel className="panel">
+              <div data-testid="panel-content">Panel content</div>
+            </ArrowPanel>
+          }
+        />
+      );
+      expect(queryByTestId('panel-content')).toBeTruthy();
+    });
   });
 
   it('opens the panel when the button is clicked and closes the panel when the escape key is pressed', () => {

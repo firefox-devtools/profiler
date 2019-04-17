@@ -149,10 +149,11 @@ exports[`FlameGraph matches the snapshot 1`] = `
         class="stackSettingsListItem stackSettingsFilter"
       >
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -161,10 +162,10 @@ exports[`FlameGraph matches the snapshot 1`] = `
           All stacks
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -173,10 +174,10 @@ exports[`FlameGraph matches the snapshot 1`] = `
           JavaScript
         </label>
         <label
-          class="stackSettingsFilterLabel"
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
         >
           <input
-            class="stackSettingsFilterInput"
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
             name="stack-settings-filter"
             title="Filter stack frames to a type."
             type="radio"
@@ -253,18 +254,19 @@ exports[`FlameGraph matches the snapshot 1`] = `
           />
         </div>
         <div
-          class="chartViewportShiftScroll hidden"
+          class="chartViewportScroll hidden"
         >
           Zoom Chart:
           <kbd
-            class="chartViewportShiftScrollKbd"
+            class="chartViewportScrollKbd"
           >
-            Shift
+            Ctrl + Scroll
           </kbd>
+          or
           <kbd
-            class="chartViewportShiftScrollKbd"
+            class="chartViewportScrollKbd"
           >
-            Scroll
+            Shift + Scroll
           </kbd>
         </div>
       </div>

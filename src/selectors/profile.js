@@ -35,13 +35,13 @@ import type {
   LocalTrackReference,
   TrackReference,
   PreviewSelection,
+  HiddenTrackCount,
 } from '../types/actions';
 import type { Selector, DangerousSelectorWithArguments } from '../types/store';
 import type {
   State,
   ProfileViewState,
   SymbolicationStatus,
-  ProfileSharingStatus,
 } from '../types/state';
 import type { $ReturnType } from '../types/utils';
 
@@ -57,8 +57,6 @@ export const getProfileRootRange: Selector<StartEndRange> = state =>
   getProfileViewOptions(state).rootRange;
 export const getSymbolicationStatus: Selector<SymbolicationStatus> = state =>
   getProfileViewOptions(state).symbolicationStatus;
-export const getProfileSharingStatus: Selector<ProfileSharingStatus> = state =>
-  getProfileViewOptions(state).profileSharingStatus;
 export const getScrollToSelectionGeneration: Selector<number> = state =>
   getProfileViewOptions(state).scrollToSelectionGeneration;
 export const getFocusCallTreeGeneration: Selector<number> = state =>
@@ -103,7 +101,7 @@ export const getThreads: Selector<Thread[]> = state =>
   getProfile(state).threads;
 export const getThreadNames: Selector<string[]> = state =>
   getProfile(state).threads.map(t => t.name);
-export const getRightClickedTrack: Selector<TrackReference> = state =>
+export const getRightClickedTrack: Selector<TrackReference | null> = state =>
   getProfileViewOptions(state).rightClickedTrack;
 export const getPreviewSelection: Selector<PreviewSelection> = state =>
   getProfileViewOptions(state).previewSelection;
@@ -145,10 +143,9 @@ function _createCounterSelectors(counterIndex: CounterIndex): * {
     (counters, range) => filterCounterToRange(counters, range.start, range.end)
   );
 
-  const getAccumulateCounterSamples: Selector<
-    AccumulatedCounterSamples
-  > = createSelector(getCommittedRangeFilteredCounter, counters =>
-    accumulateCounterSamples(counters.sampleGroups.samples)
+  const getAccumulateCounterSamples: Selector<AccumulatedCounterSamples> = createSelector(
+    getCommittedRangeFilteredCounter,
+    counters => accumulateCounterSamples(counters.sampleGroups.samples)
   );
 
   return {
@@ -174,11 +171,13 @@ export const getGlobalTracks: Selector<GlobalTrack[]> = state =>
  */
 export const getGlobalTrackReferences: Selector<
   GlobalTrackReference[]
-> = createSelector(getGlobalTracks, globalTracks =>
-  globalTracks.map((globalTrack, trackIndex) => ({
-    type: 'global',
-    trackIndex,
-  }))
+> = createSelector(
+  getGlobalTracks,
+  globalTracks =>
+    globalTracks.map((globalTrack, trackIndex) => ({
+      type: 'global',
+      trackIndex,
+    }))
 );
 
 /**
@@ -245,11 +244,31 @@ export const getLocalTrackFromReference: DangerousSelectorWithArguments<
 > = (state, trackReference) =>
   getLocalTracks(state, trackReference.pid)[trackReference.trackIndex];
 
+/**
+ * Memory markers are collected in the memory track, but in the case of profiles
+ * with no memory tracks, go ahead and place them in the parent process.
+ */
+export const getProcessesWithMemoryTrack: Selector<Set<Pid>> = createSelector(
+  getLocalTracksByPid,
+  localTracksByPid => {
+    const processesWithMemoryTrack = new Set();
+    for (const [pid, localTracks] of localTracksByPid.entries()) {
+      if (localTracks.some(track => track.type === 'memory')) {
+        processesWithMemoryTrack.add(pid);
+      }
+    }
+    return processesWithMemoryTrack;
+  }
+);
+
 export const getRightClickedThreadIndex: Selector<null | ThreadIndex> = createSelector(
   getRightClickedTrack,
   getGlobalTracks,
   getLocalTracksByPid,
   (rightClickedTrack, globalTracks, localTracksByPid) => {
+    if (rightClickedTrack === null) {
+      return null;
+    }
     if (rightClickedTrack.type === 'global') {
       const track = globalTracks[rightClickedTrack.trackIndex];
       return track.type === 'process' ? track.mainThreadIndex : null;
@@ -307,3 +326,57 @@ export const getLocalTrackName = (
     getLocalTrackNamesByPid(state).get(pid),
     'Could not find the track names from the given pid'
   )[trackIndex];
+
+/**
+ * It's a bit hard to deduce the total amount of hidden tracks, as there are both
+ * global and local tracks, and they are stored by PID. If a global track is hidden,
+ * then all its children are as well. This function walks all of the data to determine
+ * the correct hidden counts.
+ */
+export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
+  getGlobalTracks,
+  getLocalTracksByPid,
+  UrlState.getHiddenLocalTracksByPid,
+  UrlState.getHiddenGlobalTracks,
+  (
+    globalTracks,
+    localTracksByPid,
+    hiddenLocalTracksByPid,
+    hiddenGlobalTracks
+  ) => {
+    let hidden = 0;
+    let total = 0;
+
+    // Count up the local tracks
+    for (const [pid, localTracks] of localTracksByPid) {
+      // Look up some of the information.
+      const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid) || new Set();
+      const globalTrackIndex = globalTracks.findIndex(
+        track => track.type === 'process' && track.pid === pid
+      );
+      if (globalTrackIndex === -1) {
+        throw new Error('Unable to find a global track from the given pid.');
+      }
+      if (!hiddenLocalTracks) {
+        throw new Error(
+          'Unable to find the hidden local tracks from the given pid'
+        );
+      }
+
+      if (hiddenGlobalTracks.has(globalTrackIndex)) {
+        // The entire process group is hidden, count all of the tracks.
+        hidden += localTracks.length;
+      } else {
+        // Only count the hidden local tracks.
+        hidden += hiddenLocalTracks.size;
+      }
+      total += localTracks.length;
+    }
+
+    // Count up the global tracks
+    total += globalTracks.length;
+    hidden += hiddenGlobalTracks.size;
+
+    return { hidden, total };
+  }
+);

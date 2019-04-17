@@ -25,27 +25,27 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
   role="tabpanel"
 >
   <div
-    class="markerSettings"
+    class="networkSettings"
   >
     <div
-      class="markerSettingsSpacer"
+      class="networkSettingsSpacer"
     />
     <div
-      class="markerSettingsSearchbar"
+      class="networkSettingsSearchbar"
     >
       <label
-        class="markerSettingsSearchbarLabel"
+        class="networkSettingsSearchbarLabel"
       >
-        Filter Markers: 
+        Filter Networks: 
         <form
-          class="idleSearchField markerSettingsSearchField"
+          class="idleSearchField networkSettingsSearchField"
         >
           <input
             class="idleSearchFieldInput photon-input"
             name="search"
             placeholder="Enter filter terms"
             required=""
-            title="Only display markers that match a certain name"
+            title="Only display network requests that match a certain name"
             type="search"
             value=""
           />
@@ -82,46 +82,33 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               class="networkChartRowItemLabel"
             >
-              <span>
-                <span
-                  class="networkChartRowItemUriOptional"
-                >
-                  https://
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  mozilla.org
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  /
-                </span>
+              <span
+                class="networkChartRowItemUriOptional"
+              >
+                https://
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                mozilla.org
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                /
               </span>
             </div>
             <div
               class="networkChartRowItemBar"
-              style="left: 150px; width: 12.068965517241367px;"
+              style="width: 68.9655172413793px; left: 150px;"
             >
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                style="width: 100%;"
-              >
-                 
-              </span>
+              <div
+                aria-label="startTime to endTime: 1.0 milliseconds"
+                class="networkChartRowItemBarPhase"
+                data-name="endTime"
+                data-value="4"
+                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+              />
             </div>
           </section>
           <section
@@ -130,46 +117,33 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               class="networkChartRowItemLabel"
             >
-              <span>
-                <span
-                  class="networkChartRowItemUriOptional"
-                >
-                  https://
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  mozilla.org
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  /
-                </span>
+              <span
+                class="networkChartRowItemUriOptional"
+              >
+                https://
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                mozilla.org
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                /
               </span>
             </div>
             <div
               class="networkChartRowItemBar"
-              style="left: 151.20689655172413px; width: 12.068965517241395px;"
+              style="width: 68.96551724137927px; left: 156.89655172413794px;"
             >
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                style="width: 100%;"
-              >
-                 
-              </span>
+              <div
+                aria-label="startTime to endTime: 1.00 milliseconds"
+                class="networkChartRowItemBarPhase"
+                data-name="endTime"
+                data-value="4.1"
+                style="left: 0px; width: 68.96551724137927px; opacity: 1;"
+              />
             </div>
           </section>
           <section
@@ -178,46 +152,33 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               class="networkChartRowItemLabel"
             >
-              <span>
-                <span
-                  class="networkChartRowItemUriOptional"
-                >
-                  https://
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  mozilla.org
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  /
-                </span>
+              <span
+                class="networkChartRowItemUriOptional"
+              >
+                https://
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                mozilla.org
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                /
               </span>
             </div>
             <div
               class="networkChartRowItemBar"
-              style="left: 152.41379310344828px; width: 12.068965517241367px;"
+              style="width: 68.9655172413793px; left: 163.79310344827587px;"
             >
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                style="width: 100%;"
-              >
-                 
-              </span>
+              <div
+                aria-label="startTime to endTime: 1.0 milliseconds"
+                class="networkChartRowItemBarPhase"
+                data-name="endTime"
+                data-value="4.2"
+                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+              />
             </div>
           </section>
           <section
@@ -226,46 +187,33 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               class="networkChartRowItemLabel"
             >
-              <span>
-                <span
-                  class="networkChartRowItemUriOptional"
-                >
-                  https://
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  mozilla.org
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  /
-                </span>
+              <span
+                class="networkChartRowItemUriOptional"
+              >
+                https://
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                mozilla.org
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                /
               </span>
             </div>
             <div
               class="networkChartRowItemBar"
-              style="left: 153.6206896551724px; width: 12.068965517241367px;"
+              style="width: 68.9655172413793px; left: 170.68965517241378px;"
             >
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                style="width: 100%;"
-              >
-                 
-              </span>
+              <div
+                aria-label="startTime to endTime: 1.0 milliseconds"
+                class="networkChartRowItemBarPhase"
+                data-name="endTime"
+                data-value="4.3"
+                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+              />
             </div>
           </section>
           <section
@@ -274,46 +222,33 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               class="networkChartRowItemLabel"
             >
-              <span>
-                <span
-                  class="networkChartRowItemUriOptional"
-                >
-                  https://
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  mozilla.org
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  /
-                </span>
+              <span
+                class="networkChartRowItemUriOptional"
+              >
+                https://
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                mozilla.org
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                /
               </span>
             </div>
             <div
               class="networkChartRowItemBar"
-              style="left: 154.82758620689654px; width: 12.068965517241395px;"
+              style="width: 68.96551724137933px; left: 177.58620689655172px;"
             >
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                style="width: 100%;"
-              >
-                 
-              </span>
+              <div
+                aria-label="startTime to endTime: 1.0 milliseconds"
+                class="networkChartRowItemBarPhase"
+                data-name="endTime"
+                data-value="4.4"
+                style="left: 0px; width: 68.96551724137933px; opacity: 1;"
+              />
             </div>
           </section>
           <section
@@ -322,46 +257,33 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               class="networkChartRowItemLabel"
             >
-              <span>
-                <span
-                  class="networkChartRowItemUriOptional"
-                >
-                  https://
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  mozilla.org
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  /
-                </span>
+              <span
+                class="networkChartRowItemUriOptional"
+              >
+                https://
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                mozilla.org
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                /
               </span>
             </div>
             <div
               class="networkChartRowItemBar"
-              style="left: 156.0344827586207px; width: 12.068965517241367px;"
+              style="width: 68.9655172413793px; left: 184.48275862068965px;"
             >
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                style="width: 100%;"
-              >
-                 
-              </span>
+              <div
+                aria-label="startTime to endTime: 1.0 milliseconds"
+                class="networkChartRowItemBarPhase"
+                data-name="endTime"
+                data-value="4.5"
+                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+              />
             </div>
           </section>
           <section
@@ -370,46 +292,33 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               class="networkChartRowItemLabel"
             >
-              <span>
-                <span
-                  class="networkChartRowItemUriOptional"
-                >
-                  https://
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  mozilla.org
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  /
-                </span>
+              <span
+                class="networkChartRowItemUriOptional"
+              >
+                https://
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                mozilla.org
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                /
               </span>
             </div>
             <div
               class="networkChartRowItemBar"
-              style="left: 157.24137931034483px; width: 12.068965517241367px;"
+              style="width: 68.96551724137927px; left: 191.3793103448276px;"
             >
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                style="width: 100%;"
-              >
-                 
-              </span>
+              <div
+                aria-label="startTime to endTime: 1.00 milliseconds"
+                class="networkChartRowItemBarPhase"
+                data-name="endTime"
+                data-value="4.6"
+                style="left: 0px; width: 68.96551724137927px; opacity: 1;"
+              />
             </div>
           </section>
           <section
@@ -418,46 +327,33 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               class="networkChartRowItemLabel"
             >
-              <span>
-                <span
-                  class="networkChartRowItemUriOptional"
-                >
-                  https://
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  mozilla.org
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  /
-                </span>
+              <span
+                class="networkChartRowItemUriOptional"
+              >
+                https://
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                mozilla.org
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                /
               </span>
             </div>
             <div
               class="networkChartRowItemBar"
-              style="left: 158.44827586206895px; width: 12.068965517241395px;"
+              style="width: 68.9655172413793px; left: 198.27586206896552px;"
             >
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                style="width: 100%;"
-              >
-                 
-              </span>
+              <div
+                aria-label="startTime to endTime: 1.0 milliseconds"
+                class="networkChartRowItemBarPhase"
+                data-name="endTime"
+                data-value="4.7"
+                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+              />
             </div>
           </section>
           <section
@@ -466,46 +362,33 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               class="networkChartRowItemLabel"
             >
-              <span>
-                <span
-                  class="networkChartRowItemUriOptional"
-                >
-                  https://
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  mozilla.org
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  /
-                </span>
+              <span
+                class="networkChartRowItemUriOptional"
+              >
+                https://
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                mozilla.org
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                /
               </span>
             </div>
             <div
               class="networkChartRowItemBar"
-              style="left: 159.6551724137931px; width: 12.068965517241367px;"
+              style="width: 68.9655172413793px; left: 205.17241379310343px;"
             >
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                style="width: 100%;"
-              >
-                 
-              </span>
+              <div
+                aria-label="startTime to endTime: 1.0 milliseconds"
+                class="networkChartRowItemBarPhase"
+                data-name="endTime"
+                data-value="4.8"
+                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+              />
             </div>
           </section>
           <section
@@ -514,46 +397,33 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             <div
               class="networkChartRowItemLabel"
             >
-              <span>
-                <span
-                  class="networkChartRowItemUriOptional"
-                >
-                  https://
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  mozilla.org
-                </span>
-                <span
-                  class="networkChartRowItemUriRequired"
-                >
-                  /
-                </span>
+              <span
+                class="networkChartRowItemUriOptional"
+              >
+                https://
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                mozilla.org
+              </span>
+              <span
+                class="networkChartRowItemUriRequired"
+              >
+                /
               </span>
             </div>
             <div
               class="networkChartRowItemBar"
-              style="left: 160.86206896551724px; width: 12.068965517241395px;"
+              style="width: 68.96551724137933px; left: 212.06896551724137px;"
             >
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequestQueue"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarRequest"
-                style="width: 0%;"
-              >
-                 
-              </span>
-              <span
-                class="networkChartRowItemBarInner networkChartRowItemBarResponse"
-                style="width: 100%;"
-              >
-                 
-              </span>
+              <div
+                aria-label="startTime to endTime: 1.0 milliseconds"
+                class="networkChartRowItemBarPhase"
+                data-name="endTime"
+                data-value="4.9"
+                style="left: 0px; width: 68.96551724137933px; opacity: 1;"
+              />
             </div>
           </section>
         </div>

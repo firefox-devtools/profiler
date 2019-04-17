@@ -3,14 +3,20 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+// Import all global css. Ensure that this is these CSS imports happen before any
+// JS imports happen, as this determines the rule order. Global CSS should be easy
+// to overwrite with a simple class name.
+import '../res/css/focus.css';
+import 'photon-colors/photon-colors.css';
+import '../res/css/photon/index.css';
+import '../res/css/style.css';
+import '../res/css/categories.css';
+
+// Now import the JS after the CSS.
 import React from 'react';
 import { render } from 'react-dom';
 import Root from './components/app/Root';
 import createStore from './app-logic/create-store';
-import 'photon-colors/photon-colors.css';
-import '../res/css/style.css';
-import '../res/css/focus.css';
-import '../res/css/categories.css';
 import {
   addDataToWindowObject,
   logFriendlyPreamble,

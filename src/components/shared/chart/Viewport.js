@@ -19,10 +19,7 @@ import type {
   StartEndRange,
 } from '../../../types/units';
 import type { PreviewSelection } from '../../../types/actions';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../../utils/connect';
+import type { ConnectedProps } from '../../../utils/connect';
 import {
   getObjectValuesAsUnion,
   assertExhaustiveCheck,
@@ -80,16 +77,12 @@ const BARE_KEYMAP: { [string]: NavigationKey } = {
   KeyU: 'zoomOut',
   KeyW: 'up',
   KeyK: 'up',
-  ArrowUp: 'up',
   KeyS: 'down',
   KeyJ: 'down',
-  ArrowDown: 'down',
   KeyA: 'left',
   KeyH: 'left',
-  ArrowLeft: 'left',
   KeyD: 'right',
   KeyL: 'right',
-  ArrowRight: 'right',
 };
 /**
  * Mapping from keycode to navigation key when the ctrl modifier is down.
@@ -167,7 +160,7 @@ type State = {|
   dragX: CssPixels,
   dragY: CssPixels,
   isDragging: boolean,
-  isShiftScrollHintVisible: boolean,
+  isScrollHintVisible: boolean,
   isSizeSet: boolean,
 |};
 
@@ -209,7 +202,7 @@ export const withChartViewport: WithChartViewport<*, *> =
     >;
 
     class ChartViewport extends React.PureComponent<ViewportProps, State> {
-      shiftScrollId: number = 0;
+      zoomScrollId: number = 0;
       _pendingPreviewSelectionUpdates: Array<
         (HorizontalViewport) => PreviewSelection
       > = [];
@@ -264,7 +257,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           dragX: 0,
           dragY: 0,
           isDragging: false,
-          isShiftScrollHintVisible: false,
+          isScrollHintVisible: false,
           isSizeSet: false,
         };
       }
@@ -272,19 +265,19 @@ export const withChartViewport: WithChartViewport<*, *> =
       /**
        * Let the viewport know when we are actively scrolling.
        */
-      showShiftScrollingHint() {
-        // Only show this message if we haven't shift zoomed yet.
+      showScrollingHint() {
+        // Only show this message if we haven't ctrl/shift zoomed yet.
         if (this.props.hasZoomedViaMousewheel) {
           return;
         }
 
-        const scrollId = ++this.shiftScrollId;
-        if (!this.state.isShiftScrollHintVisible) {
-          this.setState({ isShiftScrollHintVisible: true });
+        const scrollId = ++this.zoomScrollId;
+        if (!this.state.isScrollHintVisible) {
+          this.setState({ isScrollHintVisible: true });
         }
         setTimeout(() => {
-          if (scrollId === this.shiftScrollId) {
-            this.setState({ isShiftScrollHintVisible: false });
+          if (scrollId === this.zoomScrollId) {
+            this.setState({ isScrollHintVisible: false });
           }
         }, 1000);
       }
@@ -353,7 +346,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         event.preventDefault();
 
         const { disableHorizontalMovement } = this.props.viewportProps;
-        if (event.shiftKey) {
+        if (event.ctrlKey || event.shiftKey) {
           if (!disableHorizontalMovement) {
             this.zoomWithMouseWheel(event);
           }
@@ -361,7 +354,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
 
         if (!disableHorizontalMovement) {
-          this.showShiftScrollingHint();
+          this.showScrollingHint();
         }
 
         // Do the work to move the viewport.
@@ -472,7 +465,9 @@ export const withChartViewport: WithChartViewport<*, *> =
               viewportRight + deltaViewportLength * (1 - center)
             );
 
-            const { viewportProps: { timeRange } } = this.props;
+            const {
+              viewportProps: { timeRange },
+            } = this.props;
             if (newViewportLeft === 0 && newViewportRight === 1) {
               return {
                 hasSelection: false,
@@ -676,7 +671,7 @@ export const withChartViewport: WithChartViewport<*, *> =
                   isModifying: false,
                 };
               }
-              const unitOffsetX = viewportLength * offsetX / containerWidth;
+              const unitOffsetX = (viewportLength * offsetX) / containerWidth;
               let newViewportLeft = viewportLeft - unitOffsetX;
               let newViewportRight = viewportRight - unitOffsetX;
               if (newViewportLeft < 0) {
@@ -740,7 +735,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           viewportBottom,
           horizontalViewport: { viewportLeft, viewportRight },
           isDragging,
-          isShiftScrollHintVisible,
+          isScrollHintVisible,
           isSizeSet,
         } = this.state;
 
@@ -752,9 +747,9 @@ export const withChartViewport: WithChartViewport<*, *> =
           className
         );
 
-        const shiftScrollClassName = classNames({
-          chartViewportShiftScroll: true,
-          hidden: hasZoomedViaMousewheel || !isShiftScrollHintVisible,
+        const scrollClassName = classNames({
+          chartViewportScroll: true,
+          hidden: hasZoomedViaMousewheel || !isScrollHintVisible,
         });
 
         const viewport: Viewport = {
@@ -780,31 +775,30 @@ export const withChartViewport: WithChartViewport<*, *> =
             tabIndex={0}
           >
             <ChartComponent {...chartProps} viewport={viewport} />
-            <div className={shiftScrollClassName}>
+            <div className={scrollClassName}>
               Zoom Chart:
-              <kbd className="chartViewportShiftScrollKbd">Shift</kbd>
-              <kbd className="chartViewportShiftScrollKbd">Scroll</kbd>
+              <kbd className="chartViewportScrollKbd">Ctrl + Scroll</kbd>or
+              <kbd className="chartViewportScrollKbd">Shift + Scroll</kbd>
             </div>
           </div>
         );
       }
     }
 
-    // Connect this component so that it knows whether or not to nag the user to use shift
+    // Connect this component so that it knows whether or not to nag the user to use ctrl
     // for zooming on range selections.
-    const options: ExplicitConnectOptions<
+    return explicitConnect<
       ViewportOwnProps<ChartOwnProps>,
       ViewportStateProps,
       ViewportDispatchProps
-    > = {
+    >({
       mapStateToProps: state => ({
         panelLayoutGeneration: getPanelLayoutGeneration(state),
         hasZoomedViaMousewheel: getHasZoomedViaMousewheel(state),
       }),
       mapDispatchToProps: { setHasZoomedViaMousewheel, updatePreviewSelection },
       component: ChartViewport,
-    };
-    return explicitConnect(options);
+    });
   };
 
 function clamp(min, max, value) {

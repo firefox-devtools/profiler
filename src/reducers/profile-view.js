@@ -23,7 +23,6 @@ import type {
 import type {
   Reducer,
   ProfileViewState,
-  ProfileSharingStatus,
   SymbolicationStatus,
   ThreadViewOptions,
 } from '../types/state';
@@ -58,6 +57,21 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
         );
       });
       return Object.assign({}, state, { threads });
+    }
+    case 'DONE_SYMBOLICATING': {
+      if (state === null) {
+        throw new Error(
+          `Strangely we're done symbolicating a non-existent profile.`
+        );
+      }
+
+      return {
+        ...state,
+        meta: {
+          ...state.meta,
+          symbolicated: true,
+        },
+      };
     }
     default:
       return state;
@@ -117,7 +131,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
       return action.profile.threads.map(() => ({
         selectedCallNodePath: [],
         expandedCallNodePaths: new PathSet(),
-        selectedMarker: -1,
+        selectedMarker: null,
       }));
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;
@@ -418,11 +432,8 @@ const rootRange: Reducer<StartEndRange> = (
   }
 };
 
-const rightClickedTrack: Reducer<TrackReference> = (
-  // Make the initial value the first global track, which is assumed to exists.
-  // This makes the track reference always exist, which in turn makes it so that
-  // we do not have to check for a null TrackReference.
-  state = { type: 'global', trackIndex: 0 },
+const rightClickedTrack: Reducer<TrackReference | null> = (
+  state = null,
   action
 ) => {
   switch (action.type) {
@@ -440,33 +451,6 @@ const isCallNodeContextMenuVisible: Reducer<boolean> = (
   switch (action.type) {
     case 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY':
       return action.isVisible;
-    default:
-      return state;
-  }
-};
-
-const profileSharingStatus: Reducer<ProfileSharingStatus> = (
-  state = {
-    sharedWithUrls: false,
-    sharedWithoutUrls: false,
-  },
-  action
-) => {
-  switch (action.type) {
-    case 'SET_PROFILE_SHARING_STATUS':
-      return action.profileSharingStatus;
-    case 'VIEW_PROFILE':
-      // Here are the possible cases:
-      // - older shared profiles, newly captured profiles, and profiles from a file don't
-      //   have the property `networkURLsRemoved`. We use the `dataSource` value
-      //   to distinguish between these cases.
-      // - newer profiles that have been shared do have this property.
-      return {
-        sharedWithUrls:
-          !action.profile.meta.networkURLsRemoved &&
-          action.dataSource === 'public',
-        sharedWithoutUrls: action.profile.meta.networkURLsRemoved === true,
-      };
     default:
       return state;
   }
@@ -505,7 +489,6 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rootRange,
       rightClickedTrack,
       isCallNodeContextMenuVisible,
-      profileSharingStatus,
     }),
     globalTracks,
     localTracksByPid,

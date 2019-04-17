@@ -15,8 +15,8 @@ import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
 import { CallTree } from '../profile-logic/call-tree';
 import {
-  cloneFrameTable,
-  cloneFuncTable,
+  shallowCloneFrameTable,
+  shallowCloneFuncTable,
   getEmptyStackTable,
 } from './data-structures';
 import { getFunctionName } from './function-info';
@@ -735,8 +735,8 @@ export function dropFunction(
   }
 
   // Regenerate the stacks for the samples table.
-  const stack = samples.stack.map(
-    stack => (stack !== null && stackContainsFunc[stack] ? null : stack)
+  const stack: Array<null | IndexIntoStackTable> = samples.stack.map(stack =>
+    stack !== null && stackContainsFunc[stack] ? null : stack
   );
 
   // Return the thread with the replaced samples.
@@ -754,8 +754,8 @@ export function collapseResource(
 ): Thread {
   const { stackTable, funcTable, frameTable, resourceTable, samples } = thread;
   const resourceNameIndex = resourceTable.name[resourceIndexToCollapse];
-  const newFrameTable = cloneFrameTable(frameTable);
-  const newFuncTable = cloneFuncTable(funcTable);
+  const newFrameTable = shallowCloneFrameTable(frameTable);
+  const newFuncTable = shallowCloneFuncTable(funcTable);
   const newStackTable = getEmptyStackTable();
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,

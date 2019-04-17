@@ -7,6 +7,7 @@ import {
   getEmptyProfile,
   getEmptyThread,
   getEmptyJsTracerTable,
+  resourceTypes,
 } from '../../../profile-logic/data-structures';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 
@@ -87,8 +88,13 @@ export function addMarkersToThreadWithCorrespondingSamples(
 
     // Try to get a consistent profile containing all markers
     allTimes.add(time);
-    if (data && typeof data.endTime === 'number') {
-      allTimes.add(data.endTime);
+    if (data) {
+      if (typeof data.startTime === 'number') {
+        allTimes.add(data.startTime);
+      }
+      if (typeof data.endTime === 'number') {
+        allTimes.add(data.endTime);
+      }
     }
   });
 
@@ -244,10 +250,15 @@ export function getProfileFromTextSamples(
 
 function _getAllMatchRanges(regex, str): Array<{ start: number, end: number }> {
   const ranges = [];
+
   let match;
-  while ((match = regex.exec(str)) !== null) {
-    ranges.push({ start: match.index, end: match.index + match[0].length });
-  }
+  do {
+    match = regex.exec(str);
+    if (match) {
+      ranges.push({ start: match.index, end: match.index + match[0].length });
+    }
+  } while (match);
+
   return ranges;
 }
 
@@ -396,12 +407,12 @@ function _buildThreadFromTextOnlyStacks(
           path: '/path/to/' + libraryName,
           debugName: libraryName,
           debugPath: '/path/to/' + libraryName,
-          breakpadId: '',
+          breakpadId: 'SOMETHING_FAKE',
         });
         resourceIndex = resourceTable.length++;
         resourceTable.lib.push(libIndex);
         resourceTable.name.push(stringTable.indexForString(libraryName));
-        resourceTable.type.push(0);
+        resourceTable.type.push(resourceTypes.library);
         resourceTable.host.push(undefined);
       } else {
         resourceIndex = -1;

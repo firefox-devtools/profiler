@@ -23,6 +23,7 @@ import {
   getGlobalTracks,
   getLocalTracks,
   getGlobalTrackName,
+  getProcessesWithMemoryTrack,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import './Track.css';
@@ -38,10 +39,7 @@ import type {
   GlobalTrack,
   LocalTrack,
 } from '../../types/profile-derived';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type OwnProps = {|
   +trackReference: GlobalTrackReference,
@@ -59,6 +57,7 @@ type StateProps = {|
   +localTracks: LocalTrack[],
   +pid: Pid | null,
   +selectedTab: TabSlug,
+  +processesWithMemoryTrack: Set<Pid>,
 |};
 
 type DispatchProps = {|
@@ -68,6 +67,8 @@ type DispatchProps = {|
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+
+export const TRACK_PROCESS_BLANK_HEIGHT = 30;
 
 class GlobalTrackComponent extends PureComponent<Props> {
   _onLabelMouseDown = (event: MouseEvent) => {
@@ -90,14 +91,26 @@ class GlobalTrackComponent extends PureComponent<Props> {
   };
 
   renderTrack() {
-    const { globalTrack } = this.props;
+    const { globalTrack, processesWithMemoryTrack } = this.props;
     switch (globalTrack.type) {
       case 'process': {
         const { mainThreadIndex } = globalTrack;
         if (mainThreadIndex === null) {
-          return <div className="timelineTrackThreadBlank" />;
+          return (
+            <div
+              className="timelineTrackThreadBlank"
+              style={{
+                '--timeline-track-thread-blank-height': TRACK_PROCESS_BLANK_HEIGHT,
+              }}
+            />
+          );
         }
-        return <TimelineTrackThread threadIndex={mainThreadIndex} />;
+        return (
+          <TimelineTrackThread
+            threadIndex={mainThreadIndex}
+            showMemoryMarkers={!processesWithMemoryTrack.has(globalTrack.pid)}
+          />
+        );
       }
       case 'screenshots': {
         const { threadIndex, id } = globalTrack;
@@ -178,6 +191,16 @@ class GlobalTrackComponent extends PureComponent<Props> {
           >
             <button type="button" className="timelineTrackNameButton">
               {trackName}
+              {
+                // Only show the PID if it is a real number. A string PID is an
+                // artificially generated value that is not useful, and a null
+                // value does not exist. */
+              }
+              {typeof pid === 'number' ? (
+                <div className="timelineTrackNameButtonAdditionalDetails">
+                  PID: {pid}
+                </div>
+              ) : null}
             </button>
           </ContextMenuTrigger>
           <div className="timelineTrackTrack">{this.renderTrack()}</div>
@@ -194,7 +217,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
 const EMPTY_TRACK_ORDER = [];
 const EMPTY_LOCAL_TRACKS = [];
 
-const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, { trackIndex }) => {
     const globalTracks = getGlobalTracks(state);
     const globalTrack = globalTracks[trackIndex];
@@ -242,6 +265,7 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
       pid,
       isHidden: getHiddenGlobalTracks(state).has(trackIndex),
       selectedTab,
+      processesWithMemoryTrack: getProcessesWithMemoryTrack(state),
     };
   },
   mapDispatchToProps: {
@@ -250,6 +274,4 @@ const options: ExplicitConnectOptions<OwnProps, StateProps, DispatchProps> = {
     selectTrack,
   },
   component: GlobalTrackComponent,
-};
-
-export default explicitConnect(options);
+});

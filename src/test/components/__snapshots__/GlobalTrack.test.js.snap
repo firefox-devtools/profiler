@@ -17,6 +17,12 @@ process: \\"tab\\" (222)"
         type="button"
       >
         Content Process
+        <div
+          class="timelineTrackNameButtonAdditionalDetails"
+        >
+          PID: 
+          222
+        </div>
       </button>
     </div>
     <div
@@ -25,6 +31,14 @@ process: \\"tab\\" (222)"
       <div
         class="timelineTrackThread"
       >
+        <div
+          class="timelineMarkers timelineMarkersMemory"
+          data-testid="TimelineMarkersMemory"
+        >
+          <canvas
+            class="timelineMarkersCanvas"
+          />
+        </div>
         <div
           class="timelineMarkers"
           data-testid="TimelineMarkersJank"

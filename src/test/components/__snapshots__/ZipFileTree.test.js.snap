@@ -88,6 +88,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-level="1"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns even  "
+                  id="treeViewRow-0"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
@@ -110,6 +111,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-level="2"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns odd  "
+                  id="treeViewRow-1"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
@@ -131,6 +133,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-level="3"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns even  "
+                  id="treeViewRow-2"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
@@ -156,6 +159,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-level="2"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns odd  "
+                  id="treeViewRow-3"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
@@ -182,6 +186,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-level="1"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns even  "
+                  id="treeViewRow-4"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >
@@ -203,6 +208,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-level="2"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns odd  "
+                  id="treeViewRow-5"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
                 >

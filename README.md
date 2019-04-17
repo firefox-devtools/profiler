@@ -16,10 +16,22 @@ _This project was previously called perf.html and [Cleopatra]._
 
 This project is live on [https://profiler.firefox.com/](https://profiler.firefox.com/). The website includes instructions on how to get going to start recording and viewing performance profiles.
 
+### Accessibility: Assistive technology support
+
+The Profiler was tested with recent versions of the following assistive technology:
+
+[NVDA](https://www.nvaccess.org/) (Windows) on Firefox and Chrome browsers </br>
+[VoiceOver](https://www.apple.com/accessibility/mac/vision/) (Mac OS X) on Chrome</br>
+[Orca](https://wiki.gnome.org/action/show/Projects/Orca?action=show&redirect=Orca) (Linux) on Firefox
+
+If you experience problems using any of the above technologies, please file a bug.
+
+If you would like to help us test on other assistive technologies or improve the existing code, we would love your contributions!
+
 ### Development
 
 You will need a recent enough version of [Yarn](http://yarnpkg.com/),
-version 1.0.1 is known to work correctly.
+version 1.10 is known to work correctly.
 You can install it into your home directory on Linux and probably OS X with:
 
 ```bash
@@ -33,7 +45,7 @@ To download and build the Firefox Profiler web app run:
 
 ```bash
 git clone git@github.com:firefox-devtools/profiler.git
-cd firefox-profiler
+cd profiler
 yarn install
 yarn start
 ```

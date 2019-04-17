@@ -16,16 +16,17 @@ import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { changeSelectedMarker } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
 import { formatSeconds } from '../../utils/format-numbers';
+import {
+  getMarkerFullDescription,
+  getMarkerCategory,
+} from '../../profile-logic/marker-data';
 
 import './index.css';
 
 import type { ThreadIndex } from '../../types/profile';
 import type { Marker, IndexIntoMarkers } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type MarkerDisplayData = {|
   start: string,
@@ -82,56 +83,8 @@ class MarkerTree {
     let displayData = this._displayDataByIndex.get(markerIndex);
     if (displayData === undefined) {
       const marker = this._markers[markerIndex];
-      let category = 'unknown';
-      let name = marker.name;
-      if (marker.data) {
-        const data = marker.data;
-
-        if (typeof data.category === 'string') {
-          category = data.category;
-        }
-
-        switch (data.type) {
-          case 'tracing':
-            if (category === 'log') {
-              // name is actually the whole message that was sent to fprintf_stderr. Would you consider that.
-              if (name.length > 100) {
-                name = name.substring(0, 100) + '...';
-              }
-            } else if (data.category === 'DOMEvent') {
-              name = data.eventType;
-            }
-            break;
-
-          case 'UserTiming':
-            category = name;
-            name = data.name;
-            break;
-          case 'FileIO':
-            category = data.type;
-            if (data.source) {
-              name = `(${data.source}) `;
-              // e.g. "(PoisonIOInterposer) "
-            }
-            name += data.operation;
-            if (data.filename) {
-              // Name is now:
-              // "(PoisonIOInterposer) "
-              // "(PoisonIOInterposer) create/open"
-              name = data.operation
-                ? `${name} — ${data.filename}`
-                : data.filename;
-            }
-            break;
-          case 'Bailout':
-            category = 'Bailout';
-            break;
-          case 'Network':
-            category = 'Network';
-            break;
-          default:
-        }
-      }
+      const name = getMarkerFullDescription(marker);
+      const category = getMarkerCategory(marker);
 
       displayData = {
         start: _formatStart(marker.start, this._zeroAt),
@@ -187,7 +140,7 @@ class MarkerTable extends PureComponent<Props> {
     { propName: 'duration', title: 'Duration' },
     { propName: 'category', title: 'Category' },
   ];
-  _mainColumn = { propName: 'name', title: '' };
+  _mainColumn = { propName: 'name', title: 'Description' };
   _expandedNodeIds: Array<IndexIntoMarkers | null> = [];
   _onExpandedNodeIdsChange = () => {};
   _treeView: ?TreeView<MarkerDisplayData>;
@@ -250,7 +203,7 @@ class MarkerTable extends PureComponent<Props> {
   }
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
@@ -260,5 +213,4 @@ const options: ExplicitConnectOptions<{||}, StateProps, DispatchProps> = {
   }),
   mapDispatchToProps: { changeSelectedMarker },
   component: MarkerTable,
-};
-export default explicitConnect(options);
+});

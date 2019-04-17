@@ -48,61 +48,74 @@ function getDataSourceDirs(
 // "null | void" in the query objects are flags which map to true for null, and false
 // for void. False flags do not show up the URL.
 type BaseQuery = {|
-  range?: string, //
-  thread?: string, // "3"
-  globalTrackOrder?: string, // "3-2-0-1"
-  hiddenGlobalTracks?: string, // "0-1"
-  hiddenLocalTracksByPid?: string,
-  localTrackOrderByPid?: string,
-  file?: string, // Path into a zip file.
-  react_perf?: null, // Flag to activate react's UserTimings profiler.
-  transforms?: string,
-  timelineType?: string,
+  v: number,
+  range: string, //
+  thread: string, // "3"
+  globalTrackOrder: string, // "3-2-0-1"
+  hiddenGlobalTracks: string, // "0-1"
+  hiddenLocalTracksByPid: string,
+  localTrackOrderByPid: string,
+  file: string, // Path into a zip file.
+  transforms: string,
+  timelineType: string,
   // The following values are legacy, and will be converted to track-based values. These
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
-  threadOrder?: string, // "3-2-0-1"
-  hiddenThreads?: string, // "0-1"
-  profiles?: string[],
+  threadOrder: string, // "3-2-0-1"
+  hiddenThreads: string, // "0-1"
+  profiles: string[],
+  profileName: string,
+  // This value tracks whether a profile was newly published. Which in that case
+  // we will want to show a friendly message.
+  published: null | void,
 |};
 
 type CallTreeQuery = {|
   ...BaseQuery,
-  search?: string, // "js::RunScript"
-  invertCallstack?: null | void,
-  implementation?: string,
+  search: string, // "js::RunScript"
+  invertCallstack: null | void,
+  implementation: string,
 |};
 
 type MarkersQuery = {|
   ...BaseQuery,
-  markerSearch?: string, // "DOMEvent"
+  markerSearch: string, // "DOMEvent"
+|};
+
+type NetworkQuery = {|
+  ...BaseQuery,
+  networkSearch?: string, // "DOMEvent"
 |};
 
 type StackChartQuery = {|
   ...BaseQuery,
-  search?: string, // "js::RunScript"
-  invertCallstack?: null | void,
-  implementation?: string,
+  search: string, // "js::RunScript"
+  invertCallstack: null | void,
+  implementation: string,
 |};
 
 type JsTracerQuery = {|
   ...BaseQuery,
-  summary?: null | void,
+  summary: null | void,
 |};
 
 // Use object type spread in the definition of Query rather than unions, so that they
 // are really easy to manipulate. This permissive definition makes it easy to not have
 // to refine the type down to the individual query types when working with them.
-type Query = {
+type Query = {|
   ...CallTreeQuery,
   ...MarkersQuery,
+  ...NetworkQuery,
   ...StackChartQuery,
   ...JsTracerQuery,
-};
+|};
+
+type $MakeOptional = <T>(T) => T | void;
+type QueryShape = $Shape<$ObjMap<Query, $MakeOptional>>;
 
 type UrlObject = {|
   pathParts: string[],
-  query: Query,
+  query: QueryShape,
 |};
 
 /**
@@ -132,16 +145,18 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   const { selectedThread } = urlState.profileSpecific;
 
   // Start with the query parameters that are shown regardless of the active tab.
-  const query: Object = {
+  const query: QueryShape = {
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
-    thread: selectedThread === null ? undefined : selectedThread,
+    thread: selectedThread === null ? undefined : selectedThread.toString(),
     globalTrackOrder:
       urlState.profileSpecific.globalTrackOrder.join('-') || undefined,
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
     v: CURRENT_URL_VERSION,
+    profileName: urlState.profileName,
+    published: urlState.isNewlyPublished === true ? null : undefined,
   };
 
   // Add the parameter hiddenGlobalTracks only when needed.
@@ -169,12 +184,11 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     query.timelineType = 'stack';
   }
 
-  const localTrackOrderByPid = '';
+  let localTrackOrderByPid = '';
   for (const [pid, trackOrder] of urlState.profileSpecific
     .localTrackOrderByPid) {
     if (trackOrder.length > 0) {
-      query.localTrackOrderByPid +=
-        `${String(pid)}-` + trackOrder.join('-') + '~';
+      localTrackOrderByPid += `${String(pid)}-` + trackOrder.join('-') + '~';
     }
   }
   query.localTrackOrderByPid = localTrackOrderByPid || undefined;
@@ -207,6 +221,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
         urlState.profileSpecific.markersSearchString || undefined;
       break;
     case 'network-chart':
+      query.networkSearch =
+        urlState.profileSpecific.networkSearchString || undefined;
       break;
     case 'js-tracer':
       // `null` adds the parameter to the query, while `undefined` doesn't.
@@ -305,6 +321,8 @@ export function stateFromLocation(location: Location): UrlState {
     profilesToCompare: query.profiles || null,
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
+    profileName: query.profileName,
+    isNewlyPublished: query.published !== undefined,
     profileSpecific: {
       implementation,
       invertCallstack: query.invertCallstack !== undefined,
@@ -327,6 +345,7 @@ export function stateFromLocation(location: Location): UrlState {
         ? parseLocalTrackOrder(query.localTrackOrderByPid)
         : new Map(),
       markersSearchString: query.markerSearch || '',
+      networkSearchString: query.networkSearch || '',
       transforms,
       timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
       legacyThreadOrder: query.threadOrder

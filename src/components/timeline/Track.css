@@ -60,6 +60,11 @@
   white-space: nowrap;
 }
 
+.timelineTrackNameButtonAdditionalDetails {
+  color: var(--grey-90-a60);
+  font-size: 10px;
+}
+
 .timelineTrackTrack {
   position: relative;
   display: flex;
