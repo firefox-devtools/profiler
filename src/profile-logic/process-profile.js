@@ -1220,9 +1220,7 @@ function sanitizeThreadPII(
         currentMarker.type === 'Network'
       ) {
         // Remove the URI fields from marker payload.
-        // Mutating the payload here but it's safe because we copied the
-        // markerTable already.
-        removeNetworkMarkerURLs(currentMarker);
+        markerTable.data[i] = removeNetworkMarkerURLs(currentMarker);
 
         // Strip the URL from the marker name
         const stringIndex = markerTable.name[i];
