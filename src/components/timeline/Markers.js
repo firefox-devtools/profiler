@@ -7,7 +7,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
 import { withSize } from '../shared/WithSize';
-import Tooltip from '../shared/Tooltip';
+import Tooltip from '../tooltip/Tooltip';
 import MarkerTooltipContents from '../tooltip/markers/MarkerTooltipContents';
 import { markerStyles, overlayFills } from '../../profile-logic/marker-styles';
 import explicitConnect from '../../utils/connect';

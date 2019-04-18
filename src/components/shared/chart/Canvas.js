@@ -6,7 +6,7 @@
 import * as React from 'react';
 import { timeCode } from '../../../utils/time-code';
 import classNames from 'classnames';
-import Tooltip from '../Tooltip';
+import Tooltip from '../../tooltip/Tooltip';
 
 import type { CssPixels, DevicePixels } from '../../../types/units';
 

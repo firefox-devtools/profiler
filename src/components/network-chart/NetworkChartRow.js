@@ -5,7 +5,7 @@
 
 import * as React from 'react';
 import MarkerTooltipContents from '../tooltip/markers/MarkerTooltipContents';
-import Tooltip from '../shared/Tooltip';
+import Tooltip from '../tooltip/Tooltip';
 import { formatNumber } from '../../utils/format-numbers';
 
 import type { CssPixels } from '../../types/units';
