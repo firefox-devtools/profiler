@@ -4,7 +4,7 @@
 // @flow
 
 import * as React from 'react';
-import MarkerTooltipContents from '../tooltip/markers/MarkerTooltipContents';
+import { TooltipMarker } from '../tooltip/Marker';
 import Tooltip from '../tooltip/Tooltip';
 import { formatNumber } from '../../utils/format-numbers';
 
@@ -303,7 +303,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           // This magic value "5" avoids the tooltip of being too close of the
           // row, especially when we mouseEnter the row from the top edge.
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
-            <MarkerTooltipContents
+            <TooltipMarker
               marker={marker}
               threadIndex={this.props.threadIndex}
             />

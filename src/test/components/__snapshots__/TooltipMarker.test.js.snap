@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Bailout-10 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -86,7 +86,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Bailout-10 
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: ConstructRootFrame-112.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: ConstructRootFrame-112.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -133,7 +133,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: ConstructRo
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: DOMEvent-10.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -187,7 +187,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: DOMEvent-10
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: FileIO-114 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -448,7 +448,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: FileIO-114 
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: GCMajor-16.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -607,7 +607,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMajor-16.
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: GCMinor-15.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -731,7 +731,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMinor-15.
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: GCSlice-17.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -806,7 +806,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCSlice-17.
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Invalidate-10 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -860,7 +860,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Invalidate-
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: http://wikia.com/-10.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wikia.com/-10.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -921,7 +921,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: ht
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: http://wikia.com/-18670.5141769375 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wikia.com/-18670.5141769375 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1003,7 +1003,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: ht
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*-111 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*-111 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1057,7 +1057,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: 
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*-13382.453655062502 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*-13382.453655062502 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1139,7 +1139,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: 
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Log-21.7 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1193,7 +1193,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Log-21.7 1`
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: NotifyDidPaint-14.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1229,7 +1229,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: NotifyDidPa
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Styles-18.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1472,7 +1472,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Styles-18.5
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Styles-20 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1754,7 +1754,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Styles-20 1
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: TTFI-21.4 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1801,7 +1801,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: TTFI-21.4 1
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: UserTiming-12.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >

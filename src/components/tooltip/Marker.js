@@ -14,21 +14,22 @@ import {
   formatMicroseconds,
   formatMilliseconds,
   formatValueTotal,
-} from '../../../utils/format-numbers';
-import explicitConnect from '../../../utils/connect';
-import { getThreadSelectors } from '../../../selectors/per-thread';
-import { getImplementationFilter } from '../../../selectors/url-state';
-import { getPageList } from '../../../selectors/profile';
+} from '../../utils/format-numbers';
+import explicitConnect from '../../utils/connect';
+import { getThreadSelectors } from '../../selectors/per-thread';
+import { getImplementationFilter } from '../../selectors/url-state';
+import { getPageList } from '../../selectors/profile';
 
-import { TooltipDetails, TooltipDetail } from '../TooltipDetails';
-import Backtrace from '../../shared/Backtrace';
+import { TooltipNetworkMarker } from './NetworkMarker';
+import { TooltipDetails, TooltipDetail } from './TooltipDetails';
+import Backtrace from '../shared/Backtrace';
 
-import { bailoutTypeInformation } from '../../../profile-logic/marker-info';
+import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 
-import type { Microseconds } from '../../../types/units';
-import type { Marker } from '../../../types/profile-derived';
-import type { ImplementationFilter } from '../../../types/actions';
-import type { Thread, ThreadIndex, PageList } from '../../../types/profile';
+import type { Microseconds } from '../../types/units';
+import type { Marker } from '../../types/profile-derived';
+import type { ImplementationFilter } from '../../types/actions';
+import type { Thread, ThreadIndex, PageList } from '../../types/profile';
 import type {
   DOMEventMarkerPayload,
   FrameConstructionMarkerPayload,
@@ -37,40 +38,8 @@ import type {
   CcMarkerTracing,
   PhaseTimes,
   StyleMarkerPayload,
-} from '../../../types/markers';
-import type { ConnectedProps } from '../../../utils/connect';
-
-function _markerDetailBytesNullable(label: string, value: ?number): * {
-  if (typeof value !== 'number') {
-    return null;
-  }
-  return (
-    <TooltipDetail key={label} label={label}>
-      {formatBytes(value)}
-    </TooltipDetail>
-  );
-}
-
-function _markerDetailDeltaTimeNullable(
-  label: string,
-  value1?: number,
-  value2?: number
-): * {
-  if (
-    value1 === undefined ||
-    value2 === undefined ||
-    value1 === null ||
-    value2 === null
-  ) {
-    return null;
-  }
-  const valueResult = value1 - value2;
-  return (
-    <TooltipDetail key={label} label={label}>
-      {formatMilliseconds(valueResult)}
-    </TooltipDetail>
-  );
-}
+} from '../../types/markers';
+import type { ConnectedProps } from '../../utils/connect';
 
 type PhaseTimeTuple = {| name: string, time: Microseconds |};
 
@@ -97,58 +66,6 @@ function _makePhaseTimesArray(
     }
   }
   return array;
-}
-
-function _makePriorityHumanReadable(label: string, priority: number): * {
-  if (typeof priority !== 'number') {
-    return null;
-  }
-
-  let prioLabel: string = '';
-
-  // https://searchfox.org/mozilla-central/source/xpcom/threads/nsISupportsPriority.idl#24-28
-  if (priority < -10) {
-    prioLabel = 'Highest';
-  } else if (priority >= -10 && priority < 0) {
-    prioLabel = 'High';
-  } else if (priority === 0) {
-    prioLabel = 'Normal';
-  } else if (priority <= 10 && priority > 0) {
-    prioLabel = 'Low';
-  } else if (priority > 10) {
-    prioLabel = 'Lowest';
-  }
-
-  if (!prioLabel) {
-    return null;
-  }
-
-  prioLabel = prioLabel + '(' + priority + ')';
-  return (
-    <TooltipDetail key={label} label={label}>
-      {prioLabel}
-    </TooltipDetail>
-  );
-}
-
-function _dataStatusReplace(str: string): string {
-  switch (str) {
-    case 'STATUS_START': {
-      return 'Waiting for response';
-    }
-    case 'STATUS_READ': {
-      return 'Reading request';
-    }
-    case 'STATUS_STOP': {
-      return 'Response received';
-    }
-    case 'STATUS_REDIRECT': {
-      return 'Redirecting request';
-    }
-    default: {
-      return 'other';
-    }
-  }
 }
 
 /*
@@ -664,65 +581,7 @@ function getMarkerDetails(
         );
       }
       case 'Network': {
-        if (
-          data.status !== 'STATUS_STOP' &&
-          data.status !== 'STATUS_REDIRECT'
-        ) {
-          return (
-            <TooltipDetails>
-              <TooltipDetail label="Status">
-                {_dataStatusReplace(data.status)}
-              </TooltipDetail>
-              <TooltipDetail label="URL">{data.URI}</TooltipDetail>
-              {_makePriorityHumanReadable('Priority', data.pri)}
-              {_markerDetailBytesNullable('Requested bytes', data.count)}
-            </TooltipDetails>
-          );
-        }
-        return (
-          <TooltipDetails>
-            <TooltipDetail label="Status">
-              {_dataStatusReplace(data.status)}
-            </TooltipDetail>
-            <TooltipDetail label="Cache">{data.cache}</TooltipDetail>
-            <TooltipDetail label="URL">{data.URI}</TooltipDetail>
-            <TooltipDetail label="Redirect URL">
-              {data.RedirectURI}
-            </TooltipDetail>
-            {_makePriorityHumanReadable('Priority', data.pri)}
-            {_markerDetailBytesNullable('Requested bytes', data.count)}
-            {_markerDetailDeltaTimeNullable(
-              'Domain lookup in total',
-              data.domainLookupEnd,
-              data.domainLookupStart
-            )}
-            {_markerDetailDeltaTimeNullable(
-              'Connection in total',
-              data.connectEnd,
-              data.connectStart
-            )}
-            {_markerDetailDeltaTimeNullable(
-              'TCP connection in total',
-              data.tcpConnectEnd,
-              data.connectStart
-            )}
-            {_markerDetailDeltaTimeNullable(
-              'Start of secure connection at',
-              data.secureConnectionStart,
-              data.tcpConnectEnd
-            )}
-            {_markerDetailDeltaTimeNullable(
-              'Start of request at',
-              data.requestStart,
-              data.connectStart
-            )}
-            {_markerDetailDeltaTimeNullable(
-              'Response time',
-              data.responseEnd,
-              data.responseStart
-            )}
-          </TooltipDetails>
-        );
+        return <TooltipNetworkMarker payload={data} />;
       }
       case 'Styles': {
         return (
@@ -826,7 +685,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, {||}>({
+export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);

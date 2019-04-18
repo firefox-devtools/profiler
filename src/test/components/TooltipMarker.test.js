@@ -7,7 +7,7 @@ import type { NetworkPayload } from '../../types/markers';
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import MarkersTooltipContents from '../../components/tooltip/markers/MarkerTooltipContents';
+import { TooltipMarker } from '../../components/tooltip/Marker';
 import { render } from 'react-testing-library';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -17,7 +17,7 @@ import {
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 
-describe('MarkerTooltipContents', function() {
+describe('TooltipMarker', function() {
   it('renders tooltips for various markers', () => {
     // First, create a profile with one stack, so that the stack table contains
     // something that we can refer to from the CauseBacktrace of a marker.
@@ -432,11 +432,10 @@ describe('MarkerTooltipContents', function() {
     const threadIndex = getSelectedThreadIndex(state);
     const markers = selectedThreadSelectors.getReferenceMarkerTable(state);
 
-    markers.forEach((marker, i) => {
+    markers.forEach(marker => {
       const { container } = render(
         <Provider store={store}>
-          <MarkersTooltipContents
-            key={i}
+          <TooltipMarker
             marker={marker}
             threadIndex={threadIndex}
             className="propClass"
