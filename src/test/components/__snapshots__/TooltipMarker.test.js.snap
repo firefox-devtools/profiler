@@ -1184,6 +1184,13 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
     <div
       class="tooltipLabel"
     >
+      Guessed MIME type
+      :
+    </div>
+    image/jpeg
+    <div
+      class="tooltipLabel"
+    >
       Requested bytes
       :
     </div>

@@ -7,6 +7,7 @@
 import * as React from 'react';
 
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
+import { guessMimeTypeFromNetworkMarker } from '../../profile-logic/marker-data';
 import {
   formatBytes,
   formatNumber,
@@ -232,6 +233,9 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
           </TooltipDetail>
           <TooltipDetail label="Priority">
             {_getHumanReadablePriority(payload.pri)}
+          </TooltipDetail>
+          <TooltipDetail label="Guessed MIME type">
+            {guessMimeTypeFromNetworkMarker(payload)}
           </TooltipDetail>
           {_markerDetailBytesNullable('Requested bytes', payload.count)}
         </TooltipDetails>
