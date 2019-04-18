@@ -850,9 +850,10 @@ export function groupScreenshotsById(markers: Marker[]): Map<string, Marker[]> {
   return idToScreenshotMarkers;
 }
 
-export function removeNetworkMarkerURLs(payload: NetworkPayload) {
-  payload.URI = '';
-  payload.RedirectURI = '';
+export function removeNetworkMarkerURLs(
+  payload: NetworkPayload
+): NetworkPayload {
+  return { ...payload, URI: '', RedirectURI: '' };
 }
 
 export function getMarkerFullDescription(marker: Marker) {
