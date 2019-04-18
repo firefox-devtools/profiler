@@ -240,7 +240,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       <summary
         class="menuButtonsPublishDataSummary"
       >
-        Include additional data
+        Choose what gets removed
       </summary>
       <div
         class="menuButtonsPublishDataChoices"
@@ -249,51 +249,56 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
           class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
+            checked=""
             class="photon-checkbox photon-checkbox-default"
-            name="includeHiddenThreads"
+            name="removeHiddenThreads"
             type="checkbox"
           />
-          Hidden threads
+          Remove hidden threads
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
+            checked=""
             class="photon-checkbox photon-checkbox-default"
-            name="includeFullTimeRange"
+            name="removeFullTimeRange"
             type="checkbox"
           />
-          Hidden time range
+          Remove hidden time range
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
+            checked=""
             class="photon-checkbox photon-checkbox-default"
-            name="includeScreenshots"
+            name="removeScreenshots"
             type="checkbox"
           />
-          Screenshots
+          Remove screenshots
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
+            checked=""
             class="photon-checkbox photon-checkbox-default"
-            name="includeUrls"
+            name="removeUrls"
             type="checkbox"
           />
-          Resource URLs
+          Remove resource URLs
         </label>
         <label
           class="photon-label menuButtonsPublishDataChoicesLabel"
         >
           <input
+            checked=""
             class="photon-checkbox photon-checkbox-default"
-            name="includeExtension"
+            name="removeExtension"
             type="checkbox"
           />
-          Extension information
+          Remove extension information
         </label>
       </div>
     </details>
