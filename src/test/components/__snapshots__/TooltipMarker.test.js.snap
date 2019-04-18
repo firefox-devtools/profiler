@@ -919,7 +919,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
     Low(8)
   </div>
   <div
-    class="tooltipNetworkPhases"
+    class="tooltipNetworkPhases network-color-other"
   >
     <div
       class="tooltipLabel"
@@ -935,7 +935,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase"
-      style="margin-left: 0%; margin-right: 0%;"
+      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
     />
   </div>
 </div>
@@ -1021,7 +1021,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
     0.000B
   </div>
   <div
-    class="tooltipNetworkPhases"
+    class="tooltipNetworkPhases network-color-other"
   >
     <div
       class="tooltipLabel"
@@ -1037,7 +1037,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase"
-      style="margin-left: 0%; margin-right: 0%;"
+      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
     />
   </div>
 </div>
@@ -1095,7 +1095,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
     Low(8)
   </div>
   <div
-    class="tooltipNetworkPhases"
+    class="tooltipNetworkPhases network-color-other"
   >
     <div
       class="tooltipLabel"
@@ -1111,7 +1111,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase"
-      style="margin-left: 0%; margin-right: 0%;"
+      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
     />
   </div>
 </div>
@@ -1197,7 +1197,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
     45.9KB
   </div>
   <div
-    class="tooltipNetworkPhases"
+    class="tooltipNetworkPhases network-color-img"
   >
     <div
       class="tooltipLabel"
@@ -1212,8 +1212,8 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
     </div>
     <div
       aria-hidden="true"
-      class="tooltipNetworkPhase"
-      style="margin-left: 0%; margin-right: 99.7%; box-shadow: 0 0 0 1px inset var(--grey-70);"
+      class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
+      style="margin-left: 0%; margin-right: 99.7%;"
     />
     <div
       class="tooltipLabel"
@@ -1229,7 +1229,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase"
-      style="margin-left: -1091.0048142353905%; margin-right: 1176.9952800184963%;"
+      style="margin-left: -1091.0048142353905%; margin-right: 1176.9952800184963%; opacity: 0.75;"
     />
     <div
       class="tooltipLabel"
@@ -1245,7 +1245,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase"
-      style="margin-left: -1076.9952800184963%; margin-right: 1175.2828809004584%;"
+      style="margin-left: -1076.9952800184963%; margin-right: 1175.2828809004584%; opacity: 1;"
     />
     <div
       class="tooltipLabel"
@@ -1260,8 +1260,8 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
     </div>
     <div
       aria-hidden="true"
-      class="tooltipNetworkPhase"
-      style="margin-left: -1075.2828809004584%; margin-right: 0%; box-shadow: 0 0 0 1px inset var(--grey-70);"
+      class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
+      style="margin-left: -1075.2828809004584%; margin-right: 0%;"
     />
   </div>
 </div>

@@ -5,9 +5,13 @@
 // @flow
 
 import * as React from 'react';
+import classNames from 'classnames';
 
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
-import { guessMimeTypeFromNetworkMarker } from '../../profile-logic/marker-data';
+import {
+  getColorClassNameForMimeType,
+  guessMimeTypeFromNetworkMarker,
+} from '../../profile-logic/marker-data';
 import {
   formatBytes,
   formatNumber,
@@ -103,13 +107,13 @@ const PROPERTIES_HUMAN_LABELS = {
 
 const NETWORK_PROPERTY_OPACITIES = {
   startTime: 0,
-  domainLookupStart: 0.333,
-  domainLookupEnd: 0.333,
-  connectStart: 0.333,
-  tcpConnectEnd: 0.333,
-  secureConnectionStart: 0.333,
-  connectEnd: 0.333,
-  requestStart: 0.666,
+  domainLookupStart: 0.5,
+  domainLookupEnd: 0.5,
+  connectStart: 0.5,
+  tcpConnectEnd: 0.5,
+  secureConnectionStart: 0.5,
+  connectEnd: 0.5,
+  requestStart: 0.75,
   responseStart: 1,
   responseEnd: 0,
   endTime: 0,
@@ -144,13 +148,14 @@ class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
           {formatMilliseconds(phaseDuration)}
         </div>
         <div
-          className="tooltipNetworkPhase"
+          className={classNames('tooltipNetworkPhase', {
+            tooltipNetworkPhaseEmpty: opacity === 0,
+          })}
           aria-hidden="true"
           style={{
             marginLeft: startPositionPercent + '%',
             marginRight: 100 - startPositionPercent - durationPercent + '%',
-            backgroundColor: `rgb(13% 13% 13% / ${opacity})`,
-            boxShadow: opacity === 0 ? '0 0 0 1px inset var(--grey-70)' : null,
+            opacity: opacity === 0 ? null : opacity,
           }}
         />
       </React.Fragment>
@@ -163,7 +168,7 @@ type Props = {|
 |};
 
 export class TooltipNetworkMarker extends React.PureComponent<Props> {
-  _getPhases(): React.Node {
+  _getPhases(markerColorClass: string): React.Node {
     const { payload } = this.props;
     const dur = payload.endTime - payload.startTime;
 
@@ -179,7 +184,7 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
     if (availableProperties.length === 2) {
       // We only have startTime and endTime.
       return (
-        <div className="tooltipNetworkPhases">
+        <div className={`tooltipNetworkPhases ${markerColorClass}`}>
           <NetworkPhase
             propertyName="responseStart"
             startPosition={0}
@@ -215,11 +220,15 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
       );
     }
 
-    return <div className="tooltipNetworkPhases">{phases}</div>;
+    return (
+      <div className={`tooltipNetworkPhases ${markerColorClass}`}>{phases}</div>
+    );
   }
 
   render() {
     const { payload } = this.props;
+    const mimeType = guessMimeTypeFromNetworkMarker(payload);
+    const markerColorClass = getColorClassNameForMimeType(mimeType);
     return (
       <>
         <TooltipDetails>
@@ -234,12 +243,10 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
           <TooltipDetail label="Priority">
             {_getHumanReadablePriority(payload.pri)}
           </TooltipDetail>
-          <TooltipDetail label="Guessed MIME type">
-            {guessMimeTypeFromNetworkMarker(payload)}
-          </TooltipDetail>
+          <TooltipDetail label="Guessed MIME type">{mimeType}</TooltipDetail>
           {_markerDetailBytesNullable('Requested bytes', payload.count)}
         </TooltipDetails>
-        {this._getPhases()}
+        {this._getPhases(markerColorClass)}
       </>
     );
   }

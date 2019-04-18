@@ -14,3 +14,13 @@
   grid-gap: 2px 5px;
   grid-template-columns: min-content min-content auto;
 }
+
+.tooltipNetworkPhase {
+  background-color: var(--marker-color);
+}
+
+.tooltipNetworkPhaseEmpty {
+  background-color: white;
+  box-shadow: 0 0 0 1px inset var(--marker-color);
+  opacity: 0.5;
+}
