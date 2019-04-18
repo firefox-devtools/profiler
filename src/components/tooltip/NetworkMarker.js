@@ -11,12 +11,12 @@ import { formatBytes, formatMilliseconds } from '../../utils/format-numbers';
 
 import type { NetworkPayload } from '../../types/markers';
 
-function _makePriorityHumanReadable(label: string, priority: number): * {
+function _getHumanReadablePriority(priority: number): string | null {
   if (typeof priority !== 'number') {
     return null;
   }
 
-  let prioLabel: string = '';
+  let prioLabel = null;
 
   // https://searchfox.org/mozilla-central/source/xpcom/threads/nsISupportsPriority.idl#24-28
   if (priority < -10) {
@@ -35,31 +35,21 @@ function _makePriorityHumanReadable(label: string, priority: number): * {
     return null;
   }
 
-  prioLabel = prioLabel + '(' + priority + ')';
-  return (
-    <TooltipDetail key={label} label={label}>
-      {prioLabel}
-    </TooltipDetail>
-  );
+  return prioLabel + '(' + priority + ')';
 }
 
-function _dataStatusReplace(str: string): string {
+function _getHumanReadableDataStatus(str: string): string {
   switch (str) {
-    case 'STATUS_START': {
+    case 'STATUS_START':
       return 'Waiting for response';
-    }
-    case 'STATUS_READ': {
+    case 'STATUS_READ':
       return 'Reading request';
-    }
-    case 'STATUS_STOP': {
+    case 'STATUS_STOP':
       return 'Response received';
-    }
-    case 'STATUS_REDIRECT': {
+    case 'STATUS_REDIRECT':
       return 'Redirecting request';
-    }
-    default: {
+    default:
       return 'other';
-    }
   }
 }
 
@@ -102,32 +92,19 @@ type Props = {|
 export class TooltipNetworkMarker extends React.PureComponent<Props> {
   render() {
     const { payload } = this.props;
-    if (
-      payload.status !== 'STATUS_STOP' &&
-      payload.status !== 'STATUS_REDIRECT'
-    ) {
-      return (
-        <TooltipDetails>
-          <TooltipDetail label="Status">
-            {_dataStatusReplace(payload.status)}
-          </TooltipDetail>
-          <TooltipDetail label="URL">{payload.URI}</TooltipDetail>
-          {_makePriorityHumanReadable('Priority', payload.pri)}
-          {_markerDetailBytesNullable('Requested bytes', payload.count)}
-        </TooltipDetails>
-      );
-    }
     return (
       <TooltipDetails>
         <TooltipDetail label="Status">
-          {_dataStatusReplace(payload.status)}
+          {_getHumanReadableDataStatus(payload.status)}
         </TooltipDetail>
         <TooltipDetail label="Cache">{payload.cache}</TooltipDetail>
         <TooltipDetail label="URL">{payload.URI}</TooltipDetail>
         <TooltipDetail label="Redirect URL">
           {payload.RedirectURI}
         </TooltipDetail>
-        {_makePriorityHumanReadable('Priority', payload.pri)}
+        <TooltipDetail label="Priority">
+          {_getHumanReadablePriority(payload.pri)}
+        </TooltipDetail>
         {_markerDetailBytesNullable('Requested bytes', payload.count)}
         {_markerDetailDeltaTimeNullable(
           'Domain lookup in total',
