@@ -16,6 +16,7 @@
 }
 
 .tooltipNetworkPhase {
+  margin: 2px 0;
   background-color: var(--marker-color);
 }
 
