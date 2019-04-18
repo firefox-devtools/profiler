@@ -157,25 +157,31 @@ describe('attemptToPublish', function() {
     const publishAttempt = dispatch(attemptToPublish());
     expect(getUploadPhase(getState())).toEqual('compressing');
     resolveUpload('FAKEHASH');
-    await publishAttempt;
+
+    expect(await publishAttempt).toEqual(true);
+
     expect(getUploadPhase(getState())).toEqual('uploaded');
   });
 
   it('can handle upload errors', async function() {
     const { dispatch, getState, rejectUpload } = setup();
     const publishAttempt = dispatch(attemptToPublish());
-    // Reject with a simple string since it's easy to test equality.
-    rejectUpload('fake error');
-    await publishAttempt;
-    expect(getUploadPhase(getState())).toEqual('error');
-    expect(getUploadError(getState())).toEqual('fake error');
+    const error = new Error('fake error');
+    rejectUpload(error);
+
+    expect(await publishAttempt).toEqual(false);
+
+    expect(getUploadPhase(getState())).toBe('error');
+    expect(getUploadError(getState())).toBe(error);
   });
 
   it('calls window.open after publishing a profile', async function() {
     const { dispatch, resolveUpload } = setup();
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload('FAKEHASH');
-    await publishAttempt;
+
+    expect(await publishAttempt).toEqual(true);
+
     expect(window.open).toHaveBeenCalledWith(
       'http://localhost/public/FAKEHASH/calltree/?profileName=&published&v=3',
       '_blank'
@@ -203,7 +209,9 @@ describe('attemptToPublish', function() {
     expect(getUploadProgress(getState())).toEqual(0.5);
 
     resolveUpload('FAKEHASH');
-    await publishAttempt;
+
+    expect(await publishAttempt).toEqual(true);
+
     expect(getUploadProgress(getState())).toEqual(0);
   });
 
@@ -212,7 +220,9 @@ describe('attemptToPublish', function() {
     const publishAttempt = dispatch(attemptToPublish());
     resolveUpload('FAKEHASH');
     expect(getUploadGeneration(getState())).toEqual(0);
-    await publishAttempt;
+
+    expect(await publishAttempt).toEqual(true);
+
     expect(getUploadPhase(getState())).toEqual('uploaded');
     expect(getUploadGeneration(getState())).toEqual(1);
     dispatch(resetUploadState());
@@ -226,8 +236,8 @@ describe('attemptToPublish', function() {
     dispatch(abortUpload());
     expect(getUploadGeneration(getState())).toEqual(1);
 
-    // Returning the publish attempt will ensure the that generation check gets hit.
-    return publishAttempt;
+    expect(await publishAttempt).toEqual(false);
+    expect(getUploadPhase(getState())).toEqual('local');
   });
 
   it('obeys the generational value, and ignores stale uploads', async function() {

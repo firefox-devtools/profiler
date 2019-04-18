@@ -8,7 +8,6 @@ import { sendAnalytics } from '../utils/analytics';
 import { getUrlState } from '../selectors/url-state';
 import {
   getAbortFunction,
-  getUploadPhase,
   getUploadGeneration,
   getSanitizedProfileData,
 } from '../selectors/publish';
@@ -28,7 +27,7 @@ export function toggleCheckedSharingOptions(
   };
 }
 
-export function startCompressingForUpload(): Action {
+export function uploadCompressionStarted(): Action {
   return {
     type: 'UPLOAD_COMPRESSION_STARTED',
   };
@@ -37,7 +36,7 @@ export function startCompressingForUpload(): Action {
 /**
  * Start uploading the profile, but save an abort function to be able to cancel it.
  */
-export function startUploading(abortFunction: () => void): Action {
+export function uploadStarted(abortFunction: () => void): Action {
   return {
     type: 'UPLOAD_STARTED',
     abortFunction,
@@ -77,8 +76,11 @@ export function uploadFailed(error: mixed): Action {
  * URLs from the profile after sharing with URLs or they can decide to add the URLs after
  * sharing without them. We check the current state before attempting to share depending
  * on that flag.
+ *
+ * The return value is used for tests to determine if the request went all the way
+ * through (true) or was quit early due to the generation value being invalidated (false).
  */
-export function attemptToPublish(): ThunkAction<Promise<void>> {
+export function attemptToPublish(): ThunkAction<Promise<boolean>> {
   return async (dispatch, getState) => {
     try {
       sendAnalytics({
@@ -91,23 +93,20 @@ export function attemptToPublish(): ThunkAction<Promise<void>> {
       // This way we can check inside this async function if we need to bail out early.
       const uploadGeneration = getUploadGeneration(getState());
 
-      dispatch(startCompressingForUpload());
+      dispatch(uploadCompressionStarted());
       const gzipData: Uint8Array = await getSanitizedProfileData(getState());
 
       // The previous line was async, check to make sure that this request is still valid.
       if (uploadGeneration !== getUploadGeneration(getState())) {
-        return;
+        return false;
       }
 
       const { abortFunction, startUpload } = uploadBinaryProfileData();
-      dispatch(startUploading(abortFunction));
+      dispatch(uploadStarted(abortFunction));
 
-      if (
-        getUploadPhase(getState()) !== 'uploading' ||
-        uploadGeneration !== getUploadGeneration(getState())
-      ) {
+      if (uploadGeneration !== getUploadGeneration(getState())) {
         // The upload could have been aborted while we were compressing the data.
-        return;
+        return false;
       }
 
       // Upload the profile, and notify it with the amount of data that has been
@@ -118,7 +117,7 @@ export function attemptToPublish(): ThunkAction<Promise<void>> {
 
       // The previous line was async, check to make sure that this request is still valid.
       if (uploadGeneration !== getUploadGeneration(getState())) {
-        return;
+        return false;
       }
 
       // Generate a url, and completely drop any of the existing URL state. In
@@ -145,7 +144,9 @@ export function attemptToPublish(): ThunkAction<Promise<void>> {
         eventCategory: 'profile upload',
         eventAction: 'failed',
       });
+      return false;
     }
+    return true;
   };
 }
 
