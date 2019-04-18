@@ -324,6 +324,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<
       case 'local':
         return this._renderPublishPanel();
       case 'uploading':
+      case 'compressing':
         return this._renderUploadPanel();
       case 'uploaded':
         return this._renderUploadedPanel();
