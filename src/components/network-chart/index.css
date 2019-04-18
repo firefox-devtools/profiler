@@ -19,9 +19,6 @@
 }
 
 .networkChartRowItem {
-  /* This color is overridden for specific mime types, see below. */
-  --marker-color: var(--grey-70);
-
   display: block;
   width: 100%;
   height: 16px;
@@ -76,25 +73,6 @@
   position: absolute;
   height: 100%;
   background-color: var(--marker-color);
-}
-
-/* These colors are quite bright and strong on purpose, because the marker has
- * some transparency, and we need the marker to stand out, especially when only
- * the border is displayed. */
-.networkChartRowItemCss {
-  --marker-color: var(--purple-70);
-}
-
-.networkChartRowItemJs {
-  --marker-color: var(--yellow-60);
-}
-
-.networkChartRowItemHtml {
-  --marker-color: var(--blue-70);
-}
-
-.networkChartRowItemImg {
-  --marker-color: var(--green-70);
 }
 
 .networkChartRowItemUriOptional {

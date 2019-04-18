@@ -9,7 +9,10 @@ import classNames from 'classnames';
 import { TooltipMarker } from '../tooltip/Marker';
 import Tooltip from '../tooltip/Tooltip';
 
-import { guessMimeTypeFromNetworkMarker } from '../../profile-logic/marker-data';
+import {
+  guessMimeTypeFromNetworkMarker,
+  getColorClassNameForMimeType,
+} from '../../profile-logic/marker-data';
 import { formatNumber } from '../../utils/format-numbers';
 
 import type { CssPixels } from '../../types/units';
@@ -239,24 +242,10 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     return name;
   }
 
-  _getClassNameTypeForMarker(): string {
+  _getClassNameTypeForMarker() {
     const { networkPayload } = this.props;
-    const resourceType = guessMimeTypeFromNetworkMarker(networkPayload);
-    switch (resourceType) {
-      case 'text/css':
-        return 'networkChartRowItemCss';
-      case 'text/html':
-        return 'networkChartRowItemHtml';
-      case 'application/javascript':
-        return 'networkChartRowItemJs';
-      case null:
-        return '';
-      default:
-        if (resourceType.startsWith('image/')) {
-          return 'networkChartRowItemImg';
-        }
-        return '';
-    }
+    const mimeType = guessMimeTypeFromNetworkMarker(networkPayload);
+    return getColorClassNameForMimeType(mimeType);
   }
 
   render() {

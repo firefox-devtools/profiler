@@ -873,6 +873,34 @@ export function guessMimeTypeFromNetworkMarker(
   }
 }
 
+// This function returns one of the global css classes, or the empty string,
+// depending on the input mime type. Usually this function is fed the result of
+// `guessMimeTypeFromNetworkMarker`.
+export function getColorClassNameForMimeType(
+  mimeType: string | null
+):
+  | 'network-color-css'
+  | 'network-color-js'
+  | 'network-color-html'
+  | 'network-color-img'
+  | 'network-color-other' {
+  switch (mimeType) {
+    case 'text/css':
+      return 'network-color-css';
+    case 'text/html':
+      return 'network-color-html';
+    case 'application/javascript':
+      return 'network-color-js';
+    case null:
+      return 'network-color-other';
+    default:
+      if (mimeType.startsWith('image/')) {
+        return 'network-color-img';
+      }
+      return 'network-color-other';
+  }
+}
+
 export function groupScreenshotsById(markers: Marker[]): Map<string, Marker[]> {
   const idToScreenshotMarkers = new Map();
   for (let i = 0; i < markers.length; i++) {
