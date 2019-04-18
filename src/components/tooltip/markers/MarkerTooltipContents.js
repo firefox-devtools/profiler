@@ -14,20 +14,20 @@ import {
   formatMicroseconds,
   formatMilliseconds,
   formatValueTotal,
-} from '../../utils/format-numbers';
-import explicitConnect from '../../utils/connect';
-import { getThreadSelectors } from '../../selectors/per-thread';
-import { getImplementationFilter } from '../../selectors/url-state';
-import { getPageList } from '../../selectors/profile';
+} from '../../../utils/format-numbers';
+import explicitConnect from '../../../utils/connect';
+import { getThreadSelectors } from '../../../selectors/per-thread';
+import { getImplementationFilter } from '../../../selectors/url-state';
+import { getPageList } from '../../../selectors/profile';
 
-import Backtrace from './Backtrace';
+import Backtrace from '../../shared/Backtrace';
 
-import { bailoutTypeInformation } from '../../profile-logic/marker-info';
-import type { Microseconds } from '../../types/units';
-import type { Marker } from '../../types/profile-derived';
-import type { NotVoidOrNull } from '../../types/utils';
-import type { ImplementationFilter } from '../../types/actions';
-import type { Thread, ThreadIndex, PageList } from '../../types/profile';
+import { bailoutTypeInformation } from '../../../profile-logic/marker-info';
+import type { Microseconds } from '../../../types/units';
+import type { Marker } from '../../../types/profile-derived';
+import type { NotVoidOrNull } from '../../../types/utils';
+import type { ImplementationFilter } from '../../../types/actions';
+import type { Thread, ThreadIndex, PageList } from '../../../types/profile';
 import type {
   DOMEventMarkerPayload,
   FrameConstructionMarkerPayload,
@@ -36,8 +36,8 @@ import type {
   CcMarkerTracing,
   PhaseTimes,
   StyleMarkerPayload,
-} from '../../types/markers';
-import type { ConnectedProps } from '../../utils/connect';
+} from '../../../types/markers';
+import type { ConnectedProps } from '../../../utils/connect';
 
 function _markerDetail<T: NotVoidOrNull>(
   key: string,

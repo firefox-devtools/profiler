@@ -10,7 +10,7 @@ import {
   type WithChartViewport,
 } from '../shared/chart/Viewport';
 import ChartCanvas from '../shared/chart/Canvas';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
+import MarkerTooltipContents from '../tooltip/markers/MarkerTooltipContents';
 import TextMeasurement from '../../utils/text-measurement';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { BLUE_40 } from '../../utils/colors';

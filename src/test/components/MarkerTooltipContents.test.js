@@ -7,7 +7,7 @@ import type { NetworkPayload } from '../../types/markers';
 
 import React from 'react';
 import { Provider } from 'react-redux';
-import MarkersTooltipContents from '../../components/shared/MarkerTooltipContents';
+import MarkersTooltipContents from '../../components/tooltip/markers/MarkerTooltipContents';
 import { render } from 'react-testing-library';
 import { storeWithProfile } from '../fixtures/stores';
 import {

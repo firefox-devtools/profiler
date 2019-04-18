@@ -9,7 +9,7 @@ import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
+import MarkerTooltipContents from '../tooltip/markers/MarkerTooltipContents';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';

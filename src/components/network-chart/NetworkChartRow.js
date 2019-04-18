@@ -4,7 +4,7 @@
 // @flow
 
 import * as React from 'react';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
+import MarkerTooltipContents from '../tooltip/markers/MarkerTooltipContents';
 import Tooltip from '../shared/Tooltip';
 import { formatNumber } from '../../utils/format-numbers';
 
