@@ -4,8 +4,12 @@
 // @flow
 
 import * as React from 'react';
+import classNames from 'classnames';
+
 import { TooltipMarker } from '../tooltip/Marker';
 import Tooltip from '../tooltip/Tooltip';
+
+import { guessMimeTypeFromNetworkMarker } from '../../profile-logic/marker-data';
 import { formatNumber } from '../../utils/format-numbers';
 
 import type { CssPixels } from '../../types/units';
@@ -63,7 +67,7 @@ export type NetworkChartRowProps = {
   +marker: Marker,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
-  +networkPayload: NetworkPayload | null,
+  +networkPayload: NetworkPayload,
   +markerWidth: CssPixels,
   +startPosition: CssPixels,
   +threadIndex: ThreadIndex,
@@ -235,31 +239,22 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     return name;
   }
 
-  // Identifies mime type of request. This is a workaround until we have
-  // mime types passed from gecko to network marker requests.
-  _identifyType(name: string): string {
-    const uri = this._extractURI(name);
-    if (uri === null) {
-      return '';
-    }
-    // Extracting the fileName from the path.
-    const fileName = uri.pathname;
-    const fileExt = fileName.slice(fileName.lastIndexOf('.'));
-
-    switch (fileExt) {
-      case '.js':
-        return 'networkChartRowItemJs';
-      case '.css':
+  _getClassNameTypeForMarker(): string {
+    const { networkPayload } = this.props;
+    const resourceType = guessMimeTypeFromNetworkMarker(networkPayload);
+    switch (resourceType) {
+      case 'text/css':
         return 'networkChartRowItemCss';
-      case '.gif':
-      case '.png':
-      case '.jpg':
-      case '.jpeg':
-      case '.svg':
-        return 'networkChartRowItemImg';
-      case '.html':
+      case 'text/html':
         return 'networkChartRowItemHtml';
+      case 'application/javascript':
+        return 'networkChartRowItemJs';
+      case null:
+        return '';
       default:
+        if (resourceType.startsWith('image/')) {
+          return 'networkChartRowItemImg';
+        }
         return '';
     }
   }
@@ -273,15 +268,16 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
       networkPayload,
     } = this.props;
 
-    const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
-
     if (networkPayload === null) {
       return null;
     }
-    const itemClassName =
-      evenOddClassName +
-      ' networkChartRowItem ' +
-      this._identifyType(marker.name);
+
+    const itemClassName = classNames(
+      'networkChartRowItem',
+      this._getClassNameTypeForMarker(),
+      { odd: index % 2 === 1 }
+    );
+
     return (
       <section className={itemClassName}>
         <div className="networkChartRowItemLabel">

@@ -77,7 +77,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
           class="treeViewBodyInner treeViewBodyInner0InnerChunk"
         >
           <section
-            class="even networkChartRowItem "
+            class="networkChartRowItem"
           >
             <div
               class="networkChartRowItemLabel"
@@ -112,7 +112,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             </div>
           </section>
           <section
-            class="odd networkChartRowItem "
+            class="networkChartRowItem odd"
           >
             <div
               class="networkChartRowItemLabel"
@@ -147,7 +147,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             </div>
           </section>
           <section
-            class="even networkChartRowItem "
+            class="networkChartRowItem"
           >
             <div
               class="networkChartRowItemLabel"
@@ -182,7 +182,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             </div>
           </section>
           <section
-            class="odd networkChartRowItem "
+            class="networkChartRowItem odd"
           >
             <div
               class="networkChartRowItemLabel"
@@ -217,7 +217,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             </div>
           </section>
           <section
-            class="even networkChartRowItem "
+            class="networkChartRowItem"
           >
             <div
               class="networkChartRowItemLabel"
@@ -252,7 +252,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             </div>
           </section>
           <section
-            class="odd networkChartRowItem "
+            class="networkChartRowItem odd"
           >
             <div
               class="networkChartRowItemLabel"
@@ -287,7 +287,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             </div>
           </section>
           <section
-            class="even networkChartRowItem "
+            class="networkChartRowItem"
           >
             <div
               class="networkChartRowItemLabel"
@@ -322,7 +322,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             </div>
           </section>
           <section
-            class="odd networkChartRowItem "
+            class="networkChartRowItem odd"
           >
             <div
               class="networkChartRowItemLabel"
@@ -357,7 +357,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             </div>
           </section>
           <section
-            class="even networkChartRowItem "
+            class="networkChartRowItem"
           >
             <div
               class="networkChartRowItemLabel"
@@ -392,7 +392,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             </div>
           </section>
           <section
-            class="odd networkChartRowItem "
+            class="networkChartRowItem odd"
           >
             <div
               class="networkChartRowItemLabel"

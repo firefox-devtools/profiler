@@ -831,6 +831,48 @@ export function mergeStartAndEndNetworkMarker(markers: Marker[]): Marker[] {
   return filteredMarkers;
 }
 
+// Identifies mime type of a network request.
+export function guessMimeTypeFromNetworkMarker(
+  payload: NetworkPayload
+): string | null {
+  let uri;
+  try {
+    uri = new URL(payload.URI);
+  } catch (e) {
+    return null;
+  }
+
+  // Extracting the fileName from the path.
+  // This is a workaround until we have
+  // mime types passed from gecko to network marker requests.
+
+  const fileName = uri.pathname;
+  const lastDotIndex = fileName.lastIndexOf('.');
+  if (lastDotIndex < 0) {
+    return null;
+  }
+
+  const fileExt = fileName.slice(lastDotIndex + 1);
+
+  switch (fileExt) {
+    case 'js':
+      return 'application/javascript';
+    case 'css':
+    case 'html':
+      return `text/${fileExt}`;
+    case 'gif':
+    case 'png':
+      return `image/${fileExt}`;
+    case 'jpeg':
+    case 'jpg':
+      return 'image/jpeg';
+    case 'svg':
+      return 'image/svg+xml';
+    default:
+      return null;
+  }
+}
+
 export function groupScreenshotsById(markers: Marker[]): Map<string, Marker[]> {
   const idToScreenshotMarkers = new Map();
   for (let i = 0; i < markers.length; i++) {

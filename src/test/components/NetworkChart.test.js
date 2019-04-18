@@ -394,7 +394,7 @@ describe('NetworkChartRowBar MIME-type filter', function() {
       }
     );
 
-    expect(rowItem().className).toEqual('even networkChartRowItem ');
+    expect(rowItem().className).toEqual('networkChartRowItem');
   });
 });
 
