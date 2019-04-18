@@ -1,0 +1,16 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.tooltipNetwork {
+  width: 600px;
+}
+
+.tooltipNetworkPhases {
+  display: grid;
+  padding-top: 4px;
+  margin-top: 4px;
+  border-top: 1px solid var(--grey-40);
+  grid-gap: 2px 5px;
+  grid-template-columns: min-content min-content auto;
+}

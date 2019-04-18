@@ -7,9 +7,16 @@
 import * as React from 'react';
 
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
-import { formatBytes, formatMilliseconds } from '../../utils/format-numbers';
+import {
+  formatBytes,
+  formatNumber,
+  formatMilliseconds,
+} from '../../utils/format-numbers';
 
 import type { NetworkPayload } from '../../types/markers';
+import type { Milliseconds } from '../../types/units';
+
+import './NetworkMarker.css';
 
 function _getHumanReadablePriority(priority: number): string | null {
   if (typeof priority !== 'number') {
@@ -64,25 +71,90 @@ function _markerDetailBytesNullable(label: string, value: ?number): * {
   );
 }
 
-function _markerDetailDeltaTimeNullable(
-  label: string,
-  value1?: number,
-  value2?: number
-): * {
-  if (
-    value1 === undefined ||
-    value2 === undefined ||
-    value1 === null ||
-    value2 === null
-  ) {
-    return null;
+const ALL_NETWORK_PROPERTIES_IN_ORDER = [
+  'startTime',
+  'domainLookupStart',
+  'domainLookupEnd',
+  'connectStart',
+  'tcpConnectEnd',
+  'secureConnectionStart',
+  'connectEnd',
+  'requestStart',
+  'responseStart',
+  'responseEnd',
+  'endTime',
+];
+
+/* The labels are for the duration between _this_ label and the next label. */
+const PROPERTIES_HUMAN_LABELS = {
+  startTime: 'Waiting for socket thread',
+  domainLookupStart: 'DNS request',
+  domainLookupEnd: 'After DNS request',
+  connectStart: 'TCP connection',
+  tcpConnectEnd: 'After TCP connection',
+  secureConnectionStart: 'Establishing TLS session',
+  connectEnd: 'Waiting for HTTP request',
+  requestStart: 'HTTP request and waiting for response',
+  responseStart: 'HTTP response',
+  responseEnd: 'Waiting to transmit the response',
+  endTime: 'End',
+};
+
+const NETWORK_PROPERTY_OPACITIES = {
+  startTime: 0,
+  domainLookupStart: 0.333,
+  domainLookupEnd: 0.333,
+  connectStart: 0.333,
+  tcpConnectEnd: 0.333,
+  secureConnectionStart: 0.333,
+  connectEnd: 0.333,
+  requestStart: 0.666,
+  responseStart: 1,
+  responseEnd: 0,
+  endTime: 0,
+};
+
+type NetworkPhaseProps = {|
+  +propertyName: string,
+  +dur: Milliseconds,
+  +startPosition: Milliseconds,
+  +phaseDuration: Milliseconds,
+|};
+
+class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
+  render() {
+    const { startPosition, dur, propertyName, phaseDuration } = this.props;
+    const startPositionPercent = (startPosition / dur) * 100;
+    const durationPercent = Math.max(0.3, (phaseDuration / dur) * 100);
+    const opacity = NETWORK_PROPERTY_OPACITIES[propertyName];
+
+    return (
+      <React.Fragment>
+        <div className="tooltipLabel">
+          {PROPERTIES_HUMAN_LABELS[propertyName]}:
+        </div>
+        <div
+          aria-label={`Starting at ${formatNumber(
+            startPosition
+          )} milliseconds, duration is ${formatNumber(
+            phaseDuration
+          )} milliseconds`}
+        >
+          {formatMilliseconds(phaseDuration)}
+        </div>
+        <div
+          className="tooltipNetworkPhase"
+          aria-hidden="true"
+          style={{
+            marginLeft: startPositionPercent + '%',
+            marginRight: 100 - startPositionPercent - durationPercent + '%',
+            backgroundColor: `rgb(13% 13% 13% / ${opacity})`,
+            boxShadow: opacity === 0 ? '0 0 0 1px inset var(--grey-70)' : null,
+          }}
+        />
+      </React.Fragment>
+    );
   }
-  const valueResult = value1 - value2;
-  return (
-    <TooltipDetail key={label} label={label}>
-      {formatMilliseconds(valueResult)}
-    </TooltipDetail>
-  );
 }
 
 type Props = {|
@@ -90,53 +162,81 @@ type Props = {|
 |};
 
 export class TooltipNetworkMarker extends React.PureComponent<Props> {
+  _getPhases(): React.Node {
+    const { payload } = this.props;
+    const dur = payload.endTime - payload.startTime;
+
+    const availableProperties = ALL_NETWORK_PROPERTIES_IN_ORDER.filter(
+      property => typeof payload[property] === 'number'
+    );
+
+    if (availableProperties.length === 0 || availableProperties.length === 1) {
+      // This shouldn't happen as we should always have both startTime and endTime.
+      return null;
+    }
+
+    if (availableProperties.length === 2) {
+      // We only have startTime and endTime.
+      return (
+        <div className="tooltipNetworkPhases">
+          <NetworkPhase
+            propertyName="responseStart"
+            startPosition={0}
+            phaseDuration={dur}
+            dur={dur}
+          />
+        </div>
+      );
+    }
+
+    // Looks like availableProperties.length >= 3.
+    const phases = [];
+
+    for (let i = 1; i < availableProperties.length; i++) {
+      const thisProperty = availableProperties[i];
+      const previousProperty = availableProperties[i - 1];
+      // We force-coerce the values into numbers just to appease Flow. Indeed the
+      // previous filter ensures that all values are numbers but Flow can't know
+      // that.
+      const startValue = +payload[previousProperty];
+      const endValue = +payload[thisProperty];
+      const phaseDuration = endValue - startValue;
+      const startPosition = startValue - payload.startTime;
+
+      phases.push(
+        <NetworkPhase
+          key={previousProperty}
+          propertyName={previousProperty}
+          startPosition={startPosition}
+          phaseDuration={phaseDuration}
+          dur={dur}
+        />
+      );
+    }
+
+    return <div className="tooltipNetworkPhases">{phases}</div>;
+  }
+
   render() {
     const { payload } = this.props;
     return (
-      <TooltipDetails>
-        <TooltipDetail label="Status">
-          {_getHumanReadableDataStatus(payload.status)}
-        </TooltipDetail>
-        <TooltipDetail label="Cache">{payload.cache}</TooltipDetail>
-        <TooltipDetail label="URL">{payload.URI}</TooltipDetail>
-        <TooltipDetail label="Redirect URL">
-          {payload.RedirectURI}
-        </TooltipDetail>
-        <TooltipDetail label="Priority">
-          {_getHumanReadablePriority(payload.pri)}
-        </TooltipDetail>
-        {_markerDetailBytesNullable('Requested bytes', payload.count)}
-        {_markerDetailDeltaTimeNullable(
-          'Domain lookup in total',
-          payload.domainLookupEnd,
-          payload.domainLookupStart
-        )}
-        {_markerDetailDeltaTimeNullable(
-          'Connection in total',
-          payload.connectEnd,
-          payload.connectStart
-        )}
-        {_markerDetailDeltaTimeNullable(
-          'TCP connection in total',
-          payload.tcpConnectEnd,
-          payload.connectStart
-        )}
-        {_markerDetailDeltaTimeNullable(
-          'Start of secure connection at',
-          payload.secureConnectionStart,
-          payload.tcpConnectEnd
-        )}
-        {_markerDetailDeltaTimeNullable(
-          'Start of request at',
-          payload.requestStart,
-          payload.connectStart
-        )}
-        {_markerDetailDeltaTimeNullable(
-          'Response time',
-          payload.responseEnd,
-          payload.responseStart
-        )}
-      </TooltipDetails>
+      <>
+        <TooltipDetails>
+          <TooltipDetail label="Status">
+            {_getHumanReadableDataStatus(payload.status)}
+          </TooltipDetail>
+          <TooltipDetail label="Cache">{payload.cache}</TooltipDetail>
+          <TooltipDetail label="URL">{payload.URI}</TooltipDetail>
+          <TooltipDetail label="Redirect URL">
+            {payload.RedirectURI}
+          </TooltipDetail>
+          <TooltipDetail label="Priority">
+            {_getHumanReadablePriority(payload.pri)}
+          </TooltipDetail>
+          {_markerDetailBytesNullable('Requested bytes', payload.count)}
+        </TooltipDetails>
+        {this._getPhases()}
+      </>
     );
   }
 }

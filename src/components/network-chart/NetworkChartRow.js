@@ -304,6 +304,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           // row, especially when we mouseEnter the row from the top edge.
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
             <TooltipMarker
+              className="tooltipNetwork"
               marker={marker}
               threadIndex={this.props.threadIndex}
             />

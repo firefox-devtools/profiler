@@ -918,6 +918,26 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
     </div>
     Low(8)
   </div>
+  <div
+    class="tooltipNetworkPhases"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is 101 milliseconds"
+    >
+      101ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 0%; margin-right: 0%;"
+    />
+  </div>
 </div>
 `;
 
@@ -1000,6 +1020,26 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
     </div>
     0.000B
   </div>
+  <div
+    class="tooltipNetworkPhases"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is 66 milliseconds"
+    >
+      66ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 0%; margin-right: 0%;"
+    />
+  </div>
 </div>
 `;
 
@@ -1053,6 +1093,26 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
       :
     </div>
     Low(8)
+  </div>
+  <div
+    class="tooltipNetworkPhases"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is 11 milliseconds"
+    >
+      11ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 0%; margin-right: 0%;"
+    />
   </div>
 </div>
 `;
@@ -1128,13 +1188,74 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
       :
     </div>
     45.9KB
+  </div>
+  <div
+    class="tooltipNetworkPhases"
+  >
     <div
       class="tooltipLabel"
     >
-      Response time
+      Waiting for socket thread
       :
     </div>
-    3.5ms
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is -2,239 milliseconds"
+    >
+      -2,239ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 0%; margin-right: 99.7%; box-shadow: 0 0 0 1px inset var(--grey-70);"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      HTTP request and waiting for response
+      :
+    </div>
+    <div
+      aria-label="Starting at -2,239 milliseconds, duration is 29 milliseconds"
+    >
+      29ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: -1091.0048142353905%; margin-right: 1176.9952800184963%;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at -2,210 milliseconds, duration is 3.5 milliseconds"
+    >
+      3.5ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: -1076.9952800184963%; margin-right: 1175.2828809004584%;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      Waiting to transmit the response
+      :
+    </div>
+    <div
+      aria-label="Starting at -2,207 milliseconds, duration is 2,412 milliseconds"
+    >
+      2,412ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: -1075.2828809004584%; margin-right: 0%; box-shadow: 0 0 0 1px inset var(--grey-70);"
+    />
   </div>
 </div>
 `;
