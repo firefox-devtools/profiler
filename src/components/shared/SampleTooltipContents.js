@@ -38,7 +38,7 @@ export default class SampleTooltipContents extends React.PureComponent<Props> {
           <div className="tooltipLabel">Category:</div>
           <div>
             <span
-              className={`category-swatch category-color-${category.color}`}
+              className={`colored-square category-color-${category.color}`}
             />
             {category.name}
           </div>

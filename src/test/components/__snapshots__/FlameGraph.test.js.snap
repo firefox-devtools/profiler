@@ -122,7 +122,7 @@ exports[`FlameGraph has a tooltip that matches the screenshot 1`] = `
         </div>
         <div>
           <span
-            class="category-swatch category-color-blue"
+            class="colored-square category-color-blue"
           />
           DOM
         </div>

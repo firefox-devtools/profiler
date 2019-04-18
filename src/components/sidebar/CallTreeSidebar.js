@@ -45,7 +45,7 @@ function SidebarDetail({ label, color, children }: SidebarDetailProps) {
       <div className="sidebar-value">{children}</div>
       {color ? (
         <div
-          className={`sidebar-color category-swatch category-color-${color}`}
+          className={`sidebar-color colored-square category-color-${color}`}
           title={label}
         />
       ) : (

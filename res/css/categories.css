@@ -3,51 +3,44 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 /**
- * This class should be used to create a small color swatch to describe a
- * category. It is a global css class as it can be used across the project.
+ * These classes should be used to create a small color swatch to describe a
+ * category. They should be used with the class `colored-square` that's defined
+ * in res/css/style.css.
+ * They're global css classes that can be used across the project.
  */
-.category-swatch {
-  display: inline-block;
-  width: 9px;
-  height: 9px;
-  box-sizing: border-box;
-  margin-right: 3px;
-  border: 0.5px solid rgba(0, 0, 0, 0.1);
-}
-
-.category-swatch.category-color-transparent {
+.category-color-transparent {
   border-color: rgba(0, 0, 0, 0.4);
   background-color: #fff;
 }
 
-.category-swatch.category-color-purple {
+.category-color-purple {
   background-color: var(--purple-70);
 }
 
-.category-swatch.category-color-green {
+.category-color-green {
   background-color: var(--green-60);
 }
 
-.category-swatch.category-color-orange {
+.category-color-orange {
   background-color: var(--orange-50);
 }
 
-.category-swatch.category-color-yellow {
+.category-color-yellow {
   background-color: var(--yellow-50);
 }
 
-.category-swatch.category-color-lightblue {
+.category-color-lightblue {
   background-color: var(--blue-40);
 }
 
-.category-swatch.category-color-grey {
+.category-color-grey {
   background-color: var(--grey-30);
 }
 
-.category-swatch.category-color-blue {
+.category-color-blue {
   background-color: var(--blue-60);
 }
 
-.category-swatch.category-color-brown {
+.category-color-brown {
   background-color: var(--magenta-60);
 }
