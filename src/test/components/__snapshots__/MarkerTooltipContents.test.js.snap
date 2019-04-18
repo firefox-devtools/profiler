@@ -27,7 +27,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Bailout-10 
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -73,7 +74,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Bailout-10 
     <div
       class="tooltipLabel"
     >
-      Description:
+      Description
+      :
     </div>
     <div
       style="max-width: 300px;"
@@ -111,7 +113,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: ConstructRo
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -157,13 +160,15 @@ exports[`MarkerTooltipContents renders tooltips for various markers: DOMEvent-10
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
       <div
         class="tooltipLabel"
       >
-        URL:
+        URL
+        :
       </div>
       https://developer.mozilla.org/en-US/
     </div>
@@ -209,7 +214,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: FileIO-114 
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -469,7 +475,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMajor-16.
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -627,7 +634,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMinor-15.
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -750,7 +758,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCSlice-17.
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -824,7 +833,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Invalidate-
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -877,7 +887,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: ht
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -937,7 +948,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: ht
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1018,7 +1030,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: 
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1071,7 +1084,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: 
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1152,7 +1166,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Log-21.7 1`
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1205,7 +1220,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: NotifyDidPa
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1240,7 +1256,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Styles-18.5
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1482,7 +1499,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Styles-20 1
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1763,7 +1781,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: TTFI-21.4 1
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1809,7 +1828,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: UserTiming-
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>

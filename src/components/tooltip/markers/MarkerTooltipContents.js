@@ -20,12 +20,13 @@ import { getThreadSelectors } from '../../../selectors/per-thread';
 import { getImplementationFilter } from '../../../selectors/url-state';
 import { getPageList } from '../../../selectors/profile';
 
+import { TooltipDetails, TooltipDetail } from '../TooltipDetails';
 import Backtrace from '../../shared/Backtrace';
 
 import { bailoutTypeInformation } from '../../../profile-logic/marker-info';
+
 import type { Microseconds } from '../../../types/units';
 import type { Marker } from '../../../types/profile-derived';
-import type { NotVoidOrNull } from '../../../types/utils';
 import type { ImplementationFilter } from '../../../types/actions';
 import type { Thread, ThreadIndex, PageList } from '../../../types/profile';
 import type {
@@ -39,49 +40,22 @@ import type {
 } from '../../../types/markers';
 import type { ConnectedProps } from '../../../utils/connect';
 
-function _markerDetail<T: NotVoidOrNull>(
-  key: string,
-  label: string,
-  value: T,
-  fn: T => string = String
-): React.Node {
-  return [
-    <div className="tooltipLabel" key={key}>
-      {label}:
-    </div>,
-    fn(value),
-  ];
-}
-
-function _markerDetailNullable<T: NotVoidOrNull>(
-  key: string,
-  label: string,
-  value: T | void | null,
-  fn: T => string = String
-): React.Node {
-  if (value === undefined || value === null || fn(value).length === 0) {
-    return null;
-  }
-  return _markerDetail(key, label, value, fn);
-}
-
-function _markerDetailBytesNullable(
-  key: string,
-  label: string,
-  value: ?number
-): React.Node {
+function _markerDetailBytesNullable(label: string, value: ?number): * {
   if (typeof value !== 'number') {
     return null;
   }
-  return _markerDetail(key, label, formatBytes(value));
+  return (
+    <TooltipDetail key={label} label={label}>
+      {formatBytes(value)}
+    </TooltipDetail>
+  );
 }
 
 function _markerDetailDeltaTimeNullable(
-  key: string,
   label: string,
   value1?: number,
   value2?: number
-): React.Node {
+): * {
   if (
     value1 === undefined ||
     value2 === undefined ||
@@ -91,17 +65,20 @@ function _markerDetailDeltaTimeNullable(
     return null;
   }
   const valueResult = value1 - value2;
-  return _markerDetail(key, label, formatMilliseconds(valueResult));
+  return (
+    <TooltipDetail key={label} label={label}>
+      {formatMilliseconds(valueResult)}
+    </TooltipDetail>
+  );
 }
 
 type PhaseTimeTuple = {| name: string, time: Microseconds |};
 
-function _markerDetailPhase(p: PhaseTimeTuple): React.Node {
-  return _markerDetail(
-    'gcphase' + p.name,
-    'Phase ' + p.name,
-    p.time,
-    t => formatNumber(t / 1000) + 'ms'
+function _markerDetailPhase(p: PhaseTimeTuple): * {
+  return (
+    <TooltipDetail key={p.name} label={'Phase ' + p.name}>
+      {formatMilliseconds(p.time / 1000)}
+    </TooltipDetail>
   );
 }
 
@@ -122,11 +99,7 @@ function _makePhaseTimesArray(
   return array;
 }
 
-function _makePriorityHumanReadable(
-  key: string,
-  label: string,
-  priority: number
-): React.Node {
+function _makePriorityHumanReadable(label: string, priority: number): * {
   if (typeof priority !== 'number') {
     return null;
   }
@@ -151,7 +124,11 @@ function _makePriorityHumanReadable(
   }
 
   prioLabel = prioLabel + '(' + priority + ')';
-  return _markerDetail(key, label, prioLabel);
+  return (
+    <TooltipDetail key={label} label={label}>
+      {prioLabel}
+    </TooltipDetail>
+  );
 }
 
 function _dataStatusReplace(str: string): string {
@@ -320,19 +297,17 @@ function _markerBacktrace(
           ? null
           : formatMilliseconds(marker.start - data.timeStamp);
       return (
-        <div className="tooltipDetails">
-          {_markerDetail('type', 'Type', data.eventType)}
-          {latency === null
-            ? null
-            : _markerDetail('latency', 'Latency', latency)}
-        </div>
+        <TooltipDetails>
+          <TooltipDetail label="Type">{data.eventType}</TooltipDetail>
+          <TooltipDetail label="Latency">{latency}</TooltipDetail>
+        </TooltipDetails>
       );
     }
     case 'Frame Construction':
       return (
-        <div className="tooltipDetails">
-          {_markerDetail('category', 'Category', data.category)}
-        </div>
+        <TooltipDetails>
+          <TooltipDetail label="Category">{data.category}</TooltipDetail>
+        </TooltipDetails>
       );
     default:
       break;
@@ -367,44 +342,46 @@ function getMarkerDetails(
   if (data) {
     switch (data.type) {
       case 'FileIO': {
-        return [
-          <div className="tooltipDetails" key="details">
-            {_markerDetailNullable('name', 'Operation', data.operation)}
-            {_markerDetailNullable('name', 'Source', data.source)}
-            {_markerDetailNullable('name', 'Filename', data.filename)}
-          </div>,
-          data.cause ? (
-            <div className="tooltipDetailsBackTrace" key="backtrace">
-              <Backtrace
-                maxHeight="30em"
-                stackIndex={data.cause.stack}
-                thread={thread}
-                implementationFilter={implementationFilter}
-              />
-            </div>
-          ) : null,
-        ];
+        return (
+          <>
+            <TooltipDetails>
+              <TooltipDetail label="Operation">{data.operation}</TooltipDetail>
+              <TooltipDetail label="Source">{data.source}</TooltipDetail>
+              <TooltipDetail label="Filename">{data.filename}</TooltipDetail>
+            </TooltipDetails>
+            {data.cause ? (
+              <div className="tooltipDetailsBackTrace" key="backtrace">
+                <Backtrace
+                  maxHeight="30em"
+                  stackIndex={data.cause.stack}
+                  thread={thread}
+                  implementationFilter={implementationFilter}
+                />
+              </div>
+            ) : null}
+          </>
+        );
       }
       case 'UserTiming': {
         return (
-          <div className="tooltipDetails">
-            {_markerDetail('name', 'Name', data.name)}
-          </div>
+          <TooltipDetails>
+            <TooltipDetail label="Name">{data.name}</TooltipDetail>
+          </TooltipDetails>
         );
       }
       case 'Text': {
         return (
-          <div className="tooltipDetails">
-            {_markerDetail('name', 'Name', data.name)}
-          </div>
+          <TooltipDetails>
+            <TooltipDetail label="Name">{data.name}</TooltipDetail>
+          </TooltipDetails>
         );
       }
       case 'Log': {
         return (
-          <div className="tooltipDetails">
-            {_markerDetail('module', 'Module', data.module)}
-            {_markerDetail('name', 'Name', data.name)}
-          </div>
+          <TooltipDetails>
+            <TooltipDetail label="Module">{data.module}</TooltipDetail>
+            <TooltipDetail label="Name">{data.name}</TooltipDetail>
+          </TooltipDetails>
         );
       }
       case 'GCMinor': {
@@ -430,101 +407,79 @@ function getMarkerDetails(
                   ])
                 : undefined;
               return (
-                <div className="tooltipDetails">
-                  {_markerDetail('gcreason', 'Reason', nursery.reason)}
-                  {_markerDetail(
-                    'gcpromotion',
-                    'Bytes evicted',
-                    formatValueTotal(
+                <TooltipDetails>
+                  <TooltipDetail label="Reason">{nursery.reason}</TooltipDetail>
+                  <TooltipDetail label="Bytes evicted">
+                    {formatValueTotal(
                       nursery.bytes_tenured,
                       nursery.bytes_used,
                       formatBytes
-                    )
-                  )}
-                  {nursery.cells_tenured && nursery.cells_allocated_nursery
-                    ? _markerDetail(
-                        'gcpromotioncells',
-                        'Cells evicted',
-                        formatValueTotal(
-                          nursery.cells_tenured,
-                          nursery.cells_allocated_nursery,
-                          formatSI
-                        )
-                      )
-                    : null}
-                  {nursery.cur_capacity
-                    ? _markerDetail(
-                        'gcnurseryusage',
-                        'Bytes used',
-                        formatValueTotal(
-                          nursery.bytes_used,
-                          nursery.cur_capacity,
-                          formatBytes
-                        )
-                      )
-                    : null}
-                  {nursery.new_capacity
-                    ? _markerDetail(
-                        'gcnewnurserysize',
-                        'New nursery size',
-                        nursery.new_capacity,
+                    )}
+                  </TooltipDetail>
+                  {nursery.cells_tenured && nursery.cells_allocated_nursery ? (
+                    <TooltipDetail label="Cells evicted">
+                      {formatValueTotal(
+                        nursery.cells_tenured,
+                        nursery.cells_allocated_nursery,
+                        formatSI
+                      )}
+                    </TooltipDetail>
+                  ) : null}
+                  {nursery.cur_capacity ? (
+                    <TooltipDetail label="Bytes used">
+                      {formatValueTotal(
+                        nursery.bytes_used,
+                        nursery.cur_capacity,
                         formatBytes
-                      )
-                    : null}
-                  {nursery.lazy_capacity
-                    ? _markerDetail(
-                        'gclazynurserysize',
-                        'Lazy-allocated size',
-                        nursery.lazy_capacity,
-                        formatBytes
-                      )
-                    : null}
+                      )}
+                    </TooltipDetail>
+                  ) : null}
+                  {nursery.new_capacity ? (
+                    <TooltipDetail label="New nursery size">
+                      {formatBytes(nursery.new_capacity)}
+                    </TooltipDetail>
+                  ) : null}
+                  {nursery.lazy_capacity ? (
+                    <TooltipDetail label="Lazy-allocated size">
+                      {formatBytes(nursery.lazy_capacity)}
+                    </TooltipDetail>
+                  ) : null}
                   {nursery.cells_allocated_nursery &&
-                  nursery.cells_allocated_tenured
-                    ? _markerDetail(
-                        'gcnursaryallocations',
-                        'Nursery allocations since last minor GC',
-                        formatValueTotal(
-                          nursery.cells_allocated_nursery,
-                          nursery.cells_allocated_nursery +
-                            nursery.cells_allocated_tenured,
-                          formatSI
-                        )
-                      )
-                    : null}
-                  {evictTimeMS
-                    ? _markerDetail(
-                        'gctenurerate',
-                        'Tenuring allocation rate',
+                  nursery.cells_allocated_tenured ? (
+                    <TooltipDetail label="Nursery allocations since last minor GC">
+                      {formatValueTotal(
+                        nursery.cells_allocated_nursery,
+                        nursery.cells_allocated_nursery +
+                          nursery.cells_allocated_tenured,
+                        formatSI
+                      )}
+                    </TooltipDetail>
+                  ) : null}
+                  {evictTimeMS ? (
+                    <TooltipDetail label="Tenuring allocation rate">
+                      {formatBytes(
                         // evictTimeMS is in milliseconds.
-                        nursery.bytes_tenured / (evictTimeMS / 1000000),
-                        x => formatBytes(x) + '/s'
-                      )
-                    : null}
-                  {evictTimeMS && nursery.cells_tenured
-                    ? _markerDetail(
-                        'gctenurereatecells',
-                        'Tenuring allocation rate',
-                        nursery.cells_tenured / (evictTimeMS / 10000000),
-                        x => formatSI(x) + '/s'
-                      )
-                    : null}
-                  {nursery.chunk_alloc_us
-                    ? _markerDetail(
-                        'gctimeinchunkalloc',
-                        'Time spent allocating chunks in mutator',
-                        nursery.chunk_alloc_us,
-                        formatMicroseconds
-                      )
-                    : null}
-                  {nursery.groups_pretenured
-                    ? _markerDetail(
-                        'gcpretenured',
-                        'Number of groups to pretenure',
-                        nursery.groups_pretenured,
-                        x => formatNumber(x, 2, 0)
-                      )
-                    : null}
+                        nursery.bytes_tenured / (evictTimeMS / 1000000)
+                      ) + '/s'}
+                    </TooltipDetail>
+                  ) : null}
+                  {evictTimeMS && nursery.cells_tenured ? (
+                    <TooltipDetail label="Tenuring allocation rate">
+                      {formatSI(
+                        nursery.cells_tenured / (evictTimeMS / 10000000)
+                      ) + '/s'}
+                    </TooltipDetail>
+                  ) : null}
+                  {nursery.chunk_alloc_us ? (
+                    <TooltipDetail label="Time spent allocating chunks in mutator">
+                      {formatMicroseconds(nursery.chunk_alloc_us)}
+                    </TooltipDetail>
+                  ) : null}
+                  {nursery.groups_pretenured ? (
+                    <TooltipDetail label="Number of groups to pretenure">
+                      {formatNumber(nursery.groups_pretenured, 2, 0)}
+                    </TooltipDetail>
+                  ) : null}
                   {_makePhaseTimesArray(nursery.phase_times)
                     /*
                      * Nursery collection should usually be very quick.  1ms
@@ -535,20 +490,20 @@ function getMarkerDetails(
                      */
                     .filter(pt => pt.time > 250) // 250us
                     .map(_markerDetailPhase)}
-                </div>
+                </TooltipDetails>
               );
             }
             case 'nursery disabled':
               return (
-                <div className="tooltipDetails">
-                  {_markerDetail('gcstatus', 'Status', 'Nursery disabled')}
-                </div>
+                <TooltipDetails>
+                  <TooltipDetail label="Status">Nursery disabled</TooltipDetail>
+                </TooltipDetails>
               );
             case 'nursery empty':
               return (
-                <div className="tooltipDetails">
-                  {_markerDetail('gcstatus', 'Status', 'Nursery empty')}
-                </div>
+                <TooltipDetails>
+                  <TooltipDetail label="Status">Nursery empty</TooltipDetail>
+                </TooltipDetails>
               );
             default:
               return null;
@@ -562,20 +517,20 @@ function getMarkerDetails(
         switch (timings.status) {
           case 'aborted':
             return (
-              <div className="tooltipDetails">
-                {_markerDetail('status', 'Status', 'Aborted (OOM)')}
-              </div>
+              <TooltipDetails>
+                <TooltipDetail label="Status">Aborted (OOM)</TooltipDetail>
+              </TooltipDetails>
             );
           case 'completed': {
-            let nonIncrementalReason;
+            let nonIncrementalReason = null;
             if (
               timings.nonincremental_reason &&
               timings.nonincremental_reason !== 'None'
             ) {
-              nonIncrementalReason = _markerDetail(
-                'gcnonincrementalreason',
-                'Non-incremental reason',
-                timings.nonincremental_reason
+              nonIncrementalReason = (
+                <TooltipDetail label="Non-incremental reason">
+                  {timings.nonincremental_reason}
+                </TooltipDetail>
               );
             }
             const phase_times = _filterInterestingPhaseTimes(
@@ -585,78 +540,61 @@ function getMarkerDetails(
             let gcsize;
             const post_heap_size = timings.post_heap_size;
             if (post_heap_size !== undefined) {
-              gcsize = _markerDetail(
-                'gcsize',
-                'Heap size (pre - post)',
-                formatBytes(timings.allocated_bytes) +
-                  ' - ' +
-                  formatBytes(post_heap_size)
+              gcsize = (
+                <TooltipDetail label="Heap size (pre - post)">
+                  {formatBytes(timings.allocated_bytes) +
+                    ' - ' +
+                    formatBytes(post_heap_size)}
+                </TooltipDetail>
               );
             } else {
-              gcsize = _markerDetail(
-                'gcsizepre',
-                'Heap size (pre)',
-                timings.allocated_bytes,
-                formatBytes
+              gcsize = (
+                <TooltipDetail label="Heap size (pre)">
+                  {formatBytes(timings.allocated_bytes)}
+                </TooltipDetail>
               );
             }
             return (
-              <div className="tooltipDetails">
-                {_markerDetail('gcreason', 'Reason', timings.reason)}
+              <TooltipDetails>
+                <TooltipDetail label="Reason">{timings.reason}</TooltipDetail>
                 {nonIncrementalReason}
-                {_markerDetail(
-                  'gctime',
-                  'Total slice times',
-                  timings.total_time,
-                  x =>
-                    formatMilliseconds(
-                      x,
-                      /* significantDigits */ 3,
-                      /* maxFractionalDigits */ 2
-                    )
-                )}
-                {_markerDetail(
-                  'gcmaxpause',
-                  'Max Pause',
-                  timings.max_pause,
-                  x =>
-                    formatMilliseconds(
-                      x,
-                      /* significantDigits */ 3,
-                      /* maxFractionalDigits */ 2
-                    )
-                )}
+                <TooltipDetail label="Total slice times">
+                  {formatMilliseconds(
+                    timings.total_time,
+                    /* significantDigits */ 3,
+                    /* maxFractionalDigits */ 2
+                  )}
+                </TooltipDetail>
+                <TooltipDetail label="Max Pause">
+                  {formatMilliseconds(
+                    timings.max_pause,
+                    /* significantDigits */ 3,
+                    /* maxFractionalDigits */ 2
+                  )}
+                </TooltipDetail>
                 {gcsize}
-                {_markerDetail(
-                  'gcmmu20ms',
-                  'MMU 20ms',
-                  timings.mmu_20ms,
-                  formatPercent
-                )}
-                {_markerDetail(
-                  'gcmmu50ms',
-                  'MMU 50ms',
-                  timings.mmu_50ms,
-                  formatPercent
-                )}
-                {_markerDetail('gcnumminors', 'Minor GCs', timings.minor_gcs)}
-                {_markerDetail('gcnumslices', 'Slices', timings.slices)}
-                {_markerDetail(
-                  'gcnumzones',
-                  'Zones',
-                  formatValueTotal(
+                <TooltipDetail label="MMU 20ms">
+                  {formatPercent(timings.mmu_20ms)}
+                </TooltipDetail>
+                <TooltipDetail label="MMU 50ms">
+                  {formatPercent(timings.mmu_50ms)}
+                </TooltipDetail>
+                <TooltipDetail label="Minor GCs">
+                  {timings.minor_gcs}
+                </TooltipDetail>
+                <TooltipDetail label="Slices">{timings.slices}</TooltipDetail>
+                <TooltipDetail label="Zones">
+                  {formatValueTotal(
                     timings.zones_collected,
                     timings.total_zones,
                     String
-                  )
-                )}
-                {_markerDetail(
-                  'gcnumcompartments',
-                  'Compartments',
-                  timings.total_compartments
-                )}
+                  )}
+                </TooltipDetail>
+                <TooltipDetail label="Compartments">
+                  {timings.total_compartments}
+                </TooltipDetail>
                 {phase_times.map(_markerDetailPhase)}
-              </div>
+              </TooltipDetails>
             );
           }
           default:
@@ -665,17 +603,17 @@ function getMarkerDetails(
       }
       case 'GCSlice': {
         const timings = data.timings;
-        let triggers;
+        let triggers = null;
         if (timings.trigger_amount && timings.trigger_threshold) {
-          triggers = _markerDetail(
-            'gctrigger',
-            'Trigger (amt/trig)',
-            formatValueTotal(
-              timings.trigger_amount,
-              timings.trigger_threshold,
-              formatBytes,
-              false
-            )
+          triggers = (
+            <TooltipDetail label="Trigger (amt/trig)">
+              {formatValueTotal(
+                timings.trigger_amount,
+                timings.trigger_threshold,
+                formatBytes,
+                false /* includePercent */
+              )}
+            </TooltipDetail>
           );
         }
         const phase_times = _filterInterestingPhaseTimes(
@@ -683,43 +621,46 @@ function getMarkerDetails(
           6
         );
         return (
-          <div className="tooltipDetails">
-            {_markerDetail('gcreason', 'Reason', timings.reason)}
-            {_markerDetail('gcbudget', 'Budget', timings.budget)}
-            {_markerDetail(
-              'gcstate',
-              'States (pre - post)',
-              timings.initial_state + ' – ' + timings.final_state
-            )}
+          <TooltipDetails>
+            <TooltipDetail label="Reason">{timings.reason}</TooltipDetail>
+            <TooltipDetail label="Budget">{timings.budget}</TooltipDetail>
+            <TooltipDetail label="States (pre - post)">
+              {timings.initial_state + ' – ' + timings.final_state}
+            </TooltipDetail>
             {triggers}
-            {timings.page_faults
-              ? _markerDetail('gcfaults', 'Page faults', timings.page_faults)
-              : null}
+            <TooltipDetail label="Page faults">
+              {timings.page_faults}
+            </TooltipDetail>
             {phase_times.map(_markerDetailPhase)}
-          </div>
+          </TooltipDetails>
         );
       }
       case 'Bailout': {
         return (
-          <div className="tooltipDetails">
-            {_markerDetail('bailoutType', 'Type', data.bailoutType)}
-            {_markerDetail('where', 'Where', data.where)}
-            {_markerDetail('script', 'Script', data.script)}
-            {_markerDetail('functionLine', 'Function Line', data.functionLine)}
-            {_markerDetail('bailoutLine', 'Bailout Line', data.bailoutLine)}
-            <div className="tooltipLabel">Description:</div>
-            <div style={{ maxWidth: '300px' }}>
-              {bailoutTypeInformation['Bailout_' + data.bailoutType]}
-            </div>
-          </div>
+          <TooltipDetails>
+            <TooltipDetail label="Type">{data.bailoutType}</TooltipDetail>
+            <TooltipDetail label="Where">{data.where}</TooltipDetail>
+            <TooltipDetail label="Script">{data.script}</TooltipDetail>
+            <TooltipDetail label="Function Line">
+              {data.functionLine}
+            </TooltipDetail>
+            <TooltipDetail label="Bailout Line">
+              {data.bailoutLine}
+            </TooltipDetail>
+            <TooltipDetail label="Description">
+              <div style={{ maxWidth: '300px' }}>
+                {bailoutTypeInformation['Bailout_' + data.bailoutType]}
+              </div>
+            </TooltipDetail>
+          </TooltipDetails>
         );
       }
       case 'Invalidation': {
         return (
-          <div className="tooltipDetails">
-            {_markerDetailNullable('url', 'URL', data.url)}
-            {_markerDetail('line', 'Line', data.line)}
-          </div>
+          <TooltipDetails>
+            <TooltipDetail label="URL">{data.url}</TooltipDetail>
+            <TooltipDetail label="Line">{data.line}</TooltipDetail>
+          </TooltipDetails>
         );
       }
       case 'Network': {
@@ -728,96 +669,84 @@ function getMarkerDetails(
           data.status !== 'STATUS_REDIRECT'
         ) {
           return (
-            <div className="tooltipDetails">
-              {_markerDetail(
-                'status',
-                'Status',
-                _dataStatusReplace(data.status)
-              )}
-              {_markerDetailNullable('url', 'URL', data.URI)}
-              {_makePriorityHumanReadable('pri', 'Priority', data.pri)}
-              {_markerDetailBytesNullable(
-                'count',
-                'Requested bytes',
-                data.count
-              )}
-            </div>
+            <TooltipDetails>
+              <TooltipDetail label="Status">
+                {_dataStatusReplace(data.status)}
+              </TooltipDetail>
+              <TooltipDetail label="URL">{data.URI}</TooltipDetail>
+              {_makePriorityHumanReadable('Priority', data.pri)}
+              {_markerDetailBytesNullable('Requested bytes', data.count)}
+            </TooltipDetails>
           );
         }
         return (
-          <div className="tooltipDetails">
-            {_markerDetail('status', 'Status', _dataStatusReplace(data.status))}
-            {_markerDetailNullable('cache', 'Cache', data.cache)}
-            {_markerDetailNullable('url', 'URL', data.URI)}
-            {_markerDetailNullable(
-              'redirect_url',
-              'Redirect URL',
-              data.RedirectURI
-            )}
-            {_makePriorityHumanReadable('pri', 'Priority', data.pri)}
-            {_markerDetailBytesNullable('count', 'Requested bytes', data.count)}
+          <TooltipDetails>
+            <TooltipDetail label="Status">
+              {_dataStatusReplace(data.status)}
+            </TooltipDetail>
+            <TooltipDetail label="Cache">{data.cache}</TooltipDetail>
+            <TooltipDetail label="URL">{data.URI}</TooltipDetail>
+            <TooltipDetail label="Redirect URL">
+              {data.RedirectURI}
+            </TooltipDetail>
+            {_makePriorityHumanReadable('Priority', data.pri)}
+            {_markerDetailBytesNullable('Requested bytes', data.count)}
             {_markerDetailDeltaTimeNullable(
-              'domainLookup',
               'Domain lookup in total',
               data.domainLookupEnd,
               data.domainLookupStart
             )}
             {_markerDetailDeltaTimeNullable(
-              'connect',
               'Connection in total',
               data.connectEnd,
               data.connectStart
             )}
             {_markerDetailDeltaTimeNullable(
-              'tcpConnect',
               'TCP connection in total',
               data.tcpConnectEnd,
               data.connectStart
             )}
             {_markerDetailDeltaTimeNullable(
-              'secureConnectionStart',
               'Start of secure connection at',
               data.secureConnectionStart,
               data.tcpConnectEnd
             )}
             {_markerDetailDeltaTimeNullable(
-              'requestStart',
               'Start of request at',
               data.requestStart,
               data.connectStart
             )}
             {_markerDetailDeltaTimeNullable(
-              'response',
               'Response time',
               data.responseEnd,
               data.responseStart
             )}
-          </div>
+          </TooltipDetails>
         );
       }
       case 'Styles': {
-        return [
-          <div className="tooltipDetails" key="details">
-            {_markerDetail(
-              'elementsTraversed',
-              'Elements traversed',
-              data.elementsTraversed
-            )}
-            {_markerDetail(
-              'elementsStyled',
-              'Elements styled',
-              data.elementsStyled
-            )}
-            {_markerDetail(
-              'elementsMatched',
-              'Elements matched',
-              data.elementsMatched
-            )}
-            {_markerDetail('stylesShared', 'Styles shared', data.stylesShared)}
-            {_markerDetail('stylesReused', 'Styles reused', data.stylesReused)}
-          </div>,
-          _markerBacktrace(marker, data, thread, implementationFilter),
-        ];
+        return (
+          <>
+            <TooltipDetails>
+              <TooltipDetail label="Elements traversed">
+                {data.elementsTraversed}
+              </TooltipDetail>
+              <TooltipDetail label="Elements styled">
+                {data.elementsStyled}
+              </TooltipDetail>
+              <TooltipDetail label="Elements matched">
+                {data.elementsMatched}
+              </TooltipDetail>
+              <TooltipDetail label="Styles shared">
+                {data.stylesShared}
+              </TooltipDetail>
+              <TooltipDetail label="Styles reused">
+                {data.stylesReused}
+              </TooltipDetail>
+            </TooltipDetails>
+            {_markerBacktrace(marker, data, thread, implementationFilter)}
+          </>
+        );
       }
       case 'tracing': {
         return _markerBacktrace(marker, data, thread, implementationFilter);
@@ -868,21 +797,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       implementationFilter,
     } = this.props;
 
-    const threadNameDetail = threadName ? (
-      <>
-        <div className="tooltipLabel">Thread:</div>
-        {threadName}
-      </>
-    ) : null;
-
     const url = this._getUrl(marker);
-    const urlDetail = url ? (
-      <>
-        <div className="tooltipLabel">URL:</div>
-        {url}
-      </>
-    ) : null;
-
     const details = getMarkerDetails(marker, thread, implementationFilter);
     return (
       <div className={classNames('tooltipMarker', className)}>
@@ -898,11 +813,11 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
             </div>
             <div className="tooltipTitle">{marker.title || marker.name}</div>
           </div>
-          {threadNameDetail || urlDetail ? (
-            <div className="tooltipDetails">
-              {threadNameDetail}
-              {urlDetail}
-            </div>
+          {threadName || url ? (
+            <TooltipDetails>
+              <TooltipDetail label="Thread">{threadName}</TooltipDetail>
+              <TooltipDetail label="URL">{url}</TooltipDetail>
+            </TooltipDetails>
           ) : null}
         </div>
         {details}
