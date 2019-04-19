@@ -918,26 +918,6 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
     </div>
     Low(8)
   </div>
-  <div
-    class="tooltipNetworkPhases network-color-other"
-  >
-    <div
-      class="tooltipLabel"
-    >
-      HTTP response
-      :
-    </div>
-    <div
-      aria-label="Starting at 0.000 milliseconds, duration is 101 milliseconds"
-    >
-      101ms
-    </div>
-    <div
-      aria-hidden="true"
-      class="tooltipNetworkPhase"
-      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
-    />
-  </div>
 </div>
 `;
 

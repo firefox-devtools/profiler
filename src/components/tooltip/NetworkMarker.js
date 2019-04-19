@@ -170,6 +170,11 @@ type Props = {|
 export class TooltipNetworkMarker extends React.PureComponent<Props> {
   _getPhases(markerColorClass: string): React.Node {
     const { payload } = this.props;
+
+    if (payload.status === 'STATUS_START') {
+      return null;
+    }
+
     const dur = payload.endTime - payload.startTime;
 
     const availableProperties = ALL_NETWORK_PROPERTIES_IN_ORDER.filter(
