@@ -12,10 +12,13 @@
   user-select: none;
 }
 
+.networkChart .treeViewBody {
+  border-top: 1px solid var(--grey-30);
+}
+
 .networkChart .treeViewBody .treeViewBodyInnerWrapper {
   width: 100%;
   flex-flow: column nowrap;
-  border-top: 1px solid var(--grey-30);
 }
 
 .networkChartRowItem {
