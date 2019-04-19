@@ -1187,7 +1187,15 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
       Guessed MIME type
       :
     </div>
-    image/jpeg
+    <div
+      class="tooltipNetworkMimeType"
+    >
+      <span
+        class="tooltipNetworkMimeTypeSwatch colored-square network-color-img"
+        title="image/jpeg"
+      />
+      image/jpeg
+    </div>
     <div
       class="tooltipLabel"
     >

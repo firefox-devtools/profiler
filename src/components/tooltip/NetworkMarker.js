@@ -243,7 +243,17 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
           <TooltipDetail label="Priority">
             {_getHumanReadablePriority(payload.pri)}
           </TooltipDetail>
-          <TooltipDetail label="Guessed MIME type">{mimeType}</TooltipDetail>
+          {mimeType ? (
+            <TooltipDetail label="Guessed MIME type">
+              <div className="tooltipNetworkMimeType">
+                <span
+                  className={`tooltipNetworkMimeTypeSwatch colored-square ${markerColorClass}`}
+                  title={mimeType}
+                />
+                {mimeType}
+              </div>
+            </TooltipDetail>
+          ) : null}
           {_markerDetailBytesNullable('Requested bytes', payload.count)}
         </TooltipDetails>
         {this._getPhases(markerColorClass)}

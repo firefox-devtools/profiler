@@ -25,3 +25,12 @@
   box-shadow: 0 0 0 1px inset var(--marker-color);
   opacity: 0.5;
 }
+
+.tooltipNetworkMimeType {
+  display: flex;
+  align-items: center;
+}
+
+.tooltipNetworkMimeTypeSwatch {
+  background-color: var(--marker-color);
+}
