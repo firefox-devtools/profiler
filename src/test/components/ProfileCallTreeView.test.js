@@ -25,6 +25,18 @@ import {
   addTransformToStack,
 } from '../../actions/profile-view';
 
+beforeEach(() => {
+  // Mock out the 2d canvas for the loupe view.
+  jest
+    .spyOn(HTMLCanvasElement.prototype, 'getContext')
+    .mockImplementation(() => mockCanvasContext());
+  // This makes the bounding box large enough so that we don't trigger
+  // VirtualList's virtualization. We assert this above.
+  jest
+    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+    .mockImplementation(() => getBoundingBox(1000, 2000));
+});
+
 describe('calltree/ProfileCallTreeView', function() {
   const { profile } = getProfileFromTextSamples(`
     A  A  A
@@ -33,13 +45,6 @@ describe('calltree/ProfileCallTreeView', function() {
     D  F  I
     E  E
   `);
-
-  beforeEach(() => {
-    // Mock out the 2d canvas for the loupe view.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
-  });
 
   it('renders an unfiltered call tree', () => {
     const { container } = render(
@@ -116,13 +121,6 @@ describe('calltree/ProfileCallTreeView', function() {
 });
 
 describe('calltree/ProfileCallTreeView EmptyReasons', function() {
-  beforeEach(() => {
-    // Mock out the 2d canvas for the loupe view.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
-  });
-
   const { profile } = getProfileFromTextSamples(`
     A  A  A
     B  B  B
@@ -164,20 +162,7 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
 });
 
 describe('calltree/ProfileCallTreeView navigation keys', () => {
-  beforeEach(() => {
-    // Mock out the 2d canvas for the loupe view.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
-  });
-
   function setup(profileString: string, expectedRowsLength: number) {
-    // This makes the bounding box large enough so that we don't trigger
-    // VirtualList's virtualization. We assert this above.
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(1000, 2000));
-
     const { profile } = getProfileFromTextSamples(profileString);
     const store = storeWithProfile(profile);
     const { container } = render(
@@ -254,19 +239,6 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
 });
 
 describe('calltree/ProfileCallTreeView TransformNavigator', () => {
-  beforeEach(() => {
-    // Mock out the 2d canvas for the loupe view.
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => mockCanvasContext());
-
-    // This makes the bounding box large enough so that we don't trigger
-    // VirtualList's virtualization. We assert this above.
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(1000, 2000));
-  });
-
   it('renders with multiple transforms applied', () => {
     const {
       profile,
