@@ -10,7 +10,9 @@ import '../res/css/focus.css';
 import 'photon-colors/photon-colors.css';
 import '../res/css/photon/index.css';
 import '../res/css/style.css';
+import '../res/css/global.css';
 import '../res/css/categories.css';
+import '../res/css/network.css';
 
 // Now import the JS after the CSS.
 import React from 'react';

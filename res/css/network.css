@@ -1,0 +1,28 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/* These colors are used with network markers, to give a quick visual indication
+ * of their mime types. They're used in the network chart and in the tooltip.
+ * They're quite bright and strong on purpose, because the marker has some
+ * transparency, and we need the marker to stand out, especially when only the
+ * border is displayed. */
+.network-color-css {
+  --marker-color: var(--purple-70);
+}
+
+.network-color-js {
+  --marker-color: var(--yellow-60);
+}
+
+.network-color-html {
+  --marker-color: var(--blue-70);
+}
+
+.network-color-img {
+  --marker-color: var(--green-70);
+}
+
+.network-color-other {
+  --marker-color: var(--grey-70);
+}

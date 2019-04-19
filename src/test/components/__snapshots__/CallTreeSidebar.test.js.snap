@@ -82,7 +82,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       %)
     </div>
     <div
-      class="sidebar-color category-swatch category-color-grey"
+      class="sidebar-color colored-square category-color-grey"
       title="Other"
     />
     <h4
@@ -236,7 +236,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       %)
     </div>
     <div
-      class="sidebar-color category-swatch category-color-grey"
+      class="sidebar-color colored-square category-color-grey"
       title="Other"
     />
     <h4
@@ -390,7 +390,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       %)
     </div>
     <div
-      class="sidebar-color category-swatch category-color-transparent"
+      class="sidebar-color colored-square category-color-transparent"
       title="Idle"
     />
     <div
@@ -408,7 +408,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       %)
     </div>
     <div
-      class="sidebar-color category-swatch category-color-purple"
+      class="sidebar-color colored-square category-color-purple"
       title="Layout"
     />
     <h4
@@ -602,7 +602,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       %)
     </div>
     <div
-      class="sidebar-color category-swatch category-color-grey"
+      class="sidebar-color colored-square category-color-grey"
       title="Other"
     />
     <h4
@@ -804,7 +804,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       %)
     </div>
     <div
-      class="sidebar-color category-swatch category-color-grey"
+      class="sidebar-color colored-square category-color-grey"
       title="Other"
     />
     <h4
@@ -978,7 +978,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       %)
     </div>
     <div
-      class="sidebar-color category-swatch category-color-purple"
+      class="sidebar-color colored-square category-color-purple"
       title="Layout"
     />
     <h4
@@ -1152,7 +1152,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       %)
     </div>
     <div
-      class="sidebar-color category-swatch category-color-transparent"
+      class="sidebar-color colored-square category-color-transparent"
       title="Idle"
     />
     <h4
@@ -1326,7 +1326,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       %)
     </div>
     <div
-      class="sidebar-color category-swatch category-color-purple"
+      class="sidebar-color colored-square category-color-purple"
       title="Layout"
     />
     <h4

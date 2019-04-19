@@ -322,7 +322,7 @@ describe('NetworkChartRowBar MIME-type filter', function() {
         endTime: 90,
       }
     );
-    expect(rowItem().classList.contains('networkChartRowItemImg')).toBe(true);
+    expect(rowItem().classList.contains('network-color-img')).toBe(true);
   });
 
   it('searches for html MIME-Type', function() {
@@ -340,7 +340,7 @@ describe('NetworkChartRowBar MIME-type filter', function() {
       }
     );
 
-    expect(rowItem().classList.contains('networkChartRowItemHtml')).toBe(true);
+    expect(rowItem().classList.contains('network-color-html')).toBe(true);
   });
 
   it('searches for js MIME-Type', function() {
@@ -358,7 +358,7 @@ describe('NetworkChartRowBar MIME-type filter', function() {
       }
     );
 
-    expect(rowItem().classList.contains('networkChartRowItemJs')).toBe(true);
+    expect(rowItem().classList.contains('network-color-js')).toBe(true);
   });
 
   it('searches for css MIME-Type', function() {
@@ -376,7 +376,7 @@ describe('NetworkChartRowBar MIME-type filter', function() {
       }
     );
 
-    expect(rowItem().classList.contains('networkChartRowItemCss')).toBe(true);
+    expect(rowItem().classList.contains('network-color-css')).toBe(true);
   });
 
   it('uses default when no filter applies', function() {
@@ -394,7 +394,7 @@ describe('NetworkChartRowBar MIME-type filter', function() {
       }
     );
 
-    expect(rowItem().className).toEqual('even networkChartRowItem ');
+    expect(rowItem().classList.contains('network-color-other')).toBe(true);
   });
 });
 
