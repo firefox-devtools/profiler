@@ -120,7 +120,12 @@ export type AppState = {|
   +trackThreadHeights: Array<ThreadIndex | void>,
 |};
 
-export type UploadPhase = 'local' | 'uploading' | 'uploaded' | 'error';
+export type UploadPhase =
+  | 'local'
+  | 'compressing'
+  | 'uploading'
+  | 'uploaded'
+  | 'error';
 
 export type UploadState = {|
   phase: UploadPhase,

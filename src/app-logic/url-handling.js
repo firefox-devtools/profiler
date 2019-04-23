@@ -155,7 +155,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
     v: CURRENT_URL_VERSION,
-    profileName: urlState.profileName,
+    profileName: urlState.profileName || undefined,
     published: urlState.isNewlyPublished === true ? null : undefined,
   };
 

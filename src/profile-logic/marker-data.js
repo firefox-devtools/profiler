@@ -831,6 +831,76 @@ export function mergeStartAndEndNetworkMarker(markers: Marker[]): Marker[] {
   return filteredMarkers;
 }
 
+// Identifies mime type of a network request.
+export function guessMimeTypeFromNetworkMarker(
+  payload: NetworkPayload
+): string | null {
+  let uri;
+  try {
+    uri = new URL(payload.URI);
+  } catch (e) {
+    return null;
+  }
+
+  // Extracting the fileName from the path.
+  // This is a workaround until we have
+  // mime types passed from gecko to network marker requests.
+
+  const fileName = uri.pathname;
+  const lastDotIndex = fileName.lastIndexOf('.');
+  if (lastDotIndex < 0) {
+    return null;
+  }
+
+  const fileExt = fileName.slice(lastDotIndex + 1);
+
+  switch (fileExt) {
+    case 'js':
+      return 'application/javascript';
+    case 'css':
+    case 'html':
+      return `text/${fileExt}`;
+    case 'gif':
+    case 'png':
+      return `image/${fileExt}`;
+    case 'jpeg':
+    case 'jpg':
+      return 'image/jpeg';
+    case 'svg':
+      return 'image/svg+xml';
+    default:
+      return null;
+  }
+}
+
+// This function returns one of the global css classes, or the empty string,
+// depending on the input mime type. Usually this function is fed the result of
+// `guessMimeTypeFromNetworkMarker`.
+export function getColorClassNameForMimeType(
+  mimeType: string | null
+):
+  | 'network-color-css'
+  | 'network-color-js'
+  | 'network-color-html'
+  | 'network-color-img'
+  | 'network-color-other' {
+  switch (mimeType) {
+    case 'text/css':
+      return 'network-color-css';
+    case 'text/html':
+      return 'network-color-html';
+    case 'application/javascript':
+      return 'network-color-js';
+    case null:
+      return 'network-color-other';
+    default:
+      if (mimeType.startsWith('image/')) {
+        return 'network-color-img';
+      }
+      return 'network-color-other';
+  }
+}
+
 export function groupScreenshotsById(markers: Marker[]): Map<string, Marker[]> {
   const idToScreenshotMarkers = new Map();
   for (let i = 0; i < markers.length; i++) {
@@ -850,7 +920,77 @@ export function groupScreenshotsById(markers: Marker[]): Map<string, Marker[]> {
   return idToScreenshotMarkers;
 }
 
-export function removeNetworkMarkerURLs(payload: NetworkPayload) {
-  payload.URI = '';
-  payload.RedirectURI = '';
+export function removeNetworkMarkerURLs(
+  payload: NetworkPayload
+): NetworkPayload {
+  return { ...payload, URI: '', RedirectURI: '' };
+}
+
+export function getMarkerFullDescription(marker: Marker) {
+  let description = marker.name;
+
+  if (marker.data) {
+    const data = marker.data;
+    switch (data.type) {
+      case 'tracing':
+        if (typeof data.category === 'string') {
+          if (data.category === 'log' && description.length > 100) {
+            description = description.substring(0, 100) + '...';
+          } else if (data.category === 'DOMEvent') {
+            description = data.eventType;
+          }
+        }
+        break;
+      case 'UserTiming':
+        description = data.name;
+        break;
+      case 'FileIO':
+        if (data.source) {
+          description = `(${data.source}) `;
+        }
+        description += data.operation;
+        if (data.filename) {
+          description = data.operation
+            ? `${description} — ${data.filename}`
+            : data.filename;
+        }
+        break;
+      case 'Text':
+        description += ` — ${data.name}`;
+        break;
+      default:
+    }
+  }
+  return description;
+}
+
+export function getMarkerCategory(marker: Marker) {
+  let category = 'unknown';
+  if (marker.data) {
+    const data = marker.data;
+
+    if (typeof data.category === 'string') {
+      category = data.category;
+    }
+
+    switch (data.type) {
+      case 'UserTiming':
+        category = marker.name;
+        break;
+      case 'FileIO':
+        category = data.type;
+        break;
+      case 'Bailout':
+        category = 'Bailout';
+        break;
+      case 'Network':
+        category = 'Network';
+        break;
+      case 'Text':
+        category = 'Text';
+        break;
+      default:
+    }
+  }
+  return category;
 }

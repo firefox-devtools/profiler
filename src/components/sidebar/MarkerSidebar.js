@@ -9,7 +9,7 @@ import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
+import { TooltipMarker } from '../tooltip/Marker';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
@@ -37,10 +37,7 @@ class MarkerSidebar extends React.PureComponent<Props> {
     return (
       <aside className="sidebar sidebar-marker-table">
         <div className="sidebar-contents-wrapper">
-          <MarkerTooltipContents
-            marker={marker}
-            threadIndex={selectedThreadIndex}
-          />
+          <TooltipMarker marker={marker} threadIndex={selectedThreadIndex} />
         </div>
       </aside>
     );

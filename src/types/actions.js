@@ -326,12 +326,33 @@ type PublishAction =
       +slug: $Keys<CheckedSharingOptions>,
     |}
   | {|
-      +type: 'CHANGE_UPLOAD_STATE',
-      +changes: $Shape<UploadState>,
+      +type: 'UPLOAD_STARTED',
+      +abortFunction: () => void,
     |}
   | {|
-      +type: 'SAVE_ABORT_UPLOAD_FUNCTION',
-      +abort: () => void,
+      +type: 'UPDATE_UPLOAD_PROGRESS',
+      +uploadProgress: number,
+    |}
+  | {|
+      +type: 'UPLOAD_FINISHED',
+      +url: string,
+    |}
+  | {|
+      +type: 'UPLOAD_FAILED',
+      +error: mixed,
+    |}
+  | {|
+      +type: 'UPLOAD_ABORTED',
+    |}
+  | {|
+      +type: 'UPLOAD_RESET',
+    |}
+  | {|
+      +type: 'UPLOAD_COMPRESSION_STARTED',
+    |}
+  | {|
+      +type: 'CHANGE_UPLOAD_STATE',
+      +changes: $Shape<UploadState>,
     |};
 
 export type Action =

@@ -14,7 +14,7 @@ import {
 
 import { ensureExists } from '../../utils/flow';
 
-import Tooltip, { MOUSE_OFFSET } from '../../components/shared/Tooltip';
+import Tooltip, { MOUSE_OFFSET } from '../../components/tooltip/Tooltip';
 
 describe('shared/Tooltip', () => {
   beforeEach(addRootOverlayElement);

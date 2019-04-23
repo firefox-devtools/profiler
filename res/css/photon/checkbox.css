@@ -15,7 +15,7 @@
 
 /* Remove the border, as it compets with box-shadow styles applied with focus.css */
 .photon-checkbox:focus {
-  border: none
+  border: none;
 }
 
 /* Use this class with the photon-checkbox for the canonical photon styling. */

@@ -49,7 +49,7 @@
   position: unset;
 }
 
-.profileViewerSplitter .layout-pane:not(.layout-pane-primary) {
+.profileViewerSplitter > .layout-pane:not(.layout-pane-primary) {
   display: flex;
   overflow: hidden;
   max-height: var(--profile-viewer-splitter-max-height);
