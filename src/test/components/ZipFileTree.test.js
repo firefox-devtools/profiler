@@ -13,7 +13,7 @@ import * as ZippedProfileSelectors from '../../selectors/zipped-profiles';
 
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
-import { waitUntilState } from '../fixtures/utils';
+import { getBoundingBox, waitUntilState } from '../fixtures/utils';
 
 describe('calltree/ZipFileTree', function() {
   async function setup() {
@@ -27,6 +27,12 @@ describe('calltree/ZipFileTree', function() {
     jest
       .spyOn(HTMLCanvasElement.prototype, 'getContext')
       .mockImplementation(() => mockCanvasContext());
+
+    // This makes the bounding box large enough so that we don't trigger
+    // VirtualList's virtualization.
+    jest
+      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+      .mockImplementation(() => getBoundingBox(1000, 2000));
 
     const renderResult = render(
       <Provider store={store}>
