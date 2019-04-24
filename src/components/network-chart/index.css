@@ -48,12 +48,6 @@
   white-space: nowrap;
 }
 
-/* This rule is useful to make the label more visible on hover. */
-.networkChartRowItem:hover .networkChartRowItemLabel {
-  position: relative;
-  z-index: 1;
-}
-
 .networkChartRowItemBar {
   position: absolute; /* The bar will be positioned in JS. */
   display: inline-block;
@@ -66,10 +60,6 @@
   border-radius: 2px;
   box-shadow: 0 0 0 1px inset var(--marker-color);
   opacity: 0.7;
-}
-
-.networkChartRowItem:hover .networkChartRowItemBar {
-  opacity: 0.4;
 }
 
 .networkChartRowItemBarPhase {
@@ -90,14 +80,11 @@
 .networkChartRowItemUriRequired {
   display: inline-block;
   overflow: hidden;
+  max-width: 600px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.networkChartRowItemUriRequired:nth-child(1) {
-  padding-right: 8px;
-}
-
-/* This makes the URI completely visible on hover */
 .networkChartRowItem:hover .networkChartRowItemUriOptional {
-  max-width: unset;
   color: unset;
 }

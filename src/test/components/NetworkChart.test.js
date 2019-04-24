@@ -4,7 +4,7 @@
 
 // @flow
 import * as React from 'react';
-import { render } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 
 import { changeNetworkSearchString } from '../../actions/profile-view';
@@ -23,7 +23,12 @@ import {
   getNetworkMarkers,
   type TestDefinedMarkers,
 } from '../fixtures/profiles/processed-profile';
-import { getBoundingBox } from '../fixtures/utils';
+import {
+  getBoundingBox,
+  addRootOverlayElement,
+  removeRootOverlayElement,
+  getMouseEvent,
+} from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
 const NETWORK_MARKERS = (function() {
@@ -414,5 +419,24 @@ describe('EmptyReasons', () => {
     dispatch(changeSelectedTab('network-chart'));
     dispatch(changeNetworkSearchString('MATCH_NOTHING'));
     expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+  });
+});
+
+describe('Network Chart/tooltip behavior', () => {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
+  it('shows a tooltip when the mouse hovers the line', () => {
+    const { rowItem, queryByTestId, getByTestId } = setupWithPayload(
+      getNetworkMarkers()
+    );
+
+    expect(queryByTestId('tooltip')).toBeFalsy();
+    // React uses mouseover/mouseout events to implement mouseenter/mouseleave.
+    // See https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/react-dom/src/events/EnterLeaveEventPlugin.js#L24-L31
+    fireEvent(rowItem(), getMouseEvent('mouseover', { pageX: 25, pageY: 25 }));
+    expect(getByTestId('tooltip')).toBeTruthy();
+    fireEvent(rowItem(), getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+    expect(queryByTestId('tooltip')).toBeFalsy();
   });
 });
