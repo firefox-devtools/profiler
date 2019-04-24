@@ -9,34 +9,58 @@ Object {
       Object {
         "color": "transparent",
         "name": "Idle",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "grey",
         "name": "Other",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "purple",
         "name": "Layout",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "yellow",
         "name": "JavaScript",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "orange",
         "name": "GC / CC",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "lightblue",
         "name": "Network",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "green",
         "name": "Graphics",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "blue",
         "name": "DOM",
+        "subcategories": Array [
+          "Other",
+        ],
       },
     ],
     "extensions": Object {
@@ -51,7 +75,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 22,
+    "preprocessedProfileVersion": 23,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -59,7 +83,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 15,
+    "version": 16,
   },
   "pages": Array [],
   "threads": Array [
@@ -142,6 +166,17 @@ Object {
           null,
           null,
           null,
+        ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
       },
       "funcTable": Object {
@@ -327,6 +362,17 @@ Object {
           1,
           7,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -365,6 +411,7 @@ Object {
         "length": 0,
         "line": Array [],
         "optimizations": Array [],
+        "subcategory": Array [],
       },
       "funcTable": Object {
         "address": Array [],
@@ -483,6 +530,7 @@ Object {
         "frame": Array [],
         "length": 0,
         "prefix": Array [],
+        "subcategory": Array [],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -598,6 +646,17 @@ Array [
         null,
         null,
         null,
+      ],
+      "subcategory": Array [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
       ],
     },
     "funcTable": Object {
@@ -783,6 +842,17 @@ Array [
         1,
         7,
       ],
+      "subcategory": Array [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
     },
     "stringTable": UniqueStringArray {
       "_array": Array [
@@ -821,6 +891,7 @@ Array [
       "length": 0,
       "line": Array [],
       "optimizations": Array [],
+      "subcategory": Array [],
     },
     "funcTable": Object {
       "address": Array [],
@@ -939,6 +1010,7 @@ Array [
       "frame": Array [],
       "length": 0,
       "prefix": Array [],
+      "subcategory": Array [],
     },
     "stringTable": UniqueStringArray {
       "_array": Array [
@@ -1384,6 +1456,16 @@ Object {
       1,
       6,
     ],
+    "subcategory": Int32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "stackIndexToCallNodeIndex": Uint32Array [
     0,
@@ -1452,6 +1534,16 @@ CallTree {
       1,
       6,
     ],
+    "subcategory": Int32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "_callNodeTimes": Object {
     "selfTime": Float32Array [
@@ -1479,34 +1571,58 @@ CallTree {
     Object {
       "color": "transparent",
       "name": "Idle",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "grey",
       "name": "Other",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "purple",
       "name": "Layout",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "yellow",
       "name": "JavaScript",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "orange",
       "name": "GC / CC",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "lightblue",
       "name": "Network",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "green",
       "name": "Graphics",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "blue",
       "name": "DOM",
+      "subcategories": Array [
+        "Other",
+      ],
     },
   ],
   "_children": Array [],
@@ -1721,6 +1837,17 @@ Object {
       null,
       null,
     ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "funcTable": Object {
     "address": Array [
@@ -1886,6 +2013,16 @@ Object {
       4,
       1,
       6,
+    ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
   },
   "stringTable": UniqueStringArray {
@@ -2075,6 +2212,17 @@ Object {
       null,
       null,
     ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "funcTable": Object {
     "address": Array [
@@ -2235,6 +2383,16 @@ Object {
       1,
       6,
     ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "stringTable": UniqueStringArray {
     "_array": Array [
@@ -2345,6 +2503,17 @@ Object {
       null,
       null,
       null,
+    ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
   },
   "funcTable": Object {
@@ -2512,6 +2681,16 @@ Object {
       1,
       6,
     ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "stringTable": UniqueStringArray {
     "_array": Array [
@@ -2622,6 +2801,17 @@ Object {
       null,
       null,
       null,
+    ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
   },
   "funcTable": Object {
@@ -2791,6 +2981,17 @@ Object {
       5,
       1,
       7,
+    ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
   },
   "stringTable": UniqueStringArray {

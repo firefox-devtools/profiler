@@ -43,6 +43,7 @@ export type CallNodeTable = {
   prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
+  subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   depth: number[],
   length: number,
 };

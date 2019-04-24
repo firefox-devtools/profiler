@@ -469,6 +469,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.func.push(funcIndex);
         frameTable.address.push(0);
         frameTable.category.push(category);
+        frameTable.subcategory.push(0);
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(null);
         frameTable.column.push(null);
@@ -491,14 +492,20 @@ function _buildThreadFromTextOnlyStacks(
       // If we couldn't find a stack, go ahead and create it.
       if (stackIndex === undefined) {
         const frameCategory = frameTable.category[frameIndex];
+        const frameSubcategory = frameTable.subcategory[frameIndex];
         const prefixCategory =
           prefix === null ? categoryOther : stackTable.category[prefix];
+        const prefixSubcategory =
+          prefix === null ? 0 : stackTable.subcategory[prefix];
         const stackCategory =
           frameCategory === null ? prefixCategory : frameCategory;
+        const stackSubcategory =
+          frameSubcategory === null ? prefixSubcategory : frameSubcategory;
 
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
         stackTable.category.push(stackCategory);
+        stackTable.subcategory.push(stackSubcategory);
         stackIndex = stackTable.length++;
       }
 

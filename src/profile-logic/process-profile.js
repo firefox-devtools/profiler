@@ -509,6 +509,7 @@ function _processFrameTable(
   return {
     address: frameFuncs.map(funcIndex => funcTable.address[funcIndex]),
     category: geckoFrameStruct.category,
+    subcategory: geckoFrameStruct.subcategory,
     func: frameFuncs,
     implementation: geckoFrameStruct.implementation,
     line: geckoFrameStruct.line,
@@ -530,28 +531,36 @@ function _processStackTable(
   // Compute a non-null category for every stack
   const defaultCategory = categories.findIndex(c => c.color === 'grey') || 0;
   const categoryColumn = new Array(geckoStackTable.length);
+  const subcategoryColumn = new Array(geckoStackTable.length);
   for (let stackIndex = 0; stackIndex < geckoStackTable.length; stackIndex++) {
-    const frameCategory =
-      frameTable.category[geckoStackTable.frame[stackIndex]];
+    const frameIndex = geckoStackTable.frame[stackIndex];
+    const frameCategory = frameTable.category[frameIndex];
+    const frameSubcategory = frameTable.subcategory[frameIndex];
     let stackCategory;
+    let stackSubcategory;
     if (frameCategory !== null) {
       stackCategory = frameCategory;
+      stackSubcategory = frameSubcategory || 0;
     } else {
       const prefix = geckoStackTable.prefix[stackIndex];
       if (prefix !== null) {
         // Because of the structure of the stack table, prefix < stackIndex.
         // So we've already computed the category for the prefix.
         stackCategory = categoryColumn[prefix];
+        stackSubcategory = subcategoryColumn[prefix];
       } else {
         stackCategory = defaultCategory;
+        stackSubcategory = 0;
       }
     }
     categoryColumn[stackIndex] = stackCategory;
+    subcategoryColumn[stackIndex] = stackSubcategory;
   }
 
   return {
     frame: geckoStackTable.frame,
     category: categoryColumn,
+    subcategory: subcategoryColumn,
     prefix: geckoStackTable.prefix,
     length: geckoStackTable.length,
   };
