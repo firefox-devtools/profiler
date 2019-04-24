@@ -910,31 +910,31 @@ export function adjustMarkerTimestamps(
         }
       }
       if (newData.type === 'Network') {
-        if (newData.domainLookupStart) {
+        if (typeof newData.domainLookupStart === 'number') {
           newData.domainLookupStart += delta;
         }
-        if (newData.domainLookupEnd) {
+        if (typeof newData.domainLookupEnd === 'number') {
           newData.domainLookupEnd += delta;
         }
-        if (newData.connectStart) {
+        if (typeof newData.connectStart === 'number') {
           newData.connectStart += delta;
         }
-        if (newData.tcpConnectEnd) {
+        if (typeof newData.tcpConnectEnd === 'number') {
           newData.tcpConnectEnd += delta;
         }
-        if (newData.secureConnectionStart) {
+        if (typeof newData.secureConnectionStart === 'number') {
           newData.secureConnectionStart += delta;
         }
-        if (newData.connectEnd) {
+        if (typeof newData.connectEnd === 'number') {
           newData.connectEnd += delta;
         }
-        if (newData.requestStart) {
+        if (typeof newData.requestStart === 'number') {
           newData.requestStart += delta;
         }
-        if (newData.responseStart) {
+        if (typeof newData.responseStart === 'number') {
           newData.responseStart += delta;
         }
-        if (newData.responseEnd) {
+        if (typeof newData.responseEnd === 'number') {
           newData.responseEnd += delta;
         }
       }

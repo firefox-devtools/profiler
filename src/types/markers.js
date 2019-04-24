@@ -338,11 +338,20 @@ export type NetworkPayload = {|
   // happens on the process' main thread.
   endTime: Milliseconds,
 
+  // fetchStart doesn't exist directly in raw markers. This is added in the
+  // deriving process and represents the junction between START and END markers.
+  // This is the same value as the start marker's endTime and the end marker's
+  // startTime (which are the same values).
+  // We don't expose it directly but this is useful for debugging.
+  fetchStart?: Milliseconds,
+
   // The following properties are present only in non-START markers.
   // domainLookupStart, if present, should be the first timestamp for an event
   // happening on the socket thread. However it's not present for persisted
   // connections. This is also the case for `domainLookupEnd`, `connectStart`,
   // `tcpConnectEnd`, `secureConnectionStart`, and `connectEnd`.
+  // NOTE: If you add a new property, don't forget to adjust its timestamp in
+  // `adjustMarkerTimestamps` in `process-profile.js`.
   domainLookupStart?: Milliseconds,
   domainLookupEnd?: Milliseconds,
   connectStart?: Milliseconds,

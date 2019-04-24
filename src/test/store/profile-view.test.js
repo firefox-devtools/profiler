@@ -1035,8 +1035,8 @@ describe('snapshots of selectors/profile', function() {
       ['D', 3, null],
       ['E', 4, null],
       ['F', 5, null],
-      ...getNetworkMarkers(6, 6),
-      ...getNetworkMarkers(7, 7),
+      ...getNetworkMarkers({ id: 6, startTime: 6 }),
+      ...getNetworkMarkers({ id: 7, startTime: 7 }),
     ]);
     profile.threads.push(markersThread);
     const { getState, dispatch } = storeWithProfile(profile);
