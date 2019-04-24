@@ -873,68 +873,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
       <div
         class="tooltipTiming"
       >
-        101ms
-      </div>
-      <div
-        class="tooltipTitle"
-      >
-        Load 31: http://wikia.com/
-      </div>
-    </div>
-    <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        Thread
-        :
-      </div>
-      Main Thread
-    </div>
-  </div>
-  <div
-    class="tooltipDetails"
-  >
-    <div
-      class="tooltipLabel"
-    >
-      Status
-      :
-    </div>
-    Waiting for response
-    <div
-      class="tooltipLabel"
-    >
-      URL
-      :
-    </div>
-    http://wikia.com/
-    <div
-      class="tooltipLabel"
-    >
-      Priority
-      :
-    </div>
-    Low(8)
-  </div>
-</div>
-`;
-
-exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wikia.com/-18670.5141769375 1`] = `
-<div
-  class="tooltipMarker propClass"
->
-  <div
-    class="tooltipHeader"
-  >
-    <div
-      class="tooltipOneLine"
-    >
-      <div
-        class="tooltipTiming"
-      >
-        66ms
+        18,726ms
       </div>
       <div
         class="tooltipTitle"
@@ -984,7 +923,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
       Redirect URL
       :
     </div>
-    Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+    http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
     <div
       class="tooltipLabel"
     >
@@ -1010,9 +949,9 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is 66 milliseconds"
+      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
     >
-      66ms
+      18,726ms
     </div>
     <div
       aria-hidden="true"
@@ -1023,7 +962,7 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
 </div>
 `;
 
-exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*-111 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625-19000 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1036,86 +975,12 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
       <div
         class="tooltipTiming"
       >
-        11ms
+        1,434ms
       </div>
       <div
         class="tooltipTitle"
       >
-        Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
-      </div>
-    </div>
-    <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        Thread
-        :
-      </div>
-      Main Thread
-    </div>
-  </div>
-  <div
-    class="tooltipDetails"
-  >
-    <div
-      class="tooltipLabel"
-    >
-      Status
-      :
-    </div>
-    other
-    <div
-      class="tooltipLabel"
-    >
-      Priority
-      :
-    </div>
-    Low(8)
-  </div>
-  <div
-    class="tooltipNetworkPhases network-color-other"
-  >
-    <div
-      class="tooltipLabel"
-    >
-      HTTP response
-      :
-    </div>
-    <div
-      aria-label="Starting at 0.000 milliseconds, duration is 11 milliseconds"
-    >
-      11ms
-    </div>
-    <div
-      aria-hidden="true"
-      class="tooltipNetworkPhase"
-      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
-    />
-  </div>
-</div>
-`;
-
-exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*-13382.453655062502 1`] = `
-<div
-  class="tooltipMarker propClass"
->
-  <div
-    class="tooltipHeader"
-  >
-    <div
-      class="tooltipOneLine"
-    >
-      <div
-        class="tooltipTiming"
-      >
-        205ms
-      </div>
-      <div
-        class="tooltipTitle"
-      >
-        Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
       </div>
     </div>
     <div
@@ -1194,14 +1059,110 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
       :
     </div>
     <div
-      aria-label="Starting at 0.000 milliseconds, duration is -2,239 milliseconds"
+      aria-label="Starting at 0.000 milliseconds, duration is 50 milliseconds"
     >
-      -2,239ms
+      50ms
     </div>
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: 0%; margin-right: 99.7%;"
+      style="margin-left: 0%; margin-right: 96.51276328637188%;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      DNS request
+      :
+    </div>
+    <div
+      aria-label="Starting at 50 milliseconds, duration is 10 milliseconds"
+    >
+      10ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 3.487236713628123%; margin-right: 95.81531594364625%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      After DNS request
+      :
+    </div>
+    <div
+      aria-label="Starting at 60 milliseconds, duration is 140 milliseconds"
+    >
+      140ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 4.184684056353747%; margin-right: 86.05105314548751%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      TCP connection
+      :
+    </div>
+    <div
+      aria-label="Starting at 200 milliseconds, duration is 5.0 milliseconds"
+    >
+      5.0ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 13.948946854512492%; margin-right: 85.7023294741247%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      After TCP connection
+      :
+    </div>
+    <div
+      aria-label="Starting at 205 milliseconds, duration is 45 milliseconds"
+    >
+      45ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 14.297670525875303%; margin-right: 82.56381643185938%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      Establishing TLS session
+      :
+    </div>
+    <div
+      aria-label="Starting at 250 milliseconds, duration is 40 milliseconds"
+    >
+      40ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 17.436183568140613%; margin-right: 79.77402706095688%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      Waiting for HTTP request
+      :
+    </div>
+    <div
+      aria-label="Starting at 290 milliseconds, duration is 11 milliseconds"
+    >
+      11ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 20.225972939043114%; margin-right: 79.02078393081325%; opacity: 0.5;"
     />
     <div
       class="tooltipLabel"
@@ -1210,14 +1171,14 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
       :
     </div>
     <div
-      aria-label="Starting at -2,239 milliseconds, duration is 29 milliseconds"
+      aria-label="Starting at 301 milliseconds, duration is 99 milliseconds"
     >
-      29ms
+      99ms
     </div>
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase"
-      style="margin-left: -1091.0048142353905%; margin-right: 1176.9952800184963%; opacity: 0.75;"
+      style="margin-left: 20.979216069186737%; margin-right: 72.08815734412046%; opacity: 0.75;"
     />
     <div
       class="tooltipLabel"
@@ -1226,14 +1187,14 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
       :
     </div>
     <div
-      aria-label="Starting at -2,210 milliseconds, duration is 3.5 milliseconds"
+      aria-label="Starting at 400 milliseconds, duration is 800 milliseconds"
     >
-      3.5ms
+      800ms
     </div>
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase"
-      style="margin-left: -1076.9952800184963%; margin-right: 1175.2828809004584%; opacity: 1;"
+      style="margin-left: 27.91184265587955%; margin-right: 16.306318872925047%; opacity: 1;"
     />
     <div
       class="tooltipLabel"
@@ -1242,14 +1203,14 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
       :
     </div>
     <div
-      aria-label="Starting at -2,207 milliseconds, duration is 2,412 milliseconds"
+      aria-label="Starting at 1,200 milliseconds, duration is 234 milliseconds"
     >
-      2,412ms
+      234ms
     </div>
     <div
       aria-hidden="true"
       class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
-      style="margin-left: -1075.2828809004584%; margin-right: 0%;"
+      style="margin-left: 83.69368112707495%;"
     />
   </div>
 </div>

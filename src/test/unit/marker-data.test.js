@@ -20,6 +20,11 @@ import type { Milliseconds } from '../../types/units';
 
 describe('deriveMarkersFromRawMarkerTable', function() {
   function setup() {
+    // We have a broken marker on purpose in our test data, which outputs an
+    // error. Let's silence an error to have a clean output. We check that the
+    // mock is called in one of the tests.
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
     const profile = processProfile(createGeckoProfile());
     profile.meta.symbolicated = true; // avoid to kick off the symbolication process
     const thread = profile.threads[0]; // This is the parent process main thread
@@ -155,8 +160,14 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       title: null,
       data: { category: 'ArbitraryCategory', type: 'tracing' },
     });
+    // Such a marker is unexpected, so we output an error to the console in this
+    // case.
+    expect(console.error).toHaveBeenCalled();
   });
-  it('shifts content process marker times correctly', function() {
+
+  // Note that the network markers are also extensively tested below in the part
+  // for filterRawMarkerTableToRange.
+  it('shifts content process marker times correctly, especially in network markers', function() {
     const { thread, contentThread, markers, contentMarkers } = setup();
     expect(thread.processStartupTime).toBe(0);
     expect(contentThread.processStartupTime).toBe(1000);
@@ -169,16 +180,16 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         status: 'STATUS_STOP',
         pri: -20,
         count: 37838,
-        URI: 'https://github.com/rustwasm/wasm-bindgen/issues/2',
-        domainLookupStart: 22.1,
-        domainLookupEnd: 22.2,
-        connectStart: 22.3,
-        tcpConnectEnd: 22.4,
-        secureConnectionStart: 22.5,
-        connectEnd: 22.6,
-        requestStart: 22.7,
-        responseStart: 22.8,
-        responseEnd: 22.9,
+        URI: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
+        domainLookupStart: 23.1,
+        domainLookupEnd: 23.2,
+        connectStart: 23.3,
+        tcpConnectEnd: 23.4,
+        secureConnectionStart: 23.5,
+        connectEnd: 23.6,
+        requestStart: 23.7,
+        responseStart: 23.8,
+        responseEnd: 23.9,
       },
       dur: 2,
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
@@ -194,16 +205,16 @@ describe('deriveMarkersFromRawMarkerTable', function() {
         status: 'STATUS_STOP',
         pri: -20,
         count: 37838,
-        URI: 'https://github.com/rustwasm/wasm-bindgen/issues/2',
-        domainLookupStart: 1022.1,
-        domainLookupEnd: 1022.2,
-        connectStart: 1022.3,
-        tcpConnectEnd: 1022.4,
-        secureConnectionStart: 1022.5,
-        connectEnd: 1022.6,
-        requestStart: 1022.7,
-        responseStart: 1022.8,
-        responseEnd: 1022.9,
+        URI: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
+        domainLookupStart: 1023.1,
+        domainLookupEnd: 1023.2,
+        connectStart: 1023.3,
+        tcpConnectEnd: 1023.4,
+        secureConnectionStart: 1023.5,
+        connectEnd: 1023.6,
+        requestStart: 1023.7,
+        responseStart: 1023.8,
+        responseEnd: 1023.9,
       },
       dur: 2,
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
@@ -242,7 +253,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       },
       name: 'CompositorScreenshot',
       start: 25,
-      dur: -18,
+      dur: 0,
       title: null,
     });
   });

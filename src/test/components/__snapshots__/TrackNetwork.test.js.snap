@@ -75,60 +75,12 @@ Array [
   Array [
     "moveTo",
     0,
-    2.5,
-  ],
-  Array [
-    "lineTo",
-    0,
-    2.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
     7.5,
   ],
   Array [
     "lineTo",
     0,
     7.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
-    7.5,
-  ],
-  Array [
-    "lineTo",
-    0,
-    7.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
-    12.5,
-  ],
-  Array [
-    "lineTo",
-    0,
-    12.5,
   ],
   Array [
     "stroke",
@@ -171,60 +123,12 @@ Array [
   Array [
     "moveTo",
     0,
-    17.5,
-  ],
-  Array [
-    "lineTo",
-    0,
-    17.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
     22.5,
   ],
   Array [
     "lineTo",
     0,
     22.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
-    22.5,
-  ],
-  Array [
-    "lineTo",
-    0,
-    22.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
-    27.5,
-  ],
-  Array [
-    "lineTo",
-    0,
-    27.5,
   ],
   Array [
     "stroke",
@@ -267,38 +171,6 @@ Array [
   Array [
     "moveTo",
     0,
-    32.5,
-  ],
-  Array [
-    "lineTo",
-    0,
-    32.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
-    2.5,
-  ],
-  Array [
-    "lineTo",
-    0,
-    2.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
     2.5,
   ],
   Array [
@@ -321,38 +193,6 @@ Array [
     "lineTo",
     0,
     7.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
-    7.5,
-  ],
-  Array [
-    "lineTo",
-    0,
-    7.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    0,
-    12.5,
-  ],
-  Array [
-    "lineTo",
-    0,
-    12.5,
   ],
   Array [
     "stroke",
@@ -402,22 +242,6 @@ Array [
   ],
   Array [
     "lineTo",
-    33.333333333333336,
-    2.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    33.333333333333336,
-    2.5,
-  ],
-  Array [
-    "lineTo",
     66.66666666666667,
     2.5,
   ],
@@ -430,22 +254,6 @@ Array [
   Array [
     "moveTo",
     6.666666666666673,
-    7.5,
-  ],
-  Array [
-    "lineTo",
-    40.00000000000001,
-    7.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    40.00000000000001,
     7.5,
   ],
   Array [
@@ -466,22 +274,6 @@ Array [
   ],
   Array [
     "lineTo",
-    46.66666666666668,
-    12.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    46.66666666666668,
-    12.5,
-  ],
-  Array [
-    "lineTo",
     80.00000000000001,
     12.5,
   ],
@@ -494,22 +286,6 @@ Array [
   Array [
     "moveTo",
     19.99999999999999,
-    17.5,
-  ],
-  Array [
-    "lineTo",
-    53.33333333333333,
-    17.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    53.33333333333333,
     17.5,
   ],
   Array [
@@ -530,22 +306,6 @@ Array [
   ],
   Array [
     "lineTo",
-    60,
-    22.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    60,
-    22.5,
-  ],
-  Array [
-    "lineTo",
     93.33333333333336,
     22.5,
   ],
@@ -558,22 +318,6 @@ Array [
   Array [
     "moveTo",
     33.333333333333336,
-    27.5,
-  ],
-  Array [
-    "lineTo",
-    66.66666666666667,
-    27.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    66.66666666666667,
     27.5,
   ],
   Array [
@@ -594,22 +338,6 @@ Array [
   ],
   Array [
     "lineTo",
-    73.33333333333331,
-    32.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    73.33333333333331,
-    32.5,
-  ],
-  Array [
-    "lineTo",
     106.66666666666666,
     32.5,
   ],
@@ -622,22 +350,6 @@ Array [
   Array [
     "moveTo",
     46.66666666666668,
-    2.5,
-  ],
-  Array [
-    "lineTo",
-    80.00000000000001,
-    2.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    80.00000000000001,
     2.5,
   ],
   Array [
@@ -658,22 +370,6 @@ Array [
   ],
   Array [
     "lineTo",
-    86.66666666666666,
-    7.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    86.66666666666666,
-    7.5,
-  ],
-  Array [
-    "lineTo",
     120,
     7.5,
   ],
@@ -686,22 +382,6 @@ Array [
   Array [
     "moveTo",
     60,
-    12.5,
-  ],
-  Array [
-    "lineTo",
-    93.33333333333336,
-    12.5,
-  ],
-  Array [
-    "stroke",
-  ],
-  Array [
-    "beginPath",
-  ],
-  Array [
-    "moveTo",
-    93.33333333333336,
     12.5,
   ],
   Array [

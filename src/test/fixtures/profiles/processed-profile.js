@@ -31,7 +31,7 @@ import type { Milliseconds } from '../../../types/units';
 type MarkerName = string;
 type MarkerTime = Milliseconds;
 type MockPayload = {| startTime: Milliseconds, endTime: Milliseconds |};
-type TestDefinedMarkers = Array<
+export type TestDefinedMarkers = Array<
   [MarkerName, MarkerTime, MarkerPayload | MockPayload]
 >;
 export type TestDefinedJsTracerEvent = [
