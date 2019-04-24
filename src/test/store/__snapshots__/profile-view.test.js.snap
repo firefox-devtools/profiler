@@ -991,6 +991,7 @@ Array [
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 7,
+      "fetchStart": 6.5,
       "id": 6,
       "pri": 0,
       "startTime": 6,
@@ -1227,6 +1228,7 @@ Array [
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 7,
+      "fetchStart": 6.5,
       "id": 6,
       "pri": 0,
       "startTime": 6,
@@ -1242,6 +1244,7 @@ Array [
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 8,
+      "fetchStart": 7.5,
       "id": 7,
       "pri": 0,
       "startTime": 7,
@@ -1283,6 +1286,7 @@ Array [
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 7,
+      "fetchStart": 6.5,
       "id": 6,
       "pri": 0,
       "startTime": 6,

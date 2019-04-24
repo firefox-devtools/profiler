@@ -411,6 +411,7 @@ export function deriveMarkersFromRawMarkerTable(
               data: {
                 ...endData,
                 startTime: startData.startTime,
+                fetchStart: endData.startTime,
               },
             });
           } else {
@@ -425,6 +426,7 @@ export function deriveMarkersFromRawMarkerTable(
               data: {
                 ...endData,
                 startTime: start,
+                fetchStart: endData.startTime,
               },
               incomplete: true,
             });
