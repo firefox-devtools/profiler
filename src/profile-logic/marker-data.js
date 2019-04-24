@@ -4,7 +4,6 @@
 // @flow
 
 import { getEmptyRawMarkerTable } from './data-structures';
-import { getNumberPropertyOrNull } from '../utils/flow';
 
 import type {
   SamplesTable,
@@ -239,150 +238,294 @@ export function deriveMarkersFromRawMarkerTable(
   // This is the resulting array.
   const matchedMarkers: Marker[] = [];
 
-  // This map is used to track start and end raw markers for the time-matched markers.
-  const openMarkers: Map<IndexIntoStringTable, Marker[]> = new Map();
+  // These maps contain the start markers we find while looping the marker
+  // table.
+  // The first map contains the start markers for tracing markers. They can be
+  // nested and that's why we use an array structure as value.
+  const openTracingMarkers: Map<
+    IndexIntoStringTable,
+    IndexIntoMarkers[]
+  > = new Map();
 
-  // This variable keeps a screenshot marker until we can compute its duration.
-  let previousScreenshotMarker: Marker | null = null;
+  // The second map contains the start markers for network markers.
+  // Note that we don't have more than 2 network markers with the same name as
+  // the name contains an incremented index. Therefore we don't need to use an
+  // array as value like for tracing markers.
+  const openNetworkMarkers: Map<
+    IndexIntoStringTable,
+    IndexIntoMarkers
+  > = new Map();
+
+  // We don't add a screenshot marker as we find it, because to know its
+  // duration we need to wait until the next one or the end of the profile. So
+  // we keep it here.
+  let previousScreenshotMarker: IndexIntoMarkers | null = null;
 
   for (let i = 0; i < rawMarkers.length; i++) {
+    const name = rawMarkers.name[i];
+    const time = rawMarkers.time[i];
     const data = rawMarkers.data[i];
+
     if (!data) {
       // Add a marker with a zero duration
-      const marker = {
-        start: rawMarkers.time[i],
+      matchedMarkers.push({
+        start: time,
         dur: 0,
-        name: stringTable.getString(rawMarkers.name[i]),
+        name: stringTable.getString(name),
         title: null,
         data: null,
-      };
-      matchedMarkers.push(marker);
-    } else if (data.type === 'tracing' && data.interval) {
-      // Markers are created from two distinct raw markers that are created at
-      // the start and end of whatever code that is running that we care about.
-      // This is implemented by AutoProfilerTracing in Gecko.
-      //
-      // In this function we convert both of these raw markers into a single
-      // marker with a non-null duration.
-      //
-      // We also handle nested markers by assuming markers of the same type are
-      // never interwoven: given input markers startA, startB, endC, endD, we'll
-      // get 2 markers A-D and B-C.
+      });
+      continue;
+    }
 
-      const time = rawMarkers.time[i];
-      const nameStringIndex = rawMarkers.name[i];
-      if (data.interval === 'start') {
-        let markerBucket = openMarkers.get(nameStringIndex);
-        if (markerBucket === undefined) {
-          markerBucket = [];
-          openMarkers.set(nameStringIndex, markerBucket);
-        }
+    // Depending on the type we have to do some special handling.
+    switch (data.type) {
+      case 'tracing': {
+        // Markers are created from two distinct raw markers that are created at
+        // the start and end of whatever code that is running that we care about.
+        // This is implemented by AutoProfilerTracing in Gecko.
+        //
+        // In this function we convert both of these raw markers into a single
+        // marker with a non-null duration.
+        //
+        // We also handle nested markers by assuming markers of the same type are
+        // never interwoven: given input markers startA, startB, endC, endD, we'll
+        // get 2 markers A-D and B-C.
+        //
+        // Sometimes we don't have one side of the pair, in this case we still
+        // insert a marker and try to fill it with sensible values.
+        if (data.interval === 'start') {
+          let openMarkersForName = openTracingMarkers.get(name);
+          if (!openMarkersForName) {
+            openMarkersForName = [];
+            openTracingMarkers.set(name, openMarkersForName);
+          }
+          openMarkersForName.push(i);
 
-        markerBucket.push({
-          start: time,
-          name: stringTable.getString(nameStringIndex),
-          dur: 0,
-          title: null,
-          data,
-        });
-      } else if (data.interval === 'end') {
-        const markerBucket = openMarkers.get(nameStringIndex);
-        let marker;
-        if (markerBucket && markerBucket.length) {
-          // We already encountered a matching "start" marker for this "end".
-          marker = markerBucket.pop();
+          // We're not inserting anything to matchedMarkers yet. We wait for the
+          // end marker for that so that we know about the duration.
+          //
+          // We'll loop at all open markers after the main loop.
+        } else if (data.interval === 'end') {
+          const openMarkersForName = openTracingMarkers.get(name);
+
+          let startIndex;
+
+          if (openMarkersForName) {
+            startIndex = openMarkersForName.pop();
+          }
+
+          if (startIndex !== undefined) {
+            // A start marker matches this end marker.
+            const start = rawMarkers.time[startIndex];
+            matchedMarkers.push({
+              start,
+              name: stringTable.getString(name),
+              dur: time - start,
+              title: null,
+              data: rawMarkers.data[startIndex],
+            });
+          } else {
+            // No matching "start" marker has been encountered before this "end".
+            // This means it was issued before the capture started. Here we create
+            // an "incomplete" marker which will be truncated at the starting end
+            // since we don't know exactly when it started.
+            // Note we won't have additional data (eg the cause stack) for this
+            // marker because that data is contained in the "start" marker.
+
+            // Also note that the end marker could occur before the
+            // first sample. In that case it'll become a dot marker at
+            // the location of the end marker. Otherwise we'll use the
+            // time of the first sample as its start.
+            const start = Math.min(time, firstSampleTime);
+
+            matchedMarkers.push({
+              start,
+              name: stringTable.getString(name),
+              dur: time - start,
+              title: null,
+              data,
+              incomplete: true,
+            });
+          }
         } else {
-          // No matching "start" marker has been encountered before this "end",
-          // this means it was issued before the capture started. Here we create
-          // an "incomplete" marker which will be truncated at the starting end
-          // since we don't know exactly when it started.
-          // Note we won't have additional data (eg the cause stack) for this
-          // marker because that data is contained in the "start" marker.
-
-          const nameStringIndex = rawMarkers.name[i];
-
-          // Also note that the end marker could occur before the
-          // first sample. In that case it'll become a dot marker at
-          // the location of the end marker. Otherwise we'll use the
-          // time of the first sample as its start.
-          marker = {
-            start: Math.min(firstSampleTime, time),
-            name: stringTable.getString(nameStringIndex),
+          console.error(
+            `'data.interval' holds the invalid value '${
+              data.interval
+            }' in marker index ${i}. This should not normally happen.`
+          );
+          matchedMarkers.push({
+            start: time,
             dur: 0,
+            name: stringTable.getString(name),
             title: null,
             data,
-            incomplete: true,
-          };
+          });
         }
-        if (marker.start !== undefined) {
-          marker.dur = time - marker.start;
-        }
-        matchedMarkers.push(marker);
-      }
-    } else if (data.type === 'CompositorScreenshot') {
-      // Screenshot markers are already ordered. We compute their duration using the
-      // following marker of the same type.
-      if (previousScreenshotMarker !== null) {
-        previousScreenshotMarker.dur =
-          rawMarkers.time[i] - previousScreenshotMarker.start;
-        matchedMarkers.push(previousScreenshotMarker);
+        break;
       }
 
-      previousScreenshotMarker = {
-        start: rawMarkers.time[i],
-        dur: 0,
-        title: null,
-        name: 'CompositorScreenshot',
-        data,
-      };
-    } else {
-      // `data` here is a union of different shaped objects, that may or not have
-      // certain properties. Flow doesn't like us arbitrarily accessing properties
-      // that may not exist, so use a utility function to generically get the data out.
-      const startTime = getNumberPropertyOrNull(data, 'startTime');
-      const endTime = getNumberPropertyOrNull(data, 'endTime');
+      case 'Network': {
+        // Network markers are similar to tracing markers in that they also
+        // normally exist in pairs of start/stop markers. But unlike tracing
+        // markers they have a duration and "startTime/endTime" properties like
+        // more generic markers. Lastly they're always adjacent: the start
+        // markers ends when the stop markers starts.
+        //
+        // The timestamps on the start and end markers describe two
+        // non-overlapping parts of the same load. The start marker has a
+        // duration from channel-creation until Start (i.e. AsyncOpen()). The
+        // end marker has a duration from AsyncOpen time until OnStopRequest.
+        // In the merged marker, we want to represent the entire duration, from
+        // channel-creation until OnStopRequest.
+        //
+        // |--- start marker ---|--- stop marker with timings ---|
+        //
+        // Usually the start marker is very small. It's emitted mostly to know
+        // about the start of the request. But most of the interesting bits are
+        // in the stop marker.
 
-      if (startTime !== null && endTime !== null) {
-        // Construct a marker with a duration if these properties exist.
-        const name = stringTable.getString(rawMarkers.name[i]);
-        const duration = endTime - startTime;
-        matchedMarkers.push({
-          start: startTime,
-          dur: duration,
-          name,
-          data,
-          title: null,
-        });
-      } else {
-        // Ensure all raw markers are converted to markers, even if they have no
-        // more timing information. This ensures that markers can be filtered by time
-        // in a consistent manner.
-        matchedMarkers.push({
-          start: rawMarkers.time[i],
-          dur: 0,
-          name: stringTable.getString(rawMarkers.name[i]),
-          data,
-          title: null,
-        });
+        if (data.status === 'STATUS_START') {
+          openNetworkMarkers.set(name, i);
+        } else {
+          // End status can be any status other than 'STATUS_START'. They are
+          // either 'STATUS_STOP' or 'STATUS_REDIRECT'.
+          const endData = data;
+
+          const startIndex = openNetworkMarkers.get(name);
+
+          if (startIndex !== undefined) {
+            // A start marker matches this end marker.
+            openNetworkMarkers.delete(name);
+
+            // We know this startIndex points to a Network marker.
+            const startData: NetworkPayload = (rawMarkers.data[
+              startIndex
+            ]: any);
+
+            matchedMarkers.push({
+              start: startData.startTime,
+              dur: endData.endTime - startData.startTime,
+              name: stringTable.getString(name),
+              title: null,
+              data: {
+                ...endData,
+                startTime: startData.startTime,
+              },
+            });
+          } else {
+            // There's no start marker matching this end marker. This means an
+            // abstract marker exists before the start of the profile.
+            const start = Math.min(firstSampleTime, endData.startTime);
+            matchedMarkers.push({
+              start,
+              dur: endData.endTime - start,
+              name: stringTable.getString(name),
+              title: null,
+              data: {
+                ...endData,
+                startTime: start,
+              },
+              incomplete: true,
+            });
+          }
+        }
+
+        break;
       }
+
+      case 'CompositorScreenshot': {
+        // Screenshot markers are already ordered. In the raw marker table,
+        // they're dot markers, but since they're valid until the following
+        // raw marker of the same type, we convert them to markers with a
+        // duration using the following marker.
+
+        if (previousScreenshotMarker !== null) {
+          const start = rawMarkers.time[previousScreenshotMarker];
+          const data = rawMarkers.data[previousScreenshotMarker];
+
+          matchedMarkers.push({
+            start,
+            dur: time - start,
+            name: 'CompositorScreenshot',
+            title: null,
+            data,
+          });
+        }
+
+        previousScreenshotMarker = i;
+
+        break;
+      }
+
+      default:
+        if (
+          typeof data.startTime === 'number' &&
+          typeof data.endTime === 'number'
+        ) {
+          matchedMarkers.push({
+            start: data.startTime,
+            dur: data.endTime - data.startTime,
+            name: stringTable.getString(name),
+            data,
+            title: null,
+          });
+        } else {
+          // Ensure all raw markers are converted to markers, even if they have no
+          // more timing information. This ensures that markers can be filtered by time
+          // in a consistent manner.
+
+          matchedMarkers.push({
+            start: time,
+            dur: 0,
+            name: stringTable.getString(name),
+            data,
+            title: null,
+          });
+        }
     }
   }
 
   const endOfThread = lastSampleTime + interval;
 
-  // Loop over "start" markers without any "end" markers
-  for (const markerBucket of openMarkers.values()) {
-    for (const marker of markerBucket) {
-      marker.dur = Math.max(endOfThread - marker.start, 0);
-      marker.incomplete = true;
-      matchedMarkers.push(marker);
+  // Loop over "start" markers without any "end" markers.
+  for (const markerBucket of openTracingMarkers.values()) {
+    for (const startIndex of markerBucket) {
+      const start = rawMarkers.time[startIndex];
+      matchedMarkers.push({
+        start,
+        dur: Math.max(endOfThread - start, 0),
+        name: stringTable.getString(rawMarkers.name[startIndex]),
+        data: rawMarkers.data[startIndex],
+        title: null,
+        incomplete: true,
+      });
     }
   }
 
-  // Compute the last screenshot marker's duration using the last sample time.
-  if (previousScreenshotMarker) {
-    previousScreenshotMarker.dur = endOfThread - previousScreenshotMarker.start;
-    matchedMarkers.push(previousScreenshotMarker);
+  for (const startIndex of openNetworkMarkers.values()) {
+    // We know this startIndex points to a Network marker.
+    const startData: NetworkPayload = (rawMarkers.data[startIndex]: any);
+    matchedMarkers.push({
+      start: startData.startTime,
+      dur: Math.max(endOfThread - startData.startTime, 0),
+      name: stringTable.getString(rawMarkers.name[startIndex]),
+      title: null,
+      data: startData,
+      incomplete: true,
+    });
+  }
+
+  // And we also need to add the "last screenshot marker".
+  if (previousScreenshotMarker !== null) {
+    const start = rawMarkers.time[previousScreenshotMarker];
+    matchedMarkers.push({
+      start,
+      dur: Math.max(endOfThread - start, 0),
+      name: 'CompositorScreenshot',
+      data: rawMarkers.data[previousScreenshotMarker],
+      title: null,
+    });
   }
 
   return matchedMarkers;
@@ -756,79 +899,6 @@ export function filterForNetworkChart(markers: Marker[]): Marker[] {
 
 export function filterForMarkerChart(markers: Marker[]): Marker[] {
   return markers.filter(marker => !isNetworkMarker(marker));
-}
-// Firefox emits separate start and end markers for each load. It does this so that,
-// if a profile is collected while a request is in progress, the profile will still contain
-// a start marker for that request. So by looking at start markers we can get
-// information about requests that were in progress at profile collection time.
-// For requests that have finished, we want to merge the request's start and end
-// markers into one marker.
-export function mergeStartAndEndNetworkMarker(markers: Marker[]): Marker[] {
-  const sortedMarkers: Marker[] = markers.slice(0);
-  const filteredMarkers: Marker[] = [];
-
-  // Sort markers, alphabetized by name to filter for markers with the same name
-  sortedMarkers.sort((a, b) => {
-    if (a.name < b.name) return -1;
-    if (a.name > b.name) return 1;
-    return 0;
-  });
-  for (let i = 0; i < sortedMarkers.length; i++) {
-    const marker = sortedMarkers[i];
-    const markerNext = sortedMarkers[i + 1];
-
-    if (!marker.data || marker.data.type !== 'Network') {
-      continue;
-    }
-    // The timestamps on the start and end markers describe two non-overlapping parts
-    // of the same load. The start marker has a duration from channel-creation until Start
-    // (i.e. AsyncOpen()). The End marker has a duration from AsyncOpen time until
-    // OnStopRequest.
-    // In the merged marker, we want to represent the entire duration, from channel-creation
-    // until OnStopRequest.
-    if (markerNext !== undefined && marker.name === markerNext.name) {
-      if (
-        marker.data &&
-        marker.data.type === 'Network' &&
-        markerNext.data &&
-        markerNext.data.type === 'Network'
-      ) {
-        // Markers have either status STATUS_START or (STATUS_STOP || STATUS_REDIRECT || STATUS_READ). STATUS_START is reliable and the only not likely to change.
-        if (
-          (marker.data.status === 'STATUS_START' &&
-            markerNext.data.status !== 'STATUS_START') ||
-          (markerNext.data.status === 'STATUS_START' &&
-            marker.data.status !== 'STATUS_START')
-        ) {
-          // As we discard the start marker, but want the whole duration we override the
-          // start of the end marker with the start time of the start marker
-          const [startMarker, endMarker] =
-            marker.data.status === 'STATUS_START'
-              ? [marker, markerNext]
-              : [markerNext, marker];
-          const startData: NetworkPayload = (startMarker.data: any);
-          const endData: NetworkPayload = (endMarker.data: any);
-          const mergedMarker = {
-            data: {
-              ...endData,
-              startTime: startData.startTime,
-            },
-            dur: startMarker.dur + endMarker.dur,
-            name: endMarker.name,
-            title: endMarker.title,
-            start: startMarker.start,
-          };
-          filteredMarkers.push(mergedMarker);
-          i++;
-        }
-        continue;
-      }
-    }
-    filteredMarkers.push(marker);
-  }
-  // Sort markers by startTime to display in the right order in the network panel waterfall
-  filteredMarkers.sort((a, b) => a.start - b.start);
-  return filteredMarkers;
 }
 
 // Identifies mime type of a network request.

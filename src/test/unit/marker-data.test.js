@@ -8,7 +8,6 @@ import { processProfile } from '../../profile-logic/process-profile';
 import {
   deriveMarkersFromRawMarkerTable,
   filterRawMarkerTableToRange,
-  mergeStartAndEndNetworkMarker,
   filterRawMarkerTableToRangeWithMarkersToDelete,
 } from '../../profile-logic/marker-data';
 
@@ -544,10 +543,8 @@ describe('filterRawMarkerTableToRange', () => {
       1 /* interval */
     );
 
-    const mergedMarkers = mergeStartAndEndNetworkMarker(processedMarkers);
-
     expect(
-      mergedMarkers.map(marker => [
+      processedMarkers.map(marker => [
         marker.name,
         marker.data && (marker.data: any).status,
         marker.start,

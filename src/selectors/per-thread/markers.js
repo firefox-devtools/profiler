@@ -163,15 +163,10 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     markers => markers.filter(MarkerData.isNetworkMarker)
   );
 
-  const getMergedNetworkChartMarkers: Selector<Marker[]> = createSelector(
-    getNetworkChartMarkers,
-    MarkerData.mergeStartAndEndNetworkMarker
-  );
-
   const getSearchFilteredNetworkChartMarkers: Selector<
     Marker[]
   > = createSelector(
-    getMergedNetworkChartMarkers,
+    getNetworkChartMarkers,
     UrlState.getNetworkSearchString,
     MarkerData.getSearchFilteredMarkers
   );
@@ -252,7 +247,6 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getMemoryMarkers,
     getNetworkMarkers,
     getNetworkTrackTiming,
-    getMergedNetworkChartMarkers,
     getRangeFilteredScreenshotsById,
     getSearchFilteredMarkers,
     getPreviewFilteredMarkers,
