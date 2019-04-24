@@ -268,7 +268,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     );
 
     return (
-      <section
+      <div
         className={itemClassName}
         onMouseEnter={this._hoverIn}
         onMouseLeave={this._hoverOut}
@@ -297,7 +297,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
             />
           </Tooltip>
         ) : null}
-      </section>
+      </div>
     );
   }
 }
