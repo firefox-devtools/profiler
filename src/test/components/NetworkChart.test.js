@@ -30,7 +30,13 @@ import { type NetworkPayload } from '../../types/markers';
 const NETWORK_MARKERS = (function() {
   const arrayOfNetworkMarkers = Array(10)
     .fill()
-    .map((_, i) => getNetworkMarkers(3 + 0.1 * i, i));
+    .map((_, i) =>
+      getNetworkMarkers({
+        uri: 'https://mozilla.org/',
+        id: i,
+        startTime: 3 + 0.1 * i,
+      })
+    );
   return [].concat(...arrayOfNetworkMarkers);
 })();
 

@@ -506,29 +506,51 @@ function _buildThreadFromTextOnlyStacks(
   return thread;
 }
 
-export function getNetworkMarkers(startTime: number, id: number) {
-  const name = `Load ${id}: https://mozilla.org`;
+type NetworkMarkersOptions = {|
+  uri: string,
+  id: number,
+  startTime: number,
+  fetchStart: number,
+  endTime: number,
+  payload: $Shape<NetworkPayload>,
+|};
+
+export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
+  // Default values
+  const { uri, id, startTime, fetchStart, endTime, payload } = {
+    uri: 'https://mozilla.org',
+    id: 0,
+    startTime: 0,
+    fetchStart: (options.startTime || 0) + 0.5,
+    endTime: (options.fetchStart || (options.startTime || 0) + 0.5) + 0.5,
+    payload: {},
+    ...options,
+  };
+
+  const name = `Load ${id}: ${uri}`;
   const startPayload: NetworkPayload = {
     type: 'Network',
     id,
     pri: 0,
     status: 'STATUS_START',
     startTime,
-    endTime: startTime + 0.5,
-    URI: 'https://mozilla.org',
-    RedirectURI: 'https://mozilla.org',
+    endTime: fetchStart,
+    URI: uri,
   };
 
   const stopPayload: NetworkPayload = {
     ...startPayload,
     status: 'STATUS_STOP',
-    startTime: startPayload.endTime,
-    endTime: startPayload.endTime + 0.5,
+    startTime: fetchStart,
+    endTime,
+    ...payload,
   };
 
   return [
-    [name, startPayload.startTime, startPayload],
-    [name, stopPayload.startTime, stopPayload],
+    // Note that the "time" of network markers is generally close to the
+    // payload's endTime. We don't use it at all in our business logic though.
+    [name, startPayload.endTime, startPayload],
+    [name, stopPayload.endTime, stopPayload],
   ];
 }
 
@@ -541,7 +563,12 @@ export function getNetworkMarkers(startTime: number, id: number) {
 export function getNetworkTrackProfile() {
   const arrayOfNetworkMarkers = Array(10)
     .fill()
-    .map((_, i) => getNetworkMarkers(3 + 0.1 * i, i));
+    .map((_, i) =>
+      getNetworkMarkers({
+        id: i,
+        startTime: 3 + 0.1 * i,
+      })
+    );
   const profile = getProfileWithMarkers([].concat(...arrayOfNetworkMarkers));
 
   const docShellId = '{c03a6ebd-2430-7949-b25b-95ba9776bdbf}';
