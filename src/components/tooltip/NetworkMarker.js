@@ -241,10 +241,14 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
             {_getHumanReadableDataStatus(payload.status)}
           </TooltipDetail>
           <TooltipDetail label="Cache">{payload.cache}</TooltipDetail>
-          <TooltipDetail label="URL">{payload.URI}</TooltipDetail>
-          <TooltipDetail label="Redirect URL">
-            {payload.RedirectURI}
+          <TooltipDetail label="URL">
+            <span className="tooltipNetworkUrl">{payload.URI}</span>
           </TooltipDetail>
+          {payload.RedirectURI ? (
+            <TooltipDetail label="Redirect URL">
+              <span className="tooltipNetworkUrl">{payload.RedirectURI}</span>
+            </TooltipDetail>
+          ) : null}
           <TooltipDetail label="Priority">
             {_getHumanReadablePriority(payload.pri)}
           </TooltipDetail>

@@ -916,14 +916,22 @@ exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wik
       URL
       :
     </div>
-    http://www.wikia.com/
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://www.wikia.com/
+    </span>
     <div
       class="tooltipLabel"
     >
       Redirect URL
       :
     </div>
-    http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
+    </span>
     <div
       class="tooltipLabel"
     >
@@ -1018,7 +1026,11 @@ exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://i
       URL
       :
     </div>
-    https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+    <span
+      class="tooltipNetworkUrl"
+    >
+      https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+    </span>
     <div
       class="tooltipLabel"
     >
