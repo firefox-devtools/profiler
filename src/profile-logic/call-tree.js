@@ -4,7 +4,11 @@
 
 // @flow
 import { timeCode } from '../utils/time-code';
-import { getSampleCallNodes, getOriginAnnotationForFunc } from './profile-data';
+import {
+  getSampleCallNodes,
+  getOriginAnnotationForFunc,
+  getCategoryPairLabel,
+} from './profile-data';
 import { resourceTypes } from './data-structures';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import type {
@@ -200,6 +204,7 @@ export class CallTree {
       } = this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const categoryIndex = this._callNodeTable.category[callNodeIndex];
+      const subcategoryIndex = this._callNodeTable.subcategory[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
@@ -231,7 +236,11 @@ export class CallTree {
         lib: libName.slice(0, 1000),
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
-        categoryName: this._categories[categoryIndex].name,
+        categoryName: getCategoryPairLabel(
+          this._categories,
+          categoryIndex,
+          subcategoryIndex
+        ),
         categoryColor: this._categories[categoryIndex].color,
         icon,
       };

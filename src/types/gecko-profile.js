@@ -79,6 +79,7 @@ export type GeckoFrameTable = {
     line: 4,
     column: 5,
     category: 6,
+    subcategory: 7,
   },
   data: Array<
     [
@@ -94,17 +95,9 @@ export type GeckoFrameTable = {
       null | Object,
       // The line of code
       null | number,
-      // int bitmask of the category
-      // 16 - js::ProfileEntry::Category::OTHER
-      // 32 - js::ProfileEntry::Category::CSS
-      // 64 - js::ProfileEntry::Category::JS
-      // 128 - js::ProfileEntry::Category::GC
-      // 256 - js::ProfileEntry::Category::CC
-      // 512 - js::ProfileEntry::Category::NETWORK
-      // 1024 - js::ProfileEntry::Category::GRAPHICS
-      // 2048 - js::ProfileEntry::Category::STORAGE
-      // 4096 - js::ProfileEntry::Category::EVENTS
-      // 9000 - other non-bitmask category
+      // index into profile.meta.categories
+      null | number,
+      // index into profile.meta.categories[category].subcategories. Always non-null if category is non-null.
       null | number,
     ]
   >,
@@ -118,6 +111,7 @@ export type GeckoFrameStruct = {
   line: Array<null | number>,
   column: Array<null | number>,
   category: Array<null | number>,
+  subcategory: Array<null | number>,
   length: number,
 };
 

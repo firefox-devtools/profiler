@@ -13,10 +13,12 @@ import type {
   ResourceTable,
   CategoryList,
   IndexIntoCategoryList,
+  IndexIntoSubcategoryListForCategory,
   IndexIntoFuncTable,
   IndexIntoSamplesTable,
   IndexIntoStackTable,
   ThreadIndex,
+  Category,
   Counter,
   CounterSamplesTable,
 } from '../types/profile';
@@ -68,18 +70,21 @@ export function getCallNodeInfo(
     const prefix: Array<IndexIntoCallNodeTable> = [];
     const func: Array<IndexIntoFuncTable> = [];
     const category: Array<IndexIntoCategoryList> = [];
+    const subcategory: Array<IndexIntoSubcategoryListForCategory> = [];
     const depth: Array<number> = [];
     let length = 0;
 
     function addCallNode(
       prefixIndex: IndexIntoCallNodeTable,
       funcIndex: IndexIntoFuncTable,
-      categoryIndex: IndexIntoCategoryList
+      categoryIndex: IndexIntoCategoryList,
+      subcategoryIndex: IndexIntoSubcategoryListForCategory
     ) {
       const index = length++;
       prefix[index] = prefixIndex;
       func[index] = funcIndex;
       category[index] = categoryIndex;
+      subcategory[index] = subcategoryIndex;
       if (prefixIndex === -1) {
         depth[index] = 0;
       } else {
@@ -97,6 +102,7 @@ export function getCallNodeInfo(
         prefixStack === null ? -1 : stackIndexToCallNodeIndex[prefixStack];
       const frameIndex = stackTable.frame[stackIndex];
       const categoryIndex = stackTable.category[stackIndex];
+      const subcategoryIndex = stackTable.subcategory[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
       const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
       let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
@@ -104,14 +110,18 @@ export function getCallNodeInfo(
       );
       if (callNodeIndex === undefined) {
         callNodeIndex = length;
-        addCallNode(prefixCallNode, funcIndex, categoryIndex);
+        addCallNode(prefixCallNode, funcIndex, categoryIndex, subcategoryIndex);
         prefixCallNodeAndFuncToCallNodeMap.set(
           prefixCallNodeAndFuncIndex,
           callNodeIndex
         );
       } else if (category[callNodeIndex] !== categoryIndex) {
-        // Conflicting origin stack categories -> default category.
+        // Conflicting origin stack categories -> default category + subcategory.
         category[callNodeIndex] = defaultCategory;
+        subcategory[callNodeIndex] = 0;
+      } else if (subcategory[callNodeIndex] !== subcategoryIndex) {
+        // Conflicting origin stack subcategories -> "Other" subcategory.
+        subcategory[callNodeIndex] = 0;
       }
       stackIndexToCallNodeIndex[stackIndex] = callNodeIndex;
     }
@@ -120,6 +130,7 @@ export function getCallNodeInfo(
       prefix: new Int32Array(prefix),
       func: new Int32Array(func),
       category: new Int32Array(category),
+      subcategory: new Int32Array(subcategory),
       depth,
       length,
     };
@@ -698,6 +709,7 @@ function _filterThreadByFunc(
       frame: [],
       prefix: [],
       category: [],
+      subcategory: [],
     };
 
     const oldStackToNewStack = new Map();
@@ -723,11 +735,20 @@ function _filterThreadByFunc(
             newStackTable.prefix[newStack] = prefixNewStack;
             newStackTable.frame[newStack] = frameIndex;
             newStackTable.category[newStack] = stackTable.category[stackIndex];
+            newStackTable.subcategory[newStack] =
+              stackTable.subcategory[stackIndex];
           } else if (
             newStackTable.category[newStack] !== stackTable.category[stackIndex]
           ) {
-            // Conflicting origin stack categories -> default category.
+            // Conflicting origin stack categories -> default category + subcategory.
             newStackTable.category[newStack] = defaultCategory;
+            newStackTable.subcategory[newStack] = 0;
+          } else if (
+            newStackTable.subcategory[stackIndex] !==
+            stackTable.subcategory[stackIndex]
+          ) {
+            // Conflicting origin stack subcategories -> "Other" subcategory.
+            newStackTable.subcategory[stackIndex] = 0;
           }
           oldStackToNewStack.set(stackIndex, newStack);
           prefixStackAndFrameToStack.set(prefixStackAndFrameIndex, newStack);
@@ -1176,6 +1197,7 @@ export function invertCallstack(
       length: 0,
       frame: [],
       category: [],
+      subcategory: [],
       prefix: [],
     };
     // Create a Map that keys off of two values, both the prefix and frame combination
@@ -1186,7 +1208,7 @@ export function invertCallstack(
     // Returns the stackIndex for a specific frame (that is, a function and its
     // context), and a specific prefix. If it doesn't exist yet it will create
     // a new stack entry and return its index.
-    function stackFor(prefix, frame, category) {
+    function stackFor(prefix, frame, category, subcategory) {
       const prefixAndFrameIndex =
         (prefix === null ? -1 : prefix) * frameCount + frame;
       let stackIndex = prefixAndFrameToStack.get(prefixAndFrameIndex);
@@ -1195,6 +1217,7 @@ export function invertCallstack(
         newStackTable.prefix[stackIndex] = prefix;
         newStackTable.frame[stackIndex] = frame;
         newStackTable.category[stackIndex] = category;
+        newStackTable.subcategory[stackIndex] = subcategory;
         prefixAndFrameToStack.set(prefixAndFrameIndex, stackIndex);
       } else if (newStackTable.category[stackIndex] !== category) {
         // If two stack nodes from the non-inverted stack tree with different
@@ -1202,6 +1225,13 @@ export function invertCallstack(
         // inverted tree, discard their category and set the category to the
         // default category.
         newStackTable.category[stackIndex] = defaultCategory;
+        newStackTable.subcategory[stackIndex] = 0;
+      } else if (newStackTable.subcategory[stackIndex] !== subcategory) {
+        // If two stack nodes from the non-inverted stack tree with the same
+        // category but different subcategories happen to collapse into the same
+        // stack node in the inverted tree, discard their subcategory and set it
+        // to the "Other" subcategory.
+        newStackTable.subcategory[stackIndex] = 0;
       }
       return stackIndex;
     }
@@ -1227,7 +1257,8 @@ export function invertCallstack(
           newStack = stackFor(
             newStack,
             stackTable.frame[currentStack],
-            stackTable.category[currentStack]
+            stackTable.category[currentStack],
+            stackTable.subcategory[currentStack]
           );
         }
         oldStackToNewStack.set(stackIndex, newStack);
@@ -1632,4 +1663,24 @@ export function getFriendlyStackTypeName(
     default:
       throw assertExhaustiveCheck(implementation);
   }
+}
+
+export function shouldDisplaySubcategoryInfoForCategory(
+  category: Category
+): boolean {
+  // The first subcategory of every category is the "Other" subcategory.
+  // For categories which only have the "Other" subcategory and no other
+  // subcategories, don't display any subcategory information.
+  return category.subcategories.length > 1;
+}
+
+export function getCategoryPairLabel(
+  categories: CategoryList,
+  categoryIndex: number,
+  subcategoryIndex: number
+): string {
+  const category = categories[categoryIndex];
+  return subcategoryIndex !== 0
+    ? `${category.name}: ${category.subcategories[subcategoryIndex]}`
+    : `${category.name}`;
 }
