@@ -343,6 +343,8 @@ export type NetworkPayload = {|
   // happening on the socket thread. However it's not present for persisted
   // connections. This is also the case for `domainLookupEnd`, `connectStart`,
   // `tcpConnectEnd`, `secureConnectionStart`, and `connectEnd`.
+  // NOTE: If you add a new property, don't forget to adjust its timestamp in
+  // `adjustMarkerTimestamps` in `process-profile.js`.
   domainLookupStart?: Milliseconds,
   domainLookupEnd?: Milliseconds,
   connectStart?: Milliseconds,
