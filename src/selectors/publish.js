@@ -13,7 +13,10 @@ import {
 } from './profile';
 import { compress } from '../utils/gz';
 import { serializeProfile } from '../profile-logic/process-profile';
-import { sanitizePII } from '../profile-logic/sanitize';
+import {
+  sanitizePII,
+  getShouldSanitizeByDefault as getShouldSanitizeByDefaultImpl,
+} from '../profile-logic/sanitize';
 import prettyBytes from '../utils/pretty-bytes';
 import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 import { ensureExists } from '../utils/flow';
@@ -69,7 +72,12 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     globalTracks,
     localTracksByPid
   ) => {
-    if (!checkedSharingOptions.isFiltering) {
+    let isIncludingEverything = true;
+    for (const value of Object.values(checkedSharingOptions)) {
+      isIncludingEverything = isIncludingEverything && value;
+    }
+    if (isIncludingEverything) {
+      // No sanitization is happening, bail out early.
       return null;
     }
 
@@ -191,3 +199,8 @@ export const getUploadProgressString: Selector<string> = createSelector(
 
 export const getAbortFunction: Selector<() => void> = state =>
   getUploadState(state).abortFunction;
+
+export const getShouldSanitizeByDefault: Selector<boolean> = createSelector(
+  getProfile,
+  getShouldSanitizeByDefaultImpl
+);

@@ -145,16 +145,21 @@
 
 .menuButtonsPublishContent {
   position: relative;
-  padding: 10px 0 10px 60px;
+  padding: 0 0 10px 70px;
 }
 
 .menuButtonsPublishIcon {
   position: absolute;
-  top: 32px;
-  left: 5px;
+  top: -6px;
+  left: 10px;
   width: 44px;
   height: 44px;
   background: url(../../../../res/img/svg/info.svg) center center no-repeat;
+}
+
+.menuButtonsPublishTitle {
+  margin-top: 25px;
+  margin-bottom: 15px;
 }
 
 .menuButtonsPublishInfoDescription {
@@ -165,22 +170,12 @@
 }
 
 .menuButtonsPublishDataChoices {
-  margin-left: 35px;
+  margin-left: 10px;
 }
 
 .menuButtonsPublishDataChoicesLabel {
   display: flex;
   margin: 4px 0;
-}
-
-.menuButtonsPublishDataSummary {
-  margin: 13px 8px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: bold;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
 }
 
 .menuButtonsPublishDataLabel {
@@ -296,7 +291,7 @@
 
 .menuButtonsPublishUrl {
   padding: 10px;
-  margin: 10px 0;
+  margin: 10px 0 35px;
   border: 1px solid var(--grey-30);
   background: #fff;
   border-radius: 3px;
