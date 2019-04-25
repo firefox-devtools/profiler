@@ -9,7 +9,9 @@ import { getUrlState } from '../selectors/url-state';
 import {
   getAbortFunction,
   getUploadGeneration,
+  getSanitizedProfile,
   getSanitizedProfileData,
+  getRemoveProfileInformation,
 } from '../selectors/publish';
 import { urlFromState } from '../app-logic/url-handling';
 import { profilePublished } from './app';
@@ -17,6 +19,8 @@ import urlStateReducer from '../reducers/url-state';
 
 import type { Action, ThunkAction } from '../types/store';
 import type { CheckedSharingOptions } from '../types/actions';
+import type { StartEndRange } from '../types/units';
+import type { ThreadIndex } from '../types/profile';
 
 export function toggleCheckedSharingOptions(
   slug: $Keys<CheckedSharingOptions>
@@ -120,13 +124,23 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         return false;
       }
 
-      // Generate a url, and completely drop any of the existing URL state. In
-      // a future patch, we should handle this gracefully.
-      const url =
-        window.location.origin +
-        urlFromState(
-          urlStateReducer(getUrlState(getState()), profilePublished(hash))
+      const removeProfileInformation = getRemoveProfileInformation(getState());
+      let urlState;
+      if (removeProfileInformation) {
+        const { committedRanges, oldThreadIndexToNew } = getSanitizedProfile(
+          getState()
         );
+        urlState = urlStateReducer(
+          getUrlState(getState()),
+          profileSanitized(hash, committedRanges, oldThreadIndexToNew)
+        );
+      } else {
+        urlState = urlStateReducer(
+          getUrlState(getState()),
+          profilePublished(hash)
+        );
+      }
+      const url = window.location.origin + urlFromState(urlState);
 
       dispatch(uploadFinished(url));
 
@@ -170,5 +184,22 @@ export function abortUpload(): ThunkAction<Promise<void>> {
 export function resetUploadState(): Action {
   return {
     type: 'UPLOAD_RESET',
+  };
+}
+
+/**
+ * Report to the UrlState that the profile was sanitized. This will re-map any stored
+ * indexes or information that has been sanitized away.
+ */
+export function profileSanitized(
+  hash: string,
+  committedRanges: StartEndRange[] | null,
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null
+): Action {
+  return {
+    type: 'SANITIZE_PROFILE',
+    hash,
+    committedRanges,
+    oldThreadIndexToNew,
   };
 }

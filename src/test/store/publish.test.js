@@ -187,7 +187,7 @@ describe('attemptToPublish', function() {
     expect(await publishAttempt).toEqual(true);
 
     expect(window.open).toHaveBeenCalledWith(
-      'http://localhost/public/FAKEHASH/calltree/?published&v=3',
+      'http://localhost/public/FAKEHASH/calltree/?globalTrackOrder=0&localTrackOrderByPid=0-0~&thread=0&v=3',
       '_blank'
     );
   });
