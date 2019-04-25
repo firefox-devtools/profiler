@@ -80,7 +80,7 @@
 .networkChartRowItemUriRequired {
   display: inline-block;
   overflow: hidden;
-  max-width: 600px;
+  max-width: 35%;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
