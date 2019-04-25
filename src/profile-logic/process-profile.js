@@ -1149,7 +1149,7 @@ export function sanitizePII(
           const newThreadIndex = oldThreadIndexToNew.get(
             counter.mainThreadIndex
           );
-          if (!newThreadIndex) {
+          if (newThreadIndex === undefined || newThreadIndex === null) {
             // Filtering out the current counter.
             return acc;
           }

@@ -125,6 +125,25 @@ export function createGeckoProfile(): GeckoProfile {
     startTime: parentProcessMeta.startTime + 1000,
   };
 
+  const parentProcessThreads: GeckoThread[] = [
+    {
+      ..._createGeckoThread(),
+      name: 'GeckoMain',
+      processType: 'default',
+      pid: 3333,
+    },
+    {
+      ..._createGeckoThread(),
+      name: 'Compositor',
+      processType: 'default',
+      pid: 3333,
+    },
+  ];
+
+  const parentProcessCounters: GeckoCounter[] = [
+    createGeckoCounter(parentProcessThreads[0]),
+  ];
+
   const contentProcessProfile: GeckoProfile = {
     meta: contentProcessMeta,
     pausedRanges: [],
@@ -151,21 +170,9 @@ export function createGeckoProfile(): GeckoProfile {
     meta: parentProcessMeta,
     libs: [parentProcessBinary].concat(extraBinaries),
     pages: [],
+    counters: parentProcessCounters,
     pausedRanges: [],
-    threads: [
-      {
-        ..._createGeckoThread(),
-        name: 'GeckoMain',
-        processType: 'default',
-        pid: 3333,
-      },
-      {
-        ..._createGeckoThread(),
-        name: 'Compositor',
-        processType: 'default',
-        pid: 3333,
-      },
-    ],
+    threads: parentProcessThreads,
     processes: [contentProcessProfile],
   };
 }
