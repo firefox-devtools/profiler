@@ -75,7 +75,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
 
     // Find all of the thread indexes that are hidden.
     const shouldRemoveThreads = new Set();
-    if (checkedSharingOptions.removeHiddenThreads) {
+    if (!checkedSharingOptions.includeHiddenThreads) {
       for (const globalTrackIndex of hiddenGlobalTracks) {
         const globalTrack = globalTracks[globalTrackIndex];
         if (
@@ -114,18 +114,18 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     }
 
     return {
-      shouldFilterToCommittedRange: checkedSharingOptions.removeFullTimeRange
-        ? committedRange
-        : null,
-      shouldRemoveNetworkUrls: checkedSharingOptions.removeUrls,
-      shouldRemoveAllUrls: checkedSharingOptions.removeUrls,
+      shouldFilterToCommittedRange: checkedSharingOptions.includeFullTimeRange
+        ? null
+        : committedRange,
+      shouldRemoveNetworkUrls: !checkedSharingOptions.includeUrls,
+      shouldRemoveAllUrls: !checkedSharingOptions.includeUrls,
       shouldRemoveThreadsWithScreenshots: new Set(
-        checkedSharingOptions.removeScreenshots
-          ? profile.threads.map((_, threadIndex) => threadIndex)
-          : []
+        checkedSharingOptions.includeScreenshots
+          ? []
+          : profile.threads.map((_, threadIndex) => threadIndex)
       ),
       shouldRemoveThreads,
-      shouldRemoveExtensions: checkedSharingOptions.removeExtension,
+      shouldRemoveExtensions: !checkedSharingOptions.includeExtension,
     };
   }
 );

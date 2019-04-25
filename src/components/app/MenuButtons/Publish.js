@@ -73,15 +73,15 @@ class MenuButtonsPublishImpl extends React.PureComponent<
       this.setState({ isFilteringToggledOnce: true });
       this.props.toggleCheckedSharingOptions('isFiltering');
     },
-    removeHiddenThreads: () =>
-      this.props.toggleCheckedSharingOptions('removeHiddenThreads'),
-    removeFullTimeRange: () =>
-      this.props.toggleCheckedSharingOptions('removeFullTimeRange'),
-    removeScreenshots: () =>
-      this.props.toggleCheckedSharingOptions('removeScreenshots'),
-    removeUrls: () => this.props.toggleCheckedSharingOptions('removeUrls'),
-    removeExtension: () =>
-      this.props.toggleCheckedSharingOptions('removeExtension'),
+    includeHiddenThreads: () =>
+      this.props.toggleCheckedSharingOptions('includeHiddenThreads'),
+    includeFullTimeRange: () =>
+      this.props.toggleCheckedSharingOptions('includeFullTimeRange'),
+    includeScreenshots: () =>
+      this.props.toggleCheckedSharingOptions('includeScreenshots'),
+    includeUrls: () => this.props.toggleCheckedSharingOptions('includeUrls'),
+    includeExtension: () =>
+      this.props.toggleCheckedSharingOptions('includeExtension'),
   };
 
   state = {
@@ -152,25 +152,19 @@ class MenuButtonsPublishImpl extends React.PureComponent<
               open={isFilteringToggledOnce}
             >
               <summary className="menuButtonsPublishDataSummary">
-                Choose what gets removed
+                Include additional data
               </summary>
               <div className="menuButtonsPublishDataChoices">
+                {this._renderCheckbox('includeHiddenThreads', 'Hidden threads')}
                 {this._renderCheckbox(
-                  'removeHiddenThreads',
-                  'Remove hidden threads'
+                  'includeFullTimeRange',
+                  'Hidden time range'
                 )}
+                {this._renderCheckbox('includeScreenshots', 'Screenshots')}
+                {this._renderCheckbox('includeUrls', 'Resource URLs')}
                 {this._renderCheckbox(
-                  'removeFullTimeRange',
-                  'Remove hidden time range'
-                )}
-                {this._renderCheckbox(
-                  'removeScreenshots',
-                  'Remove screenshots'
-                )}
-                {this._renderCheckbox('removeUrls', 'Remove resource URLs')}
-                {this._renderCheckbox(
-                  'removeExtension',
-                  'Remove extension information'
+                  'includeExtension',
+                  'Extension information'
                 )}
               </div>
             </details>

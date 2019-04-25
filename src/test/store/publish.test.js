@@ -71,19 +71,19 @@ describe('getCheckedSharingOptions', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { getState, dispatch } = storeWithProfile(profile);
       expect(getCheckedSharingOptions(getState())).toMatchObject({
-        removeHiddenThreads: true,
+        includeHiddenThreads: false,
       });
 
-      dispatch(toggleCheckedSharingOptions('removeHiddenThreads'));
+      dispatch(toggleCheckedSharingOptions('includeHiddenThreads'));
 
       expect(getCheckedSharingOptions(getState())).toMatchObject({
-        removeHiddenThreads: false,
+        includeHiddenThreads: true,
       });
 
-      dispatch(toggleCheckedSharingOptions('removeHiddenThreads'));
+      dispatch(toggleCheckedSharingOptions('includeHiddenThreads'));
 
       expect(getCheckedSharingOptions(getState())).toMatchObject({
-        removeHiddenThreads: true,
+        includeHiddenThreads: false,
       });
     });
   });
