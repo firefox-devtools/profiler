@@ -12,10 +12,8 @@ import {
   getLocalTracksByPid,
 } from './profile';
 import { compress } from '../utils/gz';
-import {
-  serializeProfile,
-  sanitizePII,
-} from '../profile-logic/process-profile';
+import { serializeProfile } from '../profile-logic/process-profile';
+import { sanitizePII } from '../profile-logic/sanitize';
 import prettyBytes from '../utils/pretty-bytes';
 import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 import { ensureExists } from '../utils/flow';
