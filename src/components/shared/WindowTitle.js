@@ -26,7 +26,7 @@ type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 class WindowTitle extends PureComponent<Props> {
   // This component updates window title in the form of:
-  // profile name - version - platform - date time - 'perf.html'
+  // profile name - version - platform - date time - data source - 'Firefox profiler'
   componentDidUpdate() {
     const { profile, profileName, dataSource } = this.props;
     const { meta } = profile;
@@ -43,8 +43,7 @@ class WindowTitle extends PureComponent<Props> {
     if (dataSource === 'public') {
       title = title.concat(' (', dataSource, ')');
     }
-    title = title.concat(' - ');
-    title = title.concat('Firefox profiler');
+    title = title.concat(' - ', 'Firefox profiler');
     document.title = title;
   }
 
@@ -62,6 +61,7 @@ function _formatVersionNumber(version?: string): string | null {
       return match.toString();
     }
   }
+
   return null;
 }
 
@@ -86,27 +86,12 @@ function _formatPlatform(meta: ProfileMeta): string {
 }
 
 function _formatDateTime(timestamp: number): string {
-  const dateOptions = {
+  const dateTimeLabel = new Date(timestamp).toLocaleString(undefined, {
     timeZone: 'UTC',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  };
-  const timeOptions = {
-    timeZone: 'UTC',
-    hourCycle: 'h24',
-    hour: '2-digit',
-    minute: '2-digit',
-  };
-  const date = new Date(timestamp);
-  const dateLabel = date
-    .toLocaleString('en-GB', dateOptions)
-    .split('/')
-    .reverse()
-    .join('-');
-  const timeLabel = date.toLocaleString('en-GB', timeOptions);
+    timeZoneName: 'short',
+  });
 
-  return [dateLabel, timeLabel].join(' ');
+  return dateTimeLabel;
 }
 
 const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
