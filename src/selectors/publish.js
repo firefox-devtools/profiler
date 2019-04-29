@@ -125,8 +125,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       shouldFilterToCommittedRange: checkedSharingOptions.includeFullTimeRange
         ? null
         : committedRange,
-      shouldRemoveNetworkUrls: !checkedSharingOptions.includeUrls,
-      shouldRemoveAllUrls: !checkedSharingOptions.includeUrls,
+      shouldRemoveUrls: !checkedSharingOptions.includeUrls,
       shouldRemoveThreadsWithScreenshots: new Set(
         checkedSharingOptions.includeScreenshots
           ? []

@@ -264,8 +264,7 @@ describe('sanitizePII', function() {
     return {
       shouldRemoveThreads: new Set(),
       shouldRemoveThreadsWithScreenshots: new Set(),
-      shouldRemoveNetworkUrls: false,
-      shouldRemoveAllUrls: false,
+      shouldRemoveUrls: false,
       shouldFilterToCommittedRange: null,
       shouldRemoveExtensions: false,
       ...customFields,
@@ -369,7 +368,7 @@ describe('sanitizePII', function() {
     }
 
     const PIIToRemove = getRemoveProfileInformation({
-      shouldRemoveNetworkUrls: true,
+      shouldRemoveUrls: true,
     });
 
     const sanitizedProfile = sanitizePII(profile, PIIToRemove);
@@ -378,10 +377,10 @@ describe('sanitizePII', function() {
     }
   });
 
-  it('should sanitize the network URLS', function() {
+  it('should sanitize all the URLs inside network markers', function() {
     const profile = processProfile(createGeckoProfile());
     const PIIToRemove = getRemoveProfileInformation({
-      shouldRemoveNetworkUrls: true,
+      shouldRemoveUrls: true,
     });
 
     const sanitizedProfile = sanitizePII(profile, PIIToRemove);
@@ -403,10 +402,10 @@ describe('sanitizePII', function() {
     }
   });
 
-  it('should sanitize all the URLS', function() {
+  it('should sanitize all the URLs inside string table', function() {
     const profile = processProfile(createGeckoProfile());
     const PIIToRemove = getRemoveProfileInformation({
-      shouldRemoveAllUrls: true,
+      shouldRemoveUrls: true,
     });
 
     const sanitizedProfile = sanitizePII(profile, PIIToRemove);

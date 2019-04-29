@@ -31,10 +31,7 @@ export function sanitizePII(
   const oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex | null> = new Map();
   let pages;
   if (profile.pages) {
-    if (
-      PIIToBeRemoved.shouldRemoveNetworkUrls ||
-      PIIToBeRemoved.shouldRemoveAllUrls
-    ) {
+    if (PIIToBeRemoved.shouldRemoveUrls) {
       pages = profile.pages.map(page =>
         Object.assign({}, page, {
           url: 'Page #' + urlCounter++,
@@ -137,7 +134,7 @@ function sanitizeThreadPII(
   // status.
   const markersToDelete = new Set();
   if (
-    PIIToBeRemoved.shouldRemoveNetworkUrls ||
+    PIIToBeRemoved.shouldRemoveUrls ||
     PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0
   ) {
     for (let i = 0; i < markerTable.length; i++) {
@@ -145,7 +142,7 @@ function sanitizeThreadPII(
 
       // Remove the all network URLs if user wants to remove them.
       if (
-        PIIToBeRemoved.shouldRemoveNetworkUrls &&
+        PIIToBeRemoved.shouldRemoveUrls &&
         currentMarker &&
         currentMarker.type &&
         currentMarker.type === 'Network'
@@ -210,7 +207,7 @@ function sanitizeThreadPII(
 
   // This is expensive but needs to be done somehow.
   // Maybe we can find something better here.
-  if (PIIToBeRemoved.shouldRemoveAllUrls) {
+  if (PIIToBeRemoved.shouldRemoveUrls) {
     for (let i = 0; i < stringArray.length; i++) {
       stringArray[i] = removeURLs(stringArray[i]);
     }
