@@ -16,7 +16,10 @@ import { withSize } from '../shared/WithSize';
 import NetworkChartEmptyReasons from './NetworkChartEmptyReasons';
 import NetworkChartRow from './NetworkChartRow';
 
-import { getPreviewSelectionRange } from '../../selectors/profile';
+import {
+  getPreviewSelection,
+  getPreviewSelectionRange,
+} from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
@@ -38,6 +41,7 @@ type DispatchProps = {|
 
 type StateProps = {|
   +markers: Marker[],
+  +disableOverscan: boolean,
   +timeRange: StartEndRange,
   +threadIndex: number,
 |};
@@ -115,7 +119,7 @@ class NetworkChart extends React.PureComponent<Props> {
   };
 
   render() {
-    const { markers, width, timeRange } = this.props;
+    const { markers, width, timeRange, disableOverscan } = this.props;
 
     // We want to force a full rerender whenever the width or the range changes.
     // We compute a string using these values, so that when one of the value
@@ -145,7 +149,7 @@ class NetworkChart extends React.PureComponent<Props> {
             specialItems={this._specialItems}
             containerWidth={width}
             forceRender={forceRenderKey}
-            disableOverscan={false}
+            disableOverscan={disableOverscan}
             onCopy={this._onCopy}
             onKeyDown={this._onKeyDown}
           />
@@ -166,6 +170,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
         state
       ),
       timeRange: getPreviewSelectionRange(state),
+      disableOverscan: getPreviewSelection(state).isModifying,
       threadIndex: getSelectedThreadIndex(state),
     };
   },
