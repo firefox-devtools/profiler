@@ -115,7 +115,14 @@ class NetworkChart extends React.PureComponent<Props> {
   };
 
   render() {
-    const { markers } = this.props;
+    const { markers, width, timeRange } = this.props;
+
+    // We want to force a full rerender whenever the width or the range changes.
+    // We compute a string using these values, so that when one of the value
+    // changes the string changes and forces a rerender of the whole
+    // VirtualList. See also the comments around this value in the VirtualList
+    // component definition file.
+    const forceRenderKey = `${timeRange.start}-${timeRange.end}-${width}`;
 
     return (
       <div
@@ -136,7 +143,8 @@ class NetworkChart extends React.PureComponent<Props> {
             columnCount={1}
             focusable={true}
             specialItems={this._specialItems}
-            containerWidth={3000}
+            containerWidth={width}
+            forceRender={forceRenderKey}
             disableOverscan={false}
             onCopy={this._onCopy}
             onKeyDown={this._onKeyDown}
