@@ -69,6 +69,9 @@ function setupWithProfile(profile) {
       <NetworkChart />
     </Provider>
   );
+
+  flushRafCalls();
+
   const { container } = renderResult;
 
   function getUrlShorteningParts(): Array<[string, string]> {
@@ -92,8 +95,8 @@ function setupWithProfile(profile) {
 
   return {
     ...renderResult,
+    ...store,
     flushRafCalls,
-    dispatch: store.dispatch,
     flushDrawLog: () => ctx.__flushDrawLog(),
     getUrlShorteningParts,
     getPhaseElements,
@@ -102,30 +105,14 @@ function setupWithProfile(profile) {
   };
 }
 
-// create new function to get ProfileWithNetworkMarkers
 function setupWithPayload(markers: TestDefinedMarkers) {
   const profile = getProfileWithMarkers(markers);
-  const setupResult = setupWithProfile(profile);
-  const { flushRafCalls, dispatch } = setupResult;
-
-  dispatch(changeSelectedTab('network-chart'));
-  flushRafCalls();
-
-  return setupResult;
+  return setupWithProfile(profile);
 }
 
 describe('NetworkChart', function() {
   it('renders NetworkChart correctly', () => {
-    const profile = getProfileWithMarkers([...NETWORK_MARKERS]);
-    const {
-      flushRafCalls,
-      dispatch,
-      flushDrawLog,
-      container,
-    } = setupWithProfile(profile);
-
-    dispatch(changeSelectedTab('network-chart'));
-    flushRafCalls();
+    const { flushDrawLog, container } = setupWithPayload([...NETWORK_MARKERS]);
 
     const drawCalls = flushDrawLog();
     expect(container.firstChild).toMatchSnapshot();
@@ -413,10 +400,8 @@ describe('NetworkChartRowBar MIME-type filter', function() {
 
 describe('EmptyReasons', () => {
   it("shows a reason when a profile's network markers have been filtered out", () => {
-    const profile = getProfileWithMarkers(NETWORK_MARKERS);
-    const { dispatch, container } = setupWithProfile(profile);
+    const { dispatch, container } = setupWithPayload([...NETWORK_MARKERS]);
 
-    dispatch(changeSelectedTab('network-chart'));
     dispatch(changeNetworkSearchString('MATCH_NOTHING'));
     expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
   });
