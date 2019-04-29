@@ -170,21 +170,79 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <div
       class="menuButtonsPublishIcon"
     />
+    <h1
+      class="menuButtonsPublishTitle"
+    >
+      Share Performance Profile
+    </h1>
     <p
       class="menuButtonsPublishInfoDescription"
     >
-      You’re about to publicly share your profile, which can potentially contain personally identifiable information.
+      Upload your profile and make it accessible to anyone with the link.
+       This profile is from Firefox Nightly, so by default all information is included.
     </p>
-    <label
-      class="photon-label"
+    <h3>
+      Include additional data that may be identifiable
+    </h3>
+    <div
+      class="menuButtonsPublishDataChoices"
     >
-      <input
-        class="photon-checkbox photon-checkbox-default"
-        name="isFiltering"
-        type="checkbox"
-      />
-      Filter out potentially identifying information
-    </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          checked=""
+          class="photon-checkbox photon-checkbox-default"
+          name="includeHiddenThreads"
+          type="checkbox"
+        />
+        Include hidden threads
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          checked=""
+          class="photon-checkbox photon-checkbox-default"
+          name="includeFullTimeRange"
+          type="checkbox"
+        />
+        Include hidden time range
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          checked=""
+          class="photon-checkbox photon-checkbox-default"
+          name="includeScreenshots"
+          type="checkbox"
+        />
+        Include screenshots
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          checked=""
+          class="photon-checkbox photon-checkbox-default"
+          name="includeUrls"
+          type="checkbox"
+        />
+        Include resource URLs
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          checked=""
+          class="photon-checkbox photon-checkbox-default"
+          name="includeExtension"
+          type="checkbox"
+        />
+        Include extension information
+      </label>
+    </div>
     <div
       class="menuButtonsPublishButtons"
     >
@@ -218,85 +276,74 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
     <div
       class="menuButtonsPublishIcon"
     />
+    <h1
+      class="menuButtonsPublishTitle"
+    >
+      Share Performance Profile
+    </h1>
     <p
       class="menuButtonsPublishInfoDescription"
     >
-      You’re about to publicly share your profile, which can potentially contain personally identifiable information.
+      Upload your profile and make it accessible to anyone with the link.
+       By default, your personal data is removed.
     </p>
-    <label
-      class="photon-label"
+    <h3>
+      Include additional data that may be identifiable
+    </h3>
+    <div
+      class="menuButtonsPublishDataChoices"
     >
-      <input
-        checked=""
-        class="photon-checkbox photon-checkbox-default"
-        name="isFiltering"
-        type="checkbox"
-      />
-      Filter out potentially identifying information
-    </label>
-    <details
-      class="menuButtonsPublishData"
-    >
-      <summary
-        class="menuButtonsPublishDataSummary"
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
       >
-        Include additional data
-      </summary>
-      <div
-        class="menuButtonsPublishDataChoices"
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeHiddenThreads"
+          type="checkbox"
+        />
+        Include hidden threads
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
       >
-        <label
-          class="photon-label menuButtonsPublishDataChoicesLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-default"
-            name="includeHiddenThreads"
-            type="checkbox"
-          />
-          Hidden threads
-        </label>
-        <label
-          class="photon-label menuButtonsPublishDataChoicesLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-default"
-            name="includeFullTimeRange"
-            type="checkbox"
-          />
-          Hidden time range
-        </label>
-        <label
-          class="photon-label menuButtonsPublishDataChoicesLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-default"
-            name="includeScreenshots"
-            type="checkbox"
-          />
-          Screenshots
-        </label>
-        <label
-          class="photon-label menuButtonsPublishDataChoicesLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-default"
-            name="includeUrls"
-            type="checkbox"
-          />
-          Resource URLs
-        </label>
-        <label
-          class="photon-label menuButtonsPublishDataChoicesLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-default"
-            name="includeExtension"
-            type="checkbox"
-          />
-          Extension information
-        </label>
-      </div>
-    </details>
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeFullTimeRange"
+          type="checkbox"
+        />
+        Include hidden time range
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeScreenshots"
+          type="checkbox"
+        />
+        Include screenshots
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeUrls"
+          type="checkbox"
+        />
+        Include resource URLs
+      </label>
+      <label
+        class="photon-label menuButtonsPublishDataChoicesLabel"
+      >
+        <input
+          class="photon-checkbox photon-checkbox-default"
+          name="includeExtension"
+          type="checkbox"
+        />
+        Include extension information
+      </label>
+    </div>
     <div
       class="menuButtonsPublishButtons"
     >

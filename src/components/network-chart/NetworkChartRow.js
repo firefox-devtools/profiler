@@ -268,15 +268,17 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     );
 
     return (
-      <section className={itemClassName}>
+      <div
+        className={itemClassName}
+        onMouseEnter={this._hoverIn}
+        onMouseLeave={this._hoverOut}
+      >
         <div className="networkChartRowItemLabel">
           {this._splitsURI(marker.name)}
         </div>
         <div
           className="networkChartRowItemBar"
           style={{ width: markerWidth, left: startPosition }}
-          onMouseEnter={this._hoverIn}
-          onMouseLeave={this._hoverOut}
         >
           <NetworkChartRowBar
             marker={marker}
@@ -295,7 +297,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
             />
           </Tooltip>
         ) : null}
-      </section>
+      </div>
     );
   }
 }

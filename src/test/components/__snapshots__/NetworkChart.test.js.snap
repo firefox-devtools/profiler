@@ -76,7 +76,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
         <div
           class="treeViewBodyInner treeViewBodyInner0InnerChunk"
         >
-          <section
+          <div
             class="networkChartRowItem network-color-other"
           >
             <div
@@ -110,8 +110,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
+          </div>
+          <div
             class="networkChartRowItem network-color-other odd"
           >
             <div
@@ -145,8 +145,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.96551724137927px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
+          </div>
+          <div
             class="networkChartRowItem network-color-other"
           >
             <div
@@ -180,8 +180,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
+          </div>
+          <div
             class="networkChartRowItem network-color-other odd"
           >
             <div
@@ -215,8 +215,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
+          </div>
+          <div
             class="networkChartRowItem network-color-other"
           >
             <div
@@ -250,8 +250,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.96551724137933px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
+          </div>
+          <div
             class="networkChartRowItem network-color-other odd"
           >
             <div
@@ -285,8 +285,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
+          </div>
+          <div
             class="networkChartRowItem network-color-other"
           >
             <div
@@ -320,8 +320,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.96551724137927px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
+          </div>
+          <div
             class="networkChartRowItem network-color-other odd"
           >
             <div
@@ -355,8 +355,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
+          </div>
+          <div
             class="networkChartRowItem network-color-other"
           >
             <div
@@ -390,8 +390,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
+          </div>
+          <div
             class="networkChartRowItem network-color-other odd"
           >
             <div
@@ -425,7 +425,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.96551724137933px; opacity: 1;"
               />
             </div>
-          </section>
+          </div>
         </div>
       </div>
     </div>

@@ -327,45 +327,6 @@ describe('TooltipMarker', function() {
       ],
       [
         'Load 31: http://wikia.com/',
-        18670.5141769375,
-        // Coerce all of the Network payload objects to the NetworkPayload type to help
-        // surface helpful Flow error messages.
-        ({
-          type: 'Network',
-          startTime: 18670.5141769375,
-          endTime: 18736.9210449375,
-          id: 107838038867999,
-          status: 'STATUS_REDIRECT',
-          cache: 'any string could be here',
-          pri: -20,
-          count: 0,
-          URI: 'http://www.wikia.com/',
-          RedirectURI:
-            'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
-        }: NetworkPayload),
-      ],
-      [
-        'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
-        111.0,
-        ({
-          type: 'Network',
-          startTime: 13382.453655062502,
-          endTime: 13587.6919060625,
-          id: 1234,
-          status: 'STATUS_STOP',
-          cache: 'Hit',
-          pri: 8,
-          count: 47027,
-          URI:
-            'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
-          requestStart: 11143.294456,
-          responseStart: 11172.047379,
-          responseEnd: 11175.561877,
-          RedirectURI: '',
-        }: NetworkPayload),
-      ],
-      [
-        'Load 31: http://wikia.com/',
         10.5,
         ({
           type: 'Network',
@@ -379,17 +340,61 @@ describe('TooltipMarker', function() {
         }: NetworkPayload),
       ],
       [
-        'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        'Load 31: http://wikia.com/',
         111.0,
+        // Coerce all of the Network payload objects to the NetworkPayload type to help
+        // surface helpful Flow error messages.
         ({
           type: 'Network',
           startTime: 111.0,
-          endTime: 121.5,
+          endTime: 18736.6,
           id: 1234,
+          status: 'STATUS_REDIRECT',
+          cache: 'any string could be here',
+          pri: -20,
+          count: 0,
+          URI: 'http://www.wikia.com/',
+          RedirectURI:
+            'http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625',
+        }: NetworkPayload),
+      ],
+      [
+        'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625',
+        19000,
+        ({
+          type: 'Network',
+          startTime: 19000,
+          endTime: 19200.2,
+          id: 1235,
           pri: 8,
-          status: 'STATUS_READING',
+          status: 'STATUS_START',
           RedirectURI: '',
           URI: '',
+        }: NetworkPayload),
+      ],
+      [
+        'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625',
+        19200.2,
+        ({
+          type: 'Network',
+          startTime: 19200.2,
+          endTime: 20433.8,
+          id: 1235,
+          status: 'STATUS_STOP',
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          URI:
+            'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+          domainLookupStart: 19050,
+          domainLookupEnd: 19060,
+          connectStart: 19200,
+          tcpConnectEnd: 19205,
+          secureConnectionStart: 19250,
+          connectEnd: 19290,
+          requestStart: 19300.8,
+          responseStart: 19400.2,
+          responseEnd: 20200,
         }: NetworkPayload),
       ],
       [

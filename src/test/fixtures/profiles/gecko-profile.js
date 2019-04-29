@@ -125,6 +125,25 @@ export function createGeckoProfile(): GeckoProfile {
     startTime: parentProcessMeta.startTime + 1000,
   };
 
+  const parentProcessThreads: GeckoThread[] = [
+    {
+      ..._createGeckoThread(),
+      name: 'GeckoMain',
+      processType: 'default',
+      pid: 3333,
+    },
+    {
+      ..._createGeckoThread(),
+      name: 'Compositor',
+      processType: 'default',
+      pid: 3333,
+    },
+  ];
+
+  const parentProcessCounters: GeckoCounter[] = [
+    createGeckoCounter(parentProcessThreads[0]),
+  ];
+
   const contentProcessProfile: GeckoProfile = {
     meta: contentProcessMeta,
     pausedRanges: [],
@@ -151,21 +170,9 @@ export function createGeckoProfile(): GeckoProfile {
     meta: parentProcessMeta,
     libs: [parentProcessBinary].concat(extraBinaries),
     pages: [],
+    counters: parentProcessCounters,
     pausedRanges: [],
-    threads: [
-      {
-        ..._createGeckoThread(),
-        name: 'GeckoMain',
-        processType: 'default',
-        pid: 3333,
-      },
-      {
-        ..._createGeckoThread(),
-        name: 'Compositor',
-        processType: 'default',
-        pid: 3333,
-      },
-    ],
+    threads: parentProcessThreads,
     processes: [contentProcessProfile],
   };
 }
@@ -421,25 +428,39 @@ function _createGeckoThread(): GeckoThread {
         ],
         [
           13, // Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5
-          24,
+          23,
           {
             type: 'Network',
             startTime: 22,
+            endTime: 23,
+            id: 388634410746504,
+            status: 'STATUS_START',
+            pri: -20,
+            count: 37838,
+            URI: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
+          },
+        ],
+        [
+          13, // Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5
+          24,
+          {
+            type: 'Network',
+            startTime: 23,
             endTime: 24,
             id: 388634410746504,
             status: 'STATUS_STOP',
             pri: -20,
             count: 37838,
-            URI: 'https://github.com/rustwasm/wasm-bindgen/issues/2',
-            domainLookupStart: 22.1,
-            domainLookupEnd: 22.2,
-            connectStart: 22.3,
-            tcpConnectEnd: 22.4,
-            secureConnectionStart: 22.5,
-            connectEnd: 22.6,
-            requestStart: 22.7,
-            responseStart: 22.8,
-            responseEnd: 22.9,
+            URI: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
+            domainLookupStart: 23.1,
+            domainLookupEnd: 23.2,
+            connectStart: 23.3,
+            tcpConnectEnd: 23.4,
+            secureConnectionStart: 23.5,
+            connectEnd: 23.6,
+            requestStart: 23.7,
+            responseStart: 23.8,
+            responseEnd: 23.9,
           },
         ],
         [

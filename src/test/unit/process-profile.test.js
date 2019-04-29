@@ -8,8 +8,8 @@ import {
   processProfile,
   serializeProfile,
   unserializeProfileOfArbitraryFormat,
-  sanitizePII,
 } from '../../profile-logic/process-profile';
+import { sanitizePII } from '../../profile-logic/sanitize';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import {
   createGeckoProfile,
@@ -282,6 +282,52 @@ describe('sanitizePII', function() {
     const sanitizedProfile = sanitizePII(profile, PIIToRemove);
     // First and last threads are removed and now there are only 1 thread.
     expect(sanitizedProfile.threads.length).toEqual(1);
+  });
+
+  it('should sanitize counters if its thread is deleted', function() {
+    const profile = processProfile(createGeckoProfile());
+    const { counters } = profile;
+    expect(counters).not.toEqual(undefined);
+    if (counters === undefined) {
+      return;
+    }
+    expect(counters.length).toEqual(1);
+    // Assuming that the mainThreadIndex of the counter is 0.
+    // If that assertion fails, put back the counter where you moved from.
+    expect(counters[0].mainThreadIndex).toEqual(0);
+
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldRemoveThreads: new Set([0]),
+    });
+    const { counters: sanitizedCounters } = sanitizePII(profile, PIIToRemove);
+    // The counter was for the first thread, it should be deleted now.
+    expect(sanitizedCounters).not.toEqual(undefined);
+    if (sanitizedCounters !== undefined) {
+      expect(sanitizedCounters.length).toEqual(0);
+    }
+  });
+
+  it('should not sanitize counters if its thread is deleted', function() {
+    const profile = processProfile(createGeckoProfile());
+    const { counters } = profile;
+    expect(counters).not.toEqual(undefined);
+    if (counters === undefined) {
+      return;
+    }
+    expect(counters.length).toEqual(1);
+    // Assuming that the mainThreadIndex of the counter is 0.
+    // If that assertion fails, put back the counter where you moved from.
+    expect(counters[0].mainThreadIndex).toEqual(0);
+
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldRemoveThreads: new Set([1, 2]),
+    });
+    const { counters: sanitizedCounters } = sanitizePII(profile, PIIToRemove);
+    // The counter was for the first thread, it should not be deleted now.
+    expect(sanitizedCounters).not.toEqual(undefined);
+    if (sanitizedCounters !== undefined) {
+      expect(sanitizedCounters.length).toEqual(1);
+    }
   });
 
   it('should sanitize the screenshots if they are provided', function() {
