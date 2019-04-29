@@ -10,6 +10,7 @@ import { Provider } from 'react-redux';
 import {
   changeNetworkSearchString,
   commitRange,
+  updatePreviewSelection,
 } from '../../actions/profile-view';
 import NetworkChart from '../../components/network-chart';
 import { changeSelectedTab } from '../../actions/app';
@@ -83,13 +84,11 @@ function setupWithProfile(profile) {
     ).map(node => [node.className, node.textContent]);
   }
 
-  const getBarElement = () =>
-    ensureExists(
-      container.querySelector('.networkChartRowItemBar'),
-      `Couldn't find the network marker bar in the network chart, with selector .networkChartRowItemBar`
-    );
+  const getBarElements = () =>
+    Array.from(container.querySelectorAll('.networkChartRowItemBar'));
 
-  const getBarElementStyle = () => getBarElement().getAttribute('style');
+  const getBarElementStyles = () =>
+    getBarElements().map(element => element.getAttribute('style'));
 
   const getPhaseElements = () =>
     Array.from(container.querySelectorAll('.networkChartRowItemBarPhase'));
@@ -110,8 +109,8 @@ function setupWithProfile(profile) {
     flushRafCalls,
     flushDrawLog: () => ctx.__flushDrawLog(),
     getUrlShorteningParts,
-    getBarElement,
-    getBarElementStyle,
+    getBarElements,
+    getBarElementStyles,
     getPhaseElements,
     getPhaseElementStyles,
     rowItem,
@@ -135,7 +134,7 @@ describe('NetworkChart', function() {
 
 describe('NetworkChartRowBar phase calculations', function() {
   it('divides up the different phases of the request with full set of required information', () => {
-    const { getPhaseElementStyles, getBarElementStyle } = setupWithPayload(
+    const { getPhaseElementStyles, getBarElementStyles } = setupWithPayload(
       getNetworkMarkers({
         uri: 'https://mozilla.org/img/',
         id: 100,
@@ -161,7 +160,7 @@ describe('NetworkChartRowBar phase calculations', function() {
 
     // Width is nearly the available width (200px). It's expected that it's not
     // the full width because the range ends 1ms after the marker.
-    expect(getBarElementStyle()).toEqual(
+    expect(getBarElementStyles()[0]).toEqual(
       `width: 198px; left: ${TIMELINE_MARGIN_LEFT}px;`
     );
     // The sum of widths should equal the width above.
@@ -178,7 +177,7 @@ describe('NetworkChartRowBar phase calculations', function() {
     const {
       dispatch,
       getPhaseElementStyles,
-      getBarElementStyle,
+      getBarElementStyles,
     } = setupWithPayload(
       getNetworkMarkers({
         uri: 'https://mozilla.org/img/',
@@ -211,7 +210,7 @@ describe('NetworkChartRowBar phase calculations', function() {
     // this is expected.
     // It's also expected that the left value is less than TIMELINE_MARGIN_LEFT,
     // because the range start is after the start of the marker.
-    expect(getBarElementStyle()).toEqual('width: 495px; left: 100px;');
+    expect(getBarElementStyles()[0]).toEqual('width: 495px; left: 100px;');
 
     // It's expected that all elements are rendered, but some of them will be
     // drawn out of the window obviously.
@@ -224,6 +223,54 @@ describe('NetworkChartRowBar phase calculations', function() {
       expect.stringMatching(/^left: 250\.\d*?px; width: 100px; opacity: 1;$/),
       'left: 350px; width: 145px; opacity: 0;',
     ]);
+  });
+
+  it('renders according to the preview selection', () => {
+    const { dispatch, getBarElements } = setupWithPayload([
+      ...getNetworkMarkers({
+        uri: 'https://mozilla.org/img/',
+        id: 100,
+        startTime: 10,
+        endTime: 55,
+      }),
+      ...getNetworkMarkers({
+        uri: 'https://mozilla.org/img/',
+        id: 100,
+        startTime: 50,
+        endTime: 109,
+      }),
+    ]);
+
+    // With this preview selection, we expect that the first marker will still
+    // be in sight, but that the second marker will be out of the view.
+    // Still, because it's a preview selection, the second marker will have a
+    // dedicated line.
+    dispatch(
+      updatePreviewSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: 20,
+        selectionEnd: 40,
+      })
+    );
+
+    const [firstMarker, secondMarker] = getBarElements();
+
+    // We expect that the first marker will be displayed.
+    const firstMarkerWidth = parseInt(firstMarker.style.width);
+    const firstMarkerLeft = parseInt(firstMarker.style.left);
+    // The start is before the end of the range.
+    expect(firstMarkerLeft).toBeLessThanOrEqual(TIMELINE_MARGIN_LEFT + 200);
+    // The end is after the start of the range.
+    expect(firstMarkerLeft + firstMarkerWidth).toBeGreaterThanOrEqual(
+      TIMELINE_MARGIN_LEFT
+    );
+
+    // We expect that the second marker will have a line but is drawn out of the view.
+    expect(secondMarker).toBeTruthy();
+
+    const secondMarkerLeft = parseInt(secondMarker.style.left);
+    expect(secondMarkerLeft).toBeGreaterThan(TIMELINE_MARGIN_LEFT + 200);
   });
 
   it('divides up the different phases of the request with subset of required information', () => {
