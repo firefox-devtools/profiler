@@ -18,7 +18,7 @@ import NetworkChartRow from './NetworkChartRow';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 
-import { getCommittedRange } from '../../selectors/profile';
+import { getPreviewSelectionRange } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
@@ -111,7 +111,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       markers: selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(
         state
       ),
-      timeRange: getCommittedRange(state),
+      timeRange: getPreviewSelectionRange(state),
       threadIndex: getSelectedThreadIndex(state),
     };
   },
