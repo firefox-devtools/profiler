@@ -18,7 +18,7 @@ import NetworkChartRow from './NetworkChartRow';
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 
-import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
+import { getCommittedRange } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
@@ -42,7 +42,6 @@ type DispatchProps = {|
 type StateProps = {|
   +markers: Marker[],
   +timeRange: StartEndRange,
-  +interval: Milliseconds,
   +threadIndex: number,
 |};
 
@@ -113,7 +112,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
         state
       ),
       timeRange: getCommittedRange(state),
-      interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
     };
   },
