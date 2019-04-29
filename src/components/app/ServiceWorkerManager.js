@@ -68,7 +68,7 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
     });
   }
 
-  componentWillMount() {
+  componentDidMount() {
     if (process.env.NODE_ENV === 'production') {
       this._installServiceWorker();
     }
