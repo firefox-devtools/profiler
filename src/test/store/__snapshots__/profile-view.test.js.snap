@@ -1085,27 +1085,6 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getNetworkChartTiming 1`] = `
-Array [
-  Object {
-    "end": Array [
-      7,
-    ],
-    "index": Array [
-      0,
-    ],
-    "label": Array [
-      "",
-    ],
-    "length": 1,
-    "name": "Load 6: https://mozilla.org",
-    "start": Array [
-      6,
-    ],
-  },
-]
-`;
-
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getProcessedRawMarkerTable 1`] = `
 Object {
   "data": Array [

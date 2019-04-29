@@ -25,8 +25,8 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
 import type { NetworkPayload } from '../../types/markers';
-import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
-import type { Milliseconds, CssPixels } from '../../types/units';
+import type { Marker } from '../../types/profile-derived';
+import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
 import type { ConnectedProps } from '../../utils/connect';
 import type { NetworkChartRowProps } from './NetworkChartRow';
 
@@ -41,9 +41,7 @@ type DispatchProps = {|
 
 type StateProps = {|
   +markers: Marker[],
-  +networkTimingRows: MarkerTimingRows,
-  +maxNetworkRows: number,
-  +timeRange: { start: Milliseconds, end: Milliseconds },
+  +timeRange: StartEndRange,
   +interval: Milliseconds,
   +threadIndex: number,
 |};
@@ -110,15 +108,10 @@ class NetworkChart extends React.PureComponent<Props> {
  */
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
-    const networkTimingRows = selectedThreadSelectors.getNetworkChartTiming(
-      state
-    );
     return {
       markers: selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(
         state
       ),
-      networkTimingRows,
-      maxNetworkRows: networkTimingRows.length,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),

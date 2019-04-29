@@ -1156,12 +1156,6 @@ describe('snapshots of selectors/profile', function() {
       markerThreadSelectors.getMarkerChartTiming(getState())
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of markerThreadSelectors.getNetworkChartTiming', function() {
-    const { getState, markerThreadSelectors } = setupStore();
-    expect(
-      markerThreadSelectors.getNetworkChartTiming(getState())
-    ).toMatchSnapshot();
-  });
   it('matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkers', function() {
     const { getState, markerThreadSelectors } = setupStore();
     expect(
