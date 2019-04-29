@@ -87,14 +87,12 @@ export type ImplementationFilter = 'combined' | 'js' | 'cpp';
  * This type determines what kind of information gets sanitized from published profiles.
  */
 export type CheckedSharingOptions = {|
-  // This first values determines if we are filtering at all.
-  isFiltering: boolean,
-  // The following values are to control which information is removed from profile.
-  removeHiddenThreads: boolean,
-  removeFullTimeRange: boolean,
-  removeScreenshots: boolean,
-  removeUrls: boolean,
-  removeExtension: boolean,
+  // The following values are for including more information in a sanitized profile.
+  includeHiddenThreads: boolean,
+  includeFullTimeRange: boolean,
+  includeScreenshots: boolean,
+  includeUrls: boolean,
+  includeExtension: boolean,
 |};
 
 type ProfileAction =
