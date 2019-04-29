@@ -4,7 +4,8 @@
 
 // @flow
 import React, { PureComponent } from 'react';
-import { ContextMenu, MenuItem } from 'react-contextmenu';
+import { MenuItem } from 'react-contextmenu';
+import ContextMenu from '../shared/ContextMenu';
 import explicitConnect from '../../utils/connect';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import {
