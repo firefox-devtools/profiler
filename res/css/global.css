@@ -1,0 +1,16 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+/**
+ * This class should be used to create a small colored square. It's used
+ * especially for categories and network mime types.
+ */
+.colored-square {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  box-sizing: border-box;
+  margin-right: 3px;
+  border: 0.5px solid rgba(0, 0, 0, 0.1);
+}

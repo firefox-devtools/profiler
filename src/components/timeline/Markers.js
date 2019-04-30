@@ -7,8 +7,8 @@ import * as React from 'react';
 import classNames from 'classnames';
 import { timeCode } from '../../utils/time-code';
 import { withSize } from '../shared/WithSize';
-import Tooltip from '../shared/Tooltip';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
+import Tooltip from '../tooltip/Tooltip';
+import { TooltipMarker } from '../tooltip/Marker';
 import { markerStyles, overlayFills } from '../../profile-logic/marker-styles';
 import explicitConnect from '../../utils/connect';
 import { getPreviewSelection } from '../../selectors/profile';
@@ -230,10 +230,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
         />
         {shouldShowTooltip && hoveredItem ? (
           <Tooltip mouseX={mouseX} mouseY={mouseY}>
-            <MarkerTooltipContents
-              marker={hoveredItem}
-              threadIndex={threadIndex}
-            />
+            <TooltipMarker marker={hoveredItem} threadIndex={threadIndex} />
           </Tooltip>
         ) : null}
       </div>

@@ -12,16 +12,16 @@
   user-select: none;
 }
 
-.networkChart .treeViewBody .treeViewBodyInnerWrapper {
-  width: 100%;
-  flex-flow: column nowrap;
+.networkChart .treeViewBody {
   border-top: 1px solid var(--grey-30);
 }
 
-.networkChartRowItem {
-  /* This color is overridden for specific mime types, see below. */
-  --marker-color: var(--grey-70);
+.networkChart .treeViewBody .treeViewBodyInnerWrapper {
+  width: 100%;
+  flex-flow: column nowrap;
+}
 
+.networkChartRowItem {
   display: block;
   width: 100%;
   height: 16px;
@@ -48,12 +48,6 @@
   white-space: nowrap;
 }
 
-/* This rule is useful to make the label more visible on hover. */
-.networkChartRowItem:hover .networkChartRowItemLabel {
-  position: relative;
-  z-index: 1;
-}
-
 .networkChartRowItemBar {
   position: absolute; /* The bar will be positioned in JS. */
   display: inline-block;
@@ -68,33 +62,10 @@
   opacity: 0.7;
 }
 
-.networkChartRowItem:hover .networkChartRowItemBar {
-  opacity: 0.4;
-}
-
 .networkChartRowItemBarPhase {
   position: absolute;
   height: 100%;
   background-color: var(--marker-color);
-}
-
-/* These colors are quite bright and strong on purpose, because the marker has
- * some transparency, and we need the marker to stand out, especially when only
- * the border is displayed. */
-.networkChartRowItemCss {
-  --marker-color: var(--purple-70);
-}
-
-.networkChartRowItemJs {
-  --marker-color: var(--yellow-60);
-}
-
-.networkChartRowItemHtml {
-  --marker-color: var(--blue-70);
-}
-
-.networkChartRowItemImg {
-  --marker-color: var(--green-70);
 }
 
 .networkChartRowItemUriOptional {
@@ -109,14 +80,11 @@
 .networkChartRowItemUriRequired {
   display: inline-block;
   overflow: hidden;
+  max-width: 35%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.networkChartRowItemUriRequired:nth-child(1) {
-  padding-right: 8px;
-}
-
-/* This makes the URI completely visible on hover */
 .networkChartRowItem:hover .networkChartRowItemUriOptional {
-  max-width: unset;
   color: unset;
 }

@@ -87,8 +87,6 @@ export type ImplementationFilter = 'combined' | 'js' | 'cpp';
  * This type determines what kind of information gets sanitized from published profiles.
  */
 export type CheckedSharingOptions = {|
-  // This first values determines if we are filtering at all.
-  isFiltering: boolean,
   // The following values are for including more information in a sanitized profile.
   includeHiddenThreads: boolean,
   includeFullTimeRange: boolean,
@@ -326,12 +324,33 @@ type PublishAction =
       +slug: $Keys<CheckedSharingOptions>,
     |}
   | {|
-      +type: 'CHANGE_UPLOAD_STATE',
-      +changes: $Shape<UploadState>,
+      +type: 'UPLOAD_STARTED',
+      +abortFunction: () => void,
     |}
   | {|
-      +type: 'SAVE_ABORT_UPLOAD_FUNCTION',
-      +abort: () => void,
+      +type: 'UPDATE_UPLOAD_PROGRESS',
+      +uploadProgress: number,
+    |}
+  | {|
+      +type: 'UPLOAD_FINISHED',
+      +url: string,
+    |}
+  | {|
+      +type: 'UPLOAD_FAILED',
+      +error: mixed,
+    |}
+  | {|
+      +type: 'UPLOAD_ABORTED',
+    |}
+  | {|
+      +type: 'UPLOAD_RESET',
+    |}
+  | {|
+      +type: 'UPLOAD_COMPRESSION_STARTED',
+    |}
+  | {|
+      +type: 'CHANGE_UPLOAD_STATE',
+      +changes: $Shape<UploadState>,
     |};
 
 export type Action =

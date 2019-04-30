@@ -4,8 +4,15 @@
 // @flow
 
 import * as React from 'react';
-import MarkerTooltipContents from '../shared/MarkerTooltipContents';
-import Tooltip from '../shared/Tooltip';
+import classNames from 'classnames';
+
+import { TooltipMarker } from '../tooltip/Marker';
+import Tooltip from '../tooltip/Tooltip';
+
+import {
+  guessMimeTypeFromNetworkMarker,
+  getColorClassNameForMimeType,
+} from '../../profile-logic/marker-data';
 import { formatNumber } from '../../utils/format-numbers';
 
 import type { CssPixels } from '../../types/units';
@@ -63,7 +70,7 @@ export type NetworkChartRowProps = {
   +marker: Marker,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
-  +networkPayload: NetworkPayload | null,
+  +networkPayload: NetworkPayload,
   +markerWidth: CssPixels,
   +startPosition: CssPixels,
   +threadIndex: ThreadIndex,
@@ -235,33 +242,10 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     return name;
   }
 
-  // Identifies mime type of request. This is a workaround until we have
-  // mime types passed from gecko to network marker requests.
-  _identifyType(name: string): string {
-    const uri = this._extractURI(name);
-    if (uri === null) {
-      return '';
-    }
-    // Extracting the fileName from the path.
-    const fileName = uri.pathname;
-    const fileExt = fileName.slice(fileName.lastIndexOf('.'));
-
-    switch (fileExt) {
-      case '.js':
-        return 'networkChartRowItemJs';
-      case '.css':
-        return 'networkChartRowItemCss';
-      case '.gif':
-      case '.png':
-      case '.jpg':
-      case '.jpeg':
-      case '.svg':
-        return 'networkChartRowItemImg';
-      case '.html':
-        return 'networkChartRowItemHtml';
-      default:
-        return '';
-    }
+  _getClassNameTypeForMarker() {
+    const { networkPayload } = this.props;
+    const mimeType = guessMimeTypeFromNetworkMarker(networkPayload);
+    return getColorClassNameForMimeType(mimeType);
   }
 
   render() {
@@ -273,25 +257,28 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
       networkPayload,
     } = this.props;
 
-    const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
-
     if (networkPayload === null) {
       return null;
     }
-    const itemClassName =
-      evenOddClassName +
-      ' networkChartRowItem ' +
-      this._identifyType(marker.name);
+
+    const itemClassName = classNames(
+      'networkChartRowItem',
+      this._getClassNameTypeForMarker(),
+      { odd: index % 2 === 1 }
+    );
+
     return (
-      <section className={itemClassName}>
+      <div
+        className={itemClassName}
+        onMouseEnter={this._hoverIn}
+        onMouseLeave={this._hoverOut}
+      >
         <div className="networkChartRowItemLabel">
           {this._splitsURI(marker.name)}
         </div>
         <div
           className="networkChartRowItemBar"
           style={{ width: markerWidth, left: startPosition }}
-          onMouseEnter={this._hoverIn}
-          onMouseLeave={this._hoverOut}
         >
           <NetworkChartRowBar
             marker={marker}
@@ -303,13 +290,14 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           // This magic value "5" avoids the tooltip of being too close of the
           // row, especially when we mouseEnter the row from the top edge.
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
-            <MarkerTooltipContents
+            <TooltipMarker
+              className="tooltipNetwork"
               marker={marker}
               threadIndex={this.props.threadIndex}
             />
           </Tooltip>
         ) : null}
-      </section>
+      </div>
     );
   }
 }

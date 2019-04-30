@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Bailout-10 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Bailout-10 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -27,7 +27,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Bailout-10 
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -73,7 +74,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Bailout-10 
     <div
       class="tooltipLabel"
     >
-      Description:
+      Description
+      :
     </div>
     <div
       style="max-width: 300px;"
@@ -84,7 +86,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Bailout-10 
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: ConstructRootFrame-112.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: ConstructRootFrame-112.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -111,7 +113,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: ConstructRo
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -130,7 +133,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: ConstructRo
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: DOMEvent-10.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: DOMEvent-10.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -157,13 +160,15 @@ exports[`MarkerTooltipContents renders tooltips for various markers: DOMEvent-10
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
       <div
         class="tooltipLabel"
       >
-        URL:
+        URL
+        :
       </div>
       https://developer.mozilla.org/en-US/
     </div>
@@ -182,7 +187,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: DOMEvent-10
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: FileIO-114 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -209,7 +214,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: FileIO-114 
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -442,7 +448,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: FileIO-114 
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: GCMajor-16.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: GCMajor-16.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -469,7 +475,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMajor-16.
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -600,7 +607,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMajor-16.
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: GCMinor-15.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: GCMinor-15.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -627,7 +634,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMinor-15.
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -723,7 +731,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCMinor-15.
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: GCSlice-17.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: GCSlice-17.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -750,7 +758,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCSlice-17.
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -797,7 +806,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: GCSlice-17.
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Invalidate-10 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Invalidate-10 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -824,7 +833,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Invalidate-
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -850,7 +860,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Invalidate-
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: http://wikia.com/-10.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Load 31: http://wikia.com/-10.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -863,7 +873,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: ht
       <div
         class="tooltipTiming"
       >
-        101ms
+        18,726ms
       </div>
       <div
         class="tooltipTitle"
@@ -877,67 +887,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: ht
       <div
         class="tooltipLabel"
       >
-        Thread:
-      </div>
-      Main Thread
-    </div>
-  </div>
-  <div
-    class="tooltipDetails"
-  >
-    <div
-      class="tooltipLabel"
-    >
-      Status
-      :
-    </div>
-    Waiting for response
-    <div
-      class="tooltipLabel"
-    >
-      URL
-      :
-    </div>
-    http://wikia.com/
-    <div
-      class="tooltipLabel"
-    >
-      Priority
-      :
-    </div>
-    Low(8)
-  </div>
-</div>
-`;
-
-exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: http://wikia.com/-18670.5141769375 1`] = `
-<div
-  class="tooltipMarker propClass"
->
-  <div
-    class="tooltipHeader"
-  >
-    <div
-      class="tooltipOneLine"
-    >
-      <div
-        class="tooltipTiming"
-      >
-        66ms
-      </div>
-      <div
-        class="tooltipTitle"
-      >
-        Load 31: http://wikia.com/
-      </div>
-    </div>
-    <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -965,14 +916,22 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: ht
       URL
       :
     </div>
-    http://www.wikia.com/
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://www.wikia.com/
+    </span>
     <div
       class="tooltipLabel"
     >
       Redirect URL
       :
     </div>
-    Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+    <span
+      class="tooltipNetworkUrl"
+    >
+      http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
+    </span>
     <div
       class="tooltipLabel"
     >
@@ -988,10 +947,30 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 31: ht
     </div>
     0.000B
   </div>
+  <div
+    class="tooltipNetworkPhases network-color-other"
+  >
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is 18,726 milliseconds"
+    >
+      18,726ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 0%; margin-right: 0%; opacity: 1;"
+    />
+  </div>
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*-111 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625-19000 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1004,12 +983,12 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: 
       <div
         class="tooltipTiming"
       >
-        11ms
+        1,434ms
       </div>
       <div
         class="tooltipTitle"
       >
-        Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+        Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625
       </div>
     </div>
     <div
@@ -1018,60 +997,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: 
       <div
         class="tooltipLabel"
       >
-        Thread:
-      </div>
-      Main Thread
-    </div>
-  </div>
-  <div
-    class="tooltipDetails"
-  >
-    <div
-      class="tooltipLabel"
-    >
-      Status
-      :
-    </div>
-    other
-    <div
-      class="tooltipLabel"
-    >
-      Priority
-      :
-    </div>
-    Low(8)
-  </div>
-</div>
-`;
-
-exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*-13382.453655062502 1`] = `
-<div
-  class="tooltipMarker propClass"
->
-  <div
-    class="tooltipHeader"
-  >
-    <div
-      class="tooltipOneLine"
-    >
-      <div
-        class="tooltipTiming"
-      >
-        205ms
-      </div>
-      <div
-        class="tooltipTitle"
-      >
-        Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
-      </div>
-    </div>
-    <div
-      class="tooltipDetails"
-    >
-      <div
-        class="tooltipLabel"
-      >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1099,7 +1026,11 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: 
       URL
       :
     </div>
-    https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+    <span
+      class="tooltipNetworkUrl"
+    >
+      https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*
+    </span>
     <div
       class="tooltipLabel"
     >
@@ -1110,22 +1041,194 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Load 1234: 
     <div
       class="tooltipLabel"
     >
+      Guessed MIME type
+      :
+    </div>
+    <div
+      class="tooltipNetworkMimeType"
+    >
+      <span
+        class="tooltipNetworkMimeTypeSwatch colored-square network-color-img"
+        title="image/jpeg"
+      />
+      image/jpeg
+    </div>
+    <div
+      class="tooltipLabel"
+    >
       Requested bytes
       :
     </div>
     45.9KB
+  </div>
+  <div
+    class="tooltipNetworkPhases network-color-img"
+  >
     <div
       class="tooltipLabel"
     >
-      Response time
+      Waiting for socket thread
       :
     </div>
-    3.5ms
+    <div
+      aria-label="Starting at 0.000 milliseconds, duration is 50 milliseconds"
+    >
+      50ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
+      style="margin-left: 0%; margin-right: 96.51276328637188%;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      DNS request
+      :
+    </div>
+    <div
+      aria-label="Starting at 50 milliseconds, duration is 10 milliseconds"
+    >
+      10ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 3.487236713628123%; margin-right: 95.81531594364625%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      After DNS request
+      :
+    </div>
+    <div
+      aria-label="Starting at 60 milliseconds, duration is 140 milliseconds"
+    >
+      140ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 4.184684056353747%; margin-right: 86.05105314548751%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      TCP connection
+      :
+    </div>
+    <div
+      aria-label="Starting at 200 milliseconds, duration is 5.0 milliseconds"
+    >
+      5.0ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 13.948946854512492%; margin-right: 85.7023294741247%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      After TCP connection
+      :
+    </div>
+    <div
+      aria-label="Starting at 205 milliseconds, duration is 45 milliseconds"
+    >
+      45ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 14.297670525875303%; margin-right: 82.56381643185938%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      Establishing TLS session
+      :
+    </div>
+    <div
+      aria-label="Starting at 250 milliseconds, duration is 40 milliseconds"
+    >
+      40ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 17.436183568140613%; margin-right: 79.77402706095688%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      Waiting for HTTP request
+      :
+    </div>
+    <div
+      aria-label="Starting at 290 milliseconds, duration is 11 milliseconds"
+    >
+      11ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 20.225972939043114%; margin-right: 79.02078393081325%; opacity: 0.5;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      HTTP request and waiting for response
+      :
+    </div>
+    <div
+      aria-label="Starting at 301 milliseconds, duration is 99 milliseconds"
+    >
+      99ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 20.979216069186737%; margin-right: 72.08815734412046%; opacity: 0.75;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      HTTP response
+      :
+    </div>
+    <div
+      aria-label="Starting at 400 milliseconds, duration is 800 milliseconds"
+    >
+      800ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase"
+      style="margin-left: 27.91184265587955%; margin-right: 16.306318872925047%; opacity: 1;"
+    />
+    <div
+      class="tooltipLabel"
+    >
+      Waiting to transmit the response
+      :
+    </div>
+    <div
+      aria-label="Starting at 1,200 milliseconds, duration is 234 milliseconds"
+    >
+      234ms
+    </div>
+    <div
+      aria-hidden="true"
+      class="tooltipNetworkPhase tooltipNetworkPhaseEmpty"
+      style="margin-left: 83.69368112707495%;"
+    />
   </div>
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Log-21.7 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Log-21.7 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1152,7 +1255,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Log-21.7 1`
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1178,7 +1282,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Log-21.7 1`
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: NotifyDidPaint-14.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1205,7 +1309,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: NotifyDidPa
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1213,7 +1318,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: NotifyDidPa
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Styles-18.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1240,7 +1345,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Styles-18.5
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1455,7 +1561,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Styles-18.5
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: Styles-20 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1482,7 +1588,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Styles-20 1
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1736,7 +1843,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: Styles-20 1
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: TTFI-21.4 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1763,7 +1870,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: TTFI-21.4 1
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>
@@ -1782,7 +1890,7 @@ exports[`MarkerTooltipContents renders tooltips for various markers: TTFI-21.4 1
 </div>
 `;
 
-exports[`MarkerTooltipContents renders tooltips for various markers: UserTiming-12.5 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: UserTiming-12.5 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -1809,7 +1917,8 @@ exports[`MarkerTooltipContents renders tooltips for various markers: UserTiming-
       <div
         class="tooltipLabel"
       >
-        Thread:
+        Thread
+        :
       </div>
       Main Thread
     </div>

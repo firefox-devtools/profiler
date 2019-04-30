@@ -76,8 +76,8 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
         <div
           class="treeViewBodyInner treeViewBodyInner0InnerChunk"
         >
-          <section
-            class="even networkChartRowItem "
+          <div
+            class="networkChartRowItem network-color-other"
           >
             <div
               class="networkChartRowItemLabel"
@@ -110,9 +110,9 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
-            class="odd networkChartRowItem "
+          </div>
+          <div
+            class="networkChartRowItem network-color-other odd"
           >
             <div
               class="networkChartRowItemLabel"
@@ -145,9 +145,9 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.96551724137927px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
-            class="even networkChartRowItem "
+          </div>
+          <div
+            class="networkChartRowItem network-color-other"
           >
             <div
               class="networkChartRowItemLabel"
@@ -180,9 +180,9 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
-            class="odd networkChartRowItem "
+          </div>
+          <div
+            class="networkChartRowItem network-color-other odd"
           >
             <div
               class="networkChartRowItemLabel"
@@ -215,9 +215,9 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
-            class="even networkChartRowItem "
+          </div>
+          <div
+            class="networkChartRowItem network-color-other"
           >
             <div
               class="networkChartRowItemLabel"
@@ -250,9 +250,9 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.96551724137933px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
-            class="odd networkChartRowItem "
+          </div>
+          <div
+            class="networkChartRowItem network-color-other odd"
           >
             <div
               class="networkChartRowItemLabel"
@@ -285,9 +285,9 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
-            class="even networkChartRowItem "
+          </div>
+          <div
+            class="networkChartRowItem network-color-other"
           >
             <div
               class="networkChartRowItemLabel"
@@ -320,9 +320,9 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.96551724137927px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
-            class="odd networkChartRowItem "
+          </div>
+          <div
+            class="networkChartRowItem network-color-other odd"
           >
             <div
               class="networkChartRowItemLabel"
@@ -355,9 +355,9 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
-            class="even networkChartRowItem "
+          </div>
+          <div
+            class="networkChartRowItem network-color-other"
           >
             <div
               class="networkChartRowItemLabel"
@@ -390,9 +390,9 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.9655172413793px; opacity: 1;"
               />
             </div>
-          </section>
-          <section
-            class="odd networkChartRowItem "
+          </div>
+          <div
+            class="networkChartRowItem network-color-other odd"
           >
             <div
               class="networkChartRowItemLabel"
@@ -425,7 +425,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
                 style="left: 0px; width: 68.96551724137933px; opacity: 1;"
               />
             </div>
-          </section>
+          </div>
         </div>
       </div>
     </div>
