@@ -27,6 +27,10 @@ Array [
 %cwindow.filteredThread%c - The current filtered thread
 %cwindow.filteredMarkers%c - The current filtered and processed markers
 %cwindow.callTree%c - The call tree of the current filtered thread
+%cwindow.getState%c - The function that returns the current Redux state.
+%cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
+%cwindow.dispatch%c - The function to dispatch a Redux action to change the state.
+%cwindow.actions%c - All the actions that can be dispatched to change the state.
 
 The profile format is documented here:
 %chttps://github.com/firefox-devtools/profiler/blob/master/docs-developer/processed-profile-format.md%c
@@ -34,6 +38,14 @@ The profile format is documented here:
 The CallTree class's source code is available here:
 %chttps://github.com/firefox-devtools/profiler/blob/master/src/profile-logic/call-tree.js%c",
     "font-size: 130%;",
+    "",
+    "font-weight: bold;",
+    "",
+    "font-weight: bold;",
+    "",
+    "font-weight: bold;",
+    "",
+    "font-weight: bold;",
     "",
     "font-weight: bold;",
     "",

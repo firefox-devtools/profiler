@@ -6,6 +6,16 @@
 import * as app from './app';
 import * as icons from './icons';
 import * as profileView from './profile-view';
+import * as publish from './publish';
 import * as receiveProfile from './receive-profile';
+import * as zippedProfiles from './zipped-profiles';
 
-export default Object.assign({}, app, icons, profileView, receiveProfile);
+export default Object.assign(
+  {},
+  app,
+  icons,
+  profileView,
+  publish,
+  receiveProfile,
+  zippedProfiles
+);

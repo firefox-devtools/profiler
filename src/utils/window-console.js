@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { stripIndent } from 'common-tags';
-import type { GetState } from '../types/store';
-import { getProfile } from '../selectors/profile';
-import { selectedThreadSelectors } from '../selectors/per-thread';
+import type { GetState, Dispatch } from '../types/store';
+import selectors from '../selectors';
+import actions from '../actions';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
 // special-cases the `value` property: if it's missing it throws an error. Using
@@ -19,35 +19,41 @@ const defineProperty = Object.defineProperty;
  */
 export function addDataToWindowObject(
   getState: GetState,
+  dispatch: Dispatch,
   target: Object = window
 ) {
   defineProperty(target, 'profile', {
     enumerable: true,
     get() {
-      return getProfile(getState());
+      return selectors.profile.getProfile(getState());
     },
   });
 
   defineProperty(target, 'filteredThread', {
     enumerable: true,
     get() {
-      return selectedThreadSelectors.getPreviewFilteredThread(getState());
+      return selectors.selectedThread.getPreviewFilteredThread(getState());
     },
   });
 
   defineProperty(target, 'callTree', {
     enumerable: true,
     get() {
-      return selectedThreadSelectors.getCallTree(getState());
+      return selectors.selectedThread.getCallTree(getState());
     },
   });
 
   defineProperty(target, 'filteredMarkers', {
     enumerable: true,
     get() {
-      return selectedThreadSelectors.getPreviewFilteredMarkers(getState());
+      return selectors.selectedThread.getPreviewFilteredMarkers(getState());
     },
   });
+
+  target.getState = getState;
+  target.selectors = selectors;
+  target.dispatch = dispatch;
+  target.actions = actions;
 }
 
 export function logFriendlyPreamble() {
@@ -90,6 +96,10 @@ export function logFriendlyPreamble() {
       %cwindow.filteredThread%c - The current filtered thread
       %cwindow.filteredMarkers%c - The current filtered and processed markers
       %cwindow.callTree%c - The call tree of the current filtered thread
+      %cwindow.getState%c - The function that returns the current Redux state.
+      %cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
+      %cwindow.dispatch%c - The function to dispatch a Redux action to change the state.
+      %cwindow.actions%c - All the actions that can be dispatched to change the state.
 
       The profile format is documented here:
       %chttps://github.com/firefox-devtools/profiler/blob/master/docs-developer/processed-profile-format.md%c
@@ -110,6 +120,18 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.callTree"
+    bold,
+    reset,
+    // "window.getState"
+    bold,
+    reset,
+    // "window.selectors"
+    bold,
+    reset,
+    // "window.dispatch"
+    bold,
+    reset,
+    // "window.actions"
     bold,
     reset,
     // "processed-profile-format.md"
