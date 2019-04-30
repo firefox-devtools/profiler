@@ -22,7 +22,7 @@ describe('console-accessible values on the window object', function() {
   it('adds values to the console', function() {
     const store = storeWithSimpleProfile();
     const target = {};
-    addDataToWindowObject(store.getState, target);
+    addDataToWindowObject(store.getState, store.dispatch, target);
     expect(target.profile).toBeTruthy();
     expect(target.filteredThread).toBeTruthy();
     expect(target.callTree).toBeTruthy();

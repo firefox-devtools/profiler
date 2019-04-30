@@ -50,7 +50,7 @@ render(
   )
 );
 
-addDataToWindowObject(store.getState);
+addDataToWindowObject(store.getState, store.dispatch);
 if (process.env.NODE_ENV === 'production') {
   // Don't clutter the console in development mode.
   logFriendlyPreamble();
