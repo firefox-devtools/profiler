@@ -473,7 +473,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
         onShow={this._showMenu}
         onHide={this._hideMenu}
       >
-        {this.state.isShown && this.renderContextMenuContents()}
+        {this.state.isShown ? this.renderContextMenuContents() : null}
       </ContextMenu>
     );
   }
