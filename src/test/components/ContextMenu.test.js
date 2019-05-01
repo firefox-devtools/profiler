@@ -9,7 +9,7 @@ import ContextMenu from '../../components/shared/ContextMenu';
 
 describe('ContextMenu', function() {
   it('correctly renders the context-menu with the props that were passed through', () => {
-    const component = render(
+    const { container } = render(
       <ContextMenu
         id="contextMenu"
         className="context-menu"
@@ -17,6 +17,6 @@ describe('ContextMenu', function() {
         onShow={() => null}
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
