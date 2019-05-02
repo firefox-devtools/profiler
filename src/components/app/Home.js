@@ -125,7 +125,9 @@ class ActionButtons extends React.PureComponent<
         </div>
         {this.state.isLoadFromUrlPressed ? (
           <LoadFromUrl {...this.props} />
-        ) : null}
+        ) : (
+          <p>You can also drag and drop a profile file here to load it.</p>
+        )}
       </div>
     );
   }

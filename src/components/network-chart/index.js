@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import clamp from 'clamp';
 import { oneLine } from 'common-tags';
 import * as React from 'react';
 import {
@@ -164,8 +163,7 @@ function _timeToCssPixels(props: Props, time: Milliseconds): CssPixels {
     ((time - timeRange.start) / timeRangeTotal) * innerContainerWidth +
     TIMELINE_MARGIN_LEFT;
 
-  // Keep the value bounded to the available viewport area.
-  return clamp(markerPosition, 0, width);
+  return markerPosition;
 }
 
 /**

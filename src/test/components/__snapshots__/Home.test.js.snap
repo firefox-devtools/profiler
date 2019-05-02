@@ -124,6 +124,9 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
                 Load a profile from a URL
               </button>
             </div>
+            <p>
+              You can also drag and drop a profile file here to load it.
+            </p>
           </div>
         </div>
       </div>
@@ -266,6 +269,9 @@ exports[`app/Home renders the install screen for the extension 1`] = `
                 Load a profile from a URL
               </button>
             </div>
+            <p>
+              You can also drag and drop a profile file here to load it.
+            </p>
           </div>
         </div>
       </div>
@@ -438,6 +444,9 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
                 Load a profile from a URL
               </button>
             </div>
+            <p>
+              You can also drag and drop a profile file here to load it.
+            </p>
           </div>
         </div>
       </div>
@@ -601,6 +610,9 @@ exports[`app/Home renders the usage instructions for pages with the extension in
                 Load a profile from a URL
               </button>
             </div>
+            <p>
+              You can also drag and drop a profile file here to load it.
+            </p>
           </div>
         </div>
       </div>

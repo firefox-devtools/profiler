@@ -29,6 +29,20 @@ jest.mock('../../profile-logic/profile-store');
 
 describe('getCheckedSharingOptions', function() {
   describe('default filtering by channel', function() {
+    const isFiltering = {
+      includeExtension: false,
+      includeFullTimeRange: false,
+      includeHiddenThreads: false,
+      includeScreenshots: false,
+      includeUrls: false,
+    };
+    const isNotFiltering = {
+      includeExtension: true,
+      includeFullTimeRange: true,
+      includeHiddenThreads: true,
+      includeScreenshots: true,
+      includeUrls: true,
+    };
     function getDefaultsWith(updateChannel: string) {
       const { profile } = getProfileFromTextSamples('A');
       profile.meta.updateChannel = updateChannel;
@@ -37,33 +51,23 @@ describe('getCheckedSharingOptions', function() {
     }
 
     it('does not filter with nightly', function() {
-      expect(getDefaultsWith('nightly')).toMatchObject({
-        isFiltering: false,
-      });
+      expect(getDefaultsWith('nightly')).toEqual(isNotFiltering);
     });
 
     it('does not filter with nightly-try', function() {
-      expect(getDefaultsWith('nightly-try')).toMatchObject({
-        isFiltering: false,
-      });
+      expect(getDefaultsWith('nightly-try')).toEqual(isNotFiltering);
     });
 
     it('does not filter with default', function() {
-      expect(getDefaultsWith('default')).toMatchObject({
-        isFiltering: false,
-      });
+      expect(getDefaultsWith('default')).toEqual(isNotFiltering);
     });
 
     it('does filter with aurora', function() {
-      expect(getDefaultsWith('aurora')).toMatchObject({
-        isFiltering: true,
-      });
+      expect(getDefaultsWith('aurora')).toEqual(isFiltering);
     });
 
     it('does filter with release', function() {
-      expect(getDefaultsWith('release')).toMatchObject({
-        isFiltering: true,
-      });
+      expect(getDefaultsWith('release')).toEqual(isFiltering);
     });
   });
   describe('toggleCheckedSharingOptions', function() {
@@ -71,19 +75,19 @@ describe('getCheckedSharingOptions', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { getState, dispatch } = storeWithProfile(profile);
       expect(getCheckedSharingOptions(getState())).toMatchObject({
-        removeHiddenThreads: true,
+        includeHiddenThreads: false,
       });
 
-      dispatch(toggleCheckedSharingOptions('removeHiddenThreads'));
+      dispatch(toggleCheckedSharingOptions('includeHiddenThreads'));
 
       expect(getCheckedSharingOptions(getState())).toMatchObject({
-        removeHiddenThreads: false,
+        includeHiddenThreads: true,
       });
 
-      dispatch(toggleCheckedSharingOptions('removeHiddenThreads'));
+      dispatch(toggleCheckedSharingOptions('includeHiddenThreads'));
 
       expect(getCheckedSharingOptions(getState())).toMatchObject({
-        removeHiddenThreads: true,
+        includeHiddenThreads: false,
       });
     });
   });
