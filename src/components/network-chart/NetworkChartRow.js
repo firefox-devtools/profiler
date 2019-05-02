@@ -65,7 +65,7 @@ const PHASE_OPACITIES = PROPERTIES_IN_ORDER.reduce(
   {}
 );
 
-export type NetworkChartRowProps = {
+type NetworkChartRowProps = {
   +index: number,
   +marker: Marker,
   // Pass the payload in as well, since our types can't express a Marker with

@@ -4,7 +4,33 @@
 
 // @flow
 
+import memoize from 'memoize-immutable';
+import NamedTupleMap from 'namedtuplemap';
+
 import type { Microseconds, Milliseconds } from '../types/units';
+
+// Calling `toLocalestring` repeatedly in a tight loop can be a performance
+// problem. It's much better to reuse an instance of `Intl.NumberFormat`.
+// This function simply returns an instance of this class, and then we use a
+// memoization tool to store an instance for each set of arguments.
+// It's probably OK to keep all instances because their number is finite.
+function _getNumberFormat({
+  places,
+  style,
+}: {
+  places: number,
+  style: 'decimal' | 'percent',
+}) {
+  return new Intl.NumberFormat(undefined, {
+    minimumFractionDigits: places,
+    maximumFractionDigits: places,
+    style: style,
+  });
+}
+
+const _memoizedGetNumberFormat = memoize(_getNumberFormat, {
+  cache: new NamedTupleMap(),
+});
 
 /**
  * Format a positive float into a string.
@@ -45,11 +71,8 @@ export function formatNumber(
     places = maxFractionalDigits;
   }
 
-  return value.toLocaleString(undefined, {
-    minimumFractionDigits: places,
-    maximumFractionDigits: places,
-    style: style,
-  });
+  const numberFormat = _memoizedGetNumberFormat({ places, style });
+  return numberFormat.format(value);
 }
 
 /**

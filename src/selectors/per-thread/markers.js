@@ -194,11 +194,6 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerTiming.getMarkerTiming
   );
 
-  const getNetworkChartTiming: Selector<MarkerTimingRows> = createSelector(
-    getSearchFilteredNetworkChartMarkers,
-    MarkerTiming.getMarkerTiming
-  );
-
   const getNetworkMarkers: Selector<Marker[]> = createSelector(
     getCommittedRangeFilteredMarkers,
     markers => markers.filter(MarkerData.isNetworkMarker)
@@ -239,7 +234,6 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getMarkerChartMarkers,
     getSearchFilteredMarkerChartMarkers,
     getMarkerChartTiming,
-    getNetworkChartTiming,
     getCommittedRangeFilteredMarkers,
     getCommittedRangeFilteredMarkersForHeader,
     getTimelineVerticalMarkers,

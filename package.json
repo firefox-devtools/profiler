@@ -63,6 +63,7 @@
     "jszip": "^3.1.5",
     "memoize-immutable": "^3.0.0",
     "mixedtuplemap": "^1.0.0",
+    "namedtuplemap": "^1.0.0",
     "photon-colors": "3.3.2",
     "prop-types": "^15.7.2",
     "query-string": "^6.3.0",

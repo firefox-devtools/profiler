@@ -775,11 +775,25 @@ describe('actions/ProfileView', function() {
         { start: 0, end: 10 },
       ]);
 
+      expect(ProfileViewSelectors.getPreviewSelectionRange(getState())).toEqual(
+        {
+          start: 0,
+          end: 10,
+        }
+      );
+
       dispatch(ProfileView.commitRange(1, 9));
       expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
+
+      expect(ProfileViewSelectors.getPreviewSelectionRange(getState())).toEqual(
+        {
+          start: 1,
+          end: 9,
+        }
+      );
     });
   });
 
@@ -803,9 +817,15 @@ describe('actions/ProfileView', function() {
       expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
-        selectionEnd: 9,
         selectionStart: 1,
+        selectionEnd: 9,
       });
+      expect(ProfileViewSelectors.getPreviewSelectionRange(getState())).toEqual(
+        {
+          start: 1,
+          end: 9,
+        }
+      );
 
       dispatch(ProfileView.commitRange(2, 8));
       expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
@@ -816,6 +836,12 @@ describe('actions/ProfileView', function() {
         hasSelection: false,
         isModifying: false,
       });
+      expect(ProfileViewSelectors.getPreviewSelectionRange(getState())).toEqual(
+        {
+          start: 2,
+          end: 8,
+        }
+      );
     });
   });
 
@@ -1154,12 +1180,6 @@ describe('snapshots of selectors/profile', function() {
     const { getState, markerThreadSelectors } = setupStore();
     expect(
       markerThreadSelectors.getMarkerChartTiming(getState())
-    ).toMatchSnapshot();
-  });
-  it('matches the last stored run of markerThreadSelectors.getNetworkChartTiming', function() {
-    const { getState, markerThreadSelectors } = setupStore();
-    expect(
-      markerThreadSelectors.getNetworkChartTiming(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkers', function() {

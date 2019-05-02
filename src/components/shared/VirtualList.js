@@ -3,6 +3,36 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+
+/**
+ * VirtualList implements a virtualized component. This means it doesn't
+ * render only the items that are currently displayed, and makes long list
+ * manageable in the Web platform.
+ * This implementation has some unique features that make it especially
+ * performant, but also comes with constraints.
+ *
+ * The items are organized in chunks:
+ *
+ * .
+ * | 16 items
+ * |
+ * -
+ * |
+ * | 16 items
+ * |
+ * -
+ * |
+ * | 16 items
+ * .
+ *
+ * Depending on the current scroll position, the logic decides which chunk(s)
+ * will be rendered. If `disableOverscan` is false (this is the default) we
+ * render more items before and after the visible part so that when scrolling
+ * the user doesn't see a white background while the app catches up.
+ *
+ * Using chunks avoids the need to render often, and thus improves performance.
+ */
+
 import * as React from 'react';
 import classNames from 'classnames';
 import range from 'array-range';
@@ -16,10 +46,23 @@ type VirtualListRowProps = {|
   +item: *,
   +index: number,
   +columnIndex: number,
+  // These properties are not used directly, but are needed for strict equality
+  // checks so that the components update correctly.
+  // * `isSpecial` is used when we want to update one row or a few rows only,
+  //   this is typically when the selection changes and both the old and the new
+  //   selection need to be changed.
   +isSpecial: boolean,
-  // Items are not used directly, but are needed for strict equality checks so that
-  // the components update correctly.
+  // * `items` contains the full items, so that we update the whole list
+  //   whenever the source changes. This is necessary because often `item` is a
+  //   native value (eg a number), and shallow checking only `item` won't always
+  //   give the expected behavior.
   +items: *,
+  // * `forceRender` is passed through directly from the main VirtualList
+  //   component to the row as a way to update the full list for reasons
+  //   unbeknownst to this component. This can be used for example in chart-like
+  //   panels where we'd want to redraw if some source value necessary to the
+  //   computation changes.
+  +forceRender?: number | string,
 |};
 
 class VirtualListRow extends React.PureComponent<VirtualListRowProps> {
@@ -37,6 +80,7 @@ type VirtualListInnerChunkProps = {|
   +visibleRangeStart: number,
   +visibleRangeEnd: number,
   +columnIndex: number,
+  +forceRender?: number | string,
 |};
 
 class VirtualListInnerChunk extends React.PureComponent<VirtualListInnerChunkProps> {
@@ -49,6 +93,7 @@ class VirtualListInnerChunk extends React.PureComponent<VirtualListInnerChunkPro
       visibleRangeStart,
       visibleRangeEnd,
       columnIndex,
+      forceRender,
     } = this.props;
 
     return (
@@ -67,6 +112,7 @@ class VirtualListInnerChunk extends React.PureComponent<VirtualListInnerChunkPro
               item={item}
               items={items}
               isSpecial={specialItems.includes(item)}
+              forceRender={forceRender}
             />
           );
         })}
@@ -85,6 +131,7 @@ type VirtualListInnerProps = {|
   +visibleRangeEnd: number,
   +columnIndex: number,
   +containerWidth: CssPixels,
+  +forceRender?: number | string,
 |};
 
 class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
@@ -112,6 +159,7 @@ class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
       visibleRangeEnd,
       columnIndex,
       containerWidth,
+      forceRender,
     } = this.props;
 
     const chunkSize = 16;
@@ -150,6 +198,7 @@ class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
               renderItem={renderItem}
               items={items}
               specialItems={specialItems}
+              forceRender={forceRender}
             />
           );
         })}
@@ -167,9 +216,17 @@ type VirtualListProps = {|
   +specialItems: *[],
   +onKeyDown: KeyboardEvent => void,
   +onCopy: Event => void,
+  // Set `disableOverscan` to `true` when you expect a lot of updates in a short
+  // time: this will render only the visible part, which makes each update faster.
   +disableOverscan: boolean,
   +columnCount: number,
   +containerWidth: CssPixels,
+  // `forceRender` is passed through directly from the main VirtualList
+  // component to the row as a way to update the full list for reasons
+  // unbeknownst to this component. This can be used for example in chart-like
+  // panels where we'd want to redraw if some source value necessary to the
+  // computation changes.
+  +forceRender?: number | string,
   // The next 3 props will be applied to the underlying DOM element.
   // They're important for accessibility (especially focus and navigation).
   +ariaLabel?: string,
@@ -312,6 +369,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
       specialItems,
       onKeyDown,
       containerWidth,
+      forceRender,
       ariaRole,
       ariaLabel,
       ariaActiveDescendant,
@@ -343,6 +401,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
               specialItems={specialItems}
               columnIndex={columnIndex}
               containerWidth={containerWidth}
+              forceRender={forceRender}
               key={columnIndex}
               ref={columnIndex === 0 ? this._innerCreated : undefined}
             />
