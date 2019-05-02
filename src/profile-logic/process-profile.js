@@ -1136,11 +1136,3 @@ export async function unserializeProfileOfArbitraryFormat(
     throw new Error(`Unserializing the profile failed: ${e}`);
   }
 }
-
-export class ProfileProcessor {
-  processProfile(geckoProfile: GeckoProfile): Promise<*> {
-    return new Promise(resolve => {
-      resolve(processProfile(geckoProfile));
-    });
-  }
-}
