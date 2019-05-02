@@ -170,10 +170,8 @@ export type RemoveProfileInformation = {
   shouldRemoveThreadsWithScreenshots: Set<ThreadIndex>,
   // Remove the full time range if StartEndRange is provided.
   shouldFilterToCommittedRange: StartEndRange | null,
-  // Remove all the network URLs if it's true.
-  shouldRemoveNetworkUrls: boolean,
-  // Remove all the URLs inside string table if it's true.
-  shouldRemoveAllUrls: boolean,
+  // Remove all the URLs if it's true.
+  shouldRemoveUrls: boolean,
   // Remove the extension list if it's true.
   shouldRemoveExtensions: boolean,
 };

@@ -79,6 +79,27 @@ export const getCommittedRange: Selector<StartEndRange> = createSelector(
   }
 );
 
+export const getPreviewSelection: Selector<PreviewSelection> = state =>
+  getProfileViewOptions(state).previewSelection;
+
+/**
+ * This selector returns the current range, taking into account the current
+ * preview selection if any.
+ */
+export const getPreviewSelectionRange: Selector<StartEndRange> = createSelector(
+  getCommittedRange,
+  getPreviewSelection,
+  (committedRange, previewSelection) => {
+    if (previewSelection.hasSelection) {
+      return {
+        start: previewSelection.selectionStart,
+        end: previewSelection.selectionEnd,
+      };
+    }
+    return committedRange;
+  }
+);
+
 /**
  * Profile
  */
@@ -103,8 +124,6 @@ export const getThreadNames: Selector<string[]> = state =>
   getProfile(state).threads.map(t => t.name);
 export const getRightClickedTrack: Selector<TrackReference | null> = state =>
   getProfileViewOptions(state).rightClickedTrack;
-export const getPreviewSelection: Selector<PreviewSelection> = state =>
-  getProfileViewOptions(state).previewSelection;
 export const getCounter: Selector<Counter[] | null> = state =>
   getProfile(state).counters || null;
 

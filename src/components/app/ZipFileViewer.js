@@ -127,7 +127,8 @@ class ZipFileViewer extends React.PureComponent<Props> {
   _treeView: ?TreeView<ZipDisplayData>;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
-  componentWillMount() {
+  constructor(props) {
+    super(props);
     const {
       expandedZipFileIndexes,
       zipFileTree,

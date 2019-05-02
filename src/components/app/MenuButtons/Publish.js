@@ -22,6 +22,7 @@ import {
   getUploadProgressString,
   getUploadUrl,
   getUploadError,
+  getShouldSanitizeByDefault,
 } from '../../../selectors/publish';
 import { BlobUrlLink } from '../../shared/BlobUrlLink';
 import { assertExhaustiveCheck } from '../../../utils/flow';
@@ -47,6 +48,7 @@ type StateProps = {|
   +uploadPhase: UploadPhase,
   +uploadProgress: string,
   +uploadUrl: string,
+  +shouldSanitizeByDefault: boolean,
   +error: mixed,
 |};
 
@@ -59,33 +61,17 @@ type DispatchProps = {|
 
 type PublishProps = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-type PublishState = {|
-  isFilteringToggledOnce: boolean,
-|};
-
-class MenuButtonsPublishImpl extends React.PureComponent<
-  PublishProps,
-  PublishState
-> {
+class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   _toggles: { [$Keys<CheckedSharingOptions>]: () => mixed } = {
-    isFiltering: () => {
-      // Make it is that the details summary defaults to open.
-      this.setState({ isFilteringToggledOnce: true });
-      this.props.toggleCheckedSharingOptions('isFiltering');
-    },
-    removeHiddenThreads: () =>
-      this.props.toggleCheckedSharingOptions('removeHiddenThreads'),
-    removeFullTimeRange: () =>
-      this.props.toggleCheckedSharingOptions('removeFullTimeRange'),
-    removeScreenshots: () =>
-      this.props.toggleCheckedSharingOptions('removeScreenshots'),
-    removeUrls: () => this.props.toggleCheckedSharingOptions('removeUrls'),
-    removeExtension: () =>
-      this.props.toggleCheckedSharingOptions('removeExtension'),
-  };
-
-  state = {
-    isFilteringToggledOnce: false,
+    includeHiddenThreads: () =>
+      this.props.toggleCheckedSharingOptions('includeHiddenThreads'),
+    includeFullTimeRange: () =>
+      this.props.toggleCheckedSharingOptions('includeFullTimeRange'),
+    includeScreenshots: () =>
+      this.props.toggleCheckedSharingOptions('includeScreenshots'),
+    includeUrls: () => this.props.toggleCheckedSharingOptions('includeUrls'),
+    includeExtension: () =>
+      this.props.toggleCheckedSharingOptions('includeExtension'),
   };
 
   _renderCheckbox(slug: $Keys<CheckedSharingOptions>, label: string) {
@@ -107,14 +93,13 @@ class MenuButtonsPublishImpl extends React.PureComponent<
 
   _renderPublishPanel() {
     const {
-      checkedSharingOptions,
       downloadSizePromise,
       attemptToPublish,
       downloadFileName,
       compressedProfileBlobPromise,
       uploadUrl,
+      shouldSanitizeByDefault,
     } = this.props;
-    const { isFilteringToggledOnce } = this.state;
 
     return (
       <div data-testid="MenuButtonsPublish-container">
@@ -132,49 +117,30 @@ class MenuButtonsPublishImpl extends React.PureComponent<
         ) : null}
         <form className="menuButtonsPublishContent" onSubmit={attemptToPublish}>
           <div className="menuButtonsPublishIcon" />
+          <h1 className="menuButtonsPublishTitle">Share Performance Profile</h1>
           <p className="menuButtonsPublishInfoDescription">
-            You’re about to publicly share your profile, which can potentially
-            contain personally identifiable information.
+            Upload your profile and make it accessible to anyone with the link.
+            {shouldSanitizeByDefault
+              ? ' By default, your personal data is removed.'
+              : ' This profile is from Firefox Nightly, so by default all information is included.'}
           </p>
-          <label className="photon-label">
-            <input
-              className="photon-checkbox photon-checkbox-default"
-              type="checkbox"
-              name="isFiltering"
-              onChange={this._toggles.isFiltering}
-              checked={checkedSharingOptions.isFiltering}
-            />
-            Filter out potentially identifying information
-          </label>
-          {checkedSharingOptions.isFiltering ? (
-            <details
-              className="menuButtonsPublishData"
-              open={isFilteringToggledOnce}
-            >
-              <summary className="menuButtonsPublishDataSummary">
-                Choose what gets removed
-              </summary>
-              <div className="menuButtonsPublishDataChoices">
-                {this._renderCheckbox(
-                  'removeHiddenThreads',
-                  'Remove hidden threads'
-                )}
-                {this._renderCheckbox(
-                  'removeFullTimeRange',
-                  'Remove hidden time range'
-                )}
-                {this._renderCheckbox(
-                  'removeScreenshots',
-                  'Remove screenshots'
-                )}
-                {this._renderCheckbox('removeUrls', 'Remove resource URLs')}
-                {this._renderCheckbox(
-                  'removeExtension',
-                  'Remove extension information'
-                )}
-              </div>
-            </details>
-          ) : null}
+          <h3>Include additional data that may be identifiable</h3>
+          <div className="menuButtonsPublishDataChoices">
+            {this._renderCheckbox(
+              'includeHiddenThreads',
+              'Include hidden threads'
+            )}
+            {this._renderCheckbox(
+              'includeFullTimeRange',
+              'Include hidden time range'
+            )}
+            {this._renderCheckbox('includeScreenshots', 'Include screenshots')}
+            {this._renderCheckbox('includeUrls', 'Include resource URLs')}
+            {this._renderCheckbox(
+              'includeExtension',
+              'Include extension information'
+            )}
+          </div>
           <div className="menuButtonsPublishButtons">
             <DownloadButton
               downloadFileName={downloadFileName}
@@ -356,6 +322,7 @@ export const MenuButtonsPublish = explicitConnect<
     uploadProgress: getUploadProgressString(state),
     uploadUrl: getUploadUrl(state),
     error: getUploadError(state),
+    shouldSanitizeByDefault: getShouldSanitizeByDefault(state),
   }),
   mapDispatchToProps: {
     toggleCheckedSharingOptions,

@@ -16,12 +16,11 @@ import type {
 
 function _getDefaultSharingOptions(): CheckedSharingOptions {
   return {
-    isFiltering: true,
-    removeHiddenThreads: true,
-    removeFullTimeRange: true,
-    removeScreenshots: true,
-    removeUrls: true,
-    removeExtension: true,
+    includeHiddenThreads: false,
+    includeFullTimeRange: false,
+    includeScreenshots: false,
+    includeUrls: false,
+    includeExtension: false,
   };
 }
 
@@ -32,7 +31,12 @@ const checkedSharingOptions: Reducer<CheckedSharingOptions> = (
   switch (action.type) {
     case 'VIEW_PROFILE': {
       const newState = _getDefaultSharingOptions();
-      newState.isFiltering = getShouldSanitizeByDefault(action.profile);
+      if (!getShouldSanitizeByDefault(action.profile)) {
+        // Flip the sharing options.
+        for (const key of Object.keys(newState)) {
+          newState[key] = true;
+        }
+      }
       return newState;
     }
     case 'TOGGLE_CHECKED_SHARING_OPTION':

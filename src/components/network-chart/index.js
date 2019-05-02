@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import clamp from 'clamp';
 import { oneLine } from 'common-tags';
 import * as React from 'react';
 import {
@@ -16,20 +15,20 @@ import VirtualList from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
 import NetworkChartEmptyReasons from './NetworkChartEmptyReasons';
 import NetworkChartRow from './NetworkChartRow';
-import memoize from 'memoize-immutable';
-import MixedTupleMap from 'mixedtuplemap';
 
-import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
+import {
+  getPreviewSelection,
+  getPreviewSelectionRange,
+} from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
 import type { NetworkPayload } from '../../types/markers';
-import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
-import type { Milliseconds, CssPixels } from '../../types/units';
+import type { Marker } from '../../types/profile-derived';
+import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
 import type { ConnectedProps } from '../../utils/connect';
-import type { NetworkChartRowProps } from './NetworkChartRow';
 
 require('./index.css');
 
@@ -42,10 +41,8 @@ type DispatchProps = {|
 
 type StateProps = {|
   +markers: Marker[],
-  +networkTimingRows: MarkerTimingRows,
-  +maxNetworkRows: number,
-  +timeRange: { start: Milliseconds, end: Milliseconds },
-  +interval: Milliseconds,
+  +disableOverscan: boolean,
+  +timeRange: StartEndRange,
   +threadIndex: number,
 |};
 
@@ -54,27 +51,83 @@ type Props = {|
   ...ConnectedProps<{||}, StateProps, DispatchProps>,
 |};
 
-/*
- * The VirtualListRows only re-render when their items have changed. This information
- * is derived from the current props, which includes time range, container sizing,
- * and the marker information itself. In order to properly update the rows,
- * provide a memoized function that can compute this on the fly.
- */
-const _getVirtualListItemsMemoized = memoize(_getVirtualListItems, {
-  cache: new MixedTupleMap(),
-});
-
 class NetworkChart extends React.PureComponent<Props> {
+  // This isn't used at the moment, but we need a fixed instance so that a
+  // rerender isn't triggered in VirtualList.
+  _specialItems = [];
+
   _onCopy = (_event: Event) => {
-    // No implemented.
+    // Not implemented.
   };
 
   _onKeyDown = (_event: KeyboardEvent) => {
-    // No implemented.
+    // Not implemented.
+  };
+
+  /**
+   * Convert the time for a network marker into the CssPixels to be used on the screen.
+   * This function takes into account the range used, as well as the container sizing
+   * as passed in by the WithSize component.
+   */
+  _timeToCssPixels(time: Milliseconds): CssPixels {
+    const { timeRange, width } = this.props;
+    const timeRangeTotal = timeRange.end - timeRange.start;
+    const innerContainerWidth =
+      width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+
+    const markerPosition =
+      ((time - timeRange.start) / timeRangeTotal) * innerContainerWidth +
+      TIMELINE_MARGIN_LEFT;
+
+    return markerPosition;
+  }
+
+  _renderRow = (marker: Marker, index: number): React.Node => {
+    const { threadIndex } = this.props;
+
+    // Since our type definition for Marker can't refine to just Network
+    // markers, extract the payload using an utility function.
+    const networkPayload = _getNetworkPayloadOrNull(marker);
+    if (networkPayload === null) {
+      throw new Error(
+        oneLine`
+          The NetworkChart is supposed to only receive Network markers, but some other
+          kind of marker payload was passed in.
+        `
+      );
+    }
+    // Compute the positioning of the network markers.
+    const startPosition = this._timeToCssPixels(marker.start);
+    const endPosition = this._timeToCssPixels(marker.start + marker.dur);
+
+    // Set min-width for marker bar.
+    let markerWidth = endPosition - startPosition;
+    if (markerWidth < 1) {
+      markerWidth = 2.5;
+    }
+
+    return (
+      <NetworkChartRow
+        index={index}
+        marker={marker}
+        networkPayload={networkPayload}
+        threadIndex={threadIndex}
+        startPosition={startPosition}
+        markerWidth={markerWidth}
+      />
+    );
   };
 
   render() {
-    const { markers } = this.props;
+    const { markers, width, timeRange, disableOverscan } = this.props;
+
+    // We want to force a full rerender whenever the width or the range changes.
+    // We compute a string using these values, so that when one of the value
+    // changes the string changes and forces a rerender of the whole
+    // VirtualList. See also the comments around this value in the VirtualList
+    // component definition file.
+    const forceRenderKey = `${timeRange.start}-${timeRange.end}-${width}`;
+
     return (
       <div
         className="networkChart"
@@ -88,14 +141,15 @@ class NetworkChart extends React.PureComponent<Props> {
         ) : (
           <VirtualList
             className="treeViewBody"
-            items={_getVirtualListItemsMemoized(this.props)}
-            renderItem={_renderRow}
+            items={markers}
+            renderItem={this._renderRow}
             itemHeight={ROW_HEIGHT}
             columnCount={1}
             focusable={true}
-            specialItems={[]}
-            containerWidth={3000}
-            disableOverscan={false}
+            specialItems={this._specialItems}
+            containerWidth={width}
+            forceRender={forceRenderKey}
+            disableOverscan={disableOverscan}
             onCopy={this._onCopy}
             onKeyDown={this._onKeyDown}
           />
@@ -111,31 +165,17 @@ class NetworkChart extends React.PureComponent<Props> {
  */
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
-    const networkTimingRows = selectedThreadSelectors.getNetworkChartTiming(
-      state
-    );
     return {
       markers: selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(
         state
       ),
-      networkTimingRows,
-      maxNetworkRows: networkTimingRows.length,
-      timeRange: getCommittedRange(state),
-      interval: getProfileInterval(state),
+      timeRange: getPreviewSelectionRange(state),
+      disableOverscan: getPreviewSelection(state).isModifying,
       threadIndex: getSelectedThreadIndex(state),
     };
   },
   component: withSize<Props>(NetworkChart),
 });
-
-/**
- * The VirtualListRow only re-renders when the props change, so pass in a pure function
- * rather than a method, so it is clear to not use `this.props`, as this would bypass
- * the update cycle, and rows would not be correctly re-rendered.
- */
-function _renderRow(rowProps: NetworkChartRowProps): React.Node {
-  return <NetworkChartRow {...rowProps} />;
-}
 
 /**
  * Our definition of markers does not currently have the ability to refine
@@ -147,62 +187,4 @@ function _getNetworkPayloadOrNull(marker: Marker): null | NetworkPayload {
     return null;
   }
   return marker.data;
-}
-
-/**
- * Convert the time for a network marker into the CssPixels to be used on the screen.
- * This function takes into account the range used, as well as the container sizing
- * as passed in by the WithSize component.
- */
-function _timeToCssPixels(props: Props, time: Milliseconds): CssPixels {
-  const { timeRange, width } = props;
-  const timeRangeTotal = timeRange.end - timeRange.start;
-  const innerContainerWidth =
-    width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
-
-  const markerPosition =
-    ((time - timeRange.start) / timeRangeTotal) * innerContainerWidth +
-    TIMELINE_MARGIN_LEFT;
-
-  // Keep the value bounded to the available viewport area.
-  return clamp(markerPosition, 0, width);
-}
-
-/**
- * Compute the NetworkChartRowProps for each marker. See _getVirtualListItemsMemoized
- * for more information.
- */
-function _getVirtualListItems(props: Props): NetworkChartRowProps[] {
-  const { markers, threadIndex } = props;
-  return markers.map((marker, markerIndex) => {
-    // Since our type definition for Marker can't refine to just Network
-    // markers, extract the payload.
-    const networkPayload = _getNetworkPayloadOrNull(marker);
-    if (networkPayload === null) {
-      throw new Error(
-        oneLine`
-          The NetworkChart is supposed to only receive Network markers, but some other
-          kind of marker payload was passed in.
-        `
-      );
-    }
-    // Compute the positioning of the network markers.
-    const startPosition = _timeToCssPixels(props, marker.start);
-    const endPosition = _timeToCssPixels(props, marker.start + marker.dur);
-
-    // Set min-width for marker bar.
-    let markerWidth = endPosition - startPosition;
-    if (markerWidth < 1) {
-      markerWidth = 2.5;
-    }
-
-    return {
-      index: markerIndex,
-      marker,
-      networkPayload,
-      threadIndex,
-      startPosition,
-      markerWidth,
-    };
-  });
 }
