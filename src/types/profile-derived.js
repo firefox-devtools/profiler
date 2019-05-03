@@ -80,6 +80,15 @@ export type Marker = {|
   incomplete?: boolean,
 |};
 
+/**
+ * A value with this type uniquely identifies a marker. This is the index of a
+ * marker in the full marker list (as returned by the selector `getFullMarkerList`),
+ * and the marker object is returned using the function `getMarker` as returned
+ * by the selector `getMarkerGetter`:
+ *
+ *   const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+ *   const marker = getMarker(markerIndex);
+ */
 export type MarkerIndex = number;
 
 export type CallNodeData = {

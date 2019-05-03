@@ -836,6 +836,10 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   };
 }
 
+/**
+ * This utility function makes it easier to implement functions filtering
+ * markers, with marker indexes both as input and output.
+ */
 export function filterMarkerIndexes(
   getMarker: MarkerIndex => Marker,
   markerIndexes: MarkerIndex[],

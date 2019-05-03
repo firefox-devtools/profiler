@@ -684,14 +684,14 @@ describe('actions/ProfileView', function() {
       const networkSearchString = '3';
 
       expect(
-        selectedThreadSelectors.getSearchFilteredNetworkChartMarkerIndexes(
+        selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
           getState()
         )
       ).toHaveLength(10);
       dispatch(ProfileView.changeNetworkSearchString(networkSearchString));
 
       const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-      const markerIndexes = selectedThreadSelectors.getSearchFilteredNetworkChartMarkerIndexes(
+      const markerIndexes = selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
         getState()
       );
       expect(markerIndexes).toHaveLength(1);

@@ -168,7 +168,7 @@ class NetworkChart extends React.PureComponent<Props> {
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
-      markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkChartMarkerIndexes(
+      markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
         state
       ),
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
