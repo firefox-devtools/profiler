@@ -348,15 +348,16 @@ type TreeViewProps<DisplayData> = {|
 class TreeView<DisplayData: Object> extends React.PureComponent<
   TreeViewProps<DisplayData>
 > {
-  _specialItems: (NodeIndex | null)[];
+  _specialItems: NodeIndex[];
   _visibleRows: NodeIndex[];
   _expandedNodes: Set<NodeIndex | null>;
-  _list: VirtualList | null = null;
-  _takeListRef = (list: VirtualList | null) => (this._list = list);
+  _list: VirtualList<NodeIndex> | null = null;
+  _takeListRef = (list: VirtualList<NodeIndex> | null) => (this._list = list);
 
   constructor(props: TreeViewProps<DisplayData>) {
     super(props);
-    this._specialItems = [props.selectedNodeId];
+    this._specialItems =
+      props.selectedNodeId === null ? [] : [props.selectedNodeId];
     this._expandedNodes = new Set(props.expandedNodeIds);
     this._visibleRows = this._getAllVisibleRows(props);
   }
@@ -373,7 +374,8 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
 
   componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
     if (nextProps.selectedNodeId !== this.props.selectedNodeId) {
-      this._specialItems = [nextProps.selectedNodeId];
+      this._specialItems =
+        nextProps.selectedNodeId === null ? [] : [nextProps.selectedNodeId];
     }
     if (
       nextProps.tree !== this.props.tree ||

@@ -39,11 +39,11 @@ import range from 'array-range';
 
 import type { CssPixels } from '../../types/units';
 
-type RenderItem = (*, number, number) => React.Node;
+type RenderItem<Item> = (Item, number, number) => React.Node;
 
-type VirtualListRowProps = {|
-  +renderItem: RenderItem,
-  +item: *,
+type VirtualListRowProps<Item> = {|
+  +renderItem: RenderItem<Item>,
+  +item: Item,
   +index: number,
   +columnIndex: number,
   // These properties are not used directly, but are needed for strict equality
@@ -56,7 +56,7 @@ type VirtualListRowProps = {|
   //   whenever the source changes. This is necessary because often `item` is a
   //   native value (eg a number), and shallow checking only `item` won't always
   //   give the expected behavior.
-  +items: *,
+  +items: Item[],
   // * `forceRender` is passed through directly from the main VirtualList
   //   component to the row as a way to update the full list for reasons
   //   unbeknownst to this component. This can be used for example in chart-like
@@ -65,25 +65,29 @@ type VirtualListRowProps = {|
   +forceRender?: number | string,
 |};
 
-class VirtualListRow extends React.PureComponent<VirtualListRowProps> {
+class VirtualListRow<Item> extends React.PureComponent<
+  VirtualListRowProps<Item>
+> {
   render() {
     const { renderItem, item, index, columnIndex } = this.props;
     return renderItem(item, index, columnIndex);
   }
 }
 
-type VirtualListInnerChunkProps = {|
+type VirtualListInnerChunkProps<Item> = {|
   +className: string,
-  +renderItem: RenderItem,
-  +items: *[],
-  +specialItems: *[],
+  +renderItem: RenderItem<Item>,
+  +items: Item[],
+  +specialItems: Item[],
   +visibleRangeStart: number,
   +visibleRangeEnd: number,
   +columnIndex: number,
   +forceRender?: number | string,
 |};
 
-class VirtualListInnerChunk extends React.PureComponent<VirtualListInnerChunkProps> {
+class VirtualListInnerChunk<Item> extends React.PureComponent<
+  VirtualListInnerChunkProps<Item>
+> {
   render() {
     const {
       className,
@@ -121,12 +125,12 @@ class VirtualListInnerChunk extends React.PureComponent<VirtualListInnerChunkPro
   }
 }
 
-type VirtualListInnerProps = {|
+type VirtualListInnerProps<Item> = {|
   +itemHeight: CssPixels,
   +className: string,
-  +renderItem: RenderItem,
-  +items: *[],
-  +specialItems: *[],
+  +renderItem: RenderItem<Item>,
+  +items: Item[],
+  +specialItems: Item[],
   +visibleRangeStart: number,
   +visibleRangeEnd: number,
   +columnIndex: number,
@@ -134,7 +138,9 @@ type VirtualListInnerProps = {|
   +forceRender?: number | string,
 |};
 
-class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
+class VirtualListInner<Item> extends React.PureComponent<
+  VirtualListInnerProps<Item>
+> {
   _container: ?HTMLElement;
 
   _takeContainerRef = (element: ?HTMLDivElement) => {
@@ -207,13 +213,13 @@ class VirtualListInner extends React.PureComponent<VirtualListInnerProps> {
   }
 }
 
-type VirtualListProps = {|
+type VirtualListProps<Item> = {|
   +itemHeight: CssPixels,
   +className: string,
-  +renderItem: RenderItem,
-  +items: *[],
+  +renderItem: RenderItem<Item>,
+  +items: Item[],
   +focusable: boolean,
-  +specialItems: *[],
+  +specialItems: Item[],
   +onKeyDown: KeyboardEvent => void,
   +onCopy: Event => void,
   // Set `disableOverscan` to `true` when you expect a lot of updates in a short
@@ -244,22 +250,14 @@ type Geometry = {
   innerRectY: CssPixels,
 };
 
-class VirtualList extends React.PureComponent<VirtualListProps> {
-  _container: ?HTMLDivElement;
-  _inner: ?VirtualListInner;
+class VirtualList<Item> extends React.PureComponent<VirtualListProps<Item>> {
+  _container: {| current: HTMLDivElement | null |} = React.createRef();
+  _inner: {| current: VirtualListInner<Item> | null |} = React.createRef();
   _geometry: ?Geometry;
-
-  _takeContainerRef = (element: ?HTMLDivElement) => {
-    this._container = element;
-  };
-
-  _innerCreated = (element: ?VirtualListInner) => {
-    this._inner = element;
-  };
 
   componentDidMount() {
     document.addEventListener('copy', this._onCopy, false);
-    const container = this._container;
+    const container = this._container.current;
     if (!container) {
       throw new Error(
         'The container was assumed to exist while mounting The VirtualList.'
@@ -271,7 +269,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
 
   componentWillUnmount() {
     document.removeEventListener('copy', this._onCopy, false);
-    const container = this._container;
+    const container = this._container.current;
     if (!container) {
       throw new Error(
         'The container was assumed to exist while unmounting The VirtualList.'
@@ -286,14 +284,14 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
   };
 
   _onCopy = (event: Event) => {
-    if (document.activeElement === this._container) {
+    if (document.activeElement === this._container.current) {
       this.props.onCopy(event);
     }
   };
 
   _queryGeometry(): Geometry | void {
-    const container = this._container;
-    const inner = this._inner;
+    const container = this._container.current;
+    const inner = this._inner.current;
     if (!container || !inner) {
       return undefined;
     }
@@ -322,12 +320,12 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
   }
 
   scrollItemIntoView(itemIndex: number, offsetX: CssPixels) {
-    if (!this._container) {
+    const container = this._container.current;
+    if (!container) {
       return;
     }
     const itemTop = itemIndex * this.props.itemHeight;
     const itemBottom = itemTop + this.props.itemHeight;
-    const container = this._container;
 
     if (container.scrollTop > itemTop) {
       container.scrollTop = itemTop;
@@ -353,7 +351,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
   }
 
   focus() {
-    const container = this._container;
+    const container = this._container.current;
     if (container) {
       container.focus();
     }
@@ -379,7 +377,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
     return (
       <div
         className={className}
-        ref={this._takeContainerRef}
+        ref={this._container}
         tabIndex={focusable ? 0 : -1}
         onKeyDown={onKeyDown}
         role={ariaRole}
@@ -403,7 +401,7 @@ class VirtualList extends React.PureComponent<VirtualListProps> {
               containerWidth={containerWidth}
               forceRender={forceRender}
               key={columnIndex}
-              ref={columnIndex === 0 ? this._innerCreated : undefined}
+              ref={columnIndex === 0 ? this._inner : undefined}
             />
           ))}
         </div>
