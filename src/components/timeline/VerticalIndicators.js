@@ -11,13 +11,14 @@ import { formatSeconds } from '../../utils/format-numbers';
 
 import type { SizeProps } from '../shared/WithSize';
 import type { PageList } from '../../types/profile';
-import type { Marker } from '../../types/profile-derived';
+import type { Marker, MarkerIndex } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 
 import './VerticalIndicators.css';
 
 type Props = {|
-  +verticalMarkers: Marker[],
+  +getMarker: MarkerIndex => Marker,
+  +verticalMarkerIndexes: MarkerIndex[],
   +pages: PageList | null,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -32,7 +33,8 @@ type Props = {|
 class VerticalIndicatorsImpl extends React.PureComponent<Props> {
   render() {
     const {
-      verticalMarkers,
+      getMarker,
+      verticalMarkerIndexes,
       pages,
       rangeStart,
       rangeEnd,
@@ -44,7 +46,8 @@ class VerticalIndicatorsImpl extends React.PureComponent<Props> {
         data-testid="vertical-indicators"
         className="timelineVerticalIndicators"
       >
-        {verticalMarkers.map((marker, markerIndex) => {
+        {verticalMarkerIndexes.map(markerIndex => {
+          const marker = getMarker(markerIndex);
           // Decide on the indicator color.
           let color = '#000';
           switch (marker.name) {

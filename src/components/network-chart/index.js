@@ -26,7 +26,7 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
 import type { NetworkPayload } from '../../types/markers';
-import type { Marker } from '../../types/profile-derived';
+import type { Marker, MarkerIndex } from '../../types/profile-derived';
 import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -40,7 +40,8 @@ type DispatchProps = {|
 |};
 
 type StateProps = {|
-  +markers: Marker[],
+  +markerIndexes: MarkerIndex[],
+  +getMarker: MarkerIndex => Marker,
   +disableOverscan: boolean,
   +timeRange: StartEndRange,
   +threadIndex: number,
@@ -82,8 +83,9 @@ class NetworkChart extends React.PureComponent<Props> {
     return markerPosition;
   }
 
-  _renderRow = (marker: Marker, index: number): React.Node => {
-    const { threadIndex } = this.props;
+  _renderRow = (markerIndex: MarkerIndex, index: number): React.Node => {
+    const { threadIndex, getMarker } = this.props;
+    const marker = getMarker(markerIndex);
 
     // Since our type definition for Marker can't refine to just Network
     // markers, extract the payload using an utility function.
@@ -119,7 +121,7 @@ class NetworkChart extends React.PureComponent<Props> {
   };
 
   render() {
-    const { markers, width, timeRange, disableOverscan } = this.props;
+    const { markerIndexes, width, timeRange, disableOverscan } = this.props;
 
     // We want to force a full rerender whenever the width or the range changes.
     // We compute a string using these values, so that when one of the value
@@ -136,12 +138,12 @@ class NetworkChart extends React.PureComponent<Props> {
         aria-labelledby="network-chart-tab-button"
       >
         <NetworkSettings />
-        {markers.length === 0 ? (
+        {markerIndexes.length === 0 ? (
           <NetworkChartEmptyReasons />
         ) : (
           <VirtualList
             className="treeViewBody"
-            items={markers}
+            items={markerIndexes}
             renderItem={this._renderRow}
             itemHeight={ROW_HEIGHT}
             columnCount={1}
@@ -166,9 +168,10 @@ class NetworkChart extends React.PureComponent<Props> {
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
-      markers: selectedThreadSelectors.getSearchFilteredNetworkChartMarkers(
+      markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
         state
       ),
+      getMarker: selectedThreadSelectors.getMarkerGetter(state),
       timeRange: getPreviewSelectionRange(state),
       disableOverscan: getPreviewSelection(state).isModifying,
       threadIndex: getSelectedThreadIndex(state),

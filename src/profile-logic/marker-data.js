@@ -11,7 +11,7 @@ import type {
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
 } from '../types/profile';
-import type { Marker, IndexIntoMarkers } from '../types/profile-derived';
+import type { Marker, MarkerIndex } from '../types/profile-derived';
 import type { BailoutPayload, NetworkPayload } from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { StartEndRange } from '../types/units';
@@ -76,20 +76,21 @@ export function deriveJankMarkers(
   return jankInstances;
 }
 
-export function getSearchFilteredMarkers(
-  markers: Marker[],
+export function getSearchFilteredMarkerIndexes(
+  getMarker: MarkerIndex => Marker,
+  markerIndexes: MarkerIndex[],
   searchString: string
-): Marker[] {
+): MarkerIndex[] {
   if (!searchString) {
-    return markers;
+    return markerIndexes;
   }
   const lowerCaseSearchString = searchString.toLowerCase();
-  const newMarkers: Marker[] = [];
-  for (const marker of markers) {
-    const { data, name } = marker;
+  const newMarkers: MarkerIndex[] = [];
+  for (const markerIndex of markerIndexes) {
+    const { data, name } = getMarker(markerIndex);
     const lowerCaseName = name.toLowerCase();
     if (lowerCaseName.includes(lowerCaseSearchString)) {
-      newMarkers.push(marker);
+      newMarkers.push(markerIndex);
       continue;
     }
     if (data && typeof data === 'object') {
@@ -100,7 +101,7 @@ export function getSearchFilteredMarkers(
           operation.toLowerCase().includes(lowerCaseSearchString) ||
           source.toLowerCase().includes(lowerCaseSearchString)
         ) {
-          newMarkers.push(marker);
+          newMarkers.push(markerIndex);
           continue;
         }
       }
@@ -109,7 +110,7 @@ export function getSearchFilteredMarkers(
         data.eventType.toLowerCase().includes(lowerCaseSearchString)
       ) {
         // Match DOMevents data.eventType
-        newMarkers.push(marker);
+        newMarkers.push(markerIndex);
         continue;
       }
       if (
@@ -117,7 +118,7 @@ export function getSearchFilteredMarkers(
         data.name.toLowerCase().includes(lowerCaseSearchString)
       ) {
         // Match UserTiming's name.
-        newMarkers.push(marker);
+        newMarkers.push(markerIndex);
         continue;
       }
       if (
@@ -125,7 +126,7 @@ export function getSearchFilteredMarkers(
         data.category.toLowerCase().includes(lowerCaseSearchString)
       ) {
         // Match UserTiming's name.
-        newMarkers.push(marker);
+        newMarkers.push(markerIndex);
         continue;
       }
     }
@@ -244,22 +245,19 @@ export function deriveMarkersFromRawMarkerTable(
   // nested and that's why we use an array structure as value.
   const openTracingMarkers: Map<
     IndexIntoStringTable,
-    IndexIntoMarkers[]
+    MarkerIndex[]
   > = new Map();
 
   // The second map contains the start markers for network markers.
   // Note that we don't have more than 2 network markers with the same name as
   // the name contains an incremented index. Therefore we don't need to use an
   // array as value like for tracing markers.
-  const openNetworkMarkers: Map<
-    IndexIntoStringTable,
-    IndexIntoMarkers
-  > = new Map();
+  const openNetworkMarkers: Map<IndexIntoStringTable, MarkerIndex> = new Map();
 
   // We don't add a screenshot marker as we find it, because to know its
   // duration we need to wait until the next one or the end of the profile. So
   // we keep it here.
-  let previousScreenshotMarker: IndexIntoMarkers | null = null;
+  let previousScreenshotMarker: MarkerIndex | null = null;
 
   for (let i = 0; i < rawMarkers.length; i++) {
     const name = rawMarkers.name[i];
@@ -577,7 +575,7 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
   markers: RawMarkerTable,
   rangeStart: number,
   rangeEnd: number
-): Generator<IndexIntoMarkers, void, void> {
+): Generator<MarkerIndex, void, void> {
   const isTimeInRange = (time: number): boolean =>
     time < rangeEnd && time >= rangeStart;
   const intersectsRange = (start: number, end: number): boolean =>
@@ -589,7 +587,7 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
   // nested and that's why we use an array structure as value.
   const openTracingMarkers: Map<
     IndexIntoStringTable,
-    IndexIntoMarkers[]
+    IndexIntoRawMarkerTable[]
   > = new Map();
 
   // The second map contains the start markers for network markers.
@@ -598,7 +596,7 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
   // array as value like for tracing markers.
   const openNetworkMarkers: Map<
     IndexIntoStringTable,
-    IndexIntoMarkers
+    IndexIntoRawMarkerTable
   > = new Map();
 
   let previousScreenshotMarker = null;
@@ -838,13 +836,30 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
   };
 }
 
-export function filterMarkersToRange(
-  markers: Marker[],
+/**
+ * This utility function makes it easier to implement functions filtering
+ * markers, with marker indexes both as input and output.
+ */
+export function filterMarkerIndexes(
+  getMarker: MarkerIndex => Marker,
+  markerIndexes: MarkerIndex[],
+  filterFunc: Marker => boolean
+): MarkerIndex[] {
+  return markerIndexes.filter(markerIndex => {
+    return filterFunc(getMarker(markerIndex));
+  });
+}
+
+export function filterMarkerIndexesToRange(
+  getMarker: MarkerIndex => Marker,
+  markerIndexes: MarkerIndex[],
   rangeStart: number,
   rangeEnd: number
-): Marker[] {
-  return markers.filter(
-    tm => tm.start < rangeEnd && tm.start + tm.dur >= rangeStart
+): MarkerIndex[] {
+  return filterMarkerIndexes(
+    getMarker,
+    markerIndexes,
+    marker => marker.start < rangeEnd && marker.start + marker.dur >= rangeStart
   );
 }
 
@@ -899,8 +914,15 @@ export function filterForNetworkChart(markers: Marker[]): Marker[] {
   return markers.filter(marker => isNetworkMarker(marker));
 }
 
-export function filterForMarkerChart(markers: Marker[]): Marker[] {
-  return markers.filter(marker => !isNetworkMarker(marker));
+export function filterForMarkerChart(
+  getMarker: MarkerIndex => Marker,
+  markerIndexes: MarkerIndex[]
+): MarkerIndex[] {
+  return filterMarkerIndexes(
+    getMarker,
+    markerIndexes,
+    marker => !isNetworkMarker(marker)
+  );
 }
 
 // Identifies mime type of a network request.
@@ -973,10 +995,13 @@ export function getColorClassNameForMimeType(
   }
 }
 
-export function groupScreenshotsById(markers: Marker[]): Map<string, Marker[]> {
+export function groupScreenshotsById(
+  getMarker: MarkerIndex => Marker,
+  markerIndexes: MarkerIndex[]
+): Map<string, Marker[]> {
   const idToScreenshotMarkers = new Map();
-  for (let i = 0; i < markers.length; i++) {
-    const marker = markers[i];
+  for (const markerIndex of markerIndexes) {
+    const marker = getMarker(markerIndex);
     const { data } = marker;
     if (data && data.type === 'CompositorScreenshot') {
       let markers = idToScreenshotMarkers.get(data.windowID);

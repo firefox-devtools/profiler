@@ -80,7 +80,16 @@ export type Marker = {|
   incomplete?: boolean,
 |};
 
-export type IndexIntoMarkers = number;
+/**
+ * A value with this type uniquely identifies a marker. This is the index of a
+ * marker in the full marker list (as returned by the selector `getFullMarkerList`),
+ * and the marker object is returned using the function `getMarker` as returned
+ * by the selector `getMarkerGetter`:
+ *
+ *   const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+ *   const marker = getMarker(markerIndex);
+ */
+export type MarkerIndex = number;
 
 export type CallNodeData = {
   funcName: string,
@@ -106,14 +115,12 @@ export type CallNodeDisplayData = $Exact<
   }>
 >;
 
-export type IndexIntoMarkerTiming = number;
-
 export type MarkerTiming = {
   // Start time in milliseconds.
   start: number[],
   // End time in milliseconds.
   end: number[],
-  index: IndexIntoMarkers[],
+  index: MarkerIndex[],
   label: string[],
   name: string,
   length: number,

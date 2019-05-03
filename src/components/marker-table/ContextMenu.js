@@ -15,7 +15,7 @@ import {
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import copy from 'copy-to-clipboard';
 
-import type { Marker, IndexIntoMarkers } from '../../types/profile-derived';
+import type { Marker } from '../../types/profile-derived';
 import type { StartEndRange } from '../../types/units';
 import type {
   PreviewSelection,
@@ -32,10 +32,9 @@ import {
 import { getMarkerFullDescription } from '../../profile-logic/marker-data';
 
 type StateProps = {|
-  +markers: Marker[],
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +selectedMarker: IndexIntoMarkers | null,
+  +selectedMarker: Marker | null,
   +thread: Thread,
   +implementationFilter: ImplementationFilter,
 |};
@@ -50,7 +49,6 @@ class MarkersContextMenu extends PureComponent<Props> {
   setStartRange = () => {
     const {
       selectedMarker,
-      markers,
       updatePreviewSelection,
       previewSelection,
       committedRange,
@@ -67,7 +65,7 @@ class MarkersContextMenu extends PureComponent<Props> {
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: markers[selectedMarker].start,
+      selectionStart: selectedMarker.start,
       selectionEnd,
     });
   };
@@ -75,7 +73,6 @@ class MarkersContextMenu extends PureComponent<Props> {
   setEndRange = () => {
     const {
       selectedMarker,
-      markers,
       updatePreviewSelection,
       committedRange,
       previewSelection,
@@ -89,34 +86,32 @@ class MarkersContextMenu extends PureComponent<Props> {
       ? previewSelection.selectionStart
       : committedRange.start;
 
-    const marker = markers[selectedMarker];
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
       selectionStart,
       // For markers without a duration, add an arbitrarily small bit of time at
       // the end to make sure the selected marker doesn't disappear from view.
-      selectionEnd: marker.start + (marker.dur || 0.0001),
+      selectionEnd: selectedMarker.start + (selectedMarker.dur || 0.0001),
     });
   };
 
   setRangeByDuration = () => {
-    const { selectedMarker, markers, updatePreviewSelection } = this.props;
+    const { selectedMarker, updatePreviewSelection } = this.props;
 
     if (selectedMarker === null) {
       return;
     }
 
-    const marker = markers[selectedMarker];
-    if (this._isZeroDurationMarker(marker)) {
+    if (this._isZeroDurationMarker(selectedMarker)) {
       return;
     }
 
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: marker.start,
-      selectionEnd: marker.start + marker.dur,
+      selectionStart: selectedMarker.start,
+      selectionEnd: selectedMarker.start + selectedMarker.dur,
     });
   };
 
@@ -143,47 +138,40 @@ class MarkersContextMenu extends PureComponent<Props> {
   }
 
   copyMarkerJSON = () => {
-    const { selectedMarker, markers } = this.props;
+    const { selectedMarker } = this.props;
 
     if (selectedMarker === null) {
       return;
     }
 
-    copy(JSON.stringify(markers[selectedMarker], null, 2));
+    copy(JSON.stringify(selectedMarker, null, 2));
   };
 
   copyMarkerDescription = () => {
-    const { selectedMarker, markers } = this.props;
+    const { selectedMarker } = this.props;
 
     if (selectedMarker === null) {
       return;
     }
-    const marker = markers[selectedMarker];
-    copy(getMarkerFullDescription(marker));
+
+    copy(getMarkerFullDescription(selectedMarker));
   };
 
   copyMarkerCause = () => {
-    const { markers, selectedMarker } = this.props;
+    const { selectedMarker } = this.props;
 
-    if (selectedMarker === null) {
-      return;
-    }
-
-    const marker = markers[selectedMarker];
-    if (marker && marker.data && marker.data.cause) {
-      const stack = this._convertStackToString(marker.data.cause.stack);
+    if (selectedMarker && selectedMarker.data && selectedMarker.data.cause) {
+      const stack = this._convertStackToString(selectedMarker.data.cause.stack);
       copy(stack);
     }
   };
 
   render() {
-    const { markers, selectedMarker } = this.props;
+    const { selectedMarker } = this.props;
 
     if (selectedMarker === null) {
       return null;
     }
-
-    const marker = markers[selectedMarker];
 
     return (
       <ContextMenu id="MarkersContextMenu">
@@ -195,7 +183,7 @@ class MarkersContextMenu extends PureComponent<Props> {
         </MenuItem>
         <MenuItem
           onClick={this.setRangeByDuration}
-          disabled={this._isZeroDurationMarker(marker)}
+          disabled={this._isZeroDurationMarker(selectedMarker)}
         >
           Set selection from duration
         </MenuItem>
@@ -203,7 +191,7 @@ class MarkersContextMenu extends PureComponent<Props> {
         <MenuItem onClick={this.copyMarkerDescription}>
           Copy marker description
         </MenuItem>
-        {marker && marker.data && marker.data.cause ? (
+        {selectedMarker.data && selectedMarker.data.cause ? (
           <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
         ) : null}
       </ContextMenu>
@@ -213,12 +201,11 @@ class MarkersContextMenu extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    markers: selectedThreadSelectors.getPreviewFilteredMarkers(state),
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
     thread: selectedThreadSelectors.getThread(state),
     implementationFilter: getImplementationFilter(state),
-    selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
+    selectedMarker: selectedThreadSelectors.getSelectedMarker(state),
   }),
   mapDispatchToProps: { updatePreviewSelection },
   component: MarkersContextMenu,
