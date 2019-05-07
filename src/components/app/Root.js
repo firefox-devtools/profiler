@@ -235,6 +235,8 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
         // with multiple profiles. Only show the ZipFileViewer if the data loaded is a
         // Zip file, and there is no stored path into the zip file.
         return hasZipFile ? <ZipFileViewer /> : <ProfileViewer />;
+      case 'TRANSITIONING_FROM_STALE_PROFILE':
+        return null;
       case 'ROUTE_NOT_FOUND':
       default:
         // Assert with Flow that we've handled all the cases, as the only thing left
