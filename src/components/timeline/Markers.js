@@ -17,7 +17,7 @@ import { getSelectedThreadIndex } from '../../selectors/url-state';
 import './Markers.css';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
-import type { Marker } from '../../types/profile-derived';
+import type { Marker, MarkerIndex } from '../../types/profile-derived';
 import type { SizeProps } from '../shared/WithSize';
 import type { ConnectedProps } from '../../utils/connect';
 import type { ThreadIndex } from '../../types/profile';
@@ -58,7 +58,8 @@ export type OwnProps = {|
 
 export type StateProps = {|
   +additionalClassName?: ?string,
-  +markers: Marker[],
+  +getMarker: MarkerIndex => Marker,
+  +markerIndexes: MarkerIndex[],
   +isSelected: boolean,
   +isModifyingSelection: boolean,
   +testId: string,
@@ -108,7 +109,13 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     }
 
     const r = c.getBoundingClientRect();
-    const { width, rangeStart, rangeEnd, markers } = this.props;
+    const {
+      width,
+      rangeStart,
+      rangeEnd,
+      getMarker,
+      markerIndexes,
+    } = this.props;
     const x = e.pageX - r.left;
     const y = e.pageY - r.top;
     const rangeLength = rangeEnd - rangeStart;
@@ -119,8 +126,10 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     // there are multiple markers under the mouse, we want to find the one
     // with the highest array index. So we walk the list of markers
     // from high index to low index, which is front to back in z-order.
-    for (let i = markers.length - 1; i >= 0; i--) {
-      const { start, dur, name } = markers[i];
+    for (let i = markerIndexes.length - 1; i >= 0; i--) {
+      const markerIndex = markerIndexes[i];
+      const marker = getMarker(markerIndex);
+      const { start, dur, name } = marker;
       const duration = Math.max(dur, onePixelTime);
       if (time < start || time >= start + duration) {
         continue;
@@ -128,7 +137,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
       const markerStyle =
         name in markerStyles ? markerStyles[name] : markerStyles.default;
       if (y >= markerStyle.top && y < markerStyle.top + markerStyle.height) {
-        return markers[i];
+        return marker;
       }
     }
     return null;
@@ -254,7 +263,13 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
   }
 
   drawCanvas(c: HTMLCanvasElement) {
-    const { rangeStart, rangeEnd, width, markers } = this.props;
+    const {
+      rangeStart,
+      rangeEnd,
+      width,
+      getMarker,
+      markerIndexes,
+    } = this.props;
 
     const devicePixelRatio = c.ownerDocument
       ? c.ownerDocument.defaultView.devicePixelRatio
@@ -276,14 +291,15 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     ctx.scale(devicePixelRatio, devicePixelRatio);
 
     let previousPos = null;
-    markers.forEach(marker => {
+    for (const markerIndex of markerIndexes) {
+      const marker = getMarker(markerIndex);
       const { start, dur, name } = marker;
       let pos = ((start - rangeStart) / (rangeEnd - rangeStart)) * width;
       pos = Math.round(pos * devicePixelRatio) / devicePixelRatio;
 
       if (previousPos === pos && dur === 0) {
         // This position has already been drawn, let's move to the next marker!
-        return;
+        continue;
       }
       previousPos = pos;
       const itemWidth = Number.isFinite(dur)
@@ -336,11 +352,11 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
           );
         }
       }
-    });
+    }
     ctx.scale(1 / devicePixelRatio, 1 / devicePixelRatio);
   }
 
-  _getMarkerState(marker): MarkerState {
+  _getMarkerState(marker: Marker): MarkerState {
     const { hoveredItem, mouseDownItem } = this.state;
     if (mouseDownItem !== null) {
       if (marker === mouseDownItem && marker === hoveredItem) {
@@ -371,7 +387,8 @@ export const TimelineMarkersJank = explicitConnect<OwnProps, StateProps, {||}>({
     const selectedThread = getSelectedThreadIndex(state);
 
     return {
-      markers: selectors.getJankMarkersForHeader(state),
+      getMarker: selectors.getMarkerGetter(state),
+      markerIndexes: selectors.getJankMarkerIndexesForHeader(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersJank',
@@ -392,13 +409,16 @@ export const TimelineMarkersOverview = explicitConnect<
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
-    const markers = selectors.getCommittedRangeFilteredMarkersForHeader(state);
+    const markerIndexes = selectors.getCommittedRangeFilteredMarkerIndexesForHeader(
+      state
+    );
     return {
       additionalClassName:
         selectors.getThread(state).name === 'GeckoMain'
           ? 'timelineMarkersGeckoMain'
           : null,
-      markers,
+      getMarker: selectors.getMarkerGetter(state),
+      markerIndexes,
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersOverview',
@@ -421,7 +441,8 @@ export const TimelineMarkersFileIo = explicitConnect<
     const selectedThread = getSelectedThreadIndex(state);
 
     return {
-      markers: selectors.getFileIoMarkers(state),
+      getMarker: selectors.getMarkerGetter(state),
+      markerIndexes: selectors.getFileIoMarkerIndexes(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersFileIo',
@@ -444,7 +465,8 @@ export const TimelineMarkersMemory = explicitConnect<
     const selectedThread = getSelectedThreadIndex(state);
 
     return {
-      markers: selectors.getMemoryMarkers(state),
+      getMarker: selectors.getMarkerGetter(state),
+      markerIndexes: selectors.getMemoryMarkerIndexes(state),
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersMemory',

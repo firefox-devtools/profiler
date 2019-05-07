@@ -4,16 +4,19 @@
 
 // @flow
 import { createSelector } from 'reselect';
+import { stripIndent } from 'common-tags';
+
 import * as UrlState from '../url-state';
 import * as MarkerData from '../../profile-logic/marker-data';
 import * as MarkerTiming from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
 
+import type { RawMarkerTable } from '../../types/profile';
 import type {
-  RawMarkerTable,
-  IndexIntoRawMarkerTable,
-} from '../../types/profile';
-import type { Marker, MarkerTimingRows } from '../../types/profile-derived';
+  MarkerIndex,
+  Marker,
+  MarkerTimingRows,
+} from '../../types/profile-derived';
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
 import type { Milliseconds } from '../../types/units';
@@ -43,19 +46,24 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * omitted, but the ordered steps below give the general picture.
    *
    * 1. _getRawMarkerTable - Get the RawMarkerTable from the current thread.
-   * 2. getProcessedRawMarkerTable - Process marker payloads out of raw strings, and other
-   *                                 future processing needs. This returns a
+   * 2. getProcessedRawMarkerTable - Process marker payloads out of raw strings, and
+   *                                 other future processing needs. This returns a
    *                                 RawMarkerTable still.
-   * 3a. _getDerivedMarkers - Match up start/end markers, and start returning
-   *                          the Marker[] type.
-   * 3b. _getDerivedJankMarkers - Jank markers come from our samples data, and
-   *                              this selector returns Marker structures out of
-   *                              the samples structure.
-   * 4. getReferenceMarkerTable - Concatenates and sorts all markers coming from
-   *                              different origin structures.
-   * 5. getCommittedRangeFilteredMarkers - Apply the committed range.
-   * 6. getSearchFilteredMarkers - Apply the search string
-   * 7. getPreviewFilteredMarkers - Apply the preview range
+   * 3a. _getDerivedMarkers        - Match up start/end markers, and start
+   *                                 returning the Marker[] type.
+   * 3b. _getDerivedJankMarkers    - Jank markers come from our samples data, and
+   *                                 this selector returns Marker structures out of
+   *                                 the samples structure.
+   * 4. getFullMarkerList          - Concatenates and sorts all markers coming from
+   *                                 different origin structures.
+   * 5. getFullMarkerListIndexes   - From the full marker list, generates an array
+   *                                 containing the sequence of indexes for all markers.
+   * 5. getCommittedRangeFilteredMarkerIndexes - Apply the committed range.
+   * 6. getSearchFilteredMarkerIndexes         - Apply the search string
+   * 7. getPreviewFilteredMarkerIndexes        - Apply the preview range
+   *
+   * Selectors are commonly written using the utility filterMarkerIndexesCreator
+   * (see below for more information about this function).
    */
   const getProcessedRawMarkerTable: Selector<RawMarkerTable> = createSelector(
     _getRawMarkerTable,
@@ -80,12 +88,19 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerData.deriveMarkersFromRawMarkerTable
   );
 
+  /**
+   * This selector constructs jank markers from the responsiveness data.
+   */
   const _getDerivedJankMarkers: Selector<Marker[]> = createSelector(
     threadSelectors.getSamplesTable,
     samples => MarkerData.deriveJankMarkers(samples, 50)
   );
 
-  const getReferenceMarkerTable: Selector<Marker[]> = createSelector(
+  /**
+   * This selector returns the list of all markers, this is our reference list
+   * that MarkerIndex values refer to.
+   */
+  const getFullMarkerList: Selector<Marker[]> = createSelector(
     _getDerivedMarkers,
     _getDerivedJankMarkers,
     (derivedMarkers, derivedJankMarkers) =>
@@ -94,163 +109,312 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
       )
   );
 
-  const getCommittedRangeFilteredMarkers: Selector<Marker[]> = createSelector(
-    getReferenceMarkerTable,
-    ProfileSelectors.getCommittedRange,
-    (markers, range): Marker[] => {
-      const { start, end } = range;
-      return MarkerData.filterMarkersToRange(markers, start, end);
+  /**
+   * This selector returns a function that's used to retrieve a marker object
+   * from its MarkerIndex:
+   *
+   *   const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+   *   const marker = getMarker(markerIndex);
+   *
+   * This is essentially the same as using the full marker list, but it's more
+   * encapsulated and handles the case where a marker object isn't found (which
+   * means the marker index is incorrect).
+   */
+  const getMarkerGetter: Selector<(MarkerIndex) => Marker> = createSelector(
+    getFullMarkerList,
+    markerList => (markerIndex: MarkerIndex): Marker => {
+      const marker = markerList[markerIndex];
+      if (!marker) {
+        throw new Error(stripIndent`
+          Tried to get marker index ${markerIndex} but it's not in the full list.
+          This is a programming error.
+        `);
+      }
+      return marker;
     }
   );
 
-  const getCommittedRangeFilteredMarkersForHeader: Selector<
-    Marker[]
+  /**
+   * This returns the list of all marker indexes. This is simply a sequence
+   * built from the full marker list.
+   */
+  const getFullMarkerListIndexes: Selector<MarkerIndex[]> = createSelector(
+    getFullMarkerList,
+    markers => markers.map((_, i) => i)
+  );
+
+  /**
+   * This utility function makes it easy to write selectors that deal with list
+   * of marker indexes.
+   * It takes a filtering function as parameter. This filtering function takes a
+   * marker as parameter and returns a boolean deciding whether this marker
+   * should be kept.
+   * This function returns a function that does the actual filtering.
+   *
+   * It is typically used this way:
+   *  const filteredMarkerIndexes = createSelector(
+   *    getMarkerGetter,
+   *    getSourceMarkerIndexesSelector,
+   *    filterMarkerIndexesCreator(
+   *      marker => MarkerData.isNetworkMarker(marker)
+   *    )
+   *  );
+   */
+  const filterMarkerIndexesCreator = (filterFunc: Marker => boolean) => (
+    getMarker: MarkerIndex => Marker,
+    markerIndexes: MarkerIndex[]
+  ): MarkerIndex[] =>
+    MarkerData.filterMarkerIndexes(getMarker, markerIndexes, filterFunc);
+
+  /**
+   * This selector applies the committed range to the full list of markers.
+   */
+  const getCommittedRangeFilteredMarkerIndexes: Selector<
+    MarkerIndex[]
   > = createSelector(
-    getCommittedRangeFilteredMarkers,
-    (markers): Marker[] =>
-      markers.filter(
-        marker =>
-          marker.name !== 'BHR-detected hang' &&
-          marker.name !== 'LongTask' &&
-          marker.name !== 'LongIdleTask' &&
-          marker.name !== 'Jank' &&
-          !MarkerData.isNetworkMarker(marker) &&
-          !MarkerData.isFileIoMarker(marker) &&
-          !MarkerData.isNavigationMarker(marker) &&
-          !MarkerData.isMemoryMarker(marker)
-      )
+    getMarkerGetter,
+    getFullMarkerListIndexes,
+    ProfileSelectors.getCommittedRange,
+    (getMarker, markerIndexes, range): MarkerIndex[] => {
+      const { start, end } = range;
+      return MarkerData.filterMarkerIndexesToRange(
+        getMarker,
+        markerIndexes,
+        start,
+        end
+      );
+    }
   );
 
-  const getTimelineVerticalMarkers: Selector<Marker[]> = createSelector(
-    getCommittedRangeFilteredMarkers,
-    (markers): Marker[] => markers.filter(MarkerData.isNavigationMarker)
+  /**
+   * This selector filters out markers that are usually too long to be displayed
+   * in the header, because they would obscure the header, or that are displayed
+   * in other tracks already.
+   */
+  const getCommittedRangeFilteredMarkerIndexesForHeader: Selector<
+    MarkerIndex[]
+  > = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
+    filterMarkerIndexesCreator(
+      marker =>
+        marker.name !== 'BHR-detected hang' &&
+        marker.name !== 'LongTask' &&
+        marker.name !== 'LongIdleTask' &&
+        marker.name !== 'Jank' &&
+        !MarkerData.isNetworkMarker(marker) &&
+        !MarkerData.isFileIoMarker(marker) &&
+        !MarkerData.isNavigationMarker(marker) &&
+        !MarkerData.isMemoryMarker(marker)
+    )
   );
 
-  const getJankMarkersForHeader: Selector<Marker[]> = createSelector(
-    getCommittedRangeFilteredMarkers,
-    markers => markers.filter(marker => marker.name === 'Jank')
+  /**
+   * This selector selects only navigation markers.
+   */
+  const getTimelineVerticalMarkerIndexes: Selector<
+    MarkerIndex[]
+  > = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
+    filterMarkerIndexesCreator(MarkerData.isNavigationMarker)
   );
 
-  const getSearchFilteredMarkers: Selector<Marker[]> = createSelector(
-    getCommittedRangeFilteredMarkers,
+  /**
+   * This selector selects only jank markers.
+   */
+  const getJankMarkerIndexesForHeader: Selector<MarkerIndex[]> = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
+    filterMarkerIndexesCreator(marker => marker.name === 'Jank')
+  );
+
+  /**
+   * This selector filters markers matching a search string.
+   */
+  const getSearchFilteredMarkerIndexes: Selector<
+    MarkerIndex[]
+  > = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
     UrlState.getMarkersSearchString,
-    MarkerData.getSearchFilteredMarkers
+    MarkerData.getSearchFilteredMarkerIndexes
   );
 
-  const getPreviewFilteredMarkers: Selector<Marker[]> = createSelector(
-    getSearchFilteredMarkers,
+  /**
+   * This further filters markers using the preview selection range.
+   */
+  const getPreviewFilteredMarkerIndexes: Selector<
+    MarkerIndex[]
+  > = createSelector(
+    getMarkerGetter,
+    getSearchFilteredMarkerIndexes,
     ProfileSelectors.getPreviewSelection,
-    (markers, previewSelection) => {
+    (getMarker, markerIndexes, previewSelection) => {
       if (!previewSelection.hasSelection) {
-        return markers;
+        return markerIndexes;
       }
       const { selectionStart, selectionEnd } = previewSelection;
-      return MarkerData.filterMarkersToRange(
-        markers,
+      return MarkerData.filterMarkerIndexesToRange(
+        getMarker,
+        markerIndexes,
         selectionStart,
         selectionEnd
       );
     }
   );
 
+  /**
+   * This selector finds out whether there's any network marker in this thread.
+   */
   const getIsNetworkChartEmptyInFullRange: Selector<boolean> = createSelector(
-    getReferenceMarkerTable,
-    markers => markers.filter(MarkerData.isNetworkMarker).length === 0
+    getFullMarkerList,
+    markers => markers.every(marker => !MarkerData.isNetworkMarker(marker))
   );
 
-  const getNetworkChartMarkers: Selector<Marker[]> = createSelector(
-    getCommittedRangeFilteredMarkers,
-    markers => markers.filter(MarkerData.isNetworkMarker)
+  /**
+   * This selector filters network markers from the range filtered markers.
+   */
+  const getNetworkMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
+    filterMarkerIndexesCreator(MarkerData.isNetworkMarker)
   );
 
-  const getSearchFilteredNetworkChartMarkers: Selector<
-    Marker[]
+  /**
+   * This filters network markers using a search string.
+   */
+  const getSearchFilteredNetworkMarkerIndexes: Selector<
+    MarkerIndex[]
   > = createSelector(
-    getNetworkChartMarkers,
+    getMarkerGetter,
+    getNetworkMarkerIndexes,
     UrlState.getNetworkSearchString,
-    MarkerData.getSearchFilteredMarkers
+    MarkerData.getSearchFilteredMarkerIndexes
   );
 
+  /**
+   * Returns whether there's any marker besides network markers.
+   */
   const getIsMarkerChartEmptyInFullRange: Selector<boolean> = createSelector(
-    getReferenceMarkerTable,
-    markers => MarkerData.filterForMarkerChart(markers).length === 0
+    getFullMarkerList,
+    markers => markers.every(marker => MarkerData.isNetworkMarker(marker))
   );
 
-  const getMarkerChartMarkers: Selector<Marker[]> = createSelector(
-    getCommittedRangeFilteredMarkers,
+  /**
+   * This filters out network markers from the list of all markers, so that
+   * they'll be displayed in the marker chart.
+   */
+  const getMarkerChartMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
     MarkerData.filterForMarkerChart
   );
 
-  const getSearchFilteredMarkerChartMarkers: Selector<
-    Marker[]
+  /**
+   * This filters the previous result using a search string.
+   */
+  const getSearchFilteredMarkerChartMarkerIndexes: Selector<
+    MarkerIndex[]
   > = createSelector(
-    getMarkerChartMarkers,
+    getMarkerGetter,
+    getMarkerChartMarkerIndexes,
     UrlState.getMarkersSearchString,
-    MarkerData.getSearchFilteredMarkers
+    MarkerData.getSearchFilteredMarkerIndexes
   );
 
+  /**
+   * This organizes the result of the previous selector in rows to be nicely
+   * displayed in the marker chart.
+   */
   const getMarkerChartTiming: Selector<MarkerTimingRows> = createSelector(
-    getSearchFilteredMarkerChartMarkers,
+    getMarkerGetter,
+    getSearchFilteredMarkerChartMarkerIndexes,
     MarkerTiming.getMarkerTiming
   );
 
-  const getNetworkChartTiming: Selector<MarkerTimingRows> = createSelector(
-    getSearchFilteredNetworkChartMarkers,
-    MarkerTiming.getMarkerTiming
+  /**
+   * This returns only FileIO markers.
+   */
+  const getFileIoMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
+    filterMarkerIndexesCreator(MarkerData.isFileIoMarker)
   );
 
-  const getNetworkMarkers: Selector<Marker[]> = createSelector(
-    getCommittedRangeFilteredMarkers,
-    markers => markers.filter(MarkerData.isNetworkMarker)
+  /**
+   * This returns only memory markers.
+   */
+  const getMemoryMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
+    filterMarkerIndexesCreator(MarkerData.isMemoryMarker)
   );
 
-  const getFileIoMarkers: Selector<Marker[]> = createSelector(
-    getCommittedRangeFilteredMarkers,
-    markers => markers.filter(MarkerData.isFileIoMarker)
-  );
-
-  const getMemoryMarkers: Selector<Marker[]> = createSelector(
-    getCommittedRangeFilteredMarkers,
-    markers => markers.filter(MarkerData.isMemoryMarker)
-  );
-
+  /**
+   * This organizes the network markers in rows so that they're nicely displayed
+   * in the header.
+   */
   const getNetworkTrackTiming: Selector<MarkerTimingRows> = createSelector(
-    getNetworkMarkers,
+    getMarkerGetter,
+    getNetworkMarkerIndexes,
     MarkerTiming.getMarkerTiming
   );
 
+  /**
+   * This groups screenshot markers by their window ID.
+   */
   const getRangeFilteredScreenshotsById: Selector<
     Map<string, Marker[]>
   > = createSelector(
-    getCommittedRangeFilteredMarkers,
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
     MarkerData.groupScreenshotsById
   );
 
-  const getSelectedMarkerIndex: Selector<IndexIntoRawMarkerTable | null> = state =>
+  /**
+   * This returns the marker index for the currently selected marker.
+   */
+  const getSelectedMarkerIndex: Selector<MarkerIndex | null> = state =>
     threadSelectors.getViewOptions(state).selectedMarker;
 
+  /**
+   * From the previous value, this returns the full marker object for the
+   * selected marker.
+   */
+  const getSelectedMarker: Selector<Marker | null> = state => {
+    const getMarker = getMarkerGetter(state);
+    const selectedMarkerIndex = getSelectedMarkerIndex(state);
+
+    if (selectedMarkerIndex === null) {
+      return null;
+    }
+
+    return getMarker(selectedMarkerIndex);
+  };
+
   return {
-    getJankMarkersForHeader,
+    getMarkerGetter,
+    getJankMarkerIndexesForHeader,
     getProcessedRawMarkerTable,
-    getReferenceMarkerTable,
-    getNetworkChartMarkers,
-    getSearchFilteredNetworkChartMarkers,
+    getFullMarkerListIndexes,
+    getNetworkMarkerIndexes,
+    getSearchFilteredNetworkMarkerIndexes,
     getIsMarkerChartEmptyInFullRange,
-    getMarkerChartMarkers,
-    getSearchFilteredMarkerChartMarkers,
+    getMarkerChartMarkerIndexes,
+    getSearchFilteredMarkerChartMarkerIndexes,
     getMarkerChartTiming,
-    getNetworkChartTiming,
-    getCommittedRangeFilteredMarkers,
-    getCommittedRangeFilteredMarkersForHeader,
-    getTimelineVerticalMarkers,
-    getFileIoMarkers,
-    getMemoryMarkers,
-    getNetworkMarkers,
+    getCommittedRangeFilteredMarkerIndexes,
+    getCommittedRangeFilteredMarkerIndexesForHeader,
+    getTimelineVerticalMarkerIndexes,
+    getFileIoMarkerIndexes,
+    getMemoryMarkerIndexes,
     getNetworkTrackTiming,
     getRangeFilteredScreenshotsById,
-    getSearchFilteredMarkers,
-    getPreviewFilteredMarkers,
+    getSearchFilteredMarkerIndexes,
+    getPreviewFilteredMarkerIndexes,
     getSelectedMarkerIndex,
+    getSelectedMarker,
     getIsNetworkChartEmptyInFullRange,
   };
 }

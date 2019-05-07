@@ -62,11 +62,11 @@ describe('VerticalIndicators', function() {
 
   it('creates the vertical indicators', function() {
     const { getIndicatorLines, getState } = setup();
-    const markers = selectedThreadSelectors.getTimelineVerticalMarkers(
+    const markerIndexes = selectedThreadSelectors.getTimelineVerticalMarkerIndexes(
       getState()
     );
     const markerCount = 5;
-    expect(markers).toHaveLength(markerCount);
+    expect(markerIndexes).toHaveLength(markerCount);
     expect(getIndicatorLines()).toHaveLength(markerCount);
   });
 

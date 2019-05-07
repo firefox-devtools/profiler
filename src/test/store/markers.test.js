@@ -206,16 +206,17 @@ describe('getProcessedRawMarkerTable', function() {
 describe('getTimelineVerticalMarkers', function() {
   it('gets the appropriate markers', function() {
     const { getState } = storeWithProfile(getNetworkTrackProfile());
-    const markers = selectedThreadSelectors.getTimelineVerticalMarkers(
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const markerIndexes = selectedThreadSelectors.getTimelineVerticalMarkerIndexes(
       getState()
     );
-    const allMarkers = selectedThreadSelectors.getReferenceMarkerTable(
+    const allMarkers = selectedThreadSelectors.getFullMarkerListIndexes(
       getState()
     );
 
-    expect(allMarkers.length).toBeGreaterThan(markers.length);
-    expect(markers).toHaveLength(5);
-    expect(markers).toMatchSnapshot();
+    expect(allMarkers.length).toBeGreaterThan(markerIndexes.length);
+    expect(markerIndexes).toHaveLength(5);
+    expect(markerIndexes.map(getMarker)).toMatchSnapshot();
   });
 });
 
@@ -261,20 +262,23 @@ describe('memory markers', function() {
 
   it('can get memory markers using getMemoryMarkers', function() {
     const { getState } = setup();
-    const markers = selectedThreadSelectors.getMemoryMarkers(getState());
-    expect(markers.map(marker => marker.name)).toEqual([
-      'IdleForgetSkippable',
-      'GCMinor',
-      'GCMajor',
-      'GCSlice',
-    ]);
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const markerIndexes = selectedThreadSelectors.getMemoryMarkerIndexes(
+      getState()
+    );
+    expect(
+      markerIndexes.map(markerIndex => getMarker(markerIndex).name)
+    ).toEqual(['IdleForgetSkippable', 'GCMinor', 'GCMajor', 'GCSlice']);
   });
 
   it('ignores memory markers in getCommittedRangeFilteredMarkersForHeader', function() {
     const { getState } = setup();
-    const markers = selectedThreadSelectors.getCommittedRangeFilteredMarkersForHeader(
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const markerIndexes = selectedThreadSelectors.getCommittedRangeFilteredMarkerIndexesForHeader(
       getState()
     );
-    expect(markers.map(marker => marker.name)).toEqual(['A', 'B', 'C']);
+    expect(
+      markerIndexes.map(markerIndex => getMarker(markerIndex).name)
+    ).toEqual(['A', 'B', 'C']);
   });
 });

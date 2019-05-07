@@ -24,7 +24,7 @@ import type { ThreadIndex } from '../../types/profile';
 import type {
   Marker,
   MarkerTimingRows,
-  IndexIntoMarkerTiming,
+  MarkerIndex,
 } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
@@ -43,7 +43,7 @@ type OwnProps = {|
   +rangeEnd: Milliseconds,
   +markerTimingRows: MarkerTimingRows,
   +rowHeight: CssPixels,
-  +markers: Marker[],
+  +getMarker: MarkerIndex => Marker,
   +threadIndex: ThreadIndex,
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection
@@ -72,7 +72,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoMarkerTiming | null
+    hoveredItem: MarkerIndex | null
   ) => {
     const {
       rowHeight,
@@ -148,7 +148,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
   drawMarkers(
     ctx: CanvasRenderingContext2D,
-    hoveredItem: IndexIntoMarkerTiming | null,
+    hoveredItem: MarkerIndex | null,
     startRow: number,
     endRow: number
   ) {
@@ -302,7 +302,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     }
   }
 
-  hitTest = (x: CssPixels, y: CssPixels): IndexIntoMarkerTiming | null => {
+  hitTest = (x: CssPixels, y: CssPixels): MarkerIndex | null => {
     const {
       rangeStart,
       rangeEnd,
@@ -345,12 +345,12 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     return null;
   };
 
-  onDoubleClickMarker = (markerIndex: IndexIntoMarkerTiming | null) => {
+  onDoubleClickMarker = (markerIndex: MarkerIndex | null) => {
     if (markerIndex === null) {
       return;
     }
-    const { markers, updatePreviewSelection } = this.props;
-    const marker = markers[markerIndex];
+    const { getMarker, updatePreviewSelection } = this.props;
+    const marker = getMarker(markerIndex);
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
@@ -375,8 +375,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     ctx.fillRect(x + c, bottom - c, width - 2 * c, c);
   }
 
-  getHoveredMarkerInfo = (hoveredItem: IndexIntoMarkerTiming): React.Node => {
-    const marker = this.props.markers[hoveredItem];
+  getHoveredMarkerInfo = (markerIndex: MarkerIndex): React.Node => {
+    const marker = this.props.getMarker(markerIndex);
     return (
       <TooltipMarker marker={marker} threadIndex={this.props.threadIndex} />
     );
