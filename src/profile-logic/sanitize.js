@@ -17,6 +17,14 @@ import {
 import { filterThreadSamplesToRange } from './profile-data';
 import type { Profile, Thread, ThreadIndex } from '../types/profile';
 import type { RemoveProfileInformation } from '../types/profile-derived';
+import type { StartEndRange } from '../types/units';
+
+export type SanitizeProfileResult = {|
+  +profile: Profile,
+  +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+  +committedRanges: StartEndRange[] | null,
+  +isSanitized: boolean,
+|};
 
 /**
  * Take a processed profile with PII that user wants to be removed and remove the
@@ -25,10 +33,23 @@ import type { RemoveProfileInformation } from '../types/profile-derived';
  */
 export function sanitizePII(
   profile: Profile,
-  PIIToBeRemoved: RemoveProfileInformation
-): Profile {
+  maybePIIToBeRemoved: RemoveProfileInformation | null
+): SanitizeProfileResult {
+  if (maybePIIToBeRemoved === null) {
+    // Nothing is sanitized.
+    return {
+      profile,
+      isSanitized: false,
+      oldThreadIndexToNew: null,
+      committedRanges: null,
+    };
+  }
+  // Flow mistakenly thinks that PIIToBeRemoved could be null in the reduce functions
+  // below, so instead re-bind it here.
+  const PIIToBeRemoved = maybePIIToBeRemoved;
   let urlCounter = 0;
-  const oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex | null> = new Map();
+  const oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> = new Map();
+
   let pages;
   if (profile.pages) {
     if (PIIToBeRemoved.shouldRemoveUrls) {
@@ -61,7 +82,6 @@ export function sanitizePII(
       );
 
       if (newThread === null) {
-        oldThreadIndexToNew.set(threadIndex, null);
         // Filtering out the current thread if it's null.
         return acc;
       }
@@ -77,7 +97,7 @@ export function sanitizePII(
           const newThreadIndex = oldThreadIndexToNew.get(
             counter.mainThreadIndex
           );
-          if (newThreadIndex === undefined || newThreadIndex === null) {
+          if (newThreadIndex === undefined) {
             // Filtering out the current counter.
             return acc;
           }
@@ -89,7 +109,19 @@ export function sanitizePII(
       : undefined,
   };
 
-  return newProfile;
+  return {
+    profile: newProfile,
+    // Note that the profile was sanitized.
+    isSanitized: true,
+    // Provide a new empty committed range if needed.
+    committedRanges: PIIToBeRemoved.shouldFilterToCommittedRange ? [] : null,
+    // Only return the oldThreadIndexToNew if some threads are being removed. This
+    // allows the UrlState to be dynamically updated.
+    oldThreadIndexToNew:
+      oldThreadIndexToNew.size === profile.threads.length
+        ? null
+        : oldThreadIndexToNew,
+  };
 }
 
 /**
