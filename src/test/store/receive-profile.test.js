@@ -209,12 +209,12 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    it('will hide content threads with no RefreshDriverTick markers', function() {
+    it('will hide idle content threads with no RefreshDriverTick markers', function() {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
+        `A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]`,
         `work  work  work  work  work  work  work`,
-        `work  work  work  work  work  work  work`,
-        `work  work  work  work  work  work  work`
+        `C[cat:Idle]  C[cat:Idle]  C[cat:Idle]  C[cat:Idle]  C[cat:Idle]`
       );
 
       profile.threads.forEach((thread, threadIndex) => {
@@ -236,6 +236,36 @@ describe('actions/receive-profile', function() {
         'hide [thread GeckoMain tab]',
         'show [thread GeckoMain tab] SELECTED',
         'hide [thread GeckoMain tab]',
+      ]);
+    });
+
+    it('will not hide non-idle content threads with no RefreshDriverTick markers', function() {
+      const store = blankStore();
+      const { profile } = getProfileFromTextSamples(
+        `work  work  work  work  work  work  work`,
+        `work  work  work  work  work  work  work`,
+        `C[cat:Idle]  C[cat:Idle]  C[cat:Idle]  work  work`
+      );
+
+      profile.threads.forEach((thread, threadIndex) => {
+        thread.name = 'GeckoMain';
+        thread.processType = 'tab';
+        thread.pid = threadIndex;
+      });
+
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+        [
+          'RefreshDriverTick',
+          0,
+          { type: 'tracing', category: 'Paint', interval: 'start' },
+        ],
+      ]);
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread GeckoMain tab] SELECTED',
+        'show [thread GeckoMain tab]',
+        'show [thread GeckoMain tab]',
       ]);
     });
   });
