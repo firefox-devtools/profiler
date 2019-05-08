@@ -996,7 +996,10 @@ const FUNC_MATCHES = {
     return !isProbablyJitCode;
   },
   js: (thread: Thread, funcIndex: IndexIntoFuncTable): boolean => {
-    return thread.funcTable.isJS[funcIndex];
+    return (
+      thread.funcTable.isJS[funcIndex] ||
+      thread.funcTable.relevantForJS[funcIndex]
+    );
   },
 };
 
