@@ -121,8 +121,8 @@ describe('actions/receive-profile', function() {
 
     function getProfileWithIdleAndWorkThread() {
       const { profile } = getProfileFromTextSamples(
-        'idle idle idle idle idle idle idle',
-        'work work work work work work work'
+        `A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]`,
+        `work  work  work  work  work  work  work`
       );
 
       const [idleThread, workThread] = profile.threads;
@@ -212,9 +212,9 @@ describe('actions/receive-profile', function() {
     it('will hide content threads with no RefreshDriverTick markers', function() {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
-        'work work work work work work work',
-        'work work work work work work work',
-        'work work work work work gswork work'
+        `work  work  work  work  work  work  work`,
+        `work  work  work  work  work  work  work`,
+        `work  work  work  work  work  work  work`
       );
 
       profile.threads.forEach((thread, threadIndex) => {
