@@ -11,20 +11,7 @@ import * as icons from './icons';
 import * as publish from './publish';
 import * as zippedProfiles from './zipped-profiles';
 
-// Normally we don't need that type because flow can infer types, but on that
-// object, it gives weird flow errors that say missing type annotation for X.
-// Only adding a type like that seems to solve it.
-type Selectors = {
-  app: typeof app,
-  profile: typeof profile,
-  urlState: typeof urlState,
-  icons: typeof icons,
-  publish: typeof publish,
-  zippedProfiles: typeof zippedProfiles,
-  selectedThread: typeof selectedThread,
-};
-
-export default ({
+const allSelectors = {
   app,
   profile,
   urlState,
@@ -32,4 +19,7 @@ export default ({
   publish,
   zippedProfiles,
   selectedThread,
-}: Selectors);
+};
+
+// Flow requires that all exported object is explicitely typed.
+export default (allSelectors: typeof allSelectors);
