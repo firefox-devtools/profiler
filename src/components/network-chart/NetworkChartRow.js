@@ -85,6 +85,7 @@ type State = {|
 export type NetworkChartRowBarProps = {
   +marker: Marker,
   +markerWidth: CssPixels,
+  +startPosition: CssPixels,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload,
@@ -93,7 +94,7 @@ export type NetworkChartRowBarProps = {
 // This component splits a network marker duration in different phases,
 // and renders each phase as a differently colored bar.
 const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
-  const { marker, networkPayload, markerWidth } = props;
+  const { marker, networkPayload, markerWidth, startPosition } = props;
   const { start, dur } = marker;
 
   const barPhases = [];
@@ -134,7 +135,10 @@ const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
   });
 
   return (
-    <>
+    <div
+      className="networkChartRowItemBar"
+      style={{ width: markerWidth, left: startPosition }}
+    >
       {barPhases.map(({ name, previousName, value, duration, ...style }) => (
         // Specifying data attributes makes it easier to debug.
         <div
@@ -148,7 +152,7 @@ const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
           )} milliseconds`}
         />
       ))}
-    </>
+    </div>
   );
 };
 
@@ -276,16 +280,12 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
         <div className="networkChartRowItemLabel">
           {this._splitsURI(marker.name)}
         </div>
-        <div
-          className="networkChartRowItemBar"
-          style={{ width: markerWidth, left: startPosition }}
-        >
-          <NetworkChartRowBar
-            marker={marker}
-            networkPayload={networkPayload}
-            markerWidth={markerWidth}
-          />
-        </div>
+        <NetworkChartRowBar
+          marker={marker}
+          networkPayload={networkPayload}
+          startPosition={startPosition}
+          markerWidth={markerWidth}
+        />
         {this.state.hovered ? (
           // This magic value "5" avoids the tooltip of being too close of the
           // row, especially when we mouseEnter the row from the top edge.
