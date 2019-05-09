@@ -25,7 +25,7 @@
     "postcheckout": "node bin/post-checkout.js",
     "postmerge": "node bin/post-merge.js",
     "preinstall": "node bin/pre-install.js",
-    "prepush": "yarn test-all && test-alex",
+    "prepush": "yarn test-all && yarn test-alex",
     "postrewrite": "node bin/post-rewrite.js",
     "publish": "rimraf public_html && cp -r dist public_html",
     "serve-static": "ws -d dist/ -s index.html -p 4242",

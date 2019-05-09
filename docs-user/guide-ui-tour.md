@@ -22,7 +22,7 @@ Clicking and dragging in the timeline creates a new range selection. The selecti
 
 ## The committed range selections
 
-![A screenshot highlighting the commit ranges int he top toolbar](images/ui-tour-ranges.jpg)
+![A screenshot highlighting the commit ranges in the top toolbar](images/ui-tour-ranges.jpg)
 
 Committing a range selection by clicking the zoom button is a useful way to zoom in on a useful selection. It can be helpful to commit several ranges to hone in on specific parts of a profile.
 
@@ -32,7 +32,7 @@ Committing a range selection by clicking the zoom button is a useful way to zoom
 
 Each thread in the timeline contains a thread stack graph. The X axis represents time, and the Y axis represents the height of the stack. It's important to realize that the height does not correlate with the amount of work that was being done. It only represents the arbitrary height of the stack at the time. It can be used as a useful way to get oriented with what was executing at the time.
 
-Clicking on the thread stack graph will select that stack and update the panel below (if the panel uses the currently selected stack). For instance, in the call tree, it will open up the tree to find the stack. The selected stack will be colored a darker blue in the list. This is another useful way to correlate stacks with when they were executed over time.
+Clicking on the thread stack graph will select that stack and update the panel below (if the panel uses the currently selected stack). For instance, in the call tree, it will open up the tree to find the stack. The selected stack will be darker blue in the list. This is another useful way to correlate stacks with when they were executed over time.
 
 [Stacks and samples can be filtered out ](./guide-filtering-call-trees.md) through various operations. When this happens, the thread stack graph will be empty at that spot. When the thread didn't have samples at all for an area (for instance the thread hadn't yet started up), then it should have an indicator as to the reason why there are no samples.
 
@@ -44,7 +44,7 @@ Markers are displayed in the timeline and can be useful to correlate events with
 
 Perhaps one of the most useful markers is the responsiveness marker—pictured here in red. This is collected when events are taking a long time to run inside of Firefox. Clicking on one of these will quickly hone in on potential problem areas and can indicate jank.
 
-Only certain markers are broken out and colored in the timeline. A similar but more detailed view can be seen in the Marker Chart panel.
+Only certain markers are broken out and highlighted in the timeline. A similar but more detailed view can be seen in the Marker Chart panel.
 
 ## Sharing profiles
 
