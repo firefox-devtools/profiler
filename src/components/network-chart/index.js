@@ -5,10 +5,6 @@
 // @flow
 import { oneLine } from 'common-tags';
 import * as React from 'react';
-import {
-  TIMELINE_MARGIN_LEFT,
-  TIMELINE_MARGIN_RIGHT,
-} from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
 import NetworkSettings from '../shared/NetworkSettings';
 import VirtualList from '../shared/VirtualList';
@@ -27,7 +23,7 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 import type { SizeProps } from '../shared/WithSize';
 import type { NetworkPayload } from '../../types/markers';
 import type { Marker, MarkerIndex } from '../../types/profile-derived';
-import type { Milliseconds, CssPixels, StartEndRange } from '../../types/units';
+import type { StartEndRange } from '../../types/units';
 import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');
@@ -64,26 +60,8 @@ class NetworkChart extends React.PureComponent<Props> {
     // Not implemented.
   };
 
-  /**
-   * Convert the time for a network marker into the CssPixels to be used on the screen.
-   * This function takes into account the range used, as well as the container sizing
-   * as passed in by the WithSize component.
-   */
-  _timeToCssPixels(time: Milliseconds): CssPixels {
-    const { timeRange, width } = this.props;
-    const timeRangeTotal = timeRange.end - timeRange.start;
-    const innerContainerWidth =
-      width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
-
-    const markerPosition =
-      ((time - timeRange.start) / timeRangeTotal) * innerContainerWidth +
-      TIMELINE_MARGIN_LEFT;
-
-    return markerPosition;
-  }
-
   _renderRow = (markerIndex: MarkerIndex, index: number): React.Node => {
-    const { threadIndex, getMarker } = this.props;
+    const { threadIndex, getMarker, timeRange, width } = this.props;
     const marker = getMarker(markerIndex);
 
     // Since our type definition for Marker can't refine to just Network
@@ -97,15 +75,6 @@ class NetworkChart extends React.PureComponent<Props> {
         `
       );
     }
-    // Compute the positioning of the network markers.
-    const startPosition = this._timeToCssPixels(marker.start);
-    const endPosition = this._timeToCssPixels(marker.start + marker.dur);
-
-    // Set min-width for marker bar.
-    let markerWidth = endPosition - startPosition;
-    if (markerWidth < 1) {
-      markerWidth = 2.5;
-    }
 
     return (
       <NetworkChartRow
@@ -113,8 +82,8 @@ class NetworkChart extends React.PureComponent<Props> {
         marker={marker}
         networkPayload={networkPayload}
         threadIndex={threadIndex}
-        startPosition={startPosition}
-        markerWidth={markerWidth}
+        timeRange={timeRange}
+        width={width}
       />
     );
   };

@@ -14,8 +14,12 @@ import {
   getColorClassNameForMimeType,
 } from '../../profile-logic/marker-data';
 import { formatNumber } from '../../utils/format-numbers';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
 
-import type { CssPixels } from '../../types/units';
+import type { CssPixels, Milliseconds, StartEndRange } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
 import type { Marker } from '../../types/profile-derived';
 import type { NetworkPayload } from '../../types/markers';
@@ -71,8 +75,8 @@ type NetworkChartRowProps = {
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload,
-  +markerWidth: CssPixels,
-  +startPosition: CssPixels,
+  +timeRange: StartEndRange,
+  +width: CssPixels,
   +threadIndex: ThreadIndex,
 };
 
@@ -84,8 +88,8 @@ type State = {|
 
 export type NetworkChartRowBarProps = {
   +marker: Marker,
-  +markerWidth: CssPixels,
-  +startPosition: CssPixels,
+  +width: CssPixels,
+  +timeRange: StartEndRange,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload,
@@ -93,68 +97,102 @@ export type NetworkChartRowBarProps = {
 
 // This component splits a network marker duration in different phases,
 // and renders each phase as a differently colored bar.
-const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
-  const { marker, networkPayload, markerWidth, startPosition } = props;
-  const { start, dur } = marker;
+class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
+  /**
+   * Convert the time for a network marker into the CssPixels to be used on the screen.
+   * This function takes into account the range used, as well as the container sizing
+   * as passed in by the WithSize component.
+   */
+  _timeToCssPixels(time: Milliseconds): CssPixels {
+    const { timeRange, width } = this.props;
+    const timeRangeTotal = timeRange.end - timeRange.start;
+    const innerContainerWidth =
+      width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
 
-  const barPhases = [];
-  let previousValue = start;
-  let previousName = 'startTime';
+    const markerPosition =
+      ((time - timeRange.start) / timeRangeTotal) * innerContainerWidth +
+      TIMELINE_MARGIN_LEFT;
 
-  // In this loop we add the various phases to the array.
-  PROPERTIES_IN_ORDER.filter(
-    property => typeof networkPayload[property] === 'number'
-  ).forEach((property, i) => {
-    // We force-coerce the value into a number just to appease Flow. Indeed the
-    // previous filter ensures that all values are numbers but Flow can't know
-    // that.
-    const value = +networkPayload[property];
+    return markerPosition;
+  }
+
+  render() {
+    const {
+      marker: { start, dur },
+      networkPayload,
+    } = this.props;
+
+    // Compute the positioning of this network marker.
+    const startPosition = this._timeToCssPixels(start);
+    const endPosition = this._timeToCssPixels(start + dur);
+
+    // Set min-width for marker bar.
+    let markerWidth = endPosition - startPosition;
+    if (markerWidth < 1) {
+      markerWidth = 2.5;
+    }
+
+    // Compute the phases for this marker.
+    const barPhases = [];
+    let previousValue = start;
+    let previousName = 'startTime';
+
+    // In this loop we add the various phases to the array.
+    // Not all properties are always present.
+    PROPERTIES_IN_ORDER.filter(
+      property => typeof networkPayload[property] === 'number'
+    ).forEach((property, i) => {
+      // We force-coerce the value into a number just to appease Flow. Indeed the
+      // previous filter ensures that all values are numbers but Flow can't know
+      // that.
+      const value = +networkPayload[property];
+      barPhases.push({
+        left: ((previousValue - start) / dur) * markerWidth,
+        width: Math.max(((value - previousValue) / dur) * markerWidth, 1),
+        opacity: i === 0 ? 0 : PHASE_OPACITIES[property],
+        name: property,
+        previousName,
+        value,
+        duration: value - previousValue,
+      });
+      previousValue = value;
+      previousName = property;
+    });
+
+    // The last part isn't generally colored (opacity is 0) unless it's the only
+    // one, and in that case it covers the whole duration.
     barPhases.push({
       left: ((previousValue - start) / dur) * markerWidth,
-      width: Math.max(((value - previousValue) / dur) * markerWidth, 1),
-      opacity: i === 0 ? 0 : PHASE_OPACITIES[property],
-      name: property,
+      width: ((start + dur - previousValue) / dur) * markerWidth,
+      opacity: barPhases.length ? 0 : 1,
+      name: 'endTime',
       previousName,
-      value,
-      duration: value - previousValue,
+      value: start + dur,
+      duration: start + dur - previousValue,
     });
-    previousValue = value;
-    previousName = property;
-  });
 
-  // The last part isn't generally colored (opacity is 0) unless it's the only
-  // one, and in that case it covers the whole duration.
-  barPhases.push({
-    left: ((previousValue - start) / dur) * markerWidth,
-    width: ((start + dur - previousValue) / dur) * markerWidth,
-    opacity: barPhases.length ? 0 : 1,
-    name: 'endTime',
-    previousName,
-    value: start + dur,
-    duration: start + dur - previousValue,
-  });
-
-  return (
-    <div
-      className="networkChartRowItemBar"
-      style={{ width: markerWidth, left: startPosition }}
-    >
-      {barPhases.map(({ name, previousName, value, duration, ...style }) => (
-        // Specifying data attributes makes it easier to debug.
-        <div
-          className="networkChartRowItemBarPhase"
-          key={name}
-          data-name={name}
-          data-value={value}
-          style={style}
-          aria-label={`${previousName} to ${name}: ${formatNumber(
-            duration
-          )} milliseconds`}
-        />
-      ))}
-    </div>
-  );
-};
+    return (
+      <div
+        className="networkChartRowItemBar"
+        style={{ width: markerWidth, left: startPosition }}
+      >
+        {barPhases.map(({ name, previousName, value, duration, ...style }) => (
+          // Specifying data attributes makes it easier to debug.
+          <div
+            className="networkChartRowItemBarPhase"
+            key={name}
+            data-name={name}
+            data-value={value}
+            style={style}
+            aria-label={`${previousName} to ${name}: ${formatNumber(
+              duration
+            )} milliseconds`}
+          />
+        ))}
+      </div>
+    );
+  }
+}
 
 class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   state = {
@@ -253,13 +291,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   }
 
   render() {
-    const {
-      index,
-      marker,
-      markerWidth,
-      startPosition,
-      networkPayload,
-    } = this.props;
+    const { index, marker, networkPayload, width, timeRange } = this.props;
 
     if (networkPayload === null) {
       return null;
@@ -283,8 +315,8 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
         <NetworkChartRowBar
           marker={marker}
           networkPayload={networkPayload}
-          startPosition={startPosition}
-          markerWidth={markerWidth}
+          width={width}
+          timeRange={timeRange}
         />
         {this.state.hovered ? (
           // This magic value "5" avoids the tooltip of being too close of the
