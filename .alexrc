@@ -1,4 +1,4 @@
 {
-    "allow": ["reject", "faith", "husky", "special", "execution", "executed", "execute", "fire", "primitive", "crash", "hosts", "host", "reject", "remain", "bigger", "colors", "color", "white", "harder", "periods", "dive", "primitive", "disabled"],
-    "profanitySureness": 0
+    "allow": ["reject", "faith", "husky", "special", "execution", "executed", "execute", "fire", "crash", "hosts", "host", "reject", "remain", "bigger", "colors", "color", "white", "harder", "periods", "dive", "primitive", "disabled"],
+    "profanitySureness": 2 
 }
