@@ -47,10 +47,9 @@ type StateProps = {|
   +threadIndex: number,
 |};
 
-type Props = {|
-  ...SizeProps,
-  ...ConnectedProps<{||}, StateProps, DispatchProps>,
-|};
+type OwnProps = {| ...SizeProps |};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class NetworkChart extends React.PureComponent<Props> {
   // This isn't used at the moment, but we need a fixed instance so that a
@@ -165,20 +164,24 @@ class NetworkChart extends React.PureComponent<Props> {
  * Wrap the component in the WithSize higher order component, as well as the redux
  * connected component.
  */
-export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    return {
-      markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
-        state
-      ),
-      getMarker: selectedThreadSelectors.getMarkerGetter(state),
-      timeRange: getPreviewSelectionRange(state),
-      disableOverscan: getPreviewSelection(state).isModifying,
-      threadIndex: getSelectedThreadIndex(state),
-    };
-  },
-  component: withSize<Props>(NetworkChart),
-});
+const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
+  {
+    mapStateToProps: state => {
+      return {
+        markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+          state
+        ),
+        getMarker: selectedThreadSelectors.getMarkerGetter(state),
+        timeRange: getPreviewSelectionRange(state),
+        disableOverscan: getPreviewSelection(state).isModifying,
+        threadIndex: getSelectedThreadIndex(state),
+      };
+    },
+    component: NetworkChart,
+  }
+);
+
+export default withSize<OwnProps>(ConnectedComponent);
 
 /**
  * Our definition of markers does not currently have the ability to refine
