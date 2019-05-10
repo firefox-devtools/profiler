@@ -76,19 +76,26 @@ function _markerDetailBytesNullable(label: string, value: ?number): * {
   );
 }
 
-const ALL_NETWORK_PROPERTIES_IN_ORDER = [
-  'startTime',
+const PRECONNECT_PROPERTIES_IN_ORDER = [
   'domainLookupStart',
   'domainLookupEnd',
   'connectStart',
   'tcpConnectEnd',
   'secureConnectionStart',
   'connectEnd',
+];
+
+const ALL_NETWORK_PROPERTIES_IN_ORDER = [
+  'startTime',
+  ...PRECONNECT_PROPERTIES_IN_ORDER,
   'requestStart',
   'responseStart',
   'responseEnd',
   'endTime',
 ];
+
+const REQUEST_PROPERTIES_IN_ORDER = ALL_NETWORK_PROPERTIES_IN_ORDER.slice();
+REQUEST_PROPERTIES_IN_ORDER.splice(1, PRECONNECT_PROPERTIES_IN_ORDER.length);
 
 /* The labels are for the duration between _this_ label and the next label. */
 const PROPERTIES_HUMAN_LABELS = {
@@ -118,6 +125,16 @@ const NETWORK_PROPERTY_OPACITIES = {
   responseEnd: 0,
   endTime: 0,
 };
+
+// When the DNS request and the connection happen in a preconnect phase, the
+// timestamps for these properties will happen before `startTime`.
+// These properties represent respectively two possible ends of a preconnect
+// session. They're specified in their reverse order because we'll want to find
+// the latest one first.
+// It could theorically happen that a preconnect session starts before
+// `startTime` but ends after `startTime`; in that case we'll still draw only
+// one diagram.
+const PRECONNECT_END_PROPERTIES = ['connectEnd', 'domainLookupEnd'];
 
 type NetworkPhaseProps = {|
   +propertyName: string,
@@ -165,19 +182,116 @@ class NetworkPhase extends React.PureComponent<NetworkPhaseProps> {
 
 type Props = {|
   +payload: NetworkPayload,
+  +zeroAt: Milliseconds,
 |};
 
 export class TooltipNetworkMarker extends React.PureComponent<Props> {
-  _getPhases(markerColorClass: string): React.Node {
+  _getPhasesForProperties(
+    properties: string[],
+    sectionDuration: Milliseconds,
+    startTime: Milliseconds
+  ): Array<React.Element<typeof NetworkPhase>> | null {
+    if (properties.length < 2) {
+      console.error(
+        'Only 1 preconnect property has been found, this should not happen.'
+      );
+      return null;
+    }
+
+    const { payload } = this.props;
+    const phases = [];
+
+    for (let i = 1; i < properties.length; i++) {
+      const thisProperty = properties[i];
+      const previousProperty = properties[i - 1];
+      // We force-coerce the values into numbers just to appease Flow. Indeed the
+      // previous filter ensures that all values are numbers but Flow can't know
+      // that.
+      const startValue = +payload[previousProperty];
+      const endValue = +payload[thisProperty];
+      const phaseDuration = endValue - startValue;
+      const startPosition = startValue - startTime;
+
+      phases.push(
+        <NetworkPhase
+          key={previousProperty}
+          propertyName={previousProperty}
+          startPosition={startPosition}
+          phaseDuration={phaseDuration}
+          dur={sectionDuration}
+        />
+      );
+    }
+
+    return phases;
+  }
+
+  _renderPreconnectPhases(): React.Node {
+    const { payload, zeroAt } = this.props;
+    const preconnectStart = payload.domainLookupStart;
+    if (typeof preconnectStart !== 'number') {
+      // All preconnect operations include a domain lookup part.
+      return null;
+    }
+
+    // The preconnect bar goes from the start to the end of the whole preconnect
+    // operation, that includes both the domain lookup and the connection
+    // process. Therefore we want the property that represents the latest phase.
+    const latestPreconnectEndProperty = PRECONNECT_END_PROPERTIES.find(
+      property => typeof payload[property] === 'number'
+    );
+
+    if (!latestPreconnectEndProperty) {
+      return null;
+    }
+
+    // We force-coerce the value into a number just to appease Flow. Indeed
+    // the previous find operation ensures that all values are numbers but
+    // Flow can't know that.
+    const preconnectEnd = +payload[latestPreconnectEndProperty];
+
+    // If the latest phase ends before the start of the marker, we'll display a
+    // separate preconnect section.
+    const hasPreconnect = preconnectEnd < payload.startTime;
+    if (!hasPreconnect) {
+      return null;
+    }
+
+    const availableProperties = PRECONNECT_PROPERTIES_IN_ORDER.filter(
+      property => typeof payload[property] === 'number'
+    );
+    const dur = preconnectEnd - preconnectStart;
+
+    const phases = this._getPhasesForProperties(
+      availableProperties,
+      dur,
+      preconnectStart
+    );
+
+    return (
+      <>
+        <h3 className="tooltipNetworkTitle3">
+          Preconnect (starting at {formatMilliseconds(preconnectStart - zeroAt)}
+          )
+        </h3>
+        {phases}
+      </>
+    );
+  }
+
+  _renderPhases(markerColorClass: string): React.Node {
     const { payload } = this.props;
 
     if (payload.status === 'STATUS_START') {
       return null;
     }
 
-    const dur = payload.endTime - payload.startTime;
+    const preconnectPhases = this._renderPreconnectPhases();
+    const networkProperties = preconnectPhases
+      ? REQUEST_PROPERTIES_IN_ORDER
+      : ALL_NETWORK_PROPERTIES_IN_ORDER;
 
-    const availableProperties = ALL_NETWORK_PROPERTIES_IN_ORDER.filter(
+    const availableProperties = networkProperties.filter(
       property => typeof payload[property] === 'number'
     );
 
@@ -186,6 +300,7 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
       return null;
     }
 
+    const dur = payload.endTime - payload.startTime;
     if (availableProperties.length === 2) {
       // We only have startTime and endTime.
       return (
@@ -201,32 +316,24 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
     }
 
     // Looks like availableProperties.length >= 3.
-    const phases = [];
-
-    for (let i = 1; i < availableProperties.length; i++) {
-      const thisProperty = availableProperties[i];
-      const previousProperty = availableProperties[i - 1];
-      // We force-coerce the values into numbers just to appease Flow. Indeed the
-      // previous filter ensures that all values are numbers but Flow can't know
-      // that.
-      const startValue = +payload[previousProperty];
-      const endValue = +payload[thisProperty];
-      const phaseDuration = endValue - startValue;
-      const startPosition = startValue - payload.startTime;
-
-      phases.push(
-        <NetworkPhase
-          key={previousProperty}
-          propertyName={previousProperty}
-          startPosition={startPosition}
-          phaseDuration={phaseDuration}
-          dur={dur}
-        />
-      );
-    }
-
+    const phases = this._getPhasesForProperties(
+      availableProperties,
+      dur,
+      payload.startTime
+    );
     return (
-      <div className={`tooltipNetworkPhases ${markerColorClass}`}>{phases}</div>
+      // We render both phase sections in the same grid so that they're aligned
+      // and the bar widths have the same reference.
+      <div className={`tooltipNetworkPhases ${markerColorClass}`}>
+        {preconnectPhases ? (
+          <>
+            {/* Note: preconnectPhases contains its own title */}
+            {preconnectPhases}
+            <h3 className="tooltipNetworkTitle3">Actual request</h3>
+          </>
+        ) : null}
+        {phases}
+      </div>
     );
   }
 
@@ -265,7 +372,7 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
           ) : null}
           {_markerDetailBytesNullable('Requested bytes', payload.count)}
         </TooltipDetails>
-        {this._getPhases(markerColorClass)}
+        {this._renderPhases(markerColorClass)}
       </>
     );
   }
