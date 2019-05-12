@@ -372,8 +372,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
     // This could be the C++ library, or the JS filename.
-    const nameForResource = this.getNameForSelectedResource()?this.getNameForSelectedResource().substr(0,70):null;
-    
+    const nameForResource = this.getNameForSelectedResource();
     const showExpandAll = selectedTab === 'calltree';
 
     return (
