@@ -372,7 +372,12 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
     // This could be the C++ library, or the JS filename.
-    const nameForResource = this.getNameForSelectedResource();
+    const nameForResource = {name:this.getNameForSelectedResource()};
+    if(nameForResource.name!==""){
+      nameForResource.name=nameForResource.name.substr(0,70)+"...";
+    }
+
+
     const showExpandAll = selectedTab === 'calltree';
 
     return (
@@ -407,14 +412,14 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
           <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
           {'Collapse function’s subtree across the entire tree'}
         </MenuItem>
-        {nameForResource ? (
+        {nameForResource.name ? (
           <MenuItem
             onClick={this._handleClick}
             data={{ type: 'collapse-resource' }}
           >
             <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
             Collapse functions in{' '}
-            <span className="callNodeContextMenuLabel">{nameForResource}</span>
+            <span className="callNodeContextMenuLabel">{nameForResource.name}</span>
           </MenuItem>
         ) : null}
         {this.isRecursiveCall() ? (
