@@ -414,7 +414,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
           >
             <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
             Collapse functions in{' '}
-            <span className="callNodeContextMenuLabel">{nameForResource}</span>
+            <span className="callNodeContextMenuLabel">{nameForResource.substr(0,70)+"..."}</span>
           </MenuItem>
         ) : null}
         {this.isRecursiveCall() ? (
