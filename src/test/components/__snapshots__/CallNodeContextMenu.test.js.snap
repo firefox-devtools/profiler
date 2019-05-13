@@ -87,7 +87,7 @@ exports[`calltree/CallNodeContextMenu basic rendering renders a full context men
     <span
       class="callNodeContextMenuLabel"
     >
-      library
+      library...
     </span>
   </div>
   <div

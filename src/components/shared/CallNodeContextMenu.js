@@ -295,7 +295,9 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
       callNodeInfo
     );
   }
-
+  trimString(name :string ): string{
+    return name.substr(0,Math.min(name.length,10))+"..."
+  }
   getNameForSelectedResource(): string | null {
     const {
       selectedCallNodePath,
@@ -312,7 +314,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
       const fileNameIndex = funcTable.fileName[funcIndex];
       return fileNameIndex === null
         ? null
-        : stringTable.getString(fileNameIndex);
+        : this.trimString(stringTable.getString(fileNameIndex));
     }
     const resourceIndex = funcTable.resource[funcIndex];
     if (resourceIndex === -1) {
@@ -322,7 +324,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     if (libIndex === undefined || libIndex === null || libIndex === -1) {
       return null;
     }
-    return libs[libIndex].name;
+    return this.trimString(libs[libIndex].name);
   }
 
   /**
@@ -372,10 +374,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
     const funcIndex = callNodeTable.func[selectedCallNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
     // This could be the C++ library, or the JS filename.
-    const nameForResource = new Object()
-    if(this.getNameForSelectedResource()!==""){
-      nameForResource.name = (this.getNameForSelectedResource().substr(0,70)+"...")
-    }
+    const nameForResource = this.getNameForSelectedResource();
     const showExpandAll = selectedTab === 'calltree';
 
     return (
@@ -410,14 +409,14 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
           <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
           {'Collapse function’s subtree across the entire tree'}
         </MenuItem>
-        {nameForResource.name ? (
+        {nameForResource ? (
           <MenuItem
             onClick={this._handleClick}
             data={{ type: 'collapse-resource' }}
           >
             <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
             Collapse functions in{' '}
-            <span className="callNodeContextMenuLabel">{nameForResource.name}</span>
+            <span className="callNodeContextMenuLabel">{nameForResource}</span>
           </MenuItem>
         ) : null}
         {this.isRecursiveCall() ? (
