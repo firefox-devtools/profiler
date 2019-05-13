@@ -11,10 +11,7 @@ import { getProfileName, getDataSource } from '../../selectors/url-state';
 import { getProfile } from '../../selectors/profile';
 
 import type { Profile, ProfileMeta } from '../../types/profile';
-import type {
-  ExplicitConnectOptions,
-  ConnectedProps,
-} from '../../utils/connect';
+import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
   +profile: Profile,
@@ -27,7 +24,7 @@ type Props = ConnectedProps<{||}, StateProps, {||}>;
 class WindowTitle extends PureComponent<Props> {
   // This component updates window title in the form of:
   // profile name - version - platform - date time - data source - 'Firefox profiler'
-  componentDidUpdate() {
+  _updateTitle() {
     const { profile, profileName, dataSource } = this.props;
     const { meta } = profile;
     let title = '';
@@ -45,6 +42,14 @@ class WindowTitle extends PureComponent<Props> {
     }
     title = title.concat(' - ', 'Firefox profiler');
     document.title = title;
+  }
+
+  componentDidMount() {
+    this._updateTitle();
+  }
+
+  componentDidUpdate() {
+    this._updateTitle();
   }
 
   render() {
@@ -94,13 +99,11 @@ function _formatDateTime(timestamp: number): string {
   return dateTimeLabel;
 }
 
-const options: ExplicitConnectOptions<{||}, StateProps, {||}> = {
+export default explicitConnect({
   mapStateToProps: state => ({
     profileName: getProfileName(state),
     profile: getProfile(state),
     dataSource: getDataSource(state),
   }),
   component: WindowTitle,
-};
-
-export default explicitConnect(options);
+});
