@@ -101,6 +101,21 @@ exports[`StackChart matches the snapshot 1`] = `
       </label>
     </div>
   </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index="0"
+      title="Complete \\"Empty\\""
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete "Empty"
+      </span>
+    </li>
+  </ol>
   <div
     class="stackChartContent"
   >

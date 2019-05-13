@@ -20,6 +20,7 @@ import {
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import StackSettings from '../shared/StackSettings';
+import TransformNavigator from '../shared/TransformNavigator';
 import {
   updatePreviewSelection,
   changeSelectedCallNode,
@@ -126,6 +127,7 @@ class StackChartGraph extends React.PureComponent<Props> {
         aria-labelledby="stack-chart-tab-button"
       >
         <StackSettings />
+        <TransformNavigator />
         <div className="stackChartContent">
           <StackChartCanvas
             viewportProps={{
