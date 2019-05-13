@@ -582,7 +582,13 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
   }
 
   if (_isContentThreadWithNoPaint(thread)) {
-    return true;
+    // If content thread doesn't have any paint markers, set it idle if the
+    // thread has at least 80% idle samples.
+    return _isThreadMostlyFullOfIdleSamples(
+      profile,
+      thread,
+      PERCENTAGE_ACTIVE_SAMPLES_NON_PAINT
+    );
   }
 
   return _isThreadMostlyFullOfIdleSamples(profile, thread);
@@ -616,8 +622,13 @@ function _isContentThreadWithNoPaint(thread: Thread): boolean {
   return false;
 }
 
-// Any thread with less than 5% non-idle time will be hidden.
+// Any thread, except content thread with no RefreshDriverTick, with less than
+// 5% non-idle time will be hidden.
 const PERCENTAGE_ACTIVE_SAMPLES = 0.05;
+
+// Any content thread with no RefreshDriverTick with less than 20% non-idle
+// time will be hidden.
+const PERCENTAGE_ACTIVE_SAMPLES_NON_PAINT = 0.2;
 
 /**
  * This function goes through all of the samples in the thread, and sees if some large
@@ -625,9 +636,10 @@ const PERCENTAGE_ACTIVE_SAMPLES = 0.05;
  */
 function _isThreadMostlyFullOfIdleSamples(
   profile: Profile,
-  thread: Thread
+  thread: Thread,
+  activeSamplePercentage: number = PERCENTAGE_ACTIVE_SAMPLES
 ): boolean {
-  let maxActiveStackCount = PERCENTAGE_ACTIVE_SAMPLES * thread.samples.length;
+  let maxActiveStackCount = activeSamplePercentage * thread.samples.length;
   let activeStackCount = 0;
   let filteredStackCount = 0;
 
@@ -644,8 +656,7 @@ function _isThreadMostlyFullOfIdleSamples(
       filteredStackCount++;
       // Adjust the maximum necessary active stacks to find based on null stacks.
       maxActiveStackCount =
-        PERCENTAGE_ACTIVE_SAMPLES *
-        (thread.samples.length - filteredStackCount);
+        activeSamplePercentage * (thread.samples.length - filteredStackCount);
     } else {
       const categoryIndex = thread.stackTable.category[stackIndex];
       const category = profile.meta.categories[categoryIndex];
