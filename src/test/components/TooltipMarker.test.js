@@ -464,4 +464,64 @@ describe('TooltipMarker', function() {
 
     expect(container.firstChild).toMatchSnapshot();
   });
+
+  it('renders properly network markers with a preconnect part', () => {
+    const { container, getByText } = setupWithPayload(
+      getNetworkMarkers({
+        startTime: 19000,
+        fetchStart: 19201,
+        endTime: 20433,
+        id: 1235,
+        uri:
+          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          domainLookupStart: 10000,
+          domainLookupEnd: 10100,
+          connectStart: 10200,
+          tcpConnectEnd: 10210,
+          secureConnectionStart: 10211,
+          connectEnd: 10220,
+          requestStart: 19300,
+          responseStart: 19400,
+          responseEnd: 20200,
+        },
+      })
+    );
+
+    const preconnectTitle = getByText(/preconnect/i);
+    expect(preconnectTitle).toBeTruthy();
+    expect(preconnectTitle).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders properly network markers with a preconnect part containing only the domain lookup', () => {
+    const { container, getByText } = setupWithPayload(
+      getNetworkMarkers({
+        startTime: 19000,
+        fetchStart: 19201,
+        endTime: 20433,
+        id: 1235,
+        uri:
+          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          domainLookupStart: 10000,
+          domainLookupEnd: 10100,
+          requestStart: 19300,
+          responseStart: 19400,
+          responseEnd: 20200,
+        },
+      })
+    );
+
+    const preconnectTitle = getByText(/preconnect/i);
+    expect(preconnectTitle).toBeTruthy();
+    expect(preconnectTitle).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
+  });
 });
