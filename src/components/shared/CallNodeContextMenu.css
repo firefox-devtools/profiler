@@ -29,8 +29,9 @@
 }
 
 .callNodeContextMenuLabel {
+  display: block;
   overflow: hidden;
-  min-width: 250px;
+  width: 250px;
   color: #555;
   font-weight: bold;
   text-overflow: ellipsis;
