@@ -295,8 +295,8 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
       callNodeInfo
     );
   }
-  trimString(name :string ): string{
-    return name.substr(0,Math.min(name.length,10))+"..."
+  trimString(name){
+    return `${name.substr(0,Math.min(name.length,10))}...`
   }
   getNameForSelectedResource(): string | null {
     const {
