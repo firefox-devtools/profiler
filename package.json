@@ -35,11 +35,11 @@
     "start-docs": "docsify serve ./docs-user",
     "start-photon": "node res/photon/server",
     "test": "cross-env NODE_ENV=test NODE_OPTIONS=--experimental-worker jest",
-    "test-all": "run-p flow license-check lint test && test-alex",
+    "test-all": "run-p flow license-check lint test test-alex",
     "test-build-coverage": "jest --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
     "test-coverage": "run-s test-build-coverage test-serve-coverage",
-    "test-alex": "alex ./docs-* *.md --diff"
+    "test-alex": "alex ./docs-* *.md"
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",
