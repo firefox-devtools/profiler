@@ -25,7 +25,7 @@ The profile version number is stored in `profile.meta.version`, and is just an i
 
 When [profiler.firefox.com] receives a profile, as a first step it will run it through an upgrade process: If the profile is in a format version that's older than the most recent version known to it, a number of "upgrader" functions get applied to it, and at the end of that process the result can be treated as a profile of the most recent version. This way, most of the client's code can pretend that it only receives up-to-date profiles, and the compatibility concerns are constrained to a dedicated file.
 
-This dedicated file is [gecko-profile-versioning.js](../src/profile-logic/gecko-profile-versioning.js). It hosts the upgrader functions. These upgrader functions are also a great place to document format changes.
+This dedicated file is [gecko-profile-versioning.js](../src/profile-logic/gecko-profile-versioning.js). It holds the upgrader functions. These upgrader functions are also a great place to document format changes.
 
 ### No forwards compatibility
 
