@@ -3,8 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { NetworkPayload } from '../../types/markers';
-
 import React from 'react';
 import { Provider } from 'react-redux';
 import { TooltipMarker } from '../../components/tooltip/Marker';
@@ -13,6 +11,8 @@ import { storeWithProfile } from '../fixtures/stores';
 import {
   addMarkersToThreadWithCorrespondingSamples,
   getProfileFromTextSamples,
+  getNetworkMarkers,
+  getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
@@ -326,78 +326,6 @@ describe('TooltipMarker', function() {
         },
       ],
       [
-        'Load 31: http://wikia.com/',
-        10.5,
-        ({
-          type: 'Network',
-          startTime: 10.5,
-          endTime: 111.0,
-          id: 1234,
-          pri: 8,
-          status: 'STATUS_START',
-          URI: 'http://wikia.com/',
-          RedirectURI: '',
-        }: NetworkPayload),
-      ],
-      [
-        'Load 31: http://wikia.com/',
-        111.0,
-        // Coerce all of the Network payload objects to the NetworkPayload type to help
-        // surface helpful Flow error messages.
-        ({
-          type: 'Network',
-          startTime: 111.0,
-          endTime: 18736.6,
-          id: 1234,
-          status: 'STATUS_REDIRECT',
-          cache: 'any string could be here',
-          pri: -20,
-          count: 0,
-          URI: 'http://www.wikia.com/',
-          RedirectURI:
-            'http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625',
-        }: NetworkPayload),
-      ],
-      [
-        'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625',
-        19000,
-        ({
-          type: 'Network',
-          startTime: 19000,
-          endTime: 19200.2,
-          id: 1235,
-          pri: 8,
-          status: 'STATUS_START',
-          RedirectURI: '',
-          URI: '',
-        }: NetworkPayload),
-      ],
-      [
-        'Load 1234: http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625',
-        19200.2,
-        ({
-          type: 'Network',
-          startTime: 19200.2,
-          endTime: 20433.8,
-          id: 1235,
-          status: 'STATUS_STOP',
-          cache: 'Hit',
-          pri: 8,
-          count: 47027,
-          URI:
-            'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
-          domainLookupStart: 19050,
-          domainLookupEnd: 19060,
-          connectStart: 19200,
-          tcpConnectEnd: 19205,
-          secureConnectionStart: 19250,
-          connectEnd: 19290,
-          requestStart: 19300.8,
-          responseStart: 19400.2,
-          responseEnd: 20200,
-        }: NetworkPayload),
-      ],
-      [
         'ConstructRootFrame',
         112.5,
         {
@@ -460,5 +388,140 @@ describe('TooltipMarker', function() {
         `${marker.name}-${marker.start}`
       );
     });
+  });
+
+  // In this setup function, we'll render only the first derived marker. But
+  // there can be several raw markers as sources, that will be merged in our
+  // processing pipeline.
+  function setupWithPayload(markers) {
+    const profile = getProfileWithMarkers(markers);
+
+    const store = storeWithProfile(profile);
+    const state = store.getState();
+
+    const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+    const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
+      state
+    );
+
+    // We render the first marker.
+    const marker = getMarker(markerIndexes[0]);
+
+    return render(
+      <Provider store={store}>
+        <TooltipMarker marker={marker} threadIndex={0} className="propClass" />
+      </Provider>
+    );
+  }
+
+  it('renders properly redirect network markers', () => {
+    const { container } = setupWithPayload(
+      getNetworkMarkers({
+        id: 1234,
+        startTime: 10.5,
+        fetchStart: 111.0,
+        endTime: 18736.6,
+        uri: 'http://www.wikia.com/',
+        payload: {
+          status: 'STATUS_REDIRECT',
+          cache: 'any string could be here',
+          pri: -20,
+          count: 0,
+          RedirectURI:
+            'http://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625',
+        },
+      })
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders properly normal network markers', () => {
+    const { container } = setupWithPayload(
+      getNetworkMarkers({
+        id: 1235,
+        startTime: 19000,
+        fetchStart: 19200.2,
+        endTime: 20433.8,
+        uri:
+          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          domainLookupStart: 19050,
+          domainLookupEnd: 19060,
+          connectStart: 19200,
+          tcpConnectEnd: 19205,
+          secureConnectionStart: 19250,
+          connectEnd: 19290,
+          requestStart: 19300.8,
+          responseStart: 19400.2,
+          responseEnd: 20200,
+        },
+      })
+    );
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders properly network markers with a preconnect part', () => {
+    const { container, getByText } = setupWithPayload(
+      getNetworkMarkers({
+        startTime: 19000,
+        fetchStart: 19201,
+        endTime: 20433,
+        id: 1235,
+        uri:
+          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          domainLookupStart: 10000,
+          domainLookupEnd: 10100,
+          connectStart: 10200,
+          tcpConnectEnd: 10210,
+          secureConnectionStart: 10211,
+          connectEnd: 10220,
+          requestStart: 19300,
+          responseStart: 19400,
+          responseEnd: 20200,
+        },
+      })
+    );
+
+    const preconnectTitle = getByText(/preconnect/i);
+    expect(preconnectTitle).toBeTruthy();
+    expect(preconnectTitle).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('renders properly network markers with a preconnect part containing only the domain lookup', () => {
+    const { container, getByText } = setupWithPayload(
+      getNetworkMarkers({
+        startTime: 19000,
+        fetchStart: 19201,
+        endTime: 20433,
+        id: 1235,
+        uri:
+          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        payload: {
+          cache: 'Hit',
+          pri: 8,
+          count: 47027,
+          domainLookupStart: 10000,
+          domainLookupEnd: 10100,
+          requestStart: 19300,
+          responseStart: 19400,
+          responseEnd: 20200,
+        },
+      })
+    );
+
+    const preconnectTitle = getByText(/preconnect/i);
+    expect(preconnectTitle).toBeTruthy();
+    expect(preconnectTitle).toMatchSnapshot();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

@@ -18,7 +18,7 @@ import {
 import explicitConnect from '../../utils/connect';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { getImplementationFilter } from '../../selectors/url-state';
-import { getPageList } from '../../selectors/profile';
+import { getPageList, getZeroAt } from '../../selectors/profile';
 
 import { TooltipNetworkMarker } from './NetworkMarker';
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
@@ -26,7 +26,7 @@ import Backtrace from '../shared/Backtrace';
 
 import { bailoutTypeInformation } from '../../profile-logic/marker-info';
 
-import type { Microseconds } from '../../types/units';
+import type { Milliseconds, Microseconds } from '../../types/units';
 import type { Marker } from '../../types/profile-derived';
 import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex, PageList } from '../../types/profile';
@@ -252,7 +252,8 @@ function _markerBacktrace(
 function getMarkerDetails(
   marker: Marker,
   thread: Thread,
-  implementationFilter: ImplementationFilter
+  implementationFilter: ImplementationFilter,
+  zeroAt: Milliseconds
 ): React.Node {
   const data = marker.data;
 
@@ -581,7 +582,7 @@ function getMarkerDetails(
         );
       }
       case 'Network': {
-        return <TooltipNetworkMarker payload={data} />;
+        return <TooltipNetworkMarker payload={data} zeroAt={zeroAt} />;
       }
       case 'Styles': {
         return (
@@ -627,6 +628,7 @@ type StateProps = {|
   +thread: Thread,
   +implementationFilter: ImplementationFilter,
   +pages: PageList | null,
+  +zeroAt: Milliseconds,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, {||}>;
@@ -654,10 +656,16 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       threadName,
       thread,
       implementationFilter,
+      zeroAt,
     } = this.props;
 
     const url = this._getUrl(marker);
-    const details = getMarkerDetails(marker, thread, implementationFilter);
+    const details = getMarkerDetails(
+      marker,
+      thread,
+      implementationFilter,
+      zeroAt
+    );
     return (
       <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>
@@ -693,11 +701,13 @@ export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
     const thread = selectors.getThread(state);
     const implementationFilter = getImplementationFilter(state);
     const pages = getPageList(state);
+    const zeroAt = getZeroAt(state);
     return {
       threadName,
       thread,
       implementationFilter,
       pages,
+      zeroAt,
     };
   },
   component: MarkerTooltipContents,
