@@ -378,6 +378,72 @@ describe('NetworkChartRowBar phase calculations', function() {
       'left: 140px; width: 58px; opacity: 0;',
     ]);
   });
+
+  it('renders 2 bars for a network marker with a preconnect part', () => {
+    const { getBarElementStyles } = setupWithPayload(
+      getNetworkMarkers({
+        startTime: 10010,
+        fetchStart: 10011,
+        // endTime is 99ms after startTime, so that the profile's end time is
+        // 10110ms, which makes the length 100ms, and we get nice rounded values
+        // as a result.
+        endTime: 10109,
+        id: 1235,
+        uri:
+          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        payload: {
+          count: 47027,
+          domainLookupStart: 500,
+          domainLookupEnd: 510,
+          connectStart: 511,
+          tcpConnectEnd: 515,
+          secureConnectionStart: 516,
+          connectEnd: 520,
+          requestStart: 10030,
+          responseStart: 10060,
+          responseEnd: 10080,
+        },
+      })
+    );
+
+    const barStyles = getBarElementStyles();
+    expect(barStyles).toHaveLength(2);
+    expect(barStyles).toEqual([
+      'width: 40px; left: -18870px;',
+      'width: 198px; left: 150px;',
+    ]);
+  });
+
+  it('renders 2 bars for a network markers with a preconnect part containing only the domain lookup', () => {
+    const { getBarElementStyles } = setupWithPayload(
+      getNetworkMarkers({
+        startTime: 10010,
+        fetchStart: 10011,
+        // endTime is 99ms after startTime, so that the profile's end time is
+        // 10110ms, which makes the length 100ms, and we get nice rounded values
+        // as a result.
+        endTime: 10109,
+        id: 1235,
+        uri:
+          'https://img.buzzfeed.com/buzzfeed-static/static/2018-04/29/11/tmp/buzzfeed-prod-web-02/tmp-name-2-18011-1525016782-0_dblwide.jpg?output-format=auto&output-quality=auto&resize=625:*',
+        payload: {
+          count: 47027,
+          domainLookupStart: 500,
+          domainLookupEnd: 520,
+          requestStart: 10030,
+          responseStart: 10060,
+          responseEnd: 10080,
+        },
+      })
+    );
+
+    const barStyles = getBarElementStyles();
+    expect(barStyles).toHaveLength(2);
+    expect(barStyles).toEqual([
+      'width: 40px; left: -18870px;',
+      'width: 198px; left: 150px;',
+    ]);
+  });
 });
 
 describe('NetworkChartRowBar URL split', function() {

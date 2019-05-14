@@ -8,7 +8,6 @@ button::-moz-focus-inner {
   border: 0;
 }
 
-a:focus,
 input[type='radio']:focus,
 input[type='checkbox']:focus,
 input[type='button']:focus,
@@ -19,5 +18,10 @@ input[type='range']:focus,
 button:focus {
   box-shadow: 0 0 0 1px var(--blue-50) inset, 0 0 0 1px var(--blue-50),
     0 0 0 4px var(--blue-50-a30);
+  outline: 0;
+}
+
+a:focus {
+  box-shadow: 0 0 0 2px var(--blue-50), 0 0 0 6px var(--blue-50-a30);
   outline: 0;
 }
