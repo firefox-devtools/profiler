@@ -4,6 +4,8 @@
 
 // @flow
 import { combineReducers } from 'redux';
+import { oneLine } from 'common-tags';
+import { objectEntries } from '../utils/flow';
 
 import type { ThreadIndex, Pid } from '../types/profile';
 import type { TrackIndex } from '../types/profile-derived';
@@ -35,6 +37,7 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
       return 'from-file';
     case 'PROFILE_PUBLISHED':
+    case 'SANITIZE_PROFILE':
       return 'public';
     case 'TRIGGER_LOADING_FROM_URL':
       return 'from-url';
@@ -46,6 +49,7 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
 const hash: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'PROFILE_PUBLISHED':
+    case 'SANITIZE_PROFILE':
       return action.hash;
     default:
       return state;
@@ -88,9 +92,9 @@ const committedRanges: Reducer<StartEndRange[]> = (state = [], action) => {
     }
     case 'POP_COMMITTED_RANGES':
       return state.slice(0, action.firstPoppedFilterIndex);
-    case 'PROFILE_PUBLISHED':
-      // This may no longer be valid because of PII sanitization.
-      return [];
+    case 'SANITIZE_PROFILE':
+      // This value may be updated due to profile sanitization.
+      return action.committedRanges ? action.committedRanges : state;
     default:
       return state;
   }
@@ -108,9 +112,22 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
     case 'ISOLATE_LOCAL_TRACK':
       // Only switch to non-null selected threads.
       return (action.selectedThreadIndex: ThreadIndex);
-    case 'PROFILE_PUBLISHED':
-      // This may no longer be valid because of PII sanitization.
-      return null;
+    case 'SANITIZE_PROFILE': {
+      const { oldThreadIndexToNew } = action;
+      if (state === null || !oldThreadIndexToNew) {
+        // Either there was no selected thread, or the thread indexes were not modified.
+        return state;
+      }
+      const newThreadIndex = oldThreadIndexToNew.get(state);
+      if (newThreadIndex === undefined) {
+        console.error(oneLine`
+          Unable to map an old thread index to a new thread index for the selected
+          thread when sanitizing a profile
+        `);
+        return null;
+      }
+      return newThreadIndex;
+    }
     default:
       return state;
   }
@@ -161,9 +178,22 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
         [threadIndex]: transforms.slice(0, firstPoppedFilterIndex),
       });
     }
-    case 'PROFILE_PUBLISHED':
+    case 'SANITIZE_PROFILE': {
+      const { oldThreadIndexToNew } = action;
+      if (!oldThreadIndexToNew) {
+        // The thread indexes weren't modified, just return the old value here.
+        return state;
+      }
       // This may no longer be valid because of PII sanitization.
-      return {};
+      const newTransforms = {};
+      for (const [threadIndex, transformStack] of objectEntries(state)) {
+        const newThreadIndex = oldThreadIndexToNew.get(threadIndex);
+        if (newThreadIndex !== undefined) {
+          newTransforms[newThreadIndex] = transformStack;
+        }
+      }
+      return newTransforms;
+    }
     default:
       return state;
   }
@@ -223,9 +253,10 @@ const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
     case 'VIEW_PROFILE':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
       return action.globalTrackOrder;
-    case 'PROFILE_PUBLISHED':
-      // This may no longer be valid because of PII sanitization.
-      return [];
+    case 'SANITIZE_PROFILE':
+      // If some threads were removed, do not even attempt to figure this out. It's
+      // complicated, and not many people use this feature.
+      return action.oldThreadIndexToNew ? [] : state;
     default:
       return state;
   }
@@ -251,9 +282,10 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
       hiddenGlobalTracks.delete(action.trackIndex);
       return hiddenGlobalTracks;
     }
-    case 'PROFILE_PUBLISHED':
-      // This may no longer be valid because of PII sanitization.
-      return new Set();
+    case 'SANITIZE_PROFILE':
+      // If any threads were removed, this was because they were hidden.
+      // Reset this state.
+      return action.oldThreadIndexToNew ? new Set() : state;
     default:
       return state;
   }
@@ -286,9 +318,9 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
       hiddenLocalTracksByPid.set(action.pid, action.hiddenLocalTracks);
       return hiddenLocalTracksByPid;
     }
-    case 'PROFILE_PUBLISHED':
-      // This may no longer be valid because of PII sanitization.
-      return new Map();
+    case 'SANITIZE_PROFILE':
+      // If any threads were removed then this information is no longer valid.
+      return action.oldThreadIndexToNew ? new Map() : state;
     default:
       return state;
   }
@@ -306,9 +338,10 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
       localTrackOrderByPid.set(action.pid, action.localTrackOrder);
       return localTrackOrderByPid;
     }
-    case 'PROFILE_PUBLISHED':
-      // This may no longer be valid because of PII sanitization.
-      return new Map();
+    case 'SANITIZE_PROFILE':
+      // If any threads were removed then remove this information. It's complicated
+      // to compute, and not many people use it.
+      return action.oldThreadIndexToNew ? new Map() : state;
     default:
       return state;
   }

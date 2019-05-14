@@ -25,7 +25,7 @@ import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { UrlState, UploadState } from '../types/state';
-import type { CssPixels } from '../types/units';
+import type { CssPixels, StartEndRange } from '../types/units';
 
 export type DataSource =
   | 'none'
@@ -306,7 +306,13 @@ type UrlStateAction =
   | {| +type: 'CHANGE_MARKER_SEARCH_STRING', +searchString: string |}
   | {| +type: 'CHANGE_NETWORK_SEARCH_STRING', +searchString: string |}
   | {| +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] |}
-  | {| +type: 'CHANGE_PROFILE_NAME', +profileName: string |};
+  | {| +type: 'CHANGE_PROFILE_NAME', +profileName: string |}
+  | {|
+      +type: 'SANITIZE_PROFILE',
+      +hash: string,
+      +committedRanges: StartEndRange[] | null,
+      +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+    |};
 
 type IconsAction =
   | {| +type: 'ICON_HAS_LOADED', +icon: string |}
