@@ -12,7 +12,24 @@
   margin-top: 4px;
   border-top: 1px solid var(--grey-40);
   grid-gap: 2px 5px;
+
+  /* When changing the number of columns, don't forget to change the span values
+   * in grid-column-start properties. */
   grid-template-columns: min-content min-content auto;
+}
+
+.tooltipNetworkTitle3 {
+  /* Reset most default properties of h3. */
+  padding: 0;
+  margin: 5px 0 3px 0;
+  font: inherit;
+
+  /* Make the title take the 2 columns. */
+  grid-column-start: span 3;
+}
+
+.tooltipNetworkTitle3:first-child {
+  margin-top: 3px;
 }
 
 .tooltipNetworkPhase {
