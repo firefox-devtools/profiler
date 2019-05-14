@@ -29,13 +29,8 @@
 }
 
 .callNodeContextMenuLabel {
-  display: block;
-  overflow: hidden;
-  width: 250px;
   color: #555;
   font-weight: bold;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .react-contextmenu-item--selected > .callNodeContextMenuLabel {
