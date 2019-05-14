@@ -76,6 +76,7 @@ function _markerDetailBytesNullable(label: string, value: ?number): * {
   );
 }
 
+/* The preconnect phase may only contain these properties. */
 const PRECONNECT_PROPERTIES_IN_ORDER = [
   'domainLookupStart',
   'domainLookupEnd',
@@ -85,6 +86,7 @@ const PRECONNECT_PROPERTIES_IN_ORDER = [
   'connectEnd',
 ];
 
+/* A marker without a preconnect phase may contain all these properties. */
 const ALL_NETWORK_PROPERTIES_IN_ORDER = [
   'startTime',
   ...PRECONNECT_PROPERTIES_IN_ORDER,
@@ -94,6 +96,12 @@ const ALL_NETWORK_PROPERTIES_IN_ORDER = [
   'endTime',
 ];
 
+/* For a marker with a preconnect phase, the second displayed diagram may only
+ * contain these properties.
+ * We use `splice` to generate this list out of the previous arrays, taking
+ * ALL_NETWORK_PROPERTIES_IN_ORDER as source, then removing all the properties
+ * of PRECONNECT_PROPERTIES_IN_ORDER.
+ */
 const REQUEST_PROPERTIES_IN_ORDER = ALL_NETWORK_PROPERTIES_IN_ORDER.slice();
 REQUEST_PROPERTIES_IN_ORDER.splice(1, PRECONNECT_PROPERTIES_IN_ORDER.length);
 
@@ -125,16 +133,6 @@ const NETWORK_PROPERTY_OPACITIES = {
   responseEnd: 0,
   endTime: 0,
 };
-
-// When the DNS request and the connection happen in a preconnect phase, the
-// timestamps for these properties will happen before `startTime`.
-// These properties represent respectively two possible ends of a preconnect
-// session. They're specified in their reverse order because we'll want to find
-// the latest one first.
-// It could theorically happen that a preconnect session starts before
-// `startTime` but ends after `startTime`; in that case we'll still draw only
-// one diagram.
-const PRECONNECT_END_PROPERTIES = ['connectEnd', 'domainLookupEnd'];
 
 type NetworkPhaseProps = {|
   +propertyName: string,
@@ -226,6 +224,25 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
     return phases;
   }
 
+  /**
+   * Properties `connectEnd` and `domainLookupEnd` aren't always present. This
+   * function returns the value for the latest one so that we can determine if
+   * these phases happen in a preconnect session.
+   */
+  _getLatestPreconnectValue(): number | null {
+    const { payload } = this.props;
+
+    if (typeof payload.connectEnd === 'number') {
+      return payload.connectEnd;
+    }
+
+    if (typeof payload.domainLookupEnd === 'number') {
+      return payload.domainLookupEnd;
+    }
+
+    return null;
+  }
+
   _renderPreconnectPhases(): React.Node {
     const { payload, zeroAt } = this.props;
     const preconnectStart = payload.domainLookupStart;
@@ -236,22 +253,17 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
 
     // The preconnect bar goes from the start to the end of the whole preconnect
     // operation, that includes both the domain lookup and the connection
-    // process. Therefore we want the property that represents the latest phase.
-    const latestPreconnectEndProperty = PRECONNECT_END_PROPERTIES.find(
-      property => typeof payload[property] === 'number'
-    );
-
-    if (!latestPreconnectEndProperty) {
+    // process. Therefore we want the value that represents the latest phase.
+    const preconnectEnd = this._getLatestPreconnectValue();
+    if (preconnectEnd === null) {
       return null;
     }
 
-    // We force-coerce the value into a number just to appease Flow. Indeed
-    // the previous find operation ensures that all values are numbers but
-    // Flow can't know that.
-    const preconnectEnd = +payload[latestPreconnectEndProperty];
-
     // If the latest phase ends before the start of the marker, we'll display a
     // separate preconnect section.
+    // It could theorically happen that a preconnect session starts before
+    // `startTime` but ends after `startTime`; in that case we'll still draw
+    // only one diagram.
     const hasPreconnect = preconnectEnd < payload.startTime;
     if (!hasPreconnect) {
       return null;

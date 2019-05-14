@@ -65,16 +65,6 @@ const PROPERTIES_IN_ORDER = [
   'responseEnd',
 ];
 
-// When the DNS request and the connection happen in a preconnect phase, the
-// timestamps for these properties will happen before `startTime`.
-// These properties represent respectively two possible ends of a preconnect
-// session. They're specified in their reverse order because we'll want to find
-// the latest one first.
-// It could theorically happen that a preconnect session starts before
-// `startTime` but ends after `startTime`; in that case we'll still draw only
-// one bar.
-const PRECONNECT_END_PROPERTIES = ['connectEnd', 'domainLookupEnd'];
-
 const PHASE_OPACITIES = PROPERTIES_IN_ORDER.reduce(
   (result, property, i, { length }) => {
     result[property] = length > 1 ? i / (length - 1) : 0;
@@ -83,7 +73,21 @@ const PHASE_OPACITIES = PROPERTIES_IN_ORDER.reduce(
   {}
 );
 
-function NetworkPhase({ name, previousName, value, duration, ...style }) {
+type NetworkPhaseProps = {|
+  +name: string,
+  +previousName: string,
+  +value: number | string,
+  +duration: Milliseconds,
+  +style: Object,
+|};
+
+function NetworkPhase({
+  name,
+  previousName,
+  value,
+  duration,
+  style,
+}: NetworkPhaseProps) {
   // Specifying data attributes makes it easier to debug.
   return (
     <div
@@ -99,14 +103,14 @@ function NetworkPhase({ name, previousName, value, duration, ...style }) {
   );
 }
 
-export type NetworkChartRowBarProps = {
+export type NetworkChartRowBarProps = {|
   +marker: Marker,
   +width: CssPixels,
   +timeRange: StartEndRange,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload,
-};
+|};
 
 // This component splits a network marker duration in different phases,
 // and renders each phase as a differently colored bar.
@@ -129,6 +133,29 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
     return markerPosition;
   }
 
+  /**
+   * Properties `connectEnd` and `domainLookupEnd` aren't always present. This
+   * function returns the latest one so that we can determine if these phases
+   * happen in a preconnect session.
+   */
+  _getLatestPreconnectEndProperty(): 'connectEnd' | 'domainLookupEnd' | null {
+    const { networkPayload } = this.props;
+
+    if (typeof networkPayload.connectEnd === 'number') {
+      return 'connectEnd';
+    }
+
+    if (typeof networkPayload.domainLookupEnd === 'number') {
+      return 'domainLookupEnd';
+    }
+
+    return null;
+  }
+
+  /**
+   * This returns the preconnect component, or null if there's no preconnect
+   * operation for this marker.
+   */
   _preconnectComponent(): React.Node {
     const { networkPayload, marker } = this.props;
 
@@ -141,10 +168,7 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
     // The preconnect bar goes from the start to the end of the whole preconnect
     // operation, that includes both the domain lookup and the connection
     // process. Therefore we want the property that represents the latest phase.
-    const latestPreconnectEndProperty = PRECONNECT_END_PROPERTIES.find(
-      property => typeof networkPayload[property] === 'number'
-    );
-
+    const latestPreconnectEndProperty = this._getLatestPreconnectEndProperty();
     if (!latestPreconnectEndProperty) {
       return null;
     }
@@ -156,6 +180,9 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
 
     // If the latest phase ends before the start of the marker, we'll display a
     // separate preconnect bar.
+    // It could theorically happen that a preconnect session starts before
+    // `startTime` but ends after `startTime`; in that case we'll still draw
+    // only one bar.
     const hasPreconnect = preconnectEnd < marker.start;
     if (!hasPreconnect) {
       return null;
@@ -167,13 +194,15 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
     const preconnectWidth = preconnectEndPosition - preconnectStartPosition;
 
     const preconnectPhase = {
-      left: 0,
-      width: '100%',
-      opacity: PHASE_OPACITIES.requestStart,
       name: latestPreconnectEndProperty,
       previousName: 'domainLookupStart',
       value: preconnectEnd,
       duration: preconnectDuration,
+      style: {
+        left: 0,
+        width: '100%',
+        opacity: PHASE_OPACITIES.requestStart,
+      },
     };
 
     return (
@@ -228,14 +257,16 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
       // that.
       const value = +networkPayload[property];
       mainBarPhases.push({
-        left: ((previousValue - start) / dur) * markerWidth,
-        width: Math.max(((value - previousValue) / dur) * markerWidth, 1),
-        // The first phase is always transparent because this represents the wait time.
-        opacity: i === 0 ? 0 : PHASE_OPACITIES[property],
         name: property,
         previousName,
         value,
         duration: value - previousValue,
+        style: {
+          left: ((previousValue - start) / dur) * markerWidth,
+          width: Math.max(((value - previousValue) / dur) * markerWidth, 1),
+          // The first phase is always transparent because this represents the wait time.
+          opacity: i === 0 ? 0 : PHASE_OPACITIES[property],
+        },
       });
       previousValue = value;
       previousName = property;
@@ -244,13 +275,15 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
     // The last part isn't generally colored (opacity is 0) unless it's the only
     // one, and in that case it covers the whole duration.
     mainBarPhases.push({
-      left: ((previousValue - start) / dur) * markerWidth,
-      width: ((start + dur - previousValue) / dur) * markerWidth,
-      opacity: mainBarPhases.length ? 0 : 1,
       name: 'endTime',
       previousName,
       value: start + dur,
       duration: start + dur - previousValue,
+      style: {
+        left: ((previousValue - start) / dur) * markerWidth,
+        width: ((start + dur - previousValue) / dur) * markerWidth,
+        opacity: mainBarPhases.length ? 0 : 1,
+      },
     });
 
     return (
@@ -260,14 +293,16 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
           className="networkChartRowItemBar"
           style={{ width: markerWidth, left: startPosition }}
         >
-          {mainBarPhases.map(NetworkPhase)}
+          {mainBarPhases.map(phaseProps => (
+            <NetworkPhase key={phaseProps.name} {...phaseProps} />
+          ))}
         </div>
       </>
     );
   }
 }
 
-type NetworkChartRowProps = {
+type NetworkChartRowProps = {|
   +index: number,
   +marker: Marker,
   // Pass the payload in as well, since our types can't express a Marker with
@@ -276,7 +311,7 @@ type NetworkChartRowProps = {
   +timeRange: StartEndRange,
   +width: CssPixels,
   +threadIndex: ThreadIndex,
-};
+|};
 
 type State = {|
   pageX: CssPixels,
