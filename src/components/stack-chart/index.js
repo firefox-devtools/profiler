@@ -13,12 +13,14 @@ import StackChartCanvas from './Canvas';
 import {
   getCommittedRange,
   getProfileInterval,
+  getProfileViewOptions,
   getPreviewSelection,
   getScrollToSelectionGeneration,
   getCategories,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
+import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
 import {
@@ -55,6 +57,7 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +isCallNodeContextMenuVisible: boolean,
   +scrollToSelectionGeneration: number,
 |};
 
@@ -114,6 +117,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       callNodeInfo,
       categories,
       selectedCallNodeIndex,
+      isCallNodeContextMenuVisible,
       scrollToSelectionGeneration,
     } = this.props;
 
@@ -128,35 +132,43 @@ class StackChartGraph extends React.PureComponent<Props> {
       >
         <StackSettings />
         <TransformNavigator />
-        <div className="stackChartContent">
-          <StackChartCanvas
-            viewportProps={{
-              previewSelection,
-              timeRange,
-              maxViewportHeight,
-              viewportNeedsUpdate,
-              marginLeft: TIMELINE_MARGIN_LEFT,
-              marginRight: TIMELINE_MARGIN_RIGHT,
-              maximumZoom: this.getMaximumZoom(),
-              containerRef: this._takeViewportRef,
-            }}
-            chartProps={{
-              interval,
-              thread,
-              stackTimingByDepth,
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              updatePreviewSelection,
-              rangeStart: timeRange.start,
-              rangeEnd: timeRange.end,
-              stackFrameHeight: STACK_FRAME_HEIGHT,
-              callNodeInfo,
-              categories,
-              selectedCallNodeIndex,
-              onSelectionChange: this._onSelectedCallNodeChange,
-              scrollToSelectionGeneration,
-            }}
-          />
-        </div>
+        <ContextMenuTrigger
+          id="CallNodeContextMenu"
+          attributes={{
+            className: 'treeViewContextMenu',
+          }}
+        >
+          <div className="stackChartContent">
+            <StackChartCanvas
+              viewportProps={{
+                previewSelection,
+                timeRange,
+                maxViewportHeight,
+                viewportNeedsUpdate,
+                marginLeft: TIMELINE_MARGIN_LEFT,
+                marginRight: TIMELINE_MARGIN_RIGHT,
+                maximumZoom: this.getMaximumZoom(),
+                containerRef: this._takeViewportRef,
+              }}
+              chartProps={{
+                interval,
+                thread,
+                stackTimingByDepth,
+                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
+                updatePreviewSelection,
+                rangeStart: timeRange.start,
+                rangeEnd: timeRange.end,
+                stackFrameHeight: STACK_FRAME_HEIGHT,
+                callNodeInfo,
+                categories,
+                selectedCallNodeIndex,
+                onSelectionChange: this._onSelectedCallNodeChange,
+                disableTooltips: isCallNodeContextMenuVisible,
+                scrollToSelectionGeneration,
+              }}
+            />
+          </div>
+        </ContextMenuTrigger>
       </div>
     );
   }
@@ -181,6 +193,8 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
+      isCallNodeContextMenuVisible: getProfileViewOptions(state)
+        .isCallNodeContextMenuVisible,
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     };
   },
