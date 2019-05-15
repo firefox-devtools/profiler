@@ -14,8 +14,12 @@ import {
   getColorClassNameForMimeType,
 } from '../../profile-logic/marker-data';
 import { formatNumber } from '../../utils/format-numbers';
+import {
+  TIMELINE_MARGIN_LEFT,
+  TIMELINE_MARGIN_RIGHT,
+} from '../../app-logic/constants';
 
-import type { CssPixels } from '../../types/units';
+import type { CssPixels, Milliseconds, StartEndRange } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
 import type { Marker } from '../../types/profile-derived';
 import type { NetworkPayload } from '../../types/markers';
@@ -43,6 +47,10 @@ const PATH_SPLIT_RE = /(.*)(\/[^/]+\/?)$/;
 //   connection is reused.
 // - Between `domainLookupStart` and `requestStart`, both the DNS request and
 //   the connection happens.
+//   Note that we never have connection-related properties without
+//   domainLookup-related properties, but we do have domainLookup-related
+//   properties without connection-related properties. So we only consider
+//   `domainLookupStart` to represent this whole connection phase.
 // - `responseStart` represents the first received information from the server.
 // - At last `responseEnd` represents the last received information from the
 //   server.
@@ -65,92 +73,251 @@ const PHASE_OPACITIES = PROPERTIES_IN_ORDER.reduce(
   {}
 );
 
-type NetworkChartRowProps = {
+type NetworkPhaseProps = {|
+  +name: string,
+  +previousName: string,
+  +value: number | string,
+  +duration: Milliseconds,
+  +style: Object,
+|};
+
+function NetworkPhase({
+  name,
+  previousName,
+  value,
+  duration,
+  style,
+}: NetworkPhaseProps) {
+  // Specifying data attributes makes it easier to debug.
+  return (
+    <div
+      className="networkChartRowItemBarPhase"
+      key={name}
+      data-name={name}
+      data-value={value}
+      style={style}
+      aria-label={`${previousName} to ${name}: ${formatNumber(
+        duration
+      )} milliseconds`}
+    />
+  );
+}
+
+export type NetworkChartRowBarProps = {|
+  +marker: Marker,
+  +width: CssPixels,
+  +timeRange: StartEndRange,
+  // Pass the payload in as well, since our types can't express a Marker with
+  // a specific payload.
+  +networkPayload: NetworkPayload,
+|};
+
+// This component splits a network marker duration in different phases,
+// and renders each phase as a differently colored bar.
+class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
+  /**
+   * Convert the time for a network marker into the CssPixels to be used on the screen.
+   * This function takes into account the range used, as well as the container sizing
+   * as passed in by the WithSize component.
+   */
+  _timeToCssPixels(time: Milliseconds): CssPixels {
+    const { timeRange, width } = this.props;
+    const timeRangeTotal = timeRange.end - timeRange.start;
+    const innerContainerWidth =
+      width - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+
+    const markerPosition =
+      ((time - timeRange.start) / timeRangeTotal) * innerContainerWidth +
+      TIMELINE_MARGIN_LEFT;
+
+    return markerPosition;
+  }
+
+  /**
+   * Properties `connectEnd` and `domainLookupEnd` aren't always present. This
+   * function returns the latest one so that we can determine if these phases
+   * happen in a preconnect session.
+   */
+  _getLatestPreconnectEndProperty(): 'connectEnd' | 'domainLookupEnd' | null {
+    const { networkPayload } = this.props;
+
+    if (typeof networkPayload.connectEnd === 'number') {
+      return 'connectEnd';
+    }
+
+    if (typeof networkPayload.domainLookupEnd === 'number') {
+      return 'domainLookupEnd';
+    }
+
+    return null;
+  }
+
+  /**
+   * This returns the preconnect component, or null if there's no preconnect
+   * operation for this marker.
+   */
+  _preconnectComponent(): React.Node {
+    const { networkPayload, marker } = this.props;
+
+    const preconnectStart = networkPayload.domainLookupStart;
+    if (typeof preconnectStart !== 'number') {
+      // All preconnect operations include a domain lookup part.
+      return null;
+    }
+
+    // The preconnect bar goes from the start to the end of the whole preconnect
+    // operation, that includes both the domain lookup and the connection
+    // process. Therefore we want the property that represents the latest phase.
+    const latestPreconnectEndProperty = this._getLatestPreconnectEndProperty();
+    if (!latestPreconnectEndProperty) {
+      return null;
+    }
+
+    // We force-coerce the value into a number just to appease Flow. Indeed
+    // the previous find operation ensures that all values are numbers but
+    // Flow can't know that.
+    const preconnectEnd = +networkPayload[latestPreconnectEndProperty];
+
+    // If the latest phase ends before the start of the marker, we'll display a
+    // separate preconnect bar.
+    // It could theorically happen that a preconnect session starts before
+    // `startTime` but ends after `startTime`; in that case we'll still draw
+    // only one bar.
+    const hasPreconnect = preconnectEnd < marker.start;
+    if (!hasPreconnect) {
+      return null;
+    }
+
+    const preconnectDuration = preconnectEnd - preconnectStart;
+    const preconnectStartPosition = this._timeToCssPixels(preconnectStart);
+    const preconnectEndPosition = this._timeToCssPixels(preconnectEnd);
+    const preconnectWidth = preconnectEndPosition - preconnectStartPosition;
+
+    const preconnectPhase = {
+      name: latestPreconnectEndProperty,
+      previousName: 'domainLookupStart',
+      value: preconnectEnd,
+      duration: preconnectDuration,
+      style: {
+        left: 0,
+        width: '100%',
+        opacity: PHASE_OPACITIES.requestStart,
+      },
+    };
+
+    return (
+      <div
+        className="networkChartRowItemBar"
+        style={{ width: preconnectWidth, left: preconnectStartPosition }}
+      >
+        {NetworkPhase(preconnectPhase)}
+      </div>
+    );
+  }
+
+  render() {
+    const {
+      marker: { start, dur },
+      networkPayload,
+    } = this.props;
+
+    // Compute the positioning of this network marker.
+    const startPosition = this._timeToCssPixels(start);
+    const endPosition = this._timeToCssPixels(start + dur);
+
+    // Set min-width for marker bar.
+    let markerWidth = endPosition - startPosition;
+    if (markerWidth < 1) {
+      markerWidth = 2.5;
+    }
+
+    const preconnectComponent = this._preconnectComponent();
+
+    // Compute the phases for this marker.
+
+    // If there's a preconnect phase, we remove `domainLookupStart` from the
+    // main bar, but we'll draw a separate bar to represent it.
+    const mainBarProperties = preconnectComponent
+      ? PROPERTIES_IN_ORDER.slice(1)
+      : PROPERTIES_IN_ORDER;
+
+    // Not all properties are always present.
+    const availableProperties = mainBarProperties.filter(
+      property => typeof networkPayload[property] === 'number'
+    );
+
+    const mainBarPhases = [];
+    let previousValue = start;
+    let previousName = 'startTime';
+
+    // In this loop we add the various phases to the array.
+    availableProperties.forEach((property, i) => {
+      // We force-coerce the value into a number just to appease Flow. Indeed the
+      // previous filter ensures that all values are numbers but Flow can't know
+      // that.
+      const value = +networkPayload[property];
+      mainBarPhases.push({
+        name: property,
+        previousName,
+        value,
+        duration: value - previousValue,
+        style: {
+          left: ((previousValue - start) / dur) * markerWidth,
+          width: Math.max(((value - previousValue) / dur) * markerWidth, 1),
+          // The first phase is always transparent because this represents the wait time.
+          opacity: i === 0 ? 0 : PHASE_OPACITIES[property],
+        },
+      });
+      previousValue = value;
+      previousName = property;
+    });
+
+    // The last part isn't generally colored (opacity is 0) unless it's the only
+    // one, and in that case it covers the whole duration.
+    mainBarPhases.push({
+      name: 'endTime',
+      previousName,
+      value: start + dur,
+      duration: start + dur - previousValue,
+      style: {
+        left: ((previousValue - start) / dur) * markerWidth,
+        width: ((start + dur - previousValue) / dur) * markerWidth,
+        opacity: mainBarPhases.length ? 0 : 1,
+      },
+    });
+
+    return (
+      <>
+        {preconnectComponent}
+        <div
+          className="networkChartRowItemBar"
+          style={{ width: markerWidth, left: startPosition }}
+        >
+          {mainBarPhases.map(phaseProps => (
+            <NetworkPhase key={phaseProps.name} {...phaseProps} />
+          ))}
+        </div>
+      </>
+    );
+  }
+}
+
+type NetworkChartRowProps = {|
   +index: number,
   +marker: Marker,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload,
-  +markerWidth: CssPixels,
-  +startPosition: CssPixels,
+  +timeRange: StartEndRange,
+  +width: CssPixels,
   +threadIndex: ThreadIndex,
-};
+|};
 
 type State = {|
   pageX: CssPixels,
   pageY: CssPixels,
   hovered: ?boolean,
 |};
-
-export type NetworkChartRowBarProps = {
-  +marker: Marker,
-  +markerWidth: CssPixels,
-  // Pass the payload in as well, since our types can't express a Marker with
-  // a specific payload.
-  +networkPayload: NetworkPayload,
-};
-
-// This component splits a network marker duration in different phases,
-// and renders each phase as a differently colored bar.
-const NetworkChartRowBar = (props: NetworkChartRowBarProps) => {
-  const { marker, networkPayload, markerWidth } = props;
-  const { start, dur } = marker;
-
-  const barPhases = [];
-  let previousValue = start;
-  let previousName = 'startTime';
-
-  // In this loop we add the various phases to the array.
-  PROPERTIES_IN_ORDER.filter(
-    property => typeof networkPayload[property] === 'number'
-  ).forEach((property, i) => {
-    // We force-coerce the value into a number just to appease Flow. Indeed the
-    // previous filter ensures that all values are numbers but Flow can't know
-    // that.
-    const value = +networkPayload[property];
-    barPhases.push({
-      left: ((previousValue - start) / dur) * markerWidth,
-      width: Math.max(((value - previousValue) / dur) * markerWidth, 1),
-      opacity: i === 0 ? 0 : PHASE_OPACITIES[property],
-      name: property,
-      previousName,
-      value,
-      duration: value - previousValue,
-    });
-    previousValue = value;
-    previousName = property;
-  });
-
-  // The last part isn't generally colored (opacity is 0) unless it's the only
-  // one, and in that case it covers the whole duration.
-  barPhases.push({
-    left: ((previousValue - start) / dur) * markerWidth,
-    width: ((start + dur - previousValue) / dur) * markerWidth,
-    opacity: barPhases.length ? 0 : 1,
-    name: 'endTime',
-    previousName,
-    value: start + dur,
-    duration: start + dur - previousValue,
-  });
-
-  return (
-    <>
-      {barPhases.map(({ name, previousName, value, duration, ...style }) => (
-        // Specifying data attributes makes it easier to debug.
-        <div
-          className="networkChartRowItemBarPhase"
-          key={name}
-          data-name={name}
-          data-value={value}
-          style={style}
-          aria-label={`${previousName} to ${name}: ${formatNumber(
-            duration
-          )} milliseconds`}
-        />
-      ))}
-    </>
-  );
-};
 
 class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   state = {
@@ -249,13 +416,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   }
 
   render() {
-    const {
-      index,
-      marker,
-      markerWidth,
-      startPosition,
-      networkPayload,
-    } = this.props;
+    const { index, marker, networkPayload, width, timeRange } = this.props;
 
     if (networkPayload === null) {
       return null;
@@ -276,16 +437,12 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
         <div className="networkChartRowItemLabel">
           {this._splitsURI(marker.name)}
         </div>
-        <div
-          className="networkChartRowItemBar"
-          style={{ width: markerWidth, left: startPosition }}
-        >
-          <NetworkChartRowBar
-            marker={marker}
-            networkPayload={networkPayload}
-            markerWidth={markerWidth}
-          />
-        </div>
+        <NetworkChartRowBar
+          marker={marker}
+          networkPayload={networkPayload}
+          width={width}
+          timeRange={timeRange}
+        />
         {this.state.hovered ? (
           // This magic value "5" avoids the tooltip of being too close of the
           // row, especially when we mouseEnter the row from the top edge.
