@@ -63,5 +63,10 @@ describe('WindowTitle', () => {
     expect(document.title).toBe(
       'good profile - Firefox - Intel Mac OS X 10.14 - 1/1/1970, 12:00:00 AM UTC - Firefox profiler'
     );
+
+    store.dispatch(changeProfileName('awesome profile'));
+    expect(document.title).toBe(
+      'awesome profile - Firefox - Intel Mac OS X 10.14 - 1/1/1970, 12:00:00 AM UTC - Firefox profiler'
+    );
   });
 });
