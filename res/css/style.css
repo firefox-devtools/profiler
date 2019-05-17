@@ -467,6 +467,7 @@ body,
   z-index: 4; /* needs to be on a higher level than .overflowEdgeIndicatorEdge */
   display: none;
   min-width: 160px;
+  max-width: 600px;
   padding: 5px 0;
   margin: 2px 0 0;
   background-color: #fff;
@@ -498,9 +499,11 @@ body,
 }
 
 .react-contextmenu-item {
+  overflow: hidden;
   padding: 2px 12px;
   cursor: default;
   line-height: 1.5;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
