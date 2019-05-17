@@ -10,7 +10,13 @@
  */
 export function isPerfScriptFormat(profile: string): boolean {
   const firstLine = profile.substring(0, profile.indexOf('\n'));
-  return /^(\S.+?)\s+(\d+)\/*(\d+)*\s+([\d.]+)/.test(firstLine);
+  //          +- process name (anything before the rest of the regexp, can contain spaces)
+  //          |        +- PID/ (optional)
+  //          |        |      +- TID
+  //          |        |      |          +- [CPU] (optional, present in SimplePerf output)
+  //          |        |      |          |          +- timestamp
+  //       vvvvv   vvvvvvvvv vvv   vvvvvvvvvvvvvv vvvvvv
+  return /^\S.+?\s+(?:\d+\/)?\d+\s+(?:\[\d+\]\s+)?[\d.]+:/.test(firstLine);
 }
 
 /**
@@ -133,25 +139,29 @@ export function convertPerfScriptProfile(profile: string): Object {
   let startTime = 0;
   while (lineIndex < lines.length) {
     const sampleStartLine = lines[lineIndex++];
+    if (sampleStartLine === '') {
+      continue;
+    }
     // default "perf script" output has TID but not PID
     // eg, "java 25607 4794564.109216: cycles:"
     // eg, "java 12688 [002] 6544038.708352: cpu-clock:"
     // eg, "V8 WorkerThread 25607 4794564.109216: cycles:"
     // eg, "java 24636/25607 [000] 4794564.109216: cycles:"
+    // eg, "Gecko	25122 [007] 115539.936601:		1000000 task-clock:u:" <-- SimplePerf output; note the tab characters
     // eg, "java 12688/12764 6544038.708352: cpu-clock:"
     // eg, "V8 WorkerThread 24636/25607 [000] 94564.109216: cycles:"
     // other combinations possible
-    // pattern: thread-name-with-optional-spaces-and-numbers tid time: NNN cycles:XXXX:
-    // alternate pattern: thread-name-with-optional-spaces-and-numbers pid/tid time: NNN cycles:XXXX:
+    // pattern: thread-name-with-optional-spaces-and-numbers tid [NNN] time: NNN cycles:XXXX:
+    // alternate pattern: thread-name-with-optional-spaces-and-numbers pid/tid [NNN] time: NNN cycles:XXXX:
     // eg, "FS Broker 5858  5791/5860  30171.917889:    4612247 cycles:ppp: "
     // eg, "java 25607/25608 4794564.109216: 33 cycles:uppp"
     //   (generate with "perf script -F +pid")
 
-    // First, get the sample's time stamp and whatever comes before the timeStamp:
-    const sampleStartMatch = /^(.*) ([\d.]+):/.exec(sampleStartLine);
+    // First, get the sample's time stamp and whatever comes before the timestamp:
+    const sampleStartMatch = /^(.*)\s+([\d.]+):/.exec(sampleStartLine);
     if (!sampleStartMatch) {
       console.log(
-        'Could not parse line as the start of a sample in the "perf script" profile format:',
+        'Could not parse line as the start of a sample in the "perf script" profile format: "%s"',
         sampleStartLine
       );
       continue;
@@ -163,16 +173,17 @@ export function convertPerfScriptProfile(profile: string): Object {
     // Now try to find the tid within `beforeTimeStamp`, possibly with a pid/ in
     // front of it. Treat everything before that as the thread name.
     //                                  +- threadName
-    //                                  |        +- pid/ (optional)
-    //                                  |        |        +- tid
-    //                                  |        |        |   +- space or end of string
-    //                                 vvvv vvvvvvvvvvv vvvvv v
-    const threadNamePidAndTidMatch = /^(.*) (?:(\d+)\/)?(\d+)\b/.exec(
+    //                                  |          +- pid/ (optional)
+    //                                  |          |        +- tid
+    //                                  |          |        |   +- end of word (space or end of string)
+    //                                 vvvv   vvvvvvvvvvv vvvvv v
+    const threadNamePidAndTidMatch = /^(.*)\s+(?:(\d+)\/)?(\d+)\b/.exec(
       beforeTimeStamp
     );
+
     if (!threadNamePidAndTidMatch) {
       console.log(
-        'Could not parse line as the start of a sample in the "perf script" profile format:',
+        'Could not parse line as the start of a sample in the "perf script" profile format: "%s"',
         sampleStartLine
       );
       continue;
