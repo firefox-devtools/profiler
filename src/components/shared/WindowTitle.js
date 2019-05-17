@@ -99,7 +99,7 @@ function _formatDateTime(timestamp: number): string {
   return dateTimeLabel;
 }
 
-export default explicitConnect({
+export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
     profileName: getProfileName(state),
     profile: getProfile(state),
