@@ -17,6 +17,7 @@ test_script:
   - yarn versions
   # run tests
   - yarn license-check
+  - yarn test-alex
   - yarn lint
   - yarn flow --quiet
   # stop flow to recover some memory

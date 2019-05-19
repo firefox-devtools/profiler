@@ -126,4 +126,4 @@ At the moment, Firefox Nightly Desktop doesn't support symbolicating profiles th
 * Avoid opening any other panels besides the Performance panel, to reduce the overhead of activated panels.
 * After connecting to the device, do not select *Main Process* or any of the open tabs from the list of targets on the left.
 * If WebIDE automatically reconnects to a debugging target from a previous session, disconnect, uncheck the two checkboxes in the WebIDE preferences (*Project* > *Preferences*) and reconnect to the device.
-* If the recording doesn't start after clicking the start button, or if the button is disabled or in an otherwise confused state, it might be necessary to close and restart WebIDE to reset some internal state.
+* If the recording doesn't start after clicking the start button, or if the button is inactive or in an otherwise confused state, it might be necessary to close and restart WebIDE to reset some internal state.
