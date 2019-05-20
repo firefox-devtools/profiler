@@ -55,6 +55,7 @@ type OwnProps = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
+  +disableTooltips: boolean,
   +scrollToSelectionGeneration: number,
 |};
 
@@ -388,8 +389,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
       stackTimingByDepth,
       categories,
       callNodeInfo,
+      disableTooltips,
       interval,
     } = this.props;
+
+    if (disableTooltips) {
+      return null;
+    }
 
     const stackTiming = stackTimingByDepth[depth];
     const callNodeIndex = stackTiming.callNode[stackTimingIndex];

@@ -101,36 +101,55 @@ exports[`StackChart matches the snapshot 1`] = `
       </label>
     </div>
   </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index="0"
+      title="Complete \\"Empty\\""
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete "Empty"
+      </span>
+    </li>
+  </ol>
   <div
-    class="stackChartContent"
+    class="react-contextmenu-wrapper treeViewContextMenu"
   >
     <div
-      class="chartViewport"
-      tabindex="0"
+      class="stackChartContent"
     >
-      <div>
-        <canvas
-          class="chartCanvas stackChartCanvas"
-          height="300"
-          style="width: 365px; height: 300px;"
-          width="365"
-        />
-      </div>
       <div
-        class="chartViewportScroll hidden"
+        class="chartViewport"
+        tabindex="0"
       >
-        Zoom Chart:
-        <kbd
-          class="chartViewportScrollKbd"
+        <div>
+          <canvas
+            class="chartCanvas stackChartCanvas"
+            height="300"
+            style="width: 365px; height: 300px;"
+            width="365"
+          />
+        </div>
+        <div
+          class="chartViewportScroll hidden"
         >
-          Ctrl + Scroll
-        </kbd>
-        or
-        <kbd
-          class="chartViewportScrollKbd"
-        >
-          Shift + Scroll
-        </kbd>
+          Zoom Chart:
+          <kbd
+            class="chartViewportScrollKbd"
+          >
+            Ctrl + Scroll
+          </kbd>
+          or
+          <kbd
+            class="chartViewportScrollKbd"
+          >
+            Shift + Scroll
+          </kbd>
+        </div>
       </div>
     </div>
   </div>
