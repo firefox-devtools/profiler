@@ -7,35 +7,24 @@ import React, { Fragment, PureComponent } from 'react';
 import { Provider } from 'react-redux';
 import explicitConnect from '../../utils/connect';
 
-import {
-  retrieveProfileFromAddon,
-  retrieveProfileFromStore,
-  retrieveProfileOrZipFromUrl,
-  retrieveProfilesToCompare,
-} from '../../actions/receive-profile';
 import ProfileViewer from './ProfileViewer';
 import ZipFileViewer from './ZipFileViewer';
 import Home from './Home';
 import CompareHome from './CompareHome';
+import { ProfileRootMessage } from './ProfileRootMessage';
 import { getView } from '../../selectors/app';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
-import {
-  getDataSource,
-  getHash,
-  getProfileUrl,
-  getProfilesToCompare,
-} from '../../selectors/url-state';
+import { getDataSource, getProfilesToCompare } from '../../selectors/url-state';
 import UrlManager from './UrlManager';
 import ServiceWorkerManager from './ServiceWorkerManager';
 import FooterLinks from './FooterLinks';
 import { ErrorBoundary } from './ErrorBoundary';
+import { ProfileLoader } from './ProfileLoader';
 
 import type { Store } from '../../types/store';
 import type { AppViewState, State } from '../../types/state';
 import type { DataSource } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
-
-require('./Root.css');
 
 const LOADING_MESSAGES: { [string]: string } = Object.freeze({
   'from-addon': 'Grabbing the profile from the Gecko Profiler Addon...',
@@ -67,124 +56,16 @@ function fewTimes(count: number) {
   }
 }
 
-function toParagraphs(str: string) {
-  return str.split('\n').map((s, i) => {
-    return <p key={i}>{s}</p>;
-  });
-}
 type ProfileViewStateProps = {|
   +view: AppViewState,
   +dataSource: DataSource,
-  +hash: string,
-  +profileUrl: string,
   +profilesToCompare: string[] | null,
   +hasZipFile: boolean,
 |};
 
-type ProfileViewDispatchProps = {|
-  +retrieveProfileFromAddon: typeof retrieveProfileFromAddon,
-  +retrieveProfileFromStore: typeof retrieveProfileFromStore,
-  +retrieveProfileOrZipFromUrl: typeof retrieveProfileOrZipFromUrl,
-  +retrieveProfilesToCompare: typeof retrieveProfilesToCompare,
-|};
-
-type ProfileViewProps = ConnectedProps<
-  {||},
-  ProfileViewStateProps,
-  ProfileViewDispatchProps
->;
+type ProfileViewProps = ConnectedProps<{||}, ProfileViewStateProps, {||}>;
 
 class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
-  _retrieveProfileFromDataSource = () => {
-    const {
-      dataSource,
-      hash,
-      profileUrl,
-      profilesToCompare,
-      retrieveProfileFromAddon,
-      retrieveProfileFromStore,
-      retrieveProfileOrZipFromUrl,
-      retrieveProfilesToCompare,
-    } = this.props;
-    switch (dataSource) {
-      case 'from-addon':
-        retrieveProfileFromAddon().catch(e => console.error(e));
-        break;
-      case 'from-file':
-        // retrieveProfileFromFile should already have been called
-        break;
-      case 'local':
-        break;
-      case 'public':
-        retrieveProfileFromStore(hash).catch(e => console.error(e));
-        break;
-      case 'from-url':
-        retrieveProfileOrZipFromUrl(profileUrl).catch(e => console.error(e));
-        break;
-      case 'compare':
-        if (profilesToCompare) {
-          retrieveProfilesToCompare(profilesToCompare);
-        }
-        break;
-      case 'none':
-        // nothing to do
-        break;
-      default:
-        throw new Error(`Unknown datasource ${dataSource}`);
-    }
-  };
-
-  componentDidMount() {
-    this._retrieveProfileFromDataSource();
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.dataSource === 'none' && this.props.dataSource !== 'none') {
-      this._retrieveProfileFromDataSource();
-    } else if (
-      this.props.dataSource === 'compare' &&
-      !prevProps.profilesToCompare &&
-      this.props.profilesToCompare
-    ) {
-      this.props.retrieveProfilesToCompare(this.props.profilesToCompare);
-    }
-  }
-
-  renderMessage(
-    message: string,
-    additionalMessage: string | null,
-    showLoader: boolean
-  ) {
-    return (
-      <div className="rootMessageContainer">
-        <div className="rootMessage">
-          <h1 className="rootMessageTitle">Firefox Profiler</h1>
-          <div className="rootMessageText">{message}</div>
-          {additionalMessage ? (
-            <div className="rootMessageAdditional">
-              {toParagraphs(additionalMessage)}
-              <a href="/">Back to home</a>
-            </div>
-          ) : null}
-          {showLoader ? (
-            <div className="loading">
-              <div className="loading-div loading-div-1 loading-row-1" />
-              <div className="loading-div loading-div-2 loading-row-2" />
-              <div className="loading-div loading-div-3 loading-row-3" />
-              <div className="loading-div loading-div-4 loading-row-3" />
-              <div className="loading-div loading-div-5 loading-row-4" />
-              <div className="loading-div loading-div-6 loading-row-4" />
-              <div className="loading-div loading-div-7 loading-row-4" />
-              <div className="loading-div loading-div-8 loading-row-4" />
-              <div className="loading-div loading-div-9 loading-row-4" />
-              <div className="loading-div loading-div-10 loading-row-4" />
-            </div>
-          ) : null}
-        </div>
-      </div>
-    );
-  }
-
   renderAppropriateComponents() {
     const { view, dataSource, profilesToCompare, hasZipFile } = this.props;
     const phase = view.phase;
@@ -215,7 +96,13 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
           }
         }
 
-        return this.renderMessage(message, additionalMessage, showLoader);
+        return (
+          <ProfileRootMessage
+            message={message}
+            additionalMessage={additionalMessage}
+            showLoader={showLoader}
+          />
+        );
       }
       case 'FATAL_ERROR': {
         const message =
@@ -228,7 +115,13 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
             'The full stack has been written to the Web Console.';
         }
 
-        return this.renderMessage(message, additionalMessage, false);
+        return (
+          <ProfileRootMessage
+            message={message}
+            additionalMessage={additionalMessage}
+            showLoader={false}
+          />
+        );
       }
       case 'DATA_LOADED':
         // The data is now loaded. This could be either a single profile, or a zip file
@@ -259,22 +152,14 @@ class ProfileViewWhenReadyImpl extends PureComponent<ProfileViewProps> {
 export const ProfileViewWhenReady = explicitConnect<
   {||},
   ProfileViewStateProps,
-  ProfileViewDispatchProps
+  {||}
 >({
   mapStateToProps: (state: State) => ({
     view: getView(state),
     dataSource: getDataSource(state),
-    hash: getHash(state),
-    profileUrl: getProfileUrl(state),
     profilesToCompare: getProfilesToCompare(state),
     hasZipFile: getHasZipFile(state),
   }),
-  mapDispatchToProps: {
-    retrieveProfileFromStore,
-    retrieveProfileOrZipFromUrl,
-    retrieveProfileFromAddon,
-    retrieveProfilesToCompare,
-  },
   component: ProfileViewWhenReadyImpl,
 });
 
@@ -289,6 +174,7 @@ export default class Root extends PureComponent<RootProps> {
       <ErrorBoundary message="Uh oh, some error happened in profiler.firefox.com.">
         <Provider store={store}>
           <UrlManager>
+            <ProfileLoader />
             <ProfileViewWhenReady />
             <FooterLinks />
           </UrlManager>
