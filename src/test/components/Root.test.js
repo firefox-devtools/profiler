@@ -30,6 +30,7 @@ import { Provider } from 'react-redux';
 import { render } from 'react-testing-library';
 
 import { ProfileViewWhenReady } from '../../components/app/Root';
+import { ProfileLoader } from '../../components/app/ProfileLoader';
 import { updateUrlState, changeProfilesToCompare } from '../../actions/app';
 // Because this module is mocked but we want the real actions in the test, we
 // use `jest.requireActual` here.
@@ -161,7 +162,10 @@ function setup() {
   const store = blankStore();
   const renderResult = render(
     <Provider store={store}>
-      <ProfileViewWhenReady />
+      <>
+        <ProfileLoader />
+        <ProfileViewWhenReady />
+      </>
     </Provider>
   );
 
