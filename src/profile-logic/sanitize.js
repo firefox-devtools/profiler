@@ -81,14 +81,14 @@ export function sanitizePII(
         PIIToBeRemoved
       );
 
-      if (newThread === null) {
-        // Filtering out the current thread if it's null.
-        return acc;
+      // Filtering out the current thread if it's null.
+      if (newThread !== null) {
+        // Adding the thread to the `threads` list.
+        oldThreadIndexToNew.set(threadIndex, acc.length);
+        acc.push(newThread);
       }
 
-      // Adding the thread to the `threads` list.
-      oldThreadIndexToNew.set(threadIndex, acc.length);
-      return acc.concat(newThread);
+      return acc;
     }, []),
     // Remove counters which belong to the removed counters.
     // Also adjust other counters to point to the right thread.
@@ -97,14 +97,16 @@ export function sanitizePII(
           const newThreadIndex = oldThreadIndexToNew.get(
             counter.mainThreadIndex
           );
-          if (newThreadIndex === undefined) {
-            // Filtering out the current counter.
-            return acc;
+
+          // Filtering out the counter if it's undefined.
+          if (newThreadIndex !== undefined) {
+            acc.push({
+              ...counter,
+              mainThreadIndex: newThreadIndex,
+            });
           }
 
-          counter.mainThreadIndex = newThreadIndex;
-          // Adding the current counter to the `counters` list.
-          return acc.concat(counter);
+          return acc;
         }, [])
       : undefined,
   };
