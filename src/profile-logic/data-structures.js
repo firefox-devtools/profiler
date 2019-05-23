@@ -4,8 +4,10 @@
 
 // @flow
 import { UniqueStringArray } from '../utils/unique-string-array';
-import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
-import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profile-versioning';
+import {
+  GECKO_PROFILE_VERSION,
+  PROCESSED_PROFILE_VERSION,
+} from '../app-logic/constants';
 
 import type {
   Thread,

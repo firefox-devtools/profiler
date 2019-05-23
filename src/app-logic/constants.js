@@ -4,6 +4,12 @@
 
 // @flow
 
+// The current version of the Gecko profile format.
+export const GECKO_PROFILE_VERSION = 15;
+
+// The current version of the "processed" profile format.
+export const PROCESSED_PROFILE_VERSION = 22;
+
 // The following are the margin sizes for the left and right of the timeline. Independent
 // components need to share these values.
 export const TIMELINE_MARGIN_RIGHT = 15;
