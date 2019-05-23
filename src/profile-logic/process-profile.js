@@ -14,7 +14,6 @@ import {
 } from './data-structures';
 import { immutableUpdate } from '../utils/flow';
 import {
-  CURRENT_VERSION,
   upgradeProcessedProfileToCurrentVersion,
   isProcessedProfile,
 } from './processed-profile-versioning';
@@ -28,6 +27,8 @@ import {
   convertPerfScriptProfile,
 } from './import/linux-perf';
 import { convertPhaseTimes } from './convert-markers';
+import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
+
 import type {
   Profile,
   Thread,
@@ -1033,7 +1034,7 @@ export function processProfile(
     toolkit: geckoProfile.meta.toolkit,
     version: geckoProfile.meta.version,
     categories: geckoProfile.meta.categories,
-    preprocessedProfileVersion: CURRENT_VERSION,
+    preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
     appBuildID: geckoProfile.meta.appBuildID,
     // A link to the source code revision for this build.
     sourceURL: geckoProfile.meta.sourceURL,

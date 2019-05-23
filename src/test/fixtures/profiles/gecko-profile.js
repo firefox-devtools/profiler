@@ -13,7 +13,7 @@ import type {
   GeckoMarkerStack,
 } from '../../../types/gecko-profile';
 
-import { CURRENT_VERSION } from '../../../profile-logic/gecko-profile-versioning';
+import { GECKO_PROFILE_VERSION } from '../../../app-logic/constants';
 
 /**
  * export defaults one object that is an example profile, in the Gecko format,
@@ -85,7 +85,7 @@ export function createGeckoProfile(): GeckoProfile {
     startTime: 1460221352723.438,
     shutdownTime: 1560221352723,
     toolkit: 'cocoa',
-    version: CURRENT_VERSION,
+    version: GECKO_PROFILE_VERSION,
     logicalCPUs: 8,
     physicalCPUs: 4,
     sourceURL: '',

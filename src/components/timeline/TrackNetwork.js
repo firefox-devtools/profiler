@@ -14,6 +14,11 @@ import {
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { VerticalIndicators } from './VerticalIndicators';
+import {
+  TRACK_NETWORK_ROW_HEIGHT,
+  TRACK_NETWORK_ROW_REPEAT,
+  TRACK_NETWORK_HEIGHT,
+} from '../../app-logic/constants';
 
 import type { ThreadIndex, PageList } from '../../types/profile';
 import type {
@@ -46,10 +51,6 @@ type Props = {|
   ...SizeProps,
 |};
 type State = void;
-
-export const ROW_HEIGHT = 5;
-export const ROW_REPEAT = 7;
-export const TRACK_NETWORK_HEIGHT = ROW_HEIGHT * ROW_REPEAT;
 
 class Network extends PureComponent<Props, State> {
   _canvas: null | HTMLCanvasElement = null;
@@ -96,7 +97,7 @@ class Network extends PureComponent<Props, State> {
     const rangeLength = rangeEnd - rangeStart;
 
     const devicePixelRatio = window.devicePixelRatio;
-    const rowHeight = ROW_HEIGHT * devicePixelRatio;
+    const rowHeight = TRACK_NETWORK_ROW_HEIGHT * devicePixelRatio;
     canvas.width = Math.round(containerWidth * devicePixelRatio);
     canvas.height = Math.round(TRACK_NETWORK_HEIGHT * devicePixelRatio);
     const ctx = canvas.getContext('2d');
@@ -113,7 +114,8 @@ class Network extends PureComponent<Props, State> {
           (timing.start[timingIndex] - rangeStart);
         const end =
           (canvas.width / rangeLength) * (timing.end[timingIndex] - rangeStart);
-        const y = (rowIndex % ROW_REPEAT) * rowHeight + rowHeight * 0.5;
+        const y =
+          (rowIndex % TRACK_NETWORK_ROW_REPEAT) * rowHeight + rowHeight * 0.5;
         ctx.beginPath();
         ctx.moveTo(start, y);
         ctx.lineTo(end, y);
