@@ -31,6 +31,8 @@ import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';
 import TimelineLocalTrack from './LocalTrack';
 import Reorderable from '../shared/Reorderable';
+import { TRACK_PROCESS_BLANK_HEIGHT } from '../../app-logic/constants';
+
 import type { TabSlug } from '../../app-logic/tabs-handling';
 import type { GlobalTrackReference } from '../../types/actions';
 import type { Pid } from '../../types/profile';
@@ -67,8 +69,6 @@ type DispatchProps = {|
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
-
-export const TRACK_PROCESS_BLANK_HEIGHT = 30;
 
 class GlobalTrackComponent extends PureComponent<Props> {
   _onLabelMouseDown = (event: MouseEvent) => {
