@@ -21,8 +21,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
-
-export const CURRENT_VERSION = 22; // The current version of the "processed" profile format.
+import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -52,22 +51,22 @@ export function isProcessedProfile(profile: Object): boolean {
 export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
   const profileVersion =
     profile.meta.preprocessedProfileVersion || UNANNOTATED_VERSION;
-  if (profileVersion === CURRENT_VERSION) {
+  if (profileVersion === PROCESSED_PROFILE_VERSION) {
     return;
   }
 
-  if (profileVersion > CURRENT_VERSION) {
+  if (profileVersion > PROCESSED_PROFILE_VERSION) {
     throw new Error(
       `Unable to parse a processed profile of version ${profileVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
-        `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_VERSION}.\n` +
+        `The most recent version understood by this version of profiler.firefox.com is version ${PROCESSED_PROFILE_VERSION}.\n` +
         'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
     );
   }
 
-  // Convert to CURRENT_VERSION, one step at a time.
+  // Convert to PROCESSED_PROFILE_VERSION, one step at a time.
   for (
     let destVersion = profileVersion + 1;
-    destVersion <= CURRENT_VERSION;
+    destVersion <= PROCESSED_PROFILE_VERSION;
     destVersion++
   ) {
     if (destVersion in _upgraders) {
@@ -75,7 +74,7 @@ export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
     }
   }
 
-  profile.meta.preprocessedProfileVersion = CURRENT_VERSION;
+  profile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
 }
 
 function _archFromAbi(abi) {

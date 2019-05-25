@@ -14,12 +14,14 @@ import { tabSlugs } from '../app-logic/tabs-handling';
 import { selectedThreadSelectors } from './per-thread';
 import { getGlobalTracks, getLocalTracksByPid } from './profile';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
-import { TRACK_SCREENSHOT_HEIGHT } from '../components/timeline/TrackScreenshots';
-import { TRACK_NETWORK_HEIGHT } from '../components/timeline/TrackNetwork';
-import { TRACK_MEMORY_HEIGHT } from '../components/timeline/TrackMemory';
-import { TRACK_PROCESS_BLANK_HEIGHT } from '../components/timeline/GlobalTrack';
-import { TIMELINE_RULER_HEIGHT } from '../components/timeline/Ruler';
-import { TIMELINE_SETTINGS_HEIGHT } from '../components/timeline';
+import {
+  TRACK_SCREENSHOT_HEIGHT,
+  TRACK_NETWORK_HEIGHT,
+  TRACK_MEMORY_HEIGHT,
+  TRACK_PROCESS_BLANK_HEIGHT,
+  TIMELINE_RULER_HEIGHT,
+  TIMELINE_SETTINGS_HEIGHT,
+} from '../app-logic/constants';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { AppState, AppViewState } from '../types/state';

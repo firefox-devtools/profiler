@@ -6,16 +6,16 @@ import { isOldCleopatraFormat } from '../../profile-logic/old-cleopatra-profile-
 import {
   isProcessedProfile,
   upgradeProcessedProfileToCurrentVersion,
-  CURRENT_VERSION as CURRENT_PROCESSED_VERSION,
 } from '../../profile-logic/processed-profile-versioning';
 import {
   unserializeProfileOfArbitraryFormat,
   serializeProfile,
 } from '../../profile-logic/process-profile';
+import { upgradeGeckoProfileToCurrentVersion } from '../../profile-logic/gecko-profile-versioning';
 import {
-  upgradeGeckoProfileToCurrentVersion,
-  CURRENT_VERSION as CURRENT_GECKO_VERSION,
-} from '../../profile-logic/gecko-profile-versioning';
+  GECKO_PROFILE_VERSION,
+  PROCESSED_PROFILE_VERSION,
+} from '../../app-logic/constants';
 
 describe('upgrading old cleopatra profiles', function() {
   const oldCleopatraProfile = require('../fixtures/upgrades/old-cleopatra-profile.sps.json');
@@ -88,8 +88,9 @@ describe('upgrading old cleopatra profiles', function() {
 //
 // These steps are the same for the Gecko profile format and the processed
 // profile format.
-// When you've increased CURRENT_VERSION and added an upgrader for the format
-// changes, follow these steps to make sure your upgrader is tested:
+// When you've increased {GECKO_PROFILE_VERSION, PROCESSED_PROFILE_VERSION} and
+// added an upgrader for the format changes, follow these steps to make sure
+// your upgrader is tested:
 //  1. Run these tests. The test harness will report snapshot mismatches.
 //     Inspect these mismatches.
 //  2. If the snapshot mismatches demonstrate that your upgrader code is being
@@ -118,7 +119,7 @@ describe('upgrading old cleopatra profiles', function() {
 describe('upgrading gecko profiles', function() {
   function testProfileUpgrading(profile) {
     upgradeGeckoProfileToCurrentVersion(profile);
-    expect(profile.meta.version).toEqual(CURRENT_GECKO_VERSION);
+    expect(profile.meta.version).toEqual(GECKO_PROFILE_VERSION);
     expect(profile).toMatchSnapshot();
   }
 
@@ -140,7 +141,7 @@ describe('upgrading processed profiles', function() {
   async function testProfileUpgrading(profile) {
     const upgradedProfile = await unserializeProfileOfArbitraryFormat(profile);
     expect(upgradedProfile.meta.preprocessedProfileVersion).toEqual(
-      CURRENT_PROCESSED_VERSION
+      PROCESSED_PROFILE_VERSION
     );
     expect(JSON.parse(serializeProfile(upgradedProfile))).toMatchSnapshot();
   }
