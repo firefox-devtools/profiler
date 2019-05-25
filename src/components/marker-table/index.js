@@ -5,6 +5,8 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import memoize from 'memoize-immutable';
+
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import {
@@ -149,6 +151,8 @@ class MarkerTable extends PureComponent<Props> {
   _treeView: ?TreeView<MarkerDisplayData>;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
+  getMarkerTree = memoize((...args) => new MarkerTree(...args), { limit: 1 });
+
   componentDidMount() {
     this.focus();
   }
@@ -178,7 +182,7 @@ class MarkerTable extends PureComponent<Props> {
 
   render() {
     const { getMarker, markerIndexes, zeroAt, selectedMarker } = this.props;
-    const tree = new MarkerTree(getMarker, markerIndexes, zeroAt);
+    const tree = this.getMarkerTree(getMarker, markerIndexes, zeroAt);
     return (
       <div
         className="markerTable"
