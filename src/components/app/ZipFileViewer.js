@@ -283,7 +283,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
                 selectedNodeId={selectedZipFileIndex}
                 expandedNodeIds={expandedZipFileIndexes}
                 ref={this._takeTreeViewRef}
-                contextMenuId="MarkersContextMenu"
+                contextMenuId="unused"
                 rowHeight={30}
                 indentWidth={15}
                 onEnterKey={this._onEnterKey}

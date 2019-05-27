@@ -45,7 +45,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MarkersContextMenu extends PureComponent<Props> {
+class MarkerContextMenu extends PureComponent<Props> {
   setStartRange = () => {
     const {
       selectedMarker,
@@ -174,7 +174,7 @@ class MarkersContextMenu extends PureComponent<Props> {
     }
 
     return (
-      <ContextMenu id="MarkersContextMenu">
+      <ContextMenu id="MarkerContextMenu">
         <MenuItem onClick={this.setStartRange}>
           Set selection start time here
         </MenuItem>
@@ -208,5 +208,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     selectedMarker: selectedThreadSelectors.getSelectedMarker(state),
   }),
   mapDispatchToProps: { updatePreviewSelection },
-  component: MarkersContextMenu,
+  component: MarkerContextMenu,
 });
