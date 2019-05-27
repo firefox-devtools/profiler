@@ -276,6 +276,22 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         ...state.slice(threadIndex + 1),
       ];
     }
+    case 'SET_CONTEXT_MENU_VISIBILITY': {
+      // We want to change the state only when the menu is hidden.
+      if (action.isVisible) {
+        return state;
+      }
+
+      const { threadIndex } = action;
+      return [
+        ...state.slice(0, threadIndex),
+        {
+          ...state[threadIndex],
+          rightClickedCallNodePath: null,
+        },
+        ...state.slice(threadIndex + 1),
+      ];
+    }
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadIndex, transform, transformedThread } = action;
       const expandedCallNodePaths = new PathSet(
