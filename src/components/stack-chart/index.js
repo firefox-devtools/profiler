@@ -58,7 +58,7 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +isCallNodeContextMenuVisible: boolean,
+  +isContextMenuVisible: boolean,
   +scrollToSelectionGeneration: number,
 |};
 
@@ -133,7 +133,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       callNodeInfo,
       categories,
       selectedCallNodeIndex,
-      isCallNodeContextMenuVisible,
+      isContextMenuVisible,
       scrollToSelectionGeneration,
     } = this.props;
 
@@ -180,7 +180,7 @@ class StackChartGraph extends React.PureComponent<Props> {
                 selectedCallNodeIndex,
                 onSelectionChange: this._onSelectedCallNodeChange,
                 onRightClick: this._onRightClickedCallNodeChange,
-                disableTooltips: isCallNodeContextMenuVisible,
+                disableTooltips: isContextMenuVisible,
                 scrollToSelectionGeneration,
               }}
             />
@@ -210,8 +210,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      isCallNodeContextMenuVisible: getProfileViewOptions(state)
-        .isCallNodeContextMenuVisible,
+      isContextMenuVisible: getProfileViewOptions(state).isContextMenuVisible,
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     };
   },

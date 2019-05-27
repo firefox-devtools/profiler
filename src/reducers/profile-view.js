@@ -470,12 +470,9 @@ const rightClickedTrack: Reducer<TrackReference | null> = (
   }
 };
 
-const isCallNodeContextMenuVisible: Reducer<boolean> = (
-  state = false,
-  action
-) => {
+const isContextMenuVisible: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
-    case 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY':
+    case 'SET_CONTEXT_MENU_VISIBILITY':
       return action.isVisible;
     default:
       return state;
@@ -514,7 +511,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       focusCallTreeGeneration,
       rootRange,
       rightClickedTrack,
-      isCallNodeContextMenuVisible,
+      isContextMenuVisible,
     }),
     globalTracks,
     localTracksByPid,

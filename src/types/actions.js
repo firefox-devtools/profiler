@@ -199,7 +199,7 @@ type ProfileAction =
       +selectedThreadIndex: ThreadIndex,
     |}
   | {|
-      +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
+      +type: 'SET_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
     |}
   | {|

@@ -14,7 +14,7 @@ import copy from 'copy-to-clipboard';
 import {
   addTransformToStack,
   expandAllCallNodeDescendants,
-  setCallNodeContextMenuVisibility,
+  setContextMenuVisibility,
 } from '../../actions/profile-view';
 import {
   getSelectedTab,
@@ -56,7 +56,7 @@ type StateProps = {|
 type DispatchProps = {|
   +addTransformToStack: typeof addTransformToStack,
   +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
-  +setCallNodeContextMenuVisibility: typeof setCallNodeContextMenuVisibility,
+  +setContextMenuVisibility: typeof setContextMenuVisibility,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -76,12 +76,12 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
   }
 
   _showMenu = () => {
-    this.props.setCallNodeContextMenuVisibility(true);
+    this.props.setContextMenuVisibility(true);
     this.setState({ isShown: true });
   };
 
   _hideMenu = () => {
-    this.props.setCallNodeContextMenuVisibility(false);
+    this.props.setContextMenuVisibility(false);
     this.setState({ isShown: false });
   };
 
@@ -507,7 +507,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapDispatchToProps: {
     addTransformToStack,
     expandAllCallNodeDescendants,
-    setCallNodeContextMenuVisibility,
+    setContextMenuVisibility,
   },
   component: CallNodeContextMenu,
 });

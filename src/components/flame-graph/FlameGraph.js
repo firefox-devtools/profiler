@@ -62,7 +62,7 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +threadIndex: number,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +isCallNodeContextMenuVisible: boolean,
+  +isContextMenuVisible: boolean,
   +scrollToSelectionGeneration: number,
   +icons: IconWithClassName[],
   +categories: CategoryList,
@@ -252,7 +252,7 @@ class FlameGraph extends React.PureComponent<Props> {
       timeRange,
       previewSelection,
       selectedCallNodeIndex,
-      isCallNodeContextMenuVisible,
+      isContextMenuVisible,
       scrollToSelectionGeneration,
       icons,
       categories,
@@ -305,7 +305,7 @@ class FlameGraph extends React.PureComponent<Props> {
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
               onRightClick: this._onRightClickedCallNodeChange,
-              disableTooltips: isCallNodeContextMenuVisible,
+              disableTooltips: isContextMenuVisible,
               interval,
               isInverted,
             }}
@@ -341,8 +341,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      isCallNodeContextMenuVisible: getProfileViewOptions(state)
-        .isCallNodeContextMenuVisible,
+      isContextMenuVisible: getProfileViewOptions(state).isContextMenuVisible,
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       icons: getIconsWithClassNames(state),
       interval: getProfileInterval(state),

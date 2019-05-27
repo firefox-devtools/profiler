@@ -336,9 +336,9 @@ export function changeRightClickedTrack(
   };
 }
 
-export function setCallNodeContextMenuVisibility(isVisible: boolean): Action {
+export function setContextMenuVisibility(isVisible: boolean): Action {
   return {
-    type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
+    type: 'SET_CONTEXT_MENU_VISIBILITY',
     isVisible,
   };
 }
