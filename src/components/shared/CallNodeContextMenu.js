@@ -63,13 +63,18 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 require('./CallNodeContextMenu.css');
 
 class CallNodeContextMenu extends PureComponent<Props> {
+  _hidingTimeout: TimeoutID | null = null;
 
-  _showMenu = () => {
+  _onShow = () => {
+    clearTimeout(this._hidingTimeout);
     this.props.setContextMenuVisibility(true);
   };
 
-  _hideMenu = () => {
-    this.props.setContextMenuVisibility(false);
+  _onHide = () => {
+    this._hidingTimeout = setTimeout(() => {
+      this._hidingTimeout = null;
+      this.props.setContextMenuVisibility(false);
+    }, 100);
   };
 
   _getFunctionName(): string {
@@ -350,7 +355,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
       // changed to null, the onHide callback will not execute when
       // null is returned below. Call _menuHidden() here to be ensure
       // the visibility state is updated.
-      this._hideMenu();
+      this._onHide();
     }
   }
 
@@ -471,8 +476,8 @@ class CallNodeContextMenu extends PureComponent<Props> {
     return (
       <ContextMenu
         id="CallNodeContextMenu"
-        onShow={this._showMenu}
-        onHide={this._hideMenu}
+        onShow={this._onShow}
+        onHide={this._onHide}
       >
         {this.props.isContextMenuVisible
           ? this.renderContextMenuContents()
