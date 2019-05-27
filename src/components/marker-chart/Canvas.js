@@ -53,6 +53,7 @@ type OwnProps = {|
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
   +rightClickedMarker: MarkerIndex | null,
+  +disableTooltips: boolean,
 |};
 
 type Props = {|
@@ -393,6 +394,10 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   }
 
   getHoveredMarkerInfo = (markerIndex: MarkerIndex): React.Node => {
+    if (this.props.disableTooltips) {
+      return null;
+    }
+
     const marker = this.props.getMarker(markerIndex);
     return (
       <TooltipMarker marker={marker} threadIndex={this.props.threadIndex} />
