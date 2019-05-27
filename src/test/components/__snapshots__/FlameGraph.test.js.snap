@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FlameGraph has a tooltip that matches the screenshot 1`] = `
+exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
