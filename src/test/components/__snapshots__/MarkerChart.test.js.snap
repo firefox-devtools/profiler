@@ -496,32 +496,36 @@ exports[`MarkerChart renders the normal marker chart and matches the snapshot 1`
     </div>
   </div>
   <div
-    class="chartViewport"
-    tabindex="0"
+    class="react-contextmenu-wrapper treeViewContextMenu"
   >
-    <div>
-      <canvas
-        class="chartCanvas markerChartCanvas"
-        height="600"
-        style="width: 365px; height: 300px;"
-        width="730"
-      />
-    </div>
     <div
-      class="chartViewportScroll hidden"
+      class="chartViewport"
+      tabindex="0"
     >
-      Zoom Chart:
-      <kbd
-        class="chartViewportScrollKbd"
+      <div>
+        <canvas
+          class="chartCanvas markerChartCanvas"
+          height="600"
+          style="width: 365px; height: 300px;"
+          width="730"
+        />
+      </div>
+      <div
+        class="chartViewportScroll hidden"
       >
-        Ctrl + Scroll
-      </kbd>
-      or
-      <kbd
-        class="chartViewportScrollKbd"
-      >
-        Shift + Scroll
-      </kbd>
+        Zoom Chart:
+        <kbd
+          class="chartViewportScrollKbd"
+        >
+          Ctrl + Scroll
+        </kbd>
+        or
+        <kbd
+          class="chartViewportScrollKbd"
+        >
+          Shift + Scroll
+        </kbd>
+      </div>
     </div>
   </div>
 </div>

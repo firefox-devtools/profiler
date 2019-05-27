@@ -24,6 +24,7 @@ import {
   updatePreviewSelection,
   changeRightClickedMarker,
 } from '../../actions/profile-view';
+import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 
 import type {
   Marker,
@@ -114,33 +115,40 @@ class MarkerChart extends React.PureComponent<Props> {
         {maxMarkerRows === 0 ? (
           <MarkerChartEmptyReasons />
         ) : (
-          <MarkerChartCanvas
-            key={threadIndex}
-            viewportProps={{
-              timeRange,
-              previewSelection,
-              maxViewportHeight,
-              viewportNeedsUpdate,
-              maximumZoom: this.getMaximumZoom(),
-              marginLeft: TIMELINE_MARGIN_LEFT,
-              marginRight: TIMELINE_MARGIN_RIGHT,
-              containerRef: this._takeViewportRef,
+          <ContextMenuTrigger
+            id="MarkerContextMenu"
+            attributes={{
+              className: 'treeViewContextMenu',
             }}
-            chartProps={{
-              markerTimingRows,
-              getMarker,
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              updatePreviewSelection,
-              changeRightClickedMarker,
-              rangeStart: timeRange.start,
-              rangeEnd: timeRange.end,
-              rowHeight: ROW_HEIGHT,
-              threadIndex,
-              marginLeft: TIMELINE_MARGIN_LEFT,
-              marginRight: TIMELINE_MARGIN_RIGHT,
-              rightClickedMarker,
-            }}
-          />
+          >
+            <MarkerChartCanvas
+              key={threadIndex}
+              viewportProps={{
+                timeRange,
+                previewSelection,
+                maxViewportHeight,
+                viewportNeedsUpdate,
+                maximumZoom: this.getMaximumZoom(),
+                marginLeft: TIMELINE_MARGIN_LEFT,
+                marginRight: TIMELINE_MARGIN_RIGHT,
+                containerRef: this._takeViewportRef,
+              }}
+              chartProps={{
+                markerTimingRows,
+                getMarker,
+                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
+                updatePreviewSelection,
+                changeRightClickedMarker,
+                rangeStart: timeRange.start,
+                rangeEnd: timeRange.end,
+                rowHeight: ROW_HEIGHT,
+                threadIndex,
+                marginLeft: TIMELINE_MARGIN_LEFT,
+                marginRight: TIMELINE_MARGIN_RIGHT,
+                rightClickedMarker,
+              }}
+            />
+          </ContextMenuTrigger>
         )}
       </div>
     );
