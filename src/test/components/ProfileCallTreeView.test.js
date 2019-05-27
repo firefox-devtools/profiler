@@ -6,8 +6,11 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
+// This module is mocked.
+import copy from 'copy-to-clipboard';
 
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
+import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
@@ -25,6 +28,8 @@ import {
   addTransformToStack,
 } from '../../actions/profile-view';
 
+import type { Profile } from '../../types/profile';
+
 beforeEach(() => {
   // Mock out the 2d canvas for the loupe view.
   jest
@@ -38,21 +43,65 @@ beforeEach(() => {
 });
 
 describe('calltree/ProfileCallTreeView', function() {
-  const { profile } = getProfileFromTextSamples(`
-    A  A  A
-    B  B  B
-    C  C  H
-    D  F  I
-    E  E
-  `);
+  function setup(profile?: Profile) {
+    if (!profile) {
+      profile = getProfileFromTextSamples(`
+        A  A  A
+        B  B  B
+        C  C  H
+        D  F  I
+        E  E
+      `).profile;
+    }
 
-  it('renders an unfiltered call tree', () => {
-    const { container } = render(
-      <Provider store={storeWithProfile(profile)}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+    const store = storeWithProfile(profile);
+    const renderResult = render(
+      <Provider store={store}>
+        <>
+          <CallNodeContextMenu />
+          <ProfileCallTreeView hideThreadActivityGraph={true} />
+        </>
       </Provider>
     );
+    const { container, getByText } = renderResult;
 
+    const node = str => getByText(str);
+    const row = str =>
+      ensureExists(
+        node(str).closest('.treeViewRow'),
+        `Couldn't find the row for node ${str}.`
+      );
+    const contextMenu = () =>
+      ensureExists(
+        container.querySelector('.react-contextmenu'),
+        `Couldn't find the context menu.`
+      );
+
+    const click = (element: HTMLElement) => {
+      fireEvent.mouseDown(element);
+      fireEvent.mouseUp(element);
+      fireEvent.click(element);
+    };
+
+    const rightClick = (element: HTMLElement) => {
+      fireEvent.mouseDown(element, { button: 2, buttons: 2 });
+      fireEvent.mouseUp(element, { button: 2, buttons: 2 });
+      fireEvent.contextMenu(element);
+    };
+
+    return {
+      ...store,
+      ...renderResult,
+      node,
+      row,
+      contextMenu,
+      click,
+      rightClick,
+    };
+  }
+
+  it('renders an unfiltered call tree', () => {
+    const { container } = setup();
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -65,6 +114,10 @@ describe('calltree/ProfileCallTreeView', function() {
       E  Z  Y
             Z
     `).profile;
+
+    // Note: we're not using the setup function because we want to change the
+    // invertCallstack flag before rendering, so that we get the initial
+    // expanded selection in this case too.
     const store = storeWithProfile(profileForInvertedTree);
     store.dispatch(changeInvertCallstack(true));
 
@@ -78,28 +131,23 @@ describe('calltree/ProfileCallTreeView', function() {
   });
 
   it('renders call tree with some search strings', () => {
-    const store = storeWithProfile(profile);
-    const { container } = render(
-      <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
-      </Provider>
-    );
+    const { container, dispatch } = setup();
 
     expect(container.firstChild).toMatchSnapshot();
 
-    store.dispatch(changeCallTreeSearchString('C'));
+    dispatch(changeCallTreeSearchString('C'));
     expect(container.firstChild).toMatchSnapshot();
 
-    store.dispatch(changeCallTreeSearchString('C,'));
+    dispatch(changeCallTreeSearchString('C,'));
     expect(container.firstChild).toMatchSnapshot();
 
-    store.dispatch(changeCallTreeSearchString('C, F'));
+    dispatch(changeCallTreeSearchString('C, F'));
     expect(container.firstChild).toMatchSnapshot();
 
-    store.dispatch(changeCallTreeSearchString('C, F,E'));
+    dispatch(changeCallTreeSearchString('C, F,E'));
     expect(container.firstChild).toMatchSnapshot();
 
-    store.dispatch(changeCallTreeSearchString(' C , E   '));
+    dispatch(changeCallTreeSearchString(' C , E   '));
     expect(container.firstChild).toMatchSnapshot();
   });
 
@@ -109,14 +157,118 @@ describe('calltree/ProfileCallTreeView', function() {
         .fill('name')
         .join('\n')
     );
-    const store = storeWithProfile(profile);
-    const { container } = render(
-      <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
-      </Provider>
-    );
 
-    expect(container.firstChild).toMatchSnapshot();
+    const { container } = setup(profile);
+    const treeBody = ensureExists(
+      container.querySelector('.treeViewBodyInner1')
+    );
+    const treeBodyWidth = parseInt(treeBody.style.width);
+    expect(treeBodyWidth).toBeGreaterThan(3000);
+  });
+
+  it('selects a node when left clicking', () => {
+    const { node, row, click } = setup();
+
+    click(node('A'));
+    expect(row('A')).toHaveClass('selected');
+
+    click(node('B'));
+    expect(row('A')).not.toHaveClass('selected');
+    expect(row('B')).toHaveClass('selected');
+  });
+
+  it('displays a context menu when right clicking', () => {
+    // Fake timers are needed when dealing with the context menu.
+    jest.useFakeTimers();
+
+    const { contextMenu, node, row, rightClick, getByText } = setup();
+
+    function checkMenuIsDisplayedForNode(str) {
+      expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+
+      // Note that selecting a menu item will close the menu.
+      fireEvent.click(getByText('Copy function name'));
+      expect(copy).toHaveBeenLastCalledWith(str);
+    }
+
+    rightClick(node('A'));
+    expect(row('A')).toHaveClass('rightClicked');
+    checkMenuIsDisplayedForNode('A');
+
+    // Wait that all timers are done before trying again.
+    jest.runAllTimers();
+
+    // Now try it again by right clicking 2 nodes in sequence.
+    rightClick(node('A'));
+    rightClick(node('C'));
+    expect(row('C')).toHaveClass('rightClicked');
+    checkMenuIsDisplayedForNode('C');
+
+    // Wait that all timers are done before trying again.
+    jest.runAllTimers();
+
+    // And now let's do it again, but this time waiting for timers before
+    // clicking, because the timer can impact the menu being displayed.
+    rightClick(node('A'));
+    rightClick(node('C'));
+    jest.runAllTimers();
+    expect(row('C')).toHaveClass('rightClicked');
+    checkMenuIsDisplayedForNode('C');
+  });
+
+  it('hides the context menu by left clicking somewhere else', () => {
+    // Fake timers are needed when dealing with the context menu.
+    jest.useFakeTimers();
+
+    const { contextMenu, node, click, rightClick, container } = setup();
+    rightClick(node('A'));
+    expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+
+    click(node('C'));
+    expect(contextMenu()).not.toHaveClass('react-contextmenu--visible');
+
+    jest.runAllTimers();
+    expect(container.querySelector('.react-contextmenu')).toBeFalsy();
+  });
+
+  it('highlights the row properly when rightclicking a selected row', () => {
+    // Fake timers are needed when dealing with the context menu.
+    jest.useFakeTimers();
+
+    const { node, row, click, rightClick } = setup();
+
+    click(node('A'));
+    expect(row('A')).toHaveClass('selected');
+    expect(row('A')).not.toHaveClass('rightClicked');
+
+    rightClick(node('A'));
+    // Both classes will be set, but our CSS styles `rightClicked` only when
+    // `selected` is not present either.
+    expect(row('A')).toHaveClass('selected');
+    expect(row('A')).toHaveClass('rightClicked');
+  });
+
+  it('highlights the row properly when selecting a rightclicked row', () => {
+    // Fake timers are needed when dealing with the context menu.
+    jest.useFakeTimers();
+
+    const { node, row, click, rightClick } = setup();
+
+    rightClick(node('A'));
+    expect(row('A')).not.toHaveClass('selected');
+    expect(row('A')).toHaveClass('rightClicked');
+
+    // When the node is highlighted from a right click, left clicking it will
+    // chnage its highlight style.
+    click(node('A'));
+    expect(row('A')).toHaveClass('selected');
+    expect(row('A')).toHaveClass('rightClicked');
+
+    // After a timeout, the menu publicizes that it's hidden and the right click
+    // information is removed.
+    jest.runAllTimers();
+    expect(row('A')).toHaveClass('selected');
+    expect(row('A')).not.toHaveClass('rightClicked');
   });
 });
 
