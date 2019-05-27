@@ -20,7 +20,10 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import {
+  updatePreviewSelection,
+  changeRightClickedMarker,
+} from '../../actions/profile-view';
 
 import type {
   Marker,
@@ -40,6 +43,7 @@ const ROW_HEIGHT = 16;
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +changeRightClickedMarker: typeof changeRightClickedMarker,
 |};
 
 type StateProps = {|
@@ -90,6 +94,7 @@ class MarkerChart extends React.PureComponent<Props> {
       getMarker,
       previewSelection,
       updatePreviewSelection,
+      changeRightClickedMarker,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -124,6 +129,7 @@ class MarkerChart extends React.PureComponent<Props> {
               getMarker,
               // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
               updatePreviewSelection,
+              changeRightClickedMarker,
               rangeStart: timeRange.start,
               rangeEnd: timeRange.end,
               rowHeight: ROW_HEIGHT,
@@ -161,6 +167,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       previewSelection: getPreviewSelection(state),
     };
   },
-  mapDispatchToProps: { updatePreviewSelection },
+  mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },
   component: MarkerChart,
 });

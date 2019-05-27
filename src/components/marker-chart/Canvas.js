@@ -12,7 +12,10 @@ import {
 import ChartCanvas from '../shared/chart/Canvas';
 import { TooltipMarker } from '../tooltip/Marker';
 import TextMeasurement from '../../utils/text-measurement';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import {
+  typeof updatePreviewSelection as UpdatePreviewSelection,
+  typeof changeRightClickedMarker as ChangeRightClickedMarker,
+} from '../../actions/profile-view';
 import { BLUE_40 } from '../../utils/colors';
 
 import type {
@@ -45,9 +48,8 @@ type OwnProps = {|
   +rowHeight: CssPixels,
   +getMarker: MarkerIndex => Marker,
   +threadIndex: ThreadIndex,
-  +updatePreviewSelection: WrapFunctionInDispatch<
-    typeof updatePreviewSelection
-  >,
+  +updatePreviewSelection: WrapFunctionInDispatch<UpdatePreviewSelection>,
+  +changeRightClickedMarker: ChangeRightClickedMarker,
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
 |};
@@ -359,6 +361,11 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     });
   };
 
+  onRightClickMarker = (markerIndex: IndexIntoMarkers | null) => {
+    const { changeRightClickedMarker, threadIndex } = this.props;
+    changeRightClickedMarker(threadIndex, markerIndex);
+  };
+
   drawRoundedRect(
     ctx: CanvasRenderingContext2D,
     x: CssPixels,
@@ -393,6 +400,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         isDragging={isDragging}
         scaleCtxToCssPixels={true}
         onDoubleClickItem={this.onDoubleClickMarker}
+        onRightClick={this.onRightClickMarker}
         getHoveredItemInfo={this.getHoveredMarkerInfo}
         drawCanvas={this.drawCanvas}
         hitTest={this.hitTest}
