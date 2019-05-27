@@ -11,6 +11,7 @@ import { render, fireEvent } from 'react-testing-library';
 import {
   changeRightClickedCallNode,
   changeExpandedCallNodes,
+  setContextMenuVisibility,
 } from '../../actions/profile-view';
 import { Provider } from 'react-redux';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -42,10 +43,14 @@ describe('calltree/CallNodeContextMenu', function() {
     return store;
   }
 
-  function setup(store = createStore(), forceOpenForTests = true) {
+  function setup(store = createStore(), openMenuState = true) {
+    if (openMenuState) {
+      store.dispatch(setContextMenuVisibility(true));
+    }
+
     const renderResult = render(
       <Provider store={store}>
-        <CallNodeContextMenu forceOpenForTests={forceOpenForTests} />
+        <CallNodeContextMenu />
       </Provider>
     );
 

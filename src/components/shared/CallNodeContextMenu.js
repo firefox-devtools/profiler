@@ -22,6 +22,8 @@ import {
   getImplementationFilter,
   getInvertCallstack,
 } from '../../selectors/url-state';
+import { getProfileViewOptions } from '../../selectors/profile';
+
 import {
   convertToTransformType,
   assertExhaustiveCheck,
@@ -38,10 +40,6 @@ import type {
 import type { Thread, ThreadIndex } from '../../types/profile';
 import type { ConnectedProps } from '../../utils/connect';
 
-type OwnProps = {|
-  forceOpenForTests?: boolean,
-|};
-
 type StateProps = {|
   +thread: Thread,
   +threadIndex: ThreadIndex,
@@ -51,6 +49,7 @@ type StateProps = {|
   +callNodePath: CallNodePath | null,
   +callNodeIndex: IndexIntoCallNodeTable | null,
   +selectedTab: TabSlug,
+  +isContextMenuVisible: boolean,
 |};
 
 type DispatchProps = {|
@@ -59,30 +58,18 @@ type DispatchProps = {|
   +setContextMenuVisibility: typeof setContextMenuVisibility,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
-
-type State = {|
-  isShown: boolean,
-|};
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 require('./CallNodeContextMenu.css');
 
-class CallNodeContextMenu extends PureComponent<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      isShown: Boolean(this.props.forceOpenForTests),
-    };
-  }
+class CallNodeContextMenu extends PureComponent<Props> {
 
   _showMenu = () => {
     this.props.setContextMenuVisibility(true);
-    this.setState({ isShown: true });
   };
 
   _hideMenu = () => {
     this.props.setContextMenuVisibility(false);
-    this.setState({ isShown: false });
   };
 
   _getFunctionName(): string {
@@ -358,7 +345,7 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.callNodeIndex === null && this.state.isShown) {
+    if (nextProps.callNodeIndex === null && this.props.isContextMenuVisible) {
       // If the menu was visible while callNodeIndex was
       // changed to null, the onHide callback will not execute when
       // null is returned below. Call _menuHidden() here to be ensure
@@ -487,13 +474,15 @@ class CallNodeContextMenu extends PureComponent<Props, State> {
         onShow={this._showMenu}
         onHide={this._hideMenu}
       >
-        {this.state.isShown ? this.renderContextMenuContents() : null}
+        {this.props.isContextMenuVisible
+          ? this.renderContextMenuContents()
+          : null}
       </ContextMenu>
     );
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     thread: selectedThreadSelectors.getFilteredThread(state),
     threadIndex: getSelectedThreadIndex(state),
@@ -503,6 +492,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     callNodePath: selectedThreadSelectors.getRightClickedCallNodePath(state),
     callNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(state),
     selectedTab: getSelectedTab(state),
+    isContextMenuVisible: getProfileViewOptions(state).isContextMenuVisible,
   }),
   mapDispatchToProps: {
     addTransformToStack,
