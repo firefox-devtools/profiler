@@ -82,35 +82,6 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "Highlight",
-  ],
-  Array [
-    "fillRect",
-    151,
-    1,
-    123,
-    1,
-  ],
-  Array [
-    "fillRect",
-    150,
-    2,
-    125,
-    11,
-  ],
-  Array [
-    "fillRect",
-    151,
-    13,
-    123,
-    1,
-  ],
-  Array [
-    "measureText",
-    "",
-  ],
-  Array [
-    "set fillStyle",
     "#45a1ff",
   ],
   Array [
@@ -290,6 +261,35 @@ Array [
     264,
     125,
     85.5,
+    1,
+  ],
+  Array [
+    "measureText",
+    "",
+  ],
+  Array [
+    "set fillStyle",
+    "Highlight",
+  ],
+  Array [
+    "fillRect",
+    151,
+    1,
+    123,
+    1,
+  ],
+  Array [
+    "fillRect",
+    150,
+    2,
+    125,
+    11,
+  ],
+  Array [
+    "fillRect",
+    151,
+    13,
+    123,
     1,
   ],
   Array [

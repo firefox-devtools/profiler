@@ -52,6 +52,7 @@ type OwnProps = {|
   +changeRightClickedMarker: ChangeRightClickedMarker,
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
+  +rightClickedMarker: MarkerIndex | null,
 |};
 
 type Props = {|
@@ -161,6 +162,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       rowHeight,
       marginLeft,
       marginRight,
+      rightClickedMarker,
       viewport: { containerWidth, viewportLeft, viewportRight, viewportTop },
     } = this.props;
 
@@ -182,6 +184,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       // This represents the amount of seconds in the right margin:
       marginRight * ((viewportLength * rangeLength) / markerContainerWidth);
 
+    const highlightedMarkers: MarkerDrawingInformation[] = [];
+
     // Only draw the stack frames that are vertically within view.
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // Get the timing information for a row of stack frames.
@@ -191,8 +195,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         continue;
       }
 
-      let hoveredElement: MarkerDrawingInformation | null = null;
       let previousDrawnPixel: number | null = null;
+
       for (let i = 0; i < markerTiming.length; i++) {
         // Only draw samples that are in bounds.
         if (
@@ -227,11 +231,14 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
           x = Math.round(x * devicePixelRatio) / devicePixelRatio;
 
-          const markerIndex = markerTiming.index[i];
-          const isHovered = hoveredItem === markerIndex;
           const text = markerTiming.label[i];
-          if (isHovered) {
-            hoveredElement = { x, y, w, h, uncutWidth, text };
+          const markerIndex = markerTiming.index[i];
+
+          const isHighlighted =
+            rightClickedMarker === markerIndex || hoveredItem === markerIndex;
+
+          if (isHighlighted) {
+            highlightedMarkers.push({ x, y, w, h, uncutWidth, text });
           } else if (x !== previousDrawnPixel || uncutWidth > 0) {
             // We avoid to draw several dot markers in the same place.
             previousDrawnPixel = x;
@@ -239,20 +246,23 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
           }
         }
       }
-      if (hoveredElement) {
-        this.drawOneMarker(
-          ctx,
-          hoveredElement.x,
-          hoveredElement.y,
-          hoveredElement.w,
-          hoveredElement.h,
-          hoveredElement.uncutWidth,
-          hoveredElement.text,
-          'Highlight', //    background color
-          'HighlightText' // foreground color
-        );
-      }
     }
+
+    // We draw highlighted markers after the normal markers so that they stand
+    // out more.
+    highlightedMarkers.forEach(highlightedMarker => {
+      this.drawOneMarker(
+        ctx,
+        highlightedMarker.x,
+        highlightedMarker.y,
+        highlightedMarker.w,
+        highlightedMarker.h,
+        highlightedMarker.uncutWidth,
+        highlightedMarker.text,
+        'Highlight', //    background color
+        'HighlightText' // foreground color
+      );
+    });
   }
 
   /**
@@ -361,7 +371,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     });
   };
 
-  onRightClickMarker = (markerIndex: IndexIntoMarkers | null) => {
+  onRightClickMarker = (markerIndex: MarkerIndex | null) => {
     const { changeRightClickedMarker, threadIndex } = this.props;
     changeRightClickedMarker(threadIndex, markerIndex);
   };
