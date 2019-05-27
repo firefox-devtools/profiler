@@ -620,7 +620,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -651,7 +651,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -682,7 +682,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -713,7 +713,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -744,7 +744,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -775,7 +775,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -806,7 +806,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -837,7 +837,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -868,7 +868,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -899,7 +899,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -930,7 +930,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -961,7 +961,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -992,7 +992,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -1023,7 +1023,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -1054,7 +1054,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -1085,7 +1085,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -1120,7 +1120,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -1182,7 +1182,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -1230,7 +1230,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1260,7 +1260,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1290,7 +1290,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1320,7 +1320,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1350,7 +1350,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="5"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1380,7 +1380,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="6"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1410,7 +1410,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="7"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1440,7 +1440,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="8"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1470,7 +1470,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="9"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-8"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1500,7 +1500,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="10"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-9"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1530,7 +1530,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="11"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-10"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1560,7 +1560,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="12"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-11"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1590,7 +1590,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="13"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-12"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1620,7 +1620,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="14"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-13"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1650,7 +1650,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="15"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-14"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1680,7 +1680,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="16"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-15"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1714,7 +1714,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="17"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-16"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1744,7 +1744,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="18"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns odd selected "
+                class="treeViewRow treeViewRowScrolledColumns odd selected"
                 id="treeViewRow-17"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1774,7 +1774,7 @@ exports[`calltree/ProfileCallTreeView computes a width for a call tree of a real
                 aria-label="name, running time is 1ms (100%), self time is 0ms"
                 aria-level="19"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-18"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1976,7 +1976,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2007,38 +2007,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="67%"
-                >
-                  67%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="2"
-                >
-                  2
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2069,7 +2038,38 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="67%"
+                >
+                  67%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="2"
+                >
+                  2
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2131,7 +2131,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2162,7 +2162,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2210,7 +2210,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="Z, running time is 2ms (67%), self time is 2ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2240,7 +2240,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="Y, running time is 2ms (67%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2270,7 +2270,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="X, running time is 2ms (67%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2300,7 +2300,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="B, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-8"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2329,7 +2329,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="A, running time is 1ms (33%), self time is 0ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even selected"
                 id="treeViewRow-9"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2359,7 +2359,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="C, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-10"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2389,7 +2389,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="E, running time is 1ms (33%), self time is 1ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2590,7 +2590,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2621,7 +2621,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2652,7 +2652,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2683,7 +2683,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2745,7 +2745,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2776,7 +2776,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2824,7 +2824,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="A, running time is 3ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2854,7 +2854,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="B, running time is 3ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2884,7 +2884,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="C, running time is 2ms (67%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2914,7 +2914,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="D, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2943,7 +2943,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="E, running time is 1ms (33%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even selected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2973,7 +2973,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="F, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3003,7 +3003,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="H, running time is 1ms (33%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3204,7 +3204,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3235,7 +3235,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3266,7 +3266,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3297,7 +3297,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3359,7 +3359,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3390,7 +3390,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3438,7 +3438,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 3ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3468,7 +3468,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 3ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3498,7 +3498,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 2ms (67%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3528,7 +3528,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3557,7 +3557,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (33%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even selected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3587,7 +3587,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3617,7 +3617,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="H, running time is 1ms (33%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3818,7 +3818,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3849,7 +3849,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3880,7 +3880,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3911,7 +3911,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3973,7 +3973,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4021,7 +4021,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 2ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4053,7 +4053,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 2ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4085,7 +4085,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 2ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4123,7 +4123,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4154,7 +4154,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (50%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even selected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4186,7 +4186,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4389,7 +4389,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4420,7 +4420,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4451,7 +4451,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4482,7 +4482,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4544,7 +4544,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4592,7 +4592,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 2ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4624,7 +4624,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 2ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4656,7 +4656,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 2ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4694,7 +4694,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4725,7 +4725,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (50%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even selected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4757,7 +4757,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4960,7 +4960,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4991,7 +4991,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5022,7 +5022,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5053,7 +5053,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5101,7 +5101,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 1ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5133,7 +5133,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 1ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5165,7 +5165,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 1ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5203,7 +5203,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (100%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5412,7 +5412,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5443,7 +5443,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5474,7 +5474,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5505,7 +5505,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5553,7 +5553,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 1ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5585,7 +5585,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 1ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5617,7 +5617,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 1ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5655,7 +5655,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (100%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5864,7 +5864,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5895,7 +5895,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5926,7 +5926,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5957,7 +5957,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -6019,7 +6019,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -6067,7 +6067,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 2ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6099,7 +6099,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 2ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6131,7 +6131,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 2ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6169,7 +6169,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6200,7 +6200,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (50%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even selected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6238,7 +6238,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"

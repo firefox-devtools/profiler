@@ -46,27 +46,27 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                 class="treeViewBodyInner treeViewBodyInner0InnerChunk"
               >
                 <div
-                  class="treeViewRow treeViewRowFixedColumns even "
+                  class="treeViewRow treeViewRowFixedColumns even"
                   style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  class="treeViewRow treeViewRowFixedColumns odd "
+                  class="treeViewRow treeViewRowFixedColumns odd"
                   style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  class="treeViewRow treeViewRowFixedColumns even "
+                  class="treeViewRow treeViewRowFixedColumns even"
                   style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  class="treeViewRow treeViewRowFixedColumns odd "
+                  class="treeViewRow treeViewRowFixedColumns odd"
                   style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  class="treeViewRow treeViewRowFixedColumns even "
+                  class="treeViewRow treeViewRowFixedColumns even"
                   style="height: 30px; line-height: 30px;"
                 />
                 <div
-                  class="treeViewRow treeViewRowFixedColumns odd "
+                  class="treeViewRow treeViewRowFixedColumns odd"
                   style="height: 30px; line-height: 30px;"
                 />
               </div>
@@ -87,7 +87,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-label="foo, running time is undefined (undefined), self time is undefined"
                   aria-level="1"
                   aria-selected="false"
-                  class="treeViewRow treeViewRowScrolledColumns even  "
+                  class="treeViewRow treeViewRowScrolledColumns even"
                   id="treeViewRow-0"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
@@ -110,7 +110,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-label="bar, running time is undefined (undefined), self time is undefined"
                   aria-level="2"
                   aria-selected="false"
-                  class="treeViewRow treeViewRowScrolledColumns odd  "
+                  class="treeViewRow treeViewRowScrolledColumns odd"
                   id="treeViewRow-1"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
@@ -132,7 +132,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-label="profile1.json, running time is undefined (undefined), self time is undefined"
                   aria-level="3"
                   aria-selected="false"
-                  class="treeViewRow treeViewRowScrolledColumns even  "
+                  class="treeViewRow treeViewRowScrolledColumns even"
                   id="treeViewRow-2"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
@@ -158,7 +158,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-label="profile2.json, running time is undefined (undefined), self time is undefined"
                   aria-level="2"
                   aria-selected="false"
-                  class="treeViewRow treeViewRowScrolledColumns odd  "
+                  class="treeViewRow treeViewRowScrolledColumns odd"
                   id="treeViewRow-3"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
@@ -185,7 +185,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-label="baz, running time is undefined (undefined), self time is undefined"
                   aria-level="1"
                   aria-selected="false"
-                  class="treeViewRow treeViewRowScrolledColumns even  "
+                  class="treeViewRow treeViewRowScrolledColumns even"
                   id="treeViewRow-4"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"
@@ -207,7 +207,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   aria-label="profile3.json, running time is undefined (undefined), self time is undefined"
                   aria-level="2"
                   aria-selected="false"
-                  class="treeViewRow treeViewRowScrolledColumns odd  "
+                  class="treeViewRow treeViewRowScrolledColumns odd"
                   id="treeViewRow-5"
                   role="treeitem"
                   style="height: 30px; line-height: 30px;"

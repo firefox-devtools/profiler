@@ -51,12 +51,12 @@ type VirtualListRowProps<Item> = {|
   // * `isSpecial` is used when we want to update one row or a few rows only,
   //   this is typically when the selection changes and both the old and the new
   //   selection need to be changed.
-  +isSpecial: boolean,
+  +isSpecial: string,
   // * `items` contains the full items, so that we update the whole list
   //   whenever the source changes. This is necessary because often `item` is a
   //   native value (eg a number), and shallow checking only `item` won't always
   //   give the expected behavior.
-  +items: Item[],
+  +items: $ReadOnlyArray<Item>,
   // * `forceRender` is passed through directly from the main VirtualList
   //   component to the row as a way to update the full list for reasons
   //   unbeknownst to this component. This can be used for example in chart-like
@@ -77,8 +77,8 @@ class VirtualListRow<Item> extends React.PureComponent<
 type VirtualListInnerChunkProps<Item> = {|
   +className: string,
   +renderItem: RenderItem<Item>,
-  +items: Item[],
-  +specialItems: Item[],
+  +items: $ReadOnlyArray<Item>,
+  +specialItems: $ReadOnlyArray<Item | void>,
   +visibleRangeStart: number,
   +visibleRangeEnd: number,
   +columnIndex: number,
@@ -107,6 +107,15 @@ class VirtualListInnerChunk<Item> extends React.PureComponent<
           Math.max(visibleRangeStart, visibleRangeEnd)
         ).map(i => {
           const item = items[i];
+
+          // We compute isSpecial from the first position of item in the list,
+          // and the number of occurrences. Indeed we want to rerender the item
+          // when one of these properties changes.
+          const firstPosOfItem = specialItems.indexOf(item);
+          const countOfItem = specialItems.reduce(
+            (acc, specialItem) => (specialItem === item ? acc + 1 : acc),
+            0
+          );
           return (
             <VirtualListRow
               key={i}
@@ -115,7 +124,7 @@ class VirtualListInnerChunk<Item> extends React.PureComponent<
               renderItem={renderItem}
               item={item}
               items={items}
-              isSpecial={specialItems.includes(item)}
+              isSpecial={`${firstPosOfItem}|${countOfItem}`}
               forceRender={forceRender}
             />
           );
@@ -129,8 +138,8 @@ type VirtualListInnerProps<Item> = {|
   +itemHeight: CssPixels,
   +className: string,
   +renderItem: RenderItem<Item>,
-  +items: Item[],
-  +specialItems: Item[],
+  +items: $ReadOnlyArray<Item>,
+  +specialItems: $ReadOnlyArray<Item | void>,
   +visibleRangeStart: number,
   +visibleRangeEnd: number,
   +columnIndex: number,
@@ -217,9 +226,9 @@ type VirtualListProps<Item> = {|
   +itemHeight: CssPixels,
   +className: string,
   +renderItem: RenderItem<Item>,
-  +items: Item[],
+  +items: $ReadOnlyArray<Item>,
   +focusable: boolean,
-  +specialItems: Item[],
+  +specialItems: $ReadOnlyArray<Item | void>,
   +onKeyDown: KeyboardEvent => void,
   +onCopy: Event => void,
   // Set `disableOverscan` to `true` when you expect a lot of updates in a short

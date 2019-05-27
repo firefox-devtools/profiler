@@ -5,6 +5,8 @@
 // @flow
 
 import * as React from 'react';
+import classNames from 'classnames';
+
 import VirtualList from './VirtualList';
 import { BackgroundImageStyleDef } from './StyleDef';
 
@@ -103,6 +105,7 @@ type TreeViewRowFixedColumnsProps<DisplayData: Object> = {|
   +columns: Column[],
   +index: number,
   +selected: boolean,
+  +rightClicked: boolean,
   +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
   +highlightRegExp: RegExp | null,
   +rowHeightStyle: { height: CssPixels, lineHeight: string },
@@ -122,15 +125,18 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
       columns,
       index,
       selected,
+      rightClicked,
       highlightRegExp,
       rowHeightStyle,
     } = this.props;
-    const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     return (
       <div
-        className={`treeViewRow treeViewRowFixedColumns ${evenOddClassName} ${
-          selected ? 'selected' : ''
-        }`}
+        className={classNames('treeViewRow', 'treeViewRowFixedColumns', {
+          even: index % 2 === 0,
+          odd: index % 2 !== 0,
+          selected,
+          rightClicked,
+        })}
         style={rowHeightStyle}
         onMouseDown={this._onClick}
       >
@@ -173,6 +179,7 @@ type TreeViewRowScrolledColumnsProps<DisplayData: Object> = {|
   +canBeExpanded: boolean,
   +isExpanded: boolean,
   +selected: boolean,
+  +rightClicked: boolean,
   +onToggle: (NodeIndex, boolean, boolean) => mixed,
   +onClick: (NodeIndex, SyntheticMouseEvent<>) => mixed,
   +highlightRegExp: RegExp | null,
@@ -215,12 +222,12 @@ class TreeViewRowScrolledColumns<
       canBeExpanded,
       isExpanded,
       selected,
+      rightClicked,
       highlightRegExp,
       rowHeightStyle,
       indentWidth,
       nodeId,
     } = this.props;
-    const evenOddClassName = index % 2 === 0 ? 'even' : 'odd';
     const RenderComponent = mainColumn.component;
 
     // By default there's no 'aria-expanded' attribute.
@@ -248,9 +255,13 @@ class TreeViewRowScrolledColumns<
 
     return (
       <div
-        className={`treeViewRow treeViewRowScrolledColumns ${evenOddClassName} ${
-          selected ? 'selected' : ''
-        } ${displayData.dim ? 'dim' : ''}`}
+        className={classNames('treeViewRow', 'treeViewRowScrolledColumns', {
+          even: index % 2 === 0,
+          odd: index % 2 !== 0,
+          selected,
+          rightClicked,
+          dim: displayData.dim,
+        })}
         style={rowHeightStyle}
         onMouseDown={this._onMouseDown}
         // The following attributes are important for accessibility.
@@ -331,6 +342,7 @@ type TreeViewProps<DisplayData> = {|
   +tree: Tree<DisplayData>,
   +expandedNodeIds: Array<NodeIndex | null>,
   +selectedNodeId: NodeIndex | null,
+  +rightClickedNodeId?: NodeIndex | null,
   +onExpandedNodesChange: (Array<NodeIndex | null>) => mixed,
   +highlightRegExp?: RegExp | null,
   +appendageColumn?: Column,
@@ -340,6 +352,7 @@ type TreeViewProps<DisplayData> = {|
   +contextMenuId?: string,
   +maxNodeDepth: number,
   +onSelectionChange: NodeIndex => mixed,
+  +onRightClickSelection?: NodeIndex => mixed,
   +onEnterKey?: NodeIndex => mixed,
   +rowHeight: CssPixels,
   +indentWidth: CssPixels,
@@ -348,7 +361,7 @@ type TreeViewProps<DisplayData> = {|
 class TreeView<DisplayData: Object> extends React.PureComponent<
   TreeViewProps<DisplayData>
 > {
-  _specialItems: NodeIndex[];
+  _specialItems: [NodeIndex | void, NodeIndex | void];
   _visibleRows: NodeIndex[];
   _expandedNodes: Set<NodeIndex | null>;
   _list: VirtualList<NodeIndex> | null = null;
@@ -356,10 +369,30 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
 
   constructor(props: TreeViewProps<DisplayData>) {
     super(props);
-    this._specialItems =
-      props.selectedNodeId === null ? [] : [props.selectedNodeId];
+
+    this._updateSpecialItems(props);
     this._expandedNodes = new Set(props.expandedNodeIds);
     this._visibleRows = this._getAllVisibleRows(props);
+  }
+
+  // The tuple `_specialItems` always contains 2 elements: the first element is
+  // the selected node id (if any), and the second element is the right clicked
+  // id (if any).
+  // This method will always change the tuple, so we take care to call it only
+  // if one of these values changes.
+  _updateSpecialItems(props: TreeViewProps<DisplayData>) {
+    this._specialItems = [undefined, undefined];
+
+    if (props.selectedNodeId !== null) {
+      this._specialItems[0] = props.selectedNodeId;
+    }
+
+    if (
+      props.rightClickedNodeId !== undefined &&
+      props.rightClickedNodeId !== null
+    ) {
+      this._specialItems[1] = props.rightClickedNodeId;
+    }
   }
 
   scrollSelectionIntoView() {
@@ -373,10 +406,15 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
   }
 
   componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
-    if (nextProps.selectedNodeId !== this.props.selectedNodeId) {
-      this._specialItems =
-        nextProps.selectedNodeId === null ? [] : [nextProps.selectedNodeId];
+    const hasNewSelectedNode =
+      nextProps.selectedNodeId !== this.props.selectedNodeId;
+    const hasNewRightClickedNode =
+      nextProps.rightClickedNodeId !== this.props.rightClickedNodeId;
+
+    if (hasNewSelectedNode || hasNewRightClickedNode) {
+      this._updateSpecialItems(nextProps);
     }
+
     if (
       nextProps.tree !== this.props.tree ||
       nextProps.expandedNodeIds !== this.props.expandedNodeIds
@@ -393,6 +431,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
       mainColumn,
       appendageColumn,
       selectedNodeId,
+      rightClickedNodeId,
       highlightRegExp,
       rowHeight,
       indentWidth,
@@ -410,6 +449,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
           nodeId={nodeId}
           index={index}
           selected={nodeId === selectedNodeId}
+          rightClicked={nodeId === rightClickedNodeId}
           onClick={this._onRowClicked}
           highlightRegExp={highlightRegExp || null}
           rowHeightStyle={rowHeightStyle}
@@ -433,6 +473,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
         isExpanded={isExpanded}
         onToggle={this._toggle}
         selected={nodeId === selectedNodeId}
+        rightClicked={nodeId === rightClickedNodeId}
         onClick={this._onRowClicked}
         highlightRegExp={highlightRegExp || null}
         indentWidth={indentWidth}
@@ -499,8 +540,21 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     this.props.onSelectionChange(nodeId);
   }
 
+  _rightClickSelect(nodeId: NodeIndex) {
+    if (this.props.onRightClickSelection) {
+      this.props.onRightClickSelection(nodeId);
+    } else {
+      this._select(nodeId);
+    }
+  }
+
   _onRowClicked = (nodeId: NodeIndex, event: SyntheticMouseEvent<>) => {
-    this._select(nodeId);
+    if (event.button === 0) {
+      this._select(nodeId);
+    } else if (event.button === 2) {
+      this._rightClickSelect(nodeId);
+    }
+
     if (event.detail === 2 && event.button === 0) {
       // double click
       this._toggle(nodeId);

@@ -186,6 +186,11 @@ body,
 .treeViewRow.odd {
   background-color: #f5f5f5;
 }
+
+/* Note that `rightClicked` is present before `selected` so that it's overriden. */
+.treeViewRow.rightClicked {
+  background-color: var(--blue-50-a30);
+}
 .treeViewRow.selected {
   background-color: var(--grey-30);
   color: black;

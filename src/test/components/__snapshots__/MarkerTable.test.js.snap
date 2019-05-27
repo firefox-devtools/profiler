@@ -92,7 +92,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -115,7 +115,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -138,7 +138,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -177,7 +177,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 aria-label="foobar, running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -199,7 +199,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 aria-label="NotifyDidPaint, running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -221,7 +221,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 aria-label="setTimeout — 5.5, running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
