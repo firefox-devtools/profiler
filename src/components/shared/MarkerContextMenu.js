@@ -7,7 +7,10 @@ import React, { PureComponent } from 'react';
 import { MenuItem } from 'react-contextmenu';
 import ContextMenu from '../shared/ContextMenu';
 import explicitConnect from '../../utils/connect';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import {
+  setContextMenuVisibility,
+  updatePreviewSelection,
+} from '../../actions/profile-view';
 import {
   getPreviewSelection,
   getCommittedRange,
@@ -41,6 +44,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +setContextMenuVisibility: typeof setContextMenuVisibility,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -166,6 +170,14 @@ class MarkerContextMenu extends PureComponent<Props> {
     }
   };
 
+  _onHide = () => {
+    this.props.setContextMenuVisibility(false);
+  };
+
+  _onShow = () => {
+    this.props.setContextMenuVisibility(true);
+  };
+
   render() {
     const { selectedMarker } = this.props;
 
@@ -174,7 +186,11 @@ class MarkerContextMenu extends PureComponent<Props> {
     }
 
     return (
-      <ContextMenu id="MarkerContextMenu">
+      <ContextMenu
+        id="MarkerContextMenu"
+        onShow={this._onShow}
+        onHide={this._onHide}
+      >
         <MenuItem onClick={this.setStartRange}>
           Set selection start time here
         </MenuItem>
@@ -207,6 +223,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     implementationFilter: getImplementationFilter(state),
     selectedMarker: selectedThreadSelectors.getRightClickedMarker(state),
   }),
-  mapDispatchToProps: { updatePreviewSelection },
+  mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
   component: MarkerContextMenu,
 });
