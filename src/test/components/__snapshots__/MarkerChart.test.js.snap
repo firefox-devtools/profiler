@@ -416,7 +416,7 @@ exports[`MarkerChart renders the hoveredItem markers properly 2`] = `
 <div
   class="tooltip"
   data-testid="tooltip"
-  style="left: 61px; top: 16px;"
+  style="left: 211px; top: 16px;"
 >
   <div
     class="tooltipMarker"
