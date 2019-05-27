@@ -99,6 +99,22 @@ export function changeSelectedCallNode(
 }
 
 /**
+ * This action is used when the user right clicks on a call node (in panels such
+ * as the call tree, the flame chart, or the stack chart). It's especially used
+ * to display the context menu.
+ */
+export function changeRightClickedCallNode(
+  threadIndex: ThreadIndex,
+  callNodePath: CallNodePath | null
+) {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+    threadIndex,
+    callNodePath,
+  };
+}
+
+/**
  * Given a threadIndex and a sampleIndex, select the call node at the top ("leaf")
  * of that sample's stack.
  */

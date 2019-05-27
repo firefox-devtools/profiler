@@ -130,6 +130,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
     case 'VIEW_PROFILE':
       return action.profile.threads.map(() => ({
         selectedCallNodePath: [],
+        rightClickedCallNodePath: null,
         expandedCallNodePaths: new PathSet(),
         selectedMarker: null,
       }));
@@ -151,6 +152,9 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
           selectedCallNodePath: threadViewOptions.selectedCallNodePath.map(
             mapOldFuncToNewFunc
           ),
+          rightClickedCallNodePath:
+            threadViewOptions.rightClickedCallNodePath &&
+            threadViewOptions.rightClickedCallNodePath.map(mapOldFuncToNewFunc),
           expandedCallNodePaths: new PathSet(
             Array.from(threadViewOptions.expandedCallNodePaths).map(oldPath =>
               oldPath.map(mapOldFuncToNewFunc)
@@ -212,6 +216,17 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         ...state.slice(threadIndex + 1),
       ];
     }
+    case 'CHANGE_RIGHT_CLICKED_CALL_NODE': {
+      const { callNodePath, threadIndex } = action;
+      return [
+        ...state.slice(0, threadIndex),
+        {
+          ...state[threadIndex],
+          rightClickedCallNodePath: callNodePath,
+        },
+        ...state.slice(threadIndex + 1),
+      ];
+    }
     case 'CHANGE_INVERT_CALLSTACK': {
       const { callTree, callNodeTable, selectedThreadIndex } = action;
       return state.map((viewOptions, threadIndex) => {
@@ -229,9 +244,13 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
           for (let i = 1; i < selectedCallNodePath.length; i++) {
             expandedCallNodePaths.add(selectedCallNodePath.slice(0, i));
           }
+
           return {
             ...viewOptions,
             selectedCallNodePath,
+            // `rightClickedCallNodePath` is most likely null already, but we
+            // force it because we don't want to risk that it's incorrect.
+            rightClickedCallNodePath: null,
             expandedCallNodePaths,
           };
         }
@@ -282,13 +301,16 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         {
           ...state[threadIndex],
           selectedCallNodePath,
+          // `rightClickedCallNodePath` is most likely null already, but we
+          // force it because we don't want to risk that it's incorrect.
+          rightClickedCallNodePath: null,
           expandedCallNodePaths,
         },
         ...state.slice(threadIndex + 1),
       ];
     }
     case 'POP_TRANSFORMS_FROM_STACK': {
-      // Simply reset the selected and expanded paths until this bug is fixed:
+      // Simply reset the stored paths until this bug is fixed:
       // https://github.com/firefox-devtools/profiler/issues/882
       const { threadIndex } = action;
       return [
@@ -296,6 +318,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         {
           ...state[threadIndex],
           selectedCallNodePath: [],
+          rightClickedCallNodePath: null,
           expandedCallNodePaths: new PathSet(),
         },
         ...state.slice(threadIndex + 1),
@@ -351,6 +374,9 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         {
           ...state[threadIndex],
           selectedCallNodePath,
+          // `rightClickedCallNodePath` is most likely null already, but we
+          // force it because we don't want to risk that it's incorrect.
+          rightClickedCallNodePath: null,
           expandedCallNodePaths,
         },
         ...state.slice(threadIndex + 1),

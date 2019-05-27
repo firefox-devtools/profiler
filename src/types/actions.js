@@ -117,6 +117,11 @@ type ProfileAction =
       +threadIndex: ThreadIndex,
     |}
   | {|
+      +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      +threadIndex: ThreadIndex,
+      +callNodePath: CallNodePath | null,
+    |}
+  | {|
       +type: 'FOCUS_CALL_TREE',
     |}
   | {|
