@@ -26,6 +26,7 @@ import TransformNavigator from '../shared/TransformNavigator';
 import {
   updatePreviewSelection,
   changeSelectedCallNode,
+  changeRightClickedCallNode,
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
@@ -63,6 +64,7 @@ type StateProps = {|
 
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
+  +changeRightClickedCallNode: typeof changeRightClickedCallNode,
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
@@ -86,6 +88,20 @@ class StackChartGraph extends React.PureComponent<Props> {
   ) => {
     const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
+      threadIndex,
+      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+    );
+  };
+
+  _onRightClickedCallNodeChange = (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => {
+    const {
+      callNodeInfo,
+      threadIndex,
+      changeRightClickedCallNode,
+    } = this.props;
+    changeRightClickedCallNode(
       threadIndex,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
@@ -163,6 +179,7 @@ class StackChartGraph extends React.PureComponent<Props> {
                 categories,
                 selectedCallNodeIndex,
                 onSelectionChange: this._onSelectedCallNodeChange,
+                onRightClick: this._onRightClickedCallNodeChange,
                 disableTooltips: isCallNodeContextMenuVisible,
                 scrollToSelectionGeneration,
               }}
@@ -200,6 +217,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   },
   mapDispatchToProps: {
     changeSelectedCallNode,
+    changeRightClickedCallNode,
     updatePreviewSelection,
   },
   component: StackChartGraph,

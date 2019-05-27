@@ -21,7 +21,10 @@ import {
 } from '../../selectors/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
-import { changeSelectedCallNode } from '../../actions/profile-view';
+import {
+  changeSelectedCallNode,
+  changeRightClickedCallNode,
+} from '../../actions/profile-view';
 import { getIconsWithClassNames } from '../../selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
@@ -68,6 +71,7 @@ type StateProps = {|
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
+  +changeRightClickedCallNode: typeof changeRightClickedCallNode,
 |};
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
@@ -79,6 +83,20 @@ class FlameGraph extends React.PureComponent<Props> {
   ) => {
     const { callNodeInfo, threadIndex, changeSelectedCallNode } = this.props;
     changeSelectedCallNode(
+      threadIndex,
+      getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
+    );
+  };
+
+  _onRightClickedCallNodeChange = (
+    callNodeIndex: IndexIntoCallNodeTable | null
+  ) => {
+    const {
+      callNodeInfo,
+      threadIndex,
+      changeRightClickedCallNode,
+    } = this.props;
+    changeRightClickedCallNode(
       threadIndex,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
@@ -286,6 +304,7 @@ class FlameGraph extends React.PureComponent<Props> {
               scrollToSelectionGeneration,
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
+              onRightClick: this._onRightClickedCallNodeChange,
               disableTooltips: isCallNodeContextMenuVisible,
               interval,
               isInverted,
@@ -332,6 +351,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   },
   mapDispatchToProps: {
     changeSelectedCallNode,
+    changeRightClickedCallNode,
   },
   component: FlameGraph,
 });
