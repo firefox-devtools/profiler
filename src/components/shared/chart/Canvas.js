@@ -15,6 +15,7 @@ type Props<HoveredItem> = {|
   +containerHeight: CssPixels,
   +className: string,
   +onSelectItem?: (HoveredItem | null) => void,
+  +onRightClick?: (HoveredItem | null) => void,
   +onDoubleClickItem: (HoveredItem | null) => void,
   +getHoveredItemInfo: HoveredItem => React.Node,
   +drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
@@ -128,18 +129,31 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     }
   }
 
-  _onMouseDown = (
-    event: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>
-  ) => {
-    // Remember where the mouse was positioned. Move too far and it
-    // won't be registered as a selecting click on mouse up.
-    this._mouseDownOffsetX = event.nativeEvent.offsetX;
-    this._mouseDownOffsetY = event.nativeEvent.offsetY;
-    this._mouseMovedWhileClicked = false;
+  _onMouseDown = (e: { nativeEvent: MouseEvent } & SyntheticMouseEvent<>) => {
+    if (e.button === 0) {
+      // Remember where the mouse was positioned. Move too far and it
+      // won't be registered as a selecting click on mouse up.
+      this._mouseDownOffsetX = e.nativeEvent.offsetX;
+      this._mouseDownOffsetY = e.nativeEvent.offsetY;
+      this._mouseMovedWhileClicked = false;
+    }
+
+    if (e.button === 2 && this.props.onRightClick) {
+      // The right button is a contextual action.
+      // It is important that we call the right click callback at mousedown so
+      // that the state is updated and the context menus are rendered before the
+      // mouseup/contextmenu events.
+      this.props.onRightClick(this.state.hoveredItem);
+    }
   };
 
-  _onMouseUp = () => {
-    if (!this._mouseMovedWhileClicked && this.props.onSelectItem) {
+  _onMouseUp = (e: SyntheticMouseEvent<>) => {
+    if (this._mouseMovedWhileClicked) {
+      return;
+    }
+
+    if (e.button === 0 && this.props.onSelectItem) {
+      // Left button is a selection action
       this.props.onSelectItem(this.state.hoveredItem);
     }
   };
@@ -155,12 +169,12 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     this._offsetY = event.nativeEvent.offsetY;
     const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
 
-    // If the mouse moves too far while a button down, flag this as
-    // drag event only. Then it won't select anything when the button
-    // is released.
+    // If the mouse moves too far while the primary button is down, flag this as
+    // drag event only. Then it won't select anything when the button is
+    // released.
     if (
       !this._mouseMovedWhileClicked &&
-      event.buttons !== 0 &&
+      (event.buttons & 1) !== 0 &&
       (Math.abs(this._offsetX - this._mouseDownOffsetX) >
         MOUSE_CLICK_MAX_MOVEMENT_DELTA ||
         Math.abs(this._offsetY - this._mouseDownOffsetY) >
