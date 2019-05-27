@@ -4,11 +4,15 @@
 
 // @flow
 import * as React from 'react';
-import { render } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
+// This module is mocked.
+import copy from 'copy-to-clipboard';
 
 import MarkerTable from '../../components/marker-table';
+import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
 import { updatePreviewSelection } from '../../actions/profile-view';
+import { ensureExists } from '../../utils/flow';
 
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
@@ -62,21 +66,53 @@ describe('MarkerTable', function() {
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>
-        <MarkerTable />
+        <>
+          <MarkerContextMenu />
+          <MarkerTable />
+        </>
       </Provider>
     );
-    const { container } = renderResult;
+    const { container, getByText } = renderResult;
 
     const fixedRows = () =>
       Array.from(container.querySelectorAll('.treeViewRowFixedColumns'));
     const scrolledRows = () =>
       Array.from(container.querySelectorAll('.treeViewRowScrolledColumns'));
 
+    const node = str => getByText(str);
+    const row = str =>
+      ensureExists(
+        node(str).closest('.treeViewRow'),
+        `Couldn't find the row for node ${String(str)}.`
+      );
+    const contextMenu = () =>
+      ensureExists(
+        container.querySelector('.react-contextmenu'),
+        `Couldn't find the context menu.`
+      );
+
+    const click = (element: HTMLElement) => {
+      fireEvent.mouseDown(element);
+      fireEvent.mouseUp(element);
+      fireEvent.click(element);
+    };
+
+    const rightClick = (element: HTMLElement) => {
+      fireEvent.mouseDown(element, { button: 2, buttons: 2 });
+      fireEvent.mouseUp(element, { button: 2, buttons: 2 });
+      fireEvent.contextMenu(element);
+    };
+
     return {
       ...renderResult,
       ...store,
       fixedRows,
       scrolledRows,
+      node,
+      row,
+      contextMenu,
+      click,
+      rightClick,
     };
   }
 
@@ -99,5 +135,55 @@ describe('MarkerTable', function() {
 
     expect(fixedRows()).toHaveLength(2);
     expect(scrolledRows()).toHaveLength(2);
+  });
+
+  it('selects a row when left clicking', () => {
+    const { node, row, click } = setup();
+
+    click(node(/setTimeout/));
+    expect(row(/setTimeout/)).toHaveClass('selected');
+
+    click(node('foobar'));
+    expect(row(/setTimeout/)).not.toHaveClass('selected');
+    expect(row('foobar')).toHaveClass('selected');
+  });
+
+  it('displays a context menu when right clicking', () => {
+    jest.useFakeTimers();
+
+    const { contextMenu, node, row, rightClick, getByText } = setup();
+
+    function checkMenuIsDisplayedForNode(str) {
+      expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+
+      // Note that selecting a menu item will close the menu.
+      fireEvent.click(getByText('Copy marker description'));
+      expect(copy).toHaveBeenLastCalledWith(expect.stringMatching(str));
+    }
+
+    rightClick(node(/setTimeout/));
+    checkMenuIsDisplayedForNode(/setTimeout/);
+    expect(row(/setTimeout/)).toHaveClass('rightClicked');
+
+    // Wait that all timers are done before trying again.
+    jest.runAllTimers();
+
+    // Now try it again by right clicking 2 nodes in sequence.
+    rightClick(node(/setTimeout/));
+    rightClick(node('foobar'));
+    checkMenuIsDisplayedForNode('foobar');
+    expect(row(/setTimeout/)).not.toHaveClass('rightClicked');
+    expect(row('foobar')).toHaveClass('rightClicked');
+
+    // Wait that all timers are done before trying again.
+    jest.runAllTimers();
+
+    // And now let's do it again, but this time waiting for timers before
+    // clicking, because the timer can impact the menu being displayed.
+    rightClick(node('NotifyDidPaint'));
+    rightClick(node('foobar'));
+    jest.runAllTimers();
+    checkMenuIsDisplayedForNode('foobar');
+    expect(row('foobar')).toHaveClass('rightClicked');
   });
 });
