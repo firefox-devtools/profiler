@@ -39,6 +39,7 @@ export type ThreadViewOptions = {|
   +rightClickedCallNodePath: CallNodePath | null,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
+  +rightClickedMarker: MarkerIndex | null,
 |};
 
 export type ProfileViewState = {|

@@ -45,17 +45,13 @@ import type {
 } from '../types/actions';
 import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
-import type {
-  ThreadIndex,
-  IndexIntoRawMarkerTable,
-  Pid,
-  IndexIntoSamplesTable,
-} from '../types/profile';
+import type { ThreadIndex, Pid, IndexIntoSamplesTable } from '../types/profile';
 import type {
   CallNodePath,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   TrackIndex,
+  MarkerIndex,
 } from '../types/profile-derived';
 import type { Transform } from '../types/transforms';
 
@@ -874,12 +870,27 @@ export function changeExpandedCallNodes(
 
 export function changeSelectedMarker(
   threadIndex: ThreadIndex,
-  selectedMarker: IndexIntoRawMarkerTable | null
+  selectedMarker: MarkerIndex | null
 ): Action {
   return {
     type: 'CHANGE_SELECTED_MARKER',
     selectedMarker,
     threadIndex,
+  };
+}
+
+/**
+ * This action is used when the user right clicks a marker, and is especially
+ * used to display its context menu.
+ */
+export function changeRightClickedMarker(
+  threadIndex: ThreadIndex,
+  markerIndex: MarkerIndex | null
+): Action {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_MARKER',
+    threadIndex,
+    markerIndex,
   };
 }
 
