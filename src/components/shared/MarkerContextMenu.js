@@ -205,7 +205,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     committedRange: getCommittedRange(state),
     thread: selectedThreadSelectors.getThread(state),
     implementationFilter: getImplementationFilter(state),
-    selectedMarker: selectedThreadSelectors.getSelectedMarker(state),
+    selectedMarker: selectedThreadSelectors.getRightClickedMarker(state),
   }),
   mapDispatchToProps: { updatePreviewSelection },
   component: MarkerContextMenu,
