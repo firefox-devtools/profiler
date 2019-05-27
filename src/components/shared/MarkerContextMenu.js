@@ -170,11 +170,17 @@ class MarkerContextMenu extends PureComponent<Props> {
     }
   };
 
+  _hidingTimeout: TimeoutID | null = null;
+
   _onHide = () => {
-    this.props.setContextMenuVisibility(false);
+    this._hidingTimeout = setTimeout(() => {
+      this._hidingTimeout = null;
+      this.props.setContextMenuVisibility(false);
+    }, 100);
   };
 
   _onShow = () => {
+    clearTimeout(this._hidingTimeout);
     this.props.setContextMenuVisibility(true);
   };
 
