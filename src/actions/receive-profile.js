@@ -44,6 +44,10 @@ import { getProfileOrNull } from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { setDataSource } from './profile-view';
 
+import {
+  convertInstrumentsProfile,
+  isInstrumentsProfile,
+} from '../profile-logic/import/instruments/instruments';
 import type {
   FunctionsUpdatePerThread,
   FuncToFuncMap,
@@ -861,6 +865,11 @@ function _fileReader(input: File): * {
       reader.readAsArrayBuffer(input);
       return promise;
     },
+
+    // asBinaryString(): Promise<string> {
+    //   reader.readAsBinaryString(input);
+    //   return promise;
+    // },
   };
 }
 
@@ -879,6 +888,7 @@ export function retrieveProfileFromFile(
     dispatch(waitingForProfileFromFile());
 
     try {
+      console.log(file);
       switch (file.type) {
         case 'application/gzip':
         case 'application/x-gzip':
@@ -910,8 +920,21 @@ export function retrieveProfileFromFile(
           // extensions (eg .profile). So we can't rely on the mime type to
           // decide how to handle them. We'll try to parse them as a plain JSON
           // file.
-          const text = await fileReader(file).asText();
-          const profile = await unserializeProfileOfArbitraryFormat(text);
+          // Trace files are in the directory form so they don't satisfy any above
+          // cases, that's why they fall into default case
+
+          let profile;
+          if (isInstrumentsProfile(file)) {
+            console.log('instruments profile');
+            // Here we need to do decompression(unzip) and then we will give the output to convertInstrumentsProfile function
+            // const data = await fileReader(file).asBinaryString();
+            // console.log(data);
+            profile = await convertInstrumentsProfile(file);
+          } else {
+            const text = await fileReader(file).asText();
+            profile = await unserializeProfileOfArbitraryFormat(text);
+          }
+
           if (profile === undefined) {
             throw new Error('Unable to parse the profile.');
           }
