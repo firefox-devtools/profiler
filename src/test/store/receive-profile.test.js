@@ -1229,8 +1229,17 @@ describe('actions/receive-profile', function() {
           unregisterTime: thread.samples.length,
         })
       );
+
+      // comparison thread
+      expectedThreads.push(
+        expect.objectContaining({
+          processType: 'comparison',
+          pid: 'Diff between 1 and 2',
+          name: 'Diff between 1 and 2',
+        })
+      );
       expect(resultProfile.threads).toEqual(expectedThreads);
-      expect(globalTracks).toHaveLength(2);
+      expect(globalTracks).toHaveLength(3); // each thread + comparison track
       expect(rootRange).toEqual({ start: 0, end: 9 });
     });
 
@@ -1243,7 +1252,7 @@ describe('actions/receive-profile', function() {
       } = await setupWithShortUrl('thread=0', 'thread=1');
 
       // Reuse some expectations from the previous test
-      expect(globalTracks).toHaveLength(2);
+      expect(globalTracks).toHaveLength(3); // each thread + comparison track
       expect(rootRange).toEqual({ start: 0, end: 9 });
 
       // Check that expandUrl has been called
