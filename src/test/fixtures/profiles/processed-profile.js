@@ -73,7 +73,8 @@ function _refineMockPayload(
 
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: Thread,
-  markers: TestDefinedMarkers
+  markers: TestDefinedMarkers,
+  interval: Milliseconds
 ) {
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
@@ -118,6 +119,9 @@ export function addMarkersToThreadWithCorrespondingSamples(
     samples.time.unshift(firstMarkerTime);
     samples.stack.unshift(null);
     samples.responsiveness.unshift(null);
+    if (samples.duration) {
+      samples.duration.unshift(interval);
+    }
     samples.length++;
   }
 
@@ -125,13 +129,19 @@ export function addMarkersToThreadWithCorrespondingSamples(
     samples.time.push(lastMarkerTime);
     samples.stack.push(null);
     samples.responsiveness.push(null);
+    if (samples.duration) {
+      samples.duration.push(interval);
+    }
     samples.length++;
   }
 }
 
-export function getThreadWithMarkers(markers: TestDefinedMarkers) {
+export function getThreadWithMarkers(
+  markers: TestDefinedMarkers,
+  interval: Milliseconds
+) {
   const thread = getEmptyThread();
-  addMarkersToThreadWithCorrespondingSamples(thread, markers);
+  addMarkersToThreadWithCorrespondingSamples(thread, markers, interval);
   return thread;
 }
 
@@ -140,7 +150,7 @@ export function getProfileWithMarkers(
 ): Profile {
   const profile = getEmptyProfile();
   profile.threads = markersPerThread.map(testDefinedMarkers =>
-    getThreadWithMarkers(testDefinedMarkers)
+    getThreadWithMarkers(testDefinedMarkers, profile.meta.interval)
   );
   return profile;
 }
@@ -616,43 +626,47 @@ export function getNetworkTrackProfile() {
     docshellHistoryId,
   };
 
-  addMarkersToThreadWithCorrespondingSamples(thread, [
+  addMarkersToThreadWithCorrespondingSamples(
+    thread,
     [
-      'Load',
-      4,
-      ({
-        ...loadPayloadBase,
-        interval: 'start',
-      }: NavigationMarkerPayload),
+      [
+        'Load',
+        4,
+        ({
+          ...loadPayloadBase,
+          interval: 'start',
+        }: NavigationMarkerPayload),
+      ],
+      [
+        'Load',
+        5,
+        ({
+          ...loadPayloadBase,
+          interval: 'end',
+        }: NavigationMarkerPayload),
+      ],
+      ['TTI', 6, null],
+      ['Navigation::Start', 7, null],
+      ['Contentful paint at something', 8, null],
+      [
+        'DOMContentLoaded',
+        6,
+        ({
+          ...domContentLoadedBase,
+          interval: 'start',
+        }: NavigationMarkerPayload),
+      ],
+      [
+        'DOMContentLoaded',
+        7,
+        ({
+          ...domContentLoadedBase,
+          interval: 'end',
+        }: NavigationMarkerPayload),
+      ],
     ],
-    [
-      'Load',
-      5,
-      ({
-        ...loadPayloadBase,
-        interval: 'end',
-      }: NavigationMarkerPayload),
-    ],
-    ['TTI', 6, null],
-    ['Navigation::Start', 7, null],
-    ['Contentful paint at something', 8, null],
-    [
-      'DOMContentLoaded',
-      6,
-      ({
-        ...domContentLoadedBase,
-        interval: 'start',
-      }: NavigationMarkerPayload),
-    ],
-    [
-      'DOMContentLoaded',
-      7,
-      ({
-        ...domContentLoadedBase,
-        interval: 'end',
-      }: NavigationMarkerPayload),
-    ],
-  ]);
+    profile.meta.interval
+  );
 
   return profile;
 }

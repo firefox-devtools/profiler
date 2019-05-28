@@ -737,10 +737,7 @@ describe('get-sample-index-closest-to-time', function() {
       defaultCategory
     );
 
-    // getProfileFromTextSamples will generate a profile with samples
-    // with 1ms of interval
-    const interval = 1;
-
+    const interval = profile.meta.interval;
     expect(getSampleIndexClosestToTime(samples, 0, interval)).toBe(0);
     expect(getSampleIndexClosestToTime(samples, 0.9, interval)).toBe(0);
     expect(getSampleIndexClosestToTime(samples, 1.1, interval)).toBe(1);

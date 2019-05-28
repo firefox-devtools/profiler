@@ -229,13 +229,17 @@ describe('actions/receive-profile', function() {
         thread.pid = threadIndex;
       });
 
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+      addMarkersToThreadWithCorrespondingSamples(
+        profile.threads[1],
         [
-          'RefreshDriverTick',
-          0,
-          { type: 'tracing', category: 'Paint', interval: 'start' },
+          [
+            'RefreshDriverTick',
+            0,
+            { type: 'tracing', category: 'Paint', interval: 'start' },
+          ],
         ],
-      ]);
+        profile.meta.interval
+      );
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -259,13 +263,17 @@ describe('actions/receive-profile', function() {
         thread.pid = threadIndex;
       });
 
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+      addMarkersToThreadWithCorrespondingSamples(
+        profile.threads[1],
         [
-          'RefreshDriverTick',
-          0,
-          { type: 'tracing', category: 'Paint', interval: 'start' },
+          [
+            'RefreshDriverTick',
+            0,
+            { type: 'tracing', category: 'Paint', interval: 'start' },
+          ],
         ],
-      ]);
+        profile.meta.interval
+      );
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -1135,23 +1143,31 @@ describe('actions/receive-profile', function() {
       );
 
       profile1.threads.forEach(thread =>
-        addMarkersToThreadWithCorrespondingSamples(thread, [
-          ['A', 1, { startTime: 1, endTime: 3 }],
-          ['A', 1, null],
-          ['B', 2, null],
-          ['C', 3, null],
-          ['D', 4, null],
-          ['E', 5, null],
-        ])
+        addMarkersToThreadWithCorrespondingSamples(
+          thread,
+          [
+            ['A', 1, { startTime: 1, endTime: 3 }],
+            ['A', 1, null],
+            ['B', 2, null],
+            ['C', 3, null],
+            ['D', 4, null],
+            ['E', 5, null],
+          ],
+          profile1.meta.interval
+        )
       );
       profile2.threads.forEach(thread =>
-        addMarkersToThreadWithCorrespondingSamples(thread, [
-          ['F', 1, { startTime: 1, endTime: 3 }],
-          ['G', 2, null],
-          ['H', 3, null],
-          ['I', 4, null],
-          ['J', 5, null],
-        ])
+        addMarkersToThreadWithCorrespondingSamples(
+          thread,
+          [
+            ['F', 1, { startTime: 1, endTime: 3 }],
+            ['G', 2, null],
+            ['H', 3, null],
+            ['I', 4, null],
+            ['J', 5, null],
+          ],
+          profile2.meta.interval
+        )
       );
 
       window.fetch
