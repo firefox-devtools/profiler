@@ -21,7 +21,9 @@ describe('mergeProfiles function', function() {
       hash: '',
     });
     sampleProfileA.profile.meta.interval = 10;
+    sampleProfileA.profile.threads[0].samples.duration.fill(10);
     sampleProfileB.profile.meta.interval = 20;
+    sampleProfileB.profile.threads[0].samples.duration.fill(20);
 
     const mergedProfile = mergeProfiles(
       [sampleProfileA.profile, sampleProfileB.profile],
