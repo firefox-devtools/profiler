@@ -114,6 +114,7 @@ describe('CallTreeSidebar', function() {
     } = getProfileFromTextSamples(profileString);
     // This is lazy but this works good enough for what we're doing here.
     profile.meta.interval = interval;
+    profile.threads[0].samples.duration.fill(interval);
 
     const store = storeWithProfile(profile);
 
