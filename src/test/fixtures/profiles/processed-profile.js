@@ -73,7 +73,8 @@ function _refineMockPayload(
 
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: Thread,
-  markers: TestDefinedMarkers
+  markers: TestDefinedMarkers,
+  interval: Milliseconds
 ) {
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
@@ -118,6 +119,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
     samples.time.unshift(firstMarkerTime);
     samples.stack.unshift(null);
     samples.responsiveness.unshift(null);
+    samples.duration.unshift(interval);
     samples.length++;
   }
 
@@ -125,13 +127,17 @@ export function addMarkersToThreadWithCorrespondingSamples(
     samples.time.push(lastMarkerTime);
     samples.stack.push(null);
     samples.responsiveness.push(null);
+    samples.duration.push(interval);
     samples.length++;
   }
 }
 
-export function getThreadWithMarkers(markers: TestDefinedMarkers) {
+export function getThreadWithMarkers(
+  markers: TestDefinedMarkers,
+  interval: Milliseconds
+) {
   const thread = getEmptyThread();
-  addMarkersToThreadWithCorrespondingSamples(thread, markers);
+  addMarkersToThreadWithCorrespondingSamples(thread, markers, interval);
   return thread;
 }
 
@@ -140,7 +146,7 @@ export function getProfileWithMarkers(
 ): Profile {
   const profile = getEmptyProfile();
   profile.threads = markersPerThread.map(testDefinedMarkers =>
-    getThreadWithMarkers(testDefinedMarkers)
+    getThreadWithMarkers(testDefinedMarkers, profile.meta.interval)
   );
   return profile;
 }
@@ -241,7 +247,8 @@ export function getProfileFromTextSamples(
     return _buildThreadFromTextOnlyStacks(
       textOnlyStacks,
       funcNames,
-      categories
+      categories,
+      profile.meta.interval
     );
   });
 
@@ -368,7 +375,8 @@ function _findLibNameFromFuncName(funcNameWithModifier: string): string | null {
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: Array<string>,
-  categories: CategoryList
+  categories: CategoryList,
+  interval: Milliseconds
 ): Thread {
   const thread = getEmptyThread();
 
@@ -517,6 +525,7 @@ function _buildThreadFromTextOnlyStacks(
     samples.responsiveness.push(0);
     samples.stack.push(prefix);
     samples.time.push(columnIndex);
+    samples.duration.push(interval);
   });
   return thread;
 }
@@ -616,43 +625,47 @@ export function getNetworkTrackProfile() {
     docshellHistoryId,
   };
 
-  addMarkersToThreadWithCorrespondingSamples(thread, [
+  addMarkersToThreadWithCorrespondingSamples(
+    thread,
     [
-      'Load',
-      4,
-      ({
-        ...loadPayloadBase,
-        interval: 'start',
-      }: NavigationMarkerPayload),
+      [
+        'Load',
+        4,
+        ({
+          ...loadPayloadBase,
+          interval: 'start',
+        }: NavigationMarkerPayload),
+      ],
+      [
+        'Load',
+        5,
+        ({
+          ...loadPayloadBase,
+          interval: 'end',
+        }: NavigationMarkerPayload),
+      ],
+      ['TTI', 6, null],
+      ['Navigation::Start', 7, null],
+      ['Contentful paint at something', 8, null],
+      [
+        'DOMContentLoaded',
+        6,
+        ({
+          ...domContentLoadedBase,
+          interval: 'start',
+        }: NavigationMarkerPayload),
+      ],
+      [
+        'DOMContentLoaded',
+        7,
+        ({
+          ...domContentLoadedBase,
+          interval: 'end',
+        }: NavigationMarkerPayload),
+      ],
     ],
-    [
-      'Load',
-      5,
-      ({
-        ...loadPayloadBase,
-        interval: 'end',
-      }: NavigationMarkerPayload),
-    ],
-    ['TTI', 6, null],
-    ['Navigation::Start', 7, null],
-    ['Contentful paint at something', 8, null],
-    [
-      'DOMContentLoaded',
-      6,
-      ({
-        ...domContentLoadedBase,
-        interval: 'start',
-      }: NavigationMarkerPayload),
-    ],
-    [
-      'DOMContentLoaded',
-      7,
-      ({
-        ...domContentLoadedBase,
-        interval: 'end',
-      }: NavigationMarkerPayload),
-    ],
-  ]);
+    profile.meta.interval
+  );
 
   return profile;
 }
@@ -695,7 +708,8 @@ export function getJsTracerTable(
 }
 
 export function getThreadWithJsTracerEvents(
-  events: TestDefinedJsTracerEvent[]
+  events: TestDefinedJsTracerEvent[],
+  profile: $ReadOnly<Profile>
 ): Thread {
   const thread = getEmptyThread();
   thread.jsTracer = getJsTracerTable(thread.stringTable, events);
@@ -722,6 +736,7 @@ export function getThreadWithJsTracerEvents(
     time: Array(endOfEvents)
       .fill(0)
       .map((_, i) => i),
+    duration: Array(endOfEvents).fill(profile.meta.interval),
     length: endOfEvents,
   };
 
@@ -733,7 +748,7 @@ export function getProfileWithJsTracerEvents(
 ): Profile {
   const profile = getEmptyProfile();
   profile.threads = eventsLists.map(events =>
-    getThreadWithJsTracerEvents(events)
+    getThreadWithJsTracerEvents(events, profile)
   );
   return profile;
 }

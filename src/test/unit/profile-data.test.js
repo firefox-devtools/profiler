@@ -737,16 +737,12 @@ describe('get-sample-index-closest-to-time', function() {
       defaultCategory
     );
 
-    // getProfileFromTextSamples will generate a profile with samples
-    // with 1ms of interval
-    const interval = 1;
-
-    expect(getSampleIndexClosestToTime(samples, 0, interval)).toBe(0);
-    expect(getSampleIndexClosestToTime(samples, 0.9, interval)).toBe(0);
-    expect(getSampleIndexClosestToTime(samples, 1.1, interval)).toBe(1);
-    expect(getSampleIndexClosestToTime(samples, 1.5, interval)).toBe(1);
-    expect(getSampleIndexClosestToTime(samples, 9.9, interval)).toBe(9);
-    expect(getSampleIndexClosestToTime(samples, 100, interval)).toBe(9);
+    expect(getSampleIndexClosestToTime(samples, 0)).toBe(0);
+    expect(getSampleIndexClosestToTime(samples, 0.9)).toBe(0);
+    expect(getSampleIndexClosestToTime(samples, 1.1)).toBe(1);
+    expect(getSampleIndexClosestToTime(samples, 1.5)).toBe(1);
+    expect(getSampleIndexClosestToTime(samples, 9.9)).toBe(9);
+    expect(getSampleIndexClosestToTime(samples, 100)).toBe(9);
   });
 });
 

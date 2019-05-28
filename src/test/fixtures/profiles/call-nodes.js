@@ -119,6 +119,7 @@ export default function getProfile(): Profile {
     responsiveness: [0, 0],
     stack: [4, 6],
     time: [0, 0],
+    duration: Array(2).fill(profile.meta.interval),
     length: 2,
   };
 
