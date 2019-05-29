@@ -23,7 +23,6 @@ import {
   retrieveProfilesToCompare,
   _fetchProfile,
 } from '../../actions/receive-profile';
-import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
@@ -34,10 +33,8 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 
-// Mocking SymbolStoreDB. By default the functions will return undefined, which
-// will make the symbolication move forward with some bogus information.
-// If you need to simulate that it doesn't have the information, use the
-// function simulateSymbolStoreHasNoCache defined below.
+// Mocking SymbolStoreDB
+import exampleSymbolTable from '../fixtures/example-symbol-table';
 import SymbolStoreDB from '../../profile-logic/symbol-store-db';
 jest.mock('../../profile-logic/symbol-store-db');
 
@@ -49,23 +46,6 @@ import { expandUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
 import { TextDecoder } from 'util';
-
-function simulateSymbolStoreHasNoCache() {
-  // SymbolStoreDB is a mock, but Flow doesn't know this. That's why we use
-  // `any` so that we can use `mockImplementation`.
-  (SymbolStoreDB: any).mockImplementation(() => ({
-    getSymbolTable: jest
-      .fn()
-      .mockImplementation((debugName, breakpadId) =>
-        Promise.reject(
-          new SymbolsNotFoundError(
-            'The requested library does not exist in the database.',
-            { debugName, breakpadId }
-          )
-        )
-      ),
-  }));
-}
 
 describe('actions/receive-profile', function() {
   /**
@@ -271,47 +251,45 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileFromAddon', function() {
-    function setup() {
-      jest.useFakeTimers();
+    let geckoProfiler;
+    let clock;
 
-      const geckoProfiler = {
-        getProfile: jest.fn().mockResolvedValue(createGeckoProfile()),
-        getSymbolTable: jest
-          .fn()
-          .mockRejectedValue(new Error('No symbol tables available')),
+    beforeEach(function() {
+      clock = sinon.useFakeTimers();
+
+      geckoProfiler = {
+        getProfile: () => Promise.resolve(createGeckoProfile()),
+        getSymbolTable: () =>
+          Promise.reject(new Error('No symbol tables available')),
       };
-      window.fetch = jest
-        .fn()
-        .mockRejectedValue(new Error('No symbolication API in place'));
+      window.fetch = sinon.stub();
+      fetch.rejects(new Error('No symbolication API in place'));
       window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
 
-      simulateSymbolStoreHasNoCache();
+      // This is a mock implementation because of the `mock` call above, but
+      // Flow doesn't know this.
+      (SymbolStoreDB: any).mockImplementation(() => ({
+        getSymbolTable: jest.fn().mockResolvedValue(exampleSymbolTable),
+      }));
 
       window.TextDecoder = TextDecoder;
-
-      // Silence the logs coming from the promise rejections above.
-      jest.spyOn(console, 'log').mockImplementation(() => {});
-
-      const store = blankStore();
-
-      return {
-        geckoProfiler,
-        store,
-        ...store,
-      };
-    }
+    });
 
     afterEach(function() {
+      clock.restore();
+
+      geckoProfiler = null;
       delete window.geckoProfilerPromise;
       delete window.TextDecoder;
+      delete window.requestIdleCallback;
       delete window.fetch;
     });
 
     it('can retrieve a profile from the addon', async function() {
-      const { dispatch, getState } = setup();
-      await dispatch(retrieveProfileFromAddon());
+      const store = blankStore();
+      await store.dispatch(retrieveProfileFromAddon());
 
-      const state = getState();
+      const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
@@ -320,33 +298,14 @@ describe('actions/receive-profile', function() {
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
 
-    it('tries to symbolicate the received profile', async () => {
-      const { dispatch, geckoProfiler } = setup();
-
-      await dispatch(retrieveProfileFromAddon());
-
-      expect(geckoProfiler.getSymbolTable).toHaveBeenCalledWith(
-        'firefox',
-        expect.any(String)
-      );
-
-      expect(window.fetch).toHaveBeenCalledWith(
-        'https://symbols.mozilla.org/symbolicate/v5',
-        expect.objectContaining({
-          body: expect.stringMatching(/memoryMap.*firefox/),
-        })
-      );
-    });
-
     it('displays a warning after 30 seconds', async function() {
-      const { dispatch, store } = setup();
+      const store = blankStore();
 
       const states = await observeStoreStateChanges(store, () => {
-        const dispatchResultPromise = dispatch(retrieveProfileFromAddon());
-
-        // this will triggers the timeout synchronously, before the profiler
-        // promise's then is run.
-        jest.advanceTimersByTime(30000);
+        const dispatchResultPromise = store.dispatch(
+          retrieveProfileFromAddon()
+        );
+        clock.tick(30000); // this will triggers the timeout synchronously, before the profiler promise's then is run.
         return dispatchResultPromise;
       });
       const views = states.map(state => getView(state));
@@ -380,10 +339,9 @@ describe('actions/receive-profile', function() {
       ok: true,
       status: 200,
       headers: {
-        get: () => 'application/json',
+        get: () => 'appliciation/json',
       },
-      json: () =>
-        Promise.resolve(JSON.parse(serializeProfile(_getSimpleProfile()))),
+      json: () => Promise.resolve(createGeckoProfile()),
     };
 
     beforeEach(function() {
@@ -413,36 +371,9 @@ describe('actions/receive-profile', function() {
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1,
+        end: 1007,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
-    });
-
-    it('symbolicates a profile if it is not symbolicated yet', async () => {
-      const { profile: unsymbolicatedProfile } = getProfileFromTextSamples(
-        '0xA:libxul'
-      );
-      unsymbolicatedProfile.meta.symbolicated = false;
-
-      window.fetch.resolves({
-        ...fetch200Response,
-        json: () =>
-          Promise.resolve(JSON.parse(serializeProfile(unsymbolicatedProfile))),
-      });
-
-      simulateSymbolStoreHasNoCache();
-
-      // Silence console logs coming from the previous rejection
-      jest.spyOn(console, 'log').mockImplementation(() => {});
-
-      const store = blankStore();
-      await store.dispatch(retrieveProfileFromStore('FAKEHASH'));
-
-      sinon.assert.calledWithMatch(
-        window.fetch,
-        'https://symbols.mozilla.org/symbolicate/v5',
-        { body: sinon.match(/memoryMap.*libxul/) }
-      );
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
     it('requests several times in case of 403', async function() {
@@ -475,9 +406,9 @@ describe('actions/receive-profile', function() {
       const state = store.getState();
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1,
+        end: 1007,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
     it('fails in case the profile cannot be found after several tries', async function() {
@@ -525,8 +456,7 @@ describe('actions/receive-profile', function() {
       headers: {
         get: () => 'application/json',
       },
-      json: () =>
-        Promise.resolve(JSON.parse(serializeProfile(_getSimpleProfile()))),
+      json: () => Promise.resolve(createGeckoProfile()),
     };
 
     beforeEach(function() {
@@ -555,9 +485,9 @@ describe('actions/receive-profile', function() {
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1,
+        end: 1007,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
     it('requests several times in case of 403', async function() {
@@ -589,9 +519,9 @@ describe('actions/receive-profile', function() {
       const state = store.getState();
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1,
+        end: 1007,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
+      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(3); // not empty
     });
 
     it('fails in case the profile cannot be found after several tries', async function() {
@@ -660,14 +590,13 @@ describe('actions/receive-profile', function() {
       json?: () => Promise<mixed>,
     }) {
       const { url, contentType, isZipped, isJSON } = obj;
-      const stringProfile = serializeProfile(_getSimpleProfile());
-      const profile = JSON.parse(stringProfile);
+      const profile = _getSimpleProfile();
       let arrayBuffer = obj.arrayBuffer;
       let json = obj.json;
 
       if (isZipped) {
         const zip = new JSZip();
-        zip.file('profile.json', stringProfile);
+        zip.file('profile.json', serializeProfile(profile));
         const buffer = await zip.generateAsync({ type: 'uint8array' });
         arrayBuffer = () => buffer;
         json = () => Promise.reject(new Error('Not JSON'));
@@ -878,33 +807,6 @@ describe('actions/receive-profile', function() {
       expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
         'JSON Test'
       );
-    });
-
-    it('symbolicates unsymbolicated profiles', async function() {
-      simulateSymbolStoreHasNoCache();
-
-      window.fetch = jest
-        .fn()
-        .mockRejectedValue(new Error('No symbolication API in place'));
-
-      // Silence console logs coming from the previous rejections
-      jest.spyOn(console, 'log').mockImplementation(() => {});
-
-      const profile = createGeckoProfile();
-
-      await setupTestWithFile({
-        type: 'application/json',
-        payload: profile,
-      });
-
-      expect(window.fetch).toHaveBeenCalledWith(
-        'https://symbols.mozilla.org/symbolicate/v5',
-        expect.objectContaining({
-          body: expect.stringMatching(/memoryMap.*firefox/),
-        })
-      );
-
-      delete window.fetch;
     });
 
     it('can load json with an empty mime type', async function() {

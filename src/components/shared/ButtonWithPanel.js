@@ -33,6 +33,7 @@ type Props = {
   // This prop tells the panel to be open by default, but the open/close state is fully
   // managed by the ButtonWithPanel component.
   defaultOpen?: boolean,
+  disabled?: boolean,
 };
 
 type State = {|
@@ -105,7 +106,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { className, label, panel } = this.props;
+    const { className, label, panel, disabled } = this.props;
     const { open } = this.state;
     return (
       <div className={classNames('buttonWithPanel', className, { open })}>
@@ -116,6 +117,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
               'buttonWithPanelButton',
               `${className}Button`
             )}
+            disabled={!!disabled}
             value={label}
             onClick={this._onButtonClick}
           />

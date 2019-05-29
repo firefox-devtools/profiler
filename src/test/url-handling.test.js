@@ -20,6 +20,8 @@ import {
   CURRENT_URL_VERSION,
 } from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
+import { createGeckoProfile } from './fixtures/profiles/gecko-profile';
+import { processProfile } from '../profile-logic/process-profile';
 import { viewProfile } from '../actions/receive-profile';
 import type { Profile } from '../types/profile';
 import getProfile from './fixtures/profiles/call-nodes';
@@ -80,7 +82,8 @@ function _getStoreWithURL(
 }
 
 describe('selectedThread', function() {
-  function dispatchUrlWithThread(store, threadIndex) {
+  function storeWithThread(threadIndex) {
+    const store = blankStore();
     const newUrlState = stateFromLocation({
       pathname: '/public/1ecd7a421948995171a4bb483b7bcc8e1868cc57/calltree/',
       search: `?thread=${threadIndex}`,
@@ -90,41 +93,27 @@ describe('selectedThread', function() {
       type: 'UPDATE_URL_STATE',
       newUrlState,
     });
-  }
-
-  function setup(threadIndex) {
-    const store = blankStore();
-    dispatchUrlWithThread(store, threadIndex);
-
-    const { profile } = getProfileFromTextSamples('A', 'B', 'C', 'D');
-    Object.assign(profile.threads[0], {
-      name: 'GeckoMain',
-      processType: 'default',
-    });
-    Object.assign(profile.threads[1], {
-      name: 'Compositor',
-      processType: 'default',
-    });
-    Object.assign(profile.threads[2], {
-      name: 'GeckoMain',
-      processType: 'tab',
-    });
-
-    store.dispatch(viewProfile(profile));
 
     return store;
   }
 
   it('selects the right thread when receiving a profile from web', function() {
-    const { getState } = setup(1);
-    expect(urlStateReducers.getSelectedThreadIndex(getState())).toBe(1);
+    const profile: Profile = processProfile(createGeckoProfile());
+
+    const store = storeWithThread(1);
+    store.dispatch(viewProfile(profile));
+
+    expect(urlStateReducers.getSelectedThreadIndex(store.getState())).toBe(1);
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
-    const { getState } = setup(100);
+    const profile: Profile = processProfile(createGeckoProfile());
+
+    const store = storeWithThread(100);
+    store.dispatch(viewProfile(profile));
 
     // "2" is the content process' main tab
-    expect(urlStateReducers.getSelectedThreadIndex(getState())).toBe(2);
+    expect(urlStateReducers.getSelectedThreadIndex(store.getState())).toBe(2);
   });
 });
 

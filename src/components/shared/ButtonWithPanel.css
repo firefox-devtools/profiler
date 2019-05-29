@@ -36,11 +36,11 @@
   font-size: 100%;
 }
 
-.buttonWithPanelButton:hover {
+.buttonWithPanelButton:not([disabled]):hover {
   background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1));
 }
 
 .buttonWithPanel.open > * > .buttonWithPanelButton,
-.buttonWithPanelButton:hover:active {
+.buttonWithPanelButton:not([disabled]):hover:active {
   background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
 }

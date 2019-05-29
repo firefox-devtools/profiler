@@ -379,12 +379,6 @@ export type ProfileMeta = {|
   physicalCPUs?: number,
   // The amount of logically available CPU cores for the program.
   logicalCPUs?: number,
-  // A boolean flag indicating whether we symbolicated this profile. If this is
-  // false we'll start a symbolication process when the profile is loaded.
-  // A missing property means that it's an older profile, it stands for an
-  // "unknown" state.  For now we don't do much with it but we may want to
-  // propose a manual symbolication in the future.
-  symbolicated?: boolean,
   // The Update channel for this build of the application.
   // This property is landed in Firefox 67, and is optional because older
   // processed profile versions may not have them. No upgrader was necessary.

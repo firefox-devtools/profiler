@@ -7,9 +7,7 @@ import type { IDBFactory, IDBKeyRange } from '../indexeddb';
 import type { SymbolTableAsTuple } from '../../profile-logic/symbol-store-db';
 import type { GoogleAnalytics } from '../../utils/analytics';
 
-// Because this type isn't an existing Global type, but still it's useful to
-// have it available, we define it with a $ as prfix.
-declare type $GeckoProfiler = {
+declare type GeckoProfiler = {
   getProfile: () => Object,
   getSymbolTable: (
     debugName: string,
@@ -21,8 +19,8 @@ declare class Window extends EventTarget {
   // Google Analytics
   ga?: GoogleAnalytics;
   // profiler.firefox.com and Gecko Profiler Addon
-  geckoProfilerPromise: Promise<$GeckoProfiler>;
-  connectToGeckoProfiler: $GeckoProfiler => void;
+  geckoProfilerPromise: Promise<GeckoProfiler>;
+  connectToGeckoProfiler: GeckoProfiler => void;
   geckoProfilerAddonInstalled?: () => void;
   isGeckoProfilerAddonInstalled?: boolean;
   InstallTrigger?: {

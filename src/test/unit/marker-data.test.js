@@ -26,7 +26,6 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     jest.spyOn(console, 'error').mockImplementation(() => {});
 
     const profile = processProfile(createGeckoProfile());
-    profile.meta.symbolicated = true; // avoid to kick off the symbolication process
     const thread = profile.threads[0]; // This is the parent process main thread
     const contentThread = profile.threads[2]; // This is the content process main thread
 

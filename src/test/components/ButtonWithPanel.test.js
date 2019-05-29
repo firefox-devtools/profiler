@@ -83,6 +83,22 @@ describe('shared/ButtonWithPanel', () => {
     });
   });
 
+  it('renders a disabled button', () => {
+    const { container } = render(
+      <ButtonWithPanel
+        className="button"
+        label="My Button"
+        disabled={true}
+        panel={
+          <ArrowPanel className="panel">
+            <div>Panel content</div>
+          </ArrowPanel>
+        }
+      />
+    );
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
   it('opens the panel when the button is clicked and closes the panel when the escape key is pressed', () => {
     const { getByValue, container } = setup();
 
