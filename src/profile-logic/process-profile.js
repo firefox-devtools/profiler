@@ -50,6 +50,7 @@ import type {
 import type { Milliseconds } from '../types/units';
 import type {
   GeckoProfile,
+  GeckoSubprocessProfile,
   GeckoThread,
   GeckoMarkerStruct,
   GeckoFrameStruct,
@@ -680,7 +681,7 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
  * Converts the Gecko list of counters into the processed format.
  */
 function _processCounters(
-  geckoProfile: GeckoProfile,
+  geckoProfile: GeckoProfile | GeckoSubprocessProfile,
   // The counters are listed independently from the threads, so we need an index that
   // references back into a stable list of threads. The threads list in the processing
   // step is built dynamically, so the "stableThreadList" variable is a hint that this
@@ -737,7 +738,7 @@ function _processCounters(
  */
 function _processThread(
   thread: GeckoThread,
-  processProfile: GeckoProfile,
+  processProfile: GeckoProfile | GeckoSubprocessProfile,
   extensions: ExtensionTable
 ): Thread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
@@ -1028,7 +1029,7 @@ export function processProfile(
     oscpu: geckoProfile.meta.oscpu,
     platform: geckoProfile.meta.platform,
     processType: geckoProfile.meta.processType,
-    product: geckoProfile.meta.product,
+    product: geckoProfile.meta.product || '',
     stackwalk: geckoProfile.meta.stackwalk,
     debug: !!geckoProfile.meta.debug,
     toolkit: geckoProfile.meta.toolkit,

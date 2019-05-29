@@ -7,13 +7,65 @@ import type { Lib } from '../../../types/profile';
 
 import type {
   GeckoProfile,
-  GeckoProfileMeta,
+  GeckoSubprocessProfile,
+  GeckoProfileFullMeta,
+  GeckoProfileShortMeta,
   GeckoThread,
   GeckoCounter,
   GeckoMarkerStack,
 } from '../../../types/gecko-profile';
 
 import { GECKO_PROFILE_VERSION } from '../../../app-logic/constants';
+
+export function createGeckoSubprocessProfile(
+  parentProfile: GeckoProfile
+): GeckoSubprocessProfile {
+  const contentProcessMeta: GeckoProfileShortMeta = {
+    version: parentProfile.meta.version,
+    // content process was launched 1 second after parent process:
+    startTime: parentProfile.meta.startTime + 1000,
+    shutdownTime: null,
+    categories: parentProfile.meta.categories,
+  };
+
+  const contentProcessBinary: Lib = {
+    breakpadId: '9F950E2CE3CD3E1ABD06D80788B606E60',
+    debugName: 'firefox-webcontent',
+    name: 'firefox-webcontent',
+    path:
+      '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
+    debugPath:
+      '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
+    offset: 0,
+    start: 0x100000000,
+    end: 0x100000000 + 10000,
+    arch: 'x86_64',
+  };
+
+  const contentProcessProfile: GeckoSubprocessProfile = {
+    meta: contentProcessMeta,
+    pausedRanges: [],
+    libs: [contentProcessBinary, ...parentProfile.libs.slice(1)], // libs are stringified in the Gecko profile
+    pages: [
+      {
+        docshellId: '{e18794dd-3960-3543-b101-e5ed287ab617}',
+        historyId: 1,
+        url: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
+        isSubFrame: false,
+      },
+    ],
+    threads: [
+      {
+        ..._createGeckoThread(),
+        name: 'GeckoMain',
+        processType: 'tab',
+      },
+    ],
+    processes: [],
+  };
+
+  return contentProcessProfile;
+}
 
 /**
  * export defaults one object that is an example profile, in the Gecko format,
@@ -26,20 +78,6 @@ export function createGeckoProfile(): GeckoProfile {
     name: 'firefox',
     path: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox',
     debugPath: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox',
-    offset: 0,
-    start: 0x100000000,
-    end: 0x100000000 + 10000,
-    arch: 'x86_64',
-  };
-
-  const contentProcessBinary: Lib = {
-    breakpadId: '9F950E2CE3CD3E1ABD06D80788B606E60',
-    debugName: 'firefox-webcontent',
-    name: 'firefox-webcontent',
-    path:
-      '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
-    debugPath:
-      '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
     offset: 0,
     start: 0x100000000,
     end: 0x100000000 + 10000,
@@ -71,7 +109,7 @@ export function createGeckoProfile(): GeckoProfile {
     },
   ];
 
-  const parentProcessMeta: GeckoProfileMeta = {
+  const parentProcessMeta: GeckoProfileFullMeta = {
     abi: 'x86_64-gcc3',
     appBuildID: '20181126165837',
     interval: 1,
@@ -90,6 +128,8 @@ export function createGeckoProfile(): GeckoProfile {
     physicalCPUs: 4,
     sourceURL: '',
     updateChannel: 'nightly',
+    gcpoison: 0,
+    asyncstack: 1,
     categories: [
       {
         name: 'Other',
@@ -118,13 +158,6 @@ export function createGeckoProfile(): GeckoProfile {
     },
   };
 
-  const contentProcessMeta: GeckoProfileMeta = {
-    ...parentProcessMeta,
-    processType: 2,
-    // content process was launched 1 second after parent process:
-    startTime: parentProcessMeta.startTime + 1000,
-  };
-
   const parentProcessThreads: GeckoThread[] = [
     {
       ..._createGeckoThread(),
@@ -144,37 +177,20 @@ export function createGeckoProfile(): GeckoProfile {
     createGeckoCounter(parentProcessThreads[0]),
   ];
 
-  const contentProcessProfile: GeckoProfile = {
-    meta: contentProcessMeta,
-    pausedRanges: [],
-    libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the Gecko profile
-    pages: [
-      {
-        docshellId: '{e18794dd-3960-3543-b101-e5ed287ab617}',
-        historyId: 1,
-        url: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
-        isSubFrame: false,
-      },
-    ],
-    threads: [
-      {
-        ..._createGeckoThread(),
-        name: 'GeckoMain',
-        processType: 'tab',
-      },
-    ],
-    processes: [],
-  };
-
-  return {
+  const profile = {
     meta: parentProcessMeta,
     libs: [parentProcessBinary].concat(extraBinaries),
     pages: [],
     counters: parentProcessCounters,
     pausedRanges: [],
     threads: parentProcessThreads,
-    processes: [contentProcessProfile],
+    processes: [],
   };
+
+  const contentProcessProfile = createGeckoSubprocessProfile(profile);
+  profile.processes.push(contentProcessProfile);
+
+  return profile;
 }
 
 function _createGeckoThread(): GeckoThread {

@@ -177,20 +177,24 @@ export type GeckoCounter = {|
   |},
 |};
 
-export type GeckoProfileMeta = {|
-  interval: Milliseconds,
+/* This meta object is used in subprocesses profiles.
+ * Using https://searchfox.org/mozilla-central/rev/7556a400affa9eb99e522d2d17c40689fa23a729/tools/profiler/core/platform.cpp#1829
+ * as source of truth. (Please update the link whenever there's a new property).
+ * */
+export type GeckoProfileShortMeta = {|
+  version: number,
   startTime: Milliseconds,
   shutdownTime: Milliseconds | null,
-  abi: string,
-  // The extensions property landed in Firefox 60, and is only optional because
-  // older profile versions may not have it. No upgrader was written for this change.
-  extensions?: GeckoExtensionMeta,
   categories: CategoryList,
-  misc: string,
-  oscpu: string,
-  platform: string,
-  processType: number,
-  product: string,
+|};
+
+/* This meta object is used on the top level profile object.
+ * Using https://searchfox.org/mozilla-central/rev/7556a400affa9eb99e522d2d17c40689fa23a729/tools/profiler/core/platform.cpp#1829
+ * as source of truth. (Please update the link whenever there's a new property).
+ * */
+export type GeckoProfileFullMeta = {|
+  ...GeckoProfileShortMeta,
+  interval: Milliseconds,
   stackwalk: 0 | 1,
   // This value represents a boolean, but for some reason is written out as an int
   // value as the previous field.
@@ -198,20 +202,9 @@ export type GeckoProfileMeta = {|
   // This property was added to Firefox Profiler a long time after it was added to
   // Firefox, that's why we don't need to make it optional for gecko profiles.
   debug: 0 | 1,
-  toolkit: string,
-  version: number,
-  // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
-  // in Firefox 62, and are only optional because older processed profile
-  // versions may not have them. No upgrader was written for this change.
-  appBuildID?: string,
-  sourceURL?: string,
-  physicalCPUs?: number,
-  logicalCPUs?: number,
-  // This boolean indicates whether this gecko profile includes already
-  // symbolicated frames. This will be missing for profiles coming from Gecko
-  // (which indicates that they'll need to be symbolicated) but may be specified
-  // for profiles imported from other formats (eg: linux perf).
-  presymbolicated?: boolean,
+  gcpoison: 0 | 1,
+  asyncstack: 0 | 1,
+  processType: number,
   // The Update channel for this build of the application.
   // This property is landed in Firefox 67, and is optional because older
   // Firefox versions may not have them. No upgrader was necessary.
@@ -224,16 +217,46 @@ export type GeckoProfileMeta = {|
     | 'release'
     | 'esr' // Extended Support Release channel
     | string,
+  // -- platform information -- This can be absent in some very rare situations.
+  platform?: string,
+  oscpu?: string,
+  misc?: string,
+  // -- Runtime -- This can be absent in some very rare situations.
+  abi?: string,
+  toolkit?: string,
+  product?: string,
+  // -- appInfo -- This can be absent in some very rare situations.
+  // The appBuildID, sourceURL, physicalCPUs and logicalCPUs properties landed
+  // in Firefox 62, and are only optional because older processed profile
+  // versions may not have them. No upgrader was written for this change.
+  appBuildID?: string,
+  sourceURL?: string,
+  // -- system info -- This can be absent in some very rare situations.
+  physicalCPUs?: number,
+  logicalCPUs?: number,
+  // -- extensions --
+  // The extensions property landed in Firefox 60, and is only optional because
+  // older profile versions may not have it. No upgrader was written for this change.
+  extensions?: GeckoExtensionMeta,
+  // -- extra properties added by the frontend --
+  // This boolean indicates whether this gecko profile includes already
+  // symbolicated frames. This will be missing for profiles coming from Gecko
+  // (which indicates that they'll need to be symbolicated) but may be specified
+  // for profiles imported from other formats (eg: linux perf).
+  presymbolicated?: boolean,
 |};
 
-export type GeckoProfile = {|
+export type GeckoProfileWithMeta<Meta> = {|
   counters?: GeckoCounter[],
-  meta: GeckoProfileMeta,
+  meta: Meta,
   libs: Lib[],
   pages?: PageList,
   threads: GeckoThread[],
   pausedRanges: PausedRange[],
   tasktracer?: Object,
-  processes: GeckoProfile[],
+  processes: GeckoSubprocessProfile[],
   jsTracerDictionary?: string[],
 |};
+
+export type GeckoSubprocessProfile = GeckoProfileWithMeta<GeckoProfileShortMeta>;
+export type GeckoProfile = GeckoProfileWithMeta<GeckoProfileFullMeta>;
