@@ -13,6 +13,7 @@ import {
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { withSize, type SizeProps } from '../shared/WithSize';
 import { createPortal } from 'react-dom';
+import { TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
 
 import type { ScreenshotPayload } from '../../types/markers';
 import type { ThreadIndex, Thread } from '../../types/profile';
@@ -45,10 +46,6 @@ type State = {|
   pageX: null | number,
   containerTop: null | number,
 |};
-
-// Export the value for tests, and for computing the max height of the timeline
-// for the splitter.
-export const TRACK_SCREENSHOT_HEIGHT = 50;
 
 class Screenshots extends PureComponent<Props, State> {
   state = {

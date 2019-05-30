@@ -14,11 +14,10 @@ import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 
 import { commitRange } from '../../actions/profile-view';
-import TrackScreenshots, {
-  TRACK_SCREENSHOT_HEIGHT,
-} from '../../components/timeline/TrackScreenshots';
+import TrackScreenshots from '../../components/timeline/TrackScreenshots';
 import Timeline from '../../components/timeline';
 import { ensureExists } from '../../utils/flow';
+import { TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';

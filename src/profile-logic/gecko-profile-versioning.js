@@ -16,8 +16,7 @@ import {
   upgradeGCMajorMarker_Gecko8To9,
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
-
-export const CURRENT_VERSION = 15; // The current version of the Gecko profile format.
+import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
 
 // Gecko profiles before version 1 did not have a profile.meta.version field.
 // Treat those as version zero.
@@ -30,22 +29,22 @@ const UNANNOTATED_VERSION = 0;
  */
 export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
   const profileVersion = profile.meta.version || UNANNOTATED_VERSION;
-  if (profileVersion === CURRENT_VERSION) {
+  if (profileVersion === GECKO_PROFILE_VERSION) {
     return;
   }
 
-  if (profileVersion > CURRENT_VERSION) {
+  if (profileVersion > GECKO_PROFILE_VERSION) {
     throw new Error(
       `Unable to parse a Gecko profile of version ${profileVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
-        `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_VERSION}.\n` +
+        `The most recent version understood by this version of profiler.firefox.com is version ${GECKO_PROFILE_VERSION}.\n` +
         'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
     );
   }
 
-  // Convert to CURRENT_VERSION, one step at a time.
+  // Convert to GECKO_PROFILE_VERSION, one step at a time.
   for (
     let destVersion = profileVersion + 1;
-    destVersion <= CURRENT_VERSION;
+    destVersion <= GECKO_PROFILE_VERSION;
     destVersion++
   ) {
     if (destVersion in _upgraders) {
@@ -53,7 +52,7 @@ export function upgradeGeckoProfileToCurrentVersion(profile: Object) {
     }
   }
 
-  profile.meta.version = CURRENT_VERSION;
+  profile.meta.version = GECKO_PROFILE_VERSION;
 }
 
 function _archFromAbi(abi) {

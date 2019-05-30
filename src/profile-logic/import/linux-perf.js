@@ -236,6 +236,12 @@ export function convertPerfScriptProfile(profile: string): Object {
     thread.finish()
   );
 
+  for (const thread of threadArray) {
+    // The samples are not guaranteed to be in order, sort them so that they are.
+    const key = thread.samples.schema.time;
+    (thread.samples.data: Array<any>).sort((a, b) => a[key] - b[key]);
+  }
+
   return {
     meta: {
       interval: 1,

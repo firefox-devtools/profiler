@@ -13,17 +13,17 @@ import {
 import { TimelineMarkersMemory } from './Markers';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { TrackMemoryGraph } from './TrackMemoryGraph';
+import {
+  TRACK_MEMORY_GRAPH_HEIGHT,
+  TRACK_MEMORY_MARKERS_HEIGHT,
+  TRACK_MEMORY_LINE_WIDTH,
+} from '../../app-logic/constants';
 
 import type { CounterIndex, ThreadIndex } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type { ConnectedProps } from '../../utils/connect';
 
 import './TrackMemory.css';
-
-export const GRAPH_HEIGHT = 25;
-export const MARKERS_HEIGHT = 15;
-export const TRACK_MEMORY_HEIGHT = GRAPH_HEIGHT + MARKERS_HEIGHT;
-export const LINE_WIDTH = 2;
 
 type OwnProps = {|
   +counterIndex: CounterIndex,
@@ -64,9 +64,9 @@ export class TrackMemoryImpl extends React.PureComponent<Props, State> {
       <div
         className="timelineTrackMemory"
         style={{
-          height: GRAPH_HEIGHT + MARKERS_HEIGHT,
-          '--graph-height': `${GRAPH_HEIGHT}px`,
-          '--markers-height': `${MARKERS_HEIGHT}px`,
+          height: TRACK_MEMORY_GRAPH_HEIGHT + TRACK_MEMORY_MARKERS_HEIGHT,
+          '--graph-height': `${TRACK_MEMORY_GRAPH_HEIGHT}px`,
+          '--markers-height': `${TRACK_MEMORY_MARKERS_HEIGHT}px`,
         }}
       >
         <TimelineMarkersMemory
@@ -77,8 +77,8 @@ export class TrackMemoryImpl extends React.PureComponent<Props, State> {
         />
         <TrackMemoryGraph
           counterIndex={counterIndex}
-          lineWidth={LINE_WIDTH}
-          graphHeight={GRAPH_HEIGHT}
+          lineWidth={TRACK_MEMORY_LINE_WIDTH}
+          graphHeight={TRACK_MEMORY_GRAPH_HEIGHT}
         />
       </div>
     );
