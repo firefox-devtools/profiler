@@ -7,10 +7,8 @@
 import * as React from 'react';
 import explicitConnect from '../../../utils/connect';
 import { getProfile, getProfileRootRange } from '../../../selectors/profile';
-import {
-  getDataSource,
-  getIsNewlyPublished,
-} from '../../../selectors/url-state';
+import { getDataSource } from '../../../selectors/url-state';
+import { getIsNewlyPublished } from '../../../selectors/app';
 import { MenuButtonsMetaInfo } from './MetaInfo';
 import { MenuButtonsPublish } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';
