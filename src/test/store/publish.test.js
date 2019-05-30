@@ -179,19 +179,6 @@ describe('attemptToPublish', function() {
     expect(getUploadError(getState())).toBe(error);
   });
 
-  it('calls window.open after publishing a profile', async function() {
-    const { dispatch, resolveUpload } = setup();
-    const publishAttempt = dispatch(attemptToPublish());
-    resolveUpload('FAKEHASH');
-
-    expect(await publishAttempt).toEqual(true);
-
-    expect(window.open).toHaveBeenCalledWith(
-      'http://localhost/public/FAKEHASH/calltree/?globalTrackOrder=0&localTrackOrderByPid=0-0~&thread=0&v=3',
-      '_blank'
-    );
-  });
-
   it('updates with upload progress', async function() {
     const {
       waitUntilPhase,
