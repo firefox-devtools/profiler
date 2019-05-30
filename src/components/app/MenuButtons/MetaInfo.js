@@ -25,6 +25,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
     return (
       <ButtonWithPanel
         className="menuButtonsMetaInfoButton"
+        buttonClassName="menuButtonsMetaInfoButtonButton"
         label={_formatLabel(meta) || 'Profile information'}
         panel={
           <ArrowPanel className="arrowPanelOpenMetaInfo">

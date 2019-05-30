@@ -20,7 +20,6 @@ import {
   getCompressedProfileBlob,
   getUploadPhase,
   getUploadProgressString,
-  getUploadUrl,
   getUploadError,
   getShouldSanitizeByDefault,
 } from '../../../selectors/publish';
@@ -36,7 +35,9 @@ import type { UploadPhase } from '../../../types/state';
 
 require('./Publish.css');
 
-type OwnProps = {||};
+type OwnProps = {|
+  +isRepublish?: boolean,
+|};
 
 type StateProps = {|
   +profile: Profile,
@@ -47,7 +48,6 @@ type StateProps = {|
   +downloadFileName: string,
   +uploadPhase: UploadPhase,
   +uploadProgress: string,
-  +uploadUrl: string,
   +shouldSanitizeByDefault: boolean,
   +error: mixed,
 |};
@@ -97,27 +97,19 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       attemptToPublish,
       downloadFileName,
       compressedProfileBlobPromise,
-      uploadUrl,
       shouldSanitizeByDefault,
+      isRepublish,
     } = this.props;
 
     return (
       <div data-testid="MenuButtonsPublish-container">
-        {uploadUrl ? (
-          <div className="menuButtonsPublishPreviousUrl">
-            <div className="menuButtonsPublishPreviousUrlTitle">
-              Previously published profile:
-            </div>
-            <div className="menuButtonsPublishUrl">
-              <a href={uploadUrl} target="_blank" rel="noopener noreferrer">
-                {uploadUrl}
-              </a>
-            </div>
-          </div>
-        ) : null}
         <form className="menuButtonsPublishContent" onSubmit={attemptToPublish}>
           <div className="menuButtonsPublishIcon" />
-          <h1 className="menuButtonsPublishTitle">Share Performance Profile</h1>
+          <h1 className="menuButtonsPublishTitle">
+            {isRepublish
+              ? 'Re-publish Performance Profile'
+              : 'Share Performance Profile'}
+          </h1>
           <p className="menuButtonsPublishInfoDescription">
             Upload your profile and make it accessible to anyone with the link.
             {shouldSanitizeByDefault
@@ -221,37 +213,6 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
     );
   }
 
-  _renderUploadedPanel() {
-    const { uploadUrl } = this.props;
-    return (
-      <div
-        className="menuButtonsPublishUpload"
-        data-testid="MenuButtonsPublish-container"
-      >
-        <div className="menuButtonsPublishUploadTop">
-          <div className="menuButtonsPublishUploadTitle">Profile published</div>
-          <div className="menuButtonsPublishMessage">
-            Your profile was published, it is now safe to close this window.
-          </div>
-          <div className="menuButtonsPublishUrl">
-            <a href={uploadUrl} target="_blank" rel="noopener noreferrer">
-              {uploadUrl}
-            </a>
-          </div>
-        </div>
-        <div className="menuButtonsPublishButtons">
-          <button
-            type="button"
-            className="photon-button photon-button-primary menuButtonsPublishButton"
-            onClick={this._closePanelAfterUpload}
-          >
-            Ok
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   _renderErrorPanel() {
     const { error, resetUploadState } = this.props;
     let message: string =
@@ -294,12 +255,11 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
       case 'error':
         return this._renderErrorPanel();
       case 'local':
+      case 'uploaded':
         return this._renderPublishPanel();
       case 'uploading':
       case 'compressing':
         return this._renderUploadPanel();
-      case 'uploaded':
-        return this._renderUploadedPanel();
       default:
         throw assertExhaustiveCheck(uploadPhase);
     }
@@ -320,7 +280,6 @@ export const MenuButtonsPublish = explicitConnect<
     compressedProfileBlobPromise: getCompressedProfileBlob(state),
     uploadPhase: getUploadPhase(state),
     uploadProgress: getUploadProgressString(state),
-    uploadUrl: getUploadUrl(state),
     error: getUploadError(state),
     shouldSanitizeByDefault: getShouldSanitizeByDefault(state),
   }),

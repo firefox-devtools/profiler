@@ -15,6 +15,7 @@ describe('shared/ButtonWithPanel', () => {
     return render(
       <ButtonWithPanel
         className="button"
+        buttonClassName="buttonButton"
         label="My Button"
         panel={
           <ArrowPanel className="panel">
