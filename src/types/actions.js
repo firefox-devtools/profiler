@@ -308,10 +308,12 @@ type UrlStateAction =
   | {| +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] |}
   | {| +type: 'CHANGE_PROFILE_NAME', +profileName: string |}
   | {|
-      +type: 'SANITIZE_PROFILE',
+      +type: 'SANITIZE_PROFILE_PUBLISHED',
       +hash: string,
       +committedRanges: StartEndRange[] | null,
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+      +originalProfile: Profile,
+      +originalUrlState: UrlState,
     |};
 
 type IconsAction =
@@ -338,10 +340,6 @@ type PublishAction =
       +uploadProgress: number,
     |}
   | {|
-      +type: 'UPLOAD_FINISHED',
-      +url: string,
-    |}
-  | {|
       +type: 'UPLOAD_FAILED',
       +error: mixed,
     |}
@@ -357,7 +355,12 @@ type PublishAction =
   | {|
       +type: 'CHANGE_UPLOAD_STATE',
       +changes: $Shape<UploadState>,
-    |};
+    |}
+  | {|
+      +type: 'REVERT_TO_ORIGINAL_PROFILE',
+      +originalUrlState: UrlState,
+    |}
+  | {| +type: 'HIDE_STALE_PROFILE' |};
 
 export type Action =
   | ProfileAction
