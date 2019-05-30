@@ -89,9 +89,6 @@ type BaseQuery = {|
   hiddenThreads: string, // "0-1"
   profiles: string[],
   profileName: string,
-  // This value tracks whether a profile was newly published. Which in that case
-  // we will want to show a friendly message.
-  published: null | void,
 |};
 
 type CallTreeQuery = {|
@@ -180,7 +177,6 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     profiles: urlState.profilesToCompare || undefined,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
-    published: urlState.isNewlyPublished === true ? null : undefined,
   };
 
   // Add the parameter hiddenGlobalTracks only when needed.
@@ -346,7 +342,6 @@ export function stateFromLocation(location: Location): UrlState {
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
     profileName: query.profileName,
-    isNewlyPublished: query.published !== undefined,
     profileSpecific: {
       implementation,
       invertCallstack: query.invertCallstack !== undefined,

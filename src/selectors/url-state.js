@@ -41,8 +41,6 @@ export const getProfilesToCompare: Selector<string[] | null> = state =>
   getUrlState(state).profilesToCompare;
 export const getProfileNameFromUrl: Selector<string> = state =>
   getUrlState(state).profileName;
-export const getIsNewlyPublished: Selector<boolean> = state =>
-  getUrlState(state).isNewlyPublished;
 export const getAllCommittedRanges: Selector<StartEndRange[]> = state =>
   getProfileSpecificState(state).committedRanges;
 export const getImplementationFilter: Selector<ImplementationFilter> = state =>

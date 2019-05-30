@@ -161,6 +161,22 @@ const trackThreadHeights: Reducer<Array<ThreadIndex | void>> = (
   }
 };
 
+/**
+ * This reducer holds the state for whether or not a profile was newly uploaded
+ * or not. This way we can show the permalink to the user.
+ */
+const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'PROFILE_PUBLISHED':
+    case 'SANITIZE_PROFILE_PUBLISHED':
+      return true;
+    case 'DISMISS_NEWLY_PUBLISHED':
+      return false;
+    default:
+      return state;
+  }
+};
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   isUrlSetupDone,
@@ -169,6 +185,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   panelLayoutGeneration,
   lastVisibleThreadTabSlug,
   trackThreadHeights,
+  isNewlyPublished,
 });
 
 export default appStateReducer;
