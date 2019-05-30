@@ -518,9 +518,11 @@ const wrapReducerInResetter = (
 ): Reducer<ProfileViewState> => {
   return (state, action) => {
     switch (action.type) {
+      case 'SANITIZE_PROFILE_PUBLISHED':
+      case 'REVERT_TO_ORIGINAL_PROFILE':
       case 'RETURN_TO_ZIP_FILE_LIST':
-        // Provide a mechanism to wipe this state clean when returning to the zip file
-        // list, as it invalidates all of the profile view state.
+        // Provide a mechanism to wipe the state clean when changing out profiles.
+        // All of the profile view information is invalidated.
         return regularReducer(undefined, action);
       default:
         // Run the normal reducer.

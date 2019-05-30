@@ -19,11 +19,6 @@ const view: Reducer<AppViewState> = (
   state = { phase: 'INITIALIZING' },
   action
 ) => {
-  if (state.phase === 'DATA_LOADED') {
-    // Let's not come back at another phase if we're already displaying a profile
-    return state;
-  }
-
   switch (action.type) {
     case 'TEMPORARY_ERROR':
       return {
@@ -40,6 +35,9 @@ const view: Reducer<AppViewState> = (
       return { phase: 'INITIALIZING' };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
+    case 'REVERT_TO_ORIGINAL_PROFILE':
+    case 'SANITIZE_PROFILE_PUBLISHED':
+      return { phase: 'TRANSITIONING_FROM_STALE_PROFILE' };
     case 'RECEIVE_ZIP_FILE':
     case 'VIEW_PROFILE':
       return { phase: 'DATA_LOADED' };

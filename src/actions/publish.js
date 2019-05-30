@@ -5,22 +5,26 @@
 // @flow
 import { uploadBinaryProfileData } from '../profile-logic/profile-store';
 import { sendAnalytics } from '../utils/analytics';
-import { getUrlState } from '../selectors/url-state';
+import { getProfile } from '../selectors/profile';
 import {
   getAbortFunction,
   getUploadGeneration,
   getSanitizedProfile,
   getSanitizedProfileData,
   getRemoveProfileInformation,
+  getOriginalProfile,
+  getOriginalUrlState,
 } from '../selectors/publish';
-import { urlFromState } from '../app-logic/url-handling';
-import { profilePublished } from './app';
-import urlStateReducer from '../reducers/url-state';
+import { getUrlState } from '../selectors/url-state';
+import { viewProfile } from './receive-profile';
+import { ensureExists } from '../utils/flow';
+import { setHistoryReplaceState } from '../app-logic/url-handling';
 
 import type { Action, ThunkAction } from '../types/store';
 import type { CheckedSharingOptions } from '../types/actions';
 import type { StartEndRange } from '../types/units';
-import type { ThreadIndex } from '../types/profile';
+import type { Profile, ThreadIndex } from '../types/profile';
+import type { UrlState } from '../types/state';
 
 export function toggleCheckedSharingOptions(
   slug: $Keys<CheckedSharingOptions>
@@ -56,13 +60,6 @@ export function updateUploadProgress(uploadProgress: number): Action {
     type: 'UPDATE_UPLOAD_PROGRESS',
     uploadProgress,
   };
-}
-
-/**
- * A profile upload finished.
- */
-export function uploadFinished(url: string): Action {
-  return { type: 'UPLOAD_FINISHED', url };
 }
 
 /**
@@ -125,32 +122,46 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       }
 
       const removeProfileInformation = getRemoveProfileInformation(getState());
-      let urlState;
       if (removeProfileInformation) {
-        const { committedRanges, oldThreadIndexToNew } = getSanitizedProfile(
-          getState()
-        );
-        urlState = urlStateReducer(
-          getUrlState(getState()),
-          profileSanitized(hash, committedRanges, oldThreadIndexToNew)
-        );
-      } else {
-        urlState = urlStateReducer(
-          getUrlState(getState()),
-          profilePublished(hash)
-        );
-      }
-      const url = window.location.origin + urlFromState(urlState);
+        const {
+          committedRanges,
+          oldThreadIndexToNew,
+          profile,
+        } = getSanitizedProfile(getState());
+        const originalProfile = getProfile(getState());
+        const originalUrlState = getUrlState(getState());
 
-      dispatch(uploadFinished(url));
+        // Hide the old UI gracefully.
+        await dispatch(hideStaleProfile());
+
+        // Update the UrlState so that we are sanitized.
+        dispatch(
+          profileSanitized(
+            hash,
+            committedRanges,
+            oldThreadIndexToNew,
+            originalProfile,
+            originalUrlState
+          )
+        );
+        // Swap out the URL state, since the view profile calculates all of the default
+        // settings. If we don't do this then we can go back in history to where we
+        // are trying to view a profile without valid view settings.
+        setHistoryReplaceState(true);
+        // Multiple dispatches are usually to be avoided, but viewProfile requires
+        // the next UrlState in place. It could be rewritten to have a UrlState passed
+        // in as a paremeter, but that doesn't seem worth it at the time of this writing.
+        dispatch(viewProfile(profile));
+        setHistoryReplaceState(false);
+      } else {
+        dispatch(profilePublished(hash));
+      }
 
       sendAnalytics({
         hitType: 'event',
         eventCategory: 'profile upload',
         eventAction: 'succeeded',
       });
-
-      window.open(url, '_blank');
     } catch (error) {
       dispatch(uploadFailed(error));
       sendAnalytics({
@@ -194,12 +205,58 @@ export function resetUploadState(): Action {
 export function profileSanitized(
   hash: string,
   committedRanges: StartEndRange[] | null,
-  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+  originalProfile: Profile,
+  originalUrlState: UrlState
 ): Action {
   return {
-    type: 'SANITIZE_PROFILE',
+    type: 'SANITIZE_PROFILE_PUBLISHED',
     hash,
     committedRanges,
     oldThreadIndexToNew,
+    originalProfile,
+    originalUrlState,
+  };
+}
+
+/**
+ * Report that the profile was published, but not sanitized.
+ */
+export function profilePublished(hash: string): Action {
+  return {
+    type: 'PROFILE_PUBLISHED',
+    hash,
+  };
+}
+
+export function revertToOriginalProfile(): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    const originalProfile = ensureExists(
+      getOriginalProfile(getState()),
+      'Expected to find an original profile when reverting to it.'
+    );
+    const originalUrlState = ensureExists(
+      getOriginalUrlState(getState()),
+      'Expected to find the original url state to revert to.'
+    );
+
+    await dispatch(hideStaleProfile());
+
+    dispatch({
+      type: 'REVERT_TO_ORIGINAL_PROFILE',
+      originalUrlState: originalUrlState,
+    });
+
+    dispatch(viewProfile(originalProfile));
+  };
+}
+
+export function hideStaleProfile(): ThunkAction<Promise<void>> {
+  return dispatch => {
+    dispatch({ type: 'HIDE_STALE_PROFILE' });
+    return new Promise(resolve => {
+      // This timing should match .profileViewerFadeOut.
+      setTimeout(resolve, 300);
+    });
   };
 }

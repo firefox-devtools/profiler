@@ -28,13 +28,6 @@ export function changeSelectedTab(selectedTab: TabSlug): ThunkAction<void> {
   };
 }
 
-export function profilePublished(hash: string): Action {
-  return {
-    type: 'PROFILE_PUBLISHED',
-    hash,
-  };
-}
-
 export function changeProfilesToCompare(profiles: string[]): Action {
   return {
     type: 'CHANGE_PROFILES_TO_COMPARE',
