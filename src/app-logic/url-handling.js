@@ -21,6 +21,30 @@ import type { TrackIndex } from '../types/profile-derived';
 
 export const CURRENT_URL_VERSION = 3;
 
+/**
+ * This static piece of state might look like an anti-pattern, but it's a relatively
+ * simple way to adjust whether we are pushing or replacing onto the history API.
+ * The history API is a singleton, and so here we're also using a singleton pattern
+ * to manage this bit of state.
+ */
+let _isReplaceState: boolean = false;
+
+/**
+ * This function can be called from thunk actions or other components to change the
+ * history API's behavior.
+ */
+export function setHistoryReplaceState(value: boolean): void {
+  _isReplaceState = value;
+}
+
+/**
+ * This function is consumed by the UrlManager so it knows how to interact with the
+ * history API. It's embedded here to avoid cyclical dependencies when importing files.
+ */
+export function getIsHistoryReplaceState(): boolean {
+  return _isReplaceState;
+}
+
 function getDataSourceDirs(
   urlState: UrlState
 ): [] | [DataSource] | [DataSource, string] {
