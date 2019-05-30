@@ -3,19 +3,40 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .menuButtonsShareButton,
-.menuButtonsUploadingButton,
 .menuButtonsPermalinkButton,
-.menuButtonsUploadErrorButton {
+.menuButtonsRevertButton,
+.menuButtonsAbortUploadButton {
   height: 24px;
   margin-bottom: -24px;
-}
-
-.menuButtonsPermalinkButton {
   border-left: 1px solid var(--grey-30);
 }
 
-.menuButtonsPublishPanel,
-.menuButtonsUploadErrorPanel {
+.menuButtonsAbortUploadButton {
+  background-color: var(--green-70);
+  color: #fff;
+}
+
+.menuButtonsUploadingButtonLabel {
+  position: relative;
+  padding: 0 10px;
+  color: hsla(0, 0%, 100%, 0.7);
+  cursor: default;
+  line-height: 24px;
+  text-align: center;
+  -moz-user-select: none;
+}
+
+.menuButtonsShareButtonOriginal {
+  background-color: var(--green-70);
+  color: white;
+}
+
+.menuButtonsShareButtonError {
+  background-color: var(--red-60);
+  color: white;
+}
+
+.menuButtonsPublishPanel {
   --width: 500px;
 }
 
@@ -148,7 +169,9 @@
 }
 
 .menuButtonsPublishUploadBarInner {
-  height: 5px;
+  position: absolute;
+  top: 0;
+  height: 3px;
   animation: animate-stripes 1s linear infinite;
   background-color: var(--blue-50);
   background-image: linear-gradient(
@@ -163,7 +186,7 @@
     transparent 80%
   );
   background-size: 21px 20px, 100% 100%, 100% 100%;
-  border-radius: 2px;
+  border-radius: 0 2px 2px 0;
 }
 
 @keyframes animate-stripes {
