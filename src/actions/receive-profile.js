@@ -865,11 +865,6 @@ function _fileReader(input: File): * {
       reader.readAsArrayBuffer(input);
       return promise;
     },
-
-    // asBinaryString(): Promise<string> {
-    //   reader.readAsBinaryString(input);
-    //   return promise;
-    // },
   };
 }
 
@@ -920,21 +915,15 @@ export function retrieveProfileFromFile(
           // extensions (eg .profile). So we can't rely on the mime type to
           // decide how to handle them. We'll try to parse them as a plain JSON
           // file.
-          // Trace files are in the directory form so they don't satisfy any above
-          // cases, that's why they fall into default case
-
+          console.log('default case');
+          console.log(file);
           let profile;
           if (isInstrumentsProfile(file)) {
-            console.log('instruments profile');
-            // Here we need to do decompression(unzip) and then we will give the output to convertInstrumentsProfile function
-            // const data = await fileReader(file).asBinaryString();
-            // console.log(data);
             profile = await convertInstrumentsProfile(file);
           } else {
             const text = await fileReader(file).asText();
             profile = await unserializeProfileOfArbitraryFormat(text);
           }
-
           if (profile === undefined) {
             throw new Error('Unable to parse the profile.');
           }

@@ -3,16 +3,43 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+//types
+import type { Profile } from '../../../types/profile';
+
+//utils
+import { getEmptyProfile } from '../../../profile-logic/data-structures';
+
+async function extractDirectoryTree(entry) {
+  const node = {
+    name: entry.name,
+    files: new Map(),
+    subdirectories: new Map(),
+  };
+
+  const children = await new Promise((resolve, reject) => {
+    entry.createReader().readEntries((entries: any[]) => {
+      resolve(entries);
+    }, reject);
+  });
+
+  for (const child of children) {
+    if (child.isDirectory) {
+      const subtree = await extractDirectoryTree(child);
+      node.subdirectories.set(subtree.name, subtree);
+    } else {
+      const file = await new Promise((resolve, reject) => {
+        child.file(resolve, reject);
+      });
+      node.files.set(file.name, file);
+    }
+  }
+
+  return node;
+}
+
 export function isInstrumentsProfile(file: mixed): boolean {
   let fileName = '';
-  if (
-    // Check that file is not `null` or `undefined`
-    file &&
-    // Check that file is an object.
-    typeof file === 'object' &&
-    // Check that the property name is a string
-    typeof file.name === 'string'
-  ) {
+  if (file && typeof file === 'object' && typeof file.name === 'string') {
     fileName = file.name;
   }
 
@@ -26,9 +53,13 @@ export function isInstrumentsProfile(file: mixed): boolean {
   return fileMetaData.pop() === 'trace';
 }
 
-export function convertInstrumentsProfile(
-  profileData: mixed
-): typeof undefined {
+export async function convertInstrumentsProfile(entry: mixed): Profile {
   // We have kept return type as undefined as of now, we will update it once we implement the other functions
-  console.log(profileData);
+  console.log('inside convertInstrumentsProfile!!!!');
+  console.log('entry', entry);
+  const tree = await extractDirectoryTree(entry);
+  console.log('tree', tree);
+  const profile = getEmptyProfile();
+
+  return profile;
 }
