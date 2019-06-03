@@ -48,10 +48,12 @@ type VirtualListRowProps<Item> = {|
   +columnIndex: number,
   // These properties are not used directly, but are needed for strict equality
   // checks so that the components update correctly.
-  // * `isSpecial` is used when we want to update one row or a few rows only,
+  // * `forceRenderControl` is used when we want to update one row or a few rows only,
   //   this is typically when the selection changes and both the old and the new
   //   selection need to be changed.
-  +isSpecial: string,
+  //   It needs to change whenever the row should be updated, so it should be
+  //   computed from the values that control these update.
+  +forceRenderItem: string,
   // * `items` contains the full items, so that we update the whole list
   //   whenever the source changes. This is necessary because often `item` is a
   //   native value (eg a number), and shallow checking only `item` won't always
@@ -108,14 +110,16 @@ class VirtualListInnerChunk<Item> extends React.PureComponent<
         ).map(i => {
           const item = items[i];
 
-          // We compute isSpecial from the first position of item in the list,
-          // and the number of occurrences. Indeed we want to rerender the item
-          // when one of these properties changes.
+          // We compute forceRenderItem from the first position of item in the list,
+          // and the number of occurrences. Indeed we want to rerender this
+          // specific item whenever one of these values changes.
           const firstPosOfItem = specialItems.indexOf(item);
           const countOfItem = specialItems.reduce(
             (acc, specialItem) => (specialItem === item ? acc + 1 : acc),
             0
           );
+          const forceRenderItem = `${firstPosOfItem}|${countOfItem}`;
+
           return (
             <VirtualListRow
               key={i}
@@ -124,7 +128,7 @@ class VirtualListInnerChunk<Item> extends React.PureComponent<
               renderItem={renderItem}
               item={item}
               items={items}
-              isSpecial={`${firstPosOfItem}|${countOfItem}`}
+              forceRenderItem={forceRenderItem}
               forceRender={forceRender}
             />
           );
