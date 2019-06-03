@@ -27,6 +27,7 @@ import { resourceTypes } from '../../profile-logic/data-structures';
 import {
   createGeckoProfile,
   createGeckoProfileWithJsTimings,
+  createGeckoSubprocessProfile,
 } from '.././fixtures/profiles/gecko-profile';
 import { UniqueStringArray } from '../../utils/unique-string-array';
 import { FakeSymbolStore } from '../fixtures/fake-symbol-store';
@@ -284,13 +285,12 @@ describe('process-profile', function() {
 
     it('processes JS tracer and offsets the timestamps', function() {
       const geckoProfile = createGeckoProfile();
-      const timestampOffsetMs = 33;
-      const timestampOffsetMicro = timestampOffsetMs * 1000;
+      let timestampOffsetMs = 33;
 
       {
         // Build the custom thread with JS tracer information. The startTime is offset
         // from the parent process.
-        const geckoSubprocess = createGeckoProfile();
+        const geckoSubprocess = createGeckoSubprocessProfile(geckoProfile);
         const childProcessThread = geckoSubprocess.threads[0];
         const stringTable = new UniqueStringArray();
         const jsTracer = getJsTracerTable(stringTable, [
@@ -300,9 +300,14 @@ describe('process-profile', function() {
         ]);
         childProcessThread.jsTracerEvents = jsTracer;
         geckoSubprocess.jsTracerDictionary = stringTable._array;
-        geckoProfile.processes.push(geckoSubprocess);
         geckoSubprocess.meta.startTime += timestampOffsetMs;
+        // Update the timestampOffset taking into account the subprocess offset
+        timestampOffsetMs =
+          geckoSubprocess.meta.startTime - geckoProfile.meta.startTime;
+        geckoProfile.processes.push(geckoSubprocess);
       }
+
+      const timestampOffsetMicro = timestampOffsetMs * 1000;
 
       // Process the profile, and grab the threads we are interested in.
       const processedProfile = processProfile(geckoProfile);
