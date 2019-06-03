@@ -166,7 +166,7 @@ describe('calltree/CallNodeContextMenu', function() {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
       fireEvent.click(getByText('Copy stack'));
-      expect(copy).toBeCalledWith(`B:library\nA`);
+      expect(copy).toBeCalledWith(`B:library\nA\n`);
     });
   });
 });

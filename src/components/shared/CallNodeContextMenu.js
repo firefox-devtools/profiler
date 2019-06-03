@@ -135,23 +135,27 @@ class CallNodeContextMenu extends PureComponent<Props> {
 
   copyStack(): void {
     const {
-      callNodePath,
+      callNodeIndex,
       thread: { stringTable, funcTable },
+
+      callNodeInfo: { callNodeTable },
     } = this.props;
 
-    if (callNodePath === null) {
+    if (callNodeIndex === null) {
       throw new Error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
     }
 
-    const stack = callNodePath
-      .map(funcIndex => {
-        const stringIndex = funcTable.name[funcIndex];
-        return stringTable.getString(stringIndex);
-      })
-      .reverse()
-      .join('\n');
+    let stack = '';
+    let curCallNodeIndex = callNodeIndex;
+
+    do {
+      const funcIndex = callNodeTable.func[curCallNodeIndex];
+      const stringIndex = funcTable.name[funcIndex];
+      stack += stringTable.getString(stringIndex) + '\n';
+      curCallNodeIndex = callNodeTable.prefix[curCallNodeIndex];
+    } while (curCallNodeIndex !== -1);
 
     copy(stack);
   }
