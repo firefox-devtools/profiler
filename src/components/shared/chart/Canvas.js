@@ -167,14 +167,18 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
 
     this._offsetX = event.nativeEvent.offsetX;
     this._offsetY = event.nativeEvent.offsetY;
-    const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
+    // event.buttons is a bitfield representing which buttons are pressed at the
+    // time of the mousemove event. The first bit is for the left click.
+    // This operation checks if the left button is clicked, but this will also
+    // be true if any other button is clickes as well.
+    const hasLeftClick = (event.buttons & 1) !== 0;
 
     // If the mouse moves too far while the primary button is down, flag this as
     // drag event only. Then it won't select anything when the button is
     // released.
     if (
       !this._mouseMovedWhileClicked &&
-      (event.buttons & 1) !== 0 &&
+      hasLeftClick &&
       (Math.abs(this._offsetX - this._mouseDownOffsetX) >
         MOUSE_CLICK_MAX_MOVEMENT_DELTA ||
         Math.abs(this._offsetY - this._mouseDownOffsetY) >
@@ -183,6 +187,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       this._mouseMovedWhileClicked = true;
     }
 
+    const maybeHoveredItem = this.props.hitTest(this._offsetX, this._offsetY);
     if (maybeHoveredItem !== null) {
       this.setState({
         hoveredItem: maybeHoveredItem,
