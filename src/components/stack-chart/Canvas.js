@@ -55,6 +55,7 @@ type OwnProps = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
+  +onRightClick: (IndexIntoCallNodeTable | null) => void,
   +disableTooltips: boolean,
   +scrollToSelectionGeneration: number,
 |};
@@ -428,16 +429,28 @@ class StackChartCanvas extends React.PureComponent<Props> {
     });
   };
 
+  _getCallNodeIndexFromHoveredItem(
+    hoveredItem: HoveredStackTiming | null
+  ): IndexIntoCallNodeTable | null {
+    if (hoveredItem === null) {
+      return null;
+    }
+
+    const { depth, stackTimingIndex } = hoveredItem;
+    const { stackTimingByDepth } = this.props;
+    const callNodeIndex = stackTimingByDepth[depth].callNode[stackTimingIndex];
+    return callNodeIndex;
+  }
   _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
-    let callNodeIndex = null;
-    if (hoveredItem !== null) {
-      const { depth, stackTimingIndex } = hoveredItem;
-      const { stackTimingByDepth } = this.props;
-      callNodeIndex = stackTimingByDepth[depth].callNode[stackTimingIndex];
-    }
+    const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
     this.props.onSelectionChange(callNodeIndex);
+  };
+
+  _onRightClick = (hoveredItem: HoveredStackTiming | null) => {
+    const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
+    this.props.onRightClick(callNodeIndex);
   };
 
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
@@ -490,6 +503,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
         onSelectItem={this._onSelectItem}
+        onRightClick={this._onRightClick}
       />
     );
   }

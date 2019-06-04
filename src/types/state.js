@@ -36,6 +36,7 @@ export type Reducer<T> = (T | void, Action) => T;
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
+  +rightClickedCallNodePath: CallNodePath | null,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
 |};
@@ -50,7 +51,7 @@ export type ProfileViewState = {|
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
     rightClickedTrack: TrackReference | null,
-    isCallNodeContextMenuVisible: boolean,
+    isContextMenuVisible: boolean,
   |},
   +globalTracks: GlobalTrack[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,

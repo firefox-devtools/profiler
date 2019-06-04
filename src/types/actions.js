@@ -117,6 +117,11 @@ type ProfileAction =
       +threadIndex: ThreadIndex,
     |}
   | {|
+      +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      +threadIndex: ThreadIndex,
+      +callNodePath: CallNodePath | null,
+    |}
+  | {|
       +type: 'FOCUS_CALL_TREE',
     |}
   | {|
@@ -194,8 +199,9 @@ type ProfileAction =
       +selectedThreadIndex: ThreadIndex,
     |}
   | {|
-      +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
+      +type: 'SET_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
+      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
