@@ -76,6 +76,8 @@ describe('calltree/ProfileCallTreeView', function() {
         `Couldn't find the context menu.`
       );
 
+    // Because different components listen to different events, we trigger all
+    // the right events as part of click and rightClick actions.
     const click = (element: HTMLElement) => {
       fireEvent.mouseDown(element);
       fireEvent.mouseUp(element);
