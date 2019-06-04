@@ -294,6 +294,8 @@ describe('MarkerChart', function() {
           buttons: 2,
         };
 
+        // Because different components listen to different events, we trigger
+        // all the right events, to be as close as possible to the real stuff.
         fireMouseEvent('mousemove', positioningOptions);
         fireMouseEvent('mousedown', clickOptions);
         fireMouseEvent('mouseup', clickOptions);
@@ -311,7 +313,7 @@ describe('MarkerChart', function() {
         fireEvent.click(getByText(stringOrRegexp));
       }
 
-      const contextMenu = () =>
+      const getContextMenu = () =>
         ensureExists(
           container.querySelector('.react-contextmenu'),
           `Couldn't find the context menu.`
@@ -321,48 +323,48 @@ describe('MarkerChart', function() {
         ...setupResult,
         rightClick,
         mouseOver,
-        contextMenu,
+        getContextMenu,
         clickOnMenuItem,
       };
     }
 
     it('when right clicking on a marker', () => {
-      const { rightClick, clickOnMenuItem, contextMenu } = setup();
+      const { rightClick, clickOnMenuItem, getContextMenu } = setup();
 
       // The "Marker A" marker is drawn from 150,1 to 275,13.
       rightClick({ x: 200, y: 5 });
-      expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+      expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       clickOnMenuItem(/description/);
       expect(copy).toHaveBeenLastCalledWith('Marker A');
-      expect(contextMenu()).not.toHaveClass('react-contextmenu--visible');
+      expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
       jest.runAllTimers();
       expect(document.querySelector('react-contextmenu')).toBeFalsy();
     });
 
     it('when right clicking on markers in a sequence', () => {
-      const { rightClick, clickOnMenuItem, contextMenu } = setup();
+      const { rightClick, clickOnMenuItem, getContextMenu } = setup();
 
       // The "Marker A" marker is drawn from 150,1 to 275,13.
       rightClick({ x: 200, y: 5 });
-      expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+      expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       // The "click" DOMEvent marker is drawn from 213,82 to 275.5,93.
       rightClick({ x: 220, y: 90 });
       jest.runAllTimers();
 
-      expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+      expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
       clickOnMenuItem(/description/);
       expect(copy).toHaveBeenLastCalledWith('click');
     });
 
     it('and still highlights other markers when hovering them', () => {
-      const { rightClick, mouseOver, flushDrawLog, contextMenu } = setup();
+      const { rightClick, mouseOver, flushDrawLog, getContextMenu } = setup();
 
       // The "Marker A" marker is drawn from 150,1 to 275,13.
       rightClick({ x: 200, y: 5 });
-      expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+      expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       flushDrawLog();
       // The "click" DOMEvent marker is drawn from 213,82 to 275.5,93.

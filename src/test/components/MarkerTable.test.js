@@ -79,18 +79,19 @@ describe('MarkerTable', function() {
     const scrolledRows = () =>
       Array.from(container.querySelectorAll('.treeViewRowScrolledColumns'));
 
-    const node = str => getByText(str);
-    const row = str =>
+    const getRowElement = functionName =>
       ensureExists(
-        node(str).closest('.treeViewRow'),
-        `Couldn't find the row for node ${String(str)}.`
+        getByText(functionName).closest('.treeViewRow'),
+        `Couldn't find the row for node ${String(functionName)}.`
       );
-    const contextMenu = () =>
+    const getContextMenu = () =>
       ensureExists(
         container.querySelector('.react-contextmenu'),
         `Couldn't find the context menu.`
       );
 
+    // Because different components listen to different events, we trigger all
+    // the right events as part of click and rightClick actions.
     const click = (element: HTMLElement) => {
       fireEvent.mouseDown(element);
       fireEvent.mouseUp(element);
@@ -108,9 +109,8 @@ describe('MarkerTable', function() {
       ...store,
       fixedRows,
       scrolledRows,
-      node,
-      row,
-      contextMenu,
+      getRowElement,
+      getContextMenu,
       click,
       rightClick,
     };
@@ -138,52 +138,52 @@ describe('MarkerTable', function() {
   });
 
   it('selects a row when left clicking', () => {
-    const { node, row, click } = setup();
+    const { getByText, getRowElement, click } = setup();
 
-    click(node(/setTimeout/));
-    expect(row(/setTimeout/)).toHaveClass('selected');
+    click(getByText(/setTimeout/));
+    expect(getRowElement(/setTimeout/)).toHaveClass('isSelected');
 
-    click(node('foobar'));
-    expect(row(/setTimeout/)).not.toHaveClass('selected');
-    expect(row('foobar')).toHaveClass('selected');
+    click(getByText('foobar'));
+    expect(getRowElement(/setTimeout/)).not.toHaveClass('isSelected');
+    expect(getRowElement('foobar')).toHaveClass('isSelected');
   });
 
   it('displays a context menu when right clicking', () => {
     jest.useFakeTimers();
 
-    const { contextMenu, node, row, rightClick, getByText } = setup();
+    const { getContextMenu, getRowElement, rightClick, getByText } = setup();
 
     function checkMenuIsDisplayedForNode(str) {
-      expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+      expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       // Note that selecting a menu item will close the menu.
       fireEvent.click(getByText('Copy marker description'));
       expect(copy).toHaveBeenLastCalledWith(expect.stringMatching(str));
     }
 
-    rightClick(node(/setTimeout/));
+    rightClick(getByText(/setTimeout/));
     checkMenuIsDisplayedForNode(/setTimeout/);
-    expect(row(/setTimeout/)).toHaveClass('rightClicked');
+    expect(getRowElement(/setTimeout/)).toHaveClass('isRightClicked');
 
     // Wait that all timers are done before trying again.
     jest.runAllTimers();
 
     // Now try it again by right clicking 2 nodes in sequence.
-    rightClick(node(/setTimeout/));
-    rightClick(node('foobar'));
+    rightClick(getByText(/setTimeout/));
+    rightClick(getByText('foobar'));
     checkMenuIsDisplayedForNode('foobar');
-    expect(row(/setTimeout/)).not.toHaveClass('rightClicked');
-    expect(row('foobar')).toHaveClass('rightClicked');
+    expect(getRowElement(/setTimeout/)).not.toHaveClass('isRightClicked');
+    expect(getRowElement('foobar')).toHaveClass('isRightClicked');
 
     // Wait that all timers are done before trying again.
     jest.runAllTimers();
 
     // And now let's do it again, but this time waiting for timers before
     // clicking, because the timer can impact the menu being displayed.
-    rightClick(node('NotifyDidPaint'));
-    rightClick(node('foobar'));
+    rightClick(getByText('NotifyDidPaint'));
+    rightClick(getByText('foobar'));
     jest.runAllTimers();
     checkMenuIsDisplayedForNode('foobar');
-    expect(row('foobar')).toHaveClass('rightClicked');
+    expect(getRowElement('foobar')).toHaveClass('isRightClicked');
   });
 });
