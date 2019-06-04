@@ -111,10 +111,10 @@ describe('FlameGraph', function() {
     // Fake timers are indicated when dealing with the context menus.
     jest.useFakeTimers();
 
-    const { rightClick, clickMenuItem, contextMenu } = setupFlameGraph();
+    const { rightClick, clickMenuItem, getContextMenu } = setupFlameGraph();
 
     rightClick(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
-    expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('A');
 
@@ -122,7 +122,7 @@ describe('FlameGraph', function() {
 
     // Try another node to make sure the menu can handle other nodes than the first.
     rightClick(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 25);
-    expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('B');
   });
@@ -236,7 +236,7 @@ function setupFlameGraph() {
   }
 
   // Context menu tools
-  const contextMenu = () =>
+  const getContextMenu = () =>
     ensureExists(
       container.querySelector('.react-contextmenu'),
       `Couldn't find the context menu.`
@@ -255,7 +255,7 @@ function setupFlameGraph() {
     rightClick,
     getTooltip,
     getContentDiv,
-    contextMenu,
+    getContextMenu,
     clickMenuItem,
     flushDrawLog: () => ctx.__flushDrawLog(),
   };

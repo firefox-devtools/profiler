@@ -154,7 +154,7 @@ describe('StackChart', function() {
     }
 
     // Context menu tools
-    const contextMenu = () =>
+    const getContextMenu = () =>
       ensureExists(
         container.querySelector('.react-contextmenu'),
         `Couldn't find the context menu.`
@@ -175,7 +175,7 @@ describe('StackChart', function() {
       leftClick,
       rightClick,
       clickMenuItem,
-      contextMenu,
+      getContextMenu,
     };
   }
 
@@ -220,19 +220,19 @@ describe('StackChart', function() {
     // Fake timers are indicated when dealing with the context menus.
     jest.useFakeTimers();
 
-    const { rightClick, contextMenu, clickMenuItem } = setup();
+    const { rightClick, getContextMenu, clickMenuItem } = setup();
 
     // Right click the first frame
     rightClick({
       x: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
       y: 10,
     });
-    expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('A');
 
     // The menu should be closed now.
-    expect(contextMenu()).not.toHaveClass('react-contextmenu--visible');
+    expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
     // Run the timers to have a clean state.
     jest.runAllTimers();
@@ -243,7 +243,7 @@ describe('StackChart', function() {
       x: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
       y: 20,
     });
-    expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('B');
   });

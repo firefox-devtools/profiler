@@ -65,13 +65,12 @@ describe('calltree/ProfileCallTreeView', function() {
     );
     const { container, getByText } = renderResult;
 
-    const node = str => getByText(str);
-    const row = str =>
+    const getRowElement = functionName =>
       ensureExists(
-        node(str).closest('.treeViewRow'),
-        `Couldn't find the row for node ${str}.`
+        getByText(functionName).closest('.treeViewRow'),
+        `Couldn't find the row for node ${functionName}.`
       );
-    const contextMenu = () =>
+    const getContextMenu = () =>
       ensureExists(
         container.querySelector('.react-contextmenu'),
         `Couldn't find the context menu.`
@@ -92,9 +91,8 @@ describe('calltree/ProfileCallTreeView', function() {
     return {
       ...store,
       ...renderResult,
-      node,
-      row,
-      contextMenu,
+      getRowElement,
+      getContextMenu,
       click,
       rightClick,
     };
@@ -167,41 +165,41 @@ describe('calltree/ProfileCallTreeView', function() {
   });
 
   it('selects a node when left clicking', () => {
-    const { node, row, click } = setup();
+    const { getByText, getRowElement, click } = setup();
 
-    click(node('A'));
-    expect(row('A')).toHaveClass('selected');
+    click(getByText('A'));
+    expect(getRowElement('A')).toHaveClass('selected');
 
-    click(node('B'));
-    expect(row('A')).not.toHaveClass('selected');
-    expect(row('B')).toHaveClass('selected');
+    click(getByText('B'));
+    expect(getRowElement('A')).not.toHaveClass('selected');
+    expect(getRowElement('B')).toHaveClass('selected');
   });
 
   it('displays a context menu when right clicking', () => {
     // Fake timers are needed when dealing with the context menu.
     jest.useFakeTimers();
 
-    const { contextMenu, node, row, rightClick, getByText } = setup();
+    const { getContextMenu, getByText, getRowElement, rightClick } = setup();
 
     function checkMenuIsDisplayedForNode(str) {
-      expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+      expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       // Note that selecting a menu item will close the menu.
       fireEvent.click(getByText('Copy function name'));
       expect(copy).toHaveBeenLastCalledWith(str);
     }
 
-    rightClick(node('A'));
-    expect(row('A')).toHaveClass('rightClicked');
+    rightClick(getByText('A'));
+    expect(getRowElement('A')).toHaveClass('rightClicked');
     checkMenuIsDisplayedForNode('A');
 
     // Wait that all timers are done before trying again.
     jest.runAllTimers();
 
     // Now try it again by right clicking 2 nodes in sequence.
-    rightClick(node('A'));
-    rightClick(node('C'));
-    expect(row('C')).toHaveClass('rightClicked');
+    rightClick(getByText('A'));
+    rightClick(getByText('C'));
+    expect(getRowElement('C')).toHaveClass('rightClicked');
     checkMenuIsDisplayedForNode('C');
 
     // Wait that all timers are done before trying again.
@@ -209,10 +207,10 @@ describe('calltree/ProfileCallTreeView', function() {
 
     // And now let's do it again, but this time waiting for timers before
     // clicking, because the timer can impact the menu being displayed.
-    rightClick(node('A'));
-    rightClick(node('C'));
+    rightClick(getByText('A'));
+    rightClick(getByText('C'));
     jest.runAllTimers();
-    expect(row('C')).toHaveClass('rightClicked');
+    expect(getRowElement('C')).toHaveClass('rightClicked');
     checkMenuIsDisplayedForNode('C');
   });
 
@@ -220,12 +218,12 @@ describe('calltree/ProfileCallTreeView', function() {
     // Fake timers are needed when dealing with the context menu.
     jest.useFakeTimers();
 
-    const { contextMenu, node, click, rightClick, container } = setup();
-    rightClick(node('A'));
-    expect(contextMenu()).toHaveClass('react-contextmenu--visible');
+    const { getContextMenu, getByText, click, rightClick, container } = setup();
+    rightClick(getByText('A'));
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-    click(node('C'));
-    expect(contextMenu()).not.toHaveClass('react-contextmenu--visible');
+    click(getByText('C'));
+    expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
     jest.runAllTimers();
     expect(container.querySelector('.react-contextmenu')).toBeFalsy();
@@ -235,40 +233,40 @@ describe('calltree/ProfileCallTreeView', function() {
     // Fake timers are needed when dealing with the context menu.
     jest.useFakeTimers();
 
-    const { node, row, click, rightClick } = setup();
+    const { getByText, getRowElement, click, rightClick } = setup();
 
-    click(node('A'));
-    expect(row('A')).toHaveClass('selected');
-    expect(row('A')).not.toHaveClass('rightClicked');
+    click(getByText('A'));
+    expect(getRowElement('A')).toHaveClass('selected');
+    expect(getRowElement('A')).not.toHaveClass('rightClicked');
 
-    rightClick(node('A'));
+    rightClick(getByText('A'));
     // Both classes will be set, but our CSS styles `rightClicked` only when
     // `selected` is not present either.
-    expect(row('A')).toHaveClass('selected');
-    expect(row('A')).toHaveClass('rightClicked');
+    expect(getRowElement('A')).toHaveClass('selected');
+    expect(getRowElement('A')).toHaveClass('rightClicked');
   });
 
   it('highlights the row properly when selecting a rightclicked row', () => {
     // Fake timers are needed when dealing with the context menu.
     jest.useFakeTimers();
 
-    const { node, row, click, rightClick } = setup();
+    const { getByText, getRowElement, click, rightClick } = setup();
 
-    rightClick(node('A'));
-    expect(row('A')).not.toHaveClass('selected');
-    expect(row('A')).toHaveClass('rightClicked');
+    rightClick(getByText('A'));
+    expect(getRowElement('A')).not.toHaveClass('selected');
+    expect(getRowElement('A')).toHaveClass('rightClicked');
 
     // When the node is highlighted from a right click, left clicking it will
     // chnage its highlight style.
-    click(node('A'));
-    expect(row('A')).toHaveClass('selected');
-    expect(row('A')).toHaveClass('rightClicked');
+    click(getByText('A'));
+    expect(getRowElement('A')).toHaveClass('selected');
+    expect(getRowElement('A')).toHaveClass('rightClicked');
 
     // After a timeout, the menu publicizes that it's hidden and the right click
     // information is removed.
     jest.runAllTimers();
-    expect(row('A')).toHaveClass('selected');
-    expect(row('A')).not.toHaveClass('rightClicked');
+    expect(getRowElement('A')).toHaveClass('selected');
+    expect(getRowElement('A')).not.toHaveClass('rightClicked');
   });
 });
 
