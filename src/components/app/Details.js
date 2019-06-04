@@ -23,7 +23,7 @@ import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
 import { getSelectedTab } from '../../selectors/url-state';
 import { getIsSidebarOpen, getVisibleTabs } from '../../selectors/app';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
-import MarkerTableContextMenu from '../marker-table/ContextMenu';
+import MarkerContextMenu from '../shared/MarkerContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
 
@@ -105,7 +105,7 @@ class ProfileViewer extends PureComponent<Props> {
           }
         </ErrorBoundary>
         <CallNodeContextMenu />
-        <MarkerTableContextMenu />
+        <MarkerContextMenu />
         <TimelineTrackContextMenu />
       </div>
     );

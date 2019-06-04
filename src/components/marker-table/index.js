@@ -15,7 +15,10 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { changeSelectedMarker } from '../../actions/profile-view';
+import {
+  changeSelectedMarker,
+  changeRightClickedMarker,
+} from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
 import { formatSeconds } from '../../utils/format-numbers';
 import {
@@ -129,12 +132,14 @@ type StateProps = {|
   +getMarker: MarkerIndex => Marker,
   +markerIndexes: MarkerIndex[],
   +selectedMarker: MarkerIndex | null,
+  +rightClickedMarker: MarkerIndex | null,
   +zeroAt: Milliseconds,
   +scrollToSelectionGeneration: number,
 |};
 
 type DispatchProps = {|
   +changeSelectedMarker: typeof changeSelectedMarker,
+  +changeRightClickedMarker: typeof changeRightClickedMarker,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -180,8 +185,19 @@ class MarkerTable extends PureComponent<Props> {
     changeSelectedMarker(threadIndex, selectedMarker);
   };
 
+  _onRightClickSelection = (selectedMarker: MarkerIndex) => {
+    const { threadIndex, changeRightClickedMarker } = this.props;
+    changeRightClickedMarker(threadIndex, selectedMarker);
+  };
+
   render() {
-    const { getMarker, markerIndexes, zeroAt, selectedMarker } = this.props;
+    const {
+      getMarker,
+      markerIndexes,
+      zeroAt,
+      selectedMarker,
+      rightClickedMarker,
+    } = this.props;
     const tree = this.getMarkerTree(getMarker, markerIndexes, zeroAt);
     return (
       <div
@@ -197,11 +213,13 @@ class MarkerTable extends PureComponent<Props> {
           fixedColumns={this._fixedColumns}
           mainColumn={this._mainColumn}
           onSelectionChange={this._onSelectionChange}
+          onRightClickSelection={this._onRightClickSelection}
           onExpandedNodesChange={this._onExpandedNodeIdsChange}
           selectedNodeId={selectedMarker}
+          rightClickedNodeId={rightClickedMarker}
           expandedNodeIds={this._expandedNodeIds}
           ref={this._takeTreeViewRef}
-          contextMenuId="MarkersContextMenu"
+          contextMenuId="MarkerContextMenu"
           rowHeight={16}
           indentWidth={10}
         />
@@ -219,8 +237,11 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       state
     ),
     selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
+    rightClickedMarker: selectedThreadSelectors.getRightClickedMarkerIndex(
+      state
+    ),
     zeroAt: getZeroAt(state),
   }),
-  mapDispatchToProps: { changeSelectedMarker },
+  mapDispatchToProps: { changeSelectedMarker, changeRightClickedMarker },
   component: MarkerTable,
 });

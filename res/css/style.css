@@ -186,14 +186,19 @@ body,
 .treeViewRow.odd {
   background-color: #f5f5f5;
 }
-.treeViewRow.selected {
+
+/* Note that `isRightClicked` is present before `isSelected` so that it can be overriden. */
+.treeViewRow.isRightClicked {
+  background-color: var(--blue-50-a30);
+}
+.treeViewRow.isSelected {
   background-color: var(--grey-30);
   color: black;
 }
 .treeViewRow.dim > .treeViewMainColumn {
   opacity: 0.7;
 }
-.treeViewBody:focus .treeViewRow.selected {
+.treeViewBody:focus .treeViewRow.isSelected {
   background-color: highlight;
   color: highlighttext;
 }
@@ -234,11 +239,13 @@ body,
   visibility: visible;
 }
 
-.treeViewBody:focus .treeViewRow.selected > .focusCallstackButton {
+.treeViewBody:focus .treeViewRow.isSelected > .focusCallstackButton {
   background-position: -32px 0;
 }
 
-.treeViewBody:focus .treeViewRow.selected > .focusCallstackButton:active:hover {
+.treeViewBody:focus
+  .treeViewRow.isSelected
+  > .focusCallstackButton:active:hover {
   background-position: -48px 0;
 }
 
@@ -267,11 +274,13 @@ body,
   color: var(--grey-60);
 }
 
-.treeViewBody:focus .treeViewRow.selected > .treeRowToggleButton {
+.treeViewBody:focus .treeViewRow.isSelected > .treeRowToggleButton {
   color: #fff;
 }
 
-.treeViewBody:focus .treeViewRow.selected > .treeRowToggleButton:active:hover {
+.treeViewBody:focus
+  .treeViewRow.isSelected
+  > .treeRowToggleButton:active:hover {
   color: rgba(255, 255, 255, 0.7);
 }
 

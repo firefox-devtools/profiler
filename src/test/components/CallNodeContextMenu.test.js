@@ -8,7 +8,11 @@ import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { render, fireEvent } from 'react-testing-library';
-import { changeSelectedCallNode } from '../../actions/profile-view';
+import {
+  changeRightClickedCallNode,
+  changeExpandedCallNodes,
+  setContextMenuVisibility,
+} from '../../actions/profile-view';
 import { Provider } from 'react-redux';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
@@ -31,19 +35,22 @@ describe('calltree/CallNodeContextMenu', function() {
       E          E
     `);
     const store = storeWithProfile(profile);
-    store.dispatch(
-      changeSelectedCallNode(0, [
-        funcNames.indexOf('A'),
-        funcNames.indexOf('B:library'),
-      ])
-    );
+    const A = funcNames.indexOf('A');
+    const B = funcNames.indexOf('B:library');
+
+    store.dispatch(changeExpandedCallNodes(0, [[A]]));
+    store.dispatch(changeRightClickedCallNode(0, [A, B]));
     return store;
   }
 
-  function setup(store = createStore(), forceOpenForTests = true) {
+  function setup(store = createStore(), openMenuState = true) {
+    if (openMenuState) {
+      store.dispatch(setContextMenuVisibility(true));
+    }
+
     const renderResult = render(
       <Provider store={store}>
-        <CallNodeContextMenu forceOpenForTests={forceOpenForTests} />
+        <CallNodeContextMenu />
       </Provider>
     );
 
@@ -147,7 +154,7 @@ describe('calltree/CallNodeContextMenu', function() {
       );
 
       const store = storeWithProfile(profile);
-      store.dispatch(changeSelectedCallNode(0, [funcIndex]));
+      store.dispatch(changeRightClickedCallNode(0, [funcIndex]));
       const { getByText } = setup(store);
 
       // Copy is a mocked module, clear it both before and after.

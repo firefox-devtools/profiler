@@ -9,7 +9,6 @@ import type {
   Profile,
   Thread,
   ThreadIndex,
-  IndexIntoRawMarkerTable,
   IndexIntoFuncTable,
   Pid,
 } from './profile';
@@ -19,6 +18,7 @@ import type {
   GlobalTrack,
   LocalTrack,
   TrackIndex,
+  MarkerIndex,
 } from './profile-derived';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
@@ -117,6 +117,11 @@ type ProfileAction =
       +threadIndex: ThreadIndex,
     |}
   | {|
+      +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      +threadIndex: ThreadIndex,
+      +callNodePath: CallNodePath | null,
+    |}
+  | {|
       +type: 'FOCUS_CALL_TREE',
     |}
   | {|
@@ -127,7 +132,12 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_SELECTED_MARKER',
       +threadIndex: ThreadIndex,
-      +selectedMarker: IndexIntoRawMarkerTable | null,
+      +selectedMarker: MarkerIndex | null,
+    |}
+  | {|
+      +type: 'CHANGE_RIGHT_CLICKED_MARKER',
+      +threadIndex: ThreadIndex,
+      +markerIndex: MarkerIndex | null,
     |}
   | {|
       +type: 'UPDATE_PREVIEW_SELECTION',
@@ -194,8 +204,9 @@ type ProfileAction =
       +selectedThreadIndex: ThreadIndex,
     |}
   | {|
-      +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
+      +type: 'SET_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
+      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',

@@ -45,17 +45,13 @@ import type {
 } from '../types/actions';
 import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
-import type {
-  ThreadIndex,
-  IndexIntoRawMarkerTable,
-  Pid,
-  IndexIntoSamplesTable,
-} from '../types/profile';
+import type { ThreadIndex, Pid, IndexIntoSamplesTable } from '../types/profile';
 import type {
   CallNodePath,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   TrackIndex,
+  MarkerIndex,
 } from '../types/profile-derived';
 import type { Transform } from '../types/transforms';
 
@@ -95,6 +91,22 @@ export function changeSelectedCallNode(
     selectedCallNodePath,
     optionalExpandedToCallNodePath,
     threadIndex,
+  };
+}
+
+/**
+ * This action is used when the user right clicks on a call node (in panels such
+ * as the call tree, the flame chart, or the stack chart). It's especially used
+ * to display the context menu.
+ */
+export function changeRightClickedCallNode(
+  threadIndex: ThreadIndex,
+  callNodePath: CallNodePath | null
+) {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+    threadIndex,
+    callNodePath,
   };
 }
 
@@ -320,10 +332,16 @@ export function changeRightClickedTrack(
   };
 }
 
-export function setCallNodeContextMenuVisibility(isVisible: boolean): Action {
-  return {
-    type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
-    isVisible,
+export function setContextMenuVisibility(
+  isVisible: boolean
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const selectedThreadIndex = getSelectedThreadIndex(getState());
+    dispatch({
+      type: 'SET_CONTEXT_MENU_VISIBILITY',
+      threadIndex: selectedThreadIndex,
+      isVisible,
+    });
   };
 }
 
@@ -852,12 +870,27 @@ export function changeExpandedCallNodes(
 
 export function changeSelectedMarker(
   threadIndex: ThreadIndex,
-  selectedMarker: IndexIntoRawMarkerTable | null
+  selectedMarker: MarkerIndex | null
 ): Action {
   return {
     type: 'CHANGE_SELECTED_MARKER',
     selectedMarker,
     threadIndex,
+  };
+}
+
+/**
+ * This action is used when the user right clicks a marker, and is especially
+ * used to display its context menu.
+ */
+export function changeRightClickedMarker(
+  threadIndex: ThreadIndex,
+  markerIndex: MarkerIndex | null
+): Action {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_MARKER',
+    threadIndex,
+    markerIndex,
   };
 }
 
