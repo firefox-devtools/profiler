@@ -168,11 +168,11 @@ describe('calltree/ProfileCallTreeView', function() {
     const { getByText, getRowElement, click } = setup();
 
     click(getByText('A'));
-    expect(getRowElement('A')).toHaveClass('selected');
+    expect(getRowElement('A')).toHaveClass('isSelected');
 
     click(getByText('B'));
-    expect(getRowElement('A')).not.toHaveClass('selected');
-    expect(getRowElement('B')).toHaveClass('selected');
+    expect(getRowElement('A')).not.toHaveClass('isSelected');
+    expect(getRowElement('B')).toHaveClass('isSelected');
   });
 
   it('displays a context menu when right clicking', () => {
@@ -190,7 +190,7 @@ describe('calltree/ProfileCallTreeView', function() {
     }
 
     rightClick(getByText('A'));
-    expect(getRowElement('A')).toHaveClass('rightClicked');
+    expect(getRowElement('A')).toHaveClass('isRightClicked');
     checkMenuIsDisplayedForNode('A');
 
     // Wait that all timers are done before trying again.
@@ -199,7 +199,7 @@ describe('calltree/ProfileCallTreeView', function() {
     // Now try it again by right clicking 2 nodes in sequence.
     rightClick(getByText('A'));
     rightClick(getByText('C'));
-    expect(getRowElement('C')).toHaveClass('rightClicked');
+    expect(getRowElement('C')).toHaveClass('isRightClicked');
     checkMenuIsDisplayedForNode('C');
 
     // Wait that all timers are done before trying again.
@@ -210,7 +210,7 @@ describe('calltree/ProfileCallTreeView', function() {
     rightClick(getByText('A'));
     rightClick(getByText('C'));
     jest.runAllTimers();
-    expect(getRowElement('C')).toHaveClass('rightClicked');
+    expect(getRowElement('C')).toHaveClass('isRightClicked');
     checkMenuIsDisplayedForNode('C');
   });
 
@@ -236,14 +236,14 @@ describe('calltree/ProfileCallTreeView', function() {
     const { getByText, getRowElement, click, rightClick } = setup();
 
     click(getByText('A'));
-    expect(getRowElement('A')).toHaveClass('selected');
-    expect(getRowElement('A')).not.toHaveClass('rightClicked');
+    expect(getRowElement('A')).toHaveClass('isSelected');
+    expect(getRowElement('A')).not.toHaveClass('isRightClicked');
 
     rightClick(getByText('A'));
     // Both classes will be set, but our CSS styles `rightClicked` only when
     // `selected` is not present either.
-    expect(getRowElement('A')).toHaveClass('selected');
-    expect(getRowElement('A')).toHaveClass('rightClicked');
+    expect(getRowElement('A')).toHaveClass('isSelected');
+    expect(getRowElement('A')).toHaveClass('isRightClicked');
   });
 
   it('highlights the row properly when selecting a rightclicked row', () => {
@@ -253,20 +253,20 @@ describe('calltree/ProfileCallTreeView', function() {
     const { getByText, getRowElement, click, rightClick } = setup();
 
     rightClick(getByText('A'));
-    expect(getRowElement('A')).not.toHaveClass('selected');
-    expect(getRowElement('A')).toHaveClass('rightClicked');
+    expect(getRowElement('A')).not.toHaveClass('isSelected');
+    expect(getRowElement('A')).toHaveClass('isRightClicked');
 
     // When the node is highlighted from a right click, left clicking it will
     // chnage its highlight style.
     click(getByText('A'));
-    expect(getRowElement('A')).toHaveClass('selected');
-    expect(getRowElement('A')).toHaveClass('rightClicked');
+    expect(getRowElement('A')).toHaveClass('isSelected');
+    expect(getRowElement('A')).toHaveClass('isRightClicked');
 
     // After a timeout, the menu publicizes that it's hidden and the right click
     // information is removed.
     jest.runAllTimers();
-    expect(getRowElement('A')).toHaveClass('selected');
-    expect(getRowElement('A')).not.toHaveClass('rightClicked');
+    expect(getRowElement('A')).toHaveClass('isSelected');
+    expect(getRowElement('A')).not.toHaveClass('isRightClicked');
   });
 });
 
@@ -344,8 +344,8 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
       },
       selectedText: () =>
         ensureExists(
-          container.querySelector('.treeViewRowScrolledColumns.selected'),
-          `Couldn't find the selected column with selector .treeViewRowScrolledColumns.selected`
+          container.querySelector('.treeViewRowScrolledColumns.isSelected'),
+          `Couldn't find the selected column with selector .treeViewRowScrolledColumns.isSelected`
         ).textContent,
     };
   }

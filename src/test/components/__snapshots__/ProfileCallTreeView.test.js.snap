@@ -745,7 +745,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -974,7 +974,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="A, running time is 1ms (33%), self time is 0ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-9"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1359,7 +1359,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -1588,7 +1588,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="E, running time is 1ms (33%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -1973,7 +1973,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2202,7 +2202,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (33%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2587,7 +2587,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2799,7 +2799,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (50%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3158,7 +3158,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3370,7 +3370,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (50%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4633,7 +4633,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4845,7 +4845,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (50%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected"
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
