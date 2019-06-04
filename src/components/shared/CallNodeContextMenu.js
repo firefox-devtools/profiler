@@ -65,6 +65,30 @@ require('./CallNodeContextMenu.css');
 class CallNodeContextMenu extends PureComponent<Props> {
   _hidingTimeout: TimeoutID | null = null;
 
+  // Using setTimeout here is a bit complex, but is necessary to make the menu
+  // work fine when we want to display it somewhere when it's already open
+  // somewhere else.
+  // This is the order of events in such a situation:
+  // 0. The menu is open somewhere, it means the user right clicked somewhere
+  //     previously, and as a result some node has the "right clicked" status.
+  // 1. The user right clicks on another node. This is actually happening in
+  //    several events, the first event is "mousedown": this is where our own
+  //    components react for right click (both our TreeView and our charts)
+  //    and thus this is when the "right clicked" item is set in our store. BTW
+  //    this triggers a rerender of this component.
+  // 2. Then the event "mouseup" happens but we don't do anything for it for right
+  //    clicks.
+  // 3. Then the event "contextmenu" is triggered. This is the event that the
+  //    context menu library reacts to: first it closes the previous menu, then
+  //    opens the new one. This means that `_onHide` is called first for the
+  //    first menu, then `_onShow` for the second menu.
+  //    The problem here is that the call to `setContextMenuVisibility` we do in
+  //    `onHide` resets the value for the "right clicked" item. This is normally
+  //    what we want when the user closes the menu, but this case where the menu
+  //    is still open but for another node, we don't want to reset this value
+  //    which was set earlier when handling the "mousedown" event.
+  //    To avoid this problem we use this `setTimeout` call to delay the reset
+  //    just a bit, just in case we get a `_onShow` call right after that.
   _onShow = () => {
     clearTimeout(this._hidingTimeout);
     this.props.setContextMenuVisibility(true);
@@ -74,7 +98,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
     this._hidingTimeout = setTimeout(() => {
       this._hidingTimeout = null;
       this.props.setContextMenuVisibility(false);
-    }, 100);
+    });
   };
 
   _getFunctionName(): string {
