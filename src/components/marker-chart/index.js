@@ -17,10 +17,15 @@ import {
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
+  getProfileViewOptions,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import {
+  updatePreviewSelection,
+  changeRightClickedMarker,
+} from '../../actions/profile-view';
+import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 
 import type {
   Marker,
@@ -40,6 +45,7 @@ const ROW_HEIGHT = 16;
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +changeRightClickedMarker: typeof changeRightClickedMarker,
 |};
 
 type StateProps = {|
@@ -50,6 +56,8 @@ type StateProps = {|
   +interval: Milliseconds,
   +threadIndex: number,
   +previewSelection: PreviewSelection,
+  +rightClickedMarker: MarkerIndex | null,
+  +isContextMenuVisible: boolean,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -90,6 +98,9 @@ class MarkerChart extends React.PureComponent<Props> {
       getMarker,
       previewSelection,
       updatePreviewSelection,
+      changeRightClickedMarker,
+      rightClickedMarker,
+      isContextMenuVisible,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -107,31 +118,41 @@ class MarkerChart extends React.PureComponent<Props> {
         {maxMarkerRows === 0 ? (
           <MarkerChartEmptyReasons />
         ) : (
-          <MarkerChartCanvas
-            key={threadIndex}
-            viewportProps={{
-              timeRange,
-              previewSelection,
-              maxViewportHeight,
-              viewportNeedsUpdate,
-              maximumZoom: this.getMaximumZoom(),
-              marginLeft: TIMELINE_MARGIN_LEFT,
-              marginRight: TIMELINE_MARGIN_RIGHT,
-              containerRef: this._takeViewportRef,
+          <ContextMenuTrigger
+            id="MarkerContextMenu"
+            attributes={{
+              className: 'treeViewContextMenu',
             }}
-            chartProps={{
-              markerTimingRows,
-              getMarker,
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              updatePreviewSelection,
-              rangeStart: timeRange.start,
-              rangeEnd: timeRange.end,
-              rowHeight: ROW_HEIGHT,
-              threadIndex,
-              marginLeft: TIMELINE_MARGIN_LEFT,
-              marginRight: TIMELINE_MARGIN_RIGHT,
-            }}
-          />
+          >
+            <MarkerChartCanvas
+              key={threadIndex}
+              viewportProps={{
+                timeRange,
+                previewSelection,
+                maxViewportHeight,
+                viewportNeedsUpdate,
+                maximumZoom: this.getMaximumZoom(),
+                marginLeft: TIMELINE_MARGIN_LEFT,
+                marginRight: TIMELINE_MARGIN_RIGHT,
+                containerRef: this._takeViewportRef,
+              }}
+              chartProps={{
+                markerTimingRows,
+                getMarker,
+                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
+                updatePreviewSelection,
+                changeRightClickedMarker,
+                rangeStart: timeRange.start,
+                rangeEnd: timeRange.end,
+                rowHeight: ROW_HEIGHT,
+                threadIndex,
+                marginLeft: TIMELINE_MARGIN_LEFT,
+                marginRight: TIMELINE_MARGIN_RIGHT,
+                rightClickedMarker,
+                disableTooltips: isContextMenuVisible,
+              }}
+            />
+          </ContextMenuTrigger>
         )}
       </div>
     );
@@ -159,8 +180,12 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       previewSelection: getPreviewSelection(state),
+      rightClickedMarker: selectedThreadSelectors.getRightClickedMarkerIndex(
+        state
+      ),
+      isContextMenuVisible: getProfileViewOptions(state).isContextMenuVisible,
     };
   },
-  mapDispatchToProps: { updatePreviewSelection },
+  mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },
   component: MarkerChart,
 });
