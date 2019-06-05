@@ -1097,16 +1097,42 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    function setupWithLongUrl(urlSearch1: string, urlSearch2: string): * {
+    function getSomeProfiles() {
+      const { profile: profile1 } = getProfileFromTextSamples(
+        `A  B  C  D  E`,
+        `G  H  I  J  K`
+      );
+      const { profile: profile2 } = getProfileFromTextSamples(
+        `L  M  N  O  P  Ex  Ex  Ex  Ex`,
+        `Q  R  S  T  U  Ex  Ex  Ex  Ex`
+      );
+
+      return { profile1, profile2 };
+    }
+
+    type SetupProfileParams = {|
+      profile1: Profile,
+      profile2: Profile,
+    |};
+
+    type SetupUrlSearchParams = {|
+      urlSearch1: string,
+      urlSearch2: string,
+    |};
+
+    function setupWithLongUrl(
+      profiles: SetupProfileParams,
+      { urlSearch1, urlSearch2 }: SetupUrlSearchParams
+    ): * {
       const fakeUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
       const fakeUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
 
-      return setup(fakeUrl1, fakeUrl2);
+      return setup(profiles, { url1: fakeUrl1, url2: fakeUrl2 });
     }
 
     async function setupWithShortUrl(
-      urlSearch1: string,
-      urlSearch2: string
+      profiles: SetupProfileParams,
+      { urlSearch1, urlSearch2 }: SetupUrlSearchParams
     ): * {
       const longUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
       const longUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
@@ -1124,7 +1150,11 @@ describe('actions/receive-profile', function() {
         }
       });
 
-      const setupResult = await setup(shortUrl1, shortUrl2);
+      const setupResult = await setup(profiles, {
+        url1: shortUrl1,
+        url2: shortUrl2,
+      });
+
       return {
         ...setupResult,
         shortUrl1,
@@ -1132,16 +1162,15 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    async function setup(fakeUrl1: string, fakeUrl2: string): * {
-      const { profile: profile1 } = getProfileFromTextSamples(
-        `A  B  C  D  E`,
-        `G  H  I  J  K`
-      );
-      const { profile: profile2 } = getProfileFromTextSamples(
-        `L  M  N  O  P  Ex  Ex  Ex  Ex`,
-        `Q  R  S  T  U  Ex  Ex  Ex  Ex`
-      );
+    type SetupUrlParams = {|
+      url1: string,
+      url2: string,
+    |};
 
+    async function setup(
+      { profile1, profile2 }: SetupProfileParams,
+      { url1, url2 }: SetupUrlParams
+    ): * {
       profile1.threads.forEach(thread =>
         addMarkersToThreadWithCorrespondingSamples(
           thread,
@@ -1175,7 +1204,7 @@ describe('actions/receive-profile', function() {
         .mockResolvedValueOnce(fetch200Response(serializeProfile(profile2)));
 
       const { dispatch, getState } = blankStore();
-      await dispatch(retrieveProfilesToCompare([fakeUrl1, fakeUrl2]));
+      await dispatch(retrieveProfilesToCompare([url1, url2]));
 
       // To find stupid mistakes more easily, check that we didn't get a fatal
       // error here. If we got one, let's rethrow the error.
@@ -1219,7 +1248,10 @@ describe('actions/receive-profile', function() {
         resultProfile,
         globalTracks,
         rootRange,
-      } = await setupWithLongUrl('thread=0', 'thread=1');
+      } = await setupWithLongUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0',
+        urlSearch2: 'thread=1',
+      });
 
       const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
         (thread, i) => ({
@@ -1249,7 +1281,10 @@ describe('actions/receive-profile', function() {
         shortUrl2,
         globalTracks,
         rootRange,
-      } = await setupWithShortUrl('thread=0', 'thread=1');
+      } = await setupWithShortUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0',
+        urlSearch2: 'thread=1',
+      });
 
       // Reuse some expectations from the previous test
       expect(globalTracks).toHaveLength(3); // each thread + comparison track
@@ -1261,28 +1296,28 @@ describe('actions/receive-profile', function() {
     });
 
     it('filters samples and markers, according to the URL', async function() {
-      const { resultProfile } = await setupWithLongUrl(
-        'thread=0&range=0.0011_0.0043',
-        'thread=1'
-      );
+      const { resultProfile } = await setupWithLongUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0&range=0.0011_0.0043',
+        urlSearch2: 'thread=1',
+      });
       expect(resultProfile.threads[0].samples).toHaveLength(3);
       expect(resultProfile.threads[0].markers).toHaveLength(4);
     });
 
     it('reuses the implementation information if both profiles used it', async function() {
-      const { getState } = await setupWithLongUrl(
-        'thread=0&implementation=js',
-        'thread=1&implementation=js'
-      );
+      const { getState } = await setupWithLongUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0&implementation=js',
+        urlSearch2: 'thread=1&implementation=js',
+      });
 
       expect(UrlStateSelectors.getImplementationFilter(getState())).toBe('js');
     });
 
     it('does not reuse the implementation information if one profile used it', async function() {
-      const { getState } = await setupWithLongUrl(
-        'thread=0&implementation=js',
-        'thread=1'
-      );
+      const { getState } = await setupWithLongUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0&implementation=js',
+        urlSearch2: 'thread=1',
+      });
 
       expect(UrlStateSelectors.getImplementationFilter(getState())).not.toBe(
         'js'
@@ -1290,10 +1325,10 @@ describe('actions/receive-profile', function() {
     });
 
     it('reuses transforms', async function() {
-      const { getState } = await setupWithLongUrl(
-        'thread=0&transforms=ff-42',
-        'thread=1'
-      );
+      const { getState } = await setupWithLongUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0&transforms=ff-42',
+        urlSearch2: 'thread=1',
+      });
 
       expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
         {
