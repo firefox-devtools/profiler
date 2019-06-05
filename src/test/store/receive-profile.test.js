@@ -13,6 +13,7 @@ import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import * as UrlStateSelectors from '../../selectors/url-state';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import { getView } from '../../selectors/app';
 import {
   viewProfile,
@@ -1122,7 +1123,10 @@ describe('actions/receive-profile', function() {
 
     function setupWithLongUrl(
       profiles: SetupProfileParams,
-      { urlSearch1, urlSearch2 }: SetupUrlSearchParams
+      { urlSearch1, urlSearch2 }: SetupUrlSearchParams = {
+        urlSearch1: 'thread=0',
+        urlSearch2: 'thread=0',
+      }
     ): * {
       const fakeUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
       const fakeUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
@@ -1336,6 +1340,24 @@ describe('actions/receive-profile', function() {
           funcIndex: 42,
         },
       ]);
+    });
+
+    it('creates a diff thread that computes properly diff timings', async function() {
+      const { profile: baseProfile } = getProfileFromTextSamples('A  A');
+      const { profile: regressionProfile } = getProfileFromTextSamples(
+        'A  A  A  A  A  A'
+      );
+      const { resultProfile, getState } = await setupWithLongUrl({
+        profile1: baseProfile,
+        profile2: regressionProfile,
+      });
+
+      expect(resultProfile.threads).toHaveLength(3);
+      const selectors = getThreadSelectors(2);
+      const callTree = selectors.getCallTree(getState());
+      const [firstChild] = callTree.getRoots();
+      const nodeData = callTree.getNodeData(firstChild);
+      expect(nodeData.selfTime).toBe(4);
     });
   });
 });
