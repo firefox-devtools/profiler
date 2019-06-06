@@ -614,13 +614,14 @@ describe('"focus-function" transform', function() {
 describe('"collapse-resource" transform', function() {
   describe('combined implementation', function() {
     /**
-     *               A                                   A
-     *             /   \                                 |
-     *            v     v        Collapse firefox        v
-     *    B:firefox    E:firefox       ->             firefox
-     *        |            |                         /       \
-     *        v            v                        D        F
-     *    C:firefox        F
+     *                A
+     *          -----´ `-----                                  A
+     *         /             \                                 |
+     *        v               v        Collapse firefox        v
+     *  B[lib:firefox]  E[lib:firefox]       ->             firefox
+     *        |               |                            /       \
+     *        v               v                           D         F
+     *  C[lib:firefox]        F
      *        |
      *        v
      *        D
@@ -629,9 +630,9 @@ describe('"collapse-resource" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A          A
-      B:firefox  E:firefox
-      C:firefox  F
+      A               A
+      B[lib:firefox]  E[lib:firefox]
+      C[lib:firefox]  F
       D
     `);
     const collapsedFuncNames = [...funcNames, 'firefox'];
@@ -657,10 +658,10 @@ describe('"collapse-resource" transform', function() {
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
         '- A (total: 2, self: —)',
-        '  - B:firefox (total: 1, self: —)',
-        '    - C:firefox (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
         '      - D (total: 1, self: 1)',
-        '  - E:firefox (total: 1, self: —)',
+        '  - E (total: 1, self: —)',
         '    - F (total: 1, self: 1)',
       ]);
     });
@@ -684,9 +685,7 @@ describe('"collapse-resource" transform', function() {
       dispatch(
         changeSelectedCallNode(
           threadIndex,
-          ['A', 'B:firefox', 'C:firefox', 'D'].map(name =>
-            collapsedFuncNames.indexOf(name)
-          )
+          ['A', 'B', 'C', 'D'].map(name => collapsedFuncNames.indexOf(name))
         )
       );
       dispatch(addTransformToStack(threadIndex, collapseTransform));
@@ -730,10 +729,10 @@ describe('"collapse-resource" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A.js           A.js
-      B.cpp:firefox  H.cpp:firefox
-      C.js           I.js
-      D.cpp:firefox
+      A.js                A.js
+      B.cpp[lib:firefox]  H.cpp[lib:firefox]
+      C.js                I.js
+      D.cpp[lib:firefox]
       E.js
       F.cpp
       G.js
@@ -761,13 +760,13 @@ describe('"collapse-resource" transform', function() {
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
         '- A.js (total: 2, self: —)',
-        '  - B.cpp:firefox (total: 1, self: —)',
+        '  - B.cpp (total: 1, self: —)',
         '    - C.js (total: 1, self: —)',
-        '      - D.cpp:firefox (total: 1, self: —)',
+        '      - D.cpp (total: 1, self: —)',
         '        - E.js (total: 1, self: —)',
         '          - F.cpp (total: 1, self: —)',
         '            - G.js (total: 1, self: 1)',
-        '  - H.cpp:firefox (total: 1, self: —)',
+        '  - H.cpp (total: 1, self: —)',
         '    - I.js (total: 1, self: 1)',
       ]);
     });
@@ -795,9 +794,7 @@ describe('"collapse-resource" transform', function() {
       dispatch(
         changeSelectedCallNode(
           threadIndex,
-          ['B.cpp:firefox', 'D.cpp:firefox'].map(name =>
-            collapsedFuncNames.indexOf(name)
-          )
+          ['B.cpp', 'D.cpp'].map(name => collapsedFuncNames.indexOf(name))
         )
       );
       dispatch(changeImplementationFilter('cpp'));
