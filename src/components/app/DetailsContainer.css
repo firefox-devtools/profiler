@@ -5,7 +5,7 @@
 }
 
 .DetailsContainer .layout-pane:not(.layout-pane-primary) {
-  max-width: 250px;
+  max-width: 300px;
 }
 
 /* overriding defaults from splitter-layout */
