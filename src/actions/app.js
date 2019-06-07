@@ -106,3 +106,10 @@ export const reportTrackThreadHeight = (
 export function dismissNewlyPublished(): Action {
   return { type: 'DISMISS_NEWLY_PUBLISHED' };
 }
+
+export function changeProfileName(profileName: string): Action {
+  return {
+    type: 'CHANGE_PROFILE_NAME',
+    profileName,
+  };
+}
