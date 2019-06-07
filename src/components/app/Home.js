@@ -266,12 +266,12 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     if (!event.dataTransfer) {
       return;
     }
-    console.log(event.dataTransfer);
+    // console.log(event.dataTransfer);
     const firstItem = event.dataTransfer.items[0];
 
     if ('webkitGetAsEntry' in firstItem) {
       const webkitEntry = firstItem.webkitGetAsEntry();
-      console.log(webkitEntry);
+      // console.log(webkitEntry);
       if (webkitEntry.isDirectory && webkitEntry.name.endsWith('.trace')) {
         this.props.retrieveProfileFromFile(webkitEntry);
         return;

@@ -8,6 +8,49 @@ import type { Profile } from '../../../types/profile';
 
 //utils
 import { getEmptyProfile } from '../../../profile-logic/data-structures';
+import BinaryPlistParser from './BinaryPlistParser';
+
+// TODO make helpers.js and move the appropriate helper functions into it
+// TODO add the missing return types in the functions
+
+function parseBinaryPlist(bytes) {
+  // console.log('bytes inside parseBinaryPlist function', bytes);
+  const text = 'bplist00';
+  for (let i = 0; i < 8; i++) {
+    if (bytes[i] !== text.charCodeAt(i)) {
+      throw new Error('File is not a binary plist');
+    }
+  }
+
+  // console.log(new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength));
+
+  return new BinaryPlistParser(
+    new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+  ).parseRoot();
+}
+
+function readInstrumentsArchive(buffer) {
+  const byteArray = new Uint8Array(buffer);
+  // console.log('byteArray', byteArray);
+  const parsedPlist = parseBinaryPlist(byteArray);
+
+  console.log('parsedList', parsedPlist);
+  return {};
+}
+
+async function readFormTemplateFile(tree, fileReader) {
+  //console.log('inside readFormTemplateFile', tree);
+  const formTemplate = tree.files.get('form.template'); // TODO check for empty formTemplate
+
+  //console.log(await fileReader(formTemplate).asArrayBuffer());
+  const archive = readInstrumentsArchive(
+    await fileReader(formTemplate).asArrayBuffer()
+  );
+
+  // console.log(archive);
+
+  return {};
+}
 
 async function extractDirectoryTree(entry) {
   const node = {
@@ -53,12 +96,23 @@ export function isInstrumentsProfile(file: mixed): boolean {
   return fileMetaData.pop() === 'trace';
 }
 
-export async function convertInstrumentsProfile(entry: mixed): Profile {
+export async function convertInstrumentsProfile(
+  entry: mixed,
+  fileReader
+): Profile {
   // We have kept return type as undefined as of now, we will update it once we implement the other functions
-  console.log('inside convertInstrumentsProfile!!!!');
-  console.log('entry', entry);
+  //console.log('inside convertInstrumentsProfile!!!!');
+  //console.log('entry', entry);
   const tree = await extractDirectoryTree(entry);
-  console.log('tree', tree);
+  // console.log('tree', tree);
+
+  const {
+    version,
+    runs,
+    instrument,
+    selectedRunNumber,
+  } = await readFormTemplateFile(tree, fileReader);
+
   const profile = getEmptyProfile();
 
   return profile;

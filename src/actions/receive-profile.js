@@ -883,7 +883,7 @@ export function retrieveProfileFromFile(
     dispatch(waitingForProfileFromFile());
 
     try {
-      console.log(file);
+      // console.log(file);
       switch (file.type) {
         case 'application/gzip':
         case 'application/x-gzip':
@@ -915,11 +915,11 @@ export function retrieveProfileFromFile(
           // extensions (eg .profile). So we can't rely on the mime type to
           // decide how to handle them. We'll try to parse them as a plain JSON
           // file.
-          console.log('default case');
-          console.log(file);
+          // console.log('default case');
+          // console.log(file);
           let profile;
           if (isInstrumentsProfile(file)) {
-            profile = await convertInstrumentsProfile(file);
+            profile = await convertInstrumentsProfile(file, fileReader);
           } else {
             const text = await fileReader(file).asText();
             profile = await unserializeProfileOfArbitraryFormat(text);
