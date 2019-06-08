@@ -34,7 +34,7 @@ function readInstrumentsArchive(buffer) {
   // console.log('byteArray', byteArray);
   const parsedPlist = parseBinaryPlist(byteArray);
 
-  console.log('parsedList', parsedPlist);
+  console.log('parsedPlist', parsedPlist);
   return {};
 }
 

@@ -36,7 +36,10 @@ class BinaryPlistParser {
 
     // console.log(this.parseObject(this.offsetTable[rootIndex]))
     // Parse the root object assuming the graph is a tree
-
+    console.log(
+      'output of parseRoot function',
+      this.parseObject(this.offsetTable[rootIndex])
+    );
     return this.parseObject(this.offsetTable[rootIndex]);
   }
 
@@ -185,9 +188,8 @@ class BinaryPlistParser {
         return this.parseStringASCII(offset, extra);
       case 0x6:
         return this.parseStringUTF16(offset, extra);
-      case 0x8: {
+      case 0x8:
         return this.parseUID(offset, extra + 1);
-      }
       case 0xa:
         return this.parseArray(offset, extra);
       case 0xd:
