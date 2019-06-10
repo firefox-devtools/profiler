@@ -210,7 +210,7 @@ export function profileSanitized(
   originalUrlState: UrlState
 ): Action {
   return {
-    type: 'SANITIZE_PROFILE_PUBLISHED',
+    type: 'SANITIZED_PROFILE_PUBLISHED',
     hash,
     committedRanges,
     oldThreadIndexToNew,

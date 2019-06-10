@@ -36,7 +36,7 @@ const view: Reducer<AppViewState> = (
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
     case 'REVERT_TO_ORIGINAL_PROFILE':
-    case 'SANITIZE_PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       return { phase: 'TRANSITIONING_FROM_STALE_PROFILE' };
     case 'RECEIVE_ZIP_FILE':
     case 'VIEW_PROFILE':
@@ -166,7 +166,7 @@ const trackThreadHeights: Reducer<Array<ThreadIndex | void>> = (
 const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'PROFILE_PUBLISHED':
-    case 'SANITIZE_PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       return true;
     case 'DISMISS_NEWLY_PUBLISHED':
       return false;

@@ -47,7 +47,7 @@ class UrlManager extends React.PureComponent<Props> {
       newUrlState = (window.history.state: UrlState);
     } else {
       // There is no state serialized and stored by the browser, attempt to create
-      // A UrlState object by parsin gthe window.location.
+      // a UrlState object by parsing the window.location.
       try {
         newUrlState = stateFromLocation(window.location);
       } catch (e) {
@@ -68,9 +68,8 @@ class UrlManager extends React.PureComponent<Props> {
       previousUrlState.hash !== newUrlState.hash
     ) {
       // Profile sanitization and publishing can do weird things for the history API.
-      // Rather than write lots of complicated interactions, just bail out of allowing
-      // the back button to work when going between a published profile, and one
-      // that is not.
+      // Rather than write lots of complicated interactions, just prevent the back button
+      // from working when going between a published profile, and one that is not.
       window.history.replaceState(
         previousUrlState,
         document.title,

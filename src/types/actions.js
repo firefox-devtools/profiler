@@ -319,7 +319,7 @@ type UrlStateAction =
   | {| +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] |}
   | {| +type: 'CHANGE_PROFILE_NAME', +profileName: string |}
   | {|
-      +type: 'SANITIZE_PROFILE_PUBLISHED',
+      +type: 'SANITIZED_PROFILE_PUBLISHED',
       +hash: string,
       +committedRanges: StartEndRange[] | null,
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,

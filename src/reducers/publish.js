@@ -71,7 +71,7 @@ const phase: Reducer<UploadPhase> = (state = 'local', action) => {
     case 'UPLOAD_STARTED':
       return 'uploading';
     case 'PROFILE_PUBLISHED':
-    case 'SANITIZE_PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       return 'uploaded';
     case 'UPLOAD_FAILED':
       return 'error';
@@ -93,7 +93,7 @@ const uploadProgress: Reducer<number> = (state = 0, action) => {
     case 'UPLOAD_ABORTED':
     case 'UPLOAD_RESET':
     case 'PROFILE_PUBLISHED':
-    case 'SANITIZE_PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'UPLOAD_COMPRESSION_STARTED':
     case 'UPLOAD_FAILED':
       return 0;
@@ -119,7 +119,7 @@ const abortFunction: Reducer<() => void> = (state = noop, action) => {
   switch (action.type) {
     case 'UPLOAD_ABORTED':
     case 'PROFILE_PUBLISHED':
-    case 'SANITIZE_PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'UPLOAD_FAILED':
       return noop;
     case 'UPLOAD_STARTED':
@@ -135,7 +135,7 @@ const abortFunction: Reducer<() => void> = (state = noop, action) => {
 const generation: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
     case 'PROFILE_PUBLISHED':
-    case 'SANITIZE_PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
     case 'UPLOAD_ABORTED':
     case 'UPLOAD_FAILED':
       // Increment the generation value when exiting out of the profile uploading.
@@ -159,7 +159,7 @@ const upload: Reducer<UploadState> = combineReducers({
  */
 const originalProfile: Reducer<null | Profile> = (state = null, action) => {
   switch (action.type) {
-    case 'SANITIZE_PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       return action.originalProfile;
     case 'REVERT_TO_ORIGINAL_PROFILE':
       return null;
@@ -174,7 +174,7 @@ const originalProfile: Reducer<null | Profile> = (state = null, action) => {
  */
 const originalUrlState: Reducer<null | UrlState> = (state = null, action) => {
   switch (action.type) {
-    case 'SANITIZE_PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       return action.originalUrlState;
     case 'REVERT_TO_ORIGINAL_PROFILE':
       return null;
@@ -185,6 +185,10 @@ const originalUrlState: Reducer<null | UrlState> = (state = null, action) => {
 
 /**
  * This piece of state controls the animation of hiding the profile when it's stale.
+ * Stale profiles are ones that have been mutated in some way. This happens when
+ * the user goes from an original profile to a sanitized profile, or when they revert
+ * to the original. We want to display a helpful animation when this happens, and so
+ * this piece of state controls it.
  */
 const isHidingStaleProfile: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
