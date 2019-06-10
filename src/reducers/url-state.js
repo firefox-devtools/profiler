@@ -37,7 +37,7 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
     case 'WAITING_FOR_PROFILE_FROM_FILE':
       return 'from-file';
     case 'PROFILE_PUBLISHED':
-    case 'SANITIZE_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       return 'public';
     case 'TRIGGER_LOADING_FROM_URL':
       return 'from-url';
@@ -49,7 +49,7 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
 const hash: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'PROFILE_PUBLISHED':
-    case 'SANITIZE_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       return action.hash;
     default:
       return state;
@@ -92,7 +92,7 @@ const committedRanges: Reducer<StartEndRange[]> = (state = [], action) => {
     }
     case 'POP_COMMITTED_RANGES':
       return state.slice(0, action.firstPoppedFilterIndex);
-    case 'SANITIZE_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       // This value may be updated due to profile sanitization.
       return action.committedRanges ? action.committedRanges : state;
     default:
@@ -112,7 +112,7 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
     case 'ISOLATE_LOCAL_TRACK':
       // Only switch to non-null selected threads.
       return (action.selectedThreadIndex: ThreadIndex);
-    case 'SANITIZE_PROFILE': {
+    case 'SANITIZED_PROFILE_PUBLISHED': {
       const { oldThreadIndexToNew } = action;
       if (state === null || !oldThreadIndexToNew) {
         // Either there was no selected thread, or the thread indexes were not modified.
@@ -178,7 +178,7 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
         [threadIndex]: transforms.slice(0, firstPoppedFilterIndex),
       });
     }
-    case 'SANITIZE_PROFILE': {
+    case 'SANITIZED_PROFILE_PUBLISHED': {
       const { oldThreadIndexToNew } = action;
       if (!oldThreadIndexToNew) {
         // The thread indexes weren't modified, just return the old value here.
@@ -253,7 +253,7 @@ const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
     case 'VIEW_PROFILE':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
       return action.globalTrackOrder;
-    case 'SANITIZE_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       // If some threads were removed, do not even attempt to figure this out. It's
       // complicated, and not many people use this feature.
       return action.oldThreadIndexToNew ? [] : state;
@@ -282,7 +282,7 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
       hiddenGlobalTracks.delete(action.trackIndex);
       return hiddenGlobalTracks;
     }
-    case 'SANITIZE_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       // If any threads were removed, this was because they were hidden.
       // Reset this state.
       return action.oldThreadIndexToNew ? new Set() : state;
@@ -318,7 +318,7 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
       hiddenLocalTracksByPid.set(action.pid, action.hiddenLocalTracks);
       return hiddenLocalTracksByPid;
     }
-    case 'SANITIZE_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       // If any threads were removed then this information is no longer valid.
       return action.oldThreadIndexToNew ? new Map() : state;
     default:
@@ -338,7 +338,7 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
       localTrackOrderByPid.set(action.pid, action.localTrackOrder);
       return localTrackOrderByPid;
     }
-    case 'SANITIZE_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
       // If any threads were removed then remove this information. It's complicated
       // to compute, and not many people use it.
       return action.oldThreadIndexToNew ? new Map() : state;
@@ -364,21 +364,6 @@ const profileName: Reducer<string> = (state = '', action) => {
   switch (action.type) {
     case 'CHANGE_PROFILE_NAME':
       return action.profileName;
-    default:
-      return state;
-  }
-};
-
-/**
- * This reducer holds the state for whether or not a profile was newly uploaded
- * or not. This way we can show a friendly message to the user.
- */
-const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
-  switch (action.type) {
-    case 'PROFILE_PUBLISHED':
-      return true;
-    case 'DISMISS_NEWLY_PUBLISHED':
-      return false;
     default:
       return state;
   }
@@ -420,6 +405,8 @@ const wrapReducerInResetter = (
 ): Reducer<UrlState> => {
   return (state, action) => {
     switch (action.type) {
+      case 'REVERT_TO_ORIGINAL_PROFILE':
+        return action.originalUrlState;
       case 'UPDATE_URL_STATE':
         // A new URL came in because of a browser action, discard the current UrlState
         // and use the new one, which was probably serialized from the URL, or stored
@@ -449,7 +436,6 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     pathInZipFile,
     profileSpecific,
     profileName,
-    isNewlyPublished,
   })
 );
 

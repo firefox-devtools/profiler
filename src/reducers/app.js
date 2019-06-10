@@ -19,11 +19,6 @@ const view: Reducer<AppViewState> = (
   state = { phase: 'INITIALIZING' },
   action
 ) => {
-  if (state.phase === 'DATA_LOADED') {
-    // Let's not come back at another phase if we're already displaying a profile
-    return state;
-  }
-
   switch (action.type) {
     case 'TEMPORARY_ERROR':
       return {
@@ -40,6 +35,9 @@ const view: Reducer<AppViewState> = (
       return { phase: 'INITIALIZING' };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
+    case 'REVERT_TO_ORIGINAL_PROFILE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
+      return { phase: 'TRANSITIONING_FROM_STALE_PROFILE' };
     case 'RECEIVE_ZIP_FILE':
     case 'VIEW_PROFILE':
       return { phase: 'DATA_LOADED' };
@@ -161,6 +159,22 @@ const trackThreadHeights: Reducer<Array<ThreadIndex | void>> = (
   }
 };
 
+/**
+ * This reducer holds the state for whether or not a profile was newly uploaded
+ * or not. This way we can show the permalink to the user.
+ */
+const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
+      return true;
+    case 'DISMISS_NEWLY_PUBLISHED':
+      return false;
+    default:
+      return state;
+  }
+};
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   isUrlSetupDone,
@@ -169,6 +183,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   panelLayoutGeneration,
   lastVisibleThreadTabSlug,
   trackThreadHeights,
+  isNewlyPublished,
 });
 
 export default appStateReducer;

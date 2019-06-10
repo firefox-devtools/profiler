@@ -48,6 +48,8 @@ export const getLastVisibleThreadTabSlug: Selector<TabSlug> = state =>
 export const getTrackThreadHeights: Selector<
   Array<ThreadIndex | void>
 > = state => getApp(state).trackThreadHeights;
+export const getIsNewlyPublished: Selector<boolean> = state =>
+  getApp(state).isNewlyPublished;
 
 /**
  * Visible tabs are computed based on the current state of the profile. Some

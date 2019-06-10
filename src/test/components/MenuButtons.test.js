@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent, wait } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
@@ -74,6 +74,8 @@ describe('app/MenuButtons', function() {
 
     const { container, getByTestId, getByText } = renderResult;
     const getPublishButton = () => getByText('Publish…');
+    const getErrorButton = () => getByText('Error publishing…');
+    const getCancelButton = () => getByText('Cancel Upload');
     const getPanelForm = () =>
       ensureExists(
         container.querySelector('form'),
@@ -86,6 +88,8 @@ describe('app/MenuButtons', function() {
       ...renderResult,
       getPanel,
       getPublishButton,
+      getErrorButton,
+      getCancelButton,
       getPanelForm,
       resolveUpload,
       rejectUpload,
@@ -138,36 +142,47 @@ describe('app/MenuButtons', function() {
       expect(getPanel()).toMatchSnapshot();
     });
 
-    it('matches the snapshot for the uploading panel', () => {
-      const { getPanel, getPublishButton, getPanelForm } = setup();
-      fireEvent.click(getPublishButton());
-      fireEvent.submit(getPanelForm());
-      expect(getPanel()).toMatchSnapshot();
-    });
-
-    it('matches the snapshot for the completed upload panel', () => {
+    it('can publish, cancel, and then publish again', () => {
       const {
         getPanel,
         getPublishButton,
+        getCancelButton,
         getPanelForm,
         resolveUpload,
       } = setup();
       fireEvent.click(getPublishButton());
       fireEvent.submit(getPanelForm());
       resolveUpload();
-      expect(getPanel()).toMatchSnapshot();
+
+      // These shouldn't exist anymore.
+      expect(() => getPanel()).toThrow();
+      expect(() => getPublishButton()).toThrow();
+
+      fireEvent.click(getCancelButton());
+
+      expect(getPublishButton()).toBeTruthy();
     });
 
-    it('matches the snapshot for an error', () => {
+    it('matches the snapshot for an error', async () => {
       const {
         getPanel,
         getPublishButton,
+        getErrorButton,
         getPanelForm,
         rejectUpload,
       } = setup();
+
       fireEvent.click(getPublishButton());
       fireEvent.submit(getPanelForm());
       rejectUpload('This is a mock error');
+
+      // Wait until the error button is visible.
+      await wait(() => {
+        getErrorButton();
+      });
+
+      // Now click the error button, and get a snapshot of the panel.
+      fireEvent.click(getErrorButton());
       expect(getPanel()).toMatchSnapshot();
     });
   });

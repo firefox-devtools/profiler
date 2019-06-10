@@ -6,42 +6,20 @@ exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
   data-testid="MenuButtonsPublish-container"
 >
   <div
-    class="menuButtonsPublishUploadTop"
+    class="photon-message-bar photon-message-bar-error"
   >
-    <div
-      class="menuButtonsPublishUploadTitle"
+    Uh oh, something went wrong when publishing the profile.
+    <button
+      class="photon-button photon-button-micro"
+      type="button"
     >
-      Publishing profile…
-    </div>
-    <div
-      class="menuButtonsPublishUploadPercentage"
-    >
-      0%
-    </div>
-    <div
-      class="menuButtonsPublishUploadBar"
-    >
-      <div
-        class="menuButtonsPublishUploadBarInner"
-        style="width: 0%;"
-      />
-    </div>
+      Try again
+    </button>
   </div>
   <div
-    class="menuButtonsPublishButtons"
+    class="menuButtonsPublishError"
   >
-    <button
-      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
-      type="button"
-    >
-      Compressing…
-    </button>
-    <button
-      class="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
-      type="button"
-    >
-      Cancel Upload
-    </button>
+    This is a mock error
   </div>
 </div>
 `;
@@ -76,13 +54,13 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
     class="menuButtons"
   >
     <div
-      class="buttonWithPanel menuButtonsShareButton"
+      class="buttonWithPanel menuButtonsShareButton menuButtonsShareButtonOriginal"
     >
       <div
         class="buttonWithPanelButtonWrapper"
       >
         <input
-          class="buttonWithPanelButton menuButtonsShareButtonButton"
+          class="buttonWithPanelButton"
           type="button"
           value="Publish…"
         />
@@ -110,52 +88,6 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
         class="open-in-new"
       />
     </a>
-  </div>
-</div>
-`;
-
-exports[`app/MenuButtons <Publish> matches the snapshot for the completed upload panel 1`] = `
-<div
-  class="menuButtonsPublishUpload"
-  data-testid="MenuButtonsPublish-container"
->
-  <div
-    class="menuButtonsPublishUploadTop"
-  >
-    <div
-      class="menuButtonsPublishUploadTitle"
-    >
-      Publishing profile…
-    </div>
-    <div
-      class="menuButtonsPublishUploadPercentage"
-    >
-      0%
-    </div>
-    <div
-      class="menuButtonsPublishUploadBar"
-    >
-      <div
-        class="menuButtonsPublishUploadBarInner"
-        style="width: 0%;"
-      />
-    </div>
-  </div>
-  <div
-    class="menuButtonsPublishButtons"
-  >
-    <button
-      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
-      type="button"
-    >
-      Compressing…
-    </button>
-    <button
-      class="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
-      type="button"
-    >
-      Cancel Upload
-    </button>
   </div>
 </div>
 `;
@@ -364,51 +296,5 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the opened panel for
       </button>
     </div>
   </form>
-</div>
-`;
-
-exports[`app/MenuButtons <Publish> matches the snapshot for the uploading panel 1`] = `
-<div
-  class="menuButtonsPublishUpload"
-  data-testid="MenuButtonsPublish-container"
->
-  <div
-    class="menuButtonsPublishUploadTop"
-  >
-    <div
-      class="menuButtonsPublishUploadTitle"
-    >
-      Publishing profile…
-    </div>
-    <div
-      class="menuButtonsPublishUploadPercentage"
-    >
-      0%
-    </div>
-    <div
-      class="menuButtonsPublishUploadBar"
-    >
-      <div
-        class="menuButtonsPublishUploadBarInner"
-        style="width: 0%;"
-      />
-    </div>
-  </div>
-  <div
-    class="menuButtonsPublishButtons"
-  >
-    <button
-      class="photon-button menuButtonsPublishButton menuButtonsPublishButtonsDownload menuButtonsPublishButtonDisabled"
-      type="button"
-    >
-      Compressing…
-    </button>
-    <button
-      class="photon-button photon-button-default menuButtonsPublishButton menuButtonsPublishButtonsCancelUpload"
-      type="button"
-    >
-      Cancel Upload
-    </button>
-  </div>
 </div>
 `;
