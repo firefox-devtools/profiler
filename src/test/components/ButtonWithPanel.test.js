@@ -9,12 +9,17 @@ import ButtonWithPanel from '../../components/shared/ButtonWithPanel';
 import ArrowPanel from '../../components/shared/ArrowPanel';
 import { ensureExists } from '../../utils/flow';
 
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
 describe('shared/ButtonWithPanel', () => {
   // renders the button in its default state
   function setup() {
     return render(
       <ButtonWithPanel
         className="button"
+        buttonClassName="buttonButton"
         label="My Button"
         panel={
           <ArrowPanel className="panel">
@@ -87,6 +92,7 @@ describe('shared/ButtonWithPanel', () => {
     const { getByValue, container } = setup();
 
     fireEvent.click(getByValue('My Button'));
+    jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
 
     //it closes the panel when Esc key is pressed
@@ -102,14 +108,47 @@ describe('shared/ButtonWithPanel', () => {
     const { getByValue, container } = setup();
 
     fireEvent.click(getByValue('My Button'));
+    jest.runAllTimers();
     expect(container.firstChild).toMatchSnapshot();
 
-    //it closes the panel when clicking outside the panel
+    // it closes the panel when clicking outside the panel
     const newDiv = ensureExists(document.body).appendChild(
       document.createElement('div')
     );
-    fireEvent.mouseDown(newDiv);
+    fireEvent.click(newDiv);
 
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('opens the panel when the button is clicked and closes the panel by clicking the button again', () => {
+    const { getByValue, container } = setup();
+
+    fireEvent.click(getByValue('My Button'));
+    jest.runAllTimers();
+
+    ensureExists(container.querySelector('.arrowPanel.open'));
+
+    fireEvent.click(getByValue('My Button'));
+    jest.runAllTimers();
+
+    expect(container.querySelector('.arrowPanel.open')).toBe(null);
+  });
+
+  it('opens the panel when the button is clicked and does not close the panel by clicking inside the panel', () => {
+    const { getByValue, getByText, container } = setup();
+
+    fireEvent.click(getByValue('My Button'));
+    jest.runAllTimers();
+    ensureExists(container.querySelector('.arrowPanel.open'));
+
+    // Clicking on the panel doesn't hide the popup.
+    fireEvent.click(getByText('Panel content'));
+    jest.runAllTimers();
+    ensureExists(container.querySelector('.arrowPanel.open'));
+
+    // But clicking on the arrow area does.
+    fireEvent.click(ensureExists(container.querySelector('.arrowPanelArrow')));
+    jest.runAllTimers();
+    expect(container.querySelector('.arrowPanel.open')).toBe(null);
   });
 });

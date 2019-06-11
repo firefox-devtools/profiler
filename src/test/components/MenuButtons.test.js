@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
-import { render, fireEvent } from 'react-testing-library';
+import { render, fireEvent, wait } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
@@ -52,6 +52,8 @@ describe('app/MenuButtons', function() {
   }
 
   function setup(updateChannel = 'release') {
+    jest.useFakeTimers();
+
     const { profile } = getProfileFromTextSamples('A');
     profile.meta.updateChannel = updateChannel;
     const store = storeWithProfile(profile);
@@ -74,19 +76,28 @@ describe('app/MenuButtons', function() {
 
     const { container, getByTestId, getByText } = renderResult;
     const getPublishButton = () => getByText('Publish…');
+    const getErrorButton = () => getByText('Error publishing…');
+    const getCancelButton = () => getByText('Cancel Upload');
     const getPanelForm = () =>
       ensureExists(
         container.querySelector('form'),
         'Could not find the form in the panel'
       );
     const getPanel = () => getByTestId('MenuButtonsPublish-container');
+    const clickAndRunTimers = where => {
+      fireEvent.click(where);
+      jest.runAllTimers();
+    };
 
     return {
       store,
       ...renderResult,
       getPanel,
       getPublishButton,
+      getErrorButton,
+      getCancelButton,
       getPanelForm,
+      clickAndRunTimers,
       resolveUpload,
       rejectUpload,
     };
@@ -127,47 +138,64 @@ describe('app/MenuButtons', function() {
     });
 
     it('matches the snapshot for the opened panel for a nightly profile', () => {
-      const { getPanel, getPublishButton } = setup('nightly');
-      fireEvent.click(getPublishButton());
+      const { getPanel, getPublishButton, clickAndRunTimers } = setup(
+        'nightly'
+      );
+      clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a release profile', () => {
-      const { getPanel, getPublishButton } = setup('release');
-      fireEvent.click(getPublishButton());
+      const { getPanel, getPublishButton, clickAndRunTimers } = setup(
+        'release'
+      );
+      clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
 
-    it('matches the snapshot for the uploading panel', () => {
-      const { getPanel, getPublishButton, getPanelForm } = setup();
-      fireEvent.click(getPublishButton());
-      fireEvent.submit(getPanelForm());
-      expect(getPanel()).toMatchSnapshot();
-    });
-
-    it('matches the snapshot for the completed upload panel', () => {
+    it('can publish, cancel, and then publish again', () => {
       const {
         getPanel,
         getPublishButton,
+        getCancelButton,
         getPanelForm,
         resolveUpload,
+        clickAndRunTimers,
       } = setup();
-      fireEvent.click(getPublishButton());
+      clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
       resolveUpload();
-      expect(getPanel()).toMatchSnapshot();
+
+      // These shouldn't exist anymore.
+      expect(() => getPanel()).toThrow();
+      expect(() => getPublishButton()).toThrow();
+
+      clickAndRunTimers(getCancelButton());
+
+      expect(getPublishButton()).toBeTruthy();
     });
 
-    it('matches the snapshot for an error', () => {
+    it('matches the snapshot for an error', async () => {
       const {
         getPanel,
         getPublishButton,
+        getErrorButton,
         getPanelForm,
         rejectUpload,
+        clickAndRunTimers,
       } = setup();
-      fireEvent.click(getPublishButton());
+
+      clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
       rejectUpload('This is a mock error');
+
+      // Wait until the error button is visible.
+      await wait(() => {
+        getErrorButton();
+      });
+
+      // Now click the error button, and get a snapshot of the panel.
+      clickAndRunTimers(getErrorButton());
       expect(getPanel()).toMatchSnapshot();
     });
   });

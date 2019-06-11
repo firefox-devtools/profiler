@@ -330,11 +330,13 @@ describe('unfiltered call tree', function() {
     describe('icons from the call tree', function() {
       it('upgrades http to https', function() {
         const { profile } = getProfileFromTextSamples(`
-          A:examplecom.js
+          A[lib:examplecom.js]
         `);
         const callTree = callTreeFromProfile(profile);
         const [thread] = profile.threads;
-        const hostStringIndex = thread.stringTable.indexForString('examplecom');
+        const hostStringIndex = thread.stringTable.indexForString(
+          'examplecom.js'
+        );
 
         thread.resourceTable.type[0] = resourceTypes.webhost;
         thread.resourceTable.host[0] = hostStringIndex;

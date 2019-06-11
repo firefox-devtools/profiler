@@ -355,6 +355,16 @@ function _findCategoryFromFuncName(
   return null;
 }
 
+function _findLibNameFromFuncName(funcNameWithModifier: string): string | null {
+  const findLibNameResult = /\[lib:([^\]]+)\]/.exec(funcNameWithModifier);
+  if (findLibNameResult) {
+    const libName = findLibNameResult[1];
+    return libName;
+  }
+
+  return null;
+}
+
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: Array<string>,
@@ -372,8 +382,6 @@ function _buildThreadFromTextOnlyStacks(
     libs,
   } = thread;
 
-  const resourceIndexCache = {};
-
   // Create the FuncTable.
   funcNames.forEach(funcName => {
     funcTable.name.push(stringTable.indexForString(funcName));
@@ -390,40 +398,10 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.length++;
   });
 
-  // Go back through and create resources as needed.
-  funcNames.forEach(funcName => {
-    // See if this sample has a resource like "funcName:libraryName".
-    const [, libraryName] = funcName.match(/\w+:(\w+)/) || [];
-    let resourceIndex = resourceIndexCache[libraryName];
-    if (resourceIndex === undefined) {
-      const libIndex = libs.length;
-      if (libraryName) {
-        libs.push({
-          start: 0,
-          end: 0,
-          offset: 0,
-          arch: '',
-          name: libraryName,
-          path: '/path/to/' + libraryName,
-          debugName: libraryName,
-          debugPath: '/path/to/' + libraryName,
-          breakpadId: 'SOMETHING_FAKE',
-        });
-        resourceIndex = resourceTable.length++;
-        resourceTable.lib.push(libIndex);
-        resourceTable.name.push(stringTable.indexForString(libraryName));
-        resourceTable.type.push(resourceTypes.library);
-        resourceTable.host.push(undefined);
-      } else {
-        resourceIndex = -1;
-      }
-      resourceIndexCache[libraryName] = resourceIndex;
-    }
-
-    funcTable.resource.push(resourceIndex);
-  });
-
   const categoryOther = categories.findIndex(c => c.name === 'Other');
+
+  // This map caches resource indexes for library names.
+  const resourceIndexCache = {};
 
   // Create the samples, stacks, and frames.
   textOnlyStacks.forEach((column, columnIndex) => {
@@ -434,6 +412,36 @@ function _buildThreadFromTextOnlyStacks(
       // There is a one-to-one relationship between strings and funcIndexes here, so
       // the indexes can double as both string indexes and func indexes.
       const funcIndex = stringTable.indexForString(funcName);
+
+      // Find the library name from the function name and create an entry if needed.
+      const libraryName = _findLibNameFromFuncName(funcNameWithModifier);
+      let resourceIndex = -1;
+      if (libraryName) {
+        resourceIndex = resourceIndexCache[libraryName];
+        if (resourceIndex === undefined) {
+          libs.push({
+            start: 0,
+            end: 0,
+            offset: 0,
+            arch: '',
+            name: libraryName,
+            path: '/path/to/' + libraryName,
+            debugName: libraryName,
+            debugPath: '/path/to/' + libraryName,
+            breakpadId: 'SOMETHING_FAKE',
+          });
+
+          resourceTable.lib.push(libs.length - 1); // The lastly inserted item.
+          resourceTable.name.push(stringTable.indexForString(libraryName));
+          resourceTable.type.push(resourceTypes.library);
+          resourceTable.host.push(undefined);
+          resourceIndex = resourceTable.length++;
+
+          resourceIndexCache[libraryName] = resourceIndex;
+        }
+      }
+
+      funcTable.resource[funcIndex] = resourceIndex;
 
       // Find the wanted jit type from the function name
       const jitType = _findJitTypeFromFuncName(funcNameWithModifier);

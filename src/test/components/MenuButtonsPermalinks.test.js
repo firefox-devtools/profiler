@@ -10,10 +10,11 @@ import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { ensureExists } from '../../utils/flow';
-import { getIsNewlyPublished } from '../../selectors/url-state';
 
 describe('<Permalink>', function() {
   function setup(search = '', injectedUrlShortener) {
+    jest.useFakeTimers();
+
     const store = storeWithProfile();
     const shortUrl = 'http://example.com/fake-short-url';
     const shortUrlPromise = Promise.resolve(shortUrl);
@@ -41,11 +42,16 @@ describe('<Permalink>', function() {
     const { queryByTestId, getByText } = renderResult;
     const getPermalinkButton = () => getByText('Permalink');
     const queryInput = () => queryByTestId('MenuButtonsPermalink-input');
+    const clickAndRunTimers = where => {
+      fireEvent.click(where);
+      jest.runAllTimers();
+    };
 
     return {
       ...store,
       ...renderResult,
       getPermalinkButton,
+      clickAndRunTimers,
       shortUrl,
       shortUrlPromise,
       queryInput,
@@ -65,29 +71,14 @@ describe('<Permalink>', function() {
       queryInput,
       shortUrl,
       shortUrlPromise,
+      clickAndRunTimers,
     } = setup();
-    fireEvent.click(getPermalinkButton());
+    clickAndRunTimers(getPermalinkButton());
     await shortUrlPromise;
     const input = ensureExists(
       queryInput(),
       'Unable to find the permalink input text field'
     );
     expect(input.getAttribute('value')).toBe(shortUrl);
-  });
-
-  it('shows the permalink when visiting a published profile', async function() {
-    const { queryInput, shortUrl, shortUrlPromise } = setup('?published');
-    await shortUrlPromise;
-    const input = ensureExists(
-      queryInput(),
-      'Unable to find the permalink input text field'
-    );
-    expect(input.getAttribute('value')).toBe(shortUrl);
-  });
-
-  it('resets the isNewlyPublishedState in the URL when mounted', async function() {
-    const { originalState, getState } = setup('?published');
-    expect(getIsNewlyPublished(originalState)).toBe(true);
-    expect(getIsNewlyPublished(getState())).toBe(false);
   });
 });

@@ -21,6 +21,30 @@ import type { TrackIndex } from '../types/profile-derived';
 
 export const CURRENT_URL_VERSION = 3;
 
+/**
+ * This static piece of state might look like an anti-pattern, but it's a relatively
+ * simple way to adjust whether we are pushing or replacing onto the history API.
+ * The history API is a singleton, and so here we're also using a singleton pattern
+ * to manage this bit of state.
+ */
+let _isReplaceState: boolean = false;
+
+/**
+ * This function can be called from thunk actions or other components to change the
+ * history API's behavior.
+ */
+export function setHistoryReplaceState(value: boolean): void {
+  _isReplaceState = value;
+}
+
+/**
+ * This function is consumed by the UrlManager so it knows how to interact with the
+ * history API. It's embedded here to avoid cyclical dependencies when importing files.
+ */
+export function getIsHistoryReplaceState(): boolean {
+  return _isReplaceState;
+}
+
 function getDataSourceDirs(
   urlState: UrlState
 ): [] | [DataSource] | [DataSource, string] {
@@ -65,9 +89,6 @@ type BaseQuery = {|
   hiddenThreads: string, // "0-1"
   profiles: string[],
   profileName: string,
-  // This value tracks whether a profile was newly published. Which in that case
-  // we will want to show a friendly message.
-  published: null | void,
 |};
 
 type CallTreeQuery = {|
@@ -156,7 +177,6 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     profiles: urlState.profilesToCompare || undefined,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
-    published: urlState.isNewlyPublished === true ? null : undefined,
   };
 
   // Add the parameter hiddenGlobalTracks only when needed.
@@ -322,7 +342,6 @@ export function stateFromLocation(location: Location): UrlState {
     selectedTab: toValidTabSlug(pathParts[selectedTabPathPart]) || 'calltree',
     pathInZipFile: query.file || null,
     profileName: query.profileName,
-    isNewlyPublished: query.published !== undefined,
     profileSpecific: {
       implementation,
       invertCallstack: query.invertCallstack !== undefined,
