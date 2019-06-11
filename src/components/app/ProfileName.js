@@ -23,9 +23,26 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 class ProfileNameImpl extends React.PureComponent<Props> {
+  onInputChange = (e: SyntheticEvent<HTMLInputElement>) => {
+    const { changeProfileName } = this.props;
+    changeProfileName(e.currentTarget.value);
+  };
+
   render() {
     const { profileName } = this.props;
-    return <div className="profileViewerName">{profileName}</div>;
+    const inputSize = profileName ? Math.max(profileName.length, 10) : 10;
+
+    return (
+      <input
+        className="profileNameInput"
+        value={profileName}
+        placeholder="untitled"
+        aria-label="Profile name"
+        title="Click to edit the profile name"
+        size={inputSize}
+        onChange={this.onInputChange}
+      />
+    );
   }
 }
 
