@@ -13,6 +13,8 @@ import { ensureExists } from '../../utils/flow';
 
 describe('<Permalink>', function() {
   function setup(search = '', injectedUrlShortener) {
+    jest.useFakeTimers();
+
     const store = storeWithProfile();
     const shortUrl = 'http://example.com/fake-short-url';
     const shortUrlPromise = Promise.resolve(shortUrl);
@@ -40,11 +42,16 @@ describe('<Permalink>', function() {
     const { queryByTestId, getByText } = renderResult;
     const getPermalinkButton = () => getByText('Permalink');
     const queryInput = () => queryByTestId('MenuButtonsPermalink-input');
+    const clickAndRunTimers = where => {
+      fireEvent.click(where);
+      jest.runAllTimers();
+    };
 
     return {
       ...store,
       ...renderResult,
       getPermalinkButton,
+      clickAndRunTimers,
       shortUrl,
       shortUrlPromise,
       queryInput,
@@ -64,8 +71,9 @@ describe('<Permalink>', function() {
       queryInput,
       shortUrl,
       shortUrlPromise,
+      clickAndRunTimers,
     } = setup();
-    fireEvent.click(getPermalinkButton());
+    clickAndRunTimers(getPermalinkButton());
     await shortUrlPromise;
     const input = ensureExists(
       queryInput(),
