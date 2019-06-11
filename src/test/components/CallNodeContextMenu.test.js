@@ -24,19 +24,17 @@ describe('calltree/CallNodeContextMenu', function() {
     // Create a profile that every transform can be applied to.
     const {
       profile,
-      funcNamesPerThread: [funcNames],
+      funcNamesDictPerThread: [{ A, B }],
     } = getProfileFromTextSamples(`
-      A          A          A
-      B:library  B:library  B:library
-      B:library  B:library  B:library
-      B:library  B:library  B:library
-      C          C          H
-      D          F          I
-      E          E
+      A               A               A
+      B[lib:library]  B[lib:library]  B[lib:library]
+      B[lib:library]  B[lib:library]  B[lib:library]
+      B[lib:library]  B[lib:library]  B[lib:library]
+      C               C               H
+      D               F               I
+      E               E
     `);
     const store = storeWithProfile(profile);
-    const A = funcNames.indexOf('A');
-    const B = funcNames.indexOf('B:library');
 
     store.dispatch(changeExpandedCallNodes(0, [[A]]));
     store.dispatch(changeRightClickedCallNode(0, [A, B]));
@@ -127,7 +125,7 @@ describe('calltree/CallNodeContextMenu', function() {
       jest.spyOn(window, 'open').mockImplementation(() => {});
       fireEvent.click(getByText(/Searchfox/));
       expect(window.open).toBeCalledWith(
-        'https://searchfox.org/mozilla-central/search?q=B%3Alibrary',
+        'https://searchfox.org/mozilla-central/search?q=B',
         '_blank'
       );
     });
@@ -136,7 +134,7 @@ describe('calltree/CallNodeContextMenu', function() {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
       fireEvent.click(getByText('Copy function name'));
-      expect(copy).toBeCalledWith('B:library');
+      expect(copy).toBeCalledWith('B');
     });
 
     it('can copy a script URL', function() {
@@ -166,7 +164,7 @@ describe('calltree/CallNodeContextMenu', function() {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
       fireEvent.click(getByText('Copy stack'));
-      expect(copy).toBeCalledWith(`B:library\nA\n`);
+      expect(copy).toBeCalledWith(`B\nA\n`);
     });
   });
 });

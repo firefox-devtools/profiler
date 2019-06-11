@@ -420,7 +420,7 @@ describe('actions/receive-profile', function() {
 
     it('symbolicates a profile if it is not symbolicated yet', async () => {
       const { profile: unsymbolicatedProfile } = getProfileFromTextSamples(
-        '0xA:libxul'
+        '0xA[lib:libxul]'
       );
       unsymbolicatedProfile.meta.symbolicated = false;
 
