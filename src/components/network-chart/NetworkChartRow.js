@@ -21,7 +21,7 @@ import {
 
 import type { CssPixels, Milliseconds, StartEndRange } from '../../types/units';
 import type { ThreadIndex } from '../../types/profile';
-import type { Marker } from '../../types/profile-derived';
+import type { Marker, MarkerIndex } from '../../types/profile-derived';
 import type { NetworkPayload } from '../../types/markers';
 
 // This regexp is used to split a pathname into a directory path and a filename.
@@ -305,12 +305,16 @@ class NetworkChartRowBar extends React.PureComponent<NetworkChartRowBarProps> {
 type NetworkChartRowProps = {|
   +index: number,
   +marker: Marker,
+  +markerIndex: MarkerIndex,
   // Pass the payload in as well, since our types can't express a Marker with
   // a specific payload.
   +networkPayload: NetworkPayload,
   +timeRange: StartEndRange,
   +width: CssPixels,
   +threadIndex: ThreadIndex,
+  +isRightClicked: boolean,
+  +onLeftClick?: MarkerIndex => mixed,
+  +onRightClick?: MarkerIndex => mixed,
 |};
 
 type State = {|
@@ -341,6 +345,19 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     this.setState({
       hovered: false,
     });
+  };
+
+  _onMouseDown = (e: SyntheticMouseEvent<>) => {
+    const { markerIndex, onLeftClick, onRightClick } = this.props;
+    if (e.button === 0) {
+      if (onLeftClick) {
+        onLeftClick(markerIndex);
+      }
+    } else if (e.button === 2) {
+      if (onRightClick) {
+        onRightClick(markerIndex);
+      }
+    }
   };
 
   _findIndexOfLoadid(name: string): number | null {
@@ -416,7 +433,14 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
   }
 
   render() {
-    const { index, marker, networkPayload, width, timeRange } = this.props;
+    const {
+      index,
+      marker,
+      networkPayload,
+      width,
+      timeRange,
+      isRightClicked,
+    } = this.props;
 
     if (networkPayload === null) {
       return null;
@@ -425,7 +449,10 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
     const itemClassName = classNames(
       'networkChartRowItem',
       this._getClassNameTypeForMarker(),
-      { odd: index % 2 === 1 }
+      {
+        odd: index % 2 === 1,
+        isRightClicked,
+      }
     );
 
     return (
@@ -433,6 +460,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
         className={itemClassName}
         onMouseEnter={this._hoverIn}
         onMouseLeave={this._hoverOut}
+        onMouseDown={this._onMouseDown}
       >
         <div className="networkChartRowItemLabel">
           {this._splitsURI(marker.name)}
