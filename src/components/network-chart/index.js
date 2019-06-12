@@ -80,6 +80,8 @@ class NetworkChart extends React.PureComponent<Props> {
     changeRightClickedMarker(threadIndex, markerIndex);
   };
 
+  _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
+
   _renderRow = (markerIndex: MarkerIndex, index: number): React.Node => {
     const {
       threadIndex,
@@ -111,6 +113,7 @@ class NetworkChart extends React.PureComponent<Props> {
         threadIndex={threadIndex}
         timeRange={timeRange}
         width={width}
+        shouldDisplayTooltips={this._shouldDisplayTooltips}
         isRightClicked={rightClickedMarkerIndex === markerIndex}
         onRightClick={this._onRightClick}
       />

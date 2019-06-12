@@ -315,6 +315,7 @@ type NetworkChartRowProps = {|
   +isRightClicked: boolean,
   +onLeftClick?: MarkerIndex => mixed,
   +onRightClick?: MarkerIndex => mixed,
+  +shouldDisplayTooltips: () => boolean,
 |};
 
 type State = {|
@@ -440,6 +441,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
       width,
       timeRange,
       isRightClicked,
+      shouldDisplayTooltips,
     } = this.props;
 
     if (networkPayload === null) {
@@ -471,7 +473,7 @@ class NetworkChartRow extends React.PureComponent<NetworkChartRowProps, State> {
           width={width}
           timeRange={timeRange}
         />
-        {this.state.hovered ? (
+        {shouldDisplayTooltips() && this.state.hovered ? (
           // This magic value "5" avoids the tooltip of being too close of the
           // row, especially when we mouseEnter the row from the top edge.
           <Tooltip mouseX={this.state.pageX} mouseY={this.state.pageY + 5}>
