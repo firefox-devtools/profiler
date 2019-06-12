@@ -14,7 +14,6 @@
   padding: 0 20px;
   border-left: 1px solid var(--grey-30);
   color: var(--grey-90);
-  cursor: default;
   line-height: 24px;
   text-decoration: none;
 }

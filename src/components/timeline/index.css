@@ -69,19 +69,18 @@
   padding: 0 7px 0 20px;
   margin: 4px 5px 0;
   border: 0;
-  background-color: var(--blue-60);
+  background-color: var(--grey-90-a10);
   border-radius: 12px;
-  color: #fff;
   font: inherit;
   line-height: 17px;
 }
 
 .timelineSettingsHiddenTracks:hover {
-  background-color: var(--blue-70);
+  background-color: var(--grey-90-a20);
 }
 
-.timelineSettingsHiddenTracks:active {
-  background-color: var(--blue-80);
+.timelineSettingsHiddenTracks:hover:active {
+  background-color: var(--grey-90-a30);
 }
 
 /* This is the dropdown arrow on the left of the button. */
