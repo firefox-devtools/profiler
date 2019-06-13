@@ -36,6 +36,8 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
+import { getProfile } from '../selectors/profile';
+import { getView } from '../selectors/app';
 
 import type {
   FunctionsUpdatePerThread,
@@ -71,14 +73,9 @@ export function waitingForProfileFromAddon(): Action {
 
 /**
  * Call this function once the profile has been fetched and pre-processed from whatever
- * source (url, addon, file, etc). This function will take the view information from the
- * URL, such as hiding and sorting information, and it will validate it against the
- * profile. If there is no pre-existing view information, this function will compute the
- * defaults. There is a decent amount of complexity to making all of these decisions,
- * which has been collected in a bunch of functions in the src/profile-logic/tracks.js
- * file.
+ * source (url, addon, file, etc).
  */
-export function viewProfile(
+export function loadProfile(
   profile: Profile,
   config: $Shape<{|
     pathInZipFile: string,
@@ -86,8 +83,8 @@ export function viewProfile(
     transformStacks: TransformStacksPerThread,
     geckoProfiler: $GeckoProfiler,
   |}> = {}
-): ThunkAction<Promise<void>> {
-  return async (dispatch, getState) => {
+): ThunkAction<void> {
+  return dispatch => {
     if (profile.threads.length === 0) {
       console.error('This profile has no threads.', profile);
       dispatch(
@@ -97,6 +94,34 @@ export function viewProfile(
           )
         )
       );
+      return;
+    }
+
+    dispatch({
+      type: 'PROFILE_LOADED',
+      profile,
+      pathInZipFile: config.pathInZipFile,
+      implementationFilter: config.implementationFilter,
+      transformStacks: config.transformStacks,
+    });
+  };
+}
+
+/**
+ * This function will take the view information from the URL, such as hiding and sorting
+ * information, and it will validate it against the profile. If there is no pre-existing
+ * view information, this function will compute the defaults. There is a decent amount of
+ * complexity to making all of these decisions, which has been collected in a bunch of
+ * functions in the src/profile-logic/tracks.js file.
+ */
+export function finalizeView(
+  profile?: Profile,
+  geckoProfiler?: $GeckoProfiler
+): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    profile = profile || getProfile(getState());
+    if (getView(getState()).phase !== 'PROFILE_LOADED') {
+      // Profile load was not successful. Do not continue.
       return;
     }
 
@@ -161,7 +186,6 @@ export function viewProfile(
 
     dispatch({
       type: 'VIEW_PROFILE',
-      profile,
       selectedThreadIndex,
       globalTracks,
       globalTrackOrder,
@@ -169,17 +193,29 @@ export function viewProfile(
       localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
-      pathInZipFile: config.pathInZipFile,
-      implementationFilter: config.implementationFilter,
-      transformStacks: config.transformStacks,
     });
 
     // Note we kick off symbolication only for the profiles we know for sure
     // that they weren't symbolicated.
     if (profile.meta.symbolicated === false) {
-      const symbolStore = getSymbolStore(dispatch, config.geckoProfiler);
+      const symbolStore = getSymbolStore(dispatch, geckoProfiler);
       await doSymbolicateProfile(dispatch, profile, symbolStore);
     }
+  };
+}
+
+export function viewProfile(
+  profile: Profile,
+  config: $Shape<{|
+    pathInZipFile: string,
+    implementationFilter: ImplementationFilter,
+    transformStacks: TransformStacksPerThread,
+    geckoProfiler: $GeckoProfiler,
+  |}> = {}
+): ThunkAction<Promise<void>> {
+  return async dispatch => {
+    dispatch(loadProfile(profile, config));
+    await dispatch(finalizeView(profile, config.geckoProfiler));
   };
 }
 

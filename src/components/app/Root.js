@@ -8,8 +8,8 @@ import { Provider } from 'react-redux';
 import UrlManager from './UrlManager';
 import FooterLinks from './FooterLinks';
 import { ErrorBoundary } from './ErrorBoundary';
-import { ProfileLoader } from './ProfileLoader';
 import { AppViewRouter } from './AppViewRouter';
+import { ProfileLoader } from './ProfileLoader';
 
 import type { Store } from '../../types/store';
 

@@ -38,6 +38,8 @@ const view: Reducer<AppViewState> = (
     case 'REVERT_TO_ORIGINAL_PROFILE':
     case 'SANITIZED_PROFILE_PUBLISHED':
       return { phase: 'TRANSITIONING_FROM_STALE_PROFILE' };
+    case 'PROFILE_LOADED':
+      return { phase: 'PROFILE_LOADED' };
     case 'RECEIVE_ZIP_FILE':
     case 'VIEW_PROFILE':
       return { phase: 'DATA_LOADED' };

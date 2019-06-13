@@ -29,7 +29,7 @@ import type {
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'PROFILE_LOADED':
       return action.profile;
     case 'COALESCED_FUNCTIONS_UPDATE': {
       if (state === null) {
@@ -127,7 +127,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'PROFILE_LOADED':
       return action.profile.threads.map(() => ({
         selectedCallNodePath: [],
         rightClickedCallNodePath: null,
@@ -480,7 +480,7 @@ const rootRange: Reducer<StartEndRange> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'PROFILE_LOADED':
       return ProfileData.getTimeRangeIncludingAllThreads(action.profile);
     default:
       return state;

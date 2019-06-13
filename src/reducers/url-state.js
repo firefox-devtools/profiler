@@ -162,7 +162,7 @@ const networkSearchString: Reducer<string> = (state = '', action) => {
 
 const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'PROFILE_LOADED':
       return action.transformStacks || state;
     case 'ADD_TRANSFORM_TO_STACK': {
       const { threadIndex, transform } = action;
@@ -217,7 +217,7 @@ const implementation: Reducer<ImplementationFilter> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'PROFILE_LOADED':
       return action.implementationFilter || state;
     case 'CHANGE_IMPLEMENTATION_FILTER':
       return action.implementation;

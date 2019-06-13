@@ -231,8 +231,14 @@ type ReceiveProfileAction =
       +error: Error,
     |}
   | {|
-      +type: 'VIEW_PROFILE',
+      +type: 'PROFILE_LOADED',
       +profile: Profile,
+      +pathInZipFile: ?string,
+      +implementationFilter: ?ImplementationFilter,
+      +transformStacks: ?TransformStacksPerThread,
+    |}
+  | {|
+      +type: 'VIEW_PROFILE',
       +selectedThreadIndex: ThreadIndex,
       +globalTracks: GlobalTrack[],
       +globalTrackOrder: TrackIndex[],
@@ -240,9 +246,6 @@ type ReceiveProfileAction =
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-      +pathInZipFile: ?string,
-      +implementationFilter: ?ImplementationFilter,
-      +transformStacks: ?TransformStacksPerThread,
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}
