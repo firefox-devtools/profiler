@@ -26,6 +26,8 @@ const ADDON_URL =
 const LEGACY_ADDON_URL =
   'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
 
+import DragAndDrop from './DragAndDrop';
+
 type InstallButtonProps = {
   name: string,
   xpiUrl: string,
@@ -220,7 +222,6 @@ type DispatchHomeProps = {|
 type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
 
 type HomeState = {
-  isDragging: boolean,
   isAddonInstalled: boolean,
 };
 
@@ -228,7 +229,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   _supportsWebExtensionAPI: boolean = _supportsWebExtensionAPI();
   _isFirefox: boolean = _isFirefox();
   state = {
-    isDragging: false,
     isAddonInstalled: Boolean(window.isGeckoProfilerAddonInstalled),
   };
 
@@ -237,41 +237,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   }
 
   componentDidMount() {
-    // Prevent dropping files on the document.
-    document.addEventListener('drag', _dragPreventDefault, false);
-    document.addEventListener('dragover', _dragPreventDefault, false);
-    document.addEventListener('drop', _dragPreventDefault, false);
-    // Let the Gecko Profiler Add-on let the home-page know when it's been installed.
     homeInstance = this;
   }
-
-  componentWillUnmount() {
-    document.removeEventListener('drag', _dragPreventDefault, false);
-    document.removeEventListener('dragover', _dragPreventDefault, false);
-    document.removeEventListener('drop', _dragPreventDefault, false);
-  }
-
-  _startDragging = (event: Event) => {
-    event.preventDefault();
-    this.setState({ isDragging: true });
-  };
-
-  _stopDragging = (event: Event) => {
-    event.preventDefault();
-    this.setState({ isDragging: false });
-  };
-
-  _handleProfileDrop = (event: DragEvent) => {
-    event.preventDefault();
-    if (!event.dataTransfer) {
-      return;
-    }
-
-    const { files } = event.dataTransfer;
-    if (files.length > 0) {
-      this.props.retrieveProfileFromFile(files[0]);
-    }
-  };
 
   _renderInstructions() {
     const { isAddonInstalled } = this.state;
@@ -444,14 +411,12 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   }
 
   render() {
-    const { isDragging } = this.state;
-    const { specialMessage } = this.props;
+    const { specialMessage, retrieveProfileFromFile } = this.props;
+
     return (
-      <div
+      <DragAndDrop
         className="home"
-        onDragEnter={this._startDragging}
-        onDragExit={this._stopDragging}
-        onDrop={this._handleProfileDrop}
+        retrieveProfileFromFile={retrieveProfileFromFile}
       >
         <section className="homeSection">
           <header>
@@ -496,19 +461,10 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           <TransitionGroup className="homeInstructionsTransitionGroup">
             {this._renderInstructions()}
           </TransitionGroup>
-          <div
-            className={classNames('homeDrop', isDragging ? 'dragging' : false)}
-          >
-            <div className="homeDropMessage">Drop a saved profile here</div>
-          </div>
         </section>
-      </div>
+      </DragAndDrop>
     );
   }
-}
-
-function _dragPreventDefault(event: DragEvent) {
-  event.preventDefault();
 }
 
 function _supportsWebExtensionAPI(): boolean {
