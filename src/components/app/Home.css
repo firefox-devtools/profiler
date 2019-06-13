@@ -14,6 +14,7 @@
 
 .homeDrop {
   position: absolute;
+  z-index: 10;
   top: 0;
   left: 0;
   display: flex;
@@ -27,7 +28,6 @@
   opacity: 0;
   pointer-events: none;
   transition: opacity 200ms;
-  z-index: 10;
 }
 
 .homeDropMessage {
