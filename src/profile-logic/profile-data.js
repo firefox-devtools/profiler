@@ -26,6 +26,7 @@ import type {
   CallNodePath,
   IndexIntoCallNodeTable,
   AccumulatedCounterSamples,
+  SelectedState,
 } from '../types/profile-derived';
 import { assertExhaustiveCheck } from '../utils/flow';
 
@@ -141,20 +142,6 @@ export function getSampleCallNodes(
     return stack === null ? null : stackIndexToCallNodeIndex[stack];
   });
 }
-
-export type SelectedState =
-  // Samples can be filtered through various operations, like searching, or
-  // call tree transforms.
-  | 'FILTERED_OUT'
-  // This sample is selected because either the tip or an ancestor call node matches
-  // the currently selected call node.
-  | 'SELECTED'
-  // This call node is not selected, and the stacks are ordered before the selected
-  // call node as sorted by the getTreeOrderComparator.
-  | 'UNSELECTED_ORDERED_BEFORE_SELECTED'
-  // This call node is not selected, and the stacks are ordered after the selected
-  // call node as sorted by the getTreeOrderComparator.
-  | 'UNSELECTED_ORDERED_AFTER_SELECTED';
 
 /**
  * Go through the samples, and determine their current state.

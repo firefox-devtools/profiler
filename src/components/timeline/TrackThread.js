@@ -48,6 +48,7 @@ import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
+  SelectedState,
 } from '../../types/profile-derived';
 import type { State } from '../../types/state';
 import type { ConnectedProps } from '../../utils/connect';
@@ -69,7 +70,7 @@ type StateProps = {|
   +categories: CategoryList,
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
-  +samplesSelectedStates: boolean[],
+  +samplesSelectedStates?: SelectedState[],
 |};
 
 type DispatchProps = {|

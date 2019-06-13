@@ -28,23 +28,22 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
 } from '../../../types/profile';
-import type { Milliseconds } from '../../../types/units';
+import type { Milliseconds, StartEndRange } from '../../../types/units';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
+  SelectedState,
 } from '../../../types/profile-derived';
 import type { State } from '../../../types/state';
+import type { PreviewSelection } from '../../../types/actions';
 import type { ConnectedProps } from '../../../utils/connect';
 import type { Viewport } from '../chart/Viewport';
 
-type OwnProps = {|
+type CanvasProps = {|
   // The viewport property is injected by the withViewport component, but is not
   // actually used or needed in this case. However, withViewport has side effects
   // of enabling event listeners for adjusting the view.
   +viewport: Viewport,
-|};
-
-type StateProps = {|
   +selectedThreadIndex: ThreadIndex,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
@@ -54,22 +53,17 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
-  +samplesSelectedStates: boolean[],
+  +samplesSelectedStates: SelectedState[],
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
   ) => number,
-|};
-
-type DispatchProps = {|
   +selectBestAncestorCallNodeAndExpandCallTree: typeof selectBestAncestorCallNodeAndExpandCallTree,
   +selectLeafCallNode: typeof selectLeafCallNode,
   +focusCallTree: typeof focusCallTree,
 |};
 
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
-
-class SelectedThreadActivityGraphCanvas extends PureComponent<Props> {
+class SelectedThreadActivityGraphCanvas extends PureComponent<CanvasProps> {
   /**
    *
    */
@@ -152,7 +146,36 @@ function viewportNeedsUpdate() {
   return false;
 }
 
-class SelectedThreadActivityGraph extends PureComponent<*> {
+type OwnProps = {||};
+
+type StateProps = {|
+  +selectedThreadIndex: ThreadIndex,
+  +interval: Milliseconds,
+  +timeRange: StartEndRange,
+  +rangeStart: Milliseconds,
+  +rangeEnd: Milliseconds,
+  +fullThread: Thread,
+  +filteredThread: Thread,
+  +callNodeInfo: CallNodeInfo,
+  +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +categories: CategoryList,
+  +previewSelection: PreviewSelection,
+  +samplesSelectedStates: SelectedState[],
+  +treeOrderSampleComparator: (
+    IndexIntoSamplesTable,
+    IndexIntoSamplesTable
+  ) => number,
+|};
+
+type DispatchProps = {|
+  +selectBestAncestorCallNodeAndExpandCallTree: typeof selectBestAncestorCallNodeAndExpandCallTree,
+  +selectLeafCallNode: typeof selectLeafCallNode,
+  +focusCallTree: typeof focusCallTree,
+|};
+
+type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+
+class SelectedThreadActivityGraph extends PureComponent<Props> {
   render() {
     const {
       interval,
@@ -207,7 +230,7 @@ class SelectedThreadActivityGraph extends PureComponent<*> {
   }
 }
 
-export default explicitConnect<*, *, *>({
+export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => {
     const committedRange = getCommittedRange(state);
     const previewSelection = getPreviewSelection(state);
