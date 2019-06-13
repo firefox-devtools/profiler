@@ -17,7 +17,6 @@ import { expandUrl } from '../utils/shorten-url';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
 import {
-  getDataSource,
   getSelectedThreadIndexOrNull,
   getGlobalTrackOrder,
   getHiddenGlobalTracks,
@@ -173,7 +172,6 @@ export function viewProfile(
       pathInZipFile: config.pathInZipFile,
       implementationFilter: config.implementationFilter,
       transformStacks: config.transformStacks,
-      dataSource: getDataSource(getState()),
     });
 
     // Note we kick off symbolication only for the profiles we know for sure

@@ -243,7 +243,6 @@ type ReceiveProfileAction =
       +pathInZipFile: ?string,
       +implementationFilter: ?ImplementationFilter,
       +transformStacks: ?TransformStacksPerThread,
-      +dataSource: DataSource,
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}
