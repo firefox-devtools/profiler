@@ -195,8 +195,10 @@ export const getProfileName: Selector<null | string> = createSelector(
       return profileName;
     }
     if (pathInZipFile) {
-      const pathParts = pathInZipFile.split('/');
-      return pathParts[pathParts.length - 1];
+      const matchResult = pathInZipFile.match(/(?:[^/]+\/)?[^/]+$/);
+      if (matchResult !== null) {
+        return matchResult[0];
+      }
     }
     return '';
   }
