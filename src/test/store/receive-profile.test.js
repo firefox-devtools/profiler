@@ -34,6 +34,8 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 
+import { compress } from '../../utils/gz';
+
 // Mocking SymbolStoreDB. By default the functions will return undefined, which
 // will make the symbolication move forward with some bogus information.
 // If you need to simulate that it doesn't have the information, use the
@@ -48,7 +50,7 @@ jest.mock('../../profile-logic/symbol-store-db');
 import { expandUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
-import { TextDecoder } from 'util';
+import { TextEncoder, TextDecoder } from 'util';
 
 function simulateSymbolStoreHasNoCache() {
   // SymbolStoreDB is a mock, but Flow doesn't know this. That's why we use
@@ -271,11 +273,37 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileFromAddon', function() {
-    function setup() {
+    function toUint8Array(json) {
+      return new TextEncoder().encode(JSON.stringify(json));
+    }
+
+    function setup(profileAs = 'json') {
       jest.useFakeTimers();
 
+      const profileJSON = createGeckoProfile();
+      let mockGetProfile;
+      switch (profileAs) {
+        case 'json':
+          mockGetProfile = jest.fn().mockResolvedValue(profileJSON);
+          break;
+        case 'arraybuffer':
+          mockGetProfile = jest
+            .fn()
+            .mockResolvedValue(toUint8Array(profileJSON).buffer);
+          break;
+        case 'gzip':
+          mockGetProfile = jest
+            .fn()
+            .mockReturnValue(
+              compress(toUint8Array(profileJSON)).then(x => x.buffer)
+            );
+          break;
+        default:
+          throw new Error('unknown profiler format');
+      }
+
       const geckoProfiler = {
-        getProfile: jest.fn().mockResolvedValue(createGeckoProfile()),
+        getProfile: mockGetProfile,
         getSymbolTable: jest
           .fn()
           .mockRejectedValue(new Error('No symbol tables available')),
@@ -307,18 +335,22 @@ describe('actions/receive-profile', function() {
       delete window.fetch;
     });
 
-    it('can retrieve a profile from the addon', async function() {
-      const { dispatch, getState } = setup();
-      await dispatch(retrieveProfileFromAddon());
+    for (const profileAs of ['json', 'arraybuffer', 'gzip']) {
+      const desc = 'can retrieve a profile from the addon as ' + profileAs;
+      it(desc, async function() {
+        const { dispatch, getState } = setup(profileAs);
+        await dispatch(retrieveProfileFromAddon());
 
-      const state = getState();
-      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
-        start: 0,
-        end: 1007,
+        const state = getState();
+        expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
+        expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+          start: 0,
+          end: 1007,
+        });
+        // not empty
+        expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3);
       });
-      expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
-    });
+    }
 
     it('tries to symbolicate the received profile', async () => {
       const { dispatch, geckoProfiler } = setup();
