@@ -41,6 +41,8 @@ const dataSource: Reducer<DataSource> = (state = 'none', action) => {
       return 'public';
     case 'TRIGGER_LOADING_FROM_URL':
       return 'from-url';
+    case 'SET_DATA_SOURCE':
+      return action.dataSource;
     default:
       return state;
   }

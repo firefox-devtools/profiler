@@ -109,9 +109,11 @@ export type ZipFileState =
 
 export type IsSidebarOpenPerPanelState = { [TabSlug]: boolean };
 
+export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
+
 export type AppState = {|
   +view: AppViewState,
-  +isUrlSetupDone: boolean,
+  +urlSetupPhase: UrlSetupPhase,
   +hasZoomedViaMousewheel: boolean,
   +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
   +panelLayoutGeneration: number,

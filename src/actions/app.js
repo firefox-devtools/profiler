@@ -6,7 +6,9 @@
 import { getSelectedTab, getDataSource } from '../selectors/url-state';
 import { getTrackThreadHeights } from '../selectors/app';
 import { sendAnalytics } from '../utils/analytics';
-import type { ThreadIndex } from '../types/profile';
+import { stateFromLocation } from '../app-logic/url-handling';
+import { finalizeView } from './receive-profile';
+import type { Profile, ThreadIndex } from '../types/profile';
 import type { CssPixels } from '../types/units';
 import type { Action, ThunkAction } from '../types/store';
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -33,6 +35,10 @@ export function changeProfilesToCompare(profiles: string[]): Action {
     type: 'CHANGE_PROFILES_TO_COMPARE',
     profiles,
   };
+}
+
+export function startFetchingProfiles(): Action {
+  return { type: 'START_FETCHING_PROFILES' };
 }
 
 export function urlSetupDone(): ThunkAction<void> {
@@ -72,6 +78,37 @@ export function invalidatePanelLayout(): Action {
  */
 export function setHasZoomedViaMousewheel() {
   return { type: 'HAS_ZOOMED_VIA_MOUSEWHEEL' };
+}
+
+/**
+ * This function is called when we start setting up the initial url state.
+ * It takes the location and profile data, converts the location into url
+ * state and then dispatches relevant actions to finalize the view.
+ */
+export function setupInitialUrlState(
+  location: Location,
+  _profile: Profile
+): ThunkAction<void> {
+  return dispatch => {
+    let urlState;
+    try {
+      urlState = stateFromLocation(location); // TODO: pass the profile here.
+    } catch (e) {
+      // The location could not be parsed, show a 404 instead.
+      console.error(e);
+      dispatch(show404(location.pathname + location.search));
+      return;
+    }
+
+    // Validate the initial URL state. We can't refresh on a from-file URL.
+    if (urlState.dataSource === 'from-file') {
+      urlState = null;
+    }
+
+    dispatch(updateUrlState(urlState));
+    dispatch(urlSetupDone());
+    dispatch(finalizeView());
+  };
 }
 
 /**

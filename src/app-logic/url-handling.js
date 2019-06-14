@@ -271,7 +271,7 @@ export function urlFromState(urlState: UrlState): string {
   return pathname + (qString ? '?' + qString : '');
 }
 
-function getDataSourceFromPathParts(pathParts: string[]): DataSource {
+export function getDataSourceFromPathParts(pathParts: string[]): DataSource {
   const str = pathParts[0] || 'none';
   // With this switch, flow is able to understand that we return a valid value
   switch (str) {

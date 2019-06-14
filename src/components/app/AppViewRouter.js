@@ -53,6 +53,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
     }
     switch (phase) {
       case 'INITIALIZING':
+      case 'PROFILE_LOADED':
         return <ProfileLoaderAnimation />;
       case 'FATAL_ERROR': {
         const message =
@@ -84,7 +85,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
       default:
         // Assert with Flow that we've handled all the cases, as the only thing left
         // should be 'ROUTE_NOT_FOUND' or 'PROFILE_LOADED'.
-        (phase: 'ROUTE_NOT_FOUND' | 'PROFILE_LOADED');
+        (phase: 'ROUTE_NOT_FOUND');
         return (
           <Home specialMessage="The URL you came in on was not recognized." />
         );

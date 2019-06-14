@@ -6,26 +6,39 @@
 
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getIsUrlSetupDone } from '../../selectors/app';
-import { updateUrlState, urlSetupDone, show404 } from '../../actions/app';
+import { getUrlSetupPhase } from '../../selectors/app';
+import {
+  updateUrlState,
+  startFetchingProfiles,
+  urlSetupDone,
+  show404,
+  setupInitialUrlState,
+} from '../../actions/app';
 import {
   urlFromState,
   stateFromLocation,
   getIsHistoryReplaceState,
 } from '../../app-logic/url-handling';
+import { getProfilesFromRawUrl } from '../../actions/receive-profile';
+import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { ConnectedProps } from '../../utils/connect';
-import type { UrlState } from '../../types/state';
+import type { UrlState, UrlSetupPhase } from '../../types/state';
+import type { Profile } from '../../types/profile';
 
 type StateProps = {|
   +urlState: UrlState,
-  +isUrlSetupDone: boolean,
+  +urlSetupPhase: UrlSetupPhase,
 |};
 
 type DispatchProps = {|
   +updateUrlState: typeof updateUrlState,
+  +startFetchingProfiles: typeof startFetchingProfiles,
   +urlSetupDone: typeof urlSetupDone,
   +show404: typeof show404,
+  +getProfilesFromRawUrl: typeof getProfilesFromRawUrl,
+  +setupInitialUrlState: typeof setupInitialUrlState,
 |};
 
 type OwnProps = {|
@@ -38,7 +51,39 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
  * This component manages the interaction with the window.history browser API.
  */
 class UrlManager extends React.PureComponent<Props> {
-  _updateState(firstRun: boolean) {
+  async _processInitialUrls() {
+    const {
+      startFetchingProfiles,
+      getProfilesFromRawUrl,
+      setupInitialUrlState,
+      urlSetupDone,
+    } = this.props;
+    let profile: Profile | null = null;
+    let error;
+
+    startFetchingProfiles();
+
+    try {
+      // Process the raw url and fetch the profile.
+      // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
+      profile = await getProfilesFromRawUrl(window.location);
+    } catch (err) {
+      error = err;
+    }
+
+    if (profile) {
+      setupInitialUrlState(window.location, profile);
+    } else if (error) {
+      // Just silently finish the url setup and return to home.
+      urlSetupDone();
+    } else {
+      throw new Error(
+        'An unhandled case was reached during the initial processing of URLs'
+      );
+    }
+  }
+
+  _updateState() {
     const { updateUrlState, show404, urlState: previousUrlState } = this.props;
     let newUrlState;
     if (window.history.state) {
@@ -58,12 +103,7 @@ class UrlManager extends React.PureComponent<Props> {
       }
     }
 
-    if (firstRun) {
-      // Validate the initial URL state. We can't refresh on a from-file URL.
-      if (newUrlState.dataSource === 'from-file') {
-        newUrlState = null;
-      }
-    } else if (
+    if (
       previousUrlState.dataSource !== newUrlState.dataSource ||
       previousUrlState.hash !== newUrlState.hash
     ) {
@@ -83,16 +123,18 @@ class UrlManager extends React.PureComponent<Props> {
   }
 
   componentDidMount() {
-    this._updateState(true);
-    window.addEventListener('popstate', () => this._updateState(false));
-    this.props.urlSetupDone();
+    this._processInitialUrls();
+    window.addEventListener('popstate', () => this._updateState());
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    const { isUrlSetupDone } = this.props;
+    const { urlSetupPhase } = this.props;
+    if (urlSetupPhase !== 'done') {
+      return;
+    }
     const newUrl = urlFromState(nextProps.urlState);
     if (newUrl !== window.location.pathname + window.location.search) {
-      if (isUrlSetupDone && !getIsHistoryReplaceState()) {
+      if (!getIsHistoryReplaceState()) {
         // Push the URL state only when the url setup is done, and we haven't set
         // a flag to only replace the state.
         window.history.pushState(nextProps.urlState, document.title, newUrl);
@@ -105,24 +147,33 @@ class UrlManager extends React.PureComponent<Props> {
   }
 
   render() {
-    const { isUrlSetupDone } = this.props;
-    return isUrlSetupDone ? (
-      this.props.children
-    ) : (
-      <div className="processingUrl" />
-    );
+    const { urlSetupPhase, children } = this.props;
+    switch (urlSetupPhase) {
+      case 'initial-load':
+        return null;
+      case 'loading-profile':
+        return <ProfileLoaderAnimation />;
+      case 'done':
+        return children;
+      default:
+        assertExhaustiveCheck(urlSetupPhase, `Unhandled URL setup phase.`);
+        return null;
+    }
   }
 }
 
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     urlState: state.urlState,
-    isUrlSetupDone: getIsUrlSetupDone(state),
+    urlSetupPhase: getUrlSetupPhase(state),
   }),
   mapDispatchToProps: {
     updateUrlState,
+    startFetchingProfiles,
     urlSetupDone,
     show404,
+    setupInitialUrlState,
+    getProfilesFromRawUrl,
   },
   component: UrlManager,
 });

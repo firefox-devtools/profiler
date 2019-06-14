@@ -262,6 +262,7 @@ type ReceiveProfileAction =
   | {| +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string |};
 
 type UrlEnhancerAction =
+  | {| +type: 'START_FETCHING_PROFILES' |}
   | {| +type: 'URL_SETUP_DONE' |}
   | {| +type: 'UPDATE_URL_STATE', +newUrlState: UrlState | null |};
 
@@ -327,6 +328,10 @@ type UrlStateAction =
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
       +originalProfile: Profile,
       +originalUrlState: UrlState,
+    |}
+  | {|
+      +type: 'SET_DATA_SOURCE',
+      +dataSource: DataSource,
     |};
 
 type IconsAction =

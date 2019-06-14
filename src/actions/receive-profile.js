@@ -4,6 +4,7 @@
 
 // @flow
 import { oneLine } from 'common-tags';
+import queryString from 'query-string';
 import {
   processProfile,
   unserializeProfileOfArbitraryFormat,
@@ -25,7 +26,10 @@ import {
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
 } from '../selectors/url-state';
-import { stateFromLocation } from '../app-logic/url-handling';
+import {
+  stateFromLocation,
+  getDataSourceFromPathParts,
+} from '../app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -36,8 +40,9 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
-import { getProfile } from '../selectors/profile';
+import { getProfile, getProfileOrNull } from '../selectors/profile';
 import { getView } from '../selectors/app';
+import { setDataSource } from './profile-view';
 
 import type {
   FunctionsUpdatePerThread,
@@ -81,7 +86,6 @@ export function loadProfile(
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-    geckoProfiler: $GeckoProfiler,
   |}> = {}
 ): ThunkAction<void> {
   return dispatch => {
@@ -115,12 +119,12 @@ export function loadProfile(
  * functions in the src/profile-logic/tracks.js file.
  */
 export function finalizeView(
-  profile?: Profile,
+  profile?: Profile | null,
   geckoProfiler?: $GeckoProfiler
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
-    profile = profile || getProfile(getState());
-    if (getView(getState()).phase !== 'PROFILE_LOADED') {
+    profile = profile || getProfileOrNull(getState());
+    if (profile === null || getView(getState()).phase !== 'PROFILE_LOADED') {
       // Profile load was not successful. Do not continue.
       return;
     }
@@ -210,12 +214,12 @@ export function viewProfile(
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-    geckoProfiler: $GeckoProfiler,
-  |}> = {}
+  |}> = {},
+  geckoProfiler?: $GeckoProfiler
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
     dispatch(loadProfile(profile, config));
-    await dispatch(finalizeView(profile, config.geckoProfiler));
+    await dispatch(finalizeView(profile, geckoProfiler));
   };
 }
 
@@ -399,7 +403,8 @@ async function _unpackGeckoProfileFromAddon(profile) {
 
 async function getProfileFromAddon(
   dispatch: Dispatch,
-  geckoProfiler: $GeckoProfiler
+  geckoProfiler: $GeckoProfiler,
+  initialLoad: boolean = false
 ): Promise<Profile> {
   dispatch(waitingForProfileFromAddon());
 
@@ -407,7 +412,10 @@ async function getProfileFromAddon(
   const rawGeckoProfile = await geckoProfiler.getProfile();
   const unpackedProfile = await _unpackGeckoProfileFromAddon(rawGeckoProfile);
   const profile = processProfile(unpackedProfile);
-  await dispatch(viewProfile(profile, { geckoProfiler }));
+  dispatch(loadProfile(profile));
+  if (initialLoad === false) {
+    await dispatch(finalizeView(null, geckoProfiler));
+  }
 
   return profile;
 }
@@ -494,7 +502,9 @@ export function fatalError(error: Error): Action {
   };
 }
 
-export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
+export function retrieveProfileFromAddon(
+  initialLoad: boolean = false
+): ThunkAction<Promise<void>> {
   return async dispatch => {
     try {
       const timeoutId = setTimeout(() => {
@@ -511,7 +521,7 @@ export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
       const geckoProfiler = await window.geckoProfilerPromise;
       clearTimeout(timeoutId);
 
-      await getProfileFromAddon(dispatch, geckoProfiler);
+      await getProfileFromAddon(dispatch, geckoProfiler, initialLoad);
     } catch (error) {
       dispatch(fatalError(error));
       throw error;
@@ -737,9 +747,10 @@ function getProfileUrlForHash(hash: string): string {
 }
 
 export function retrieveProfileFromStore(
-  hash: string
+  hash: string,
+  initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
-  return retrieveProfileOrZipFromUrl(getProfileUrlForHash(hash));
+  return retrieveProfileOrZipFromUrl(getProfileUrlForHash(hash), initialLoad);
 }
 
 /**
@@ -748,7 +759,8 @@ export function retrieveProfileFromStore(
  * into the store so that the user can then choose which file to load.
  */
 export function retrieveProfileOrZipFromUrl(
-  profileUrl: string
+  profileUrl: string,
+  initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async function(dispatch) {
     dispatch(waitingForProfileFromUrl());
@@ -771,7 +783,10 @@ export function retrieveProfileOrZipFromUrl(
           throw new Error('Unable to parse the profile.');
         }
 
-        await dispatch(viewProfile(profile));
+        dispatch(loadProfile(profile));
+        if (initialLoad === false) {
+          await dispatch(finalizeView());
+        }
       } else if (zip) {
         await dispatch(receiveZipFile(zip));
       } else {
@@ -881,7 +896,8 @@ export function retrieveProfileFromFile(
  * information contained in the query.
  */
 export function retrieveProfilesToCompare(
-  profileViewUrls: string[]
+  profileViewUrls: string[],
+  initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
     dispatch(waitingForProfileFromUrl());
@@ -947,13 +963,60 @@ export function retrieveProfilesToCompare(
       }
 
       await dispatch(
-        viewProfile(resultProfile, {
+        loadProfile(resultProfile, {
           transformStacks,
           implementationFilter,
         })
       );
+      if (initialLoad === false) {
+        dispatch(finalizeView());
+      }
     } catch (error) {
       dispatch(fatalError(error));
     }
+  };
+}
+
+export function getProfilesFromRawUrl(
+  location: Location
+): ThunkAction<Promise<Profile>> {
+  return async (dispatch, getState) => {
+    const pathParts = location.pathname.split('/').filter(d => d);
+    let dataSource = getDataSourceFromPathParts(pathParts);
+    if (dataSource === 'from-file') {
+      // Redirect to 'none' if dataSource is 'from-file' since initial url can't
+      // be from-file and needs to be redirected to home
+      dataSource = 'none';
+    }
+    dispatch(setDataSource(dataSource));
+
+    switch (dataSource) {
+      case 'from-addon':
+        await dispatch(retrieveProfileFromAddon(true));
+        break;
+      case 'public':
+        await dispatch(retrieveProfileFromStore(pathParts[1], true));
+        break;
+      case 'from-url':
+        await dispatch(retrieveProfileOrZipFromUrl(pathParts[1], true));
+        break;
+      case 'compare': {
+        const query = queryString.parse(location.search.substr(1), {
+          arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+        });
+        if (Array.isArray(query.profiles)) {
+          await dispatch(retrieveProfilesToCompare(query.profiles, true));
+        }
+        break;
+      }
+      case 'none':
+      case 'from-file':
+      case 'local':
+        throw new Error(`There is no profile to download`);
+      default:
+        throw new Error(`Unknown datasource ${dataSource}`);
+    }
+
+    return getProfile(getState());
   };
 }

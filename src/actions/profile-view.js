@@ -42,6 +42,7 @@ import type {
   ImplementationFilter,
   TrackReference,
   TimelineType,
+  DataSource,
 } from '../types/actions';
 import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
@@ -1064,5 +1065,12 @@ export function changeProfileName(profileName: string): Action {
   return {
     type: 'CHANGE_PROFILE_NAME',
     profileName,
+  };
+}
+
+export function setDataSource(dataSource: DataSource): Action {
+  return {
+    type: 'SET_DATA_SOURCE',
+    dataSource,
   };
 }
