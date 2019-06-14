@@ -345,10 +345,20 @@ export function assignFunctionNames(
  * If the profile object we got from the add-on is an ArrayBuffer, convert it
  * to a gecko profile object by parsing the JSON.
  */
-function _unpackGeckoProfileFromAddon(profile) {
+async function _unpackGeckoProfileFromAddon(profile) {
   if (profile instanceof ArrayBuffer) {
+    const profileBytes = new Uint8Array(profile);
+    let decompressedProfile;
+    // Check for the gzip magic number in the header. If we find it, decompress
+    // the data first.
+    if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
+      decompressedProfile = await decompress(profileBytes);
+    } else {
+      decompressedProfile = profile;
+    }
+
     const textDecoder = new TextDecoder();
-    return JSON.parse(textDecoder.decode(profile));
+    return JSON.parse(textDecoder.decode(decompressedProfile));
   }
   return profile;
 }
@@ -361,7 +371,8 @@ async function getProfileFromAddon(
 
   // XXX update state to show that we're connected to the profiler addon
   const rawGeckoProfile = await geckoProfiler.getProfile();
-  const profile = processProfile(_unpackGeckoProfileFromAddon(rawGeckoProfile));
+  const unpackedProfile = await _unpackGeckoProfileFromAddon(rawGeckoProfile);
+  const profile = processProfile(unpackedProfile);
   await dispatch(viewProfile(profile, { geckoProfiler }));
 
   return profile;
