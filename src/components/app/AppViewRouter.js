@@ -16,19 +16,11 @@ import { getView } from '../../selectors/app';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getDataSource, getProfilesToCompare } from '../../selectors/url-state';
 import ServiceWorkerManager from './ServiceWorkerManager';
+import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 
 import type { AppViewState, State } from '../../types/state';
 import type { DataSource } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
-
-const LOADING_MESSAGES: { [string]: string } = Object.freeze({
-  'from-addon': 'Grabbing the profile from the Gecko Profiler Addon...',
-  'from-file': 'Reading the file and processing the profile...',
-  local: 'Not implemented yet.',
-  public: 'Downloading and processing the profile...',
-  'from-url': 'Downloading and processing the profile...',
-  compare: 'Reading and processing profiles...',
-});
 
 const ERROR_MESSAGES: { [string]: string } = Object.freeze({
   'from-addon': "Couldn't retrieve the profile from the Gecko Profiler Addon.",
@@ -38,18 +30,6 @@ const ERROR_MESSAGES: { [string]: string } = Object.freeze({
   'from-url': 'Could not download the profile.',
   compare: 'Could not retrieve the profile',
 });
-
-// TODO Switch to a proper i18n library
-function fewTimes(count: number) {
-  switch (count) {
-    case 1:
-      return 'once';
-    case 2:
-      return 'twice';
-    default:
-      return `${count} times`;
-  }
-}
 
 type AppViewRouterStateProps = {|
   +view: AppViewState,
@@ -72,33 +52,8 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
       return <CompareHome />;
     }
     switch (phase) {
-      case 'INITIALIZING': {
-        const loadingMessage = LOADING_MESSAGES[dataSource];
-        const message = loadingMessage ? loadingMessage : 'View not found';
-        const showLoader = Boolean(loadingMessage);
-
-        let additionalMessage = '';
-        if (view.additionalData) {
-          if (view.additionalData.message) {
-            additionalMessage = view.additionalData.message;
-          }
-
-          if (view.additionalData.attempt) {
-            const attempt = view.additionalData.attempt;
-            additionalMessage += `\nTried ${fewTimes(attempt.count)} out of ${
-              attempt.total
-            }.`;
-          }
-        }
-
-        return (
-          <ProfileRootMessage
-            message={message}
-            additionalMessage={additionalMessage}
-            showLoader={showLoader}
-          />
-        );
-      }
+      case 'INITIALIZING':
+        return <ProfileLoaderAnimation />;
       case 'FATAL_ERROR': {
         const message =
           ERROR_MESSAGES[dataSource] || "Couldn't retrieve the profile.";
