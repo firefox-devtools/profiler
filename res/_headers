@@ -22,14 +22,17 @@
   #   https://report-uri.io/home/hash after grabbing the script from the Inspector.
   #   NOTE: you can't use the script file directly as the API modifies it before injecting.
   #   c. We use Google Analytics to track the usage of the application.
-  # 2. `unsafe-inline` in `style-src` is necessary to support favicons.
-  # 3. `img-src` defines rules to specifically allow http, https, and data URLs.
-  # 4. `object-src` is for plugins, we don't need them.
-  # 5. `connect-src` is `*` to support `from-url`. We also do requests to bitly to shorten URLs.
-  # 6. `frame-ancestors` is the same purpose as `X-Frame-Options` above.
-  # 7. `form-action`prevents forms, we don't need this.`
-  # 8. `frame-src` allows the embedding of YouTube videos in the docs.
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' 'sha256-vY1KJ1dyP9vvnuERKMiQAcoKKtMUXZUEWJ/dT1XqpKM=' https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src http: https: data:; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'; frame-src www.youtube-nocookie.com
+  # 2. style-src
+  #   a. `unsafe-inline` is necessary to support favicons.
+  #   b. Google Fonts are used in the docs.
+  # 3. The domain in `font-src` allows the use of Google Fonts in the docs.
+  # 4. `img-src` defines rules to specifically allow http, https, and data URLs.
+  # 5. `object-src` is for plugins, we don't need them.
+  # 6. `connect-src` is `*` to support `from-url`. We also do requests to bitly to shorten URLs.
+  # 7. `frame-ancestors` is the same purpose as `X-Frame-Options` above.
+  # 8. `form-action`prevents forms, we don't need this.`
+  # 9. `frame-src` allows the embedding of YouTube videos in the docs.
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-eRTCQnd2fhPykpATDzCv4gdVk/EOdDq+6yzFXaWgGEw=' 'sha256-vY1KJ1dyP9vvnuERKMiQAcoKKtMUXZUEWJ/dT1XqpKM=' https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src http: https: data:; object-src 'none'; connect-src *; frame-ancestors 'self'; form-action 'none'; frame-src www.youtube-nocookie.com
 
 # Set the correct MIME type for WebAssembly modules.
 /*.wasm
