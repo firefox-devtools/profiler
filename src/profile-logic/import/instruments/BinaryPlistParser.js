@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-class UID {
+export class UID {
   constructor(index) {
     this.index = index;
   }
@@ -34,12 +34,6 @@ class BinaryPlistParser {
       tableOffset += offsetSize;
     }
 
-    // console.log(this.parseObject(this.offsetTable[rootIndex]))
-    // Parse the root object assuming the graph is a tree
-    console.log(
-      'output of parseRoot function',
-      this.parseObject(this.offsetTable[rootIndex])
-    );
     return this.parseObject(this.offsetTable[rootIndex]);
   }
 
