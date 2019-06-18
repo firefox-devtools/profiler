@@ -9,7 +9,6 @@ import FlameGraphCanvas from './Canvas';
 import {
   getCategories,
   getCommittedRange,
-  getProfileViewOptions,
   getPreviewSelection,
   getScrollToSelectionGeneration,
   getProfileInterval,
@@ -62,7 +61,7 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +threadIndex: number,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +isContextMenuVisible: boolean,
+  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
   +icons: IconWithClassName[],
   +categories: CategoryList,
@@ -101,6 +100,8 @@ class FlameGraph extends React.PureComponent<Props> {
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
     );
   };
+
+  _shouldDisplayTooltips = () => this.props.rightClickedCallNodeIndex === null;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
     this._viewport = viewport;
@@ -252,7 +253,6 @@ class FlameGraph extends React.PureComponent<Props> {
       timeRange,
       previewSelection,
       selectedCallNodeIndex,
-      isContextMenuVisible,
       scrollToSelectionGeneration,
       icons,
       categories,
@@ -305,7 +305,7 @@ class FlameGraph extends React.PureComponent<Props> {
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
               onRightClick: this._onRightClickedCallNodeChange,
-              disableTooltips: isContextMenuVisible,
+              shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
               isInverted,
             }}
@@ -341,7 +341,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      isContextMenuVisible: getProfileViewOptions(state).isContextMenuVisible,
+      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
+        state
+      ),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       icons: getIconsWithClassNames(state),
       interval: getProfileInterval(state),

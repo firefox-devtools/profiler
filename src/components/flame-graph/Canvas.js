@@ -41,7 +41,7 @@ export type OwnProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
   +onRightClick: (IndexIntoCallNodeTable | null) => void,
-  +disableTooltips: boolean,
+  +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
   +interval: Milliseconds,
@@ -249,13 +249,13 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       flameGraphTiming,
       callTree,
       callNodeInfo,
-      disableTooltips,
+      shouldDisplayTooltips,
       categories,
       interval,
       isInverted,
     } = this.props;
 
-    if (disableTooltips) {
+    if (!shouldDisplayTooltips()) {
       return null;
     }
 

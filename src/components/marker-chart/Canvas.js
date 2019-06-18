@@ -53,7 +53,7 @@ type OwnProps = {|
   +marginLeft: CssPixels,
   +marginRight: CssPixels,
   +rightClickedMarker: MarkerIndex | null,
-  +disableTooltips: boolean,
+  +shouldDisplayTooltips: () => boolean,
 |};
 
 type Props = {|
@@ -394,7 +394,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   }
 
   getHoveredMarkerInfo = (markerIndex: MarkerIndex): React.Node => {
-    if (this.props.disableTooltips) {
+    if (!this.props.shouldDisplayTooltips()) {
       return null;
     }
 
