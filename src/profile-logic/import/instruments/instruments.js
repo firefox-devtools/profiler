@@ -30,7 +30,7 @@ function parseBinaryPlist(bytes) {
 }
 
 export function decodeUTF8(bytes: Uint8Array): string {
-  let text = String.fromCharCode.apply(String, bytes);
+  let text = String.fromCharCode.apply(String, bytes); // eslint-disable-line prefer-spread
   if (text.slice(-1) === '\0') text = text.slice(0, -1); // Remove a single trailing null character if present
   return decodeURIComponent(escape(text));
 }
@@ -286,16 +286,94 @@ function readInstrumentsArchive(buffer) {
   return data;
 }
 
-async function readFormTemplateFile(tree, fileReader) {
-  //console.log('inside readFormTemplateFile', tree);
-  const formTemplate = tree.files.get('form.template'); // TODO check for empty formTemplate
+export function zeroPad(s: string, width: number) {
+  return new Array(Math.max(width - s.length, 0) + 1).join('0') + s;
+}
 
-  //console.log(await fileReader(formTemplate).asArrayBuffer());
+export function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
+  if (!map.has(k)) {
+    throw new Error(`Expected key ${k}`);
+  }
+  return map.get(k);
+}
+
+export function getOrInsert<K, V>(
+  map: Map<K, V>,
+  k: K,
+  fallback: (k: K) => V
+): V {
+  if (!map.has(k)) map.set(k, fallback(k));
+  return map.get(k);
+}
+
+async function readFormTemplateFile(tree, fileReader) {
+  const formTemplate = tree.files.get('form.template'); // TODO check for empty formTemplate
   const archive = readInstrumentsArchive(
     await fileReader(formTemplate).asArrayBuffer()
   );
 
-  console.log('archive', archive);
+  // console.log('archive', archive);
+  const version = archive['com.apple.xray.owner.template.version'];
+  let selectedRunNumber = 1;
+  if ('com.apple.xray.owner.template' in archive) {
+    selectedRunNumber = archive['com.apple.xray.owner.template'].get(
+      '_selectedRunNumber'
+    );
+  }
+  let instrument = archive.$1;
+  if ('stubInfoByUUID' in archive) {
+    instrument = Array.from(archive.stubInfoByUUID.keys())[0];
+  }
+  const allRunData = archive['com.apple.xray.run.data'];
+
+  const runs: FormTemplateRunData[] = [];
+  for (const runNumber of allRunData.runNumbers) {
+    const runData = getOrThrow<number, Map<any, any>>(
+      allRunData.runData,
+      runNumber
+    );
+    // console.log('runNumber', runNumber);
+    // console.log('runData', runData);
+    const symbolsByPid = getOrThrow<
+      string,
+      Map<number, { symbols: SymbolInfo[] }>
+    >(runData, 'symbolsByPid');
+
+    const addressToFrameMap = new Map<number, FrameInfo>();
+    for (const symbols of symbolsByPid.values()) {
+      for (const symbol of symbols.symbols) {
+        if (!symbol) continue;
+        const { sourcePath, symbolName, addressToLine } = symbol;
+        for (const address of addressToLine.keys()) {
+          getOrInsert(addressToFrameMap, address, () => {
+            const name = symbolName || `0x${zeroPad(address.toString(16), 16)}`;
+            const frame: FrameInfo = {
+              key: `${sourcePath}:${name}`,
+              name: name,
+            };
+            if (sourcePath) {
+              frame.file = sourcePath;
+            }
+            return frame;
+          });
+        }
+      }
+      // console.log(counter);
+      // console.log(addressToFrameMap);
+      // console.log('runs', console.log(JSON.parse(JSON.stringify(runs))));
+      runs.push({
+        number: runNumber,
+        addressToFrameMap,
+      });
+    }
+  }
+
+  return {
+    version,
+    instrument,
+    selectedRunNumber,
+    runs,
+  };
 }
 
 async function extractDirectoryTree(entry) {
