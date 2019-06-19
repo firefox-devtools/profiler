@@ -161,15 +161,19 @@ export function getSamplesSelectedStates(
 ): SelectedState[] {
   const result = new Array(sampleCallNodes.length);
 
+  // Precompute an array containing the call node indexes for the selected call
+  // node and its parents up to the root.
+  // The case of when we have no selected call node is a special case: we won't
+  // use these values but we still compute them to make the code simpler later.
   const selectedCallNodeDepth =
     selectedCallNodeIndex === -1 || selectedCallNodeIndex === null
       ? 0
       : callNodeTable.depth[selectedCallNodeIndex];
 
-  // Find all of the call nodes from the current depth to the root.
   const selectedCallNodeAtDepth: IndexIntoCallNodeTable[] = new Array(
     selectedCallNodeDepth
   );
+
   for (
     let callNodeIndex = selectedCallNodeIndex, depth = selectedCallNodeDepth;
     depth >= 0 && callNodeIndex !== null;
@@ -189,7 +193,15 @@ export function getSamplesSelectedStates(
       return 'FILTERED_OUT';
     }
 
-    // Walk the call nodes toward the root, and get the call node at the the depth
+    // When there's no selected call node, we don't want to shadow everything
+    // because everything is unselected. So let's decide this is as if
+    // everything is selected so that anything not filtered out will be nicely
+    // visible.
+    if (selectedCallNodeIndex === null) {
+      return 'SELECTED';
+    }
+
+    // Walk the call nodes toward the root, and get the call node at the depth
     // of the selected call node.
     let depth = callNodeTable.depth[callNodeIndex];
     while (depth > selectedCallNodeDepth) {

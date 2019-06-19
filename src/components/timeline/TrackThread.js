@@ -70,7 +70,7 @@ type StateProps = {|
   +categories: CategoryList,
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
-  +samplesSelectedStates?: SelectedState[],
+  +samplesSelectedStates: SelectedState[],
 |};
 
 type DispatchProps = {|
@@ -237,10 +237,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       categories: getCategories(state),
       timelineType: getTimelineType(state),
       hasFileIoMarkers: selectors.getFileIoMarkerIndexes(state).length !== 0,
-      samplesSelectedStates:
-        selectedCallNodeIndex !== null
-          ? selectors.getSamplesSelectedStatesInFilteredThread(state)
-          : undefined,
+      samplesSelectedStates: selectors.getSamplesSelectedStatesInFilteredThread(
+        state
+      ),
     };
   },
   mapDispatchToProps: {
