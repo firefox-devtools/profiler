@@ -86,22 +86,38 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
   _toggleLocalTrackVisibility = (
     _,
-    data: { pid: Pid, trackIndex: TrackIndex }
+    data: { pid: Pid, trackIndex: TrackIndex, globalTrackIndex: TrackIndex }
   ): void => {
-    const { trackIndex, pid } = data;
+    const { trackIndex, pid, globalTrackIndex } = data;
     const {
       hiddenLocalTracksByPid,
       hideLocalTrack,
       showLocalTrack,
+      hiddenGlobalTracks,
+      showGlobalTrack,
+      localTrackOrderByPid,
     } = this.props;
     const hiddenLocalTracks = ensureExists(
       hiddenLocalTracksByPid.get(pid),
       'Expected to find hidden local tracks for the given pid'
     );
-    if (hiddenLocalTracks.has(trackIndex)) {
+
+    if (hiddenGlobalTracks.has(globalTrackIndex)) {
+      showGlobalTrack(globalTrackIndex);
+      const localTrackOrder = ensureExists(
+        localTrackOrderByPid.get(pid),
+        'Expected to find local tracks for the given pid'
+      );
+      localTrackOrder.forEach(trackIndex => {
+        hideLocalTrack(pid, trackIndex);
+      });
       showLocalTrack(pid, trackIndex);
     } else {
-      hideLocalTrack(pid, trackIndex);
+      if (hiddenLocalTracks.has(trackIndex)) {
+        showLocalTrack(pid, trackIndex);
+      } else {
+        hideLocalTrack(pid, trackIndex);
+      }
     }
   };
 
@@ -199,14 +215,13 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     return localTrackOrder.map(trackIndex => (
       <MenuItem
-        disabled={isGlobalTrackHidden}
         key={trackIndex}
         preventClose={true}
-        data={{ pid, trackIndex }}
+        data={{ pid, trackIndex, globalTrackIndex }}
         onClick={this._toggleLocalTrackVisibility}
         attributes={{
           className: classNames('checkable indented', {
-            checked: !hiddenLocalTracks.has(trackIndex),
+            checked: !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
           }),
         }}
       >
