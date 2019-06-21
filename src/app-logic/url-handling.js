@@ -552,3 +552,71 @@ if (Object.keys(_upgraders).length - 1 !== CURRENT_URL_VERSION) {
     new upgrader, make sure and bump the CURRENT_URL_VERSION variable.
   `);
 }
+
+// This function returns the stack index of the first occurrence of the given
+// CallNodePath. Assumes the implementation filter of CallNodePath is 'js'.
+// This should only be used for the URL upgrader, typically this
+// operation would use a call node index rather than a stack.
+function getStackIndexFromVersion3JSCallNodePath(
+  thread: Thread,
+  oldCallNodePath: CallNodePath
+): IndexIntoStackTable | null {
+  const { stackTable, funcTable, frameTable } = thread;
+  const stackIndexDepth: Map<IndexIntoStackTable | null, number> = new Map();
+  stackIndexDepth.set(null, -1);
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const isJS = funcTable.isJS[funcIndex];
+    // We know that at this point stack table is sorted and the following
+    // condition holds:
+    // assert(prefixStack === null || prefixStack < stackIndex);
+    const doesPrefixMatchCallNodePath =
+      prefix === null || stackIndexDepth.has(prefix);
+
+    if (!doesPrefixMatchCallNodePath) {
+      continue;
+    }
+    const prefixStackDepth = ensureExists(
+      stackIndexDepth.get(prefix),
+      'Unable to find the stack depth for a prefix'
+    );
+    const depth = prefixStackDepth + 1;
+
+    if (isJS && oldCallNodePath[depth] === funcIndex) {
+      // This is a JS frame, and it matches the CallNodePath.
+      if (depth === oldCallNodePath.length - 1) {
+        // This is the stack index that we are looking for.
+        return stackIndex;
+      }
+      stackIndexDepth.set(stackIndex, depth);
+    } else {
+      // Any non-JS stack potentially matches, because they're skipped in the JS
+      // call node path. Add it here using the previous depth.
+      stackIndexDepth.set(stackIndex, prefixStackDepth);
+    }
+  }
+  return null;
+}
+
+// Constructs the new JS CallNodePath from given stackIndex and returns it.
+// This should only be used for the URL upgrader.
+function getVersion4JSCallNodePathFromStackIndex(
+  thread: Thread,
+  stackIndex: IndexIntoStackTable
+): CallNodePath {
+  const { funcTable, stackTable, frameTable } = thread;
+  const callNodePath = [];
+  let nextStackIndex = stackIndex;
+  while (nextStackIndex !== null) {
+    const frameIndex = stackTable.frame[nextStackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
+      callNodePath.unshift(funcIndex);
+    }
+    nextStackIndex = stackTable.prefix[nextStackIndex];
+  }
+  return callNodePath;
+}
