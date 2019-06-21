@@ -63,6 +63,21 @@ describe('MarkerTable', function() {
                 name: '5.5',
               },
             ],
+            [
+              'IPC',
+              120,
+              {
+                type: 'IPC',
+                startTime: 120,
+                endTime: 120,
+                otherPid: 2222,
+                messageType: 'PContent::Msg_PreferenceUpdate',
+                messageSeqno: 1,
+                side: 'parent',
+                direction: 'sending',
+                sync: false,
+              },
+            ],
           ]
             // Sort the markers.
             .sort((a, b) => a[1] - b[1])
@@ -124,8 +139,8 @@ describe('MarkerTable', function() {
   it('renders some basic markers and updates when needed', () => {
     const { container, fixedRows, scrolledRows, dispatch } = setup();
 
-    expect(fixedRows()).toHaveLength(3);
-    expect(scrolledRows()).toHaveLength(3);
+    expect(fixedRows()).toHaveLength(4);
+    expect(scrolledRows()).toHaveLength(4);
     expect(container.firstChild).toMatchSnapshot();
 
     /* Check that the table updates properly despite the memoisation. */

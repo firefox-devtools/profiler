@@ -121,7 +121,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 48px;"
+            style="height: 64px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -182,6 +182,29 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
+                  title="0.108s"
+                >
+                  0.108s
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn duration"
+                  title="unknown"
+                >
+                  unknown
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn category"
+                  title="IPC out"
+                >
+                  IPC out
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn start"
                   title="0.153s"
                 >
                   0.153s
@@ -203,7 +226,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 48px; width: 3000px;"
+            style="height: 64px; width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -259,6 +282,27 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  PContent::Msg_PreferenceUpdate — sent to 2222
+                </span>
+              </div>
+              <div
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
               >

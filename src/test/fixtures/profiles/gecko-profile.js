@@ -55,7 +55,8 @@ export function createGeckoMarkerStack({
 }
 
 export function createGeckoSubprocessProfile(
-  parentProfile: GeckoProfile
+  parentProfile: GeckoProfile,
+  extraMarkers: * = []
 ): GeckoSubprocessProfile {
   const contentProcessMeta: GeckoProfileShortMeta = {
     version: parentProfile.meta.version,
@@ -93,7 +94,7 @@ export function createGeckoSubprocessProfile(
     ],
     threads: [
       {
-        ..._createGeckoThread(),
+        ..._createGeckoThread(extraMarkers),
         name: 'GeckoMain',
         processType: 'tab',
       },
@@ -196,18 +197,35 @@ export function createGeckoProfile(): GeckoProfile {
     },
   };
 
+  const [parentIPCMarker, childIPCMarker] = _createIPCMarkerPair({
+    srcPid: 3333,
+    destPid: 2222,
+    startTime: 30,
+    endTime: 31,
+    messageSeqno: 1,
+  });
+  const parentIPCMarker2 = _createIPCMarkerPair({
+    srcPid: 3333,
+    destPid: 9999,
+    startTime: 40,
+    endTime: 41,
+    messageSeqno: 2,
+  })[0];
+
   const parentProcessThreads: GeckoThread[] = [
     {
-      ..._createGeckoThread(),
+      ..._createGeckoThread([parentIPCMarker, parentIPCMarker2]),
       name: 'GeckoMain',
       processType: 'default',
       pid: 3333,
+      tid: 3333,
     },
     {
       ..._createGeckoThread(),
       name: 'Compositor',
       processType: 'default',
       pid: 3333,
+      tid: 3334,
     },
   ];
 
@@ -230,13 +248,58 @@ export function createGeckoProfile(): GeckoProfile {
     processes: [],
   };
 
-  const contentProcessProfile = createGeckoSubprocessProfile(profile);
+  const contentProcessProfile = createGeckoSubprocessProfile(profile, [
+    childIPCMarker,
+  ]);
   profile.processes.push(contentProcessProfile);
 
   return profile;
 }
 
-function _createGeckoThread(): GeckoThread {
+function _createIPCMarkerPair({
+  srcPid,
+  destPid,
+  startTime,
+  endTime,
+  messageSeqno,
+}) {
+  return [
+    [
+      18, // IPC: see string table in _createGeckoThread
+      startTime,
+      0, // Other
+      {
+        type: 'IPC',
+        startTime: startTime,
+        endTime: startTime,
+        otherPid: destPid,
+        messageType: 'PContent::Msg_PreferenceUpdate',
+        messageSeqno,
+        side: 'parent',
+        direction: 'sending',
+        sync: false,
+      },
+    ],
+    [
+      18, // IPC: see string table in _createGeckoThread
+      endTime,
+      0, // Other
+      {
+        type: 'IPC',
+        startTime: endTime,
+        endTime: endTime,
+        otherPid: srcPid,
+        messageType: 'PContent::Msg_PreferenceUpdate',
+        messageSeqno,
+        side: 'child',
+        direction: 'receiving',
+        sync: false,
+      },
+    ],
+  ];
+}
+
+function _createGeckoThread(extraMarkers = []): GeckoThread {
   return {
     name: 'Unnamed',
     registerTime: 0,
@@ -595,10 +658,12 @@ function _createGeckoThread(): GeckoThread {
         // Please make sure that the marker below always have a time
         // larger than the previous ones.
 
+        ...extraMarkers,
+
         // Start a tracing marker but never finish it.
         [
           10, // Rasterize
-          28,
+          100,
           0, // Other
           {
             category: 'Paint',
@@ -630,6 +695,7 @@ function _createGeckoThread(): GeckoThread {
       'CompositorScreenshot', // 15
       'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUD', // 16
       'PreferenceRead', // 17
+      'IPC', // 18
     ],
   };
 }
