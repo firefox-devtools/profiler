@@ -87,12 +87,12 @@ export function setHasZoomedViaMousewheel() {
  */
 export function setupInitialUrlState(
   location: Location,
-  _profile: Profile
+  profile: Profile
 ): ThunkAction<void> {
   return dispatch => {
     let urlState;
     try {
-      urlState = stateFromLocation(location); // TODO: pass the profile here.
+      urlState = stateFromLocation(location, profile);
     } catch (e) {
       // The location could not be parsed, show a 404 instead.
       console.error(e);
