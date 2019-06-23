@@ -9,9 +9,12 @@ import type { Profile } from '../../../types/profile';
 //utils
 import { getEmptyProfile } from '../../../profile-logic/data-structures';
 import BinaryPlistParser, { UID } from './BinaryPlistParser';
+import BinReader from './BinReader';
 
 // TODO make helpers.js and move the appropriate helper functions into it
 // TODO add the missing return types in the functions
+
+let fileReader;
 
 function parseBinaryPlist(bytes) {
   // console.log('bytes inside parseBinaryPlist function', bytes);
@@ -37,6 +40,13 @@ export function decodeUTF8(bytes: Uint8Array): string {
 
 function followUID(objects: any[], value: any): any {
   return value instanceof UID ? objects[value.index] : value;
+}
+
+export function sortBy<T>(ts: T[], key: (t: T) => number | string): void {
+  function comparator(a: T, b: T) {
+    return key(a) < key(b) ? -1 : 1;
+  }
+  ts.sort(comparator);
 }
 
 function patternMatchObjectiveC(
@@ -306,7 +316,170 @@ export function getOrInsert<K, V>(
   return map.get(k);
 }
 
-async function readFormTemplateFile(tree, fileReader) {
+export function getOrElse<K, V>(
+  map: Map<K, V>,
+  k: K,
+  fallback: (k: K) => V
+): V {
+  if (!map.has(k)) return fallback(k);
+  return map.get(k);
+}
+
+async function getIntegerArrays(
+  samples: Sample[],
+  core: TraceDirectoryTree
+): Promise<number[][]> {
+  const uniquing = getOrThrow(core.subdirectories, 'uniquing');
+  const arrayUniquer = getOrThrow(uniquing.subdirectories, 'arrayUniquer');
+  const integeruniquerindex = getOrThrow(
+    arrayUniquer.files,
+    'integeruniquer.index'
+  );
+  const integeruniquerdata = getOrThrow(
+    arrayUniquer.files,
+    'integeruniquer.data'
+  );
+
+  // integeruniquer.index is a binary file containing an array of [byte offset, MB offset] pairs
+  // that indicate where array data starts in the .data file
+
+  // integeruniquer.data is a binary file containing an array of arrays of 64 bit integer.
+  // The schema is a 32 byte header followed by a stream of arrays.
+  // Each array consists of a 4 byte size N followed by N 8 byte little endian integers
+
+  // This table contains the memory addresses of stack frames
+
+  const indexreader = new BinReader(
+    await fileReader(integeruniquerindex).asArrayBuffer()
+  );
+  const datareader = new BinReader(
+    await fileReader(integeruniquerdata).asArrayBuffer()
+  );
+
+  // Header we don't care about
+  indexreader.seek(32);
+
+  const arrays: number[][] = [];
+
+  while (indexreader.hasMore()) {
+    const byteOffset =
+      indexreader.readUint32() + indexreader.readUint32() * (1024 * 1024);
+
+    if (byteOffset === 0) {
+      // The first entry in the index table seems to just indicate the offset of
+      // the header into the data file
+      continue;
+    }
+
+    datareader.seek(byteOffset);
+
+    let length = datareader.readUint32();
+    const array: number[] = [];
+
+    while (length--) {
+      array.push(datareader.readUint64());
+    }
+    arrays.push(array);
+  }
+
+  return arrays;
+}
+
+async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
+  const stores = getOrThrow(core.subdirectories, 'stores');
+  for (const storedir of stores.subdirectories.values()) {
+    const schemaFile = storedir.files.get('schema.xml');
+    if (!schemaFile) continue;
+    const schema = await fileReader(schemaFile).asText();
+    if (!/name="time-profile"/.exec(schema)) {
+      continue;
+    }
+    const bulkstore = new BinReader(
+      await fileReader(getOrThrow(storedir.files, 'bulkstore')).asArrayBuffer()
+    );
+    // Ignore the first 3 words
+    bulkstore.readUint32();
+    bulkstore.readUint32();
+    bulkstore.readUint32();
+    const headerSize = bulkstore.readUint32();
+    const bytesPerEntry = bulkstore.readUint32();
+
+    bulkstore.seek(headerSize);
+
+    const samples: Sample[] = [];
+    while (true) {
+      // Schema as of Instruments 8.3.3 is a 6 byte timestamp, followed by a bunch
+      // of stuff we don't care about, followed by a 4 byte backtrace ID
+      const timestamp = bulkstore.readUint48();
+      if (timestamp === 0) break;
+
+      const threadID = bulkstore.readUint32();
+
+      bulkstore.skip(bytesPerEntry - 6 - 4 - 4);
+      const backtraceID = bulkstore.readUint32();
+      samples.push({ timestamp, threadID, backtraceID });
+    }
+    return samples;
+  }
+  throw new Error('Could not find sample list');
+}
+
+function getCoreDirForRun(
+  tree: TraceDirectoryTree,
+  selectedRun: number
+): TraceDirectoryTree {
+  const corespace = getOrThrow(tree.subdirectories, 'corespace');
+  const corespaceRunDir = getOrThrow(
+    corespace.subdirectories,
+    `run${selectedRun}`
+  );
+  return getOrThrow(corespaceRunDir.subdirectories, 'core');
+}
+
+export async function importRunFromInstrumentsTrace(
+  args
+): Promise<ProfileGroup> {
+  const { fileName, tree, addressToFrameMap, runNumber } = args;
+  const core = getCoreDirForRun(tree, runNumber);
+  const samples = await getRawSampleList(core);
+
+  console.log('samples', samples);
+
+  const arrays = await getIntegerArrays(samples, core);
+
+  console.log('arrays', arrays);
+
+  // We'll try to guess which thread is the main thread by assuming
+  // it's the one with the most samples.
+  const sampleCountByThreadID = new Map<number, number>();
+  let min = 100000000000;
+  let max = -10000000000;
+  for (const sample of samples) {
+    if (sample.backtraceID < min) {
+      min = sample.backtraceID;
+    }
+    if (sample.backtraceID > max) {
+      max = sample.backtraceID;
+    }
+    sampleCountByThreadID.set(
+      sample.threadID,
+      getOrElse(sampleCountByThreadID, sample.threadID, () => 0) + 1
+    );
+  }
+
+  console.log('Minimum', min);
+  console.log('Maximum', max);
+  const counts = Array.from(sampleCountByThreadID.entries());
+  sortBy(counts, c => -c[1]);
+  const threadIDs = counts.map(c => c[0]);
+
+  return {
+    name: fileName,
+    indexToView: 0,
+  };
+}
+
+async function readFormTemplateFile(tree) {
   const formTemplate = tree.files.get('form.template'); // TODO check for empty formTemplate
   const archive = readInstrumentsArchive(
     await fileReader(formTemplate).asArrayBuffer()
@@ -422,11 +595,13 @@ export function isInstrumentsProfile(file: mixed): boolean {
 
 export async function convertInstrumentsProfile(
   entry: mixed,
-  fileReader
+  fileReaderHelper
 ): Profile {
   // We have kept return type as undefined as of now, we will update it once we implement the other functions
   //console.log('inside convertInstrumentsProfile!!!!');
   //console.log('entry', entry);
+
+  fileReader = fileReaderHelper;
   const tree = await extractDirectoryTree(entry);
   // console.log('tree', tree);
 
@@ -437,12 +612,30 @@ export async function convertInstrumentsProfile(
     selectedRunNumber,
   } = await readFormTemplateFile(tree, fileReader);
 
-  console.log('version', version);
+  // console.log('version', version);
   console.log('runs', runs);
-  console.log('instrument', instrument);
-  console.log('selectedRunNumber', selectedRunNumber);
+  // console.log('instrument', instrument);
+  // console.log('selectedRunNumber', selectedRunNumber);
+
+  if (instrument !== 'com.apple.xray.instrument-type.coresampler2') {
+    throw new Error(
+      `The only supported instrument from .trace import is "com.apple.xray.instrument-type.coresampler2". Got ${instrument}`
+    );
+  }
 
   const profile = getEmptyProfile();
+
+  const indexToView = 0;
+
+  for (const run of runs) {
+    const { addressToFrameMap, number } = run;
+    const group = await importRunFromInstrumentsTrace({
+      fileName: entry.name,
+      tree,
+      addressToFrameMap,
+      runNumber: number,
+    });
+  }
 
   return profile;
 }
