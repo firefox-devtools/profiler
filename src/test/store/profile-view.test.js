@@ -667,6 +667,27 @@ describe('actions/ProfileView', function() {
       dispatch(ProfileView.changeMarkersSearchString('a'));
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('a');
     });
+    it('filters the markers', function() {
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+        ['c', 2, null],
+      ]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(3);
+      dispatch(ProfileView.changeMarkersSearchString('A, c'));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('c')).toBeTruthy();
+    });
   });
 
   describe('changeNetworkSearchString', function() {
