@@ -105,6 +105,12 @@ export function setupInitialUrlState(
       urlState = null;
     }
 
+    // Normally having multiple dispatches is an anti pattern, but here it's
+    // necessary because we are doing different things inside those actions and
+    // they can't be merged because we are also calling those seperately on
+    // other parts of the code.
+    // The first dispatch here updates the url state, then changes state as the url
+    // setup is done, and lastly finalizes the profile view since everything is set up now.
     dispatch(updateUrlState(urlState));
     dispatch(urlSetupDone());
     dispatch(finalizeProfileView());

@@ -217,6 +217,12 @@ export function finalizeProfileView(
   };
 }
 
+// Previously `loadProfile` and `finalizeProfileView` functions were a single
+// function called `viewProfile`. Then we had to split it because of the changes
+// of url/profile loading mechanism. We kept the `viewProfile` function with the
+// same functionality as previous `viewProfile` because many of the tests use this.
+// This function will simply call `loadProfile` (and `finalizeProfileView` inside
+// `loadProfile`) and wait until symbolication finishes.
 export function viewProfile(
   profile: Profile,
   config: $Shape<{|
@@ -980,6 +986,10 @@ export function retrieveProfilesToCompare(
   };
 }
 
+// This function takes location(most probably `window.location`) as parameter
+// and loads the profile in that given location, then returns the profile data.
+// This function is being used to get the initial profile data before upgrading
+// the url and processing the UrlState.
 export function getProfilesFromRawUrl(
   location: Location
 ): ThunkAction<Promise<Profile>> {
@@ -987,8 +997,8 @@ export function getProfilesFromRawUrl(
     const pathParts = location.pathname.split('/').filter(d => d);
     let dataSource = getDataSourceFromPathParts(pathParts);
     if (dataSource === 'from-file') {
-      // Redirect to 'none' if dataSource is 'from-file' since initial url can't
-      // be from-file and needs to be redirected to home
+      // Redirect to 'none' if `dataSource` is 'from-file' since initial urls can't
+      // be 'from-file' and needs to be redirected to home page.
       dataSource = 'none';
     }
     dispatch(setDataSource(dataSource));
