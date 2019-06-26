@@ -5,7 +5,7 @@
 // @flow
 import { getZipFileTable, getZipFileState } from '../selectors/zipped-profiles';
 import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
-import { loadProfile, finalizeView } from './receive-profile';
+import { loadProfile } from './receive-profile';
 
 import type { Action, ThunkAction } from '../types/store';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
@@ -67,10 +67,7 @@ export function viewProfileFromZip(
         zipFileState.pathInZipFile === pathInZipFile &&
         zipFileState.phase === 'PROCESS_PROFILE_FROM_ZIP_FILE'
       ) {
-        dispatch(loadProfile(profile, { pathInZipFile }));
-        if (initialLoad === false) {
-          dispatch(finalizeView());
-        }
+        await dispatch(loadProfile(profile, { pathInZipFile }, initialLoad));
       }
     } catch (error) {
       console.error(

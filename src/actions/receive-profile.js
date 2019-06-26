@@ -86,9 +86,11 @@ export function loadProfile(
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-  |}> = {}
-): ThunkAction<void> {
-  return dispatch => {
+    geckoProfiler?: $GeckoProfiler,
+  |}> = {},
+  initialLoad: boolean = false
+): ThunkAction<Promise<void>> {
+  return async dispatch => {
     if (profile.threads.length === 0) {
       console.error('This profile has no threads.', profile);
       dispatch(
@@ -108,6 +110,13 @@ export function loadProfile(
       implementationFilter: config.implementationFilter,
       transformStacks: config.transformStacks,
     });
+
+    // During initial load, we are upgrading the URL and generating the UrlState
+    // before finalizing profile view. That's why we are dispatching this action
+    // after completing those steps inside `setupInitialUrlState`.
+    if (initialLoad === false) {
+      await dispatch(finalizeProfileView(profile, config.geckoProfiler));
+    }
   };
 }
 
@@ -118,7 +127,7 @@ export function loadProfile(
  * complexity to making all of these decisions, which has been collected in a bunch of
  * functions in the src/profile-logic/tracks.js file.
  */
-export function finalizeView(
+export function finalizeProfileView(
   profile?: Profile | null,
   geckoProfiler?: $GeckoProfiler
 ): ThunkAction<Promise<void>> {
@@ -214,12 +223,11 @@ export function viewProfile(
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-  |}> = {},
-  geckoProfiler?: $GeckoProfiler
+    geckoProfiler: $GeckoProfiler,
+  |}> = {}
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
-    dispatch(loadProfile(profile, config));
-    await dispatch(finalizeView(profile, geckoProfiler));
+    await dispatch(loadProfile(profile, config, false));
   };
 }
 
@@ -412,10 +420,7 @@ async function getProfileFromAddon(
   const rawGeckoProfile = await geckoProfiler.getProfile();
   const unpackedProfile = await _unpackGeckoProfileFromAddon(rawGeckoProfile);
   const profile = processProfile(unpackedProfile);
-  dispatch(loadProfile(profile));
-  if (initialLoad === false) {
-    await dispatch(finalizeView(null, geckoProfiler));
-  }
+  await dispatch(loadProfile(profile, { geckoProfiler }, initialLoad));
 
   return profile;
 }
@@ -783,10 +788,7 @@ export function retrieveProfileOrZipFromUrl(
           throw new Error('Unable to parse the profile.');
         }
 
-        dispatch(loadProfile(profile));
-        if (initialLoad === false) {
-          await dispatch(finalizeView());
-        }
+        await dispatch(loadProfile(profile, {}, initialLoad));
       } else if (zip) {
         await dispatch(receiveZipFile(zip));
       } else {
@@ -963,14 +965,15 @@ export function retrieveProfilesToCompare(
       }
 
       await dispatch(
-        loadProfile(resultProfile, {
-          transformStacks,
-          implementationFilter,
-        })
+        loadProfile(
+          resultProfile,
+          {
+            transformStacks,
+            implementationFilter,
+          },
+          initialLoad
+        )
       );
-      if (initialLoad === false) {
-        dispatch(finalizeView());
-      }
     } catch (error) {
       dispatch(fatalError(error));
     }

@@ -7,7 +7,7 @@ import { getSelectedTab, getDataSource } from '../selectors/url-state';
 import { getTrackThreadHeights } from '../selectors/app';
 import { sendAnalytics } from '../utils/analytics';
 import { stateFromLocation } from '../app-logic/url-handling';
-import { finalizeView } from './receive-profile';
+import { finalizeProfileView } from './receive-profile';
 import type { Profile, ThreadIndex } from '../types/profile';
 import type { CssPixels } from '../types/units';
 import type { Action, ThunkAction } from '../types/store';
@@ -107,7 +107,7 @@ export function setupInitialUrlState(
 
     dispatch(updateUrlState(urlState));
     dispatch(urlSetupDone());
-    dispatch(finalizeView());
+    dispatch(finalizeProfileView());
   };
 }
 
