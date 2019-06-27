@@ -413,7 +413,6 @@ export type DOMEventMarkerPayload = {|
   interval: 'start' | 'end',
   eventType: string,
   phase: 0 | 1 | 2 | 3,
-  cause?: CauseBacktrace,
   docShellId?: string,
   docshellHistoryId?: number,
 |};
@@ -479,7 +478,6 @@ export type FrameConstructionMarkerPayload = {|
   type: 'tracing',
   category: 'Frame Construction',
   interval: 'start' | 'end',
-  cause?: CauseBacktrace,
 |};
 
 export type DummyForTestsMarkerPayload = {|
