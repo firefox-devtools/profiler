@@ -1751,7 +1751,7 @@ exports[`TooltipMarker renders tooltips for various markers: NotifyDidPaint-14.5
   class="tooltipMarker propClass"
 >
   <div
-    class="tooltipHeader"
+    class=""
   >
     <div
       class="tooltipOneLine"

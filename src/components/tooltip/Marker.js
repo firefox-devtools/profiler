@@ -614,6 +614,12 @@ function getMarkerDetails(
     }
   }
 
+  // If there are no details or backtrace to print, we should return null
+  // instead of an empty Fragment.
+  if (!tooltipDetails && (!data || !data.cause)) {
+    return null;
+  }
+
   return (
     <>
       {tooltipDetails}
