@@ -49,6 +49,32 @@ type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 /**
  * This component manages the interaction with the window.history browser API.
+ *
+ * There are two different profile loading paths currently:
+ * 1. Initial URL processing:
+ *    This happens when user loads a URL with a profile hash or URL.
+ *    In the first load, we have the URL but we don't have the `UrlState` to get the
+ *    information from it and download the profile. So we have these steps in the
+ *    initial URL processsing:
+ *    1. Get the intial raw url, set the `urlSetupPhase` as 'initial-load'.
+ *    2. Extract the `dataSource` from the raw url.
+ *    3. Extract the profile hash or URL from it if it's in the store and download
+ *       it, or retrieve from Firefox. Set the `urlSetupPhase` as 'loading-profile'.
+ *    4. Upgrade the URL with downloaded profile data and setup initial `UrlState`.
+ *    5. Finalize the profile view with the `UrlState` information. (we couldn't
+ *       finalize the profile view immediately after the download because we need
+ *       `UrlState` for this step.)
+ *    6. Set the `urlSetupPhase` as 'done' and display the profile view.
+ *
+ * 2. State changes after some user interactions (e.g. drag and drop):
+ *    In this path, the initial URL processing is already done, and this path is
+ *    being used if `dataSource` changes after some user interaction. This is
+ *    handled by `ProfileLoader` component. This path has these steps:
+ *    1. Get the `dataSource` and `hash/profileUrl` information from the store.
+ *    2. Download the profile.
+ *    3. Update the `UrlState` to reflect the changes and finalize the profile
+ *       view with the `UrlState` information.
+ *    4. Display the profile view.
  */
 class UrlManager extends React.PureComponent<Props> {
   async _processInitialUrls() {
