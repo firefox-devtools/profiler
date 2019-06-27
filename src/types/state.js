@@ -52,7 +52,6 @@ export type ProfileViewState = {|
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
     rightClickedTrack: TrackReference | null,
-    isContextMenuVisible: boolean,
   |},
   +globalTracks: GlobalTrack[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,

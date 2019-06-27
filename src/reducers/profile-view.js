@@ -499,15 +499,6 @@ const rightClickedTrack: Reducer<TrackReference | null> = (
   }
 };
 
-const isContextMenuVisible: Reducer<boolean> = (state = false, action) => {
-  switch (action.type) {
-    case 'SET_CONTEXT_MENU_VISIBILITY':
-      return action.isVisible;
-    default:
-      return state;
-  }
-};
-
 /**
  * Provide a mechanism to wrap the reducer in a special function that can reset
  * the state to the default values. This is useful when viewing multiple profiles
@@ -542,7 +533,6 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       focusCallTreeGeneration,
       rootRange,
       rightClickedTrack,
-      isContextMenuVisible,
     }),
     globalTracks,
     localTracksByPid,
