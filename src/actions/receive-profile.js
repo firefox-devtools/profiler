@@ -103,6 +103,13 @@ export function loadProfile(
       return;
     }
 
+    // We have a 'PROFILE_LOADED' dispatch here and a second dispatch for
+    // `finalizeProfileView`. Normally this is an anti-pattern but that was
+    // necessary for initial load url handling. We are not dispatching
+    // `finalizeProfileView` here if it's initial load, instead are getting the
+    // url, upgrading the url and then creating a UrlState that we can use
+    // first. That is necessary because we need a UrlState inside `finalizeProfileView`.
+    // If this is not the initial load, we are dispatching both of them.
     dispatch({
       type: 'PROFILE_LOADED',
       profile,
