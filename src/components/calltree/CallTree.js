@@ -164,7 +164,15 @@ class CallTreeComponent extends PureComponent<Props> {
       newExpandedCallNodeIndexes.push(currentCallNodeIndex);
     }
     this._onExpandedCallNodesChange(newExpandedCallNodeIndexes);
-    this._onSelectedCallNodeChange(currentCallNodeIndex);
+
+    const category = tree.getDisplayData(currentCallNodeIndex).categoryName;
+    if (category !== 'Idle') {
+      // If we selected the call node with a "idle" category, we'd have a
+      // completely dimmed activity graph because idle stacks are not drawn in
+      // this graph. Because this isn't probably what the average user wants we
+      // do it only when the category is something different.
+      this._onSelectedCallNodeChange(currentCallNodeIndex);
+    }
   }
 
   render() {
