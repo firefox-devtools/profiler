@@ -182,3 +182,21 @@ export type RemoveProfileInformation = {
   // Remove the extension list if it's true.
   shouldRemoveExtensions: boolean,
 };
+
+/**
+ * This type is used to decide how to highlight and stripe areas in the
+ * timeline.
+ */
+export type SelectedState =
+  // Samples can be filtered through various operations, like searching, or
+  // call tree transforms.
+  | 'FILTERED_OUT'
+  // This sample is selected because either the tip or an ancestor call node matches
+  // the currently selected call node.
+  | 'SELECTED'
+  // This call node is not selected, and the stacks are ordered before the selected
+  // call node as sorted by the getTreeOrderComparator.
+  | 'UNSELECTED_ORDERED_BEFORE_SELECTED'
+  // This call node is not selected, and the stacks are ordered after the selected
+  // call node as sorted by the getTreeOrderComparator.
+  | 'UNSELECTED_ORDERED_AFTER_SELECTED';
