@@ -667,6 +667,7 @@ describe('actions/ProfileView', function() {
       dispatch(ProfileView.changeMarkersSearchString('a'));
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('a');
     });
+
     it('filters the markers', function() {
       const profile = getProfileWithMarkers([
         ['a', 0, null],
@@ -678,7 +679,7 @@ describe('actions/ProfileView', function() {
       expect(
         selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
       ).toHaveLength(3);
-      dispatch(ProfileView.changeMarkersSearchString('A, c'));
+      dispatch(ProfileView.changeMarkersSearchString('A, b'));
 
       const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
       const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
@@ -686,7 +687,7 @@ describe('actions/ProfileView', function() {
       );
       expect(markerIndexes).toHaveLength(2);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
-      expect(getMarker(markerIndexes[1]).name.includes('c')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
     });
   });
 
@@ -699,6 +700,7 @@ describe('actions/ProfileView', function() {
       dispatch(ProfileView.changeNetworkSearchString('a'));
       expect(UrlStateSelectors.getNetworkSearchString(getState())).toEqual('a');
     });
+
     it('filters the network markers', function() {
       const profile = getNetworkTrackProfile();
       const { dispatch, getState } = storeWithProfile(profile);

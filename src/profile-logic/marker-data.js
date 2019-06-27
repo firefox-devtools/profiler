@@ -87,6 +87,12 @@ export function getSearchFilteredMarkerIndexes(
   const newMarkers: MarkerIndex[] = [];
   for (const markerIndex of markerIndexes) {
     const { data, name } = getMarker(markerIndex);
+
+    // Reset regexp for each iteration. Otherwise state from previous
+    // iterations can cause matches to fail if the search is global or
+    // sticky.
+    searchRegExp.lastIndex = 0;
+
     if (searchRegExp.test(name)) {
       newMarkers.push(markerIndex);
       continue;
