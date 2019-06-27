@@ -202,7 +202,7 @@ const MaybeBacktrace = ({
     const causeAge = start - cause.time;
     return (
       <div className="tooltipDetailsBackTrace" key="backtrace">
-        {data.type === 'Styles' ? (
+        {data.type === 'Styles' || marker.name === 'Reflow' ? (
           <h2 className="tooltipBackTraceTitle">
             First invalidated {formatNumber(causeAge)}ms before the flush, at:
           </h2>
