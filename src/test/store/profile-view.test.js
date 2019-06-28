@@ -722,6 +722,27 @@ describe('actions/ProfileView', function() {
         getMarker(markerIndexes[0]).name.includes(networkSearchString)
       ).toBeTruthy();
     });
+
+    it('filters multiple network markers', function() {
+      const profile = getNetworkTrackProfile();
+      const { dispatch, getState } = storeWithProfile(profile);
+      const networkSearchString = '3, 4';
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+          getState()
+        )
+      ).toHaveLength(10);
+      dispatch(ProfileView.changeNetworkSearchString(networkSearchString));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const markerIndexes = selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('3')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('4')).toBeTruthy();
+    });
   });
 
   describe('changeImplementationFilter', function() {

@@ -163,6 +163,13 @@ export const getMarkersSearchStrings: Selector<
   splitSearchString
 );
 
+export const getNetworkSearchStrings: Selector<
+  string[] | null
+> = createSelector(
+  getNetworkSearchString,
+  splitSearchString
+);
+
 /**
  * A RegExp can be used for searching and filtering the thread's samples.
  */
@@ -176,14 +183,9 @@ export const getMarkersSearchStringsAsRegExp: Selector<RegExp | null> = createSe
   stringsToRegExp
 );
 
-export const getNetworkSearchStringAsRegExp: Selector<RegExp | null> = createSelector(
-  getNetworkSearchString,
-  string => {
-    if (!string) {
-      return null;
-    }
-    return stringsToRegExp([string]);
-  }
+export const getNetworkSearchStringsAsRegExp: Selector<RegExp | null> = createSelector(
+  getNetworkSearchStrings,
+  stringsToRegExp
 );
 
 // Pre-allocate an array to help with strict equality tests in the selectors.

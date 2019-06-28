@@ -289,7 +289,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = createSelector(
     getMarkerGetter,
     getNetworkMarkerIndexes,
-    UrlState.getNetworkSearchStringAsRegExp,
+    UrlState.getNetworkSearchStringsAsRegExp,
     MarkerData.getSearchFilteredMarkerIndexes
   );
 
