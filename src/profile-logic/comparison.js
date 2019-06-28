@@ -75,7 +75,7 @@ export function mergeProfiles(
     );
   }
   if (!profiles.length) {
-    throw new Error('There is no profiles to merge.');
+    throw new Error('There are no profiles to merge.');
   }
 
   const resultProfile = getEmptyProfile();
@@ -184,6 +184,8 @@ export function mergeProfiles(
     resultProfile.threads.push(thread);
   }
 
+  // We can import several profiles in this view, but the comparison thread
+  // really makes sense when there's only 2 profiles.
   if (resultProfile.threads.length === 2) {
     resultProfile.threads.push(
       getComparisonThread(
@@ -323,7 +325,7 @@ function adjustNullableCategories(
  * when merging lib references in other tables.
  */
 function combineLibTables(
-  ...threads: Thread[]
+  threads: $ReadOnlyArray<Thread>
 ): { libs: Lib[], translationMaps: TranslationMapForLibs[] } {
   const mapOfInsertedLibs: Map<string, IndexIntoLibs> = new Map();
 
@@ -345,17 +347,7 @@ function combineLibTables(
       translationMap.set(i, newLibTable.length);
       mapOfInsertedLibs.set(insertedLibKey, newLibTable.length);
 
-      newLibTable.push({
-        start: lib.start,
-        end: lib.end,
-        offset: lib.offset,
-        arch: lib.arch,
-        name: lib.name,
-        path: lib.path,
-        debugName: lib.debugName,
-        debugPath: lib.debugPath,
-        breakpadId: lib.breakpadId,
-      });
+      newLibTable.push(lib);
     });
 
     translationMaps.push(translationMap);
@@ -372,7 +364,7 @@ function combineLibTables(
 function combineResourceTables(
   translationMapsForLibs: TranslationMapForLibs[],
   newStringTable: UniqueStringArray,
-  ...threads: Thread[]
+  threads: $ReadOnlyArray<Thread>
 ): {
   resourceTable: ResourceTable,
   translationMaps: TranslationMapForResources[],
@@ -449,7 +441,7 @@ function combineResourceTables(
 function combineFuncTables(
   translationMapsForResources: TranslationMapForResources[],
   newStringTable: UniqueStringArray,
-  ...threads: Thread[]
+  threads: $ReadOnlyArray<Thread>
 ): { funcTable: FuncTable, translationMaps: TranslationMapForFuncs[] } {
   const mapOfInsertedFuncs: Map<string, IndexIntoFuncTable> = new Map();
   const translationMaps = [];
@@ -517,7 +509,7 @@ function combineFrameTables(
   translationMapsForCategories: TranslationMapForCategories[],
   translationMapsForFuncs: TranslationMapForFuncs[],
   newStringTable: UniqueStringArray,
-  ...threads: Thread[]
+  threads: $ReadOnlyArray<Thread>
 ): { frameTable: FrameTable, translationMaps: TranslationMapForFrames[] } {
   const translationMaps = [];
   const newFrameTable = getEmptyFrameTable();
@@ -590,7 +582,7 @@ function combineFrameTables(
 function combineStackTables(
   translationMapsForCategories: TranslationMapForCategories[],
   translationMapsForFrames: TranslationMapForFrames[],
-  ...threads: Thread[]
+  threads: $ReadOnlyArray<Thread>
 ): { stackTable: StackTable, translationMaps: TranslationMapForStacks[] } {
   const translationMaps = [];
   const newStackTable = getEmptyStackTable();
@@ -733,28 +725,20 @@ function getComparisonThread(
 ): Thread {
   const newStringTable = new UniqueStringArray();
 
+  const threads = [thread1, thread2];
+
   const {
     libs: newLibTable,
     translationMaps: translationMapsForLibs,
-  } = combineLibTables(thread1, thread2);
+  } = combineLibTables(threads);
   const {
     resourceTable: newResourceTable,
     translationMaps: translationMapsForResources,
-  } = combineResourceTables(
-    translationMapsForLibs,
-    newStringTable,
-    thread1,
-    thread2
-  );
+  } = combineResourceTables(translationMapsForLibs, newStringTable, threads);
   const {
     funcTable: newFuncTable,
     translationMaps: translationMapsForFuncs,
-  } = combineFuncTables(
-    translationMapsForResources,
-    newStringTable,
-    thread1,
-    thread2
-  );
+  } = combineFuncTables(translationMapsForResources, newStringTable, threads);
   const {
     frameTable: newFrameTable,
     translationMaps: translationMapsForFrames,
@@ -762,8 +746,7 @@ function getComparisonThread(
     translationMapsForCategories,
     translationMapsForFuncs,
     newStringTable,
-    thread1,
-    thread2
+    threads
   );
   const {
     stackTable: newStackTable,
@@ -771,8 +754,7 @@ function getComparisonThread(
   } = combineStackTables(
     translationMapsForCategories,
     translationMapsForFrames,
-    thread1,
-    thread2
+    threads
   );
   const { samples: newSamples } = combineSamplesDiffing(
     translationMapsForStacks,
