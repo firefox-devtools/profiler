@@ -12,14 +12,23 @@ import {
   stringifyTransforms,
   parseTransforms,
 } from '../profile-logic/transforms';
-import { assertExhaustiveCheck, toValidTabSlug } from '../utils/flow';
+import {
+  assertExhaustiveCheck,
+  toValidTabSlug,
+  ensureExists,
+} from '../utils/flow';
 import { oneLine } from 'common-tags';
 import type { UrlState } from '../types/state';
 import type { DataSource } from '../types/actions';
-import type { Pid } from '../types/profile';
-import type { TrackIndex } from '../types/profile-derived';
+import type {
+  Pid,
+  Profile,
+  Thread,
+  IndexIntoStackTable,
+} from '../types/profile';
+import type { TrackIndex, CallNodePath } from '../types/profile-derived';
 
-export const CURRENT_URL_VERSION = 3;
+export const CURRENT_URL_VERSION = 4;
 
 /**
  * This static piece of state might look like an anti-pattern, but it's a relatively
@@ -271,7 +280,7 @@ export function urlFromState(urlState: UrlState): string {
   return pathname + (qString ? '?' + qString : '');
 }
 
-function getDataSourceFromPathParts(pathParts: string[]): DataSource {
+export function getDataSourceFromPathParts(pathParts: string[]): DataSource {
   const str = pathParts[0] || 'none';
   // With this switch, flow is able to understand that we return a valid value
   switch (str) {
@@ -298,14 +307,20 @@ type Location = {
   hash: string,
 };
 
-export function stateFromLocation(location: Location): UrlState {
-  const { pathname, query } = upgradeLocationToCurrentVersion({
-    pathname: location.pathname,
-    hash: location.hash,
-    query: queryString.parse(location.search.substr(1), {
-      arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
-    }),
-  });
+export function stateFromLocation(
+  location: Location,
+  profile?: Profile
+): UrlState {
+  const { pathname, query } = upgradeLocationToCurrentVersion(
+    {
+      pathname: location.pathname,
+      hash: location.hash,
+      query: queryString.parse(location.search.substr(1), {
+        arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+      }),
+    },
+    profile
+  );
 
   const pathParts = pathname.split('/').filter(d => d);
   const dataSource = getDataSourceFromPathParts(pathParts);
@@ -438,7 +453,8 @@ type ProcessedLocationBeforeUpgrade = {|
 |};
 
 export function upgradeLocationToCurrentVersion(
-  processedLocation: ProcessedLocationBeforeUpgrade
+  processedLocation: ProcessedLocationBeforeUpgrade,
+  profile?: Profile
 ): ProcessedLocation {
   const urlVersion = +processedLocation.query.v || 0;
   if (urlVersion === CURRENT_URL_VERSION) {
@@ -459,7 +475,7 @@ export function upgradeLocationToCurrentVersion(
     destVersion++
   ) {
     if (destVersion in _upgraders) {
-      _upgraders[destVersion](processedLocation);
+      _upgraders[destVersion](processedLocation, profile);
     }
   }
 
@@ -471,7 +487,7 @@ export function upgradeLocationToCurrentVersion(
 // Every "upgrader" takes the processedLocation as its single argument and mutates it.
 /* eslint-disable no-useless-computed-key */
 const _upgraders = {
-  [0]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
+  [0]: (processedLocation: ProcessedLocationBeforeUpgrade, _: Profile) => {
     // Version 1 is the first versioned url.
 
     // If the pathname is '/', this could be a very old URL that has its information
@@ -497,7 +513,7 @@ const _upgraders = {
       processedLocation.query.implementation = 'js';
     }
   },
-  [1]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
+  [1]: (processedLocation: ProcessedLocationBeforeUpgrade, _: Profile) => {
     // The transform stack was added. Convert the callTreeFilters into the new
     // transforms format.
     if (processedLocation.query.callTreeFilters) {
@@ -525,7 +541,7 @@ const _upgraders = {
       delete processedLocation.query.callTreeFilters;
     }
   },
-  [2]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
+  [2]: (processedLocation: ProcessedLocationBeforeUpgrade, _: Profile) => {
     // Map the tab "timeline" to "stack-chart".
     // Map the tab "markers" to "marker-table".
     processedLocation.pathname = processedLocation.pathname
@@ -536,13 +552,65 @@ const _upgraders = {
       // Matches:  $1^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
       .replace(/^(\/[^/]+\/[^/]+)\/markers\/?/, '$1/marker-table/');
   },
-  [3]: (processedLocation: ProcessedLocationBeforeUpgrade) => {
+  [3]: (processedLocation: ProcessedLocationBeforeUpgrade, _: Profile) => {
     const { query } = processedLocation;
     // Removed "Hide platform details" checkbox from the stack chart.
     if ('hidePlatformDetails' in query) {
       delete query.hidePlatformDetails;
       query.implementation = 'js';
     }
+  },
+  [4]: (
+    processedLocation: ProcessedLocationBeforeUpgrade,
+    profile: Profile
+  ) => {
+    // 'js' implementation filter has been changed to include 'relevantForJS' label frames.
+    // Iterate through all transforms and upgrade the ones that has callNodePath with JS
+    // implementation filter, so they also include 'relevantForJS' label frames in their
+    // callNodePaths. For example,  in a call stack like this: 'C++->JS->relevantForJS->JS'
+    // Previous callNodePath was 'JS,JS'. But now it has to be 'JS,relevantForJS,JS'.
+    const query = processedLocation.query;
+    const selectedThread = query.thread !== undefined ? +query.thread : null;
+    const transforms = query.transforms
+      ? parseTransforms(query.transforms)
+      : [];
+
+    if (transforms.length === 0) {
+      // We don't have any transforms to upgrade.
+      return;
+    }
+
+    if (selectedThread === null || profile === undefined) {
+      return;
+    }
+
+    const thread = profile.threads[selectedThread];
+    for (let i = 0; i < transforms.length; i++) {
+      const transform = transforms[i];
+      if (
+        !transform.implementation ||
+        transform.implementation !== 'js' ||
+        !transform.callNodePath
+      ) {
+        // Only transforms with JS implementation filters that have callNodePaths
+        // need to be upgraded.
+        continue;
+      }
+
+      const callNodeStackIndex = getStackIndexFromVersion3JSCallNodePath(
+        thread,
+        transform.callNodePath
+      );
+      if (callNodeStackIndex === null) {
+        // If we can't find the stack index of given call node path, just abort.
+        continue;
+      }
+      transform.callNodePath = getVersion4JSCallNodePathFromStackIndex(
+        thread,
+        callNodeStackIndex
+      );
+    }
+    processedLocation.query.transforms = stringifyTransforms(transforms);
   },
 };
 
@@ -551,4 +619,72 @@ if (Object.keys(_upgraders).length - 1 !== CURRENT_URL_VERSION) {
     CURRENT_URL_VERSION does not match the number of URL upgraders. If you added a
     new upgrader, make sure and bump the CURRENT_URL_VERSION variable.
   `);
+}
+
+// This function returns the stack index of the first occurrence of the given
+// CallNodePath. Assumes the implementation filter of CallNodePath is 'js'.
+// This should only be used for the URL upgrader, typically this
+// operation would use a call node index rather than a stack.
+function getStackIndexFromVersion3JSCallNodePath(
+  thread: Thread,
+  oldCallNodePath: CallNodePath
+): IndexIntoStackTable | null {
+  const { stackTable, funcTable, frameTable } = thread;
+  const stackIndexDepth: Map<IndexIntoStackTable | null, number> = new Map();
+  stackIndexDepth.set(null, -1);
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefix = stackTable.prefix[stackIndex];
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    const isJS = funcTable.isJS[funcIndex];
+    // We know that at this point stack table is sorted and the following
+    // condition holds:
+    // assert(prefixStack === null || prefixStack < stackIndex);
+    const doesPrefixMatchCallNodePath =
+      prefix === null || stackIndexDepth.has(prefix);
+
+    if (!doesPrefixMatchCallNodePath) {
+      continue;
+    }
+    const prefixStackDepth = ensureExists(
+      stackIndexDepth.get(prefix),
+      'Unable to find the stack depth for a prefix'
+    );
+    const depth = prefixStackDepth + 1;
+
+    if (isJS && oldCallNodePath[depth] === funcIndex) {
+      // This is a JS frame, and it matches the CallNodePath.
+      if (depth === oldCallNodePath.length - 1) {
+        // This is the stack index that we are looking for.
+        return stackIndex;
+      }
+      stackIndexDepth.set(stackIndex, depth);
+    } else {
+      // Any non-JS stack potentially matches, because they're skipped in the JS
+      // call node path. Add it here using the previous depth.
+      stackIndexDepth.set(stackIndex, prefixStackDepth);
+    }
+  }
+  return null;
+}
+
+// Constructs the new JS CallNodePath from given stackIndex and returns it.
+// This should only be used for the URL upgrader.
+function getVersion4JSCallNodePathFromStackIndex(
+  thread: Thread,
+  stackIndex: IndexIntoStackTable
+): CallNodePath {
+  const { funcTable, stackTable, frameTable } = thread;
+  const callNodePath = [];
+  let nextStackIndex = stackIndex;
+  while (nextStackIndex !== null) {
+    const frameIndex = stackTable.frame[nextStackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+    if (funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]) {
+      callNodePath.unshift(funcIndex);
+    }
+    nextStackIndex = stackTable.prefix[nextStackIndex];
+  }
+  return callNodePath;
 }

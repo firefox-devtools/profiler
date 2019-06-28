@@ -61,6 +61,7 @@ export type ProfileViewState = {|
 export type AppViewState =
   | {| +phase: 'ROUTE_NOT_FOUND' |}
   | {| +phase: 'TRANSITIONING_FROM_STALE_PROFILE' |}
+  | {| +phase: 'PROFILE_LOADED' |}
   | {| +phase: 'DATA_LOADED' |}
   | {| +phase: 'FATAL_ERROR', +error: Error |}
   | {|
@@ -108,9 +109,11 @@ export type ZipFileState =
 
 export type IsSidebarOpenPerPanelState = { [TabSlug]: boolean };
 
+export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
+
 export type AppState = {|
   +view: AppViewState,
-  +isUrlSetupDone: boolean,
+  +urlSetupPhase: UrlSetupPhase,
   +hasZoomedViaMousewheel: boolean,
   +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
   +panelLayoutGeneration: number,

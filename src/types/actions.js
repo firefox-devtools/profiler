@@ -231,8 +231,14 @@ type ReceiveProfileAction =
       +error: Error,
     |}
   | {|
-      +type: 'VIEW_PROFILE',
+      +type: 'PROFILE_LOADED',
       +profile: Profile,
+      +pathInZipFile: ?string,
+      +implementationFilter: ?ImplementationFilter,
+      +transformStacks: ?TransformStacksPerThread,
+    |}
+  | {|
+      +type: 'VIEW_PROFILE',
       +selectedThreadIndex: ThreadIndex,
       +globalTracks: GlobalTrack[],
       +globalTrackOrder: TrackIndex[],
@@ -240,10 +246,6 @@ type ReceiveProfileAction =
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-      +pathInZipFile: ?string,
-      +implementationFilter: ?ImplementationFilter,
-      +transformStacks: ?TransformStacksPerThread,
-      +dataSource: DataSource,
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}
@@ -260,6 +262,7 @@ type ReceiveProfileAction =
   | {| +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string |};
 
 type UrlEnhancerAction =
+  | {| +type: 'START_FETCHING_PROFILES' |}
   | {| +type: 'URL_SETUP_DONE' |}
   | {| +type: 'UPDATE_URL_STATE', +newUrlState: UrlState | null |};
 
@@ -325,6 +328,10 @@ type UrlStateAction =
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
       +originalProfile: Profile,
       +originalUrlState: UrlState,
+    |}
+  | {|
+      +type: 'SET_DATA_SOURCE',
+      +dataSource: DataSource,
     |};
 
 type IconsAction =
