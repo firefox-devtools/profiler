@@ -9,6 +9,8 @@ import {
   getEmptyJsTracerTable,
   resourceTypes,
 } from '../../../profile-logic/data-structures';
+import { mergeProfiles } from '../../../profile-logic/comparison';
+import { stateFromLocation } from '../../../app-logic/url-handling';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 
 import type {
@@ -529,6 +531,22 @@ function _buildThreadFromTextOnlyStacks(
     samples.time.push(columnIndex);
   });
   return thread;
+}
+
+/**
+ * This returns a merged profile from a number of profile strings.
+ */
+export function getMergedProfileFromTextSamples(...profileStrings: string[]) {
+  const profiles = profileStrings.map(
+    str => getProfileFromTextSamples(str).profile
+  );
+  const profileState = stateFromLocation({
+    pathname: '/public/fakehash1/',
+    search: '?thread=0&v=3',
+    hash: '',
+  });
+  const { profile } = mergeProfiles(profiles, profiles.map(() => profileState));
+  return profile;
 }
 
 type NetworkMarkersOptions = {|

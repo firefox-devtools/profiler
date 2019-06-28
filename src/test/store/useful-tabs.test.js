@@ -11,6 +11,7 @@ import {
   getProfileWithMarkers,
   getNetworkMarkers,
   getProfileWithJsTracerEvents,
+  getMergedProfileFromTextSamples,
 } from '../fixtures/profiles/processed-profile';
 
 describe('getUsefulTabs', function() {
@@ -49,6 +50,27 @@ describe('getUsefulTabs', function() {
       'marker-chart',
       'marker-table',
       'js-tracer',
+    ]);
+  });
+
+  it('shows only the call tree when a diffing track is selected', function() {
+    const profile = getMergedProfileFromTextSamples('A  B  C', 'A  B  B');
+    const { getState, dispatch } = storeWithProfile(profile);
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+      'calltree',
+      'flame-graph',
+      'stack-chart',
+      'marker-chart',
+      'marker-table',
+    ]);
+
+    dispatch({
+      type: 'SELECT_TRACK',
+      selectedThreadIndex: 2,
+      selectedTab: 'calltree',
+    });
+    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+      'calltree',
     ]);
   });
 });

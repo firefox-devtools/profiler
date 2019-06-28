@@ -8,6 +8,7 @@ import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import {
   getProfileFromTextSamples,
+  getMergedProfileFromTextSamples,
   getProfileWithMarkers,
   getNetworkTrackProfile,
   getScreenshotTrackProfile,
@@ -437,6 +438,30 @@ describe('actions/ProfileView', function() {
           'calltree'
         );
         dispatch(ProfileView.selectTrack(memoryTrackReference));
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'calltree'
+        );
+      });
+    });
+
+    describe('with a comparison profile', function() {
+      it('selects the calltree tab when selecting the diffing track', function() {
+        const diffingTrackReference = {
+          type: 'global',
+          trackIndex: 2,
+        };
+
+        const profile = getMergedProfileFromTextSamples('A  B  C', 'A  B  B');
+        const { getState, dispatch } = storeWithProfile(profile);
+
+        dispatch(App.changeSelectedTab('flame-graph'));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'flame-graph'
+        );
+
+        dispatch(ProfileView.selectTrack(diffingTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(2);
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'calltree'
         );
