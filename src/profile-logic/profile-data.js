@@ -285,7 +285,11 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
 export type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
 export type StackImplementation = 'native' | JsImplementation;
 export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
-export type BreakdownByCategory = Milliseconds[]; // { [IndexIntoCategoryList]: Milliseconds }
+export type OneCategoryBreakdown = {|
+  entireCategoryValue: Milliseconds,
+  subcategoryBreakdown: Milliseconds[], // { [IndexIntoSubcategoryList]: Milliseconds }
+|};
+export type BreakdownByCategory = OneCategoryBreakdown[]; // { [IndexIntoCategoryList]: OneCategoryBreakdown }
 type ItemTimings = {|
   selfTime: {|
     // time spent excluding children
@@ -436,12 +440,19 @@ export function getTimingsForCallNodeIndex(
 
     // step 4: find the category value for this stack
     const categoryIndex = stackTable.category[stackIndex];
+    const subcategoryIndex = stackTable.subcategory[stackIndex];
 
     // step 5: increment the right value in the category breakdown
     if (timings.breakdownByCategory === null) {
-      timings.breakdownByCategory = Array(categories.length).fill(0);
+      timings.breakdownByCategory = categories.map(category => ({
+        entireCategoryValue: 0,
+        subcategoryBreakdown: Array(category.subcategories.length).fill(0),
+      }));
     }
-    timings.breakdownByCategory[categoryIndex] += interval;
+    timings.breakdownByCategory[categoryIndex].entireCategoryValue += interval;
+    timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
+      subcategoryIndex
+    ] += interval;
   }
 
   // Loop over each sample and accumulate the self time, running time, and

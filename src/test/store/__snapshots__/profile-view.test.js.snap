@@ -1370,14 +1370,54 @@ Object {
     },
     "totalTime": Object {
       "breakdownByCategory": Array [
-        0,
-        2,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 2,
+          "subcategoryBreakdown": Array [
+            2,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
       ],
       "breakdownByImplementation": Object {
         "native": 2,
@@ -1393,14 +1433,54 @@ Object {
     },
     "totalTime": Object {
       "breakdownByCategory": Array [
-        0,
-        2,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 2,
+          "subcategoryBreakdown": Array [
+            2,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
       ],
       "breakdownByImplementation": Object {
         "native": 2,
