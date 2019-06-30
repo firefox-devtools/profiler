@@ -8,10 +8,7 @@ import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import IdleSearchField from './IdleSearchField';
 import { changeCallTreeSearchString } from '../../actions/profile-view';
-import {
-  getCurrentSearchString,
-  getSearchStrings,
-} from '../../selectors/url-state';
+import { getCurrentSearchString } from '../../selectors/url-state';
 
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -23,7 +20,6 @@ type OwnProps = {|
 
 type StateProps = {|
   +currentSearchString: string,
-  +searchStrings: string[] | null,
 |};
 
 type DispatchProps = {|
@@ -49,12 +45,11 @@ class StackSearchField extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { currentSearchString, searchStrings, className } = this.props;
+    const { currentSearchString, className } = this.props;
     const { searchFieldFocused } = this.state;
     const showIntroduction =
       searchFieldFocused &&
-      searchStrings &&
-      searchStrings.length &&
+      currentSearchString &&
       !currentSearchString.includes(',');
     return (
       <div className={classNames('stackSearchField', className)}>
@@ -87,7 +82,6 @@ class StackSearchField extends React.PureComponent<Props, State> {
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     currentSearchString: getCurrentSearchString(state),
-    searchStrings: getSearchStrings(state),
   }),
   mapDispatchToProps: { changeCallTreeSearchString },
   component: StackSearchField,
