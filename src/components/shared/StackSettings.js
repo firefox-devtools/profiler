@@ -15,7 +15,7 @@ import {
   getInvertCallstack,
   getCurrentSearchString,
 } from '../../selectors/url-state';
-import StackSearchField from '../shared/StackSearchField';
+import PanelSearch from '../shared/PanelSearch';
 import { toValidImplementationFilter } from '../../profile-logic/profile-data';
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
@@ -107,8 +107,10 @@ class StackSettings extends PureComponent<Props> {
             </li>
           )}
         </ul>
-        <StackSearchField
+        <PanelSearch
           className="stackSettingsSearchField"
+          label="Filter stacks: "
+          title="Only display stacks which contain a function whose name matches this substring"
           currentSearchString={currentSearchString}
           onSearch={this._onSearch}
         />
