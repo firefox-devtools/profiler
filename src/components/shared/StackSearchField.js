@@ -4,36 +4,23 @@
 
 // @flow
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import IdleSearchField from './IdleSearchField';
-import { changeCallTreeSearchString } from '../../actions/profile-view';
-import { getCurrentSearchString } from '../../selectors/url-state';
-
-import type { ConnectedProps } from '../../utils/connect';
 
 import './StackSearchField.css';
 
-type OwnProps = {|
+type Props = {|
   +className: string,
-|};
-
-type StateProps = {|
   +currentSearchString: string,
+  +onSearch: string => void,
 |};
-
-type DispatchProps = {|
-  +changeCallTreeSearchString: typeof changeCallTreeSearchString,
-|};
-
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {| searchFieldFocused: boolean |};
 
 class StackSearchField extends React.PureComponent<Props, State> {
   state = { searchFieldFocused: false };
   _onSearchFieldIdleAfterChange = (value: string) => {
-    this.props.changeCallTreeSearchString(value);
+    this.props.onSearch(value);
   };
 
   _onSearchFieldFocus = () => {
@@ -79,10 +66,4 @@ class StackSearchField extends React.PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    currentSearchString: getCurrentSearchString(state),
-  }),
-  mapDispatchToProps: { changeCallTreeSearchString },
-  component: StackSearchField,
-});
+export default StackSearchField;
