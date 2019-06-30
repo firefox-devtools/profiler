@@ -14,20 +14,10 @@
   flex: 1;
 }
 
-.networkSettingsLabel {
-  display: inline-flex;
-  height: 25px;
-  flex-flow: row nowrap;
-  align-items: center;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-}
-
-.networkSettingsSearchbar {
-  padding: 0 5px;
-}
-
-.networkSettingsSearchField {
+.networkSettingsSearchField .panelSearchFieldInput {
   width: 250px;
+}
+
+.networkSettingsSearchField .panelSearchFieldIntroduction {
+  max-width: 320px;
 }
