@@ -1151,10 +1151,6 @@ Array [
     "#d7d7db",
   ],
   Array [
-    "set fillStyle",
-    "#d7d7db60",
-  ],
-  Array [
     "beginPath",
   ],
   Array [
@@ -1807,6 +1803,10 @@ Array [
   ],
   Array [
     "fill",
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db60",
   ],
   Array [
     "set fillStyle",
@@ -1853,10 +1853,6 @@ Array [
     "#12bc00",
   ],
   Array [
-    "set fillStyle",
-    "#12bc0060",
-  ],
-  Array [
     "beginPath",
   ],
   Array [
@@ -2321,6 +2317,10 @@ Array [
   ],
   Array [
     "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "set fillStyle",
     Object {},
   ],
   Array [
@@ -2330,10 +2330,6 @@ Array [
   Array [
     "set fillStyle",
     "#0060df",
-  ],
-  Array [
-    "set fillStyle",
-    "#0060df60",
   ],
   Array [
     "beginPath",
@@ -2471,6 +2467,10 @@ Array [
   ],
   Array [
     "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "set fillStyle",
     Object {},
   ],
   Array [
@@ -2524,6 +2524,10 @@ Array [
   Array [
     "set fillStyle",
     "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
   ],
   Array [
     "fillRect",
@@ -2580,10 +2584,6 @@ Array [
     0,
     10,
     10,
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
   ],
   Array [
     "set fillStyle",

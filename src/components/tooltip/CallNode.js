@@ -8,7 +8,10 @@ import { getStackType } from '../../profile-logic/transforms';
 import { objectEntries } from '../../utils/flow';
 import { formatNumberDependingOnInterval } from '../../utils/format-numbers';
 import NodeIcon from '../shared/NodeIcon';
-import { getFriendlyStackTypeName } from '../../profile-logic/profile-data';
+import {
+  getFriendlyStackTypeName,
+  getCategoryPairLabel,
+} from '../../profile-logic/profile-data';
 
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { Thread, CategoryList } from '../../types/profile';
@@ -151,7 +154,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       callNodeInfo: { callNodeTable },
     } = this.props;
     const categoryIndex = callNodeTable.category[callNodeIndex];
-    const category = categories[categoryIndex];
+    const categoryColor = categories[categoryIndex].color;
+    const subcategoryIndex = callNodeTable.subcategory[callNodeIndex];
     const funcIndex = callNodeTable.func[callNodeIndex];
     const funcStringIndex = thread.funcTable.name[funcIndex];
     const funcName = thread.stringTable.getString(funcStringIndex);
@@ -238,9 +242,13 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             <div className="tooltipLabel">Category:</div>
             <div>
               <span
-                className={`colored-square category-color-${category.color}`}
+                className={`colored-square category-color-${categoryColor}`}
               />
-              {category.name}
+              {getCategoryPairLabel(
+                categories,
+                categoryIndex,
+                subcategoryIndex
+              )}
             </div>
             {/* --------------------------------------------------------------- */}
             {resourceOrFileName}

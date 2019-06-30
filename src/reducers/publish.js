@@ -31,7 +31,7 @@ const checkedSharingOptions: Reducer<CheckedSharingOptions> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE': {
+    case 'PROFILE_LOADED': {
       const newState = _getDefaultSharingOptions();
       if (!getShouldSanitizeByDefault(action.profile)) {
         // Flip the sharing options.
@@ -194,7 +194,7 @@ const isHidingStaleProfile: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'HIDE_STALE_PROFILE':
       return true;
-    case 'VIEW_PROFILE':
+    case 'VIEW_PROFILE': // TODO: should this be PROFILE_LOADED?
       return false;
     default:
       return state;

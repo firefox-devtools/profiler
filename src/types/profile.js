@@ -16,6 +16,7 @@ export type IndexIntoFuncTable = number;
 export type IndexIntoResourceTable = number;
 export type IndexIntoLibs = number;
 export type IndexIntoCategoryList = number;
+export type IndexIntoSubcategoryListForCategory = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 export type IndexIntoJsTracerEvents = number;
@@ -75,6 +76,7 @@ export type Pid = number | string;
 export type StackTable = {
   frame: IndexIntoFrameTable[],
   category: IndexIntoCategoryList[],
+  subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
   length: number,
 };
@@ -131,6 +133,7 @@ export type RawMarkerTable = {
 export type FrameTable = {
   address: IndexIntoStringTable[],
   category: (IndexIntoCategoryList | null)[],
+  subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
@@ -190,10 +193,11 @@ export type Lib = {
   breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
 };
 
-export type Category = {
+export type Category = {|
   name: string,
   color: string,
-};
+  subcategories: string[],
+|};
 
 export type CategoryList = Array<Category>;
 

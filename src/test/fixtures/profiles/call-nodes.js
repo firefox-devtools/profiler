@@ -82,6 +82,7 @@ export default function getProfile(): Profile {
     func: frameFuncs.map(stringIndex => funcTable.name.indexOf(stringIndex)),
     address: Array(frameFuncs.length).fill(-1),
     category: Array(frameFuncs.length).fill(null),
+    subcategory: Array(frameFuncs.length).fill(null),
     implementation: Array(frameFuncs.length).fill(null),
     line: Array(frameFuncs.length).fill(null),
     column: Array(frameFuncs.length).fill(null),
@@ -96,6 +97,7 @@ export default function getProfile(): Profile {
     stackTable.frame.push(frame);
     stackTable.prefix.push(prefix);
     stackTable.category.push(category);
+    stackTable.subcategory.push(0);
     stackTable.length++;
   }
   // Shared root stacks.
