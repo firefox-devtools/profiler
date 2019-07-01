@@ -27,7 +27,11 @@ import {
 import { getIconsWithClassNames } from '../../selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
-import type { Thread, CategoryList } from '../../types/profile';
+import type {
+  Thread,
+  CategoryList,
+  IndexIntoSamplesTable,
+} from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
 import type { PreviewSelection } from '../../types/actions';
@@ -66,6 +70,7 @@ type StateProps = {|
   +icons: IconWithClassName[],
   +categories: CategoryList,
   +interval: Milliseconds,
+  +getSampleDuration: IndexIntoSamplesTable => Milliseconds,
   +isInverted: boolean,
 |};
 type DispatchProps = {|
@@ -257,6 +262,7 @@ class FlameGraph extends React.PureComponent<Props> {
       icons,
       categories,
       interval,
+      getSampleDuration,
       isInverted,
     } = this.props;
 
@@ -307,6 +313,7 @@ class FlameGraph extends React.PureComponent<Props> {
               onRightClick: this._onRightClickedCallNodeChange,
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
+              getSampleDuration,
               isInverted,
             }}
           />
@@ -347,6 +354,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       icons: getIconsWithClassNames(state),
       interval: getProfileInterval(state),
+      getSampleDuration: selectedThreadSelectors.getSampleDurationGetter(state),
       isInverted: getInvertCallstack(state),
     };
   },

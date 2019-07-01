@@ -144,7 +144,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   const getTimingsForSidebar: Selector<TimingsForPath> = createSelector(
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getCallNodeInfo,
-    ProfileSelectors.getProfileInterval,
+    selectedThreadSelectors.getSampleDurationGetter,
     UrlState.getInvertCallstack,
     selectedThreadSelectors.getPreviewFilteredThread,
     ProfileSelectors.getCategories,

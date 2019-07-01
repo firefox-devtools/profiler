@@ -22,6 +22,7 @@ import {
   getCallNodeIndexFromPath,
   getTreeOrderComparator,
   getSamplesSelectedStates,
+  getSampleDurationGetter,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import {
@@ -731,18 +732,32 @@ describe('get-sample-index-closest-to-time', function() {
       c => c.name === 'Other'
     );
     const thread = profile.threads[0];
+    const getSampleDuration = getSampleDurationGetter(
+      thread.samples,
+      profile.meta.interval
+    );
     const { samples } = filterThreadByImplementation(
       thread,
       'js',
       defaultCategory
     );
 
-    expect(getSampleIndexClosestToTime(samples, 0)).toBe(0);
-    expect(getSampleIndexClosestToTime(samples, 0.9)).toBe(0);
-    expect(getSampleIndexClosestToTime(samples, 1.1)).toBe(1);
-    expect(getSampleIndexClosestToTime(samples, 1.5)).toBe(1);
-    expect(getSampleIndexClosestToTime(samples, 9.9)).toBe(9);
-    expect(getSampleIndexClosestToTime(samples, 100)).toBe(9);
+    expect(getSampleIndexClosestToTime(samples, 0, getSampleDuration)).toBe(0);
+    expect(getSampleIndexClosestToTime(samples, 0.9, getSampleDuration)).toBe(
+      0
+    );
+    expect(getSampleIndexClosestToTime(samples, 1.1, getSampleDuration)).toBe(
+      1
+    );
+    expect(getSampleIndexClosestToTime(samples, 1.5, getSampleDuration)).toBe(
+      1
+    );
+    expect(getSampleIndexClosestToTime(samples, 9.9, getSampleDuration)).toBe(
+      9
+    );
+    expect(getSampleIndexClosestToTime(samples, 100, getSampleDuration)).toBe(
+      9
+    );
   });
 });
 
@@ -818,11 +833,15 @@ describe('getTimingsForPath in a non-inverted tree', function() {
       thread.funcTable,
       defaultCategory
     );
+    const getSampleDuration = getSampleDurationGetter(
+      thread.samples,
+      profile.meta.interval
+    );
     const curriedGetTimingsForPath = path =>
       getTimingsForPath(
         path,
         callNodeInfo,
-        profile.meta.interval,
+        getSampleDuration,
         false,
         thread,
         profile.meta.categories
@@ -982,11 +1001,15 @@ describe('getTimingsForPath for an inverted tree', function() {
       thread.funcTable,
       defaultCategory
     );
+    const getSampleDuration = getSampleDurationGetter(
+      thread.samples,
+      profile.meta.interval
+    );
     const curriedGetTimingsForPath = path =>
       getTimingsForPath(
         path,
         callNodeInfo,
-        profile.meta.interval,
+        getSampleDuration,
         true,
         thread,
         profile.meta.categories

@@ -280,18 +280,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 10,
         "responsiveness": Array [
           null,
@@ -512,12 +500,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -686,12 +668,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -1036,13 +1012,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 5,
         "responsiveness": Array [
           null,
@@ -1296,12 +1265,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -1528,17 +1491,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 9,
         "responsiveness": Array [
           null,
@@ -1736,12 +1688,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -1904,12 +1850,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -2078,12 +2018,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -2256,12 +2190,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -2446,12 +2374,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -3118,12 +3040,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -3938,12 +3854,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -4758,12 +4668,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -5582,12 +5486,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 4,
         "responsiveness": Array [
           null,
@@ -6214,9 +6112,6 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-        ],
         "length": 1,
         "responsiveness": Array [
           null,
@@ -8771,15 +8666,6 @@ Object {
         ],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 7,
         "responsiveness": Array [
           0,
@@ -9123,15 +9009,6 @@ Object {
         ],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 7,
         "responsiveness": Array [
           0,
@@ -9475,15 +9352,6 @@ Object {
         ],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 7,
         "responsiveness": Array [
           0,
@@ -9959,15 +9827,6 @@ Object {
         ],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 7,
         "responsiveness": Array [
           0,
@@ -10314,15 +10173,6 @@ Object {
         ],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 7,
         "responsiveness": Array [
           0,
@@ -10731,15 +10581,6 @@ Object {
         ],
       },
       "samples": Object {
-        "duration": Array [
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-          1,
-        ],
         "length": 7,
         "responsiveness": Array [
           0,

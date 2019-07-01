@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import type { Thread } from '../types/profile';
+import type { Thread, IndexIntoSamplesTable } from '../types/profile';
 import type { Milliseconds } from '../types/units';
 import type {
   CallNodeInfo,
@@ -66,7 +66,8 @@ type LastSeen = {
 export function getStackTimingByDepth(
   thread: Thread,
   callNodeInfo: CallNodeInfo,
-  maxDepth: number
+  maxDepth: number,
+  getSampleDuration: IndexIntoSamplesTable => Milliseconds
 ): StackTimingByDepth {
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
   const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({
@@ -126,7 +127,7 @@ export function getStackTimingByDepth(
   // Pop the remaining stacks
   const lastIndex = thread.samples.length - 1;
   const endingTime =
-    thread.samples.time[lastIndex] + thread.samples.duration[lastIndex];
+    thread.samples.time[lastIndex] + getSampleDuration(lastIndex);
   _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, endingTime);
 
   return stackTimingByDepth;

@@ -271,6 +271,23 @@ export function getSamplesSelectedStates(
   return result;
 }
 
+/*
+ * This function returns another function that can be used to retrieve the
+ * duration for a specific sample. It handles the 2 cases of a samples table
+ * with or without a duration property.
+ */
+export function getSampleDurationGetter(
+  samples: SamplesTable,
+  interval: Milliseconds
+): IndexIntoSamplesTable => Milliseconds {
+  if (typeof samples.duration !== 'undefined') {
+    const duration = samples.duration;
+    return i => duration[i];
+  }
+
+  return () => interval;
+}
+
 /**
  * This function returns the function index for a specific call node path. This
  * is the last element of this path, or the leaf element of the path.
@@ -346,7 +363,7 @@ export function getJsImplementationForStack(
 export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
-  interval: number,
+  getSampleDuration: IndexIntoSamplesTable => Milliseconds,
   isInvertedTree: boolean,
   thread: Thread,
   categories: CategoryList
@@ -354,6 +371,7 @@ export function getTimingsForPath(
   return getTimingsForCallNodeIndex(
     getCallNodeIndexFromPath(needlePath, callNodeInfo.callNodeTable),
     callNodeInfo,
+    getSampleDuration,
     isInvertedTree,
     thread,
     categories
@@ -367,6 +385,7 @@ export function getTimingsForPath(
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
+  getSampleDuration: IndexIntoSamplesTable => Milliseconds,
   isInvertedTree: boolean,
   thread: Thread,
   categories: CategoryList
@@ -462,7 +481,7 @@ export function getTimingsForCallNodeIndex(
     if (thisStackIndex === null) {
       continue;
     }
-    const duration = samples.duration[sampleIndex];
+    const duration = getSampleDuration(sampleIndex);
 
     rootTime += duration;
 
@@ -601,7 +620,10 @@ export function getTimingsForCallNodeIndex(
   return { forPath: pathTimings, forFunc: funcTimings, rootTime };
 }
 
-export function getTimeRangeForThread(thread: Thread): StartEndRange {
+export function getTimeRangeForThread(
+  thread: Thread,
+  interval: Milliseconds
+): StartEndRange {
   if (thread.samples.length === 0) {
     return { start: Infinity, end: -Infinity };
   }
@@ -609,9 +631,7 @@ export function getTimeRangeForThread(thread: Thread): StartEndRange {
   const lastSampleIndex = thread.samples.length - 1;
   return {
     start: thread.samples.time[0],
-    end:
-      thread.samples.time[lastSampleIndex] +
-      thread.samples.duration[lastSampleIndex],
+    end: thread.samples.time[lastSampleIndex] + interval,
   };
 }
 
@@ -620,7 +640,7 @@ export function getTimeRangeIncludingAllThreads(
 ): StartEndRange {
   const completeRange = { start: Infinity, end: -Infinity };
   profile.threads.forEach(thread => {
-    const threadRange = getTimeRangeForThread(thread);
+    const threadRange = getTimeRangeForThread(thread, profile.meta.interval);
     completeRange.start = Math.min(completeRange.start, threadRange.start);
     completeRange.end = Math.max(completeRange.end, threadRange.end);
   });
@@ -935,7 +955,9 @@ export function filterThreadSamplesToRange(
   const newSamples = {
     length: sEnd - sBegin,
     time: samples.time.slice(sBegin, sEnd),
-    duration: samples.duration.slice(sBegin, sEnd),
+    duration: samples.duration
+      ? samples.duration.slice(sBegin, sEnd)
+      : undefined,
     stack: samples.stack.slice(sBegin, sEnd),
     responsiveness: samples.responsiveness.slice(sBegin, sEnd),
   };
@@ -1321,7 +1343,8 @@ export function invertCallstack(
 
 export function getSampleIndexClosestToTime(
   samples: SamplesTable,
-  time: number
+  time: number,
+  getSampleDuration: IndexIntoSamplesTable => Milliseconds
 ): IndexIntoSamplesTable {
   // Bisect to find the index of the first sample after the provided time.
   const index = bisection.right(samples.time, time);
@@ -1338,9 +1361,9 @@ export function getSampleIndexClosestToTime(
   // and its predecessor.
   const previousIndex = index - 1;
   const distanceToThis =
-    samples.time[index] + samples.duration[index] / 2 - time;
+    samples.time[index] + getSampleDuration(index) / 2 - time;
   const distanceToLast =
-    time - (samples.time[previousIndex] + samples.duration[previousIndex] / 2);
+    time - (samples.time[previousIndex] + getSampleDuration(previousIndex) / 2);
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 

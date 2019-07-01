@@ -14,6 +14,7 @@ import {
   invertCallstack,
   getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
+  getSampleDurationGetter,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import { formatTree, formatTreeIncludeCategories } from '../fixtures/utils';
@@ -46,7 +47,7 @@ describe('unfiltered call tree', function() {
 
   function callTreeFromProfile(profile: Profile): CallTree {
     const [thread] = profile.threads;
-    const { categories } = profile.meta;
+    const { interval, categories } = profile.meta;
     const defaultCategory = categories.findIndex(c => c.name === 'Other');
     const callNodeInfo = getCallNodeInfo(
       thread.stackTable,
@@ -54,13 +55,16 @@ describe('unfiltered call tree', function() {
       thread.funcTable,
       defaultCategory
     );
+    const getSampleDuration = getSampleDurationGetter(thread.samples, interval);
     const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
       thread,
       callNodeInfo,
+      getSampleDuration,
       false
     );
     return getCallTree(
       thread,
+      interval,
       callNodeInfo,
       categories,
       'combined',
@@ -85,9 +89,18 @@ describe('unfiltered call tree', function() {
       defaultCategory
     );
 
-    it('does', function() {
+    it('yields expected results', function() {
+      const getSampleDuration = getSampleDurationGetter(
+        thread.samples,
+        profile.meta.interval
+      );
       expect(
-        computeCallTreeCountsAndTimings(thread, callNodeInfo, false)
+        computeCallTreeCountsAndTimings(
+          thread,
+          callNodeInfo,
+          getSampleDuration,
+          false
+        )
       ).toEqual({
         rootCount: 1,
         rootTotalTime: 3,
@@ -402,7 +415,7 @@ describe('inverted call tree', function() {
       E                Z           Y
                                    Z
     `).profile;
-    const { categories } = profile.meta;
+    const { interval, categories } = profile.meta;
     const defaultCategory = categories.findIndex(c => c.color === 'grey');
 
     // Check the non-inverted tree first.
@@ -413,18 +426,22 @@ describe('inverted call tree', function() {
       thread.funcTable,
       defaultCategory
     );
+    const getSampleDuration = getSampleDurationGetter(thread.samples, interval);
     const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
       thread,
       callNodeInfo,
+      getSampleDuration,
       true
     );
     const callTree = getCallTree(
       thread,
+      interval,
       callNodeInfo,
       categories,
       'combined',
       callTreeCountsAndTimings
     );
+
     it('computes an non-inverted call tree', function() {
       expect(formatTreeIncludeCategories(callTree)).toEqual([
         '- A [Other] (total: 3, self: 3)',
@@ -452,10 +469,12 @@ describe('inverted call tree', function() {
     const invertedCallTreeCountsAndTimings = computeCallTreeCountsAndTimings(
       invertedThread,
       invertedCallNodeInfo,
+      getSampleDuration,
       true
     );
     const invertedCallTree = getCallTree(
       invertedThread,
+      interval,
       invertedCallNodeInfo,
       categories,
       'combined',

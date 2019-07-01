@@ -138,7 +138,10 @@ export function mergeProfiles(
     // drawn, which will help the users visualizing the different lengths of
     // the loaded profiles.
     if (thread.processShutdownTime === null && thread.unregisterTime === null) {
-      thread.unregisterTime = getTimeRangeForThread(thread).end;
+      thread.unregisterTime = getTimeRangeForThread(
+        thread,
+        profile.meta.interval
+      ).end;
     }
 
     resultProfile.threads.push(thread);

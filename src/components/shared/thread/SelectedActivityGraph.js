@@ -61,6 +61,7 @@ type CanvasProps = {|
   +selectBestAncestorCallNodeAndExpandCallTree: typeof selectBestAncestorCallNodeAndExpandCallTree,
   +selectLeafCallNode: typeof selectLeafCallNode,
   +focusCallTree: typeof focusCallTree,
+  +getSampleDuration: IndexIntoSamplesTable => Milliseconds,
 |};
 
 class SelectedThreadActivityGraphCanvas extends PureComponent<CanvasProps> {
@@ -102,6 +103,7 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<CanvasProps> {
       categories,
       samplesSelectedStates,
       treeOrderSampleComparator,
+      getSampleDuration,
     } = this.props;
 
     return (
@@ -128,6 +130,7 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<CanvasProps> {
           onSampleClick={this._onStackSampleClick}
           categories={categories}
           stacksGrowFromCeiling={true}
+          getSampleDuration={getSampleDuration}
         />
       </div>
     );
@@ -165,6 +168,7 @@ type StateProps = {|
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
   ) => number,
+  +getSampleDuration: IndexIntoSamplesTable => Milliseconds,
 |};
 
 type DispatchProps = {|
@@ -189,6 +193,7 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
       categories,
       samplesSelectedStates,
       treeOrderSampleComparator,
+      getSampleDuration,
       previewSelection,
       selectBestAncestorCallNodeAndExpandCallTree,
       selectLeafCallNode,
@@ -209,6 +214,7 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
           categories,
           samplesSelectedStates,
           treeOrderSampleComparator,
+          getSampleDuration,
           selectBestAncestorCallNodeAndExpandCallTree,
           selectLeafCallNode,
           focusCallTree,
@@ -258,6 +264,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       treeOrderSampleComparator: selectedThreadSelectors.getTreeOrderComparatorInFilteredThread(
         state
       ),
+      getSampleDuration: selectedThreadSelectors.getSampleDurationGetter(state),
       timeRange: getCommittedRange(state),
       previewSelection,
     };

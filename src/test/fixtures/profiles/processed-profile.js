@@ -119,7 +119,9 @@ export function addMarkersToThreadWithCorrespondingSamples(
     samples.time.unshift(firstMarkerTime);
     samples.stack.unshift(null);
     samples.responsiveness.unshift(null);
-    samples.duration.unshift(interval);
+    if (samples.duration) {
+      samples.duration.unshift(interval);
+    }
     samples.length++;
   }
 
@@ -127,7 +129,9 @@ export function addMarkersToThreadWithCorrespondingSamples(
     samples.time.push(lastMarkerTime);
     samples.stack.push(null);
     samples.responsiveness.push(null);
-    samples.duration.push(interval);
+    if (samples.duration) {
+      samples.duration.push(interval);
+    }
     samples.length++;
   }
 }
@@ -247,8 +251,7 @@ export function getProfileFromTextSamples(
     return _buildThreadFromTextOnlyStacks(
       textOnlyStacks,
       funcNames,
-      categories,
-      profile.meta.interval
+      categories
     );
   });
 
@@ -375,8 +378,7 @@ function _findLibNameFromFuncName(funcNameWithModifier: string): string | null {
 function _buildThreadFromTextOnlyStacks(
   textOnlyStacks: Array<string[]>,
   funcNames: Array<string>,
-  categories: CategoryList,
-  interval: Milliseconds
+  categories: CategoryList
 ): Thread {
   const thread = getEmptyThread();
 
@@ -525,7 +527,6 @@ function _buildThreadFromTextOnlyStacks(
     samples.responsiveness.push(0);
     samples.stack.push(prefix);
     samples.time.push(columnIndex);
-    samples.duration.push(interval);
   });
   return thread;
 }

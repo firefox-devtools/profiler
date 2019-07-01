@@ -16,7 +16,11 @@ import { TooltipCallNode } from '../tooltip/CallNode';
 import { getTimingsForCallNodeIndex } from '../../profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
 
-import type { Thread, CategoryList } from '../../types/profile';
+import type {
+  Thread,
+  CategoryList,
+  IndexIntoSamplesTable,
+} from '../../types/profile';
 import type { CssPixels, Milliseconds } from '../../types/units';
 import type {
   FlameGraphTiming,
@@ -45,6 +49,7 @@ export type OwnProps = {|
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
   +interval: Milliseconds,
+  +getSampleDuration: IndexIntoSamplesTable => Milliseconds,
   +isInverted: boolean,
 |};
 
@@ -253,6 +258,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       categories,
       interval,
       isInverted,
+      getSampleDuration,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -279,6 +285,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         timings={this._getTimingsForCallNodeIndex(
           callNodeIndex,
           callNodeInfo,
+          getSampleDuration,
           isInverted,
           thread,
           categories

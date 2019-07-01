@@ -18,6 +18,7 @@ import type {
   JsTracerTable,
   SamplesTable,
   StartEndSampleRange,
+  IndexIntoSamplesTable,
 } from '../../types/profile';
 import type { Selector } from '../../types/store';
 import type { ThreadViewOptions } from '../../types/state';
@@ -25,6 +26,7 @@ import type { TransformStack } from '../../types/transforms';
 import type { UniqueStringArray } from '../../utils/unique-string-array';
 import type { JsTracerTiming } from '../../types/profile-derived';
 import type { $ReturnType } from '../../types/utils';
+import type { Milliseconds } from '../../types/units';
 
 /**
  * Infer the return type from the getThreadSelectorsPerThread function. This
@@ -215,6 +217,14 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
         : JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
   );
 
+  const getSampleDurationGetter: Selector<
+    (IndexIntoSamplesTable) => Milliseconds
+  > = createSelector(
+    getSamplesTable,
+    ProfileSelectors.getProfileInterval,
+    ProfileData.getSampleDurationGetter
+  );
+
   return {
     getThread,
     getStringTable,
@@ -231,5 +241,6 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getJsTracerTable,
     getExpensiveJsTracerTiming,
     getExpensiveJsTracerLeafTiming,
+    getSampleDurationGetter,
   };
 }
