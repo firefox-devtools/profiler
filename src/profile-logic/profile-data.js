@@ -770,14 +770,16 @@ function _filterThreadByFunc(
       return newStack;
     }
 
-    const newSamples = Object.assign({}, samples, {
+    const newSamples = {
+      ...samples,
       stack: samples.stack.map(oldStack => convertStack(oldStack)),
-    });
+    };
 
-    return Object.assign({}, thread, {
+    return {
+      ...thread,
       samples: newSamples,
       stackTable: newStackTable,
-    });
+    };
   });
 }
 
@@ -868,11 +870,12 @@ export function filterThreadToSearchString(
     return result;
   }
 
-  return Object.assign({}, thread, {
+  return {
+    ...thread,
     samples: Object.assign({}, samples, {
       stack: samples.stack.map(s => (stackMatchesFilter(s) ? s : null)),
     }),
-  });
+  };
 }
 
 /**
@@ -914,9 +917,10 @@ export function filterThreadSamplesToRange(
     stack: samples.stack.slice(sBegin, sEnd),
     responsiveness: samples.responsiveness.slice(sBegin, sEnd),
   };
-  return Object.assign({}, thread, {
+  return {
+    ...thread,
     samples: newSamples,
-  });
+  };
 }
 
 export function filterCounterToRange(
@@ -1277,14 +1281,16 @@ export function invertCallstack(
       return newStack;
     }
 
-    const newSamples = Object.assign({}, samples, {
+    const newSamples = {
+      ...samples,
       stack: samples.stack.map(oldStack => convertStack(oldStack)),
-    });
+    };
 
-    return Object.assign({}, thread, {
+    return {
+      ...thread,
       samples: newSamples,
       stackTable: newStackTable,
-    });
+    };
   });
 }
 

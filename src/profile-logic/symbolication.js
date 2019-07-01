@@ -123,7 +123,7 @@ export function setFuncNames(
     const symbolIndex = stringTable.indexForString(symbolName);
     funcTable.name[funcIndex] = symbolIndex;
   });
-  return Object.assign({}, thread, { funcTable, stringTable });
+  return { ...thread, funcTable, stringTable };
 }
 
 /**
@@ -146,7 +146,7 @@ export function applyFunctionMerging(
       return newFunc === undefined ? oldFunc : newFunc;
     }),
   });
-  return Object.assign({}, thread, { frameTable });
+  return { ...thread, frameTable };
 }
 
 // Gather the symbols needed in this thread into a nested map:
