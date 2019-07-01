@@ -442,36 +442,44 @@ export async function importRunFromInstrumentsTrace(
   const { fileName, tree, addressToFrameMap, runNumber } = args;
   const core = getCoreDirForRun(tree, runNumber);
   const samples = await getRawSampleList(core);
-
-  console.log('samples', samples);
-
   const arrays = await getIntegerArrays(samples, core);
 
-  console.log('arrays', arrays);
+  console.log('samples', samples);
+  console.log('addressToFrameMap', addressToFrameMap);
+  const backtraceIDtoStack = new Map<number, FrameInfo[]>();
 
-  // We'll try to guess which thread is the main thread by assuming
-  // it's the one with the most samples.
-  const sampleCountByThreadID = new Map<number, number>();
-  let min = 100000000000;
-  let max = -10000000000;
+  function appendRecursive(k: number, stack: FrameInfo[]) {
+    const frame = addressToFrameMap.get(k);
+    if (frame) {
+      stack.push(k);
+    } else if (k in arrays) {
+      for (const addr of arrays[k]) {
+        appendRecursive(addr, stack);
+      }
+    } else {
+      const rawAddressFrame: FrameInfo = {
+        key: k,
+        name: `0x${zeroPad(k.toString(16), 16)}`,
+      };
+      addressToFrameMap.set(k, rawAddressFrame);
+      stack.push(k);
+    }
+  }
+
   for (const sample of samples) {
-    if (sample.backtraceID < min) {
-      min = sample.backtraceID;
-    }
-    if (sample.backtraceID > max) {
-      max = sample.backtraceID;
-    }
-    sampleCountByThreadID.set(
-      sample.threadID,
-      getOrElse(sampleCountByThreadID, sample.threadID, () => 0) + 1
+    const stackForSample = getOrInsert(
+      backtraceIDtoStack,
+      sample.backtraceID,
+      id => {
+        const stack: FrameInfo[] = [];
+        appendRecursive(id, stack);
+        stack.reverse();
+        return stack;
+      }
     );
   }
 
-  console.log('Minimum', min);
-  console.log('Maximum', max);
-  const counts = Array.from(sampleCountByThreadID.entries());
-  sortBy(counts, c => -c[1]);
-  const threadIDs = counts.map(c => c[0]);
+  console.log('backtraceIDtoStack', backtraceIDtoStack);
 
   return {
     name: fileName,
