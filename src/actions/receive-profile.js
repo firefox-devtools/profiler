@@ -57,6 +57,7 @@ import type {
   ThreadIndex,
   IndexIntoFuncTable,
 } from '../types/profile';
+import { assertExhaustiveCheck } from '../utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -1035,7 +1036,10 @@ export function getProfilesFromRawUrl(
       case 'local':
         throw new Error(`There is no profile to download`);
       default:
-        throw new Error(`Unknown datasource ${dataSource}`);
+        throw assertExhaustiveCheck(
+          dataSource,
+          `Unknown dataSource ${dataSource}.`
+        );
     }
 
     return {
