@@ -52,6 +52,7 @@ import type {
 import type { UrlState } from '../types/state';
 import type { ImplementationFilter } from '../types/actions';
 import type { TransformStacksPerThread } from '../types/transforms';
+import type { Milliseconds } from '../types/units';
 
 /**
  * This function is the entry point for this file. From a list of profile
@@ -186,12 +187,18 @@ export function mergeProfiles(
 
   // We can import several profiles in this view, but the comparison thread
   // really makes sense when there's only 2 profiles.
-  if (resultProfile.threads.length === 2) {
+  if (profiles.length === 2) {
     resultProfile.threads.push(
-      getComparisonThread(
-        translationMapsForCategories,
-        ...resultProfile.threads
-      )
+      getComparisonThread(translationMapsForCategories, [
+        {
+          thread: resultProfile.threads[0],
+          interval: profiles[0].meta.interval,
+        },
+        {
+          thread: resultProfile.threads[1],
+          interval: profiles[1].meta.interval,
+        },
+      ])
     );
   }
 
@@ -642,11 +649,24 @@ function combineStackTables(
  */
 function combineSamplesDiffing(
   translationMapsForStacks: TranslationMapForStacks[],
-  { samples: samples1 }: Thread,
-  { samples: samples2 }: Thread
+  threadsAndIntervals: [ThreadAndInterval, ThreadAndInterval]
 ): { samples: SamplesTable, translationMaps: TranslationMapForSamples[] } {
   const translationMaps = [new Map(), new Map()];
-  const newSamples = getEmptySamplesTable();
+  const [
+    {
+      thread: { samples: samples1 },
+      interval: interval1,
+    },
+    {
+      thread: { samples: samples2 },
+      interval: interval2,
+    },
+  ] = threadsAndIntervals;
+
+  const newSamples = {
+    ...getEmptySamplesTable(),
+    duration: [],
+  };
 
   let i = 0;
   let j = 0;
@@ -679,7 +699,7 @@ function combineSamplesDiffing(
       newSamples.time.push(samples1.time[i]);
       // We add the first thread with a negative duration, because this is the
       // base profile.
-      newSamples.duration.push(-samples1.duration[i]);
+      newSamples.duration.push(-interval1);
 
       translationMaps[0].set(i, newSamples.length);
       newSamples.length++;
@@ -700,7 +720,7 @@ function combineSamplesDiffing(
       newSamples.stack.push(newStackIndex);
       newSamples.responsiveness.push(samples2.responsiveness[j]);
       newSamples.time.push(samples2.time[j]);
-      newSamples.duration.push(samples2.duration[j]);
+      newSamples.duration.push(interval2);
 
       translationMaps[1].set(j, newSamples.length);
       newSamples.length++;
@@ -714,18 +734,22 @@ function combineSamplesDiffing(
   };
 }
 
+type ThreadAndInterval = {|
+  thread: Thread,
+  interval: Milliseconds,
+|};
+
 /**
  * This function will compute a diffing thread from 2 different threads, using
  * all the previous functions.
  */
 function getComparisonThread(
   translationMapsForCategories: TranslationMapForCategories[],
-  thread1: Thread,
-  thread2: Thread
+  threadsAndIntervals: [ThreadAndInterval, ThreadAndInterval]
 ): Thread {
   const newStringTable = new UniqueStringArray();
 
-  const threads = [thread1, thread2];
+  const threads = threadsAndIntervals.map(item => item.thread);
 
   const {
     libs: newLibTable,
@@ -758,25 +782,26 @@ function getComparisonThread(
   );
   const { samples: newSamples } = combineSamplesDiffing(
     translationMapsForStacks,
-    thread1,
-    thread2
+    threadsAndIntervals
   );
 
   const mergedThread = {
     processType: 'comparison',
     processStartupTime: Math.min(
-      thread1.processStartupTime,
-      thread2.processStartupTime
+      threads[0].processStartupTime,
+      threads[1].processStartupTime
     ),
     processShutdownTime:
       Math.max(
-        thread1.processShutdownTime || 0,
-        thread2.processShutdownTime || 0
+        threads[0].processShutdownTime || 0,
+        threads[1].processShutdownTime || 0
       ) || null,
-    registerTime: Math.min(thread1.registerTime, thread2.registerTime),
+    registerTime: Math.min(threads[0].registerTime, threads[1].registerTime),
     unregisterTime:
-      Math.max(thread1.unregisterTime || 0, thread2.unregisterTime || 0) ||
-      null,
+      Math.max(
+        threads[0].unregisterTime || 0,
+        threads[1].unregisterTime || 0
+      ) || null,
     pausedRanges: [],
     name: 'Diff between 1 and 2',
     pid: 'Diff between 1 and 2',
