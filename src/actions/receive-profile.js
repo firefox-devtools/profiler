@@ -424,8 +424,7 @@ async function _unpackGeckoProfileFromAddon(profile) {
 
 async function getProfileFromAddon(
   dispatch: Dispatch,
-  geckoProfiler: $GeckoProfiler,
-  initialLoad: boolean = false
+  geckoProfiler: $GeckoProfiler
 ): Promise<Profile> {
   dispatch(waitingForProfileFromAddon());
 
@@ -433,7 +432,7 @@ async function getProfileFromAddon(
   const rawGeckoProfile = await geckoProfiler.getProfile();
   const unpackedProfile = await _unpackGeckoProfileFromAddon(rawGeckoProfile);
   const profile = processProfile(unpackedProfile);
-  await dispatch(loadProfile(profile, { geckoProfiler }, initialLoad));
+  await dispatch(loadProfile(profile, { geckoProfiler }));
 
   return profile;
 }
@@ -520,9 +519,7 @@ export function fatalError(error: Error): Action {
   };
 }
 
-export function retrieveProfileFromAddon(
-  initialLoad: boolean = false
-): ThunkAction<Promise<void>> {
+export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
   return async dispatch => {
     try {
       const timeoutId = setTimeout(() => {
@@ -539,7 +536,7 @@ export function retrieveProfileFromAddon(
       const geckoProfiler = await window.geckoProfilerPromise;
       clearTimeout(timeoutId);
 
-      await getProfileFromAddon(dispatch, geckoProfiler, initialLoad);
+      await getProfileFromAddon(dispatch, geckoProfiler);
     } catch (error) {
       dispatch(fatalError(error));
       throw error;
@@ -1012,8 +1009,13 @@ export function getProfilesFromRawUrl(
 
     switch (dataSource) {
       case 'from-addon':
-        await dispatch(retrieveProfileFromAddon(true));
-        break;
+        await dispatch(retrieveProfileFromAddon());
+        // This is not an actual error. It's notifying it's caller to not handle
+        // url processing and finalizing profile view anymore since it's happening
+        // inside retrieveProfileFromAddon sequentially already.
+        throw new Error(
+          `We don't need to handle url process for profiles from addon`
+        );
       case 'public':
         await dispatch(retrieveProfileFromStore(pathParts[1], true));
         break;

@@ -100,7 +100,7 @@ class UrlManager extends React.PureComponent<Props> {
     if (profile) {
       setupInitialUrlState(window.location, profile);
     } else if (error) {
-      // Just silently finish the url setup and return to home.
+      // Just silently finish the url setup.
       urlSetupDone();
     } else {
       throw new Error(
@@ -154,8 +154,7 @@ class UrlManager extends React.PureComponent<Props> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    const { urlSetupPhase } = this.props;
-    if (urlSetupPhase !== 'done') {
+    if (nextProps.urlSetupPhase !== 'done') {
       return;
     }
     const newUrl = urlFromState(nextProps.urlState);
