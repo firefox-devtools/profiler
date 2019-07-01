@@ -996,7 +996,9 @@ export function retrieveProfilesToCompare(
 // the url and processing the UrlState.
 export function getProfilesFromRawUrl(
   location: Location
-): ThunkAction<Promise<Profile>> {
+): ThunkAction<
+  Promise<{| profile: Profile, shouldSetupInitialUrlState: boolean |}>
+> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter(d => d);
     let dataSource = getDataSourceFromPathParts(pathParts);
@@ -1007,15 +1009,12 @@ export function getProfilesFromRawUrl(
     }
     dispatch(setDataSource(dataSource));
 
+    let shouldSetupInitialUrlState = true;
     switch (dataSource) {
       case 'from-addon':
+        shouldSetupInitialUrlState = false;
         await dispatch(retrieveProfileFromAddon());
-        // This is not an actual error. It's notifying it's caller to not handle
-        // url processing and finalizing profile view anymore since it's happening
-        // inside retrieveProfileFromAddon sequentially already.
-        throw new Error(
-          `We don't need to handle url process for profiles from addon`
-        );
+        break;
       case 'public':
         await dispatch(retrieveProfileFromStore(pathParts[1], true));
         break;
@@ -1039,6 +1038,9 @@ export function getProfilesFromRawUrl(
         throw new Error(`Unknown datasource ${dataSource}`);
     }
 
-    return getProfile(getState());
+    return {
+      profile: getProfile(getState()),
+      shouldSetupInitialUrlState,
+    };
   };
 }
