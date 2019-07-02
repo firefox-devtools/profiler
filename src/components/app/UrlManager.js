@@ -96,7 +96,8 @@ class UrlManager extends React.PureComponent<Props> {
 
       // Manually coerce these into the proper type due to the FlowFixMe above.
       const profile: Profile = results.profile;
-      const shouldSetupInitialUrlState: boolean = results.dataSource;
+      const shouldSetupInitialUrlState: boolean =
+        results.shouldSetupInitialUrlState;
       if (shouldSetupInitialUrlState) {
         setupInitialUrlState(window.location, profile);
       } else {
