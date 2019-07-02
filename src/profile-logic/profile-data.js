@@ -15,6 +15,7 @@ import type {
   IndexIntoCategoryList,
   IndexIntoSubcategoryListForCategory,
   IndexIntoFuncTable,
+  IndexIntoFrameTable,
   IndexIntoSamplesTable,
   IndexIntoStackTable,
   ThreadIndex,
@@ -667,11 +668,11 @@ export function filterThreadByImplementation(
   implementation: string,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const { funcTable, stringTable } = thread;
+  const { funcTable, frameTable, stringTable } = thread;
 
   switch (implementation) {
     case 'cpp':
-      return _filterThreadByFunc(
+      return _filterThreadByFuncAndFrame(
         thread,
         funcIndex => {
           // Return quickly if this is a JS frame.
@@ -693,13 +694,15 @@ export function filterThreadByImplementation(
         defaultCategory
       );
     case 'js':
-      return _filterThreadByFunc(
+      return _filterThreadByFuncAndFrame(
         thread,
-        funcIndex => {
-          return (
-            funcTable.isJS[funcIndex] || funcTable.relevantForJS[funcIndex]
-          );
-        },
+        (funcIndex, frameIndex) =>
+          // This is clearly a JS frame, keep it.
+          funcTable.isJS[funcIndex] ||
+          // This function is relevant for JS.
+          funcTable.relevantForJS[funcIndex] ||
+          // This is a label frame with a category. Preserve it.
+          frameTable.category[frameIndex] !== null,
         defaultCategory
       );
     default:
@@ -707,9 +710,9 @@ export function filterThreadByImplementation(
   }
 }
 
-function _filterThreadByFunc(
+function _filterThreadByFuncAndFrame(
   thread: Thread,
-  filter: IndexIntoFuncTable => boolean,
+  filter: (IndexIntoFuncTable, IndexIntoFrameTable) => boolean,
   defaultCategory: IndexIntoCallNodeTable
 ): Thread {
   return timeCode('filterThread', () => {
@@ -736,7 +739,7 @@ function _filterThreadByFunc(
         const prefixNewStack = convertStack(stackTable.prefix[stackIndex]);
         const frameIndex = stackTable.frame[stackIndex];
         const funcIndex = frameTable.func[frameIndex];
-        if (filter(funcIndex)) {
+        if (filter(funcIndex, frameIndex)) {
           const prefixStackAndFrameIndex =
             (prefixNewStack === null ? -1 : prefixNewStack) * frameCount +
             frameIndex;

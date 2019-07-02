@@ -5,7 +5,7 @@
 import * as React from 'react';
 
 import { getStackType } from '../../profile-logic/transforms';
-import { objectEntries } from '../../utils/flow';
+import { objectEntries, assertExhaustiveCheck } from '../../utils/flow';
 import { formatNumberDependingOnInterval } from '../../utils/format-numbers';
 import NodeIcon from '../shared/NodeIcon';
 import {
@@ -210,8 +210,11 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           ? 'Unsymbolicated native'
           : 'Unsymbolicated or generated JIT instructions';
         break;
+      case 'label':
+        stackTypeLabel = 'Label';
+        break;
       default:
-        throw new Error(`Unknown stack type case "${stackType}".`);
+        throw assertExhaustiveCheck(stackType, 'Unhandled StackType.');
     }
 
     return (

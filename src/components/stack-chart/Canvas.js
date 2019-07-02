@@ -40,10 +40,12 @@ import type {
 } from '../../profile-logic/stack-timing';
 import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
+import type { ImplementationFilter } from '../../types/actions';
 
 type OwnProps = {|
   +thread: Thread,
   +interval: Milliseconds,
+  +implementationFilter: ImplementationFilter,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +stackTimingByDepth: StackTimingByDepth,
@@ -146,6 +148,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
       stackFrameHeight,
       selectedCallNodeIndex,
       categories,
+      implementationFilter,
       callNodeInfo: { callNodeTable },
       viewport: {
         containerWidth,
@@ -297,10 +300,16 @@ class StackChartCanvas extends React.PureComponent<Props> {
           // Look up information about this stack frame.
           const callNodeIndex = stackTiming.callNode[i];
           const funcIndex = callNodeTable.func[callNodeIndex];
-          const funcNameIndex = thread.funcTable.name[funcIndex];
-          const text = thread.stringTable.getString(funcNameIndex);
           const categoryIndex = callNodeTable.category[callNodeIndex];
+          const isJS = thread.funcTable.isJS[funcIndex];
+          const relevantForJS = thread.funcTable.relevantForJS[funcIndex];
+          const funcNameIndex = thread.funcTable.name[funcIndex];
           const category = categories[categoryIndex];
+
+          const text =
+            implementationFilter === 'js' && !relevantForJS && !isJS
+              ? category.name
+              : thread.stringTable.getString(funcNameIndex);
 
           const isHovered =
             hoveredItem &&

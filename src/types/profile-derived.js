@@ -153,7 +153,7 @@ export type AccumulatedCounterSamples = {|
   +accumulatedCounts: number[],
 |};
 
-export type StackType = 'js' | 'native' | 'unsymbolicated';
+export type StackType = 'js' | 'native' | 'unsymbolicated' | 'label';
 
 export type GlobalTrack =
   | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}

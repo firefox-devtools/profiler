@@ -18,7 +18,10 @@ import {
   getCategories,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import {
+  getSelectedThreadIndex,
+  getImplementationFilter,
+} from '../../selectors/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
@@ -39,7 +42,10 @@ import type {
   UnitIntervalOfProfileRange,
 } from '../../types/units';
 import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
-import type { PreviewSelection } from '../../types/actions';
+import type {
+  PreviewSelection,
+  ImplementationFilter,
+} from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
 
 require('./index.css');
@@ -48,6 +54,7 @@ const STACK_FRAME_HEIGHT = 16;
 
 type StateProps = {|
   +thread: Thread,
+  +implementationFilter: ImplementationFilter,
   +maxStackDepth: number,
   +stackTimingByDepth: StackTimingByDepth,
   +timeRange: { start: Milliseconds, end: Milliseconds },
@@ -135,6 +142,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       categories,
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
+      implementationFilter,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -169,6 +177,7 @@ class StackChartGraph extends React.PureComponent<Props> {
               chartProps={{
                 interval,
                 thread,
+                implementationFilter,
                 stackTimingByDepth,
                 // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                 updatePreviewSelection,
@@ -207,6 +216,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       threadIndex: getSelectedThreadIndex(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
       categories: getCategories(state),
+      implementationFilter: getImplementationFilter(state),
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
