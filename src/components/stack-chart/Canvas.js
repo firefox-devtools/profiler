@@ -301,15 +301,23 @@ class StackChartCanvas extends React.PureComponent<Props> {
           const callNodeIndex = stackTiming.callNode[i];
           const funcIndex = callNodeTable.func[callNodeIndex];
           const categoryIndex = callNodeTable.category[callNodeIndex];
+          const subCategoryIndex = callNodeTable.subcategory[callNodeIndex];
           const isJS = thread.funcTable.isJS[funcIndex];
           const relevantForJS = thread.funcTable.relevantForJS[funcIndex];
           const funcNameIndex = thread.funcTable.name[funcIndex];
           const category = categories[categoryIndex];
+          const subcategory = category.subcategories[subCategoryIndex];
 
-          const text =
-            implementationFilter === 'js' && !relevantForJS && !isJS
-              ? category.name
-              : thread.stringTable.getString(funcNameIndex);
+          let text;
+          if (implementationFilter === 'js' && !relevantForJS && !isJS) {
+            if (subcategory === 'Other') {
+              text = category.name;
+            } else {
+              text = subcategory;
+            }
+          } else {
+            text = thread.stringTable.getString(funcNameIndex);
+          }
 
           const isHovered =
             hoveredItem &&
