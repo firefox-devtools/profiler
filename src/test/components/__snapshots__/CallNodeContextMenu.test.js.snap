@@ -1,16 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`calltree/CallNodeContextMenu basic rendering renders a blank context menu (with only 1 div) before it is open 1`] = `
-<nav
-  class="react-contextmenu"
-  role="menu"
-  style="position: fixed; opacity: 0; pointer-events: none;"
-  tabindex="-1"
->
-  <div />
-</nav>
-`;
-
 exports[`calltree/CallNodeContextMenu basic rendering renders a full context menu when open, with many nav items 1`] = `
 <nav
   class="react-contextmenu"

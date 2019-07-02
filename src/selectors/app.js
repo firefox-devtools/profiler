@@ -24,7 +24,7 @@ import {
 } from '../app-logic/constants';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { AppState, AppViewState } from '../types/state';
+import type { AppState, AppViewState, UrlSetupPhase } from '../types/state';
 import type { Selector } from '../types/store';
 import type { CssPixels } from '../types/units';
 import type { ThreadIndex } from '../types/profile';
@@ -34,8 +34,8 @@ import type { ThreadIndex } from '../types/profile';
  */
 export const getApp: Selector<AppState> = state => state.app;
 export const getView: Selector<AppViewState> = state => getApp(state).view;
-export const getIsUrlSetupDone: Selector<boolean> = state =>
-  getApp(state).isUrlSetupDone;
+export const getUrlSetupPhase: Selector<UrlSetupPhase> = state =>
+  getApp(state).urlSetupPhase;
 export const getHasZoomedViaMousewheel: Selector<boolean> = state => {
   return getApp(state).hasZoomedViaMousewheel;
 };

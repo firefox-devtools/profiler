@@ -270,6 +270,26 @@ describe('calltree/ProfileCallTreeView', function() {
     expect(getRowElement('A')).toHaveClass('isSelected');
     expect(getRowElement('A')).not.toHaveClass('isRightClicked');
   });
+
+  it('selects the heaviest stack if it is not idle', () => {
+    const { profile } = getProfileFromTextSamples(`
+      A  A  A  A  A
+      B  C  C  C  D
+      E           E
+    `);
+    const { getRowElement } = setup(profile);
+    expect(getRowElement('C')).toHaveClass('isSelected');
+  });
+
+  it('does not select the heaviest stack if it is idle', () => {
+    const { profile } = getProfileFromTextSamples(`
+      A  A            A            A            A
+      B  C[cat:Idle]  C[cat:Idle]  C[cat:Idle]  D
+      E                                         E
+    `);
+    const { container } = setup(profile);
+    expect(container.querySelector('.treeViewRow.isSelected')).toBeFalsy();
+  });
 });
 
 describe('calltree/ProfileCallTreeView EmptyReasons', function() {

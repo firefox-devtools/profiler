@@ -18,6 +18,7 @@ import type {
   CategoryList,
   IndexIntoSamplesTable,
 } from '../../../types/profile';
+import type { SelectedState } from '../../../types/profile-derived';
 import type { Milliseconds, CssPixels } from '../../../types/units';
 import type {
   CategoryDrawStyles,
@@ -32,7 +33,7 @@ export type Props = {|
   +rangeEnd: Milliseconds,
   +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
   +categories: CategoryList,
-  +samplesSelectedStates?: boolean[],
+  +samplesSelectedStates: SelectedState[],
   +treeOrderSampleComparator?: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable

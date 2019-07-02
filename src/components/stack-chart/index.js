@@ -13,7 +13,6 @@ import StackChartCanvas from './Canvas';
 import {
   getCommittedRange,
   getProfileInterval,
-  getProfileViewOptions,
   getPreviewSelection,
   getScrollToSelectionGeneration,
   getCategories,
@@ -58,7 +57,7 @@ type StateProps = {|
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
-  +isContextMenuVisible: boolean,
+  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
 |};
 
@@ -107,6 +106,8 @@ class StackChartGraph extends React.PureComponent<Props> {
     );
   };
 
+  _shouldDisplayTooltips = () => this.props.rightClickedCallNodeIndex === null;
+
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
     this._viewport = viewport;
   };
@@ -133,7 +134,6 @@ class StackChartGraph extends React.PureComponent<Props> {
       callNodeInfo,
       categories,
       selectedCallNodeIndex,
-      isContextMenuVisible,
       scrollToSelectionGeneration,
     } = this.props;
 
@@ -180,7 +180,7 @@ class StackChartGraph extends React.PureComponent<Props> {
                 selectedCallNodeIndex,
                 onSelectionChange: this._onSelectedCallNodeChange,
                 onRightClick: this._onRightClickedCallNodeChange,
-                disableTooltips: isContextMenuVisible,
+                shouldDisplayTooltips: this._shouldDisplayTooltips,
                 scrollToSelectionGeneration,
               }}
             />
@@ -210,7 +210,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      isContextMenuVisible: getProfileViewOptions(state).isContextMenuVisible,
+      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
+        state
+      ),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     };
   },

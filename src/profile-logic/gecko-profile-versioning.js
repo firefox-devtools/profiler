@@ -568,5 +568,36 @@ const _upgraders = {
     }
     convertToVersion15Recursive(profile);
   },
+  [16]: profile => {
+    // profile.meta.categories now has a subcategories property on each element,
+    // with an array of subcategories for that category.
+    // And the frameTable has another column, subcategory.
+    function convertToVersion16Recursive(p) {
+      for (const category of p.meta.categories) {
+        category.subcategories = ['Other'];
+      }
+      for (const thread of p.threads) {
+        const { frameTable } = thread;
+        frameTable.schema.subcategory = 7;
+        for (
+          let frameIndex = 0;
+          frameIndex < frameTable.data.length;
+          frameIndex++
+        ) {
+          // Set a non-null subcategory on every frame that has a non-null category.
+          // The subcategory is going to be subcategory 0, the "Other" subcategory.
+          const category =
+            frameTable.data[frameIndex][frameTable.schema.category];
+          if (category) {
+            frameTable.data[frameIndex][frameTable.schema.subcategory] = 0;
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersion16Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion16Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */
