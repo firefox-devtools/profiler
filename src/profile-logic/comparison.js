@@ -477,8 +477,17 @@ function combineFuncTables(
         `);
       }
       const name = stringTable.getString(funcTable.name[i]);
+      const lineNumber = funcTable.lineNumber[i];
 
-      const funcKey = [name, newResourceIndex].join('#');
+      // Entries in this table can be either:
+      // 1. native: in that case they'll have a resource index and a name. The
+      //    name should be unique in a specific resource.
+      // 2. JS: they'll have a resource index and a name too, but the name is
+      //    not garanteed to be unique in a resource. That's why we use the line
+      //    number as well.
+      // 3. Label frames: they have no resource, only a name. So we can't do
+      //    better than this.
+      const funcKey = [name, newResourceIndex, lineNumber].join('#');
       const insertedFuncIndex = mapOfInsertedFuncs.get(funcKey);
       if (insertedFuncIndex !== undefined) {
         translationMap.set(i, insertedFuncIndex);
@@ -495,7 +504,7 @@ function combineFuncTables(
       newFuncTable.fileName.push(
         fileName === null ? null : newStringTable.indexForString(fileName)
       );
-      newFuncTable.lineNumber.push(funcTable.lineNumber[i]);
+      newFuncTable.lineNumber.push(lineNumber);
       newFuncTable.columnNumber.push(funcTable.columnNumber[i]);
 
       newFuncTable.length++;
@@ -511,6 +520,8 @@ function combineFuncTables(
  * This combines the frame tables for a list of threads. It returns the new
  * frame table with the translation maps to be used in subsequent merging
  * functions.
+ * Note that we don't try to merge the frames of the source threads, because
+ * that's not needed to get a diffing call tree.
  */
 function combineFrameTables(
   translationMapsForCategories: TranslationMapForCategories[],
@@ -585,6 +596,8 @@ function combineFrameTables(
  * This combines the stack tables for a list of threads. It returns the new
  * stack table with the translation maps to be used in subsequent merging
  * functions.
+ * Note that we don't try to merge the stacks of the source threads, because
+ * that's not needed to get a diffing call tree.
  */
 function combineStackTables(
   translationMapsForCategories: TranslationMapForCategories[],
