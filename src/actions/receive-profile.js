@@ -1020,7 +1020,9 @@ export function getProfilesFromRawUrl(
         await dispatch(retrieveProfileFromStore(pathParts[1], true));
         break;
       case 'from-url':
-        await dispatch(retrieveProfileOrZipFromUrl(pathParts[1], true));
+        await dispatch(
+          retrieveProfileOrZipFromUrl(decodeURIComponent(pathParts[1]), true)
+        );
         break;
       case 'compare': {
         const query = queryString.parse(location.search.substr(1), {
