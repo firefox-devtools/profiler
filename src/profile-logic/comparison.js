@@ -539,11 +539,6 @@ function combineFrameTables(
     const categoryTranslationMap = translationMapsForCategories[threadIndex];
 
     for (let i = 0; i < frameTable.length; i++) {
-      const addressIndex = frameTable.address[i];
-      const address =
-        typeof addressIndex === 'number' && addressIndex >= 0
-          ? stringTable.getString(addressIndex)
-          : null;
       const category = frameTable.category[i];
       const newCategory =
         category === null ? null : categoryTranslationMap.get(category);
@@ -568,9 +563,7 @@ function combineFrameTables(
           ? stringTable.getString(implementationIndex)
           : null;
 
-      newFrameTable.address.push(
-        address === null ? -1 : newStringTable.indexForString(address)
-      );
+      newFrameTable.address.push(frameTable.address[i]);
       newFrameTable.category.push(newCategory);
       newFrameTable.func.push(newFunc);
       newFrameTable.implementation.push(
