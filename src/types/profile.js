@@ -177,7 +177,7 @@ export type ResourceTable = {|
   // See https://github.com/firefox-devtools/profiler/issues/652
   lib: Array<IndexIntoLibs | void | null | -1>,
   name: Array<IndexIntoStringTable | -1>,
-  host: Array<IndexIntoStringTable | void>,
+  host: Array<IndexIntoStringTable | void | null>,
   type: resourceTypeEnum[],
 |};
 
