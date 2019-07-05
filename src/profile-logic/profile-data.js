@@ -912,6 +912,29 @@ export function filterThreadSamplesToRange(
     rangeEnd
   );
   const newSamples = {
+    ...samples,
+    stack: samples.stack.map((stackIndex, sampleIndex) =>
+      sampleIndex >= sBegin && sampleIndex < sEnd ? stackIndex : null
+    ),
+  };
+  return {
+    ...thread,
+    samples: newSamples,
+  };
+}
+
+export function trimThreadSamplesToRange(
+  thread: Thread,
+  rangeStart: number,
+  rangeEnd: number
+): Thread {
+  const { samples } = thread;
+  const [sBegin, sEnd] = _getSampleIndexRangeForSelection(
+    samples,
+    rangeStart,
+    rangeEnd
+  );
+  const newSamples = {
     length: sEnd - sBegin,
     time: samples.time.slice(sBegin, sEnd),
     stack: samples.stack.slice(sBegin, sEnd),

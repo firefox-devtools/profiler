@@ -1240,7 +1240,9 @@ describe('actions/receive-profile', function() {
         'thread=0&range=0.0011_0.0043',
         'thread=1'
       );
-      expect(resultProfile.threads[0].samples).toHaveLength(3);
+      expect(
+        resultProfile.threads[0].samples.stack.filter(stack => stack)
+      ).toHaveLength(3);
       expect(resultProfile.threads[0].markers).toHaveLength(4);
     });
 

@@ -6,6 +6,7 @@
 import { processProfile } from '../../profile-logic/process-profile';
 import { sanitizePII } from '../../profile-logic/sanitize';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
 import type { RemoveProfileInformation } from '../../types/profile-derived';
 
@@ -33,6 +34,17 @@ describe('sanitizePII', function() {
     const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
     // First and last threads are removed and now there are only 1 thread.
     expect(sanitizedProfile.threads.length).toEqual(1);
+  });
+
+  it('should remove the range if provided', function() {
+    const { profile } = getProfileFromTextSamples('A  B  C  D  E  F');
+    expect(profile.threads[0].samples).toHaveLength(6);
+
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldFilterToCommittedRange: { start: 1, end: 5 },
+    });
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
+    expect(sanitizedProfile.threads[0].samples).toHaveLength(4);
   });
 
   it('should sanitize counters if its thread is deleted', function() {

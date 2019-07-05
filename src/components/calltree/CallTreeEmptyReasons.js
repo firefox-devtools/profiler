@@ -32,7 +32,9 @@ class CallTreeEmptyReasons extends PureComponent<Props> {
 
     if (thread.samples.length === 0) {
       reason = 'This thread has no samples.';
-    } else if (rangeFilteredThread.samples.length === 0) {
+    } else if (
+      rangeFilteredThread.samples.stack.every(stack => stack === null)
+    ) {
       reason = 'Broaden the selected range to view samples.';
     } else {
       reason = oneLine`
