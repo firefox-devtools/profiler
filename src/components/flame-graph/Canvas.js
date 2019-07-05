@@ -33,6 +33,8 @@ import type { Viewport } from '../shared/chart/Viewport';
 
 export type OwnProps = {|
   +thread: Thread,
+  +unfilteredThread: Thread,
+  +sampleIndexOffset: number,
   +maxStackDepth: number,
   +flameGraphTiming: FlameGraphTiming,
   +callNodeInfo: CallNodeInfo,
@@ -246,6 +248,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
   }: HoveredStackTiming): React.Node => {
     const {
       thread,
+      unfilteredThread,
+      sampleIndexOffset,
       flameGraphTiming,
       callTree,
       callNodeInfo,
@@ -282,6 +286,8 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
           interval,
           isInverted,
           thread,
+          unfilteredThread,
+          sampleIndexOffset,
           categories
         )}
       />

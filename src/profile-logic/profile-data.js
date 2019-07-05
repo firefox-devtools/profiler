@@ -352,6 +352,8 @@ export function getTimingsForPath(
   interval: Milliseconds,
   isInvertedTree: boolean,
   thread: Thread,
+  unfilteredThread: Thread,
+  sampleIndexOffset: number,
   categories: CategoryList
 ) {
   return getTimingsForCallNodeIndex(
@@ -360,6 +362,8 @@ export function getTimingsForPath(
     interval,
     isInvertedTree,
     thread,
+    unfilteredThread,
+    sampleIndexOffset,
     categories
   );
 }
@@ -367,6 +371,10 @@ export function getTimingsForPath(
 /**
  * This function returns the timings for a specific path. The algorithm is
  * adjusted when the call tree is inverted.
+ * Note that the unfilteredThread should be the original thread before any filtering
+ * (by range or other) happens. Also sampleIndexOffset needs to be properly
+ * specified and is the offset to be applied on thread's indexes to access
+ * the same samples in unfilteredThread.
  */
 export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
@@ -374,9 +382,15 @@ export function getTimingsForCallNodeIndex(
   interval: Milliseconds,
   isInvertedTree: boolean,
   thread: Thread,
+  unfilteredThread: Thread,
+  sampleIndexOffset: number,
   categories: CategoryList
 ): TimingsForPath {
   const { samples, stackTable, funcTable } = thread;
+  const {
+    samples: unfilteredSamples,
+    stackTable: unfilteredStackTable,
+  } = unfilteredThread;
 
   const pathTimings: ItemTimings = {
     selfTime: {
@@ -422,6 +436,7 @@ export function getTimingsForCallNodeIndex(
       breakdownByCategory: BreakdownByCategory | null,
       value: number,
     },
+    sampleIndex: IndexIntoSamplesTable,
     stackIndex: IndexIntoStackTable,
     funcIndex: IndexIntoFuncTable,
     duration: Milliseconds
@@ -443,21 +458,29 @@ export function getTimingsForCallNodeIndex(
     }
     timings.breakdownByImplementation[implementation] += duration;
 
-    // step 4: find the category value for this stack
-    const categoryIndex = stackTable.category[stackIndex];
-    const subcategoryIndex = stackTable.subcategory[stackIndex];
+    // step 4: find the category value for this stack. We want to use the
+    // category of the unfilteredThread.
+    const unfilteredStackIndex =
+      unfilteredSamples.stack[sampleIndex + sampleIndexOffset];
+    if (unfilteredStackIndex !== null) {
+      const categoryIndex = unfilteredStackTable.category[unfilteredStackIndex];
+      const subcategoryIndex =
+        unfilteredStackTable.subcategory[unfilteredStackIndex];
 
-    // step 5: increment the right value in the category breakdown
-    if (timings.breakdownByCategory === null) {
-      timings.breakdownByCategory = categories.map(category => ({
-        entireCategoryValue: 0,
-        subcategoryBreakdown: Array(category.subcategories.length).fill(0),
-      }));
+      // step 5: increment the right value in the category breakdown
+      if (timings.breakdownByCategory === null) {
+        timings.breakdownByCategory = categories.map(category => ({
+          entireCategoryValue: 0,
+          subcategoryBreakdown: Array(category.subcategories.length).fill(0),
+        }));
+      }
+      timings.breakdownByCategory[
+        categoryIndex
+      ].entireCategoryValue += duration;
+      timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
+        subcategoryIndex
+      ] += duration;
     }
-    timings.breakdownByCategory[categoryIndex].entireCategoryValue += duration;
-    timings.breakdownByCategory[categoryIndex].subcategoryBreakdown[
-      subcategoryIndex
-    ] += duration;
   }
 
   // Loop over each sample and accumulate the self time, running time, and
@@ -482,6 +505,7 @@ export function getTimingsForCallNodeIndex(
       if (thisNodeIndex === needleNodeIndex) {
         accumulateDataToTimings(
           pathTimings.selfTime,
+          sampleIndex,
           thisStackIndex,
           thisFunc,
           duration
@@ -491,6 +515,7 @@ export function getTimingsForCallNodeIndex(
       if (thisFunc === needleFuncIndex) {
         accumulateDataToTimings(
           funcTimings.selfTime,
+          sampleIndex,
           thisStackIndex,
           thisFunc,
           duration
@@ -524,6 +549,7 @@ export function getTimingsForCallNodeIndex(
         if (!isInvertedTree) {
           accumulateDataToTimings(
             pathTimings.totalTime,
+            sampleIndex,
             thisStackIndex,
             thisFunc,
             duration
@@ -542,6 +568,7 @@ export function getTimingsForCallNodeIndex(
         if (!isInvertedTree) {
           accumulateDataToTimings(
             funcTimings.totalTime,
+            sampleIndex,
             thisStackIndex,
             thisFunc,
             duration
@@ -575,6 +602,7 @@ export function getTimingsForCallNodeIndex(
           // This root node is the same function as the passed call node path.
           accumulateDataToTimings(
             funcTimings.selfTime,
+            sampleIndex,
             currentStackIndex,
             currentFuncIndex,
             duration
@@ -586,6 +614,7 @@ export function getTimingsForCallNodeIndex(
           // found in this stack earlier.
           accumulateDataToTimings(
             pathTimings.totalTime,
+            sampleIndex,
             currentStackIndex,
             currentFuncIndex,
             duration
@@ -597,6 +626,7 @@ export function getTimingsForCallNodeIndex(
           // of the passed path was found in this stack earlier.
           accumulateDataToTimings(
             funcTimings.totalTime,
+            sampleIndex,
             currentStackIndex,
             currentFuncIndex,
             duration
