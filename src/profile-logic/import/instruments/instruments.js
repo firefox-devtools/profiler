@@ -439,7 +439,7 @@ function getCoreDirForRun(
 export async function importRunFromInstrumentsTrace(
   args
 ): Promise<ProfileGroup> {
-  const { fileName, tree, addressToFrameMap, runNumber } = args;
+  const { tree, addressToFrameMap, runNumber } = args;
   const core = getCoreDirForRun(tree, runNumber);
   const samples = await getRawSampleList(core);
   const arrays = await getIntegerArrays(samples, core);
@@ -479,11 +479,13 @@ export async function importRunFromInstrumentsTrace(
     );
   }
 
+  for (const sample of samples) {
+    sample.backtraceStack = backtraceIDtoStack.get(sample.backtraceID);
+  }
   console.log('backtraceIDtoStack', backtraceIDtoStack);
 
   return {
-    name: fileName,
-    indexToView: 0,
+    samples,
   };
 }
 
@@ -632,17 +634,21 @@ export async function convertInstrumentsProfile(
   }
 
   const profile = getEmptyProfile();
-
-  const indexToView = 0;
+  const runsSet = [];
 
   for (const run of runs) {
     const { addressToFrameMap, number } = run;
+    if (runsSet.includes(number)) continue;
+    // if we encounter same run then we don't need to proceed again
+    else {
+      runsSet.push(number);
+    }
     const group = await importRunFromInstrumentsTrace({
-      fileName: entry.name,
       tree,
       addressToFrameMap,
       runNumber: number,
     });
+    console.log('group', group);
   }
 
   return profile;
