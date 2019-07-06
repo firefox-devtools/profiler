@@ -603,6 +603,21 @@ export function isInstrumentsProfile(file: mixed): boolean {
   return fileMetaData.pop() === 'trace';
 }
 
+function pushThreadsInProfile(profile, addressToFrameMap, samples) {
+  const threadIDToSamples = new Map();
+  for (const sample of samples) {
+    if (threadIDToSamples.has(sample.threadID)) {
+      threadIDToSamples.set(sample.threadID, [
+        ...threadIDToSamples.get(sample.threadID),
+        sample,
+      ]);
+    } else {
+      threadIDToSamples.set(sample.threadID, [sample]);
+    }
+  }
+  console.log('threadIDToSamples', threadIDToSamples);
+}
+
 export async function convertInstrumentsProfile(
   entry: mixed,
   fileReaderHelper
@@ -639,7 +654,7 @@ export async function convertInstrumentsProfile(
   for (const run of runs) {
     const { addressToFrameMap, number } = run;
     if (runsSet.includes(number)) continue;
-    // if we encounter same run then we don't need to proceed again
+    // if we encounter same run then we don't need to process it again
     else {
       runsSet.push(number);
     }
@@ -649,6 +664,7 @@ export async function convertInstrumentsProfile(
       runNumber: number,
     });
     console.log('group', group);
+    pushThreadsInProfile(profile, addressToFrameMap, group.samples);
   }
 
   return profile;
