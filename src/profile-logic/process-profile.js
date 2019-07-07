@@ -859,9 +859,10 @@ export function adjustSampleTimestamps(
   samples: SamplesTable,
   delta: Milliseconds
 ): SamplesTable {
-  return Object.assign({}, samples, {
+  return {
+    ...samples,
     time: samples.time.map(time => time + delta),
-  });
+  };
 }
 
 /**
@@ -890,7 +891,8 @@ export function adjustMarkerTimestamps(
   markers: RawMarkerTable,
   delta: Milliseconds
 ): RawMarkerTable {
-  return Object.assign({}, markers, {
+  return {
+    ...markers,
     time: markers.time.map(time => time + delta),
     data: markers.data.map(data => {
       if (!data) {
@@ -947,7 +949,7 @@ export function adjustMarkerTimestamps(
       // for at least two cases where we forgot to do the adjustment initially.
       return newData;
     }),
-  });
+  };
 }
 
 function _adjustCounterTimestamps<T: Object>(

@@ -73,13 +73,13 @@ export type Pid = number | string;
  * category would be lost if it wasn't inherited into the
  * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
  */
-export type StackTable = {
+export type StackTable = {|
   frame: IndexIntoFrameTable[],
   category: IndexIntoCategoryList[],
   subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
   length: number,
-};
+|};
 
 /**
  * The Gecko Profiler records samples of what function was currently being executed, and
@@ -88,12 +88,12 @@ export type StackTable = {
  * information that is needed to represent that sampled function. Most of the entries
  * are indices into other tables.
  */
-export type SamplesTable = {
+export type SamplesTable = {|
   responsiveness: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
   length: number,
-};
+|};
 
 /**
  * This is the base abstract class that marker payloads inherit from. This probably isn't
@@ -119,18 +119,18 @@ export type ProfilerMarkerPayload = {
  * create markers with durations, or even take a string-only marker and parse
  * it into a structured marker.
  */
-export type RawMarkerTable = {
+export type RawMarkerTable = {|
   data: MarkerPayload[],
   name: IndexIntoStringTable[],
   time: number[],
   length: number,
-};
+|};
 
 /**
  * Frames contain the context information about the function execution at the moment in
  * time. The relationship between frames is defined by the StackTable.
  */
-export type FrameTable = {
+export type FrameTable = {|
   address: IndexIntoStringTable[],
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
@@ -140,7 +140,7 @@ export type FrameTable = {
   column: (number | null)[],
   optimizations: ({} | null)[],
   length: number,
-};
+|};
 
 /**
  * Multiple frames represent individual invocations of a function, while the FuncTable
@@ -149,7 +149,7 @@ export type FrameTable = {
  * these samples are collapsed to point to a single function rather than multiple memory
  * locations.
  */
-export type FuncTable = {
+export type FuncTable = {|
   address: MemoryOffset[],
   isJS: boolean[],
   length: number,
@@ -159,13 +159,13 @@ export type FuncTable = {
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
   columnNumber: Array<number | null>,
-};
+|};
 
 /**
  * The ResourceTable holds additional information about functions. It tends to contain
  * sparse arrays. Multiple functions can point to the same resource.
  */
-export type ResourceTable = {
+export type ResourceTable = {|
   length: number,
   // lib SHOULD be void in this case, but some profiles in the store have null or -1
   // here. We should investigate and provide an upgrader.
@@ -174,14 +174,14 @@ export type ResourceTable = {
   name: Array<IndexIntoStringTable | -1>,
   host: Array<IndexIntoStringTable | void>,
   type: resourceTypeEnum[],
-};
+|};
 
 /**
  * Information about libraries, for instance the Firefox executables, and its memory
  * offsets. This information is used for symbolicating C++ memory addresses into
  * actual function names. For instance turning 0x23459234 into "void myFuncName()".
  */
-export type Lib = {
+export type Lib = {|
   start: MemoryOffset,
   end: MemoryOffset,
   offset: MemoryOffset,
@@ -191,7 +191,7 @@ export type Lib = {
   debugName: string, // e.g. "firefox"
   debugPath: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
   breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
-};
+|};
 
 export type Category = {|
   name: string,
@@ -223,14 +223,14 @@ export type PageList = Array<Page>;
 /**
  * Information about a period of time during which no samples were collected.
  */
-export type PausedRange = {
+export type PausedRange = {|
   // null if the profiler was already paused at the beginning of the period of
   // time that was present in the profile buffer
   startTime: Milliseconds | null,
   // null if the profiler was still paused when the profile was captured
   endTime: Milliseconds | null,
   reason: 'profiler-paused' | 'collecting',
-};
+|};
 
 export type JsTracerTable = {|
   events: Array<IndexIntoStringTable>,
@@ -266,7 +266,7 @@ export type Counter = {|
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
-export type Thread = {
+export type Thread = {|
   // This list of process types is defined here:
   // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
   processType:
@@ -302,7 +302,7 @@ export type Thread = {
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   jsTracer?: JsTracerTable,
-};
+|};
 
 export type ExtensionTable = {|
   baseURL: string[],
@@ -406,11 +406,11 @@ export type ProfileMeta = {|
 /**
  * All of the data for a processed profile.
  */
-export type Profile = {
+export type Profile = {|
   meta: ProfileMeta,
   pages?: PageList,
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.
   counters?: Counter[],
   threads: Thread[],
-};
+|};

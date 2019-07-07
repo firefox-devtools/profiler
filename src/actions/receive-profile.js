@@ -57,6 +57,7 @@ import type {
   ThreadIndex,
   IndexIntoFuncTable,
 } from '../types/profile';
+import { assertExhaustiveCheck } from '../utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -424,8 +425,7 @@ async function _unpackGeckoProfileFromAddon(profile) {
 
 async function getProfileFromAddon(
   dispatch: Dispatch,
-  geckoProfiler: $GeckoProfiler,
-  initialLoad: boolean = false
+  geckoProfiler: $GeckoProfiler
 ): Promise<Profile> {
   dispatch(waitingForProfileFromAddon());
 
@@ -433,7 +433,7 @@ async function getProfileFromAddon(
   const rawGeckoProfile = await geckoProfiler.getProfile();
   const unpackedProfile = await _unpackGeckoProfileFromAddon(rawGeckoProfile);
   const profile = processProfile(unpackedProfile);
-  await dispatch(loadProfile(profile, { geckoProfiler }, initialLoad));
+  await dispatch(loadProfile(profile, { geckoProfiler }));
 
   return profile;
 }
@@ -520,9 +520,7 @@ export function fatalError(error: Error): Action {
   };
 }
 
-export function retrieveProfileFromAddon(
-  initialLoad: boolean = false
-): ThunkAction<Promise<void>> {
+export function retrieveProfileFromAddon(): ThunkAction<Promise<void>> {
   return async dispatch => {
     try {
       const timeoutId = setTimeout(() => {
@@ -539,7 +537,7 @@ export function retrieveProfileFromAddon(
       const geckoProfiler = await window.geckoProfilerPromise;
       clearTimeout(timeoutId);
 
-      await getProfileFromAddon(dispatch, geckoProfiler, initialLoad);
+      await getProfileFromAddon(dispatch, geckoProfiler);
     } catch (error) {
       dispatch(fatalError(error));
       throw error;
@@ -999,7 +997,9 @@ export function retrieveProfilesToCompare(
 // the url and processing the UrlState.
 export function getProfilesFromRawUrl(
   location: Location
-): ThunkAction<Promise<Profile>> {
+): ThunkAction<
+  Promise<{| profile: Profile, shouldSetupInitialUrlState: boolean |}>
+> {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter(d => d);
     let dataSource = getDataSourceFromPathParts(pathParts);
@@ -1010,15 +1010,19 @@ export function getProfilesFromRawUrl(
     }
     dispatch(setDataSource(dataSource));
 
+    let shouldSetupInitialUrlState = true;
     switch (dataSource) {
       case 'from-addon':
-        await dispatch(retrieveProfileFromAddon(true));
+        shouldSetupInitialUrlState = false;
+        await dispatch(retrieveProfileFromAddon());
         break;
       case 'public':
         await dispatch(retrieveProfileFromStore(pathParts[1], true));
         break;
       case 'from-url':
-        await dispatch(retrieveProfileOrZipFromUrl(pathParts[1], true));
+        await dispatch(
+          retrieveProfileOrZipFromUrl(decodeURIComponent(pathParts[1]), true)
+        );
         break;
       case 'compare': {
         const query = queryString.parse(location.search.substr(1), {
@@ -1034,9 +1038,15 @@ export function getProfilesFromRawUrl(
       case 'local':
         throw new Error(`There is no profile to download`);
       default:
-        throw new Error(`Unknown datasource ${dataSource}`);
+        throw assertExhaustiveCheck(
+          dataSource,
+          `Unknown dataSource ${dataSource}.`
+        );
     }
 
-    return getProfile(getState());
+    return {
+      profile: getProfile(getState()),
+      shouldSetupInitialUrlState,
+    };
   };
 }

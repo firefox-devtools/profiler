@@ -56,7 +56,7 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
           funcNames
         );
       });
-      return Object.assign({}, state, { threads });
+      return { ...state, threads };
     }
     case 'DONE_SYMBOLICATING': {
       if (state === null) {

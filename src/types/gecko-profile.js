@@ -28,14 +28,14 @@ export type GeckoMarkers = {
  * processed format. See `docs-developer/gecko-profile-format.md` for more
  * information.
  */
-export type GeckoMarkerStruct = {
+export type GeckoMarkerStruct = {|
   name: IndexIntoStringTable[],
   time: Milliseconds[],
   data: MarkerPayload_Gecko[],
   length: number,
-};
+|};
 
-export type GeckoMarkerStack = {
+export type GeckoMarkerStack = {|
   name: 'SyncProfile',
   registerTime: null,
   unregisterTime: null,
@@ -44,14 +44,14 @@ export type GeckoMarkerStack = {
   pid: number,
   markers: GeckoMarkers,
   samples: GeckoSamples,
-};
+|};
 
-export type GeckoSamples = {
-  schema: {
+export type GeckoSamples = {|
+  schema: {|
     stack: 0,
     time: 1,
     responsiveness: 2,
-  },
+  |},
   data: Array<
     [
       null | IndexIntoGeckoStackTable,
@@ -61,17 +61,17 @@ export type GeckoSamples = {
       Milliseconds,
     ]
   >,
-};
+|};
 
-export type GeckoSampleStruct = {
+export type GeckoSampleStruct = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   responsiveness: Array<?Milliseconds>,
   length: number,
-};
+|};
 
-export type GeckoFrameTable = {
-  schema: {
+export type GeckoFrameTable = {|
+  schema: {|
     location: 0,
     relevantForJS: 1,
     implementation: 2,
@@ -80,7 +80,7 @@ export type GeckoFrameTable = {
     column: 5,
     category: 6,
     subcategory: 7,
-  },
+  |},
   data: Array<
     [
       // index into stringTable, points to strings like:
@@ -101,9 +101,9 @@ export type GeckoFrameTable = {
       null | number,
     ]
   >,
-};
+|};
 
-export type GeckoFrameStruct = {
+export type GeckoFrameStruct = {|
   location: IndexIntoStringTable[],
   relevantForJS: Array<boolean>,
   implementation: Array<null | IndexIntoStringTable>,
@@ -113,23 +113,23 @@ export type GeckoFrameStruct = {
   category: Array<null | number>,
   subcategory: Array<null | number>,
   length: number,
-};
+|};
 
-export type GeckoStackTable = {
-  schema: {
+export type GeckoStackTable = {|
+  schema: {|
     prefix: 0,
     frame: 1,
-  },
+  |},
   data: Array<[IndexIntoGeckoStackTable | null, IndexIntoGeckoFrameTable]>,
-};
+|};
 
-export type GeckoStackStruct = {
+export type GeckoStackStruct = {|
   frame: IndexIntoGeckoFrameTable[],
   prefix: Array<IndexIntoGeckoStackTable | null>,
   length: number,
-};
+|};
 
-export type GeckoThread = {
+export type GeckoThread = {|
   name: string,
   registerTime: number,
   processType: string,
@@ -143,7 +143,7 @@ export type GeckoThread = {
   stackTable: GeckoStackTable,
   stringTable: string[],
   jsTracerEvents?: JsTracerTable,
-};
+|};
 
 export type GeckoExtensionMeta = {|
   schema: {|

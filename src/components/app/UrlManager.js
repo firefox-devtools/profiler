@@ -19,11 +19,17 @@ import {
   stateFromLocation,
   getIsHistoryReplaceState,
 } from '../../app-logic/url-handling';
-import { getProfilesFromRawUrl } from '../../actions/receive-profile';
+import {
+  getProfilesFromRawUrl,
+  typeof getProfilesFromRawUrl as GetProfilesFromRawUrl,
+} from '../../actions/receive-profile';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
-import type { ConnectedProps } from '../../utils/connect';
+import type {
+  ConnectedProps,
+  WrapFunctionInDispatch,
+} from '../../utils/connect';
 import type { UrlState, UrlSetupPhase } from '../../types/state';
 import type { Profile } from '../../types/profile';
 
@@ -80,32 +86,33 @@ class UrlManager extends React.PureComponent<Props> {
   async _processInitialUrls() {
     const {
       startFetchingProfiles,
-      getProfilesFromRawUrl,
       setupInitialUrlState,
       urlSetupDone,
     } = this.props;
-    let profile: Profile | null = null;
-    let error;
-
+    // We have to wrap this because of the error introduced by upgrading to v0.96.0. See issue #1936.
+    const getProfilesFromRawUrl: WrapFunctionInDispatch<GetProfilesFromRawUrl> = (this
+      .props.getProfilesFromRawUrl: any);
     startFetchingProfiles();
 
     try {
       // Process the raw url and fetch the profile.
-      // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-      profile = await getProfilesFromRawUrl(window.location);
-    } catch (err) {
-      error = err;
-    }
+      const results: {
+        profile: Profile,
+        shouldSetupInitialUrlState: boolean,
+      } = await getProfilesFromRawUrl(window.location);
 
-    if (profile) {
-      setupInitialUrlState(window.location, profile);
-    } else if (error) {
-      // Just silently finish the url setup and return to home.
+      // Manually coerce these into the proper type due to the FlowFixMe above.
+      const profile: Profile = results.profile;
+      const shouldSetupInitialUrlState: boolean =
+        results.shouldSetupInitialUrlState;
+      if (shouldSetupInitialUrlState) {
+        setupInitialUrlState(window.location, profile);
+      } else {
+        urlSetupDone();
+      }
+    } catch (error) {
+      // Silently complete the url setup.
       urlSetupDone();
-    } else {
-      throw new Error(
-        'An unhandled case was reached during the initial processing of URLs'
-      );
     }
   }
 
@@ -154,8 +161,7 @@ class UrlManager extends React.PureComponent<Props> {
   }
 
   componentWillReceiveProps(nextProps: Props) {
-    const { urlSetupPhase } = this.props;
-    if (urlSetupPhase !== 'done') {
+    if (nextProps.urlSetupPhase !== 'done') {
       return;
     }
     const newUrl = urlFromState(nextProps.urlState);
