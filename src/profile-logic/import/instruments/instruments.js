@@ -7,7 +7,10 @@
 import type { Profile } from '../../../types/profile';
 
 //utils
-import { getEmptyProfile } from '../../../profile-logic/data-structures';
+import {
+  getEmptyProfile,
+  getEmptyThread,
+} from '../../../profile-logic/data-structures';
 import BinaryPlistParser, { UID } from './BinaryPlistParser';
 import BinReader from './BinReader';
 
@@ -603,6 +606,82 @@ export function isInstrumentsProfile(file: mixed): boolean {
   return fileMetaData.pop() === 'trace';
 }
 
+function fillThread(thread, threadId, samples, addressToFrameMap) {
+  const {
+    funcTable,
+    frameTable,
+    stackTable,
+    stringTable,
+    samples: samplesTable,
+  } = thread;
+
+  const funcKeyToIndex = new Map<string, number>();
+  const frameKeyToIndex = new Map<number, number>();
+  const stackKeyToIndex = new Map<string, number>();
+
+  thread.name = `Thread ${threadId}`;
+
+  for (const frameData of addressToFrameMap) {
+    const frameMetaData = frameData[1];
+    const funcKey = frameMetaData.key;
+
+    if (funcKeyToIndex.has(funcKey)) {
+      const funcIndex = funcKeyToIndex.get(funcKey);
+
+      frameTable.func.push(funcIndex);
+    } else {
+      funcKeyToIndex.set(funcKey, funcTable.length);
+      funcTable.name.push(stringTable.indexForString(frameMetaData.name));
+      funcTable.fileName.push(
+        stringTable.indexForString(frameMetaData.file || null)
+      );
+      funcTable.isJS.push(false);
+      funcTable.resource.push(-1);
+      funcTable.lineNumber.push(null);
+      funcTable.columnNumber.push(null);
+      frameTable.func.push(funcTable.length);
+      funcTable.length++;
+    }
+
+    frameTable.category.push(1); // TODO: Make the function to get the index of 'Other' category
+    frameTable.address.push(stringTable.indexForString(''));
+    frameTable.implementation.push(null);
+    frameTable.line.push(null);
+    frameTable.column.push(null);
+    frameKeyToIndex.set(frameData[0], frameTable.length);
+    frameTable.length++;
+  }
+
+  for (const sample of samples) {
+    const stackTrace = sample.backtraceStack;
+    let parentIndex = null;
+
+    for (let index = 0; index < stackTrace.length; index++) {
+      const frameAddress = stackTrace[index];
+      const keyOfStackKeyToIndexMap = '$' + parentIndex + '$' + frameAddress;
+
+      if (!stackKeyToIndex.has(keyOfStackKeyToIndexMap)) {
+        stackTable.prefix.push(parentIndex);
+        stackTable.frame.push(frameKeyToIndex.get(frameAddress));
+        stackKeyToIndex.set(keyOfStackKeyToIndexMap, stackTable.length);
+        stackTable.category.push(1);
+        stackTable.length++;
+      }
+
+      parentIndex = stackKeyToIndex.get(keyOfStackKeyToIndexMap);
+
+      if (index === stackTrace.length - 1) {
+        samplesTable.stack.push(stackKeyToIndex.get(keyOfStackKeyToIndexMap));
+        samplesTable.time.push(sample.timestamp / 100000); // TODO: Doubt
+        samplesTable.responsiveness.push(null);
+        samplesTable.length++;
+      }
+    }
+  }
+
+  return thread;
+}
+
 function pushThreadsInProfile(profile, addressToFrameMap, samples) {
   const threadIDToSamples = new Map();
   for (const sample of samples) {
@@ -615,7 +694,16 @@ function pushThreadsInProfile(profile, addressToFrameMap, samples) {
       threadIDToSamples.set(sample.threadID, [sample]);
     }
   }
-  console.log('threadIDToSamples', threadIDToSamples);
+
+  for (const threadID of threadIDToSamples.keys()) {
+    const processedThread = fillThread(
+      getEmptyThread(),
+      threadID,
+      threadIDToSamples.get(threadID),
+      addressToFrameMap
+    );
+    profile.threads.push(processedThread);
+  }
 }
 
 export async function convertInstrumentsProfile(
@@ -664,8 +752,16 @@ export async function convertInstrumentsProfile(
       runNumber: number,
     });
     console.log('group', group);
+
+    // for (let i = 0; i < 10; i++) {
+    //   group.samples[i].threadID = 1;
+    // }
+    // To check how our functionality will behave for multi threaded samples
+
     pushThreadsInProfile(profile, addressToFrameMap, group.samples);
   }
 
+  profile.meta.platform = 'Macintosh';
+  console.log('profile', profile);
   return profile;
 }
