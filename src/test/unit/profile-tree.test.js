@@ -60,6 +60,7 @@ describe('unfiltered call tree', function() {
       thread,
       callNodeInfo,
       getSampleDuration,
+      0, // sampleIndexOffset == 0 because there's no range filtering involved here.
       false
     );
     return getCallTree(
@@ -99,6 +100,7 @@ describe('unfiltered call tree', function() {
           thread,
           callNodeInfo,
           getSampleDuration,
+          0, // sampleIndexOffset == 0 because there's no range filtering involved here.
           false
         )
       ).toEqual({
@@ -431,6 +433,7 @@ describe('inverted call tree', function() {
       thread,
       callNodeInfo,
       getSampleDuration,
+      0, // sampleIndexOffset == 0 because there's no range filtering involved here.
       true
     );
     const callTree = getCallTree(
@@ -470,6 +473,7 @@ describe('inverted call tree', function() {
       invertedThread,
       invertedCallNodeInfo,
       getSampleDuration,
+      0, // sampleIndexOffset == 0 because there's no range filtering involved here.
       true
     );
     const invertedCallTree = getCallTree(

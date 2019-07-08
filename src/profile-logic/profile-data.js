@@ -364,6 +364,7 @@ export function getTimingsForPath(
   needlePath: CallNodePath,
   callNodeInfo: CallNodeInfo,
   getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  sampleIndexOffset: number,
   isInvertedTree: boolean,
   thread: Thread,
   categories: CategoryList
@@ -372,6 +373,7 @@ export function getTimingsForPath(
     getCallNodeIndexFromPath(needlePath, callNodeInfo.callNodeTable),
     callNodeInfo,
     getSampleDuration,
+    sampleIndexOffset,
     isInvertedTree,
     thread,
     categories
@@ -386,6 +388,7 @@ export function getTimingsForCallNodeIndex(
   needleNodeIndex: IndexIntoCallNodeTable | null,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  sampleIndexOffset: number,
   isInvertedTree: boolean,
   thread: Thread,
   categories: CategoryList
@@ -481,7 +484,7 @@ export function getTimingsForCallNodeIndex(
     if (thisStackIndex === null) {
       continue;
     }
-    const duration = getSampleDuration(sampleIndex);
+    const duration = getSampleDuration(sampleIndex + sampleIndexOffset);
 
     rootTime += duration;
 
@@ -1344,7 +1347,8 @@ export function invertCallstack(
 export function getSampleIndexClosestToTime(
   samples: SamplesTable,
   time: number,
-  getSampleDuration: IndexIntoSamplesTable => Milliseconds
+  getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  sampleIndexOffset: number
 ): IndexIntoSamplesTable {
   // Bisect to find the index of the first sample after the provided time.
   const index = bisection.right(samples.time, time);
@@ -1361,9 +1365,13 @@ export function getSampleIndexClosestToTime(
   // and its predecessor.
   const previousIndex = index - 1;
   const distanceToThis =
-    samples.time[index] + getSampleDuration(index) / 2 - time;
+    samples.time[index] +
+    getSampleDuration(index + sampleIndexOffset) / 2 -
+    time;
   const distanceToLast =
-    time - (samples.time[previousIndex] + getSampleDuration(previousIndex) / 2);
+    time -
+    (samples.time[previousIndex] +
+      getSampleDuration(previousIndex + sampleIndexOffset) / 2);
   return distanceToThis < distanceToLast ? index : index - 1;
 }
 

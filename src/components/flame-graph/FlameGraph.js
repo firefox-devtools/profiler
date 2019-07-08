@@ -71,6 +71,7 @@ type StateProps = {|
   +categories: CategoryList,
   +interval: Milliseconds,
   +getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  +sampleIndexOffset: number,
   +isInverted: boolean,
 |};
 type DispatchProps = {|
@@ -263,6 +264,7 @@ class FlameGraph extends React.PureComponent<Props> {
       categories,
       interval,
       getSampleDuration,
+      sampleIndexOffset,
       isInverted,
     } = this.props;
 
@@ -314,6 +316,7 @@ class FlameGraph extends React.PureComponent<Props> {
               shouldDisplayTooltips: this._shouldDisplayTooltips,
               interval,
               getSampleDuration,
+              sampleIndexOffset,
               isInverted,
             }}
           />
@@ -355,6 +358,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       icons: getIconsWithClassNames(state),
       interval: getProfileInterval(state),
       getSampleDuration: selectedThreadSelectors.getSampleDurationGetter(state),
+      sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
+        state
+      ),
       isInverted: getInvertCallstack(state),
     };
   },

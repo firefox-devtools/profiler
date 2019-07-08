@@ -32,6 +32,7 @@ type Props = {|
   +thread: Thread,
   +interval: Milliseconds,
   +getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  +sampleIndexOffset: number,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +callNodeInfo: CallNodeInfo,
@@ -200,7 +201,13 @@ class StackGraph extends PureComponent<Props> {
   _onMouseUp = (e: SyntheticMouseEvent<>) => {
     const canvas = this._canvas;
     if (canvas) {
-      const { rangeStart, rangeEnd, thread, getSampleDuration } = this.props;
+      const {
+        rangeStart,
+        rangeEnd,
+        thread,
+        getSampleDuration,
+        sampleIndexOffset,
+      } = this.props;
       const r = canvas.getBoundingClientRect();
 
       const x = e.pageX - r.left;
@@ -209,7 +216,8 @@ class StackGraph extends PureComponent<Props> {
       const sampleIndex = getSampleIndexClosestToTime(
         thread.samples,
         time,
-        getSampleDuration
+        getSampleDuration,
+        sampleIndexOffset
       );
 
       this.props.onSampleClick(sampleIndex);

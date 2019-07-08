@@ -264,7 +264,8 @@ function _getInvertedStackSelfTimes(
   thread: Thread,
   callNodeTable: CallNodeTable,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
-  getSampleDuration: IndexIntoSamplesTable => Milliseconds
+  getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  sampleIndexOffset: number
 ): {
   // In an inverted profile, all the self time is accounted to the root nodes.
   // So `callNodeSelfTime` will be 0 for all non-root nodes.
@@ -308,7 +309,7 @@ function _getInvertedStackSelfTimes(
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       const rootIndex = callNodeToRoot[callNodeIndex];
-      const duration = getSampleDuration(sampleIndex);
+      const duration = getSampleDuration(sampleIndex + sampleIndexOffset);
       callNodeSelfTime[rootIndex] += duration;
       callNodeLeafTime[callNodeIndex] += duration;
     }
@@ -324,7 +325,8 @@ function _getStackSelfTimes(
   thread: Thread,
   callNodeTable: CallNodeTable,
   sampleCallNodes: Array<null | IndexIntoCallNodeTable>,
-  getSampleDuration: IndexIntoSamplesTable => Milliseconds
+  getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  sampleIndexOffset: number
 ): {
   callNodeSelfTime: Float32Array, // Milliseconds[]
   callNodeLeafTime: Float32Array, // Milliseconds[]
@@ -338,7 +340,9 @@ function _getStackSelfTimes(
   ) {
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
-      callNodeSelfTime[callNodeIndex] += getSampleDuration(sampleIndex);
+      callNodeSelfTime[callNodeIndex] += getSampleDuration(
+        sampleIndex + sampleIndexOffset
+      );
     }
   }
 
@@ -353,6 +357,7 @@ export function computeCallTreeCountsAndTimings(
   thread: Thread,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  sampleIndexOffset: number,
   invertCallstack: boolean
 ): CallTreeCountsAndTimings {
   const sampleCallNodes = getSampleCallNodes(
@@ -365,13 +370,15 @@ export function computeCallTreeCountsAndTimings(
         thread,
         callNodeTable,
         sampleCallNodes,
-        getSampleDuration
+        getSampleDuration,
+        sampleIndexOffset
       )
     : _getStackSelfTimes(
         thread,
         callNodeTable,
         sampleCallNodes,
-        getSampleDuration
+        getSampleDuration,
+        sampleIndexOffset
       );
 
   // Compute the following variables:

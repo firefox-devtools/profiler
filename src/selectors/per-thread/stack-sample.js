@@ -170,6 +170,7 @@ export function getStackAndSampleSelectorsPerThread(
     threadSelectors.getPreviewFilteredThread,
     getCallNodeInfo,
     threadSelectors.getSampleDurationGetter,
+    threadSelectors.getSampleIndexOffsetFromPreviewRange,
     UrlState.getInvertCallstack,
     CallTree.computeCallTreeCountsAndTimings
   );
@@ -189,6 +190,7 @@ export function getStackAndSampleSelectorsPerThread(
     getCallNodeInfo,
     getCallNodeMaxDepth,
     threadSelectors.getSampleDurationGetter,
+    threadSelectors.getSampleIndexOffsetFromCommittedRange,
     StackTiming.getStackTimingByDepth
   );
 

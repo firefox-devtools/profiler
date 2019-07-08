@@ -742,22 +742,20 @@ describe('get-sample-index-closest-to-time', function() {
       defaultCategory
     );
 
-    expect(getSampleIndexClosestToTime(samples, 0, getSampleDuration)).toBe(0);
-    expect(getSampleIndexClosestToTime(samples, 0.9, getSampleDuration)).toBe(
-      0
-    );
-    expect(getSampleIndexClosestToTime(samples, 1.1, getSampleDuration)).toBe(
-      1
-    );
-    expect(getSampleIndexClosestToTime(samples, 1.5, getSampleDuration)).toBe(
-      1
-    );
-    expect(getSampleIndexClosestToTime(samples, 9.9, getSampleDuration)).toBe(
-      9
-    );
-    expect(getSampleIndexClosestToTime(samples, 100, getSampleDuration)).toBe(
-      9
-    );
+    const curriedGetSampleIndexClosestToTime = inputIndex =>
+      getSampleIndexClosestToTime(
+        samples,
+        inputIndex,
+        getSampleDuration,
+        0 // sampleIndexOffset == 0 because there's no range filtering involved here.
+      );
+
+    expect(curriedGetSampleIndexClosestToTime(0)).toBe(0);
+    expect(curriedGetSampleIndexClosestToTime(0.9)).toBe(0);
+    expect(curriedGetSampleIndexClosestToTime(1.1)).toBe(1);
+    expect(curriedGetSampleIndexClosestToTime(1.5)).toBe(1);
+    expect(curriedGetSampleIndexClosestToTime(9.9)).toBe(9);
+    expect(curriedGetSampleIndexClosestToTime(100)).toBe(9);
   });
 });
 
@@ -842,6 +840,7 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         path,
         callNodeInfo,
         getSampleDuration,
+        0, // sampleIndexOffset == 0 because there's no range filtering involved here.
         false,
         thread,
         profile.meta.categories
@@ -1010,6 +1009,7 @@ describe('getTimingsForPath for an inverted tree', function() {
         path,
         callNodeInfo,
         getSampleDuration,
+        0, // sampleIndexOffset == 0 because there's no range filtering involved here.
         true,
         thread,
         profile.meta.categories

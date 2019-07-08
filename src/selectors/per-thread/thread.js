@@ -217,6 +217,16 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
         : JsTracer.getJsTracerLeafTiming(jsTracerTable, stringTable)
   );
 
+  /**
+   * This selector returns a function that can be used to retrieve the duration
+   * of a specific sample. For normal threads it will just return the capture
+   * interval, but for diffing threads it can be more complex.
+   * Note that it gets the data from the complete thread, so most of the time we
+   * need to use an offset computed by one the following selectors, depending on
+   * the thread that's handled in the caller code.
+   * This is done in 2 selectors so that this function never changes for a thread
+   * and therefore hopefully stays JIT-optimized.
+   */
   const getSampleDurationGetter: Selector<
     (IndexIntoSamplesTable) => Milliseconds
   > = createSelector(
@@ -224,6 +234,28 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     ProfileSelectors.getProfileInterval,
     ProfileData.getSampleDurationGetter
   );
+
+  /**
+   * This selector returns the offset to add to a sampleIndex when using
+   * getSampleDuration, if your thread is a range filtered thread (all but the
+   * base `getThread` or the last `getPreviewFilteredThread`).
+   */
+  const getSampleIndexOffsetFromCommittedRange: Selector<number> = state =>
+    getCommittedSampleRange(state).sampleStart;
+
+  /**
+   * This selector returns the offset to add to a sampleIndex when using
+   * getSampleDuration, if your thread is the preview filtered thread.
+   */
+  const getSampleIndexOffsetFromPreviewRange: Selector<number> = state => {
+    const committedRange = getCommittedSampleRange(state);
+    const previewRange = getPreviewSelectionSampleRange(state);
+
+    if (previewRange) {
+      return previewRange.sampleStart + committedRange.sampleStart;
+    }
+    return committedRange.sampleStart;
+  };
 
   return {
     getThread,
@@ -242,5 +274,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getExpensiveJsTracerTiming,
     getExpensiveJsTracerLeafTiming,
     getSampleDurationGetter,
+    getSampleIndexOffsetFromCommittedRange,
+    getSampleIndexOffsetFromPreviewRange,
   };
 }

@@ -66,6 +66,7 @@ type StateProps = {|
   +unfilteredSamplesRange: StartEndRange | null,
   +interval: Milliseconds,
   +getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  +sampleIndexOffset: number,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +categories: CategoryList,
@@ -127,6 +128,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       threadIndex,
       interval,
       getSampleDuration,
+      sampleIndexOffset,
       rangeStart,
       rangeEnd,
       callNodeInfo,
@@ -203,6 +205,7 @@ class TimelineTrackThread extends PureComponent<Props> {
             selectedCallNodeIndex={selectedCallNodeIndex}
             categories={categories}
             getSampleDuration={getSampleDuration}
+            sampleIndexOffset={sampleIndexOffset}
             onSampleClick={this._onSampleClick}
           />
         )}
@@ -236,6 +239,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       interval: getProfileInterval(state),
       getSampleDuration: selectors.getSampleDurationGetter(state),
+      sampleIndexOffset: selectors.getSampleIndexOffsetFromCommittedRange(
+        state
+      ),
       rangeStart: committedRange.start,
       rangeEnd: committedRange.end,
       categories: getCategories(state),

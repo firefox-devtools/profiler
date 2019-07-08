@@ -50,6 +50,7 @@ export type OwnProps = {|
   +categories: CategoryList,
   +interval: Milliseconds,
   +getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  +sampleIndexOffset: number,
   +isInverted: boolean,
 |};
 
@@ -259,6 +260,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       interval,
       isInverted,
       getSampleDuration,
+      sampleIndexOffset,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -286,6 +288,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
           callNodeIndex,
           callNodeInfo,
           getSampleDuration,
+          sampleIndexOffset,
           isInverted,
           thread,
           categories

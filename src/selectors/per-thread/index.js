@@ -145,6 +145,7 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     selectedThreadSelectors.getSelectedCallNodePath,
     selectedThreadSelectors.getCallNodeInfo,
     selectedThreadSelectors.getSampleDurationGetter,
+    selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
     UrlState.getInvertCallstack,
     selectedThreadSelectors.getPreviewFilteredThread,
     ProfileSelectors.getCategories,

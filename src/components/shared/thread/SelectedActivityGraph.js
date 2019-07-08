@@ -62,6 +62,7 @@ type CanvasProps = {|
   +selectLeafCallNode: typeof selectLeafCallNode,
   +focusCallTree: typeof focusCallTree,
   +getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  +sampleIndexOffset: number,
 |};
 
 class SelectedThreadActivityGraphCanvas extends PureComponent<CanvasProps> {
@@ -104,6 +105,7 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<CanvasProps> {
       samplesSelectedStates,
       treeOrderSampleComparator,
       getSampleDuration,
+      sampleIndexOffset,
     } = this.props;
 
     return (
@@ -131,6 +133,7 @@ class SelectedThreadActivityGraphCanvas extends PureComponent<CanvasProps> {
           categories={categories}
           stacksGrowFromCeiling={true}
           getSampleDuration={getSampleDuration}
+          sampleIndexOffset={sampleIndexOffset}
         />
       </div>
     );
@@ -169,6 +172,7 @@ type StateProps = {|
     IndexIntoSamplesTable
   ) => number,
   +getSampleDuration: IndexIntoSamplesTable => Milliseconds,
+  +sampleIndexOffset: number,
 |};
 
 type DispatchProps = {|
@@ -194,6 +198,7 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
       samplesSelectedStates,
       treeOrderSampleComparator,
       getSampleDuration,
+      sampleIndexOffset,
       previewSelection,
       selectBestAncestorCallNodeAndExpandCallTree,
       selectLeafCallNode,
@@ -215,6 +220,7 @@ class SelectedThreadActivityGraph extends PureComponent<Props> {
           samplesSelectedStates,
           treeOrderSampleComparator,
           getSampleDuration,
+          sampleIndexOffset,
           selectBestAncestorCallNodeAndExpandCallTree,
           selectLeafCallNode,
           focusCallTree,
@@ -265,6 +271,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         state
       ),
       getSampleDuration: selectedThreadSelectors.getSampleDurationGetter(state),
+      sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
+        state
+      ),
       timeRange: getCommittedRange(state),
       previewSelection,
     };
