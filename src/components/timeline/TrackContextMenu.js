@@ -103,16 +103,24 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
 
     if (hiddenGlobalTracks.has(globalTrackIndex)) {
+      // When the parent global track is hidden, instead of simply
+      // toggling, we'll just unhide the global track and this
+      // particular local track. Other local tracks should be hidden.
       showGlobalTrack(globalTrackIndex);
       const localTrackOrder = ensureExists(
         localTrackOrderByPid.get(pid),
         'Expected to find local tracks for the given pid'
       );
-      localTrackOrder.forEach(trackIndex => {
-        hideLocalTrack(pid, trackIndex);
+      localTrackOrder.forEach(index => {
+        if (index === trackIndex) {
+          showLocalTrack(pid, trackIndex);
+        } else {
+          hideLocalTrack(pid, index);
+        }
       });
-      showLocalTrack(pid, trackIndex);
     } else {
+      // When the global track is not hidden, we'll just go ahead and
+      // toggle this local track.
       if (hiddenLocalTracks.has(trackIndex)) {
         showLocalTrack(pid, trackIndex);
       } else {
