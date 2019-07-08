@@ -1014,7 +1014,12 @@ export function getProfilesFromRawUrl(
     switch (dataSource) {
       case 'from-addon':
         shouldSetupInitialUrlState = false;
-        await dispatch(retrieveProfileFromAddon());
+        // We don't need to `await` the result because there's no url upgrading
+        // when retrieving the profile from the addon and we don't need to wait
+        // for the process. Moreover we don't want to wait for the end of
+        // symbolication and rather want to show the UI as soon as we get
+        // the profile data.
+        dispatch(retrieveProfileFromAddon());
         break;
       case 'public':
         await dispatch(retrieveProfileFromStore(pathParts[1], true));
