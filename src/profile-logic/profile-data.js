@@ -21,6 +21,7 @@ import type {
   Category,
   Counter,
   CounterSamplesTable,
+  StartEndSampleRange,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -902,38 +903,41 @@ export function filterThreadToSearchString(
 }
 
 /**
- * This function takes both a SamplesTable and can be used on CounterSamplesTable.
+ * This function takes a SamplesTable and can also be used on CounterSamplesTable.
+ * It takes a time-based range as parameter and returns a sample-based range.
+ * Just like rangeStart is inclusive and rangeEnd is exclusive, sampleStart is
+ * inclusive and sampleEnd is exclusive.
  */
-function _getSampleIndexRangeForSelection(
+export function getSampleIndexRangeForSelection(
   samples: SamplesTable | CounterSamplesTable,
   rangeStart: number,
   rangeEnd: number
-): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
+): StartEndSampleRange {
   // TODO: This should really use bisect. samples.time is sorted.
-  const firstSample = samples.time.findIndex(t => t >= rangeStart);
-  if (firstSample === -1) {
-    return [samples.length, samples.length];
+  const sampleStart = samples.time.findIndex(t => t >= rangeStart);
+  if (sampleStart === -1) {
+    return { sampleStart: samples.length, sampleEnd: samples.length };
   }
-  const afterLastSample = samples.time
-    .slice(firstSample)
+  const sampleEnd = samples.time
+    .slice(sampleStart)
     .findIndex(t => t >= rangeEnd);
-  if (afterLastSample === -1) {
-    return [firstSample, samples.length];
+  if (sampleEnd === -1) {
+    return { sampleStart, sampleEnd: samples.length };
   }
-  return [firstSample, firstSample + afterLastSample];
+  return { sampleStart, sampleEnd: sampleEnd + sampleStart };
 }
 
+/**
+ * This function filters the samples table using the sample indexes. Use
+ * getSampleIndexRangeForSelection to get this information from the time-based
+ * range information.
+ */
 export function filterThreadSamplesToRange(
   thread: Thread,
-  rangeStart: number,
-  rangeEnd: number
+  sBegin: IndexIntoSamplesTable,
+  sEnd: IndexIntoSamplesTable
 ): Thread {
   const { samples } = thread;
-  const [sBegin, sEnd] = _getSampleIndexRangeForSelection(
-    samples,
-    rangeStart,
-    rangeEnd
-  );
   const newSamples = {
     length: sEnd - sBegin,
     time: samples.time.slice(sBegin, sEnd),
@@ -949,17 +953,20 @@ export function filterThreadSamplesToRange(
   };
 }
 
+/**
+ * This function filters a counter table using a time-based range information.
+ */
 export function filterCounterToRange(
   counter: Counter,
   rangeStart: number,
   rangeEnd: number
 ): Counter {
   const samples = counter.sampleGroups.samples;
-  let [sBegin, sEnd] = _getSampleIndexRangeForSelection(
-    samples,
-    rangeStart,
-    rangeEnd
-  );
+
+  let {
+    sampleStart: sBegin,
+    sampleEnd: sEnd,
+  } = getSampleIndexRangeForSelection(samples, rangeStart, rangeEnd);
 
   // Include the samples just before and after the selection range, so that charts will
   // not be cut off at the edges.

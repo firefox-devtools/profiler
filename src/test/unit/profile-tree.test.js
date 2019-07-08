@@ -17,6 +17,7 @@ import {
   invertCallstack,
   getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
+  getSampleIndexRangeForSelection,
   filterThreadSamplesToRange,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
@@ -572,9 +573,14 @@ describe('diffing trees', function() {
     const profile = getProfile();
     const rangeStart = 1;
     const rangeEnd = 3;
-    profile.threads = profile.threads.map(thread =>
-      filterThreadSamplesToRange(thread, rangeStart, rangeEnd)
-    );
+    profile.threads = profile.threads.map(thread => {
+      const { sampleStart, sampleEnd } = getSampleIndexRangeForSelection(
+        thread.samples,
+        rangeStart,
+        rangeEnd
+      );
+      return filterThreadSamplesToRange(thread, sampleStart, sampleEnd);
+    });
     const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
     const formattedTree = formatTree(callTree);
     expect(formattedTree).toEqual([

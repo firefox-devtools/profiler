@@ -24,6 +24,7 @@ import {
   getEmptyRawMarkerTable,
 } from './data-structures';
 import {
+  getSampleIndexRangeForSelection,
   filterThreadSamplesToRange,
   getTimeRangeForThread,
   getTimeRangeIncludingAllThreads,
@@ -214,7 +215,12 @@ function filterThreadToRange(
   rangeStart: number,
   rangeEnd: number
 ): Thread {
-  thread = filterThreadSamplesToRange(thread, rangeStart, rangeEnd);
+  const { sampleStart, sampleEnd } = getSampleIndexRangeForSelection(
+    thread.samples,
+    rangeStart,
+    rangeEnd
+  );
+  thread = filterThreadSamplesToRange(thread, sampleStart, sampleEnd);
   thread.markers = filterRawMarkerTableToRange(
     thread.markers,
     rangeStart,

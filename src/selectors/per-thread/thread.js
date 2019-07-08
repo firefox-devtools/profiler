@@ -17,6 +17,7 @@ import type {
   ThreadIndex,
   JsTracerTable,
   SamplesTable,
+  StartEndSampleRange,
 } from '../../types/profile';
 import type { Selector } from '../../types/store';
 import type { ThreadViewOptions } from '../../types/state';
@@ -46,6 +47,13 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
   const getSamplesTable: Selector<SamplesTable> = state =>
     getThread(state).samples;
 
+  const getCommittedSampleRange: Selector<StartEndSampleRange> = createSelector(
+    getThread,
+    ProfileSelectors.getCommittedRange,
+    ({ samples }, { start, end }) =>
+      ProfileData.getSampleIndexRangeForSelection(samples, start, end)
+  );
+
   /**
    * The first per-thread selectors filter out and transform a thread based on user's
    * interactions. The transforms are order dependendent.
@@ -59,11 +67,9 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
    */
   const getRangeFilteredThread: Selector<Thread> = createSelector(
     getThread,
-    ProfileSelectors.getCommittedRange,
-    (thread, range) => {
-      const { start, end } = range;
-      return ProfileData.filterThreadSamplesToRange(thread, start, end);
-    }
+    getCommittedSampleRange,
+    (thread, { sampleStart, sampleEnd }) =>
+      ProfileData.filterThreadSamplesToRange(thread, sampleStart, sampleEnd)
   );
 
   // It becomes very expensive to apply each transform over and over again as they
@@ -116,18 +122,34 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     }
   );
 
-  const getPreviewFilteredThread: Selector<Thread> = createSelector(
+  const getPreviewSelectionSampleRange: Selector<StartEndSampleRange | null> = createSelector(
     getFilteredThread,
     ProfileSelectors.getPreviewSelection,
-    (thread, previewSelection): Thread => {
+    ({ samples }, previewSelection) => {
       if (!previewSelection.hasSelection) {
+        return null;
+      }
+
+      return ProfileData.getSampleIndexRangeForSelection(
+        samples,
+        previewSelection.selectionStart,
+        previewSelection.selectionEnd
+      );
+    }
+  );
+
+  const getPreviewFilteredThread: Selector<Thread> = createSelector(
+    getFilteredThread,
+    getPreviewSelectionSampleRange,
+    (thread, previewSelectionSampleRange): Thread => {
+      if (!previewSelectionSampleRange) {
         return thread;
       }
-      const { selectionStart, selectionEnd } = previewSelection;
+      const { sampleStart, sampleEnd } = previewSelectionSampleRange;
       return ProfileData.filterThreadSamplesToRange(
         thread,
-        selectionStart,
-        selectionEnd
+        sampleStart,
+        sampleEnd
       );
     }
   );
