@@ -213,7 +213,7 @@ async function processTracingEvents(
         if (funcId === undefined) {
           // The function did not exist.
           funcId = funcTable.length++;
-          funcTable.address.push(0);
+          funcTable.address.push(-1);
           funcTable.isJS.push(true);
           funcTable.relevantForJS.push(false);
           funcTable.name.push(stringTable.indexForString(functionName));
@@ -238,7 +238,7 @@ async function processTracingEvents(
             'Unable to find the prefix stack index from a node index.'
           );
         }
-        frameTable.address[frameIndex] = stringTable.indexForString('');
+        frameTable.address[frameIndex] = -1;
         frameTable.category[frameIndex] = javascriptCategoryIndex;
         frameTable.subcategory[frameIndex] = 0;
         frameTable.func[frameIndex] = funcId;
