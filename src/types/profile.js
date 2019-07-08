@@ -21,6 +21,10 @@ export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 export type IndexIntoJsTracerEvents = number;
 export type CounterIndex = number;
+export type StartEndSampleRange = {|
+  +sampleStart: IndexIntoSamplesTable,
+  +sampleEnd: IndexIntoSamplesTable,
+|};
 
 /**
  * If a pid is a number, then it is the int value that came from the profiler.

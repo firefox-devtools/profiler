@@ -14,7 +14,10 @@ import {
   removeNetworkMarkerURLs,
   filterRawMarkerTableToRangeWithMarkersToDelete,
 } from './marker-data';
-import { filterThreadSamplesToRange } from './profile-data';
+import {
+  getSampleIndexRangeForSelection,
+  filterThreadSamplesToRange,
+} from './profile-data';
 import type { Profile, Thread, ThreadIndex } from '../types/profile';
 import type { RemoveProfileInformation } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
@@ -227,7 +230,12 @@ function sanitizeThreadPII(
     // to range.
     if (PIIToBeRemoved.shouldFilterToCommittedRange !== null) {
       const { start, end } = PIIToBeRemoved.shouldFilterToCommittedRange;
-      newThread = filterThreadSamplesToRange(thread, start, end);
+      const { sampleStart, sampleEnd } = getSampleIndexRangeForSelection(
+        thread.samples,
+        start,
+        end
+      );
+      newThread = filterThreadSamplesToRange(thread, sampleStart, sampleEnd);
     } else {
       // Copying the thread even if we don't filter samples because we are gonna
       // change some fields later.
