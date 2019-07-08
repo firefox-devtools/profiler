@@ -13,11 +13,3 @@
 .networkSettingsSpacer {
   flex: 1;
 }
-
-.networkSettingsSearchField .panelSearchFieldInput {
-  width: 250px;
-}
-
-.networkSettingsSearchField .panelSearchFieldIntroduction {
-  max-width: 320px;
-}

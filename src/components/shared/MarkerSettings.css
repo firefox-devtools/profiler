@@ -13,11 +13,3 @@
 .markerSettingsSpacer {
   flex: 1;
 }
-
-.markerSettingsSearchField .panelSearchFieldInput {
-  width: 250px;
-}
-
-.markerSettingsSearchField .panelSearchFieldIntroduction {
-  max-width: 320px;
-}
