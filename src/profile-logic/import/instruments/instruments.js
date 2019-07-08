@@ -737,29 +737,23 @@ export async function convertInstrumentsProfile(
   }
 
   const profile = getEmptyProfile();
-  const runsSet = [];
 
-  for (const run of runs) {
-    const { addressToFrameMap, number } = run;
-    if (runsSet.includes(number)) continue;
-    // if we encounter same run then we don't need to process it again
-    else {
-      runsSet.push(number);
-    }
-    const group = await importRunFromInstrumentsTrace({
-      tree,
-      addressToFrameMap,
-      runNumber: number,
-    });
-    console.log('group', group);
+  const { addressToFrameMap, number } = runs[0];
+  // For now, we will just process first run
 
-    // for (let i = 0; i < 10; i++) {
-    //   group.samples[i].threadID = 1;
-    // }
-    // To check how our functionality will behave for multi threaded samples
+  const group = await importRunFromInstrumentsTrace({
+    tree,
+    addressToFrameMap,
+    runNumber: number,
+  });
+  console.log('group', group);
 
-    pushThreadsInProfile(profile, addressToFrameMap, group.samples);
-  }
+  // for (let i = 0; i < 10; i++) {
+  //   group.samples[i].threadID = 1;
+  // }
+  // To check how our functionality will behave for multi threaded samples
+
+  pushThreadsInProfile(profile, addressToFrameMap, group.samples);
 
   profile.meta.platform = 'Macintosh';
   console.log('profile', profile);
