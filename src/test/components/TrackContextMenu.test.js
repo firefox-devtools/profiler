@@ -283,14 +283,25 @@ describe('timeline/TrackContextMenu', function() {
 
     it('will unhide the global track when unhiding one of its local tracks', function() {
       const { getState, globalTrackItem, localTrackItem } = setupTracks();
-      // Hide the global track
+      // Hide the global track.
       fireEvent.click(globalTrackItem());
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        // The "GeckoMain tab" process is now hidden.
+        'hide [thread GeckoMain tab]',
+        // These are still shown as visible, which reflects their
+        // internal state, but in the UI they'll appear hidden.
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
 
-      // Unhide one of its local tracks
+      // Unhide "DOM Worker" local track.
       fireEvent.click(localTrackItem());
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [thread GeckoMain process] SELECTED',
+        // The "GeckoMain tab" process is visible again.
         'show [thread GeckoMain tab]',
+        // Only the "DOM Worker" local track is visible.
         '  - show [thread DOM Worker]',
         '  - hide [thread Style]',
       ]);
