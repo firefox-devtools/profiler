@@ -240,6 +240,7 @@ async function processTracingEvents(
         }
         frameTable.address[frameIndex] = stringTable.indexForString('');
         frameTable.category[frameIndex] = javascriptCategoryIndex;
+        frameTable.subcategory[frameIndex] = 0;
         frameTable.func[frameIndex] = funcId;
         frameTable.implementation[frameIndex] = null;
         frameTable.line[frameIndex] =
@@ -251,6 +252,7 @@ async function processTracingEvents(
 
         stackTable.frame.push(frameIndex);
         stackTable.category.push(javascriptCategoryIndex);
+        stackTable.subcategory.push(0);
         stackTable.prefix.push(prefixStackIndex);
         nodeIdToStackId.set(nodeIndex, stackTable.length++);
       }

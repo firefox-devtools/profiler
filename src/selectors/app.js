@@ -10,8 +10,6 @@ import {
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
 } from './url-state';
-import { tabSlugs } from '../app-logic/tabs-handling';
-import { selectedThreadSelectors } from './per-thread';
 import { getGlobalTracks, getLocalTracksByPid } from './profile';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
@@ -24,7 +22,7 @@ import {
 } from '../app-logic/constants';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { AppState, AppViewState } from '../types/state';
+import type { AppState, AppViewState, UrlSetupPhase } from '../types/state';
 import type { Selector } from '../types/store';
 import type { CssPixels } from '../types/units';
 import type { ThreadIndex } from '../types/profile';
@@ -34,8 +32,8 @@ import type { ThreadIndex } from '../types/profile';
  */
 export const getApp: Selector<AppState> = state => state.app;
 export const getView: Selector<AppViewState> = state => getApp(state).view;
-export const getIsUrlSetupDone: Selector<boolean> = state =>
-  getApp(state).isUrlSetupDone;
+export const getUrlSetupPhase: Selector<UrlSetupPhase> = state =>
+  getApp(state).urlSetupPhase;
 export const getHasZoomedViaMousewheel: Selector<boolean> = state => {
   return getApp(state).hasZoomedViaMousewheel;
 };
@@ -50,25 +48,6 @@ export const getTrackThreadHeights: Selector<
 > = state => getApp(state).trackThreadHeights;
 export const getIsNewlyPublished: Selector<boolean> = state =>
   getApp(state).isNewlyPublished;
-
-/**
- * Visible tabs are computed based on the current state of the profile. Some
- * effort is made to not show a tab when there is no data available for it.
- */
-export const getVisibleTabs: Selector<$ReadOnlyArray<TabSlug>> = createSelector(
-  selectedThreadSelectors.getIsNetworkChartEmptyInFullRange,
-  selectedThreadSelectors.getJsTracerTable,
-  (isNetworkChartEmpty, jsTracerTable) => {
-    let visibleTabs = tabSlugs;
-    if (isNetworkChartEmpty) {
-      visibleTabs = visibleTabs.filter(tabSlug => tabSlug !== 'network-chart');
-    }
-    if (!jsTracerTable) {
-      visibleTabs = visibleTabs.filter(tabSlug => tabSlug !== 'js-tracer');
-    }
-    return visibleTabs;
-  }
-);
 
 /**
  * This selector takes all of the tracks, and deduces the height in CssPixels

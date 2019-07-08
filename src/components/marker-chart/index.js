@@ -17,7 +17,6 @@ import {
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
-  getProfileViewOptions,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
@@ -57,7 +56,6 @@ type StateProps = {|
   +threadIndex: number,
   +previewSelection: PreviewSelection,
   +rightClickedMarker: MarkerIndex | null,
-  +isContextMenuVisible: boolean,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -74,6 +72,8 @@ class MarkerChart extends React.PureComponent<Props> {
     } = this.props;
     return interval / (end - start);
   }
+
+  _shouldDisplayTooltips = () => this.props.rightClickedMarker === null;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
     this._viewport = viewport;
@@ -100,7 +100,6 @@ class MarkerChart extends React.PureComponent<Props> {
       updatePreviewSelection,
       changeRightClickedMarker,
       rightClickedMarker,
-      isContextMenuVisible,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -149,7 +148,7 @@ class MarkerChart extends React.PureComponent<Props> {
                 marginLeft: TIMELINE_MARGIN_LEFT,
                 marginRight: TIMELINE_MARGIN_RIGHT,
                 rightClickedMarker,
-                disableTooltips: isContextMenuVisible,
+                shouldDisplayTooltips: this._shouldDisplayTooltips,
               }}
             />
           </ContextMenuTrigger>
@@ -183,7 +182,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       rightClickedMarker: selectedThreadSelectors.getRightClickedMarkerIndex(
         state
       ),
-      isContextMenuVisible: getProfileViewOptions(state).isContextMenuVisible,
     };
   },
   mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },

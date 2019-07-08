@@ -29,7 +29,7 @@ import type {
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'PROFILE_LOADED':
       return action.profile;
     case 'COALESCED_FUNCTIONS_UPDATE': {
       if (state === null) {
@@ -56,7 +56,7 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
           funcNames
         );
       });
-      return Object.assign({}, state, { threads });
+      return { ...state, threads };
     }
     case 'DONE_SYMBOLICATING': {
       if (state === null) {
@@ -127,7 +127,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'PROFILE_LOADED':
       return action.profile.threads.map(() => ({
         selectedCallNodePath: [],
         rightClickedCallNodePath: null,
@@ -480,7 +480,7 @@ const rootRange: Reducer<StartEndRange> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'PROFILE_LOADED':
       return ProfileData.getTimeRangeIncludingAllThreads(action.profile);
     default:
       return state;
@@ -494,15 +494,6 @@ const rightClickedTrack: Reducer<TrackReference | null> = (
   switch (action.type) {
     case 'CHANGE_RIGHT_CLICKED_TRACK':
       return action.trackReference;
-    default:
-      return state;
-  }
-};
-
-const isContextMenuVisible: Reducer<boolean> = (state = false, action) => {
-  switch (action.type) {
-    case 'SET_CONTEXT_MENU_VISIBILITY':
-      return action.isVisible;
     default:
       return state;
   }
@@ -542,7 +533,6 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       focusCallTreeGeneration,
       rootRange,
       rightClickedTrack,
-      isContextMenuVisible,
     }),
     globalTracks,
     localTracksByPid,

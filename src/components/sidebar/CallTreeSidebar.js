@@ -14,7 +14,10 @@ import {
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { getCategories, getProfileInterval } from '../../selectors/profile';
 import { getFunctionName } from '../../profile-logic/function-info';
-import { getFriendlyStackTypeName } from '../../profile-logic/profile-data';
+import {
+  getFriendlyStackTypeName,
+  shouldDisplaySubcategoryInfoForCategory,
+} from '../../profile-logic/profile-data';
 import CanSelectContent from './CanSelectContent';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -30,7 +33,7 @@ import type {
   StackImplementation,
   TimingsForPath,
 } from '../../profile-logic/profile-data';
-import { formatMilliseconds } from '../../utils/format-numbers';
+import { formatMilliseconds, formatPercent } from '../../utils/format-numbers';
 
 type SidebarDetailProps = {|
   +label: string,
@@ -38,19 +41,11 @@ type SidebarDetailProps = {|
   +children: React.Node,
 |};
 
-function SidebarDetail({ label, color, children }: SidebarDetailProps) {
+function SidebarDetail({ label, children }: SidebarDetailProps) {
   return (
     <React.Fragment>
       <div className="sidebar-label">{label}:</div>
       <div className="sidebar-value">{children}</div>
-      {color ? (
-        <div
-          className={`sidebar-color colored-square category-color-${color}`}
-          title={label}
-        />
-      ) : (
-        <div />
-      )}
     </React.Fragment>
   );
 }
@@ -102,25 +97,70 @@ class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
   render() {
     const { breakdown, categoryList, isIntervalInteger } = this.props;
     const data = breakdown
-      .map((value, categoryIndex) => {
+      .map((oneCategoryBreakdown, categoryIndex) => {
         const category = categoryList[categoryIndex];
         return {
-          group: category.name,
-          value: value || 0,
-          color: category.color,
+          category,
+          value: oneCategoryBreakdown.entireCategoryValue || 0,
+          subcategories: category.subcategories
+            .map((subcategoryName, subcategoryIndex) => ({
+              name: subcategoryName,
+              value:
+                oneCategoryBreakdown.subcategoryBreakdown[subcategoryIndex],
+            }))
+            // sort subcategories in descending order
+            .sort(({ value: valueA }, { value: valueB }) => valueB - valueA)
+            .filter(({ value }) => value),
         };
       })
-      // sort in descending order
-      .sort(({ value: valueA }, { value: valueB }) => valueB - valueA);
+      // sort categories in descending order
+      .sort(({ value: valueA }, { value: valueB }) => valueB - valueA)
+      .filter(({ value }) => value);
 
-    return <Breakdown data={data} isIntervalInteger={isIntervalInteger} />;
+    const totalTime = data.reduce((accum, { value }) => accum + value, 0);
+    const maxFractionalDigits = isIntervalInteger ? 0 : 1;
+
+    return (
+      <div className="sidebar-categorylist">
+        {data.map(({ category, value, subcategories }) => {
+          const percentage = Math.round((value / totalTime) * 100);
+          return (
+            <React.Fragment key={category.name}>
+              <div className="sidebar-categoryname">
+                <span
+                  className={`sidebar-color colored-square category-color-${
+                    category.color
+                  }`}
+                  title={category.name}
+                />
+                {category.name}
+              </div>
+              <div className="sidebar-categorytiming">
+                {formatMilliseconds(value, 3, maxFractionalDigits)} (
+                {percentage}%)
+              </div>
+              {shouldDisplaySubcategoryInfoForCategory(category)
+                ? subcategories.map(({ name, value }) => (
+                    <React.Fragment key={name}>
+                      <div className="sidebar-subcategoryname">{name}</div>
+                      <div className="sidebar-categorytiming">
+                        {formatMilliseconds(value, 3, maxFractionalDigits)} (
+                        {formatPercent(value / totalTime)})
+                      </div>
+                    </React.Fragment>
+                  ))
+                : null}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    );
   }
 }
 
 type BreakdownProps = {|
   +data: $ReadOnlyArray<{|
     group: string,
-    color?: string,
     value: Milliseconds,
   |}>,
   +isIntervalInteger: boolean,
@@ -130,15 +170,15 @@ type BreakdownProps = {|
 // breakdown. It also computes the percentage from the total time.
 function Breakdown({ data, isIntervalInteger }: BreakdownProps) {
   const totalTime = data.reduce((result, item) => result + item.value, 0);
+  const maxFractionalDigits = isIntervalInteger ? 0 : 1;
 
   return data
     .filter(({ value }) => value)
-    .map(({ group, color, value }) => {
+    .map(({ group, value }) => {
       const percentage = Math.round((value / totalTime) * 100);
-      const maxFractionalDigits = isIntervalInteger ? 0 : 1;
 
       return (
-        <SidebarDetail label={group} color={color} key={group}>
+        <SidebarDetail label={group} key={group}>
           {formatMilliseconds(value, 3, maxFractionalDigits)} ({percentage}%)
         </SidebarDetail>
       );

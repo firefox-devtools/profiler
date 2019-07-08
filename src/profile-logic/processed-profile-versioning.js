@@ -943,5 +943,24 @@ const _upgraders = {
       }
     }
   },
+  [23]: profile => {
+    // profile.meta.categories now has a subcategories property on each element,
+    // with an array of subcategories for that category, with at least one
+    // subcategory per category.
+    // And the frameTable and stackTable have another column, subcategory, which
+    // is non-null whenever the category column is non-null.
+    for (const category of profile.meta.categories) {
+      category.subcategories = ['Other'];
+    }
+    for (const thread of profile.threads) {
+      const { frameTable, stackTable } = thread;
+      frameTable.subcategory = frameTable.category.map(c =>
+        c === null ? null : 0
+      );
+      stackTable.subcategory = stackTable.category.map(c =>
+        c === null ? null : 0
+      );
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

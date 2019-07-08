@@ -82,6 +82,7 @@ export function mergeProfiles(
     implementationFilters.push(profileSpecific.implementation);
 
     // We adjust the categories using the maps computed above.
+    // TODO: Also adjust subcategories.
     thread.stackTable.category = adjustCategories(
       thread.stackTable.category,
       translationMapsForCategories[i]
@@ -179,7 +180,7 @@ function mergeCategories(
 |} {
   const newCategories = [];
   const translationMaps = [];
-  const insertedCategories: Map<string, IndexIntoCategoryList> = new Map();
+  const newCategoryIndexByName: Map<string, IndexIntoCategoryList> = new Map();
 
   categoriesPerThread.forEach(categories => {
     const translationMap = new Map();
@@ -187,15 +188,18 @@ function mergeCategories(
 
     categories.forEach((category, i) => {
       const { name } = category;
-      const insertedCategoryIndex = insertedCategories.get(name);
-      if (insertedCategoryIndex !== undefined) {
-        translationMap.set(i, insertedCategoryIndex);
-        return;
+      let newCategoryIndex = newCategoryIndexByName.get(name);
+      if (newCategoryIndex === undefined) {
+        newCategoryIndex = newCategories.length;
+        newCategories.push(category);
+        newCategoryIndexByName.set(name, newCategoryIndex);
+      } else {
+        // We're assuming that newCategories[newCategoryIndex].subcategories
+        // is the same list of strings as category.subcategories.
+        // TODO: merge the subcategories too, and make a translationMap for
+        // those (per category), too.
       }
-
-      translationMap.set(i, newCategories.length);
-      insertedCategories.set(name, newCategories.length);
-      newCategories.push(category);
+      translationMap.set(i, newCategoryIndex);
     });
   });
 

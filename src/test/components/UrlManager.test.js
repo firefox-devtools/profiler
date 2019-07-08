@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render } from 'react-testing-library';
 
-import { getIsUrlSetupDone } from '../../selectors/app';
+import { getUrlSetupPhase } from '../../selectors/app';
 import UrlManager from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
 import { getDataSource } from '../../selectors/url-state';
@@ -33,9 +33,9 @@ describe('UrlManager', function() {
 
   it('sets up the URL', function() {
     const { getState, createUrlManager } = setup();
-    expect(getIsUrlSetupDone(getState())).toBe(false);
+    expect(getUrlSetupPhase(getState())).toBe('initial-load');
     createUrlManager();
-    expect(getIsUrlSetupDone(getState())).toBe(true);
+    expect(getUrlSetupPhase(getState())).toBe('loading-profile');
   });
 
   it('has no data source by default', function() {

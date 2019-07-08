@@ -12,6 +12,7 @@ import type {
   AppViewState,
   IsSidebarOpenPerPanelState,
   Reducer,
+  UrlSetupPhase,
 } from '../types/state';
 import type { ThreadIndex } from '../types/profile';
 
@@ -38,6 +39,8 @@ const view: Reducer<AppViewState> = (
     case 'REVERT_TO_ORIGINAL_PROFILE':
     case 'SANITIZED_PROFILE_PUBLISHED':
       return { phase: 'TRANSITIONING_FROM_STALE_PROFILE' };
+    case 'PROFILE_LOADED':
+      return { phase: 'PROFILE_LOADED' };
     case 'RECEIVE_ZIP_FILE':
     case 'VIEW_PROFILE':
       return { phase: 'DATA_LOADED' };
@@ -46,10 +49,15 @@ const view: Reducer<AppViewState> = (
   }
 };
 
-const isUrlSetupDone: Reducer<boolean> = (state = false, action) => {
+const urlSetupPhase: Reducer<UrlSetupPhase> = (
+  state = 'initial-load',
+  action
+) => {
   switch (action.type) {
+    case 'START_FETCHING_PROFILES':
+      return 'loading-profile';
     case 'URL_SETUP_DONE':
-      return true;
+      return 'done';
     default:
       return state;
   }
@@ -177,7 +185,7 @@ const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
 
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
-  isUrlSetupDone,
+  urlSetupPhase,
   hasZoomedViaMousewheel,
   isSidebarOpenPerPanel,
   panelLayoutGeneration,

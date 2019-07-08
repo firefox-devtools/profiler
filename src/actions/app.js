@@ -6,7 +6,9 @@
 import { getSelectedTab, getDataSource } from '../selectors/url-state';
 import { getTrackThreadHeights } from '../selectors/app';
 import { sendAnalytics } from '../utils/analytics';
-import type { ThreadIndex } from '../types/profile';
+import { stateFromLocation } from '../app-logic/url-handling';
+import { finalizeProfileView } from './receive-profile';
+import type { Profile, ThreadIndex } from '../types/profile';
 import type { CssPixels } from '../types/units';
 import type { Action, ThunkAction } from '../types/store';
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -33,6 +35,10 @@ export function changeProfilesToCompare(profiles: string[]): Action {
     type: 'CHANGE_PROFILES_TO_COMPARE',
     profiles,
   };
+}
+
+export function startFetchingProfiles(): Action {
+  return { type: 'START_FETCHING_PROFILES' };
 }
 
 export function urlSetupDone(): ThunkAction<void> {
@@ -75,6 +81,43 @@ export function setHasZoomedViaMousewheel() {
 }
 
 /**
+ * This function is called when we start setting up the initial url state.
+ * It takes the location and profile data, converts the location into url
+ * state and then dispatches relevant actions to finalize the view.
+ */
+export function setupInitialUrlState(
+  location: Location,
+  profile: Profile
+): ThunkAction<void> {
+  return dispatch => {
+    let urlState;
+    try {
+      urlState = stateFromLocation(location, profile);
+    } catch (e) {
+      // The location could not be parsed, show a 404 instead.
+      console.error(e);
+      dispatch(show404(location.pathname + location.search));
+      return;
+    }
+
+    // Validate the initial URL state. We can't refresh on a from-file URL.
+    if (urlState.dataSource === 'from-file') {
+      urlState = null;
+    }
+
+    // Normally having multiple dispatches is an anti pattern, but here it's
+    // necessary because we are doing different things inside those actions and
+    // they can't be merged because we are also calling those seperately on
+    // other parts of the code.
+    // The first dispatch here updates the url state, then changes state as the url
+    // setup is done, and lastly finalizes the profile view since everything is set up now.
+    dispatch(updateUrlState(urlState));
+    dispatch(urlSetupDone());
+    dispatch(finalizeProfileView());
+  };
+}
+
+/**
  * This function is called when a browser navigation event happens. A new UrlState
  * is generated when the window.location is serialized, or the state is pulled out of
  * the history API.
@@ -83,21 +126,23 @@ export function updateUrlState(newUrlState: UrlState | null): Action {
   return { type: 'UPDATE_URL_STATE', newUrlState };
 }
 
-export const reportTrackThreadHeight = (
+export function reportTrackThreadHeight(
   threadIndex: ThreadIndex,
   height: CssPixels
-): ThunkAction<void> => (dispatch, getState) => {
-  const trackThreadHeights = getTrackThreadHeights(getState());
-  const previousHeight = trackThreadHeights[threadIndex];
-  if (previousHeight !== height) {
-    // Guard against unnecessary dispatches. This could happen frequently.
-    dispatch({
-      type: 'UPDATE_TRACK_THREAD_HEIGHT',
-      height,
-      threadIndex,
-    });
-  }
-};
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const trackThreadHeights = getTrackThreadHeights(getState());
+    const previousHeight = trackThreadHeights[threadIndex];
+    if (previousHeight !== height) {
+      // Guard against unnecessary dispatches. This could happen frequently.
+      dispatch({
+        type: 'UPDATE_TRACK_THREAD_HEIGHT',
+        height,
+        threadIndex,
+      });
+    }
+  };
+}
 
 /**
  * This action dismisses the newly published state. This happens when a user first

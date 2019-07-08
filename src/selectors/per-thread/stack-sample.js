@@ -21,10 +21,10 @@ import type {
   CallNodeInfo,
   CallNodePath,
   IndexIntoCallNodeTable,
+  SelectedState,
 } from '../../types/profile-derived';
 import type { StartEndRange } from '../../types/units';
 import type { Selector } from '../../types/store';
-import type { SelectedState } from '../../profile-logic/profile-data';
 import type { $ReturnType } from '../../types/utils';
 import type { ThreadSelectorsPerThread } from './thread';
 

@@ -1818,13 +1818,6 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
   <div
     class="tooltipDetailsBackTrace"
   >
-    <h2
-      class="tooltipBackTraceTitle"
-    >
-      First invalidated 
-      1.5
-      ms before the flush, at:
-    </h2>
     <ol
       class="backtrace"
     >

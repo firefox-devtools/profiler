@@ -42,6 +42,7 @@ import type {
   ImplementationFilter,
   TrackReference,
   TimelineType,
+  DataSource,
 } from '../types/actions';
 import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
@@ -288,13 +289,13 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
       }
     }
 
-    if (
-      selectedTab === 'js-tracer' &&
-      getThreadSelectors(selectedThreadIndex).getJsTracerTable(getState()) ===
-        null
-    ) {
-      // If the user switches to another thread that doesn't have JS Tracer information,
-      // then switch to the calltree.
+    const doesNextTrackHaveSelectedTab = getThreadSelectors(selectedThreadIndex)
+      .getUsefulTabs(getState())
+      .includes(selectedTab);
+
+    if (!doesNextTrackHaveSelectedTab) {
+      // If the user switches to another track that doesn't have the current
+      // selectedTab then switch to the calltree.
       selectedTab = 'calltree';
     }
 
@@ -1064,5 +1065,12 @@ export function changeProfileName(profileName: string): Action {
   return {
     type: 'CHANGE_PROFILE_NAME',
     profileName,
+  };
+}
+
+export function setDataSource(dataSource: DataSource): Action {
+  return {
+    type: 'SET_DATA_SOURCE',
+    dataSource,
   };
 }

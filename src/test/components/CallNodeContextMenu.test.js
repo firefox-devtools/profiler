@@ -42,9 +42,7 @@ describe('calltree/CallNodeContextMenu', function() {
   }
 
   function setup(store = createStore(), openMenuState = true) {
-    if (openMenuState) {
-      store.dispatch(setContextMenuVisibility(true));
-    }
+    store.dispatch(setContextMenuVisibility(openMenuState));
 
     const renderResult = render(
       <Provider store={store}>
@@ -56,16 +54,10 @@ describe('calltree/CallNodeContextMenu', function() {
   }
 
   describe('basic rendering', function() {
-    it('renders a blank context menu (with only 1 div) before it is open', () => {
+    it('does not render the context menu when it is closed', () => {
       const isContextMenuOpen = false;
       const { container } = setup(createStore(), isContextMenuOpen);
-      expect(
-        ensureExists(
-          container.querySelector('.react-contextmenu'),
-          `Couldn't find the context menu root component .react-contextmenu`
-        ).children
-      ).toHaveLength(1);
-      expect(container.firstChild).toMatchSnapshot();
+      expect(container.querySelector('.react-contextmenu')).toBeNull();
     });
 
     it('renders a full context menu when open, with many nav items', () => {

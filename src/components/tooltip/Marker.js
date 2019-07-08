@@ -30,15 +30,7 @@ import type { Milliseconds, Microseconds } from '../../types/units';
 import type { Marker } from '../../types/profile-derived';
 import type { ImplementationFilter } from '../../types/actions';
 import type { Thread, ThreadIndex, PageList } from '../../types/profile';
-import type {
-  DOMEventMarkerPayload,
-  FrameConstructionMarkerPayload,
-  PaintProfilerMarkerTracing,
-  NavigationMarkerPayload,
-  CcMarkerTracing,
-  PhaseTimes,
-  StyleMarkerPayload,
-} from '../../types/markers';
+import type { PhaseTimes } from '../../types/markers';
 import type { ConnectedProps } from '../../utils/connect';
 
 type PhaseTimeTuple = {| name: string, time: Microseconds |};
@@ -195,48 +187,26 @@ function _sumMaybeEntries(
     .reduce((a, x) => a + x, 0);
 }
 
-function _markerBacktrace(
+const MaybeBacktrace = ({
+  marker,
+  thread,
+  implementationFilter,
+}: {|
   marker: Marker,
-  data:
-    | StyleMarkerPayload
-    | PaintProfilerMarkerTracing
-    | DOMEventMarkerPayload
-    | FrameConstructionMarkerPayload
-    | NavigationMarkerPayload
-    | CcMarkerTracing,
   thread: Thread,
-  implementationFilter: ImplementationFilter
-): React.Node {
-  switch (data.category) {
-    case 'DOMEvent': {
-      const latency =
-        data.timeStamp === undefined
-          ? null
-          : formatMilliseconds(marker.start - data.timeStamp);
-      return (
-        <TooltipDetails>
-          <TooltipDetail label="Type">{data.eventType}</TooltipDetail>
-          <TooltipDetail label="Latency">{latency}</TooltipDetail>
-        </TooltipDetails>
-      );
-    }
-    case 'Frame Construction':
-      return (
-        <TooltipDetails>
-          <TooltipDetail label="Category">{data.category}</TooltipDetail>
-        </TooltipDetails>
-      );
-    default:
-      break;
-  }
-  if ('cause' in data && data.cause) {
+  implementationFilter: ImplementationFilter,
+|}): React.Node => {
+  const { data, start } = marker;
+  if (data && 'cause' in data && data.cause) {
     const { cause } = data;
-    const causeAge = marker.start - cause.time;
+    const causeAge = start - cause.time;
     return (
       <div className="tooltipDetailsBackTrace" key="backtrace">
-        <h2 className="tooltipBackTraceTitle">
-          First invalidated {formatNumber(causeAge)}ms before the flush, at:
-        </h2>
+        {data.type === 'Styles' || marker.name === 'Reflow' ? (
+          <h2 className="tooltipBackTraceTitle">
+            First invalidated {formatNumber(causeAge)}ms before the flush, at:
+          </h2>
+        ) : null}
         <Backtrace
           maxHeight="30em"
           stackIndex={cause.stack}
@@ -247,7 +217,7 @@ function _markerBacktrace(
     );
   }
   return null;
-}
+};
 
 function getMarkerDetails(
   marker: Marker,
@@ -256,51 +226,44 @@ function getMarkerDetails(
   zeroAt: Milliseconds
 ): React.Node {
   const data = marker.data;
+  let tooltipDetails;
 
   if (data) {
     switch (data.type) {
       case 'FileIO': {
-        return (
-          <>
-            <TooltipDetails>
-              <TooltipDetail label="Operation">{data.operation}</TooltipDetail>
-              <TooltipDetail label="Source">{data.source}</TooltipDetail>
-              <TooltipDetail label="Filename">{data.filename}</TooltipDetail>
-            </TooltipDetails>
-            {data.cause ? (
-              <div className="tooltipDetailsBackTrace" key="backtrace">
-                <Backtrace
-                  maxHeight="30em"
-                  stackIndex={data.cause.stack}
-                  thread={thread}
-                  implementationFilter={implementationFilter}
-                />
-              </div>
-            ) : null}
-          </>
+        tooltipDetails = (
+          <TooltipDetails>
+            <TooltipDetail label="Operation">{data.operation}</TooltipDetail>
+            <TooltipDetail label="Source">{data.source}</TooltipDetail>
+            <TooltipDetail label="Filename">{data.filename}</TooltipDetail>
+          </TooltipDetails>
         );
+        break;
       }
       case 'UserTiming': {
-        return (
+        tooltipDetails = (
           <TooltipDetails>
             <TooltipDetail label="Name">{data.name}</TooltipDetail>
           </TooltipDetails>
         );
+        break;
       }
       case 'Text': {
-        return (
+        tooltipDetails = (
           <TooltipDetails>
             <TooltipDetail label="Name">{data.name}</TooltipDetail>
           </TooltipDetails>
         );
+        break;
       }
       case 'Log': {
-        return (
+        tooltipDetails = (
           <TooltipDetails>
             <TooltipDetail label="Module">{data.module}</TooltipDetail>
             <TooltipDetail label="Name">{data.name}</TooltipDetail>
           </TooltipDetails>
         );
+        break;
       }
       case 'GCMinor': {
         if (data.nursery) {
@@ -324,7 +287,7 @@ function getMarkerDetails(
                     'CollectToFP',
                   ])
                 : undefined;
-              return (
+              tooltipDetails = (
                 <TooltipDetails>
                   <TooltipDetail label="Reason">{nursery.reason}</TooltipDetail>
                   <TooltipDetail label="Bytes evicted">
@@ -410,35 +373,40 @@ function getMarkerDetails(
                     .map(_markerDetailPhase)}
                 </TooltipDetails>
               );
+              break;
             }
             case 'nursery disabled':
-              return (
+              tooltipDetails = (
                 <TooltipDetails>
                   <TooltipDetail label="Status">Nursery disabled</TooltipDetail>
                 </TooltipDetails>
               );
+              break;
             case 'nursery empty':
-              return (
+              tooltipDetails = (
                 <TooltipDetails>
                   <TooltipDetail label="Status">Nursery empty</TooltipDetail>
                 </TooltipDetails>
               );
+              break;
             default:
               return null;
           }
         } else {
           return null;
         }
+        break;
       }
       case 'GCMajor': {
         const timings = data.timings;
         switch (timings.status) {
           case 'aborted':
-            return (
+            tooltipDetails = (
               <TooltipDetails>
                 <TooltipDetail label="Status">Aborted (OOM)</TooltipDetail>
               </TooltipDetails>
             );
+            break;
           case 'completed': {
             let nonIncrementalReason = null;
             if (
@@ -472,7 +440,7 @@ function getMarkerDetails(
                 </TooltipDetail>
               );
             }
-            return (
+            tooltipDetails = (
               <TooltipDetails>
                 <TooltipDetail label="Reason">{timings.reason}</TooltipDetail>
                 {nonIncrementalReason}
@@ -514,10 +482,12 @@ function getMarkerDetails(
                 {phase_times.map(_markerDetailPhase)}
               </TooltipDetails>
             );
+            break;
           }
           default:
             return null;
         }
+        break;
       }
       case 'GCSlice': {
         const timings = data.timings;
@@ -538,7 +508,7 @@ function getMarkerDetails(
           timings.phase_times,
           6
         );
-        return (
+        tooltipDetails = (
           <TooltipDetails>
             <TooltipDetail label="Reason">{timings.reason}</TooltipDetail>
             <TooltipDetail label="Budget">{timings.budget}</TooltipDetail>
@@ -552,9 +522,10 @@ function getMarkerDetails(
             {phase_times.map(_markerDetailPhase)}
           </TooltipDetails>
         );
+        break;
       }
       case 'Bailout': {
-        return (
+        tooltipDetails = (
           <TooltipDetails>
             <TooltipDetail label="Type">{data.bailoutType}</TooltipDetail>
             <TooltipDetail label="Where">{data.where}</TooltipDetail>
@@ -572,49 +543,93 @@ function getMarkerDetails(
             </TooltipDetail>
           </TooltipDetails>
         );
+        break;
       }
       case 'Invalidation': {
-        return (
+        tooltipDetails = (
           <TooltipDetails>
             <TooltipDetail label="URL">{data.url}</TooltipDetail>
             <TooltipDetail label="Line">{data.line}</TooltipDetail>
           </TooltipDetails>
         );
+        break;
       }
       case 'Network': {
-        return <TooltipNetworkMarker payload={data} zeroAt={zeroAt} />;
+        tooltipDetails = (
+          <TooltipNetworkMarker payload={data} zeroAt={zeroAt} />
+        );
+        break;
       }
       case 'Styles': {
-        return (
-          <>
-            <TooltipDetails>
-              <TooltipDetail label="Elements traversed">
-                {data.elementsTraversed}
-              </TooltipDetail>
-              <TooltipDetail label="Elements styled">
-                {data.elementsStyled}
-              </TooltipDetail>
-              <TooltipDetail label="Elements matched">
-                {data.elementsMatched}
-              </TooltipDetail>
-              <TooltipDetail label="Styles shared">
-                {data.stylesShared}
-              </TooltipDetail>
-              <TooltipDetail label="Styles reused">
-                {data.stylesReused}
-              </TooltipDetail>
-            </TooltipDetails>
-            {_markerBacktrace(marker, data, thread, implementationFilter)}
-          </>
+        tooltipDetails = (
+          <TooltipDetails>
+            <TooltipDetail label="Elements traversed">
+              {data.elementsTraversed}
+            </TooltipDetail>
+            <TooltipDetail label="Elements styled">
+              {data.elementsStyled}
+            </TooltipDetail>
+            <TooltipDetail label="Elements matched">
+              {data.elementsMatched}
+            </TooltipDetail>
+            <TooltipDetail label="Styles shared">
+              {data.stylesShared}
+            </TooltipDetail>
+            <TooltipDetail label="Styles reused">
+              {data.stylesReused}
+            </TooltipDetail>
+          </TooltipDetails>
         );
+        break;
       }
       case 'tracing': {
-        return _markerBacktrace(marker, data, thread, implementationFilter);
+        switch (data.category) {
+          case 'DOMEvent': {
+            const latency =
+              data.timeStamp === undefined
+                ? null
+                : formatMilliseconds(marker.start - data.timeStamp);
+            tooltipDetails = (
+              <TooltipDetails>
+                <TooltipDetail label="Type">{data.eventType}</TooltipDetail>
+                <TooltipDetail label="Latency">{latency}</TooltipDetail>
+              </TooltipDetails>
+            );
+            break;
+          }
+          case 'Frame Construction':
+            tooltipDetails = (
+              <TooltipDetails>
+                <TooltipDetail label="Category">{data.category}</TooltipDetail>
+              </TooltipDetails>
+            );
+            break;
+          default:
+            break;
+        }
+        break;
       }
       default:
+        return null;
     }
   }
-  return null;
+
+  // If there are no details or backtrace to print, we should return null
+  // instead of an empty Fragment.
+  if (!tooltipDetails && (!data || !data.cause)) {
+    return null;
+  }
+
+  return (
+    <>
+      {tooltipDetails}
+      <MaybeBacktrace
+        marker={marker}
+        thread={thread}
+        implementationFilter={implementationFilter}
+      />
+    </>
+  );
 }
 
 type OwnProps = {|

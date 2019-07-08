@@ -193,7 +193,8 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
           optimizations: 3,
           line: 4,
           column: 5,
-          category: 6
+          category: 6,
+          subcategory: 7
         },
         data: [
           [
@@ -204,17 +205,8 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
             40,    // for JS frames, an index into the string table, usually "Baseline" or "Ion"
             null,  // JSON info about JIT optimizations.
             1536,  // The line of code
-            16     // int bitmask of the category
-                   // 16 - js::ProfileEntry::Category::OTHER
-                   // 32 - js::ProfileEntry::Category::CSS
-                   // 64 - js::ProfileEntry::Category::JS
-                   // 128 - js::ProfileEntry::Category::GC
-                   // 256 - js::ProfileEntry::Category::CC
-                   // 512 - js::ProfileEntry::Category::NETWORK
-                   // 1024 - js::ProfileEntry::Category::GRAPHICS
-                   // 2048 - js::ProfileEntry::Category::STORAGE
-                   // 4096 - js::ProfileEntry::Category::EVENTS
-                   // 9000 - other non-bitmask category
+            3,     // an index into profile.meta.categories
+            1      // an index into profile.meta.categories[3].subcategories
           ],
           ...
         ]

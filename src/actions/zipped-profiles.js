@@ -5,7 +5,7 @@
 // @flow
 import { getZipFileTable, getZipFileState } from '../selectors/zipped-profiles';
 import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
-import { viewProfile } from './receive-profile';
+import { loadProfile } from './receive-profile';
 
 import type { Action, ThunkAction } from '../types/store';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
@@ -38,7 +38,8 @@ export function changeExpandedZipFile(
  * can change the ZipFileState, and not have any race conditions.
  */
 export function viewProfileFromZip(
-  zipFileIndex: IndexIntoZipFileTable
+  zipFileIndex: IndexIntoZipFileTable,
+  initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
     const zipFileTable = getZipFileTable(getState());
@@ -66,7 +67,7 @@ export function viewProfileFromZip(
         zipFileState.pathInZipFile === pathInZipFile &&
         zipFileState.phase === 'PROCESS_PROFILE_FROM_ZIP_FILE'
       ) {
-        dispatch(viewProfile(profile, { pathInZipFile }));
+        await dispatch(loadProfile(profile, { pathInZipFile }, initialLoad));
       }
     } catch (error) {
       console.error(

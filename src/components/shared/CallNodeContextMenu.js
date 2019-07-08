@@ -22,7 +22,6 @@ import {
   getImplementationFilter,
   getInvertCallstack,
 } from '../../selectors/url-state';
-import { getProfileViewOptions } from '../../selectors/profile';
 
 import {
   convertToTransformType,
@@ -49,7 +48,6 @@ type StateProps = {|
   +callNodePath: CallNodePath | null,
   +callNodeIndex: IndexIntoCallNodeTable | null,
   +selectedTab: TabSlug,
-  +isContextMenuVisible: boolean,
 |};
 
 type DispatchProps = {|
@@ -377,16 +375,6 @@ class CallNodeContextMenu extends PureComponent<Props> {
     return funcHasRecursiveCall(thread, implementation, funcIndex);
   }
 
-  componentWillReceiveProps(nextProps: Props) {
-    if (nextProps.callNodeIndex === null && this.props.isContextMenuVisible) {
-      // If the menu was visible while callNodeIndex was
-      // changed to null, the onHide callback will not execute when
-      // null is returned below. Call _menuHidden() here to be ensure
-      // the visibility state is updated.
-      this._onHide();
-    }
-  }
-
   renderContextMenuContents() {
     const {
       callNodeIndex,
@@ -507,9 +495,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
         onShow={this._onShow}
         onHide={this._onHide}
       >
-        {this.props.isContextMenuVisible
-          ? this.renderContextMenuContents()
-          : null}
+        {this.renderContextMenuContents()}
       </ContextMenu>
     );
   }
@@ -525,7 +511,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     callNodePath: selectedThreadSelectors.getRightClickedCallNodePath(state),
     callNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(state),
     selectedTab: getSelectedTab(state),
-    isContextMenuVisible: getProfileViewOptions(state).isContextMenuVisible,
   }),
   mapDispatchToProps: {
     addTransformToStack,

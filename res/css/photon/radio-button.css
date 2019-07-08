@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .photon-radio {
-  border: none;
+  border: 1px solid var(--grey-90-a30);
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -31,6 +31,7 @@
 }
 
 .photon-radio:checked {
+  border: none;
   background-color: var(--blue-60);
 }
 

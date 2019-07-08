@@ -79,10 +79,6 @@ class ProfileLoaderImpl extends PureComponent<Props> {
     }
   };
 
-  componentDidMount() {
-    this._retrieveProfileFromDataSource();
-  }
-
   componentDidUpdate(prevProps) {
     if (prevProps.dataSource === 'none' && this.props.dataSource !== 'none') {
       this._retrieveProfileFromDataSource();

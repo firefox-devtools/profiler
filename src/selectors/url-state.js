@@ -49,12 +49,17 @@ export const getInvertCallstack: Selector<boolean> = state =>
   getProfileSpecificState(state).invertCallstack;
 export const getShowJsTracerSummary: Selector<boolean> = state =>
   getProfileSpecificState(state).showJsTracerSummary;
+
+/**
+ * Raw search strings, before any splitting has been performed.
+ */
 export const getCurrentSearchString: Selector<string> = state =>
   getProfileSpecificState(state).callTreeSearchString;
 export const getMarkersSearchString: Selector<string> = state =>
   getProfileSpecificState(state).markersSearchString;
 export const getNetworkSearchString: Selector<string> = state =>
   getProfileSpecificState(state).networkSearchString;
+
 export const getSelectedTab: Selector<TabSlug> = state =>
   getUrlState(state).selectedTab;
 export const getSelectedThreadIndexOrNull: Selector<ThreadIndex | null> = state =>
@@ -113,25 +118,56 @@ export const getLocalTrackOrder: DangerousSelectorWithArguments<
   );
 
 /**
+ * Divide a search string into several parts by splitting on comma.
+ */
+const splitSearchString = (searchString: string): string[] | null => {
+  if (!searchString) {
+    return null;
+  }
+  const result = searchString
+    .split(',')
+    .map(part => part.trim())
+    .filter(part => part);
+
+  if (result.length) {
+    return result;
+  }
+
+  return null;
+};
+
+/**
+ * Concatenate an array of strings into a RegExp that matches on all
+ * the strings.
+ */
+const stringsToRegExp = (strings: string[] | null): RegExp | null => {
+  if (!strings || !strings.length) {
+    return null;
+  }
+  const regexpStr = strings.map(escapeStringRegexp).join('|');
+  return new RegExp(regexpStr, 'gi');
+};
+
+/**
  * Search strings filter a thread to only samples that match the strings.
  */
 export const getSearchStrings: Selector<string[] | null> = createSelector(
   getCurrentSearchString,
-  searchString => {
-    if (!searchString) {
-      return null;
-    }
-    const result = searchString
-      .split(',')
-      .map(part => part.trim())
-      .filter(part => part);
+  splitSearchString
+);
 
-    if (result.length) {
-      return result;
-    }
+export const getMarkersSearchStrings: Selector<
+  string[] | null
+> = createSelector(
+  getMarkersSearchString,
+  splitSearchString
+);
 
-    return null;
-  }
+export const getNetworkSearchStrings: Selector<
+  string[] | null
+> = createSelector(
+  getNetworkSearchString,
+  splitSearchString
 );
 
 /**
@@ -139,13 +175,17 @@ export const getSearchStrings: Selector<string[] | null> = createSelector(
  */
 export const getSearchStringsAsRegExp: Selector<RegExp | null> = createSelector(
   getSearchStrings,
-  strings => {
-    if (!strings || !strings.length) {
-      return null;
-    }
-    const regexpStr = strings.map(escapeStringRegexp).join('|');
-    return new RegExp(regexpStr, 'gi');
-  }
+  stringsToRegExp
+);
+
+export const getMarkersSearchStringsAsRegExp: Selector<RegExp | null> = createSelector(
+  getMarkersSearchStrings,
+  stringsToRegExp
+);
+
+export const getNetworkSearchStringsAsRegExp: Selector<RegExp | null> = createSelector(
+  getNetworkSearchStrings,
+  stringsToRegExp
 );
 
 // Pre-allocate an array to help with strict equality tests in the selectors.

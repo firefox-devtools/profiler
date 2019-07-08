@@ -4,7 +4,6 @@
 
 // @flow
 
-import type { Viewport } from '../../components/shared/chart/Viewport';
 import type { Profile, IndexIntoSamplesTable } from '../../types/profile';
 import type { CssPixels } from '../../types/units';
 
@@ -68,21 +67,9 @@ describe('SelectedThreadActivityGraph', function() {
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
-    const viewport: Viewport = {
-      containerWidth: GRAPH_WIDTH,
-      containerHeight: GRAPH_HEIGHT,
-      viewportLeft: 0,
-      viewportRight: 1,
-      viewportTop: 0,
-      viewportBottom: GRAPH_HEIGHT,
-      isDragging: false,
-      moveViewport: (_x: CssPixels, _y: CssPixels) => {},
-      isSizeSet: true,
-    };
-
     const renderResult = render(
       <Provider store={store}>
-        <SelectedThreadActivityGraph viewport={viewport} />
+        <SelectedThreadActivityGraph />
       </Provider>
     );
     const { container } = renderResult;

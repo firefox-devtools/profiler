@@ -129,7 +129,11 @@ describe('actions/receive-profile', function() {
 
       const [idleThread, workThread] = profile.threads;
       const idleCategoryIndex = profile.meta.categories.length;
-      profile.meta.categories.push({ name: 'Idle', color: '#fff' });
+      profile.meta.categories.push({
+        name: 'Idle',
+        color: '#fff',
+        subcategories: ['Other'],
+      });
       workThread.name = 'Work Thread';
       idleThread.name = 'Idle Thread';
       idleThread.stackTable.category = idleThread.stackTable.category.map(
@@ -392,7 +396,7 @@ describe('actions/receive-profile', function() {
           additionalData: { attempt: null, message: errorMessage },
         }, // when the error happens
         { phase: 'INITIALIZING' }, // when we could connect to the addon but waiting for the profile
-        { phase: 'DATA_LOADED' }, // yay, we got a profile!
+        { phase: 'PROFILE_LOADED' }, // yay, we got a profile!
       ]);
 
       const state = store.getState();
@@ -501,6 +505,7 @@ describe('actions/receive-profile', function() {
             message: errorMessage,
           },
         },
+        { phase: 'PROFILE_LOADED' },
         { phase: 'DATA_LOADED' },
       ]);
 
@@ -615,6 +620,7 @@ describe('actions/receive-profile', function() {
             message: errorMessage,
           },
         },
+        { phase: 'PROFILE_LOADED' },
         { phase: 'DATA_LOADED' },
       ]);
 

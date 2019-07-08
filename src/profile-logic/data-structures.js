@@ -36,6 +36,7 @@ export function getEmptyStackTable(): StackTable {
     frame: [],
     prefix: [],
     category: [],
+    subcategory: [],
     length: 0,
   };
 }
@@ -61,6 +62,7 @@ export function getEmptyFrameTable(): FrameTable {
     // be caught by the type system.
     address: [],
     category: [],
+    subcategory: [],
     func: [],
     implementation: [],
     line: [],
@@ -78,6 +80,7 @@ export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
     // be caught by the type system.
     address: frameTable.address.slice(),
     category: frameTable.category.slice(),
+    subcategory: frameTable.subcategory.slice(),
     func: frameTable.func.slice(),
     implementation: frameTable.implementation.slice(),
     line: frameTable.line.slice(),
@@ -198,14 +201,14 @@ export function getEmptyExtensions(): ExtensionTable {
 
 export function getDefaultCategories(): CategoryList {
   return [
-    { name: 'Idle', color: 'transparent' },
-    { name: 'Other', color: 'grey' },
-    { name: 'Layout', color: 'purple' },
-    { name: 'JavaScript', color: 'yellow' },
-    { name: 'GC / CC', color: 'orange' },
-    { name: 'Network', color: 'lightblue' },
-    { name: 'Graphics', color: 'green' },
-    { name: 'DOM', color: 'blue' },
+    { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
+    { name: 'Other', color: 'grey', subcategories: ['Other'] },
+    { name: 'Layout', color: 'purple', subcategories: ['Other'] },
+    { name: 'JavaScript', color: 'yellow', subcategories: ['Other'] },
+    { name: 'GC / CC', color: 'orange', subcategories: ['Other'] },
+    { name: 'Network', color: 'lightblue', subcategories: ['Other'] },
+    { name: 'Graphics', color: 'green', subcategories: ['Other'] },
+    { name: 'DOM', color: 'blue', subcategories: ['Other'] },
   ];
 }
 

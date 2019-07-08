@@ -134,6 +134,7 @@ export function createGeckoProfile(): GeckoProfile {
       {
         name: 'Other',
         color: 'grey',
+        subcategories: ['Other'],
       },
     ],
     extensions: {
@@ -236,13 +237,14 @@ function _createGeckoThread(): GeckoThread {
         line: 4,
         column: 5,
         category: 6,
+        subcategory: 7,
       },
       data: [
-        [0, false, null, null, null, null], // (root)
-        [1, false, null, null, null, null], // 0x100000f84
-        [2, false, null, null, null, null], // 0x100001a45
-        [3, false, null, null, 4391, 0], // Startup::XRE_Main, line 4391, category Other
-        [7, false, 6, null, 34, null], // frobnicate, implementation 'baseline', line 34
+        [0, false, null, null, null, null, null], // (root)
+        [1, false, null, null, null, null, null], // 0x100000f84
+        [2, false, null, null, null, null, null], // 0x100001a45
+        [3, false, null, null, 4391, 0, 0], // Startup::XRE_Main, line 4391, category Other, subcategory Other
+        [7, false, 6, null, 34, null, null], // frobnicate, implementation 'baseline', line 34
       ],
     },
     markers: {
@@ -626,17 +628,18 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
         line: 4,
         column: 5,
         category: 6,
+        subcategory: 7,
       },
       data: [
-        [0, false, null, null, null, null], // 0: (root)
-        [1, false, null, null, null, null], // 1: 0x100000f84
-        [2, false, null, null, null, null], // 2: 0x100001a45
-        [3, false, null, null, 4391, 16], // 3: Startup::XRE_Main, line 4391, category 16
-        [7, false, 6, null, 1, null], // 4: javascriptOne, implementation 'baseline', line 1
-        [8, false, 6, null, 2, null], // 5: javascriptTwo, implementation 'baseline', line 2
-        [9, false, null, null, null, null], // 6: 0x10000f0f0
-        [10, false, null, null, null, null], // 7: 0x100fefefe
-        [11, false, null, null, 3, null], // 8: javascriptThree, implementation null, line 3
+        [0, false, null, null, null, null, null], // 0: (root)
+        [1, false, null, null, null, null, null], // 1: 0x100000f84
+        [2, false, null, null, null, null, null], // 2: 0x100001a45
+        [3, false, null, null, 4391, 0, 0], // 3: Startup::XRE_Main, line 4391, category 16
+        [7, false, 6, null, 1, null, null], // 4: javascriptOne, implementation 'baseline', line 1
+        [8, false, 6, null, 2, null, null], // 5: javascriptTwo, implementation 'baseline', line 2
+        [9, false, null, null, null, null, null], // 6: 0x10000f0f0
+        [10, false, null, null, null, null, null], // 7: 0x100fefefe
+        [11, false, null, null, 3, null, null], // 8: javascriptThree, implementation null, line 3
       ],
     },
     markers: {
