@@ -86,22 +86,46 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
   _toggleLocalTrackVisibility = (
     _,
-    data: { pid: Pid, trackIndex: TrackIndex }
+    data: { pid: Pid, trackIndex: TrackIndex, globalTrackIndex: TrackIndex }
   ): void => {
-    const { trackIndex, pid } = data;
+    const { trackIndex, pid, globalTrackIndex } = data;
     const {
       hiddenLocalTracksByPid,
       hideLocalTrack,
       showLocalTrack,
+      hiddenGlobalTracks,
+      showGlobalTrack,
+      localTrackOrderByPid,
     } = this.props;
     const hiddenLocalTracks = ensureExists(
       hiddenLocalTracksByPid.get(pid),
       'Expected to find hidden local tracks for the given pid'
     );
-    if (hiddenLocalTracks.has(trackIndex)) {
-      showLocalTrack(pid, trackIndex);
+
+    if (hiddenGlobalTracks.has(globalTrackIndex)) {
+      // When the parent global track is hidden, instead of simply
+      // toggling, we'll just unhide the global track and this
+      // particular local track. Other local tracks should be hidden.
+      showGlobalTrack(globalTrackIndex);
+      const localTrackOrder = ensureExists(
+        localTrackOrderByPid.get(pid),
+        'Expected to find local tracks for the given pid'
+      );
+      localTrackOrder.forEach(index => {
+        if (index === trackIndex) {
+          showLocalTrack(pid, trackIndex);
+        } else {
+          hideLocalTrack(pid, index);
+        }
+      });
     } else {
-      hideLocalTrack(pid, trackIndex);
+      // When the global track is not hidden, we'll just go ahead and
+      // toggle this local track.
+      if (hiddenLocalTracks.has(trackIndex)) {
+        showLocalTrack(pid, trackIndex);
+      } else {
+        hideLocalTrack(pid, trackIndex);
+      }
     }
   };
 
@@ -199,14 +223,13 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     return localTrackOrder.map(trackIndex => (
       <MenuItem
-        disabled={isGlobalTrackHidden}
         key={trackIndex}
         preventClose={true}
-        data={{ pid, trackIndex }}
+        data={{ pid, trackIndex, globalTrackIndex }}
         onClick={this._toggleLocalTrackVisibility}
         attributes={{
           className: classNames('checkable indented', {
-            checked: !hiddenLocalTracks.has(trackIndex),
+            checked: !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
           }),
         }}
       >
