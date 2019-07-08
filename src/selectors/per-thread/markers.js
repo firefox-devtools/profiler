@@ -237,7 +237,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    UrlState.getMarkersSearchString,
+    UrlState.getMarkersSearchStringsAsRegExp,
     MarkerData.getSearchFilteredMarkerIndexes
   );
 
@@ -289,7 +289,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = createSelector(
     getMarkerGetter,
     getNetworkMarkerIndexes,
-    UrlState.getNetworkSearchString,
+    UrlState.getNetworkSearchStringsAsRegExp,
     MarkerData.getSearchFilteredMarkerIndexes
   );
 
@@ -319,7 +319,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = createSelector(
     getMarkerGetter,
     getMarkerChartMarkerIndexes,
-    UrlState.getMarkersSearchString,
+    UrlState.getMarkersSearchStringsAsRegExp,
     MarkerData.getSearchFilteredMarkerIndexes
   );
 

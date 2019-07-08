@@ -667,6 +667,28 @@ describe('actions/ProfileView', function() {
       dispatch(ProfileView.changeMarkersSearchString('a'));
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('a');
     });
+
+    it('filters the markers', function() {
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+        ['c', 2, null],
+      ]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(3);
+      dispatch(ProfileView.changeMarkersSearchString('A, b'));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
+    });
   });
 
   describe('changeNetworkSearchString', function() {
@@ -678,6 +700,7 @@ describe('actions/ProfileView', function() {
       dispatch(ProfileView.changeNetworkSearchString('a'));
       expect(UrlStateSelectors.getNetworkSearchString(getState())).toEqual('a');
     });
+
     it('filters the network markers', function() {
       const profile = getNetworkTrackProfile();
       const { dispatch, getState } = storeWithProfile(profile);
@@ -698,6 +721,27 @@ describe('actions/ProfileView', function() {
       expect(
         getMarker(markerIndexes[0]).name.includes(networkSearchString)
       ).toBeTruthy();
+    });
+
+    it('filters multiple network markers', function() {
+      const profile = getNetworkTrackProfile();
+      const { dispatch, getState } = storeWithProfile(profile);
+      const networkSearchString = '3, 4';
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+          getState()
+        )
+      ).toHaveLength(10);
+      dispatch(ProfileView.changeNetworkSearchString(networkSearchString));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const markerIndexes = selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('3')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('4')).toBeTruthy();
     });
   });
 

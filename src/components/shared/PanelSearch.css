@@ -1,21 +1,21 @@
-.stackSearchField {
+.panelSearchField {
   /* so that the introduction is on top of other panels, _but_ still keep it
    * below the input field (see below) */
   z-index: 1;
   padding: 0 5px;
 }
 
-.stackSearchFieldLabel {
-  /* We fix the height so that the stackSearchFieldIntroduction doesn't increase it */
+.panelSearchFieldLabel {
+  /* We fix the height so that the panelSearchFieldIntroduction doesn't increase it */
   display: block;
   height: 100%;
 }
 
-.stackSearchFieldInput {
+.panelSearchFieldInput {
   width: 300px;
 }
 
-.stackSearchFieldIntroduction {
+.panelSearchFieldIntroduction {
   z-index: -1; /* it needs to be below the input field */
   padding: 0 5px;
   background-color: white;
@@ -26,11 +26,11 @@
   transform: translate(2px, -2px);
 }
 
-.stackSearchFieldIntroduction.isDisplayed {
+.panelSearchFieldIntroduction.isDisplayed {
   transition: transform 150ms var(--animation-curve), opacity 150ms ease-in-out;
 }
 
-.stackSearchFieldIntroduction.isHidden {
+.panelSearchFieldIntroduction.isHidden {
   opacity: 0;
   transform: translateY(-100%);
 

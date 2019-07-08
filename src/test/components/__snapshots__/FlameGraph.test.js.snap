@@ -188,14 +188,14 @@ exports[`FlameGraph matches the snapshot 1`] = `
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -213,7 +213,7 @@ exports[`FlameGraph matches the snapshot 1`] = `
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>

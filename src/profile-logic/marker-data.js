@@ -79,17 +79,21 @@ export function deriveJankMarkers(
 export function getSearchFilteredMarkerIndexes(
   getMarker: MarkerIndex => Marker,
   markerIndexes: MarkerIndex[],
-  searchString: string
+  searchRegExp: RegExp | null
 ): MarkerIndex[] {
-  if (!searchString) {
+  if (!searchRegExp) {
     return markerIndexes;
   }
-  const lowerCaseSearchString = searchString.toLowerCase();
   const newMarkers: MarkerIndex[] = [];
   for (const markerIndex of markerIndexes) {
     const { data, name } = getMarker(markerIndex);
-    const lowerCaseName = name.toLowerCase();
-    if (lowerCaseName.includes(lowerCaseSearchString)) {
+
+    // Reset regexp for each iteration. Otherwise state from previous
+    // iterations can cause matches to fail if the search is global or
+    // sticky.
+    searchRegExp.lastIndex = 0;
+
+    if (searchRegExp.test(name)) {
       newMarkers.push(markerIndex);
       continue;
     }
@@ -97,9 +101,9 @@ export function getSearchFilteredMarkerIndexes(
       if (data.type === 'FileIO') {
         const { filename, operation, source } = data;
         if (
-          filename.toLowerCase().includes(lowerCaseSearchString) ||
-          operation.toLowerCase().includes(lowerCaseSearchString) ||
-          source.toLowerCase().includes(lowerCaseSearchString)
+          searchRegExp.test(filename) ||
+          searchRegExp.test(operation) ||
+          searchRegExp.test(source)
         ) {
           newMarkers.push(markerIndex);
           continue;
@@ -107,23 +111,20 @@ export function getSearchFilteredMarkerIndexes(
       }
       if (
         typeof data.eventType === 'string' &&
-        data.eventType.toLowerCase().includes(lowerCaseSearchString)
+        searchRegExp.test(data.eventType)
       ) {
         // Match DOMevents data.eventType
         newMarkers.push(markerIndex);
         continue;
       }
-      if (
-        typeof data.name === 'string' &&
-        data.name.toLowerCase().includes(lowerCaseSearchString)
-      ) {
+      if (typeof data.name === 'string' && searchRegExp.test(data.name)) {
         // Match UserTiming's name.
         newMarkers.push(markerIndex);
         continue;
       }
       if (
         typeof data.category === 'string' &&
-        data.category.toLowerCase().includes(lowerCaseSearchString)
+        searchRegExp.test(data.category)
       ) {
         // Match UserTiming's name.
         newMarkers.push(markerIndex);
