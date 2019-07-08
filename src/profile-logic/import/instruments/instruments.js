@@ -633,7 +633,7 @@ function fillThread(thread, threadId, samples, addressToFrameMap) {
       funcKeyToIndex.set(funcKey, funcTable.length);
       funcTable.name.push(stringTable.indexForString(frameMetaData.name));
       funcTable.fileName.push(
-        stringTable.indexForString(frameMetaData.file || null)
+        stringTable.indexForString(frameMetaData.file || '')
       );
       funcTable.isJS.push(false);
       funcTable.resource.push(-1);
@@ -672,7 +672,7 @@ function fillThread(thread, threadId, samples, addressToFrameMap) {
 
       if (index === stackTrace.length - 1) {
         samplesTable.stack.push(stackKeyToIndex.get(keyOfStackKeyToIndexMap));
-        samplesTable.time.push(sample.timestamp / 100000); // TODO: Doubt
+        samplesTable.time.push(sample.timestamp / 1000000); // TODO: Doubt
         samplesTable.responsiveness.push(null);
         samplesTable.length++;
       }
