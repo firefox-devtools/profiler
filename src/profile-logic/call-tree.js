@@ -122,9 +122,15 @@ export class CallTree {
         children.length < childCount;
         childCallNodeIndex++
       ) {
+        const childPrefixIndex = this._callNodeTable.prefix[childCallNodeIndex];
+        const childTotalTime = this._callNodeTimes.totalTime[
+          childCallNodeIndex
+        ];
+        const childChildCount = this._callNodeChildCount[childCallNodeIndex];
+
         if (
-          this._callNodeTable.prefix[childCallNodeIndex] === callNodeIndex &&
-          this._callNodeTimes.totalTime[childCallNodeIndex] !== 0
+          childPrefixIndex === callNodeIndex &&
+          (childTotalTime !== 0 || childChildCount !== 0)
         ) {
           children.push(childCallNodeIndex);
         }
@@ -381,16 +387,21 @@ export function computeCallTreeCountsAndTimings(
   let rootCount = 0;
 
   // We loop the call node table in reverse, so that we find the children
-  // before their parents.
+  // before their parents, and the total time is known at the time we reach a
+  // node.
   for (
     let callNodeIndex = callNodeTable.length - 1;
     callNodeIndex >= 0;
     callNodeIndex--
   ) {
     callNodeTotalTime[callNodeIndex] += callNodeLeafTime[callNodeIndex];
-    if (callNodeTotalTime[callNodeIndex] === 0) {
+    const hasChildren = callNodeChildCount[callNodeIndex] !== 0;
+    const hasTotalTime = callNodeTotalTime[callNodeIndex] !== 0;
+
+    if (!hasChildren && !hasTotalTime) {
       continue;
     }
+
     const prefixCallNode = callNodeTable.prefix[callNodeIndex];
     if (prefixCallNode === -1) {
       rootTotalTime += callNodeTotalTime[callNodeIndex];
