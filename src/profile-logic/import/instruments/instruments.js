@@ -623,14 +623,14 @@ function fillThread(thread, threadId, samples, addressToFrameMap) {
 
   for (const frameData of addressToFrameMap) {
     const frameMetaData = frameData[1];
-    const funcKey = frameMetaData.key;
+    const frameAddress = frameMetaData.key;
 
-    if (funcKeyToIndex.has(funcKey)) {
-      const funcIndex = funcKeyToIndex.get(funcKey);
+    if (funcKeyToIndex.has(frameAddress)) {
+      const funcIndex = funcKeyToIndex.get(frameAddress);
 
       frameTable.func.push(funcIndex);
     } else {
-      funcKeyToIndex.set(funcKey, funcTable.length);
+      funcKeyToIndex.set(frameAddress, funcTable.length);
       funcTable.name.push(stringTable.indexForString(frameMetaData.name));
       funcTable.fileName.push(
         stringTable.indexForString(frameMetaData.file || '')
@@ -644,7 +644,7 @@ function fillThread(thread, threadId, samples, addressToFrameMap) {
     }
 
     frameTable.category.push(1); // TODO: Make the function to get the index of 'Other' category
-    frameTable.address.push(stringTable.indexForString(''));
+    frameTable.address.push(stringTable.indexForString(frameAddress));
     frameTable.implementation.push(null);
     frameTable.line.push(null);
     frameTable.column.push(null);
