@@ -69,14 +69,14 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -94,7 +94,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -202,14 +202,14 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -227,7 +227,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -335,14 +335,14 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -360,7 +360,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -523,14 +523,14 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -548,7 +548,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -1137,14 +1137,14 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -1162,7 +1162,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -1751,14 +1751,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -1776,7 +1776,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -2365,14 +2365,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -2390,7 +2390,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -2936,14 +2936,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -2961,7 +2961,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -3507,14 +3507,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -3532,7 +3532,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -3959,14 +3959,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -3984,7 +3984,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -4411,14 +4411,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -4436,7 +4436,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>

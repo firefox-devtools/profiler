@@ -131,7 +131,8 @@ export type RawMarkerTable = {|
  * time. The relationship between frames is defined by the StackTable.
  */
 export type FrameTable = {|
-  address: IndexIntoStringTable[],
+  // The address is a copy from the FuncTable entry.
+  address: Array<MemoryOffset | -1>,
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
@@ -150,10 +151,13 @@ export type FrameTable = {|
  * locations.
  */
 export type FuncTable = {|
-  address: MemoryOffset[],
+  // This is relevant for native entries only.
+  address: Array<MemoryOffset | -1>,
   isJS: boolean[],
   length: number,
   name: IndexIntoStringTable[],
+  // The resource is -1 if we couldn't extract a function name as a native or JS
+  // function. This is most often the case for frame labels.
   resource: Array<IndexIntoResourceTable | -1>,
   relevantForJS: Array<boolean>,
   fileName: Array<IndexIntoStringTable | null>,

@@ -8,12 +8,14 @@ import React, { PureComponent } from 'react';
 import {
   changeImplementationFilter,
   changeInvertCallstack,
+  changeCallTreeSearchString,
 } from '../../actions/profile-view';
 import {
   getImplementationFilter,
   getInvertCallstack,
+  getCurrentSearchString,
 } from '../../selectors/url-state';
-import StackSearchField from '../shared/StackSearchField';
+import PanelSearch from '../shared/PanelSearch';
 import { toValidImplementationFilter } from '../../profile-logic/profile-data';
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
@@ -28,11 +30,13 @@ type OwnProps = {|
 type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +invertCallstack: boolean,
+  +currentSearchString: string,
 |};
 
 type DispatchProps = {|
   +changeImplementationFilter: typeof changeImplementationFilter,
   +changeInvertCallstack: typeof changeInvertCallstack,
+  +changeCallTreeSearchString: typeof changeCallTreeSearchString,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -48,6 +52,10 @@ class StackSettings extends PureComponent<Props> {
 
   _onInvertCallstackClick = (e: SyntheticEvent<HTMLInputElement>) => {
     this.props.changeInvertCallstack(e.currentTarget.checked);
+  };
+
+  _onSearch = (value: string) => {
+    this.props.changeCallTreeSearchString(value);
   };
 
   _renderRadioButton(
@@ -71,7 +79,11 @@ class StackSettings extends PureComponent<Props> {
   }
 
   render() {
-    const { invertCallstack, hideInvertCallstack } = this.props;
+    const {
+      invertCallstack,
+      hideInvertCallstack,
+      currentSearchString,
+    } = this.props;
 
     return (
       <div className="stackSettings">
@@ -95,7 +107,13 @@ class StackSettings extends PureComponent<Props> {
             </li>
           )}
         </ul>
-        <StackSearchField className="stackSettingsSearchField" />
+        <PanelSearch
+          className="stackSettingsSearchField"
+          label="Filter stacks: "
+          title="Only display stacks which contain a function whose name matches this substring"
+          currentSearchString={currentSearchString}
+          onSearch={this._onSearch}
+        />
       </div>
     );
   }
@@ -105,10 +123,12 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
+    currentSearchString: getCurrentSearchString(state),
   }),
   mapDispatchToProps: {
     changeImplementationFilter,
     changeInvertCallstack,
+    changeCallTreeSearchString,
   },
   component: StackSettings,
 });

@@ -7,6 +7,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
+import { ensureExists } from '../../utils/flow';
 
 import {
   changeSelectedThread,
@@ -245,6 +246,65 @@ describe('timeline/TrackContextMenu', function() {
 
     xit('can isolate a non-thread track, as long as there process has a thread index', function() {
       // TODO - We should wait until we have some real non-thread tracks
+    });
+  });
+
+  describe('global / local track visibility interplay', function() {
+    function setupTracks() {
+      const results = setup();
+      const { getByText, dispatch, getState } = results;
+
+      const trackIndex = 1;
+      const trackReference = {
+        type: 'global',
+        trackIndex: trackIndex,
+      };
+      const track = getGlobalTracks(getState())[trackIndex];
+      if (track.type !== 'process') {
+        throw new Error('Expected a process track.');
+      }
+      const threadIndex = ensureExists(
+        track.mainThreadIndex,
+        `Couldn't get the mainThreadIndex of global track`
+      );
+
+      dispatch(changeSelectedThread(threadIndex));
+      dispatch(changeRightClickedTrack(trackReference));
+
+      const globalTrackItem = () => getByText('Content Process');
+      const localTrackItem = () => getByText('DOM Worker');
+
+      return {
+        ...results,
+        globalTrackItem,
+        localTrackItem,
+      };
+    }
+
+    it('will unhide the global track when unhiding one of its local tracks', function() {
+      const { getState, globalTrackItem, localTrackItem } = setupTracks();
+      // Hide the global track.
+      fireEvent.click(globalTrackItem());
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        // The "GeckoMain tab" process is now hidden.
+        'hide [thread GeckoMain tab]',
+        // These are still shown as visible, which reflects their
+        // internal state, but in the UI they'll appear hidden.
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      // Unhide "DOM Worker" local track.
+      fireEvent.click(localTrackItem());
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        // The "GeckoMain tab" process is visible again.
+        'show [thread GeckoMain tab]',
+        // Only the "DOM Worker" local track is visible.
+        '  - show [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
     });
   });
 });
