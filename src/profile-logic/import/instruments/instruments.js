@@ -679,10 +679,7 @@ function pushThreadsInProfile(profile, addressToFrameMap, samples) {
   const threadIDToSamples = new Map();
   for (const sample of samples) {
     if (threadIDToSamples.has(sample.threadID)) {
-      threadIDToSamples.set(sample.threadID, [
-        ...threadIDToSamples.get(sample.threadID),
-        sample,
-      ]);
+      threadIDToSamples.get(sample.threadID).push(sample);
     } else {
       threadIDToSamples.set(sample.threadID, [sample]);
     }
