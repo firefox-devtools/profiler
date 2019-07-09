@@ -16,11 +16,13 @@ import BinReader from './BinReader';
 
 // TODO make helpers.js and move the appropriate helper functions into it
 // TODO add the missing return types in the functions
+// TODO I have used console.log() statements for debug purpose, I will remove them later
+// TODO add Root frame at the top
+// TODO fill remaining meta data inside profile
 
 let fileReader;
 
 function parseBinaryPlist(bytes) {
-  // console.log('bytes inside parseBinaryPlist function', bytes);
   const text = 'bplist00';
   for (let i = 0; i < 8; i++) {
     if (bytes[i] !== text.charCodeAt(i)) {
@@ -28,14 +30,12 @@ function parseBinaryPlist(bytes) {
     }
   }
 
-  // console.log(new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength));
-
   return new BinaryPlistParser(
     new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
   ).parseRoot();
 }
 
-export function decodeUTF8(bytes: Uint8Array): string {
+function decodeUTF8(bytes: Uint8Array): string {
   let text = String.fromCharCode.apply(String, bytes); // eslint-disable-line prefer-spread
   if (text.slice(-1) === '\0') text = text.slice(0, -1); // Remove a single trailing null character if present
   return decodeURIComponent(escape(text));
@@ -45,7 +45,7 @@ function followUID(objects: any[], value: any): any {
   return value instanceof UID ? objects[value.index] : value;
 }
 
-export function sortBy<T>(ts: T[], key: (t: T) => number | string): void {
+function sortBy<T>(ts: T[], key: (t: T) => number | string): void {
   function comparator(a: T, b: T) {
     return key(a) < key(b) ? -1 : 1;
   }
@@ -74,7 +74,6 @@ function patternMatchObjectiveC(
           let digit = mantissa[i];
 
           if (byteOrder !== 1) {
-            // I assume this is how this works but I am unable to test it
             digit = ((digit & 0xff00) >> 8) | ((digit & 0x00ff) << 8);
           }
 
@@ -299,31 +298,23 @@ function readInstrumentsArchive(buffer) {
   return data;
 }
 
-export function zeroPad(s: string, width: number) {
+function zeroPad(s: string, width: number) {
   return new Array(Math.max(width - s.length, 0) + 1).join('0') + s;
 }
 
-export function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
+function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
   if (!map.has(k)) {
     throw new Error(`Expected key ${k}`);
   }
   return map.get(k);
 }
 
-export function getOrInsert<K, V>(
-  map: Map<K, V>,
-  k: K,
-  fallback: (k: K) => V
-): V {
+function getOrInsert<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V {
   if (!map.has(k)) map.set(k, fallback(k));
   return map.get(k);
 }
 
-export function getOrElse<K, V>(
-  map: Map<K, V>,
-  k: K,
-  fallback: (k: K) => V
-): V {
+function getOrElse<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V {
   if (!map.has(k)) return fallback(k);
   return map.get(k);
 }
@@ -393,7 +384,8 @@ async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
   for (const storedir of stores.subdirectories.values()) {
     const schemaFile = storedir.files.get('schema.xml');
     if (!schemaFile) continue;
-    const schema = await fileReader(schemaFile).asText();
+    const schema = await fileReader(schemaFile).asText(); // TODO: Getting an error while processing latest version profiles
+    console.log('schema', schema);
     if (!/name="time-profile"/.exec(schema)) {
       continue;
     }
@@ -606,7 +598,8 @@ export function isInstrumentsProfile(file: mixed): boolean {
   return fileMetaData.pop() === 'trace';
 }
 
-function fillThread(thread, threadId, samples, addressToFrameMap) {
+function fillThread(threadId, samples, addressToFrameMap) {
+  const thread = getEmptyThread();
   const {
     funcTable,
     frameTable,
@@ -697,7 +690,6 @@ function pushThreadsInProfile(profile, addressToFrameMap, samples) {
 
   for (const threadID of threadIDToSamples.keys()) {
     const processedThread = fillThread(
-      getEmptyThread(),
       threadID,
       threadIDToSamples.get(threadID),
       addressToFrameMap
@@ -710,10 +702,6 @@ export async function convertInstrumentsProfile(
   entry: mixed,
   fileReaderHelper
 ): Profile {
-  // We have kept return type as undefined as of now, we will update it once we implement the other functions
-  //console.log('inside convertInstrumentsProfile!!!!');
-  //console.log('entry', entry);
-
   fileReader = fileReaderHelper;
   const tree = await extractDirectoryTree(entry);
   // console.log('tree', tree);
@@ -727,7 +715,7 @@ export async function convertInstrumentsProfile(
 
   // console.log('version', version);
   console.log('runs', runs);
-  // console.log('instrument', instrument);
+  // console.log('instrument', instrument); TODO: Use version and instruments' information into meta data if possible
   // console.log('selectedRunNumber', selectedRunNumber);
 
   if (instrument !== 'com.apple.xray.instrument-type.coresampler2') {
@@ -739,7 +727,7 @@ export async function convertInstrumentsProfile(
   const profile = getEmptyProfile();
 
   const { addressToFrameMap, number } = runs[0];
-  // For now, we will just process first run
+  // For now, we will just process the first run
 
   const group = await importRunFromInstrumentsTrace({
     tree,
