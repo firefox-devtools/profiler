@@ -7,8 +7,8 @@
 .menuButtonsRevertButton,
 .menuButtonsAbortUploadButton {
   height: 24px;
-  margin-bottom: -24px;
   border-left: 1px solid var(--grey-30);
+  margin-bottom: -24px;
 }
 
 .menuButtonsAbortUploadButton {

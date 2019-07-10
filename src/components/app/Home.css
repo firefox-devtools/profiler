@@ -47,8 +47,8 @@
 
 .homeSpecialMessage {
   padding: 8px 16px;
-  margin: 17px 0;
   border: 1px solid #000;
+  margin: 17px 0;
   background-color: #798fc8;
   border-radius: 3px;
   color: #fff;
@@ -71,8 +71,8 @@
 .homeSection kbd {
   display: inline-block;
   padding: 0 0.5em;
-  margin: 0 0.2em;
   border: 1px solid #ccc;
+  margin: 0 0.2em;
   background-color: #f6f6f6;
   border-radius: 0.2em;
   box-shadow: 0.1em 0.1em 0 #bbb;
@@ -82,10 +82,10 @@
   display: flex;
   justify-content: space-between;
   padding-bottom: 0.5em;
+  border-bottom: 1px solid #ddd;
 
   /* Negative margin is here to compensate for the children's margins */
   margin: 0 -0.2em 0.5em;
-  border-bottom: 1px solid #ddd;
 }
 
 .homeTitleSlogan {
@@ -120,8 +120,8 @@
 .homeSectionButton {
   display: block;
   padding: 0.5em;
-  margin: 15px 0;
   border: 2px solid var(--blue-60);
+  margin: 15px 0;
   background-color: #fff;
   color: var(--blue-60);
   cursor: pointer;

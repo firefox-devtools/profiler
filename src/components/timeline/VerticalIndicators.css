@@ -40,8 +40,8 @@
   display: inline-block;
   width: 12px;
   height: 12px;
-  margin-bottom: -3px;
   border: 1px solid var(--grey-30);
+  margin-bottom: -3px;
   background-color: var(--vertical-indicator-color);
 }
 
