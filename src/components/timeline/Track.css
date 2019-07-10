@@ -8,8 +8,8 @@
  */
 .timelineTrack {
   padding: 0;
-  margin: 0;
   border-top: 1px solid var(--grey-30);
+  margin: 0;
   box-shadow: 0 1px var(--grey-30);
 }
 
@@ -49,8 +49,8 @@
   width: calc(100% - 8px);
   height: calc(100% - 8px);
   padding: 0 0 0 10px;
-  margin: auto;
   border: none;
+  margin: auto;
   background: none;
   font: message-box;
   font-size: 100%;

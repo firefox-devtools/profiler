@@ -222,9 +222,9 @@ body,
   height: 16px;
   flex-shrink: 0;
   padding: 0;
+  border: 0;
   margin: 0;
   margin-left: 5px;
-  border: 0;
   background: none 0 0 no-repeat transparent;
   background-image: url(../img/svg/circlearrow.svg);
   color: transparent;
@@ -252,22 +252,22 @@ body,
 .treeRowToggleButton {
   width: 0;
   height: 0;
-  margin-left: 8px;
   border-top: 5px solid transparent;
   border-right: 4px solid transparent;
   border-bottom: 5px solid transparent;
   border-left: 8px solid;
+  margin-left: 8px;
   color: #888;
 }
 
 .treeRowToggleButton.expanded {
-  margin-top: 5px;
-  margin-right: 5px;
-  margin-left: 5px;
   border-top: 8px solid;
   border-right: 5px solid transparent;
   border-bottom: 4px solid transparent;
   border-left: 5px solid transparent;
+  margin-top: 5px;
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .treeRowToggleButton:active:hover {
@@ -294,8 +294,8 @@ body,
   flex: none;
   flex-flow: row nowrap;
   padding: 0;
-  margin: 0;
   border-bottom: 1px solid var(--grey-30);
+  margin: 0;
   background: var(--grey-10);
 }
 
@@ -406,16 +406,16 @@ body,
 
 .initializing-text h1 {
   padding-bottom: 0.5em;
+  border-bottom: 1px solid #ddd;
   margin-top: 0;
   margin-bottom: 0.5em;
-  border-bottom: 1px solid #ddd;
 }
 
 .initializing-text span {
   display: inline-block;
   padding: 0 0.5em;
-  margin: 0 0.2em;
   border: 1px solid #ccc;
+  margin: 0 0.2em;
   background-color: #f6f6f6;
   border-radius: 0.2em;
   box-shadow: 0.1em 0.1em 0 #bbb;
@@ -490,8 +490,8 @@ body,
   user-select: none;
 }
 .react-contextmenu-separator {
-  margin: 6px 0;
   border-bottom: 1px solid #ddd;
+  margin: 6px 0;
 }
 
 /* max-height for context menus in the panel changed to 90vh for better zoom experience  */
@@ -533,8 +533,8 @@ body,
 
 .react-contextmenu-item--divider {
   padding: 2px 0;
-  margin-bottom: 3px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  margin-bottom: 3px;
 }
 
 .react-contextmenu-item.react-contextmenu-submenu {

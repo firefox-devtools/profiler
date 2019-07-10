@@ -40,8 +40,8 @@
 
 /* This will be used on both the title and the subtitle */
 .can-select-content-input {
-  width: 100%;
   all: unset;
+  width: 100%;
   text-overflow: ellipsis;
 }
 

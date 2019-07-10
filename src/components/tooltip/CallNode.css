@@ -12,8 +12,8 @@
 
 .tooltipCallNodeImplementationHeader {
   padding-right: 5px;
-  margin-top: 5px;
   border-right: 1px solid var(--grey-30);
+  margin-top: 5px;
   color: var(--grey-50);
   white-space: nowrap;
 }
@@ -56,8 +56,8 @@
   width: 9px;
   height: 9px;
   box-sizing: border-box;
-  margin-right: 3px;
   border: 0.5px solid rgba(0, 0, 0, 0.1);
+  margin-right: 3px;
 }
 
 .tooltipCallNodeImplementationHeaderSwatchRunning {

@@ -22,8 +22,8 @@
 }
 
 .appFooterLinksClose {
-  margin: 0;
   border: none;
+  margin: 0;
   background: none;
   cursor: pointer;
   font: inherit;
