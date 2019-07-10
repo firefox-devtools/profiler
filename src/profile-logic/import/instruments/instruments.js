@@ -637,7 +637,7 @@ function fillThread(threadId, samples, addressToFrameMap) {
     }
 
     frameTable.category.push(1); // TODO: Make the function to get the index of 'Other' category
-    frameTable.address.push(stringTable.indexForString(frameAddress));
+    frameTable.address.push(stringTable.indexForString(`${frameAddress}`));
     frameTable.implementation.push(null);
     frameTable.line.push(null);
     frameTable.column.push(null);
