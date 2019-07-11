@@ -2,7 +2,10 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getMergedProfileFromTextSamples,
+} from '../fixtures/profiles/processed-profile';
 import {
   getCallTree,
   computeCallTreeCountsAndTimings,
@@ -14,11 +17,41 @@ import {
   invertCallstack,
   getCallNodeIndexFromPath,
   getOriginAnnotationForFunc,
+  filterThreadSamplesToRange,
 } from '../../profile-logic/profile-data';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import { formatTree, formatTreeIncludeCategories } from '../fixtures/utils';
 
 import type { Profile } from '../../types/profile';
+
+function callTreeFromProfile(
+  profile: Profile,
+  threadIndex: number = 0
+): CallTree {
+  const thread = profile.threads[threadIndex];
+  const { interval, categories } = profile.meta;
+  const defaultCategory = categories.findIndex(c => c.name === 'Other');
+  const callNodeInfo = getCallNodeInfo(
+    thread.stackTable,
+    thread.frameTable,
+    thread.funcTable,
+    defaultCategory
+  );
+  const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+    thread,
+    callNodeInfo,
+    interval,
+    false
+  );
+  return getCallTree(
+    thread,
+    interval,
+    callNodeInfo,
+    categories,
+    'combined',
+    callTreeCountsAndTimings
+  );
+}
 
 describe('unfiltered call tree', function() {
   // These values are hoisted at the top for the ease of access. In the profile fixture
@@ -42,32 +75,6 @@ describe('unfiltered call tree', function() {
       D  F  I
       E  G
     `).profile;
-  }
-
-  function callTreeFromProfile(profile: Profile): CallTree {
-    const [thread] = profile.threads;
-    const { interval, categories } = profile.meta;
-    const defaultCategory = categories.findIndex(c => c.name === 'Other');
-    const callNodeInfo = getCallNodeInfo(
-      thread.stackTable,
-      thread.frameTable,
-      thread.funcTable,
-      defaultCategory
-    );
-    const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
-      thread,
-      callNodeInfo,
-      interval,
-      false
-    );
-    return getCallTree(
-      thread,
-      interval,
-      callNodeInfo,
-      categories,
-      'combined',
-      callTreeCountsAndTimings
-    );
   }
 
   /**
@@ -523,6 +530,82 @@ describe('inverted call tree', function() {
         '        - A [Other] (total: 1, self: —)',
       ]);
     });
+  });
+});
+
+describe('diffing trees', function() {
+  function getProfile() {
+    const profile = getMergedProfileFromTextSamples(
+      `
+      A  A  A
+      B  B  C
+      D  E  F
+    `,
+      `
+      A  A  A
+      B  B  B
+      G  I  E
+    `
+    );
+    return profile;
+  }
+
+  it('displays a proper call tree, including nodes with totalTime = 0', () => {
+    const profile = getProfile();
+    const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
+    const formattedTree = formatTree(callTree);
+    expect(formattedTree).toEqual([
+      '- A (total: 0, self: —)',
+      '  - B (total: 1, self: —)',
+      '    - D (total: -1, self: -1)',
+      '    - G (total: 1, self: 1)',
+      '    - I (total: 1, self: 1)',
+      '  - C (total: -1, self: —)',
+      '    - F (total: -1, self: -1)',
+    ]);
+
+    // There's no A -> B -> E node because the diff makes it completely disappear.
+    expect(formattedTree).not.toContainEqual(expect.stringMatching(/^\s*- E/));
+  });
+
+  it('displays a proper call tree, even for range-filtered threads', () => {
+    const profile = getProfile();
+    const rangeStart = 1;
+    const rangeEnd = 3;
+    profile.threads = profile.threads.map(thread =>
+      filterThreadSamplesToRange(thread, rangeStart, rangeEnd)
+    );
+    const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
+    const formattedTree = formatTree(callTree);
+    expect(formattedTree).toEqual([
+      // A -> B -> D and A -> B -> G should be filtered out by the range filtering.
+      '- A (total: 0, self: —)',
+      '  - B (total: 1, self: —)',
+      '    - I (total: 1, self: 1)',
+      '  - C (total: -1, self: —)',
+      '    - F (total: -1, self: -1)',
+    ]);
+  });
+
+  it('computes a rootTotalTime that is the absolute count of all intervals', () => {
+    const profile = getProfile();
+
+    const thread = profile.threads[2];
+    const { interval, categories } = profile.meta;
+    const defaultCategory = categories.findIndex(c => c.name === 'Other');
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+    const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
+      thread,
+      callNodeInfo,
+      interval,
+      false
+    );
+    expect(callTreeCountsAndTimings.rootTotalTime).toBe(4);
   });
 });
 
