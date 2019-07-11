@@ -395,6 +395,7 @@ export function computeCallTreeCountsAndTimings(
     callNodeIndex--
   ) {
     callNodeTotalTime[callNodeIndex] += callNodeLeafTime[callNodeIndex];
+    rootTotalTime += Math.abs(callNodeLeafTime[callNodeIndex]);
     const hasChildren = callNodeChildCount[callNodeIndex] !== 0;
     const hasTotalTime = callNodeTotalTime[callNodeIndex] !== 0;
 
@@ -404,7 +405,6 @@ export function computeCallTreeCountsAndTimings(
 
     const prefixCallNode = callNodeTable.prefix[callNodeIndex];
     if (prefixCallNode === -1) {
-      rootTotalTime += callNodeTotalTime[callNodeIndex];
       rootCount++;
     } else {
       callNodeTotalTime[prefixCallNode] += callNodeTotalTime[callNodeIndex];
