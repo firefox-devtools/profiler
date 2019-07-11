@@ -267,7 +267,10 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
       return;
     }
     // console.log(event.dataTransfer);
-    const firstItem = event.dataTransfer.items[0];
+    const {
+      files,
+      items: [firstItem],
+    } = event.dataTransfer;
 
     if ('webkitGetAsEntry' in firstItem) {
       const webkitEntry = firstItem.webkitGetAsEntry();
@@ -277,7 +280,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
         return;
       }
     }
-    const { files } = event.dataTransfer;
 
     if (files.length > 0) {
       this.props.retrieveProfileFromFile(files[0]);

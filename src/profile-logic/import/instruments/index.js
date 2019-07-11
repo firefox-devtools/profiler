@@ -96,7 +96,7 @@ function patternMatchObjectiveC(
 
       // Replace NSArray with an Array
       case 'NSArray':
-      case 'NSMutableArray':
+      case 'NSMutableArray': {
         if ('NS.objects' in value) {
           return value['NS.objects'];
         }
@@ -109,7 +109,7 @@ function patternMatchObjectiveC(
           array.push(value[object]);
         }
         return array;
-
+      }
       case '_NSKeyedCoderOldStyleArray': {
         const count = value['NS.count'];
 
@@ -127,7 +127,7 @@ function patternMatchObjectiveC(
       }
 
       case 'NSDictionary':
-      case 'NSMutableDictionary':
+      case 'NSMutableDictionary': {
         const map = new Map();
         if ('NS.keys' in value && 'NS.objects' in value) {
           for (let i = 0; i < value['NS.keys'].length; i++) {
@@ -144,10 +144,11 @@ function patternMatchObjectiveC(
           }
         }
         return map;
-
-      default:
+      }
+      default: {
         const converted = interpretClass(name, value);
         if (converted !== value) return converted;
+      }
     }
   }
   return value;

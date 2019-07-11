@@ -47,7 +47,7 @@ import { setDataSource } from './profile-view';
 import {
   convertInstrumentsProfile,
   isInstrumentsProfile,
-} from '../profile-logic/import/instruments/instruments';
+} from '../profile-logic/import/instruments';
 import type {
   FunctionsUpdatePerThread,
   FuncToFuncMap,

@@ -188,8 +188,11 @@ class BinaryPlistParser {
         return this.parseArray(offset, extra);
       case 0xd:
         return this.parseDictionary(offset, extra);
+      default:
+        throw new Error(
+          'Unexpected marker ' + marker + ' at offset ' + --offset
+        );
     }
-    throw new Error('Unexpected marker ' + marker + ' at offset ' + --offset);
   }
 }
 
