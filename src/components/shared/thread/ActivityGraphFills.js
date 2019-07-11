@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import bisection from 'bisection';
+import { bisectionRight } from '../../../utils/bisect';
 import clamp from 'clamp';
 
 import './ActivityGraph.css';
@@ -515,11 +515,11 @@ export class ActivityFillGraphQuerier {
 
     // Now find the samples where the range [mid(previousSample.time, thisSample.time), mid(thisSample.time, nextSample.time)]
     // overlaps with contributionTimeRange.
-    const firstSampleAfterContributionTimeRangeStart = bisection.right(
+    const firstSampleAfterContributionTimeRangeStart = bisectionRight(
       samples.time,
       contributionTimeRangeStart
     );
-    const firstSampleAfterContributionTimeRangeEnd = bisection.right(
+    const firstSampleAfterContributionTimeRangeEnd = bisectionRight(
       samples.time,
       contributionTimeRangeEnd
     );

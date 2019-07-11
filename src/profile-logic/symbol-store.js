@@ -5,7 +5,7 @@
 // @flow
 import SymbolStoreDB from './symbol-store-db';
 import { SymbolsNotFoundError } from './errors';
-import bisection from 'bisection';
+import { bisectionRight } from '../utils/bisect';
 
 import type { RequestedLib } from '../types/actions';
 import type { SymbolTableAsTuple } from './symbol-store-db';
@@ -171,7 +171,7 @@ export class SymbolStore {
       // the index that we consider the match, so we need to subtract 1 from the
       // result.
       const symbolIndex =
-        bisection(symbolTableAddrs, address, currentSymbolIndex) - 1;
+        bisectionRight(symbolTableAddrs, address, currentSymbolIndex) - 1;
 
       if (symbolIndex >= 0) {
         if (symbolIndex !== currentSymbolIndex) {

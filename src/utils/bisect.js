@@ -56,7 +56,6 @@ export function bisectionRight(array, x, low, high): Number {
   return low;
 }
 
-
 /**
  * Calculates the index of the Array where item X should be placed, assuming the Array is sorted.
  * @param {Array} array The array containing the items.

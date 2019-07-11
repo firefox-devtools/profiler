@@ -5,7 +5,7 @@
 // @flow
 
 import * as React from 'react';
-import bisection from 'bisection';
+import { bisectionRight } from '../../utils/bisect';
 import clamp from 'clamp';
 import arrayMove from 'array-move';
 import {
@@ -204,7 +204,7 @@ class Reorderable extends React.PureComponent<Props, State> {
       );
       this.setState({
         manipulationDelta: delta,
-        destinationIndex: bisection.right(midPoints, delta),
+        destinationIndex: bisectionRight(midPoints, delta),
       });
     };
     const mouseUpListener = (event: EventWithPageProperties) => {

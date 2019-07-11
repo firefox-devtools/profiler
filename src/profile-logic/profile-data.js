@@ -36,7 +36,7 @@ import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
 import { hashPath } from '../utils/path';
 import type { ImplementationFilter } from '../types/actions';
-import bisection from 'bisection';
+import { bisectionRight } from '../utils/bisect';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 
 /**
@@ -1300,7 +1300,7 @@ export function getSampleIndexClosestToTime(
   interval: number
 ): IndexIntoSamplesTable {
   // Bisect to find the index of the first sample after the provided time.
-  const index = bisection.right(samples.time, time);
+  const index = bisectionRight(samples.time, time);
 
   if (index === 0) {
     return 0;

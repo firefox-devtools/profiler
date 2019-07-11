@@ -4,7 +4,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import bisection from 'bisection';
+import { bisectionRight } from '../../../utils/bisect';
 import classNames from 'classnames';
 import { ensureExists } from '../../../utils/flow';
 import { timeCode } from '../../../utils/time-code';
@@ -115,11 +115,11 @@ class StackGraph extends PureComponent<Props> {
     const firstDrawnSampleTime = range[0] - drawnIntervalWidth / xPixelsPerMs;
     const lastDrawnSampleTime = range[1];
 
-    const firstDrawnSampleIndex = bisection.right(
+    const firstDrawnSampleIndex = bisectionRight(
       thread.samples.time,
       firstDrawnSampleTime
     );
-    const afterLastDrawnSampleIndex = bisection.right(
+    const afterLastDrawnSampleIndex = bisectionRight(
       thread.samples.time,
       lastDrawnSampleTime,
       firstDrawnSampleIndex

@@ -17,7 +17,7 @@ import { getThreadSelectors } from '../../selectors/per-thread';
 import { ORANGE_50 } from 'photon-colors';
 import Tooltip from '../tooltip/Tooltip';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
-import bisection from 'bisection';
+import { bisectionRight } from '../../utils/bisect';
 
 import type {
   CounterIndex,
@@ -228,7 +228,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredCounter: null });
     } else {
-      let hoveredCounter = bisection.right(samples.time, timeAtMouse);
+      let hoveredCounter = bisectionRight(samples.time, timeAtMouse);
       if (hoveredCounter === samples.length) {
         // When hovering the last sample, it's possible the mouse is past the time.
         // In this case, hover over the last sample. This happens because of the
