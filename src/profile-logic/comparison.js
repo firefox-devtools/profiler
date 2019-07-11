@@ -565,6 +565,10 @@ function combineFrameTables(
 
       newFrameTable.address.push(frameTable.address[i]);
       newFrameTable.category.push(newCategory);
+      // TODO we assume that subcategory strings are the same if the category is
+      // the same, and have no translation maps. But we should really implement
+      // one.
+      newFrameTable.subcategory.push(frameTable.subcategory[i]);
       newFrameTable.func.push(newFunc);
       newFrameTable.implementation.push(
         implementation === null
@@ -633,6 +637,10 @@ function combineStackTables(
 
       newStackTable.frame.push(newFrameIndex);
       newStackTable.category.push(newCategory);
+      // TODO we assume that subcategory strings are the same if the category is
+      // the same, and have no translation maps. But we should really implement
+      // one.
+      newStackTable.subcategory.push(stackTable.subcategory[i]);
       newStackTable.prefix.push(newPrefix);
 
       translationMap.set(i, newStackTable.length);
