@@ -35,10 +35,13 @@ function parseBinaryPlist(bytes) {
   ).parseRoot();
 }
 
+const textDecoder = new TextDecoder('utf-8');
 function decodeUTF8(bytes: Uint8Array): string {
-  let text = String.fromCharCode.apply(String, bytes); // eslint-disable-line prefer-spread
-  if (text.slice(-1) === '\0') text = text.slice(0, -1); // Remove a single trailing null character if present
-  return decodeURIComponent(escape(text));
+  if (bytes[bytes.length - 1] === 0) {
+    // Remove a single trailing null byte if present.
+    return textDecoder.decode(bytes.subarray(0, -1));
+  }
+  return textDecoder.decode(bytes);
 }
 
 function followUID(objects: any[], value: any): any {
@@ -92,7 +95,7 @@ function patternMatchObjectiveC(
       // Replace NSString with a string
       case 'NSString':
       case 'NSMutableString':
-        return decodeUTF8(value['NS.bytes']);
+        return value['NS.bytes'] ? decodeUTF8(value['NS.bytes']) : '';
 
       // Replace NSArray with an Array
       case 'NSArray':
