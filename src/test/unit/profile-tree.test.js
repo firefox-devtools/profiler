@@ -87,7 +87,7 @@ describe('unfiltered call tree', function() {
       defaultCategory
     );
 
-    it('does', function() {
+    it('yields expected results', function() {
       expect(
         computeCallTreeCountsAndTimings(
           thread,
@@ -434,6 +434,7 @@ describe('inverted call tree', function() {
       'combined',
       callTreeCountsAndTimings
     );
+
     it('computes an non-inverted call tree', function() {
       expect(formatTreeIncludeCategories(callTree)).toEqual([
         '- A [Other] (total: 3, self: 3)',

@@ -121,7 +121,7 @@ describe('extract functions and resource from location strings', function() {
             resourceTable.name[resourceIndex]
           );
           host =
-            hostStringIndex === undefined
+            hostStringIndex === undefined || hostStringIndex === null
               ? null
               : stringTable.getString(hostStringIndex);
           resourceType = resourceTable.type[resourceIndex];

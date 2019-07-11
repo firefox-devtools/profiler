@@ -2042,6 +2042,7 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "duration": undefined,
     "length": 4,
     "responsiveness": Array [
       0,
@@ -2417,6 +2418,7 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "duration": undefined,
     "length": 2,
     "responsiveness": Array [
       100,
@@ -2709,6 +2711,7 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "duration": undefined,
     "length": 4,
     "responsiveness": Array [
       0,
@@ -3007,6 +3010,7 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "duration": undefined,
     "length": 4,
     "responsiveness": Array [
       0,
