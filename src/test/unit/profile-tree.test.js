@@ -555,7 +555,7 @@ describe('diffing trees', function() {
     const callTree = callTreeFromProfile(profile, /* threadIndex */ 2);
     const formattedTree = formatTree(callTree);
     expect(formattedTree).toEqual([
-      '- A (total: 0, self: —)',
+      '- A (total: —, self: —)',
       '  - B (total: 1, self: —)',
       '    - D (total: -1, self: -1)',
       '    - G (total: 1, self: 1)',
@@ -579,7 +579,7 @@ describe('diffing trees', function() {
     const formattedTree = formatTree(callTree);
     expect(formattedTree).toEqual([
       // A -> B -> D and A -> B -> G should be filtered out by the range filtering.
-      '- A (total: 0, self: —)',
+      '- A (total: —, self: —)',
       '  - B (total: 1, self: —)',
       '    - I (total: 1, self: 1)',
       '  - C (total: -1, self: —)',

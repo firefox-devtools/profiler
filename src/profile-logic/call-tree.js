@@ -234,8 +234,8 @@ export class CallTree {
       );
 
       displayData = {
-        totalTime: formattedTotalTime,
-        totalTimeWithUnit: formattedTotalTime + 'ms',
+        totalTime: totalTime === 0 ? '—' : formattedTotalTime,
+        totalTimeWithUnit: totalTime === 0 ? '—' : formattedTotalTime + 'ms',
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
         selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
         totalTimePercent: `${formatPercent(totalTimeRelative)}`,
