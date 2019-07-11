@@ -11,11 +11,15 @@ import copy from 'copy-to-clipboard';
 
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
+import { processProfile } from '../../profile-logic/process-profile';
 import { ensureExists } from '../../utils/flow';
+
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
+
 import {
   getEmptyThread,
   getEmptyProfile,
@@ -462,5 +466,18 @@ describe('calltree/ProfileCallTreeView TransformNavigator', () => {
     expect(
       container.querySelector('.calltreeTransformNavigator')
     ).toMatchSnapshot();
+  });
+});
+
+describe('ProfileCallTreeView/end-to-end', () => {
+  it('can display a gecko profile without crashing', () => {
+    const geckoProfile = createGeckoProfile();
+    const processedProfile = processProfile(geckoProfile);
+    const store = storeWithProfile(processedProfile);
+    render(
+      <Provider store={store}>
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
+      </Provider>
+    );
   });
 });
