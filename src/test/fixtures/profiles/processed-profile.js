@@ -536,17 +536,32 @@ function _buildThreadFromTextOnlyStacks(
 /**
  * This returns a merged profile from a number of profile strings.
  */
-export function getMergedProfileFromTextSamples(...profileStrings: string[]) {
-  const profiles = profileStrings.map(
-    str => getProfileFromTextSamples(str).profile
+export function getMergedProfileFromTextSamples(
+  ...profileStrings: string[]
+): {
+  profile: Profile,
+  funcNamesPerThread: Array<string[]>,
+  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
+} {
+  const profilesAndFuncNames = profileStrings.map(str =>
+    getProfileFromTextSamples(str)
   );
+  const profiles = profilesAndFuncNames.map(({ profile }) => profile);
   const profileState = stateFromLocation({
     pathname: '/public/fakehash1/',
     search: '?thread=0&v=3',
     hash: '',
   });
   const { profile } = mergeProfiles(profiles, profiles.map(() => profileState));
-  return profile;
+  return {
+    profile,
+    funcNamesPerThread: profilesAndFuncNames.map(
+      ({ funcNamesPerThread }) => funcNamesPerThread[0]
+    ),
+    funcNamesDictPerThread: profilesAndFuncNames.map(
+      ({ funcNamesDictPerThread }) => funcNamesDictPerThread[0]
+    ),
+  };
 }
 
 type NetworkMarkersOptions = {|

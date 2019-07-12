@@ -54,7 +54,7 @@ describe('getUsefulTabs', function() {
   });
 
   it('shows only the call tree when a diffing track is selected', function() {
-    const profile = getMergedProfileFromTextSamples('A  B  C', 'A  B  B');
+    const { profile } = getMergedProfileFromTextSamples('A  B  C', 'A  B  B');
     const { getState, dispatch } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
       'calltree',

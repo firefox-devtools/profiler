@@ -451,7 +451,10 @@ describe('actions/ProfileView', function() {
           trackIndex: 2,
         };
 
-        const profile = getMergedProfileFromTextSamples('A  B  C', 'A  B  B');
+        const { profile } = getMergedProfileFromTextSamples(
+          'A  B  C',
+          'A  B  B'
+        );
         const { getState, dispatch } = storeWithProfile(profile);
 
         dispatch(App.changeSelectedTab('flame-graph'));
