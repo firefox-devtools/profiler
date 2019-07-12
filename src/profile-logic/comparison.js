@@ -121,7 +121,7 @@ export function mergeProfiles(
     implementationFilters.push(profileSpecific.implementation);
 
     // We adjust the categories using the maps computed above.
-    // TODO: Also adjust subcategories.
+    // TODO issue #2151: Also adjust subcategories.
     thread.stackTable.category = adjustCategories(
       thread.stackTable.category,
       translationMapsForCategories[i]
@@ -268,8 +268,8 @@ function mergeCategories(
       } else {
         // We're assuming that newCategories[newCategoryIndex].subcategories
         // is the same list of strings as category.subcategories.
-        // TODO: merge the subcategories too, and make a translationMap for
-        // those (per category), too.
+        // TODO issue #2151: merge the subcategories too, and make a
+        // translationMap for those (per category), too.
       }
       translationMap.set(i, newCategoryIndex);
     });
@@ -565,9 +565,9 @@ function combineFrameTables(
 
       newFrameTable.address.push(frameTable.address[i]);
       newFrameTable.category.push(newCategory);
-      // TODO we assume that subcategory strings are the same if the category is
-      // the same, and have no translation maps. But we should really implement
-      // one.
+      // TODO issue #2151: we assume that subcategory strings are the same if
+      // the category is the same, and have no translation maps. But we should
+      // really implement one.
       newFrameTable.subcategory.push(frameTable.subcategory[i]);
       newFrameTable.func.push(newFunc);
       newFrameTable.implementation.push(
@@ -637,9 +637,9 @@ function combineStackTables(
 
       newStackTable.frame.push(newFrameIndex);
       newStackTable.category.push(newCategory);
-      // TODO we assume that subcategory strings are the same if the category is
-      // the same, and have no translation maps. But we should really implement
-      // one.
+      // TODO issue #2151: we assume that subcategory strings are the same if
+      // the category is the same, and have no translation maps. But we should
+      // really implement one.
       newStackTable.subcategory.push(stackTable.subcategory[i]);
       newStackTable.prefix.push(newPrefix);
 
