@@ -468,7 +468,7 @@ export function getTimingsForCallNodeIndex(
       ? samples.duration[sampleIndex]
       : interval;
 
-    rootTime += duration;
+    rootTime += Math.abs(duration);
 
     const thisNodeIndex = stackIndexToCallNodeIndex[thisStackIndex];
     const thisFunc = callNodeTable.func[thisNodeIndex];
