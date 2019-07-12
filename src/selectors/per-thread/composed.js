@@ -43,9 +43,16 @@ export function getComposedSelectorsPerThread(
    * when it's absurd.
    */
   const getUsefulTabs: Selector<$ReadOnlyArray<TabSlug>> = createSelector(
+    threadSelectors.getThread,
     threadSelectors.getIsNetworkChartEmptyInFullRange,
     threadSelectors.getJsTracerTable,
-    (isNetworkChartEmpty, jsTracerTable) => {
+    ({ processType }, isNetworkChartEmpty, jsTracerTable) => {
+      if (processType === 'comparison') {
+        // For a diffing tracks, we display only the calltree tab for now, because
+        // other views make no or not much sense.
+        return ['calltree'];
+      }
+
       let visibleTabs = tabSlugs;
       if (isNetworkChartEmpty) {
         visibleTabs = visibleTabs.filter(
