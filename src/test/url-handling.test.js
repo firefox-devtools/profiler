@@ -843,3 +843,35 @@ describe('compare', function() {
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url2)}`);
   });
 });
+
+describe('call tree summary strategy', function() {
+  const { getCallTreeSummaryStrategy } = urlStateReducers;
+
+  it('defaults to timing', function() {
+    const { getState } = _getStoreWithURL();
+    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+  });
+
+  it('can be js allocations', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?ctSummary=js-allocations',
+    });
+    expect(getCallTreeSummaryStrategy(getState())).toEqual('js-allocations');
+  });
+
+  it('can be native allocations', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?ctSummary=native-allocations',
+    });
+    expect(getCallTreeSummaryStrategy(getState())).toEqual(
+      'native-allocations'
+    );
+  });
+
+  it('will use the default "timing" when an unknown value is received', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?ctSummary=unknown-value',
+    });
+    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+  });
+});

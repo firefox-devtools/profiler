@@ -17,6 +17,7 @@ import {
   toValidTabSlug,
   ensureExists,
 } from '../utils/flow';
+import { toValidCallTreeSummaryStrategy } from '../profile-logic/profile-data';
 import { oneLine } from 'common-tags';
 import type { UrlState } from '../types/state';
 import type { DataSource } from '../types/actions';
@@ -105,6 +106,7 @@ type CallTreeQuery = {|
   search: string, // "js::RunScript"
   invertCallstack: null | void,
   implementation: string,
+  ctSummary: string,
 |};
 
 type MarkersQuery = {|
@@ -122,6 +124,7 @@ type StackChartQuery = {|
   search: string, // "js::RunScript"
   invertCallstack: null | void,
   implementation: string,
+  ctSummary: string,
 |};
 
 type JsTracerQuery = {|
@@ -242,6 +245,10 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
             urlState.profileSpecific.transforms[selectedThread]
           ) || undefined;
       }
+      query.ctSummary =
+        urlState.profileSpecific.callTreeSummaryStrategy === 'timing'
+          ? undefined
+          : urlState.profileSpecific.callTreeSummaryStrategy;
       break;
     }
     case 'marker-table':
@@ -359,6 +366,7 @@ export function stateFromLocation(
     profileName: query.profileName,
     profileSpecific: {
       implementation,
+      callTreeSummaryStrategy: toValidCallTreeSummaryStrategy(query.ctSummary),
       invertCallstack: query.invertCallstack !== undefined,
       showJsTracerSummary: query.summary !== undefined,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],

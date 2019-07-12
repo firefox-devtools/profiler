@@ -35,7 +35,10 @@ import { assertExhaustiveCheck } from '../utils/flow';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import { timeCode } from '../utils/time-code';
 import { hashPath } from '../utils/path';
-import type { ImplementationFilter } from '../types/actions';
+import type {
+  ImplementationFilter,
+  CallTreeSummaryStrategy,
+} from '../types/actions';
 import bisection from 'bisection';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 
@@ -682,6 +685,21 @@ export function toValidImplementationFilter(
       return implementation;
     default:
       return 'combined';
+  }
+}
+
+export function toValidCallTreeSummaryStrategy(
+  strategy: mixed
+): CallTreeSummaryStrategy {
+  switch (strategy) {
+    case 'timing':
+    case 'js-allocations':
+    case 'native-allocations':
+      return strategy;
+    default:
+      // Default to timing if the strategy is not recognized. This value can come
+      // from a user-generated URL.
+      return 'timing';
   }
 }
 

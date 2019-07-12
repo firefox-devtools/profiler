@@ -40,6 +40,7 @@ import { objectShallowEquals } from '../utils/index';
 import type {
   PreviewSelection,
   ImplementationFilter,
+  CallTreeSummaryStrategy,
   TrackReference,
   TimelineType,
   DataSource,
@@ -936,6 +937,22 @@ export function changeImplementationFilter(
       transformedThread,
       previousImplementation,
     });
+  };
+}
+
+export function changeCallTreeSummaryStrategy(
+  strategy: CallTreeSummaryStrategy
+): Action {
+  sendAnalytics({
+    hitType: 'event',
+    eventCategory: 'profile',
+    eventAction: 'change call tree summary strategy',
+    eventLabel: strategy,
+  });
+
+  return {
+    type: 'CHANGE_CALL_TREE_SUMMARY_STRATEGY',
+    strategy,
   };
 }
 
