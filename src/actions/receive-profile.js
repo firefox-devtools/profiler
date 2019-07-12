@@ -123,7 +123,7 @@ export function loadProfile(
     // before finalizing profile view. That's why we are dispatching this action
     // after completing those steps inside `setupInitialUrlState`.
     if (initialLoad === false) {
-      await dispatch(finalizeProfileView(profile, config.geckoProfiler));
+      await dispatch(finalizeProfileView(config.geckoProfiler));
     }
   };
 }
@@ -136,11 +136,10 @@ export function loadProfile(
  * functions in the src/profile-logic/tracks.js file.
  */
 export function finalizeProfileView(
-  profile?: Profile | null,
   geckoProfiler?: $GeckoProfiler
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
-    profile = profile || getProfileOrNull(getState());
+    const profile = getProfileOrNull(getState());
     if (profile === null || getView(getState()).phase !== 'PROFILE_LOADED') {
       // Profile load was not successful. Do not continue.
       return;
