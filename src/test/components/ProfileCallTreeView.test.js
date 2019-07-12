@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 // This module is mocked.
 import copy from 'copy-to-clipboard';
+import fakeIndexedDB from 'fake-indexeddb';
 
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
@@ -44,6 +45,12 @@ beforeEach(() => {
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => getBoundingBox(1000, 2000));
+
+  window.indexedDB = fakeIndexedDB;
+});
+
+afterEach(() => {
+  delete window.indexedDB;
 });
 
 describe('calltree/ProfileCallTreeView', function() {
