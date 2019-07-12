@@ -14,24 +14,54 @@ import {
   adjustSampleTimestamps,
   adjustMarkerTimestamps,
 } from './process-profile';
-import { getEmptyProfile } from './data-structures';
+import {
+  getEmptyProfile,
+  getEmptyResourceTable,
+  getEmptySamplesTable,
+  getEmptyFrameTable,
+  getEmptyFuncTable,
+  getEmptyStackTable,
+  getEmptyRawMarkerTable,
+} from './data-structures';
 import {
   filterThreadSamplesToRange,
   getTimeRangeForThread,
   getTimeRangeIncludingAllThreads,
 } from './profile-data';
 import { filterRawMarkerTableToRange } from './marker-data';
+import { UniqueStringArray } from '../utils/unique-string-array';
 
 import type {
   Profile,
   Thread,
   IndexIntoCategoryList,
   CategoryList,
+  IndexIntoFrameTable,
+  IndexIntoFuncTable,
+  IndexIntoResourceTable,
+  IndexIntoLibs,
+  IndexIntoStackTable,
+  IndexIntoSamplesTable,
+  FuncTable,
+  FrameTable,
+  Lib,
+  ResourceTable,
+  StackTable,
+  SamplesTable,
 } from '../types/profile';
 import type { UrlState } from '../types/state';
 import type { ImplementationFilter } from '../types/actions';
 import type { TransformStacksPerThread } from '../types/transforms';
+import type { Milliseconds } from '../types/units';
 
+/**
+ * This function is the entry point for this file. From a list of profile
+ * sources and a list of states coming from URLs, it computes a new profile
+ * that's composed of parts of the 2 source profiles.
+ * It also computes a diffed profile as a last thread.
+ * It returns this merged profile along the transforms and implementation
+ * filters as decided by the source states.
+ */
 export function mergeProfiles(
   profiles: Profile[],
   profileStates: UrlState[]
@@ -40,6 +70,15 @@ export function mergeProfiles(
   transformStacks: TransformStacksPerThread,
   implementationFilters: ImplementationFilter[],
 |} {
+  if (profiles.length !== profileStates.length) {
+    throw new Error(
+      'Passed arrays do not have the same length. This should not happen.'
+    );
+  }
+  if (!profiles.length) {
+    throw new Error('There are no profiles to merge.');
+  }
+
   const resultProfile = getEmptyProfile();
   resultProfile.meta.interval = Math.min(
     ...profiles.map(profile => profile.meta.interval)
@@ -82,7 +121,7 @@ export function mergeProfiles(
     implementationFilters.push(profileSpecific.implementation);
 
     // We adjust the categories using the maps computed above.
-    // TODO: Also adjust subcategories.
+    // TODO issue #2151: Also adjust subcategories.
     thread.stackTable.category = adjustCategories(
       thread.stackTable.category,
       translationMapsForCategories[i]
@@ -146,9 +185,30 @@ export function mergeProfiles(
     resultProfile.threads.push(thread);
   }
 
+  // We can import several profiles in this view, but the comparison thread
+  // really makes sense when there's only 2 profiles.
+  if (profiles.length === 2) {
+    resultProfile.threads.push(
+      getComparisonThread(translationMapsForCategories, [
+        {
+          thread: resultProfile.threads[0],
+          interval: profiles[0].meta.interval,
+        },
+        {
+          thread: resultProfile.threads[1],
+          interval: profiles[1].meta.interval,
+        },
+      ])
+    );
+  }
+
   return { profile: resultProfile, implementationFilters, transformStacks };
 }
 
+/**
+ * This is a small utility function that makes it easier to filter a thread
+ * completely (both markers and samples).
+ */
 function filterThreadToRange(
   thread: Thread,
   rangeStart: number,
@@ -166,6 +226,18 @@ function filterThreadToRange(
 type TranslationMapForCategories = Map<
   IndexIntoCategoryList,
   IndexIntoCategoryList
+>;
+type TranslationMapForFuncs = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
+type TranslationMapForResources = Map<
+  IndexIntoResourceTable,
+  IndexIntoResourceTable
+>;
+type TranslationMapForFrames = Map<IndexIntoFrameTable, IndexIntoFrameTable>;
+type TranslationMapForStacks = Map<IndexIntoStackTable, IndexIntoStackTable>;
+type TranslationMapForLibs = Map<IndexIntoLibs, IndexIntoLibs>;
+type TranslationMapForSamples = Map<
+  IndexIntoSamplesTable,
+  IndexIntoSamplesTable
 >;
 
 /**
@@ -196,8 +268,8 @@ function mergeCategories(
       } else {
         // We're assuming that newCategories[newCategoryIndex].subcategories
         // is the same list of strings as category.subcategories.
-        // TODO: merge the subcategories too, and make a translationMap for
-        // those (per category), too.
+        // TODO issue #2151: merge the subcategories too, and make a
+        // translationMap for those (per category), too.
       }
       translationMap.set(i, newCategoryIndex);
     });
@@ -252,4 +324,511 @@ function adjustNullableCategories(
     }
     return result;
   });
+}
+
+/**
+ * This combines the library tables for a list of threads. It returns a merged
+ * Lib array, along with a translation maps that can be used in other functions
+ * when merging lib references in other tables.
+ */
+function combineLibTables(
+  threads: $ReadOnlyArray<Thread>
+): { libs: Lib[], translationMaps: TranslationMapForLibs[] } {
+  const mapOfInsertedLibs: Map<string, IndexIntoLibs> = new Map();
+
+  const translationMaps = [];
+  const newLibTable = [];
+
+  threads.forEach(thread => {
+    const translationMap = new Map();
+    const { libs } = thread;
+
+    libs.forEach((lib, i) => {
+      const insertedLibKey = [lib.name, lib.debugName].join('#');
+      const insertedLibIndex = mapOfInsertedLibs.get(insertedLibKey);
+      if (insertedLibIndex !== undefined) {
+        translationMap.set(i, insertedLibIndex);
+        return;
+      }
+
+      translationMap.set(i, newLibTable.length);
+      mapOfInsertedLibs.set(insertedLibKey, newLibTable.length);
+
+      newLibTable.push(lib);
+    });
+
+    translationMaps.push(translationMap);
+  });
+
+  return { libs: newLibTable, translationMaps };
+}
+
+/**
+ * This combines the resource tables for a list of threads. It returns the new
+ * resource table with the translation maps to be used in subsequent merging
+ * functions.
+ */
+function combineResourceTables(
+  translationMapsForLibs: TranslationMapForLibs[],
+  newStringTable: UniqueStringArray,
+  threads: $ReadOnlyArray<Thread>
+): {
+  resourceTable: ResourceTable,
+  translationMaps: TranslationMapForResources[],
+} {
+  const mapOfInsertedResources: Map<string, IndexIntoResourceTable> = new Map();
+  const translationMaps = [];
+  const newResourceTable = getEmptyResourceTable();
+
+  threads.forEach((thread, threadIndex) => {
+    const translationMap = new Map();
+    const { resourceTable, stringTable } = thread;
+    const libTranslationMap = translationMapsForLibs[threadIndex];
+
+    for (let i = 0; i < resourceTable.length; i++) {
+      const libIndex = resourceTable.lib[i];
+      const newLibIndex =
+        typeof libIndex === 'number' && libIndex >= 0
+          ? libTranslationMap.get(libIndex)
+          : null;
+      if (newLibIndex === undefined) {
+        throw new Error(stripIndent`
+          We couldn't find the lib of resource ${i} in the translation map.
+          This is a programming error.
+        `);
+      }
+
+      const nameIndex = resourceTable.name[i];
+      const newName = nameIndex >= 0 ? stringTable.getString(nameIndex) : null;
+
+      const hostIndex = resourceTable.host[i];
+      const newHost =
+        typeof hostIndex === 'number' && hostIndex >= 0
+          ? stringTable.getString(hostIndex)
+          : undefined;
+
+      const type = resourceTable.type[i];
+
+      // Duplicate search.
+      const resourceKey = [newLibIndex, newName || '', type].join('#');
+      const insertedResourceIndex = mapOfInsertedResources.get(resourceKey);
+      if (insertedResourceIndex !== undefined) {
+        translationMap.set(i, insertedResourceIndex);
+        continue;
+      }
+
+      translationMap.set(i, newResourceTable.length);
+      mapOfInsertedResources.set(resourceKey, newResourceTable.length);
+
+      newResourceTable.lib.push(newLibIndex);
+      newResourceTable.name.push(
+        newName === null ? -1 : newStringTable.indexForString(newName)
+      );
+      newResourceTable.host.push(
+        newHost === undefined
+          ? undefined
+          : newStringTable.indexForString(newHost)
+      );
+      newResourceTable.type.push(type);
+
+      newResourceTable.length++;
+    }
+
+    translationMaps.push(translationMap);
+  });
+
+  return { resourceTable: newResourceTable, translationMaps };
+}
+
+/**
+ * This combines the function tables for a list of threads. It returns the new
+ * function table with the translation maps to be used in subsequent merging
+ * functions.
+ */
+function combineFuncTables(
+  translationMapsForResources: TranslationMapForResources[],
+  newStringTable: UniqueStringArray,
+  threads: $ReadOnlyArray<Thread>
+): { funcTable: FuncTable, translationMaps: TranslationMapForFuncs[] } {
+  const mapOfInsertedFuncs: Map<string, IndexIntoFuncTable> = new Map();
+  const translationMaps = [];
+  const newFuncTable = getEmptyFuncTable();
+
+  threads.forEach((thread, threadIndex) => {
+    const { funcTable, stringTable } = thread;
+    const translationMap = new Map();
+    const resourceTranslationMap = translationMapsForResources[threadIndex];
+
+    for (let i = 0; i < funcTable.length; i++) {
+      const fileNameIndex = funcTable.fileName[i];
+      const fileName =
+        typeof fileNameIndex === 'number'
+          ? stringTable.getString(fileNameIndex)
+          : null;
+      const resourceIndex = funcTable.resource[i];
+      const newResourceIndex =
+        resourceIndex >= 0
+          ? resourceTranslationMap.get(funcTable.resource[i])
+          : -1;
+      if (newResourceIndex === undefined) {
+        throw new Error(stripIndent`
+          We couldn't find the resource of func ${i} in the translation map.
+          This is a programming error.
+        `);
+      }
+      const name = stringTable.getString(funcTable.name[i]);
+      const lineNumber = funcTable.lineNumber[i];
+
+      // Entries in this table can be either:
+      // 1. native: in that case they'll have a resource index and a name. The
+      //    name should be unique in a specific resource.
+      // 2. JS: they'll have a resource index and a name too, but the name is
+      //    not garanteed to be unique in a resource. That's why we use the line
+      //    number as well.
+      // 3. Label frames: they have no resource, only a name. So we can't do
+      //    better than this.
+      const funcKey = [name, newResourceIndex, lineNumber].join('#');
+      const insertedFuncIndex = mapOfInsertedFuncs.get(funcKey);
+      if (insertedFuncIndex !== undefined) {
+        translationMap.set(i, insertedFuncIndex);
+        continue;
+      }
+      mapOfInsertedFuncs.set(funcKey, newFuncTable.length);
+      translationMap.set(i, newFuncTable.length);
+
+      newFuncTable.address.push(funcTable.address[i]);
+      newFuncTable.isJS.push(funcTable.isJS[i]);
+      newFuncTable.name.push(newStringTable.indexForString(name));
+      newFuncTable.resource.push(newResourceIndex);
+      newFuncTable.relevantForJS.push(funcTable.relevantForJS[i]);
+      newFuncTable.fileName.push(
+        fileName === null ? null : newStringTable.indexForString(fileName)
+      );
+      newFuncTable.lineNumber.push(lineNumber);
+      newFuncTable.columnNumber.push(funcTable.columnNumber[i]);
+
+      newFuncTable.length++;
+    }
+
+    translationMaps.push(translationMap);
+  });
+
+  return { funcTable: newFuncTable, translationMaps };
+}
+
+/**
+ * This combines the frame tables for a list of threads. It returns the new
+ * frame table with the translation maps to be used in subsequent merging
+ * functions.
+ * Note that we don't try to merge the frames of the source threads, because
+ * that's not needed to get a diffing call tree.
+ */
+function combineFrameTables(
+  translationMapsForCategories: TranslationMapForCategories[],
+  translationMapsForFuncs: TranslationMapForFuncs[],
+  newStringTable: UniqueStringArray,
+  threads: $ReadOnlyArray<Thread>
+): { frameTable: FrameTable, translationMaps: TranslationMapForFrames[] } {
+  const translationMaps = [];
+  const newFrameTable = getEmptyFrameTable();
+
+  threads.forEach((thread, threadIndex) => {
+    const { frameTable, stringTable } = thread;
+    const translationMap = new Map();
+    const funcTranslationMap = translationMapsForFuncs[threadIndex];
+    const categoryTranslationMap = translationMapsForCategories[threadIndex];
+
+    for (let i = 0; i < frameTable.length; i++) {
+      const category = frameTable.category[i];
+      const newCategory =
+        category === null ? null : categoryTranslationMap.get(category);
+      if (newCategory === undefined) {
+        throw new Error(stripIndent`
+          We couldn't find the category of frame ${i} in the translation map.
+          This is a programming error.
+        `);
+      }
+
+      const newFunc = funcTranslationMap.get(frameTable.func[i]);
+      if (newFunc === undefined) {
+        throw new Error(stripIndent`
+          We couldn't find the function of frame ${i} in the translation map.
+          This is a programming error.
+        `);
+      }
+
+      const implementationIndex = frameTable.implementation[i];
+      const implementation =
+        typeof implementationIndex === 'number'
+          ? stringTable.getString(implementationIndex)
+          : null;
+
+      newFrameTable.address.push(frameTable.address[i]);
+      newFrameTable.category.push(newCategory);
+      // TODO issue #2151: we assume that subcategory strings are the same if
+      // the category is the same, and have no translation maps. But we should
+      // really implement one.
+      newFrameTable.subcategory.push(frameTable.subcategory[i]);
+      newFrameTable.func.push(newFunc);
+      newFrameTable.implementation.push(
+        implementation === null
+          ? null
+          : newStringTable.indexForString(implementation)
+      );
+      newFrameTable.line.push(frameTable.line[i]);
+      newFrameTable.column.push(frameTable.column[i]);
+      newFrameTable.optimizations.push(frameTable.optimizations[i]);
+
+      translationMap.set(i, newFrameTable.length);
+      newFrameTable.length++;
+    }
+
+    translationMaps.push(translationMap);
+  });
+
+  return { frameTable: newFrameTable, translationMaps };
+}
+
+/**
+ * This combines the stack tables for a list of threads. It returns the new
+ * stack table with the translation maps to be used in subsequent merging
+ * functions.
+ * Note that we don't try to merge the stacks of the source threads, because
+ * that's not needed to get a diffing call tree.
+ */
+function combineStackTables(
+  translationMapsForCategories: TranslationMapForCategories[],
+  translationMapsForFrames: TranslationMapForFrames[],
+  threads: $ReadOnlyArray<Thread>
+): { stackTable: StackTable, translationMaps: TranslationMapForStacks[] } {
+  const translationMaps = [];
+  const newStackTable = getEmptyStackTable();
+
+  threads.forEach((thread, threadIndex) => {
+    const { stackTable } = thread;
+    const translationMap = new Map();
+    const frameTranslationMap = translationMapsForFrames[threadIndex];
+    const categoryTranslationMap = translationMapsForCategories[threadIndex];
+
+    for (let i = 0; i < stackTable.length; i++) {
+      const newFrameIndex = frameTranslationMap.get(stackTable.frame[i]);
+      if (newFrameIndex === undefined) {
+        throw new Error(stripIndent`
+          We couldn't find the frame of stack ${i} in the translation map.
+          This is a programming error.
+        `);
+      }
+      const newCategory = categoryTranslationMap.get(stackTable.category[i]);
+      if (newCategory === undefined) {
+        throw new Error(stripIndent`
+          We couldn't find the category of stack ${i} in the translation map.
+          This is a programming error.
+        `);
+      }
+
+      const prefix = stackTable.prefix[i];
+      const newPrefix = prefix === null ? null : translationMap.get(prefix);
+      if (newPrefix === undefined) {
+        throw new Error(stripIndent`
+          We couldn't find the prefix of stack ${i} in the translation map.
+          This is a programming error.
+        `);
+      }
+
+      newStackTable.frame.push(newFrameIndex);
+      newStackTable.category.push(newCategory);
+      // TODO issue #2151: we assume that subcategory strings are the same if
+      // the category is the same, and have no translation maps. But we should
+      // really implement one.
+      newStackTable.subcategory.push(stackTable.subcategory[i]);
+      newStackTable.prefix.push(newPrefix);
+
+      translationMap.set(i, newStackTable.length);
+      newStackTable.length++;
+    }
+
+    translationMaps.push(translationMap);
+  });
+
+  return { stackTable: newStackTable, translationMaps };
+}
+
+/**
+ * This combines the sample tables for 2 threads. The samples for the first
+ * thread are added in a negative way while the samples for the second thread
+ * are added in a positive way, so that they will be diffed when computing the
+ * call tree and the various other timings in the app.
+ * It returns the new sample table with the translation maps to be used in
+ * subsequent merging functions, if necessary.
+ */
+function combineSamplesDiffing(
+  translationMapsForStacks: TranslationMapForStacks[],
+  threadsAndIntervals: [ThreadAndInterval, ThreadAndInterval]
+): { samples: SamplesTable, translationMaps: TranslationMapForSamples[] } {
+  const translationMaps = [new Map(), new Map()];
+  const [
+    {
+      thread: { samples: samples1 },
+      interval: interval1,
+    },
+    {
+      thread: { samples: samples2 },
+      interval: interval2,
+    },
+  ] = threadsAndIntervals;
+
+  const newSamples = {
+    ...getEmptySamplesTable(),
+    duration: [],
+  };
+
+  let i = 0;
+  let j = 0;
+  while (i < samples1.length || j < samples2.length) {
+    // We take the next sample from thread 1 if:
+    // - We still have samples in thread 1 AND
+    // - EITHER:
+    //   + there's no samples left in thread 2
+    //   + looking at the next samples for each thread, the earliest is from thread 1.
+    // Otherwise we take the next samples from thread 2 until we run out of samples.
+    const nextSampleIsFromThread1 =
+      i < samples1.length &&
+      (j >= samples2.length || samples1.time[i] < samples2.time[j]);
+
+    if (nextSampleIsFromThread1) {
+      // Next sample is from thread 1.
+      const stackIndex = samples1.stack[i];
+      const newStackIndex =
+        stackIndex === null
+          ? null
+          : translationMapsForStacks[0].get(stackIndex);
+      if (newStackIndex === undefined) {
+        throw new Error(stripIndent`
+          We couldn't find the stack of sample ${i} in the translation map.
+          This is a programming error.
+        `);
+      }
+      newSamples.stack.push(newStackIndex);
+      newSamples.responsiveness.push(samples1.responsiveness[i]);
+      newSamples.time.push(samples1.time[i]);
+      // We add the first thread with a negative duration, because this is the
+      // base profile.
+      newSamples.duration.push(-interval1);
+
+      translationMaps[0].set(i, newSamples.length);
+      newSamples.length++;
+      i++;
+    } else {
+      // Next sample is from thread 2.
+      const stackIndex = samples2.stack[j];
+      const newStackIndex =
+        stackIndex === null
+          ? null
+          : translationMapsForStacks[1].get(stackIndex);
+      if (newStackIndex === undefined) {
+        throw new Error(stripIndent`
+          We couldn't find the stack of sample ${j} in the translation map.
+          This is a programming error.
+        `);
+      }
+      newSamples.stack.push(newStackIndex);
+      newSamples.responsiveness.push(samples2.responsiveness[j]);
+      newSamples.time.push(samples2.time[j]);
+      newSamples.duration.push(interval2);
+
+      translationMaps[1].set(j, newSamples.length);
+      newSamples.length++;
+      j++;
+    }
+  }
+
+  return {
+    samples: newSamples,
+    translationMaps,
+  };
+}
+
+type ThreadAndInterval = {|
+  thread: Thread,
+  interval: Milliseconds,
+|};
+
+/**
+ * This function will compute a diffing thread from 2 different threads, using
+ * all the previous functions.
+ */
+function getComparisonThread(
+  translationMapsForCategories: TranslationMapForCategories[],
+  threadsAndIntervals: [ThreadAndInterval, ThreadAndInterval]
+): Thread {
+  const newStringTable = new UniqueStringArray();
+
+  const threads = threadsAndIntervals.map(item => item.thread);
+
+  const {
+    libs: newLibTable,
+    translationMaps: translationMapsForLibs,
+  } = combineLibTables(threads);
+  const {
+    resourceTable: newResourceTable,
+    translationMaps: translationMapsForResources,
+  } = combineResourceTables(translationMapsForLibs, newStringTable, threads);
+  const {
+    funcTable: newFuncTable,
+    translationMaps: translationMapsForFuncs,
+  } = combineFuncTables(translationMapsForResources, newStringTable, threads);
+  const {
+    frameTable: newFrameTable,
+    translationMaps: translationMapsForFrames,
+  } = combineFrameTables(
+    translationMapsForCategories,
+    translationMapsForFuncs,
+    newStringTable,
+    threads
+  );
+  const {
+    stackTable: newStackTable,
+    translationMaps: translationMapsForStacks,
+  } = combineStackTables(
+    translationMapsForCategories,
+    translationMapsForFrames,
+    threads
+  );
+  const { samples: newSamples } = combineSamplesDiffing(
+    translationMapsForStacks,
+    threadsAndIntervals
+  );
+
+  const mergedThread = {
+    processType: 'comparison',
+    processStartupTime: Math.min(
+      threads[0].processStartupTime,
+      threads[1].processStartupTime
+    ),
+    processShutdownTime:
+      Math.max(
+        threads[0].processShutdownTime || 0,
+        threads[1].processShutdownTime || 0
+      ) || null,
+    registerTime: Math.min(threads[0].registerTime, threads[1].registerTime),
+    unregisterTime:
+      Math.max(
+        threads[0].unregisterTime || 0,
+        threads[1].unregisterTime || 0
+      ) || null,
+    pausedRanges: [],
+    name: 'Diff between 1 and 2',
+    pid: 'Diff between 1 and 2',
+    tid: undefined,
+    samples: newSamples,
+    markers: getEmptyRawMarkerTable(),
+    stackTable: newStackTable,
+    frameTable: newFrameTable,
+    stringTable: newStringTable,
+    libs: newLibTable,
+    funcTable: newFuncTable,
+    resourceTable: newResourceTable,
+  };
+
+  return mergedThread;
 }
