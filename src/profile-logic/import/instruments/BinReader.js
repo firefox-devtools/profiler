@@ -4,6 +4,9 @@
 // @flow
 
 class BinReader {
+  view: DataView;
+  bytePos: number;
+
   constructor(buffer: ArrayBuffer) {
     this.view = new DataView(buffer);
     this.bytePos = 0;

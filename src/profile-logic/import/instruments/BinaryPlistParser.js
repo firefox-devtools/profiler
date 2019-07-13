@@ -4,13 +4,19 @@
 // @flow
 
 export class UID {
-  constructor(index) {
+  index: number;
+
+  constructor(index: number) {
     this.index = index;
   }
 }
 
 class BinaryPlistParser {
-  constructor(view) {
+  view: DataView;
+  referenceSize: number;
+  offsetTable: Array<number>;
+
+  constructor(view: DataView) {
     this.view = view;
     this.referenceSize = 0;
     this.offsetTable = [];
