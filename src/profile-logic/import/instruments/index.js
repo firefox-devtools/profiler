@@ -595,7 +595,7 @@ export function isInstrumentsProfile(file: mixed): boolean {
   return fileMetaData.pop() === 'trace';
 }
 
-function fillThread(threadId, samples, addressToFrameMap) {
+function getProcessedThread(threadId, samples, addressToFrameMap) {
   const thread = getEmptyThread();
   const {
     funcTable,
@@ -683,7 +683,7 @@ function pushThreadsInProfile(profile, addressToFrameMap, samples) {
   }
 
   for (const threadID of threadIDToSamples.keys()) {
-    const processedThread = fillThread(
+    const processedThread = getProcessedThread(
       threadID,
       threadIDToSamples.get(threadID),
       addressToFrameMap
