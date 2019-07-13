@@ -656,11 +656,49 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
     samples: samplesTable,
   } = thread;
 
+  thread.name = `Thread ${threadId}`;
+
   const funcKeyToIndex = new Map<string, number>();
   const frameKeyToIndex = new Map<string, number>();
   const stackKeyToIndex = new Map<string, number>();
 
-  thread.name = `Thread ${threadId}`;
+  // We don't have (root) function in our data.
+  // So, we have to explicitly add it in the funcTable, frameTable and then stackTable
+  // We have defined the address of (root) frame as $00000000.
+  // $ sign here is intentionally, because we might get a frame whose address is '00000000'
+
+  const rootFuncName = '(root)';
+  const rootFrameAddress = '$00000000';
+  const rootFuncFileName = '';
+  const rootFuncKey = '(root)';
+
+  const indexOfRootFunc = getOrCreateFunc(
+    funcTable,
+    funcKeyToIndex,
+    stringTable,
+    rootFuncName,
+    rootFuncFileName,
+    rootFuncKey
+  );
+
+  createFrame(
+    frameTable,
+    stringTable,
+    frameKeyToIndex,
+    indexOfRootFunc,
+    rootFrameAddress
+  );
+
+  const rootStackKey = 'rootStack';
+
+  createStack(
+    stackTable,
+    stringTable,
+    stackKeyToIndex,
+    rootStackKey,
+    null,
+    frameKeyToIndex.get(rootFrameAddress)
+  );
 
   for (const frameData of addressToFrameMap) {
     const frameMetaData = frameData[1];
@@ -686,7 +724,7 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
 
   for (const sample of samples) {
     const stackTrace = sample.backtraceStack;
-    let parentIndex = null;
+    let parentIndex = stackKeyToIndex.get(rootStackKey);
 
     for (let index = 0; index < stackTrace.length; index++) {
       const frameAddress = stackTrace[index];
