@@ -35,13 +35,12 @@ function parseBinaryPlist(bytes) {
   ).parseRoot();
 }
 
-const textDecoder = new TextDecoder('utf-8');
 function decodeUTF8(bytes: Uint8Array): string {
   if (bytes[bytes.length - 1] === 0) {
     // Remove a single trailing null byte if present.
-    return textDecoder.decode(bytes.subarray(0, -1));
+    return TextDecoder.decode(bytes.subarray(0, -1));
   }
-  return textDecoder.decode(bytes);
+  return TextDecoder.decode(bytes);
 }
 
 function followUID(objects: any[], value: any): any {
@@ -740,7 +739,7 @@ function pushThreadsInProfile(profile, addressToFrameMap, samples) {
 
 export async function convertInstrumentsProfile(
   entry: mixed,
-  fileReaderHelper
+  fileReaderHelper: fileReader
 ): Profile {
   fileReader = fileReaderHelper;
   const tree = await extractDirectoryTree(entry);
@@ -751,7 +750,7 @@ export async function convertInstrumentsProfile(
     runs,
     instrument,
     selectedRunNumber,
-  } = await readFormTemplateFile(tree, fileReader);
+  } = await readFormTemplateFile(tree);
 
   console.log('version', version);
   console.log('runs', runs);
