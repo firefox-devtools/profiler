@@ -595,6 +595,35 @@ export function isInstrumentsProfile(file: mixed): boolean {
   return fileMetaData.pop() === 'trace';
 }
 
+function getOrCreateFunc(
+  funcTable,
+  funcKeyToIndex,
+  stringTable,
+  name,
+  fileName,
+  funcKey
+) {
+  let indexToFunc = -1;
+
+  if (funcKeyToIndex.has(funcKey)) {
+    const index = funcKeyToIndex.get(funcKey);
+
+    indexToFunc = index;
+  } else {
+    funcKeyToIndex.set(funcKey, funcTable.length);
+    funcTable.name.push(stringTable.indexForString(name));
+    funcTable.fileName.push(stringTable.indexForString(fileName));
+    funcTable.isJS.push(false);
+    funcTable.resource.push(-1);
+    funcTable.lineNumber.push(null);
+    funcTable.columnNumber.push(null);
+    indexToFunc = funcTable.length;
+    funcTable.length++;
+  }
+
+  return indexToFunc;
+}
+
 function getProcessedThread(threadId, samples, addressToFrameMap) {
   const thread = getEmptyThread();
   const {
@@ -615,24 +644,16 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
     const frameMetaData = frameData[1];
     const frameAddress = frameMetaData.key;
 
-    if (funcKeyToIndex.has(frameAddress)) {
-      const funcIndex = funcKeyToIndex.get(frameAddress);
+    const indexToFunc = getOrCreateFunc(
+      funcTable,
+      funcKeyToIndex,
+      stringTable,
+      frameMetaData.name,
+      frameMetaData.file || '',
+      frameMetaData.key
+    );
 
-      frameTable.func.push(funcIndex);
-    } else {
-      funcKeyToIndex.set(frameAddress, funcTable.length);
-      funcTable.name.push(stringTable.indexForString(frameMetaData.name));
-      funcTable.fileName.push(
-        stringTable.indexForString(frameMetaData.file || '')
-      );
-      funcTable.isJS.push(false);
-      funcTable.resource.push(-1);
-      funcTable.lineNumber.push(null);
-      funcTable.columnNumber.push(null);
-      frameTable.func.push(funcTable.length);
-      funcTable.length++;
-    }
-
+    frameTable.func.push(indexToFunc);
     frameTable.category.push(1); // TODO: Make the function to get the index of 'Other' category
     frameTable.address.push(stringTable.indexForString(`${frameAddress}`));
     frameTable.implementation.push(null);
