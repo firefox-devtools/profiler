@@ -48,13 +48,6 @@ function followUID(objects: any[], value: any): any {
   return value instanceof UID ? objects[value.index] : value;
 }
 
-function sortBy<T>(ts: T[], key: (t: T) => number | string): void {
-  function comparator(a: T, b: T) {
-    return key(a) < key(b) ? -1 : 1;
-  }
-  ts.sort(comparator);
-}
-
 function patternMatchObjectiveC(
   objects: any[],
   value: any,
