@@ -238,6 +238,7 @@ function readInstrumentsArchive(buffer) {
         for (let i = 3; ; i += 2) {
           const address = object['$' + i];
           const line = object['$' + (i + 1)];
+          // eslint-disable-next-line eqeqeq
           if (address == null || line == null) {
             break;
           }
@@ -289,6 +290,7 @@ function readInstrumentsArchive(buffer) {
         ret.name = object.$1;
         return ret;
       }
+      default:
     }
     return object;
   });
@@ -308,11 +310,6 @@ function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
 
 function getOrInsert<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V {
   if (!map.has(k)) map.set(k, fallback(k));
-  return map.get(k);
-}
-
-function getOrElse<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V {
-  if (!map.has(k)) return fallback(k);
   return map.get(k);
 }
 
@@ -459,16 +456,12 @@ export async function importRunFromInstrumentsTrace(
   }
 
   for (const sample of samples) {
-    const stackForSample = getOrInsert(
-      backtraceIDtoStack,
-      sample.backtraceID,
-      id => {
-        const stack: FrameInfo[] = [];
-        appendRecursive(id, stack);
-        stack.reverse();
-        return stack;
-      }
-    );
+    getOrInsert(backtraceIDtoStack, sample.backtraceID, id => {
+      const stack: FrameInfo[] = [];
+      appendRecursive(id, stack);
+      stack.reverse();
+      return stack;
+    });
   }
 
   for (const sample of samples) {
@@ -760,10 +753,10 @@ export async function convertInstrumentsProfile(
     selectedRunNumber,
   } = await readFormTemplateFile(tree, fileReader);
 
-  // console.log('version', version);
+  console.log('version', version);
   console.log('runs', runs);
   // console.log('instrument', instrument); TODO: Use version and instruments' information into meta data if possible
-  // console.log('selectedRunNumber', selectedRunNumber);
+  console.log('selectedRunNumber', selectedRunNumber);
 
   if (instrument !== 'com.apple.xray.instrument-type.coresampler2') {
     throw new Error(
