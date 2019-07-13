@@ -624,6 +624,23 @@ function getOrCreateFunc(
   return indexToFunc;
 }
 
+function createFrame(
+  frameTable,
+  stringTable,
+  frameKeyToIndex,
+  indexToFunc,
+  frameAddress
+) {
+  frameTable.func.push(indexToFunc);
+  frameTable.category.push(1); // TODO: Make the function to get the index of 'Other' category
+  frameTable.address.push(stringTable.indexForString(`${frameAddress}`));
+  frameTable.implementation.push(null);
+  frameTable.line.push(null);
+  frameTable.column.push(null);
+  frameKeyToIndex.set(frameAddress, frameTable.length);
+  frameTable.length++;
+}
+
 function getProcessedThread(threadId, samples, addressToFrameMap) {
   const thread = getEmptyThread();
   const {
@@ -635,14 +652,14 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
   } = thread;
 
   const funcKeyToIndex = new Map<string, number>();
-  const frameKeyToIndex = new Map<number, number>();
+  const frameKeyToIndex = new Map<string, number>();
   const stackKeyToIndex = new Map<string, number>();
 
   thread.name = `Thread ${threadId}`;
 
   for (const frameData of addressToFrameMap) {
     const frameMetaData = frameData[1];
-    const frameAddress = frameMetaData.key;
+    const frameAddress = frameData[0];
 
     const indexToFunc = getOrCreateFunc(
       funcTable,
@@ -653,14 +670,13 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
       frameMetaData.key
     );
 
-    frameTable.func.push(indexToFunc);
-    frameTable.category.push(1); // TODO: Make the function to get the index of 'Other' category
-    frameTable.address.push(stringTable.indexForString(`${frameAddress}`));
-    frameTable.implementation.push(null);
-    frameTable.line.push(null);
-    frameTable.column.push(null);
-    frameKeyToIndex.set(frameData[0], frameTable.length);
-    frameTable.length++;
+    createFrame(
+      frameTable,
+      stringTable,
+      frameKeyToIndex,
+      indexToFunc,
+      frameAddress
+    );
   }
 
   for (const sample of samples) {
