@@ -606,9 +606,7 @@ function getOrCreateFunc(
   let indexToFunc = -1;
 
   if (funcKeyToIndex.has(funcKey)) {
-    const index = funcKeyToIndex.get(funcKey);
-
-    indexToFunc = index;
+    indexToFunc = funcKeyToIndex.get(funcKey);
   } else {
     funcKeyToIndex.set(funcKey, funcTable.length);
     funcTable.name.push(stringTable.indexForString(name));
@@ -639,6 +637,21 @@ function createFrame(
   frameTable.column.push(null);
   frameKeyToIndex.set(frameAddress, frameTable.length);
   frameTable.length++;
+}
+
+function createStack(
+  stackTable,
+  stringTable,
+  stackKeyToIndex,
+  stackKey,
+  parentIndex,
+  frame
+) {
+  stackTable.prefix.push(parentIndex);
+  stackTable.frame.push(frame);
+  stackKeyToIndex.set(stackKey, stackTable.length);
+  stackTable.category.push(1);
+  stackTable.length++;
 }
 
 function getProcessedThread(threadId, samples, addressToFrameMap) {
@@ -688,11 +701,14 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
       const keyOfStackKeyToIndexMap = '$' + parentIndex + '$' + frameAddress;
 
       if (!stackKeyToIndex.has(keyOfStackKeyToIndexMap)) {
-        stackTable.prefix.push(parentIndex);
-        stackTable.frame.push(frameKeyToIndex.get(frameAddress));
-        stackKeyToIndex.set(keyOfStackKeyToIndexMap, stackTable.length);
-        stackTable.category.push(1);
-        stackTable.length++;
+        createStack(
+          stackTable,
+          stringTable,
+          stackKeyToIndex,
+          keyOfStackKeyToIndexMap,
+          parentIndex,
+          frameKeyToIndex.get(frameAddress)
+        );
       }
 
       parentIndex = stackKeyToIndex.get(keyOfStackKeyToIndexMap);
