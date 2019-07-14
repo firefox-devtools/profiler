@@ -55,6 +55,7 @@ function followUID(objects: any[], value: any): any {
   return value instanceof UID ? objects[value.index] : value;
 }
 
+// This function constructs an object from given interpreter class and property list
 function patternMatchObjectiveC(
   objects: any[],
   value: any,
@@ -169,6 +170,8 @@ function isArray(value: any): boolean {
   return value instanceof Array;
 }
 
+// This function populates data fields with given interpretClass(decided by various datatypes
+// from readInstrumentsArchive function)
 function expandKeyedArchive(
   root: any,
   interpretClass: ($classname: string, obj: any) => any = x => x
@@ -224,6 +227,7 @@ function expandKeyedArchive(
   return visit(root.$top);
 }
 
+// This function creates an archived data for given buffer by interpreting various Instruments specific data types
 function readInstrumentsArchive(buffer) {
   const byteArray = new Uint8Array(buffer);
   // console.log('byteArray', byteArray);
@@ -304,6 +308,7 @@ function readInstrumentsArchive(buffer) {
   return data;
 }
 
+// This function adds a padding ahead of given string to make its length equal to a given width value
 function zeroPad(s: string, width: number) {
   return new Array(Math.max(width - s.length, 0) + 1).join('0') + s;
 }
@@ -320,6 +325,7 @@ function getOrInsert<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V {
   return map.get(k);
 }
 
+// This function extracts arrays of backtraceIDs which contains information about backtrace in recursive manner
 async function getIntegerArrays(
   samples: Sample[],
   core: TraceDirectoryTree
@@ -380,6 +386,7 @@ async function getIntegerArrays(
   return arrays;
 }
 
+// This function extracts samples from given core file
 async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
   const stores = getOrThrow(core.subdirectories, 'stores');
   for (const storedir of stores.subdirectories.values()) {
@@ -420,6 +427,8 @@ async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
   throw new Error('Could not find sample list');
 }
 
+// This function extracts core directory file which contains information about samples
+// path: tree.subdirectories.corespace.subdirectories.run${runNumber}.core
 function getCoreDirForRun(
   tree: TraceDirectoryTree,
   selectedRun: number
@@ -432,6 +441,10 @@ function getCoreDirForRun(
   return getOrThrow(corespaceRunDir.subdirectories, 'core');
 }
 
+// This function mainly extracts two entities: samples and arrays
+// Here arrays contains all the information about stack trace at a given timestamp.
+// Each samples has a field named 'backtraceID' which is an index into arrays
+// Iterating recursively into arrays by given backtraceID it extracts a backtraceStack for each sample
 export async function importRunFromInstrumentsTrace(
   args
 ): Promise<ProfileGroup> {
@@ -481,6 +494,8 @@ export async function importRunFromInstrumentsTrace(
   };
 }
 
+// This function reads the 'form.template' file which contains all the important information about
+// addressToFrameMap and Instruments' version
 async function readFormTemplateFile(tree) {
   const formTemplate = tree.files.get('form.template'); // TODO check for empty formTemplate
   const archive = readInstrumentsArchive(
@@ -551,6 +566,8 @@ async function readFormTemplateFile(tree) {
   };
 }
 
+// This function returns a directory tree where each node of tree
+// is a object consist of name, files and subdirecotries fields
 async function extractDirectoryTree(entry) {
   const node = {
     name: entry.name,
@@ -579,6 +596,7 @@ async function extractDirectoryTree(entry) {
   return node;
 }
 
+// This function checks weather the given profile is of Instruments type or not by checking the extension as a 'trace'
 export function isInstrumentsProfile(file: mixed): boolean {
   let fileName = '';
   if (file && typeof file === 'object' && typeof file.name === 'string') {
@@ -595,6 +613,8 @@ export function isInstrumentsProfile(file: mixed): boolean {
   return fileMetaData.pop() === 'trace';
 }
 
+// This function return an index of function from funcTable if it already exists otherwise
+// it creates a new entry into funcTable and returns that index
 function getOrCreateFunc(
   funcTable: FuncTable,
   funcKeyToIndex: Map<string, number>,
@@ -622,6 +642,7 @@ function getOrCreateFunc(
   return indexToFunc;
 }
 
+// This function creates a new frame inside frameTable and returns index of that newly created frame
 function createFrame(
   frameTable: FrameTable,
   stringTable: UniqueStringArray,
@@ -639,6 +660,7 @@ function createFrame(
   frameTable.length++;
 }
 
+// This function creates a new stack inside stackTable and returns index of that newly created stack
 function createStack(
   stackTable: StackTable,
   stringTable: UniqueStringArray,
@@ -654,6 +676,9 @@ function createStack(
   stackTable.length++;
 }
 
+// This function returns a processed thread with all the tables filled( funcTable, frameTable, stackTable, stringTable and samples)
+// addressToFrame map here is a map between frameAddress and details for that frame.
+// Each sample is a tuple made up of (timestamp, threadID, backtraceID, backtraceStack)
 function getProcessedThread(threadId, samples, addressToFrameMap) {
   const thread = getEmptyThread();
   const {
@@ -763,6 +788,7 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
   return thread;
 }
 
+// This function creates a thread for each group of samples(by threadID)
 function pushThreadsInProfile(profile, addressToFrameMap, samples) {
   const threadIDToSamples = new Map();
   for (const sample of samples) {
