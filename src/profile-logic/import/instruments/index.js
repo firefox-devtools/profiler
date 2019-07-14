@@ -4,7 +4,14 @@
 // @flow
 
 //types
-import type { Profile } from '../../../types/profile';
+import type {
+  Profile,
+  FuncTable,
+  FrameTable,
+  StackTable,
+} from '../../../types/profile';
+
+import type { UniqueStringArray } from '../../../../src/utils/unique-string-array';
 
 //utils
 import {
@@ -588,12 +595,12 @@ export function isInstrumentsProfile(file: mixed): boolean {
 }
 
 function getOrCreateFunc(
-  funcTable,
-  funcKeyToIndex,
-  stringTable,
-  name,
-  fileName,
-  funcKey
+  funcTable: FuncTable,
+  funcKeyToIndex: Map<string, number>,
+  stringTable: UniqueStringArray,
+  name: string,
+  fileName: string,
+  funcKey: string
 ) {
   let indexToFunc = -1;
 
@@ -615,11 +622,11 @@ function getOrCreateFunc(
 }
 
 function createFrame(
-  frameTable,
-  stringTable,
-  frameKeyToIndex,
-  indexToFunc,
-  frameAddress
+  frameTable: FrameTable,
+  stringTable: UniqueStringArray,
+  frameKeyToIndex: Map<string, number>,
+  indexToFunc: number,
+  frameAddress: string
 ) {
   frameTable.func.push(indexToFunc);
   frameTable.category.push(1); // TODO: Make the function to get the index of 'Other' category
@@ -632,12 +639,12 @@ function createFrame(
 }
 
 function createStack(
-  stackTable,
-  stringTable,
-  stackKeyToIndex,
-  stackKey,
-  parentIndex,
-  frame
+  stackTable: StackTable,
+  stringTable: UniqueStringArray,
+  stackKeyToIndex: Map<string, number>,
+  stackKey: string,
+  parentIndex: number | null,
+  frame: number
 ) {
   stackTable.prefix.push(parentIndex);
   stackTable.frame.push(frame);
