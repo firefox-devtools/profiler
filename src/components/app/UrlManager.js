@@ -97,15 +97,15 @@ class UrlManager extends React.PureComponent<Props> {
     try {
       // Process the raw url and fetch the profile.
       const results: {
-        profile: Profile,
+        profile: Profile | null,
         shouldSetupInitialUrlState: boolean,
       } = await getProfilesFromRawUrl(window.location);
 
       // Manually coerce these into the proper type due to the FlowFixMe above.
-      const profile: Profile = results.profile;
+      const profile: Profile | null = results.profile;
       const shouldSetupInitialUrlState: boolean =
         results.shouldSetupInitialUrlState;
-      if (shouldSetupInitialUrlState) {
+      if (profile !== null && shouldSetupInitialUrlState) {
         setupInitialUrlState(window.location, profile);
       } else {
         urlSetupDone();

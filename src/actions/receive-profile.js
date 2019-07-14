@@ -40,7 +40,7 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
-import { getProfile, getProfileOrNull } from '../selectors/profile';
+import { getProfileOrNull } from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { setDataSource } from './profile-view';
 
@@ -997,7 +997,7 @@ export function retrieveProfilesToCompare(
 export function getProfilesFromRawUrl(
   location: Location
 ): ThunkAction<
-  Promise<{| profile: Profile, shouldSetupInitialUrlState: boolean |}>
+  Promise<{| profile: Profile | null, shouldSetupInitialUrlState: boolean |}>
 > {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter(d => d);
@@ -1049,7 +1049,7 @@ export function getProfilesFromRawUrl(
     }
 
     return {
-      profile: getProfile(getState()),
+      profile: getProfileOrNull(getState()),
       shouldSetupInitialUrlState,
     };
   };
