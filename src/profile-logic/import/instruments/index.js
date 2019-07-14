@@ -43,11 +43,12 @@ function parseBinaryPlist(bytes) {
 }
 
 function decodeUTF8(bytes: Uint8Array): string {
+  const textDecoder = new TextDecoder();
   if (bytes[bytes.length - 1] === 0) {
     // Remove a single trailing null byte if present.
-    return TextDecoder.decode(bytes.subarray(0, -1));
+    return textDecoder.decode(bytes.subarray(0, -1));
   }
-  return TextDecoder.decode(bytes);
+  return textDecoder.decode(bytes);
 }
 
 function followUID(objects: any[], value: any): any {
