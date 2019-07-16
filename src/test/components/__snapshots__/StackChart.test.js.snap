@@ -1,5 +1,56 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`StackChart EmptyReasons shows reasons when a profile has no samples 1`] = `
+<div
+  class="EmptyReasons"
+>
+  <h3>
+    The 
+    stack chart
+     is empty for “
+    Empty Thread
+    ”
+  </h3>
+  <p>
+    This thread has no samples.
+  </p>
+</div>
+`;
+
+exports[`StackChart EmptyReasons shows reasons when samples are out of range 1`] = `
+<div
+  class="EmptyReasons"
+>
+  <h3>
+    The 
+    stack chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    Broaden the selected range to view samples.
+  </p>
+</div>
+`;
+
+exports[`StackChart EmptyReasons shows reasons when samples have been completely filtered out 1`] = `
+<div
+  class="EmptyReasons"
+>
+  <h3>
+    The 
+    stack chart
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    Try broadening the selected range, removing search terms, or call tree transforms to view samples.
+  </p>
+</div>
+`;
+
 exports[`StackChart matches the snapshot 1`] = `
 <div
   aria-labelledby="stack-chart-tab-button"

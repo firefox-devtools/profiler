@@ -14,23 +14,23 @@ import type { State } from '../../types/store';
 
 type StateProps = {|
   +threadName: string,
-  +isMarkerChartEmptyInFullRange: boolean,
+  +isMarkerTableEmptyInFullRange: boolean,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
-class MarkerChartEmptyReasons extends PureComponent<Props> {
+class MarkerTableEmptyReasons extends PureComponent<Props> {
   render() {
-    const { isMarkerChartEmptyInFullRange, threadName } = this.props;
+    const { isMarkerTableEmptyInFullRange, threadName } = this.props;
 
     return (
       <EmptyReasons
         threadName={threadName}
         reason={
-          isMarkerChartEmptyInFullRange
-            ? 'This thread contains no markers for this chart.'
+          isMarkerTableEmptyInFullRange
+            ? 'This thread contains no markers for this table.'
             : 'All markers were filtered out by the current selection or search term.'
         }
-        viewName="marker chart"
+        viewName="marker table"
       />
     );
   }
@@ -39,9 +39,9 @@ class MarkerChartEmptyReasons extends PureComponent<Props> {
 export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
     threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-    isMarkerChartEmptyInFullRange: selectedThreadSelectors.getAreMarkerPanelsEmptyInFullRange(
+    isMarkerTableEmptyInFullRange: selectedThreadSelectors.getAreMarkerPanelsEmptyInFullRange(
       state
     ),
   }),
-  component: MarkerChartEmptyReasons,
+  component: MarkerTableEmptyReasons,
 });

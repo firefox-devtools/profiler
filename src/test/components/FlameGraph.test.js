@@ -23,8 +23,14 @@ import {
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
+  getEmptyThread,
+  getEmptyProfile,
+} from '../../profile-logic/data-structures';
+import {
   changeInvertCallstack,
   changeSelectedCallNode,
+  commitRange,
+  changeImplementationFilter,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
@@ -125,6 +131,38 @@ describe('FlameGraph', function() {
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('B');
+  });
+
+  describe('EmptyReasons', () => {
+    it('shows reasons when a profile has no samples', () => {
+      const profile = getEmptyProfile();
+      const thread = getEmptyThread();
+      thread.name = 'Empty Thread';
+      profile.threads.push(thread);
+
+      const store = storeWithProfile(profile);
+      const container = render(
+        <Provider store={store}>
+          <>
+            <FlameGraph />
+          </>
+        </Provider>
+      ).container;
+
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+
+    it('shows reasons when samples are out of range', () => {
+      const { dispatch, container } = setupFlameGraph();
+      dispatch(commitRange(5, 10));
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+
+    it('shows reasons when samples have been completely filtered out', function() {
+      const { dispatch, container } = setupFlameGraph();
+      dispatch(changeImplementationFilter('js'));
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
   });
 });
 

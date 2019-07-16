@@ -1,5 +1,39 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`MarkerTable EmptyReasons shows reasons when a profile has no non-network markers 1`] = `
+<div
+  class="EmptyReasons"
+>
+  <h3>
+    The 
+    marker table
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread contains no markers for this table.
+  </p>
+</div>
+`;
+
+exports[`MarkerTable EmptyReasons shows reasons when all non-network markers have been filtered out 1`] = `
+<div
+  class="EmptyReasons"
+>
+  <h3>
+    The 
+    marker table
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    All markers were filtered out by the current selection or search term.
+  </p>
+</div>
+`;
+
 exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
 <div
   aria-labelledby="marker-table-tab-button"
