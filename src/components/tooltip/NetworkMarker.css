@@ -9,8 +9,8 @@
 .tooltipNetworkPhases {
   display: grid;
   padding-top: 4px;
-  margin-top: 4px;
   border-top: 1px solid var(--grey-40);
+  margin-top: 4px;
   grid-gap: 2px 5px;
 
   /* When changing the number of columns, don't forget to change the span values

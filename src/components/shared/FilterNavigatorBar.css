@@ -42,8 +42,8 @@
   /* These lines are mostly to override the default browser styles for `<button>`.
    * The 8px are used by the box-shadow when the button receives focus */
   padding: 0;
-  margin: auto;
   border: none;
+  margin: auto;
   background: none;
   color: inherit;
   font: inherit;

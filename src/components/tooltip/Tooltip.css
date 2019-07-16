@@ -37,8 +37,8 @@
   display: inline-block;
   width: 10px;
   height: 10px;
-  margin-right: 3px;
   border: 1px solid #888;
+  margin-right: 3px;
 }
 
 .tooltipIcon {
@@ -80,8 +80,8 @@
 
 .tooltipDetails + .tooltipDetailsBackTrace {
   padding-top: 5px;
-  margin-top: 5px;
   border-top: 1px solid var(--grey-40);
+  margin-top: 5px;
 }
 
 .tooltipLib {

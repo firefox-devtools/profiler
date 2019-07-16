@@ -73,8 +73,8 @@
   /* Box */
   flex: none;
   padding: 0;
-  margin: 3px 0 3px 3px;
   border: 1px solid var(--green-60);
+  margin: 3px 0 3px 3px;
 
   /* Other */
   background: var(--green-50) url(../../../res/img/svg/back-arrow.svg) center

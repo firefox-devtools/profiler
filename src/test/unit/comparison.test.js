@@ -7,6 +7,77 @@ import { stateFromLocation } from '../../app-logic/url-handling';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
 describe('mergeProfiles function', function() {
+  it('merges the various tables properly in the diffing profile', function() {
+    const sampleProfileA = getProfileFromTextSamples(
+      'A[lib:libA]  B[lib:libA]'
+    );
+    const sampleProfileB = getProfileFromTextSamples(
+      'A[lib:libA]  A[lib:libB]  C[lib:libC]'
+    );
+    const profileState = stateFromLocation({
+      pathname: '/public/fakehash1/',
+      search: '?thread=0&v=3',
+      hash: '',
+    });
+    const { profile: mergedProfile } = mergeProfiles(
+      [sampleProfileA.profile, sampleProfileB.profile],
+      [profileState, profileState]
+    );
+    expect(mergedProfile.threads).toHaveLength(3);
+
+    const mergedThread = mergedProfile.threads[2];
+    const mergedLibs = mergedThread.libs;
+    const mergedResources = mergedThread.resourceTable;
+    const mergedFunctions = mergedThread.funcTable;
+    const stringTable = mergedThread.stringTable;
+
+    expect(mergedLibs).toHaveLength(3);
+    expect(mergedResources).toHaveLength(3);
+    expect(mergedFunctions).toHaveLength(4);
+
+    // Now check that all functions are linked to the right resources.
+    // We should have 2 A functions, linked to 2 different resources.
+    // And we should have 1 B function, and 1 C function.
+    const libsForA = [];
+    const resourcesForA = [];
+    for (let funcIndex = 0; funcIndex < mergedFunctions.length; funcIndex++) {
+      const funcName = stringTable.getString(mergedFunctions.name[funcIndex]);
+      const resourceIndex = mergedFunctions.resource[funcIndex];
+
+      let resourceName = '';
+      let libName = '';
+      if (resourceIndex >= 0) {
+        const nameIndex = mergedResources.name[resourceIndex];
+        if (nameIndex >= 0) {
+          resourceName = stringTable.getString(nameIndex);
+        }
+
+        const libIndex = mergedResources.lib[resourceIndex];
+        if (libIndex !== null && libIndex !== undefined && libIndex >= 0) {
+          libName = mergedLibs[libIndex].name;
+        }
+      }
+
+      switch (funcName) {
+        case 'A':
+          libsForA.push(libName);
+          resourcesForA.push(resourceName);
+          break;
+        case 'B':
+          expect(libName).toBe('libA');
+          expect(resourceName).toBe('libA');
+          break;
+        case 'C':
+          expect(libName).toBe('libC');
+          expect(resourceName).toBe('libC');
+          break;
+        default:
+      }
+    }
+    expect(libsForA).toEqual(['libA', 'libB']);
+    expect(resourcesForA).toEqual(['libA', 'libB']);
+  });
+
   it('should set interval of merged profile to minimum of all intervals', function() {
     const sampleProfileA = getProfileFromTextSamples('A');
     const sampleProfileB = getProfileFromTextSamples('B');

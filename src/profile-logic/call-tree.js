@@ -122,16 +122,23 @@ export class CallTree {
         children.length < childCount;
         childCallNodeIndex++
       ) {
+        const childPrefixIndex = this._callNodeTable.prefix[childCallNodeIndex];
+        const childTotalTime = this._callNodeTimes.totalTime[
+          childCallNodeIndex
+        ];
+        const childChildCount = this._callNodeChildCount[childCallNodeIndex];
+
         if (
-          this._callNodeTable.prefix[childCallNodeIndex] === callNodeIndex &&
-          this._callNodeTimes.totalTime[childCallNodeIndex] !== 0
+          childPrefixIndex === callNodeIndex &&
+          (childTotalTime !== 0 || childChildCount !== 0)
         ) {
           children.push(childCallNodeIndex);
         }
       }
       children.sort(
         (a, b) =>
-          this._callNodeTimes.totalTime[b] - this._callNodeTimes.totalTime[a]
+          Math.abs(this._callNodeTimes.totalTime[b]) -
+          Math.abs(this._callNodeTimes.totalTime[a])
       );
       this._children[callNodeIndex] = children;
     }
@@ -227,8 +234,8 @@ export class CallTree {
       );
 
       displayData = {
-        totalTime: formattedTotalTime,
-        totalTimeWithUnit: formattedTotalTime + 'ms',
+        totalTime: totalTime === 0 ? '—' : formattedTotalTime,
+        totalTimeWithUnit: totalTime === 0 ? '—' : formattedTotalTime + 'ms',
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
         selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
         totalTimePercent: `${formatPercent(totalTimeRelative)}`,
@@ -307,8 +314,11 @@ function _getInvertedStackSelfTimes(
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
       const rootIndex = callNodeToRoot[callNodeIndex];
-      callNodeSelfTime[rootIndex] += interval;
-      callNodeLeafTime[callNodeIndex] += interval;
+      const duration = thread.samples.duration
+        ? thread.samples.duration[sampleIndex]
+        : interval;
+      callNodeSelfTime[rootIndex] += duration;
+      callNodeLeafTime[callNodeIndex] += duration;
     }
   }
 
@@ -336,7 +346,10 @@ function _getStackSelfTimes(
   ) {
     const callNodeIndex = sampleCallNodes[sampleIndex];
     if (callNodeIndex !== null) {
-      callNodeSelfTime[callNodeIndex] += interval;
+      const duration = thread.samples.duration
+        ? thread.samples.duration[sampleIndex]
+        : interval;
+      callNodeSelfTime[callNodeIndex] += duration;
     }
   }
 
@@ -374,19 +387,24 @@ export function computeCallTreeCountsAndTimings(
   let rootCount = 0;
 
   // We loop the call node table in reverse, so that we find the children
-  // before their parents.
+  // before their parents, and the total time is known at the time we reach a
+  // node.
   for (
     let callNodeIndex = callNodeTable.length - 1;
     callNodeIndex >= 0;
     callNodeIndex--
   ) {
     callNodeTotalTime[callNodeIndex] += callNodeLeafTime[callNodeIndex];
-    if (callNodeTotalTime[callNodeIndex] === 0) {
+    rootTotalTime += Math.abs(callNodeLeafTime[callNodeIndex]);
+    const hasChildren = callNodeChildCount[callNodeIndex] !== 0;
+    const hasTotalTime = callNodeTotalTime[callNodeIndex] !== 0;
+
+    if (!hasChildren && !hasTotalTime) {
       continue;
     }
+
     const prefixCallNode = callNodeTable.prefix[callNodeIndex];
     if (prefixCallNode === -1) {
-      rootTotalTime += callNodeTotalTime[callNodeIndex];
       rootCount++;
     } else {
       callNodeTotalTime[prefixCallNode] += callNodeTotalTime[callNodeIndex];
@@ -427,7 +445,7 @@ export function getCallTree(
     } = callTreeCountsAndTimings;
 
     const jsOnly = implementationFilter === 'js';
-    const isIntegerInterval = Math.floor(interval) === interval;
+    const isIntegerInterval = Number.isInteger(interval);
 
     return new CallTree(
       thread,

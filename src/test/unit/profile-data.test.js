@@ -36,6 +36,7 @@ import { ensureExists } from '../../utils/flow';
 import getCallNodeProfile from '../fixtures/profiles/call-nodes';
 import {
   getProfileFromTextSamples,
+  getMergedProfileFromTextSamples,
   getJsTracerTable,
 } from '../fixtures/profiles/processed-profile';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
@@ -737,10 +738,7 @@ describe('get-sample-index-closest-to-time', function() {
       defaultCategory
     );
 
-    // getProfileFromTextSamples will generate a profile with samples
-    // with 1ms of interval
-    const interval = 1;
-
+    const interval = profile.meta.interval;
     expect(getSampleIndexClosestToTime(samples, 0, interval)).toBe(0);
     expect(getSampleIndexClosestToTime(samples, 0.9, interval)).toBe(0);
     expect(getSampleIndexClosestToTime(samples, 1.1, interval)).toBe(1);
@@ -1175,6 +1173,70 @@ describe('getTimingsForPath for an inverted tree', function() {
         },
       },
       rootTime: 5,
+    });
+  });
+});
+
+describe('getTimingsForPath for a diffing track', function() {
+  function setup() {
+    const { profile, funcNamesDictPerThread } = getMergedProfileFromTextSamples(
+      `
+      A              A  A
+      B              B  C
+      D[cat:Layout]  E  F
+    `,
+      `
+      A                  A  A
+      B                  B  B
+      G[cat:JavaScript]  I  E
+    `
+    );
+    const defaultCategory = profile.meta.categories.findIndex(
+      c => c.name === 'Other'
+    );
+    const thread = profile.threads[2];
+
+    const callNodeInfo = getCallNodeInfo(
+      thread.stackTable,
+      thread.frameTable,
+      thread.funcTable,
+      defaultCategory
+    );
+    const curriedGetTimingsForPath = path =>
+      getTimingsForPath(
+        path,
+        callNodeInfo,
+        profile.meta.interval,
+        false /* inverted tree */,
+        thread,
+        profile.meta.categories
+      );
+
+    return {
+      getTimingsForPath: curriedGetTimingsForPath,
+      funcNamesDictPerThread,
+    };
+  }
+
+  it('computes the right breakdowns', () => {
+    const {
+      getTimingsForPath,
+      funcNamesDictPerThread: [{ A }],
+    } = setup();
+    const timings = getTimingsForPath([A]);
+    expect(timings.forPath).toEqual({
+      selfTime: {
+        breakdownByCategory: null,
+        breakdownByImplementation: null,
+        value: 0,
+      },
+      totalTime: {
+        breakdownByCategory: withSingleSubcategory([0, 0, -1, 1, 0, 0, 0, 0]), // Idle, Other, Layout, JavaScript, etc.
+        breakdownByImplementation: {
+          native: 0,
+        },
+        value: 0,
+      },
     });
   });
 });

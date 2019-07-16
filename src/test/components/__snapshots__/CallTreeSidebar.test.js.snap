@@ -44,10 +44,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
-       (
-      50
-      %)
+      2ms (50%)
     </div>
     <div
       class="sidebar-label"
@@ -82,8 +79,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         2ms
          (
-        100
-        %)
+        100%
+        )
       </div>
     </div>
     <h4
@@ -119,11 +116,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
-       
-      (
-      50
-      %)
+      2ms (50%)
     </div>
     <div
       class="sidebar-label"
@@ -195,10 +188,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      25
-      %)
+      1ms (25%)
     </div>
     <div
       class="sidebar-label"
@@ -233,8 +223,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms
          (
-        100
-        %)
+        100%
+        )
       </div>
     </div>
     <h4
@@ -270,11 +260,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
-       
-      (
-      25
-      %)
+      1ms (25%)
     </div>
     <div
       class="sidebar-label"
@@ -346,10 +332,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
-       (
-      50
-      %)
+      2ms (50%)
     </div>
     <div
       class="sidebar-label"
@@ -384,8 +367,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms
          (
-        50
-        %)
+        50%
+        )
       </div>
       <div
         class="sidebar-categoryname"
@@ -401,8 +384,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms
          (
-        50
-        %)
+        50%
+        )
       </div>
     </div>
     <h4
@@ -457,11 +440,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
-       
-      (
-      50
-      %)
+      2ms (50%)
     </div>
     <div
       class="sidebar-label"
@@ -552,10 +531,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      25
-      %)
+      1ms (25%)
     </div>
     <div
       class="sidebar-label"
@@ -590,8 +566,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms
          (
-        100
-        %)
+        100%
+        )
       </div>
     </div>
     <h4
@@ -646,11 +622,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
-       
-      (
-      50
-      %)
+      2ms (50%)
     </div>
     <div
       class="sidebar-label"
@@ -749,10 +721,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
-       (
-      50
-      %)
+      2ms (50%)
     </div>
     <div
       class="sidebar-label"
@@ -787,8 +756,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         2ms
          (
-        100
-        %)
+        100%
+        )
       </div>
     </div>
     <h4
@@ -824,11 +793,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
-       
-      (
-      50
-      %)
+      2ms (50%)
     </div>
     <div
       class="sidebar-label"
@@ -919,10 +884,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      25
-      %)
+      1ms (25%)
     </div>
     <div
       class="sidebar-label"
@@ -957,8 +919,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms
          (
-        100
-        %)
+        100%
+        )
       </div>
     </div>
     <h4
@@ -994,11 +956,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
-       
-      (
-      50
-      %)
+      2ms (50%)
     </div>
     <div
       class="sidebar-label"
@@ -1089,10 +1047,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      25
-      %)
+      1ms (25%)
     </div>
     <div
       class="sidebar-label"
@@ -1127,8 +1082,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms
          (
-        100
-        %)
+        100%
+        )
       </div>
     </div>
     <h4
@@ -1164,11 +1119,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      2ms
-       
-      (
-      50
-      %)
+      2ms (50%)
     </div>
     <div
       class="sidebar-label"
@@ -1259,10 +1210,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      1ms
-       (
-      25
-      %)
+      1ms (25%)
     </div>
     <div
       class="sidebar-label"
@@ -1297,8 +1245,8 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
       >
         1ms
          (
-        100
-        %)
+        100%
+        )
       </div>
     </div>
     <h4
@@ -1334,11 +1282,7 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
     <div
       class="sidebar-value"
     >
-      4ms
-       
-      (
-      100
-      %)
+      4ms (100%)
     </div>
     <div
       class="sidebar-label"

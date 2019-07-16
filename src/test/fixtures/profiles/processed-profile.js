@@ -9,6 +9,8 @@ import {
   getEmptyJsTracerTable,
   resourceTypes,
 } from '../../../profile-logic/data-structures';
+import { mergeProfiles } from '../../../profile-logic/comparison';
+import { stateFromLocation } from '../../../app-logic/url-handling';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 
 import type {
@@ -73,7 +75,8 @@ function _refineMockPayload(
 
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: Thread,
-  markers: TestDefinedMarkers
+  markers: TestDefinedMarkers,
+  interval: Milliseconds
 ) {
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
@@ -118,6 +121,9 @@ export function addMarkersToThreadWithCorrespondingSamples(
     samples.time.unshift(firstMarkerTime);
     samples.stack.unshift(null);
     samples.responsiveness.unshift(null);
+    if (samples.duration) {
+      samples.duration.unshift(interval);
+    }
     samples.length++;
   }
 
@@ -125,13 +131,19 @@ export function addMarkersToThreadWithCorrespondingSamples(
     samples.time.push(lastMarkerTime);
     samples.stack.push(null);
     samples.responsiveness.push(null);
+    if (samples.duration) {
+      samples.duration.push(interval);
+    }
     samples.length++;
   }
 }
 
-export function getThreadWithMarkers(markers: TestDefinedMarkers) {
+export function getThreadWithMarkers(
+  markers: TestDefinedMarkers,
+  interval: Milliseconds
+) {
   const thread = getEmptyThread();
-  addMarkersToThreadWithCorrespondingSamples(thread, markers);
+  addMarkersToThreadWithCorrespondingSamples(thread, markers, interval);
   return thread;
 }
 
@@ -140,7 +152,7 @@ export function getProfileWithMarkers(
 ): Profile {
   const profile = getEmptyProfile();
   profile.threads = markersPerThread.map(testDefinedMarkers =>
-    getThreadWithMarkers(testDefinedMarkers)
+    getThreadWithMarkers(testDefinedMarkers, profile.meta.interval)
   );
   return profile;
 }
@@ -521,6 +533,37 @@ function _buildThreadFromTextOnlyStacks(
   return thread;
 }
 
+/**
+ * This returns a merged profile from a number of profile strings.
+ */
+export function getMergedProfileFromTextSamples(
+  ...profileStrings: string[]
+): {
+  profile: Profile,
+  funcNamesPerThread: Array<string[]>,
+  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
+} {
+  const profilesAndFuncNames = profileStrings.map(str =>
+    getProfileFromTextSamples(str)
+  );
+  const profiles = profilesAndFuncNames.map(({ profile }) => profile);
+  const profileState = stateFromLocation({
+    pathname: '/public/fakehash1/',
+    search: '?thread=0&v=3',
+    hash: '',
+  });
+  const { profile } = mergeProfiles(profiles, profiles.map(() => profileState));
+  return {
+    profile,
+    funcNamesPerThread: profilesAndFuncNames.map(
+      ({ funcNamesPerThread }) => funcNamesPerThread[0]
+    ),
+    funcNamesDictPerThread: profilesAndFuncNames.map(
+      ({ funcNamesDictPerThread }) => funcNamesDictPerThread[0]
+    ),
+  };
+}
+
 type NetworkMarkersOptions = {|
   uri: string,
   id: number,
@@ -616,43 +659,47 @@ export function getNetworkTrackProfile() {
     docshellHistoryId,
   };
 
-  addMarkersToThreadWithCorrespondingSamples(thread, [
+  addMarkersToThreadWithCorrespondingSamples(
+    thread,
     [
-      'Load',
-      4,
-      ({
-        ...loadPayloadBase,
-        interval: 'start',
-      }: NavigationMarkerPayload),
+      [
+        'Load',
+        4,
+        ({
+          ...loadPayloadBase,
+          interval: 'start',
+        }: NavigationMarkerPayload),
+      ],
+      [
+        'Load',
+        5,
+        ({
+          ...loadPayloadBase,
+          interval: 'end',
+        }: NavigationMarkerPayload),
+      ],
+      ['TTI', 6, null],
+      ['Navigation::Start', 7, null],
+      ['Contentful paint at something', 8, null],
+      [
+        'DOMContentLoaded',
+        6,
+        ({
+          ...domContentLoadedBase,
+          interval: 'start',
+        }: NavigationMarkerPayload),
+      ],
+      [
+        'DOMContentLoaded',
+        7,
+        ({
+          ...domContentLoadedBase,
+          interval: 'end',
+        }: NavigationMarkerPayload),
+      ],
     ],
-    [
-      'Load',
-      5,
-      ({
-        ...loadPayloadBase,
-        interval: 'end',
-      }: NavigationMarkerPayload),
-    ],
-    ['TTI', 6, null],
-    ['Navigation::Start', 7, null],
-    ['Contentful paint at something', 8, null],
-    [
-      'DOMContentLoaded',
-      6,
-      ({
-        ...domContentLoadedBase,
-        interval: 'start',
-      }: NavigationMarkerPayload),
-    ],
-    [
-      'DOMContentLoaded',
-      7,
-      ({
-        ...domContentLoadedBase,
-        interval: 'end',
-      }: NavigationMarkerPayload),
-    ],
-  ]);
+    profile.meta.interval
+  );
 
   return profile;
 }

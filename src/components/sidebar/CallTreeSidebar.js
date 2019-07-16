@@ -117,13 +117,18 @@ class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
       .sort(({ value: valueA }, { value: valueB }) => valueB - valueA)
       .filter(({ value }) => value);
 
-    const totalTime = data.reduce((accum, { value }) => accum + value, 0);
+    // Values can be negative for diffing tracks, that's why we use the absolute
+    // value to compute the total time. Indeed even if all values average out,
+    // we want to display a sensible percentage.
+    const totalTime = data.reduce(
+      (accum, { value }) => accum + Math.abs(value),
+      0
+    );
     const maxFractionalDigits = isIntervalInteger ? 0 : 1;
 
     return (
       <div className="sidebar-categorylist">
         {data.map(({ category, value, subcategories }) => {
-          const percentage = Math.round((value / totalTime) * 100);
           return (
             <React.Fragment key={category.name}>
               <div className="sidebar-categoryname">
@@ -137,7 +142,7 @@ class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
               </div>
               <div className="sidebar-categorytiming">
                 {formatMilliseconds(value, 3, maxFractionalDigits)} (
-                {percentage}%)
+                {formatPercent(value / totalTime)})
               </div>
               {shouldDisplaySubcategoryInfoForCategory(category)
                 ? subcategories.map(({ name, value }) => (
@@ -252,8 +257,13 @@ class CallTreeSidebar extends React.PureComponent<Props> {
           </header>
           <h3 className="sidebar-title2">This selected call node</h3>
           <SidebarDetail label="Running Time">
-            {formatMilliseconds(totalTime.value, 3, maxFractionalDigits)} (
-            {totalTimePercent}%)
+            {totalTime.value
+              ? `${formatMilliseconds(
+                  totalTime.value,
+                  3,
+                  maxFractionalDigits
+                )} (${totalTimePercent}%)`
+              : '—'}
           </SidebarDetail>
           <SidebarDetail label="Self Time">
             {selfTime.value
@@ -296,8 +306,13 @@ class CallTreeSidebar extends React.PureComponent<Props> {
             This function across the entire tree
           </h3>
           <SidebarDetail label="Running Time">
-            {formatMilliseconds(totalTimeForFunc.value, 3, maxFractionalDigits)}{' '}
-            ({totalTimeForFuncPercent}%)
+            {totalTimeForFunc.value
+              ? `${formatMilliseconds(
+                  totalTimeForFunc.value,
+                  3,
+                  maxFractionalDigits
+                )} (${totalTimeForFuncPercent}%)`
+              : '—'}
           </SidebarDetail>
           <SidebarDetail label="Self Time">
             {selfTimeForFunc.value
