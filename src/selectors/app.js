@@ -19,6 +19,7 @@ import {
   TRACK_PROCESS_BLANK_HEIGHT,
   TIMELINE_RULER_HEIGHT,
   TIMELINE_SETTINGS_HEIGHT,
+  TRACK_VISUAL_PROGRESS_HEIGHT,
 } from '../app-logic/constants';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -80,6 +81,11 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
         switch (globalTrack.type) {
           case 'screenshots':
             height += TRACK_SCREENSHOT_HEIGHT + border;
+            break;
+          case 'visual-progress':
+          case 'perceptual-visual-progress':
+          case 'contentful-visual-progress':
+            height += TRACK_VISUAL_PROGRESS_HEIGHT;
             break;
           case 'process':
             {

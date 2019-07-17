@@ -42,3 +42,7 @@ export const TIMELINE_RULER_HEIGHT = 20;
 
 // JS Tracer has very high fidelity information, and needs a more fine-grained zoom.
 export const JS_TRACER_MAXIMUM_CHART_ZOOM = 0.001;
+
+// The following values are for the visual progress tracks.
+export const TRACK_VISUAL_PROGRESS_HEIGHT = 40;
+export const TRACK_VISUAL_PROGRESS_LINE_WIDTH = 2;

@@ -421,7 +421,7 @@ export type ExtensionTable = {|
  * Visual progress describes the visual progression during page load. A sample is generated
  * everytime the visual completeness of the webpage changes.
  */
-export type VisualProgress = {|
+export type ProgressGraphData = {|
   // A percentage that describes the visual completeness of the webpage, ranging from 0% - 100%
   percent: number,
   // The time in milliseconds which the sample was taken.
@@ -439,15 +439,27 @@ export type VisualProgress = {|
  * into the geckoprofile. More information about browsertime can be found through https://github.com/mozilla/browsertime.
  */
 export type VisualMetrics = {|
-  SpeedIndex: number,
-  PerceptualSpeedIndexProgress: VisualProgress[],
-  LastVisualChange: number,
+  // ContentfulSpeedIndex and ContentfulSpeedIndexProgress generated here
+  // https://github.com/mozilla/browsertime/blob/master/vendor/visualmetrics.py#L1331
   ContentfulSpeedIndex: number,
-  ContentfulSpeedIndexProgress: VisualProgress[],
+  ContentfulSpeedIndexProgress: ProgressGraphData[],
+  // PerceptualSpeedIndex and PerceptualSpeedIndexProgress generated here
+  // https://github.com/mozilla/browsertime/blob/master/vendor/visualmetrics.py#L1320
   PerceptualSpeedIndex: number,
+  PerceptualSpeedIndexProgress: ProgressGraphData[],
+  // FirstVisualChange, LastVisualChange, SpeedIndex generated here
+  // https://github.com/mozilla/browsertime/blob/master/vendor/visualmetrics.py#L1312
   FirstVisualChange: number,
-  VisualProgress: VisualProgress[],
+  LastVisualChange: number,
+  SpeedIndex: number,
+  // VisualProgress generated here
+  // https://github.com/mozilla/browsertime/blob/master/vendor/visualmetrics.py#L1390
+  VisualProgress: ProgressGraphData[],
+  // VisualReadiness generated here
+  // https://github.com/mozilla/browsertime/blob/master/lib/video/postprocessing/visualmetrics/extraMetrics.js#L5
   VisualReadiness: number,
+  // VisualComplete85, VisualComplete95, VisualComplete99 generated here
+  // https://github.com/mozilla/browsertime/blob/master/lib/video/postprocessing/visualmetrics/extraMetrics.js#L10
   VisualComplete85: number,
   VisualComplete95: number,
   VisualComplete99: number,

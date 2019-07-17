@@ -24,18 +24,30 @@ import {
   getLocalTracks,
   getGlobalTrackName,
   getProcessesWithMemoryTrack,
+  getVisualProgress,
+  getPerceptualSpeedIndexProgress,
+  getContentfulSpeedIndexProgress,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';
 import TimelineLocalTrack from './LocalTrack';
+import { TrackVisualProgress } from './TrackVisualProgress';
 import Reorderable from '../shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from '../../app-logic/constants';
+import {
+  BLUE_50,
+  BLUE_60,
+  GREEN_50,
+  GREEN_60,
+  RED_50,
+  RED_60,
+} from 'photon-colors';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
 import type { GlobalTrackReference } from '../../types/actions';
-import type { Pid } from '../../types/profile';
+import type { Pid, ProgressGraphData } from '../../types/profile';
 import type {
   TrackIndex,
   GlobalTrack,
@@ -60,6 +72,7 @@ type StateProps = {|
   +pid: Pid | null,
   +selectedTab: TabSlug,
   +processesWithMemoryTrack: Set<Pid>,
+  +progressGraphData: ProgressGraphData[] | null,
 |};
 
 type DispatchProps = {|
@@ -91,7 +104,11 @@ class GlobalTrackComponent extends PureComponent<Props> {
   };
 
   renderTrack() {
-    const { globalTrack, processesWithMemoryTrack } = this.props;
+    const {
+      globalTrack,
+      processesWithMemoryTrack,
+      progressGraphData,
+    } = this.props;
     switch (globalTrack.type) {
       case 'process': {
         const { mainThreadIndex } = globalTrack;
@@ -116,6 +133,51 @@ class GlobalTrackComponent extends PureComponent<Props> {
         const { threadIndex, id } = globalTrack;
         return (
           <TimelineTrackScreenshots threadIndex={threadIndex} windowId={id} />
+        );
+      }
+      case 'visual-progress': {
+        if (!progressGraphData) {
+          throw new Error('Progress Graph Data is null');
+        }
+        return (
+          <TrackVisualProgress
+            progressGraphData={progressGraphData}
+            graphStrokeColor={BLUE_50}
+            graphFillColor="#0a84ff88" // Blue 50 with transparency.
+            graphDotColor={BLUE_60}
+            graphDotTooltipText=" visual completeness at this time"
+            windowId={globalTrack.id}
+          />
+        );
+      }
+      case 'perceptual-visual-progress': {
+        if (!progressGraphData) {
+          throw new Error('Progress Graph Data is null');
+        }
+        return (
+          <TrackVisualProgress
+            progressGraphData={progressGraphData}
+            graphStrokeColor={GREEN_50}
+            graphFillColor="#30e60b88" // Green 50 with transparency.
+            graphDotColor={GREEN_60}
+            graphDotTooltipText=" perceptual visual completeness at this time"
+            windowId={globalTrack.id}
+          />
+        );
+      }
+      case 'contentful-visual-progress': {
+        if (!progressGraphData) {
+          throw new Error('Progress Graph Data is null');
+        }
+        return (
+          <TrackVisualProgress
+            progressGraphData={progressGraphData}
+            graphStrokeColor={RED_50}
+            graphFillColor="#ff003988" // Red 50 with transparency.
+            graphDotColor={RED_60}
+            graphDotTooltipText=" contentful visual completeness at this time"
+            windowId={globalTrack.id}
+          />
         );
       }
       default:
@@ -235,6 +297,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     let localTrackOrder = EMPTY_TRACK_ORDER;
     let localTracks = EMPTY_LOCAL_TRACKS;
     let pid = null;
+    let progressGraphData = null;
 
     // Run different selectors based on the track type.
     switch (globalTrack.type) {
@@ -255,6 +318,15 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       }
       case 'screenshots':
         break;
+      case 'visual-progress':
+        progressGraphData = getVisualProgress(state);
+        break;
+      case 'perceptual-visual-progress':
+        progressGraphData = getPerceptualSpeedIndexProgress(state);
+        break;
+      case 'contentful-visual-progress':
+        progressGraphData = getContentfulSpeedIndexProgress(state);
+        break;
       default:
         throw new Error(`Unhandled GlobalTrack type ${(globalTrack: empty)}`);
     }
@@ -270,6 +342,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       isHidden: getHiddenGlobalTracks(state).has(trackIndex),
       selectedTab,
       processesWithMemoryTrack: getProcessesWithMemoryTrack(state),
+      progressGraphData,
     };
   },
   mapDispatchToProps: {
