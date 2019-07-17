@@ -123,6 +123,29 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                 </div>
               ) : null}
             </div>
+            {meta.visualMetrics ? (
+              <>
+                <h2 className="arrowPanelSubTitle">Visual Metrics</h2>
+                <div className="arrowPanelSection">
+                  <div className="metaInfoRow">
+                    <span className="metaInfoLabel">Speed Index:</span>
+                    {meta.visualMetrics.SpeedIndex}
+                  </div>
+                  <div className="metaInfoRow">
+                    <span className="metaInfoLabel">
+                      Perceptual Speed Index:
+                    </span>
+                    {meta.visualMetrics.PerceptualSpeedIndex}
+                  </div>
+                  <div className="metaInfoRow">
+                    <span className="metaInfoLabel">
+                      Contentful Speed Index:
+                    </span>
+                    {meta.visualMetrics.ContentfulSpeedIndex}
+                  </div>
+                </div>
+              </>
+            ) : null}
           </ArrowPanel>
         }
       />

@@ -3947,6 +3947,7 @@ Object {
     "toolkit": undefined,
     "updateChannel": undefined,
     "version": 16,
+    "visualMetrics": undefined,
   },
   "pages": Array [],
   "threads": Array [
@@ -10214,6 +10215,7 @@ Object {
     "toolkit": undefined,
     "updateChannel": undefined,
     "version": 16,
+    "visualMetrics": undefined,
   },
   "pages": Array [],
   "threads": Array [

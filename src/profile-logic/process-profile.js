@@ -1113,6 +1113,7 @@ export function processProfile(
     categories: geckoProfile.meta.categories,
     preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
     appBuildID: geckoProfile.meta.appBuildID,
+    visualMetrics: geckoProfile.meta.visualMetrics,
     // A link to the source code revision for this build.
     sourceURL: geckoProfile.meta.sourceURL,
     physicalCPUs: geckoProfile.meta.physicalCPUs,
