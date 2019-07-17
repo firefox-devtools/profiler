@@ -157,7 +157,10 @@ export type StackType = 'js' | 'native' | 'unsymbolicated';
 
 export type GlobalTrack =
   | {| +type: 'process', +pid: Pid, +mainThreadIndex: ThreadIndex | null |}
-  | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |};
+  | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |}
+  | {| +type: 'visual-progress', +id: string |}
+  | {| +type: 'perceptual-visual-progress', +id: string |}
+  | {| +type: 'contentful-visual-progress', +id: string |};
 
 export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}

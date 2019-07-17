@@ -22,6 +22,9 @@ import type {
   Counter,
   CounterIndex,
   PageList,
+  ProfileMeta,
+  VisualMetrics,
+  ProgressGraphData,
 } from '../types/profile';
 import type {
   LocalTrack,
@@ -126,6 +129,22 @@ export const getRightClickedTrack: Selector<TrackReference | null> = state =>
   getProfileViewOptions(state).rightClickedTrack;
 export const getCounter: Selector<Counter[] | null> = state =>
   getProfile(state).counters || null;
+export const getMeta: Selector<ProfileMeta> = state => getProfile(state).meta;
+export const getVisualMetricsOrNull: Selector<VisualMetrics | null> = state =>
+  getMeta(state).visualMetrics || null;
+export const getVisualMetrics: Selector<VisualMetrics> = state =>
+  ensureExists(
+    getVisualMetricsOrNull(state),
+    'Tried to access the visual metrics when it does not exist.'
+  );
+export const getVisualProgress: Selector<ProgressGraphData[]> = state =>
+  getVisualMetrics(state).VisualProgress;
+export const getPerceptualSpeedIndexProgress: Selector<
+  ProgressGraphData[]
+> = state => getVisualMetrics(state).PerceptualSpeedIndexProgress;
+export const getContentfulSpeedIndexProgress: Selector<
+  ProgressGraphData[]
+> = state => getVisualMetrics(state).ContentfulSpeedIndexProgress;
 
 type CounterSelectors = $ReturnType<typeof _createCounterSelectors>;
 

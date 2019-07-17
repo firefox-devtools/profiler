@@ -39,3 +39,7 @@ export const TRACK_PROCESS_BLANK_HEIGHT = 30;
 
 // Height of timeline ruler.
 export const TIMELINE_RULER_HEIGHT = 20;
+
+// The following values are for the visual progress tracks.
+export const TRACK_VISUAL_PROGRESS_HEIGHT = 40;
+export const TRACK_VISUAL_PROGRESS_LINE_WIDTH = 2;
