@@ -40,6 +40,7 @@ import { objectShallowEquals } from '../utils/index';
 import type {
   PreviewSelection,
   ImplementationFilter,
+  CallTreeSummaryStrategy,
   TrackReference,
   TimelineType,
   DataSource,
@@ -936,6 +937,27 @@ export function changeImplementationFilter(
       transformedThread,
       previousImplementation,
     });
+  };
+}
+
+/**
+ * This action changes the strategy used to build and display the call tree. This could
+ * use sample data, or build a new call tree based off of allocation information stored
+ * in markers.
+ */
+export function changeCallTreeSummaryStrategy(
+  strategy: CallTreeSummaryStrategy
+): Action {
+  sendAnalytics({
+    hitType: 'event',
+    eventCategory: 'profile',
+    eventAction: 'change call tree summary strategy',
+    eventLabel: strategy,
+  });
+
+  return {
+    type: 'CHANGE_CALL_TREE_SUMMARY_STRATEGY',
+    strategy,
   };
 }
 
