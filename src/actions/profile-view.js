@@ -940,6 +940,11 @@ export function changeImplementationFilter(
   };
 }
 
+/**
+ * This action changes the strategy used to build and display the call tree. This could
+ * use sample data, or build a new call tree based off of allocation information stored
+ * in markers.
+ */
 export function changeCallTreeSummaryStrategy(
   strategy: CallTreeSummaryStrategy
 ): Action {

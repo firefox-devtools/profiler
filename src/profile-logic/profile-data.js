@@ -697,8 +697,11 @@ export function toValidCallTreeSummaryStrategy(
     case 'native-allocations':
       return strategy;
     default:
-      // Default to timing if the strategy is not recognized. This value can come
+      // Default to "timing" if the strategy is not recognized. This value can come
       // from a user-generated URL.
+      // e.g. `profiler.firefox.com/public/hash/ctSummary=tiiming` (note the typo.)
+      // This default branch will ensure we don't send values we don't understand to
+      // the store.
       return 'timing';
   }
 }
