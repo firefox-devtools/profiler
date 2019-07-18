@@ -1544,3 +1544,16 @@ describe('counter selectors', function() {
     });
   });
 });
+
+describe('call tree summary strategy', function() {
+  it('can change the call tree strategy', function() {
+    const { dispatch, getState } = storeWithProfile();
+    expect(UrlStateSelectors.getCallTreeSummaryStrategy(getState())).toEqual(
+      'timing'
+    );
+    dispatch(ProfileView.changeCallTreeSummaryStrategy('js-allocations'));
+    expect(UrlStateSelectors.getCallTreeSummaryStrategy(getState())).toEqual(
+      'js-allocations'
+    );
+  });
+});
