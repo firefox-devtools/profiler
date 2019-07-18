@@ -16,7 +16,15 @@ import {
 } from '../../app-logic/constants';
 import StackChartGraph from '../../components/stack-chart';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
-import { changeSelectedCallNode } from '../../actions/profile-view';
+import {
+  getEmptyThread,
+  getEmptyProfile,
+} from '../../profile-logic/data-structures';
+import {
+  changeSelectedCallNode,
+  commitRange,
+  changeImplementationFilter,
+} from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
@@ -283,5 +291,37 @@ describe('StackChart', function() {
     drawnFrames = getDrawnFrames(ctx);
     expect(drawnFrames).toContain('A');
     expect(drawnFrames).not.toContain('Z');
+  });
+
+  describe('EmptyReasons', () => {
+    it('shows reasons when a profile has no samples', () => {
+      const profile = getEmptyProfile();
+      const thread = getEmptyThread();
+      thread.name = 'Empty Thread';
+      profile.threads.push(thread);
+
+      const store = storeWithProfile(profile);
+      const container = render(
+        <Provider store={store}>
+          <>
+            <StackChartGraph />
+          </>
+        </Provider>
+      ).container;
+
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+
+    it('shows reasons when samples are out of range', () => {
+      const { dispatch, container } = setup();
+      dispatch(commitRange(5, 10));
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+
+    it('shows reasons when samples have been completely filtered out', function() {
+      const { dispatch, container } = setup();
+      dispatch(changeImplementationFilter('js'));
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
   });
 });

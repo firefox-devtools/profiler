@@ -19,6 +19,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
+import StackChartEmptyReasons from './StackChartEmptyReasons';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
@@ -148,44 +149,48 @@ class StackChartGraph extends React.PureComponent<Props> {
       >
         <StackSettings />
         <TransformNavigator />
-        <ContextMenuTrigger
-          id="CallNodeContextMenu"
-          attributes={{
-            className: 'treeViewContextMenu',
-          }}
-        >
-          <div className="stackChartContent">
-            <StackChartCanvas
-              viewportProps={{
-                previewSelection,
-                timeRange,
-                maxViewportHeight,
-                viewportNeedsUpdate,
-                marginLeft: TIMELINE_MARGIN_LEFT,
-                marginRight: TIMELINE_MARGIN_RIGHT,
-                maximumZoom: this.getMaximumZoom(),
-                containerRef: this._takeViewportRef,
-              }}
-              chartProps={{
-                interval,
-                thread,
-                stackTimingByDepth,
-                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-                updatePreviewSelection,
-                rangeStart: timeRange.start,
-                rangeEnd: timeRange.end,
-                stackFrameHeight: STACK_FRAME_HEIGHT,
-                callNodeInfo,
-                categories,
-                selectedCallNodeIndex,
-                onSelectionChange: this._onSelectedCallNodeChange,
-                onRightClick: this._onRightClickedCallNodeChange,
-                shouldDisplayTooltips: this._shouldDisplayTooltips,
-                scrollToSelectionGeneration,
-              }}
-            />
-          </div>
-        </ContextMenuTrigger>
+        {maxStackDepth === 0 ? (
+          <StackChartEmptyReasons />
+        ) : (
+          <ContextMenuTrigger
+            id="CallNodeContextMenu"
+            attributes={{
+              className: 'treeViewContextMenu',
+            }}
+          >
+            <div className="stackChartContent">
+              <StackChartCanvas
+                viewportProps={{
+                  previewSelection,
+                  timeRange,
+                  maxViewportHeight,
+                  viewportNeedsUpdate,
+                  marginLeft: TIMELINE_MARGIN_LEFT,
+                  marginRight: TIMELINE_MARGIN_RIGHT,
+                  maximumZoom: this.getMaximumZoom(),
+                  containerRef: this._takeViewportRef,
+                }}
+                chartProps={{
+                  interval,
+                  thread,
+                  stackTimingByDepth,
+                  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
+                  updatePreviewSelection,
+                  rangeStart: timeRange.start,
+                  rangeEnd: timeRange.end,
+                  stackFrameHeight: STACK_FRAME_HEIGHT,
+                  callNodeInfo,
+                  categories,
+                  selectedCallNodeIndex,
+                  onSelectionChange: this._onSelectedCallNodeChange,
+                  onRightClick: this._onRightClickedCallNodeChange,
+                  shouldDisplayTooltips: this._shouldDisplayTooltips,
+                  scrollToSelectionGeneration,
+                }}
+              />
+            </div>
+          </ContextMenuTrigger>
+        )}
       </div>
     );
   }

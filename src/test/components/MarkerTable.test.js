@@ -11,7 +11,10 @@ import copy from 'copy-to-clipboard';
 
 import MarkerTable from '../../components/marker-table';
 import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import {
+  updatePreviewSelection,
+  changeMarkersSearchString,
+} from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 
 import { storeWithProfile } from '../fixtures/stores';
@@ -19,7 +22,7 @@ import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('MarkerTable', function() {
-  function setup() {
+  function setup(markers) {
     // Set an arbitrary size that will not kick in any virtualization behavior.
     jest
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
@@ -27,40 +30,42 @@ describe('MarkerTable', function() {
 
     // These were all taken from real-world values.
     const profile = getProfileWithMarkers(
-      [
-        [
-          'UserTiming',
-          12.5,
-          {
-            type: 'UserTiming',
-            startTime: 12.5,
-            endTime: 12.5,
-            name: 'foobar',
-            entryType: 'mark',
-          },
-        ],
-        [
-          'NotifyDidPaint',
-          14.5,
-          {
-            type: 'tracing',
-            category: 'Paint',
-            interval: 'start',
-          },
-        ],
-        [
-          'setTimeout',
-          165.87091900000001,
-          {
-            type: 'Text',
-            startTime: 165.87091900000001,
-            endTime: 165.871503,
-            name: '5.5',
-          },
-        ],
-      ]
-        // Sort the markers.
-        .sort((a, b) => a[1] - b[1])
+      markers !== undefined
+        ? markers
+        : [
+            [
+              'UserTiming',
+              12.5,
+              {
+                type: 'UserTiming',
+                startTime: 12.5,
+                endTime: 12.5,
+                name: 'foobar',
+                entryType: 'mark',
+              },
+            ],
+            [
+              'NotifyDidPaint',
+              14.5,
+              {
+                type: 'tracing',
+                category: 'Paint',
+                interval: 'start',
+              },
+            ],
+            [
+              'setTimeout',
+              165.87091900000001,
+              {
+                type: 'Text',
+                startTime: 165.87091900000001,
+                endTime: 165.871503,
+                name: '5.5',
+              },
+            ],
+          ]
+            // Sort the markers.
+            .sort((a, b) => a[1] - b[1])
     );
 
     const store = storeWithProfile(profile);
@@ -185,5 +190,18 @@ describe('MarkerTable', function() {
     jest.runAllTimers();
     checkMenuIsDisplayedForNode('foobar');
     expect(getRowElement('foobar')).toHaveClass('isRightClicked');
+  });
+
+  describe('EmptyReasons', () => {
+    it('shows reasons when a profile has no non-network markers', () => {
+      const { container } = setup([]);
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+
+    it('shows reasons when all non-network markers have been filtered out', function() {
+      const { dispatch, container } = setup();
+      dispatch(changeMarkersSearchString('MATCH_NOTHING'));
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
   });
 });

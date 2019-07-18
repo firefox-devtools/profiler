@@ -6,7 +6,9 @@
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
 import { getInvertCallstack } from '../../selectors/url-state';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { changeInvertCallstack } from '../../actions/profile-view';
+import FlameGraphEmptyReasons from './FlameGraphEmptyReasons';
 import FlameGraph from './FlameGraph';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -14,6 +16,7 @@ import type { ConnectedProps } from '../../utils/connect';
 require('./MaybeFlameGraph.css');
 
 type StateProps = {|
+  +maxStackDepth: number,
   +invertCallstack: boolean,
 |};
 type DispatchProps = {|
@@ -27,7 +30,13 @@ class MaybeFlameGraph extends React.PureComponent<Props> {
   };
 
   render() {
-    if (this.props.invertCallstack) {
+    const { maxStackDepth, invertCallstack } = this.props;
+
+    if (maxStackDepth === 0) {
+      return <FlameGraphEmptyReasons />;
+    }
+
+    if (invertCallstack) {
       return (
         <div className="flameGraphDisabledMessage">
           <h3>The Flame Graph is not available for inverted call stacks</h3>
@@ -51,6 +60,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       invertCallstack: getInvertCallstack(state),
+      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+        state
+      ),
     };
   },
   mapDispatchToProps: {
