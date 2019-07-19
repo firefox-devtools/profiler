@@ -21,6 +21,7 @@ import type {
   Category,
   Counter,
   CounterSamplesTable,
+  JsAllocationsTable,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -146,13 +147,13 @@ export function getCallNodeInfo(
  * Take a samples table, and return an array that contain indexes that point to the
  * leaf most call node, or null.
  */
-export function getSampleCallNodes(
-  samples: SamplesTable,
+export function getSampleIndexToCallNodeIndex(
+  stacks: Array<IndexIntoStackTable | null>,
   stackIndexToCallNodeIndex: {
     [key: IndexIntoStackTable]: IndexIntoCallNodeTable,
   }
 ): Array<IndexIntoCallNodeTable | null> {
-  return samples.stack.map(stack => {
+  return stacks.map(stack => {
     return stack === null ? null : stackIndexToCallNodeIndex[stack];
   });
 }
