@@ -6,6 +6,7 @@
 import type { Profile } from '../../types/profile';
 
 import sinon from 'sinon';
+import { oneLineTrim } from 'common-tags';
 
 import { getEmptyProfile } from '../../profile-logic/data-structures';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
@@ -17,23 +18,29 @@ import { getThreadSelectors } from '../../selectors/per-thread';
 import { getView } from '../../selectors/app';
 import {
   viewProfile,
+  finalizeProfileView,
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
   retrieveProfileFromFile,
   retrieveProfilesToCompare,
   _fetchProfile,
+  getProfilesFromRawUrl,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
-import { serializeProfile } from '../../profile-logic/process-profile';
+import {
+  serializeProfile,
+  processProfile,
+} from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
+import { waitUntilState } from '../fixtures/utils';
 
 import { compress } from '../../utils/gz';
 
@@ -1358,6 +1365,188 @@ describe('actions/receive-profile', function() {
       const [firstChild] = callTree.getRoots();
       const nodeData = callTree.getNodeData(firstChild);
       expect(nodeData.selfTime).toBe(4);
+    });
+  });
+
+  describe('getProfilesFromRawUrl', function() {
+    function fetch200Response(profile: string) {
+      return {
+        ok: true,
+        status: 200,
+        headers: {
+          get: () => 'application/json',
+        },
+        json: () => Promise.resolve(JSON.parse(profile)),
+      };
+    }
+
+    async function setup(location: Object, requiredProfile: number = 1) {
+      const profile = _getSimpleProfile();
+      const geckoProfile = createGeckoProfile();
+
+      // Add mock fetch response for the required number of times.
+      // Usually it's 1 but it can be also 2 for `compare` dataSource.
+      for (let i = 0; i < requiredProfile; i++) {
+        window.fetch.mockResolvedValueOnce(
+          fetch200Response(serializeProfile(profile))
+        );
+      }
+
+      const geckoProfiler = {
+        getProfile: jest.fn().mockResolvedValue(geckoProfile),
+        getSymbolTable: jest
+          .fn()
+          .mockRejectedValue(new Error('No symbol tables available')),
+      };
+      window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
+
+      simulateSymbolStoreHasNoCache();
+
+      // Silence the logs coming from the promise rejections above.
+      jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      const store = blankStore();
+      await store.dispatch(getProfilesFromRawUrl(location));
+
+      // To find stupid mistakes more easily, check that we didn't get a fatal
+      // error here. If we got one, let's rethrow the error.
+      const view = getView(store.getState());
+      if (view.phase === 'FATAL_ERROR') {
+        throw view.error;
+      }
+
+      const waitUntilPhase = phase =>
+        waitUntilState(store, state => getView(state).phase === phase);
+
+      const waitUntilSymbolication = () =>
+        waitUntilState(
+          store,
+          state => ProfileViewSelectors.getSymbolicationStatus(state) === 'DONE'
+        );
+
+      return {
+        profile,
+        geckoProfile,
+        waitUntilPhase,
+        waitUntilSymbolication,
+        ...store,
+      };
+    }
+
+    beforeEach(function() {
+      // The stub makes it easy to return different values for different
+      // arguments. Here we define the default return value because there is no
+      // argument specified.
+      window.fetch = jest.fn();
+      window.fetch.mockImplementation(() =>
+        Promise.reject(new Error('No more answers have been configured.'))
+      );
+    });
+
+    afterEach(function() {
+      delete window.fetch;
+      delete window.geckoProfilerPromise;
+    });
+
+    it('retrieves profile from a `public` data source and loads it', async function() {
+      const { profile, getState, dispatch } = await setup({
+        pathname: '/public/fakehash/',
+        search: '?thread=0&v=4',
+        hash: '',
+      });
+
+      // Check if we loaded the profile data successfully.
+      expect(ProfileViewSelectors.getProfile(getState())).toEqual(profile);
+      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+
+      // Check if we can successfully finalize the profile view.
+      await dispatch(finalizeProfileView());
+      expect(getView(getState()).phase).toBe('DATA_LOADED');
+    });
+
+    it('retrieves profile from a `from-url` data source and loads it', async function() {
+      const { profile, getState, dispatch } = await setup({
+        // '/from-url/https://fakeurl.com/fakeprofile.json/'
+        pathname: '/from-url/https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json/',
+        search: '',
+        hash: '',
+      });
+
+      // Check if we loaded the profile data successfully.
+      expect(ProfileViewSelectors.getProfile(getState())).toEqual(profile);
+      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+
+      // Check if we can successfully finalize the profile view.
+      await dispatch(finalizeProfileView());
+      expect(getView(getState()).phase).toBe('DATA_LOADED');
+    });
+
+    it('retrieves profile from a `compare` data source and loads it', async function() {
+      const url1 = 'http://fake-url.com/public/1?thread=0';
+      const url2 = 'http://fake-url.com/public/2?thread=0';
+      const { getState, dispatch } = await setup(
+        {
+          pathname: '/compare/FAKEURL/',
+          search: oneLineTrim`
+            ?profiles[]=${encodeURIComponent(url1)}
+            &profiles[]=${encodeURIComponent(url2)}
+          `,
+          hash: '',
+        },
+        2
+      );
+
+      // Check if we loaded the profile data successfully.
+      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+
+      // Check if we can successfully finalize the profile view.
+      await dispatch(finalizeProfileView());
+      expect(getView(getState()).phase).toBe('DATA_LOADED');
+    });
+
+    it('retrieves profile from a `from-addon` data source and loads it', async function() {
+      const { geckoProfile, getState, waitUntilPhase } = await setup(
+        {
+          pathname: '/from-addon/',
+          search: '',
+          hash: '',
+        },
+        0
+      );
+
+      // Differently, `from-addon` calls the finalizeProfileView internally,
+      // we don't need to call it again.
+      await waitUntilPhase('DATA_LOADED');
+      const processedProfile = processProfile(geckoProfile);
+      expect(ProfileViewSelectors.getProfile(getState())).toEqual(
+        processedProfile
+      );
+    });
+
+    it('finishes symbolication for `from-addon` data source', async function() {
+      const { waitUntilSymbolication } = await setup(
+        {
+          pathname: '/from-addon/',
+          search: '',
+          hash: '',
+        },
+        0
+      );
+
+      // It should successfully symbolicate the profiles that are loaded from addon.
+      await waitUntilSymbolication();
+    });
+
+    it('does not retrieve profile from other data sources', async function() {
+      ['/none/', '/from-file/', 'local'].forEach(async sourcePath => {
+        await expect(
+          setup({
+            pathname: sourcePath,
+            search: '',
+            hash: '',
+          })
+        ).rejects.toThrow();
+      });
     });
   });
 });
