@@ -16,6 +16,7 @@ import type {
   StackTable,
   FuncTable,
   RawMarkerTable,
+  JsAllocationsTable,
   ResourceTable,
   Profile,
   ExtensionTable,
@@ -149,6 +150,23 @@ export function getEmptyRawMarkerTable(): RawMarkerTable {
     data: [],
     name: [],
     time: [],
+    length: 0,
+  };
+}
+
+export function getEmptyJsAllocationsTable(): JsAllocationsTable {
+  // Important!
+  // If modifying this structure, please update all callers of this function to ensure
+  // that they are pushing on correctly to the data structure. These pushes may not
+  // be caught by the type system.
+  return {
+    time: [],
+    className: [],
+    typeName: [],
+    coarseType: [],
+    duration: [],
+    inNursery: [],
+    stack: [],
     length: 0,
   };
 }

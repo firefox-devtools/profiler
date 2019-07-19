@@ -486,18 +486,16 @@ export type DummyForTestsMarkerPayload = {|
   endTime: Milliseconds,
 |};
 
-export type JsAllocationPayload = {|
+export type JsAllocationPayload_Gecko = {|
   type: 'JS allocation',
   startTime: Milliseconds,
   endTime: Milliseconds,
-  className: 'Function',
+  className: string,
   typeName: string, // Currently only 'JSObject'
   coarseType: string, // Currently only 'Object',
   size: number, // in bytes.
   inNursery: true,
-  // There is some failure case where stacks are not collected
-  // correctly. Make sure the cause is optional.
-  cause?: CauseBacktrace,
+  stack: GeckoMarkerStack,
 |};
 
 /**
@@ -528,7 +526,6 @@ export type MarkerPayload =
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | NavigationMarkerPayload
-  | JsAllocationPayload
   | null;
 
 export type MarkerPayload_Gecko =
@@ -548,7 +545,7 @@ export type MarkerPayload_Gecko =
   | CcMarkerTracing
   | ArbitraryEventTracing
   | NavigationMarkerPayload
-  | JsAllocationPayload
+  | JsAllocationPayload_Gecko
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.

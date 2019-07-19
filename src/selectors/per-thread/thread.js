@@ -154,6 +154,13 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     ProfileSelectors.getProfileViewOptions(state).perThread[threadIndex];
 
   /**
+   * Check to see if there are any JS allocations for this thread. This way we
+   * can display a custom thread.
+   */
+  const getHasJsAllocations: Selector<boolean> = state =>
+    Boolean(getThread(state).jsAllocations);
+
+  /**
    * The JS tracer selectors are placed in the thread selectors since there are
    * not many of them. If this section grows, then consider breaking them out
    * into their own file.
@@ -209,5 +216,6 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getJsTracerTable,
     getExpensiveJsTracerTiming,
     getExpensiveJsTracerLeafTiming,
+    getHasJsAllocations,
   };
 }
