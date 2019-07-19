@@ -29,13 +29,18 @@
 /**
  * Calculates the index of the Array where item X should be placed, assuming the Array is sorted.
  *
- * @param {Array} array The array containing the items.
+ * @param {Number[] | $ArrayBufferView} array The array containing the items.
  * @param {Number} x The item that needs to be added to the array.
  * @param {Number} low Inital Index that is used to start searching, optional.
  * @param {Number} high The maximum Index that is used to stop searching, optional.
  * @returns {Number} the index where item X should be placed
  */
-export function bisectionRight(array, x, low, high): Number {
+export function bisectionRight(
+  array: Number[] | $ArrayBufferView,
+  x: Number,
+  low?: Number,
+  high?: Number
+): Number {
   // The low and high bounds the inital slice of the array that needs to be searched
   // this is optional
   low = low || 0;
@@ -58,13 +63,19 @@ export function bisectionRight(array, x, low, high): Number {
 
 /**
  * Calculates the index of the Array where item X should be placed, assuming the Array is sorted.
- * @param {Array} array The array containing the items.
- * @param {number} x The item that needs to be added to the array.
- * @param {number} low Inital Index that is used to start searching, optional.
- * @param {number} high The maximum Index that is used to stop searching, optional.
- * @return {number} the index where item X should be placed
+ *
+ * @param {Number[] | $ArrayBufferView} array The array containing the items.
+ * @param {Number} x The item that needs to be added to the array.
+ * @param {Number} low Inital Index that is used to start searching, optional.
+ * @param {Number} high The maximum Index that is used to stop searching, optional.
+ * @returns {Number} the index where item X should be placed
  */
-export function bisectionLeft(array, x, low, high): Number {
+export function bisectionLeft(
+  array: Number[] | $ArrayBufferView,
+  x: Number,
+  low?: Number,
+  high?: Number
+): Number {
   // The low and high bounds the inital slice of the array that needs to be searched
   // this is optional
   low = low || 0;
@@ -75,7 +86,7 @@ export function bisectionLeft(array, x, low, high): Number {
   while (low < high) {
     mid = (low + high) >> 1;
 
-    if (x < array[mid]) {
+    if (x > array[mid]) {
       low = mid + 1;
     } else {
       high = mid;
