@@ -147,7 +147,7 @@ class StackChartGraph extends React.PureComponent<Props> {
         role="tabpanel"
         aria-labelledby="stack-chart-tab-button"
       >
-        <StackSettings />
+        <StackSettings disableCallTreeSummaryButtons={true} />
         <TransformNavigator />
         {maxStackDepth === 0 ? (
           <StackChartEmptyReasons />

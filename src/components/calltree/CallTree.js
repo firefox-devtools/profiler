@@ -12,6 +12,7 @@ import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
+  getCallTreeSummaryStrategy,
   getSearchStringsAsRegExp,
   getSelectedThreadIndex,
 } from '../../selectors/url-state';
@@ -28,10 +29,14 @@ import {
   changeExpandedCallNodes,
   addTransformToStack,
 } from '../../actions/profile-view';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { IconWithClassName, State } from '../../types/state';
 import type { CallTree } from '../../profile-logic/call-tree';
-import type { ImplementationFilter } from '../../types/actions';
+import type {
+  ImplementationFilter,
+  CallTreeSummaryStrategy,
+} from '../../types/actions';
 import type { ThreadIndex } from '../../types/profile';
 import type {
   CallNodeInfo,
@@ -56,6 +61,7 @@ type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +icons: IconWithClassName[],
   +callNodeMaxDepth: number,
+  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
 
 type DispatchProps = {|
@@ -68,10 +74,16 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class CallTreeComponent extends PureComponent<Props> {
-  _fixedColumns: Column[] = [
+  _fixedColumnsTiming: Column[] = [
     { propName: 'totalTimePercent', title: '' },
     { propName: 'totalTime', title: 'Running Time (ms)' },
     { propName: 'selfTime', title: 'Self (ms)' },
+    { propName: 'icon', title: '', component: NodeIcon },
+  ];
+  _fixedColumnsJsAllocations: Column[] = [
+    { propName: 'totalTimePercent', title: '' },
+    { propName: 'totalTime', title: 'Total Size (bytes)' },
+    { propName: 'selfTime', title: 'Self (bytes)' },
     { propName: 'icon', title: '', component: NodeIcon },
   ];
   _mainColumn: Column = { propName: 'name', title: '' };
@@ -184,14 +196,27 @@ class CallTreeComponent extends PureComponent<Props> {
       searchStringsRegExp,
       disableOverscan,
       callNodeMaxDepth,
+      callTreeSummaryStrategy,
     } = this.props;
     if (tree.getRoots().length === 0) {
       return <CallTreeEmptyReasons />;
     }
+    let fixedColumns;
+    switch (callTreeSummaryStrategy) {
+      case 'timing':
+        fixedColumns = this._fixedColumnsTiming;
+        break;
+      case 'native-allocations':
+      case 'js-allocations':
+        fixedColumns = this._fixedColumnsJsAllocations;
+        break;
+      default:
+        throw assertExhaustiveCheck(callTreeSummaryStrategy);
+    }
     return (
       <TreeView
         tree={tree}
-        fixedColumns={this._fixedColumns}
+        fixedColumns={fixedColumns}
         mainColumn={this._mainColumn}
         appendageColumn={this._appendageColumn}
         onSelectionChange={this._onSelectedCallNodeChange}
@@ -235,6 +260,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     implementationFilter: getImplementationFilter(state),
     icons: getIconsWithClassNames(state),
     callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
+    callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,
