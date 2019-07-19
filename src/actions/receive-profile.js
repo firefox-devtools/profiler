@@ -1048,6 +1048,8 @@ export function getProfilesFromRawUrl(
         );
     }
 
+    // Profile may be null only for the `from-addon` dataSource since we do
+    // not `await` for retrieveProfileFromAddon function.
     return {
       profile: getProfileOrNull(getState()),
       shouldSetupInitialUrlState,

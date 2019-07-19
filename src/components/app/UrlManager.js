@@ -102,6 +102,8 @@ class UrlManager extends React.PureComponent<Props> {
       } = await getProfilesFromRawUrl(window.location);
 
       // Manually coerce these into the proper type due to the FlowFixMe above.
+      // Profile may be null only for the `from-addon` dataSource since we do
+      // not `await` for retrieveProfileFromAddon function.
       const profile: Profile | null = results.profile;
       const shouldSetupInitialUrlState: boolean =
         results.shouldSetupInitialUrlState;
