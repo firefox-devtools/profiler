@@ -486,6 +486,20 @@ export type DummyForTestsMarkerPayload = {|
   endTime: Milliseconds,
 |};
 
+export type JsAllocationPayload = {|
+  type: 'JS allocation',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  className: 'Function',
+  typeName: string, // Currently only 'JSObject'
+  coarseType: string, // Currently only 'Object',
+  size: number, // in bytes.
+  inNursery: true,
+  // There is some failure case where stacks are not collected
+  // correctly. Make sure the cause is optional.
+  cause?: CauseBacktrace,
+|};
+
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
@@ -514,6 +528,7 @@ export type MarkerPayload =
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | NavigationMarkerPayload
+  | JsAllocationPayload
   | null;
 
 export type MarkerPayload_Gecko =
@@ -533,6 +548,7 @@ export type MarkerPayload_Gecko =
   | CcMarkerTracing
   | ArbitraryEventTracing
   | NavigationMarkerPayload
+  | JsAllocationPayload
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.
