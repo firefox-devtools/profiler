@@ -11,6 +11,38 @@ import type {
   StackTable,
 } from '../../../types/profile';
 
+type Sample = {
+  timestamp: number,
+  threadID: number,
+  backtraceID: number,
+  backtraceStack?: Array<number>,
+};
+
+type TraceDirectoryTree = {
+  name: string,
+  files: Map<string, File>,
+  subdirectories: Map<string, TraceDirectoryTree>,
+};
+
+type FrameInfo = {
+  key: string | number,
+  name: string,
+  file?: string,
+  line?: number,
+  col?: number,
+};
+
+type FormTemplateRunData = {
+  number: number,
+  addressToFrameMap: Map<number, FrameInfo>,
+};
+
+type SymbolInfo = {
+  symbolName: string,
+  sourcePath: string,
+  addressToLine: Map<number, number>,
+};
+
 import type { UniqueStringArray } from '../../../../src/utils/unique-string-array';
 
 //utils
@@ -324,7 +356,7 @@ function zeroPad(s: string, width: number) {
 
 function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
   if (!map.has(k)) {
-    throw new Error(`Expected key ${k}`);
+    if (typeof k === 'string') throw new Error(`Expected key ${k}`);
   }
   return map.get(k);
 }
@@ -627,7 +659,7 @@ function getOrCreateFunc(
   name: string,
   fileName: string,
   funcKey: string
-) {
+): number {
   let indexToFunc = -1;
 
   if (funcKeyToIndex.has(funcKey)) {
@@ -647,14 +679,14 @@ function getOrCreateFunc(
   return indexToFunc;
 }
 
-// This function creates a new frame inside frameTable and returns index of that newly created frame
+// This function creates a new frame inside frameTable
 function createFrame(
   frameTable: FrameTable,
   stringTable: UniqueStringArray,
   frameKeyToIndex: Map<string, number>,
   indexToFunc: number,
   frameAddress: string
-) {
+): void {
   frameTable.func.push(indexToFunc);
   frameTable.category.push(1); // TODO: Make the function to get the index of 'Other' category
   frameTable.address.push(stringTable.indexForString(`${frameAddress}`));
@@ -665,7 +697,7 @@ function createFrame(
   frameTable.length++;
 }
 
-// This function creates a new stack inside stackTable and returns index of that newly created stack
+// This function creates a new stack inside stackTable
 function createStack(
   stackTable: StackTable,
   stringTable: UniqueStringArray,
@@ -673,7 +705,7 @@ function createStack(
   stackKey: string,
   parentIndex: number | null,
   frame: number
-) {
+): void {
   stackTable.prefix.push(parentIndex);
   stackTable.frame.push(frame);
   stackKeyToIndex.set(stackKey, stackTable.length);
@@ -766,7 +798,10 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
 
     for (let index = 0; index < stackTrace.length; index++) {
       const frameAddress = stackTrace[index];
-      const keyOfStackKeyToIndexMap = '$' + parentIndex + '$' + frameAddress;
+      const keyOfStackKeyToIndexMap =
+        typeof parentIndex === 'number'
+          ? '$' + parentIndex + '$' + frameAddress
+          : '$' + frameAddress;
 
       if (!stackKeyToIndex.has(keyOfStackKeyToIndexMap)) {
         createStack(
@@ -817,7 +852,7 @@ function pushThreadsInProfile(profile, addressToFrameMap, samples) {
 export async function convertInstrumentsProfile(
   entry: mixed,
   fileReaderHelper: fileReader
-): Profile {
+): Promise<Profile> {
   fileReader = fileReaderHelper;
   const tree = await extractDirectoryTree(entry);
   // console.log('tree', tree);

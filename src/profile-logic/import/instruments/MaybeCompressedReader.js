@@ -5,6 +5,9 @@
 import * as pako from 'pako';
 
 class MaybeCompressedDataReader {
+  uncompressedData: Promise<ArrayBuffer>;
+  namePromise: Promise<string>;
+
   constructor(
     namePromise: Promise<string>,
     maybeCompressedDataPromise: Promise<ArrayBuffer>
