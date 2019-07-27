@@ -361,8 +361,11 @@ function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
   return map.get(k);
 }
 
-function getOrInsert<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V {
-  if (!map.has(k)) map.set(k, fallback(k));
+function getOrInsert<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V | K {
+  if (!map.has(k)) {
+    map.set(k, fallback(k));
+    return k;
+  }
   return map.get(k);
 }
 
@@ -484,9 +487,11 @@ function getCoreDirForRun(
 // Here arrays contains all the information about stack trace at a given timestamp.
 // Each samples has a field named 'backtraceID' which is an index into arrays
 // Iterating recursively into arrays by given backtraceID it extracts a backtraceStack for each sample
-export async function importRunFromInstrumentsTrace(
-  args
-): Promise<ProfileGroup> {
+export async function importRunFromInstrumentsTrace(args: {
+  tree: TraceDirectoryTree,
+  addressToFrameMap: Map<number, FrameInfo>,
+  runNumber: number,
+}): Promise<ProfileGroup> {
   const { tree, addressToFrameMap, runNumber } = args;
   const core = getCoreDirForRun(tree, runNumber);
   const samples = await getRawSampleList(core);
@@ -494,9 +499,9 @@ export async function importRunFromInstrumentsTrace(
 
   console.log('samples', samples);
   console.log('addressToFrameMap', addressToFrameMap);
-  const backtraceIDtoStack = new Map<number, FrameInfo[]>();
+  const backtraceIDtoStack = new Map<number, number[]>();
 
-  function appendRecursive(k: number, stack: FrameInfo[]) {
+  function appendRecursive(k: number, stack: Array<number>) {
     const frame = addressToFrameMap.get(k);
     if (frame) {
       stack.push(k);
@@ -516,7 +521,7 @@ export async function importRunFromInstrumentsTrace(
 
   for (const sample of samples) {
     getOrInsert(backtraceIDtoStack, sample.backtraceID, id => {
-      const stack: FrameInfo[] = [];
+      const stack: Array<number> = [];
       appendRecursive(id, stack);
       stack.reverse();
       return stack;
@@ -537,7 +542,10 @@ export async function importRunFromInstrumentsTrace(
 // addressToFrameMap and Instruments' version
 async function readFormTemplateFile(tree) {
   const formTemplate = tree.files.get('form.template'); // TODO check for empty formTemplate
-  const archive = readInstrumentsArchive(await readAsArrayBuffer(formTemplate));
+  const archive =
+    typeof formTemplate !== 'undefined'
+      ? readInstrumentsArchive(await readAsArrayBuffer(formTemplate))
+      : {};
 
   // console.log('archive', archive);
   const version = archive['com.apple.xray.owner.template.version'];
@@ -605,7 +613,7 @@ async function readFormTemplateFile(tree) {
 
 // This function returns a directory tree where each node of tree
 // is a object consist of name, files and subdirecotries fields
-async function extractDirectoryTree(entry) {
+async function extractDirectoryTree(entry): Promise<TraceDirectoryTree> {
   const node = {
     name: entry.name,
     files: new Map(),
@@ -780,7 +788,7 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
       stringTable,
       frameMetaData.name,
       frameMetaData.file || '',
-      frameMetaData.key
+      frameMetaData.key + ''
     );
 
     createFrame(
@@ -817,7 +825,12 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
       parentIndex = stackKeyToIndex.get(keyOfStackKeyToIndexMap);
 
       if (index === stackTrace.length - 1) {
-        samplesTable.stack.push(stackKeyToIndex.get(keyOfStackKeyToIndexMap));
+        const stackForSample = stackKeyToIndex.get(keyOfStackKeyToIndexMap);
+        if (stackForSample) {
+          samplesTable.stack.push(stackForSample);
+        } else {
+          samplesTable.stack.push(null);
+        }
         samplesTable.time.push(sample.timestamp / 1000000); // TODO: Doubt
         samplesTable.responsiveness.push(null);
         samplesTable.length++;
@@ -832,19 +845,24 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
 function pushThreadsInProfile(profile, addressToFrameMap, samples) {
   const threadIDToSamples = new Map();
   for (const sample of samples) {
-    if (threadIDToSamples.has(sample.threadID)) {
-      threadIDToSamples.get(sample.threadID).push(sample);
+    const samplesArray = threadIDToSamples.get(sample.threadID);
+    if (samplesArray) {
+      samplesArray.push(sample);
     } else {
       threadIDToSamples.set(sample.threadID, [sample]);
     }
   }
 
   for (const threadID of threadIDToSamples.keys()) {
-    const processedThread = getProcessedThread(
-      threadID,
-      threadIDToSamples.get(threadID),
-      addressToFrameMap
-    );
+    const samples = threadIDToSamples.get(threadID);
+    let processedThread = getEmptyThread();
+    if (samples) {
+      processedThread = getProcessedThread(
+        threadID,
+        samples,
+        addressToFrameMap
+      );
+    }
     profile.threads.push(processedThread);
   }
 }
