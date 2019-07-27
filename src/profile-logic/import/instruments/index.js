@@ -20,6 +20,7 @@ import {
 } from '../../../profile-logic/data-structures';
 import BinaryPlistParser, { UID } from './BinaryPlistParser';
 import BinReader from './BinReader';
+import MaybeCompressedReader from './MaybeCompressedReader';
 
 // TODO make helpers.js and move the appropriate helper functions into it
 // TODO add the missing return types in the functions
@@ -28,6 +29,14 @@ import BinReader from './BinReader';
 // TODO fill remaining meta data inside profile
 
 let fileReader;
+
+function readAsArrayBuffer(file: File): Promise<ArrayBuffer> {
+  return MaybeCompressedReader.fromFile(file).readAsArrayBuffer();
+}
+
+function readAsText(file: File): Promise<string> {
+  return MaybeCompressedReader.fromFile(file).readAsText();
+}
 
 function parseBinaryPlist(bytes) {
   const text = 'bplist00';
@@ -351,11 +360,9 @@ async function getIntegerArrays(
   // This table contains the memory addresses of stack frames
 
   const indexreader = new BinReader(
-    await fileReader(integeruniquerindex).asArrayBuffer()
+    await readAsArrayBuffer(integeruniquerindex)
   );
-  const datareader = new BinReader(
-    await fileReader(integeruniquerdata).asArrayBuffer()
-  );
+  const datareader = new BinReader(await readAsArrayBuffer(integeruniquerdata));
 
   // Header we don't care about
   indexreader.seek(32);
@@ -392,13 +399,13 @@ async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
   for (const storedir of stores.subdirectories.values()) {
     const schemaFile = storedir.files.get('schema.xml');
     if (!schemaFile) continue;
-    const schema = await fileReader(schemaFile).asText(); // TODO: Getting an error while processing latest version profiles
+    const schema = await readAsText(schemaFile);
     console.log('schema', schema);
     if (!/name="time-profile"/.exec(schema)) {
       continue;
     }
     const bulkstore = new BinReader(
-      await fileReader(getOrThrow(storedir.files, 'bulkstore')).asArrayBuffer()
+      await readAsArrayBuffer(getOrThrow(storedir.files, 'bulkstore'))
     );
     // Ignore the first 3 words
     bulkstore.readUint32();
@@ -498,9 +505,7 @@ export async function importRunFromInstrumentsTrace(
 // addressToFrameMap and Instruments' version
 async function readFormTemplateFile(tree) {
   const formTemplate = tree.files.get('form.template'); // TODO check for empty formTemplate
-  const archive = readInstrumentsArchive(
-    await fileReader(formTemplate).asArrayBuffer()
-  );
+  const archive = readInstrumentsArchive(await readAsArrayBuffer(formTemplate));
 
   // console.log('archive', archive);
   const version = archive['com.apple.xray.owner.template.version'];
