@@ -768,15 +768,18 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
   );
 
   const rootStackKey = 'rootStack';
+  const rootFrameIndex = frameKeyToIndex.get(rootFrameAddress);
 
-  createStack(
-    stackTable,
-    stringTable,
-    stackKeyToIndex,
-    rootStackKey,
-    null,
-    frameKeyToIndex.get(rootFrameAddress)
-  );
+  if (typeof rootFrameIndex === 'number') {
+    createStack(
+      stackTable,
+      stringTable,
+      stackKeyToIndex,
+      rootStackKey,
+      null,
+      rootFrameIndex
+    );
+  }
 
   for (const frameData of addressToFrameMap) {
     const frameMetaData = frameData[1];
@@ -812,14 +815,18 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
           : '$' + frameAddress;
 
       if (!stackKeyToIndex.has(keyOfStackKeyToIndexMap)) {
-        createStack(
-          stackTable,
-          stringTable,
-          stackKeyToIndex,
-          keyOfStackKeyToIndexMap,
-          parentIndex,
-          frameKeyToIndex.get(frameAddress)
-        );
+        const frameIndex = frameKeyToIndex.get(frameAddress);
+
+        if (typeof frameIndex === 'number' && typeof parentIndex === 'number') {
+          createStack(
+            stackTable,
+            stringTable,
+            stackKeyToIndex,
+            keyOfStackKeyToIndexMap,
+            parentIndex,
+            frameIndex
+          );
+        }
       }
 
       parentIndex = stackKeyToIndex.get(keyOfStackKeyToIndexMap);
