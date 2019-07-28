@@ -358,7 +358,12 @@ function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
   if (!map.has(k)) {
     if (typeof k === 'string') throw new Error(`Expected key ${k}`);
   }
-  return map.get(k);
+
+  const value = map.get(k);
+
+  if (value) return value;
+
+  throw new Error(`Couldn't find a value`);
 }
 
 function getOrInsert<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V | K {
@@ -491,7 +496,7 @@ export async function importRunFromInstrumentsTrace(args: {
   tree: TraceDirectoryTree,
   addressToFrameMap: Map<number, FrameInfo>,
   runNumber: number,
-}): Promise<ProfileGroup> {
+}): Array<Sample> {
   const { tree, addressToFrameMap, runNumber } = args;
   const core = getCoreDirForRun(tree, runNumber);
   const samples = await getRawSampleList(core);
@@ -533,9 +538,7 @@ export async function importRunFromInstrumentsTrace(args: {
   }
   console.log('backtraceIDtoStack', backtraceIDtoStack);
 
-  return {
-    samples,
-  };
+  return samples;
 }
 
 // This function reads the 'form.template' file which contains all the important information about
@@ -613,7 +616,9 @@ async function readFormTemplateFile(tree) {
 
 // This function returns a directory tree where each node of tree
 // is a object consist of name, files and subdirecotries fields
-async function extractDirectoryTree(entry): Promise<TraceDirectoryTree> {
+async function extractDirectoryTree(entry: {
+  name: string,
+}): Promise<TraceDirectoryTree> {
   const node = {
     name: entry.name,
     files: new Map(),
@@ -684,7 +689,9 @@ function getOrCreateFunc(
     funcTable.length++;
   }
 
-  return indexToFunc;
+  if (typeof indexToFunc === 'number') return indexToFunc;
+
+  throw new Error(`Error in finding the indexToFunc`);
 }
 
 // This function creates a new frame inside frameTable
@@ -799,48 +806,52 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
       stringTable,
       frameKeyToIndex,
       indexToFunc,
-      frameAddress
+      frameAddress + ''
     );
   }
 
   for (const sample of samples) {
     const stackTrace = sample.backtraceStack;
     let parentIndex = stackKeyToIndex.get(rootStackKey);
+    if (stackTrace) {
+      for (let index = 0; index < stackTrace.length; index++) {
+        const frameAddress = stackTrace[index];
+        const keyOfStackKeyToIndexMap =
+          typeof parentIndex === 'number'
+            ? '$' + parentIndex + '$' + frameAddress
+            : '$' + frameAddress;
 
-    for (let index = 0; index < stackTrace.length; index++) {
-      const frameAddress = stackTrace[index];
-      const keyOfStackKeyToIndexMap =
-        typeof parentIndex === 'number'
-          ? '$' + parentIndex + '$' + frameAddress
-          : '$' + frameAddress;
+        if (!stackKeyToIndex.has(keyOfStackKeyToIndexMap)) {
+          const frameIndex = frameKeyToIndex.get(frameAddress + '');
 
-      if (!stackKeyToIndex.has(keyOfStackKeyToIndexMap)) {
-        const frameIndex = frameKeyToIndex.get(frameAddress);
-
-        if (typeof frameIndex === 'number' && typeof parentIndex === 'number') {
-          createStack(
-            stackTable,
-            stringTable,
-            stackKeyToIndex,
-            keyOfStackKeyToIndexMap,
-            parentIndex,
-            frameIndex
-          );
+          if (
+            typeof frameIndex === 'number' &&
+            typeof parentIndex === 'number'
+          ) {
+            createStack(
+              stackTable,
+              stringTable,
+              stackKeyToIndex,
+              keyOfStackKeyToIndexMap,
+              parentIndex,
+              frameIndex
+            );
+          }
         }
-      }
 
-      parentIndex = stackKeyToIndex.get(keyOfStackKeyToIndexMap);
+        parentIndex = stackKeyToIndex.get(keyOfStackKeyToIndexMap);
 
-      if (index === stackTrace.length - 1) {
-        const stackForSample = stackKeyToIndex.get(keyOfStackKeyToIndexMap);
-        if (stackForSample) {
-          samplesTable.stack.push(stackForSample);
-        } else {
-          samplesTable.stack.push(null);
+        if (index === stackTrace.length - 1) {
+          const stackForSample = stackKeyToIndex.get(keyOfStackKeyToIndexMap);
+          if (stackForSample) {
+            samplesTable.stack.push(stackForSample);
+          } else {
+            samplesTable.stack.push(null);
+          }
+          samplesTable.time.push(sample.timestamp / 1000000); // TODO: Doubt
+          samplesTable.responsiveness.push(null);
+          samplesTable.length++;
         }
-        samplesTable.time.push(sample.timestamp / 1000000); // TODO: Doubt
-        samplesTable.responsiveness.push(null);
-        samplesTable.length++;
       }
     }
   }
@@ -875,7 +886,7 @@ function pushThreadsInProfile(profile, addressToFrameMap, samples) {
 }
 
 export async function convertInstrumentsProfile(
-  entry: mixed,
+  entry: { name: string },
   fileReaderHelper: fileReader
 ): Promise<Profile> {
   fileReader = fileReaderHelper;
@@ -905,19 +916,18 @@ export async function convertInstrumentsProfile(
   const { addressToFrameMap, number } = runs[0];
   // For now, we will just process the first run
 
-  const group = await importRunFromInstrumentsTrace({
+  const samples = await importRunFromInstrumentsTrace({
     tree,
     addressToFrameMap,
     runNumber: number,
   });
-  console.log('group', group);
 
   // for (let i = 0; i < 10; i++) {
   //   group.samples[i].threadID = 1;
   // }
   // To check how our functionality will behave for multi threaded samples
 
-  pushThreadsInProfile(profile, addressToFrameMap, group.samples);
+  pushThreadsInProfile(profile, addressToFrameMap, samples);
 
   profile.meta.platform = 'Macintosh';
   console.log('profile', profile);
