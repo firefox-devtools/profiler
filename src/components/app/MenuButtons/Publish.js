@@ -12,7 +12,11 @@ import {
   abortUpload,
   resetUploadState,
 } from '../../../actions/publish';
-import { getProfile, getProfileRootRange } from '../../../selectors/profile';
+import {
+  getProfile,
+  getProfileRootRange,
+  getHasPreferenceMarkers,
+} from '../../../selectors/profile';
 import {
   getCheckedSharingOptions,
   getFilenameString,
@@ -42,6 +46,7 @@ type OwnProps = {|
 type StateProps = {|
   +profile: Profile,
   +rootRange: StartEndRange,
+  +shouldShowPreferenceOption: boolean,
   +checkedSharingOptions: CheckedSharingOptions,
   +downloadSizePromise: Promise<string>,
   +compressedProfileBlobPromise: Promise<Blob>,
@@ -72,6 +77,8 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
     includeUrls: () => this.props.toggleCheckedSharingOptions('includeUrls'),
     includeExtension: () =>
       this.props.toggleCheckedSharingOptions('includeExtension'),
+    includePreferenceValues: () =>
+      this.props.toggleCheckedSharingOptions('includePreferenceValues'),
   };
 
   _renderCheckbox(slug: $Keys<CheckedSharingOptions>, label: string) {
@@ -93,6 +100,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
 
   _renderPublishPanel() {
     const {
+      shouldShowPreferenceOption,
       downloadSizePromise,
       attemptToPublish,
       downloadFileName,
@@ -132,6 +140,12 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
               'includeExtension',
               'Include extension information'
             )}
+            {shouldShowPreferenceOption
+              ? this._renderCheckbox(
+                  'includePreferenceValues',
+                  'Include preference values'
+                )
+              : null}
           </div>
           <div className="menuButtonsPublishButtons">
             <DownloadButton
@@ -274,6 +288,7 @@ export const MenuButtonsPublish = explicitConnect<
   mapStateToProps: state => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
+    shouldShowPreferenceOption: getHasPreferenceMarkers(state),
     checkedSharingOptions: getCheckedSharingOptions(state),
     downloadSizePromise: getDownloadSize(state),
     downloadFileName: getFilenameString(state),

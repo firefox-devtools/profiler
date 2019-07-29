@@ -23,6 +23,7 @@ function _getDefaultSharingOptions(): CheckedSharingOptions {
     includeScreenshots: false,
     includeUrls: false,
     includeExtension: false,
+    includePreferenceValues: false,
   };
 }
 

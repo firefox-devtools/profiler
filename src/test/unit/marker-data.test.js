@@ -59,9 +59,9 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     expect(contentThread.processType).toBe('tab');
   });
 
-  it('creates 14 markers given the test data', function() {
+  it('creates 15 markers given the test data', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(14);
+    expect(markers.length).toEqual(15);
   });
   it('creates a marker even if there is no start or end time', function() {
     const { markers } = setup();
@@ -83,7 +83,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   });
   it('should fold the two reflow markers into one marker', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(14);
+    expect(markers.length).toEqual(15);
     expect(markers[2]).toMatchObject({
       start: 3,
       dur: 5,

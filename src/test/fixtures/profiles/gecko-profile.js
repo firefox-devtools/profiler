@@ -542,6 +542,21 @@ function _createGeckoThread(): GeckoThread {
           },
         ],
 
+        [
+          17, // PreferenceRead
+          114.9,
+          {
+            type: 'PreferenceRead',
+            startTime: 114.9,
+            endTime: 114.9,
+            prefAccessTime: 114.9,
+            prefName: 'layout.css.dpi',
+            prefKind: 'User',
+            prefType: 'Int',
+            prefValue: '-1',
+          },
+        ],
+
         // INSERT NEW MARKERS HERE
 
         // Start a tracing marker but never finish it.
@@ -577,6 +592,7 @@ function _createGeckoThread(): GeckoThread {
       'FileIO', // 14
       'CompositorScreenshot', // 15
       'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUD', // 16
+      'PreferenceRead', // 17
     ],
   };
 }

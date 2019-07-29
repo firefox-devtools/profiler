@@ -11,7 +11,10 @@ import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { ensureExists } from '../../utils/flow';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+} from '../fixtures/profiles/processed-profile';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -51,11 +54,36 @@ describe('app/MenuButtons', function() {
     return { resolveUpload, rejectUpload };
   }
 
-  function setup(updateChannel = 'release') {
-    jest.useFakeTimers();
-
+  function createSimpleProfile(updateChannel = 'release') {
     const { profile } = getProfileFromTextSamples('A');
     profile.meta.updateChannel = updateChannel;
+    return { profile };
+  }
+
+  function createPreferenceReadProfile(updateChannel = 'release') {
+    const profile = getProfileWithMarkers([
+      [
+        'PreferenceRead',
+        1,
+        {
+          type: 'PreferenceRead',
+          startTime: 0,
+          endTime: 1,
+          prefAccessTime: 0,
+          prefName: 'testing',
+          prefKind: 'testing',
+          prefType: 'testing',
+          prefValue: 'testing',
+        },
+      ],
+    ]);
+    profile.meta.updateChannel = updateChannel;
+    return { profile };
+  }
+
+  function setup(profile) {
+    jest.useFakeTimers();
+
     const store = storeWithProfile(profile);
     const { resolveUpload, rejectUpload } = mockUpload();
 
@@ -74,7 +102,7 @@ describe('app/MenuButtons', function() {
       </Provider>
     );
 
-    const { container, getByTestId, getByText } = renderResult;
+    const { container, getByTestId, getByText, queryByText } = renderResult;
     const getPublishButton = () => getByText('Publish…');
     const getErrorButton = () => getByText('Error publishing…');
     const getCancelButton = () => getByText('Cancel Upload');
@@ -83,6 +111,8 @@ describe('app/MenuButtons', function() {
         container.querySelector('form'),
         'Could not find the form in the panel'
       );
+    const queryPreferenceCheckbox = () =>
+      queryByText('Include preference values');
     const getPanel = () => getByTestId('MenuButtonsPublish-container');
     const clickAndRunTimers = where => {
       fireEvent.click(where);
@@ -97,6 +127,7 @@ describe('app/MenuButtons', function() {
       getErrorButton,
       getCancelButton,
       getPanelForm,
+      queryPreferenceCheckbox,
       clickAndRunTimers,
       resolveUpload,
       rejectUpload,
@@ -133,27 +164,49 @@ describe('app/MenuButtons', function() {
     });
 
     it('matches the snapshot for the closed state', () => {
-      const { container } = setup();
+      const { profile } = createSimpleProfile();
+      const { container } = setup(profile);
       expect(container).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a nightly profile', () => {
-      const { getPanel, getPublishButton, clickAndRunTimers } = setup(
-        'nightly'
-      );
+      const { profile } = createSimpleProfile('nightly');
+      const { getPanel, getPublishButton, clickAndRunTimers } = setup(profile);
       clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a release profile', () => {
-      const { getPanel, getPublishButton, clickAndRunTimers } = setup(
-        'release'
-      );
+      const { profile } = createSimpleProfile('release');
+      const { getPanel, getPublishButton, clickAndRunTimers } = setup(profile);
       clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
 
+    it('shows the Include preference values checkbox when a PreferenceRead marker is in the profile', () => {
+      const { profile } = createPreferenceReadProfile('release');
+      const {
+        getPublishButton,
+        clickAndRunTimers,
+        queryPreferenceCheckbox,
+      } = setup(profile);
+      clickAndRunTimers(getPublishButton());
+      expect(queryPreferenceCheckbox()).toBeTruthy();
+    });
+
+    it('does not show the Include preference values checkbox when a PreferenceRead marker is in the profile', () => {
+      const { profile } = createSimpleProfile('release');
+      const {
+        getPublishButton,
+        clickAndRunTimers,
+        queryPreferenceCheckbox,
+      } = setup(profile);
+      clickAndRunTimers(getPublishButton());
+      expect(queryPreferenceCheckbox()).toBeFalsy();
+    });
+
     it('can publish, cancel, and then publish again', () => {
+      const { profile } = createSimpleProfile();
       const {
         getPanel,
         getPublishButton,
@@ -161,7 +214,7 @@ describe('app/MenuButtons', function() {
         getPanelForm,
         resolveUpload,
         clickAndRunTimers,
-      } = setup();
+      } = setup(profile);
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
       resolveUpload();
@@ -176,6 +229,7 @@ describe('app/MenuButtons', function() {
     });
 
     it('matches the snapshot for an error', async () => {
+      const { profile } = createSimpleProfile();
       const {
         getPanel,
         getPublishButton,
@@ -183,7 +237,7 @@ describe('app/MenuButtons', function() {
         getPanelForm,
         rejectUpload,
         clickAndRunTimers,
-      } = setup();
+      } = setup(profile);
 
       clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
