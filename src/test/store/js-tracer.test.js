@@ -12,6 +12,8 @@ import {
   type TestDefinedJsTracerEvent,
 } from '../fixtures/profiles/processed-profile';
 
+import type { Profile } from '../../types/profile';
+
 describe('selectors/getJsTracerTiming', function() {
   describe('full stack-based view', function() {
     it('has no JS tracer timing if no js tracer info is present', function() {
@@ -160,6 +162,99 @@ describe('selectors/getJsTracerTiming', function() {
       ]);
     });
   });
+
+  describe('match function names', function() {
+    it('works on the sampled data', function() {
+      // Create a profile from text samples.
+      const {
+        profile,
+        funcNamesDictPerThread: [funcNamesDict],
+      } = getProfileFromTextSamples(`
+        Foo.js
+        Bar.js
+        Baz.js
+      `);
+
+      {
+        // Now here comes the fun part. Manually manipulate the data so that the profile
+        // has matching JS tracer information, such that we can deduce functions from
+        // event names.
+        const thread = profile.threads[0];
+
+        // Also create a JS tracer profile.
+        const {
+          stringTable: tracerStringTable,
+          jsTracer,
+        } = getProfileWithJsTracerEvents([
+          ['Root', 0, 20],
+          ['Node', 1, 19],
+          ['https://mozilla.org', 2, 18],
+          ['https://mozilla.org', 3, 16],
+        ]).threads[0];
+
+        if (!jsTracer) {
+          throw new Error('Unable to find a JS tracer table');
+        }
+
+        // Merge the js tracer data into the profile.
+        thread.jsTracer = jsTracer;
+        for (
+          let jsTracerIndex = 0;
+          jsTracerIndex < jsTracer.length;
+          jsTracerIndex++
+        ) {
+          // Map the old string to the new string.
+          jsTracer.events[jsTracerIndex] = thread.stringTable.indexForString(
+            tracerStringTable.getString(jsTracer.events[jsTracerIndex])
+          );
+        }
+
+        const foo = funcNamesDict['Foo.js'];
+        const fooLine = 3;
+        const fooColumn = 5;
+        thread.funcTable.lineNumber[foo] = fooLine;
+        thread.funcTable.columnNumber[foo] = fooColumn;
+        thread.funcTable.fileName[foo] = thread.stringTable.indexForString(
+          'https://mozilla.org'
+        );
+
+        const bar = funcNamesDict['Bar.js'];
+        const barLine = 7;
+        const barColumn = 11;
+        thread.funcTable.lineNumber[bar] = barLine;
+        thread.funcTable.columnNumber[bar] = barColumn;
+        thread.funcTable.fileName[bar] = thread.stringTable.indexForString(
+          'https://mozilla.org'
+        );
+
+        const baz = funcNamesDict['Baz.js'];
+        // Use bar's line and column information.
+        thread.funcTable.lineNumber[baz] = barLine;
+        thread.funcTable.columnNumber[baz] = barColumn;
+        thread.funcTable.fileName[baz] = thread.stringTable.indexForString(
+          'https://mozilla.org'
+        );
+
+        // Manually update the JS tracer events to point to the right column numbers.
+        jsTracer.lines[2] = fooLine;
+        jsTracer.columns[2] = fooColumn;
+        jsTracer.lines[3] = barLine;
+        jsTracer.columns[3] = barColumn;
+      }
+
+      expect(
+        getHumanReadableJsTracerTiming({
+          useSelfTime: false,
+          profile,
+        })
+      ).toEqual([
+        'Root (0:20)',
+        'Node (1:19)',
+        'ƒ Foo.js  https://mozilla.org (2:18)',
+        '(multiple matching functions) https://mozilla.org (3:16)',
+      ]);
+    });
+  });
 });
 
 /**
@@ -171,11 +266,20 @@ describe('selectors/getJsTracerTiming', function() {
 function getHumanReadableJsTracerTiming({
   useSelfTime,
   events,
+  profile,
 }: {|
   useSelfTime: boolean,
-  events: TestDefinedJsTracerEvent[],
+  events?: TestDefinedJsTracerEvent[],
+  profile?: Profile,
 |}): string[] {
-  const profile = getProfileWithJsTracerEvents(events);
+  if (!profile) {
+    profile = getProfileWithJsTracerEvents(
+      ensureExists(
+        events,
+        'Expected to have a list of tracer events when no profile was supplied.'
+      )
+    );
+  }
   const { dispatch, getState } = storeWithProfile(profile);
   const computeTiming = useSelfTime
     ? selectedThreadSelectors.getExpensiveJsTracerLeafTiming
