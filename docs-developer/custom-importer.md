@@ -56,21 +56,23 @@ The profile format uses a lot of indexes into other data structures. For instanc
 }
 ```
 
-It is probably to read up some on profile format docs for more information on how this structure is used.
+It is probably a good iea to read up some on profile format docs for more information on how this structure is used. See the [Gecko profile format](gecko-profile-format.md) and the [processed profile format](processed-profile-format.md) docs.
 
 ## Tips
 
  * Use `{ name: 'GeckoMain' }` for the main thread.
  * Ensure that the `pid` value is numeric, and points to the proper threads to nest threads in the timeline.
  * Processed profiles have their timestamps adjusted so that all processes use the same timeline.
- * Gecko profiles adjust the marker and sample start times based on when the process was created (based off of `geckoProfile.meta.startTime`).
+ * Make sure and adjust the timing for child processes. During profile processing, the Firefox Profiler adjusts Gecko profiles timings, so that markers and samples take into account the differences in start time (via `geckoProfile.meta.startTime`). See [src/profile-logic/process-profile.js](https://github.com/firefox-devtools/profiler/blob/3067dda9cbf5807948aef149e18caf4e8870ed25/src/profile-logic/process-profile.js#L997-L1010) for some examples.
 
 ## Samples
 
-The call tree, flame graph, and stack chart all use the samples data to generate the reports. If your data is shaped like sample data, it can be easy to shove the information in there. At the time of this writing we don't support variable durations. It's assumed 1 samples is equal in length to the sampling interval. This is probably going to change soon. Most likely the profile formats will assume that there is at least one sample in a thread. It might be necessary to fill out the samples with dummy time data if your format isn't needing samples. The sample data should match the time range as the marker data.
+The call tree, flame graph, and stack chart all use the samples data to generate the reports. If your data is shaped like sample data, it can be easy to shove the information in there. At the time of this writing we don't support variable durations. It's assumed 1 sample is equal in length to the sampling interval. This is probably going to change soon.
+
+Most likely the profile formats will assume that there is at least one sample in a thread. It might be necessary to fill out the samples with dummy time data if your format isn't needing samples. It's a good idea to push on 1 sample for the start, and 1 for the end.
 
 ## Markers
 
 Markers are used in the marker chart, marker table, and for various visualization in the header's timeline. For instance they are drawn as solid squares. Screenshots are encoded as [ScreenshotPayload](https://github.com/firefox-devtools/profiler/search?q=ScreenshotPayload&unscoped_q=ScreenshotPayload) and extracted as a separate track. Markers can be used to encode some tracing types of data, as they can have start and end times.
 
-One important distinction in the UI is that there is some processing going on everytime you view a profile. The importer should target the RawMarkerTable, while the UI surfaces the `filteredMarkers` on the window object. The filtered markers do some processing to match up start and end markers. This is a bit beyond the scope of this document, but the type definitions should explain things a bit more. It could be a source of confusion when writing and working with markers.
+One important distinction in the UI is that there is some processing going on everytime you view a profile. The importer should target the [RawMarkerTable](https://github.com/firefox-devtools/profiler/blob/3067dda9cbf5807948aef149e18caf4e8870ed25/src/types/profile.js#L123-L128), while the UI surfaces the `filteredMarkers` on the window object. The filtered markers do some processing to match up start and end markers. This is a bit beyond the scope of this document, but the type definitions should explain things a bit more. It could be a source of confusion when writing and working with markers.
