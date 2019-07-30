@@ -100,7 +100,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
             <div
               className="timelineTrackThreadBlank"
               style={{
-                '--timeline-track-thread-blank-height': TRACK_PROCESS_BLANK_HEIGHT,
+                '--timeline-track-thread-blank-height': `${TRACK_PROCESS_BLANK_HEIGHT}px`,
               }}
             />
           );
