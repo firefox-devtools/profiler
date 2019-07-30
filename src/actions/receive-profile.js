@@ -204,6 +204,28 @@ export function finalizeProfileView(
       profile
     );
 
+    // If all of the local tracks were hidden for a process, and the main thread was
+    // not recorded for that process, hide the (empty) process track as well.
+    for (const [pid, localTracks] of localTracksByPid) {
+      const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
+      if (!hiddenLocalTracks) {
+        continue;
+      }
+      if (hiddenLocalTracks.size === localTracks.length) {
+        // All of the local tracks were hidden.
+        const globalTrackIndex = globalTracks.findIndex(
+          globalTrack =>
+            globalTrack.type === 'process' &&
+            globalTrack.pid === pid &&
+            globalTrack.mainThreadIndex === null
+        );
+        if (globalTrackIndex !== -1) {
+          // An empty global track was found, hide it.
+          hiddenGlobalTracks.add(globalTrackIndex);
+        }
+      }
+    }
+
     dispatch({
       type: 'VIEW_PROFILE',
       selectedThreadIndex,
