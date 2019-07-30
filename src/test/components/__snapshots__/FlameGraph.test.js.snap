@@ -177,6 +177,12 @@ exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
           />
           DOM
         </div>
+        <div
+          class="tooltipLabel"
+        >
+          File:
+        </div>
+        path/to/file:10:100
       </div>
     </div>
   </div>

@@ -189,6 +189,15 @@ function setupFlameGraph() {
     E[cat:Graphics]  G[cat:Graphics]
   `);
 
+  // Add some file and line number to the profile so that tooltips generate
+  // an interesting snapshot.
+  const { funcTable, stringTable } = profile.threads[0];
+  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+    funcTable.lineNumber[funcIndex] = funcIndex + 10;
+    funcTable.columnNumber[funcIndex] = funcIndex + 100;
+    funcTable.fileName[funcIndex] = stringTable.indexForString('path/to/file');
+  }
+
   const store = storeWithProfile(profile);
 
   const renderResult = render(
