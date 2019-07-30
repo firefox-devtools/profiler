@@ -284,7 +284,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               />
             </>
           ) : null}
-          {totalTime.breakdownByImplementation ? (
+          {totalTime.breakdownByImplementation && totalTime.value ? (
             <React.Fragment>
               <h4 className="sidebar-title3">Implementation – running time</h4>
               <ImplementationBreakdown
@@ -293,7 +293,7 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               />
             </React.Fragment>
           ) : null}
-          {selfTime.breakdownByImplementation ? (
+          {selfTime.breakdownByImplementation && selfTime.value ? (
             <React.Fragment>
               <h4 className="sidebar-title3">Implementation – self time</h4>
               <ImplementationBreakdown
@@ -323,7 +323,8 @@ class CallTreeSidebar extends React.PureComponent<Props> {
                 )} (${selfTimeForFuncPercent}%)`
               : '—'}
           </SidebarDetail>
-          {totalTimeForFunc.breakdownByImplementation ? (
+          {totalTimeForFunc.breakdownByImplementation &&
+          totalTimeForFunc.value ? (
             <React.Fragment>
               <h4 className="sidebar-title3">Implementation – running time</h4>
               <ImplementationBreakdown
@@ -332,7 +333,8 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               />
             </React.Fragment>
           ) : null}
-          {selfTimeForFunc.breakdownByImplementation ? (
+          {selfTimeForFunc.breakdownByImplementation &&
+          selfTimeForFunc.value ? (
             <React.Fragment>
               <h4 className="sidebar-title3">Implementation – self time</h4>
               <ImplementationBreakdown
