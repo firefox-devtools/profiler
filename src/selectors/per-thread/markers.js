@@ -296,7 +296,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   /**
    * Returns whether there's any marker besides network markers.
    */
-  const getIsMarkerChartEmptyInFullRange: Selector<boolean> = createSelector(
+  const getAreMarkerPanelsEmptyInFullRange: Selector<boolean> = createSelector(
     getFullMarkerList,
     markers => markers.every(marker => MarkerData.isNetworkMarker(marker))
   );
@@ -421,7 +421,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getFullMarkerListIndexes,
     getNetworkMarkerIndexes,
     getSearchFilteredNetworkMarkerIndexes,
-    getIsMarkerChartEmptyInFullRange,
+    getAreMarkerPanelsEmptyInFullRange,
     getMarkerChartMarkerIndexes,
     getSearchFilteredMarkerChartMarkerIndexes,
     getMarkerChartTiming,
