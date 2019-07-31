@@ -164,6 +164,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
       style,
       localTracks,
       pid,
+      globalTrack,
     } = this.props;
 
     if (isHidden) {
@@ -192,11 +193,14 @@ class GlobalTrackComponent extends PureComponent<Props> {
             <button type="button" className="timelineTrackNameButton">
               {trackName}
               {
-                // Only show the PID if it is a real number. A string PID is an
-                // artificially generated value that is not useful, and a null
-                // value does not exist. */
+                // Only show the PID if:
+                //   1. It is a real number. A string PID is an artificially generated
+                //      value that is not useful, and a null value does not exist.
+                //   2. The global track actually points to a real thread. A stub
+                //      process track is created
               }
-              {typeof pid === 'number' ? (
+              {typeof pid === 'number' &&
+              globalTrack.mainThreadIndex !== null ? (
                 <div className="timelineTrackNameButtonAdditionalDetails">
                   PID: {pid}
                 </div>
