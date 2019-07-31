@@ -223,6 +223,27 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
+    it('will not hide the only global track', function() {
+      const store = blankStore();
+      const { profile } = getProfileFromTextSamples(
+        `A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]`,
+        `work work work work work`
+      );
+      const [threadA, threadB] = profile.threads;
+      threadA.name = 'GeckoMain';
+      threadA.processType = 'tab';
+      threadA.pid = 111;
+      threadB.name = 'Other';
+      threadB.processType = 'default';
+      threadB.pid = 111;
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread Other]',
+      ]);
+    });
+
     it('will hide idle content threads with no RefreshDriverTick markers', function() {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
