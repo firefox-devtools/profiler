@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`timeline/GlobalTrack matches the snapshot of a global track 1`] = `
+exports[`timeline/GlobalTrack matches the snapshot of a global process track 1`] = `
 <li
   class="timelineTrack"
 >
@@ -137,6 +137,86 @@ process: \\"tab\\" (222)"
             type="button"
           >
             Style
+          </button>
+        </div>
+        <div
+          class="timelineTrackTrack"
+        >
+          <div
+            class="timelineTrackThread"
+          >
+            <div
+              class="timelineMarkers"
+              data-testid="TimelineMarkersJank"
+            >
+              <canvas
+                class="timelineMarkersCanvas"
+              />
+            </div>
+            <div
+              class="threadActivityGraph"
+            >
+              <canvas
+                class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                height="400"
+                width="400"
+              />
+            </div>
+            <div
+              class="timelineEmptyThreadIndicator"
+            />
+          </div>
+        </div>
+      </div>
+    </li>
+  </ol>
+</li>
+`;
+
+exports[`timeline/GlobalTrack matches the snapshot of a global process track without a thread 1`] = `
+<li
+  class="timelineTrack"
+>
+  <div
+    class="timelineTrackRow timelineTrackGlobalRow"
+  >
+    <div
+      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackGlobalGrippy"
+    >
+      <button
+        class="timelineTrackNameButton"
+        type="button"
+      >
+        Process 5555
+      </button>
+    </div>
+    <div
+      class="timelineTrackTrack"
+    >
+      <div
+        class="timelineTrackThreadBlank"
+      />
+    </div>
+  </div>
+  <ol
+    class="timelineTrackLocalTracks"
+  >
+    <li
+      class="timelineTrack timelineTrackLocal"
+    >
+      <div
+        class="timelineTrackRow timelineTrackLocalRow"
+      >
+        <div
+          class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+          title="thread: \\"NoMain\\" (0)
+process: \\"default\\" (5555)"
+        >
+          <button
+            class="timelineTrackNameButton"
+            type="button"
+          >
+            NoMain
           </button>
         </div>
         <div

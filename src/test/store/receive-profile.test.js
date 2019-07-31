@@ -223,6 +223,27 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
+    it('will not hide the only global track', function() {
+      const store = blankStore();
+      const { profile } = getProfileFromTextSamples(
+        `A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]`,
+        `work work work work work`
+      );
+      const [threadA, threadB] = profile.threads;
+      threadA.name = 'GeckoMain';
+      threadA.processType = 'tab';
+      threadA.pid = 111;
+      threadB.name = 'Other';
+      threadB.processType = 'default';
+      threadB.pid = 111;
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread Other]',
+      ]);
+    });
+
     it('will hide idle content threads with no RefreshDriverTick markers', function() {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
@@ -288,6 +309,37 @@ describe('actions/receive-profile', function() {
         'show [thread GeckoMain tab] SELECTED',
         'show [thread GeckoMain tab]',
         'show [thread GeckoMain tab]',
+      ]);
+    });
+
+    it('will hide an empty global track when all child tracks are hidden', function() {
+      const store = blankStore();
+      const { profile } = getProfileFromTextSamples(
+        `work work work work work`, // pid 1
+        `work work work work work`, // pid 1
+        `idle[cat:Idle] idle[cat:Idle] idle[cat:Idle] idle[cat:Idle] idle[cat:Idle]`, // pid 2
+        `work work work work work` // pid 3
+      );
+
+      profile.threads[0].name = 'Work A';
+      profile.threads[1].name = 'Work B';
+      profile.threads[2].name = 'Idle C';
+      profile.threads[3].name = 'Work E';
+
+      profile.threads[0].pid = 1;
+      profile.threads[1].pid = 1;
+      profile.threads[2].pid = 2;
+      profile.threads[3].pid = 3;
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [process]',
+        '  - show [thread Work A] SELECTED',
+        '  - show [thread Work B]',
+        'hide [process]', // <- Ensure this process is hidden.
+        '  - hide [thread Idle C]',
+        'show [process]',
+        '  - show [thread Work E]',
       ]);
     });
   });
