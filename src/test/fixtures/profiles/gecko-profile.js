@@ -43,7 +43,7 @@ export function createGeckoMarkerStack({
   };
 
   if (stackIndex !== null) {
-    // Only add a sample if the stack exists. There have been same cases observed
+    // Only add a sample if the stack exists. There have been some cases observed
     // on profiles where a sample wasn't collected here. This is probably an error
     // in the GeckoProfiler mechanism, but the front-end should be able to handle
     // it. See Bug 1566576.

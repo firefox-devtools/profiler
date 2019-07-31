@@ -821,9 +821,9 @@ export function getCounterForThread(
  *
  * - A (total: 15, self: —)
  *   - B (total: 15, self: —)
- *     - F.js (total: 12, self: —)
- *       - G.js (total: 12, self: 5)
- *         - H.js (total: 7, self: —)
+ *     - Fjs (total: 12, self: —)
+ *       - Gjs (total: 12, self: 5)
+ *         - Hjs (total: 7, self: —)
  *           - I (total: 7, self: 7)
  *     - C (total: 3, self: —)
  *       - D (total: 3, self: —)
@@ -838,9 +838,9 @@ export function getProfileWithJsAllocations(): * {
   } = getProfileFromTextSamples(`
     A  A     A
     B  B     B
-    C  F.js  F.js
-    D  G.js  G.js
-    E        H.js
+    C  Fjs   Fjs
+    D  Gjs   Gjs
+    E        Hjs
              I
   `);
 
@@ -850,13 +850,12 @@ export function getProfileWithJsAllocations(): * {
 
   // The stack table is built sequentially, so we can assume that the stack indexes
   // match the func indexes.
-  const { E, I } = funcNamesDict;
-  const G = funcNamesDict['G.js'];
+  const { E, I, Gjs } = funcNamesDict;
 
   // Create a list of allocations.
   const allocations = [
     { byteSize: 3, stack: E },
-    { byteSize: 5, stack: G },
+    { byteSize: 5, stack: Gjs },
     { byteSize: 7, stack: I },
   ];
 

@@ -841,13 +841,11 @@ export function filterThreadToSearchString(
   }
   const lowercaseSearchString = searchString.toLowerCase();
   const {
-    samples,
     funcTable,
     frameTable,
     stackTable,
     stringTable,
     resourceTable,
-    jsAllocations,
   } = thread;
 
   function computeFuncMatchesFilter(func) {
@@ -907,21 +905,9 @@ export function filterThreadToSearchString(
     return result;
   }
 
-  const newThread = {
-    ...thread,
-    samples: Object.assign({}, samples, {
-      stack: samples.stack.map(s => (stackMatchesFilter(s) ? s : null)),
-    }),
-  };
-
-  if (jsAllocations) {
-    newThread.jsAllocations = {
-      ...jsAllocations,
-      stack: jsAllocations.stack.map(s => (stackMatchesFilter(s) ? s : null)),
-    };
-  }
-
-  return newThread;
+  return updateThreadStacks(thread, stackTable, stackIndex =>
+    stackMatchesFilter(stackIndex) ? stackIndex : null
+  );
 }
 
 /**
@@ -1361,6 +1347,12 @@ export function invertCallstack(
   });
 }
 
+/**
+ * Sometimes we want to update the stacks for a thread, for instance while searching
+ * for a text string, or doing a call tree transformation. This function abstracts
+ * out the manipulation of the data structures so that we can properly update
+ * the stack table and any possible allocation information.
+ */
 export function updateThreadStacks(
   thread: Thread,
   newStackTable: StackTable,
@@ -1389,6 +1381,11 @@ export function updateThreadStacks(
   return newThread;
 }
 
+/**
+ * When manipulating stack tables, the most common operation is to map from one
+ * stack to a new stack using a Map. This function returns another function that
+ * does this work. It is used in conjunction with updateThreadStacks().
+ */
 export function getMapStackUpdater(
   oldStackToNewStack: Map<
     null | IndexIntoStackTable,

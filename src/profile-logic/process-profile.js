@@ -594,8 +594,13 @@ function _convertStackToCause(data: Object): Object {
  * Sometimes we don't want to extract a cause, but rather just the stack index
  * from a gecko payload.
  */
-function _convertPayloadStackToIndex(data: Object): IndexIntoStackTable | null {
-  if ('stack' in data && data.stack && data.stack.samples.data.length > 0) {
+function _convertPayloadStackToIndex(
+  data: MarkerPayload_Gecko
+): IndexIntoStackTable | null {
+  if (!data) {
+    return null;
+  }
+  if (data.stack && data.stack.samples.data.length > 0) {
     const { samples } = data.stack;
     return samples.data[0][samples.schema.stack];
   }
@@ -618,25 +623,24 @@ function _processMarkers(
   const jsAllocations = getEmptyJsAllocationsTable();
   for (let markerIndex = 0; markerIndex < geckoMarkers.length; markerIndex++) {
     const geckoPayload: MarkerPayload_Gecko = geckoMarkers.data[markerIndex];
-    let payload = null;
-    if (geckoPayload) {
-      if (geckoPayload.type === 'JS allocation') {
-        // Build up a separate table for the JS allocation data, and do not
-        // include it in the marker information.
-        jsAllocations.time.push(geckoPayload.startTime);
-        jsAllocations.className.push(geckoPayload.className);
-        jsAllocations.typeName.push(geckoPayload.typeName);
-        jsAllocations.coarseType.push(geckoPayload.coarseType);
-        jsAllocations.duration.push(geckoPayload.size);
-        jsAllocations.inNursery.push(geckoPayload.inNursery);
-        jsAllocations.stack.push(_convertPayloadStackToIndex(geckoPayload));
-        jsAllocations.length++;
-        continue;
-      }
 
-      payload = _processMarkerPayload(geckoPayload);
+    if (geckoPayload && geckoPayload.type === 'JS allocation') {
+      // Build up a separate table for the JS allocation data, and do not
+      // include it in the marker information.
+      jsAllocations.time.push(geckoPayload.startTime);
+      jsAllocations.className.push(geckoPayload.className);
+      jsAllocations.typeName.push(geckoPayload.typeName);
+      jsAllocations.coarseType.push(geckoPayload.coarseType);
+      jsAllocations.duration.push(geckoPayload.size);
+      jsAllocations.inNursery.push(geckoPayload.inNursery);
+      jsAllocations.stack.push(_convertPayloadStackToIndex(geckoPayload));
+      jsAllocations.length++;
+
+      // Do not process the marker and add it to the marker list.
+      continue;
     }
 
+    const payload = _processMarkerPayload(geckoPayload);
     const name = geckoMarkers.name[markerIndex];
     const time = geckoMarkers.time[markerIndex];
     markers.name.push(name);
@@ -658,6 +662,10 @@ function _processMarkers(
 function _processMarkerPayload(
   geckoPayload: MarkerPayload_Gecko
 ): MarkerPayload {
+  if (!geckoPayload) {
+    return null;
+  }
+
   // If there is a "stack" field, convert it to a "cause" field. This is
   // pre-emptively done for every single marker payload.
   //
@@ -784,7 +792,7 @@ function _processCounters(
       mainThreadIndex,
       sampleGroups: {
         id: sample_groups.id,
-        samples: _adjustCounterTimestamps(
+        samples: adjustTableTimestamps(
           _toStructOfArrays(sample_groups.samples),
           delta
         ),
@@ -912,27 +920,13 @@ function _processThread(
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
  */
-export function adjustSampleTimestamps(
-  samples: SamplesTable,
+export function adjustTableTimestamps<Table: { time: Milliseconds[] }>(
+  table: Table,
   delta: Milliseconds
-): SamplesTable {
+): Table {
   return {
-    ...samples,
-    time: samples.time.map(time => time + delta),
-  };
-}
-
-/**
- * This is the same implementation of the adjustSampleTimestamps function,
- * but with different typing.
- */
-export function adjustJsAllocationsTimestamps(
-  samples: JsAllocationsTable,
-  delta: Milliseconds
-): JsAllocationsTable {
-  return {
-    ...samples,
-    time: samples.time.map(time => time + delta),
+    ...table,
+    time: table.time.map(time => time + delta),
   };
 }
 
@@ -1023,16 +1017,6 @@ export function adjustMarkerTimestamps(
   };
 }
 
-function _adjustCounterTimestamps<T: Object>(
-  sampleGroups: T,
-  delta: Milliseconds
-): T {
-  return {
-    ...sampleGroups,
-    time: sampleGroups.time.map(time => time + delta),
-  };
-}
-
 /**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
@@ -1069,7 +1053,7 @@ export function processProfile(
           subprocessProfile,
           extensions
         );
-        newThread.samples = adjustSampleTimestamps(
+        newThread.samples = adjustTableTimestamps(
           newThread.samples,
           adjustTimestampsBy
         );
@@ -1084,7 +1068,7 @@ export function processProfile(
           );
         }
         if (newThread.jsAllocations) {
-          newThread.jsAllocations = adjustJsAllocationsTimestamps(
+          newThread.jsAllocations = adjustTableTimestamps(
             newThread.jsAllocations,
             adjustTimestampsBy
           );

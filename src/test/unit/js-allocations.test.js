@@ -37,9 +37,9 @@ describe('JS allocation call trees', function() {
     expect(formatTree(callTree)).toEqual([
       '- A (total: 15, self: —)',
       '  - B (total: 15, self: —)',
-      '    - F.js (total: 12, self: —)',
-      '      - G.js (total: 12, self: 5)',
-      '        - H.js (total: 7, self: —)',
+      '    - Fjs (total: 12, self: —)',
+      '      - Gjs (total: 12, self: 5)',
+      '        - Hjs (total: 7, self: —)',
       '          - I (total: 7, self: 7)',
       '    - C (total: 3, self: —)',
       '      - D (total: 3, self: —)',
@@ -55,9 +55,9 @@ describe('JS allocation call trees', function() {
     expect(formatTree(callTree)).toEqual([
       '- A (total: 7, self: —)',
       '  - B (total: 7, self: —)',
-      '    - F.js (total: 7, self: —)',
-      '      - G.js (total: 7, self: —)',
-      '        - H.js (total: 7, self: —)',
+      '    - Fjs (total: 7, self: —)',
+      '      - Gjs (total: 7, self: —)',
+      '        - Hjs (total: 7, self: —)',
       '          - I (total: 7, self: 7)',
     ]);
   });
@@ -69,13 +69,13 @@ describe('JS allocation call trees', function() {
 
     expect(formatTree(callTree)).toEqual([
       '- I (total: 7, self: 7)',
-      '  - H.js (total: 7, self: —)',
-      '    - G.js (total: 7, self: —)',
-      '      - F.js (total: 7, self: —)',
+      '  - Hjs (total: 7, self: —)',
+      '    - Gjs (total: 7, self: —)',
+      '      - Fjs (total: 7, self: —)',
       '        - B (total: 7, self: —)',
       '          - A (total: 7, self: —)',
-      '- G.js (total: 5, self: 5)',
-      '  - F.js (total: 5, self: —)',
+      '- Gjs (total: 5, self: 5)',
+      '  - Fjs (total: 5, self: —)',
       '    - B (total: 5, self: —)',
       '      - A (total: 5, self: —)',
       '- E (total: 3, self: 3)',
@@ -92,9 +92,9 @@ describe('JS allocation call trees', function() {
     const callTree = selectedThreadSelectors.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
-      '- F.js (total: 12, self: —)',
-      '  - G.js (total: 12, self: 5)',
-      '    - H.js (total: 7, self: 7)',
+      '- Fjs (total: 12, self: —)',
+      '  - Gjs (total: 12, self: 5)',
+      '    - Hjs (total: 7, self: 7)',
     ]);
   });
 
@@ -122,9 +122,9 @@ describe('JS allocation call trees', function() {
     expect(formatTree(callTree)).toEqual([
       '- A (total: 15, self: —)',
       '  - B (total: 15, self: —)',
-      '    - F.js (total: 12, self: —)',
-      '      - G.js (total: 12, self: 5)',
-      '        - H.js (total: 7, self: —)',
+      '    - Fjs (total: 12, self: —)',
+      '      - Gjs (total: 12, self: 5)',
+      '        - Hjs (total: 7, self: —)',
       '          - I (total: 7, self: 7)',
       '    - D (total: 3, self: —)',
       '      - E (total: 3, self: 3)',
@@ -140,8 +140,8 @@ describe('JS allocation call trees', function() {
     expect(formatTree(callTree)).toEqual([
       '- A (total: 8, self: —)',
       '  - B (total: 8, self: —)',
-      '    - F.js (total: 5, self: —)',
-      '      - G.js (total: 5, self: 5)',
+      '    - Fjs (total: 5, self: —)',
+      '      - Gjs (total: 5, self: 5)',
       '    - C (total: 3, self: —)',
       '      - D (total: 3, self: —)',
       '        - E (total: 3, self: 3)',

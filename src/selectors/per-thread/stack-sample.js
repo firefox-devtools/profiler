@@ -143,13 +143,13 @@ export function getStackAndSampleSelectorsPerThread(
       { callNodeTable, stackIndexToCallNodeIndex },
       selectedCallNode
     ) => {
-      const sampleCallNodes = ProfileData.getSampleIndexToCallNodeIndex(
+      const sampleIndexToCallNodeIndex = ProfileData.getSampleIndexToCallNodeIndex(
         thread.samples.stack,
         stackIndexToCallNodeIndex
       );
       return ProfileData.getSamplesSelectedStates(
         callNodeTable,
-        sampleCallNodes,
+        sampleIndexToCallNodeIndex,
         selectedCallNode
       );
     }
@@ -161,11 +161,14 @@ export function getStackAndSampleSelectorsPerThread(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
     (thread, { callNodeTable, stackIndexToCallNodeIndex }) => {
-      const sampleCallNodes = ProfileData.getSampleIndexToCallNodeIndex(
+      const sampleIndexToCallNodeIndex = ProfileData.getSampleIndexToCallNodeIndex(
         thread.samples.stack,
         stackIndexToCallNodeIndex
       );
-      return ProfileData.getTreeOrderComparator(callNodeTable, sampleCallNodes);
+      return ProfileData.getTreeOrderComparator(
+        callNodeTable,
+        sampleIndexToCallNodeIndex
+      );
     }
   );
 

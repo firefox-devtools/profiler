@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Milliseconds, Microseconds, Seconds } from './units';
+import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
 import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
 
@@ -493,8 +493,8 @@ export type JsAllocationPayload_Gecko = {|
   className: string,
   typeName: string, // Currently only 'JSObject'
   coarseType: string, // Currently only 'Object',
-  size: number, // in bytes.
-  inNursery: true,
+  size: Bytes,
+  inNursery: boolean,
   stack: GeckoMarkerStack,
 |};
 

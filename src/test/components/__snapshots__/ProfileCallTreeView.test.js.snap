@@ -487,7 +487,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
               </div>
               <div
                 aria-expanded="true"
-                aria-label="F.js, running time is 12ms (80%), self time is 0ms"
+                aria-label="Fjs, running time is 12ms (80%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even"
@@ -509,7 +509,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                     class="colored-square category-color-grey"
                     title="Other"
                   />
-                  F.js
+                  Fjs
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"
@@ -517,7 +517,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
               </div>
               <div
                 aria-expanded="true"
-                aria-label="G.js, running time is 12ms (80%), self time is 5ms"
+                aria-label="Gjs, running time is 12ms (80%), self time is 5ms"
                 aria-level="4"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd"
@@ -539,7 +539,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                     class="colored-square category-color-grey"
                     title="Other"
                   />
-                  G.js
+                  Gjs
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"
@@ -547,7 +547,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
               </div>
               <div
                 aria-expanded="true"
-                aria-label="H.js, running time is 7ms (47%), self time is 0ms"
+                aria-label="Hjs, running time is 7ms (47%), self time is 0ms"
                 aria-level="5"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even"
@@ -569,7 +569,7 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                     class="colored-square category-color-grey"
                     title="Other"
                   />
-                  H.js
+                  Hjs
                 </span>
                 <span
                   class="treeViewRowColumn treeViewAppendageColumn lib"
