@@ -37,7 +37,7 @@ body,
 }
 
 #root-screenshot {
-  z-index: 14;
+  z-index: 1;
 }
 
 .nodeIcon {
