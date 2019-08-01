@@ -227,7 +227,7 @@ export function removeRootScreenshotElement() {
   ).removeChild(
     ensureExists(
       document.querySelector('#root-screenshot'),
-      'Expected to find a root overlay element to clean up.'
+      'Expected to find a root screenshot element to clean up.'
     )
   );
 }
