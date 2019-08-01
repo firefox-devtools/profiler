@@ -210,3 +210,24 @@ export function removeRootOverlayElement() {
     )
   );
 }
+
+export function addRootScreenshotElement() {
+  const div = document.createElement('div');
+  div.id = 'root-screenshot';
+  ensureExists(
+    document.body,
+    'Expected the document.body to exist.'
+  ).appendChild(div);
+}
+
+export function removeRootScreenshotElement() {
+  ensureExists(
+    document.body,
+    'Expected the document.body to exist.'
+  ).removeChild(
+    ensureExists(
+      document.querySelector('#root-screenshot'),
+      'Expected to find a root overlay element to clean up.'
+    )
+  );
+}

@@ -169,8 +169,8 @@ class HoverPreview extends PureComponent<HoverPreviewProps> {
   }
 
   _overlayElement = ensureExists(
-    document.querySelector('#root-overlay'),
-    'Expected to find a root overlay element.'
+    document.querySelector('#root-screenshot'),
+    'Expected to find a root screenshot element.'
   );
 
   render() {

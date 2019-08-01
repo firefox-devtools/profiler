@@ -25,8 +25,8 @@ import { storeWithProfile } from '../fixtures/stores';
 import {
   getBoundingBox,
   getMouseEvent,
-  addRootOverlayElement,
-  removeRootOverlayElement,
+  addRootScreenshotElement,
+  removeRootScreenshotElement,
 } from '../fixtures/utils';
 import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -37,8 +37,8 @@ const LEFT = 100;
 const TOP = 7;
 
 describe('timeline/TrackScreenshots', function() {
-  beforeEach(addRootOverlayElement);
-  afterEach(removeRootOverlayElement);
+  beforeEach(addRootScreenshotElement);
+  afterEach(removeRootScreenshotElement);
 
   it('matches the component snapshot', () => {
     const { container, unmount } = setup();

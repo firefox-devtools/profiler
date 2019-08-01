@@ -36,6 +36,10 @@ body,
   z-index: 0;
 }
 
+#root-screenshot {
+  z-index: 14;
+}
+
 .nodeIcon {
   min-width: 14px;
   height: 100%;
