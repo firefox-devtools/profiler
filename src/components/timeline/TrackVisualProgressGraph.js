@@ -97,7 +97,9 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
       for (let i = 0; i < progressGraphData.length; i++) {
         // Create a path for the top of the chart. This is the line that will have
         // a stroke applied to it.
-        x = (deviceWidth * (progressGraphData[i].timestamp - rangeStart)) / rangeLength;
+        x =
+          (deviceWidth * (progressGraphData[i].timestamp - rangeStart)) /
+          rangeLength;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
         const unitGraphCount = progressGraphData[i].percent / 100;
@@ -127,7 +129,8 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
       // of the canvas.
       ctx.lineTo(x + interval, deviceHeight);
       ctx.lineTo(
-        (deviceWidth * (progressGraphData[0].timestamp - rangeStart)) / rangeLength +
+        (deviceWidth * (progressGraphData[0].timestamp - rangeStart)) /
+          rangeLength +
           interval,
         deviceHeight
       );
@@ -212,17 +215,26 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
     const { pageX: mouseX, pageY: mouseY } = event;
     // Get the offset from here, and apply it to the time lookup.
     const { left } = event.currentTarget.getBoundingClientRect();
-    const { width, rangeStart, rangeEnd, progressGraphData, interval } = this.props;
+    const {
+      width,
+      rangeStart,
+      rangeEnd,
+      progressGraphData,
+      interval,
+    } = this.props;
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
     if (
       timeAtMouse < progressGraphData[0].timestamp ||
-      timeAtMouse > progressGraphData[progressGraphData.length - 1].timestamp + interval
+      timeAtMouse >
+        progressGraphData[progressGraphData.length - 1].timestamp + interval
     ) {
       // We are outside the range of the samples, do not display hover information.
       this.setState({ hoveredVisualProgress: null });
     } else {
-      const graphTimestamps = progressGraphData.map(({ timestamp }) => timestamp);
+      const graphTimestamps = progressGraphData.map(
+        ({ timestamp }) => timestamp
+      );
       let hoveredVisualProgress = bisection.right(graphTimestamps, timeAtMouse);
       if (hoveredVisualProgress === progressGraphData.length) {
         // When hovering the last sample, it's possible the mouse is past the time.
