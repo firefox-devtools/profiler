@@ -166,6 +166,11 @@ type State = {|
 
 require('./Viewport.css');
 
+// The overall zoom speed for shift and pinch zooming.
+const ZOOM_SPEED = 1.003;
+// This value makes the pinch zooming faster than shift+scroll zooming.
+const PINCH_ZOOM_FACTOR = 3;
+
 /**
  * This is the type signature for the higher order component. It's easier to use generics
  * by separating out the type definition.
@@ -215,7 +220,7 @@ export const withChartViewport: WithChartViewport<*, *> =
       };
       _lastKeyboardNavigationFrame: number = 0;
       _keysDown: Set<NavigationKey> = new Set();
-      _deltaToZoomFactor = delta => Math.pow(1.0009, delta);
+      _deltaToZoomFactor = delta => Math.pow(ZOOM_SPEED, delta);
 
       constructor(props: ViewportProps) {
         super(props);
@@ -348,7 +353,10 @@ export const withChartViewport: WithChartViewport<*, *> =
         const { disableHorizontalMovement } = this.props.viewportProps;
         if (event.ctrlKey || event.shiftKey) {
           if (!disableHorizontalMovement) {
-            this.zoomWithMouseWheel(event);
+            // Pinch and zoom needs to be faster to feel nice, which happens on the
+            // ctrlKey modifier.
+            const zoomModifier = event.ctrlKey ? PINCH_ZOOM_FACTOR : 1;
+            this.zoomWithMouseWheel(event, zoomModifier);
           }
           return;
         }
@@ -409,7 +417,11 @@ export const withChartViewport: WithChartViewport<*, *> =
         }
       }
 
-      zoomWithMouseWheel(event: SyntheticWheelEvent<>) {
+      zoomWithMouseWheel(
+        event: SyntheticWheelEvent<>,
+        // Allow different handlers to make the zoom faster or slower.
+        zoomModifier: number = 1
+      ) {
         const {
           hasZoomedViaMousewheel,
           setHasZoomedViaMousewheel,
@@ -426,7 +438,7 @@ export const withChartViewport: WithChartViewport<*, *> =
           // for that here.
           event.deltaY === 0 ? 'deltaX' : 'deltaY'
         );
-        const zoomFactor = this._deltaToZoomFactor(deltaY);
+        const zoomFactor = this._deltaToZoomFactor(deltaY * zoomModifier);
 
         const mouseX = event.clientX;
         const { containerLeft, containerWidth } = this.state;
