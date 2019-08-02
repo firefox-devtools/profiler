@@ -40,7 +40,8 @@
     "test-build-coverage": "jest --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
     "test-coverage": "run-s test-build-coverage test-serve-coverage",
-    "test-alex": "alex ./docs-* *.md"
+    "test-alex": "alex ./docs-* *.md",
+    "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",

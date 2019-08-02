@@ -14,6 +14,7 @@ import {
   getScreenshotTrackProfile,
   getNetworkMarkers,
   getCounterForThread,
+  getVisualProgressTrackProfile,
 } from '../fixtures/profiles/processed-profile';
 import {
   getEmptyThread,
@@ -1554,6 +1555,84 @@ describe('call tree summary strategy', function() {
     dispatch(ProfileView.changeCallTreeSummaryStrategy('js-allocations'));
     expect(UrlStateSelectors.getCallTreeSummaryStrategy(getState())).toEqual(
       'js-allocations'
+    );
+  });
+});
+
+describe('meta selector', function() {
+  const { getMeta } = ProfileViewSelectors;
+  function setup() {
+    const { profile } = getProfileFromTextSamples(
+      Array(10)
+        .fill('A')
+        .join('  ')
+    );
+    const { meta } = profile;
+    const { getState } = storeWithProfile(profile);
+    return { getState, meta };
+  }
+
+  it('can get meta', function() {
+    const { getState, meta } = setup();
+    expect(getMeta(getState())).toBe(meta);
+  });
+});
+
+describe('visual metrics selectors', function() {
+  const {
+    getVisualMetrics,
+    getVisualProgress,
+    getPerceptualSpeedIndexProgress,
+    getContentfulSpeedIndexProgress,
+  } = ProfileViewSelectors;
+  function setup() {
+    const profile = getVisualProgressTrackProfile(
+      Array(10)
+        .fill('A')
+        .join('  ')
+    );
+    const {
+      meta: { visualMetrics },
+    } = profile;
+
+    if (!visualMetrics) {
+      throw new Error('No visual metrics found.');
+    }
+
+    const { getState } = storeWithProfile(profile);
+    return { getState, visualMetrics };
+  }
+
+  it('can get visual metrics', function() {
+    const { getState, visualMetrics } = setup();
+    expect(getVisualMetrics(getState())).toEqual(visualMetrics);
+  });
+
+  it('can get visual progress', function() {
+    const {
+      getState,
+      visualMetrics: { VisualProgress },
+    } = setup();
+    expect(getVisualProgress(getState())).toEqual(VisualProgress);
+  });
+
+  it('can get perceptual visual progress', function() {
+    const {
+      getState,
+      visualMetrics: { PerceptualSpeedIndexProgress },
+    } = setup();
+    expect(getPerceptualSpeedIndexProgress(getState())).toEqual(
+      PerceptualSpeedIndexProgress
+    );
+  });
+
+  it('can get contentful visual progress', function() {
+    const {
+      getState,
+      visualMetrics: { ContentfulSpeedIndexProgress },
+    } = setup();
+    expect(getContentfulSpeedIndexProgress(getState())).toEqual(
+      ContentfulSpeedIndexProgress
     );
   });
 });
