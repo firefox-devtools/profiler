@@ -18,7 +18,7 @@ import {
   convertStackToCallNodePath,
   invertCallstack,
   getTimingsForPath,
-  getSampleCallNodes,
+  getSampleIndexToCallNodeIndex,
   getCallNodeIndexFromPath,
   getTreeOrderComparator,
   getSamplesSelectedStates,
@@ -1257,8 +1257,8 @@ describe('getSamplesSelectedStates', function() {
     thread.funcTable,
     0
   );
-  const sampleCallNodes = getSampleCallNodes(
-    thread.samples,
+  const sampleCallNodes = getSampleIndexToCallNodeIndex(
+    thread.samples.stack,
     stackIndexToCallNodeIndex
   );
 

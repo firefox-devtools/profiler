@@ -11,6 +11,8 @@ import {
   getEmptyExtensions,
   getEmptyFuncTable,
   getEmptyResourceTable,
+  getEmptyRawMarkerTable,
+  getEmptyJsAllocationsTable,
 } from './data-structures';
 import { immutableUpdate } from '../utils/flow';
 import {
@@ -42,10 +44,12 @@ import type {
   Lib,
   FuncTable,
   ResourceTable,
+  IndexIntoStackTable,
   IndexIntoFuncTable,
   IndexIntoStringTable,
   IndexIntoResourceTable,
   JsTracerTable,
+  JsAllocationsTable,
 } from '../types/profile';
 import type { Milliseconds } from '../types/units';
 import type {
@@ -587,91 +591,147 @@ function _convertStackToCause(data: Object): Object {
 }
 
 /**
- * Process the markers by either converting stacks to causes, process the GC markers.
+ * Sometimes we don't want to extract a cause, but rather just the stack index
+ * from a gecko payload.
  */
-function _processMarkers(geckoMarkers: GeckoMarkerStruct): RawMarkerTable {
+function _convertPayloadStackToIndex(
+  data: MarkerPayload_Gecko
+): IndexIntoStackTable | null {
+  if (!data) {
+    return null;
+  }
+  if (data.stack && data.stack.samples.data.length > 0) {
+    const { samples } = data.stack;
+    return samples.data[0][samples.schema.stack];
+  }
+  return null;
+}
+
+/**
+ * Process the markers.
+ *  Convert stacks to causes.
+ *  Process GC markers.
+ *  Extract JS allocations into the JsAllocationsTable.
+ */
+function _processMarkers(
+  geckoMarkers: GeckoMarkerStruct
+): {|
+  markers: RawMarkerTable,
+  jsAllocations: JsAllocationsTable | null,
+|} {
+  const markers = getEmptyRawMarkerTable();
+  const jsAllocations = getEmptyJsAllocationsTable();
+  for (let markerIndex = 0; markerIndex < geckoMarkers.length; markerIndex++) {
+    const geckoPayload: MarkerPayload_Gecko = geckoMarkers.data[markerIndex];
+
+    if (geckoPayload && geckoPayload.type === 'JS allocation') {
+      // Build up a separate table for the JS allocation data, and do not
+      // include it in the marker information.
+      jsAllocations.time.push(geckoPayload.startTime);
+      jsAllocations.className.push(geckoPayload.className);
+      jsAllocations.typeName.push(geckoPayload.typeName);
+      jsAllocations.coarseType.push(geckoPayload.coarseType);
+      jsAllocations.duration.push(geckoPayload.size);
+      jsAllocations.inNursery.push(geckoPayload.inNursery);
+      jsAllocations.stack.push(_convertPayloadStackToIndex(geckoPayload));
+      jsAllocations.length++;
+
+      // Do not process the marker and add it to the marker list.
+      continue;
+    }
+
+    const payload = _processMarkerPayload(geckoPayload);
+    const name = geckoMarkers.name[markerIndex];
+    const time = geckoMarkers.time[markerIndex];
+    markers.name.push(name);
+    markers.time.push(time);
+    markers.data.push(payload);
+    markers.length++;
+  }
+
   return {
-    data: geckoMarkers.data.map(
-      (geckoPayload: MarkerPayload_Gecko): MarkerPayload => {
-        if (!geckoPayload) {
-          return null;
-        }
-
-        // If there is a "stack" field, convert it to a "cause" field. This is
-        // pre-emptively done for every single marker payload.
-        //
-        // Warning: This function converts the payload into an Object type, which is
-        // about as bad as an any.
-        const payload = _convertStackToCause(geckoPayload);
-
-        switch (payload.type) {
-          /*
-           * We want to improve the format of these markers to make them
-           * easier to understand and work with, but we can't do that by
-           * upgrading the gecko profile since that would break
-           * compatibility with telemetry, however we can make some
-           * improvements while we process a gecko profile.
-           */
-          case 'GCSlice': {
-            const {
-              times,
-              ...partialTimings
-            }: GCSliceData_Gecko = payload.timings;
-
-            return ({
-              type: 'GCSlice',
-              startTime: payload.startTime,
-              endTime: payload.endTime,
-              timings: {
-                ...partialTimings,
-                phase_times: times ? convertPhaseTimes(times) : {},
-              },
-            }: GCSliceMarkerPayload);
-          }
-          case 'GCMajor': {
-            const geckoTimings: GCMajorAborted | GCMajorCompleted_Gecko =
-              payload.timings;
-            switch (geckoTimings.status) {
-              case 'completed': {
-                const { totals, ...partialMt } = geckoTimings;
-                const timings: GCMajorCompleted = {
-                  ...partialMt,
-                  phase_times: convertPhaseTimes(totals),
-                  mmu_20ms: geckoTimings.mmu_20ms / 100,
-                  mmu_50ms: geckoTimings.mmu_50ms / 100,
-                };
-                return ({
-                  type: 'GCMajor',
-                  startTime: payload.startTime,
-                  endTime: payload.endTime,
-                  timings: timings,
-                }: GCMajorMarkerPayload);
-              }
-              case 'aborted':
-                return ({
-                  type: 'GCMajor',
-                  startTime: payload.startTime,
-                  endTime: payload.endTime,
-                  timings: { status: 'aborted' },
-                }: GCMajorMarkerPayload);
-              default:
-                // Flow cannot detect that this switch is complete.
-                console.log('Unknown GCMajor status');
-                throw new Error('Unknown GCMajor status');
-            }
-          }
-          default:
-            // Coerce the payload into a MarkerPayload. This doesn't really provide
-            // any more type safety, but it shows the intent of going from an object
-            // without much type safety, to a specific type definition.
-            return (payload: MarkerPayload);
-        }
-      }
-    ),
-    name: geckoMarkers.name,
-    time: geckoMarkers.time,
-    length: geckoMarkers.length,
+    markers: markers,
+    jsAllocations: jsAllocations.length === 0 ? null : jsAllocations,
   };
+}
+
+/**
+ * Process just the marker payload. This converts stacks into causes, and augments
+ * the GC information.
+ */
+function _processMarkerPayload(
+  geckoPayload: MarkerPayload_Gecko
+): MarkerPayload {
+  if (!geckoPayload) {
+    return null;
+  }
+
+  // If there is a "stack" field, convert it to a "cause" field. This is
+  // pre-emptively done for every single marker payload.
+  //
+  // Warning: This function converts the payload into an Object type, which is
+  // about as bad as an any.
+  const payload = _convertStackToCause(geckoPayload);
+
+  switch (payload.type) {
+    /*
+     * We want to improve the format of these markers to make them
+     * easier to understand and work with, but we can't do that by
+     * upgrading the gecko profile since that would break
+     * compatibility with telemetry, however we can make some
+     * improvements while we process a gecko profile.
+     */
+    case 'GCSlice': {
+      const { times, ...partialTimings }: GCSliceData_Gecko = payload.timings;
+
+      return ({
+        type: 'GCSlice',
+        startTime: payload.startTime,
+        endTime: payload.endTime,
+        timings: {
+          ...partialTimings,
+          phase_times: times ? convertPhaseTimes(times) : {},
+        },
+      }: GCSliceMarkerPayload);
+    }
+    case 'GCMajor': {
+      const geckoTimings: GCMajorAborted | GCMajorCompleted_Gecko =
+        payload.timings;
+      switch (geckoTimings.status) {
+        case 'completed': {
+          const { totals, ...partialMt } = geckoTimings;
+          const timings: GCMajorCompleted = {
+            ...partialMt,
+            phase_times: convertPhaseTimes(totals),
+            mmu_20ms: geckoTimings.mmu_20ms / 100,
+            mmu_50ms: geckoTimings.mmu_50ms / 100,
+          };
+          return ({
+            type: 'GCMajor',
+            startTime: payload.startTime,
+            endTime: payload.endTime,
+            timings: timings,
+          }: GCMajorMarkerPayload);
+        }
+        case 'aborted':
+          return ({
+            type: 'GCMajor',
+            startTime: payload.startTime,
+            endTime: payload.endTime,
+            timings: { status: 'aborted' },
+          }: GCMajorMarkerPayload);
+        default:
+          // Flow cannot detect that this switch is complete.
+          console.log('Unknown GCMajor status');
+          throw new Error('Unknown GCMajor status');
+      }
+    }
+    default:
+      // Coerce the payload into a MarkerPayload. This doesn't really provide
+      // any more type safety, but it shows the intent of going from an object
+      // without much type safety, to a specific type definition.
+      return (payload: MarkerPayload);
+  }
 }
 
 /**
@@ -732,7 +792,7 @@ function _processCounters(
       mainThreadIndex,
       sampleGroups: {
         id: sample_groups.id,
-        samples: _adjustCounterTimestamps(
+        samples: adjustTableTimestamps(
           _toStructOfArrays(sample_groups.samples),
           delta
         ),
@@ -786,7 +846,7 @@ function _processThread(
     frameTable,
     categories
   );
-  const markers = _processMarkers(geckoMarkers);
+  const { markers, jsAllocations } = _processMarkers(geckoMarkers);
   const samples = _processSamples(geckoSamples);
 
   const newThread: Thread = {
@@ -810,6 +870,11 @@ function _processThread(
     stringTable,
     samples,
   };
+
+  if (jsAllocations) {
+    // Only add the JS allocations if they exist.
+    newThread.jsAllocations = jsAllocations;
+  }
 
   function processJsTracer() {
     // Optionally extract the JS Tracer information, if they exist.
@@ -855,13 +920,13 @@ function _processThread(
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
  */
-export function adjustSampleTimestamps(
-  samples: SamplesTable,
+export function adjustTableTimestamps<Table: { time: Milliseconds[] }>(
+  table: Table,
   delta: Milliseconds
-): SamplesTable {
+): Table {
   return {
-    ...samples,
-    time: samples.time.map(time => time + delta),
+    ...table,
+    time: table.time.map(time => time + delta),
   };
 }
 
@@ -952,16 +1017,6 @@ export function adjustMarkerTimestamps(
   };
 }
 
-function _adjustCounterTimestamps<T: Object>(
-  sampleGroups: T,
-  delta: Milliseconds
-): T {
-  return {
-    ...sampleGroups,
-    time: sampleGroups.time.map(time => time + delta),
-  };
-}
-
 /**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
@@ -993,8 +1048,12 @@ export function processProfile(
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
     threads = threads.concat(
       subprocessProfile.threads.map(thread => {
-        const newThread = _processThread(thread, subprocessProfile, extensions);
-        newThread.samples = adjustSampleTimestamps(
+        const newThread: Thread = _processThread(
+          thread,
+          subprocessProfile,
+          extensions
+        );
+        newThread.samples = adjustTableTimestamps(
           newThread.samples,
           adjustTimestampsBy
         );
@@ -1005,6 +1064,12 @@ export function processProfile(
         if (newThread.jsTracer) {
           newThread.jsTracer = _adjustJsTracerTimestamps(
             newThread.jsTracer,
+            adjustTimestampsBy
+          );
+        }
+        if (newThread.jsAllocations) {
+          newThread.jsAllocations = adjustTableTimestamps(
+            newThread.jsAllocations,
             adjustTimestampsBy
           );
         }

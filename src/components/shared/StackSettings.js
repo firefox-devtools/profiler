@@ -9,34 +9,47 @@ import {
   changeImplementationFilter,
   changeInvertCallstack,
   changeCallTreeSearchString,
+  changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
 import {
   getImplementationFilter,
   getInvertCallstack,
   getCurrentSearchString,
+  getCallTreeSummaryStrategy,
 } from '../../selectors/url-state';
 import PanelSearch from '../shared/PanelSearch';
-import { toValidImplementationFilter } from '../../profile-logic/profile-data';
+import {
+  toValidImplementationFilter,
+  toValidCallTreeSummaryStrategy,
+} from '../../profile-logic/profile-data';
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 import './StackSettings.css';
 
-import type { ImplementationFilter } from '../../types/actions';
+import type {
+  ImplementationFilter,
+  CallTreeSummaryStrategy,
+} from '../../types/actions';
 
 type OwnProps = {|
-  +hideInvertCallstack?: boolean,
+  +hideInvertCallstack?: true,
+  +disableCallTreeSummaryButtons?: true,
 |};
 
 type StateProps = {|
   +implementationFilter: ImplementationFilter,
+  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +invertCallstack: boolean,
   +currentSearchString: string,
+  +hasJsAllocations: boolean,
 |};
 
 type DispatchProps = {|
   +changeImplementationFilter: typeof changeImplementationFilter,
   +changeInvertCallstack: typeof changeInvertCallstack,
   +changeCallTreeSearchString: typeof changeCallTreeSearchString,
+  +changeCallTreeSummaryStrategy: typeof changeCallTreeSummaryStrategy,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -50,6 +63,14 @@ class StackSettings extends PureComponent<Props> {
     );
   };
 
+  _onCallTreeSummaryStrategyChange = (e: SyntheticEvent<HTMLInputElement>) => {
+    this.props.changeCallTreeSummaryStrategy(
+      // This function is here to satisfy Flow that we are getting a valid
+      // implementation filter.
+      toValidCallTreeSummaryStrategy(e.currentTarget.value)
+    );
+  };
+
   _onInvertCallstackClick = (e: SyntheticEvent<HTMLInputElement>) => {
     this.props.changeInvertCallstack(e.currentTarget.checked);
   };
@@ -58,7 +79,7 @@ class StackSettings extends PureComponent<Props> {
     this.props.changeCallTreeSearchString(value);
   };
 
-  _renderRadioButton(
+  _renderImplementationRadioButton(
     label: string,
     implementationFilter: ImplementationFilter
   ) {
@@ -78,21 +99,52 @@ class StackSettings extends PureComponent<Props> {
     );
   }
 
+  _renderCallTreeStrategyRadioButton(
+    label: string,
+    strategy: CallTreeSummaryStrategy
+  ) {
+    return (
+      <label className="photon-label photon-label-micro stackSettingsFilterLabel">
+        <input
+          type="radio"
+          className="photon-radio photon-radio-micro stackSettingsFilterInput"
+          value={strategy}
+          name="stack-settings-strategy"
+          title="Change how the call tree numerically summarizes the thread"
+          onChange={this._onCallTreeSummaryStrategyChange}
+          checked={this.props.callTreeSummaryStrategy === strategy}
+        />
+        {label}
+      </label>
+    );
+  }
+
   render() {
     const {
       invertCallstack,
       hideInvertCallstack,
       currentSearchString,
+      hasJsAllocations,
+      disableCallTreeSummaryButtons,
     } = this.props;
 
     return (
       <div className="stackSettings">
         <ul className="stackSettingsList">
           <li className="stackSettingsListItem stackSettingsFilter">
-            {this._renderRadioButton('All stacks', 'combined')}
-            {this._renderRadioButton('JavaScript', 'js')}
-            {this._renderRadioButton('Native', 'cpp')}
+            {this._renderImplementationRadioButton('All stacks', 'combined')}
+            {this._renderImplementationRadioButton('JavaScript', 'js')}
+            {this._renderImplementationRadioButton('Native', 'cpp')}
           </li>
+          {hasJsAllocations && !disableCallTreeSummaryButtons ? (
+            <li className="stackSettingsListItem stackSettingsFilter">
+              {this._renderCallTreeStrategyRadioButton('Timing', 'timing')}
+              {this._renderCallTreeStrategyRadioButton(
+                'JavaScript Allocations',
+                'js-allocations'
+              )}
+            </li>
+          ) : null}
           {hideInvertCallstack ? null : (
             <li className="stackSettingsListItem">
               <label className="photon-label photon-label-micro stackSettingsLabel">
@@ -124,11 +176,14 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),
+    hasJsAllocations: selectedThreadSelectors.getHasJsAllocations(state),
+    callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),
   }),
   mapDispatchToProps: {
     changeImplementationFilter,
     changeInvertCallstack,
     changeCallTreeSearchString,
+    changeCallTreeSummaryStrategy,
   },
   component: StackSettings,
 });
