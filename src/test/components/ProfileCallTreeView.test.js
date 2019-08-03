@@ -18,8 +18,12 @@ import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithJsAllocations,
+} from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
+import { getCallTreeSummaryStrategy } from '../../selectors/url-state';
 
 import {
   getEmptyThread,
@@ -486,5 +490,54 @@ describe('ProfileCallTreeView/end-to-end', () => {
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
+  });
+});
+
+describe('ProfileCallTreeView with JS Allocations', function() {
+  function setup() {
+    const { profile } = getProfileWithJsAllocations();
+    const store = storeWithProfile(profile);
+    const renderResult = render(
+      <Provider store={store}>
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
+      </Provider>
+    );
+
+    return { profile, ...renderResult, ...store };
+  }
+
+  it('can switch to JS allocations and back to timing', function() {
+    const { getByText, getState } = setup();
+
+    // It starts out with timing.
+    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+
+    // It switches to JS allocations.
+    getByText('JavaScript Allocations').click();
+    expect(getCallTreeSummaryStrategy(getState())).toEqual('js-allocations');
+
+    // And finally it can be switched back.
+    getByText('Timing').click();
+    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+  });
+
+  it('shows byte related labels for JS allocations', function() {
+    const { getByText, queryByText } = setup();
+
+    // These labels do not exist.
+    expect(queryByText('Total Size (bytes)')).toBe(null);
+    expect(queryByText('Self (bytes)')).toBe(null);
+
+    getByText('JavaScript Allocations').click();
+
+    // After clicking, they do.
+    getByText('Total Size (bytes)');
+    getByText('Self (bytes)');
+  });
+
+  it('matches the snapshot for JS allocations', function() {
+    const { getByText, container } = setup();
+    getByText('JavaScript Allocations').click();
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

@@ -38,7 +38,7 @@ function callTreeFromProfile(
     defaultCategory
   );
   const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
-    thread,
+    thread.samples,
     callNodeInfo,
     interval,
     false
@@ -97,7 +97,7 @@ describe('unfiltered call tree', function() {
     it('yields expected results', function() {
       expect(
         computeCallTreeCountsAndTimings(
-          thread,
+          thread.samples,
           callNodeInfo,
           profile.meta.interval,
           false
@@ -428,7 +428,7 @@ describe('inverted call tree', function() {
       defaultCategory
     );
     const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
-      thread,
+      thread.samples,
       callNodeInfo,
       interval,
       true
@@ -467,7 +467,7 @@ describe('inverted call tree', function() {
       defaultCategory
     );
     const invertedCallTreeCountsAndTimings = computeCallTreeCountsAndTimings(
-      invertedThread,
+      invertedThread.samples,
       invertedCallNodeInfo,
       interval,
       true
@@ -600,7 +600,7 @@ describe('diffing trees', function() {
       defaultCategory
     );
     const callTreeCountsAndTimings = computeCallTreeCountsAndTimings(
-      thread,
+      thread.samples,
       callNodeInfo,
       interval,
       false

@@ -9,7 +9,7 @@ import classNames from 'classnames';
 import { ensureExists } from '../../../utils/flow';
 import { timeCode } from '../../../utils/time-code';
 import {
-  getSampleCallNodes,
+  getSampleIndexToCallNodeIndex,
   getSamplesSelectedStates,
   getSampleIndexClosestToTime,
 } from '../../../profile-logic/profile-data';
@@ -87,8 +87,8 @@ class StackGraph extends PureComponent<Props> {
     const ctx = canvas.getContext('2d');
     let maxDepth = 0;
     const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-    const sampleCallNodes = getSampleCallNodes(
-      thread.samples,
+    const sampleCallNodes = getSampleIndexToCallNodeIndex(
+      thread.samples.stack,
       stackIndexToCallNodeIndex
     );
     const samplesSelectedStates = getSamplesSelectedStates(

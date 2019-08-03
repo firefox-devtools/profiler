@@ -4,7 +4,7 @@
 
 // @flow
 
-import type { Milliseconds, MemoryOffset, Microseconds } from './units';
+import type { Milliseconds, MemoryOffset, Microseconds, Bytes } from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload } from './markers';
 export type IndexIntoStackTable = number;
@@ -93,6 +93,24 @@ export type SamplesTable = {|
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
   duration?: Milliseconds[],
+  length: number,
+|};
+
+/**
+ * JS allocations are recorded as a marker payload, but in profile processing they
+ * are moved to the Thread. This allows them to be part of the stack processing pipeline.
+ */
+export type JsAllocationsTable = {|
+  time: Milliseconds[],
+  className: string[],
+  typeName: string[], // Currently only 'JSObject'
+  coarseType: string[], // Currently only 'Object',
+  // "duration" is a bit odd of a name for this field, but it's "duck typing" the byte
+  // size so that we can use a SamplesTable and JsAllocationsTable in the same call tree
+  // computation functions.
+  duration: Bytes[],
+  inNursery: boolean[],
+  stack: Array<IndexIntoStackTable | null>,
   length: number,
 |};
 
@@ -297,6 +315,7 @@ export type Thread = {|
   pid: Pid,
   tid: number | void,
   samples: SamplesTable,
+  jsAllocations?: JsAllocationsTable,
   markers: RawMarkerTable,
   stackTable: StackTable,
   frameTable: FrameTable,

@@ -21,6 +21,7 @@ import type {
   Category,
   Counter,
   CounterSamplesTable,
+  JsAllocationsTable,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -146,13 +147,13 @@ export function getCallNodeInfo(
  * Take a samples table, and return an array that contain indexes that point to the
  * leaf most call node, or null.
  */
-export function getSampleCallNodes(
-  samples: SamplesTable,
+export function getSampleIndexToCallNodeIndex(
+  stacks: Array<IndexIntoStackTable | null>,
   stackIndexToCallNodeIndex: {
     [key: IndexIntoStackTable]: IndexIntoCallNodeTable,
   }
 ): Array<IndexIntoCallNodeTable | null> {
-  return samples.stack.map(stack => {
+  return stacks.map(stack => {
     return stack === null ? null : stackIndexToCallNodeIndex[stack];
   });
 }
@@ -757,7 +758,7 @@ function _filterThreadByFunc(
   defaultCategory: IndexIntoCallNodeTable
 ): Thread {
   return timeCode('filterThread', () => {
-    const { stackTable, frameTable, samples } = thread;
+    const { stackTable, frameTable } = thread;
 
     const newStackTable = {
       length: 0,
@@ -814,16 +815,7 @@ function _filterThreadByFunc(
       return newStack;
     }
 
-    const newSamples = {
-      ...samples,
-      stack: samples.stack.map(oldStack => convertStack(oldStack)),
-    };
-
-    return {
-      ...thread,
-      samples: newSamples,
-      stackTable: newStackTable,
-    };
+    return updateThreadStacks(thread, newStackTable, convertStack);
   });
 }
 
@@ -849,7 +841,6 @@ export function filterThreadToSearchString(
   }
   const lowercaseSearchString = searchString.toLowerCase();
   const {
-    samples,
     funcTable,
     frameTable,
     stackTable,
@@ -914,19 +905,16 @@ export function filterThreadToSearchString(
     return result;
   }
 
-  return {
-    ...thread,
-    samples: Object.assign({}, samples, {
-      stack: samples.stack.map(s => (stackMatchesFilter(s) ? s : null)),
-    }),
-  };
+  return updateThreadStacks(thread, stackTable, stackIndex =>
+    stackMatchesFilter(stackIndex) ? stackIndex : null
+  );
 }
 
 /**
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 function _getSampleIndexRangeForSelection(
-  samples: SamplesTable | CounterSamplesTable,
+  samples: SamplesTable | CounterSamplesTable | JsAllocationsTable,
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
@@ -949,25 +937,52 @@ export function filterThreadSamplesToRange(
   rangeStart: number,
   rangeEnd: number
 ): Thread {
-  const { samples } = thread;
-  const [sBegin, sEnd] = _getSampleIndexRangeForSelection(
+  const { samples, jsAllocations } = thread;
+  const [beginSampleIndex, endSampleIndex] = _getSampleIndexRangeForSelection(
     samples,
     rangeStart,
     rangeEnd
   );
   const newSamples = {
-    length: sEnd - sBegin,
-    time: samples.time.slice(sBegin, sEnd),
+    length: endSampleIndex - beginSampleIndex,
+    time: samples.time.slice(beginSampleIndex, endSampleIndex),
     duration: samples.duration
-      ? samples.duration.slice(sBegin, sEnd)
+      ? samples.duration.slice(beginSampleIndex, endSampleIndex)
       : undefined,
-    stack: samples.stack.slice(sBegin, sEnd),
-    responsiveness: samples.responsiveness.slice(sBegin, sEnd),
+    stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
+    responsiveness: samples.responsiveness.slice(
+      beginSampleIndex,
+      endSampleIndex
+    ),
   };
-  return {
+
+  const newThread: Thread = {
     ...thread,
     samples: newSamples,
   };
+
+  if (jsAllocations) {
+    const [startAllocIndex, endAllocIndex] = _getSampleIndexRangeForSelection(
+      jsAllocations,
+      rangeStart,
+      rangeEnd
+    );
+    newThread.jsAllocations = {
+      time: jsAllocations.time.slice(startAllocIndex, endAllocIndex),
+      className: jsAllocations.className.slice(startAllocIndex, endAllocIndex),
+      typeName: jsAllocations.typeName.slice(startAllocIndex, endAllocIndex),
+      coarseType: jsAllocations.coarseType.slice(
+        startAllocIndex,
+        endAllocIndex
+      ),
+      duration: jsAllocations.duration.slice(startAllocIndex, endAllocIndex),
+      inNursery: jsAllocations.inNursery.slice(startAllocIndex, endAllocIndex),
+      stack: jsAllocations.stack.slice(startAllocIndex, endAllocIndex),
+      length: endAllocIndex - startAllocIndex,
+    };
+  }
+
+  return newThread;
 }
 
 export function filterCounterToRange(
@@ -1253,7 +1268,7 @@ export function invertCallstack(
   defaultCategory: IndexIntoCategoryList
 ): Thread {
   return timeCode('invertCallstack', () => {
-    const { stackTable, frameTable, samples } = thread;
+    const { stackTable, frameTable } = thread;
 
     const newStackTable = {
       length: 0,
@@ -1328,17 +1343,67 @@ export function invertCallstack(
       return newStack;
     }
 
-    const newSamples = {
-      ...samples,
-      stack: samples.stack.map(oldStack => convertStack(oldStack)),
-    };
-
-    return {
-      ...thread,
-      samples: newSamples,
-      stackTable: newStackTable,
-    };
+    return updateThreadStacks(thread, newStackTable, convertStack);
   });
+}
+
+/**
+ * Sometimes we want to update the stacks for a thread, for instance while searching
+ * for a text string, or doing a call tree transformation. This function abstracts
+ * out the manipulation of the data structures so that we can properly update
+ * the stack table and any possible allocation information.
+ */
+export function updateThreadStacks(
+  thread: Thread,
+  newStackTable: StackTable,
+  convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
+): Thread {
+  const { jsAllocations, samples } = thread;
+
+  const newSamples = {
+    ...samples,
+    stack: samples.stack.map(oldStack => convertStack(oldStack)),
+  };
+
+  const newThread = {
+    ...thread,
+    samples: newSamples,
+    stackTable: newStackTable,
+  };
+
+  if (jsAllocations) {
+    newThread.jsAllocations = {
+      ...jsAllocations,
+      stack: jsAllocations.stack.map(oldStack => convertStack(oldStack)),
+    };
+  }
+
+  return newThread;
+}
+
+/**
+ * When manipulating stack tables, the most common operation is to map from one
+ * stack to a new stack using a Map. This function returns another function that
+ * does this work. It is used in conjunction with updateThreadStacks().
+ */
+export function getMapStackUpdater(
+  oldStackToNewStack: Map<
+    null | IndexIntoStackTable,
+    null | IndexIntoStackTable
+  >
+): (IndexIntoStackTable | null) => IndexIntoStackTable | null {
+  return (oldStack: IndexIntoStackTable | null) => {
+    if (oldStack === null) {
+      return null;
+    }
+    const newStack = oldStackToNewStack.get(oldStack);
+    if (newStack === undefined) {
+      throw new Error(
+        'Could not find a stack when converting from an old stack to new stack.'
+      );
+    }
+    return newStack;
+  };
 }
 
 export function getSampleIndexClosestToTime(

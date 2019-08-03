@@ -8,6 +8,7 @@ import {
   getEmptyThread,
   getEmptyJsTracerTable,
   resourceTypes,
+  getEmptyJsAllocationsTable,
 } from '../../../profile-logic/data-structures';
 import { mergeProfiles } from '../../../profile-logic/comparison';
 import { stateFromLocation } from '../../../app-logic/url-handling';
@@ -813,4 +814,64 @@ export function getCounterForThread(
     },
   };
   return counter;
+}
+
+/**
+ * Get a profile with JS allocations. The allocations will form the following call tree.
+ *
+ * - A (total: 15, self: —)
+ *   - B (total: 15, self: —)
+ *     - Fjs (total: 12, self: —)
+ *       - Gjs (total: 12, self: 5)
+ *         - Hjs (total: 7, self: —)
+ *           - I (total: 7, self: 7)
+ *     - C (total: 3, self: —)
+ *       - D (total: 3, self: —)
+ *         - E (total: 3, self: 3)
+ */
+
+export function getProfileWithJsAllocations(): * {
+  // First create a normal sample-based profile.
+  const {
+    profile,
+    funcNamesDictPerThread: [funcNamesDict],
+  } = getProfileFromTextSamples(`
+    A  A     A
+    B  B     B
+    C  Fjs   Fjs
+    D  Gjs   Gjs
+    E        Hjs
+             I
+  `);
+
+  // Now add a JsAllocationsTable.
+  const jsAllocations = getEmptyJsAllocationsTable();
+  profile.threads[0].jsAllocations = jsAllocations;
+
+  // The stack table is built sequentially, so we can assume that the stack indexes
+  // match the func indexes.
+  const { E, I, Gjs } = funcNamesDict;
+
+  // Create a list of allocations.
+  const allocations = [
+    { byteSize: 3, stack: E },
+    { byteSize: 5, stack: Gjs },
+    { byteSize: 7, stack: I },
+  ];
+
+  // Loop through and add them to the table.
+  let time = 0;
+  for (const { byteSize, stack } of allocations) {
+    const thisTime = time++;
+    jsAllocations.time.push(thisTime);
+    jsAllocations.className.push('Function');
+    jsAllocations.typeName.push('JSObject');
+    jsAllocations.coarseType.push('Object');
+    jsAllocations.duration.push(byteSize);
+    jsAllocations.inNursery.push(true);
+    jsAllocations.stack.push(stack);
+    jsAllocations.length++;
+  }
+
+  return { profile, funcNamesDict };
 }

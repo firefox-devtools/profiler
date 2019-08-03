@@ -29,7 +29,7 @@ import {
 } from '../selectors/url-state';
 import {
   getCallNodePathFromIndex,
-  getSampleCallNodes,
+  getSampleIndexToCallNodeIndex,
   getSampleCategories,
   findBestAncestorCallNode,
 } from '../profile-logic/profile-data';
@@ -164,11 +164,11 @@ export function selectBestAncestorCallNodeAndExpandCallTree(
     }
 
     const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-    const sampleCallNodes = getSampleCallNodes(
-      filteredThread.samples,
+    const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
+      filteredThread.samples.stack,
       stackIndexToCallNodeIndex
     );
-    const clickedCallNode = sampleCallNodes[sampleIndex];
+    const clickedCallNode = sampleIndexToCallNodeIndex[sampleIndex];
     const clickedCategory = fullThread.stackTable.category[unfilteredStack];
 
     if (clickedCallNode === null) {
@@ -181,7 +181,7 @@ export function selectBestAncestorCallNodeAndExpandCallTree(
     );
     const bestAncestorCallNode = findBestAncestorCallNode(
       callNodeInfo,
-      sampleCallNodes,
+      sampleIndexToCallNodeIndex,
       sampleCategories,
       clickedCallNode,
       clickedCategory
