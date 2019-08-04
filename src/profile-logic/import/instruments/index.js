@@ -11,37 +11,37 @@ import type {
   StackTable,
 } from '../../../types/profile';
 
-type Sample = {
-  timestamp: number,
-  threadID: number,
-  backtraceID: number,
+type Sample = {|
+  +timestamp: number,
+  +threadID: number,
+  +backtraceID: number,
   backtraceStack?: Array<number>,
-};
+|};
 
-type TraceDirectoryTree = {
-  name: string,
-  files: Map<string, File>,
-  subdirectories: Map<string, TraceDirectoryTree>,
-};
+type TraceDirectoryTree = {|
+  +name: string,
+  +files: Map<string, File>,
+  +subdirectories: Map<string, TraceDirectoryTree>,
+|};
 
-type FrameInfo = {
-  key: string | number,
-  name: string,
+type FrameInfo = {|
+  +key: string | number,
+  +name: string,
   file?: string,
-  line?: number,
-  col?: number,
-};
+  +line?: number,
+  +col?: number,
+|};
 
-type FormTemplateRunData = {
-  number: number,
-  addressToFrameMap: Map<number, FrameInfo>,
-};
+type FormTemplateRunData = {|
+  +number: number,
+  +addressToFrameMap: Map<number, FrameInfo>,
+|};
 
-type SymbolInfo = {
-  symbolName: string,
-  sourcePath: string,
-  addressToLine: Map<number, number>,
-};
+type SymbolInfo = {|
+  +symbolName: string,
+  +sourcePath: string,
+  +addressToLine: Map<number, number>,
+|};
 
 import type { UniqueStringArray } from '../../../../src/utils/unique-string-array';
 
@@ -492,11 +492,11 @@ function getCoreDirForRun(
 // Here arrays contains all the information about stack trace at a given timestamp.
 // Each samples has a field named 'backtraceID' which is an index into arrays
 // Iterating recursively into arrays by given backtraceID it extracts a backtraceStack for each sample
-export async function importRunFromInstrumentsTrace(args: {
+async function importRunFromInstrumentsTrace(args: {
   tree: TraceDirectoryTree,
   addressToFrameMap: Map<number, FrameInfo>,
   runNumber: number,
-}): Array<Sample> {
+}): Promise<Array<Sample>> {
   const { tree, addressToFrameMap, runNumber } = args;
   const core = getCoreDirForRun(tree, runNumber);
   const samples = await getRawSampleList(core);
@@ -538,7 +538,7 @@ export async function importRunFromInstrumentsTrace(args: {
   }
   console.log('backtraceIDtoStack', backtraceIDtoStack);
 
-  return samples;
+  return Promise.resolve(samples);
 }
 
 // This function reads the 'form.template' file which contains all the important information about
@@ -615,7 +615,7 @@ async function readFormTemplateFile(tree) {
 }
 
 // This function returns a directory tree where each node of tree
-// is a object consist of name, files and subdirecotries fields
+// is a object consist of name, files and subdirectories fields
 async function extractDirectoryTree(entry: {
   name: string,
 }): Promise<TraceDirectoryTree> {
@@ -626,6 +626,7 @@ async function extractDirectoryTree(entry: {
   };
 
   const children = await new Promise((resolve, reject) => {
+    // $FlowFixMe createReader is not present in entry
     entry.createReader().readEntries((entries: any[]) => {
       resolve(entries);
     }, reject);

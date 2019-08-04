@@ -273,6 +273,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     } = event.dataTransfer;
 
     if ('webkitGetAsEntry' in firstItem) {
+      // $FlowFixMe webkitGetAsEntry is not present in DataTransferItem
       const webkitEntry = firstItem.webkitGetAsEntry();
       // console.log(webkitEntry);
       if (webkitEntry.isDirectory && webkitEntry.name.endsWith('.trace')) {
