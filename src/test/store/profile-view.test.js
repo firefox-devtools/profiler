@@ -1411,12 +1411,14 @@ describe('getFriendlyThreadName', function() {
       { name: 'GeckoMain', processType: 'tab' },
       { name: 'GeckoMain', processType: 'gpu' },
       { name: 'GeckoMain', processType: 'plugin' },
+      { name: 'GeckoMain', processType: 'socket'}
     ]);
     expect(getFriendlyThreadNames()).toEqual([
       'Parent Process',
       'Content Process',
       'GPU Process',
       'Plugin Process',
+      'Socket Process'
     ]);
   });
 
@@ -1426,12 +1428,14 @@ describe('getFriendlyThreadName', function() {
       { name: 'GeckoMain', processType: 'tab' },
       { name: 'GeckoMain', processType: 'gpu' },
       { name: 'GeckoMain', processType: 'tab' },
+      { name: 'GeckoMain', processType: 'socket'}
     ]);
     expect(getFriendlyThreadNames()).toEqual([
       'Parent Process',
       'Content Process (1/2)',
       'GPU Process',
       'Content Process (2/2)',
+      'Socket Process'
     ]);
   });
 
