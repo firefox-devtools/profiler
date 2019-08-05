@@ -913,7 +913,7 @@ export function filterThreadToSearchString(
 /**
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
-function _getSampleIndexRangeForSelection(
+export function getSampleIndexRangeForSelection(
   samples: SamplesTable | CounterSamplesTable | JsAllocationsTable,
   rangeStart: number,
   rangeEnd: number
@@ -938,7 +938,7 @@ export function filterThreadSamplesToRange(
   rangeEnd: number
 ): Thread {
   const { samples, jsAllocations } = thread;
-  const [beginSampleIndex, endSampleIndex] = _getSampleIndexRangeForSelection(
+  const [beginSampleIndex, endSampleIndex] = getSampleIndexRangeForSelection(
     samples,
     rangeStart,
     rangeEnd
@@ -962,7 +962,7 @@ export function filterThreadSamplesToRange(
   };
 
   if (jsAllocations) {
-    const [startAllocIndex, endAllocIndex] = _getSampleIndexRangeForSelection(
+    const [startAllocIndex, endAllocIndex] = getSampleIndexRangeForSelection(
       jsAllocations,
       rangeStart,
       rangeEnd
@@ -991,7 +991,7 @@ export function filterCounterToRange(
   rangeEnd: number
 ): Counter {
   const samples = counter.sampleGroups.samples;
-  let [sBegin, sEnd] = _getSampleIndexRangeForSelection(
+  let [sBegin, sEnd] = getSampleIndexRangeForSelection(
     samples,
     rangeStart,
     rangeEnd
