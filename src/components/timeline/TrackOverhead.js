@@ -14,7 +14,6 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 import { TrackOverheadGraph } from './TrackOverheadGraph';
 import {
   TRACK_MEMORY_GRAPH_HEIGHT,
-  TRACK_MEMORY_MARKERS_HEIGHT,
   TRACK_MEMORY_LINE_WIDTH,
 } from '../../app-logic/constants';
 
@@ -60,22 +59,21 @@ export class TrackOverheadImpl extends React.PureComponent<Props, State> {
 
   render() {
     const { overheadIndex, overheadType } = this.props;
+    const graphHeight = TRACK_MEMORY_GRAPH_HEIGHT + 15;
     return (
       <div
         className="timelineTrackMemory"
         style={{
-          height: TRACK_MEMORY_GRAPH_HEIGHT + TRACK_MEMORY_MARKERS_HEIGHT,
-          '--graph-height': `${TRACK_MEMORY_GRAPH_HEIGHT}px`,
-          '--markers-height': `${TRACK_MEMORY_MARKERS_HEIGHT}px`,
+          height: graphHeight,
+          '--graph-height': `${graphHeight}px`,
+          '--markers-height': `${0}px`,
         }}
       >
-        {/*  This is a placeholder for the marker height of memory track */}
-        <div style={{ height: '15px' }} />
         <TrackOverheadGraph
           overheadIndex={overheadIndex}
           overheadType={overheadType}
           lineWidth={TRACK_MEMORY_LINE_WIDTH}
-          graphHeight={TRACK_MEMORY_GRAPH_HEIGHT}
+          graphHeight={graphHeight}
         />
       </div>
     );
