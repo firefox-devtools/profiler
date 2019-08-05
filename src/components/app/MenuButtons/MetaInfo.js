@@ -140,14 +140,14 @@ function _mapMetaInfoExtensionNames(data: string[]): React.DOM {
 }
 
 function _formatDate(timestamp: number): string {
-  const timestampDate = new Date(timestamp).toLocaleString(undefined , {
+  const timestampDate = new Date(timestamp).toLocaleString(undefined, {
     month: 'short',
     year: 'numeric',
     day: 'numeric',
     weekday: 'short',
     hour: 'numeric',
     minute: 'numeric',
-  }); 
+  });
   return timestampDate;
 }
 
