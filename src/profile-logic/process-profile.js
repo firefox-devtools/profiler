@@ -742,6 +742,55 @@ function _processCounters(
 }
 
 /**
+ * Converts the Gecko list of overheads into the processed format.
+ */
+function _processOverheads(
+  geckoProfile: GeckoProfile | GeckoSubprocessProfile,
+  // The counters are listed independently from the threads, so we need an index that
+  // references back into a stable list of threads. The threads list in the processing
+  // step is built dynamically, so the "stableThreadList" variable is a hint that this
+  // should be a stable and sorted list of threads.
+  stableThreadList: Thread[],
+  // The timing across processes must be normalized, this is the timing delta between
+  // various processes.
+  delta: Milliseconds
+): any {
+  const geckoProfilerOverhead: Object = geckoProfile.profilerOverhead_UNSTABLE;
+  const mainThread = geckoProfile.threads.find(
+    thread => thread.name === 'GeckoMain'
+  );
+
+  if (!mainThread || !geckoProfilerOverhead) {
+    // Counters or a main thread weren't found, bail out, and return an empty array.
+    return [];
+  }
+
+  // The gecko profile's process don't map to the final thread list. Use the stable
+  // thread list to look up the thread index for the main thread in this profile.
+  const mainThreadIndex = stableThreadList.findIndex(
+    thread => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+  );
+
+  if (mainThreadIndex === -1) {
+    throw new Error(
+      'Unable to find the main thread in the stable thread list. This means that the ' +
+        'logic in the _processCounters function is wrong.'
+    );
+  }
+
+  const statistics = geckoProfilerOverhead.statistics;
+  return {
+    ..._adjustOverheadTimestamps(
+      _toStructOfArrays(geckoProfilerOverhead),
+      delta
+    ),
+    pid: mainThread.pid,
+    mainThreadIndex,
+    statistics,
+  };
+}
+
+/**
  * Convert the given thread into processed form. See docs-developer/gecko-profile-format for more
  * information.
  */
@@ -962,6 +1011,17 @@ function _adjustCounterTimestamps<T: Object>(
   };
 }
 
+function _adjustOverheadTimestamps<T: Object>(
+  sampleGroups: T,
+  delta: Milliseconds
+): T {
+  return {
+    ...sampleGroups,
+    // we should convert it to microseconds since it's the used timing in profiler.
+    time: sampleGroups.time.map(time => time / 1000 + delta),
+  };
+}
+
 /**
  * Convert a profile from the Gecko format into the processed format.
  * Throws an exception if it encounters an incompatible profile.
@@ -988,6 +1048,7 @@ export function processProfile(
   }
   const counters: Counter[] = _processCounters(geckoProfile, threads, 0);
 
+  const profilerOverhead: any = [_processOverheads(geckoProfile, threads, 0)];
   for (const subprocessProfile of geckoProfile.processes) {
     const adjustTimestampsBy =
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
@@ -1022,6 +1083,10 @@ export function processProfile(
 
     counters.push(
       ..._processCounters(subprocessProfile, threads, adjustTimestampsBy)
+    );
+
+    profilerOverhead.push(
+      _processOverheads(subprocessProfile, threads, adjustTimestampsBy)
     );
   }
 
@@ -1065,6 +1130,7 @@ export function processProfile(
     meta,
     pages,
     counters,
+    profilerOverhead,
     threads,
   };
   return result;

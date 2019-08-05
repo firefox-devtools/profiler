@@ -32,11 +32,13 @@ const LOCAL_TRACK_INDEX_ORDER = {
   thread: 0,
   network: 1,
   memory: 2,
+  overhead: 3,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
-  network: 0,
-  memory: 1,
-  thread: 2,
+  overhead: 0,
+  network: 1,
+  memory: 2,
+  thread: 3,
 };
 const GLOBAL_TRACK_INDEX_ORDER = {
   process: 0,
@@ -238,6 +240,34 @@ export function computeLocalTracksByPid(
         }
         tracks.push({ type: 'memory', counterIndex });
       }
+    }
+  }
+
+  const { profilerOverhead } = profile;
+  if (profilerOverhead) {
+    for (
+      let overheadIndex = 0;
+      overheadIndex < profilerOverhead.length;
+      overheadIndex++
+    ) {
+      const { pid } = profilerOverhead[overheadIndex];
+      let tracks = localTracksByPid.get(pid);
+      if (tracks === undefined) {
+        tracks = [];
+        localTracksByPid.set(pid, tracks);
+      }
+      tracks.push({
+        type: 'overhead',
+        overheadIndex,
+        overheadType: 'counters',
+      });
+      tracks.push({
+        type: 'overhead',
+        overheadIndex,
+        overheadType: 'expiredMarkerCleaning',
+      });
+      tracks.push({ type: 'overhead', overheadIndex, overheadType: 'locking' });
+      tracks.push({ type: 'overhead', overheadIndex, overheadType: 'threads' });
     }
   }
 
@@ -559,9 +589,48 @@ export function getLocalTrackName(
       return 'Network';
     case 'memory':
       return 'Memory';
+    case 'overhead':
+      return getOverheadTypeStrings(localTrack.overheadType).name + ' Overhead';
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
+}
+
+export function getOverheadTypeStrings(overheadType: any): {
+  name: string,
+  min: string,
+  max: string,
+  mean: string,
+} {
+  let name;
+  let string;
+  switch (overheadType) {
+    case 'counters':
+      name = 'Counters';
+      string = 'Counter';
+      break;
+    case 'expiredMarkerCleaning':
+      name = 'Expired Marker Cleaning';
+      string = 'Cleaning';
+      break;
+    case 'locking':
+      name = 'Locking';
+      string = 'Lockings';
+      break;
+    case 'threads':
+      name = 'Threads';
+      string = 'Thread';
+      break;
+    default:
+      throw assertExhaustiveCheck(overheadType, `Unhandled overheadType type.`);
+  }
+
+  return {
+    name,
+    min: 'min' + string,
+    max: 'max' + string,
+    mean: 'mean' + string,
+  };
 }
 
 /**

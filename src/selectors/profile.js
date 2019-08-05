@@ -176,6 +176,48 @@ function _createCounterSelectors(counterIndex: CounterIndex): * {
   };
 }
 
+type OverheadSelectors = $ReturnType<typeof _createOverheadSelectors>;
+
+const _OverheadSelectors = {};
+export const getOverheadSelectors = (
+  index: CounterIndex
+): OverheadSelectors => {
+  let selectors = _OverheadSelectors[index];
+  if (!selectors) {
+    selectors = _createOverheadSelectors(index);
+    _OverheadSelectors[index] = selectors;
+  }
+  return selectors;
+};
+
+/**
+ * This function creates selectors for each of the Counters in the profile. The type
+ * signature of each selector is defined in the function body, and inferred in the return
+ * type of the function.
+ */
+function _createOverheadSelectors(overheadIndex: CounterIndex): * {
+  const getOverhead: Selector<any> = state =>
+    ensureExists(
+      getProfile(state).profilerOverhead,
+      'Attempting to get an overhead by index, but no overheads exist.'
+    )[overheadIndex];
+
+  const getPid: Selector<Pid> = state => getOverhead(state).pid;
+
+  // FIXME:
+  // const getCommittedRangeFilteredOverhead: Selector<Counter> = createSelector(
+  //   getOverhead,
+  //   getCommittedRange,
+  //   (counters, range) => filterCounterToRange(counters, range.start, range.end)
+  // );
+
+  return {
+    getOverhead,
+    getPid,
+    // getCommittedRangeFilteredCounter,
+  };
+}
+
 /**
  * Tracks
  *

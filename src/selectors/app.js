@@ -143,6 +143,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
               height += TRACK_NETWORK_HEIGHT + border;
               break;
             case 'memory':
+            case 'overhead':
               height += TRACK_MEMORY_HEIGHT + border;
               break;
             default:

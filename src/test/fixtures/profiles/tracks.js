@@ -86,6 +86,10 @@ export function getHumanReadableTracks(state: State): string[] {
           trackName = profileViewSelectors
             .getCounterSelectors(track.counterIndex)
             .getPid(state);
+        } else if (track.type === 'overhead') {
+          trackName = profileViewSelectors
+            .getOverheadSelectors(track.overheadIndex)
+            .getPid(state);
         } else {
           trackName = threads[track.threadIndex].name;
         }

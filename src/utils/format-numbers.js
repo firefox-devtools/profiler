@@ -127,6 +127,14 @@ export function formatSI(num: number): string {
   return formatNumber(num / (1000 * 1000 * 1000), 3, 2) + 'G';
 }
 
+export function formatNanoseconds(
+  time: Milliseconds,
+  significantDigits: number = 3,
+  maxFractionalDigits: number = 5
+) {
+  return formatNumber(time, significantDigits, maxFractionalDigits) + 'ns';
+}
+
 export function formatMicroseconds(
   time: Microseconds,
   significantDigits: number = 2,

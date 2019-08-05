@@ -242,6 +242,7 @@ export type GeckoProfileFullMeta = {|
 
 export type GeckoProfileWithMeta<Meta> = {|
   counters?: GeckoCounter[],
+  profilerOverhead_UNSTABLE?: any,
   meta: Meta,
   libs: Lib[],
   pages?: PageList,

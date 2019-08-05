@@ -26,6 +26,8 @@ import { getThreadSelectors } from '../../selectors/per-thread';
 import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
+import { TrackOverhead } from './TrackOverhead';
+import { getOverheadTypeStrings } from '../../profile-logic/tracks';
 import type { TrackReference } from '../../types/actions';
 import type { Pid } from '../../types/profile';
 import type { TrackIndex, LocalTrack } from '../../types/profile-derived';
@@ -83,8 +85,15 @@ class LocalTrackComponent extends PureComponent<Props> {
         return <TrackNetwork threadIndex={localTrack.threadIndex} />;
       case 'memory':
         return <TrackMemory counterIndex={localTrack.counterIndex} />;
+      case 'overhead':
+        return (
+          <TrackOverhead
+            overheadIndex={localTrack.overheadIndex}
+            overheadType={localTrack.overheadType}
+          />
+        );
       default:
-        console.error('Unhandled localTrack type', (localTrack: empty));
+        console.error('Unhandled localTrack type', (localTrack: empty)); // TODO: change to exhaustive check
         return null;
     }
   }
@@ -161,6 +170,11 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         titleText = getCounterSelectors(localTrack.counterIndex).getDescription(
           state
         );
+        break;
+      }
+      case 'overhead': {
+        titleText =
+          getOverheadTypeStrings(localTrack.overheadType).name + ' Overhead';
         break;
       }
       default:

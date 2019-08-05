@@ -7,6 +7,7 @@ import { oneLine } from 'common-tags';
 import { getLastVisibleThreadTabSlug } from '../selectors/app';
 import {
   getCounterSelectors,
+  getOverheadSelectors,
   getGlobalTracks,
   getGlobalTrackAndIndexByPid,
   getLocalTracks,
@@ -283,6 +284,13 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
             getState()
           );
           selectedThreadIndex = counter.mainThreadIndex;
+          break;
+        }
+        case 'overhead': {
+          const { overheadIndex } = localTrack;
+          const overheadSelectors = getOverheadSelectors(overheadIndex);
+          const overhead = overheadSelectors.getOverhead(getState());
+          selectedThreadIndex = overhead.mainThreadIndex;
           break;
         }
         default:

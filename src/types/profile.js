@@ -417,5 +417,6 @@ export type Profile = {|
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.
   counters?: Counter[],
+  profilerOverhead?: any[],
   threads: Thread[],
 |};

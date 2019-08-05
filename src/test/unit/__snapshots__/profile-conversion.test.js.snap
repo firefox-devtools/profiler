@@ -3949,6 +3949,9 @@ Object {
     "version": 16,
   },
   "pages": Array [],
+  "profilerOverhead": Array [
+    Array [],
+  ],
   "threads": Array [
     Object {
       "frameTable": Object {
@@ -10216,6 +10219,9 @@ Object {
     "version": 16,
   },
   "pages": Array [],
+  "profilerOverhead": Array [
+    Array [],
+  ],
   "threads": Array [
     Object {
       "frameTable": Object {
