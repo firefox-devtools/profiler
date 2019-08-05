@@ -259,6 +259,11 @@ export function computeLocalTracksByPid(
       tracks.push({
         type: 'overhead',
         overheadIndex,
+        overheadType: 'sum',
+      });
+      tracks.push({
+        type: 'overhead',
+        overheadIndex,
         overheadType: 'counters',
       });
       tracks.push({
@@ -596,7 +601,9 @@ export function getLocalTrackName(
   }
 }
 
-export function getOverheadTypeStrings(overheadType: any): {
+export function getOverheadTypeStrings(
+  overheadType: any
+): {
   name: string,
   min: string,
   max: string,
@@ -620,6 +627,10 @@ export function getOverheadTypeStrings(overheadType: any): {
     case 'threads':
       name = 'Threads';
       string = 'Thread';
+      break;
+    case 'sum':
+      name = 'Overall';
+      string = 'Overhead';
       break;
     default:
       throw assertExhaustiveCheck(overheadType, `Unhandled overheadType type.`);

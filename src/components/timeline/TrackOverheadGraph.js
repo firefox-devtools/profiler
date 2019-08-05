@@ -107,7 +107,17 @@ class TrackOverheadCanvas extends React.PureComponent<CanvasProps> {
         x = (deviceWidth * (overhead.time[i] - rangeStart)) / rangeLength;
         // Add on half the stroke's line width so that it won't be cut off the edge
         // of the graph.
-        const unitGraphCount = overhead[overheadType][i] / maxOverhead;
+        let currentOverhead;
+        if (overheadType === 'sum') {
+          currentOverhead =
+            overhead.counters[i] +
+            overhead.expiredMarkerCleaning[i] +
+            overhead.locking[i] +
+            overhead.threads[i];
+        } else {
+          currentOverhead = overhead[overheadType][i];
+        }
+        const unitGraphCount = currentOverhead / maxOverhead;
         // console.log('canova height', { innerDeviceHeight, deviceLineHalfWidth });
         y =
           innerDeviceHeight -
@@ -242,13 +252,22 @@ class TrackOverheadGraphImpl extends React.PureComponent<Props, State> {
 
   _renderTooltip(overheadIndex: number): React.Node {
     const { overhead, overheadType } = this.props;
-    const overheadTime = overhead[overheadType][overheadIndex];
+    let currentOverhead;
+    if (overheadType === 'sum') {
+      currentOverhead =
+        overhead.counters[overheadIndex] +
+        overhead.expiredMarkerCleaning[overheadIndex] +
+        overhead.locking[overheadIndex] +
+        overhead.threads[overheadIndex];
+    } else {
+      currentOverhead = overhead[overheadType][overheadIndex];
+    }
 
     return (
       <div className="timelineTrackMemoryTooltip">
         <div className="timelineTrackMemoryTooltipLine">
           <span className="timelineTrackMemoryTooltipNumber">
-            {formatNanoseconds(overheadTime)}
+            {formatNanoseconds(currentOverhead)}
           </span>
           {' ' + getOverheadTypeStrings(overheadType).name}
         </div>
@@ -277,7 +296,17 @@ class TrackOverheadGraphImpl extends React.PureComponent<Props, State> {
     const { statistics } = overhead;
     const maxOverhead = statistics[getOverheadTypeStrings(overheadType).max];
 
-    const unitSampleCount = overhead[overheadType][overheadIndex] / maxOverhead;
+    let currentOverhead;
+    if (overheadType === 'sum') {
+      currentOverhead =
+        overhead.counters[overheadIndex] +
+        overhead.expiredMarkerCleaning[overheadIndex] +
+        overhead.locking[overheadIndex] +
+        overhead.threads[overheadIndex];
+    } else {
+      currentOverhead = overhead[overheadType][overheadIndex];
+    }
+    const unitSampleCount = currentOverhead / maxOverhead;
     const innerTrackHeight = graphHeight - lineWidth / 2;
     const top =
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
