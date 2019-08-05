@@ -70,28 +70,43 @@ type ScreenshotEvent = TracingEvent<{|
 |}>;
 
 export function isChromeProfile(profile: mixed): boolean {
-  if (!Array.isArray(profile)) {
-    return false;
+  let event;
+  if (Array.isArray(profile)) {
+    event = profile[0];
+  } else if ('traceEvents' in profile && Array.isArray(profile.traceEvents)) {
+    event = profile.traceEvents[0];
   }
-  const event = profile[0];
-  // Lightly check that some properties exist that are in the TracingEvent.
-  return (
-    typeof event === 'object' &&
-    event !== null &&
-    'ph' in event &&
-    'cat' in event &&
-    'args' in event
-  );
+  if (event) {
+    // Lightly check that some properties exist that are in the TracingEvent.
+    return (
+      typeof event === 'object' &&
+      event !== null &&
+      'ph' in event &&
+      'cat' in event &&
+      'args' in event
+    );
+  }
+  return false;
 }
 
 export function convertChromeProfile(profile: mixed): Promise<Profile> {
-  if (!Array.isArray(profile)) {
+  if (
+    !Array.isArray(profile) &&
+    'traceEvents' in profile &&
+    !Array.isArray(profile.traceEvents)
+  ) {
     throw new Error(
       'Expected an array when attempting to convert a Chrome profile.'
     );
   }
   const eventsByName: Map<string, TracingEventUnion[]> = new Map();
-  for (const tracingEvent of profile) {
+  let event;
+  if (Array.isArray(profile)) {
+    event = profile;
+  } else {
+    event = profile.traceEvents;
+  }
+  for (const tracingEvent of event) {
     if (
       typeof tracingEvent !== 'object' ||
       tracingEvent === null ||
