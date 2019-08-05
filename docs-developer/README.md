@@ -20,7 +20,7 @@
  * [Loading in profiles from various sources](./loading-in-profiles.md)
  * [Gecko profile format](./gecko-profile-format.md)
  * [Processed profile format](./processed-profile-format.md)
- * [Writing a Custom Profile Importer](./custom-importer)
+ * [Writing a Custom Profile Importer](./custom-importer.md)
  * [Markers](./markers.md)
  * [Upgrading profiles](./upgrading-profiles.md)
  * [Potential performance data sources in Gecko](./data-sources.md)
