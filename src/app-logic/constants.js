@@ -39,3 +39,6 @@ export const TRACK_PROCESS_BLANK_HEIGHT = 30;
 
 // Height of timeline ruler.
 export const TIMELINE_RULER_HEIGHT = 20;
+
+// This controls the height of the call tree and marker table.
+export const TREE_VIEW_ROW_HEIGHT = 18;

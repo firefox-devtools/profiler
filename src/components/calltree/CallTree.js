@@ -30,6 +30,7 @@ import {
   addTransformToStack,
 } from '../../actions/profile-view';
 import { assertExhaustiveCheck } from '../../utils/flow';
+import { TREE_VIEW_ROW_HEIGHT } from '../../app-logic/constants';
 
 import type { IconWithClassName, State } from '../../types/state';
 import type { CallTree } from '../../profile-logic/call-tree';
@@ -231,7 +232,7 @@ class CallTreeComponent extends PureComponent<Props> {
         contextMenuId="CallNodeContextMenu"
         maxNodeDepth={callNodeMaxDepth}
         icons={this.props.icons}
-        rowHeight={16}
+        rowHeight={TREE_VIEW_ROW_HEIGHT}
         indentWidth={10}
       />
     );

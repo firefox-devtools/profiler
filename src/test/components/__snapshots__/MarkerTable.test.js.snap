@@ -121,7 +121,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 48px;"
+            style="height: 54px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -132,7 +132,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
             >
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
-                style="height: 16px; line-height: 16px;"
+                style="height: 18px; line-height: 18px;"
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
@@ -155,7 +155,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns odd"
-                style="height: 16px; line-height: 16px;"
+                style="height: 18px; line-height: 18px;"
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
@@ -178,7 +178,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               </div>
               <div
                 class="treeViewRow treeViewRowFixedColumns even"
-                style="height: 16px; line-height: 16px;"
+                style="height: 18px; line-height: 18px;"
               >
                 <span
                   class="treeViewRowColumn treeViewFixedColumn start"
@@ -203,7 +203,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 48px; width: 3000px;"
+            style="height: 54px; width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -219,7 +219,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
-                style="height: 16px; line-height: 16px;"
+                style="height: 18px; line-height: 18px;"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -241,7 +241,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
-                style="height: 16px; line-height: 16px;"
+                style="height: 18px; line-height: 18px;"
               >
                 <span
                   class="treeRowIndentSpacer"
@@ -263,7 +263,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
-                style="height: 16px; line-height: 16px;"
+                style="height: 18px; line-height: 18px;"
               >
                 <span
                   class="treeRowIndentSpacer"

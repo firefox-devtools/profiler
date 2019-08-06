@@ -26,6 +26,7 @@ import {
   getMarkerFullDescription,
   getMarkerCategory,
 } from '../../profile-logic/marker-data';
+import { TREE_VIEW_ROW_HEIGHT } from '../../app-logic/constants';
 
 import './index.css';
 
@@ -224,7 +225,7 @@ class MarkerTable extends PureComponent<Props> {
             expandedNodeIds={this._expandedNodeIds}
             ref={this._takeTreeViewRef}
             contextMenuId="MarkerContextMenu"
-            rowHeight={16}
+            rowHeight={TREE_VIEW_ROW_HEIGHT}
             indentWidth={10}
           />
         )}
