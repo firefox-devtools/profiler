@@ -14,7 +14,6 @@ import {
   getProfileInterval,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
-import { ORANGE_50 } from 'photon-colors';
 import Tooltip from '../tooltip/Tooltip';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
 import bisection from 'bisection';
@@ -94,8 +93,8 @@ class TrackOverheadCanvas extends React.PureComponent<CanvasProps> {
       // Draw the chart.
       const rangeLength = rangeEnd - rangeStart;
       ctx.lineWidth = deviceLineWidth;
-      ctx.strokeStyle = ORANGE_50;
-      ctx.fillStyle = '#ff940088'; // Orange 50 with transparency.
+      ctx.strokeStyle = '#ff0026';
+      ctx.fillStyle = '#fc536d'; // Orange 50 with transparency.
       ctx.beginPath();
 
       // The x and y are used after the loop.
@@ -312,7 +311,10 @@ class TrackOverheadGraphImpl extends React.PureComponent<Props, State> {
       innerTrackHeight - unitSampleCount * innerTrackHeight + lineWidth / 2;
 
     return (
-      <div style={{ left, top }} className="timelineTrackMemoryGraphDot" />
+      <div
+        style={{ left, top, 'background-color': '#ff0026' }}
+        className="timelineTrackMemoryGraphDot"
+      />
     );
   }
 
