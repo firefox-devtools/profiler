@@ -5,6 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
+import './TrackContextMenu.css';
 import {
   hideGlobalTrack,
   showGlobalTrack,
@@ -178,8 +179,23 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   };
 
   renderGlobalTrack(trackIndex: TrackIndex) {
-    const { hiddenGlobalTracks, globalTrackNames } = this.props;
+    const {
+      hiddenGlobalTracks,
+      globalTrackNames,
+      globalTracks,
+      threads,
+    } = this.props;
     const isHidden = hiddenGlobalTracks.has(trackIndex);
+    const track = globalTracks[trackIndex];
+
+    let title = `${globalTrackNames[trackIndex]}`;
+    if (track.type === 'process') {
+      title += ` (Process ID: ${track.pid}`;
+      if (track.mainThreadIndex !== null) {
+        title += `, Thread ID: ${threads[track.mainThreadIndex].tid}`;
+      }
+      title += ')';
+    }
 
     return (
       <MenuItem
@@ -188,29 +204,42 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={{ trackIndex }}
         onClick={this._toggleGlobalTrackVisibility}
         attributes={{
-          className: classNames({ checkable: true, checked: !isHidden }),
+          className: classNames({
+            checkable: true,
+            checked: !isHidden,
+            timelineTrackContextMenuItem: true,
+          }),
+          title,
         }}
       >
-        {globalTrackNames[trackIndex]}
+        <span>{globalTrackNames[trackIndex]}</span>
+        <span className="timelineTrackContextMenuSpacer" />
+        {track.type === 'process' && (
+          <span className="timelineTrackContextMenuPid">({track.pid})</span>
+        )}
       </MenuItem>
     );
   }
 
   renderLocalTracks(globalTrackIndex: TrackIndex, pid: Pid) {
     const {
+      localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
       localTrackNamesByPid,
       hiddenGlobalTracks,
+      threads,
     } = this.props;
 
     const isGlobalTrackHidden = hiddenGlobalTracks.has(globalTrackIndex);
     const localTrackOrder = localTrackOrderByPid.get(pid);
+    const localTracks = localTracksByPid.get(pid);
     const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
     const localTrackNames = localTrackNamesByPid.get(pid);
 
     if (
       localTrackOrder === undefined ||
+      localTracks === undefined ||
       hiddenLocalTracks === undefined ||
       localTrackNames === undefined
     ) {
@@ -221,21 +250,31 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       return null;
     }
 
-    return localTrackOrder.map(trackIndex => (
-      <MenuItem
-        key={trackIndex}
-        preventClose={true}
-        data={{ pid, trackIndex, globalTrackIndex }}
-        onClick={this._toggleLocalTrackVisibility}
-        attributes={{
-          className: classNames('checkable indented', {
-            checked: !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
-          }),
-        }}
-      >
-        {localTrackNames[trackIndex]}
-      </MenuItem>
-    ));
+    return localTrackOrder.map(trackIndex => {
+      let title = `${localTrackNames[trackIndex]}`;
+      const track = localTracks[trackIndex];
+      if (track.type === 'thread') {
+        title += ` (Thread ID: ${threads[track.threadIndex].tid})`;
+      }
+
+      return (
+        <MenuItem
+          key={trackIndex}
+          preventClose={true}
+          data={{ pid, trackIndex, globalTrackIndex }}
+          onClick={this._toggleLocalTrackVisibility}
+          attributes={{
+            className: classNames('checkable indented', {
+              checked:
+                !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
+            }),
+            title,
+          }}
+        >
+          {localTrackNames[trackIndex]}
+        </MenuItem>
+      );
+    });
   }
 
   getRightClickedTrackName(rightClickedTrack: TrackReference): string {
