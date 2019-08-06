@@ -11,10 +11,9 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 
-import SelectedThreadActivityGraph from '../../components/shared/thread/SelectedActivityGraph';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
-
+import TrackThread from '../../components/timeline/TrackThread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -38,10 +37,10 @@ function getSamplesPixelPosition(
 
 /**
  * This test is asserting behavior of the ThreadStackGraph component. It does this
- * by using the SelectedThreadActivityGraph component, which is a connected version
+ * by using the ThreadActivityGraph component, which is a connected version
  * that is used in the CallTree.
  */
-describe('SelectedThreadActivityGraph', function() {
+describe('ThreadActivityGraph', function() {
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
       A[cat:DOM]  A[cat:DOM]       A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]   A[cat:DOM]    A[cat:DOM]
@@ -69,7 +68,7 @@ describe('SelectedThreadActivityGraph', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <SelectedThreadActivityGraph />
+        <TrackThread threadIndex={0} />
       </Provider>
     );
     const { container } = renderResult;
@@ -80,10 +79,6 @@ describe('SelectedThreadActivityGraph', function() {
     const activityGraphCanvas = ensureExists(
       container.querySelector('.threadActivityGraphCanvas'),
       `Couldn't find the activity graph canvas, with selector .threadActivityGraphCanvas`
-    );
-    const stackGraphCanvas = ensureExists(
-      container.querySelector('.threadStackGraphCanvas'),
-      `Couldn't find the stack graph canvas, with selector .threadStackGraphCanvas`
     );
     const thread = profile.threads[0];
 
@@ -119,7 +114,7 @@ describe('SelectedThreadActivityGraph', function() {
       store,
       threadIndex,
       activityGraphCanvas,
-      stackGraphCanvas,
+      // stackGraphCanvas,
       clickActivityGraph,
       getCallNodePath,
       ctx,
@@ -141,24 +136,14 @@ describe('SelectedThreadActivityGraph', function() {
    * as once it's connected to the Redux store in the SelectedActivityGraph.
    */
   describe('ThreadActivityGraph', function() {
-    it('can click a best ancestor call node', function() {
+    it('can click the leaf call node', function() {
       const { clickActivityGraph, getCallNodePath } = setup();
 
-      // The full call node at this sample is:
-      //  A -> B -> C -> F -> G
-      // However, the best ancestor call node is:
-      //  A -> B -> C -> F
-      // As this is the most common ancestor with the same category.
       clickActivityGraph(1, 0.2);
-      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F']);
+      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
 
-      // The full call node at this sample is:
-      //  A -> B -> H -> I
-      // However, the best ancestor call node is:
-      //  A -> B -> H
-      // As this is the most common ancestor with the same category.
       clickActivityGraph(1, 0.8);
-      expect(getCallNodePath()).toEqual(['A', 'B', 'H']);
+      expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'I']);
     });
 
     it('will redraw even when there are no samples in range', function() {
@@ -173,21 +158,6 @@ describe('SelectedThreadActivityGraph', function() {
       expect(drawCalls.map(([fn]) => fn)).toContain(
         'set globalCompositeOperation'
       );
-    });
-  });
-
-  /**
-   * For completeness, test that the ThreadStackGraph is clickable, as it is using
-   * a different method than the ThreadActivityGraph to select a call node.
-   */
-  describe('ThreadStackGraph', function() {
-    it('can click a stack', function() {
-      const { stackGraphCanvas, getCallNodePath } = setup();
-      fireEvent(
-        stackGraphCanvas,
-        getMouseEvent('mouseup', { pageX: getSamplesPixelPosition(1) })
-      );
-      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
     });
   });
 });

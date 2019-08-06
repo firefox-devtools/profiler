@@ -74,7 +74,7 @@ describe('calltree/ProfileCallTreeView', function() {
       <Provider store={store}>
         <>
           <CallNodeContextMenu />
-          <ProfileCallTreeView hideThreadActivityGraph={true} />
+          <ProfileCallTreeView />
         </>
       </Provider>
     );
@@ -138,7 +138,7 @@ describe('calltree/ProfileCallTreeView', function() {
 
     const { container } = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
 
@@ -320,7 +320,7 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   function renderWithStore(store) {
     return render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     ).container.firstChild;
   }
@@ -354,7 +354,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     const store = storeWithProfile(profile);
     const { container } = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
 
@@ -471,7 +471,7 @@ describe('calltree/ProfileCallTreeView TransformNavigator', () => {
 
     const { container } = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
     expect(
@@ -487,7 +487,7 @@ describe('ProfileCallTreeView/end-to-end', () => {
     const store = storeWithProfile(processedProfile);
     render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
   });
@@ -499,7 +499,7 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
 
