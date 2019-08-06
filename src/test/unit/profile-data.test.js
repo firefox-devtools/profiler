@@ -854,7 +854,7 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         totalTime: {
           value: 5,
           breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
-          breakdownByCategory: withSingleSubcategory([1, 3, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, ...]
+          breakdownByCategory: withSingleSubcategory([1, 0, 1, 3, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript, ...]
         },
       },
       forFunc: {
@@ -866,7 +866,7 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         totalTime: {
           value: 5,
           breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
-          breakdownByCategory: withSingleSubcategory([1, 3, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, ...]
+          breakdownByCategory: withSingleSubcategory([1, 0, 1, 3, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript ...]
         },
       },
       rootTime: 5,
@@ -893,24 +893,24 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         selfTime: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
-          breakdownByCategory: withSingleSubcategory([0, 2, 0, 0, 0, 0, 0, 0]), // [Idle, Other, ...]
+          breakdownByCategory: withSingleSubcategory([0, 0, 0, 2, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript, ...]
         },
         totalTime: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
-          breakdownByCategory: withSingleSubcategory([0, 2, 0, 0, 0, 0, 0, 0]), // [Idle, Other, ...]
+          breakdownByCategory: withSingleSubcategory([0, 0, 0, 2, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript, ...]
         },
       },
       forFunc: {
         selfTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
-          breakdownByCategory: withSingleSubcategory([0, 3, 0, 0, 0, 0, 0, 0]), // [Idle, Other, ...]
+          breakdownByCategory: withSingleSubcategory([0, 0, 0, 3, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript, ...]
         },
         totalTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
-          breakdownByCategory: withSingleSubcategory([0, 3, 0, 0, 0, 0, 0, 0]), // [Idle, Other, ...]
+          breakdownByCategory: withSingleSubcategory([0, 0, 0, 3, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript, ...]
         },
       },
       rootTime: 5,
@@ -931,25 +931,25 @@ describe('getTimingsForPath in a non-inverted tree', function() {
         selfTime: {
           value: 1,
           breakdownByImplementation: { native: 1 },
-          breakdownByCategory: withSingleSubcategory([0, 0, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, ...]
+          breakdownByCategory: withSingleSubcategory([0, 0, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript ...]
         },
         totalTime: {
           value: 2,
           breakdownByImplementation: { native: 2 },
 
-          breakdownByCategory: withSingleSubcategory([1, 0, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, ...]
+          breakdownByCategory: withSingleSubcategory([1, 0, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript ...]
         },
       },
       forFunc: {
         selfTime: {
           value: 1,
           breakdownByImplementation: { native: 1 },
-          breakdownByCategory: withSingleSubcategory([0, 0, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, ...]
+          breakdownByCategory: withSingleSubcategory([0, 0, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript ...]
         },
         totalTime: {
           value: 2,
           breakdownByImplementation: { native: 2 },
-          breakdownByCategory: withSingleSubcategory([1, 0, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, ...]
+          breakdownByCategory: withSingleSubcategory([1, 0, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript ...]
         },
       },
       rootTime: 5,
@@ -1016,19 +1016,19 @@ describe('getTimingsForPath for an inverted tree', function() {
         totalTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
-          breakdownByCategory: withSingleSubcategory([0, 3, 0, 0, 0, 0, 0, 0]), // [Idle, Other, ...]
+          breakdownByCategory: withSingleSubcategory([0, 0, 0, 3, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript, ...]
         },
       },
       forFunc: {
         selfTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
-          breakdownByCategory: withSingleSubcategory([0, 3, 0, 0, 0, 0, 0, 0]), // [Idle, Other, ...]
+          breakdownByCategory: withSingleSubcategory([0, 0, 0, 3, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript, ...]
         },
         totalTime: {
           value: 3,
           breakdownByImplementation: { ion: 2, baseline: 1 },
-          breakdownByCategory: withSingleSubcategory([0, 3, 0, 0, 0, 0, 0, 0]), // [Idle, Other, ...]
+          breakdownByCategory: withSingleSubcategory([0, 0, 0, 3, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript, ...]
         },
       },
       rootTime: 5,
@@ -1051,7 +1051,7 @@ describe('getTimingsForPath for an inverted tree', function() {
         totalTime: {
           value: 2,
           breakdownByImplementation: { ion: 1, baseline: 1 },
-          breakdownByCategory: withSingleSubcategory([0, 2, 0, 0, 0, 0, 0, 0]), // [Idle, Other, ...]
+          breakdownByCategory: withSingleSubcategory([0, 0, 0, 2, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript, ...]
         },
       },
       forFunc: {
@@ -1067,7 +1067,7 @@ describe('getTimingsForPath for an inverted tree', function() {
             baseline: 1,
             native: 2,
           },
-          breakdownByCategory: withSingleSubcategory([1, 3, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout, ...]
+          breakdownByCategory: withSingleSubcategory([1, 0, 1, 3, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript, ...]
         },
       },
       rootTime: 5,
@@ -1169,7 +1169,7 @@ describe('getTimingsForPath for an inverted tree', function() {
         totalTime: {
           value: 5,
           breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
-          breakdownByCategory: withSingleSubcategory([1, 3, 1, 0, 0, 0, 0, 0]), // [Idle, Other, Layout]
+          breakdownByCategory: withSingleSubcategory([1, 0, 1, 3, 0, 0, 0, 0]), // [Idle, Other, Layout, JavaScript]
         },
       },
       rootTime: 5,
