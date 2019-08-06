@@ -90,23 +90,18 @@ export function isChromeProfile(profile: mixed): boolean {
 }
 
 export function convertChromeProfile(profile: mixed): Promise<Profile> {
-  if (
-    !Array.isArray(profile) &&
-    'traceEvents' in profile &&
-    !Array.isArray(profile.traceEvents)
-  ) {
+  let events;
+  if (Array.isArray(profile)) {
+    events = profile;
+  } else if (profile.traceEvents && Array.isArray(profile.traceEvents)) {
+    events = profile.traceEvents;
+  } else {
     throw new Error(
       'Expected an array when attempting to convert a Chrome profile.'
     );
   }
   const eventsByName: Map<string, TracingEventUnion[]> = new Map();
-  let event;
-  if (Array.isArray(profile)) {
-    event = profile;
-  } else {
-    event = profile.traceEvents;
-  }
-  for (const tracingEvent of event) {
+  for (const tracingEvent of events) {
     if (
       typeof tracingEvent !== 'object' ||
       tracingEvent === null ||
