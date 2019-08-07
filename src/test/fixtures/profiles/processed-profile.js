@@ -352,13 +352,24 @@ function _findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
   return null;
 }
 
+function _isJsFunctionName(funcName) {
+  return funcName.endsWith('js');
+}
+
 function _findCategoryFromFuncName(
   funcNameWithModifier: string,
+  funcName: string,
   categories: CategoryList
 ): IndexIntoCategoryList | null {
   const findCategoryResult = /\[cat:([^\]]+)\]/.exec(funcNameWithModifier);
+  let categoryName;
   if (findCategoryResult) {
-    const categoryName = findCategoryResult[1];
+    categoryName = findCategoryResult[1];
+  } else if (_isJsFunctionName(funcName)) {
+    categoryName = 'JavaScript';
+  }
+
+  if (categoryName) {
     const category = categories.findIndex(c => c.name === categoryName);
     if (category !== -1) {
       return category;
@@ -403,7 +414,7 @@ function _buildThreadFromTextOnlyStacks(
     );
     funcTable.fileName.push(null);
     funcTable.relevantForJS.push(funcName.endsWith('js-relevant'));
-    funcTable.isJS.push(funcName.endsWith('js'));
+    funcTable.isJS.push(_isJsFunctionName(funcName));
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
     // Ignore resources for now, this way funcNames have really nice string indexes.
@@ -461,6 +472,7 @@ function _buildThreadFromTextOnlyStacks(
       const jitTypeIndex = jitType ? stringTable.indexForString(jitType) : null;
       const category = _findCategoryFromFuncName(
         funcNameWithModifier,
+        funcName,
         categories
       );
 
