@@ -271,7 +271,6 @@ function expandKeyedArchive(
 // This function creates an archived data for given buffer by interpreting various Instruments specific data types
 function readInstrumentsArchive(buffer) {
   const byteArray = new Uint8Array(buffer);
-  // console.log('byteArray', byteArray);
   const parsedPlist = parseBinaryPlist(byteArray);
 
   const data = expandKeyedArchive(parsedPlist, ($classname, object) => {
@@ -440,7 +439,6 @@ async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
     const schemaFile = storedir.files.get('schema.xml');
     if (!schemaFile) continue;
     const schema = await readAsText(schemaFile);
-    console.log('schema', schema);
     if (!/name="time-profile"/.exec(schema)) {
       continue;
     }
@@ -501,9 +499,6 @@ async function importRunFromInstrumentsTrace(args: {
   const core = getCoreDirForRun(tree, runNumber);
   const samples = await getRawSampleList(core);
   const arrays = await getIntegerArrays(samples, core);
-
-  console.log('samples', samples);
-  console.log('addressToFrameMap', addressToFrameMap);
   const backtraceIDtoStack = new Map<number, number[]>();
 
   function appendRecursive(k: number, stack: Array<number>) {
@@ -536,7 +531,6 @@ async function importRunFromInstrumentsTrace(args: {
   for (const sample of samples) {
     sample.backtraceStack = backtraceIDtoStack.get(sample.backtraceID);
   }
-  console.log('backtraceIDtoStack', backtraceIDtoStack);
 
   return Promise.resolve(samples);
 }
@@ -550,7 +544,6 @@ async function readFormTemplateFile(tree) {
       ? readInstrumentsArchive(await readAsArrayBuffer(formTemplate))
       : {};
 
-  // console.log('archive', archive);
   const version = archive['com.apple.xray.owner.template.version'];
   let selectedRunNumber = 1;
   if ('com.apple.xray.owner.template' in archive) {
@@ -570,8 +563,6 @@ async function readFormTemplateFile(tree) {
       allRunData.runData,
       runNumber
     );
-    // console.log('runNumber', runNumber);
-    // console.log('runData', runData);
     const symbolsByPid = getOrThrow<
       string,
       Map<number, { symbols: SymbolInfo[] }>
@@ -596,9 +587,7 @@ async function readFormTemplateFile(tree) {
           });
         }
       }
-      // console.log(counter);
-      // console.log(addressToFrameMap);
-      // console.log('runs', console.log(JSON.parse(JSON.stringify(runs))));
+
       runs.push({
         number: runNumber,
         addressToFrameMap,
@@ -892,19 +881,7 @@ export async function convertInstrumentsProfile(
 ): Promise<Profile> {
   fileReader = fileReaderHelper;
   const tree = await extractDirectoryTree(entry);
-  // console.log('tree', tree);
-
-  const {
-    version,
-    runs,
-    instrument,
-    selectedRunNumber,
-  } = await readFormTemplateFile(tree);
-
-  console.log('version', version);
-  console.log('runs', runs);
-  // console.log('instrument', instrument); TODO: Use version and instruments' information into meta data if possible
-  console.log('selectedRunNumber', selectedRunNumber);
+  const { runs, instrument } = await readFormTemplateFile(tree);
 
   if (instrument !== 'com.apple.xray.instrument-type.coresampler2') {
     throw new Error(
@@ -923,14 +900,9 @@ export async function convertInstrumentsProfile(
     runNumber: number,
   });
 
-  // for (let i = 0; i < 10; i++) {
-  //   group.samples[i].threadID = 1;
-  // }
-  // To check how our functionality will behave for multi threaded samples
-
   pushThreadsInProfile(profile, addressToFrameMap, samples);
 
   profile.meta.platform = 'Macintosh';
-  console.log('profile', profile);
+
   return profile;
 }

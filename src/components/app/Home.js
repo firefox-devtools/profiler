@@ -266,7 +266,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     if (!event.dataTransfer) {
       return;
     }
-    // console.log(event.dataTransfer);
+
     const {
       files,
       items: [firstItem],
@@ -275,7 +275,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     if ('webkitGetAsEntry' in firstItem) {
       // $FlowFixMe webkitGetAsEntry is not present in DataTransferItem
       const webkitEntry = firstItem.webkitGetAsEntry();
-      // console.log(webkitEntry);
       if (webkitEntry.isDirectory && webkitEntry.name.endsWith('.trace')) {
         this.props.retrieveProfileFromFile(webkitEntry);
         return;
