@@ -385,17 +385,17 @@ export function deriveMarkersFromRawMarkerTable(
         // in the stop marker.
 
         if (data.status === 'STATUS_START') {
-          openNetworkMarkers.set(name, i);
+          openNetworkMarkers.set(data.id, i);
         } else {
           // End status can be any status other than 'STATUS_START'. They are
           // either 'STATUS_STOP' or 'STATUS_REDIRECT'.
           const endData = data;
 
-          const startIndex = openNetworkMarkers.get(name);
+          const startIndex = openNetworkMarkers.get(data.id);
 
           if (startIndex !== undefined) {
             // A start marker matches this end marker.
-            openNetworkMarkers.delete(name);
+            openNetworkMarkers.delete(data.id);
 
             // We know this startIndex points to a Network marker.
             const startData: NetworkPayload = (rawMarkers.data[
@@ -679,17 +679,18 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
         // generic markers. Lastly they're always adjacent.
 
         if (data.status === 'STATUS_START') {
-          openNetworkMarkers.set(name, i);
+          openNetworkMarkers.set(data.id, i);
         } else {
           // End status can be any status other than 'STATUS_START'
-          const startIndex = openNetworkMarkers.get(name);
+          const startIndex = openNetworkMarkers.get(data.id);
           if (startIndex !== undefined) {
             // A start marker matches this end marker.
-            openNetworkMarkers.delete(name);
+            openNetworkMarkers.delete(data.id);
 
             // We know this startIndex points to a Network marker.
             const startData: NetworkPayload = (markers.data[startIndex]: any);
             const endData = data;
+            // console.log(startData, endData);
             if (intersectsRange(startData.startTime, endData.endTime)) {
               // This couple of markers define a network marker that's at least
               // partially in the range.
