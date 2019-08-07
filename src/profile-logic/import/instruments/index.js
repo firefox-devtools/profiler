@@ -615,6 +615,8 @@ async function extractDirectoryTree(entry: {
   };
 
   const children = await new Promise((resolve, reject) => {
+    // FileSystemDirectoryEntry.createReader() is a non-standard function for now, I have checked in Firefox and Chrome. It's working fine in it.
+    // We will remove FlowFixMe once it becomes a standard function
     // $FlowFixMe createReader is not present in entry
     entry.createReader().readEntries((entries: any[]) => {
       resolve(entries);
