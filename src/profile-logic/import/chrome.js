@@ -73,7 +73,12 @@ export function isChromeProfile(profile: mixed): boolean {
   let event;
   if (Array.isArray(profile)) {
     event = profile[0];
-  } else if ('traceEvents' in profile && Array.isArray(profile.traceEvents)) {
+  } else if (
+    profile !== null &&
+    typeof profile === 'object' &&
+    'traceEvents' in profile &&
+    Array.isArray(profile.traceEvents)
+  ) {
     event = profile.traceEvents[0];
   }
   if (event) {
@@ -93,7 +98,12 @@ export function convertChromeProfile(profile: mixed): Promise<Profile> {
   let events;
   if (Array.isArray(profile)) {
     events = profile;
-  } else if (profile.traceEvents && Array.isArray(profile.traceEvents)) {
+  } else if (
+    profile !== null &&
+    typeof profile === 'object' &&
+    profile.traceEvents &&
+    Array.isArray(profile.traceEvents)
+  ) {
     events = profile.traceEvents;
   } else {
     throw new Error(
