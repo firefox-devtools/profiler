@@ -29,7 +29,7 @@ import {
 } from '../selectors/url-state';
 import {
   getCallNodePathFromIndex,
-  getSampleCallNodes,
+  getSampleIndexToCallNodeIndex,
   getSampleCategories,
   findBestAncestorCallNode,
 } from '../profile-logic/profile-data';
@@ -40,6 +40,7 @@ import { objectShallowEquals } from '../utils/index';
 import type {
   PreviewSelection,
   ImplementationFilter,
+  CallTreeSummaryStrategy,
   TrackReference,
   TimelineType,
   DataSource,
@@ -163,11 +164,11 @@ export function selectBestAncestorCallNodeAndExpandCallTree(
     }
 
     const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-    const sampleCallNodes = getSampleCallNodes(
-      filteredThread.samples,
+    const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
+      filteredThread.samples.stack,
       stackIndexToCallNodeIndex
     );
-    const clickedCallNode = sampleCallNodes[sampleIndex];
+    const clickedCallNode = sampleIndexToCallNodeIndex[sampleIndex];
     const clickedCategory = fullThread.stackTable.category[unfilteredStack];
 
     if (clickedCallNode === null) {
@@ -180,7 +181,7 @@ export function selectBestAncestorCallNodeAndExpandCallTree(
     );
     const bestAncestorCallNode = findBestAncestorCallNode(
       callNodeInfo,
-      sampleCallNodes,
+      sampleIndexToCallNodeIndex,
       sampleCategories,
       clickedCallNode,
       clickedCategory
@@ -936,6 +937,27 @@ export function changeImplementationFilter(
       transformedThread,
       previousImplementation,
     });
+  };
+}
+
+/**
+ * This action changes the strategy used to build and display the call tree. This could
+ * use sample data, or build a new call tree based off of allocation information stored
+ * in markers.
+ */
+export function changeCallTreeSummaryStrategy(
+  strategy: CallTreeSummaryStrategy
+): Action {
+  sendAnalytics({
+    hitType: 'event',
+    eventCategory: 'profile',
+    eventAction: 'change call tree summary strategy',
+    eventLabel: strategy,
+  });
+
+  return {
+    type: 'CHANGE_CALL_TREE_SUMMARY_STRATEGY',
+    strategy,
   };
 }
 

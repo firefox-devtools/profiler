@@ -39,3 +39,5 @@ export type HorizontalViewport = {
 export type StartEndRange = { start: Milliseconds, end: Milliseconds };
 
 export type MemoryOffset = number;
+
+export type Bytes = number;

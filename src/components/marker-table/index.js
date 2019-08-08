@@ -9,6 +9,7 @@ import memoize from 'memoize-immutable';
 
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
+import MarkerTableEmptyReasons from './MarkerTableEmptyReasons';
 import {
   getZeroAt,
   getScrollToSelectionGeneration,
@@ -207,22 +208,26 @@ class MarkerTable extends PureComponent<Props> {
         aria-labelledby="marker-table-tab-button"
       >
         <MarkerSettings />
-        <TreeView
-          maxNodeDepth={0}
-          tree={tree}
-          fixedColumns={this._fixedColumns}
-          mainColumn={this._mainColumn}
-          onSelectionChange={this._onSelectionChange}
-          onRightClickSelection={this._onRightClickSelection}
-          onExpandedNodesChange={this._onExpandedNodeIdsChange}
-          selectedNodeId={selectedMarker}
-          rightClickedNodeId={rightClickedMarker}
-          expandedNodeIds={this._expandedNodeIds}
-          ref={this._takeTreeViewRef}
-          contextMenuId="MarkerContextMenu"
-          rowHeight={16}
-          indentWidth={10}
-        />
+        {markerIndexes.length === 0 ? (
+          <MarkerTableEmptyReasons />
+        ) : (
+          <TreeView
+            maxNodeDepth={0}
+            tree={tree}
+            fixedColumns={this._fixedColumns}
+            mainColumn={this._mainColumn}
+            onSelectionChange={this._onSelectionChange}
+            onRightClickSelection={this._onRightClickSelection}
+            onExpandedNodesChange={this._onExpandedNodeIdsChange}
+            selectedNodeId={selectedMarker}
+            rightClickedNodeId={rightClickedMarker}
+            expandedNodeIds={this._expandedNodeIds}
+            ref={this._takeTreeViewRef}
+            contextMenuId="MarkerContextMenu"
+            rowHeight={16}
+            indentWidth={10}
+          />
+        )}
       </div>
     );
   }

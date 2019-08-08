@@ -169,6 +169,16 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     // Only JavaScript functions have a filename.
     const fileNameIndex = thread.funcTable.fileName[funcIndex];
     if (fileNameIndex !== null) {
+      let fileName = thread.stringTable.getString(fileNameIndex);
+      const lineNumber = thread.funcTable.lineNumber[funcIndex];
+      if (lineNumber !== null) {
+        fileName += ':' + lineNumber;
+        const columnNumber = thread.funcTable.columnNumber[funcIndex];
+        if (columnNumber !== null) {
+          fileName += ':' + columnNumber;
+        }
+      }
+
       // Because of our use of Grid Layout, all our elements need to be direct
       // children of the grid parent. That's why we use arrays here, to add
       // the elements as direct children.
@@ -176,7 +186,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         <div className="tooltipLabel" key="file">
           File:
         </div>,
-        thread.stringTable.getString(fileNameIndex),
+        fileName,
       ];
     } else {
       const resourceIndex = thread.funcTable.resource[funcIndex];

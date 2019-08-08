@@ -13,8 +13,11 @@ import { UniqueStringArray } from '../../utils/unique-string-array';
 import {
   createGeckoProfile,
   createGeckoCounter,
+  createGeckoMarkerStack,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/flow';
+import type { JsAllocationPayload_Gecko } from '../../types/markers';
+import type { GeckoThread } from '../../types/gecko-profile';
 
 describe('extract functions and resource from location strings', function() {
   // These location strings are turned into the proper funcs.
@@ -252,5 +255,69 @@ describe('serializeProfile', function() {
       secondSerialized
     );
     expect(roundtrip).toEqual(secondRountrip);
+  });
+});
+
+describe('js allocation processing', function() {
+  function getAllocationMarkerHelper(geckoThread: GeckoThread) {
+    let time = 0;
+    return ({ byteSize, stackIndex }) => {
+      const thisTime = time++;
+      // Opt out of type checking, due to the schema look-up not being type checkable.
+      const markerTuple: any = [];
+      const payload: JsAllocationPayload_Gecko = {
+        type: 'JS allocation',
+        startTime: thisTime,
+        endTime: thisTime,
+        className: 'Function',
+        typeName: 'JSObject',
+        coarseType: 'Object',
+        size: byteSize,
+        inNursery: true,
+        stack: createGeckoMarkerStack({ stackIndex, time: thisTime }),
+      };
+
+      markerTuple[geckoThread.markers.schema.name] = 'JS allocation';
+      markerTuple[geckoThread.markers.schema.time] = thisTime;
+      markerTuple[geckoThread.markers.schema.data] = payload;
+
+      geckoThread.markers.data.push(markerTuple);
+    };
+  }
+
+  it('should process JS allocation markers into a JS allocation table', function() {
+    const geckoProfile = createGeckoProfile();
+    const geckoThread = geckoProfile.threads[0];
+    const createAllocation = getAllocationMarkerHelper(geckoThread);
+
+    // Verify the test found the parent process' main thread.
+    expect(geckoThread.name).toBe('GeckoMain');
+    expect(geckoThread.processType).toBe('default');
+
+    // Create 3 allocations, and note the marker lengths.
+    const originalMarkersLength = geckoThread.markers.data.length;
+    createAllocation({ byteSize: 3, stackIndex: 11 });
+    createAllocation({ byteSize: 5, stackIndex: 13 });
+    createAllocation({ byteSize: 7, stackIndex: null });
+    const markersAndAllocationsLength = geckoThread.markers.data.length;
+
+    // Do a simple assertion to verify that the allocations were added by the test
+    // fixture as expected.
+    expect(markersAndAllocationsLength).toEqual(originalMarkersLength + 3);
+
+    // Process the profile and get out the new thread.
+    const processedProfile = processProfile(geckoProfile);
+    const processedThread = processedProfile.threads[0];
+
+    // Check for the existence of the allocations.
+    const { jsAllocations } = processedThread;
+    if (!jsAllocations) {
+      throw new Error('Could not find the jsAllocations on the main thread.');
+    }
+
+    // Assert that the transformation makes sense.
+    expect(jsAllocations.time).toEqual([0, 1, 2]);
+    expect(jsAllocations.duration).toEqual([3, 5, 7]);
+    expect(jsAllocations.stack).toEqual([11, 13, null]);
   });
 });

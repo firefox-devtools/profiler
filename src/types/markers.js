@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Milliseconds, Microseconds, Seconds } from './units';
+import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
 import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
 
@@ -486,6 +486,18 @@ export type DummyForTestsMarkerPayload = {|
   endTime: Milliseconds,
 |};
 
+export type JsAllocationPayload_Gecko = {|
+  type: 'JS allocation',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  className: string,
+  typeName: string, // Currently only 'JSObject'
+  coarseType: string, // Currently only 'Object',
+  size: Bytes,
+  inNursery: boolean,
+  stack: GeckoMarkerStack,
+|};
+
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
@@ -533,6 +545,7 @@ export type MarkerPayload_Gecko =
   | CcMarkerTracing
   | ArbitraryEventTracing
   | NavigationMarkerPayload
+  | JsAllocationPayload_Gecko
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.

@@ -17,6 +17,42 @@ import type {
 
 import { GECKO_PROFILE_VERSION } from '../../../app-logic/constants';
 
+export function createGeckoMarkerStack({
+  stackIndex,
+  time,
+}: {
+  stackIndex: number | null,
+  time: number,
+}): GeckoMarkerStack {
+  const markerStack = {
+    registerTime: null,
+    unregisterTime: null,
+    processType: 'default',
+    tid: 1111,
+    pid: 2222,
+    markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+    name: 'SyncProfile',
+    samples: {
+      schema: {
+        stack: 0,
+        time: 1,
+        responsiveness: 2,
+      },
+      data: [],
+    },
+  };
+
+  if (stackIndex !== null) {
+    // Only add a sample if the stack exists. There have been some cases observed
+    // on profiles where a sample wasn't collected here. This is probably an error
+    // in the GeckoProfiler mechanism, but the front-end should be able to handle
+    // it. See Bug 1566576.
+    markerStack.samples.data.push([stackIndex, time, 0]);
+  }
+
+  return markerStack;
+}
+
 export function createGeckoSubprocessProfile(
   parentProfile: GeckoProfile
 ): GeckoSubprocessProfile {
@@ -271,23 +307,7 @@ function _createGeckoThread(): GeckoThread {
           {
             category: 'Paint',
             interval: 'start',
-            stack: ({
-              registerTime: null,
-              unregisterTime: null,
-              processType: 'default',
-              tid: 1111,
-              pid: 2222,
-              markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
-              name: 'SyncProfile',
-              samples: {
-                schema: {
-                  stack: 0,
-                  time: 1,
-                  responsiveness: 2,
-                },
-                data: [[2, 1, 0]], // (root), 0x100000f84, 0x100001a45
-              },
-            }: GeckoMarkerStack),
+            stack: createGeckoMarkerStack({ stackIndex: 2, time: 1 }), // (root), 0x100000f84, 0x100001a45
             type: 'tracing',
           },
         ],

@@ -14,6 +14,7 @@ import type { TransformStacksPerThread } from '../types/transforms';
 import type {
   DataSource,
   ImplementationFilter,
+  CallTreeSummaryStrategy,
   TimelineType,
 } from '../types/actions';
 import type { UrlState, Reducer } from '../types/state';
@@ -228,6 +229,22 @@ const implementation: Reducer<ImplementationFilter> = (
   }
 };
 
+/**
+ * Represents the current strategy used to summarize numeric information in the call
+ * call tree.
+ */
+const callTreeSummaryStrategy: Reducer<CallTreeSummaryStrategy> = (
+  state = 'timing',
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_CALL_TREE_SUMMARY_STRATEGY':
+      return action.strategy;
+    default:
+      return state;
+  }
+};
+
 const invertCallstack: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
@@ -381,6 +398,7 @@ const profileSpecific = combineReducers({
   hiddenLocalTracksByPid,
   localTrackOrderByPid,
   implementation,
+  callTreeSummaryStrategy,
   invertCallstack,
   showJsTracerSummary,
   committedRanges,

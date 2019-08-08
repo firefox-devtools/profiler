@@ -8,6 +8,7 @@ import {
   getEmptyThread,
   getEmptyJsTracerTable,
   resourceTypes,
+  getEmptyJsAllocationsTable,
 } from '../../../profile-logic/data-structures';
 import { mergeProfiles } from '../../../profile-logic/comparison';
 import { stateFromLocation } from '../../../app-logic/url-handling';
@@ -351,13 +352,24 @@ function _findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
   return null;
 }
 
+function _isJsFunctionName(funcName) {
+  return funcName.endsWith('js');
+}
+
 function _findCategoryFromFuncName(
   funcNameWithModifier: string,
+  funcName: string,
   categories: CategoryList
 ): IndexIntoCategoryList | null {
   const findCategoryResult = /\[cat:([^\]]+)\]/.exec(funcNameWithModifier);
+  let categoryName;
   if (findCategoryResult) {
-    const categoryName = findCategoryResult[1];
+    categoryName = findCategoryResult[1];
+  } else if (_isJsFunctionName(funcName)) {
+    categoryName = 'JavaScript';
+  }
+
+  if (categoryName) {
     const category = categories.findIndex(c => c.name === categoryName);
     if (category !== -1) {
       return category;
@@ -402,7 +414,7 @@ function _buildThreadFromTextOnlyStacks(
     );
     funcTable.fileName.push(null);
     funcTable.relevantForJS.push(funcName.endsWith('js-relevant'));
-    funcTable.isJS.push(funcName.endsWith('js'));
+    funcTable.isJS.push(_isJsFunctionName(funcName));
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
     // Ignore resources for now, this way funcNames have really nice string indexes.
@@ -460,6 +472,7 @@ function _buildThreadFromTextOnlyStacks(
       const jitTypeIndex = jitType ? stringTable.indexForString(jitType) : null;
       const category = _findCategoryFromFuncName(
         funcNameWithModifier,
+        funcName,
         categories
       );
 
@@ -813,4 +826,64 @@ export function getCounterForThread(
     },
   };
   return counter;
+}
+
+/**
+ * Get a profile with JS allocations. The allocations will form the following call tree.
+ *
+ * - A (total: 15, self: —)
+ *   - B (total: 15, self: —)
+ *     - Fjs (total: 12, self: —)
+ *       - Gjs (total: 12, self: 5)
+ *         - Hjs (total: 7, self: —)
+ *           - I (total: 7, self: 7)
+ *     - C (total: 3, self: —)
+ *       - D (total: 3, self: —)
+ *         - E (total: 3, self: 3)
+ */
+
+export function getProfileWithJsAllocations(): * {
+  // First create a normal sample-based profile.
+  const {
+    profile,
+    funcNamesDictPerThread: [funcNamesDict],
+  } = getProfileFromTextSamples(`
+    A  A     A
+    B  B     B
+    C  Fjs   Fjs
+    D  Gjs   Gjs
+    E        Hjs
+             I
+  `);
+
+  // Now add a JsAllocationsTable.
+  const jsAllocations = getEmptyJsAllocationsTable();
+  profile.threads[0].jsAllocations = jsAllocations;
+
+  // The stack table is built sequentially, so we can assume that the stack indexes
+  // match the func indexes.
+  const { E, I, Gjs } = funcNamesDict;
+
+  // Create a list of allocations.
+  const allocations = [
+    { byteSize: 3, stack: E },
+    { byteSize: 5, stack: Gjs },
+    { byteSize: 7, stack: I },
+  ];
+
+  // Loop through and add them to the table.
+  let time = 0;
+  for (const { byteSize, stack } of allocations) {
+    const thisTime = time++;
+    jsAllocations.time.push(thisTime);
+    jsAllocations.className.push('Function');
+    jsAllocations.typeName.push('JSObject');
+    jsAllocations.coarseType.push('Object');
+    jsAllocations.duration.push(byteSize);
+    jsAllocations.inNursery.push(true);
+    jsAllocations.stack.push(stack);
+    jsAllocations.length++;
+  }
+
+  return { profile, funcNamesDict };
 }

@@ -40,7 +40,7 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
-import { getProfile, getProfileOrNull } from '../selectors/profile';
+import { getProfileOrNull } from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { setDataSource } from './profile-view';
 
@@ -203,6 +203,28 @@ export function finalizeProfileView(
       visibleThreadIndexes,
       profile
     );
+
+    // If all of the local tracks were hidden for a process, and the main thread was
+    // not recorded for that process, hide the (empty) process track as well.
+    for (const [pid, localTracks] of localTracksByPid) {
+      const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
+      if (!hiddenLocalTracks) {
+        continue;
+      }
+      if (hiddenLocalTracks.size === localTracks.length) {
+        // All of the local tracks were hidden.
+        const globalTrackIndex = globalTracks.findIndex(
+          globalTrack =>
+            globalTrack.type === 'process' &&
+            globalTrack.pid === pid &&
+            globalTrack.mainThreadIndex === null
+        );
+        if (globalTrackIndex !== -1) {
+          // An empty global track was found, hide it.
+          hiddenGlobalTracks.add(globalTrackIndex);
+        }
+      }
+    }
 
     dispatch({
       type: 'VIEW_PROFILE',
@@ -997,7 +1019,7 @@ export function retrieveProfilesToCompare(
 export function getProfilesFromRawUrl(
   location: Location
 ): ThunkAction<
-  Promise<{| profile: Profile, shouldSetupInitialUrlState: boolean |}>
+  Promise<{| profile: Profile | null, shouldSetupInitialUrlState: boolean |}>
 > {
   return async (dispatch, getState) => {
     const pathParts = location.pathname.split('/').filter(d => d);
@@ -1048,8 +1070,10 @@ export function getProfilesFromRawUrl(
         );
     }
 
+    // Profile may be null only for the `from-addon` dataSource since we do
+    // not `await` for retrieveProfileFromAddon function.
     return {
-      profile: getProfile(getState()),
+      profile: getProfileOrNull(getState()),
       shouldSetupInitialUrlState,
     };
   };

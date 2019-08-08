@@ -11,7 +11,7 @@
 import { stripIndent } from 'common-tags';
 
 import {
-  adjustSampleTimestamps,
+  adjustTableTimestamps,
   adjustMarkerTimestamps,
 } from './process-profile';
 import {
@@ -152,10 +152,7 @@ export function mergeProfiles(
     // We adjust the various times so that the 2 profiles are aligned at the
     // start and the data is consistent.
     const startTimeAdjustment = -thread.samples.time[0];
-    thread.samples = adjustSampleTimestamps(
-      thread.samples,
-      startTimeAdjustment
-    );
+    thread.samples = adjustTableTimestamps(thread.samples, startTimeAdjustment);
     thread.markers = adjustMarkerTimestamps(
       thread.markers,
       startTimeAdjustment
