@@ -4,7 +4,13 @@
 
 // @flow
 
-import type { Milliseconds, MemoryOffset, Microseconds, Bytes } from './units';
+import type {
+  Milliseconds,
+  MemoryOffset,
+  Microseconds,
+  Bytes,
+  Nanoseconds,
+} from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload } from './markers';
 export type IndexIntoStackTable = number;
@@ -285,6 +291,43 @@ export type Counter = {|
   |},
 |};
 
+export type ProfilerOverheadStats = {|
+  maxCleaning: Nanoseconds,
+  maxCounter: Nanoseconds,
+  maxInterval: Nanoseconds,
+  maxLockings: Nanoseconds,
+  maxOverhead: Nanoseconds,
+  maxThread: Nanoseconds,
+  meanCleaning: Nanoseconds,
+  meanCounter: Nanoseconds,
+  meanInterval: Nanoseconds,
+  meanLockings: Nanoseconds,
+  meanOverhead: Nanoseconds,
+  meanThread: Nanoseconds,
+  minCleaning: Nanoseconds,
+  minCounter: Nanoseconds,
+  minInterval: Nanoseconds,
+  minLockings: Nanoseconds,
+  minOverhead: Nanoseconds,
+  minThread: Nanoseconds,
+  overheadDurations: Nanoseconds,
+  overheadPercentage: Nanoseconds,
+  profiledDuration: Nanoseconds,
+  samplingCount: Nanoseconds,
+|};
+
+export type ProfilerOverhead = {|
+  counters: Array<Nanoseconds>,
+  expiredMarkerCleaning: Array<Nanoseconds>,
+  locking: Array<Nanoseconds>,
+  threads: Array<Nanoseconds>,
+  time: Array<Milliseconds>,
+  length: number,
+  statistics: ProfilerOverheadStats,
+  pid: Pid,
+  mainThreadIndex: ThreadIndex,
+|};
+
 /**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
@@ -436,5 +479,6 @@ export type Profile = {|
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.
   counters?: Counter[],
+  profilerOverhead?: ProfilerOverhead[],
   threads: Thread[],
 |};

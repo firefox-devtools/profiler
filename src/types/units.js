@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+export type Nanoseconds = number;
 export type Microseconds = number;
 export type Milliseconds = number;
 export type Seconds = number;

@@ -50,8 +50,9 @@ import type {
   IndexIntoResourceTable,
   JsTracerTable,
   JsAllocationsTable,
+  ProfilerOverhead,
 } from '../types/profile';
-import type { Milliseconds } from '../types/units';
+import type { Milliseconds, Microseconds } from '../types/units';
 import type {
   GeckoProfile,
   GeckoSubprocessProfile,
@@ -60,6 +61,7 @@ import type {
   GeckoFrameStruct,
   GeckoSampleStruct,
   GeckoStackStruct,
+  GeckoProfilerOverhead,
 } from '../types/gecko-profile';
 import type {
   GCSliceMarkerPayload,
@@ -802,6 +804,56 @@ function _processCounters(
 }
 
 /**
+ * Converts the Gecko profiler overhead into the processed format.
+ */
+function _processProfilerOverhead(
+  geckoProfile: GeckoProfile | GeckoSubprocessProfile,
+  // The overhead data is listed independently from the threads, so we need an index that
+  // references back into a stable list of threads. The threads list in the processing
+  // step is built dynamically, so the "stableThreadList" variable is a hint that this
+  // should be a stable and sorted list of threads.
+  stableThreadList: Thread[],
+  // The timing across processes must be normalized, this is the timing delta between
+  // various processes.
+  delta: Milliseconds
+): ProfilerOverhead | null {
+  const geckoProfilerOverhead: ?GeckoProfilerOverhead =
+    geckoProfile.profilerOverhead_UNSTABLE;
+  const mainThread = geckoProfile.threads.find(
+    thread => thread.name === 'GeckoMain'
+  );
+
+  if (!mainThread || !geckoProfilerOverhead) {
+    // Profiler overhad or a main thread weren't found, bail out, and return an empty array.
+    return null;
+  }
+
+  // The gecko profile's process don't map to the final thread list. Use the stable
+  // thread list to look up the thread index for the main thread in this profile.
+  const mainThreadIndex = stableThreadList.findIndex(
+    thread => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+  );
+
+  if (mainThreadIndex === -1) {
+    throw new Error(
+      'Unable to find the main thread in the stable thread list. This means that the ' +
+        'logic in the _processProfilerOverhead function is wrong.'
+    );
+  }
+
+  const statistics = geckoProfilerOverhead.statistics;
+  return {
+    ...adjustProfilerOverheadTimestamps(
+      _toStructOfArrays(geckoProfilerOverhead),
+      delta
+    ),
+    pid: mainThread.pid,
+    mainThreadIndex,
+    statistics,
+  };
+}
+
+/**
  * Convert the given thread into processed form. See docs-developer/gecko-profile-format for more
  * information.
  */
@@ -946,6 +998,26 @@ function _adjustJsTracerTimestamps(
     timestamps: jsTracer.timestamps.map(time => time + deltaMicroseconds),
   };
 }
+
+/**
+ * Adjust the "timestamp" field of overhead data by the given delta. This is
+ * needed when integrating subprocess profiles into the parent process profile;
+ * each profile's process has its own timebase, and we don't want to keep
+ * converting timestamps when we deal with the integrated profile. Differently,
+ * time field of profiler overhead is in microseconds, so we have to convert it
+ * into milliseconds.
+ */
+export function adjustProfilerOverheadTimestamps<
+  Table: { time: Microseconds[] }
+>(table: Table, delta: Milliseconds): Table {
+  return {
+    ...table,
+    // Converting microseconds to millicesonds here since we use millicesonds
+    // inside the tracks.
+    time: table.time.map(time => time / 1000 + delta),
+  };
+}
+
 /**
  * Adjust all timestamp fields by the given delta. This is needed when
  * integrating subprocess profiles into the parent process profile; each
@@ -1042,6 +1114,9 @@ export function processProfile(
     threads.push(_processThread(thread, geckoProfile, extensions));
   }
   const counters: Counter[] = _processCounters(geckoProfile, threads, 0);
+  const nullableProfilerOverhead: Array<ProfilerOverhead | null> = [
+    _processProfilerOverhead(geckoProfile, threads, 0),
+  ];
 
   for (const subprocessProfile of geckoProfile.processes) {
     const adjustTimestampsBy =
@@ -1088,6 +1163,10 @@ export function processProfile(
     counters.push(
       ..._processCounters(subprocessProfile, threads, adjustTimestampsBy)
     );
+
+    nullableProfilerOverhead.push(
+      _processProfilerOverhead(subprocessProfile, threads, adjustTimestampsBy)
+    );
   }
 
   let pages = [...(geckoProfile.pages || [])];
@@ -1126,10 +1205,21 @@ export function processProfile(
     updateChannel: geckoProfile.meta.updateChannel,
   };
 
+  const profilerOverhead: ProfilerOverhead[] = nullableProfilerOverhead.reduce(
+    (acc, overhead) => {
+      if (overhead !== null) {
+        acc.push(overhead);
+      }
+      return acc;
+    },
+    []
+  );
+
   const result = {
     meta,
     pages,
     counters,
+    profilerOverhead,
     threads,
   };
   return result;
