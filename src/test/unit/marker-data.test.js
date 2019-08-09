@@ -501,7 +501,7 @@ describe('filterRawMarkerTableToRange', () => {
         0,
         {
           type: 'Network',
-          id: 0x0000000100000000,
+          id: 1,
           status: 'STATUS_START',
           startTime: 0,
           endTime: 1,
@@ -512,7 +512,7 @@ describe('filterRawMarkerTableToRange', () => {
         0,
         {
           type: 'Network',
-          id: 0x0000000100000001,
+          id: 2,
           status: 'STATUS_START',
           startTime: 0,
           endTime: 1,
@@ -523,7 +523,7 @@ describe('filterRawMarkerTableToRange', () => {
         0,
         {
           type: 'Network',
-          id: 0x0000000100000002,
+          id: 4,
           status: 'STATUS_START',
           startTime: 0,
           endTime: 1,
@@ -534,7 +534,7 @@ describe('filterRawMarkerTableToRange', () => {
         1,
         {
           type: 'Network',
-          id: 0x0000000100000002,
+          id: 4,
           status: 'STATUS_STOP',
           startTime: 1,
           endTime: 2,
@@ -545,7 +545,7 @@ describe('filterRawMarkerTableToRange', () => {
         1,
         {
           type: 'Network',
-          id: 0x0000000100000000,
+          id: 1,
           status: 'STATUS_STOP',
           startTime: 1,
           endTime: 3,
@@ -556,7 +556,7 @@ describe('filterRawMarkerTableToRange', () => {
         1,
         {
           type: 'Network',
-          id: 0x0000000100000001,
+          id: 2,
           status: 'STATUS_STOP',
           startTime: 1,
           endTime: 7,
@@ -567,7 +567,7 @@ describe('filterRawMarkerTableToRange', () => {
         2,
         {
           type: 'Network',
-          id: 0x0000000100000003,
+          id: 3,
           status: 'STATUS_START',
           startTime: 2,
           endTime: 6,
@@ -578,7 +578,7 @@ describe('filterRawMarkerTableToRange', () => {
         6,
         {
           type: 'Network',
-          id: 0x0000000100000003,
+          id: 3,
           status: 'STATUS_STOP',
           startTime: 6,
           endTime: 7,
@@ -589,7 +589,7 @@ describe('filterRawMarkerTableToRange', () => {
         6,
         {
           type: 'Network',
-          id: 0x0000000100000004,
+          id: 5,
           status: 'STATUS_START',
           startTime: 6,
           endTime: 7,
@@ -600,7 +600,7 @@ describe('filterRawMarkerTableToRange', () => {
         7,
         {
           type: 'Network',
-          id: 0x0000000100000004,
+          id: 5,
           status: 'STATUS_STOP',
           startTime: 7,
           endTime: 8,
@@ -634,9 +634,9 @@ describe('filterRawMarkerTableToRange', () => {
         marker.start + marker.dur,
       ])
     ).toEqual([
-      ['Load 1', 0x0000000100000000, 'STATUS_STOP', 0, 3],
-      ['Load 2', 0x0000000100000001, 'STATUS_STOP', 0, 7],
-      ['Load 3', 0x0000000100000003, 'STATUS_STOP', 2, 7],
+      ['Load 1', 1, 'STATUS_STOP', 0, 3],
+      ['Load 2', 2, 'STATUS_STOP', 0, 7],
+      ['Load 3', 3, 'STATUS_STOP', 2, 7],
     ]);
   });
 
@@ -647,7 +647,7 @@ describe('filterRawMarkerTableToRange', () => {
         0,
         {
           type: 'Network',
-          id: 0x0000000100000000,
+          id: 1,
           status: 'STATUS_START',
           startTime: 0,
           endTime: 1,
@@ -658,7 +658,7 @@ describe('filterRawMarkerTableToRange', () => {
         2,
         {
           type: 'Network',
-          id: 0x0000000100000001,
+          id: 2,
           status: 'STATUS_START',
           startTime: 2,
           endTime: 4,
@@ -669,7 +669,7 @@ describe('filterRawMarkerTableToRange', () => {
         2,
         {
           type: 'Network',
-          id: 0x0000000100000002,
+          id: 3,
           status: 'STATUS_START',
           startTime: 2,
           endTime: 6,
@@ -680,7 +680,7 @@ describe('filterRawMarkerTableToRange', () => {
         3,
         {
           type: 'Network',
-          id: 0x0000000100000003,
+          id: 4,
           status: 'STATUS_START',
           startTime: 3,
           endTime: 5,
@@ -691,7 +691,7 @@ describe('filterRawMarkerTableToRange', () => {
         3,
         {
           type: 'Network',
-          id: 0x0000000100000004,
+          id: 5,
           status: 'STATUS_START',
           startTime: 3,
           endTime: 7,
@@ -702,7 +702,7 @@ describe('filterRawMarkerTableToRange', () => {
         6,
         {
           type: 'Network',
-          id: 0x0000000100000005,
+          id: 6,
           status: 'STATUS_START',
           startTime: 6,
           endTime: 7,
@@ -732,11 +732,11 @@ describe('filterRawMarkerTableToRange', () => {
         marker.data && (marker.data: any).id,
       ])
     ).toEqual([
-      ['Load 1', 0x0000000100000000],
-      ['Load 2', 0x0000000100000001],
-      ['Load 3', 0x0000000100000002],
-      ['Load 4', 0x0000000100000003],
-      ['Load 5', 0x0000000100000004],
+      ['Load 1', 1],
+      ['Load 2', 2],
+      ['Load 3', 3],
+      ['Load 4', 4],
+      ['Load 5', 5],
     ]);
   });
 
@@ -747,7 +747,7 @@ describe('filterRawMarkerTableToRange', () => {
         0,
         {
           type: 'Network',
-          id: 0x0000000100000000,
+          id: 1,
           status: 'STATUS_STOP',
           startTime: 0,
           endTime: 1,
@@ -758,7 +758,7 @@ describe('filterRawMarkerTableToRange', () => {
         2,
         {
           type: 'Network',
-          id: 0x0000000100000001,
+          id: 2,
           status: 'STATUS_STOP',
           startTime: 2,
           endTime: 4,
@@ -769,7 +769,7 @@ describe('filterRawMarkerTableToRange', () => {
         2,
         {
           type: 'Network',
-          id: 0x0000000100000002,
+          id: 3,
           status: 'STATUS_STOP',
           startTime: 2,
           endTime: 6,
@@ -780,7 +780,7 @@ describe('filterRawMarkerTableToRange', () => {
         3,
         {
           type: 'Network',
-          id: 0x0000000100000003,
+          id: 4,
           status: 'STATUS_STOP',
           startTime: 3,
           endTime: 5,
@@ -791,7 +791,7 @@ describe('filterRawMarkerTableToRange', () => {
         3,
         {
           type: 'Network',
-          id: 0x0000000100000004,
+          id: 5,
           status: 'STATUS_STOP',
           startTime: 3,
           endTime: 7,
@@ -802,7 +802,7 @@ describe('filterRawMarkerTableToRange', () => {
         6,
         {
           type: 'Network',
-          id: 0x0000000100000005,
+          id: 6,
           status: 'STATUS_STOP',
           startTime: 6,
           endTime: 7,
@@ -832,22 +832,25 @@ describe('filterRawMarkerTableToRange', () => {
         marker.data && (marker.data: any).id,
       ])
     ).toEqual([
-      ['Load 2', 0x0000000100000001],
-      ['Load 3', 0x0000000100000002],
-      ['Load 4', 0x0000000100000003],
-      ['Load 5', 0x0000000100000004],
-      ['Load 6', 0x0000000100000005],
+      ['Load 2', 2],
+      ['Load 3', 3],
+      ['Load 4', 4],
+      ['Load 5', 5],
+      ['Load 6', 6],
     ]);
   });
 
   it('filters network markers based on their ids', () => {
+    // Network markers can be unique despite sharing the same name if
+    // they are from processes with different process ids which are
+    // stored in the highest 4 bytes.
     const markers = [
       [
         'Load 1',
         0,
         {
           type: 'Network',
-          id: 0x0000000100000000,
+          id: 0x0000000100000001,
           status: 'STATUS_START',
           startTime: 0,
           endTime: 1,
@@ -858,7 +861,7 @@ describe('filterRawMarkerTableToRange', () => {
         0,
         {
           type: 'Network',
-          id: 0x0000000200000000,
+          id: 0x0000000200000001,
           status: 'STATUS_START',
           startTime: 0,
           endTime: 1,
@@ -869,7 +872,7 @@ describe('filterRawMarkerTableToRange', () => {
         1,
         {
           type: 'Network',
-          id: 0x0000000200000001,
+          id: 0x0000000200000002,
           status: 'STATUS_STOP',
           startTime: 1,
           endTime: 2,
@@ -880,7 +883,7 @@ describe('filterRawMarkerTableToRange', () => {
         1,
         {
           type: 'Network',
-          id: 0x0000000100000000,
+          id: 0x0000000100000001,
           status: 'STATUS_STOP',
           startTime: 1,
           endTime: 3,
@@ -891,7 +894,7 @@ describe('filterRawMarkerTableToRange', () => {
         2,
         {
           type: 'Network',
-          id: 0x0000000100000001,
+          id: 0x0000000100000002,
           status: 'STATUS_START',
           startTime: 2,
           endTime: 4,
@@ -902,7 +905,7 @@ describe('filterRawMarkerTableToRange', () => {
         4,
         {
           type: 'Network',
-          id: 0x0000000100000001,
+          id: 0x0000000100000002,
           status: 'STATUS_STOP',
           startTime: 4,
           endTime: 7,
@@ -913,7 +916,7 @@ describe('filterRawMarkerTableToRange', () => {
         5,
         {
           type: 'Network',
-          id: 0x0000000300000001,
+          id: 0x0000000300000002,
           status: 'STATUS_START',
           startTime: 5,
           endTime: 6,
@@ -924,7 +927,7 @@ describe('filterRawMarkerTableToRange', () => {
         6,
         {
           type: 'Network',
-          id: 0x0000000300000001,
+          id: 0x0000000300000002,
           status: 'STATUS_STOP',
           startTime: 6,
           endTime: 7,
@@ -955,10 +958,10 @@ describe('filterRawMarkerTableToRange', () => {
         marker.data && (marker.data: any).id,
       ])
     ).toEqual([
-      ['Load 1', 0x0000000100000000],
-      ['Load 2', 0x0000000100000001],
-      ['Load 2', 0x0000000300000001],
-      ['Load 1', 0x0000000200000000],
+      ['Load 1', 0x0000000100000001],
+      ['Load 2', 0x0000000100000002],
+      ['Load 2', 0x0000000300000002],
+      ['Load 1', 0x0000000200000001],
     ]);
   });
 });

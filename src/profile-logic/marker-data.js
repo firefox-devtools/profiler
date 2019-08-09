@@ -253,7 +253,7 @@ export function deriveMarkersFromRawMarkerTable(
   // Note that we don't have more than 2 network markers with the same name as
   // the name contains an incremented index. Therefore we don't need to use an
   // array as value like for tracing markers.
-  const openNetworkMarkers: Map<IndexIntoStringTable, MarkerIndex> = new Map();
+  const openNetworkMarkers: Map<number, MarkerIndex> = new Map();
 
   // We don't add a screenshot marker as we find it, because to know its
   // duration we need to wait until the next one or the end of the profile. So
@@ -595,10 +595,7 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
   // Note that we don't have more than 2 network markers with the same name as
   // the name contains an incremented index. Therefore we don't need to use an
   // array as value like for tracing markers.
-  const openNetworkMarkers: Map<
-    IndexIntoStringTable,
-    IndexIntoRawMarkerTable
-  > = new Map();
+  const openNetworkMarkers: Map<number, IndexIntoRawMarkerTable> = new Map();
 
   let previousScreenshotMarker = null;
 
@@ -690,7 +687,6 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
             // We know this startIndex points to a Network marker.
             const startData: NetworkPayload = (markers.data[startIndex]: any);
             const endData = data;
-            // console.log(startData, endData);
             if (intersectsRange(startData.startTime, endData.endTime)) {
               // This couple of markers define a network marker that's at least
               // partially in the range.
