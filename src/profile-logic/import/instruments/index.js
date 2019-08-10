@@ -37,12 +37,6 @@ type FormTemplateRunData = {|
   +addressToFrameMap: Map<number, FrameInfo>,
 |};
 
-type SymbolInfo = {|
-  +symbolName: string,
-  +sourcePath: string,
-  +addressToLine: Map<number, number>,
-|};
-
 import type { UniqueStringArray } from '../../../../src/utils/unique-string-array';
 
 //utils
@@ -484,7 +478,7 @@ function getCoreDirForRun(
 // Here arrays contains all the information about stack trace at a given timestamp.
 // Each samples has a field named 'backtraceID' which is an index into arrays
 // Iterating recursively into arrays by given backtraceID it extracts a backtraceStack for each sample
-async function importRunFromInstrumentsTrace(args: {
+async function getSamples(args: {
   tree: TraceDirectoryTree,
   addressToFrameMap: Map<number, FrameInfo>,
   runNumber: number,
@@ -560,14 +554,8 @@ async function readFormTemplateFile(tree) {
 
   const runs: FormTemplateRunData[] = [];
   for (const runNumber of allRunData.runNumbers) {
-    const runData = getOrThrow<number, Map<any, any>>(
-      allRunData.runData,
-      runNumber
-    );
-    const symbolsByPid = getOrThrow<
-      string,
-      Map<number, { symbols: SymbolInfo[] }>
-    >(runData, 'symbolsByPid');
+    const runData = getOrThrow(allRunData.runData, runNumber);
+    const symbolsByPid = getOrThrow(runData, 'symbolsByPid');
 
     const addressToFrameMap = new Map<number, FrameInfo>();
     for (const symbols of symbolsByPid.values()) {
@@ -897,7 +885,7 @@ export async function convertInstrumentsProfile(
   const { addressToFrameMap, number } = runs[0];
   // For now, we will just process the first run
 
-  const samples = await importRunFromInstrumentsTrace({
+  const samples = await getSamples({
     tree,
     addressToFrameMap,
     runNumber: number,
