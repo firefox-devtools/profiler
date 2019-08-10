@@ -54,12 +54,6 @@ import BinaryPlistParser, { UID } from './BinaryPlistParser';
 import BinReader from './BinReader';
 import MaybeCompressedReader from './MaybeCompressedReader';
 
-// TODO make helpers.js and move the appropriate helper functions into it
-// TODO add the missing return types in the functions
-// TODO I have used console.log() statements for debug purpose, I will remove them later
-// TODO add Root frame at the top
-// TODO fill remaining meta data inside profile
-
 let fileReader;
 
 function readAsArrayBuffer(file: File): Promise<ArrayBuffer> {
@@ -545,7 +539,7 @@ async function importRunFromInstrumentsTrace(args: {
 // This function reads the 'form.template' file which contains all the important information about
 // addressToFrameMap and Instruments' version
 async function readFormTemplateFile(tree) {
-  const formTemplate = tree.files.get('form.template'); // TODO check for empty formTemplate
+  const formTemplate = tree.files.get('form.template');
   const archive =
     typeof formTemplate !== 'undefined'
       ? readInstrumentsArchive(await readAsArrayBuffer(formTemplate))
@@ -847,7 +841,7 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
           } else {
             samplesTable.stack.push(null);
           }
-          samplesTable.time.push(sample.timestamp / 1000000); // TODO: Doubt
+          samplesTable.time.push(sample.timestamp / 1000000);
           samplesTable.responsiveness.push(null);
           samplesTable.length++;
         }
