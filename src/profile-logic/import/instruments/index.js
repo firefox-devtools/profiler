@@ -505,18 +505,25 @@ async function importRunFromInstrumentsTrace(args: {
     const frame = addressToFrameMap.get(k);
     if (frame) {
       stack.push(k);
-    } else if (k in arrays) {
-      for (const addr of arrays[k]) {
+      return;
+    }
+
+    const arrayIndex = k & 0xffffffff;
+    if (arrayIndex in arrays) {
+      for (const addr of arrays[arrayIndex]) {
         appendRecursive(addr, stack);
       }
-    } else {
-      const rawAddressFrame: FrameInfo = {
-        key: k,
-        name: `0x${zeroPad(k.toString(16), 16)}`,
-      };
-      addressToFrameMap.set(k, rawAddressFrame);
-      stack.push(k);
+      return;
     }
+
+    // Fallback: We are not able to find the address, so we will just
+    // display the address instead of frame information
+    const rawAddressFrame: FrameInfo = {
+      key: k,
+      name: `0x${zeroPad(k.toString(16), 16)}`,
+    };
+    addressToFrameMap.set(k, rawAddressFrame);
+    stack.push(k);
   }
 
   for (const sample of samples) {
