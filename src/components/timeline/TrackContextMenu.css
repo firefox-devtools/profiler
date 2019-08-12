@@ -6,6 +6,10 @@
   display: flex;
 }
 
+/* This spacer allows the width of a menu item to both grow and
+ * shrink. By letting it shrink, it won't cause the text to get
+ * unaligned or flow into the checkmark on the far right when a
+ * scrollbar appears. */
 .timelineTrackContextMenuSpacer {
   width: 20px;
   flex: 1;
@@ -16,5 +20,5 @@
 }
 
 .react-contextmenu-item:hover .timelineTrackContextMenuPid {
-  color: white;
+  color: #fff;
 }
