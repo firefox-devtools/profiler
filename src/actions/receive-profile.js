@@ -844,7 +844,7 @@ export function waitingForProfileFromFile(): Action {
   };
 }
 
-function _fileReader(input: File): * {
+export function _fileReader(input: File): * {
   const reader = new FileReader();
   const promise = new Promise((resolve, reject) => {
     // Flow's definition for FileReader doesn't handle the polymorphic nature of
