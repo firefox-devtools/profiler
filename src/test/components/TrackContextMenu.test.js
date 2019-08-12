@@ -23,6 +23,8 @@ import {
   getProfileWithNiceTracks,
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
+import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
+
 import { storeWithProfile } from '../fixtures/stores';
 
 describe('timeline/TrackContextMenu', function() {
@@ -64,10 +66,8 @@ describe('timeline/TrackContextMenu', function() {
         trackIndex: trackIndex,
       };
       const track = getGlobalTracks(getState())[trackIndex];
-      if (track.type !== 'process') {
-        throw new Error('Expected a process track.');
-      }
-      const threadIndex = track.mainThreadIndex;
+      const threadIndex =
+        track.type === 'process' ? track.mainThreadIndex : null;
       if (threadIndex !== null) {
         // Explicitly select the global thread. Tests can pass in a custom profile,
         // so don't fail if this doesn't exist.
@@ -93,6 +93,11 @@ describe('timeline/TrackContextMenu', function() {
 
     it('matches the snapshot of a global track', () => {
       const { container } = setupGlobalTrack();
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches the snapshot of a global non-process track', () => {
+      const { container } = setupGlobalTrack(getScreenshotTrackProfile());
       expect(container.firstChild).toMatchSnapshot();
     });
 

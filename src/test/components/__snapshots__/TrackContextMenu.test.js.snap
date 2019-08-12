@@ -1,5 +1,62 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global non-process track 1`] = `
+<nav
+  class="react-contextmenu timeline-context-menu"
+  role="menu"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
+>
+  <div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
+      role="menuitem"
+      tabindex="-1"
+      title="Screenshots"
+    >
+      <span>
+        Screenshots
+      </span>
+      <span
+        class="timelineTrackContextMenuSpacer"
+      />
+    </div>
+  </div>
+  <div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
+      role="menuitem"
+      tabindex="-1"
+      title="Process 0 (Process ID: 0)"
+    >
+      <span>
+        Process 0
+      </span>
+      <span
+        class="timelineTrackContextMenuSpacer"
+      />
+      <span
+        class="timelineTrackContextMenuPid"
+      >
+        (
+        0
+        )
+      </span>
+    </div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item checkable indented checked"
+      role="menuitem"
+      tabindex="-1"
+    >
+      Empty
+    </div>
+  </div>
+</nav>
+`;
+
 exports[`timeline/TrackContextMenu selected global track matches the snapshot of a global track 1`] = `
 <nav
   class="react-contextmenu timeline-context-menu"
