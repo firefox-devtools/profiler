@@ -5,6 +5,7 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
+import './TrackContextMenu.css';
 import {
   hideGlobalTrack,
   showGlobalTrack,
@@ -178,8 +179,14 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   };
 
   renderGlobalTrack(trackIndex: TrackIndex) {
-    const { hiddenGlobalTracks, globalTrackNames } = this.props;
+    const { hiddenGlobalTracks, globalTrackNames, globalTracks } = this.props;
     const isHidden = hiddenGlobalTracks.has(trackIndex);
+    const track = globalTracks[trackIndex];
+
+    let title = `${globalTrackNames[trackIndex]}`;
+    if (track.type === 'process') {
+      title += ` (Process ID: ${track.pid})`;
+    }
 
     return (
       <MenuItem
@@ -188,10 +195,18 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={{ trackIndex }}
         onClick={this._toggleGlobalTrackVisibility}
         attributes={{
-          className: classNames({ checkable: true, checked: !isHidden }),
+          className: classNames('timelineTrackContextMenuItem', {
+            checkable: true,
+            checked: !isHidden,
+          }),
+          title,
         }}
       >
-        {globalTrackNames[trackIndex]}
+        <span>{globalTrackNames[trackIndex]}</span>
+        <span className="timelineTrackContextMenuSpacer" />
+        {track.type === 'process' && (
+          <span className="timelineTrackContextMenuPid">({track.pid})</span>
+        )}
       </MenuItem>
     );
   }
