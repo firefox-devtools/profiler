@@ -1,0 +1,20 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.timelineTrackContextMenuItem {
+  display: flex;
+}
+
+.timelineTrackContextMenuSpacer {
+  width: 20px;
+  flex: 1;
+}
+
+.timelineTrackContextMenuPid {
+  color: var(--grey-90-a60);
+}
+
+.react-contextmenu-item:hover .timelineTrackContextMenuPid {
+  color: white;
+}

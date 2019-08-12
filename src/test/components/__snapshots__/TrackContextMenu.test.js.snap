@@ -30,21 +30,47 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
   <div>
     <div
       aria-disabled="false"
-      class="react-contextmenu-item checkable checked"
+      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
       role="menuitem"
       tabindex="-1"
+      title="GeckoMain (Process ID: 111)"
     >
-      GeckoMain
+      <span>
+        GeckoMain
+      </span>
+      <span
+        class="timelineTrackContextMenuSpacer"
+      />
+      <span
+        class="timelineTrackContextMenuPid"
+      >
+        (
+        111
+        )
+      </span>
     </div>
   </div>
   <div>
     <div
       aria-disabled="false"
-      class="react-contextmenu-item checkable checked"
+      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
       role="menuitem"
       tabindex="-1"
+      title="Content Process (Process ID: 222)"
     >
-      Content Process
+      <span>
+        Content Process
+      </span>
+      <span
+        class="timelineTrackContextMenuSpacer"
+      />
+      <span
+        class="timelineTrackContextMenuPid"
+      >
+        (
+        222
+        )
+      </span>
     </div>
     <div
       aria-disabled="false"
@@ -88,21 +114,47 @@ exports[`timeline/TrackContextMenu selected local track matches the snapshot of 
   <div>
     <div
       aria-disabled="false"
-      class="react-contextmenu-item checkable checked"
+      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
       role="menuitem"
       tabindex="-1"
+      title="GeckoMain (Process ID: 111)"
     >
-      GeckoMain
+      <span>
+        GeckoMain
+      </span>
+      <span
+        class="timelineTrackContextMenuSpacer"
+      />
+      <span
+        class="timelineTrackContextMenuPid"
+      >
+        (
+        111
+        )
+      </span>
     </div>
   </div>
   <div>
     <div
       aria-disabled="false"
-      class="react-contextmenu-item checkable checked"
+      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
       role="menuitem"
       tabindex="-1"
+      title="Content Process (Process ID: 222)"
     >
-      Content Process
+      <span>
+        Content Process
+      </span>
+      <span
+        class="timelineTrackContextMenuSpacer"
+      />
+      <span
+        class="timelineTrackContextMenuPid"
+      >
+        (
+        222
+        )
+      </span>
     </div>
     <div
       aria-disabled="false"
