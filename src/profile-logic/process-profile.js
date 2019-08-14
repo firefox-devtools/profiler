@@ -818,13 +818,13 @@ function _processProfilerOverhead(
   delta: Milliseconds
 ): ProfilerOverhead | null {
   const geckoProfilerOverhead: ?GeckoProfilerOverhead =
-    geckoProfile.profilerOverhead_UNSTABLE;
+    geckoProfile.profilerOverhead;
   const mainThread = geckoProfile.threads.find(
     thread => thread.name === 'GeckoMain'
   );
 
   if (!mainThread || !geckoProfilerOverhead) {
-    // Profiler overhad or a main thread weren't found, bail out, and return an empty array.
+    // Profiler overhead or a main thread weren't found, bail out, and return an empty array.
     return null;
   }
 
@@ -841,15 +841,14 @@ function _processProfilerOverhead(
     );
   }
 
-  const statistics = geckoProfilerOverhead.statistics;
   return {
-    ...adjustProfilerOverheadTimestamps(
-      _toStructOfArrays(geckoProfilerOverhead),
+    samples: adjustProfilerOverheadTimestamps(
+      _toStructOfArrays(geckoProfilerOverhead.samples),
       delta
     ),
     pid: mainThread.pid,
     mainThreadIndex,
-    statistics,
+    statistics: geckoProfilerOverhead.statistics,
   };
 }
 
@@ -1012,7 +1011,7 @@ export function adjustProfilerOverheadTimestamps<
 >(table: Table, delta: Milliseconds): Table {
   return {
     ...table,
-    // Converting microseconds to millicesonds here since we use millicesonds
+    // Converting microseconds to milliseconds here since we use milliseconds
     // inside the tracks.
     time: table.time.map(time => time / 1000 + delta),
   };

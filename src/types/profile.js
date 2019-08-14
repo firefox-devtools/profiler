@@ -291,6 +291,10 @@ export type Counter = {|
   |},
 |};
 
+/**
+ * The statistics about profiler overhead. It includes max/min/mean values of
+ * individual and overall overhead timings.
+ */
 export type ProfilerOverheadStats = {|
   maxCleaning: Nanoseconds,
   maxCounter: Nanoseconds,
@@ -316,13 +320,29 @@ export type ProfilerOverheadStats = {|
   samplingCount: Nanoseconds,
 |};
 
-export type ProfilerOverhead = {|
+/**
+ * Gecko Profiler records profiler overhead samples of specific tasks that take time.
+ * counters: Time spent during collecting counter samples.
+ * expiredMarkerCleaning: Time spent during expired marker cleanup
+ * lockings: Time spent during acquiring locks.
+ * threads: Time spent during threads sampling and marker collection.
+ */
+export type ProfilerOverheadSamplesTable = {|
   counters: Array<Nanoseconds>,
   expiredMarkerCleaning: Array<Nanoseconds>,
   locking: Array<Nanoseconds>,
   threads: Array<Nanoseconds>,
   time: Array<Milliseconds>,
   length: number,
+|};
+
+/**
+ * Information about profiler overhead. It includes overhead timings for
+ * counters, expired marker cleanings, mutex locking and threads. Also it
+ * includes statistics about those individual and overall overhead.
+ */
+export type ProfilerOverhead = {|
+  samples: ProfilerOverheadSamplesTable,
   statistics: ProfilerOverheadStats,
   pid: Pid,
   mainThreadIndex: ThreadIndex,

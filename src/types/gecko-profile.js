@@ -173,16 +173,18 @@ export type GeckoCounter = {|
 |};
 
 export type GeckoProfilerOverhead = {|
-  schema: {|
-    time: 0,
-    locking: 1,
-    expiredMarkerCleaning: 2,
-    counters: 3,
-    threads: 4,
+  samples: {|
+    schema: {|
+      time: 0,
+      locking: 1,
+      expiredMarkerCleaning: 2,
+      counters: 3,
+      threads: 4,
+    |},
+    data: Array<
+      [Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds]
+    >,
   |},
-  data: Array<
-    [Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds]
-  >,
   statistics: ProfilerOverheadStats,
 |};
 
@@ -257,7 +259,9 @@ export type GeckoProfileFullMeta = {|
 
 export type GeckoProfileWithMeta<Meta> = {|
   counters?: GeckoCounter[],
-  profilerOverhead_UNSTABLE?: GeckoProfilerOverhead,
+  // Optional because older Firefox versions may not have that data and
+  // no upgrader was necessary.
+  profilerOverhead?: GeckoProfilerOverhead,
   meta: Meta,
   libs: Lib[],
   pages?: PageList,
