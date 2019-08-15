@@ -78,7 +78,7 @@ class MockFileSystemEntry {
 }
 
 describe('convertInstrumentsProfile function', () => {
-  async function importFromTrace(tracePath: string) {
+  async function importFromTrace(tracePath: string, fileName: string) {
     const zip = await new Promise<any>((resolve, reject) => {
       return fs.readFile(tracePath, (err, data) => {
         if (err) {
@@ -88,15 +88,37 @@ describe('convertInstrumentsProfile function', () => {
       });
     });
 
-    const root = new MockFileSystemEntry(zip, 'instruments_sample.trace');
+    const root = new MockFileSystemEntry(zip, fileName);
     const profile = await convertInstrumentsProfile(root, _fileReader);
 
     return profile;
   }
 
-  test('Can import Instruments sample profile', async () => {
+  test('Can import Instruments 8.3.3 profile', async () => {
     await importFromTrace(
-      'src/test/fixtures/upgrades/instruments_sample.trace.zip'
+      'src/test/fixtures/upgrades/simple-time-profile-8_3_3.trace.zip',
+      'simple-time-profile.trace'
+    );
+  });
+
+  test('Can import Instruments 9.3.1 profile', async () => {
+    await importFromTrace(
+      'src/test/fixtures/upgrades/simple-time-profile-9_3_1.trace.zip',
+      'simple-time-profile.trace'
+    );
+  });
+
+  test('Can import Instruments 10.0.0 profile', async () => {
+    await importFromTrace(
+      'src/test/fixtures/upgrades/simple-time-profile-10_0_0.trace.zip',
+      'simple-time-profile.trace'
+    );
+  });
+
+  test('Can import Instruments 10.1.0 profile', async () => {
+    await importFromTrace(
+      'src/test/fixtures/upgrades/simple-time-profile-10_1_0.trace.zip',
+      'simple-time-profile.trace'
     );
   });
 });
