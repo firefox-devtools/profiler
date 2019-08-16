@@ -844,7 +844,7 @@ export function waitingForProfileFromFile(): Action {
   };
 }
 
-export function _fileReader(input: File): * {
+function _fileReader(input: File): * {
   const reader = new FileReader();
   const promise = new Promise((resolve, reject) => {
     // Flow's definition for FileReader doesn't handle the polymorphic nature of
@@ -916,7 +916,7 @@ export function retrieveProfileFromFile(
           // file.
           let profile;
           if (isInstrumentsProfile(file)) {
-            profile = await convertInstrumentsProfile(file, fileReader);
+            profile = await convertInstrumentsProfile(file);
           } else {
             const text = await fileReader(file).asText();
             profile = await unserializeProfileOfArbitraryFormat(text);

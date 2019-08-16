@@ -31,9 +31,7 @@ class BinaryPlistParser {
     const objectCount = this.view.getUint32(trailer + 12, false);
     const rootIndex = this.view.getUint32(trailer + 20, false);
     let tableOffset = this.view.getUint32(trailer + 28, false);
-    // console.log('objectCount', objectCount);
 
-    // console.log('rootIndex', rootIndex);
     // Parse all offsets before starting to parse objects
     for (let i = 0; i < objectCount; i++) {
       this.offsetTable.push(this.parseInteger(tableOffset, offsetSize));
@@ -46,23 +44,36 @@ class BinaryPlistParser {
   parseLengthAndOffset(offset: number, extra: number) {
     if (extra !== 0x0f) return { length: extra, offset: 0 };
     const marker = this.view.getUint8(offset++);
-    if ((marker & 0xf0) !== 0x10)
+    if ((marker & 0xf0) !== 0x10) {
       throw new Error('Unexpected non-integer length at offset ' + offset);
+    }
     const size = 1 << (marker & 0x0f);
     return { length: this.parseInteger(offset, size), offset: size + 1 };
   }
 
   parseSingleton(offset: number, extra: number): any {
-    if (extra === 0) return null;
-    if (extra === 8) return false;
-    if (extra === 9) return true;
+    if (extra === 0) {
+      return null;
+    }
+    if (extra === 8) {
+      return false;
+    }
+    if (extra === 9) {
+      return true;
+    }
     throw new Error('Unexpected extra value ' + extra + ' at offset ' + offset);
   }
 
   parseInteger(offset: number, size: number): number {
-    if (size === 1) return this.view.getUint8(offset);
-    if (size === 2) return this.view.getUint16(offset, false);
-    if (size === 4) return this.view.getUint32(offset, false);
+    if (size === 1) {
+      return this.view.getUint8(offset);
+    }
+    if (size === 2) {
+      return this.view.getUint16(offset, false);
+    }
+    if (size === 4) {
+      return this.view.getUint32(offset, false);
+    }
 
     if (size === 8) {
       return (
@@ -86,25 +97,29 @@ class BinaryPlistParser {
   }
 
   parseFloat(offset: number, size: number): number {
-    if (size === 4) return this.view.getFloat32(offset, false);
-    if (size === 8) return this.view.getFloat64(offset, false);
+    if (size === 4) {
+      return this.view.getFloat32(offset, false);
+    }
+    if (size === 8) {
+      return this.view.getFloat64(offset, false);
+    }
     throw new Error(
       'Unexpected float of size ' + size + ' at offset ' + offset
     );
   }
 
   parseDate(offset: number, size: number): Date {
-    if (size !== 8)
+    if (size !== 8) {
       throw new Error(
         'Unexpected date of size ' + size + ' at offset ' + offset
       );
+    }
     const seconds = this.view.getFloat64(offset, false);
     return new Date(978307200000 + seconds * 1000); // Starts from January 1st, 2001
   }
 
   parseData(offset: number, extra: number): Uint8Array {
     const both = this.parseLengthAndOffset(offset, extra);
-    // console.log(new Uint8Array(this.view.buffer, offset + both.offset, both.length))
 
     return new Uint8Array(this.view.buffer, offset + both.offset, both.length);
   }
@@ -161,8 +176,9 @@ class BinaryPlistParser {
       const value = this.parseObject(
         this.offsetTable[this.parseInteger(nextValue, size)]
       );
-      if (typeof key !== 'string')
+      if (typeof key !== 'string') {
         throw new Error('Unexpected non-string key at offset ' + nextKey);
+      }
       dictionary[key] = value;
       nextKey += size;
       nextValue += size;

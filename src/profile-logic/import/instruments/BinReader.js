@@ -25,7 +25,9 @@ class BinReader {
   }
   readUint8() {
     this.bytePos++;
-    if (this.bytePos > this.view.byteLength) return 0;
+    if (this.bytePos > this.view.byteLength) {
+      return 0;
+    }
     return this.view.getUint8(this.bytePos - 1);
   }
 
@@ -33,12 +35,16 @@ class BinReader {
   // because JavaScript doesn't have true 64 bit integers.
   readUint32() {
     this.bytePos += 4;
-    if (this.bytePos > this.view.byteLength) return 0;
+    if (this.bytePos > this.view.byteLength) {
+      return 0;
+    }
     return this.view.getUint32(this.bytePos - 4, true);
   }
   readUint48() {
     this.bytePos += 6;
-    if (this.bytePos > this.view.byteLength) return 0;
+    if (this.bytePos > this.view.byteLength) {
+      return 0;
+    }
 
     return (
       this.view.getUint32(this.bytePos - 6, true) +
@@ -47,7 +53,9 @@ class BinReader {
   }
   readUint64() {
     this.bytePos += 8;
-    if (this.bytePos > this.view.byteLength) return 0;
+    if (this.bytePos > this.view.byteLength) {
+      return 0;
+    }
     return (
       this.view.getUint32(this.bytePos - 8, true) +
       this.view.getUint32(this.bytePos - 4, true) * Math.pow(2, 32)

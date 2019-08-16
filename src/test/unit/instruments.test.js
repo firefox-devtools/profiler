@@ -8,7 +8,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { convertInstrumentsProfile } from '../../profile-logic/import/instruments';
-import { _fileReader } from '../../actions/receive-profile';
 
 class MockFileSystemEntry {
   isFile: boolean;
@@ -89,7 +88,7 @@ describe('convertInstrumentsProfile function', () => {
     });
 
     const root = new MockFileSystemEntry(zip, fileName);
-    const profile = await convertInstrumentsProfile(root, _fileReader);
+    const profile = await convertInstrumentsProfile(root);
 
     return profile;
   }

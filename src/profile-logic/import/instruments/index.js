@@ -3,6 +3,14 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+import {
+  getEmptyProfile,
+  getEmptyThread,
+} from '../../../profile-logic/data-structures';
+import BinaryPlistParser, { UID } from './BinaryPlistParser';
+import BinReader from './BinReader';
+import MaybeCompressedReader from './MaybeCompressedReader';
+
 //types
 import type {
   Profile,
@@ -10,8 +18,9 @@ import type {
   FrameTable,
   StackTable,
 } from '../../../types/profile';
+import type { UniqueStringArray } from '../../../../src/utils/unique-string-array';
 
-type Sample = {|
+type InstrumentsSample = {|
   +timestamp: number,
   +threadID: number,
   +backtraceID: number,
@@ -24,7 +33,7 @@ type TraceDirectoryTree = {|
   +subdirectories: Map<string, TraceDirectoryTree>,
 |};
 
-type FrameInfo = {|
+type InstrumentsFrameInfo = {|
   +key: string | number,
   +name: string,
   file?: string,
@@ -34,21 +43,8 @@ type FrameInfo = {|
 
 type FormTemplateRunData = {|
   +number: number,
-  +addressToFrameMap: Map<number, FrameInfo>,
+  +addressToFrameMap: Map<number, InstrumentsFrameInfo>,
 |};
-
-import type { UniqueStringArray } from '../../../../src/utils/unique-string-array';
-
-//utils
-import {
-  getEmptyProfile,
-  getEmptyThread,
-} from '../../../profile-logic/data-structures';
-import BinaryPlistParser, { UID } from './BinaryPlistParser';
-import BinReader from './BinReader';
-import MaybeCompressedReader from './MaybeCompressedReader';
-
-let fileReader;
 
 function readAsArrayBuffer(file: File): Promise<ArrayBuffer> {
   return MaybeCompressedReader.fromFile(file).readAsArrayBuffer();
@@ -180,7 +176,9 @@ function patternMatchObjectiveC(
       }
       default: {
         const converted = interpretClass(name, value);
-        if (converted !== value) return converted;
+        if (converted !== value) {
+          return converted;
+        }
       }
     }
   }
@@ -343,12 +341,16 @@ function zeroPad(s: string, width: number) {
 
 function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
   if (!map.has(k)) {
-    if (typeof k === 'string') throw new Error(`Expected key ${k}`);
+    if (typeof k === 'string') {
+      throw new Error(`Expected key ${k}`);
+    }
   }
 
   const value = map.get(k);
 
-  if (value) return value;
+  if (value) {
+    return value;
+  }
 
   throw new Error(`Couldn't find a value`);
 }
@@ -363,7 +365,7 @@ function getOrInsert<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V | K {
 
 // This function extracts arrays of backtraceIDs which contains information about backtrace in recursive manner
 async function getIntegerArrays(
-  samples: Sample[],
+  samples: InstrumentsSample[],
   core: TraceDirectoryTree
 ): Promise<number[][]> {
   const uniquing = getOrThrow(core.subdirectories, 'uniquing');
@@ -421,11 +423,15 @@ async function getIntegerArrays(
 }
 
 // This function extracts samples from given core file
-async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
+async function getRawSampleList(
+  core: TraceDirectoryTree
+): Promise<InstrumentsSample[]> {
   const stores = getOrThrow(core.subdirectories, 'stores');
   for (const storedir of stores.subdirectories.values()) {
     const schemaFile = storedir.files.get('schema.xml');
-    if (!schemaFile) continue;
+    if (!schemaFile) {
+      continue;
+    }
     const schema = await readAsText(schemaFile);
     if (!/name="time-profile"/.exec(schema)) {
       continue;
@@ -442,12 +448,14 @@ async function getRawSampleList(core: TraceDirectoryTree): Promise<Sample[]> {
 
     bulkstore.seek(headerSize);
 
-    const samples: Sample[] = [];
+    const samples: InstrumentsSample[] = [];
     while (true) {
       // Schema as of Instruments 8.3.3 is a 6 byte timestamp, followed by a bunch
       // of stuff we don't care about, followed by a 4 byte backtrace ID
       const timestamp = bulkstore.readUint48();
-      if (timestamp === 0) break;
+      if (timestamp === 0) {
+        break;
+      }
 
       const threadID = bulkstore.readUint32();
 
@@ -480,9 +488,9 @@ function getCoreDirForRun(
 // Iterating recursively into arrays by given backtraceID it extracts a backtraceStack for each sample
 async function getSamples(args: {
   tree: TraceDirectoryTree,
-  addressToFrameMap: Map<number, FrameInfo>,
+  addressToFrameMap: Map<number, InstrumentsFrameInfo>,
   runNumber: number,
-}): Promise<Array<Sample>> {
+}): Promise<Array<InstrumentsSample>> {
   const { tree, addressToFrameMap, runNumber } = args;
   const core = getCoreDirForRun(tree, runNumber);
   const samples = await getRawSampleList(core);
@@ -506,7 +514,7 @@ async function getSamples(args: {
 
     // Fallback: We are not able to find the address, so we will just
     // display the address instead of frame information
-    const rawAddressFrame: FrameInfo = {
+    const rawAddressFrame: InstrumentsFrameInfo = {
       key: k,
       name: `0x${zeroPad(k.toString(16), 16)}`,
     };
@@ -546,9 +554,9 @@ async function readFormTemplateFile(tree) {
       '_selectedRunNumber'
     );
   }
-  let instrument = archive.$1;
+  let instrumentType = archive.$1;
   if ('stubInfoByUUID' in archive) {
-    instrument = Array.from(archive.stubInfoByUUID.keys())[0];
+    instrumentType = Array.from(archive.stubInfoByUUID.keys())[0];
   }
   const allRunData = archive['com.apple.xray.run.data'];
 
@@ -557,7 +565,7 @@ async function readFormTemplateFile(tree) {
     const runData = getOrThrow(allRunData.runData, runNumber);
     const symbolsByPid = getOrThrow(runData, 'symbolsByPid');
 
-    const addressToFrameMap = new Map<number, FrameInfo>();
+    const addressToFrameMap = new Map<number, InstrumentsFrameInfo>();
     for (const symbols of symbolsByPid.values()) {
       for (const symbol of symbols.symbols) {
         if (!symbol) continue;
@@ -565,7 +573,7 @@ async function readFormTemplateFile(tree) {
         for (const address of addressToLine.keys()) {
           getOrInsert(addressToFrameMap, address, () => {
             const name = symbolName || `0x${zeroPad(address.toString(16), 16)}`;
-            const frame: FrameInfo = {
+            const frame: InstrumentsFrameInfo = {
               key: `${sourcePath}:${name}`,
               name: name,
             };
@@ -586,7 +594,7 @@ async function readFormTemplateFile(tree) {
 
   return {
     version,
-    instrument,
+    instrumentType,
     selectedRunNumber,
     runs,
   };
@@ -604,7 +612,8 @@ async function extractDirectoryTree(entry: {
   };
 
   const children = await new Promise((resolve, reject) => {
-    // FileSystemDirectoryEntry.createReader() is a non-standard function for now, I have checked in Firefox and Chrome. It's working fine in it.
+    // FileSystemDirectoryEntry.createReader() is a non-standard function for now.
+    // I have checked in Firefox and Chrome. It's working fine in it.
     // We will remove FlowFixMe once it becomes a standard function
     // $FlowFixMe createReader is not present in entry
     entry.createReader().readEntries((entries: any[]) => {
@@ -841,8 +850,9 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
 }
 
 // This function creates a thread for each group of samples(by threadID)
-function pushThreadsInProfile(profile, addressToFrameMap, samples) {
+function getProcessedProfile(addressToFrameMap, samples): Profile {
   const threadIDToSamples = new Map();
+  const profile = getEmptyProfile();
   for (const sample of samples) {
     const samplesArray = threadIDToSamples.get(sample.threadID);
     if (samplesArray) {
@@ -864,23 +874,23 @@ function pushThreadsInProfile(profile, addressToFrameMap, samples) {
     }
     profile.threads.push(processedThread);
   }
+
+  return profile;
 }
 
-export async function convertInstrumentsProfile(
-  entry: { name: string },
-  fileReaderHelper: fileReader
-): Promise<Profile> {
-  fileReader = fileReaderHelper;
+// This is the root function of getting processed Instruments profile.
+// Here entry is an instance of FileSystemDirectoryEntry
+export async function convertInstrumentsProfile(entry: {
+  name: string,
+}): Promise<Profile> {
   const tree = await extractDirectoryTree(entry);
-  const { runs, instrument } = await readFormTemplateFile(tree);
+  const { runs, instrumentType } = await readFormTemplateFile(tree);
 
-  if (instrument !== 'com.apple.xray.instrument-type.coresampler2') {
+  if (instrumentType !== 'com.apple.xray.instrument-type.coresampler2') {
     throw new Error(
-      `The only supported instrument from .trace import is "com.apple.xray.instrument-type.coresampler2". Got ${instrument}`
+      `The only supported instrument from .trace import is "com.apple.xray.instrument-type.coresampler2". Got ${instrumentType}`
     );
   }
-
-  const profile = getEmptyProfile();
 
   const { addressToFrameMap, number } = runs[0];
   // For now, we will just process the first run
@@ -891,9 +901,9 @@ export async function convertInstrumentsProfile(
     runNumber: number,
   });
 
-  pushThreadsInProfile(profile, addressToFrameMap, samples);
+  const processedProfile = getProcessedProfile(addressToFrameMap, samples);
 
-  profile.meta.platform = 'Macintosh';
+  processedProfile.meta.platform = 'Macintosh';
 
-  return profile;
+  return processedProfile;
 }
