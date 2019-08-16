@@ -275,7 +275,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     if ('webkitGetAsEntry' in firstItem) {
       // DataTransferItem.webkitGetAsEntry() is a non-standard function for now.
       // I have checked in Firefox and Chrome. It's working fine in it.
-      // We will remove FlowFixMe once it becomes a standard function
+      // We will remove FlowFixMe once it becomes a standard function (issue #2217)
       // $FlowFixMe webkitGetAsEntry is not present in DataTransferItem
       const webkitEntry = firstItem.webkitGetAsEntry();
       if (webkitEntry.isDirectory && webkitEntry.name.endsWith('.trace')) {

@@ -614,7 +614,7 @@ async function extractDirectoryTree(entry: {
   const children = await new Promise((resolve, reject) => {
     // FileSystemDirectoryEntry.createReader() is a non-standard function for now.
     // I have checked in Firefox and Chrome. It's working fine in it.
-    // We will remove FlowFixMe once it becomes a standard function
+    // We will remove FlowFixMe once it becomes a standard function (issue #2218)
     // $FlowFixMe createReader is not present in entry
     entry.createReader().readEntries((entries: any[]) => {
       resolve(entries);
@@ -892,8 +892,9 @@ export async function convertInstrumentsProfile(entry: {
     );
   }
 
+  // For now, we are just processing first run
+  // In future, we will add support for processing every runs (issue #2215)
   const { addressToFrameMap, number } = runs[0];
-  // For now, we will just process the first run
 
   const samples = await getSamples({
     tree,
