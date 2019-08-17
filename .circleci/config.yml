@@ -48,6 +48,15 @@ jobs:
       - run: yarn test --coverage --logHeapUsage -w=4 --workerIdleMemoryLimit=1.5G
       - run: yarn codecov
 
+  # This is not part of `yarn lint` for now as it reports multiple
+  # issues with a11y that we want to get visibility on but also
+  # don't want to block the CI with them
+  lint-a11y:
+    executor: node
+    steps:
+      - checkout-and-dependencies
+      - run: yarn lint-js-a11y || true
+
   build-prod:
     executor: node
     resource_class: large
@@ -108,6 +117,7 @@ workflows:
     jobs:
       - tests
       - lint
+      - lint-a11y
       - build-prod
       - flow
       - licence-check
