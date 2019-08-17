@@ -140,6 +140,7 @@
     "html-webpack-plugin": "^5.5.0",
     "husky": "^4.3.8",
     "jest": "^29.3.1",
+    "jest-axe": "^4.0.0",
     "jest-environment-jsdom": "^29.3.1",
     "jest-extended": "^3.2.0",
     "json-loader": "^0.5.7",
@@ -184,6 +185,7 @@
     },
     "setupFilesAfterEnv": [
       "jest-extended/all",
+      "jest-axe/extend-expect",
       "./src/test/setup.js"
     ],
     "globals": {

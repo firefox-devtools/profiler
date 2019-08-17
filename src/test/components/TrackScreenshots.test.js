@@ -11,6 +11,7 @@ import type {
 
 import * as React from 'react';
 import { Provider } from 'react-redux';
+import { axe } from 'jest-axe';
 
 import {
   render,
@@ -275,6 +276,11 @@ describe('timeline/TrackScreenshots', function () {
   it('is not created in the <Timeline /> with a profile with no screenshots', function () {
     const { queryByText } = setup(getProfileWithNiceTracks(), <Timeline />);
     expect(queryByText('Screenshots')).not.toBeInTheDocument();
+  });
+
+  it('has no a11y violations', async () => {
+    const { container } = setup();
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
 

@@ -232,6 +232,8 @@ type EnzymeMatchersType = {
 
 // DOM testing library extensions (jest-dom)
 // https://github.com/testing-library/jest-dom
+
+// DOM testing library extensions https://github.com/kentcdodds/dom-testing-library#custom-jest-matchers
 type DomTestingLibraryType = {
   /**
    * @deprecated
@@ -572,6 +574,12 @@ type SnapshotDiffType = {
   ...
 };
 
+// jest-axe matcher: https://github.com/nickcolley/jest-axe#jest-axe
+type JestAxeMatcherType = {
+  toHaveNoViolations(): void,
+  ...
+};
+
 interface JestExpectType {
   not: JestExpectType &
     EnzymeMatchersType &
@@ -579,7 +587,8 @@ interface JestExpectType {
     JestJQueryMatchersType &
     JestStyledComponentsMatchersType &
     JestExtendedMatchersType &
-    SnapshotDiffType;
+    SnapshotDiffType &
+    JestAxeMatcherType;
   /**
    * If you have a mock function, you can use .lastCalledWith to test what
    * arguments it was last called with.
@@ -1169,7 +1178,9 @@ declare var expect: {
     JestJQueryMatchersType &
     JestStyledComponentsMatchersType &
     JestExtendedMatchersType &
-    SnapshotDiffType,
+    SnapshotDiffType &
+    JestAxeMatcherType,
+
   /** Add additional Jasmine matchers to Jest's roster */
   extend(matchers: { [name: string]: JestMatcher, ... }): void,
   /** Add a module that formats application-specific data structures. */
