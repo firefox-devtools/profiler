@@ -69,10 +69,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         class="sidebar-categoryname"
       >
         <span
-          class="sidebar-color colored-square category-color-grey"
-          title="Other"
+          class="sidebar-color colored-square category-color-yellow"
+          title="JavaScript"
         />
-        Other
+        JavaScript
       </div>
       <div
         class="sidebar-categorytiming"
@@ -213,10 +213,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         class="sidebar-categoryname"
       >
         <span
-          class="sidebar-color colored-square category-color-grey"
-          title="Other"
+          class="sidebar-color colored-square category-color-yellow"
+          title="JavaScript"
         />
-        Other
+        JavaScript
       </div>
       <div
         class="sidebar-categorytiming"
@@ -556,10 +556,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         class="sidebar-categoryname"
       >
         <span
-          class="sidebar-color colored-square category-color-grey"
-          title="Other"
+          class="sidebar-color colored-square category-color-yellow"
+          title="JavaScript"
         />
-        Other
+        JavaScript
       </div>
       <div
         class="sidebar-categorytiming"
@@ -746,10 +746,10 @@ exports[`CallTreeSidebar matches the snapshots when displaying data about the cu
         class="sidebar-categoryname"
       >
         <span
-          class="sidebar-color colored-square category-color-grey"
-          title="Other"
+          class="sidebar-color colored-square category-color-yellow"
+          title="JavaScript"
         />
-        Other
+        JavaScript
       </div>
       <div
         class="sidebar-categorytiming"

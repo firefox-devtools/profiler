@@ -1,0 +1,24 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.timelineTrackContextMenuItem {
+  display: flex;
+}
+
+/* This spacer allows the width of a menu item to both grow and
+ * shrink. By letting it shrink, it won't cause the text to get
+ * unaligned or flow into the checkmark on the far right when a
+ * scrollbar appears. */
+.timelineTrackContextMenuSpacer {
+  width: 20px;
+  flex: 1;
+}
+
+.timelineTrackContextMenuPid {
+  color: var(--grey-90-a60);
+}
+
+.react-contextmenu-item:hover .timelineTrackContextMenuPid {
+  color: #fff;
+}
