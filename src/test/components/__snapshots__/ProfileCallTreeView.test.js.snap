@@ -506,8 +506,8 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
                   <span
-                    class="colored-square category-color-grey"
-                    title="Other"
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
                   />
                   Fjs
                 </span>
@@ -536,8 +536,8 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
                   <span
-                    class="colored-square category-color-grey"
-                    title="Other"
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
                   />
                   Gjs
                 </span>
@@ -566,8 +566,8 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
                   <span
-                    class="colored-square category-color-grey"
-                    title="Other"
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
                   />
                   Hjs
                 </span>
@@ -595,8 +595,8 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
                   <span
-                    class="colored-square category-color-grey"
-                    title="Other"
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
                   />
                   I
                 </span>

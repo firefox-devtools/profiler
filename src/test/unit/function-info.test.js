@@ -45,8 +45,17 @@ describe('remove-template-information', function() {
       'fn'
     );
   });
+
   it('should not remove information we want to keep', function() {
     expect(removeTemplateInformation('foo/<bar')).toEqual('foo/<bar');
+  });
+
+  it('should not remove <script> tags', function() {
+    let fixture = '<script async src="something.js">';
+    expect(removeTemplateInformation(fixture)).toEqual(fixture);
+
+    fixture = 'starting handling <script>';
+    expect(removeTemplateInformation(fixture)).toEqual(fixture);
   });
 });
 

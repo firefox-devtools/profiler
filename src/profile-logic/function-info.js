@@ -38,8 +38,15 @@ export function removeTemplateInformation(functionName: string) {
   let result = '';
   let depth = 0;
   let start = 0; // Start of a segment we'd like to keep
-  for (let i = 0; i < functionName.length; i++) {
-    if (functionName[i] === '<') {
+  // We start the loop at i = 1 because we don't want to extract any
+  // template-like information starting at the beginning of the string:
+  // templates can't occur before the name of a function, so this is certainly
+  // an HTML tag like <script>.
+  for (let i = 1; i < functionName.length; i++) {
+    // We also don't want to extract template-like information that start after
+    // a space, as that won't likely be a real template information and
+    // probably rather an HTML tag name.
+    if (functionName[i] === '<' && functionName[i - 1] !== ' ') {
       if (depth === 0) {
         // Template information begins, save segment
         result += functionName.substr(start, i - start);

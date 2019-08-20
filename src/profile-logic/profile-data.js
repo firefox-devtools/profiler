@@ -1487,6 +1487,9 @@ export function getFriendlyThreadName(
           case 'plugin':
             label = 'Plugin Process';
             break;
+          case 'socket':
+            label = 'Socket Process';
+            break;
           default:
           // should we throw here ?
         }
