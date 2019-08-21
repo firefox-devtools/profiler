@@ -63,7 +63,7 @@ describe('sanitizePII', function() {
     }
   });
 
-  it('should not sanitize counters if its thread is deleted', function() {
+  it('should not sanitize counters if its thread is not deleted', function() {
     const profile = processProfile(createGeckoProfile());
     const { counters } = profile;
     expect(counters).not.toEqual(undefined);
@@ -86,6 +86,58 @@ describe('sanitizePII', function() {
     expect(sanitizedCounters).not.toEqual(undefined);
     if (sanitizedCounters !== undefined) {
       expect(sanitizedCounters.length).toEqual(1);
+    }
+  });
+
+  it('should sanitize profiler overhead if its thread is deleted', function() {
+    const profile = processProfile(createGeckoProfile());
+    const { profilerOverhead } = profile;
+    expect(profilerOverhead).not.toEqual(undefined);
+    if (profilerOverhead === undefined) {
+      return;
+    }
+    expect(profilerOverhead.length).toEqual(1);
+    // Assuming that the mainThreadIndex of the profiler overhead is 0.
+    // If that assertion fails, put back the profiler overhead where you moved from.
+    expect(profilerOverhead[0].mainThreadIndex).toEqual(0);
+
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldRemoveThreads: new Set([0]),
+    });
+    const { profilerOverhead: sanitizedProfilerOverhead } = sanitizePII(
+      profile,
+      PIIToRemove
+    ).profile;
+    // The counter was for the first thread, it should be deleted now.
+    expect(sanitizedProfilerOverhead).not.toEqual(undefined);
+    if (sanitizedProfilerOverhead !== undefined) {
+      expect(sanitizedProfilerOverhead.length).toEqual(0);
+    }
+  });
+
+  it('should not sanitize profiler overhead if its thread is not deleted', function() {
+    const profile = processProfile(createGeckoProfile());
+    const { profilerOverhead } = profile;
+    expect(profilerOverhead).not.toEqual(undefined);
+    if (profilerOverhead === undefined) {
+      return;
+    }
+    expect(profilerOverhead.length).toEqual(1);
+    // Assuming that the mainThreadIndex of the counter is 0.
+    // If that assertion fails, put back the counter where you moved from.
+    expect(profilerOverhead[0].mainThreadIndex).toEqual(0);
+
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldRemoveThreads: new Set([1, 2]),
+    });
+    const { profilerOverhead: sanitizedProfilerOverhead } = sanitizePII(
+      profile,
+      PIIToRemove
+    ).profile;
+    // The counter was for the first thread, it should not be deleted now.
+    expect(sanitizedProfilerOverhead).not.toEqual(undefined);
+    if (sanitizedProfilerOverhead !== undefined) {
+      expect(sanitizedProfilerOverhead.length).toEqual(1);
     }
   });
 
