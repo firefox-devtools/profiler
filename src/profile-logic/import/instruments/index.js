@@ -193,10 +193,6 @@ function isDictionary(value: any): boolean {
   );
 }
 
-function isArray(value: any): boolean {
-  return value instanceof Array;
-}
-
 // This function populates data fields with given interpretClass(decided by various datatypes
 // from readInstrumentsArchive function)
 function expandKeyedArchive(
@@ -208,7 +204,7 @@ function expandKeyedArchive(
     root.$version !== 100000 ||
     root.$archiver !== 'NSKeyedArchiver' ||
     !isDictionary(root.$top) ||
-    !isArray(root.$objects)
+    !Array.isArray(root.$objects)
   ) {
     throw new Error('Invalid keyed archive');
   }
@@ -231,7 +227,7 @@ function expandKeyedArchive(
   const visit = (object: any) => {
     if (object instanceof UID) {
       return root.$objects[object.index];
-    } else if (isArray(object)) {
+    } else if (Array.isArray(object)) {
       for (let i = 0; i < object.length; i++) {
         object[i] = visit(object[i]);
       }
@@ -568,7 +564,9 @@ async function readFormTemplateFile(tree) {
     const addressToFrameMap = new Map<number, InstrumentsFrameInfo>();
     for (const symbols of symbolsByPid.values()) {
       for (const symbol of symbols.symbols) {
-        if (!symbol) continue;
+        if (!symbol) {
+          continue;
+        }
         const { sourcePath, symbolName, addressToLine } = symbol;
         for (const address of addressToLine.keys()) {
           getOrInsert(addressToFrameMap, address, () => {
@@ -875,6 +873,8 @@ function getProcessedProfile(addressToFrameMap, samples): Profile {
     profile.threads.push(processedThread);
   }
 
+  profile.meta.platform = 'Macintosh';
+
   return profile;
 }
 
@@ -903,8 +903,6 @@ export async function convertInstrumentsProfile(entry: {
   });
 
   const processedProfile = getProcessedProfile(addressToFrameMap, samples);
-
-  processedProfile.meta.platform = 'Macintosh';
 
   return processedProfile;
 }

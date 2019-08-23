@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import * as pako from 'pako';
+import pako from 'pako';
 
 class MaybeCompressedDataReader {
   uncompressedData: Promise<ArrayBuffer>;
@@ -13,7 +13,7 @@ class MaybeCompressedDataReader {
     maybeCompressedDataPromise: Promise<ArrayBuffer>
   ) {
     this.uncompressedData = maybeCompressedDataPromise.then(
-      async (fileData: ArrayBuffer) => {
+      (fileData: ArrayBuffer) => {
         try {
           const result = pako.inflate(new Uint8Array(fileData)).buffer;
           return result;
@@ -23,6 +23,7 @@ class MaybeCompressedDataReader {
       }
     );
   }
+
   async name(): Promise<string> {
     return this.namePromise;
   }
@@ -40,7 +41,7 @@ class MaybeCompressedDataReader {
       return decoder.decode(buffer);
     }
     // JavaScript strings are UTF-16 encoded, but we're reading data
-    // from disk that we're going to asusme is UTF-8 encoded.
+    // from disk that we're going to assume is UTF-8 encoded.
     const array = new Uint8Array(buffer);
     for (let i = 0; i < array.length; i++) {
       ret += String.fromCharCode(array[i]);

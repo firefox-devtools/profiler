@@ -3,9 +3,9 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import * as JSZip from 'jszip';
-import * as fs from 'fs';
-import * as path from 'path';
+import JSZip from 'jszip';
+import fs from 'fs';
+import path from 'path';
 
 import { convertInstrumentsProfile } from '../../profile-logic/import/instruments';
 
@@ -36,7 +36,9 @@ class MockFileSystemEntry {
   }
 
   file(cb: (file: File) => void, errCb: (error: Error) => void) {
-    if (!this.zipFile) return errCb(new Error('Failed to extract file'));
+    if (!this.zipFile) {
+      return errCb(new Error('Failed to extract file'));
+    }
     this.zipFile
       .async('blob')
       .then(
@@ -59,8 +61,9 @@ class MockFileSystemEntry {
         cb: (entries: []) => void,
         errCb: (error: Error) => void
       ) => {
-        if (!this.zipDir)
+        if (!this.zipDir) {
           return errCb(new Error('Failed to read folder entries'));
+        }
         const ret = [];
         this.zipDir.forEach((relativePath: string, file: { name: string }) => {
           if (
@@ -78,7 +81,7 @@ class MockFileSystemEntry {
 
 describe('convertInstrumentsProfile function', () => {
   async function importFromTrace(tracePath: string, fileName: string) {
-    const zip = await new Promise<any>((resolve, reject) => {
+    const zip = await new Promise((resolve, reject) => {
       return fs.readFile(tracePath, (err, data) => {
         if (err) {
           return reject(err);
