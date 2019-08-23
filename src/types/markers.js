@@ -417,6 +417,17 @@ export type DOMEventMarkerPayload = {|
   docshellHistoryId?: number,
 |};
 
+export type PrefMarkerPayload = {|
+  type: 'PreferenceRead',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  prefAccessTime: Milliseconds,
+  prefName: string,
+  prefKind: string,
+  prefType: string,
+  prefValue: string,
+|};
+
 export type NavigationMarkerPayload = {|
   type: 'tracing',
   category: 'Navigation',
@@ -526,6 +537,7 @@ export type MarkerPayload =
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | NavigationMarkerPayload
+  | PrefMarkerPayload
   | null;
 
 export type MarkerPayload_Gecko =
@@ -546,6 +558,7 @@ export type MarkerPayload_Gecko =
   | ArbitraryEventTracing
   | NavigationMarkerPayload
   | JsAllocationPayload_Gecko
+  | PrefMarkerPayload
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.

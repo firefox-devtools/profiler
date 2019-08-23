@@ -12,6 +12,7 @@ import {
 import { removeURLs } from '../utils/string';
 import {
   removeNetworkMarkerURLs,
+  removePrefMarkerPreferenceValues,
   filterRawMarkerTableToRangeWithMarkersToDelete,
 } from './marker-data';
 import { filterThreadSamplesToRange } from './profile-data';
@@ -169,10 +170,22 @@ function sanitizeThreadPII(
   const markersToDelete = new Set();
   if (
     PIIToBeRemoved.shouldRemoveUrls ||
+    PIIToBeRemoved.shouldRemovePreferenceValues ||
     PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0
   ) {
     for (let i = 0; i < markerTable.length; i++) {
       const currentMarker = markerTable.data[i];
+
+      // Remove the all the preference values, if the user wants that.
+      if (
+        PIIToBeRemoved.shouldRemovePreferenceValues &&
+        currentMarker &&
+        currentMarker.type &&
+        currentMarker.type === 'PreferenceRead'
+      ) {
+        // Remove the preference value field from the marker payload.
+        markerTable.data[i] = removePrefMarkerPreferenceValues(currentMarker);
+      }
 
       // Remove the all network URLs if user wants to remove them.
       if (

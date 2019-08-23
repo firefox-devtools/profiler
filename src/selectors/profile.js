@@ -199,6 +199,21 @@ export const getGlobalTrackReferences: Selector<
     }))
 );
 
+export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
+  getThreads,
+  threads => {
+    return threads.some(({ stringTable, markers }) => {
+      /*
+       * Does this particular thread have a Preference in it?
+       */
+      const indexForPreferenceString = stringTable.indexForString(
+        'PreferenceRead'
+      );
+      return markers.name.some(name => name === indexForPreferenceString);
+    });
+  }
+);
+
 /**
  * This finds a GlobalTrack from its TrackReference. No memoization is needed
  * as this is a simple value look-up.

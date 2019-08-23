@@ -35,6 +35,7 @@ describe('getCheckedSharingOptions', function() {
       includeHiddenThreads: false,
       includeScreenshots: false,
       includeUrls: false,
+      includePreferenceValues: false,
     };
     const isNotFiltering = {
       includeExtension: true,
@@ -42,6 +43,7 @@ describe('getCheckedSharingOptions', function() {
       includeHiddenThreads: true,
       includeScreenshots: true,
       includeUrls: true,
+      includePreferenceValues: true,
     };
     function getDefaultsWith(updateChannel: string) {
       const { profile } = getProfileFromTextSamples('A');

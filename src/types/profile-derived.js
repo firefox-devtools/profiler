@@ -182,6 +182,8 @@ export type RemoveProfileInformation = {
   shouldRemoveUrls: boolean,
   // Remove the extension list if it's true.
   shouldRemoveExtensions: boolean,
+  // Remove the preference values if it's true.
+  shouldRemovePreferenceValues: boolean,
 };
 
 /**

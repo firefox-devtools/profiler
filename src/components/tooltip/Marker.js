@@ -545,6 +545,17 @@ function getMarkerDetails(
         );
         break;
       }
+      case 'PreferenceRead': {
+        tooltipDetails = (
+          <TooltipDetails>
+            <TooltipDetail label="Name">{data.prefName}</TooltipDetail>
+            <TooltipDetail label="Kind">{data.prefKind}</TooltipDetail>
+            <TooltipDetail label="Type">{data.prefType}</TooltipDetail>
+            <TooltipDetail label="Value">{data.prefValue}</TooltipDetail>
+          </TooltipDetails>
+        );
+        break;
+      }
       case 'Invalidation': {
         tooltipDetails = (
           <TooltipDetails>

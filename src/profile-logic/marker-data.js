@@ -12,7 +12,11 @@ import type {
   IndexIntoRawMarkerTable,
 } from '../types/profile';
 import type { Marker, MarkerIndex } from '../types/profile-derived';
-import type { BailoutPayload, NetworkPayload } from '../types/markers';
+import type {
+  BailoutPayload,
+  NetworkPayload,
+  PrefMarkerPayload,
+} from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { StartEndRange } from '../types/units';
 
@@ -1019,6 +1023,12 @@ export function removeNetworkMarkerURLs(
   payload: NetworkPayload
 ): NetworkPayload {
   return { ...payload, URI: '', RedirectURI: '' };
+}
+
+export function removePrefMarkerPreferenceValues(
+  payload: PrefMarkerPayload
+): PrefMarkerPayload {
+  return { ...payload, prefValue: '' };
 }
 
 export function getMarkerFullDescription(marker: Marker) {

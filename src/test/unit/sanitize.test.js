@@ -6,6 +6,7 @@
 import { processProfile } from '../../profile-logic/process-profile';
 import { sanitizePII } from '../../profile-logic/sanitize';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
+import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
 import type { RemoveProfileInformation } from '../../types/profile-derived';
 
@@ -19,6 +20,7 @@ describe('sanitizePII', function() {
       shouldRemoveUrls: false,
       shouldFilterToCommittedRange: null,
       shouldRemoveExtensions: false,
+      shouldRemovePreferenceValues: false,
       ...customFields,
     };
   }
@@ -203,5 +205,79 @@ describe('sanitizePII', function() {
       expect(extensions.name.length).toEqual(0);
       expect(extensions.baseURL.length).toEqual(0);
     }
+  });
+
+  it('should not sanitize all the preference values inside preference read markers', function() {
+    const profile = getProfileWithMarkers([
+      [
+        'PreferenceRead',
+        1,
+        {
+          type: 'PreferenceRead',
+          startTime: 0,
+          endTime: 1,
+          prefAccessTime: 0,
+          prefName: 'preferenceName',
+          prefKind: 'preferenceKind',
+          prefType: 'preferenceType',
+          prefValue: 'preferenceValue',
+        },
+      ],
+    ]);
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldRemovePreferenceValues: false,
+    });
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
+
+    expect(sanitizedProfile.threads.length).toEqual(1);
+
+    const thread = sanitizedProfile.threads[0];
+    expect(thread.markers.length).toEqual(1);
+
+    const marker = thread.markers.data[0];
+    // All the conditions have to be checked to make Flow happy.
+    expect(
+      marker &&
+        marker.type &&
+        marker.type === 'PreferenceRead' &&
+        marker.prefValue === 'preferenceValue'
+    ).toBeTruthy();
+  });
+
+  it('should sanitize all the preference values inside preference read markers', function() {
+    const profile = getProfileWithMarkers([
+      [
+        'PreferenceRead',
+        1,
+        {
+          type: 'PreferenceRead',
+          startTime: 0,
+          endTime: 1,
+          prefAccessTime: 0,
+          prefName: 'preferenceName',
+          prefKind: 'preferenceKind',
+          prefType: 'preferenceType',
+          prefValue: 'preferenceValue',
+        },
+      ],
+    ]);
+    const PIIToRemove = getRemoveProfileInformation({
+      shouldRemovePreferenceValues: true,
+    });
+    const sanitizedProfile = sanitizePII(profile, PIIToRemove).profile;
+
+    expect(sanitizedProfile.threads.length).toEqual(1);
+
+    const thread = sanitizedProfile.threads[0];
+    expect(thread.markers.length).toEqual(1);
+
+    const marker = thread.markers.data[0];
+    // All the conditions have to be checked to make Flow happy.
+    expect(
+      marker &&
+        marker.type &&
+        marker.type === 'PreferenceRead' &&
+        marker.prefValue === ''
+    ).toBeTruthy();
   });
 });
