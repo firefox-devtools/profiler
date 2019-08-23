@@ -50,7 +50,6 @@ body,
   border-top: 1px solid var(--grey-30);
   cursor: default;
   -webkit-user-select: none;
-  -moz-user-select: none;
   user-select: none;
 }
 
@@ -342,7 +341,8 @@ body,
   text-overflow: ellipsis;
   transition: background-color 200ms, border-color 200ms;
   transition-timing-function: var(--animation-timing);
-  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
   white-space: nowrap;
 }
 .tabBarTab.selected {
@@ -486,7 +486,6 @@ body,
   font-size: 12px;
   text-align: left;
   -webkit-user-select: none;
-  -moz-user-select: none;
   user-select: none;
 }
 .react-contextmenu-separator {
