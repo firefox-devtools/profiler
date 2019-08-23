@@ -14,6 +14,7 @@ import {
   createGeckoProfile,
   createGeckoCounter,
   createGeckoMarkerStack,
+  createGeckoProfilerOverhead,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/flow';
 import type { JsAllocationPayload_Gecko } from '../../types/markers';
@@ -232,6 +233,88 @@ describe('gecko counters processing', function() {
 
     // The subprocess times are offset when processed:
     expect(processedCounters[1].sampleGroups.samples.time).toEqual(offsetTime);
+  });
+});
+
+describe('gecko profilerOverhead processing', function() {
+  function setup() {
+    // Create a gecko profile with profilerOverhead.
+    const findMainThread = profile =>
+      ensureExists(
+        profile.threads.find(thread => thread.name === 'GeckoMain'),
+        'There should be a GeckoMain thread in the Gecko profile'
+      );
+
+    const parentGeckoProfile = createGeckoProfile();
+    const [childGeckoProfile] = parentGeckoProfile.processes;
+
+    const parentPid = findMainThread(parentGeckoProfile).pid;
+    const childPid = findMainThread(childGeckoProfile).pid;
+    expect(parentPid).toEqual(3333);
+    expect(childPid).toEqual(2222);
+
+    const parentOverhead = createGeckoProfilerOverhead(
+      findMainThread(parentGeckoProfile)
+    );
+    const childOverhead = createGeckoProfilerOverhead(
+      findMainThread(childGeckoProfile)
+    );
+    parentGeckoProfile.profilerOverhead = parentOverhead;
+    childGeckoProfile.profilerOverhead = childOverhead;
+    return {
+      parentGeckoProfile,
+      parentPid,
+      childPid,
+      parentOverhead,
+      childOverhead,
+    };
+  }
+
+  it('can extract the overhead information correctly', function() {
+    const { parentGeckoProfile, parentPid, childPid } = setup();
+    const processedProfile = processProfile(parentGeckoProfile);
+    const overhead = ensureExists(
+      processedProfile.profilerOverhead,
+      'Expected to find profilerOverhead on the processed profile'
+    );
+    expect(overhead.length).toBe(2);
+    expect(overhead[0].pid).toBe(parentPid);
+    expect(overhead[1].pid).toBe(childPid);
+
+    const findMainThreadIndexByPid = (pid: number): number =>
+      processedProfile.threads.findIndex(
+        thread => thread.name === 'GeckoMain' && thread.pid === pid
+      );
+
+    expect(overhead[0].mainThreadIndex).toBe(
+      findMainThreadIndexByPid(parentPid)
+    );
+    expect(overhead[1].mainThreadIndex).toBe(
+      findMainThreadIndexByPid(childPid)
+    );
+  });
+
+  it('offsets the overhead timing for child processes', function() {
+    const { parentGeckoProfile, parentOverhead, childOverhead } = setup();
+    const processedProfile = processProfile(parentGeckoProfile);
+    const processedOverheads = ensureExists(processedProfile.profilerOverhead);
+
+    const originalTime = [0, 1000, 2000, 3000, 4000, 5000, 6000];
+    const processedTime = originalTime.map(n => n / 1000);
+    const offsetTime = processedTime.map(n => n + 1000);
+
+    const extractTime = overhead =>
+      overhead.samples.data.map(tuple => tuple[0]);
+
+    // The original times are not offset and in microseconds.
+    expect(extractTime(parentOverhead)).toEqual(originalTime);
+    expect(extractTime(childOverhead)).toEqual(originalTime);
+
+    // The parent process times are not offset and in milliseconds.
+    expect(processedOverheads[0].samples.time).toEqual(processedTime);
+
+    // The subprocess times are offset and in milliseconds when processed
+    expect(processedOverheads[1].samples.time).toEqual(offsetTime);
   });
 });
 

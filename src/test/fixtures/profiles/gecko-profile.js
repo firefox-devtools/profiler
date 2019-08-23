@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Lib } from '../../../types/profile';
+import type { Lib, ProfilerOverheadStats } from '../../../types/profile';
 
 import type {
   GeckoProfile,
@@ -13,6 +13,7 @@ import type {
   GeckoThread,
   GeckoCounter,
   GeckoMarkerStack,
+  GeckoProfilerOverhead,
 } from '../../../types/gecko-profile';
 
 import { GECKO_PROFILE_VERSION } from '../../../app-logic/constants';
@@ -214,11 +215,16 @@ export function createGeckoProfile(): GeckoProfile {
     createGeckoCounter(parentProcessThreads[0]),
   ];
 
+  const parentProcessOverhead: GeckoProfilerOverhead = createGeckoProfilerOverhead(
+    parentProcessThreads[0]
+  );
+
   const profile = {
     meta: parentProcessMeta,
     libs: [parentProcessBinary].concat(extraBinaries),
     pages: [],
     counters: parentProcessCounters,
+    profilerOverhead: parentProcessOverhead,
     pausedRanges: [],
     threads: parentProcessThreads,
     processes: [],
@@ -726,4 +732,99 @@ export function createGeckoCounter(thread: GeckoThread): GeckoCounter {
     geckoCounter.sample_groups.samples.data.push([time, number, count]);
   }
   return geckoCounter;
+}
+
+export function createGeckoProfilerOverhead(
+  thread: GeckoThread
+): GeckoProfilerOverhead {
+  // Helper class to calculate statistics.
+  class ProfilerStats {
+    n = 0;
+    sum = 0;
+    min = Number.MAX_SAFE_INTEGER;
+    max = 0;
+    count(val: number) {
+      ++this.n;
+      this.sum += val;
+      if (val < this.min) {
+        this.min = val;
+      }
+      if (val > this.max) {
+        this.max = val;
+      }
+    }
+  }
+
+  const intervals = new ProfilerStats();
+  const overheads = new ProfilerStats();
+  const lockings = new ProfilerStats();
+  const cleanings = new ProfilerStats();
+  const counters = new ProfilerStats();
+  const threads = new ProfilerStats();
+
+  // Fill the profiler overhead data.
+  const data = [];
+  for (let i = 0; i < thread.samples.data.length; i++) {
+    // Go through all the thread samples and create a corresponding counter entry.
+    const time = thread.samples.data[i][1] * 1000;
+    const prevTime = i === 0 ? 0 : thread.samples.data[i - 1][1] * 1000;
+    // Create some arbitrary (positive integer) values for the individual overheads.
+    const lockingTime = Math.floor(50 * Math.sin(i) + 50);
+    const cleaningTime = Math.floor(50 * Math.sin(i) + 55);
+    const counterTime = Math.floor(50 * Math.sin(i) + 60);
+    const threadTime = Math.floor(50 * Math.sin(i) + 65);
+    const interval = time - prevTime;
+
+    intervals.count(interval);
+    lockings.count(lockingTime);
+    cleanings.count(cleaningTime);
+    counters.count(counterTime);
+    threads.count(threadTime);
+    overheads.count(lockingTime + cleaningTime + counterTime + threadTime);
+
+    data.push([time, lockingTime, cleaningTime, counterTime, threadTime]);
+  }
+
+  const profiledDuration =
+    thread.samples.data[thread.samples.data.length - 1][1] -
+    thread.samples.data[0][1];
+  const statistics: ProfilerOverheadStats = {
+    profiledDuration,
+    samplingCount: overheads.n,
+    overheadDurations: overheads.sum,
+    overheadPercentage: overheads.sum / profiledDuration,
+    // Individual statistics
+    maxCleaning: cleanings.max,
+    maxCounter: counters.max,
+    maxInterval: intervals.max,
+    maxLockings: lockings.max,
+    maxOverhead: overheads.max,
+    maxThread: threads.max,
+    meanCleaning: cleanings.sum / cleanings.n,
+    meanCounter: counters.sum / counters.n,
+    meanInterval: intervals.sum / intervals.n,
+    meanLockings: lockings.sum / lockings.n,
+    meanOverhead: overheads.sum / overheads.n,
+    meanThread: threads.sum / threads.n,
+    minCleaning: cleanings.min,
+    minCounter: counters.min,
+    minInterval: intervals.min,
+    minLockings: lockings.min,
+    minOverhead: overheads.min,
+    minThread: threads.min,
+  };
+
+  return {
+    samples: {
+      schema: {
+        time: 0,
+        locking: 1,
+        expiredMarkerCleaning: 2,
+        counters: 3,
+        threads: 4,
+      },
+      data: data,
+    },
+    statistics: statistics,
+  };
 }

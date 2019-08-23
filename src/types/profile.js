@@ -4,7 +4,13 @@
 
 // @flow
 
-import type { Milliseconds, MemoryOffset, Microseconds, Bytes } from './units';
+import type {
+  Milliseconds,
+  MemoryOffset,
+  Microseconds,
+  Bytes,
+  Nanoseconds,
+} from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload } from './markers';
 export type IndexIntoStackTable = number;
@@ -286,6 +292,63 @@ export type Counter = {|
 |};
 
 /**
+ * The statistics about profiler overhead. It includes max/min/mean values of
+ * individual and overall overhead timings.
+ */
+export type ProfilerOverheadStats = {|
+  maxCleaning: Nanoseconds,
+  maxCounter: Nanoseconds,
+  maxInterval: Nanoseconds,
+  maxLockings: Nanoseconds,
+  maxOverhead: Nanoseconds,
+  maxThread: Nanoseconds,
+  meanCleaning: Nanoseconds,
+  meanCounter: Nanoseconds,
+  meanInterval: Nanoseconds,
+  meanLockings: Nanoseconds,
+  meanOverhead: Nanoseconds,
+  meanThread: Nanoseconds,
+  minCleaning: Nanoseconds,
+  minCounter: Nanoseconds,
+  minInterval: Nanoseconds,
+  minLockings: Nanoseconds,
+  minOverhead: Nanoseconds,
+  minThread: Nanoseconds,
+  overheadDurations: Nanoseconds,
+  overheadPercentage: Nanoseconds,
+  profiledDuration: Nanoseconds,
+  samplingCount: Nanoseconds,
+|};
+
+/**
+ * Gecko Profiler records profiler overhead samples of specific tasks that take time.
+ * counters: Time spent during collecting counter samples.
+ * expiredMarkerCleaning: Time spent during expired marker cleanup
+ * lockings: Time spent during acquiring locks.
+ * threads: Time spent during threads sampling and marker collection.
+ */
+export type ProfilerOverheadSamplesTable = {|
+  counters: Array<Nanoseconds>,
+  expiredMarkerCleaning: Array<Nanoseconds>,
+  locking: Array<Nanoseconds>,
+  threads: Array<Nanoseconds>,
+  time: Array<Milliseconds>,
+  length: number,
+|};
+
+/**
+ * Information about profiler overhead. It includes overhead timings for
+ * counters, expired marker cleanings, mutex locking and threads. Also it
+ * includes statistics about those individual and overall overhead.
+ */
+export type ProfilerOverhead = {|
+  samples: ProfilerOverheadSamplesTable,
+  statistics: ProfilerOverheadStats,
+  pid: Pid,
+  mainThreadIndex: ThreadIndex,
+|};
+
+/**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
@@ -436,5 +499,6 @@ export type Profile = {|
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.
   counters?: Counter[],
+  profilerOverhead?: ProfilerOverhead[],
   threads: Thread[],
 |};

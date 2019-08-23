@@ -110,6 +110,25 @@ export function sanitizePII(
           return acc;
         }, [])
       : undefined,
+    // Remove profilerOverhead which belong to the removed threads.
+    // Also adjust other overheads to point to the right thread.
+    profilerOverhead: profile.profilerOverhead
+      ? profile.profilerOverhead.reduce((acc, overhead) => {
+          const newThreadIndex = oldThreadIndexToNew.get(
+            overhead.mainThreadIndex
+          );
+
+          // Filtering out the overhead if it's undefined.
+          if (newThreadIndex !== undefined) {
+            acc.push({
+              ...overhead,
+              mainThreadIndex: newThreadIndex,
+            });
+          }
+
+          return acc;
+        }, [])
+      : undefined,
   };
 
   return {

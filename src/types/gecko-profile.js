@@ -10,9 +10,10 @@ import type {
   CategoryList,
   PageList,
   JsTracerTable,
+  ProfilerOverheadStats,
 } from './profile';
 import type { MarkerPayload_Gecko } from './markers';
-import type { Milliseconds } from './units';
+import type { Milliseconds, Nanoseconds } from './units';
 
 export type IndexIntoGeckoFrameTable = number;
 export type IndexIntoGeckoStackTable = number;
@@ -171,6 +172,22 @@ export type GeckoCounter = {|
   |},
 |};
 
+export type GeckoProfilerOverhead = {|
+  samples: {|
+    schema: {|
+      time: 0,
+      locking: 1,
+      expiredMarkerCleaning: 2,
+      counters: 3,
+      threads: 4,
+    |},
+    data: Array<
+      [Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds]
+    >,
+  |},
+  statistics: ProfilerOverheadStats,
+|};
+
 /* This meta object is used in subprocesses profiles.
  * Using https://searchfox.org/mozilla-central/rev/7556a400affa9eb99e522d2d17c40689fa23a729/tools/profiler/core/platform.cpp#1829
  * as source of truth. (Please update the link whenever there's a new property).
@@ -242,6 +259,9 @@ export type GeckoProfileFullMeta = {|
 
 export type GeckoProfileWithMeta<Meta> = {|
   counters?: GeckoCounter[],
+  // Optional because older Firefox versions may not have that data and
+  // no upgrader was necessary.
+  profilerOverhead?: GeckoProfilerOverhead,
   meta: Meta,
   libs: Lib[],
   pages?: PageList,
