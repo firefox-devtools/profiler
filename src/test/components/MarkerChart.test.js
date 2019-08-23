@@ -449,8 +449,7 @@ describe('MarkerChart', function() {
       flushRafCalls();
 
       const text = getFillTextCalls(flushDrawLog());
-      expect(text.length).toBe(1);
-      expect(text[0]).toBe(searchString);
+      expect(text).toEqual(['Dot marker E', 'Idle']);
     });
   });
 

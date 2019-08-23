@@ -8,14 +8,14 @@ import { stripIndent } from 'common-tags';
 
 import * as UrlState from '../url-state';
 import * as MarkerData from '../../profile-logic/marker-data';
-import * as MarkerTiming from '../../profile-logic/marker-timing';
+import * as MarkerTimingLogic from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
 
 import type { RawMarkerTable } from '../../types/profile';
 import type {
   MarkerIndex,
   Marker,
-  MarkerTimingRows,
+  MarkerTiming,
 } from '../../types/profile-derived';
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
@@ -327,10 +327,13 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * This organizes the result of the previous selector in rows to be nicely
    * displayed in the marker chart.
    */
-  const getMarkerChartTiming: Selector<MarkerTimingRows> = createSelector(
+  const getMarkerChartTimingAndBuckets: Selector<
+    Array<string | MarkerTiming>
+  > = createSelector(
     getMarkerGetter,
     getSearchFilteredMarkerChartMarkerIndexes,
-    MarkerTiming.getMarkerTiming
+    ProfileSelectors.getCategories,
+    MarkerTimingLogic.getMarkerTimingAndBuckets
   );
 
   /**
@@ -364,10 +367,10 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * This organizes the network markers in rows so that they're nicely displayed
    * in the header.
    */
-  const getNetworkTrackTiming: Selector<MarkerTimingRows> = createSelector(
+  const getNetworkTrackTiming: Selector<MarkerTiming[]> = createSelector(
     getMarkerGetter,
     getNetworkMarkerIndexes,
-    MarkerTiming.getMarkerTiming
+    MarkerTimingLogic.getMarkerTiming
   );
 
   /**
@@ -433,7 +436,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getAreMarkerPanelsEmptyInFullRange,
     getMarkerChartMarkerIndexes,
     getSearchFilteredMarkerChartMarkerIndexes,
-    getMarkerChartTiming,
+    getMarkerChartTimingAndBuckets,
     getCommittedRangeFilteredMarkerIndexes,
     getCommittedRangeFilteredMarkerIndexesForHeader,
     getTimelineVerticalMarkerIndexes,

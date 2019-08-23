@@ -128,9 +128,14 @@ export type MarkerTiming = {
   index: MarkerIndex[],
   label: string[],
   name: string,
+  bucket: string,
   length: number,
 };
-export type MarkerTimingRows = Array<MarkerTiming>;
+
+export type MarkerTimingBuckets = Array<{
+  bucket: string,
+  markerTimings: MarkerTiming[],
+}>;
 
 export type JsTracerTiming = {
   // Start time in milliseconds.
