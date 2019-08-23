@@ -147,6 +147,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
     selectedThreadSelectors.getPreviewFilteredThread,
+    selectedThreadSelectors.getThread,
+    selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
     ProfileSelectors.getCategories,
     ProfileData.getTimingsForPath
   );

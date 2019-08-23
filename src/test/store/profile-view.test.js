@@ -1392,14 +1392,20 @@ describe('snapshots of selectors/profile', function() {
 describe('getTimingsForSidebar', () => {
   function setup() {
     const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
-      A                  A             A             A              A
-      B                  B             B             B              B
-      Cjs                Cjs           Cjs           H[cat:Layout]  H[cat:Layout]
-      D                  D             F             I[cat:Idle]
-      Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
+      A    A                  A             A             A              A
+      B    B                  B             B             B              B
+      Cjs  Cjs                Cjs           Cjs           H[cat:Layout]  H[cat:Layout]
+      D    D                  D             F             I[cat:Idle]
+      E    Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
     `);
 
     const store = storeWithProfile(profile);
+
+    // Committing a range exercizes the offset code for committed ranges.
+    // Note that we'll exercize the offset code for preview selections in a
+    // specific test below.
+    store.dispatch(ProfileView.commitRange(1, 6));
+
     const getTimingsForPath = path => {
       store.dispatch(ProfileView.changeSelectedCallNode(0, path));
       return selectedNodeSelectors.getTimingsForSidebar(store.getState());
@@ -1634,6 +1640,43 @@ describe('getTimingsForSidebar', () => {
         rootTime: 5,
       });
     });
+
+    it('returns good timings for preview selections', () => {
+      const {
+        dispatch,
+        funcNamesDict: { A },
+        getTimingsForPath,
+      } = setup();
+
+      dispatch(
+        ProfileView.updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 3,
+          selectionEnd: 5,
+        })
+      );
+
+      const timings = getTimingsForPath([A]);
+
+      // We don't test the whole object, just one part, because in this test
+      // we're more interested in testing if the offset logic is working.
+      expect(timings.rootTime).toEqual(2);
+      expect(timings.forPath.totalTime).toEqual({
+        value: 2,
+        breakdownByImplementation: { native: 1, ion: 1 },
+        breakdownByCategory: withSingleSubcategory([
+          1, // Idle
+          0, // Other
+          0, // Layout
+          1, // JavaScript
+          0,
+          0,
+          0,
+          0,
+        ]),
+      });
+    });
   });
 
   describe('for an inverted tree', function() {
@@ -1644,11 +1687,11 @@ describe('getTimingsForSidebar', () => {
       dispatch(ProfileView.changeInvertCallstack(true));
       // Now the profile should look like this:
       //
-      // Ejs  Ejs  Ejs  I[cat:Idle]    H[cat:Layout]
-      // D    D    F    H[cat:Layout]  B
-      // Cjs  Cjs  Cjs  B              A
-      // B    B    B    A
-      // A    A    A
+      // E    Ejs  Ejs  Ejs  I[cat:Idle]    H[cat:Layout]
+      // D    D    D    F    H[cat:Layout]  B
+      // Cjs  Cjs  Cjs  Cjs  B              A
+      // B    B    B    B    A
+      // A    A    A    A
 
       return setupResult;
     }
@@ -1943,6 +1986,43 @@ describe('getTimingsForSidebar', () => {
           },
         },
         rootTime: 5,
+      });
+    });
+
+    it('returns good timings for preview selections', () => {
+      const {
+        dispatch,
+        funcNamesDict: { Ejs },
+        getTimingsForPath,
+      } = setupForInvertedTree();
+
+      dispatch(
+        ProfileView.updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 3,
+          selectionEnd: 5,
+        })
+      );
+
+      const timings = getTimingsForPath([Ejs]);
+
+      // We don't test the whole object, just one part, because in this test
+      // we're more interested in testing if the offset logic is working.
+      expect(timings.rootTime).toEqual(2);
+      expect(timings.forPath.totalTime).toEqual({
+        value: 1,
+        breakdownByImplementation: { ion: 1 },
+        breakdownByCategory: withSingleSubcategory([
+          0, // Idle
+          0, // Other
+          0, // Layout
+          1, // JavaScript
+          0,
+          0,
+          0,
+          0,
+        ]),
       });
     });
   });
