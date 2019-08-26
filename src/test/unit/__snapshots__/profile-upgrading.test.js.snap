@@ -77,7 +77,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 23,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": undefined,
@@ -260,6 +260,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -480,6 +481,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -648,6 +650,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -992,6 +995,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1245,6 +1249,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1471,6 +1476,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1668,6 +1674,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1830,6 +1837,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1998,6 +2006,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -2170,6 +2179,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -2354,6 +2364,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -3020,6 +3031,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -3834,6 +3846,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -4648,6 +4661,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -5466,6 +5480,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -6092,6 +6107,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -6537,6 +6553,7 @@ Object {
                   "type": "VsyncTimestamp",
                   "vsync": 0,
                 },
+                4,
               ],
               Array [
                 5,
@@ -6574,6 +6591,7 @@ Object {
                   },
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 10,
@@ -6583,6 +6601,7 @@ Object {
                   "interval": "start",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 10,
@@ -6592,6 +6611,7 @@ Object {
                   "interval": "end",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 5,
@@ -6601,6 +6621,7 @@ Object {
                   "interval": "end",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 9,
@@ -6609,6 +6630,7 @@ Object {
                   "endTime": 12,
                   "startTime": 11,
                 },
+                1,
               ],
               Array [
                 8,
@@ -6621,6 +6643,7 @@ Object {
                   "timeStamp": undefined,
                   "type": "tracing",
                 },
+                5,
               ],
               Array [
                 8,
@@ -6633,9 +6656,11 @@ Object {
                   "timeStamp": undefined,
                   "type": "tracing",
                 },
+                5,
               ],
             ],
             "schema": Object {
+              "category": 3,
               "data": 2,
               "name": 0,
               "time": 1,
@@ -6792,6 +6817,7 @@ Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
+            4,
           ],
           Array [
             5,
@@ -6829,6 +6855,7 @@ Object {
               },
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -6838,6 +6865,7 @@ Object {
               "interval": "start",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -6847,6 +6875,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             5,
@@ -6856,6 +6885,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             9,
@@ -6864,6 +6894,7 @@ Object {
               "endTime": 12,
               "startTime": 11,
             },
+            1,
           ],
           Array [
             8,
@@ -6876,6 +6907,7 @@ Object {
               "timeStamp": undefined,
               "type": "tracing",
             },
+            5,
           ],
           Array [
             8,
@@ -6888,9 +6920,11 @@ Object {
               "timeStamp": undefined,
               "type": "tracing",
             },
+            5,
           ],
         ],
         "schema": Object {
+          "category": 3,
           "data": 2,
           "name": 0,
           "time": 1,
@@ -7043,6 +7077,7 @@ Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
+            4,
           ],
           Array [
             5,
@@ -7080,6 +7115,7 @@ Object {
               },
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -7089,6 +7125,7 @@ Object {
               "interval": "start",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -7098,6 +7135,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             5,
@@ -7107,6 +7145,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             9,
@@ -7115,6 +7154,7 @@ Object {
               "endTime": 12,
               "startTime": 11,
             },
+            1,
           ],
           Array [
             8,
@@ -7127,6 +7167,7 @@ Object {
               "timeStamp": undefined,
               "type": "tracing",
             },
+            5,
           ],
           Array [
             8,
@@ -7139,9 +7180,11 @@ Object {
               "timeStamp": undefined,
               "type": "tracing",
             },
+            5,
           ],
         ],
         "schema": Object {
+          "category": 3,
           "data": 2,
           "name": 0,
           "time": 1,
@@ -7534,6 +7577,7 @@ Object {
                   "type": "VsyncTimestamp",
                   "vsync": 0,
                 },
+                4,
               ],
               Array [
                 5,
@@ -7571,6 +7615,7 @@ Object {
                   },
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 10,
@@ -7580,6 +7625,7 @@ Object {
                   "interval": "start",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 10,
@@ -7589,6 +7635,7 @@ Object {
                   "interval": "end",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 5,
@@ -7598,6 +7645,7 @@ Object {
                   "interval": "end",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 9,
@@ -7606,6 +7654,7 @@ Object {
                   "endTime": 12,
                   "startTime": 11,
                 },
+                1,
               ],
               Array [
                 8,
@@ -7617,6 +7666,7 @@ Object {
                   "phase": 3,
                   "type": "tracing",
                 },
+                5,
               ],
               Array [
                 8,
@@ -7628,6 +7678,7 @@ Object {
                   "phase": 3,
                   "type": "tracing",
                 },
+                5,
               ],
               Array [
                 11,
@@ -7651,6 +7702,7 @@ Object {
                   "tcpConnectEnd": 7,
                   "type": "Network",
                 },
+                7,
               ],
               Array [
                 16,
@@ -7667,9 +7719,11 @@ Object {
                   "startTime": 13.5,
                   "type": "FileIO",
                 },
+                1,
               ],
             ],
             "schema": Object {
+              "category": 3,
               "data": 2,
               "name": 0,
               "time": 1,
@@ -7840,6 +7894,7 @@ Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
+            4,
           ],
           Array [
             5,
@@ -7877,6 +7932,7 @@ Object {
               },
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -7886,6 +7942,7 @@ Object {
               "interval": "start",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -7895,6 +7952,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             5,
@@ -7904,6 +7962,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             9,
@@ -7912,6 +7971,7 @@ Object {
               "endTime": 12,
               "startTime": 11,
             },
+            1,
           ],
           Array [
             8,
@@ -7923,6 +7983,7 @@ Object {
               "phase": 3,
               "type": "tracing",
             },
+            5,
           ],
           Array [
             8,
@@ -7934,6 +7995,7 @@ Object {
               "phase": 3,
               "type": "tracing",
             },
+            5,
           ],
           Array [
             11,
@@ -7957,9 +8019,11 @@ Object {
               "tcpConnectEnd": 7,
               "type": "Network",
             },
+            7,
           ],
         ],
         "schema": Object {
+          "category": 3,
           "data": 2,
           "name": 0,
           "time": 1,
@@ -8113,6 +8177,7 @@ Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
+            4,
           ],
           Array [
             5,
@@ -8150,6 +8215,7 @@ Object {
               },
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -8159,6 +8225,7 @@ Object {
               "interval": "start",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -8168,6 +8235,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             5,
@@ -8177,6 +8245,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             9,
@@ -8185,6 +8254,7 @@ Object {
               "endTime": 12,
               "startTime": 11,
             },
+            1,
           ],
           Array [
             8,
@@ -8196,6 +8266,7 @@ Object {
               "phase": 3,
               "type": "tracing",
             },
+            5,
           ],
           Array [
             8,
@@ -8207,9 +8278,11 @@ Object {
               "phase": 3,
               "type": "tracing",
             },
+            5,
           ],
         ],
         "schema": Object {
+          "category": 3,
           "data": 2,
           "name": 0,
           "time": 1,
@@ -8379,7 +8452,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 23,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -8572,6 +8645,16 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -8915,6 +8998,16 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -9258,6 +9351,16 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -9519,7 +9622,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 23,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -9712,6 +9815,17 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+          7,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -10079,6 +10193,16 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -10454,6 +10578,17 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+          7,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
