@@ -93,7 +93,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    */
   const _getDerivedJankMarkers: Selector<Marker[]> = createSelector(
     threadSelectors.getSamplesTable,
-    samples => MarkerData.deriveJankMarkers(samples, 50)
+    ProfileSelectors.getDefaultCategory,
+    (samples, defaultCategory) =>
+      MarkerData.deriveJankMarkers(samples, 50, defaultCategory)
   );
 
   /**

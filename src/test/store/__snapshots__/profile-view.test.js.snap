@@ -75,7 +75,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 23,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -272,6 +272,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -426,6 +427,18 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
         "data": Array [
           null,
           null,
@@ -752,6 +765,7 @@ Array [
     },
     "libs": Array [],
     "markers": Object {
+      "category": Array [],
       "data": Array [],
       "length": 0,
       "name": Array [],
@@ -906,6 +920,18 @@ Array [
     },
     "libs": Array [],
     "markers": Object {
+      "category": Array [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
       "data": Array [
         null,
         null,
@@ -1047,6 +1073,7 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexes 1`] = `
 Array [
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "D",
@@ -1054,6 +1081,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "E",
@@ -1061,6 +1089,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "F",
@@ -1068,6 +1097,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 7,
@@ -1089,6 +1119,7 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexesForHeader 1`] = `
 Array [
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "D",
@@ -1096,6 +1127,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "E",
@@ -1103,6 +1135,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "F",
@@ -1115,6 +1148,7 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getFullMarkerListIndexes 1`] = `
 Array [
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "A",
@@ -1122,6 +1156,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "B",
@@ -1129,6 +1164,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "C",
@@ -1136,6 +1172,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "D",
@@ -1143,6 +1180,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "E",
@@ -1150,6 +1188,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "F",
@@ -1157,6 +1196,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 7,
@@ -1173,6 +1213,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 8,
@@ -1246,6 +1287,18 @@ Array [
 
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getProcessedRawMarkerTable 1`] = `
 Object {
+  "category": Array [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+  ],
   "data": Array [
     null,
     null,
@@ -1321,6 +1374,7 @@ Object {
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getSearchFilteredMarkerIndexes 1`] = `
 Array [
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "D",
@@ -1328,6 +1382,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "E",
@@ -1335,6 +1390,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "F",
@@ -1342,6 +1398,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 7,
@@ -2022,6 +2079,7 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
+    "category": Array [],
     "data": Array [],
     "length": 0,
     "name": Array [],
@@ -2203,6 +2261,7 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankMarkersForHeader 1`] = `
 Array [
   Object {
+    "category": 1,
     "data": null,
     "dur": 100,
     "name": "Jank",
@@ -2398,6 +2457,7 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
+    "category": Array [],
     "data": Array [],
     "length": 0,
     "name": Array [],
@@ -2691,6 +2751,7 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
+    "category": Array [],
     "data": Array [],
     "length": 0,
     "name": Array [],
@@ -2990,6 +3051,7 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
+    "category": Array [],
     "data": Array [],
     "length": 0,
     "name": Array [],

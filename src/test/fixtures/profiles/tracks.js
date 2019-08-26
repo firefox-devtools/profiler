@@ -130,6 +130,7 @@ export function getProfileWithNiceTracks(): Profile {
     category: 'Paint',
     interval: 'start',
   });
+  thread2.markers.category.push(0);
   thread2.markers.name.push(
     thread2.stringTable.indexForString('RefreshDriverTick')
   );

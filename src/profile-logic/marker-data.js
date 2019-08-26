@@ -10,6 +10,7 @@ import type {
   RawMarkerTable,
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
+  IndexIntoCategoryList,
 } from '../types/profile';
 import type { Marker, MarkerIndex } from '../types/profile-derived';
 import type {
@@ -42,7 +43,8 @@ import type { StartEndRange } from '../types/units';
  */
 export function deriveJankMarkers(
   samples: SamplesTable,
-  thresholdInMs: number
+  thresholdInMs: number,
+  otherCategoryIndex: IndexIntoCategoryList
 ): Marker[] {
   const addMarker = () =>
     jankInstances.push({
@@ -50,6 +52,7 @@ export function deriveJankMarkers(
       dur: lastResponsiveness,
       title: `${lastResponsiveness.toFixed(2)}ms event processing delay`,
       name: 'Jank',
+      category: otherCategoryIndex,
       data: null,
     });
 
@@ -151,6 +154,7 @@ export function extractMarkerDataFromName(
     data: markers.data.slice(),
     name: markers.name.slice(),
     time: markers.time.slice(),
+    category: markers.category.slice(),
     length: markers.length,
   };
 
@@ -268,6 +272,7 @@ export function deriveMarkersFromRawMarkerTable(
     const name = rawMarkers.name[i];
     const time = rawMarkers.time[i];
     const data = rawMarkers.data[i];
+    const category = rawMarkers.category[i];
 
     if (!data) {
       // Add a marker with a zero duration
@@ -276,6 +281,7 @@ export function deriveMarkersFromRawMarkerTable(
         dur: 0,
         name: stringTable.getString(name),
         title: null,
+        category,
         data: null,
       });
       continue;
@@ -326,6 +332,7 @@ export function deriveMarkersFromRawMarkerTable(
               name: stringTable.getString(name),
               dur: time - start,
               title: null,
+              category,
               data: rawMarkers.data[startIndex],
             });
           } else {
@@ -347,6 +354,7 @@ export function deriveMarkersFromRawMarkerTable(
               name: stringTable.getString(name),
               dur: time - start,
               title: null,
+              category,
               data,
               incomplete: true,
             });
@@ -361,6 +369,7 @@ export function deriveMarkersFromRawMarkerTable(
             start: time,
             dur: 0,
             name: stringTable.getString(name),
+            category,
             title: null,
             data,
           });
@@ -411,6 +420,7 @@ export function deriveMarkersFromRawMarkerTable(
               dur: endData.endTime - startData.startTime,
               name: stringTable.getString(name),
               title: null,
+              category,
               data: {
                 ...endData,
                 startTime: startData.startTime,
@@ -426,6 +436,7 @@ export function deriveMarkersFromRawMarkerTable(
               dur: endData.endTime - start,
               name: stringTable.getString(name),
               title: null,
+              category,
               data: {
                 ...endData,
                 startTime: start,
@@ -454,6 +465,7 @@ export function deriveMarkersFromRawMarkerTable(
             dur: time - start,
             name: 'CompositorScreenshot',
             title: null,
+            category,
             data,
           });
         }
@@ -472,6 +484,7 @@ export function deriveMarkersFromRawMarkerTable(
             start: data.startTime,
             dur: data.endTime - data.startTime,
             name: stringTable.getString(name),
+            category,
             data,
             title: null,
           });
@@ -484,6 +497,7 @@ export function deriveMarkersFromRawMarkerTable(
             start: time,
             dur: 0,
             name: stringTable.getString(name),
+            category,
             data,
             title: null,
           });
@@ -502,6 +516,7 @@ export function deriveMarkersFromRawMarkerTable(
         dur: Math.max(endOfThread - start, 0),
         name: stringTable.getString(rawMarkers.name[startIndex]),
         data: rawMarkers.data[startIndex],
+        category: rawMarkers.category[startIndex],
         title: null,
         incomplete: true,
       });
@@ -516,6 +531,7 @@ export function deriveMarkersFromRawMarkerTable(
       dur: Math.max(endOfThread - startData.startTime, 0),
       name: stringTable.getString(rawMarkers.name[startIndex]),
       title: null,
+      category: rawMarkers.category[startIndex],
       data: startData,
       incomplete: true,
     });
@@ -528,6 +544,7 @@ export function deriveMarkersFromRawMarkerTable(
       start,
       dur: Math.max(endOfThread - start, 0),
       name: 'CompositorScreenshot',
+      category: rawMarkers.category[previousScreenshotMarker],
       data: rawMarkers.data[previousScreenshotMarker],
       title: null,
     });
