@@ -15,11 +15,11 @@ export function removeURLs(
 ): string {
   const regExpExtension = removeExtensions ? '|moz-extension' : '';
   const regExp = new RegExp(
-    '((?:https?|ftp' + regExpExtension + ')://)[^\\s/$.?#].[^\\s)]*',
-    // ^                                       ^           ^
-    // |                                       |           matches any characters except
-    // |                                       |           whitespaces and ) character.
-    // |                                       |           Other characters are allowed now
+    '((?:https?|ftp' + regExpExtension + ')://)[^\\s/$.?#][^\\s)]*',
+    // ^                                       ^          ^
+    // |                                       |          matches any characters except
+    // |                                       |          whitespaces and ) character.
+    // |                                       |          Other characters are allowed now
     // |                                       matches any characters except whitespaces
     // |                                       and / $ . ? # characters because this is
     // |                                       start of the URL
