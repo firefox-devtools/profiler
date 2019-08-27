@@ -15,7 +15,7 @@ export function removeURLs(
 ): string {
   const regExpExtension = removeExtensions ? '|moz-extension' : '';
   const regExp = new RegExp(
-    '((https?|ftp' + regExpExtension + ')://)([^\\s/$.?#].[^\\s)]*)',
+    '((?:https?|ftp' + regExpExtension + ')://)[^\\s/$.?#].[^\\s)]*',
     // ^                                       ^           ^
     // |                                       |           matches any characters except
     // |                                       |           whitespaces and ) character.
