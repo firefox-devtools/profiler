@@ -15,6 +15,10 @@ describe('utils/string', function() {
       expect(removeURLs(string)).toEqual('http://<URL>');
       string = 'ftp://foo.com/';
       expect(removeURLs(string)).toEqual('ftp://<URL>');
+      string = 'file://localhost/etc/fstab';
+      expect(removeURLs(string)).toEqual('file://<URL>');
+      string = 'file:///etc/fstab';
+      expect(removeURLs(string)).toEqual('file:///<URL>');
     });
 
     it('should remove the different kind of URLs successfully', () => {
@@ -56,6 +60,12 @@ describe('utils/string', function() {
       expect(removeURLs(string)).toEqual('http://<URL>');
       string = 'https://foo_bar.baz.com/';
       expect(removeURLs(string)).toEqual('https://<URL>');
+      string = 'file://localhost/c$/WINDOWS/clock.avi';
+      expect(removeURLs(string)).toEqual('file://<URL>');
+      string = 'file:///c:/WINDOWS/clock.avi';
+      expect(removeURLs(string)).toEqual('file:///<URL>');
+      string = 'file://192.168.1.50/~User/file.html';
+      expect(removeURLs(string)).toEqual('file://<URL>');
     });
 
     it('should remove the URLs with texts around it successfully', () => {
@@ -118,7 +128,7 @@ describe('utils/string', function() {
       expect(removeURLs(string)).toEqual(string);
     });
 
-    it('should not remove internal and self hosted URLs', () => {
+    it('should not remove internal URLs', () => {
       let string = 'chrome://browser/content/browser.xul';
       expect(removeURLs(string)).toEqual(string);
 
@@ -126,10 +136,6 @@ describe('utils/string', function() {
       expect(removeURLs(string)).toEqual(string);
 
       string = 'resource://gre/modules/NewTabUtils.jsm';
-      expect(removeURLs(string)).toEqual(string);
-
-      string =
-        'file:///Users/foo/gecko/browser/themes/shared/icons/customize.svg';
       expect(removeURLs(string)).toEqual(string);
     });
 
