@@ -15,17 +15,17 @@ export function removeURLs(
 ): string {
   const rmExtensions = removeExtensions ? '|moz-extension:' : '';
   const regExp = new RegExp(
-    '((?:https?:|ftp:|file:/?' + rmExtensions + ')//)[^\\s/$.?#][^\\s)]*',
-    // ^                                             ^          ^
-    // |                                             |          Matches any characters except
-    // |                                             |          whitespaces and ')' character.
-    // |                                             |          Other characters are allowed now
-    // |                                             Matches any character except whitespace
-    // |                                             and '/', '$', '.', '?' or '#' characters
-    // |                                             because this is start of the URL
-    // Matches 'http', 'https', 'ftp', 'file' and optionally 'moz-extension' protocols.
-    // The colons are repeated here but it was necessary because file protocol can be either
-    // 'file://' or 'file:///' and we need to check that inside the first group.
+    '\\b((?:https?:|ftp:|file:/?' + rmExtensions + ')//)[^\\s/$.?#][^\\s)]*',
+    //    ^                                             ^          ^
+    //    |                                             |          Matches any characters except
+    //    |                                             |          whitespaces and ')' character.
+    //    |                                             |          Other characters are allowed now
+    //    |                                             Matches any character except whitespace
+    //    |                                             and '/', '$', '.', '?' or '#' characters
+    //    |                                             because this is start of the URL
+    //    Matches 'http', 'https', 'ftp', 'file' and optionally 'moz-extension' protocols.
+    //    The colons are repeated here but it was necessary because file protocol can be either
+    //    'file://' or 'file:///' and we need to check that inside the first group.
     'gi'
   );
   return string.replace(regExp, '$1<URL>');
