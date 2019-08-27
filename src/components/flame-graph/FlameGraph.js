@@ -53,6 +53,8 @@ const SELECTABLE_THRESHOLD = 0.001;
 
 type StateProps = {|
   +thread: Thread,
+  +unfilteredThread: Thread,
+  +sampleIndexOffset: number,
   +maxStackDepth: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +previewSelection: PreviewSelection,
@@ -245,6 +247,8 @@ class FlameGraph extends React.PureComponent<Props> {
   render() {
     const {
       thread,
+      unfilteredThread,
+      sampleIndexOffset,
       threadIndex,
       maxStackDepth,
       flameGraphTiming,
@@ -295,6 +299,8 @@ class FlameGraph extends React.PureComponent<Props> {
             // FlameGraphCanvas props
             chartProps={{
               thread,
+              unfilteredThread,
+              sampleIndexOffset,
               maxStackDepth,
               flameGraphTiming,
               callTree,
@@ -328,6 +334,10 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
+      unfilteredThread: selectedThreadSelectors.getThread(state),
+      sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
+        state
+      ),
       maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
         state
       ),

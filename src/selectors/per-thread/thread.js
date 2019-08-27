@@ -132,6 +132,47 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     }
   );
 
+  /**
+   * This selector returns the offset to add to a sampleIndex when accessing the
+   * base thread, if your thread is a range filtered thread (all but the base
+   * `getThread` or the last `getPreviewFilteredThread`).
+   */
+  const getSampleIndexOffsetFromCommittedRange: Selector<number> = createSelector(
+    getThread,
+    ProfileSelectors.getCommittedRange,
+    ({ samples }, { start, end }) => {
+      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
+        samples,
+        start,
+        end
+      );
+      return beginSampleIndex;
+    }
+  );
+
+  /**
+   * This selector returns the offset to add to a sampleIndex when accessing the
+   * base thread, if your thread is the preview filtered thread.
+   */
+  const getSampleIndexOffsetFromPreviewRange: Selector<number> = createSelector(
+    getFilteredThread,
+    ProfileSelectors.getPreviewSelection,
+    getSampleIndexOffsetFromCommittedRange,
+    ({ samples }, previewSelection, sampleIndexFromCommittedRange) => {
+      if (!previewSelection.hasSelection) {
+        return sampleIndexFromCommittedRange;
+      }
+
+      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
+        samples,
+        previewSelection.selectionStart,
+        previewSelection.selectionEnd
+      );
+
+      return sampleIndexFromCommittedRange + beginSampleIndex;
+    }
+  );
+
   const getFriendlyThreadName: Selector<string> = createSelector(
     ProfileSelectors.getThreads,
     getThread,
@@ -208,6 +249,8 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getRangeFilteredThread,
     getRangeAndTransformFilteredThread,
     getPreviewFilteredThread,
+    getSampleIndexOffsetFromCommittedRange,
+    getSampleIndexOffsetFromPreviewRange,
     getFriendlyThreadName,
     getThreadProcessDetails,
     getTransformLabels,

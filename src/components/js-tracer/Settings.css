@@ -32,7 +32,6 @@
   flex-flow: row nowrap;
   align-items: center;
   -webkit-user-select: none;
-  -moz-user-select: none;
   user-select: none;
 }
 

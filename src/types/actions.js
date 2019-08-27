@@ -98,6 +98,7 @@ export type CheckedSharingOptions = {|
   includeScreenshots: boolean,
   includeUrls: boolean,
   includeExtension: boolean,
+  includePreferenceValues: boolean,
 |};
 
 type ProfileAction =

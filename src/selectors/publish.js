@@ -140,6 +140,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
       ),
       shouldRemoveThreads,
       shouldRemoveExtensions: !checkedSharingOptions.includeExtension,
+      shouldRemovePreferenceValues: !checkedSharingOptions.includePreferenceValues,
     };
   }
 );

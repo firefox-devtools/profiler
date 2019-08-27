@@ -8,7 +8,6 @@
   flex-flow: column nowrap;
   cursor: default;
   -webkit-user-select: none;
-  -moz-user-select: none;
   user-select: none;
 }
 

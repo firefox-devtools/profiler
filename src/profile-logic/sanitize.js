@@ -12,6 +12,7 @@ import {
 import { removeURLs } from '../utils/string';
 import {
   removeNetworkMarkerURLs,
+  removePrefMarkerPreferenceValues,
   filterRawMarkerTableToRangeWithMarkersToDelete,
 } from './marker-data';
 import { filterThreadSamplesToRange } from './profile-data';
@@ -109,6 +110,25 @@ export function sanitizePII(
           return acc;
         }, [])
       : undefined,
+    // Remove profilerOverhead which belong to the removed threads.
+    // Also adjust other overheads to point to the right thread.
+    profilerOverhead: profile.profilerOverhead
+      ? profile.profilerOverhead.reduce((acc, overhead) => {
+          const newThreadIndex = oldThreadIndexToNew.get(
+            overhead.mainThreadIndex
+          );
+
+          // Filtering out the overhead if it's undefined.
+          if (newThreadIndex !== undefined) {
+            acc.push({
+              ...overhead,
+              mainThreadIndex: newThreadIndex,
+            });
+          }
+
+          return acc;
+        }, [])
+      : undefined,
   };
 
   return {
@@ -169,10 +189,22 @@ function sanitizeThreadPII(
   const markersToDelete = new Set();
   if (
     PIIToBeRemoved.shouldRemoveUrls ||
+    PIIToBeRemoved.shouldRemovePreferenceValues ||
     PIIToBeRemoved.shouldRemoveThreadsWithScreenshots.size > 0
   ) {
     for (let i = 0; i < markerTable.length; i++) {
       const currentMarker = markerTable.data[i];
+
+      // Remove the all the preference values, if the user wants that.
+      if (
+        PIIToBeRemoved.shouldRemovePreferenceValues &&
+        currentMarker &&
+        currentMarker.type &&
+        currentMarker.type === 'PreferenceRead'
+      ) {
+        // Remove the preference value field from the marker payload.
+        markerTable.data[i] = removePrefMarkerPreferenceValues(currentMarker);
+      }
 
       // Remove the all network URLs if user wants to remove them.
       if (

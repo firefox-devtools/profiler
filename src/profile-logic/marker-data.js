@@ -12,7 +12,11 @@ import type {
   IndexIntoRawMarkerTable,
 } from '../types/profile';
 import type { Marker, MarkerIndex } from '../types/profile-derived';
-import type { BailoutPayload, NetworkPayload } from '../types/markers';
+import type {
+  BailoutPayload,
+  NetworkPayload,
+  PrefMarkerPayload,
+} from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { StartEndRange } from '../types/units';
 
@@ -253,7 +257,7 @@ export function deriveMarkersFromRawMarkerTable(
   // Note that we don't have more than 2 network markers with the same name as
   // the name contains an incremented index. Therefore we don't need to use an
   // array as value like for tracing markers.
-  const openNetworkMarkers: Map<IndexIntoStringTable, MarkerIndex> = new Map();
+  const openNetworkMarkers: Map<number, MarkerIndex> = new Map();
 
   // We don't add a screenshot marker as we find it, because to know its
   // duration we need to wait until the next one or the end of the profile. So
@@ -385,17 +389,17 @@ export function deriveMarkersFromRawMarkerTable(
         // in the stop marker.
 
         if (data.status === 'STATUS_START') {
-          openNetworkMarkers.set(name, i);
+          openNetworkMarkers.set(data.id, i);
         } else {
           // End status can be any status other than 'STATUS_START'. They are
           // either 'STATUS_STOP' or 'STATUS_REDIRECT'.
           const endData = data;
 
-          const startIndex = openNetworkMarkers.get(name);
+          const startIndex = openNetworkMarkers.get(data.id);
 
           if (startIndex !== undefined) {
             // A start marker matches this end marker.
-            openNetworkMarkers.delete(name);
+            openNetworkMarkers.delete(data.id);
 
             // We know this startIndex points to a Network marker.
             const startData: NetworkPayload = (rawMarkers.data[
@@ -595,10 +599,7 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
   // Note that we don't have more than 2 network markers with the same name as
   // the name contains an incremented index. Therefore we don't need to use an
   // array as value like for tracing markers.
-  const openNetworkMarkers: Map<
-    IndexIntoStringTable,
-    IndexIntoRawMarkerTable
-  > = new Map();
+  const openNetworkMarkers: Map<number, IndexIntoRawMarkerTable> = new Map();
 
   let previousScreenshotMarker = null;
 
@@ -679,13 +680,13 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
         // generic markers. Lastly they're always adjacent.
 
         if (data.status === 'STATUS_START') {
-          openNetworkMarkers.set(name, i);
+          openNetworkMarkers.set(data.id, i);
         } else {
           // End status can be any status other than 'STATUS_START'
-          const startIndex = openNetworkMarkers.get(name);
+          const startIndex = openNetworkMarkers.get(data.id);
           if (startIndex !== undefined) {
             // A start marker matches this end marker.
-            openNetworkMarkers.delete(name);
+            openNetworkMarkers.delete(data.id);
 
             // We know this startIndex points to a Network marker.
             const startData: NetworkPayload = (markers.data[startIndex]: any);
@@ -1022,6 +1023,12 @@ export function removeNetworkMarkerURLs(
   payload: NetworkPayload
 ): NetworkPayload {
   return { ...payload, URI: '', RedirectURI: '' };
+}
+
+export function removePrefMarkerPreferenceValues(
+  payload: PrefMarkerPayload
+): PrefMarkerPayload {
+  return { ...payload, prefValue: '' };
 }
 
 export function getMarkerFullDescription(marker: Marker) {
