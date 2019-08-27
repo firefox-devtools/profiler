@@ -35,23 +35,24 @@ function Backtrace(props: Props) {
     thread
   ).reverse();
 
-  return (
-    <ol className="backtrace" style={{ '--max-height': maxHeight }}>
-      {funcNamesAndOrigins.length > 0 ? (
-        funcNamesAndOrigins.map(({ funcName, origin }, i) => (
+  if (funcNamesAndOrigins.length) {
+    return (
+      <ol className="backtrace" style={{ '--max-height': maxHeight }}>
+        {funcNamesAndOrigins.map(({ funcName, origin }, i) => (
           <li key={i} className="backtraceStackFrame">
             {funcName}
             <em className="backtraceStackFrameOrigin">{origin}</em>
           </li>
-        ))
-      ) : (
-        <li className="backtraceStackFrame">
-          (The stack is empty because all its frames are filtered out by the
-          implementation filter. You can switch the implementation filter in the
-          call tree to see more frames.)
-        </li>
-      )}
-    </ol>
+        ))}
+      </ol>
+    );
+  }
+  return (
+    <div className="backtrace">
+      (The stack is empty because all its frames are filtered out by the
+      implementation filter. You can switch the implementation filter in the
+      call tree to see more frames.)
+    </div>
   );
 }
 
