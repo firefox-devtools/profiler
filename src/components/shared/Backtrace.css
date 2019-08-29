@@ -1,5 +1,6 @@
 .backtrace {
   --gradient-height: calc(var(--max-height) - 5em);
+  max-width: 35em;
 
   /* Box */
   overflow: hidden;
@@ -32,8 +33,7 @@
   /* Position */
   display: block;
   overflow: hidden;
-  max-width: 35em;
-
+  
   /* Box */
   padding: 0;
   margin: 0;

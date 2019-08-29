@@ -49,8 +49,8 @@ function Backtrace(props: Props) {
   }
   return (
     <div className="backtrace">
-      (The stack is empty because all its frames are filtered out by the
-      implementation filter. You can switch the implementation filter in the
+      (The stack is empty because all of its frames are filtered out by the
+      implementation filter. Switch the implementation filter in the
       call tree to see more frames.)
     </div>
   );
