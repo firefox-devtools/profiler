@@ -4,13 +4,13 @@
   /* Box */
   overflow: hidden;
   max-height: var(--max-height);
+  max-width: 35em;
   padding: 0;
   margin: 5px;
 
   /* Other */
   font-size: 0.9em;
   line-height: 1.5;
-  max-width: 35em;
 
   /* The gradient is defined towards the bottom so that we hide the end of the
    * backtrace only when the element is tall enough, which is when the backtrace
