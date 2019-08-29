@@ -1,6 +1,5 @@
 .backtrace {
   --gradient-height: calc(var(--max-height) - 5em);
-  max-width: 35em;
 
   /* Box */
   overflow: hidden;
@@ -11,6 +10,7 @@
   /* Other */
   font-size: 0.9em;
   line-height: 1.5;
+  max-width: 35em;
 
   /* The gradient is defined towards the bottom so that we hide the end of the
    * backtrace only when the element is tall enough, which is when the backtrace
@@ -33,7 +33,7 @@
   /* Position */
   display: block;
   overflow: hidden;
-  
+
   /* Box */
   padding: 0;
   margin: 0;
