@@ -3,8 +3,8 @@
 
   /* Box */
   overflow: hidden;
-  max-height: var(--max-height);
   max-width: 35em;
+  max-height: var(--max-height);
   padding: 0;
   margin: 5px;
 
