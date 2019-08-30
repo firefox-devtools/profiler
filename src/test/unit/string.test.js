@@ -18,7 +18,7 @@ describe('utils/string', function() {
       string = 'file://localhost/etc/fstab';
       expect(removeURLs(string)).toEqual('file://<URL>');
       string = 'file:///etc/fstab';
-      expect(removeURLs(string)).toEqual('file:///<URL>');
+      expect(removeURLs(string)).toEqual('file://<URL>');
     });
 
     it('should remove the different kind of URLs successfully', () => {
@@ -63,7 +63,7 @@ describe('utils/string', function() {
       string = 'file://localhost/c$/WINDOWS/clock.avi';
       expect(removeURLs(string)).toEqual('file://<URL>');
       string = 'file:///c:/WINDOWS/clock.avi';
-      expect(removeURLs(string)).toEqual('file:///<URL>');
+      expect(removeURLs(string)).toEqual('file://<URL>');
       string = 'file://192.168.1.50/~User/file.html';
       expect(removeURLs(string)).toEqual('file://<URL>');
     });
@@ -119,9 +119,6 @@ describe('utils/string', function() {
       expect(removeURLs(string)).toEqual(string);
 
       string = '//';
-      expect(removeURLs(string)).toEqual(string);
-
-      string = 'http:///a';
       expect(removeURLs(string)).toEqual(string);
 
       string = 'foo.com';
