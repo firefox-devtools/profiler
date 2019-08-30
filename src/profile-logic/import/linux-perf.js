@@ -19,10 +19,16 @@ export function isPerfScriptFormat(profile: string): boolean {
   return /^\S.+?\s+(?:\d+\/)?\d+\s+(?:\[\d+\]\s+)?[\d.]+:/.test(firstLine);
 }
 
+// Don't try and type this more specifically. It will be run through the Gecko upgrader
+// process.
+type GeckoProfileVersion4 = Object;
+
 /**
- * Convert the output from `perf script` into the gecko profile format.
+ * Convert the output from `perf script` into the gecko profile format (version 4).
  */
-export function convertPerfScriptProfile(profile: string): Object {
+export function convertPerfScriptProfile(
+  profile: string
+): GeckoProfileVersion4 {
   function _createThread(name, pid, tid) {
     const markers = {
       schema: {

@@ -574,6 +574,7 @@ export function filterRawMarkerTableToRange(
     newMarkerTable.time.push(markers.time[index]);
     newMarkerTable.name.push(markers.name[index]);
     newMarkerTable.data.push(markers.data[index]);
+    newMarkerTable.category.push(markers.category[index]);
     newMarkerTable.length++;
   }
   return newMarkerTable;
@@ -826,6 +827,7 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
     newMarkerTable.name.push(oldMarkers.name[index]);
     newMarkerTable.time.push(oldMarkers.time[index]);
     newMarkerTable.data.push(oldMarkers.data[index]);
+    newMarkerTable.category.push(newMarkerTable.category[index]);
     newMarkerTable.length++;
   };
 
