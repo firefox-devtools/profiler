@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import pako from 'pako';
+import { inflate } from 'pako';
 
 class MaybeCompressedDataReader {
   uncompressedData: Promise<ArrayBuffer>;
@@ -15,7 +15,7 @@ class MaybeCompressedDataReader {
     this.uncompressedData = maybeCompressedDataPromise.then(
       (fileData: ArrayBuffer) => {
         try {
-          const result = pako.inflate(new Uint8Array(fileData)).buffer;
+          const result = inflate(new Uint8Array(fileData)).buffer;
           return result;
         } catch (e) {
           return fileData;
