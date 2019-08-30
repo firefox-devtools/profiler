@@ -9,6 +9,8 @@ import path from 'path';
 
 import { convertInstrumentsProfile } from '../../profile-logic/import/instruments';
 
+// This class is a mocked version of native FileSystemEntry class
+// Reference: https://developer.mozilla.org/en-US/docs/Web/API/FileSystemEntry
 class MockFileSystemEntry {
   isFile: boolean;
   isDirectory: boolean;
