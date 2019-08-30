@@ -31,7 +31,7 @@ export function createGeckoMarkerStack({
     processType: 'default',
     tid: 1111,
     pid: 2222,
-    markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+    markers: { schema: { name: 0, time: 1, category: 2, data: 3 }, data: [] },
     name: 'SyncProfile',
     samples: {
       schema: {
@@ -290,7 +290,7 @@ function _createGeckoThread(): GeckoThread {
       ],
     },
     markers: {
-      schema: { name: 0, time: 1, data: 2 },
+      schema: { name: 0, time: 1, category: 2, data: 3 },
       data: [
         // Please keep the next marker at the start if you add more markers in
         // this structure.
@@ -299,6 +299,7 @@ function _createGeckoThread(): GeckoThread {
         [
           10, // Rasterize
           1,
+          0, // Other
           {
             category: 'Paint',
             interval: 'end',
@@ -306,10 +307,11 @@ function _createGeckoThread(): GeckoThread {
           },
         ],
         // This marker is filtered out
-        [4, 2, { type: 'VsyncTimestamp' }],
+        [4, 2, 0, { type: 'VsyncTimestamp' }],
         [
           5, // Reflow
           3,
+          0, // Other
           {
             category: 'Paint',
             interval: 'start',
@@ -320,6 +322,7 @@ function _createGeckoThread(): GeckoThread {
         [
           10, // Rasterize
           4,
+          0, // Other
           {
             category: 'Paint',
             interval: 'start',
@@ -329,6 +332,7 @@ function _createGeckoThread(): GeckoThread {
         [
           10, // Rasterize
           5,
+          0, // Other
           {
             category: 'Paint',
             interval: 'end',
@@ -338,6 +342,7 @@ function _createGeckoThread(): GeckoThread {
         [
           5, // Reflow
           8,
+          0, // Other
           {
             category: 'Paint',
             interval: 'end',
@@ -347,6 +352,7 @@ function _createGeckoThread(): GeckoThread {
         [
           9,
           11, // Note: this marker is out of order on purpose, to test we correctly sort
+          0, // Other
           {
             // MinorGC at time 11ms from 11ms to 12ms
             type: 'GCMinor',
@@ -357,6 +363,7 @@ function _createGeckoThread(): GeckoThread {
         [
           8,
           9,
+          0, // Other
           {
             // DOMEvent at time 9ms from 9ms to 10ms, this is the start marker
             type: 'tracing',
@@ -370,6 +377,7 @@ function _createGeckoThread(): GeckoThread {
         [
           8,
           10,
+          0, // Other
           {
             // DOMEvent at time 9ms from 9ms to 10ms, this is the end marker
             type: 'tracing',
@@ -383,6 +391,7 @@ function _createGeckoThread(): GeckoThread {
         [
           11, // UserTiming
           12,
+          0, // Other
           {
             startTime: 12,
             endTime: 13,
@@ -395,11 +404,15 @@ function _createGeckoThread(): GeckoThread {
         [
           5, // Reflow
           13,
+          0, // Other
           {
             category: 'Paint',
             interval: 'start',
             stack: {
-              markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+              markers: {
+                schema: { name: 0, time: 1, category: 2, data: 3 },
+                data: [],
+              },
               name: 'SyncProfile',
               registerTime: null,
               unregisterTime: null,
@@ -421,11 +434,15 @@ function _createGeckoThread(): GeckoThread {
         [
           5, // Reflow
           14,
+          0, // Other
           {
             category: 'Paint',
             interval: 'start',
             stack: {
-              markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+              markers: {
+                schema: { name: 0, time: 1, category: 2, data: 3 },
+                data: [],
+              },
               name: 'SyncProfile',
               registerTime: null,
               unregisterTime: null,
@@ -447,6 +464,7 @@ function _createGeckoThread(): GeckoThread {
         [
           5, // Reflow
           15,
+          0, // Other
           {
             category: 'Paint',
             interval: 'end',
@@ -456,6 +474,7 @@ function _createGeckoThread(): GeckoThread {
         [
           5, // Reflow
           18,
+          0, // Other
           {
             category: 'Paint',
             interval: 'end',
@@ -465,6 +484,7 @@ function _createGeckoThread(): GeckoThread {
         [
           12, // ArbitraryName
           21,
+          0, // Other
           {
             category: 'ArbitraryCategory',
             type: 'tracing',
@@ -473,6 +493,7 @@ function _createGeckoThread(): GeckoThread {
         [
           13, // Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5
           23,
+          0, // Other
           {
             type: 'Network',
             startTime: 22,
@@ -487,6 +508,7 @@ function _createGeckoThread(): GeckoThread {
         [
           13, // Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5
           24,
+          0, // Other
           {
             type: 'Network',
             startTime: 23,
@@ -510,6 +532,7 @@ function _createGeckoThread(): GeckoThread {
         [
           14, // FileIO
           24,
+          0, // Other
           {
             type: 'FileIO',
             startTime: 22,
@@ -518,7 +541,10 @@ function _createGeckoThread(): GeckoThread {
             filename: '/foo/bar/',
             operation: 'create/open',
             stack: {
-              markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+              markers: {
+                schema: { name: 0, time: 1, category: 2, data: 3 },
+                data: [],
+              },
               name: 'SyncProfile',
               registerTime: null,
               unregisterTime: null,
@@ -539,6 +565,7 @@ function _createGeckoThread(): GeckoThread {
         [
           15, // CompositorScreenshot
           25,
+          0, // Other
           {
             type: 'CompositorScreenshot',
             url: 16, // data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUD
@@ -551,6 +578,7 @@ function _createGeckoThread(): GeckoThread {
         [
           17, // PreferenceRead
           114.9,
+          0, // Other
           {
             type: 'PreferenceRead',
             startTime: 114.9,
@@ -569,6 +597,7 @@ function _createGeckoThread(): GeckoThread {
         [
           10, // Rasterize
           20,
+          0, // Other
           {
             category: 'Paint',
             interval: 'start',
@@ -685,7 +714,7 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
       ],
     },
     markers: {
-      schema: { name: 0, time: 1, data: 2 },
+      schema: { name: 0, time: 1, category: 2, data: 3 },
       data: [],
     },
     stringTable: [

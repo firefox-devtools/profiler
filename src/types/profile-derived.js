@@ -10,6 +10,7 @@ import type {
   ThreadIndex,
   Pid,
   IndexIntoJsTracerEvents,
+  IndexIntoCategoryList,
   CounterIndex,
 } from './profile';
 export type IndexIntoCallNodeTable = number;
@@ -77,6 +78,7 @@ export type Marker = {|
   dur: Milliseconds,
   name: string,
   title: string | null,
+  category: IndexIntoCategoryList,
   data: MarkerPayload,
   incomplete?: boolean,
 |};

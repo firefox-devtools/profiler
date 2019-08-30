@@ -88,6 +88,7 @@ export function addMarkersToThreadWithCorrespondingSamples(
     markersTable.name.push(stringTable.indexForString(name));
     markersTable.time.push(time);
     markersTable.data.push(_refineMockPayload(data));
+    markersTable.category.push(0);
     markersTable.length++;
 
     // Try to get a consistent profile containing all markers

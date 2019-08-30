@@ -75,7 +75,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 23,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -536,6 +536,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -3480,6 +3481,38 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+          6,
+        ],
         "data": Array [
           Object {
             "type": "CompositorScreenshot",
@@ -3937,7 +3970,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 23,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": undefined,
@@ -4120,6 +4153,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -4340,6 +4374,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -4508,6 +4543,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -4852,6 +4888,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -5105,6 +5142,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -5331,6 +5369,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -5528,6 +5567,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -5690,6 +5730,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -5858,6 +5899,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -6030,6 +6072,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -6214,6 +6257,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -6880,6 +6924,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -7694,6 +7739,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -8508,6 +8554,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -9326,6 +9373,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -9952,6 +10000,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -10205,7 +10254,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 23,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": undefined,
@@ -13780,6 +13829,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -16679,6 +16729,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -18577,6 +18628,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -21895,6 +21947,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -24654,6 +24707,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -26266,6 +26320,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -27364,6 +27419,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -28276,6 +28332,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -28812,6 +28869,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -29247,6 +29305,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -29654,6 +29713,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -30394,6 +30454,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],

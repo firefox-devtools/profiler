@@ -363,6 +363,7 @@ describe('js allocation processing', function() {
       markerTuple[geckoThread.markers.schema.name] = 'JS allocation';
       markerTuple[geckoThread.markers.schema.time] = thisTime;
       markerTuple[geckoThread.markers.schema.data] = payload;
+      markerTuple[geckoThread.markers.schema.category] = 0;
 
       geckoThread.markers.data.push(markerTuple);
     };

@@ -150,6 +150,7 @@ export function getEmptyRawMarkerTable(): RawMarkerTable {
     data: [],
     name: [],
     time: [],
+    category: [],
     length: 0,
   };
 }
@@ -182,6 +183,7 @@ export function shallowCloneRawMarkerTable(
     data: markerTable.data.slice(),
     name: markerTable.name.slice(),
     time: markerTable.time.slice(),
+    category: markerTable.category.slice(),
     length: markerTable.length,
   };
 }
