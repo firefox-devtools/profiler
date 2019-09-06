@@ -6,8 +6,16 @@
 import * as React from 'react';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
 import ArrowPanel from '../../shared/ArrowPanel';
+import {
+  formatNanoseconds,
+  formatPercent,
+} from '../../../utils/format-numbers';
 
-import type { Profile, ProfileMeta } from '../../../types/profile';
+import type {
+  Profile,
+  ProfileMeta,
+  ProfilerOverhead,
+} from '../../../types/profile';
 
 import './MetaInfo.css';
 
@@ -21,6 +29,54 @@ type Props = {
 export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
   render() {
     const meta = this.props.profile.meta;
+    const overheads: ?(ProfilerOverhead[]) = this.props.profile
+      .profilerOverhead;
+    const calculatedStats: Map<string, ProfilerStats> = new Map();
+    // These 3 values only have single values, so we are not using ProfilerStats class for them.
+    let overheadDurations = 0;
+    let overheadPercentage = 0;
+    let profiledDuration = 0;
+    let totalSamplingCount = 0;
+
+    // Older profiles(Before FF 70) don't have any overhead info. Don't show anything if
+    // that's the case.
+    if (overheads) {
+      // Overhead keys that have min/max/mean values to loop.
+      const statKeys = [
+        'Overhead',
+        'Cleaning',
+        'Counter',
+        'Interval',
+        'Lockings',
+      ];
+
+      for (const overhead of overheads) {
+        const { statistics } = overhead;
+        const { samplingCount } = statistics;
+
+        // Calculation the single values without any loop, it's not worth it.
+        overheadDurations += statistics.overheadDurations * samplingCount;
+        overheadPercentage += statistics.overheadPercentage * samplingCount;
+        profiledDuration += statistics.profiledDuration * samplingCount;
+        totalSamplingCount += samplingCount;
+
+        // Looping through the overhead values that have min/max/mean values
+        // and calculating them.
+        for (const stat of statKeys) {
+          const max = statistics['max' + stat];
+          const mean = statistics['mean' + stat];
+          const min = statistics['min' + stat];
+
+          let currentStat = calculatedStats.get(stat);
+          if (currentStat === undefined) {
+            currentStat = new ProfilerStats();
+            calculatedStats.set(stat, currentStat);
+          }
+
+          currentStat.count(min, max, mean, samplingCount);
+        }
+      }
+    }
 
     return (
       <ButtonWithPanel
@@ -123,6 +179,56 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                 </div>
               ) : null}
             </div>
+            {calculatedStats.size > 0 ? (
+              <details>
+                <summary className="arrowPanelSubTitle">
+                  Profiler Overhead
+                </summary>
+                <div className="arrowPanelSection">
+                  <div className="metaInfoGrid">
+                    <div />
+                    <div>Mean</div>
+                    <div>Max</div>
+                    <div>Min</div>
+                    {Array.from(calculatedStats).map(([key, val]) => [
+                      <div key={key}>{key}</div>,
+                      <div key={key + 'mean'}>
+                        {formatNanoseconds(val.mean)}
+                      </div>,
+                      <div key={key + 'max'}>{formatNanoseconds(val.max)}</div>,
+                      <div key={key + 'min'}>{formatNanoseconds(val.min)}</div>,
+                    ])}
+                  </div>
+
+                  {overheadDurations !== 0 ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoWideLabel">
+                        Overhead Durations:
+                      </span>
+                      {formatNanoseconds(
+                        overheadDurations / totalSamplingCount
+                      )}
+                    </div>
+                  ) : null}
+                  {overheadPercentage !== 0 ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoWideLabel">
+                        Overhead Percentage:
+                      </span>
+                      {formatPercent(overheadPercentage / totalSamplingCount)}
+                    </div>
+                  ) : null}
+                  {profiledDuration !== 0 ? (
+                    <div className="metaInfoRow">
+                      <span className="metaInfoWideLabel">
+                        Profiled Duration:
+                      </span>
+                      {formatNanoseconds(profiledDuration / totalSamplingCount)}
+                    </div>
+                  ) : null}
+                </div>
+              </details>
+            ) : null}
           </ArrowPanel>
         }
       />
@@ -179,4 +285,31 @@ function _formatLabel(meta: ProfileMeta): string {
     return '';
   }
   return labelTitle;
+}
+
+// A helper class to calculate the weighted arithmetic mean statistic values.
+class ProfilerStats {
+  _max = 0;
+  _min = 0;
+  _mean = 0;
+  _weight = 0;
+
+  count(min: number, max: number, mean: number, weight: number) {
+    this._weight += weight;
+    this._min = min * weight;
+    this._max = max * weight;
+    this._mean = mean * weight;
+  }
+
+  get min(): number {
+    return this._min / this._weight;
+  }
+
+  get max(): number {
+    return this._max / this._weight;
+  }
+
+  get mean(): number {
+    return this._mean / this._weight;
+  }
 }

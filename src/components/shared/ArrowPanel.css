@@ -103,6 +103,7 @@
 .arrowPanelSubTitle {
   padding: 5px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-weight: 700;
 }
 
 .arrowPanelContent {
@@ -185,10 +186,15 @@
   margin-bottom: 12px;
 }
 
-.metaInfoLabel {
+.metaInfoLabel,
+.metaInfoWideLabel {
   display: inline-block;
   width: 120px;
   color: var(--grey-50);
+}
+
+.metaInfoWideLabel {
+  width: 140px;
 }
 
 .metaInfoList {
@@ -198,4 +204,30 @@
 .metaInfoList .metaInfoListItem {
   margin-left: 110px;
   list-style: circle;
+}
+
+.metaInfoGrid {
+  display: grid;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.metaInfoGrid > div {
+  margin: 2px 0;
+}
+
+.metaInfoGrid > div:nth-child(-n + 4) {
+  display: block;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-weight: 500;
+}
+
+.metaInfoGrid > div:nth-child(4n + 1) {
+  color: var(--grey-50);
+  font-weight: 500;
+}
+
+.metaInfoGrid > div:not(:nth-child(4n + 1)) {
+  text-align: right;
 }
