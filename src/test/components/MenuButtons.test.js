@@ -262,7 +262,10 @@ describe('app/MenuButtons', function() {
       jest.useFakeTimers();
       jest
         .spyOn(Date.prototype, 'toLocaleString')
-        .mockImplementation(Date.prototype.toUTCString);
+        .mockImplementation(function() {
+          // eslint-disable-next-line babel/no-invalid-this
+          return 'toLocaleString ' + this.toUTCString();
+        });
       // Using gecko profile because it has metadata and profilerOverhead data in it.
       const profile = processProfile(createGeckoProfile());
       const store = storeWithProfile(profile);

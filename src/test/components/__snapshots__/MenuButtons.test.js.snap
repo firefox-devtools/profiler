@@ -41,7 +41,7 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> matches the snapshot 1`] = `
             >
               Recording started:
             </span>
-            Sat, 09 Apr 2016 17:02:32 GMT
+            toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
           </div>
           <div
             class="metaInfoRow"
