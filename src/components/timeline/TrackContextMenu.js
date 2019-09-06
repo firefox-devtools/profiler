@@ -12,6 +12,7 @@ import {
   isolateProcess,
   isolateLocalTrack,
   isolateProcessMainThread,
+  isolateScreenshot,
   hideLocalTrack,
   showLocalTrack,
 } from '../../actions/profile-view';
@@ -67,6 +68,7 @@ type DispatchProps = {|
   +showLocalTrack: typeof showLocalTrack,
   +isolateLocalTrack: typeof isolateLocalTrack,
   +isolateProcessMainThread: typeof isolateProcessMainThread,
+  +isolateScreenshot: typeof isolateScreenshot,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -143,6 +145,21 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       );
     }
     isolateProcess(rightClickedTrack.trackIndex);
+  };
+
+  _isolateScreenshot = () => {
+    const { isolateScreenshot, rightClickedTrack } = this.props;
+    if (rightClickedTrack === null) {
+      throw new Error(
+        'Attempted to isolate the screenshot with no right clicked track.'
+      );
+    }
+    if (rightClickedTrack.type === 'screenshots') {
+      throw new Error(
+        'Attempting to isolate a screenshot track with a local track is selected.'
+      );
+    }
+    isolateScreenshot(rightClickedTrack.trackIndex);
   };
 
   _isolateProcessMainThread = () => {
@@ -419,14 +436,42 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
+  renderIsolateScreenshot() {
+    const { rightClickedTrack, globalTracks, hiddenGlobalTracks } = this.props;
+
+    if (rightClickedTrack === null) {
+      return null;
+    }
+
+    const track = globalTracks[rightClickedTrack.trackIndex];
+    if (track.type !== 'screenshots') {
+      // Only process tracks with a main thread can be isolated.
+      return null;
+    }
+
+    const isDisabled =
+      // Is there only one global track and one screenshot visible?
+      globalTracks.length - hiddenGlobalTracks.size === 2;
+
+    return (
+      <MenuItem onClick={this._isolateScreenshot} disabled={isDisabled}>
+        Hide other screenshot tracks
+      </MenuItem>
+    );
+  }
+
   render() {
     const { globalTrackOrder, globalTracks } = this.props;
 
     const isolateProcessMainThread = this.renderIsolateProcessMainThread();
     const isolateProcess = this.renderIsolateProcess();
     const isolateLocalTrack = this.renderIsolateLocalTrack();
+    const isolateScreenshot = this.renderIsolateScreenshot();
     const separator =
-      isolateProcessMainThread || isolateProcess || isolateLocalTrack ? (
+      isolateProcessMainThread ||
+      isolateProcess ||
+      isolateLocalTrack ||
+      isolateScreenshot ? (
         <div className="react-contextmenu-separator" />
       ) : null;
 
@@ -442,6 +487,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         {isolateProcessMainThread}
         {isolateProcess}
         {isolateLocalTrack}
+        {isolateScreenshot}
         {separator}
         {globalTrackOrder.map(globalTrackIndex => {
           const globalTrack = globalTracks[globalTrackIndex];
@@ -479,6 +525,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     isolateProcess,
     isolateLocalTrack,
     isolateProcessMainThread,
+    isolateScreenshot,
     hideLocalTrack,
     showLocalTrack,
   },
