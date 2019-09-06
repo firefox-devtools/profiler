@@ -478,6 +478,7 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileFromStore', function() {
+    // Force type-casting to Response to allow to be used as return value for fetch
     const fetch403Response = (({ ok: false, status: 403 }: any): Response);
     const fetch500Response = (({ ok: false, status: 500 }: any): Response);
     const fetch200Response = (({
@@ -550,10 +551,17 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore('FAKEHASH'));
 
-      expect(window.fetch.mock.calls[1][0]).toBe(
-        'https://symbols.mozilla.org/symbolicate/v5'
+      expect(window.fetch).toHaveBeenLastCalledWith(
+        'https://symbols.mozilla.org/symbolicate/v5',
+        expect.objectContaining({
+          body: expect.stringMatching(/memoryMap.*libxul/),
+        })
       );
-      expect(window.fetch.mock.calls[1][1].body).toMatch(/memoryMap.*libxul/);
+
+      // expect(window.fetch.mock.calls[1][0]).toBe(
+      //   'https://symbols.mozilla.org/symbolicate/v5'
+      // );
+      // expect(window.fetch.mock.calls[1][1].body).toMatch(/memoryMap.*libxul/);
     });
 
     it('requests several times in case of 403', async function() {
@@ -631,6 +639,7 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileOrZipFromUrl', function() {
+    // Force type-casting to Response to allow to be used as return value for fetch
     const fetch403Response = (({ ok: false, status: 403 }: any): Response);
     const fetch500Response = (({ ok: false, status: 500 }: any): Response);
     const fetch200Response = (({
