@@ -516,39 +516,33 @@ export function isolateScreenshot(
   isolatedTrackIndex: TrackIndex
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const track = getGlobalTracks(getState())[isolatedTrackIndex];
-    const trackIndexes = getGlobalTrackOrder(getState());
-    console.log(track);
+    const globalTracks = getGlobalTracks(getState());
+    const track = globalTracks[isolatedTrackIndex];
     if (track.type !== 'screenshots') {
-      // Do not isolate a track unless it is a process track.
+      // Do not isolate the track unless it is a screenshot track.
       return;
     }
-
     const selectedThreadIndex = track.threadIndex;
     if (selectedThreadIndex === null) {
       // Make sure that a thread really exists.
       return;
     }
-
+    const hiddenGlobalTracks = new Set(getHiddenGlobalTracks(getState()));
+    for (let i = 0; i < globalTracks.length; i++) {
+      const track = globalTracks[i];
+      if (track.type === 'screenshots' && i !== isolatedTrackIndex) {
+        hiddenGlobalTracks.add(i);
+      }
+    }
     sendAnalytics({
       hitType: 'event',
       eventCategory: 'timeline',
-      eventAction: 'isolate screenshot main thread',
+      eventAction: 'isolate screenshot track',
     });
 
     dispatch({
-      type: 'ISOLATE_SCREENSHOT_MAIN_THREAD',
-      id: track.threadIndex,
-      hiddenGlobalTracks: new Set(
-        trackIndexes.filter(i => i !== isolatedTrackIndex)
-      ),
-      isolatedTrackIndex,
-      selectedThreadIndex,
-      // The local track order contains all of the indexes, and all should be hidden
-      // when isolating the main thread.
-      hiddenLocalTracks: new Set(
-        getLocalTrackOrder(getState(), track.threadIndex)
-      ),
+      type: 'ISOLATE_SCREENSHOT_TRACK',
+      hiddenGlobalTracks,
     });
   };
 }

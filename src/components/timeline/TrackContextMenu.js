@@ -154,7 +154,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         'Attempted to isolate the screenshot with no right clicked track.'
       );
     }
-    if (rightClickedTrack.type === 'screenshots') {
+    if (rightClickedTrack.type !== 'global') {
       throw new Error(
         'Attempting to isolate a screenshot track with a local track is selected.'
       );
@@ -436,6 +436,20 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
+  findTotalVisibleScreenshots(globalTracks, hiddenGlobalTracks) {
+    let hiddenScreenshotTypeTracks = 0;
+    let screenshotTypeTracks = 0;
+    for (const globalTrack of globalTracks) {
+      if (globalTrack.type === 'screenshots') {
+        screenshotTypeTracks++;
+        if (hiddenGlobalTracks.has(globalTrack.threadIndex)) {
+          hiddenScreenshotTypeTracks++;
+        }
+      }
+    }
+    return screenshotTypeTracks - hiddenScreenshotTypeTracks === 1;
+  }
+
   renderIsolateScreenshot() {
     const { rightClickedTrack, globalTracks, hiddenGlobalTracks } = this.props;
 
@@ -445,14 +459,14 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     const track = globalTracks[rightClickedTrack.trackIndex];
     if (track.type !== 'screenshots') {
-      // Only process tracks with a main thread can be isolated.
+      // Only process screenshot tracks
       return null;
     }
 
-    const isDisabled =
-      // Is there only one global track and one screenshot visible?
-      globalTracks.length - hiddenGlobalTracks.size === 2;
-
+    const isDisabled = this.findTotalVisibleScreenshots(
+      globalTracks,
+      hiddenGlobalTracks
+    );
     return (
       <MenuItem onClick={this._isolateScreenshot} disabled={isDisabled}>
         Hide other screenshot tracks
