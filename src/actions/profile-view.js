@@ -510,6 +510,50 @@ export function isolateProcess(
 }
 
 /**
+ * This function helps to show only the current screenshot and hide all other screenshots.
+ */
+export function isolateScreenshot(
+  isolatedTrackIndex: TrackIndex
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const track = getGlobalTracks(getState())[isolatedTrackIndex];
+    const trackIndexes = getGlobalTrackOrder(getState());
+    console.log(track);
+    if (track.type !== 'screenshots') {
+      // Do not isolate a track unless it is a process track.
+      return;
+    }
+
+    const selectedThreadIndex = track.threadIndex;
+    if (selectedThreadIndex === null) {
+      // Make sure that a thread really exists.
+      return;
+    }
+
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'isolate screenshot main thread',
+    });
+
+    dispatch({
+      type: 'ISOLATE_SCREENSHOT_MAIN_THREAD',
+      id: track.threadIndex,
+      hiddenGlobalTracks: new Set(
+        trackIndexes.filter(i => i !== isolatedTrackIndex)
+      ),
+      isolatedTrackIndex,
+      selectedThreadIndex,
+      // The local track order contains all of the indexes, and all should be hidden
+      // when isolating the main thread.
+      hiddenLocalTracks: new Set(
+        getLocalTrackOrder(getState(), track.threadIndex)
+      ),
+    });
+  };
+}
+
+/**
  * This function isolates a global track, and hides all of its local tracks.
  */
 export function isolateProcessMainThread(
