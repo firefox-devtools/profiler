@@ -205,9 +205,11 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                       <span className="metaInfoWideLabel">
                         Overhead Durations:
                       </span>
-                      {formatNanoseconds(
-                        overheadDurations / totalSamplingCount
-                      )}
+                      <span className="metaInfoValueRight">
+                        {formatNanoseconds(
+                          overheadDurations / totalSamplingCount
+                        )}
+                      </span>
                     </div>
                   ) : null}
                   {overheadPercentage !== 0 ? (
@@ -215,7 +217,9 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                       <span className="metaInfoWideLabel">
                         Overhead Percentage:
                       </span>
-                      {formatPercent(overheadPercentage / totalSamplingCount)}
+                      <span className="metaInfoValueRight">
+                        {formatPercent(overheadPercentage / totalSamplingCount)}
+                      </span>
                     </div>
                   ) : null}
                   {profiledDuration !== 0 ? (
@@ -223,7 +227,11 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                       <span className="metaInfoWideLabel">
                         Profiled Duration:
                       </span>
-                      {formatNanoseconds(profiledDuration / totalSamplingCount)}
+                      <span className="metaInfoValueRight">
+                        {formatNanoseconds(
+                          profiledDuration / totalSamplingCount
+                        )}
+                      </span>
                     </div>
                   ) : null}
                 </div>

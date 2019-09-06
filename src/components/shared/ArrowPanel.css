@@ -208,7 +208,6 @@
 
 .metaInfoGrid {
   display: grid;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   margin-bottom: 20px;
   grid-template-columns: repeat(4, 1fr);
 }
@@ -219,7 +218,6 @@
 
 .metaInfoGrid > div:nth-child(-n + 4) {
   display: block;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   font-weight: 500;
 }
 
@@ -229,5 +227,11 @@
 }
 
 .metaInfoGrid > div:not(:nth-child(4n + 1)) {
+  text-align: right;
+}
+
+.metaInfoValueRight {
+  display: inline-block;
+  width: calc(100% - 140px);
   text-align: right;
 }

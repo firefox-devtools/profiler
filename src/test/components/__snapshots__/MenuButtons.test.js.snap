@@ -282,7 +282,11 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> matches the snapshot 1`] = `
               >
                 Overhead Durations:
               </span>
-              1,586ns
+              <span
+                class="metaInfoValueRight"
+              >
+                1,586ns
+              </span>
             </div>
             <div
               class="metaInfoRow"
@@ -292,7 +296,11 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> matches the snapshot 1`] = `
               >
                 Overhead Percentage:
               </span>
-              26,433%
+              <span
+                class="metaInfoValueRight"
+              >
+                26,433%
+              </span>
             </div>
             <div
               class="metaInfoRow"
@@ -302,7 +310,11 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> matches the snapshot 1`] = `
               >
                 Profiled Duration:
               </span>
-              6.00ns
+              <span
+                class="metaInfoValueRight"
+              >
+                6.00ns
+              </span>
             </div>
           </div>
         </details>
