@@ -138,6 +138,7 @@ export type JsTracerTiming = {
   index: IndexIntoJsTracerEvents[],
   label: string[],
   name: string,
+  func: Array<IndexIntoFuncTable | null>,
   length: number,
 };
 

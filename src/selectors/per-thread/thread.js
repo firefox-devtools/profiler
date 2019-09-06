@@ -218,11 +218,11 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     JsTracerTiming[] | null
   > = createSelector(
     getJsTracerTable,
-    getStringTable,
-    (jsTracerTable, stringTable) =>
+    getThread,
+    (jsTracerTable, thread) =>
       jsTracerTable === null
         ? null
-        : JsTracer.getJsTracerTiming(jsTracerTable, stringTable)
+        : JsTracer.getJsTracerTiming(jsTracerTable, thread)
   );
 
   /**
