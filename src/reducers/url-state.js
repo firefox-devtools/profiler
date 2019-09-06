@@ -290,6 +290,7 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
     case 'ISOLATE_LOCAL_TRACK':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
+    case 'ISOLATE_SCREENSHOT_TRACK':
       return action.hiddenGlobalTracks;
     case 'HIDE_GLOBAL_TRACK': {
       const hiddenGlobalTracks = new Set(state);

@@ -186,6 +186,11 @@ type ProfileAction =
       selectedThreadIndex: ThreadIndex,
       hiddenLocalTracks: Set<TrackIndex>,
     |}
+    | {|
+      // Isolate only the screenshot track
+      +type: 'ISOLATE_SCREENSHOT_TRACK',
+      +hiddenGlobalTracks: Set<TrackIndex>,
+    |}
   | {|
       +type: 'CHANGE_LOCAL_TRACK_ORDER',
       +localTrackOrder: TrackIndex[],
