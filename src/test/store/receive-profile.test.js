@@ -557,11 +557,6 @@ describe('actions/receive-profile', function() {
           body: expect.stringMatching(/memoryMap.*libxul/),
         })
       );
-
-      // expect(window.fetch.mock.calls[1][0]).toBe(
-      //   'https://symbols.mozilla.org/symbolicate/v5'
-      // );
-      // expect(window.fetch.mock.calls[1][1].body).toMatch(/memoryMap.*libxul/);
     });
 
     it('requests several times in case of 403', async function() {
