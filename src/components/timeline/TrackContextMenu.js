@@ -436,14 +436,14 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
-  getVisibleScreenshotTracks(): TrackIndex[] {
+  getVisibleScreenshotTracks(): GlobalTrack[] {
     const { globalTracks, hiddenGlobalTracks } = this.props;
     const visibleScreenshotTracks = globalTracks.filter(
       (globalTrack, trackIndex) =>
         globalTrack.type === 'screenshots' &&
         !hiddenGlobalTracks.has(trackIndex)
     );
-    return visibleScreenshotTracks.length === 1;
+    return visibleScreenshotTracks;
   }
 
   renderIsolateScreenshot() {
@@ -459,7 +459,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       return null;
     }
 
-    const isDisabled = this.getVisibleScreenshotTracks();
+    const isDisabled = this.getVisibleScreenshotTracks().length === 1;
     return (
       <MenuItem onClick={this._isolateScreenshot} disabled={isDisabled}>
         Hide other screenshot tracks
