@@ -436,22 +436,18 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
-  findTotalVisibleScreenshots(globalTracks, hiddenGlobalTracks) {
-    let hiddenScreenshotTypeTracks = 0;
-    let screenshotTypeTracks = 0;
-    for (const globalTrack of globalTracks) {
-      if (globalTrack.type === 'screenshots') {
-        screenshotTypeTracks++;
-        if (hiddenGlobalTracks.has(globalTrack.threadIndex)) {
-          hiddenScreenshotTypeTracks++;
-        }
-      }
-    }
-    return screenshotTypeTracks - hiddenScreenshotTypeTracks === 1;
+  getVisibleScreenshotTracks(): TrackIndex[] {
+    const { globalTracks, hiddenGlobalTracks } = this.props;
+    const visibleScreenshotTracks = globalTracks.filter(
+      (globalTrack, trackIndex) =>
+        globalTrack.type === 'screenshots' &&
+        !hiddenGlobalTracks.has(trackIndex)
+    );
+    return visibleScreenshotTracks.length === 1;
   }
 
   renderIsolateScreenshot() {
-    const { rightClickedTrack, globalTracks, hiddenGlobalTracks } = this.props;
+    const { rightClickedTrack, globalTracks } = this.props;
 
     if (rightClickedTrack === null) {
       return null;
@@ -463,10 +459,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       return null;
     }
 
-    const isDisabled = this.findTotalVisibleScreenshots(
-      globalTracks,
-      hiddenGlobalTracks
-    );
+    const isDisabled = this.getVisibleScreenshotTracks();
     return (
       <MenuItem onClick={this._isolateScreenshot} disabled={isDisabled}>
         Hide other screenshot tracks
