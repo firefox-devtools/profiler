@@ -160,19 +160,23 @@ export function extractMarkerDataFromName(
 
   // Match: "Bailout_MonitorTypes after add on line 1013 of self-hosted:1008"
   // Match: "Bailout_TypeBarrierO at jumptarget on line 1490 of resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:1484"
+  // Match: "Bailout_ShapeGuard at jumptarget on line 7 of moz-extension://<URL>"
   const bailoutRegex =
     // Capture groups:
-    //       type   afterAt    where        bailoutLine  script functionLine
-    //        ↓     ↓          ↓                  ↓        ↓    ↓
-    /^Bailout_(\w+) (after|at) ([\w _-]+) on line (\d+) of (.*):(\d+)$/;
+    //       type   afterAt    where        bailoutLine  script     functionLine
+    //        ↓     ↓          ↓                  ↓        ↓        ↓
+    /^Bailout_(\w+) (after|at) ([\w _-]+) on line (\d+) of (.*?)(?::(\d+))?$/;
+  //                                                               ↑
+  // Colon in non-capturing group which only matches when functionLine is present
 
   // Match: "Invalidate resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:3662"
   // Match: "Invalidate self-hosted:4032"
+  // Match: "Invalidate moz-extension://<URL>"
   const invalidateRegex =
     // Capture groups:
-    //         url    line
-    //           ↓    ↓
-    /^Invalidate (.*):(\d+)$/;
+    //         url        line
+    //           ↓        ↓
+    /^Invalidate (.*?)(?::(\d+))?$/;
 
   const bailoutStringIndex = stringTable.indexForString('Bailout');
   const invalidationStringIndex = stringTable.indexForString('Invalidate');
@@ -203,7 +207,7 @@ export function extractMarkerDataFromName(
           where: afterAt + ' ' + where,
           script: script,
           bailoutLine: +bailoutLine,
-          functionLine: +functionLine,
+          functionLine: functionLine === undefined ? null : +functionLine,
           startTime: time,
           endTime: time,
         }: BailoutPayload);
@@ -212,14 +216,14 @@ export function extractMarkerDataFromName(
       matchFound = true;
       const match = name.match(invalidateRegex);
       if (!match) {
-        console.error(`Could not match regex for bailout: "${name}"`);
+        console.error(`Could not match regex for invalidation: "${name}"`);
       } else {
         const [, url, line] = match;
         newMarkers.name[markerIndex] = invalidationStringIndex;
         newMarkers.data[markerIndex] = {
           type: 'Invalidation',
           url,
-          line,
+          line: line === undefined ? null : line,
           startTime: time,
           endTime: time,
         };
