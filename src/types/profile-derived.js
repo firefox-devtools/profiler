@@ -10,6 +10,7 @@ import type {
   ThreadIndex,
   Pid,
   IndexIntoJsTracerEvents,
+  IndexIntoCategoryList,
   CounterIndex,
 } from './profile';
 export type IndexIntoCallNodeTable = number;
@@ -77,6 +78,7 @@ export type Marker = {|
   dur: Milliseconds,
   name: string,
   title: string | null,
+  category: IndexIntoCategoryList,
   data: MarkerPayload,
   incomplete?: boolean,
 |};
@@ -136,6 +138,7 @@ export type JsTracerTiming = {
   index: IndexIntoJsTracerEvents[],
   label: string[],
   name: string,
+  func: Array<IndexIntoFuncTable | null>,
   length: number,
 };
 

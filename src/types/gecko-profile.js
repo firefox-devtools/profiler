@@ -6,6 +6,7 @@
 import type {
   Lib,
   IndexIntoStringTable,
+  IndexIntoCategoryList,
   PausedRange,
   CategoryList,
   PageList,
@@ -19,8 +20,15 @@ export type IndexIntoGeckoFrameTable = number;
 export type IndexIntoGeckoStackTable = number;
 
 export type GeckoMarkers = {
-  schema: { name: 0, time: 1, data: 2 },
-  data: Array<[IndexIntoStringTable, Milliseconds, MarkerPayload_Gecko]>,
+  schema: { name: 0, time: 1, category: 2, data: 3 },
+  data: Array<
+    [
+      IndexIntoStringTable,
+      Milliseconds,
+      IndexIntoCategoryList,
+      MarkerPayload_Gecko,
+    ]
+  >,
 };
 
 /**
@@ -33,6 +41,7 @@ export type GeckoMarkerStruct = {|
   name: IndexIntoStringTable[],
   time: Milliseconds[],
   data: MarkerPayload_Gecko[],
+  category: IndexIntoCategoryList[],
   length: number,
 |};
 

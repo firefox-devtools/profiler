@@ -3,6 +3,7 @@
 exports[`getTimelineVerticalMarkers gets the appropriate markers 1`] = `
 Array [
   Object {
+    "category": 0,
     "data": Object {
       "category": "Navigation",
       "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
@@ -17,6 +18,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "TTI",
@@ -24,6 +26,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": Object {
       "category": "Navigation",
       "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
@@ -37,6 +40,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "Navigation::Start",
@@ -44,6 +48,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "Contentful paint at something",

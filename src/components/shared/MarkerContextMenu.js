@@ -163,10 +163,15 @@ class MarkerContextMenu extends PureComponent<Props> {
 
   copyMarkerCause = () => {
     const { selectedMarker } = this.props;
-
     if (selectedMarker && selectedMarker.data && selectedMarker.data.cause) {
       const stack = this._convertStackToString(selectedMarker.data.cause.stack);
-      copy(stack);
+      if (stack) {
+        copy(stack);
+      } else {
+        copy(
+          'The stack is empty because all of its frames are filtered out by the implementation filter. Switch the implementation filter in the call tree to see more frames.'
+        );
+      }
     }
   };
 
