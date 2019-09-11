@@ -67,8 +67,8 @@ export function getJsTracerTiming(
     tracerEventIndex++
   ) {
     const stringIndex = jsTracer.events[tracerEventIndex];
-    const column = jsTracer.columns[tracerEventIndex];
-    const line = jsTracer.lines[tracerEventIndex];
+    const column = jsTracer.column[tracerEventIndex];
+    const line = jsTracer.line[tracerEventIndex];
 
     // By default we use the display name from JS tracer, but we may update it if
     // we can figure out more information about it.

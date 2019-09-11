@@ -236,10 +236,10 @@ describe('selectors/getJsTracerTiming', function() {
         );
 
         // Manually update the JS tracer events to point to the right column numbers.
-        jsTracer.lines[2] = fooLine;
-        jsTracer.columns[2] = fooColumn;
-        jsTracer.lines[3] = barLine;
-        jsTracer.columns[3] = barColumn;
+        jsTracer.line[2] = fooLine;
+        jsTracer.column[2] = fooColumn;
+        jsTracer.line[3] = barLine;
+        jsTracer.column[3] = barColumn;
       }
 
       expect(
