@@ -326,6 +326,16 @@ async function extractScreenshots(
     screenshots[0]
   );
 
+  const graphicsIndex = profile.meta.categories.findIndex(
+    category => category.name === 'Graphics'
+  );
+
+  if (graphicsIndex === -1) {
+    throw new Error(
+      "Could not find the Graphics category in the profile's category list."
+    );
+  }
+
   for (const screenshot of screenshots) {
     const urlString = 'data:image/jpg;base64,' + screenshot.args.snapshot;
     const size = await getImageSize(urlString);
@@ -344,6 +354,7 @@ async function extractScreenshots(
       thread.stringTable.indexForString('CompositorScreenshot')
     );
     thread.markers.time.push(screenshot.ts / 1000);
+    thread.markers.category.push(graphicsIndex);
     thread.markers.length++;
   }
 }

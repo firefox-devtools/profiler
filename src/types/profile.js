@@ -148,6 +148,7 @@ export type RawMarkerTable = {|
   data: MarkerPayload[],
   name: IndexIntoStringTable[],
   time: number[],
+  category: IndexIntoCategoryList[],
   length: number,
 |};
 

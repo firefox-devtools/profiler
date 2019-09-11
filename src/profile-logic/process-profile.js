@@ -645,8 +645,10 @@ function _processMarkers(
     const payload = _processMarkerPayload(geckoPayload);
     const name = geckoMarkers.name[markerIndex];
     const time = geckoMarkers.time[markerIndex];
+    const category = geckoMarkers.category[markerIndex];
     markers.name.push(name);
     markers.time.push(time);
+    markers.category.push(category);
     markers.data.push(payload);
     markers.length++;
   }

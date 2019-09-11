@@ -205,6 +205,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       start: 22,
       title: null,
+      category: 0,
     });
     expect(contentMarkers[11]).toEqual({
       data: {
@@ -231,6 +232,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5',
       start: 1022,
       title: null,
+      category: 0,
     });
     expect(contentMarkers[12]).toEqual({
       data: {
@@ -250,6 +252,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'FileIO',
       start: 1022,
       title: null,
+      category: 0,
     });
   });
   it('should create a marker for the marker CompositorScreenshot', function() {

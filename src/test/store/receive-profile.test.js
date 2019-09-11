@@ -478,9 +478,10 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileFromStore', function() {
-    const fetch403Response = { ok: false, status: 403 };
-    const fetch500Response = { ok: false, status: 500 };
-    const fetch200Response = {
+    // Force type-casting to Response to allow to be used as return value for fetch
+    const fetch403Response = (({ ok: false, status: 403 }: any): Response);
+    const fetch500Response = (({ ok: false, status: 500 }: any): Response);
+    const fetch200Response = (({
       ok: true,
       status: 200,
       headers: {
@@ -488,14 +489,13 @@ describe('actions/receive-profile', function() {
       },
       json: () =>
         Promise.resolve(JSON.parse(serializeProfile(_getSimpleProfile()))),
-    };
+    }: any): Response);
 
     beforeEach(function() {
       // The stub makes it easy to return different values for different
       // arguments. Here we define the default return value because there is no
       // argument specified.
-      window.fetch = sinon.stub();
-      window.fetch.resolves(fetch403Response);
+      window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
       sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
     });
@@ -508,7 +508,12 @@ describe('actions/receive-profile', function() {
     it('can retrieve a profile from the web and save it to state', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
-      window.fetch.withArgs(expectedUrl).resolves(fetch200Response);
+
+      window.fetch = jest.fn(url =>
+        Promise.resolve(
+          url === expectedUrl ? fetch200Response : fetch403Response
+        )
+      );
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
@@ -528,11 +533,15 @@ describe('actions/receive-profile', function() {
       );
       unsymbolicatedProfile.meta.symbolicated = false;
 
-      window.fetch.resolves({
-        ...fetch200Response,
-        json: () =>
-          Promise.resolve(JSON.parse(serializeProfile(unsymbolicatedProfile))),
-      });
+      window.fetch = jest.fn().mockResolvedValue(
+        (({
+          ...fetch200Response,
+          json: () =>
+            Promise.resolve(
+              JSON.parse(serializeProfile(unsymbolicatedProfile))
+            ),
+        }: any): Response)
+      );
 
       simulateSymbolStoreHasNoCache();
 
@@ -542,21 +551,24 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore('FAKEHASH'));
 
-      sinon.assert.calledWithMatch(
-        window.fetch,
+      expect(window.fetch).toHaveBeenLastCalledWith(
         'https://symbols.mozilla.org/symbolicate/v5',
-        { body: sinon.match(/memoryMap.*libxul/) }
+        expect.objectContaining({
+          body: expect.stringMatching(/memoryMap.*libxul/),
+        })
       );
     });
 
     it('requests several times in case of 403', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
-      // The first call will still be a 403 -- remember, it's the default return value.
       window.fetch
-        .withArgs(expectedUrl)
-        .onSecondCall()
-        .resolves(fetch200Response);
+        .mockImplementationOnce(_ => Promise.resolve(fetch403Response))
+        .mockImplementationOnce(url =>
+          Promise.resolve(
+            url === expectedUrl ? fetch200Response : fetch403Response
+          )
+        );
 
       const store = blankStore();
       const views = (await observeStoreStateChanges(store, () =>
@@ -610,7 +622,7 @@ describe('actions/receive-profile', function() {
 
     it('fails in case the fetch returns a server error', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-      window.fetch.resolves(fetch500Response);
+      window.fetch = jest.fn().mockResolvedValue(fetch500Response);
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
@@ -622,9 +634,10 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileOrZipFromUrl', function() {
-    const fetch403Response = { ok: false, status: 403 };
-    const fetch500Response = { ok: false, status: 500 };
-    const fetch200Response = {
+    // Force type-casting to Response to allow to be used as return value for fetch
+    const fetch403Response = (({ ok: false, status: 403 }: any): Response);
+    const fetch500Response = (({ ok: false, status: 500 }: any): Response);
+    const fetch200Response = (({
       ok: true,
       status: 200,
       headers: {
@@ -632,14 +645,13 @@ describe('actions/receive-profile', function() {
       },
       json: () =>
         Promise.resolve(JSON.parse(serializeProfile(_getSimpleProfile()))),
-    };
+    }: any): Response);
 
     beforeEach(function() {
       // The stub makes it easy to return different values for different
       // arguments. Here we define the default return value because there is no
       // argument specified.
-      window.fetch = sinon.stub();
-      window.fetch.resolves(fetch403Response);
+      window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
       sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
     });
@@ -651,7 +663,11 @@ describe('actions/receive-profile', function() {
 
     it('can retrieve a profile from the web and save it to state', async function() {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch.withArgs(expectedUrl).resolves(fetch200Response);
+      window.fetch = jest.fn(url =>
+        Promise.resolve(
+          url === expectedUrl ? fetch200Response : fetch403Response
+        )
+      );
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -669,9 +685,12 @@ describe('actions/receive-profile', function() {
       const expectedUrl = 'https://profiles.club/shared.json';
       // The first call will still be a 403 -- remember, it's the default return value.
       window.fetch
-        .withArgs(expectedUrl)
-        .onSecondCall()
-        .resolves(fetch200Response);
+        .mockResolvedValueOnce(fetch403Response)
+        .mockImplementationOnce(url =>
+          Promise.resolve(
+            url === expectedUrl ? fetch200Response : fetch403Response
+          )
+        );
 
       const store = blankStore();
       const views = (await observeStoreStateChanges(store, () =>
@@ -725,7 +744,7 @@ describe('actions/receive-profile', function() {
 
     it('fails in case the fetch returns a server error', async function() {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch.resolves(fetch500Response);
+      window.fetch = jest.fn().mockResolvedValue(fetch500Response);
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));

@@ -598,6 +598,117 @@ const _upgraders = {
       }
     }
     convertToVersion16Recursive(profile);
+
+    // -------------------------------------------------------------------------
+    // Retro-actively upgrade Gecko profiles that don't have marker categories.
+    // This happened sometime before version 16.
+
+    // [key, categoryName]
+    const keyToCategoryName = [
+      ['DOMEvent', 'DOM'],
+      ['Navigation::DOMComplete', 'DOM'],
+      ['Navigation::DOMInteractive', 'DOM'],
+      ['Navigation::Start', 'DOM'],
+      ['UserTiming', 'DOM'],
+
+      ['CC', 'GC / CC'],
+      ['GCMajor', 'GC / CC'],
+      ['GCMinor', 'GC / CC'],
+      ['GCSlice', 'GC / CC'],
+
+      ['Paint', 'Graphics'],
+      ['VsyncTimestamp', 'Graphics'],
+      ['CompositorScreenshot', 'Graphics'],
+
+      ['JS allocation', 'JavaScript'],
+
+      ['Styles', 'Layout'],
+      ['nsRefreshDriver::Tick waiting for paint', 'Layout'],
+
+      ['Navigation', 'Network'],
+      ['Network', 'Network'],
+
+      // Explicitly 'Other'
+      ['firstLoadURI', 'Other'],
+      ['IPC', 'Other'],
+      ['Text', 'Other'],
+      ['MainThreadLongTask', 'Other'],
+      ['FileIO', 'Other'],
+      ['Log', 'Other'],
+      ['PreferenceRead', 'Other'],
+      ['BHR-detected hang', 'Other'],
+      ['MainThreadLongTask', 'Other'],
+    ];
+
+    // Make sure the default categories are present since we may want to refer them.
+    for (const defaultCategory of [
+      { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
+      { name: 'Other', color: 'grey', subcategories: ['Other'] },
+      { name: 'Layout', color: 'purple', subcategories: ['Other'] },
+      { name: 'JavaScript', color: 'yellow', subcategories: ['Other'] },
+      { name: 'GC / CC', color: 'orange', subcategories: ['Other'] },
+      { name: 'Network', color: 'lightblue', subcategories: ['Other'] },
+      { name: 'Graphics', color: 'green', subcategories: ['Other'] },
+      { name: 'DOM', color: 'blue', subcategories: ['Other'] },
+    ]) {
+      const index = profile.meta.categories.findIndex(
+        category => category.name === defaultCategory.name
+      );
+      if (index === -1) {
+        // Add on any unknown categories.
+        profile.meta.categories.push(defaultCategory);
+      }
+    }
+
+    const otherCategory = profile.meta.categories.findIndex(
+      category => category.name === 'Other'
+    );
+
+    const keyToCategoryIndex: Map<string, number> = new Map(
+      keyToCategoryName.map(([key, categoryName]) => {
+        const index = profile.meta.categories.findIndex(
+          category => category.name === categoryName
+        );
+        if (index === -1) {
+          throw new Error('Could not find a category index to map to.');
+        }
+        return [key, index];
+      })
+    );
+
+    function addMarkerCategoriesRecursively(p) {
+      for (const thread of p.threads) {
+        const { markers, stringTable } = thread;
+        if (markers.schema.category !== undefined) {
+          // There is nothing to upgrade, do not continue.
+          return;
+        }
+        markers.schema.category = 3;
+        for (
+          let markerIndex = 0;
+          markerIndex < markers.data.length;
+          markerIndex++
+        ) {
+          const nameIndex = markers.data[markerIndex][markers.schema.name];
+          const data = markers.data[markerIndex][markers.schema.data];
+
+          let key: string = stringTable[nameIndex];
+          if (data && data.type) {
+            key = data.type === 'tracing' ? data.category : data.type;
+          }
+          let categoryIndex = keyToCategoryIndex.get(key);
+          if (categoryIndex === undefined) {
+            categoryIndex = otherCategory;
+          }
+
+          markers.data[markerIndex][markers.schema.category] = categoryIndex;
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        addMarkerCategoriesRecursively(subprocessProfile);
+      }
+    }
+    addMarkerCategoriesRecursively(profile);
   },
 };
 /* eslint-enable no-useless-computed-key */
