@@ -79,8 +79,11 @@ class StackChartGraph extends React.PureComponent<Props> {
     const {
       timeRange: { start, end },
       interval,
+      thread,
     } = this.props;
-    return interval / (end - start);
+    // JS Tracer does not care about the interval.
+    const modifier = thread.jsTracer ? 0.01 : interval;
+    return modifier / (end - start);
   }
 
   _onSelectedCallNodeChange = (

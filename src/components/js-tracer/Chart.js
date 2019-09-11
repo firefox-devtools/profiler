@@ -13,7 +13,6 @@ import JsTracerCanvas from './Canvas';
 
 import {
   getCommittedRange,
-  getProfileInterval,
   getPreviewSelection,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -50,7 +49,6 @@ type StateProps = {|
   +jsTracerTimingRows: JsTracerTiming[],
   +stringTable: UniqueStringArray,
   +timeRange: { start: Milliseconds, end: Milliseconds },
-  +interval: Milliseconds,
   +threadIndex: number,
   +previewSelection: PreviewSelection,
 |};
@@ -69,9 +67,8 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
   getMaximumZoom(): UnitIntervalOfProfileRange {
     const {
       timeRange: { start, end },
-      interval,
     } = this.props;
-    return interval / (end - start);
+    return 0.001 / (end - start);
   }
 
   render() {
@@ -136,7 +133,6 @@ const JsTracerExpensiveChart = explicitConnect<
   mapStateToProps: (state, ownProps) => ({
     timeRange: getCommittedRange(state),
     stringTable: selectedThreadSelectors.getStringTable(state),
-    interval: getProfileInterval(state),
     threadIndex: getSelectedThreadIndex(state),
     previewSelection: getPreviewSelection(state),
     jsTracerTimingRows: ensureExists(
