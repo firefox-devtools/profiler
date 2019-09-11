@@ -43,7 +43,7 @@ type RenderedComponentSettings = {|
     IndexIntoSamplesTable
   ) => number,
   +greyCategoryIndex: IndexIntoCategoryList,
-  +samplesSelectedStates: Array<SelectedState>,
+  +samplesSelectedStates: null | Array<SelectedState>,
   +categoryDrawStyles: CategoryDrawStyles,
 |};
 

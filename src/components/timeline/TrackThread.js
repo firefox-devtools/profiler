@@ -70,7 +70,7 @@ type StateProps = {|
   +categories: CategoryList,
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
-  +samplesSelectedStates: SelectedState[],
+  +samplesSelectedStates: null | SelectedState[],
 |};
 
 type DispatchProps = {|
@@ -179,7 +179,7 @@ class TimelineTrackThread extends PureComponent<Props> {
             onSelect={this._onMarkerSelect}
           />
         ) : null}
-        {timelineType === 'category' ? (
+        {timelineType === 'category' && !filteredThread.isJsTracer ? (
           <ThreadActivityGraph
             className="threadActivityGraph"
             interval={interval}

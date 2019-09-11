@@ -53,7 +53,7 @@ type CanvasProps = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
-  +samplesSelectedStates: SelectedState[],
+  +samplesSelectedStates: null | SelectedState[],
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
@@ -160,7 +160,7 @@ type StateProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +categories: CategoryList,
   +previewSelection: PreviewSelection,
-  +samplesSelectedStates: SelectedState[],
+  +samplesSelectedStates: null | SelectedState[],
   +treeOrderSampleComparator: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable
