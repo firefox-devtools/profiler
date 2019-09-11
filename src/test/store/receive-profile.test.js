@@ -507,7 +507,7 @@ describe('actions/receive-profile', function() {
 
     it('can retrieve a profile from the web and save it to state', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-      const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
+      const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
 
       window.fetch = jest.fn(url =>
         Promise.resolve(
@@ -561,7 +561,7 @@ describe('actions/receive-profile', function() {
 
     it('requests several times in case of 403', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-      const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
+      const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
       window.fetch
         .mockImplementationOnce(_ => Promise.resolve(fetch403Response))
         .mockImplementationOnce(url =>
