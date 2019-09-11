@@ -376,6 +376,7 @@ export type Thread = {|
   pausedRanges: PausedRange[],
   name: string,
   processName?: string,
+  isJsTracer?: boolean,
   pid: Pid,
   tid: number | void,
   samples: SamplesTable,

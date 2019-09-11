@@ -30,6 +30,8 @@ import {
 } from './import/linux-perf';
 import { convertPhaseTimes } from './convert-markers';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
+import { getFriendlyThreadName } from '../profile-logic/profile-data';
+import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
 import type {
   Profile,
@@ -1215,6 +1217,26 @@ export function processProfile(
     },
     []
   );
+
+  // Convert JS tracer information into their own threads. This mutates
+  // the threads array.
+  for (const thread of threads.slice()) {
+    const { jsTracer } = thread;
+    if (jsTracer) {
+      const friendlyThreadName = getFriendlyThreadName(threads, thread);
+      const jsTracerThread = convertJsTracerToThread(
+        thread,
+        jsTracer,
+        meta.categories
+      );
+      jsTracerThread.isJsTracer = true;
+      jsTracerThread.name = `JS Tracer of ${friendlyThreadName}`;
+      threads.push(jsTracerThread);
+
+      // Delete the reference to the original jsTracer data, but keep it on this thread.
+      delete thread.jsTracer;
+    }
+  }
 
   const result = {
     meta,
