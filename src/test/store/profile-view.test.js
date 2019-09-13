@@ -1073,6 +1073,9 @@ describe('actions/ProfileView', function() {
       if (!screenshots) {
         throw new Error('No screenshots found.');
       }
+      // The profile contains the same markers twice, but with different window ids.
+      // `screenshots` contains the screenshots for only one window id.
+      // That's why we need to halve the markers length when comparing the 2 lengths.
       expect(screenshots.length).toEqual(profile.threads[0].markers.length / 2);
       for (const screenshot of screenshots) {
         expect(screenshot.name).toEqual('CompositorScreenshot');
