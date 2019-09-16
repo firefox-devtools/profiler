@@ -76,13 +76,10 @@ function _refineMockPayload(
 
 export function addMarkersToThreadWithCorrespondingSamples(
   thread: Thread,
-  markers: TestDefinedMarkers,
-  interval: Milliseconds
+  markers: TestDefinedMarkers
 ) {
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
-
-  const allTimes = new Set();
 
   markers.forEach(([name, time, data]) => {
     markersTable.name.push(stringTable.indexForString(name));
@@ -90,62 +87,12 @@ export function addMarkersToThreadWithCorrespondingSamples(
     markersTable.data.push(_refineMockPayload(data));
     markersTable.category.push(0);
     markersTable.length++;
-
-    // Try to get a consistent profile containing all markers
-    allTimes.add(time);
-    if (data) {
-      if (typeof data.startTime === 'number') {
-        allTimes.add(data.startTime);
-      }
-      if (typeof data.endTime === 'number') {
-        allTimes.add(data.endTime);
-      }
-    }
   });
-
-  const firstMarkerTime = Math.min(...allTimes);
-  const lastMarkerTime = Math.max(...allTimes);
-
-  const { samples } = thread;
-
-  // The first marker time should be added if there's no sample before this time.
-  const shouldAddFirstMarkerTime =
-    samples.length === 0 || samples.time[0] > firstMarkerTime;
-
-  // The last marker time should be added if there's no sample after this time,
-  // but only if it's different than the other time.
-  const shouldAddLastMarkerTime =
-    (samples.length === 0 ||
-      samples.time[samples.length - 1] < lastMarkerTime) &&
-    firstMarkerTime !== lastMarkerTime;
-
-  if (shouldAddFirstMarkerTime) {
-    samples.time.unshift(firstMarkerTime);
-    samples.stack.unshift(null);
-    samples.responsiveness.unshift(null);
-    if (samples.duration) {
-      samples.duration.unshift(interval);
-    }
-    samples.length++;
-  }
-
-  if (shouldAddLastMarkerTime) {
-    samples.time.push(lastMarkerTime);
-    samples.stack.push(null);
-    samples.responsiveness.push(null);
-    if (samples.duration) {
-      samples.duration.push(interval);
-    }
-    samples.length++;
-  }
 }
 
-export function getThreadWithMarkers(
-  markers: TestDefinedMarkers,
-  interval: Milliseconds
-) {
+export function getThreadWithMarkers(markers: TestDefinedMarkers) {
   const thread = getEmptyThread();
-  addMarkersToThreadWithCorrespondingSamples(thread, markers, interval);
+  addMarkersToThreadWithCorrespondingSamples(thread, markers);
   return thread;
 }
 
@@ -154,7 +101,7 @@ export function getProfileWithMarkers(
 ): Profile {
   const profile = getEmptyProfile();
   profile.threads = markersPerThread.map(testDefinedMarkers =>
-    getThreadWithMarkers(testDefinedMarkers, profile.meta.interval)
+    getThreadWithMarkers(testDefinedMarkers)
   );
   return profile;
 }
@@ -673,47 +620,43 @@ export function getNetworkTrackProfile() {
     docshellHistoryId,
   };
 
-  addMarkersToThreadWithCorrespondingSamples(
-    thread,
+  addMarkersToThreadWithCorrespondingSamples(thread, [
     [
-      [
-        'Load',
-        4,
-        ({
-          ...loadPayloadBase,
-          interval: 'start',
-        }: NavigationMarkerPayload),
-      ],
-      [
-        'Load',
-        5,
-        ({
-          ...loadPayloadBase,
-          interval: 'end',
-        }: NavigationMarkerPayload),
-      ],
-      ['TTI', 6, null],
-      ['Navigation::Start', 7, null],
-      ['Contentful paint at something', 8, null],
-      [
-        'DOMContentLoaded',
-        6,
-        ({
-          ...domContentLoadedBase,
-          interval: 'start',
-        }: NavigationMarkerPayload),
-      ],
-      [
-        'DOMContentLoaded',
-        7,
-        ({
-          ...domContentLoadedBase,
-          interval: 'end',
-        }: NavigationMarkerPayload),
-      ],
+      'Load',
+      4,
+      ({
+        ...loadPayloadBase,
+        interval: 'start',
+      }: NavigationMarkerPayload),
     ],
-    profile.meta.interval
-  );
+    [
+      'Load',
+      5,
+      ({
+        ...loadPayloadBase,
+        interval: 'end',
+      }: NavigationMarkerPayload),
+    ],
+    ['TTI', 6, null],
+    ['Navigation::Start', 7, null],
+    ['Contentful paint at something', 8, null],
+    [
+      'DOMContentLoaded',
+      6,
+      ({
+        ...domContentLoadedBase,
+        interval: 'start',
+      }: NavigationMarkerPayload),
+    ],
+    [
+      'DOMContentLoaded',
+      7,
+      ({
+        ...domContentLoadedBase,
+        interval: 'end',
+      }: NavigationMarkerPayload),
+    ],
+  ]);
 
   return profile;
 }

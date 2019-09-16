@@ -288,7 +288,7 @@ describe('filterRawMarkerTableToRange', () => {
 
     // Our marker payload union type is too difficult to work with in a
     // generic way here.
-    return getThreadWithMarkers((markers: any), 1);
+    return getThreadWithMarkers((markers: any));
   }
 
   it('filters generic markers', () => {
@@ -986,7 +986,7 @@ describe('filterRawMarkerTableToRangeWithMarkersToDelete', () => {
 
     // Our marker payload union type is too difficult to work with in a
     // generic way here.
-    return getThreadWithMarkers((markers: any), 1);
+    return getThreadWithMarkers((markers: any));
   }
 
   it('filters generic markers without markerToDelete', () => {
