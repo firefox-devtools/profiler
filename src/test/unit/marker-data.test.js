@@ -10,6 +10,7 @@ import {
   filterRawMarkerTableToRange,
   filterRawMarkerTableToRangeWithMarkersToDelete,
 } from '../../profile-logic/marker-data';
+import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getThreadWithMarkers } from '../fixtures/profiles/processed-profile';
@@ -140,7 +141,11 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers } = setup();
     expect(markers[14]).toMatchObject({
       start: 28,
-      dur: 0,
+      // This is the last marker; as a result, the time range is computed by
+      // adding the interval to its time. Because it's incomplete, it lasts
+      // until the end of the range, and as a result its duration is the same as
+      // the interval, which is 1.
+      dur: 1,
       name: 'Rasterize',
       title: null,
       incomplete: true,
@@ -268,7 +273,10 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       },
       name: 'CompositorScreenshot',
       start: 25,
-      dur: 0,
+      // Because the last compositor screenshot lasts until the end of the
+      // range, and the range ends at 29 (because of the last marker's time is
+      // at 28), the duration is 4 accordingly.
+      dur: 4,
       title: null,
     });
   });
@@ -377,21 +385,21 @@ describe('filterRawMarkerTableToRange', () => {
       ['6', 8, { type: 'tracing', interval: 'end' }],
     ];
 
-    const thread = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      thread.markers,
-      2.3,
-      5.6
-    );
+    const originalThread = setup(markers);
+
+    const filteredThread = {
+      ...originalThread,
+      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
+    };
+
+    const threadRange = getTimeRangeForThread(filteredThread, 1);
 
     // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
     // easier to assert the result for tracing markers.
     const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredMarkerTable,
-      thread.stringTable,
-      2.3 /* first sample time */,
-      5.6 /* last sample time */,
-      1 /* interval */
+      filteredThread.markers,
+      filteredThread.stringTable,
+      threadRange
     ).sort((markerA, markerB) => markerA.start - markerB.start);
     expect(processedMarkers.map(marker => marker.name)).toEqual([
       '0',
@@ -411,21 +419,21 @@ describe('filterRawMarkerTableToRange', () => {
       ['0', 6, { type: 'tracing', interval: 'end' }],
     ];
 
-    const thread = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      thread.markers,
-      2.3,
-      5.6
-    );
+    const originalThread = setup(markers);
+
+    const filteredThread = {
+      ...originalThread,
+      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
+    };
+
+    const threadRange = getTimeRangeForThread(filteredThread, 1);
 
     // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
     // easier to assert the result for tracing markers.
     const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredMarkerTable,
-      thread.stringTable,
-      2.3 /* first sample time */,
-      5.6 /* last sample time */,
-      1 /* interval */
+      filteredThread.markers,
+      filteredThread.stringTable,
+      threadRange
     ).sort((markerA, markerB) => markerA.start - markerB.start);
     expect(processedMarkers).toHaveLength(1);
     // Only the marker starting from 0 and ending at 6 is kept. The marker
@@ -443,29 +451,28 @@ describe('filterRawMarkerTableToRange', () => {
       ['7', 7, { type: 'tracing', interval: 'start' }],
     ];
 
-    const thread = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      thread.markers,
-      2.3,
-      5.6
-    );
+    const originalThread = setup(markers);
+
+    const filteredThread = {
+      ...originalThread,
+      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
+    };
+
+    const threadRange = getTimeRangeForThread(filteredThread, 1);
 
     // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
     // easier to assert the result for tracing markers.
     const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredMarkerTable,
-      thread.stringTable,
-      2.3 /* first sample time */,
-      5.6 /* last sample time */,
-      1 /* interval */
-    ).sort((markerA, markerB) => markerA.start - markerB.start);
+      filteredThread.markers,
+      filteredThread.stringTable,
+      threadRange
+    );
+    const markerNames = processedMarkers.map(marker => marker.name);
 
-    expect(processedMarkers.map(marker => marker.name)).toEqual([
-      '2',
-      '4',
-      '6',
-      '3',
-    ]);
+    // We don't really mind about the order, rather about their only presence.
+    const expectedMarkers = ['2', '3', '4', '6'];
+    expect(markerNames).toEqual(expect.arrayContaining(expectedMarkers));
+    expect(markerNames).toHaveLength(expectedMarkers.length);
   });
 
   it('filters screenshot markers', () => {
@@ -612,21 +619,21 @@ describe('filterRawMarkerTableToRange', () => {
       ],
     ];
 
-    const thread = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      thread.markers,
-      2.3,
-      5.6
-    );
+    const originalThread = setup(markers);
+
+    const filteredThread = {
+      ...originalThread,
+      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
+    };
+
+    const threadRange = getTimeRangeForThread(filteredThread, 1);
 
     // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for network markers.
+    // easier to assert the result for tracing markers.
     const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredMarkerTable,
-      thread.stringTable,
-      2.3 /* first sample time */,
-      5.6 /* last sample time */,
-      1 /* interval */
+      filteredThread.markers,
+      filteredThread.stringTable,
+      threadRange
     );
 
     expect(
@@ -714,21 +721,21 @@ describe('filterRawMarkerTableToRange', () => {
       ],
     ];
 
-    const thread = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      thread.markers,
-      2.3,
-      5.6
-    );
+    const originalThread = setup(markers);
+
+    const filteredThread = {
+      ...originalThread,
+      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
+    };
+
+    const threadRange = getTimeRangeForThread(filteredThread, 1);
 
     // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for network markers.
+    // easier to assert the result for tracing markers.
     const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredMarkerTable,
-      thread.stringTable,
-      2.3 /* first sample time */,
-      5.6 /* last sample time */,
-      1 /* interval */
+      filteredThread.markers,
+      filteredThread.stringTable,
+      threadRange
     );
     expect(
       processedMarkers.map(marker => [
@@ -814,21 +821,21 @@ describe('filterRawMarkerTableToRange', () => {
       ],
     ];
 
-    const thread = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      thread.markers,
-      2.3,
-      5.6
-    );
+    const originalThread = setup(markers);
+
+    const filteredThread = {
+      ...originalThread,
+      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
+    };
+
+    const threadRange = getTimeRangeForThread(filteredThread, 1);
 
     // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for network markers.
+    // easier to assert the result for tracing markers.
     const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredMarkerTable,
-      thread.stringTable,
-      2.3 /* first sample time */,
-      5.6 /* last sample time */,
-      1 /* interval */
+      filteredThread.markers,
+      filteredThread.stringTable,
+      threadRange
     );
     expect(
       processedMarkers.map(marker => [
@@ -939,21 +946,21 @@ describe('filterRawMarkerTableToRange', () => {
       ],
     ];
 
-    const thread = setup(markers);
-    const filteredMarkerTable = filterRawMarkerTableToRange(
-      thread.markers,
-      2.3,
-      5.6
-    );
+    const originalThread = setup(markers);
+
+    const filteredThread = {
+      ...originalThread,
+      markers: filterRawMarkerTableToRange(originalThread.markers, 2.3, 5.6),
+    };
+
+    const threadRange = getTimeRangeForThread(filteredThread, 1);
 
     // We're using `deriveMarkersFromRawMarkerTable` here because it makes it
-    // easier to assert the result for network markers.
+    // easier to assert the result for tracing markers.
     const processedMarkers = deriveMarkersFromRawMarkerTable(
-      filteredMarkerTable,
-      thread.stringTable,
-      2.3 /* first sample time */,
-      5.6 /* last sample time */,
-      1 /* interval */
+      filteredThread.markers,
+      filteredThread.stringTable,
+      threadRange
     );
 
     expect(

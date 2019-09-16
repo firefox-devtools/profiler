@@ -24,6 +24,7 @@ import type { TransformStack } from '../../types/transforms';
 import type { UniqueStringArray } from '../../utils/unique-string-array';
 import type { JsTracerTiming } from '../../types/profile-derived';
 import type { $ReturnType } from '../../types/utils';
+import type { StartEndRange } from '../../types/units';
 
 /**
  * Infer the return type from the getThreadSelectorsPerThread function. This
@@ -45,6 +46,11 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = state =>
     getThread(state).samples;
+  const getThreadRange: Selector<StartEndRange> = createSelector(
+    getThread,
+    ProfileSelectors.getProfileInterval,
+    ProfileData.getTimeRangeForThread
+  );
 
   /**
    * The first per-thread selectors filter out and transform a thread based on user's
@@ -245,6 +251,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread,
     getStringTable,
     getSamplesTable,
+    getThreadRange,
     getFilteredThread,
     getRangeFilteredThread,
     getRangeAndTransformFilteredThread,
