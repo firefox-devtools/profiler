@@ -577,12 +577,12 @@ function _createGeckoThread(): GeckoThread {
 
         [
           17, // PreferenceRead
-          114.9,
+          27,
           0, // Other
           {
             type: 'PreferenceRead',
-            startTime: 114.9,
-            endTime: 114.9,
+            startTime: 26,
+            endTime: 27,
             prefAccessTime: 114.9,
             prefName: 'layout.css.dpi',
             prefKind: 'User',
@@ -592,11 +592,13 @@ function _createGeckoThread(): GeckoThread {
         ],
 
         // INSERT NEW MARKERS HERE
+        // Please make sure that the marker below always have a time
+        // larger than the previous ones.
 
         // Start a tracing marker but never finish it.
         [
           10, // Rasterize
-          20,
+          28,
           0, // Other
           {
             category: 'Paint',
