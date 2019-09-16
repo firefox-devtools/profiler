@@ -639,19 +639,48 @@ export function getTimingsForCallNodeIndex(
   return { forPath: pathTimings, forFunc: funcTimings, rootTime };
 }
 
+// This function computes the time range for a thread, using both its samples
+// and markers data.
 export function getTimeRangeForThread(
-  thread: Thread,
+  { samples, markers }: Thread,
   interval: Milliseconds
 ): StartEndRange {
-  if (thread.samples.length === 0) {
-    return { start: Infinity, end: -Infinity };
+  const result = { start: Infinity, end: -Infinity };
+
+  if (samples.length) {
+    const lastSampleIndex = samples.length - 1;
+    result.start = samples.time[0];
+    result.end = samples.time[lastSampleIndex] + interval;
   }
 
-  const lastSampleIndex = thread.samples.length - 1;
-  return {
-    start: thread.samples.time[0],
-    end: thread.samples.time[lastSampleIndex] + interval,
-  };
+  if (markers.length) {
+    // Finding start and end times sadly requires looping through all markers :(
+    let startTime = +Infinity;
+    let endTime = -Infinity;
+    for (let i = 0; i < markers.length; i++) {
+      const thisStartTime =
+        markers.data[i] && typeof markers.data[i].startTime === 'number'
+          ? markers.data[i].startTime
+          : markers.time[i];
+
+      // We add `interval` to the read value here. It could be any number, but
+      // we use `interval` instead of for example 0.001 so that numbers round a
+      // bit more in tests, and this doesn't change things much in practice
+      // otherwise.
+      const thisEndTime =
+        markers.data[i] && typeof markers.data[i].endTime === 'number'
+          ? markers.data[i].endTime + interval
+          : markers.time[i] + interval;
+
+      startTime = Math.min(startTime, thisStartTime);
+      endTime = Math.max(endTime, thisEndTime);
+    }
+
+    result.start = Math.min(result.start, startTime);
+    result.end = Math.max(result.end, endTime);
+  }
+
+  return result;
 }
 
 export function getTimeRangeIncludingAllThreads(
