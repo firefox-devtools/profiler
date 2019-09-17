@@ -286,7 +286,7 @@ export type BailoutPayload = {|
   where: string,
   script: string,
   bailoutLine: number,
-  functionLine: number,
+  functionLine: number | null,
   startTime: Milliseconds,
   endTime: Milliseconds,
 |};
@@ -297,7 +297,7 @@ export type BailoutPayload = {|
 export type InvalidationPayload = {|
   type: 'Invalidation',
   url: string,
-  line: string,
+  line: number | null,
   startTime: Milliseconds,
   endTime: Milliseconds,
 |};

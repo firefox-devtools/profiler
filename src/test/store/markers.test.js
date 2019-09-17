@@ -137,8 +137,9 @@ describe('getProcessedRawMarkerTable', function() {
       ['Invalidate http://mozilla.com/script.js:1234', 10, null],
       ['Invalidate self-hosted:2345', 20, null],
       ['Invalidate resource://foo -> resource://bar:3456', 30, null],
+      ['Invalidate moz-extension://<URL>', 40, null],
     ]);
-    expect(markers.time).toEqual([10, 20, 30]);
+    expect(markers.time).toEqual([10, 20, 30, 40]);
     expect(markers.data).toEqual([
       {
         type: 'Invalidation',
@@ -161,6 +162,13 @@ describe('getProcessedRawMarkerTable', function() {
         startTime: 30,
         endTime: 30,
       },
+      {
+        type: 'Invalidation',
+        url: 'moz-extension://<URL>',
+        line: null,
+        startTime: 40,
+        endTime: 40,
+      },
     ]);
   });
 
@@ -176,8 +184,14 @@ describe('getProcessedRawMarkerTable', function() {
         20,
         null,
       ],
+      // Also handle sanitized profiles where URLs have been redacted
+      [
+        'Bailout_ShapeGuard at jumptarget on line 7 of moz-extension://<URL>',
+        30,
+        null,
+      ],
     ]);
-    expect(markers.time).toEqual([10, 20]);
+    expect(markers.time).toEqual([10, 20, 30]);
     expect(markers.data).toEqual([
       {
         type: 'Bailout',
@@ -198,6 +212,16 @@ describe('getProcessedRawMarkerTable', function() {
         functionLine: 970,
         startTime: 20,
         endTime: 20,
+      },
+      {
+        type: 'Bailout',
+        bailoutType: 'ShapeGuard',
+        where: 'at jumptarget',
+        script: 'moz-extension://<URL>',
+        bailoutLine: 7,
+        functionLine: null,
+        startTime: 30,
+        endTime: 30,
       },
     ]);
   });
