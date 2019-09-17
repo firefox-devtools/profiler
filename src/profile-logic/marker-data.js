@@ -17,6 +17,7 @@ import type {
   BailoutPayload,
   NetworkPayload,
   PrefMarkerPayload,
+  InvalidationPayload,
 } from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { StartEndRange } from '../types/units';
@@ -220,13 +221,13 @@ export function extractMarkerDataFromName(
       } else {
         const [, url, line] = match;
         newMarkers.name[markerIndex] = invalidationStringIndex;
-        newMarkers.data[markerIndex] = {
+        newMarkers.data[markerIndex] = ({
           type: 'Invalidation',
           url,
           line: line === undefined ? null : line,
           startTime: time,
           endTime: time,
-        };
+        }: InvalidationPayload);
       }
     }
     if (matchFound && markers.data[markerIndex]) {
