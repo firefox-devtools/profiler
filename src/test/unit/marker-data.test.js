@@ -138,11 +138,12 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   });
   it('should handle markers without an end', function() {
     const { markers } = setup();
-    expect(markers[9]).toMatchObject({
-      start: 20,
+    expect(markers[14]).toMatchObject({
+      start: 28,
       dur: 0,
       name: 'Rasterize',
       title: null,
+      incomplete: true,
     });
   });
   it('should handle nested markers correctly', function() {
@@ -162,7 +163,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   });
   it('should handle arbitrary event markers correctly', function() {
     const { markers } = setup();
-    expect(markers[10]).toMatchObject({
+    expect(markers[9]).toMatchObject({
       start: 21,
       dur: 0,
       name: 'ArbitraryName',
@@ -180,7 +181,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { thread, contentThread, markers, contentMarkers } = setup();
     expect(thread.processStartupTime).toBe(0);
     expect(contentThread.processStartupTime).toBe(1000);
-    expect(markers[11]).toEqual({
+    expect(markers[10]).toEqual({
       data: {
         type: 'Network',
         startTime: 22,
@@ -207,7 +208,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       title: null,
       category: 0,
     });
-    expect(contentMarkers[11]).toEqual({
+    expect(contentMarkers[10]).toEqual({
       data: {
         type: 'Network',
         startTime: 1022,
@@ -234,7 +235,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       title: null,
       category: 0,
     });
-    expect(contentMarkers[12]).toEqual({
+    expect(contentMarkers[11]).toEqual({
       data: {
         // Stack property is converted to a cause.
         cause: {
@@ -257,7 +258,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   });
   it('should create a marker for the marker CompositorScreenshot', function() {
     const { markers } = setup();
-    expect(markers[13]).toMatchObject({
+    expect(markers[12]).toMatchObject({
       data: {
         type: 'CompositorScreenshot',
         url: 16,
