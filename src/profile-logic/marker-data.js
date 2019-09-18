@@ -246,9 +246,7 @@ export function extractMarkerDataFromName(
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
   stringTable: UniqueStringArray,
-  firstSampleTime: number,
-  lastSampleTime: number,
-  interval: number
+  threadRange: StartEndRange
 ): Marker[] {
   // This is the resulting array.
   const matchedMarkers: Marker[] = [];
@@ -352,7 +350,7 @@ export function deriveMarkersFromRawMarkerTable(
             // first sample. In that case it'll become a dot marker at
             // the location of the end marker. Otherwise we'll use the
             // time of the first sample as its start.
-            const start = Math.min(time, firstSampleTime);
+            const start = Math.min(time, threadRange.start);
 
             matchedMarkers.push({
               start,
@@ -435,7 +433,7 @@ export function deriveMarkersFromRawMarkerTable(
           } else {
             // There's no start marker matching this end marker. This means an
             // abstract marker exists before the start of the profile.
-            const start = Math.min(firstSampleTime, endData.startTime);
+            const start = Math.min(threadRange.start, endData.startTime);
             matchedMarkers.push({
               start,
               dur: endData.endTime - start,
@@ -510,7 +508,7 @@ export function deriveMarkersFromRawMarkerTable(
     }
   }
 
-  const endOfThread = lastSampleTime + interval;
+  const endOfThread = threadRange.end;
 
   // Loop over "start" markers without any "end" markers.
   for (const markerBucket of openTracingMarkers.values()) {

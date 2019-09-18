@@ -96,8 +96,9 @@ describe('timeline/TrackScreenshots', function() {
   it('renders a screenshot images when zooming into a range without a screenshot start time actually in the range', () => {
     const profile = getScreenshotTrackProfile();
     const [thread] = profile.threads;
-    const markerIndexA = thread.markers.length - 2;
-    const markerIndexB = thread.markers.length - 1;
+    const markerIndexA = thread.markers.length - 3;
+    const markerIndexB = thread.markers.length - 2;
+    // We keep the last marker so that the profile's root range is correct.
 
     _setScreenshotMarkersToUnknown(thread, markerIndexA, markerIndexB);
 

@@ -3,6 +3,10 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
+
+import memoize from 'memoize-immutable';
+import MixedTupleMap from 'mixedtuplemap';
+
 import type {
   Profile,
   Thread,
@@ -639,27 +643,77 @@ export function getTimingsForCallNodeIndex(
   return { forPath: pathTimings, forFunc: funcTimings, rootTime };
 }
 
-export function getTimeRangeForThread(
-  thread: Thread,
+// This function computes the time range for a thread, using both its samples
+// and markers data. It's memoized and exported below, because it's called both
+// here in getTimeRangeIncludingAllThreads, and in selectors when dealing with
+// markers.
+// Because `getTimeRangeIncludingAllThreads` is called in a reducer and it's
+// quite complex to change this, the memoization happens here.
+// When changing the signature, please accordingly check that the map class used
+// for memoization is still the right one.
+function _getTimeRangeForThread(
+  { samples, markers }: Thread,
   interval: Milliseconds
 ): StartEndRange {
-  if (thread.samples.length === 0) {
-    return { start: Infinity, end: -Infinity };
+  const result = { start: Infinity, end: -Infinity };
+
+  if (samples.length) {
+    const lastSampleIndex = samples.length - 1;
+    result.start = samples.time[0];
+    result.end = samples.time[lastSampleIndex] + interval;
   }
 
-  const lastSampleIndex = thread.samples.length - 1;
-  return {
-    start: thread.samples.time[0],
-    end: thread.samples.time[lastSampleIndex] + interval,
-  };
+  if (markers.length) {
+    // Finding start and end times sadly requires looping through all markers :(
+    let startTime = +Infinity;
+    let endTime = -Infinity;
+    for (let i = 0; i < markers.length; i++) {
+      const thisStartTime =
+        markers.data[i] && typeof markers.data[i].startTime === 'number'
+          ? markers.data[i].startTime
+          : markers.time[i];
+
+      // We add `interval` to the read value here. It could be any number, but
+      // we use `interval` instead of for example 0.001 so that numbers round a
+      // bit more in tests, and this doesn't change things much in practice
+      // otherwise.
+      const thisEndTime =
+        markers.data[i] && typeof markers.data[i].endTime === 'number'
+          ? markers.data[i].endTime + interval
+          : markers.time[i] + interval;
+
+      startTime = Math.min(startTime, thisStartTime);
+      endTime = Math.max(endTime, thisEndTime);
+    }
+
+    result.start = Math.min(result.start, startTime);
+    result.end = Math.max(result.end, endTime);
+  }
+
+  return result;
 }
+
+// We do a full memoization because it's called for several different threads.
+// But it won't be called more than once per thread.
+// Note that because MixedTupleMap internally uses a WeakMap, it should properly
+// free the memory when we load another profile (for example when dealing with
+// zip files).
+const memoizedGetTimeRangeForThread = memoize(_getTimeRangeForThread, {
+  // We use a MixedTupleMap because the function takes both primitive and
+  // complex types.
+  cache: new MixedTupleMap(),
+});
+export { memoizedGetTimeRangeForThread as getTimeRangeForThread };
 
 export function getTimeRangeIncludingAllThreads(
   profile: Profile
 ): StartEndRange {
   const completeRange = { start: Infinity, end: -Infinity };
   profile.threads.forEach(thread => {
-    const threadRange = getTimeRangeForThread(thread, profile.meta.interval);
+    const threadRange = memoizedGetTimeRangeForThread(
+      thread,
+      profile.meta.interval
+    );
     completeRange.start = Math.min(completeRange.start, threadRange.start);
     completeRange.end = Math.max(completeRange.end, threadRange.end);
   });
