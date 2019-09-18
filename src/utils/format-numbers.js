@@ -7,7 +7,7 @@
 import memoize from 'memoize-immutable';
 import NamedTupleMap from 'namedtuplemap';
 
-import type { Microseconds, Milliseconds } from '../types/units';
+import type { Microseconds, Milliseconds, Nanoseconds } from '../types/units';
 
 // Calling `toLocalestring` repeatedly in a tight loop can be a performance
 // problem. It's much better to reuse an instance of `Intl.NumberFormat`.
@@ -128,7 +128,7 @@ export function formatSI(num: number): string {
 }
 
 export function formatNanoseconds(
-  time: Milliseconds,
+  time: Nanoseconds,
   significantDigits: number = 3,
   maxFractionalDigits: number = 4
 ) {

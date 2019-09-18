@@ -13,6 +13,9 @@ import type { ProfilerOverhead } from '../../../types/profile';
 
 import './MetaOverheadStatistics.css';
 
+// Profiler overhead statistics keys that have max/min/mean values.
+type StatKeys = 'Overhead' | 'Cleaning' | 'Counter' | 'Interval' | 'Lockings';
+
 type Props = {
   profilerOverhead?: ProfilerOverhead[],
 };
@@ -24,14 +27,19 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
   render() {
     const { profilerOverhead } = this.props;
 
-    const calculatedStats: Map<string, ProfilerStats> = new Map();
+    const calculatedStats: Map<StatKeys, ProfilerStats> = new Map();
     // These 3 values only have single values, so we are not using ProfilerStats class for them.
+    // Weightedly accumulated value of `overheadDurations. It's used to calculate mean value.
     let overheadDurations = 0;
+    // Weightedly accumulated value of `overheadPercentage. It's used to calculate mean value.
     let overheadPercentage = 0;
+    // Weightedly accumulated value of `profiledDuration. It's used to calculate mean value.
     let profiledDuration = 0;
+    // Total sampling count is used to calculate mean values of the 3
+    // statistics values above.
     let totalSamplingCount = 0;
 
-    // Older profiles(Before FF 70) don't have any overhead info. Don't show anything if
+    // Older profiles(before FF 70) don't have any overhead info. Don't show anything if
     // that's the case.
     if (profilerOverhead) {
       // Overhead keys that have min/max/mean values to loop.
@@ -80,12 +88,14 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
             <div>Mean</div>
             <div>Max</div>
             <div>Min</div>
-            {Array.from(calculatedStats).map(([key, val]) => [
-              <div key={key}>{key}</div>,
-              <div key={key + 'mean'}>{formatNanoseconds(val.mean)}</div>,
-              <div key={key + 'max'}>{formatNanoseconds(val.max)}</div>,
-              <div key={key + 'min'}>{formatNanoseconds(val.min)}</div>,
-            ])}
+            {[...calculatedStats].map(([key, val]) => (
+              <React.Fragment key={key}>
+                <div>{key}</div>
+                <div>{formatNanoseconds(val.mean)}</div>
+                <div>{formatNanoseconds(val.max)}</div>
+                <div>{formatNanoseconds(val.min)}</div>
+              </React.Fragment>
+            ))}
           </div>
 
           {overheadDurations !== 0 ? (
@@ -119,28 +129,32 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
 }
 
 // A helper class to calculate the weighted arithmetic mean statistic values.
+// For example let's say that we have 2 processes with these profile stats.
+// Process 1: samplingCount: 90, maxCounter: 10
+// Process 2: samplingCount: 10, maxCounter: 100
+// Since the process 2 has less samples, the weighted average maxCounter going to be 19.
 class ProfilerStats {
-  _max = 0;
-  _min = 0;
-  _mean = 0;
-  _weight = 0;
+  _accumulatedMax = 0;
+  _accumulatedMin = 0;
+  _accumulatedMean = 0;
+  _accumulatedWeight = 0;
 
   count(min: number, max: number, mean: number, weight: number) {
-    this._weight += weight;
-    this._min = min * weight;
-    this._max = max * weight;
-    this._mean = mean * weight;
+    this._accumulatedWeight += weight;
+    this._accumulatedMin += min * weight;
+    this._accumulatedMax += max * weight;
+    this._accumulatedMean += mean * weight;
   }
 
   get min(): number {
-    return this._min / this._weight;
+    return this._accumulatedMin / this._accumulatedWeight;
   }
 
   get max(): number {
-    return this._max / this._weight;
+    return this._accumulatedMax / this._accumulatedWeight;
   }
 
   get mean(): number {
-    return this._mean / this._weight;
+    return this._accumulatedMean / this._accumulatedWeight;
   }
 }
