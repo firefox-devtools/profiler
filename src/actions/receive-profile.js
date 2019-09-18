@@ -780,7 +780,13 @@ async function _extractJsonFromResponse(
 }
 
 function getProfileUrlForHash(hash: string): string {
-  return `https://profile-store.commondatastorage.googleapis.com/${hash}`;
+  // See https://cloud.google.com/storage/docs/access-public-data
+  // The URL is https://storage.googleapis.com/<BUCKET>/<FILEPATH>.
+  // https://<BUCKET>.storage.googleapis.com/<FILEPATH> seems to also work but
+  // is not documented nowadays.
+  // By convention, "profile-store" is the name of our bucket, and the file path
+  // is the hash we receive in the URL.
+  return `https://storage.googleapis.com/profile-store/${hash}`;
 }
 
 export function retrieveProfileFromStore(

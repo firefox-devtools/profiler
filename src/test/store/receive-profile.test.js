@@ -9,6 +9,7 @@ import sinon from 'sinon';
 import { oneLineTrim } from 'common-tags';
 
 import { getEmptyProfile } from '../../profile-logic/data-structures';
+import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../selectors/profile';
@@ -258,17 +259,13 @@ describe('actions/receive-profile', function() {
         thread.pid = threadIndex;
       });
 
-      addMarkersToThreadWithCorrespondingSamples(
-        profile.threads[1],
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
         [
-          [
-            'RefreshDriverTick',
-            0,
-            { type: 'tracing', category: 'Paint', interval: 'start' },
-          ],
+          'RefreshDriverTick',
+          0,
+          { type: 'tracing', category: 'Paint', interval: 'start' },
         ],
-        profile.meta.interval
-      );
+      ]);
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -292,17 +289,13 @@ describe('actions/receive-profile', function() {
         thread.pid = threadIndex;
       });
 
-      addMarkersToThreadWithCorrespondingSamples(
-        profile.threads[1],
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
         [
-          [
-            'RefreshDriverTick',
-            0,
-            { type: 'tracing', category: 'Paint', interval: 'start' },
-          ],
+          'RefreshDriverTick',
+          0,
+          { type: 'tracing', category: 'Paint', interval: 'start' },
         ],
-        profile.meta.interval
-      );
+      ]);
 
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
@@ -417,7 +410,11 @@ describe('actions/receive-profile', function() {
         expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
         expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
           start: 0,
-          end: 1007,
+          // The end can be computed as the sum of:
+          // - difference of the starts of the subprocess and the main process (1000)
+          // - the max of the last marker or sample. (in this case, last marker's time is 28)
+          // - the interval (1)
+          end: 1029,
         });
         // not empty
         expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3);
@@ -471,7 +468,7 @@ describe('actions/receive-profile', function() {
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1007,
+        end: 1029, // see the above test for more explanation on this value
       });
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
@@ -507,7 +504,7 @@ describe('actions/receive-profile', function() {
 
     it('can retrieve a profile from the web and save it to state', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-      const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
+      const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
 
       window.fetch = jest.fn(url =>
         Promise.resolve(
@@ -561,7 +558,7 @@ describe('actions/receive-profile', function() {
 
     it('requests several times in case of 403', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-      const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
+      const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
       window.fetch
         .mockImplementationOnce(_ => Promise.resolve(fetch403Response))
         .mockImplementationOnce(url =>
@@ -1254,31 +1251,23 @@ describe('actions/receive-profile', function() {
       { url1, url2 }: SetupUrlParams
     ): * {
       profile1.threads.forEach(thread =>
-        addMarkersToThreadWithCorrespondingSamples(
-          thread,
-          [
-            ['A', 1, { startTime: 1, endTime: 3 }],
-            ['A', 1, null],
-            ['B', 2, null],
-            ['C', 3, null],
-            ['D', 4, null],
-            ['E', 5, null],
-          ],
-          profile1.meta.interval
-        )
+        addMarkersToThreadWithCorrespondingSamples(thread, [
+          ['A', 1, { startTime: 1, endTime: 3 }],
+          ['A', 1, null],
+          ['B', 2, null],
+          ['C', 3, null],
+          ['D', 4, null],
+          ['E', 5, null],
+        ])
       );
       profile2.threads.forEach(thread =>
-        addMarkersToThreadWithCorrespondingSamples(
-          thread,
-          [
-            ['F', 1, { startTime: 1, endTime: 3 }],
-            ['G', 2, null],
-            ['H', 3, null],
-            ['I', 4, null],
-            ['J', 5, null],
-          ],
-          profile2.meta.interval
-        )
+        addMarkersToThreadWithCorrespondingSamples(thread, [
+          ['F', 1, { startTime: 1, endTime: 3 }],
+          ['G', 2, null],
+          ['H', 3, null],
+          ['I', 4, null],
+          ['J', 5, null],
+        ])
       );
 
       window.fetch
@@ -1340,7 +1329,7 @@ describe('actions/receive-profile', function() {
           ...thread,
           pid: `${thread.pid} from profile ${i + 1}`,
           processName: `Profile ${i + 1}: ${thread.name}`,
-          unregisterTime: thread.samples.length,
+          unregisterTime: getTimeRangeForThread(thread, 1).end,
         })
       );
 

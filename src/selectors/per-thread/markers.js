@@ -19,7 +19,6 @@ import type {
 } from '../../types/profile-derived';
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
-import type { Milliseconds } from '../../types/units';
 
 /**
  * Infer the return type from the getMarkerSelectorsPerThread function. This
@@ -71,20 +70,13 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerData.extractMarkerDataFromName
   );
 
-  const _getFirstSampleTime: Selector<Milliseconds> = state =>
-    threadSelectors.getThread(state).samples.time[0] || 0;
-  const _getLastSampleTime: Selector<Milliseconds> = state =>
-    threadSelectors.getThread(state).samples.time.slice(-1)[0] || 0;
-
   /* This selector exposes the result of the processing of the raw marker table
    * into our Marker structure that we use in the rest of our code. This is the
    * very start of our marker pipeline. */
   const _getDerivedMarkers: Selector<Marker[]> = createSelector(
     getProcessedRawMarkerTable,
     threadSelectors.getStringTable,
-    _getFirstSampleTime,
-    _getLastSampleTime,
-    ProfileSelectors.getProfileInterval,
+    threadSelectors.getThreadRange,
     MarkerData.deriveMarkersFromRawMarkerTable
   );
 

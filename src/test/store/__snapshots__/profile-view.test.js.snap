@@ -524,19 +524,10 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "length": 2,
-        "responsiveness": Array [
-          null,
-          null,
-        ],
-        "stack": Array [
-          null,
-          null,
-        ],
-        "time": Array [
-          0,
-          8,
-        ],
+        "length": 0,
+        "responsiveness": Array [],
+        "stack": Array [],
+        "time": Array [],
       },
       "stackTable": Object {
         "category": Array [],
@@ -1017,19 +1008,10 @@ Array [
       "type": Array [],
     },
     "samples": Object {
-      "length": 2,
-      "responsiveness": Array [
-        null,
-        null,
-      ],
-      "stack": Array [
-        null,
-        null,
-      ],
-      "time": Array [
-        0,
-        8,
-      ],
+      "length": 0,
+      "responsiveness": Array [],
+      "stack": Array [],
+      "time": Array [],
     },
     "stackTable": Object {
       "category": Array [],
