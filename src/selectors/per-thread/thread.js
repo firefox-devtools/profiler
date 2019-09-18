@@ -46,11 +46,13 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = state =>
     getThread(state).samples;
-  const getThreadRange: Selector<StartEndRange> = createSelector(
-    getThread,
-    ProfileSelectors.getProfileInterval,
-    ProfileData.getTimeRangeForThread
-  );
+  const getThreadRange: Selector<StartEndRange> = state =>
+    // This function is already memoized in profile-data.js, so we don't need to
+    // memoize it here with `createSelector`.
+    ProfileData.getTimeRangeForThread(
+      getThread(state),
+      ProfileSelectors.getProfileInterval(state)
+    );
 
   /**
    * The first per-thread selectors filter out and transform a thread based on user's
