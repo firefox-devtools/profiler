@@ -205,33 +205,3 @@
   margin-left: 110px;
   list-style: circle;
 }
-
-.metaInfoGrid {
-  display: grid;
-  margin-bottom: 20px;
-  grid-template-columns: repeat(4, 1fr);
-}
-
-.metaInfoGrid > div {
-  margin: 2px 0;
-}
-
-.metaInfoGrid > div:nth-child(-n + 4) {
-  display: block;
-  font-weight: 500;
-}
-
-.metaInfoGrid > div:nth-child(4n + 1) {
-  color: var(--grey-50);
-  font-weight: 500;
-}
-
-.metaInfoGrid > div:not(:nth-child(4n + 1)) {
-  text-align: right;
-}
-
-.metaInfoValueRight {
-  display: inline-block;
-  width: calc(100% - 140px);
-  text-align: right;
-}
