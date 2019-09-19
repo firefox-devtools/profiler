@@ -17,6 +17,7 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   getSelectedThreadIndex,
   getInvertCallstack,
+  getCallTreeSummaryStrategy,
 } from '../../selectors/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
@@ -30,7 +31,10 @@ import { BackgroundImageStyleDef } from '../shared/StyleDef';
 import type { Thread, CategoryList } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
-import type { PreviewSelection } from '../../types/actions';
+import type {
+  PreviewSelection,
+  CallTreeSummaryStrategy,
+} from '../../types/actions';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -69,6 +73,7 @@ type StateProps = {|
   +categories: CategoryList,
   +interval: Milliseconds,
   +isInverted: boolean,
+  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
@@ -258,6 +263,7 @@ class FlameGraph extends React.PureComponent<Props> {
       previewSelection,
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
+      callTreeSummaryStrategy,
       icons,
       categories,
       interval,
@@ -308,6 +314,7 @@ class FlameGraph extends React.PureComponent<Props> {
               categories,
               selectedCallNodeIndex,
               scrollToSelectionGeneration,
+              callTreeSummaryStrategy,
               stackFrameHeight: STACK_FRAME_HEIGHT,
               onSelectionChange: this._onSelectedCallNodeChange,
               onRightClick: this._onRightClickedCallNodeChange,
@@ -358,6 +365,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       icons: getIconsWithClassNames(state),
       interval: getProfileInterval(state),
       isInverted: getInvertCallstack(state),
+      callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),
     };
   },
   mapDispatchToProps: {

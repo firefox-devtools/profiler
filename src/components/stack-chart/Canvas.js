@@ -410,6 +410,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}
         categories={categories}
+        // The stack chart doesn't support other call tree summary types.
+        callTreeSummaryStrategy="timing"
         durationText={formatMilliseconds(duration)}
       />
     );
