@@ -132,7 +132,8 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
 // For example let's say that we have 2 processes with these profile stats.
 // Process 1: samplingCount: 90, maxCounter: 10
 // Process 2: samplingCount: 10, maxCounter: 100
-// Since the process 2 has less samples, the weighted average maxCounter going to be 19.
+// Since the process 2 has less samples, the weighted average maxCounter going to be
+// (90 * 10 + 10 * 100) / (10 + 90) = 19
 class ProfilerStats {
   _accumulatedMax = 0;
   _accumulatedMin = 0;
