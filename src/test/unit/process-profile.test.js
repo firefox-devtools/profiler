@@ -17,7 +17,10 @@ import {
   createGeckoProfilerOverhead,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/flow';
-import type { JsAllocationPayload_Gecko } from '../../types/markers';
+import type {
+  JsAllocationPayload_Gecko,
+  NativeAllocationPayload_Gecko,
+} from '../../types/markers';
 import type { GeckoThread } from '../../types/gecko-profile';
 
 describe('extract functions and resource from location strings', function() {
@@ -403,5 +406,68 @@ describe('js allocation processing', function() {
     expect(jsAllocations.time).toEqual([0, 1, 2]);
     expect(jsAllocations.duration).toEqual([3, 5, 7]);
     expect(jsAllocations.stack).toEqual([11, 13, null]);
+  });
+});
+
+describe('native allocation processing', function() {
+  function getAllocationMarkerHelper(geckoThread: GeckoThread) {
+    let time = 0;
+    return ({ byteSize, stackIndex }) => {
+      const thisTime = time++;
+      // Opt out of type checking, due to the schema look-up not being type checkable.
+      const markerTuple: any = [];
+      const payload: NativeAllocationPayload_Gecko = {
+        type: 'Native allocation',
+        startTime: thisTime,
+        endTime: thisTime,
+        size: byteSize,
+        stack: createGeckoMarkerStack({ stackIndex, time: thisTime }),
+      };
+
+      markerTuple[geckoThread.markers.schema.name] = 'Native allocation';
+      markerTuple[geckoThread.markers.schema.time] = thisTime;
+      markerTuple[geckoThread.markers.schema.data] = payload;
+      markerTuple[geckoThread.markers.schema.category] = 0;
+
+      geckoThread.markers.data.push(markerTuple);
+    };
+  }
+
+  it('should process native allocation markers into a native allocation table', function() {
+    const geckoProfile = createGeckoProfile();
+    const geckoThread = geckoProfile.threads[0];
+    const createAllocation = getAllocationMarkerHelper(geckoThread);
+
+    // Verify the test found the parent process' main thread.
+    expect(geckoThread.name).toBe('GeckoMain');
+    expect(geckoThread.processType).toBe('default');
+
+    // Create 3 allocations, and note the marker lengths.
+    const originalMarkersLength = geckoThread.markers.data.length;
+    createAllocation({ byteSize: 3, stackIndex: 11 });
+    createAllocation({ byteSize: 5, stackIndex: 13 });
+    createAllocation({ byteSize: 7, stackIndex: null });
+    const markersAndAllocationsLength = geckoThread.markers.data.length;
+
+    // Do a simple assertion to verify that the allocations were added by the test
+    // fixture as expected.
+    expect(markersAndAllocationsLength).toEqual(originalMarkersLength + 3);
+
+    // Process the profile and get out the new thread.
+    const processedProfile = processProfile(geckoProfile);
+    const processedThread = processedProfile.threads[0];
+
+    // Check for the existence of the allocations.
+    const { nativeAllocations } = processedThread;
+    if (!nativeAllocations) {
+      throw new Error(
+        'Could not find the nativeAllocations on the main thread.'
+      );
+    }
+
+    // Assert that the transformation makes sense.
+    expect(nativeAllocations.time).toEqual([0, 1, 2]);
+    expect(nativeAllocations.duration).toEqual([3, 5, 7]);
+    expect(nativeAllocations.stack).toEqual([11, 13, null]);
   });
 });
