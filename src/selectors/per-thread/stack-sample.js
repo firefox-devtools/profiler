@@ -17,6 +17,7 @@ import type {
   Thread,
   SamplesTable,
   JsAllocationsTable,
+  NativeAllocationsTable,
   IndexIntoCategoryList,
   IndexIntoSamplesTable,
 } from '../../types/profile';
@@ -177,7 +178,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getSamplesForCallTree: Selector<
-    SamplesTable | JsAllocationsTable
+    SamplesTable | JsAllocationsTable | NativeAllocationsTable
   > = createSelector(
     threadSelectors.getPreviewFilteredThread,
     UrlState.getCallTreeSummaryStrategy,
@@ -191,8 +192,18 @@ export function getStackAndSampleSelectorsPerThread(
             'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
           );
         case 'native-allocations':
-          throw new Error(
-            'Native allocations have not been implemented for the call tree.'
+          return ProfileData.filterToAllocations(
+            ensureExists(
+              thread.nativeAllocations,
+              'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
+            )
+          );
+        case 'native-deallocations':
+          return ProfileData.filterToDeallocations(
+            ensureExists(
+              thread.nativeAllocations,
+              'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
+            )
           );
         default:
           throw assertExhaustiveCheck(strategy);
@@ -208,6 +219,25 @@ export function getStackAndSampleSelectorsPerThread(
     CallTree.computeCallTreeCountsAndTimings
   );
 
+  const _getCallTreeUnit = createSelector(
+    UrlState.getCallTreeSummaryStrategy,
+    strategy => {
+      switch (strategy) {
+        case 'timing':
+          return 'ms';
+        case 'js-allocations':
+        case 'native-allocations':
+        case 'native-deallocations':
+          return 'bytes';
+        default:
+          throw assertExhaustiveCheck(
+            strategy,
+            'Unhandled callTreeSummaryStrategy.'
+          );
+      }
+    }
+  );
+
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
     threadSelectors.getPreviewFilteredThread,
     ProfileSelectors.getProfileInterval,
@@ -215,6 +245,7 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileSelectors.getCategories,
     UrlState.getImplementationFilter,
     getCallTreeCountsAndTimings,
+    _getCallTreeUnit,
     CallTree.getCallTree
   );
 

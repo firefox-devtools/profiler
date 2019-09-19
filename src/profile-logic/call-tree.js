@@ -19,6 +19,7 @@ import type {
   IndexIntoFuncTable,
   SamplesTable,
   JsAllocationsTable,
+  NativeAllocationsTable,
 } from '../types/profile';
 import type {
   CallNodeTable,
@@ -77,6 +78,8 @@ export class CallTree {
   _jsOnly: boolean;
   _interval: number;
   _isHighPrecision: boolean;
+  // The unit of summary, e.g. "ms" or "bytes"
+  _unit: string;
 
   constructor(
     { funcTable, resourceTable, stringTable }: Thread,
@@ -88,7 +91,8 @@ export class CallTree {
     rootCount: number,
     jsOnly: boolean,
     interval: number,
-    isHighPrecision: boolean
+    isHighPrecision: boolean,
+    unit: string
   ) {
     this._categories = categories;
     this._callNodeTable = callNodeTable;
@@ -104,6 +108,7 @@ export class CallTree {
     this._jsOnly = jsOnly;
     this._interval = interval;
     this._isHighPrecision = isHighPrecision;
+    this._unit = unit;
   }
 
   getRoots() {
@@ -239,9 +244,11 @@ export class CallTree {
 
       displayData = {
         totalTime: totalTime === 0 ? '—' : formattedTotalTime,
-        totalTimeWithUnit: totalTime === 0 ? '—' : formattedTotalTime + 'ms',
+        totalTimeWithUnit:
+          totalTime === 0 ? '—' : `${formattedTotalTime} ${this._unit}`,
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
-        selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
+        selfTimeWithUnit:
+          selfTime === 0 ? '—' : `${formattedSelfTime} ${this._unit}`,
         totalTimePercent: `${formatPercent(totalTimeRelative)}`,
         name: funcName,
         lib: libName.slice(0, 1000),
@@ -272,7 +279,7 @@ export class CallTree {
 
 function _getInvertedStackSelfTimes(
   // The samples could either be a SamplesTable, or a JsAllocationsTable.
-  samples: SamplesTable | JsAllocationsTable,
+  samples: SamplesTable | JsAllocationsTable | NativeAllocationsTable,
   callNodeTable: CallNodeTable,
   sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
   interval: Milliseconds
@@ -334,7 +341,7 @@ function _getInvertedStackSelfTimes(
  * This is a helper function to get the stack timings for un-inverted call trees.
  */
 function _getStackSelfTimes(
-  samples: SamplesTable | JsAllocationsTable,
+  samples: SamplesTable | JsAllocationsTable | NativeAllocationsTable,
   callNodeTable: CallNodeTable,
   sampleIndexToCallNodeIndex: Array<null | IndexIntoCallNodeTable>,
   interval: Milliseconds
@@ -366,7 +373,7 @@ function _getStackSelfTimes(
  * It takes into account both the normal tree, and the inverted tree.
  */
 export function computeCallTreeCountsAndTimings(
-  samples: SamplesTable | JsAllocationsTable,
+  samples: SamplesTable | JsAllocationsTable | NativeAllocationsTable,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   interval: Milliseconds,
   invertCallstack: boolean
@@ -444,7 +451,8 @@ export function getCallTree(
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
   implementationFilter: string,
-  callTreeCountsAndTimings: CallTreeCountsAndTimings
+  callTreeCountsAndTimings: CallTreeCountsAndTimings,
+  unit: string
 ): CallTree {
   return timeCode('getCallTree', () => {
     const {
@@ -467,7 +475,8 @@ export function getCallTree(
       rootCount,
       jsOnly,
       interval,
-      Boolean(thread.isJsTracer)
+      Boolean(thread.isJsTracer),
+      unit
     );
   });
 }
