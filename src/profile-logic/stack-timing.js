@@ -53,12 +53,92 @@ export type StackTimingByDepth = Array<{
   end: Milliseconds[],
   callNode: IndexIntoCallNodeTable[],
   length: number,
-}>;
+} | {
+  start: Milliseconds[],
+  end: Milliseconds[],
+  markerIndex: IndexIntoCallNodeTable[],
+  length: number
+  }>;
 
 type LastSeen = {
   startTimeByDepth: number[],
   callNodeIndexByDepth: IndexIntoCallNodeTable[],
 };
+
+const MAX_STACKING_DEPTH = 300;
+
+
+function getMarkerTiming(
+  getMarker: MarkerIndex => Marker,
+  markerIndexes: MarkerIndex[]
+): StackTimingByDepth {
+  // Each marker type will have it's own timing information, later collapse these into
+  // a single array.
+  const markerTimingsMap: Map<string, MarkerTiming[]> = new Map();
+
+  // Go through all of the markers.
+  for (const markerIndex of markerIndexes) {
+    const marker = getMarker(markerIndex);
+    let markerTimingsByName = markerTimingsMap.get(marker.name);
+    if (markerTimingsByName === undefined) {
+      markerTimingsByName = [];
+      markerTimingsMap.set(marker.name, markerTimingsByName);
+    }
+
+    // Place the marker in the closest row that is empty.
+    for (let i = 0; i < MAX_STACKING_DEPTH; i++) {
+      // Get or create a row for marker timings.
+      let markerTimingsRow = markerTimingsByName[i];
+      if (!markerTimingsRow) {
+        markerTimingsRow = {
+          start: [],
+          end: [],
+          markerIndex: [],
+          length: 0,
+        };
+        markerTimingsByName.push(markerTimingsRow);
+      }
+
+      // Since the markers are sorted, look at the last added marker in this row. If
+      // the new marker fits, go ahead and insert it.
+      const otherEnd = markerTimingsRow.end[markerTimingsRow.length - 1];
+      if (otherEnd === undefined || otherEnd <= marker.start) {
+        markerTimingsRow.start.push(marker.start);
+        markerTimingsRow.end.push(marker.start + marker.dur);
+        markerTimingsRow.markerIndex.push(markerIndex);
+        markerTimingsRow.length++;
+        break;
+      }
+    }
+  }
+
+  // Flatten out the map into a single array.
+  return [].concat(...markerTimingsMap.values());
+}
+
+
+
+function computeMarkerLabel(data: MarkerPayload): string {
+  // Satisfy flow's type checker.
+  if (data !== null && typeof data === 'object') {
+    // Handle different marker payloads.
+    switch (data.type) {
+      case 'UserTiming':
+        return (data: UserTimingMarkerPayload).name;
+      case 'tracing':
+        if (data.category === 'DOMEvent') {
+          return (data: DOMEventMarkerPayload).eventType;
+        }
+        break;
+      case 'Text':
+        return (data: TextMarkerPayload).name;
+      default:
+    }
+  }
+
+  return '';
+}
+
 
 /**
  * Build a StackTimingByDepth table from a given thread.
@@ -67,8 +147,12 @@ export function getStackTimingByDepth(
   thread: Thread,
   callNodeInfo: CallNodeInfo,
   maxDepth: number,
+  userTimingMarkerIndices: Object,
+  getMarker: Function,
   interval: Milliseconds
 ): StackTimingByDepth {
+
+  const userTimingsByDepth = getMarkerTiming(getMarker, userTimingMarkerIndices);
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
   const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({
     start: [],
@@ -129,7 +213,7 @@ export function getStackTimingByDepth(
   const endingTime = thread.samples.time[lastIndex] + interval;
   _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, endingTime);
 
-  return stackTimingByDepth;
+  return [...userTimingsByDepth, ...stackTimingByDepth];
 }
 
 function _findNearestSharedCallNodeDepth(

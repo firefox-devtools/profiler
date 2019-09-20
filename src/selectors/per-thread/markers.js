@@ -103,6 +103,8 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
       )
   );
 
+
+
   /**
    * This selector returns a function that's used to retrieve a marker object
    * from its MarkerIndex:
@@ -275,6 +277,13 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     filterMarkerIndexesCreator(MarkerData.isNetworkMarker)
   );
 
+  const getUserTimingMarkersIndexes: Selector<MarkerIndex[]> = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
+    filterMarkerIndexesCreator(MarkerData.isUserTimingMarker)
+  );
+
+
   /**
    * This filters network markers using a search string.
    */
@@ -433,5 +442,6 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getRightClickedMarkerIndex,
     getRightClickedMarker,
     getIsNetworkChartEmptyInFullRange,
+    getUserTimingMarkersIndexes
   };
 }

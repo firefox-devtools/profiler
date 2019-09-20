@@ -214,14 +214,6 @@ export function getStackAndSampleSelectorsPerThread(
     CallTree.getCallTree
   );
 
-  const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> = createSelector(
-    threadSelectors.getFilteredThread,
-    getCallNodeInfo,
-    getCallNodeMaxDepth,
-    ProfileSelectors.getProfileInterval,
-    StackTiming.getStackTimingByDepth
-  );
-
   const getCallNodeMaxDepthForFlameGraph: Selector<number> = createSelector(
     threadSelectors.getPreviewFilteredThread,
     getCallNodeInfo,
@@ -248,7 +240,6 @@ export function getStackAndSampleSelectorsPerThread(
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
     getCallTree,
-    getStackTimingByDepth,
     getCallNodeMaxDepthForFlameGraph,
     getFlameGraphTiming,
   };

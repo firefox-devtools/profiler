@@ -10,6 +10,8 @@ import { tabSlugs, type TabSlug } from '../../app-logic/tabs-handling';
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
 import type { Thread, JsTracerTable } from '../../types/profile';
+import * as ProfileSelectors from "../profile";
+import * as StackTiming from '../../profile-logic/stack-timing';
 
 /**
  * Infer the return type from the getStackAndSampleSelectorsPerThread function. This
@@ -29,13 +31,19 @@ type NeededThreadSelectors = {
   getThread: Selector<Thread>,
   getIsNetworkChartEmptyInFullRange: Selector<boolean>,
   getJsTracerTable: Selector<JsTracerTable | null>,
+   getCallNodeInfo: *,
+  getUserTimingMarkers: *,
+  getCallNodeMaxDepth: *,
+  getMarkerGetter: *,
 };
+
+
 
 /**
  * Create the selectors for a thread that have to do with either stacks or samples.
  */
 export function getComposedSelectorsPerThread(
-  threadSelectors: NeededThreadSelectors
+  threadSelectors: NeededThreadSelectors,
 ): * {
   /**
    * Visible tabs are computed based on the current state of the profile. Some
@@ -66,7 +74,19 @@ export function getComposedSelectorsPerThread(
     }
   );
 
+
+  const getStackTimingByDepth: Selector<StackTiming.StackTimingByDepth> = createSelector(
+    threadSelectors.getFilteredThread,
+    threadSelectors.getCallNodeInfo,
+    threadSelectors.getCallNodeMaxDepth,
+    threadSelectors.getUserTimingMarkersIndexes,
+    threadSelectors.getMarkerGetter,
+    ProfileSelectors.getProfileInterval,
+    StackTiming.getStackTimingByDepth
+  );
+
   return {
     getUsefulTabs,
+    getStackTimingByDepth,
   };
 }

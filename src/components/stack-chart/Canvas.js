@@ -23,6 +23,7 @@ import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
 
 import type { Thread, CategoryList } from '../../types/profile';
+import type { UserTimingMarkerPayload } from '../../types/markers';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -51,6 +52,7 @@ type OwnProps = {|
   +updatePreviewSelection: WrapFunctionInDispatch<
     typeof updatePreviewSelection
   >,
+  +getMarker: Function,
   +categories: CategoryList,
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
@@ -147,6 +149,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
       selectedCallNodeIndex,
       categories,
       callNodeInfo: { callNodeTable },
+      getMarker,
       viewport: {
         containerWidth,
         containerHeight,
@@ -228,6 +231,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
       let lastDrawnPixelX = 0;
       for (let i = 0; i < stackTiming.length; i++) {
+
+        // const isMarker = !stackTiming.callNode[i];
+
         // Only draw samples that are in bounds.
         if (
           stackTiming.end[i] > timeAtStart &&
@@ -295,18 +301,29 @@ class StackChartCanvas extends React.PureComponent<Props> {
           );
 
           // Look up information about this stack frame.
-          const callNodeIndex = stackTiming.callNode[i];
-          const funcIndex = callNodeTable.func[callNodeIndex];
-          const funcNameIndex = thread.funcTable.name[funcIndex];
-          const text = thread.stringTable.getString(funcNameIndex);
-          const categoryIndex = callNodeTable.category[callNodeIndex];
-          const category = categories[categoryIndex];
+          let funcIndex, funcNameIndex, text, categoryIndex, category, isSelected;
+          if (stackTiming.callNode) {
+            const callNodeIndex = stackTiming.callNode[i]
+            funcIndex = callNodeTable.func[callNodeIndex];
+            funcNameIndex = thread.funcTable.name[funcIndex];
+            text = thread.stringTable.getString(funcNameIndex);
+            categoryIndex = callNodeTable.category[callNodeIndex];
+            category = categories[categoryIndex];
+            isSelected = selectedCallNodeIndex === categoryIndex;
+
+          } else {
+            const markerIndex = stackTiming.markerIndex[i]
+            const markerPayload = ((getMarker(markerIndex).data: any): UserTimingMarkerPayload);
+            text = markerPayload.name;
+            categoryIndex = 0;
+            category = categories[categoryIndex];
+            isSelected = selectedCallNodeIndex === markerIndex;
+          }
 
           const isHovered =
             hoveredItem &&
             depth === hoveredItem.depth &&
             i === hoveredItem.stackTimingIndex;
-          const isSelected = selectedCallNodeIndex === callNodeIndex;
 
           const colorStyles = this._mapCategoryColorNameToStyles(
             category.color
@@ -399,6 +416,11 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
 
     const stackTiming = stackTimingByDepth[depth];
+
+    if (!stackTiming.callNode) {
+      return;
+    }
+
     const callNodeIndex = stackTiming.callNode[stackTimingIndex];
     const duration =
       stackTiming.end[stackTimingIndex] - stackTiming.start[stackTimingIndex];
@@ -441,16 +463,21 @@ class StackChartCanvas extends React.PureComponent<Props> {
     const callNodeIndex = stackTimingByDepth[depth].callNode[stackTimingIndex];
     return callNodeIndex;
   }
+
   _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
     const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
-    this.props.onSelectionChange(callNodeIndex);
+    if (callNodeIndex) {
+      this.props.onSelectionChange(callNodeIndex);
+    }
   };
 
   _onRightClick = (hoveredItem: HoveredStackTiming | null) => {
     const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
-    this.props.onRightClick(callNodeIndex);
+    if (callNodeIndex) {
+      this.props.onRightClick(callNodeIndex);
+    }
   };
 
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
