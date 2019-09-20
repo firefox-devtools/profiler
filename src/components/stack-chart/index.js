@@ -7,6 +7,7 @@ import * as React from 'react';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
+  JS_TRACER_MAXIMUM_CHART_ZOOM,
 } from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
 import StackChartCanvas from './Canvas';
@@ -82,7 +83,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       thread,
     } = this.props;
     // JS Tracer does not care about the interval.
-    const modifier = thread.jsTracer ? 0.01 : interval;
+    const modifier = thread.jsTracer ? JS_TRACER_MAXIMUM_CHART_ZOOM : interval;
     return modifier / (end - start);
   }
 

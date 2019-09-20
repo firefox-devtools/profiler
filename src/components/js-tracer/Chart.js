@@ -7,6 +7,7 @@ import * as React from 'react';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
+  JS_TRACER_MAXIMUM_CHART_ZOOM,
 } from '../../app-logic/constants';
 import explicitConnect from '../../utils/connect';
 import JsTracerCanvas from './Canvas';
@@ -68,7 +69,7 @@ class JsTracerExpensiveChartImpl extends React.PureComponent<Props> {
     const {
       timeRange: { start, end },
     } = this.props;
-    return 0.001 / (end - start);
+    return JS_TRACER_MAXIMUM_CHART_ZOOM / (end - start);
   }
 
   render() {

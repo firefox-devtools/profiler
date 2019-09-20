@@ -24,6 +24,41 @@ import type { JsTracerTiming } from '../types/profile-derived';
 import type { Microseconds } from '../types/units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 
+// See the function below for more information.
+type ScriptLocationToFuncIndex = Map<string, IndexIntoFuncTable | null>;
+
+/**
+ * Create a map that keys off of the string `${fileName}:${line}:${column}`. This maps
+ * the JS tracer script locations to functions in the profiling data structure.
+ * This operation can fail, as there is no guarantee that every location in the JS
+ * tracer information was sampled.
+ */
+function getScriptLocationToFuncIndex(
+  thread: Thread
+): ScriptLocationToFuncIndex {
+  const { funcTable, stringTable } = thread;
+  const scriptLocationToFuncIndex = new Map();
+  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+    if (!funcTable.isJS[funcIndex]) {
+      continue;
+    }
+    const line = funcTable.lineNumber[funcIndex];
+    const column = funcTable.columnNumber[funcIndex];
+    const fileNameIndex = funcTable.fileName[funcIndex];
+    if (column !== null && line !== null && fileNameIndex !== null) {
+      const fileName = stringTable.getString(fileNameIndex);
+      const key = `${fileName}:${line}:${column}`;
+      if (scriptLocationToFuncIndex.has(key)) {
+        // Multiple functions map to this script location.
+        scriptLocationToFuncIndex.set(key, null);
+      } else {
+        scriptLocationToFuncIndex.set(key, funcIndex);
+      }
+    }
+  }
+  return scriptLocationToFuncIndex;
+}
+
 /**
  * This function is very similar in implementation as getStackTimingByDepth.
  * It creates a list of JsTracerTiming entries that represent the underlying
@@ -46,29 +81,10 @@ export function getJsTracerTiming(
   const jsTracerTiming: JsTracerTiming[] = [];
   const { stringTable, funcTable } = thread;
 
-  // Create a map that keys off of the string `${fileName}:${line}:${column}`. This maps
-  // the JS tracer script locations to functions in the profiling data structure.
-  // This operation can fail, as there is no guarantee that every location in the JS
-  // tracer information was sampled.
-  const keyToFuncIndex: Map<string, IndexIntoFuncTable | null> = new Map();
-  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
-    if (!funcTable.isJS[funcIndex]) {
-      continue;
-    }
-    const line = funcTable.lineNumber[funcIndex];
-    const column = funcTable.columnNumber[funcIndex];
-    const fileNameIndex = funcTable.fileName[funcIndex];
-    if (line !== null && column !== null && fileNameIndex !== null) {
-      const fileName = stringTable.getString(fileNameIndex);
-      const key = `${fileName}:${line}:${column}`;
-      if (keyToFuncIndex.has(key)) {
-        // Multiple functions map to this script location.
-        keyToFuncIndex.set(key, null);
-      } else {
-        keyToFuncIndex.set(key, funcIndex);
-      }
-    }
-  }
+  // This has already been computed by the conversion of the JS tracer structure to
+  // a thread, but it's probably not worth the complexity of caching this object.
+  // Just recompute it.
+  const scriptLocationToFuncIndex = getScriptLocationToFuncIndex(thread);
 
   // Go through all of the events.
   for (
@@ -84,7 +100,7 @@ export function getJsTracerTiming(
     // we can figure out more information about it.
     let displayName = stringTable.getString(stringIndex);
 
-    // We may have deduced the funcIndex in the keyToFuncIndex Map.
+    // We may have deduced the funcIndex in the scriptLocationToFuncIndex Map.
     let funcIndex: null | IndexIntoFuncTable = null;
 
     if (column !== null && line !== null) {
@@ -92,8 +108,8 @@ export function getJsTracerTiming(
       // script location has a function in the sampled data. This is a simple way
       // to tie together the JS tracer information with the Gecko profiler's stack
       // walking.
-      const key = `${displayName}:${line}:${column}`;
-      const funcIndexInMap = keyToFuncIndex.get(key);
+      const scriptLocation = `${displayName}:${line}:${column}`;
+      const funcIndexInMap = scriptLocationToFuncIndex.get(scriptLocation);
 
       if (funcIndexInMap !== undefined) {
         if (funcIndexInMap === null) {
@@ -502,30 +518,6 @@ export function convertJsTracerToThreadWithoutSamples(
     samples,
   };
 
-  // Create a map that keys off of the string `${fileName}:${line}:${column}`. This maps
-  // the JS tracer script locations to functions in the profiling data structure.
-  // This operation can fail, as there is no guarantee that every location in the JS
-  // tracer information was sampled.
-  const keyToFuncIndex: Map<string, IndexIntoFuncTable | null> = new Map();
-  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
-    if (!funcTable.isJS[funcIndex]) {
-      continue;
-    }
-    const line = funcTable.lineNumber[funcIndex];
-    const column = funcTable.columnNumber[funcIndex];
-    const fileNameIndex = funcTable.fileName[funcIndex];
-    if (line !== null && column !== null && fileNameIndex !== null) {
-      const fileName = stringTable.getString(fileNameIndex);
-      const key = `${fileName}:${line}:${column}`;
-      if (keyToFuncIndex.has(key)) {
-        // Multiple functions map to this script location.
-        keyToFuncIndex.set(key, null);
-      } else {
-        keyToFuncIndex.set(key, funcIndex);
-      }
-    }
-  }
-
   // Keep a stack of js tracer events, and end timings, that will be used to find
   // the stack prefixes. Once a JS tracer event starts past another event end, the
   // stack will be "popped" by decrementing the unmatchedIndex.
@@ -610,6 +602,7 @@ export function convertJsTracerToThreadWithoutSamples(
     frameTable.category.push(otherCategory);
     frameTable.func.push(funcIndex);
     // TODO - We could figure out the implementation, by tracking what the callee was.
+    // See https://github.com/firefox-devtools/profiler/issues/2244
     frameTable.implementation.push(null);
     frameTable.line.push(line);
     frameTable.column.push(column);
@@ -653,6 +646,8 @@ type JsTracerFixed = {|
  */
 export function getJsTracerFixed(jsTracer: JsTracerTable): JsTracerFixed {
   if (jsTracer.length === 0) {
+    // Create an empty "fixed" table, we can't use getEmptyJsTracerTable here
+    // because the "fixed" one is slightly different.
     return {
       events: [],
       start: [],
@@ -1004,36 +999,4 @@ export function getSelfTimeSamplesFromJsTracer(
   }
 
   return samples;
-}
-
-/**
- * Create a map that keys off of the string `${fileName}:${line}:${column}`. This maps
- * the JS tracer script locations to functions in the profiling data structure.
- * This operation can fail, as there is no guarantee that every location in the JS
- * tracer information was sampled.
- */
-function getScriptLocationToFuncIndex(
-  thread: Thread
-): Map<string, IndexIntoFuncTable | null> {
-  const { funcTable, stringTable } = thread;
-  const scriptLocationToFuncIndex = new Map();
-  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
-    if (!funcTable.isJS[funcIndex]) {
-      continue;
-    }
-    const line = funcTable.lineNumber[funcIndex];
-    const column = funcTable.columnNumber[funcIndex];
-    const fileNameIndex = funcTable.fileName[funcIndex];
-    if (column !== null && line !== null && fileNameIndex !== null) {
-      const fileName = stringTable.getString(fileNameIndex);
-      const key = `${fileName}:${line}:${column}`;
-      if (scriptLocationToFuncIndex.has(key)) {
-        // Multiple functions map to this script location.
-        scriptLocationToFuncIndex.set(key, null);
-      } else {
-        scriptLocationToFuncIndex.set(key, funcIndex);
-      }
-    }
-  }
-  return scriptLocationToFuncIndex;
 }
