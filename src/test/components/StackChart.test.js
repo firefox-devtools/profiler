@@ -6,6 +6,7 @@
 import * as React from 'react';
 import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
+import * as UrlStateSelectors from '../../selectors/url-state';
 
 // This module is mocked.
 import copy from 'copy-to-clipboard';
@@ -38,9 +39,13 @@ import {
   removeRootOverlayElement,
   findFillTextPositionFromDrawLog,
 } from '../fixtures/utils';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+} from '../fixtures/profiles/processed-profile';
 
 import type { Profile } from '../../types/profile';
+import type { UserTimingMarkerPayload } from '../../types/markers';
 import type { CssPixels } from '../../types/units';
 
 jest.useFakeTimers();
@@ -79,20 +84,14 @@ describe('StackChart', function() {
     const callNodeAIndex = 0;
 
     // Click on function A's box.
-    leftClick({
-      x,
-      y,
-    });
+    leftClick({ x, y });
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       callNodeAIndex
     );
 
     // Click on a region without any drawn box to deselect.
-    leftClick({
-      x,
-      y: y + GRAPH_HEIGHT,
-    });
+    leftClick({ x, y: y + GRAPH_HEIGHT });
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       null
@@ -200,6 +199,136 @@ describe('StackChart', function() {
   });
 });
 
+describe('MarkerChart', function() {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
+  it('can turn on the show user timings', () => {
+    const { getByLabelText, getState } = setupUserTimings({
+      isShowUserTimingsClicked: false,
+    });
+
+    const checkbox = getByLabelText('Show user timing');
+
+    expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(false);
+    expect(getCheckedState(checkbox)).toBe(false);
+
+    checkbox.click();
+
+    expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(true);
+    expect(getCheckedState(checkbox)).toBe(true);
+  });
+
+  it('matches the snapshots for the component and draw log', () => {
+    const { container, ctx } = setupUserTimings({
+      isShowUserTimingsClicked: true,
+    });
+
+    expect(container.firstChild).toMatchSnapshot();
+    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+  });
+
+  // TODO implement selecting user timing markers #2355
+  // eslint-disable-next-line jest/no-disabled-test
+  it.skip('can select a marker when clicking the chart', function() {});
+
+  // TODO implement selecting user timing markers #2355
+  // eslint-disable-next-line jest/no-disabled-test
+  it.skip('can right click a marker and show a context menu', function() {});
+
+  it('shows a tooltip when hovering', () => {
+    const { getTooltip, moveMouse, findFillTextPosition } = setupUserTimings({
+      isShowUserTimingsClicked: true,
+    });
+
+    expect(getTooltip()).toBe(null);
+
+    moveMouse(findFillTextPosition('componentB'));
+    expect(getTooltip()).toBeTruthy();
+    expect(getTooltip()).toMatchSnapshot();
+  });
+});
+
+describe('CombinedChart', function() {
+  beforeEach(addRootOverlayElement);
+  afterEach(removeRootOverlayElement);
+
+  it('renders combined stack chart', () => {
+    const { container, ctx } = setupCombinedTimings();
+
+    expect(container.firstChild).toMatchSnapshot();
+    expect(ctx.__flushDrawLog()).toMatchSnapshot();
+  });
+});
+
+function getUserTiming(name: string, startTime: number, duration: number) {
+  return [
+    'UserTiming',
+    startTime,
+    ({
+      type: 'UserTiming',
+      startTime,
+      endTime: startTime + duration,
+      name,
+      entryType: 'measure',
+    }: UserTimingMarkerPayload),
+  ];
+}
+
+function showUserTimings({ ctx, getByLabelText, flushRafCalls }) {
+  ctx.__flushDrawLog();
+  const checkbox = getByLabelText('Show user timing');
+  checkbox.click();
+  flushRafCalls();
+}
+
+function setupCombinedTimings() {
+  const userTimingsProfile = getProfileWithMarkers([
+    getUserTiming('renderFunction', 0, 10),
+    getUserTiming('componentA', 1, 8),
+    getUserTiming('componentB', 2, 4),
+    getUserTiming('componentC', 3, 1),
+    getUserTiming('componentD', 7, 1),
+  ]);
+
+  const { profile } = getProfileFromTextSamples(`
+    A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
+    B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
+    C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
+    D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
+    E[cat:Graphics]  G[cat:Graphics]
+  `);
+
+  profile.threads[0].markers = userTimingsProfile.threads[0].markers;
+  const results = setup(profile);
+  showUserTimings(results);
+  return results;
+}
+
+function setupUserTimings(config: {| isShowUserTimingsClicked: boolean |}) {
+  // Approximately generate this type of graph with the following user timings.
+  //
+  // [renderFunction---------------------]
+  //   [componentA---------------------]
+  //     [componentB----]  [componentD]
+  //      [componentC-]
+  const profile = getProfileWithMarkers([
+    getUserTiming('renderFunction', 0, 10),
+    getUserTiming('componentA', 1, 8),
+    getUserTiming('componentB', 2, 4),
+    getUserTiming('componentC', 3, 1),
+    getUserTiming('componentD', 7, 1),
+  ]);
+
+  const results = setup(profile);
+
+  if (config.isShowUserTimingsClicked) {
+    showUserTimings(results);
+  }
+
+  return results;
+}
+
 /**
  * Currently the stack chart only accepts samples, but in the future it will accept
  * markers, see PR #2345.
@@ -281,6 +410,13 @@ function setup(profile: Profile, funcNames: string[] = []): * {
     fireEvent(stackChartCanvas, getMouseEvent(eventName, options));
   }
 
+  /**
+   * The tooltip is in a portal, and created in the root overlay elements.
+   */
+  function getTooltip() {
+    return document.querySelector('#root-overlay .tooltip');
+  }
+
   type Position = {| x: CssPixels, y: CssPixels |};
 
   // Use findFillTextPosition to determin the position.
@@ -345,6 +481,14 @@ function setup(profile: Profile, funcNames: string[] = []): * {
     rightClick,
     clickMenuItem,
     getContextMenu,
+    getTooltip,
     findFillTextPosition,
   };
+}
+
+/**
+ * Get around the type constraints of refining an HTMLElement into a radio input.
+ */
+function getCheckedState(element: HTMLElement): mixed {
+  return (element: any).checked;
 }
