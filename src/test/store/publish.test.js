@@ -9,8 +9,13 @@ import {
   resetUploadState,
   abortUpload,
   toggleCheckedSharingOptions,
+  revertToPrePublishedState,
 } from '../../actions/publish';
-import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
+import { changeSelectedTab } from '../../actions/app';
+import {
+  viewProfileFromPathInZipFile,
+  returnToZipFileList,
+} from '../../actions/zipped-profiles';
 import {
   getCheckedSharingOptions,
   getUploadPhase,
@@ -18,7 +23,11 @@ import {
   getUploadProgress,
   getUploadGeneration,
 } from '../../selectors/publish';
-import { getDataSource } from '../../selectors/url-state';
+import {
+  getSelectedTab,
+  getDataSource,
+  getProfileName,
+} from '../../selectors/url-state';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
@@ -273,6 +282,43 @@ describe('attemptToPublish', function() {
     expect(getUploadPhase(getState())).toEqual('local');
   });
 
+  it('can revert back to the original state', async function() {
+    // This function tests the original state with the trivial operation of
+    // testing on the current tab.
+    const { dispatch, getState, resolveUpload } = setup();
+
+    const originalTab = 'flame-graph';
+    const changedTab = 'stack-chart';
+
+    // Check which tab we start on.
+    dispatch(changeSelectedTab(originalTab));
+    expect(getSelectedTab(getState())).toEqual(originalTab);
+
+    // Ensure we are sanitizing something.
+    const sharingOptions = getCheckedSharingOptions(getState());
+    if (sharingOptions.includeUrls) {
+      dispatch(toggleCheckedSharingOptions('includeUrls'));
+    }
+
+    // Now upload.
+    const publishAttempt = dispatch(attemptToPublish());
+    resolveUpload('FAKEHASH');
+    expect(await publishAttempt).toEqual(true);
+
+    // Check that we are still on this tab.
+    expect(getSelectedTab(getState())).toEqual(originalTab);
+
+    // Now change it to another tab
+    dispatch(changeSelectedTab(changedTab));
+    expect(getSelectedTab(getState())).toEqual(changedTab);
+
+    // Revert the profile.
+    await dispatch(revertToPrePublishedState());
+
+    // The original state should be restored.
+    expect(getSelectedTab(getState())).toEqual(originalTab);
+  });
+
   describe('with zip files', function() {
     const setupZipFileTests = async () => {
       const { store } = await storeWithZipFile([
@@ -300,6 +346,45 @@ describe('attemptToPublish', function() {
       // Now check that we are reporting as being a public single profile.
       expect(getHasZipFile(getState())).toEqual(false);
       expect(getDataSource(getState())).toEqual('public');
+    });
+
+    it('can revert viewing the original zip file state after publishing', async function() {
+      const { dispatch, getState, resolveUpload } = await setupZipFileTests();
+
+      // Load and view a ZIP file.
+      await dispatch(viewProfileFromPathInZipFile('profile1.json'));
+
+      // Now upload.
+      const publishAttempt = dispatch(attemptToPublish());
+      resolveUpload('FAKEHASH');
+      expect(await publishAttempt).toEqual(true);
+
+      // Now check that we are reporting as being a public single profile.
+      expect(getHasZipFile(getState())).toEqual(false);
+      expect(getDataSource(getState())).toEqual('public');
+      expect(getProfileName(getState())).toEqual('profile1.json');
+
+      // Revert the profile.
+      await dispatch(revertToPrePublishedState());
+
+      // Now check that we have reverted to the original profile.
+      expect(getHasZipFile(getState())).toEqual(true);
+      expect(getDataSource(getState())).toEqual('from-file');
+
+      // Repeat this test with the other profile in the ZIP file.
+      dispatch(returnToZipFileList());
+      await dispatch(viewProfileFromPathInZipFile('profile2.json'));
+
+      // Now upload the SECOND profile.
+      const publishAttempt2 = dispatch(attemptToPublish());
+      resolveUpload('FAKEHASH');
+      expect(await publishAttempt2).toEqual(true);
+
+      // For the second profile, check that we are reporting as being a public
+      // single profile.
+      expect(getHasZipFile(getState())).toEqual(false);
+      expect(getDataSource(getState())).toEqual('public');
+      expect(getProfileName(getState())).toEqual('profile2.json');
     });
   });
 });

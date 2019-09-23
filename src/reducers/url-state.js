@@ -427,8 +427,6 @@ const wrapReducerInResetter = (
 ): Reducer<UrlState> => {
   return (state, action) => {
     switch (action.type) {
-      case 'REVERT_TO_ORIGINAL_PROFILE':
-        return action.originalUrlState;
       case 'UPDATE_URL_STATE':
         // A new URL came in because of a browser action, discard the current UrlState
         // and use the new one, which was probably serialized from the URL, or stored

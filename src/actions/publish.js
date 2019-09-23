@@ -5,17 +5,15 @@
 // @flow
 import { uploadBinaryProfileData } from '../profile-logic/profile-store';
 import { sendAnalytics } from '../utils/analytics';
-import { getProfile } from '../selectors/profile';
 import {
   getAbortFunction,
   getUploadGeneration,
   getSanitizedProfile,
   getSanitizedProfileData,
   getRemoveProfileInformation,
-  getOriginalProfile,
-  getOriginalUrlState,
+  getPrePublishedState,
 } from '../selectors/publish';
-import { getUrlState } from '../selectors/url-state';
+import { getDataSource } from '../selectors/url-state';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from '../utils/flow';
 import { setHistoryReplaceState } from '../app-logic/url-handling';
@@ -23,8 +21,8 @@ import { setHistoryReplaceState } from '../app-logic/url-handling';
 import type { Action, ThunkAction } from '../types/store';
 import type { CheckedSharingOptions } from '../types/actions';
 import type { StartEndRange } from '../types/units';
-import type { Profile, ThreadIndex } from '../types/profile';
-import type { UrlState } from '../types/state';
+import type { ThreadIndex } from '../types/profile';
+import type { State } from '../types/state';
 
 export function toggleCheckedSharingOptions(
   slug: $Keys<CheckedSharingOptions>
@@ -89,6 +87,8 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         eventCategory: 'profile upload',
         eventAction: 'start',
       });
+      // Grab the original pre-published state, so that we can revert back to it if needed.
+      const prePublishedState = getState();
 
       // Get the current generation of this request. It can be aborted midway through.
       // This way we can check inside this async function if we need to bail out early.
@@ -128,9 +128,6 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
           oldThreadIndexToNew,
           profile,
         } = getSanitizedProfile(getState());
-        const originalProfile = getProfile(getState());
-        const originalUrlState = getUrlState(getState());
-
         // Hide the old UI gracefully.
         await dispatch(hideStaleProfile());
 
@@ -140,8 +137,7 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
             hash,
             committedRanges,
             oldThreadIndexToNew,
-            originalProfile,
-            originalUrlState
+            prePublishedState
           )
         );
         // Swap out the URL state, since the view profile calculates all of the default
@@ -154,7 +150,14 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         dispatch(viewProfile(profile));
         setHistoryReplaceState(false);
       } else {
-        dispatch(profilePublished(hash));
+        dispatch(
+          profilePublished(
+            hash,
+            getDataSource(getState()) === 'from-addon'
+              ? null
+              : prePublishedState
+          )
+        );
       }
 
       sendAnalytics({
@@ -206,48 +209,46 @@ export function profileSanitized(
   hash: string,
   committedRanges: StartEndRange[] | null,
   oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
-  originalProfile: Profile,
-  originalUrlState: UrlState
+  prePublishedState: State
 ): Action {
   return {
     type: 'SANITIZED_PROFILE_PUBLISHED',
     hash,
     committedRanges,
     oldThreadIndexToNew,
-    originalProfile,
-    originalUrlState,
+    prePublishedState,
   };
 }
 
 /**
  * Report that the profile was published, but not sanitized.
  */
-export function profilePublished(hash: string): Action {
+export function profilePublished(
+  hash: string,
+  // If we're publishing from a URL or Zip file, then offer to revert to the previous
+  // state.
+  prePublishedState: State | null
+): Action {
   return {
     type: 'PROFILE_PUBLISHED',
     hash,
+    prePublishedState,
   };
 }
 
-export function revertToOriginalProfile(): ThunkAction<Promise<void>> {
+export function revertToPrePublishedState(): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
-    const originalProfile = ensureExists(
-      getOriginalProfile(getState()),
+    const prePublishedState = ensureExists(
+      getPrePublishedState(getState()),
       'Expected to find an original profile when reverting to it.'
-    );
-    const originalUrlState = ensureExists(
-      getOriginalUrlState(getState()),
-      'Expected to find the original url state to revert to.'
     );
 
     await dispatch(hideStaleProfile());
 
     dispatch({
-      type: 'REVERT_TO_ORIGINAL_PROFILE',
-      originalUrlState: originalUrlState,
+      type: 'REVERT_TO_PRE_PUBLISHED_STATE',
+      prePublishedState: prePublishedState,
     });
-
-    dispatch(viewProfile(originalProfile));
   };
 }
 
