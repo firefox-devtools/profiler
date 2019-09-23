@@ -6,7 +6,7 @@ import * as React from 'react';
 
 import { getStackType } from '../../profile-logic/transforms';
 import { objectEntries } from '../../utils/flow';
-import { formatNumberDependingOnInterval } from '../../utils/format-numbers';
+import { formatCallNodeNumber } from '../../utils/format-numbers';
 import NodeIcon from '../shared/NodeIcon';
 import {
   getFriendlyStackTypeName,
@@ -62,8 +62,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     const sortedTotalBreakdownByImplementation = objectEntries(
       totalTime.breakdownByImplementation
     ).sort((a, b) => b[1] - a[1]);
-    const { interval } = this.props;
-    const isIntegerInterval = Number.isInteger(interval);
+    const { interval, thread } = this.props;
+
+    // JS Tracer threads have data relevant to the microsecond level.
+    const isHighPrecision = Boolean(thread.isJsTracer);
 
     return (
       <div className="tooltipCallNodeImplementation">
@@ -125,13 +127,14 @@ export class TooltipCallNode extends React.PureComponent<Props> {
                   />
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
-                  {formatNumberDependingOnInterval(isIntegerInterval, time)}ms
+                  {formatCallNodeNumber(interval, isHighPrecision, time)}ms
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
                   {selfTimeValue === 0
                     ? '—'
-                    : `${formatNumberDependingOnInterval(
-                        isIntegerInterval,
+                    : `${formatCallNodeNumber(
+                        interval,
+                        isHighPrecision,
                         selfTimeValue
                       )}ms`}
                 </div>

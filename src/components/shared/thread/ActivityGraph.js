@@ -33,7 +33,7 @@ export type Props = {|
   +rangeEnd: Milliseconds,
   +onSampleClick: (sampleIndex: IndexIntoSamplesTable) => void,
   +categories: CategoryList,
-  +samplesSelectedStates: SelectedState[],
+  +samplesSelectedStates: null | SelectedState[],
   +treeOrderSampleComparator?: (
     IndexIntoSamplesTable,
     IndexIntoSamplesTable

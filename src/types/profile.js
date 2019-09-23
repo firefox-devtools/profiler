@@ -266,8 +266,8 @@ export type JsTracerTable = {|
   events: Array<IndexIntoStringTable>,
   timestamps: Array<Microseconds>,
   durations: Array<Microseconds | null>,
-  lines: Array<number | null>, // Line number.
-  columns: Array<number | null>, // Column number.
+  line: Array<number | null>, // Line number.
+  column: Array<number | null>, // Column number.
   length: number,
 |};
 
@@ -376,6 +376,7 @@ export type Thread = {|
   pausedRanges: PausedRange[],
   name: string,
   processName?: string,
+  isJsTracer?: boolean,
   pid: Pid,
   tid: number | void,
   samples: SamplesTable,

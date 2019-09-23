@@ -1837,7 +1837,8 @@ CallTree {
       -1,
     ],
   },
-  "_isIntegerInterval": true,
+  "_interval": 1,
+  "_isHighPrecision": false,
   "_jsOnly": false,
   "_resourceTable": Object {
     "host": Array [],
