@@ -61,6 +61,8 @@ const hash: Reducer<string> = (state = '', action) => {
 
 const profileUrl: Reducer<string> = (state = '', action) => {
   switch (action.type) {
+    case 'WAITING_FOR_PROFILE_FROM_URL':
+      return action.profileUrl ? action.profileUrl : state;
     case 'TRIGGER_LOADING_FROM_URL':
       return action.profileUrl;
     default:
