@@ -10,6 +10,7 @@ import {
   abortUpload,
   toggleCheckedSharingOptions,
 } from '../../actions/publish';
+import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import {
   getCheckedSharingOptions,
   getUploadPhase,
@@ -17,11 +18,16 @@ import {
   getUploadProgress,
   getUploadGeneration,
 } from '../../selectors/publish';
+import { getDataSource } from '../../selectors/url-state';
+import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { ensureExists } from '../../utils/flow';
 import { waitUntilState } from '../fixtures/utils';
+import { storeWithZipFile } from '../fixtures/profiles/zip-file';
+
+import type { Store } from '../../types/store';
 
 // Mocks:
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -107,10 +113,7 @@ describe('attemptToPublish', function() {
     delete (window: any).TextEncoder;
   });
 
-  function setup() {
-    const { profile } = getProfileFromTextSamples('A');
-    const store = storeWithProfile(profile);
-
+  function setupFakeUploadsWithStore(store: Store): * {
     let updateUploadProgress;
     let resolveUpload;
     let rejectUpload;
@@ -155,6 +158,12 @@ describe('attemptToPublish', function() {
       waitUntilPhase,
       abortFunction,
     };
+  }
+
+  function setup() {
+    const { profile } = getProfileFromTextSamples('A');
+    const store = storeWithProfile(profile);
+    return setupFakeUploadsWithStore(store);
   }
 
   it('cycles through the upload phases on a successful upload', async function() {
@@ -262,5 +271,35 @@ describe('attemptToPublish', function() {
     // Make sure that the attemptToPublish workflow doesn't continue to the
     // uploaded state.
     expect(getUploadPhase(getState())).toEqual('local');
+  });
+
+  describe('with zip files', function() {
+    const setupZipFileTests = async () => {
+      const { store } = await storeWithZipFile([
+        'profile1.json',
+        'profile2.json',
+      ]);
+      return setupFakeUploadsWithStore(store);
+    };
+
+    it('removes the zip viewer and only shows the profiler after upload', async function() {
+      const { dispatch, getState, resolveUpload } = await setupZipFileTests();
+
+      // Load and view a ZIP file.
+      await dispatch(viewProfileFromPathInZipFile('profile1.json'));
+
+      // Check that the initial state makes sense for viewing a zip file.
+      expect(getHasZipFile(getState())).toEqual(true);
+      expect(getDataSource(getState())).toEqual('from-file');
+
+      // Upload the profile.
+      const publishAttempt = dispatch(attemptToPublish());
+      resolveUpload('FAKEHASH');
+      expect(await publishAttempt).toEqual(true);
+
+      // Now check that we are reporting as being a public single profile.
+      expect(getHasZipFile(getState())).toEqual(false);
+      expect(getDataSource(getState())).toEqual('public');
+    });
   });
 });

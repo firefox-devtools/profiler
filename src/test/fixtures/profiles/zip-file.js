@@ -6,10 +6,12 @@
 import { getProfileFromTextSamples } from '../../fixtures/profiles/processed-profile';
 import { serializeProfile } from '../../../profile-logic/process-profile';
 import { receiveZipFile } from '../../../actions/receive-profile';
+import { setDataSource } from '../../../actions/profile-view';
 import type { ZipFileTable } from '../../../profile-logic/zip-files';
 import createStore from '../../../app-logic/create-store';
 import JSZip from 'jszip';
 import { objectValues } from '../../../utils/flow';
+
 /**
  * Puts a blank profile at each given path in a zip file.
  */
@@ -37,6 +39,7 @@ export function getZippedProfiles(files: string[] = []): JSZip {
 export async function storeWithZipFile(files: string[] = []) {
   const store = createStore();
   const zippedProfiles = getZippedProfiles(files);
+  store.dispatch(setDataSource('from-file'));
   store.dispatch(receiveZipFile(zippedProfiles));
   return {
     store,
