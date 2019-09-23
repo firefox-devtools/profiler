@@ -31,6 +31,7 @@ import type {
   NetworkPayload,
   NavigationMarkerPayload,
   IPCMarkerPayload,
+  UserTimingMarkerPayload,
 } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
@@ -98,6 +99,24 @@ export function getThreadWithMarkers(markers: TestDefinedMarkers) {
   const thread = getEmptyThread();
   addMarkersToThreadWithCorrespondingSamples(thread, markers);
   return thread;
+}
+
+export function getUserTiming(
+  name: string,
+  startTime: number,
+  duration: number
+) {
+  return [
+    'UserTiming',
+    startTime,
+    ({
+      type: 'UserTiming',
+      startTime,
+      endTime: startTime + duration,
+      name,
+      entryType: 'measure',
+    }: UserTimingMarkerPayload),
+  ];
 }
 
 export function getProfileWithMarkers(

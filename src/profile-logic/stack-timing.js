@@ -48,12 +48,14 @@ import type {
 export type StackTimingDepth = number;
 export type IndexIntoStackTiming = number;
 
-export type StackTimingByDepth = Array<{
+export type StackTiming = {|
   start: Milliseconds[],
   end: Milliseconds[],
   callNode: IndexIntoCallNodeTable[],
   length: number,
-}>;
+|};
+
+export type StackTimingByDepth = Array<StackTiming>;
 
 type LastSeen = {
   startTimeByDepth: number[],
