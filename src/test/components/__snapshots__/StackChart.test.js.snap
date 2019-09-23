@@ -1,40 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`StackChart EmptyReasons shows reasons when a profile has no samples 1`] = `
-<div
-  class="EmptyReasons"
->
-  <h3>
-    The 
-    stack chart
-     is empty for “
-    Empty Thread
-    ”
-  </h3>
-  <p>
-    This thread has no samples.
-  </p>
-</div>
-`;
-
-exports[`StackChart EmptyReasons shows reasons when samples are out of range 1`] = `
-<div
-  class="EmptyReasons"
->
-  <h3>
-    The 
-    stack chart
-     is empty for “
-    Empty
-    ”
-  </h3>
-  <p>
-    Broaden the selected range to view samples.
-  </p>
-</div>
-`;
-
-exports[`StackChart EmptyReasons shows reasons when samples have been completely filtered out 1`] = `
+exports[`StackChart with markers EmptyReasons shows reasons when samples have been completely filtered out 1`] = `
 <div
   class="EmptyReasons"
 >
@@ -51,7 +17,7 @@ exports[`StackChart EmptyReasons shows reasons when samples have been completely
 </div>
 `;
 
-exports[`StackChart matches the snapshot 1`] = `
+exports[`StackChart with markers matches the snapshot for user timings 1`] = `
 <div
   aria-labelledby="stack-chart-tab-button"
   class="stackChart"
@@ -116,6 +82,19 @@ exports[`StackChart matches the snapshot 1`] = `
             type="checkbox"
           />
            Invert call stack
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+           Show user timing
         </label>
       </li>
     </ul>
@@ -207,7 +186,7 @@ exports[`StackChart matches the snapshot 1`] = `
 </div>
 `;
 
-exports[`StackChart matches the snapshot 2`] = `
+exports[`StackChart with markers matches the snapshot for user timings 2`] = `
 Array [
   Array [
     "set font",
@@ -234,18 +213,18 @@ Array [
   ],
   Array [
     "set fillStyle",
-    "#0060df60",
+    "#ededf060",
   ],
   Array [
     "fillRect",
     150,
     0,
-    199.4,
+    181.4,
     15,
   ],
   Array [
     "measureText",
-    "A",
+    "renderFunction",
   ],
   Array [
     "set fillStyle",
@@ -253,24 +232,24 @@ Array [
   ],
   Array [
     "fillText",
-    "A",
+    "renderFunction",
     153,
     11,
   ],
   Array [
     "set fillStyle",
-    "#0060df60",
+    "#ededf060",
   ],
   Array [
     "fillRect",
-    150,
+    168,
     16,
-    199.4,
+    145.4,
     15,
   ],
   Array [
     "measureText",
-    "B",
+    "componentA",
   ],
   Array [
     "set fillStyle",
@@ -278,24 +257,24 @@ Array [
   ],
   Array [
     "fillText",
-    "B",
-    153,
+    "componentA",
+    171.1818181818182,
     27,
   ],
   Array [
     "set fillStyle",
-    "#12bc0060",
+    "#ededf060",
   ],
   Array [
     "fillRect",
-    150,
+    186,
     32,
-    133.4,
+    72.4,
     15,
   ],
   Array [
     "measureText",
-    "C",
+    "componentB",
   ],
   Array [
     "set fillStyle",
@@ -303,24 +282,24 @@ Array [
   ],
   Array [
     "fillText",
-    "C",
-    153,
+    "componentB",
+    189.36363636363637,
     43,
   ],
   Array [
     "set fillStyle",
-    "#45a1ff60",
+    "#ededf060",
   ],
   Array [
     "fillRect",
-    284,
+    277,
     32,
-    65.4,
+    18.4,
     15,
   ],
   Array [
     "measureText",
-    "H",
+    "componentD",
   ],
   Array [
     "set fillStyle",
@@ -328,24 +307,24 @@ Array [
   ],
   Array [
     "fillText",
-    "H",
-    286.3333333333333,
+    "c…",
+    280.27272727272725,
     43,
   ],
   Array [
     "set fillStyle",
-    "#12bc0060",
+    "#ededf060",
   ],
   Array [
     "fillRect",
-    150,
+    204,
     48,
-    66.4,
+    18.4,
     15,
   ],
   Array [
     "measureText",
-    "D",
+    "componentC",
   ],
   Array [
     "set fillStyle",
@@ -353,109 +332,9 @@ Array [
   ],
   Array [
     "fillText",
-    "D",
-    153,
+    "c…",
+    207.54545454545453,
     59,
-  ],
-  Array [
-    "set fillStyle",
-    "#12bc0060",
-  ],
-  Array [
-    "fillRect",
-    217,
-    48,
-    66.4,
-    15,
-  ],
-  Array [
-    "measureText",
-    "F",
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "F",
-    219.66666666666666,
-    59,
-  ],
-  Array [
-    "set fillStyle",
-    "#45a1ff60",
-  ],
-  Array [
-    "fillRect",
-    284,
-    48,
-    65.4,
-    15,
-  ],
-  Array [
-    "measureText",
-    "I",
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "I",
-    286.3333333333333,
-    59,
-  ],
-  Array [
-    "set fillStyle",
-    "#12bc0060",
-  ],
-  Array [
-    "fillRect",
-    150,
-    64,
-    66.4,
-    15,
-  ],
-  Array [
-    "measureText",
-    "E",
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "E",
-    153,
-    75,
-  ],
-  Array [
-    "set fillStyle",
-    "#12bc0060",
-  ],
-  Array [
-    "fillRect",
-    217,
-    64,
-    66.4,
-    15,
-  ],
-  Array [
-    "measureText",
-    "G",
-  ],
-  Array [
-    "set fillStyle",
-    "#000000",
-  ],
-  Array [
-    "fillText",
-    "G",
-    219.66666666666666,
-    75,
   ],
   Array [
     "set fillStyle",

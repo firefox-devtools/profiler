@@ -89,3 +89,8 @@
   color: var(--grey-50);
   white-space: nowrap;
 }
+
+.tooltip .tooltipMarker {
+  max-width: 600px;
+
+}

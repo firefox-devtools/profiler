@@ -699,7 +699,13 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       zeroAt
     );
     return (
-      <div className={classNames('tooltipMarker', className)}>
+      <div
+        className={classNames('tooltipMarker', className)}
+        style={{
+          width: 'auto',
+          height: 'auto',
+        }}
+      >
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
             <div className="tooltipTiming">
@@ -725,6 +731,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   }
 }
 
+// Here is the tooltip component for markers, which needs to be added.
 export const TooltipMarker = explicitConnect<OwnProps, StateProps, {||}>({
   mapStateToProps: (state, props) => {
     const { threadIndex } = props;

@@ -123,6 +123,7 @@ type StackChartQuery = {|
   ...BaseQuery,
   search: string, // "js::RunScript"
   invertCallstack: null | void,
+  showUserTimings: null | void,
   implementation: string,
   ctSummary: string,
 |};
@@ -371,6 +372,7 @@ export function stateFromLocation(
         query.ctSummary
       ),
       invertCallstack: query.invertCallstack !== undefined,
+      showUserTimings: query.showUserTimings !== undefined,
       showJsTracerSummary: query.summary !== undefined,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
       selectedThread: selectedThread,

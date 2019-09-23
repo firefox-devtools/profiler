@@ -88,6 +88,7 @@ export function changeSelectedCallNode(
       }
     }
   }
+
   return {
     type: 'CHANGE_SELECTED_CALL_NODE',
     selectedCallNodePath,
@@ -1022,6 +1023,22 @@ export function changeInvertCallstack(
       callTree: selectedThreadSelectors.getCallTree(getState()),
       callNodeTable: selectedThreadSelectors.getCallNodeInfo(getState())
         .callNodeTable,
+    });
+  };
+}
+
+export function changeShowUserTimings(
+  showUserTimings: boolean
+): ThunkAction<void> {
+  return dispatch => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'show user timings',
+    });
+    dispatch({
+      type: 'CHANGE_SHOW_USER_TIMINGS',
+      showUserTimings,
     });
   };
 }

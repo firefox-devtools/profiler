@@ -10,6 +10,11 @@ import { tabSlugs, type TabSlug } from '../../app-logic/tabs-handling';
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
 import type { Thread, JsTracerTable } from '../../types/profile';
+import type {
+  MarkerTimingRows,
+  CombinedTimingRows,
+} from '../../types/profile-derived';
+import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
 
 /**
  * Infer the return type from the getStackAndSampleSelectorsPerThread function. This
@@ -29,6 +34,8 @@ type NeededThreadSelectors = {
   getThread: Selector<Thread>,
   getIsNetworkChartEmptyInFullRange: Selector<boolean>,
   getJsTracerTable: Selector<JsTracerTable | null>,
+  getUserTimingMarkerTiming: Selector<MarkerTimingRows>,
+  getStackTimingByDepth: Selector<StackTimingByDepth>,
 };
 
 /**
@@ -66,7 +73,21 @@ export function getComposedSelectorsPerThread(
     }
   );
 
+  /**
+   * This selector combines the marker timing and stack timing for the stack chart.
+   * This way it displays UserTiming along with the stack chart.
+   */
+  const getCombinedTimingRows: Selector<CombinedTimingRows> = createSelector(
+    threadSelectors.getUserTimingMarkerTiming,
+    threadSelectors.getStackTimingByDepth,
+    (userTimingMarkerTiming, stackTimingByDepth) => [
+      ...userTimingMarkerTiming,
+      ...stackTimingByDepth,
+    ]
+  );
+
   return {
     getUsefulTabs,
+    getCombinedTimingRows,
   };
 }

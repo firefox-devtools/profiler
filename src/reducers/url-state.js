@@ -257,6 +257,15 @@ const invertCallstack: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+const showUserTimings: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'CHANGE_SHOW_USER_TIMINGS':
+      return action.showUserTimings;
+    default:
+      return state;
+  }
+};
+
 /**
  * This state controls whether or not to show a summary view of self time, or the full
  * stack-based view of the JS tracer data.
@@ -404,6 +413,7 @@ const profileSpecific = combineReducers({
   implementation,
   lastSelectedCallTreeSummaryStrategy,
   invertCallstack,
+  showUserTimings,
   showJsTracerSummary,
   committedRanges,
   callTreeSearchString,

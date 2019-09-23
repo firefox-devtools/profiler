@@ -13,6 +13,7 @@ import type {
   IndexIntoCategoryList,
   CounterIndex,
 } from './profile';
+import type { StackTiming } from '../profile-logic/stack-timing';
 export type IndexIntoCallNodeTable = number;
 
 /**
@@ -124,7 +125,7 @@ export type CallNodeDisplayData = $Exact<
  * The marker timing contains the necessary information to draw markers very quickly
  * in the marker chart. It represents a single row of markers in the chart.
  */
-export type MarkerTiming = {
+export type MarkerTiming = {|
   // Start time in milliseconds.
   start: number[],
   // End time in milliseconds.
@@ -134,7 +135,11 @@ export type MarkerTiming = {
   name: string,
   bucket: string,
   length: number,
-};
+|};
+
+export type MarkerTimingRows = Array<MarkerTiming>;
+
+export type CombinedTimingRows = Array<MarkerTiming | StackTiming>;
 
 /**
  * This type contains the necessary information to fully draw the marker chart. Each
