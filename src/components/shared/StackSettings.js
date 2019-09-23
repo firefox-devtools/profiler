@@ -10,10 +10,12 @@ import {
   changeInvertCallstack,
   changeCallTreeSearchString,
   changeCallTreeSummaryStrategy,
+  changeShowUserTimings,
 } from '../../actions/profile-view';
 import {
   getImplementationFilter,
   getInvertCallstack,
+  getShowUserTimings,
   getCurrentSearchString,
 } from '../../selectors/url-state';
 import PanelSearch from '../shared/PanelSearch';
@@ -40,6 +42,7 @@ type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
   +invertCallstack: boolean,
+  +showUserTimings: boolean,
   +currentSearchString: string,
   +hasJsAllocations: boolean,
   +hasNativeAllocations: boolean,
@@ -49,6 +52,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeImplementationFilter: typeof changeImplementationFilter,
   +changeInvertCallstack: typeof changeInvertCallstack,
+  +changeShowUserTimings: typeof changeShowUserTimings,
   +changeCallTreeSearchString: typeof changeCallTreeSearchString,
   +changeCallTreeSummaryStrategy: typeof changeCallTreeSummaryStrategy,
 |};
@@ -74,6 +78,10 @@ class StackSettings extends PureComponent<Props> {
 
   _onInvertCallstackClick = (e: SyntheticEvent<HTMLInputElement>) => {
     this.props.changeInvertCallstack(e.currentTarget.checked);
+  };
+
+  _onShowUserTimingsClick = (e: SyntheticEvent<HTMLInputElement>) => {
+    this.props.changeShowUserTimings(e.currentTarget.checked);
   };
 
   _onSearch = (value: string) => {
@@ -115,6 +123,7 @@ class StackSettings extends PureComponent<Props> {
   render() {
     const {
       invertCallstack,
+      showUserTimings,
       hideInvertCallstack,
       currentSearchString,
       hasJsAllocations,
@@ -193,6 +202,19 @@ class StackSettings extends PureComponent<Props> {
               </label>
             </li>
           )}
+          {
+            <li className="stackSettingsListItem">
+              <label className="photon-label photon-label-micro stackSettingsLabel">
+                <input
+                  type="checkbox"
+                  className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                  onChange={this._onShowUserTimingsClick}
+                  checked={showUserTimings}
+                />
+                {' Show user timing'}
+              </label>
+            </li>
+          }
         </ul>
         <PanelSearch
           className="stackSettingsSearchField"
@@ -209,6 +231,7 @@ class StackSettings extends PureComponent<Props> {
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     invertCallstack: getInvertCallstack(state),
+    showUserTimings: getShowUserTimings(state),
     implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),
     hasJsAllocations: selectedThreadSelectors.getHasJsAllocations(state),
@@ -227,6 +250,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     changeInvertCallstack,
     changeCallTreeSearchString,
     changeCallTreeSummaryStrategy,
+    changeShowUserTimings,
   },
   component: StackSettings,
 });
