@@ -213,7 +213,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
               class="treeViewBodyInner treeViewBodyInner1InnerChunk"
             >
               <div
-                aria-label="foobar, running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even"
@@ -235,7 +234,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 </span>
               </div>
               <div
-                aria-label="NotifyDidPaint, running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns odd"
@@ -257,7 +255,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                 </span>
               </div>
               <div
-                aria-label="setTimeout — 5.5, running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
                 class="treeViewRow treeViewRowScrolledColumns even"

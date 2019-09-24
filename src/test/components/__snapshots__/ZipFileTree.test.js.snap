@@ -84,7 +84,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
               >
                 <div
                   aria-expanded="true"
-                  aria-label="foo, running time is undefined (undefined), self time is undefined"
                   aria-level="1"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns even"
@@ -107,7 +106,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                 </div>
                 <div
                   aria-expanded="true"
-                  aria-label="bar, running time is undefined (undefined), self time is undefined"
                   aria-level="2"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns odd"
@@ -129,7 +127,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
-                  aria-label="profile1.json, running time is undefined (undefined), self time is undefined"
                   aria-level="3"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns even"
@@ -155,7 +152,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
-                  aria-label="profile2.json, running time is undefined (undefined), self time is undefined"
                   aria-level="2"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns odd"
@@ -182,7 +178,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                 </div>
                 <div
                   aria-expanded="true"
-                  aria-label="baz, running time is undefined (undefined), self time is undefined"
                   aria-level="1"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns even"
@@ -204,7 +199,6 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
                   </span>
                 </div>
                 <div
-                  aria-label="profile3.json, running time is undefined (undefined), self time is undefined"
                   aria-level="2"
                   aria-selected="false"
                   class="treeViewRow treeViewRowScrolledColumns odd"

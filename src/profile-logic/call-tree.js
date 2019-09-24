@@ -242,18 +242,27 @@ export class CallTree {
         this._isHighPrecision,
         selfTime
       );
+      const totalTimePercent = `${formatPercent(totalTimeRelative)}`;
 
-      let unit;
+      let ariaLabel;
+      let totalTimeWithUnit;
+      let selfTimeWithUnit;
       const strategy = this._callTreeSummaryStrategy;
       switch (strategy) {
-        case 'timing':
-          unit = 'ms';
+        case 'timing': {
+          totalTimeWithUnit = `${formattedTotalTime}ms`;
+          selfTimeWithUnit = `${formattedSelfTime}ms`;
+          ariaLabel = `${funcName}, running time is ${totalTimeWithUnit} (${totalTimePercent}), self time is ${selfTimeWithUnit}`;
           break;
+        }
         case 'js-allocations':
         case 'native-allocations':
-        case 'native-deallocations':
-          unit = 'bytes';
+        case 'native-deallocations': {
+          totalTimeWithUnit = `${formattedTotalTime} bytes`;
+          selfTimeWithUnit = `${formattedSelfTime} bytes`;
+          ariaLabel = `${funcName}, total size is ${totalTimeWithUnit} (${totalTimePercent}), self size is ${selfTimeWithUnit}`;
           break;
+        }
         default:
           throw assertExhaustiveCheck(
             strategy,
@@ -263,11 +272,10 @@ export class CallTree {
 
       displayData = {
         totalTime: totalTime === 0 ? '—' : formattedTotalTime,
-        totalTimeWithUnit:
-          totalTime === 0 ? '—' : `${formattedTotalTime} ${unit}`,
+        totalTimeWithUnit: totalTime === 0 ? '—' : totalTimeWithUnit,
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
-        selfTimeWithUnit: selfTime === 0 ? '—' : `${formattedSelfTime} ${unit}`,
-        totalTimePercent: `${formatPercent(totalTimeRelative)}`,
+        selfTimeWithUnit: selfTime === 0 ? '—' : selfTimeWithUnit,
+        totalTimePercent,
         name: funcName,
         lib: libName.slice(0, 1000),
         // Dim platform pseudo-stacks.
@@ -279,6 +287,7 @@ export class CallTree {
         ),
         categoryColor: this._categories[categoryIndex].color,
         icon,
+        ariaLabel,
       };
       this._displayDataByIndex.set(callNodeIndex, displayData);
     }

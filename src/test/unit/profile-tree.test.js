@@ -320,6 +320,7 @@ describe('unfiltered call tree', function() {
     describe('getDisplayData()', function() {
       it('gets a node for a given callNodeIndex', function() {
         expect(callTree.getDisplayData(A)).toEqual({
+          ariaLabel: 'A, running time is 3ms (100%), self time is 0ms',
           dim: false,
           icon: null,
           lib: '',
@@ -327,7 +328,7 @@ describe('unfiltered call tree', function() {
           selfTime: '—',
           selfTimeWithUnit: '—',
           totalTime: '3',
-          totalTimeWithUnit: '3 ms',
+          totalTimeWithUnit: '3ms',
           totalTimePercent: '100%',
           categoryColor: 'grey',
           categoryName: 'Other',

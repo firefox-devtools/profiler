@@ -46,6 +46,7 @@ describe('actions/icons', function() {
       categoryName: 'Other',
       categoryColor: 'grey',
       icon,
+      ariaLabel: 'fake aria label',
     };
   }
 

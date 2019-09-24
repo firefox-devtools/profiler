@@ -121,7 +121,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
           />
         </div>
         <div>
-          3 ms
+          3ms
         </div>
         <div>
           —

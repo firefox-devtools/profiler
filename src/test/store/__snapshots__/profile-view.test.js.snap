@@ -1686,6 +1686,7 @@ CallTree {
       0,
     ],
   },
+  "_callTreeSummaryStrategy": "timing",
   "_categories": Array [
     Object {
       "color": "transparent",
@@ -1873,7 +1874,6 @@ CallTree {
       "I" => 8,
     },
   },
-  "_unit": "ms",
 }
 `;
 

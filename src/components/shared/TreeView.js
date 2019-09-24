@@ -249,10 +249,6 @@ class TreeViewRowScrolledColumns<
       selfTimeDisplay = '0ms';
     }
 
-    const ariaLabel = `${displayData.name}, running time is ${
-      displayData.totalTimeWithUnit
-    } (${displayData.totalTimePercent}), self time is ${selfTimeDisplay}`;
-
     return (
       <div
         className={classNames('treeViewRow', 'treeViewRowScrolledColumns', {
@@ -268,7 +264,7 @@ class TreeViewRowScrolledColumns<
         aria-expanded={ariaExpanded}
         aria-level={depth + 1}
         aria-selected={isSelected}
-        aria-label={ariaLabel}
+        aria-label={displayData.ariaLabel}
         // The role and id attributes are used along with aria-activedescendant
         // (set on the parent), to manage the virtual focus of the tree items.
         // The "virtual" focus changes with the arrow keys.
