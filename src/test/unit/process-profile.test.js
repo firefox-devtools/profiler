@@ -410,7 +410,16 @@ describe('js allocation processing', function() {
 });
 
 describe('native allocation processing', function() {
-  function getAllocationMarkerHelper(geckoThread: GeckoThread) {
+  type CreateAllocation = ({
+    byteSize: number,
+    stackIndex: number | null,
+  }) => void;
+
+  // This helper will create a function that can be used to easily add allocations to
+  // the GeckoThread.
+  function getAllocationMarkerHelper(
+    geckoThread: GeckoThread
+  ): CreateAllocation {
     let time = 0;
     return ({ byteSize, stackIndex }) => {
       const thisTime = time++;
