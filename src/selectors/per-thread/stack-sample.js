@@ -219,25 +219,6 @@ export function getStackAndSampleSelectorsPerThread(
     CallTree.computeCallTreeCountsAndTimings
   );
 
-  const _getCallTreeUnit = createSelector(
-    UrlState.getCallTreeSummaryStrategy,
-    strategy => {
-      switch (strategy) {
-        case 'timing':
-          return 'ms';
-        case 'js-allocations':
-        case 'native-allocations':
-        case 'native-deallocations':
-          return 'bytes';
-        default:
-          throw assertExhaustiveCheck(
-            strategy,
-            'Unhandled callTreeSummaryStrategy.'
-          );
-      }
-    }
-  );
-
   const getCallTree: Selector<CallTree.CallTree> = createSelector(
     threadSelectors.getPreviewFilteredThread,
     ProfileSelectors.getProfileInterval,
@@ -245,7 +226,7 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileSelectors.getCategories,
     UrlState.getImplementationFilter,
     getCallTreeCountsAndTimings,
-    _getCallTreeUnit,
+    UrlState.getCallTreeSummaryStrategy,
     CallTree.getCallTree
   );
 

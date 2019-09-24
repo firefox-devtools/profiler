@@ -28,9 +28,11 @@ import type {
   CallNodeData,
   CallNodeDisplayData,
 } from '../types/profile-derived';
+import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { Milliseconds } from '../types/units';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
 import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
+import { assertExhaustiveCheck } from '../utils/flow';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
@@ -78,8 +80,7 @@ export class CallTree {
   _jsOnly: boolean;
   _interval: number;
   _isHighPrecision: boolean;
-  // The unit of summary, e.g. "ms" or "bytes"
-  _unit: string;
+  _callTreeSummaryStrategy: CallTreeSummaryStrategy;
 
   constructor(
     { funcTable, resourceTable, stringTable }: Thread,
@@ -92,7 +93,7 @@ export class CallTree {
     jsOnly: boolean,
     interval: number,
     isHighPrecision: boolean,
-    unit: string
+    strategy: CallTreeSummaryStrategy
   ) {
     this._categories = categories;
     this._callNodeTable = callNodeTable;
@@ -108,7 +109,7 @@ export class CallTree {
     this._jsOnly = jsOnly;
     this._interval = interval;
     this._isHighPrecision = isHighPrecision;
-    this._unit = unit;
+    this._callTreeSummaryStrategy = strategy;
   }
 
   getRoots() {
@@ -242,13 +243,30 @@ export class CallTree {
         selfTime
       );
 
+      let unit;
+      const strategy = this._callTreeSummaryStrategy;
+      switch (strategy) {
+        case 'timing':
+          unit = 'ms';
+          break;
+        case 'js-allocations':
+        case 'native-allocations':
+        case 'native-deallocations':
+          unit = 'bytes';
+          break;
+        default:
+          throw assertExhaustiveCheck(
+            strategy,
+            'Unhandled callTreeSummaryStrategy.'
+          );
+      }
+
       displayData = {
         totalTime: totalTime === 0 ? '—' : formattedTotalTime,
         totalTimeWithUnit:
-          totalTime === 0 ? '—' : `${formattedTotalTime} ${this._unit}`,
+          totalTime === 0 ? '—' : `${formattedTotalTime} ${unit}`,
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
-        selfTimeWithUnit:
-          selfTime === 0 ? '—' : `${formattedSelfTime} ${this._unit}`,
+        selfTimeWithUnit: selfTime === 0 ? '—' : `${formattedSelfTime} ${unit}`,
         totalTimePercent: `${formatPercent(totalTimeRelative)}`,
         name: funcName,
         lib: libName.slice(0, 1000),
@@ -452,7 +470,7 @@ export function getCallTree(
   categories: CategoryList,
   implementationFilter: string,
   callTreeCountsAndTimings: CallTreeCountsAndTimings,
-  unit: string
+  callTreeSummaryStrategy: CallTreeSummaryStrategy
 ): CallTree {
   return timeCode('getCallTree', () => {
     const {
@@ -476,7 +494,7 @@ export function getCallTree(
       jsOnly,
       interval,
       Boolean(thread.isJsTracer),
-      unit
+      callTreeSummaryStrategy
     );
   });
 }
