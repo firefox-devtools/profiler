@@ -241,8 +241,8 @@ export function getEmptyJsTracerTable(): JsTracerTable {
     events: [],
     timestamps: [],
     durations: [],
-    lines: [],
-    columns: [],
+    line: [],
+    column: [],
     length: 0,
   };
 }

@@ -29,10 +29,7 @@ import type {
 } from '../types/profile-derived';
 import type { Milliseconds } from '../types/units';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
-import {
-  formatNumberDependingOnInterval,
-  formatPercent,
-} from '../utils/format-numbers';
+import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
@@ -78,7 +75,8 @@ export class CallTree {
   // integers, using an array directly is faster than going through a Map.
   _children: Array<CallNodeChildren>;
   _jsOnly: boolean;
-  _isIntegerInterval: boolean;
+  _interval: number;
+  _isHighPrecision: boolean;
 
   constructor(
     { funcTable, resourceTable, stringTable }: Thread,
@@ -89,7 +87,8 @@ export class CallTree {
     rootTotalTime: number,
     rootCount: number,
     jsOnly: boolean,
-    isIntegerInterval: boolean
+    interval: number,
+    isHighPrecision: boolean
   ) {
     this._categories = categories;
     this._callNodeTable = callNodeTable;
@@ -103,7 +102,8 @@ export class CallTree {
     this._displayDataByIndex = new Map();
     this._children = [];
     this._jsOnly = jsOnly;
-    this._isIntegerInterval = isIntegerInterval;
+    this._interval = interval;
+    this._isHighPrecision = isHighPrecision;
   }
 
   getRoots() {
@@ -226,12 +226,14 @@ export class CallTree {
         icon = ExtensionIcon;
       }
 
-      const formattedTotalTime = formatNumberDependingOnInterval(
-        this._isIntegerInterval,
+      const formattedTotalTime = formatCallNodeNumber(
+        this._interval,
+        this._isHighPrecision,
         totalTime
       );
-      const formattedSelfTime = formatNumberDependingOnInterval(
-        this._isIntegerInterval,
+      const formattedSelfTime = formatCallNodeNumber(
+        this._interval,
+        this._isHighPrecision,
         selfTime
       );
 
@@ -453,8 +455,8 @@ export function getCallTree(
     } = callTreeCountsAndTimings;
 
     const jsOnly = implementationFilter === 'js';
-    const isIntegerInterval = Number.isInteger(interval);
 
+    // By default add a single decimal value, e.g 13.1, 0.3, 5234.4
     return new CallTree(
       thread,
       categories,
@@ -464,7 +466,8 @@ export function getCallTree(
       rootTotalTime,
       rootCount,
       jsOnly,
-      isIntegerInterval
+      interval,
+      Boolean(thread.isJsTracer)
     );
   });
 }
