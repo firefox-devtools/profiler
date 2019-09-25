@@ -103,6 +103,7 @@
 .arrowPanelSubTitle {
   padding: 5px 0;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  font-weight: 700;
 }
 
 .arrowPanelContent {
@@ -185,10 +186,15 @@
   margin-bottom: 12px;
 }
 
-.metaInfoLabel {
+.metaInfoLabel,
+.metaInfoWideLabel {
   display: inline-block;
   width: 120px;
   color: var(--grey-50);
+}
+
+.metaInfoWideLabel {
+  width: 140px;
 }
 
 .metaInfoList {

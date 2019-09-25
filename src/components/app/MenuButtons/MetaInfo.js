@@ -6,6 +6,7 @@
 import * as React from 'react';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
 import ArrowPanel from '../../shared/ArrowPanel';
+import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 
 import type { Profile, ProfileMeta } from '../../../types/profile';
 
@@ -20,7 +21,7 @@ type Props = {
  */
 export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
   render() {
-    const meta = this.props.profile.meta;
+    const { meta, profilerOverhead } = this.props.profile;
 
     return (
       <ButtonWithPanel
@@ -123,6 +124,13 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                 </div>
               ) : null}
             </div>
+            {/*
+              Older profiles(before FF 70) don't have any overhead info.
+              Don't show anything if that's the case.
+            */}
+            {profilerOverhead ? (
+              <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
+            ) : null}
           </ArrowPanel>
         }
       />
