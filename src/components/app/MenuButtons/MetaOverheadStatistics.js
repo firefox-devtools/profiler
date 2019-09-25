@@ -16,9 +16,9 @@ import './MetaOverheadStatistics.css';
 // Profiler overhead statistics keys that have max/min/mean values.
 type StatKeys = 'Overhead' | 'Cleaning' | 'Counter' | 'Interval' | 'Lockings';
 
-type Props = {
-  profilerOverhead?: ProfilerOverhead[],
-};
+type Props = {|
+  +profilerOverhead: ProfilerOverhead[],
+|};
 
 /**
  * This component formats the profile's meta information into a dropdown panel.
@@ -39,43 +39,39 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
     // statistics values above.
     let totalSamplingCount = 0;
 
-    // Older profiles(before FF 70) don't have any overhead info. Don't show anything if
-    // that's the case.
-    if (profilerOverhead) {
-      // Overhead keys that have min/max/mean values to loop.
-      const statKeys = [
-        'Overhead',
-        'Cleaning',
-        'Counter',
-        'Interval',
-        'Lockings',
-      ];
+    // Overhead keys that have min/max/mean values to loop.
+    const statKeys = [
+      'Overhead',
+      'Cleaning',
+      'Counter',
+      'Interval',
+      'Lockings',
+    ];
 
-      for (const overhead of profilerOverhead) {
-        const { statistics } = overhead;
-        const { samplingCount } = statistics;
+    for (const overhead of profilerOverhead) {
+      const { statistics } = overhead;
+      const { samplingCount } = statistics;
 
-        // Calculation the single values without any loop, it's not worth it.
-        overheadDurations += statistics.overheadDurations * samplingCount;
-        overheadPercentage += statistics.overheadPercentage * samplingCount;
-        profiledDuration += statistics.profiledDuration * samplingCount;
-        totalSamplingCount += samplingCount;
+      // Calculation the single values without any loop, it's not worth it.
+      overheadDurations += statistics.overheadDurations * samplingCount;
+      overheadPercentage += statistics.overheadPercentage * samplingCount;
+      profiledDuration += statistics.profiledDuration * samplingCount;
+      totalSamplingCount += samplingCount;
 
-        // Looping through the overhead values that have min/max/mean values
-        // and calculating them.
-        for (const stat of statKeys) {
-          const max = statistics['max' + stat];
-          const mean = statistics['mean' + stat];
-          const min = statistics['min' + stat];
+      // Looping through the overhead values that have min/max/mean values
+      // and calculating them.
+      for (const stat of statKeys) {
+        const max = statistics['max' + stat];
+        const mean = statistics['mean' + stat];
+        const min = statistics['min' + stat];
 
-          let currentStat = calculatedStats.get(stat);
-          if (currentStat === undefined) {
-            currentStat = new ProfilerStats();
-            calculatedStats.set(stat, currentStat);
-          }
-
-          currentStat.count(min, max, mean, samplingCount);
+        let currentStat = calculatedStats.get(stat);
+        if (currentStat === undefined) {
+          currentStat = new ProfilerStats();
+          calculatedStats.set(stat, currentStat);
         }
+
+        currentStat.accumulate(min, max, mean, samplingCount);
       }
     }
 
@@ -140,7 +136,7 @@ class ProfilerStats {
   _accumulatedMean = 0;
   _accumulatedWeight = 0;
 
-  count(min: number, max: number, mean: number, weight: number) {
+  accumulate(min: number, max: number, mean: number, weight: number) {
     this._accumulatedWeight += weight;
     this._accumulatedMin += min * weight;
     this._accumulatedMax += max * weight;

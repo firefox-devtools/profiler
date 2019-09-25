@@ -124,7 +124,13 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                 </div>
               ) : null}
             </div>
-            <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
+            {/*
+              Older profiles(before FF 70) don't have any overhead info.
+              Don't show anything if that's the case.
+            */}
+            {profilerOverhead ? (
+              <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
+            ) : null}
           </ArrowPanel>
         }
       />
