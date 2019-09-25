@@ -1686,6 +1686,7 @@ CallTree {
       0,
     ],
   },
+  "_callTreeSummaryStrategy": "timing",
   "_categories": Array [
     Object {
       "color": "transparent",

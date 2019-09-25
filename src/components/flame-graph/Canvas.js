@@ -30,6 +30,7 @@ import type {
 } from '../../types/profile-derived';
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { Viewport } from '../shared/chart/Viewport';
+import type { CallTreeSummaryStrategy } from '../../types/actions';
 
 export type OwnProps = {|
   +thread: Thread,
@@ -48,6 +49,7 @@ export type OwnProps = {|
   +categories: CategoryList,
   +interval: Milliseconds,
   +isInverted: boolean,
+  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
 
 type Props = {|
@@ -257,6 +259,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       categories,
       interval,
       isInverted,
+      callTreeSummaryStrategy,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -269,6 +272,14 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       stackTiming.end[flameGraphTimingIndex] -
       stackTiming.start[flameGraphTimingIndex];
 
+    const shouldComputeTimings =
+      // This is currently too slow for JS Tracer threads.
+      !thread.isJsTracer &&
+      // Only calculate this if our summary strategy is actually timing related.
+      // This function could be made more generic to handle other summary
+      // strategies, but it may not be worth implementing it.
+      callTreeSummaryStrategy === 'timing';
+
     return (
       // Important! Only pass in props that have been properly memoized so this component
       // doesn't over-render.
@@ -280,11 +291,10 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         categories={categories}
         durationText={`${(100 * duration).toFixed(2)}%`}
         callTree={callTree}
+        callTreeSummaryStrategy={callTreeSummaryStrategy}
         timings={
-          thread.isJsTracer
-            ? // This is currently too slow for JS Tracer threads.
-              undefined
-            : this._getTimingsForCallNodeIndex(
+          shouldComputeTimings
+            ? this._getTimingsForCallNodeIndex(
                 callNodeIndex,
                 callNodeInfo,
                 interval,
@@ -294,6 +304,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
                 sampleIndexOffset,
                 categories
               )
+            : undefined
         }
       />
     );

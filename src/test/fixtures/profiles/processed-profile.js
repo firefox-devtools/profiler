@@ -9,6 +9,7 @@ import {
   getEmptyJsTracerTable,
   resourceTypes,
   getEmptyJsAllocationsTable,
+  getEmptyNativeAllocationsTable,
 } from '../../../profile-logic/data-structures';
 import { mergeProfiles } from '../../../profile-logic/comparison';
 import { stateFromLocation } from '../../../app-logic/url-handling';
@@ -827,6 +828,81 @@ export function getProfileWithJsAllocations(): * {
     jsAllocations.inNursery.push(true);
     jsAllocations.stack.push(stack);
     jsAllocations.length++;
+  }
+
+  return { profile, funcNamesDict };
+}
+
+/**
+ * Get a profile with Native allocations. The allocations will form the following trees.
+ *
+ * Allocations:
+ *
+ * - A (total: 15, self: —)
+ *   - B (total: 15, self: —)
+ *     - Fjs (total: 12, self: —)
+ *       - Gjs (total: 12, self: 5)
+ *         - Hjs (total: 7, self: —)
+ *           - I (total: 7, self: 7)
+ *     - C (total: 3, self: —)
+ *       - D (total: 3, self: —)
+ *         - E (total: 3, self: 3)
+ *
+ * Deallocations:
+ *
+ * - A (total: -41, self: —)
+ *   - B (total: -41, self: —)
+ *     - Fjs (total: -30, self: —)
+ *       - Gjs (total: -30, self: -13)
+ *         - Hjs (total: -17, self: —)
+ *           - I (total: -17, self: -17)
+ *     - C (total: -11, self: —)
+ *       - D (total: -11, self: —)
+ *         - E (total: -11, self: -11)
+ */
+
+export function getProfileWithNativeAllocations(): * {
+  // First create a normal sample-based profile.
+  const {
+    profile,
+    funcNamesDictPerThread: [funcNamesDict],
+  } = getProfileFromTextSamples(`
+    A  A     A
+    B  B     B
+    C  Fjs   Fjs
+    D  Gjs   Gjs
+    E        Hjs
+             I
+  `);
+
+  // Now add a JsAllocationsTable.
+  const nativeAllocations = getEmptyNativeAllocationsTable();
+  profile.threads[0].nativeAllocations = nativeAllocations;
+
+  // The stack table is built sequentially, so we can assume that the stack indexes
+  // match the func indexes.
+  const { E, I, Gjs } = funcNamesDict;
+
+  // Create a list of allocations.
+  const allocations = [
+    // Allocations:
+    { byteSize: 3, stack: E },
+    { byteSize: 5, stack: Gjs },
+    { byteSize: 7, stack: I },
+    // Deallocations:
+    { byteSize: -11, stack: E },
+    { byteSize: -13, stack: Gjs },
+    { byteSize: -17, stack: I },
+  ];
+
+  // Loop through and add them to the table.
+  let time = 0;
+  for (const { byteSize, stack } of allocations) {
+    const thisTime = time++;
+    nativeAllocations.time.push(thisTime);
+    nativeAllocations.duration.push(byteSize);
+    nativeAllocations.stack.push(stack);
+    nativeAllocations.length++;
   }
 
   return { profile, funcNamesDict };

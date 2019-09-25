@@ -210,6 +210,13 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     Boolean(getThread(state).jsAllocations);
 
   /**
+   * Check to see if there are any JS allocations for this thread. This way we
+   * can display a custom thread.
+   */
+  const getHasNativeAllocations: Selector<boolean> = state =>
+    Boolean(getThread(state).nativeAllocations);
+
+  /**
    * The JS tracer selectors are placed in the thread selectors since there are
    * not many of them. If this section grows, then consider breaking them out
    * into their own file.
@@ -269,5 +276,6 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getExpensiveJsTracerTiming,
     getExpensiveJsTracerLeafTiming,
     getHasJsAllocations,
+    getHasNativeAllocations,
   };
 }

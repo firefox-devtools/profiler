@@ -6,6 +6,7 @@
 
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
+import { getEmptyNativeAllocationsTable } from './data-structures';
 
 import type {
   Profile,
@@ -25,7 +26,7 @@ import type {
   Category,
   Counter,
   CounterSamplesTable,
-  JsAllocationsTable,
+  NativeAllocationsTable,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -652,7 +653,7 @@ export function getTimingsForCallNodeIndex(
 // When changing the signature, please accordingly check that the map class used
 // for memoization is still the right one.
 function _getTimeRangeForThread(
-  { samples, markers }: Thread,
+  { samples, markers, jsAllocations, nativeAllocations }: Thread,
   interval: Milliseconds
 ): StartEndRange {
   const result = { start: Infinity, end: -Infinity };
@@ -688,6 +689,25 @@ function _getTimeRangeForThread(
 
     result.start = Math.min(result.start, startTime);
     result.end = Math.max(result.end, endTime);
+  }
+
+  if (jsAllocations) {
+    // For good measure, also check the allocations. This is mainly so that tests
+    // will behave nicely.
+    const lastIndex = jsAllocations.length - 1;
+    result.start = Math.min(result.start, jsAllocations.time[0]);
+    result.end = Math.max(result.end, jsAllocations.time[lastIndex] + interval);
+  }
+
+  if (nativeAllocations) {
+    // For good measure, also check the allocations. This is mainly so that tests
+    // will behave nicely.
+    const lastIndex = nativeAllocations.length - 1;
+    result.start = Math.min(result.start, nativeAllocations.time[0]);
+    result.end = Math.max(
+      result.end,
+      nativeAllocations.time[lastIndex] + interval
+    );
   }
 
   return result;
@@ -780,6 +800,7 @@ export function toValidCallTreeSummaryStrategy(
     case 'timing':
     case 'js-allocations':
     case 'native-allocations':
+    case 'native-deallocations':
       return strategy;
     default:
       // Default to "timing" if the strategy is not recognized. This value can come
@@ -998,20 +1019,20 @@ export function filterThreadToSearchString(
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */
 export function getSampleIndexRangeForSelection(
-  samples: SamplesTable | CounterSamplesTable | JsAllocationsTable,
+  table: { time: Milliseconds[], length: number },
   rangeStart: number,
   rangeEnd: number
 ): [IndexIntoSamplesTable, IndexIntoSamplesTable] {
-  // TODO: This should really use bisect. samples.time is sorted.
-  const firstSample = samples.time.findIndex(t => t >= rangeStart);
+  // TODO: This should really use bisect. table.time is sorted.
+  const firstSample = table.time.findIndex(t => t >= rangeStart);
   if (firstSample === -1) {
-    return [samples.length, samples.length];
+    return [table.length, table.length];
   }
-  const afterLastSample = samples.time
+  const afterLastSample = table.time
     .slice(firstSample)
     .findIndex(t => t >= rangeEnd);
   if (afterLastSample === -1) {
-    return [firstSample, samples.length];
+    return [firstSample, table.length];
   }
   return [firstSample, firstSample + afterLastSample];
 }
@@ -1021,7 +1042,7 @@ export function filterThreadSamplesToRange(
   rangeStart: number,
   rangeEnd: number
 ): Thread {
-  const { samples, jsAllocations } = thread;
+  const { samples, jsAllocations, nativeAllocations } = thread;
   const [beginSampleIndex, endSampleIndex] = getSampleIndexRangeForSelection(
     samples,
     rangeStart,
@@ -1062,6 +1083,23 @@ export function filterThreadSamplesToRange(
       duration: jsAllocations.duration.slice(startAllocIndex, endAllocIndex),
       inNursery: jsAllocations.inNursery.slice(startAllocIndex, endAllocIndex),
       stack: jsAllocations.stack.slice(startAllocIndex, endAllocIndex),
+      length: endAllocIndex - startAllocIndex,
+    };
+  }
+
+  if (nativeAllocations) {
+    const [startAllocIndex, endAllocIndex] = getSampleIndexRangeForSelection(
+      nativeAllocations,
+      rangeStart,
+      rangeEnd
+    );
+    newThread.nativeAllocations = {
+      time: nativeAllocations.time.slice(startAllocIndex, endAllocIndex),
+      duration: nativeAllocations.duration.slice(
+        startAllocIndex,
+        endAllocIndex
+      ),
+      stack: nativeAllocations.stack.slice(startAllocIndex, endAllocIndex),
       length: endAllocIndex - startAllocIndex,
     };
   }
@@ -1442,7 +1480,7 @@ export function updateThreadStacks(
   newStackTable: StackTable,
   convertStack: (IndexIntoStackTable | null) => IndexIntoStackTable | null
 ): Thread {
-  const { jsAllocations, samples } = thread;
+  const { jsAllocations, nativeAllocations, samples } = thread;
 
   const newSamples = {
     ...samples,
@@ -1459,6 +1497,12 @@ export function updateThreadStacks(
     newThread.jsAllocations = {
       ...jsAllocations,
       stack: jsAllocations.stack.map(oldStack => convertStack(oldStack)),
+    };
+  }
+  if (nativeAllocations) {
+    newThread.nativeAllocations = {
+      ...nativeAllocations,
+      stack: nativeAllocations.stack.map(oldStack => convertStack(oldStack)),
     };
   }
 
@@ -1909,4 +1953,49 @@ export function getCategoryPairLabel(
   return subcategoryIndex !== 0
     ? `${category.name}: ${category.subcategories[subcategoryIndex]}`
     : `${category.name}`;
+}
+
+/**
+ * Currently the native allocations naively collect allocations and deallocations.
+ * There is no attempt to match up the sampled allocations with the deallocations.
+ * Because of this, if a calltree were to combine both allocations and deallocations,
+ * then the summary would most likely lie and not misreport leaked or retained memory.
+ * For now, filter to only showing allocations or deallocations.
+ *
+ * This function filters to only positive values.
+ */
+export function filterToAllocations(
+  nativeAllocations: NativeAllocationsTable
+): NativeAllocationsTable {
+  const newNativeAllocations = getEmptyNativeAllocationsTable();
+  for (let i = 0; i < nativeAllocations.length; i++) {
+    const duration = nativeAllocations.duration[i];
+    if (duration > 0) {
+      newNativeAllocations.time.push(nativeAllocations.time[i]);
+      newNativeAllocations.stack.push(nativeAllocations.stack[i]);
+      newNativeAllocations.duration.push(duration);
+      newNativeAllocations.length++;
+    }
+  }
+  return newNativeAllocations;
+}
+
+/**
+ * See filterToAllocations for detailed documentation. This function filters to only
+ * negative values.
+ */
+export function filterToDeallocations(
+  nativeAllocations: NativeAllocationsTable
+): NativeAllocationsTable {
+  const newNativeAllocations = getEmptyNativeAllocationsTable();
+  for (let i = 0; i < nativeAllocations.length; i++) {
+    const duration = nativeAllocations.duration[i];
+    if (duration < 0) {
+      newNativeAllocations.time.push(nativeAllocations.time[i]);
+      newNativeAllocations.stack.push(nativeAllocations.stack[i]);
+      newNativeAllocations.duration.push(duration);
+      newNativeAllocations.length++;
+    }
+  }
+  return newNativeAllocations;
 }

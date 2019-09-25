@@ -21,6 +21,7 @@ import { getBoundingBox } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
   getProfileWithJsAllocations,
+  getProfileWithNativeAllocations,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getCallTreeSummaryStrategy } from '../../selectors/url-state';
@@ -538,6 +539,63 @@ describe('ProfileCallTreeView with JS Allocations', function() {
   it('matches the snapshot for JS allocations', function() {
     const { getByText, container } = setup();
     getByText('JavaScript Allocations').click();
+    expect(container.firstChild).toMatchSnapshot();
+  });
+});
+
+describe('ProfileCallTreeView with Native Allocations', function() {
+  function setup() {
+    const { profile } = getProfileWithNativeAllocations();
+    const store = storeWithProfile(profile);
+    const renderResult = render(
+      <Provider store={store}>
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
+      </Provider>
+    );
+
+    return { profile, ...renderResult, ...store };
+  }
+
+  it('can switch to native allocations and back to timing', function() {
+    const { getByText, getState } = setup();
+
+    // It starts out with timing.
+    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+
+    // It switches to native allocations.
+    getByText('Allocations').click();
+    expect(getCallTreeSummaryStrategy(getState())).toEqual(
+      'native-allocations'
+    );
+
+    // And finally it can be switched back.
+    getByText('Timing').click();
+    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+  });
+
+  it('shows byte related labels for native allocations', function() {
+    const { getByText, queryByText } = setup();
+
+    // These labels do not exist.
+    expect(queryByText('Total Size (bytes)')).toBe(null);
+    expect(queryByText('Self (bytes)')).toBe(null);
+
+    getByText('Allocations').click();
+
+    // After clicking, they do.
+    getByText('Total Size (bytes)');
+    getByText('Self (bytes)');
+  });
+
+  it('matches the snapshot for native allocations', function() {
+    const { getByText, container } = setup();
+    getByText('Allocations').click();
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('matches the snapshot for native deallocations', function() {
+    const { getByText, container } = setup();
+    getByText('Deallocations').click();
     expect(container.firstChild).toMatchSnapshot();
   });
 });

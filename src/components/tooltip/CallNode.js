@@ -22,6 +22,7 @@ import type {
 } from '../../types/profile-derived';
 import type { TimingsForPath } from '../../profile-logic/profile-data';
 import type { Milliseconds } from '../../types/units';
+import type { CallTreeSummaryStrategy } from '../../types/actions';
 
 import './CallNode.css';
 
@@ -29,16 +30,17 @@ const GRAPH_WIDTH = 150;
 const GRAPH_HEIGHT = 10;
 
 type Props = {|
-  thread: Thread,
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  categories: CategoryList,
-  interval: Milliseconds,
+  +thread: Thread,
+  +callNodeIndex: IndexIntoCallNodeTable,
+  +callNodeInfo: CallNodeInfo,
+  +categories: CategoryList,
+  +interval: Milliseconds,
   // Since this tooltip can be used in different context, provide some kind of duration
   // label, e.g. "100ms" or "33%".
-  durationText: string,
-  callTree?: CallTree,
-  timings?: TimingsForPath,
+  +durationText: string,
+  +callTree?: CallTree,
+  +timings?: TimingsForPath,
+  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
 
 /**
@@ -154,6 +156,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       categories,
       callTree,
       timings,
+      callTreeSummaryStrategy,
       callNodeInfo: { callNodeTable },
     } = this.props;
     const categoryIndex = callNodeTable.category[callNodeIndex];
@@ -246,6 +249,18 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         </div>
         <div className="tooltipCallNodeDetails">
           {this._renderTimings(timings, displayData)}
+          {callTreeSummaryStrategy !== 'timing' && displayData ? (
+            <div className="tooltipDetails tooltipCallNodeDetailsLeft">
+              {/* Everything in this div needs to come in pairs of two in order to
+                respect the CSS grid. */}
+              <div className="tooltipLabel">Total Bytes:</div>
+              <div>{displayData.totalTimeWithUnit}</div>
+              {/* --------------------------------------------------------------- */}
+              <div className="tooltipLabel">Self Bytes:</div>
+              <div>{displayData.selfTimeWithUnit}</div>
+              {/* --------------------------------------------------------------- */}
+            </div>
+          ) : null}
           <div className="tooltipDetails tooltipCallNodeDetailsLeft">
             {/* Everything in this div needs to come in pairs of two in order to
                 respect the CSS grid. */}
