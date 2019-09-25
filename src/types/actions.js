@@ -86,7 +86,8 @@ export type ImplementationFilter = 'combined' | 'js' | 'cpp';
 export type CallTreeSummaryStrategy =
   | 'timing'
   | 'js-allocations'
-  | 'native-allocations';
+  | 'native-allocations'
+  | 'native-deallocations';
 
 /**
  * This type determines what kind of information gets sanitized from published profiles.

@@ -43,6 +43,7 @@ type StateProps = {|
   +invertCallstack: boolean,
   +currentSearchString: string,
   +hasJsAllocations: boolean,
+  +hasNativeAllocations: boolean,
 |};
 
 type DispatchProps = {|
@@ -101,16 +102,20 @@ class StackSettings extends PureComponent<Props> {
 
   _renderCallTreeStrategyRadioButton(
     label: string,
-    strategy: CallTreeSummaryStrategy
+    strategy: CallTreeSummaryStrategy,
+    tooltip: string
   ) {
     return (
-      <label className="photon-label photon-label-micro stackSettingsFilterLabel">
+      <label
+        className="photon-label photon-label-micro stackSettingsFilterLabel"
+        title={tooltip}
+        key={strategy}
+      >
         <input
           type="radio"
           className="photon-radio photon-radio-micro stackSettingsFilterInput"
           value={strategy}
           name="stack-settings-strategy"
-          title="Change how the call tree numerically summarizes the thread"
           onChange={this._onCallTreeSummaryStrategyChange}
           checked={this.props.callTreeSummaryStrategy === strategy}
         />
@@ -125,8 +130,11 @@ class StackSettings extends PureComponent<Props> {
       hideInvertCallstack,
       currentSearchString,
       hasJsAllocations,
+      hasNativeAllocations,
       disableCallTreeSummaryButtons,
     } = this.props;
+
+    const hasAllocations = hasJsAllocations || hasNativeAllocations;
 
     return (
       <div className="stackSettings">
@@ -136,13 +144,34 @@ class StackSettings extends PureComponent<Props> {
             {this._renderImplementationRadioButton('JavaScript', 'js')}
             {this._renderImplementationRadioButton('Native', 'cpp')}
           </li>
-          {hasJsAllocations && !disableCallTreeSummaryButtons ? (
+          {hasAllocations && !disableCallTreeSummaryButtons ? (
             <li className="stackSettingsListItem stackSettingsFilter">
-              {this._renderCallTreeStrategyRadioButton('Timing', 'timing')}
               {this._renderCallTreeStrategyRadioButton(
-                'JavaScript Allocations',
-                'js-allocations'
+                'Timing',
+                'timing',
+                'Summarize using sampled stacks of executed code over time'
               )}
+              {hasJsAllocations
+                ? this._renderCallTreeStrategyRadioButton(
+                    'JavaScript Allocations',
+                    'js-allocations',
+                    'Summarize using bytes of JavaScript allocated (no de-allocations)'
+                  )
+                : null}
+              {hasNativeAllocations
+                ? [
+                    this._renderCallTreeStrategyRadioButton(
+                      'Allocations',
+                      'native-allocations',
+                      'Summarize using bytes of memory allocated'
+                    ),
+                    this._renderCallTreeStrategyRadioButton(
+                      'Deallocations',
+                      'native-deallocations',
+                      'Summarize using bytes of memory deallocated'
+                    ),
+                  ]
+                : null}
             </li>
           ) : null}
           {hideInvertCallstack ? null : (
@@ -177,6 +206,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),
     hasJsAllocations: selectedThreadSelectors.getHasJsAllocations(state),
+    hasNativeAllocations: selectedThreadSelectors.getHasNativeAllocations(
+      state
+    ),
     callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),
   }),
   mapDispatchToProps: {

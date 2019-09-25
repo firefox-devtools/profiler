@@ -13,6 +13,7 @@ import {
   getEmptyResourceTable,
   getEmptyRawMarkerTable,
   getEmptyJsAllocationsTable,
+  getEmptyNativeAllocationsTable,
 } from './data-structures';
 import { immutableUpdate } from '../utils/flow';
 import {
@@ -53,6 +54,7 @@ import type {
   JsTracerTable,
   JsAllocationsTable,
   ProfilerOverhead,
+  NativeAllocationsTable,
 } from '../types/profile';
 import type { Milliseconds, Microseconds } from '../types/units';
 import type {
@@ -616,32 +618,55 @@ function _convertPayloadStackToIndex(
  *  Convert stacks to causes.
  *  Process GC markers.
  *  Extract JS allocations into the JsAllocationsTable.
+ *  Extract Native allocations into the NativeAllocationsTable.
  */
 function _processMarkers(
   geckoMarkers: GeckoMarkerStruct
 ): {|
   markers: RawMarkerTable,
   jsAllocations: JsAllocationsTable | null,
+  nativeAllocations: NativeAllocationsTable | null,
 |} {
   const markers = getEmptyRawMarkerTable();
   const jsAllocations = getEmptyJsAllocationsTable();
+  const nativeAllocations = getEmptyNativeAllocationsTable();
+
   for (let markerIndex = 0; markerIndex < geckoMarkers.length; markerIndex++) {
     const geckoPayload: MarkerPayload_Gecko = geckoMarkers.data[markerIndex];
 
-    if (geckoPayload && geckoPayload.type === 'JS allocation') {
-      // Build up a separate table for the JS allocation data, and do not
-      // include it in the marker information.
-      jsAllocations.time.push(geckoPayload.startTime);
-      jsAllocations.className.push(geckoPayload.className);
-      jsAllocations.typeName.push(geckoPayload.typeName);
-      jsAllocations.coarseType.push(geckoPayload.coarseType);
-      jsAllocations.duration.push(geckoPayload.size);
-      jsAllocations.inNursery.push(geckoPayload.inNursery);
-      jsAllocations.stack.push(_convertPayloadStackToIndex(geckoPayload));
-      jsAllocations.length++;
+    if (geckoPayload) {
+      switch (geckoPayload.type) {
+        case 'JS allocation': {
+          // Build up a separate table for the JS allocation data, and do not
+          // include it in the marker information.
+          jsAllocations.time.push(geckoPayload.startTime);
+          jsAllocations.className.push(geckoPayload.className);
+          jsAllocations.typeName.push(geckoPayload.typeName);
+          jsAllocations.coarseType.push(geckoPayload.coarseType);
+          jsAllocations.duration.push(geckoPayload.size);
+          jsAllocations.inNursery.push(geckoPayload.inNursery);
+          jsAllocations.stack.push(_convertPayloadStackToIndex(geckoPayload));
+          jsAllocations.length++;
 
-      // Do not process the marker and add it to the marker list.
-      continue;
+          // Do not process the marker and add it to the marker list.
+          continue;
+        }
+        case 'Native allocation': {
+          // Build up a separate table for the native allocation data, and do not
+          // include it in the marker information.
+          nativeAllocations.time.push(geckoPayload.startTime);
+          nativeAllocations.duration.push(geckoPayload.size);
+          nativeAllocations.stack.push(
+            _convertPayloadStackToIndex(geckoPayload)
+          );
+          nativeAllocations.length++;
+
+          // Do not process the marker and add it to the marker list.
+          continue;
+        }
+        default:
+        // This is not an allocation, continue on to process the marker.
+      }
     }
 
     const payload = _processMarkerPayload(geckoPayload);
@@ -658,6 +683,8 @@ function _processMarkers(
   return {
     markers: markers,
     jsAllocations: jsAllocations.length === 0 ? null : jsAllocations,
+    nativeAllocations:
+      nativeAllocations.length === 0 ? null : nativeAllocations,
   };
 }
 
@@ -901,7 +928,9 @@ function _processThread(
     frameTable,
     categories
   );
-  const { markers, jsAllocations } = _processMarkers(geckoMarkers);
+  const { markers, jsAllocations, nativeAllocations } = _processMarkers(
+    geckoMarkers
+  );
   const samples = _processSamples(geckoSamples);
 
   const newThread: Thread = {
@@ -929,6 +958,11 @@ function _processThread(
   if (jsAllocations) {
     // Only add the JS allocations if they exist.
     newThread.jsAllocations = jsAllocations;
+  }
+
+  if (nativeAllocations) {
+    // Only add the Native allocations if they exist.
+    newThread.nativeAllocations = nativeAllocations;
   }
 
   function processJsTracer() {
@@ -1148,6 +1182,12 @@ export function processProfile(
         if (newThread.jsAllocations) {
           newThread.jsAllocations = adjustTableTimestamps(
             newThread.jsAllocations,
+            adjustTimestampsBy
+          );
+        }
+        if (newThread.nativeAllocations) {
+          newThread.nativeAllocations = adjustTableTimestamps(
+            newThread.nativeAllocations,
             adjustTimestampsBy
           );
         }

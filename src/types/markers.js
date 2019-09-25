@@ -509,6 +509,14 @@ export type JsAllocationPayload_Gecko = {|
   stack: GeckoMarkerStack,
 |};
 
+export type NativeAllocationPayload_Gecko = {|
+  type: 'Native allocation',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  size: Bytes,
+  stack: GeckoMarkerStack,
+|};
+
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
@@ -558,6 +566,7 @@ export type MarkerPayload_Gecko =
   | ArbitraryEventTracing
   | NavigationMarkerPayload
   | JsAllocationPayload_Gecko
+  | NativeAllocationPayload_Gecko
   | PrefMarkerPayload
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type

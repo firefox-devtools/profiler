@@ -49,7 +49,8 @@ function callTreeFromProfile(
     callNodeInfo,
     categories,
     'combined',
-    callTreeCountsAndTimings
+    callTreeCountsAndTimings,
+    'timing'
   );
 }
 
@@ -319,6 +320,7 @@ describe('unfiltered call tree', function() {
     describe('getDisplayData()', function() {
       it('gets a node for a given callNodeIndex', function() {
         expect(callTree.getDisplayData(A)).toEqual({
+          ariaLabel: 'A, running time is 3ms (100%), self time is 0ms',
           dim: false,
           icon: null,
           lib: '',
@@ -439,7 +441,8 @@ describe('inverted call tree', function() {
       callNodeInfo,
       categories,
       'combined',
-      callTreeCountsAndTimings
+      callTreeCountsAndTimings,
+      'timing'
     );
 
     it('computes an non-inverted call tree', function() {
@@ -478,7 +481,8 @@ describe('inverted call tree', function() {
       invertedCallNodeInfo,
       categories,
       'combined',
-      invertedCallTreeCountsAndTimings
+      invertedCallTreeCountsAndTimings,
+      'timing'
     );
 
     /**

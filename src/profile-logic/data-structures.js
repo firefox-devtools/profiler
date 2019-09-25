@@ -17,6 +17,7 @@ import type {
   FuncTable,
   RawMarkerTable,
   JsAllocationsTable,
+  NativeAllocationsTable,
   ResourceTable,
   Profile,
   ExtensionTable,
@@ -167,6 +168,19 @@ export function getEmptyJsAllocationsTable(): JsAllocationsTable {
     coarseType: [],
     duration: [],
     inNursery: [],
+    stack: [],
+    length: 0,
+  };
+}
+
+export function getEmptyNativeAllocationsTable(): NativeAllocationsTable {
+  // Important!
+  // If modifying this structure, please update all callers of this function to ensure
+  // that they are pushing on correctly to the data structure. These pushes may not
+  // be caught by the type system.
+  return {
+    time: [],
+    duration: [],
     stack: [],
     length: 0,
   };

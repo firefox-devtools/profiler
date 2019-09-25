@@ -17,6 +17,7 @@ import type {
   Thread,
   SamplesTable,
   JsAllocationsTable,
+  NativeAllocationsTable,
   IndexIntoCategoryList,
   IndexIntoSamplesTable,
 } from '../../types/profile';
@@ -177,7 +178,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getSamplesForCallTree: Selector<
-    SamplesTable | JsAllocationsTable
+    SamplesTable | JsAllocationsTable | NativeAllocationsTable
   > = createSelector(
     threadSelectors.getPreviewFilteredThread,
     UrlState.getCallTreeSummaryStrategy,
@@ -191,8 +192,18 @@ export function getStackAndSampleSelectorsPerThread(
             'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
           );
         case 'native-allocations':
-          throw new Error(
-            'Native allocations have not been implemented for the call tree.'
+          return ProfileData.filterToAllocations(
+            ensureExists(
+              thread.nativeAllocations,
+              'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
+            )
+          );
+        case 'native-deallocations':
+          return ProfileData.filterToDeallocations(
+            ensureExists(
+              thread.nativeAllocations,
+              'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
+            )
           );
         default:
           throw assertExhaustiveCheck(strategy);
@@ -215,6 +226,7 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileSelectors.getCategories,
     UrlState.getImplementationFilter,
     getCallTreeCountsAndTimings,
+    UrlState.getCallTreeSummaryStrategy,
     CallTree.getCallTree
   );
 
