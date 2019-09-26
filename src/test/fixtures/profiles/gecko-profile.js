@@ -737,7 +737,7 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
 }
 
 export function createGeckoCounter(thread: GeckoThread): GeckoCounter {
-  const geckoCounter: GeckoCounter = {
+  const geckoCounter = {
     name: 'My Counter',
     category: 'My Category',
     description: 'My Description',
