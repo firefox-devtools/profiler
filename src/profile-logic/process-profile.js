@@ -816,21 +816,36 @@ function _processCounters(
     );
   }
 
-  return geckoCounters.map(
-    ({ name, category, description, sample_groups }) => ({
-      name,
-      category,
-      description,
-      pid: mainThread.pid,
-      mainThreadIndex,
-      sampleGroups: {
-        id: sample_groups.id,
-        samples: adjustTableTimestamps(
-          _toStructOfArrays(sample_groups.samples),
-          delta
-        ),
-      },
-    })
+  return geckoCounters.reduce(
+    (result, { name, category, description, sample_groups }) => {
+      if (
+        sample_groups.id === undefined ||
+        sample_groups.samples === undefined
+      ) {
+        // Due to a bug in Gecko, it's possible that we have a counter that has no
+        // sample data. This is likely a Gecko problem that we'll need to fix.
+        // See https://github.com/firefox-devtools/profiler/issues/2248 and
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1584190
+        return result;
+      }
+
+      result.push({
+        name,
+        category,
+        description,
+        pid: mainThread.pid,
+        mainThreadIndex,
+        sampleGroups: {
+          id: sample_groups.id,
+          samples: adjustTableTimestamps(
+            _toStructOfArrays(sample_groups.samples),
+            delta
+          ),
+        },
+      });
+      return result;
+    },
+    []
   );
 }
 
