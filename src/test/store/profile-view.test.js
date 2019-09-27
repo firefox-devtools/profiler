@@ -1067,13 +1067,16 @@ describe('actions/ProfileView', function() {
         getState()
       );
       const keys = [...screenshotMarkersById.keys()];
-      expect(keys.length).toEqual(1);
+      expect(keys.length).toEqual(2);
 
       const [screenshots] = [...screenshotMarkersById.values()];
       if (!screenshots) {
         throw new Error('No screenshots found.');
       }
-      expect(screenshots.length).toEqual(profile.threads[0].markers.length);
+      // The profile contains the same markers twice, but with different window ids.
+      // `screenshots` contains the screenshots for only one window id.
+      // That's why we need to halve the markers length when comparing the 2 lengths.
+      expect(screenshots.length).toEqual(profile.threads[0].markers.length / 2);
       for (const screenshot of screenshots) {
         expect(screenshot.name).toEqual('CompositorScreenshot');
       }
@@ -1086,7 +1089,7 @@ describe('actions/ProfileView', function() {
 
       // Double check that there are 10 markers in the test data, and commit a
       // subsection of that range.
-      expect(markers.length).toBe(10);
+      expect(markers.length).toBe(20);
       const startIndex = 3;
       const endIndex = 8;
       const startTime = markers.time[startIndex];
