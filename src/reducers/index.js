@@ -12,13 +12,32 @@ import publish from './publish';
 import { combineReducers } from 'redux';
 import type { Reducer, State } from '../types/state';
 
-const rootReducer: Reducer<State> = combineReducers({
-  app,
-  profileView,
-  urlState,
-  icons,
-  zippedProfiles,
-  publish,
-});
+/**
+ * This function provides a mechanism to swap out to an old state that we have
+ * retained.
+ */
+const wrapReducerInResetter = (
+  regularRootReducer: Reducer<State>
+): Reducer<State> => {
+  return (state, action) => {
+    switch (action.type) {
+      case 'REVERT_TO_PRE_PUBLISHED_STATE':
+        return action.prePublishedState;
+      default:
+        return regularRootReducer(state, action);
+    }
+  };
+};
+
+const rootReducer: Reducer<State> = wrapReducerInResetter(
+  combineReducers({
+    app,
+    profileView,
+    urlState,
+    icons,
+    zippedProfiles,
+    publish,
+  })
+);
 
 export default rootReducer;

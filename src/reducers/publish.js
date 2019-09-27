@@ -7,13 +7,12 @@ import { combineReducers } from 'redux';
 import { getShouldSanitizeByDefault } from '../profile-logic/sanitize';
 
 import type { CheckedSharingOptions } from '../types/actions';
-import type { Profile } from '../types/profile';
 import type {
-  UrlState,
   PublishState,
   UploadState,
   UploadPhase,
   Reducer,
+  State,
 } from '../types/state';
 
 function _getDefaultSharingOptions(): CheckedSharingOptions {
@@ -156,28 +155,14 @@ const upload: Reducer<UploadState> = combineReducers({
 
 /**
  * When sanitizing profiles, it is nice to have the option to revert to the original
- * profile, which is stored in this reducer.
+ * profile and view, which is stored in this reducer.
  */
-const originalProfile: Reducer<null | Profile> = (state = null, action) => {
+const prePublishedState: Reducer<null | State> = (state = null, action) => {
   switch (action.type) {
     case 'SANITIZED_PROFILE_PUBLISHED':
-      return action.originalProfile;
-    case 'REVERT_TO_ORIGINAL_PROFILE':
-      return null;
-    default:
-      return state;
-  }
-};
-
-/**
- * When sanitizing profiles, it is nice to have the option to revert to the original
- * profile, this is the UrlState at the time of sanitization.
- */
-const originalUrlState: Reducer<null | UrlState> = (state = null, action) => {
-  switch (action.type) {
-    case 'SANITIZED_PROFILE_PUBLISHED':
-      return action.originalUrlState;
-    case 'REVERT_TO_ORIGINAL_PROFILE':
+    case 'PROFILE_PUBLISHED':
+      return action.prePublishedState;
+    case 'REVERT_TO_PRE_PUBLISHED_STATE':
       return null;
     default:
       return state;
@@ -218,10 +203,9 @@ const hasSanitizedProfile: Reducer<boolean> = (state = false, action) => {
 const publishReducer: Reducer<PublishState> = combineReducers({
   checkedSharingOptions,
   upload,
-  originalProfile,
-  originalUrlState,
   isHidingStaleProfile,
   hasSanitizedProfile,
+  prePublishedState,
 });
 
 export default publishReducer;

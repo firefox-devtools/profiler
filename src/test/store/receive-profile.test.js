@@ -17,6 +17,7 @@ import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import * as UrlStateSelectors from '../../selectors/url-state';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { getView } from '../../selectors/app';
+import { urlFromState } from '../../app-logic/url-handling';
 import {
   viewProfile,
   finalizeProfileView,
@@ -1539,6 +1540,21 @@ describe('actions/receive-profile', function() {
       // Check if we can successfully finalize the profile view.
       await dispatch(finalizeProfileView());
       expect(getView(getState()).phase).toBe('DATA_LOADED');
+    });
+
+    it('keeps the `from-url` value in the URL', async function() {
+      const { getState, dispatch } = await setup({
+        // '/from-url/https://fakeurl.com/fakeprofile.json/'
+        pathname: '/from-url/https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json/',
+        search: '',
+        hash: '',
+      });
+      await dispatch(finalizeProfileView());
+      const [, fromAddon, urlString] = urlFromState(
+        UrlStateSelectors.getUrlState(getState())
+      ).split('/');
+      expect(fromAddon).toEqual('from-url');
+      expect(urlString).toEqual('https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json');
     });
 
     it('retrieves profile from a `compare` data source and loads it', async function() {

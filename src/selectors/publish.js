@@ -27,11 +27,10 @@ import type {
   PublishState,
   UploadState,
   UploadPhase,
-  UrlState,
+  State,
 } from '../types/state';
 import type { Selector } from '../types/store';
 import type { CheckedSharingOptions } from '../types/actions';
-import type { Profile } from '../types/profile';
 import type { RemoveProfileInformation } from '../types/profile-derived';
 
 export const getPublishState: Selector<PublishState> = state => state.publish;
@@ -222,11 +221,11 @@ export const getShouldSanitizeByDefault: Selector<boolean> = createSelector(
   getShouldSanitizeByDefaultImpl
 );
 
-export const getOriginalProfile: Selector<null | Profile> = state =>
-  getPublishState(state).originalProfile;
+export const getPrePublishedState: Selector<null | State> = state =>
+  getPublishState(state).prePublishedState;
 
-export const getOriginalUrlState: Selector<null | UrlState> = state =>
-  getPublishState(state).originalUrlState;
+export const getHasPrePublishedState: Selector<boolean> = state =>
+  Boolean(getPrePublishedState(state));
 
 export const getIsHidingStaleProfile: Selector<boolean> = state =>
   getPublishState(state).isHidingStaleProfile;

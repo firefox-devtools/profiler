@@ -95,6 +95,14 @@ const zipFile: Reducer<ZipFileState> = (
             zip: ensureExists(state.zip),
             pathInZipFile: ensureExists(state.pathInZipFile),
           });
+    case 'PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
+      // Revert back to not having a zip file.
+      return {
+        phase: 'NO_ZIP_FILE',
+        zip: null,
+        pathInZipFile: null,
+      };
     default:
       return state;
   }
@@ -121,6 +129,9 @@ function _validateStateTransition(
   next: ZipFileState
 ): ZipFileState {
   const prevPhase = prev.phase;
+  if (prevPhase === next.phase) {
+    return next;
+  }
   let expectedNextPhases;
   switch (prevPhase) {
     case 'NO_ZIP_FILE':
