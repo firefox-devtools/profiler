@@ -24,7 +24,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState, UploadState } from '../types/state';
+import type { UrlState, UploadState, State } from '../types/state';
 import type { CssPixels, StartEndRange } from '../types/units';
 
 export type DataSource =
@@ -188,6 +188,11 @@ type ProfileAction =
       hiddenLocalTracks: Set<TrackIndex>,
     |}
   | {|
+      // Isolate only the screenshot track
+      +type: 'ISOLATE_SCREENSHOT_TRACK',
+      +hiddenGlobalTracks: Set<TrackIndex>,
+    |}
+  | {|
       +type: 'CHANGE_LOCAL_TRACK_ORDER',
       +localTrackOrder: TrackIndex[],
       +pid: Pid,
@@ -265,7 +270,7 @@ type ReceiveProfileAction =
   | {| +type: 'START_SYMBOLICATING' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_ADDON' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_STORE' |}
-  | {| +type: 'WAITING_FOR_PROFILE_FROM_URL' |}
+  | {| +type: 'WAITING_FOR_PROFILE_FROM_URL', +profileUrl: ?string |}
   | {| +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string |};
 
 type UrlEnhancerAction =
@@ -275,7 +280,11 @@ type UrlEnhancerAction =
 
 type UrlStateAction =
   | {| +type: 'WAITING_FOR_PROFILE_FROM_FILE' |}
-  | {| +type: 'PROFILE_PUBLISHED', +hash: string |}
+  | {|
+      +type: 'PROFILE_PUBLISHED',
+      +hash: string,
+      +prePublishedState: State | null,
+    |}
   | {| +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug |}
   | {| +type: 'COMMIT_RANGE', +start: number, +end: number |}
   | {| +type: 'POP_COMMITTED_RANGES', +firstPoppedFilterIndex: number |}
@@ -337,8 +346,7 @@ type UrlStateAction =
       +hash: string,
       +committedRanges: StartEndRange[] | null,
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
-      +originalProfile: Profile,
-      +originalUrlState: UrlState,
+      +prePublishedState: State,
     |}
   | {|
       +type: 'SET_DATA_SOURCE',
@@ -386,8 +394,8 @@ type PublishAction =
       +changes: $Shape<UploadState>,
     |}
   | {|
-      +type: 'REVERT_TO_ORIGINAL_PROFILE',
-      +originalUrlState: UrlState,
+      +type: 'REVERT_TO_PRE_PUBLISHED_STATE',
+      +prePublishedState: State,
     |}
   | {| +type: 'HIDE_STALE_PROFILE' |};
 

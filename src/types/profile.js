@@ -518,6 +518,9 @@ export type Profile = {|
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.
   counters?: Counter[],
+  // The profilerOverhead list is optional only because old profilers may not
+  // have them. An upgrader could be written to make this non-optional.
+  // This is list because there is a profiler overhead per process.
   profilerOverhead?: ProfilerOverhead[],
   threads: Thread[],
 |};

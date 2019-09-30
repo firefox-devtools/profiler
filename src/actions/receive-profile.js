@@ -572,9 +572,10 @@ export function waitingForProfileFromStore(): Action {
   };
 }
 
-export function waitingForProfileFromUrl(): Action {
+export function waitingForProfileFromUrl(profileUrl?: string): Action {
   return {
     type: 'WAITING_FOR_PROFILE_FROM_URL',
+    profileUrl,
   };
 }
 
@@ -806,7 +807,7 @@ export function retrieveProfileOrZipFromUrl(
   initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async function(dispatch) {
-    dispatch(waitingForProfileFromUrl());
+    dispatch(waitingForProfileFromUrl(profileUrl));
 
     try {
       const response = await _fetchProfile({

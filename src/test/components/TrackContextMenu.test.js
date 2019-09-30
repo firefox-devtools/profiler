@@ -79,6 +79,8 @@ describe('timeline/TrackContextMenu', function() {
       const isolateProcessMainThreadItem = () =>
         getByText(/Only show "Content Process"/);
       const trackItem = () => getByText('Content Process');
+      const isolateScreenshotTrack = () =>
+        getByText(/Hide other screenshot tracks/);
 
       return {
         ...results,
@@ -87,6 +89,7 @@ describe('timeline/TrackContextMenu', function() {
         threadIndex,
         isolateProcessItem,
         isolateProcessMainThreadItem,
+        isolateScreenshotTrack,
         trackItem,
       };
     }
@@ -157,6 +160,19 @@ describe('timeline/TrackContextMenu', function() {
         'show [process]',
         '  - show [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
+      ]);
+    });
+
+    it('isolates a screenshot track', () => {
+      const { isolateScreenshotTrack, getState } = setupGlobalTrack(
+        getScreenshotTrackProfile()
+      );
+      fireEvent.click(isolateScreenshotTrack());
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [screenshots]',
+        'hide [screenshots]',
+        'show [process]',
+        '  - show [thread Empty] SELECTED',
       ]);
     });
 

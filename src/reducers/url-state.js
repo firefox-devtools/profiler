@@ -61,6 +61,8 @@ const hash: Reducer<string> = (state = '', action) => {
 
 const profileUrl: Reducer<string> = (state = '', action) => {
   switch (action.type) {
+    case 'WAITING_FOR_PROFILE_FROM_URL':
+      return action.profileUrl ? action.profileUrl : state;
     case 'TRIGGER_LOADING_FROM_URL':
       return action.profileUrl;
     default:
@@ -290,6 +292,7 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
     case 'ISOLATE_LOCAL_TRACK':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
+    case 'ISOLATE_SCREENSHOT_TRACK':
       return action.hiddenGlobalTracks;
     case 'HIDE_GLOBAL_TRACK': {
       const hiddenGlobalTracks = new Set(state);
@@ -425,8 +428,6 @@ const wrapReducerInResetter = (
 ): Reducer<UrlState> => {
   return (state, action) => {
     switch (action.type) {
-      case 'REVERT_TO_ORIGINAL_PROFILE':
-        return action.originalUrlState;
       case 'UPDATE_URL_STATE':
         // A new URL came in because of a browser action, discard the current UrlState
         // and use the new one, which was probably serialized from the URL, or stored

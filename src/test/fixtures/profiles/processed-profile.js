@@ -663,7 +663,7 @@ export function getNetworkTrackProfile() {
 }
 
 export function getScreenshotTrackProfile() {
-  return getProfileWithMarkers(
+  const screenshotMarkersForWindowId = windowID =>
     Array(10)
       .fill()
       .map((_, i) => [
@@ -672,12 +672,15 @@ export function getScreenshotTrackProfile() {
         {
           type: 'CompositorScreenshot',
           url: 0, // Some arbitrary string.
-          windowID: '0',
+          windowID,
           windowWidth: 300,
           windowHeight: 150,
         },
-      ])
-  );
+      ]);
+  return getProfileWithMarkers([
+    ...screenshotMarkersForWindowId('0'),
+    ...screenshotMarkersForWindowId('1'),
+  ]);
 }
 
 export function getJsTracerTable(

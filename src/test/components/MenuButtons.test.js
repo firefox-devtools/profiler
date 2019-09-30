@@ -5,6 +5,7 @@
 // @flow
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
+import { MenuButtonsMetaInfo } from '../../components/app/MenuButtons/MetaInfo';
 import { render, fireEvent, wait } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
@@ -15,6 +16,8 @@ import {
   getProfileFromTextSamples,
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
+import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
+import { processProfile } from '../../profile-logic/process-profile';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -251,6 +254,33 @@ describe('app/MenuButtons', function() {
       // Now click the error button, and get a snapshot of the panel.
       clickAndRunTimers(getErrorButton());
       expect(getPanel()).toMatchSnapshot();
+    });
+  });
+
+  describe('<MenuButtonsMetaInfo>', function() {
+    it('matches the snapshot', async () => {
+      jest.useFakeTimers();
+      jest
+        .spyOn(Date.prototype, 'toLocaleString')
+        .mockImplementation(function() {
+          // eslint-disable-next-line babel/no-invalid-this
+          return 'toLocaleString ' + this.toUTCString();
+        });
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processProfile(createGeckoProfile());
+      const store = storeWithProfile(profile);
+
+      const { container, getByValue } = render(
+        <Provider store={store}>
+          <MenuButtonsMetaInfo profile={profile} />
+        </Provider>
+      );
+
+      const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
+      fireEvent.click(metaInfoButton);
+      jest.runAllTimers();
+
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 });

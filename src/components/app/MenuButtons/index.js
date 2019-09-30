@@ -15,9 +15,15 @@ import { MenuButtonsPublish } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';
 import ArrowPanel from '../../shared/ArrowPanel';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
-import { revertToOriginalProfile, abortUpload } from '../../../actions/publish';
+import {
+  revertToPrePublishedState,
+  abortUpload,
+} from '../../../actions/publish';
 import { dismissNewlyPublished } from '../../../actions/app';
-import { getUploadPhase, getOriginalProfile } from '../../../selectors/publish';
+import {
+  getUploadPhase,
+  getHasPrePublishedState,
+} from '../../../selectors/publish';
 
 import type { StartEndRange } from '../../../types/units';
 import type { Profile } from '../../../types/profile';
@@ -41,12 +47,12 @@ type StateProps = {|
   +dataSource: DataSource,
   +isNewlyPublished: boolean,
   +uploadPhase: UploadPhase,
-  +originalProfile: null | Profile,
+  +hasPrePublishedState: boolean,
 |};
 
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
-  +revertToOriginalProfile: typeof revertToOriginalProfile,
+  +revertToPrePublishedState: typeof revertToPrePublishedState,
   +abortUpload: typeof abortUpload,
 |};
 
@@ -76,10 +82,7 @@ class MenuButtons extends React.PureComponent<Props> {
       );
     }
 
-    const isRepublish =
-      dataSource === 'public' ||
-      dataSource === 'from-url' ||
-      dataSource === 'compare';
+    const isRepublish = dataSource === 'public' || dataSource === 'compare';
     const isError = uploadPhase === 'error';
 
     let label = 'Publish…';
@@ -124,15 +127,15 @@ class MenuButtons extends React.PureComponent<Props> {
   }
 
   _renderRevertProfile() {
-    const { originalProfile, revertToOriginalProfile } = this.props;
-    if (!originalProfile) {
+    const { hasPrePublishedState, revertToPrePublishedState } = this.props;
+    if (!hasPrePublishedState) {
       return null;
     }
     return (
       <button
         type="button"
         className="buttonWithPanelButton menuButtonsRevertButton"
-        onClick={revertToOriginalProfile}
+        onClick={revertToPrePublishedState}
       >
         Revert to Original Profile
       </button>
@@ -171,11 +174,11 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     dataSource: getDataSource(state),
     isNewlyPublished: getIsNewlyPublished(state),
     uploadPhase: getUploadPhase(state),
-    originalProfile: getOriginalProfile(state),
+    hasPrePublishedState: getHasPrePublishedState(state),
   }),
   mapDispatchToProps: {
     dismissNewlyPublished,
-    revertToOriginalProfile,
+    revertToPrePublishedState,
     abortUpload,
   },
   component: MenuButtons,
