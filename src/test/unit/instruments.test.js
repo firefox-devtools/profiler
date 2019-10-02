@@ -12,25 +12,28 @@ import { convertInstrumentsProfile } from '../../profile-logic/import/instrument
 // This class is a mocked version of native FileSystemEntry class
 // Reference: https://developer.mozilla.org/en-US/docs/Web/API/FileSystemEntry
 class MockFileSystemEntry {
+  //standard properties
   isFile: boolean;
   isDirectory: boolean;
   name: string;
   fullPath: string;
-  zip: typeof JSZip;
-  zipDir: any | null;
-  zipFile: JSZip.JSZipObject | null;
+
+  //private properties
+  _zip: typeof JSZip;
+  _zipDir: any;
+  _zipFile: JSZip.JSZipObject | null;
 
   constructor(zip: typeof JSZip, fullPath: string) {
     this.fullPath = fullPath;
-    this.zipFile = zip.file(fullPath);
-    this.isFile = !!this.zipFile;
-    this.zip = zip;
+    this._zipFile = zip.file(fullPath);
+    this.isFile = !!this._zipFile;
+    this._zip = zip;
 
     if (this.isFile) {
-      this.zipDir = null;
+      this._zipDir = null;
       this.isDirectory = false;
     } else {
-      this.zipDir = zip.folder(fullPath);
+      this._zipDir = zip.folder(fullPath);
       this.isDirectory = true;
     }
 
@@ -38,20 +41,16 @@ class MockFileSystemEntry {
   }
 
   file(cb: (file: File) => void, errCb: (error: Error) => void) {
-    if (!this.zipFile) {
+    if (!this._zipFile) {
       return errCb(new Error('Failed to extract file'));
     }
-    this.zipFile
+
+    this._zipFile
       .async('blob')
-      .then(
-        blob => {
-          (blob: any).name = this.name;
-          cb(blob);
-        },
-        err => {
-          errCb(err);
-        }
-      )
+      .then(blob => {
+        blob.name = this.name;
+        cb(blob);
+      })
       .catch(errCb);
 
     return undefined;
@@ -63,16 +62,16 @@ class MockFileSystemEntry {
         cb: (entries: []) => void,
         errCb: (error: Error) => void
       ) => {
-        if (!this.zipDir) {
+        if (!this._zipDir) {
           return errCb(new Error('Failed to read folder entries'));
         }
         const ret = [];
-        this.zipDir.forEach((relativePath: string, file: { name: string }) => {
+        this._zipDir.forEach((relativePath: string, file: { name: string }) => {
           if (
             relativePath.split('/').length ===
             (relativePath.endsWith('/') ? 2 : 1)
           ) {
-            ret.push(new MockFileSystemEntry(this.zip, file.name));
+            ret.push(new MockFileSystemEntry(this._zip, file.name));
           }
         });
         return cb(ret);

@@ -10,6 +10,7 @@ import {
 import BinaryPlistParser, { UID } from './BinaryPlistParser';
 import BinReader from './BinReader';
 import MaybeCompressedReader from './MaybeCompressedReader';
+import { ensureExists } from '../../../utils/flow';
 
 //types
 import type {
@@ -335,23 +336,7 @@ function zeroPad(s: string, width: number) {
   return new Array(Math.max(width - s.length, 0) + 1).join('0') + s;
 }
 
-function getOrThrow<K, V>(map: Map<K, V>, k: K): V {
-  if (!map.has(k)) {
-    if (typeof k === 'string') {
-      throw new Error(`Expected key ${k}`);
-    }
-  }
-
-  const value = map.get(k);
-
-  if (value) {
-    return value;
-  }
-
-  throw new Error(`Couldn't find a value`);
-}
-
-function getOrInsert<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V | K {
+function setIfAbsent<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V | K {
   if (!map.has(k)) {
     map.set(k, fallback(k));
     return k;
@@ -364,15 +349,15 @@ async function getIntegerArrays(
   samples: InstrumentsSample[],
   core: TraceDirectoryTree
 ): Promise<number[][]> {
-  const uniquing = getOrThrow(core.subdirectories, 'uniquing');
-  const arrayUniquer = getOrThrow(uniquing.subdirectories, 'arrayUniquer');
-  const integeruniquerindex = getOrThrow(
-    arrayUniquer.files,
-    'integeruniquer.index'
+  const uniquing = ensureExists(core.subdirectories.get('uniquing'));
+  const arrayUniquer = ensureExists(
+    uniquing.subdirectories.get('arrayUniquer')
   );
-  const integeruniquerdata = getOrThrow(
-    arrayUniquer.files,
-    'integeruniquer.data'
+  const integeruniquerindex = ensureExists(
+    arrayUniquer.files.get('integeruniquer.index')
+  );
+  const integeruniquerdata = ensureExists(
+    arrayUniquer.files.get('integeruniquer.data')
   );
 
   // integeruniquer.index is a binary file containing an array of [byte offset, MB offset] pairs
@@ -422,7 +407,7 @@ async function getIntegerArrays(
 async function getRawSampleList(
   core: TraceDirectoryTree
 ): Promise<InstrumentsSample[]> {
-  const stores = getOrThrow(core.subdirectories, 'stores');
+  const stores = ensureExists(core.subdirectories.get('stores'));
   for (const storedir of stores.subdirectories.values()) {
     const schemaFile = storedir.files.get('schema.xml');
     if (!schemaFile) {
@@ -433,7 +418,7 @@ async function getRawSampleList(
       continue;
     }
     const bulkstore = new BinReader(
-      await readAsArrayBuffer(getOrThrow(storedir.files, 'bulkstore'))
+      await readAsArrayBuffer(ensureExists(storedir.files.get('bulkstore')))
     );
     // Ignore the first 3 words
     bulkstore.readUint32();
@@ -470,12 +455,11 @@ function getCoreDirForRun(
   tree: TraceDirectoryTree,
   selectedRun: number
 ): TraceDirectoryTree {
-  const corespace = getOrThrow(tree.subdirectories, 'corespace');
-  const corespaceRunDir = getOrThrow(
-    corespace.subdirectories,
-    `run${selectedRun}`
+  const corespace = ensureExists(tree.subdirectories.get('corespace'));
+  const corespaceRunDir = ensureExists(
+    corespace.subdirectories.get(`run${selectedRun}`)
   );
-  return getOrThrow(corespaceRunDir.subdirectories, 'core');
+  return ensureExists(corespaceRunDir.subdirectories.get('core'));
 }
 
 // This function mainly extracts two entities: samples and arrays
@@ -519,7 +503,7 @@ async function getSamples(args: {
   }
 
   for (const sample of samples) {
-    getOrInsert(backtraceIDtoStack, sample.backtraceID, id => {
+    setIfAbsent(backtraceIDtoStack, sample.backtraceID, id => {
       const stack: Array<number> = [];
       appendRecursive(id, stack);
       stack.reverse();
@@ -558,8 +542,8 @@ async function readFormTemplateFile(tree) {
 
   const runs: FormTemplateRunData[] = [];
   for (const runNumber of allRunData.runNumbers) {
-    const runData = getOrThrow(allRunData.runData, runNumber);
-    const symbolsByPid = getOrThrow(runData, 'symbolsByPid');
+    const runData = ensureExists(allRunData.runData.get(runNumber));
+    const symbolsByPid = ensureExists(runData.get('symbolsByPid'));
 
     const addressToFrameMap = new Map<number, InstrumentsFrameInfo>();
     for (const symbols of symbolsByPid.values()) {
@@ -569,7 +553,7 @@ async function readFormTemplateFile(tree) {
         }
         const { sourcePath, symbolName, addressToLine } = symbol;
         for (const address of addressToLine.keys()) {
-          getOrInsert(addressToFrameMap, address, () => {
+          setIfAbsent(addressToFrameMap, address, () => {
             const name = symbolName || `0x${zeroPad(address.toString(16), 16)}`;
             const frame: InstrumentsFrameInfo = {
               key: `${sourcePath}:${name}`,

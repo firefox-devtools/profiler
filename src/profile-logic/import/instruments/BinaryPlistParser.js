@@ -28,9 +28,9 @@ class BinaryPlistParser {
     this.referenceSize = this.view.getUint8(trailer + 7);
 
     // Just use the last 32-bits of these 64-bit big-endian values
-    const objectCount = this.view.getUint32(trailer + 12, false);
-    const rootIndex = this.view.getUint32(trailer + 20, false);
-    let tableOffset = this.view.getUint32(trailer + 28, false);
+    const objectCount = this.view.getUint32(trailer + 12);
+    const rootIndex = this.view.getUint32(trailer + 20);
+    let tableOffset = this.view.getUint32(trailer + 28);
 
     // Parse all offsets before starting to parse objects
     for (let i = 0; i < objectCount; i++) {

@@ -31,8 +31,6 @@ class BinReader {
     return this.view.getUint8(this.bytePos - 1);
   }
 
-  // Note: we intentionally use Math.pow here rather than bit shifts
-  // because JavaScript doesn't have true 64 bit integers.
   readUint32() {
     this.bytePos += 4;
     if (this.bytePos > this.view.byteLength) {
@@ -46,6 +44,8 @@ class BinReader {
       return 0;
     }
 
+    // Note: we intentionally use Math.pow here rather than bit shifts
+    // because JavaScript doesn't have true 64 bit integers.
     return (
       this.view.getUint32(this.bytePos - 6, true) +
       this.view.getUint16(this.bytePos - 2, true) * Math.pow(2, 32)
