@@ -191,6 +191,12 @@
   color: var(--grey-50);
 }
 
+.visualMetricsLabel {
+  display: inline-block;
+  width: 145px;
+  color: var(--grey-50);
+}
+
 .metaInfoList {
   margin-top: -19px;
 }
