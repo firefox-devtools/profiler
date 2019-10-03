@@ -194,7 +194,7 @@ body,
   background-color: var(--grey-30);
   color: black;
 }
-.treeViewRow.selected a {
+.treeViewRow.isSelected a {
   color: white;
 }
 .treeViewRow.dim > .treeViewMainColumn {
