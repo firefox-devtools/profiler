@@ -109,6 +109,15 @@ body {
   font-size: 0.8em;
 }
 
+/**
+ * The emphasis fails accessibility guidelines.
+ */
+.markdown-section em {
+  /* Use the same color as the surrounding text. */
+  color: rgb(44, 62, 80);
+  font-weight: bold;
+}
+
 @media screen and (max-width:768px) {
   /* Make the sidebar toggle not block the text, and be at the top of the screen */
   .sidebar-toggle {
