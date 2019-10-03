@@ -1,0 +1,37 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.timelineTrackVisualProgressGraph {
+  position: relative;
+  width: 100%;
+  height: var(--graph-height);
+}
+
+.timelineTrackVisualProgressCanvas {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.timelineTrackVisualProgressGraphDot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  margin-top: -3px;
+  margin-left: -3px;
+  background-color: var(--dot-color);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.timelineTrackVisualProgressTooltipLine {
+  white-space: nowrap;
+}
+
+.timelineTrackVisualProgressTooltipNumber {
+  display: inline-block;
+  min-width: 60px;
+  color: var(--grey-60);
+  font-weight: bold;
+}

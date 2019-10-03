@@ -41,10 +41,16 @@ const LOCAL_TRACK_DISPLAY_ORDER = {
 const GLOBAL_TRACK_INDEX_ORDER = {
   process: 0,
   screenshots: 1,
+  'visual-progress': 2,
+  'perceptual-visual-progress': 3,
+  'contentful-visual-progress': 4,
 };
 const GLOBAL_TRACK_DISPLAY_ORDER = {
-  screenshots: 0,
-  process: 1,
+  'visual-progress': 0,
+  'perceptual-visual-progress': 1,
+  'contentful-visual-progress': 2,
+  screenshots: 3,
+  process: 4,
 };
 
 function _getDefaultLocalTrackOrder(tracks: LocalTrack[]) {
@@ -325,6 +331,11 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
       }
       for (const id of ids) {
         globalTracks.push({ type: 'screenshots', id, threadIndex });
+        if (profile.meta && profile.meta.visualMetrics) {
+          globalTracks.push({ type: 'visual-progress', id });
+          globalTracks.push({ type: 'perceptual-visual-progress', id });
+          globalTracks.push({ type: 'contentful-visual-progress', id });
+        }
       }
     }
   }
@@ -543,6 +554,12 @@ export function getGlobalTrackName(
     }
     case 'screenshots':
       return 'Screenshots';
+    case 'visual-progress':
+      return 'Visual Progress';
+    case 'perceptual-visual-progress':
+      return 'Perceptual Visual Progress';
+    case 'contentful-visual-progress':
+      return 'Contentful Visual Progress';
     default:
       throw assertExhaustiveCheck(globalTrack, 'Unhandled GlobalTrack type.');
   }
