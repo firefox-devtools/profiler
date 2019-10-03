@@ -190,6 +190,9 @@ body,
   background-color: var(--grey-30);
   color: black;
 }
+.treeViewRow.selected a {
+  color: white;
+}
 .treeViewRow.dim > .treeViewMainColumn {
   opacity: 0.7;
 }
