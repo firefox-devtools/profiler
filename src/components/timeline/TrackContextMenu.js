@@ -5,12 +5,14 @@
 // @flow
 import React, { PureComponent } from 'react';
 import { ContextMenu, MenuItem } from 'react-contextmenu';
+import './TrackContextMenu.css';
 import {
   hideGlobalTrack,
   showGlobalTrack,
   isolateProcess,
   isolateLocalTrack,
   isolateProcessMainThread,
+  isolateScreenshot,
   hideLocalTrack,
   showLocalTrack,
 } from '../../actions/profile-view';
@@ -66,6 +68,7 @@ type DispatchProps = {|
   +showLocalTrack: typeof showLocalTrack,
   +isolateLocalTrack: typeof isolateLocalTrack,
   +isolateProcessMainThread: typeof isolateProcessMainThread,
+  +isolateScreenshot: typeof isolateScreenshot,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -86,22 +89,46 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
   _toggleLocalTrackVisibility = (
     _,
-    data: { pid: Pid, trackIndex: TrackIndex }
+    data: { pid: Pid, trackIndex: TrackIndex, globalTrackIndex: TrackIndex }
   ): void => {
-    const { trackIndex, pid } = data;
+    const { trackIndex, pid, globalTrackIndex } = data;
     const {
       hiddenLocalTracksByPid,
       hideLocalTrack,
       showLocalTrack,
+      hiddenGlobalTracks,
+      showGlobalTrack,
+      localTrackOrderByPid,
     } = this.props;
     const hiddenLocalTracks = ensureExists(
       hiddenLocalTracksByPid.get(pid),
       'Expected to find hidden local tracks for the given pid'
     );
-    if (hiddenLocalTracks.has(trackIndex)) {
-      showLocalTrack(pid, trackIndex);
+
+    if (hiddenGlobalTracks.has(globalTrackIndex)) {
+      // When the parent global track is hidden, instead of simply
+      // toggling, we'll just unhide the global track and this
+      // particular local track. Other local tracks should be hidden.
+      showGlobalTrack(globalTrackIndex);
+      const localTrackOrder = ensureExists(
+        localTrackOrderByPid.get(pid),
+        'Expected to find local tracks for the given pid'
+      );
+      localTrackOrder.forEach(index => {
+        if (index === trackIndex) {
+          showLocalTrack(pid, trackIndex);
+        } else {
+          hideLocalTrack(pid, index);
+        }
+      });
     } else {
-      hideLocalTrack(pid, trackIndex);
+      // When the global track is not hidden, we'll just go ahead and
+      // toggle this local track.
+      if (hiddenLocalTracks.has(trackIndex)) {
+        showLocalTrack(pid, trackIndex);
+      } else {
+        hideLocalTrack(pid, trackIndex);
+      }
     }
   };
 
@@ -118,6 +145,21 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       );
     }
     isolateProcess(rightClickedTrack.trackIndex);
+  };
+
+  _isolateScreenshot = () => {
+    const { isolateScreenshot, rightClickedTrack } = this.props;
+    if (rightClickedTrack === null) {
+      throw new Error(
+        'Attempted to isolate the screenshot with no right clicked track.'
+      );
+    }
+    if (rightClickedTrack.type !== 'global') {
+      throw new Error(
+        'Attempting to isolate a screenshot track with a local track is selected.'
+      );
+    }
+    isolateScreenshot(rightClickedTrack.trackIndex);
   };
 
   _isolateProcessMainThread = () => {
@@ -154,8 +196,14 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   };
 
   renderGlobalTrack(trackIndex: TrackIndex) {
-    const { hiddenGlobalTracks, globalTrackNames } = this.props;
+    const { hiddenGlobalTracks, globalTrackNames, globalTracks } = this.props;
     const isHidden = hiddenGlobalTracks.has(trackIndex);
+    const track = globalTracks[trackIndex];
+
+    let title = `${globalTrackNames[trackIndex]}`;
+    if (track.type === 'process') {
+      title += ` (Process ID: ${track.pid})`;
+    }
 
     return (
       <MenuItem
@@ -164,10 +212,18 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         data={{ trackIndex }}
         onClick={this._toggleGlobalTrackVisibility}
         attributes={{
-          className: classNames({ checkable: true, checked: !isHidden }),
+          className: classNames('timelineTrackContextMenuItem', {
+            checkable: true,
+            checked: !isHidden,
+          }),
+          title,
         }}
       >
-        {globalTrackNames[trackIndex]}
+        <span>{globalTrackNames[trackIndex]}</span>
+        <span className="timelineTrackContextMenuSpacer" />
+        {track.type === 'process' && (
+          <span className="timelineTrackContextMenuPid">({track.pid})</span>
+        )}
       </MenuItem>
     );
   }
@@ -199,14 +255,13 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     return localTrackOrder.map(trackIndex => (
       <MenuItem
-        disabled={isGlobalTrackHidden}
         key={trackIndex}
         preventClose={true}
-        data={{ pid, trackIndex }}
+        data={{ pid, trackIndex, globalTrackIndex }}
         onClick={this._toggleLocalTrackVisibility}
         attributes={{
           className: classNames('checkable indented', {
-            checked: !hiddenLocalTracks.has(trackIndex),
+            checked: !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
           }),
         }}
       >
@@ -381,14 +436,52 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     );
   }
 
+  getVisibleScreenshotTracks(): GlobalTrack[] {
+    const { globalTracks, hiddenGlobalTracks } = this.props;
+    const visibleScreenshotTracks = globalTracks.filter(
+      (globalTrack, trackIndex) =>
+        globalTrack.type === 'screenshots' &&
+        !hiddenGlobalTracks.has(trackIndex)
+    );
+    return visibleScreenshotTracks;
+  }
+
+  renderIsolateScreenshot() {
+    const { rightClickedTrack, globalTracks } = this.props;
+
+    if (rightClickedTrack === null) {
+      return null;
+    }
+
+    const track = globalTracks[rightClickedTrack.trackIndex];
+    if (track.type !== 'screenshots') {
+      // Only process screenshot tracks
+      return null;
+    }
+
+    // We check that it's less or equal to 1 (instead of just equal to 1)
+    // because we want to also leave the item disabled when we hide the last
+    // screenshot track while the menu is open.
+    const isDisabled = this.getVisibleScreenshotTracks().length <= 1;
+    return (
+      <MenuItem onClick={this._isolateScreenshot} disabled={isDisabled}>
+        Hide other screenshot tracks
+      </MenuItem>
+    );
+  }
+
   render() {
     const { globalTrackOrder, globalTracks } = this.props;
 
     const isolateProcessMainThread = this.renderIsolateProcessMainThread();
     const isolateProcess = this.renderIsolateProcess();
     const isolateLocalTrack = this.renderIsolateLocalTrack();
+    const isolateScreenshot = this.renderIsolateScreenshot();
     const separator =
-      isolateProcessMainThread || isolateProcess || isolateLocalTrack ? (
+      isolateProcessMainThread ||
+      isolateProcess ||
+      isolateLocalTrack ||
+      isolateScreenshot ? (
         <div className="react-contextmenu-separator" />
       ) : null;
 
@@ -404,6 +497,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         {isolateProcessMainThread}
         {isolateProcess}
         {isolateLocalTrack}
+        {isolateScreenshot}
         {separator}
         {globalTrackOrder.map(globalTrackIndex => {
           const globalTrack = globalTracks[globalTrackIndex];
@@ -441,6 +535,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     isolateProcess,
     isolateLocalTrack,
     isolateProcessMainThread,
+    isolateScreenshot,
     hideLocalTrack,
     showLocalTrack,
   },

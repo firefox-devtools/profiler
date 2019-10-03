@@ -30,9 +30,12 @@ import type {
 } from '../../types/profile-derived';
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { Viewport } from '../shared/chart/Viewport';
+import type { CallTreeSummaryStrategy } from '../../types/actions';
 
 export type OwnProps = {|
   +thread: Thread,
+  +unfilteredThread: Thread,
+  +sampleIndexOffset: number,
   +maxStackDepth: number,
   +flameGraphTiming: FlameGraphTiming,
   +callNodeInfo: CallNodeInfo,
@@ -40,11 +43,13 @@ export type OwnProps = {|
   +stackFrameHeight: CssPixels,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
-  +disableTooltips: boolean,
+  +onRightClick: (IndexIntoCallNodeTable | null) => void,
+  +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
   +categories: CategoryList,
   +interval: Milliseconds,
   +isInverted: boolean,
+  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
 
 type Props = {|
@@ -245,16 +250,19 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
   }: HoveredStackTiming): React.Node => {
     const {
       thread,
+      unfilteredThread,
+      sampleIndexOffset,
       flameGraphTiming,
       callTree,
       callNodeInfo,
-      disableTooltips,
+      shouldDisplayTooltips,
       categories,
       interval,
       isInverted,
+      callTreeSummaryStrategy,
     } = this.props;
 
-    if (disableTooltips) {
+    if (!shouldDisplayTooltips()) {
       return null;
     }
 
@@ -263,6 +271,14 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
     const duration =
       stackTiming.end[flameGraphTimingIndex] -
       stackTiming.start[flameGraphTimingIndex];
+
+    const shouldComputeTimings =
+      // This is currently too slow for JS Tracer threads.
+      !thread.isJsTracer &&
+      // Only calculate this if our summary strategy is actually timing related.
+      // This function could be made more generic to handle other summary
+      // strategies, but it may not be worth implementing it.
+      callTreeSummaryStrategy === 'timing';
 
     return (
       // Important! Only pass in props that have been properly memoized so this component
@@ -275,29 +291,51 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         categories={categories}
         durationText={`${(100 * duration).toFixed(2)}%`}
         callTree={callTree}
-        timings={this._getTimingsForCallNodeIndex(
-          callNodeIndex,
-          callNodeInfo,
-          interval,
-          isInverted,
-          thread,
-          categories
-        )}
+        callTreeSummaryStrategy={callTreeSummaryStrategy}
+        timings={
+          shouldComputeTimings
+            ? this._getTimingsForCallNodeIndex(
+                callNodeIndex,
+                callNodeInfo,
+                interval,
+                isInverted,
+                thread,
+                unfilteredThread,
+                sampleIndexOffset,
+                categories
+              )
+            : undefined
+        }
       />
     );
   };
 
+  _getCallNodeIndexFromHoveredItem(
+    hoveredItem: HoveredStackTiming | null
+  ): IndexIntoCallNodeTable | null {
+    if (hoveredItem === null) {
+      return null;
+    }
+
+    const { depth, flameGraphTimingIndex } = hoveredItem;
+    const { flameGraphTiming } = this.props;
+    const stackTiming = flameGraphTiming[depth];
+    const callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
+    return callNodeIndex;
+  }
+
   _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
-    let callNodeIndex = null;
-    if (hoveredItem !== null) {
-      const { depth, flameGraphTimingIndex } = hoveredItem;
-      const { flameGraphTiming } = this.props;
-      const stackTiming = flameGraphTiming[depth];
-      callNodeIndex = stackTiming.callNode[flameGraphTimingIndex];
-    }
+    const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
     this.props.onSelectionChange(callNodeIndex);
+  };
+
+  _onRightClick = (hoveredItem: HoveredStackTiming | null) => {
+    // Change our selection to the hovered item, or deselect (with
+    // null) if there's nothing hovered.
+    const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
+    this.props.onRightClick(callNodeIndex);
   };
 
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
@@ -342,6 +380,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
         onSelectItem={this._onSelectItem}
+        onRightClick={this._onRightClick}
       />
     );
   }

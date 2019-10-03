@@ -31,6 +31,8 @@ import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';
 import TimelineLocalTrack from './LocalTrack';
 import Reorderable from '../shared/Reorderable';
+import { TRACK_PROCESS_BLANK_HEIGHT } from '../../app-logic/constants';
+
 import type { TabSlug } from '../../app-logic/tabs-handling';
 import type { GlobalTrackReference } from '../../types/actions';
 import type { Pid } from '../../types/profile';
@@ -68,8 +70,6 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-export const TRACK_PROCESS_BLANK_HEIGHT = 30;
-
 class GlobalTrackComponent extends PureComponent<Props> {
   _onLabelMouseDown = (event: MouseEvent) => {
     const { changeRightClickedTrack, trackReference } = this.props;
@@ -100,7 +100,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
             <div
               className="timelineTrackThreadBlank"
               style={{
-                '--timeline-track-thread-blank-height': TRACK_PROCESS_BLANK_HEIGHT,
+                '--timeline-track-thread-blank-height': `${TRACK_PROCESS_BLANK_HEIGHT}px`,
               }}
             />
           );
@@ -164,6 +164,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
       style,
       localTracks,
       pid,
+      globalTrack,
     } = this.props;
 
     if (isHidden) {
@@ -192,11 +193,14 @@ class GlobalTrackComponent extends PureComponent<Props> {
             <button type="button" className="timelineTrackNameButton">
               {trackName}
               {
-                // Only show the PID if it is a real number. A string PID is an
-                // artificially generated value that is not useful, and a null
-                // value does not exist. */
+                // Only show the PID if:
+                //   1. It is a real number. A string PID is an artificially generated
+                //      value that is not useful, and a null value does not exist.
+                //   2. The global track actually points to a real thread. A stub
+                //      process track is created
               }
-              {typeof pid === 'number' ? (
+              {typeof pid === 'number' &&
+              globalTrack.mainThreadIndex !== null ? (
                 <div className="timelineTrackNameButtonAdditionalDetails">
                   PID: {pid}
                 </div>

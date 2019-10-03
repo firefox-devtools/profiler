@@ -38,6 +38,10 @@ export function uploadBinaryProfileData(): * {
         };
 
         xhr.onerror = () => {
+          console.error(
+            'There was an XHR error in uploadBinaryProfileData()',
+            xhr
+          );
           reject(
             new Error(
               // The profile store does not give useful responses.

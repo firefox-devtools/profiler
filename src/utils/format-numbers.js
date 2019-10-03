@@ -7,7 +7,7 @@
 import memoize from 'memoize-immutable';
 import NamedTupleMap from 'namedtuplemap';
 
-import type { Microseconds, Milliseconds } from '../types/units';
+import type { Microseconds, Milliseconds, Nanoseconds } from '../types/units';
 
 // Calling `toLocalestring` repeatedly in a tight loop can be a performance
 // problem. It's much better to reuse an instance of `Intl.NumberFormat`.
@@ -76,22 +76,22 @@ export function formatNumber(
 }
 
 /**
- * When the interval is an integer, then there will never be fractions for timing
- * information in the call tree. In this case it's nice to display integers. If the
- * interval is fractional, then timing information could be nicer with more precise
- * numbers. This function handles this formatting method.
- *
- * e.g. (true, 6.0) => "6"
- * e.g. (false, 6.0) => "6.0"
- * e.g. (true, 6.555) => "6"
- * e.g. (false, 6.555) => "6.6"
+ * Format call node numbers consistently.
  */
-export function formatNumberDependingOnInterval(
-  isIntegerInterval: boolean,
+export function formatCallNodeNumber(
+  interval: number,
+  isHighPrecision: boolean,
   number: number
 ): string {
-  const maxFractionalDigits = isIntegerInterval ? 0 : 1;
-  return formatNumber(number, 3, maxFractionalDigits);
+  // If the interval is an integer, display the number as an integer.
+  let precision = Number.isInteger(interval) ? 0 : 1;
+
+  if (isHighPrecision) {
+    // Sometimes the number should be high precision, such as on a JS tracer thread
+    // which has timing to the microsecond.
+    precision = 3;
+  }
+  return formatNumber(number, 3, precision);
 }
 
 export function formatPercent(value: number): string {
@@ -125,6 +125,14 @@ export function formatSI(num: number): string {
     return formatNumber(num / (1000 * 1000), 3, 2) + 'M';
   }
   return formatNumber(num / (1000 * 1000 * 1000), 3, 2) + 'G';
+}
+
+export function formatNanoseconds(
+  time: Nanoseconds,
+  significantDigits: number = 3,
+  maxFractionalDigits: number = 4
+) {
+  return formatNumber(time, significantDigits, maxFractionalDigits) + 'ns';
 }
 
 export function formatMicroseconds(

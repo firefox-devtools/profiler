@@ -7,12 +7,16 @@ import * as React from 'react';
 import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 
+// This module is mocked.
+import copy from 'copy-to-clipboard';
+
 import {
   changeNetworkSearchString,
   commitRange,
   updatePreviewSelection,
 } from '../../actions/profile-view';
 import NetworkChart from '../../components/network-chart';
+import MarkerContextMenu from '../../components/shared/MarkerContextMenu';
 import { changeSelectedTab } from '../../actions/app';
 import { ensureExists } from '../../utils/flow';
 import {
@@ -70,7 +74,10 @@ function setupWithProfile(profile) {
 
   const renderResult = render(
     <Provider store={store}>
-      <NetworkChart />
+      <>
+        <MarkerContextMenu />
+        <NetworkChart />
+      </>
     </Provider>
   );
 
@@ -103,6 +110,23 @@ function setupWithProfile(profile) {
     );
   }
 
+  const getContextMenu = () =>
+    ensureExists(
+      container.querySelector('.react-contextmenu'),
+      `Couldn't find the context menu.`
+    );
+
+  function rightClick(where) {
+    const clickOptions = {
+      button: 2,
+      buttons: 2,
+    };
+
+    fireEvent.mouseDown(where, clickOptions);
+    fireEvent.mouseUp(where, clickOptions);
+    fireEvent.contextMenu(where, clickOptions);
+  }
+
   return {
     ...renderResult,
     ...store,
@@ -114,6 +138,8 @@ function setupWithProfile(profile) {
     getPhaseElements,
     getPhaseElementStyles,
     rowItem,
+    getContextMenu,
+    rightClick,
   };
 }
 
@@ -129,6 +155,38 @@ describe('NetworkChart', function() {
     const drawCalls = flushDrawLog();
     expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
+  });
+
+  it('displays a context menu when right clicking', () => {
+    // Context menus trigger asynchronous operations for some behaviors, so we
+    // use fake timers to avoid bad interactions between tests.
+    jest.useFakeTimers();
+
+    const markers = [
+      ...getNetworkMarkers({
+        uri: 'https://mozilla.org/1',
+        id: 1,
+        startTime: 10,
+        endTime: 60,
+      }),
+      ...getNetworkMarkers({
+        uri: 'https://mozilla.org/2',
+        id: 2,
+        startTime: 20,
+        endTime: 70,
+      }),
+    ];
+    const { getByText, getContextMenu, rightClick } = setupWithPayload(markers);
+    rightClick(getByText('/1'));
+
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+
+    fireEvent.click(getByText('Copy URL'));
+    expect(copy).toHaveBeenLastCalledWith('https://mozilla.org/1');
+    expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
+
+    jest.runAllTimers();
+    expect(document.querySelector('react-contextmenu')).toBeFalsy();
   });
 });
 
@@ -606,6 +664,29 @@ describe('Network Chart/tooltip behavior', () => {
     fireEvent(rowItem(), getMouseEvent('mouseover', { pageX: 25, pageY: 25 }));
     expect(getByTestId('tooltip')).toBeTruthy();
     fireEvent(rowItem(), getMouseEvent('mouseout', { pageX: 25, pageY: 25 }));
+    expect(queryByTestId('tooltip')).toBeFalsy();
+  });
+
+  it('does not show tooltips when a context menu is displayed', () => {
+    // Context menus trigger asynchronous operations for some behaviors, so we
+    // use fake timers to avoid bad interactions between tests.
+    jest.useFakeTimers();
+
+    const {
+      rowItem,
+      queryByTestId,
+      rightClick,
+      getByText,
+      getContextMenu,
+    } = setupWithPayload(getNetworkMarkers());
+
+    rightClick(getByText('mozilla.org'));
+
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+
+    // React uses mouseover/mouseout events to implement mouseenter/mouseleave.
+    // See https://github.com/facebook/react/blob/b87aabdfe1b7461e7331abb3601d9e6bb27544bc/packages/react-dom/src/events/EnterLeaveEventPlugin.js#L24-L31
+    fireEvent(rowItem(), getMouseEvent('mouseover', { pageX: 25, pageY: 25 }));
     expect(queryByTestId('tooltip')).toBeFalsy();
   });
 });

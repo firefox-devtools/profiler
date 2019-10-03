@@ -10,6 +10,8 @@ import {
 import {
   toValidImplementationFilter,
   getCallNodeIndexFromPath,
+  updateThreadStacks,
+  getMapStackUpdater,
 } from './profile-data';
 import { timeCode } from '../utils/time-code';
 import { assertExhaustiveCheck, convertToTransformType } from '../utils/flow';
@@ -556,7 +558,7 @@ export function mergeCallNode(
   implementation: ImplementationFilter
 ): Thread {
   return timeCode('mergeCallNode', () => {
-    const { stackTable, frameTable, samples } = thread;
+    const { stackTable, frameTable } = thread;
     // Depth here is 0 indexed.
     const depthAtCallNodePathLeaf = callNodePath.length - 1;
     const oldStackToNewStack: Map<
@@ -576,6 +578,7 @@ export function mergeCallNode(
       const prefix = stackTable.prefix[stackIndex];
       const frameIndex = stackTable.frame[stackIndex];
       const category = stackTable.category[stackIndex];
+      const subcategory = stackTable.subcategory[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
 
       const doesPrefixMatch = prefix === null ? true : stackMatches[prefix];
@@ -627,27 +630,16 @@ export function mergeCallNode(
           newStackPrefix === undefined ? null : newStackPrefix;
         newStackTable.frame[newStackIndex] = frameIndex;
         newStackTable.category[newStackIndex] = category;
+        newStackTable.subcategory[newStackIndex] = subcategory;
         oldStackToNewStack.set(stackIndex, newStackIndex);
       }
     }
-    const newSamples = {
-      ...samples,
-      stack: samples.stack.map(oldStack => {
-        const newStack = oldStackToNewStack.get(oldStack);
-        if (newStack === undefined) {
-          throw new Error(
-            'Converting from the old stack to a new stack cannot be undefined'
-          );
-        }
-        return newStack;
-      }),
-    };
 
-    return {
-      ...thread,
-      stackTable: newStackTable,
-      samples: newSamples,
-    };
+    return updateThreadStacks(
+      thread,
+      newStackTable,
+      getMapStackUpdater(oldStackToNewStack)
+    );
   });
 }
 
@@ -659,7 +651,7 @@ export function mergeFunction(
   thread: Thread,
   funcIndexToMerge: IndexIntoFuncTable
 ): Thread {
-  const { stackTable, frameTable, samples } = thread;
+  const { stackTable, frameTable } = thread;
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
     IndexIntoStackTable | null
@@ -668,10 +660,12 @@ export function mergeFunction(
   // stacks by mapping from null to null.
   oldStackToNewStack.set(null, null);
   const newStackTable = getEmptyStackTable();
+
   for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
     const category = stackTable.category[stackIndex];
+    const subcategory = stackTable.subcategory[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
 
     if (funcIndex === funcIndexToMerge) {
@@ -687,26 +681,16 @@ export function mergeFunction(
         newStackPrefix === undefined ? null : newStackPrefix;
       newStackTable.frame[newStackIndex] = frameIndex;
       newStackTable.category[newStackIndex] = category;
+      newStackTable.subcategory[newStackIndex] = subcategory;
       oldStackToNewStack.set(stackIndex, newStackIndex);
     }
   }
-  const newSamples = {
-    ...samples,
-    stack: samples.stack.map(oldStack => {
-      const newStack = oldStackToNewStack.get(oldStack);
-      if (newStack === undefined) {
-        throw new Error(
-          'Converting from the old stack to a new stack cannot be undefined'
-        );
-      }
-      return newStack;
-    }),
-  };
-  return {
-    ...thread,
-    stackTable: newStackTable,
-    samples: newSamples,
-  };
+
+  return updateThreadStacks(
+    thread,
+    newStackTable,
+    getMapStackUpdater(oldStackToNewStack)
+  );
 }
 
 /**
@@ -716,7 +700,7 @@ export function dropFunction(
   thread: Thread,
   funcIndexToDrop: IndexIntoFuncTable
 ) {
-  const { stackTable, frameTable, samples } = thread;
+  const { stackTable, frameTable } = thread;
 
   // Go through each stack, and label it as containing the function or not.
   const stackContainsFunc: Array<void | true> = [];
@@ -734,16 +718,10 @@ export function dropFunction(
     }
   }
 
-  // Regenerate the stacks for the samples table.
-  const stack: Array<null | IndexIntoStackTable> = samples.stack.map(stack =>
+  return updateThreadStacks(thread, stackTable, stack =>
+    // Drop the stacks that contain that function.
     stack !== null && stackContainsFunc[stack] ? null : stack
   );
-
-  // Return the thread with the replaced samples.
-  return {
-    ...thread,
-    samples: { ...samples, stack },
-  };
 }
 
 export function collapseResource(
@@ -752,7 +730,7 @@ export function collapseResource(
   implementation: ImplementationFilter,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const { stackTable, funcTable, frameTable, resourceTable, samples } = thread;
+  const { stackTable, funcTable, frameTable, resourceTable } = thread;
   const resourceNameIndex = resourceTable.name[resourceIndexToCollapse];
   const newFrameTable = shallowCloneFrameTable(frameTable);
   const newFuncTable = shallowCloneFuncTable(funcTable);
@@ -780,6 +758,7 @@ export function collapseResource(
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
     const category = stackTable.category[stackIndex];
+    const subcategory = stackTable.subcategory[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
     const resourceIndex = funcTable.resource[funcIndex];
     const newStackPrefix = oldStackToNewStack.get(prefix);
@@ -811,6 +790,7 @@ export function collapseResource(
             // Add the collapsed frame
             newFrameTable.address.push(frameTable.address[frameIndex]);
             newFrameTable.category.push(frameTable.category[frameIndex]);
+            newFrameTable.subcategory.push(frameTable.subcategory[frameIndex]);
             newFrameTable.func.push(collapsedFuncIndex);
             newFrameTable.line.push(frameTable.line[frameIndex]);
             newFrameTable.column.push(frameTable.column[frameIndex]);
@@ -835,6 +815,7 @@ export function collapseResource(
           newStackTable.prefix.push(newStackPrefix);
           newStackTable.frame.push(collapsedFrameIndex);
           newStackTable.category.push(category);
+          newStackTable.subcategory.push(subcategory);
         } else {
           // A collapsed stack at this level already exists, use that one.
           if (existingCollapsedStack === null) {
@@ -842,8 +823,14 @@ export function collapseResource(
           }
           oldStackToNewStack.set(stackIndex, existingCollapsedStack);
           if (newStackTable.category[existingCollapsedStack] !== category) {
-            // Conflicting origin stack categories -> default category.
+            // Conflicting origin stack categories -> default category + subcategory.
             newStackTable.category[existingCollapsedStack] = defaultCategory;
+            newStackTable.subcategory[existingCollapsedStack] = 0;
+          } else if (
+            newStackTable.subcategory[existingCollapsedStack] !== subcategory
+          ) {
+            // Conflicting origin stack subcategories -> "Other" subcategory.
+            newStackTable.subcategory[existingCollapsedStack] = 0;
           }
         }
       } else {
@@ -872,30 +859,22 @@ export function collapseResource(
       newStackTable.prefix.push(newStackPrefix);
       newStackTable.frame.push(frameIndex);
       newStackTable.category.push(category);
+      newStackTable.subcategory.push(subcategory);
       oldStackToNewStack.set(stackIndex, newStackIndex);
     }
   }
 
-  const newSamples = {
-    ...samples,
-    stack: samples.stack.map(oldStack => {
-      const newStack = oldStackToNewStack.get(oldStack);
-      if (newStack === undefined) {
-        throw new Error(
-          'Converting from the old stack to a new stack cannot be undefined'
-        );
-      }
-      return newStack;
-    }),
-  };
-
-  return {
+  const newThread = {
     ...thread,
-    stackTable: newStackTable,
     frameTable: newFrameTable,
     funcTable: newFuncTable,
-    samples: newSamples,
   };
+
+  return updateThreadStacks(
+    newThread,
+    newStackTable,
+    getMapStackUpdater(oldStackToNewStack)
+  );
 }
 
 export function collapseDirectRecursion(
@@ -903,7 +882,7 @@ export function collapseDirectRecursion(
   funcToCollapse: IndexIntoFuncTable,
   implementation: ImplementationFilter
 ): Thread {
-  const { stackTable, frameTable, samples } = thread;
+  const { stackTable, frameTable } = thread;
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
     IndexIntoStackTable | null
@@ -919,6 +898,7 @@ export function collapseDirectRecursion(
     const prefix = stackTable.prefix[stackIndex];
     const frameIndex = stackTable.frame[stackIndex];
     const category = stackTable.category[stackIndex];
+    const subcategory = stackTable.subcategory[stackIndex];
     const funcIndex = frameTable.func[frameIndex];
 
     if (
@@ -952,6 +932,7 @@ export function collapseDirectRecursion(
       newStackTable.prefix[newStackIndex] = newStackPrefix;
       newStackTable.frame[newStackIndex] = frameIndex;
       newStackTable.category[newStackIndex] = category;
+      newStackTable.subcategory[newStackIndex] = subcategory;
       oldStackToNewStack.set(stackIndex, newStackIndex);
 
       if (funcToCollapse === funcIndex) {
@@ -959,23 +940,11 @@ export function collapseDirectRecursion(
       }
     }
   }
-  const newSamples = {
-    ...samples,
-    stack: samples.stack.map(oldStack => {
-      const newStack = oldStackToNewStack.get(oldStack);
-      if (newStack === undefined) {
-        throw new Error(
-          'Converting from the old stack to a new stack cannot be undefined'
-        );
-      }
-      return newStack;
-    }),
-  };
-  return {
-    ...thread,
-    stackTable: newStackTable,
-    samples: newSamples,
-  };
+  return updateThreadStacks(
+    thread,
+    newStackTable,
+    getMapStackUpdater(oldStackToNewStack)
+  );
 }
 const FUNC_MATCHES = {
   combined: (_thread: Thread, _funcIndex: IndexIntoFuncTable) => true,
@@ -996,7 +965,10 @@ const FUNC_MATCHES = {
     return !isProbablyJitCode;
   },
   js: (thread: Thread, funcIndex: IndexIntoFuncTable): boolean => {
-    return thread.funcTable.isJS[funcIndex];
+    return (
+      thread.funcTable.isJS[funcIndex] ||
+      thread.funcTable.relevantForJS[funcIndex]
+    );
   },
 };
 
@@ -1005,7 +977,7 @@ export function collapseFunctionSubtree(
   funcToCollapse: IndexIntoFuncTable,
   defaultCategory: IndexIntoCategoryList
 ): Thread {
-  const { stackTable, frameTable, samples } = thread;
+  const { stackTable, frameTable } = thread;
   const oldStackToNewStack: Map<
     IndexIntoStackTable | null,
     IndexIntoStackTable | null
@@ -1034,12 +1006,19 @@ export function collapseFunctionSubtree(
       collapsedStacks.add(stackIndex);
 
       // Fall back to the default category when stack categories conflict.
-      if (
-        newPrefixStackIndex !== null &&
-        newStackTable.category[newPrefixStackIndex] !==
+      if (newPrefixStackIndex !== null) {
+        if (
+          newStackTable.category[newPrefixStackIndex] !==
           stackTable.category[stackIndex]
-      ) {
-        newStackTable.category[newPrefixStackIndex] = defaultCategory;
+        ) {
+          newStackTable.category[newPrefixStackIndex] = defaultCategory;
+          newStackTable.subcategory[newPrefixStackIndex] = 0;
+        } else if (
+          newStackTable.subcategory[newPrefixStackIndex] !==
+          stackTable.subcategory[stackIndex]
+        ) {
+          newStackTable.subcategory[newPrefixStackIndex] = 0;
+        }
       }
     } else {
       // Add this stack.
@@ -1053,9 +1032,11 @@ export function collapseFunctionSubtree(
 
       const frameIndex = stackTable.frame[stackIndex];
       const category = stackTable.category[stackIndex];
+      const subcategory = stackTable.subcategory[stackIndex];
       newStackTable.prefix[newStackIndex] = newStackPrefix;
       newStackTable.frame[newStackIndex] = frameIndex;
       newStackTable.category[newStackIndex] = category;
+      newStackTable.subcategory[newStackIndex] = subcategory;
       oldStackToNewStack.set(stackIndex, newStackIndex);
 
       // If this is the function to collapse, keep the stack, but note that its children
@@ -1066,23 +1047,12 @@ export function collapseFunctionSubtree(
       }
     }
   }
-  const newSamples = {
-    ...samples,
-    stack: samples.stack.map(oldStack => {
-      const newStack = oldStackToNewStack.get(oldStack);
-      if (newStack === undefined) {
-        throw new Error(
-          'Converting from the old stack to a new stack cannot be undefined'
-        );
-      }
-      return newStack;
-    }),
-  };
-  return {
-    ...thread,
-    stackTable: newStackTable,
-    samples: newSamples,
-  };
+
+  return updateThreadStacks(
+    thread,
+    newStackTable,
+    getMapStackUpdater(oldStackToNewStack)
+  );
 }
 
 /**
@@ -1096,7 +1066,7 @@ export function focusSubtree(
   implementation: ImplementationFilter
 ): Thread {
   return timeCode('focusSubtree', () => {
-    const { stackTable, frameTable, samples } = thread;
+    const { stackTable, frameTable } = thread;
     const prefixDepth = callNodePath.length;
     const stackMatches = new Int32Array(stackTable.length);
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
@@ -1115,6 +1085,7 @@ export function focusSubtree(
       if (prefixMatchesUpTo !== -1) {
         const frame = stackTable.frame[stackIndex];
         const category = stackTable.category[stackIndex];
+        const subcategory = stackTable.subcategory[stackIndex];
         if (prefixMatchesUpTo === prefixDepth) {
           stackMatchesUpTo = prefixDepth;
         } else {
@@ -1132,31 +1103,25 @@ export function focusSubtree(
             newStackPrefix !== undefined ? newStackPrefix : null;
           newStackTable.frame[newStackIndex] = frame;
           newStackTable.category[newStackIndex] = category;
+          newStackTable.subcategory[newStackIndex] = subcategory;
           oldStackToNewStack.set(stackIndex, newStackIndex);
         }
       }
       stackMatches[stackIndex] = stackMatchesUpTo;
     }
-    const newSamples = {
-      ...samples,
-      stack: samples.stack.map(oldStack => {
-        if (oldStack === null || stackMatches[oldStack] !== prefixDepth) {
-          return null;
-        }
-        const newStack = oldStackToNewStack.get(oldStack);
-        if (newStack === undefined) {
-          throw new Error(
-            'Converting from the old stack to a new stack cannot be undefined'
-          );
-        }
-        return newStack;
-      }),
-    };
-    return {
-      ...thread,
-      stackTable: newStackTable,
-      samples: newSamples,
-    };
+
+    return updateThreadStacks(thread, newStackTable, oldStack => {
+      if (oldStack === null || stackMatches[oldStack] !== prefixDepth) {
+        return null;
+      }
+      const newStack = oldStackToNewStack.get(oldStack);
+      if (newStack === undefined) {
+        throw new Error(
+          'Converting from the old stack to a new stack cannot be undefined'
+        );
+      }
+      return newStack;
+    });
   });
 }
 
@@ -1172,7 +1137,7 @@ export function focusInvertedSubtree(
 ): Thread {
   return timeCode('focusInvertedSubtree', () => {
     const postfixDepth = postfixCallNodePath.length;
-    const { stackTable, frameTable, samples } = thread;
+    const { stackTable, frameTable } = thread;
     const funcMatchesImplementation = FUNC_MATCHES[implementation];
     function convertStack(leaf) {
       let matchesUpToDepth = 0; // counted from the leaf
@@ -1195,29 +1160,24 @@ export function focusInvertedSubtree(
     // A root stack's prefix will be null. Maintain that relationship from old to new
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
-    const newSamples = {
-      ...samples,
-      stack: samples.stack.map(stackIndex => {
-        let newStackIndex = oldStackToNewStack.get(stackIndex);
-        if (newStackIndex === undefined) {
-          newStackIndex = convertStack(stackIndex);
-          oldStackToNewStack.set(stackIndex, newStackIndex);
-        }
-        return newStackIndex;
-      }),
-    };
-    return {
-      ...thread,
-      samples: newSamples,
-    };
+
+    return updateThreadStacks(thread, stackTable, stackIndex => {
+      let newStackIndex = oldStackToNewStack.get(stackIndex);
+      if (newStackIndex === undefined) {
+        newStackIndex = convertStack(stackIndex);
+        oldStackToNewStack.set(stackIndex, newStackIndex);
+      }
+      return newStackIndex;
+    });
   });
 }
+
 export function focusFunction(
   thread: Thread,
   funcIndexToFocus: IndexIntoFuncTable
 ): Thread {
-  return timeCode('focusSubtree', () => {
-    const { stackTable, frameTable, samples } = thread;
+  return timeCode('focusFunction', () => {
+    const { stackTable, frameTable } = thread;
     const oldStackToNewStack: Map<
       IndexIntoStackTable | null,
       IndexIntoStackTable | null
@@ -1226,10 +1186,12 @@ export function focusFunction(
     // stacks by mapping from null to null.
     oldStackToNewStack.set(null, null);
     const newStackTable = getEmptyStackTable();
+
     for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
       const prefix = stackTable.prefix[stackIndex];
       const frameIndex = stackTable.frame[stackIndex];
       const category = stackTable.category[stackIndex];
+      const subcategory = stackTable.subcategory[stackIndex];
       const funcIndex = frameTable.func[frameIndex];
       const matchesFocusFunc = funcIndex === funcIndexToFocus;
 
@@ -1243,30 +1205,18 @@ export function focusFunction(
         newStackTable.prefix[newStackIndex] = newPrefix;
         newStackTable.frame[newStackIndex] = frameIndex;
         newStackTable.category[newStackIndex] = category;
+        newStackTable.subcategory[newStackIndex] = subcategory;
         oldStackToNewStack.set(stackIndex, newStackIndex);
       } else {
         oldStackToNewStack.set(stackIndex, null);
       }
     }
-    const newSamples = Object.assign({}, samples, {
-      stack: samples.stack.map(oldStack => {
-        if (oldStack === null) {
-          return null;
-        }
-        const newStack = oldStackToNewStack.get(oldStack);
-        if (newStack === undefined) {
-          throw new Error(
-            'Converting from the old stack to a new stack cannot be undefined'
-          );
-        }
-        return newStack;
-      }),
-    });
-    return {
-      ...thread,
-      stackTable: newStackTable,
-      samples: newSamples,
-    };
+
+    return updateThreadStacks(
+      thread,
+      newStackTable,
+      getMapStackUpdater(oldStackToNewStack)
+    );
   });
 }
 

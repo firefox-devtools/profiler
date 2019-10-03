@@ -10,9 +10,15 @@ import type {
   RawMarkerTable,
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
+  IndexIntoCategoryList,
 } from '../types/profile';
 import type { Marker, MarkerIndex } from '../types/profile-derived';
-import type { BailoutPayload, NetworkPayload } from '../types/markers';
+import type {
+  BailoutPayload,
+  NetworkPayload,
+  PrefMarkerPayload,
+  InvalidationPayload,
+} from '../types/markers';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { StartEndRange } from '../types/units';
 
@@ -38,7 +44,8 @@ import type { StartEndRange } from '../types/units';
  */
 export function deriveJankMarkers(
   samples: SamplesTable,
-  thresholdInMs: number
+  thresholdInMs: number,
+  otherCategoryIndex: IndexIntoCategoryList
 ): Marker[] {
   const addMarker = () =>
     jankInstances.push({
@@ -46,6 +53,7 @@ export function deriveJankMarkers(
       dur: lastResponsiveness,
       title: `${lastResponsiveness.toFixed(2)}ms event processing delay`,
       name: 'Jank',
+      category: otherCategoryIndex,
       data: null,
     });
 
@@ -79,17 +87,21 @@ export function deriveJankMarkers(
 export function getSearchFilteredMarkerIndexes(
   getMarker: MarkerIndex => Marker,
   markerIndexes: MarkerIndex[],
-  searchString: string
+  searchRegExp: RegExp | null
 ): MarkerIndex[] {
-  if (!searchString) {
+  if (!searchRegExp) {
     return markerIndexes;
   }
-  const lowerCaseSearchString = searchString.toLowerCase();
   const newMarkers: MarkerIndex[] = [];
   for (const markerIndex of markerIndexes) {
     const { data, name } = getMarker(markerIndex);
-    const lowerCaseName = name.toLowerCase();
-    if (lowerCaseName.includes(lowerCaseSearchString)) {
+
+    // Reset regexp for each iteration. Otherwise state from previous
+    // iterations can cause matches to fail if the search is global or
+    // sticky.
+    searchRegExp.lastIndex = 0;
+
+    if (searchRegExp.test(name)) {
       newMarkers.push(markerIndex);
       continue;
     }
@@ -97,9 +109,9 @@ export function getSearchFilteredMarkerIndexes(
       if (data.type === 'FileIO') {
         const { filename, operation, source } = data;
         if (
-          filename.toLowerCase().includes(lowerCaseSearchString) ||
-          operation.toLowerCase().includes(lowerCaseSearchString) ||
-          source.toLowerCase().includes(lowerCaseSearchString)
+          searchRegExp.test(filename) ||
+          searchRegExp.test(operation) ||
+          searchRegExp.test(source)
         ) {
           newMarkers.push(markerIndex);
           continue;
@@ -107,23 +119,20 @@ export function getSearchFilteredMarkerIndexes(
       }
       if (
         typeof data.eventType === 'string' &&
-        data.eventType.toLowerCase().includes(lowerCaseSearchString)
+        searchRegExp.test(data.eventType)
       ) {
         // Match DOMevents data.eventType
         newMarkers.push(markerIndex);
         continue;
       }
-      if (
-        typeof data.name === 'string' &&
-        data.name.toLowerCase().includes(lowerCaseSearchString)
-      ) {
+      if (typeof data.name === 'string' && searchRegExp.test(data.name)) {
         // Match UserTiming's name.
         newMarkers.push(markerIndex);
         continue;
       }
       if (
         typeof data.category === 'string' &&
-        data.category.toLowerCase().includes(lowerCaseSearchString)
+        searchRegExp.test(data.category)
       ) {
         // Match UserTiming's name.
         newMarkers.push(markerIndex);
@@ -146,24 +155,29 @@ export function extractMarkerDataFromName(
     data: markers.data.slice(),
     name: markers.name.slice(),
     time: markers.time.slice(),
+    category: markers.category.slice(),
     length: markers.length,
   };
 
   // Match: "Bailout_MonitorTypes after add on line 1013 of self-hosted:1008"
   // Match: "Bailout_TypeBarrierO at jumptarget on line 1490 of resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:1484"
+  // Match: "Bailout_ShapeGuard at jumptarget on line 7 of moz-extension://<URL>"
   const bailoutRegex =
     // Capture groups:
-    //       type   afterAt    where        bailoutLine  script functionLine
-    //        ↓     ↓          ↓                  ↓        ↓    ↓
-    /^Bailout_(\w+) (after|at) ([\w _-]+) on line (\d+) of (.*):(\d+)$/;
+    //       type   afterAt    where        bailoutLine  script     functionLine
+    //        ↓     ↓          ↓                  ↓        ↓        ↓
+    /^Bailout_(\w+) (after|at) ([\w _-]+) on line (\d+) of (.*?)(?::(\d+))?$/;
+  //                                                               ↑
+  // Colon in non-capturing group which only matches when functionLine is present
 
   // Match: "Invalidate resource://devtools/shared/base-loader.js -> resource://devtools/client/shared/vendor/immutable.js:3662"
   // Match: "Invalidate self-hosted:4032"
+  // Match: "Invalidate moz-extension://<URL>"
   const invalidateRegex =
     // Capture groups:
-    //         url    line
-    //           ↓    ↓
-    /^Invalidate (.*):(\d+)$/;
+    //         url        line
+    //           ↓        ↓
+    /^Invalidate (.*?)(?::(\d+))?$/;
 
   const bailoutStringIndex = stringTable.indexForString('Bailout');
   const invalidationStringIndex = stringTable.indexForString('Invalidate');
@@ -194,7 +208,7 @@ export function extractMarkerDataFromName(
           where: afterAt + ' ' + where,
           script: script,
           bailoutLine: +bailoutLine,
-          functionLine: +functionLine,
+          functionLine: functionLine === undefined ? null : +functionLine,
           startTime: time,
           endTime: time,
         }: BailoutPayload);
@@ -203,17 +217,17 @@ export function extractMarkerDataFromName(
       matchFound = true;
       const match = name.match(invalidateRegex);
       if (!match) {
-        console.error(`Could not match regex for bailout: "${name}"`);
+        console.error(`Could not match regex for invalidation: "${name}"`);
       } else {
         const [, url, line] = match;
         newMarkers.name[markerIndex] = invalidationStringIndex;
-        newMarkers.data[markerIndex] = {
+        newMarkers.data[markerIndex] = ({
           type: 'Invalidation',
           url,
-          line,
+          line: line === undefined ? null : line,
           startTime: time,
           endTime: time,
-        };
+        }: InvalidationPayload);
       }
     }
     if (matchFound && markers.data[markerIndex]) {
@@ -232,9 +246,7 @@ export function extractMarkerDataFromName(
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
   stringTable: UniqueStringArray,
-  firstSampleTime: number,
-  lastSampleTime: number,
-  interval: number
+  threadRange: StartEndRange
 ): Marker[] {
   // This is the resulting array.
   const matchedMarkers: Marker[] = [];
@@ -252,7 +264,7 @@ export function deriveMarkersFromRawMarkerTable(
   // Note that we don't have more than 2 network markers with the same name as
   // the name contains an incremented index. Therefore we don't need to use an
   // array as value like for tracing markers.
-  const openNetworkMarkers: Map<IndexIntoStringTable, MarkerIndex> = new Map();
+  const openNetworkMarkers: Map<number, MarkerIndex> = new Map();
 
   // We don't add a screenshot marker as we find it, because to know its
   // duration we need to wait until the next one or the end of the profile. So
@@ -263,6 +275,7 @@ export function deriveMarkersFromRawMarkerTable(
     const name = rawMarkers.name[i];
     const time = rawMarkers.time[i];
     const data = rawMarkers.data[i];
+    const category = rawMarkers.category[i];
 
     if (!data) {
       // Add a marker with a zero duration
@@ -271,6 +284,7 @@ export function deriveMarkersFromRawMarkerTable(
         dur: 0,
         name: stringTable.getString(name),
         title: null,
+        category,
         data: null,
       });
       continue;
@@ -321,6 +335,7 @@ export function deriveMarkersFromRawMarkerTable(
               name: stringTable.getString(name),
               dur: time - start,
               title: null,
+              category,
               data: rawMarkers.data[startIndex],
             });
           } else {
@@ -335,13 +350,14 @@ export function deriveMarkersFromRawMarkerTable(
             // first sample. In that case it'll become a dot marker at
             // the location of the end marker. Otherwise we'll use the
             // time of the first sample as its start.
-            const start = Math.min(time, firstSampleTime);
+            const start = Math.min(time, threadRange.start);
 
             matchedMarkers.push({
               start,
               name: stringTable.getString(name),
               dur: time - start,
               title: null,
+              category,
               data,
               incomplete: true,
             });
@@ -356,6 +372,7 @@ export function deriveMarkersFromRawMarkerTable(
             start: time,
             dur: 0,
             name: stringTable.getString(name),
+            category,
             title: null,
             data,
           });
@@ -384,17 +401,17 @@ export function deriveMarkersFromRawMarkerTable(
         // in the stop marker.
 
         if (data.status === 'STATUS_START') {
-          openNetworkMarkers.set(name, i);
+          openNetworkMarkers.set(data.id, i);
         } else {
           // End status can be any status other than 'STATUS_START'. They are
           // either 'STATUS_STOP' or 'STATUS_REDIRECT'.
           const endData = data;
 
-          const startIndex = openNetworkMarkers.get(name);
+          const startIndex = openNetworkMarkers.get(data.id);
 
           if (startIndex !== undefined) {
             // A start marker matches this end marker.
-            openNetworkMarkers.delete(name);
+            openNetworkMarkers.delete(data.id);
 
             // We know this startIndex points to a Network marker.
             const startData: NetworkPayload = (rawMarkers.data[
@@ -406,6 +423,7 @@ export function deriveMarkersFromRawMarkerTable(
               dur: endData.endTime - startData.startTime,
               name: stringTable.getString(name),
               title: null,
+              category,
               data: {
                 ...endData,
                 startTime: startData.startTime,
@@ -415,12 +433,13 @@ export function deriveMarkersFromRawMarkerTable(
           } else {
             // There's no start marker matching this end marker. This means an
             // abstract marker exists before the start of the profile.
-            const start = Math.min(firstSampleTime, endData.startTime);
+            const start = Math.min(threadRange.start, endData.startTime);
             matchedMarkers.push({
               start,
               dur: endData.endTime - start,
               name: stringTable.getString(name),
               title: null,
+              category,
               data: {
                 ...endData,
                 startTime: start,
@@ -449,6 +468,7 @@ export function deriveMarkersFromRawMarkerTable(
             dur: time - start,
             name: 'CompositorScreenshot',
             title: null,
+            category,
             data,
           });
         }
@@ -467,6 +487,7 @@ export function deriveMarkersFromRawMarkerTable(
             start: data.startTime,
             dur: data.endTime - data.startTime,
             name: stringTable.getString(name),
+            category,
             data,
             title: null,
           });
@@ -479,6 +500,7 @@ export function deriveMarkersFromRawMarkerTable(
             start: time,
             dur: 0,
             name: stringTable.getString(name),
+            category,
             data,
             title: null,
           });
@@ -486,7 +508,7 @@ export function deriveMarkersFromRawMarkerTable(
     }
   }
 
-  const endOfThread = lastSampleTime + interval;
+  const endOfThread = threadRange.end;
 
   // Loop over "start" markers without any "end" markers.
   for (const markerBucket of openTracingMarkers.values()) {
@@ -497,6 +519,7 @@ export function deriveMarkersFromRawMarkerTable(
         dur: Math.max(endOfThread - start, 0),
         name: stringTable.getString(rawMarkers.name[startIndex]),
         data: rawMarkers.data[startIndex],
+        category: rawMarkers.category[startIndex],
         title: null,
         incomplete: true,
       });
@@ -511,6 +534,7 @@ export function deriveMarkersFromRawMarkerTable(
       dur: Math.max(endOfThread - startData.startTime, 0),
       name: stringTable.getString(rawMarkers.name[startIndex]),
       title: null,
+      category: rawMarkers.category[startIndex],
       data: startData,
       incomplete: true,
     });
@@ -523,6 +547,7 @@ export function deriveMarkersFromRawMarkerTable(
       start,
       dur: Math.max(endOfThread - start, 0),
       name: 'CompositorScreenshot',
+      category: rawMarkers.category[previousScreenshotMarker],
       data: rawMarkers.data[previousScreenshotMarker],
       title: null,
     });
@@ -552,6 +577,7 @@ export function filterRawMarkerTableToRange(
     newMarkerTable.time.push(markers.time[index]);
     newMarkerTable.name.push(markers.name[index]);
     newMarkerTable.data.push(markers.data[index]);
+    newMarkerTable.category.push(markers.category[index]);
     newMarkerTable.length++;
   }
   return newMarkerTable;
@@ -594,10 +620,7 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
   // Note that we don't have more than 2 network markers with the same name as
   // the name contains an incremented index. Therefore we don't need to use an
   // array as value like for tracing markers.
-  const openNetworkMarkers: Map<
-    IndexIntoStringTable,
-    IndexIntoRawMarkerTable
-  > = new Map();
+  const openNetworkMarkers: Map<number, IndexIntoRawMarkerTable> = new Map();
 
   let previousScreenshotMarker = null;
 
@@ -678,13 +701,13 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
         // generic markers. Lastly they're always adjacent.
 
         if (data.status === 'STATUS_START') {
-          openNetworkMarkers.set(name, i);
+          openNetworkMarkers.set(data.id, i);
         } else {
           // End status can be any status other than 'STATUS_START'
-          const startIndex = openNetworkMarkers.get(name);
+          const startIndex = openNetworkMarkers.get(data.id);
           if (startIndex !== undefined) {
             // A start marker matches this end marker.
-            openNetworkMarkers.delete(name);
+            openNetworkMarkers.delete(data.id);
 
             // We know this startIndex points to a Network marker.
             const startData: NetworkPayload = (markers.data[startIndex]: any);
@@ -807,6 +830,7 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
     newMarkerTable.name.push(oldMarkers.name[index]);
     newMarkerTable.time.push(oldMarkers.time[index]);
     newMarkerTable.data.push(oldMarkers.data[index]);
+    newMarkerTable.category.push(newMarkerTable.category[index]);
     newMarkerTable.length++;
   };
 
@@ -1021,6 +1045,12 @@ export function removeNetworkMarkerURLs(
   payload: NetworkPayload
 ): NetworkPayload {
   return { ...payload, URI: '', RedirectURI: '' };
+}
+
+export function removePrefMarkerPreferenceValues(
+  payload: PrefMarkerPayload
+): PrefMarkerPayload {
+  return { ...payload, prefValue: '' };
 }
 
 export function getMarkerFullDescription(marker: Marker) {

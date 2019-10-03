@@ -50,7 +50,6 @@ body,
   border-top: 1px solid var(--grey-30);
   cursor: default;
   -webkit-user-select: none;
-  -moz-user-select: none;
   user-select: none;
 }
 
@@ -186,7 +185,12 @@ body,
 .treeViewRow.odd {
   background-color: #f5f5f5;
 }
-.treeViewRow.selected {
+
+/* Note that `isRightClicked` is present before `isSelected` so that it can be overriden. */
+.treeViewRow.isRightClicked {
+  background-color: var(--blue-50-a30);
+}
+.treeViewRow.isSelected {
   background-color: var(--grey-30);
   color: black;
 }
@@ -196,7 +200,7 @@ body,
 .treeViewRow.dim > .treeViewMainColumn {
   opacity: 0.7;
 }
-.treeViewBody:focus .treeViewRow.selected {
+.treeViewBody:focus .treeViewRow.isSelected {
   background-color: highlight;
   color: highlighttext;
 }
@@ -220,9 +224,9 @@ body,
   height: 16px;
   flex-shrink: 0;
   padding: 0;
+  border: 0;
   margin: 0;
   margin-left: 5px;
-  border: 0;
   background: none 0 0 no-repeat transparent;
   background-image: url(../img/svg/circlearrow.svg);
   color: transparent;
@@ -237,44 +241,48 @@ body,
   visibility: visible;
 }
 
-.treeViewBody:focus .treeViewRow.selected > .focusCallstackButton {
+.treeViewBody:focus .treeViewRow.isSelected > .focusCallstackButton {
   background-position: -32px 0;
 }
 
-.treeViewBody:focus .treeViewRow.selected > .focusCallstackButton:active:hover {
+.treeViewBody:focus
+  .treeViewRow.isSelected
+  > .focusCallstackButton:active:hover {
   background-position: -48px 0;
 }
 
 .treeRowToggleButton {
   width: 0;
   height: 0;
-  margin-left: 8px;
   border-top: 5px solid transparent;
   border-right: 4px solid transparent;
   border-bottom: 5px solid transparent;
   border-left: 8px solid;
+  margin-left: 8px;
   color: #888;
 }
 
 .treeRowToggleButton.expanded {
-  margin-top: 5px;
-  margin-right: 5px;
-  margin-left: 5px;
   border-top: 8px solid;
   border-right: 5px solid transparent;
   border-bottom: 4px solid transparent;
   border-left: 5px solid transparent;
+  margin-top: 5px;
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .treeRowToggleButton:active:hover {
   color: var(--grey-60);
 }
 
-.treeViewBody:focus .treeViewRow.selected > .treeRowToggleButton {
+.treeViewBody:focus .treeViewRow.isSelected > .treeRowToggleButton {
   color: #fff;
 }
 
-.treeViewBody:focus .treeViewRow.selected > .treeRowToggleButton:active:hover {
+.treeViewBody:focus
+  .treeViewRow.isSelected
+  > .treeRowToggleButton:active:hover {
   color: rgba(255, 255, 255, 0.7);
 }
 
@@ -288,8 +296,8 @@ body,
   flex: none;
   flex-flow: row nowrap;
   padding: 0;
-  margin: 0;
   border-bottom: 1px solid var(--grey-30);
+  margin: 0;
   background: var(--grey-10);
 }
 
@@ -336,7 +344,8 @@ body,
   text-overflow: ellipsis;
   transition: background-color 200ms, border-color 200ms;
   transition-timing-function: var(--animation-timing);
-  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
   white-space: nowrap;
 }
 .tabBarTab.selected {
@@ -400,16 +409,16 @@ body,
 
 .initializing-text h1 {
   padding-bottom: 0.5em;
+  border-bottom: 1px solid #ddd;
   margin-top: 0;
   margin-bottom: 0.5em;
-  border-bottom: 1px solid #ddd;
 }
 
 .initializing-text span {
   display: inline-block;
   padding: 0 0.5em;
-  margin: 0 0.2em;
   border: 1px solid #ccc;
+  margin: 0 0.2em;
   background-color: #f6f6f6;
   border-radius: 0.2em;
   box-shadow: 0.1em 0.1em 0 #bbb;
@@ -480,12 +489,11 @@ body,
   font-size: 12px;
   text-align: left;
   -webkit-user-select: none;
-  -moz-user-select: none;
   user-select: none;
 }
 .react-contextmenu-separator {
-  margin: 6px 0;
   border-bottom: 1px solid #ddd;
+  margin: 6px 0;
 }
 
 /* max-height for context menus in the panel changed to 90vh for better zoom experience  */
@@ -527,8 +535,8 @@ body,
 
 .react-contextmenu-item--divider {
   padding: 2px 0;
-  margin-bottom: 3px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  margin-bottom: 3px;
 }
 
 .react-contextmenu-item.react-contextmenu-submenu {

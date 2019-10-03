@@ -15,8 +15,8 @@
   width: var(--content-width);
   flex: 1;
   flex-direction: column;
-  margin-left: calc(var(--thread-label-column-width) - 1px);
   border-left: 1px solid var(--grey-30);
+  margin-left: calc(var(--thread-label-column-width) - 1px);
   -moz-user-focus: ignore;
 }
 
@@ -78,8 +78,8 @@
   z-index: 3;
   width: 0;
   padding: 3px;
-  margin: 0 -4px;
   border: 1px solid white;
+  margin: 0 -4px;
   background: #aaa;
   border-radius: 5px;
   cursor: ew-resize;
@@ -134,8 +134,8 @@
   width: 30px;
   height: 30px;
   box-sizing: border-box;
-  margin: -15px;
   border: 1px solid rgba(0, 0, 0, 0.2);
+  margin: -15px;
   background: url(../../../res/img/svg/zoom-icon.svg) center center no-repeat
     rgba(255, 255, 255, 0.6);
   border-radius: 100%;

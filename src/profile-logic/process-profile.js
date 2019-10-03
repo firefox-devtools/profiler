@@ -11,10 +11,12 @@ import {
   getEmptyExtensions,
   getEmptyFuncTable,
   getEmptyResourceTable,
+  getEmptyRawMarkerTable,
+  getEmptyJsAllocationsTable,
+  getEmptyNativeAllocationsTable,
 } from './data-structures';
 import { immutableUpdate } from '../utils/flow';
 import {
-  CURRENT_VERSION,
   upgradeProcessedProfileToCurrentVersion,
   isProcessedProfile,
 } from './processed-profile-versioning';
@@ -28,6 +30,10 @@ import {
   convertPerfScriptProfile,
 } from './import/linux-perf';
 import { convertPhaseTimes } from './convert-markers';
+import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
+import { getFriendlyThreadName } from '../profile-logic/profile-data';
+import { convertJsTracerToThread } from '../profile-logic/js-tracer';
+
 import type {
   Profile,
   Thread,
@@ -41,19 +47,25 @@ import type {
   Lib,
   FuncTable,
   ResourceTable,
+  IndexIntoStackTable,
   IndexIntoFuncTable,
   IndexIntoStringTable,
   IndexIntoResourceTable,
   JsTracerTable,
+  JsAllocationsTable,
+  ProfilerOverhead,
+  NativeAllocationsTable,
 } from '../types/profile';
-import type { Milliseconds } from '../types/units';
+import type { Milliseconds, Microseconds } from '../types/units';
 import type {
   GeckoProfile,
+  GeckoSubprocessProfile,
   GeckoThread,
   GeckoMarkerStruct,
   GeckoFrameStruct,
   GeckoSampleStruct,
   GeckoStackStruct,
+  GeckoProfilerOverhead,
 } from '../types/gecko-profile';
 import type {
   GCSliceMarkerPayload,
@@ -507,6 +519,7 @@ function _processFrameTable(
   return {
     address: frameFuncs.map(funcIndex => funcTable.address[funcIndex]),
     category: geckoFrameStruct.category,
+    subcategory: geckoFrameStruct.subcategory,
     func: frameFuncs,
     implementation: geckoFrameStruct.implementation,
     line: geckoFrameStruct.line,
@@ -528,28 +541,36 @@ function _processStackTable(
   // Compute a non-null category for every stack
   const defaultCategory = categories.findIndex(c => c.color === 'grey') || 0;
   const categoryColumn = new Array(geckoStackTable.length);
+  const subcategoryColumn = new Array(geckoStackTable.length);
   for (let stackIndex = 0; stackIndex < geckoStackTable.length; stackIndex++) {
-    const frameCategory =
-      frameTable.category[geckoStackTable.frame[stackIndex]];
+    const frameIndex = geckoStackTable.frame[stackIndex];
+    const frameCategory = frameTable.category[frameIndex];
+    const frameSubcategory = frameTable.subcategory[frameIndex];
     let stackCategory;
+    let stackSubcategory;
     if (frameCategory !== null) {
       stackCategory = frameCategory;
+      stackSubcategory = frameSubcategory || 0;
     } else {
       const prefix = geckoStackTable.prefix[stackIndex];
       if (prefix !== null) {
         // Because of the structure of the stack table, prefix < stackIndex.
         // So we've already computed the category for the prefix.
         stackCategory = categoryColumn[prefix];
+        stackSubcategory = subcategoryColumn[prefix];
       } else {
         stackCategory = defaultCategory;
+        stackSubcategory = 0;
       }
     }
     categoryColumn[stackIndex] = stackCategory;
+    subcategoryColumn[stackIndex] = stackSubcategory;
   }
 
   return {
     frame: geckoStackTable.frame,
     category: categoryColumn,
+    subcategory: subcategoryColumn,
     prefix: geckoStackTable.prefix,
     length: geckoStackTable.length,
   };
@@ -576,91 +597,174 @@ function _convertStackToCause(data: Object): Object {
 }
 
 /**
- * Process the markers by either converting stacks to causes, process the GC markers.
+ * Sometimes we don't want to extract a cause, but rather just the stack index
+ * from a gecko payload.
  */
-function _processMarkers(geckoMarkers: GeckoMarkerStruct): RawMarkerTable {
-  return {
-    data: geckoMarkers.data.map(
-      (geckoPayload: MarkerPayload_Gecko): MarkerPayload => {
-        if (!geckoPayload) {
-          return null;
+function _convertPayloadStackToIndex(
+  data: MarkerPayload_Gecko
+): IndexIntoStackTable | null {
+  if (!data) {
+    return null;
+  }
+  if (data.stack && data.stack.samples.data.length > 0) {
+    const { samples } = data.stack;
+    return samples.data[0][samples.schema.stack];
+  }
+  return null;
+}
+
+/**
+ * Process the markers.
+ *  Convert stacks to causes.
+ *  Process GC markers.
+ *  Extract JS allocations into the JsAllocationsTable.
+ *  Extract Native allocations into the NativeAllocationsTable.
+ */
+function _processMarkers(
+  geckoMarkers: GeckoMarkerStruct
+): {|
+  markers: RawMarkerTable,
+  jsAllocations: JsAllocationsTable | null,
+  nativeAllocations: NativeAllocationsTable | null,
+|} {
+  const markers = getEmptyRawMarkerTable();
+  const jsAllocations = getEmptyJsAllocationsTable();
+  const nativeAllocations = getEmptyNativeAllocationsTable();
+
+  for (let markerIndex = 0; markerIndex < geckoMarkers.length; markerIndex++) {
+    const geckoPayload: MarkerPayload_Gecko = geckoMarkers.data[markerIndex];
+
+    if (geckoPayload) {
+      switch (geckoPayload.type) {
+        case 'JS allocation': {
+          // Build up a separate table for the JS allocation data, and do not
+          // include it in the marker information.
+          jsAllocations.time.push(geckoPayload.startTime);
+          jsAllocations.className.push(geckoPayload.className);
+          jsAllocations.typeName.push(geckoPayload.typeName);
+          jsAllocations.coarseType.push(geckoPayload.coarseType);
+          jsAllocations.duration.push(geckoPayload.size);
+          jsAllocations.inNursery.push(geckoPayload.inNursery);
+          jsAllocations.stack.push(_convertPayloadStackToIndex(geckoPayload));
+          jsAllocations.length++;
+
+          // Do not process the marker and add it to the marker list.
+          continue;
         }
+        case 'Native allocation': {
+          // Build up a separate table for the native allocation data, and do not
+          // include it in the marker information.
+          nativeAllocations.time.push(geckoPayload.startTime);
+          nativeAllocations.duration.push(geckoPayload.size);
+          nativeAllocations.stack.push(
+            _convertPayloadStackToIndex(geckoPayload)
+          );
+          nativeAllocations.length++;
 
-        // If there is a "stack" field, convert it to a "cause" field. This is
-        // pre-emptively done for every single marker payload.
-        //
-        // Warning: This function converts the payload into an Object type, which is
-        // about as bad as an any.
-        const payload = _convertStackToCause(geckoPayload);
-
-        switch (payload.type) {
-          /*
-           * We want to improve the format of these markers to make them
-           * easier to understand and work with, but we can't do that by
-           * upgrading the gecko profile since that would break
-           * compatibility with telemetry, however we can make some
-           * improvements while we process a gecko profile.
-           */
-          case 'GCSlice': {
-            const {
-              times,
-              ...partialTimings
-            }: GCSliceData_Gecko = payload.timings;
-
-            return ({
-              type: 'GCSlice',
-              startTime: payload.startTime,
-              endTime: payload.endTime,
-              timings: {
-                ...partialTimings,
-                phase_times: times ? convertPhaseTimes(times) : {},
-              },
-            }: GCSliceMarkerPayload);
-          }
-          case 'GCMajor': {
-            const geckoTimings: GCMajorAborted | GCMajorCompleted_Gecko =
-              payload.timings;
-            switch (geckoTimings.status) {
-              case 'completed': {
-                const { totals, ...partialMt } = geckoTimings;
-                const timings: GCMajorCompleted = {
-                  ...partialMt,
-                  phase_times: convertPhaseTimes(totals),
-                  mmu_20ms: geckoTimings.mmu_20ms / 100,
-                  mmu_50ms: geckoTimings.mmu_50ms / 100,
-                };
-                return ({
-                  type: 'GCMajor',
-                  startTime: payload.startTime,
-                  endTime: payload.endTime,
-                  timings: timings,
-                }: GCMajorMarkerPayload);
-              }
-              case 'aborted':
-                return ({
-                  type: 'GCMajor',
-                  startTime: payload.startTime,
-                  endTime: payload.endTime,
-                  timings: { status: 'aborted' },
-                }: GCMajorMarkerPayload);
-              default:
-                // Flow cannot detect that this switch is complete.
-                console.log('Unknown GCMajor status');
-                throw new Error('Unknown GCMajor status');
-            }
-          }
-          default:
-            // Coerce the payload into a MarkerPayload. This doesn't really provide
-            // any more type safety, but it shows the intent of going from an object
-            // without much type safety, to a specific type definition.
-            return (payload: MarkerPayload);
+          // Do not process the marker and add it to the marker list.
+          continue;
         }
+        default:
+        // This is not an allocation, continue on to process the marker.
       }
-    ),
-    name: geckoMarkers.name,
-    time: geckoMarkers.time,
-    length: geckoMarkers.length,
+    }
+
+    const payload = _processMarkerPayload(geckoPayload);
+    const name = geckoMarkers.name[markerIndex];
+    const time = geckoMarkers.time[markerIndex];
+    const category = geckoMarkers.category[markerIndex];
+    markers.name.push(name);
+    markers.time.push(time);
+    markers.category.push(category);
+    markers.data.push(payload);
+    markers.length++;
+  }
+
+  return {
+    markers: markers,
+    jsAllocations: jsAllocations.length === 0 ? null : jsAllocations,
+    nativeAllocations:
+      nativeAllocations.length === 0 ? null : nativeAllocations,
   };
+}
+
+/**
+ * Process just the marker payload. This converts stacks into causes, and augments
+ * the GC information.
+ */
+function _processMarkerPayload(
+  geckoPayload: MarkerPayload_Gecko
+): MarkerPayload {
+  if (!geckoPayload) {
+    return null;
+  }
+
+  // If there is a "stack" field, convert it to a "cause" field. This is
+  // pre-emptively done for every single marker payload.
+  //
+  // Warning: This function converts the payload into an Object type, which is
+  // about as bad as an any.
+  const payload = _convertStackToCause(geckoPayload);
+
+  switch (payload.type) {
+    /*
+     * We want to improve the format of these markers to make them
+     * easier to understand and work with, but we can't do that by
+     * upgrading the gecko profile since that would break
+     * compatibility with telemetry, however we can make some
+     * improvements while we process a gecko profile.
+     */
+    case 'GCSlice': {
+      const { times, ...partialTimings }: GCSliceData_Gecko = payload.timings;
+
+      return ({
+        type: 'GCSlice',
+        startTime: payload.startTime,
+        endTime: payload.endTime,
+        timings: {
+          ...partialTimings,
+          phase_times: times ? convertPhaseTimes(times) : {},
+        },
+      }: GCSliceMarkerPayload);
+    }
+    case 'GCMajor': {
+      const geckoTimings: GCMajorAborted | GCMajorCompleted_Gecko =
+        payload.timings;
+      switch (geckoTimings.status) {
+        case 'completed': {
+          const { totals, ...partialMt } = geckoTimings;
+          const timings: GCMajorCompleted = {
+            ...partialMt,
+            phase_times: convertPhaseTimes(totals),
+            mmu_20ms: geckoTimings.mmu_20ms / 100,
+            mmu_50ms: geckoTimings.mmu_50ms / 100,
+          };
+          return ({
+            type: 'GCMajor',
+            startTime: payload.startTime,
+            endTime: payload.endTime,
+            timings: timings,
+          }: GCMajorMarkerPayload);
+        }
+        case 'aborted':
+          return ({
+            type: 'GCMajor',
+            startTime: payload.startTime,
+            endTime: payload.endTime,
+            timings: { status: 'aborted' },
+          }: GCMajorMarkerPayload);
+        default:
+          // Flow cannot detect that this switch is complete.
+          console.log('Unknown GCMajor status');
+          throw new Error('Unknown GCMajor status');
+      }
+    }
+    default:
+      // Coerce the payload into a MarkerPayload. This doesn't really provide
+      // any more type safety, but it shows the intent of going from an object
+      // without much type safety, to a specific type definition.
+      return (payload: MarkerPayload);
+  }
 }
 
 /**
@@ -679,7 +783,7 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
  * Converts the Gecko list of counters into the processed format.
  */
 function _processCounters(
-  geckoProfile: GeckoProfile,
+  geckoProfile: GeckoProfile | GeckoSubprocessProfile,
   // The counters are listed independently from the threads, so we need an index that
   // references back into a stable list of threads. The threads list in the processing
   // step is built dynamically, so the "stableThreadList" variable is a hint that this
@@ -712,22 +816,86 @@ function _processCounters(
     );
   }
 
-  return geckoCounters.map(
-    ({ name, category, description, sample_groups }) => ({
-      name,
-      category,
-      description,
-      pid: mainThread.pid,
-      mainThreadIndex,
-      sampleGroups: {
-        id: sample_groups.id,
-        samples: _adjustCounterTimestamps(
-          _toStructOfArrays(sample_groups.samples),
-          delta
-        ),
-      },
-    })
+  return geckoCounters.reduce(
+    (result, { name, category, description, sample_groups }) => {
+      if (
+        sample_groups.id === undefined ||
+        sample_groups.samples === undefined
+      ) {
+        // Due to a bug in Gecko, it's possible that we have a counter that has no
+        // sample data. This is likely a Gecko problem that we'll need to fix.
+        // See https://github.com/firefox-devtools/profiler/issues/2248 and
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1584190
+        return result;
+      }
+
+      result.push({
+        name,
+        category,
+        description,
+        pid: mainThread.pid,
+        mainThreadIndex,
+        sampleGroups: {
+          id: sample_groups.id,
+          samples: adjustTableTimestamps(
+            _toStructOfArrays(sample_groups.samples),
+            delta
+          ),
+        },
+      });
+      return result;
+    },
+    []
   );
+}
+
+/**
+ * Converts the Gecko profiler overhead into the processed format.
+ */
+function _processProfilerOverhead(
+  geckoProfile: GeckoProfile | GeckoSubprocessProfile,
+  // The overhead data is listed independently from the threads, so we need an index that
+  // references back into a stable list of threads. The threads list in the processing
+  // step is built dynamically, so the "stableThreadList" variable is a hint that this
+  // should be a stable and sorted list of threads.
+  stableThreadList: Thread[],
+  // The timing across processes must be normalized, this is the timing delta between
+  // various processes.
+  delta: Milliseconds
+): ProfilerOverhead | null {
+  const geckoProfilerOverhead: ?GeckoProfilerOverhead =
+    geckoProfile.profilerOverhead;
+  const mainThread = geckoProfile.threads.find(
+    thread => thread.name === 'GeckoMain'
+  );
+
+  if (!mainThread || !geckoProfilerOverhead) {
+    // Profiler overhead or a main thread weren't found, bail out, and return an empty array.
+    return null;
+  }
+
+  // The gecko profile's process don't map to the final thread list. Use the stable
+  // thread list to look up the thread index for the main thread in this profile.
+  const mainThreadIndex = stableThreadList.findIndex(
+    thread => thread.name === 'GeckoMain' && thread.pid === mainThread.pid
+  );
+
+  if (mainThreadIndex === -1) {
+    throw new Error(
+      'Unable to find the main thread in the stable thread list. This means that the ' +
+        'logic in the _processProfilerOverhead function is wrong.'
+    );
+  }
+
+  return {
+    samples: adjustProfilerOverheadTimestamps(
+      _toStructOfArrays(geckoProfilerOverhead.samples),
+      delta
+    ),
+    pid: mainThread.pid,
+    mainThreadIndex,
+    statistics: geckoProfilerOverhead.statistics,
+  };
 }
 
 /**
@@ -736,7 +904,7 @@ function _processCounters(
  */
 function _processThread(
   thread: GeckoThread,
-  processProfile: GeckoProfile,
+  processProfile: GeckoProfile | GeckoSubprocessProfile,
   extensions: ExtensionTable
 ): Thread {
   const geckoFrameStruct: GeckoFrameStruct = _toStructOfArrays(
@@ -775,7 +943,9 @@ function _processThread(
     frameTable,
     categories
   );
-  const markers = _processMarkers(geckoMarkers);
+  const { markers, jsAllocations, nativeAllocations } = _processMarkers(
+    geckoMarkers
+  );
   const samples = _processSamples(geckoSamples);
 
   const newThread: Thread = {
@@ -799,6 +969,16 @@ function _processThread(
     stringTable,
     samples,
   };
+
+  if (jsAllocations) {
+    // Only add the JS allocations if they exist.
+    newThread.jsAllocations = jsAllocations;
+  }
+
+  if (nativeAllocations) {
+    // Only add the Native allocations if they exist.
+    newThread.nativeAllocations = nativeAllocations;
+  }
 
   function processJsTracer() {
     // Optionally extract the JS Tracer information, if they exist.
@@ -844,13 +1024,14 @@ function _processThread(
  * has its own timebase, and we don't want to keep converting timestamps when
  * we deal with the integrated profile.
  */
-export function adjustSampleTimestamps(
-  samples: SamplesTable,
+export function adjustTableTimestamps<Table: { time: Milliseconds[] }>(
+  table: Table,
   delta: Milliseconds
-): SamplesTable {
-  return Object.assign({}, samples, {
-    time: samples.time.map(time => time + delta),
-  });
+): Table {
+  return {
+    ...table,
+    time: table.time.map(time => time + delta),
+  };
 }
 
 /**
@@ -869,6 +1050,26 @@ function _adjustJsTracerTimestamps(
     timestamps: jsTracer.timestamps.map(time => time + deltaMicroseconds),
   };
 }
+
+/**
+ * Adjust the "timestamp" field of overhead data by the given delta. This is
+ * needed when integrating subprocess profiles into the parent process profile;
+ * each profile's process has its own timebase, and we don't want to keep
+ * converting timestamps when we deal with the integrated profile. Differently,
+ * time field of profiler overhead is in microseconds, so we have to convert it
+ * into milliseconds.
+ */
+export function adjustProfilerOverheadTimestamps<
+  Table: { time: Microseconds[] }
+>(table: Table, delta: Milliseconds): Table {
+  return {
+    ...table,
+    // Converting microseconds to milliseconds here since we use milliseconds
+    // inside the tracks.
+    time: table.time.map(time => time / 1000 + delta),
+  };
+}
+
 /**
  * Adjust all timestamp fields by the given delta. This is needed when
  * integrating subprocess profiles into the parent process profile; each
@@ -879,7 +1080,8 @@ export function adjustMarkerTimestamps(
   markers: RawMarkerTable,
   delta: Milliseconds
 ): RawMarkerTable {
-  return Object.assign({}, markers, {
+  return {
+    ...markers,
     time: markers.time.map(time => time + delta),
     data: markers.data.map(data => {
       if (!data) {
@@ -936,16 +1138,6 @@ export function adjustMarkerTimestamps(
       // for at least two cases where we forgot to do the adjustment initially.
       return newData;
     }),
-  });
-}
-
-function _adjustCounterTimestamps<T: Object>(
-  sampleGroups: T,
-  delta: Milliseconds
-): T {
-  return {
-    ...sampleGroups,
-    time: sampleGroups.time.map(time => time + delta),
   };
 }
 
@@ -974,14 +1166,21 @@ export function processProfile(
     threads.push(_processThread(thread, geckoProfile, extensions));
   }
   const counters: Counter[] = _processCounters(geckoProfile, threads, 0);
+  const nullableProfilerOverhead: Array<ProfilerOverhead | null> = [
+    _processProfilerOverhead(geckoProfile, threads, 0),
+  ];
 
   for (const subprocessProfile of geckoProfile.processes) {
     const adjustTimestampsBy =
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
     threads = threads.concat(
       subprocessProfile.threads.map(thread => {
-        const newThread = _processThread(thread, subprocessProfile, extensions);
-        newThread.samples = adjustSampleTimestamps(
+        const newThread: Thread = _processThread(
+          thread,
+          subprocessProfile,
+          extensions
+        );
+        newThread.samples = adjustTableTimestamps(
           newThread.samples,
           adjustTimestampsBy
         );
@@ -992,6 +1191,18 @@ export function processProfile(
         if (newThread.jsTracer) {
           newThread.jsTracer = _adjustJsTracerTimestamps(
             newThread.jsTracer,
+            adjustTimestampsBy
+          );
+        }
+        if (newThread.jsAllocations) {
+          newThread.jsAllocations = adjustTableTimestamps(
+            newThread.jsAllocations,
+            adjustTimestampsBy
+          );
+        }
+        if (newThread.nativeAllocations) {
+          newThread.nativeAllocations = adjustTableTimestamps(
+            newThread.nativeAllocations,
             adjustTimestampsBy
           );
         }
@@ -1010,6 +1221,10 @@ export function processProfile(
     counters.push(
       ..._processCounters(subprocessProfile, threads, adjustTimestampsBy)
     );
+
+    nullableProfilerOverhead.push(
+      _processProfilerOverhead(subprocessProfile, threads, adjustTimestampsBy)
+    );
   }
 
   let pages = [...(geckoProfile.pages || [])];
@@ -1027,13 +1242,13 @@ export function processProfile(
     oscpu: geckoProfile.meta.oscpu,
     platform: geckoProfile.meta.platform,
     processType: geckoProfile.meta.processType,
-    product: geckoProfile.meta.product,
+    product: geckoProfile.meta.product || '',
     stackwalk: geckoProfile.meta.stackwalk,
     debug: !!geckoProfile.meta.debug,
     toolkit: geckoProfile.meta.toolkit,
     version: geckoProfile.meta.version,
     categories: geckoProfile.meta.categories,
-    preprocessedProfileVersion: CURRENT_VERSION,
+    preprocessedProfileVersion: PROCESSED_PROFILE_VERSION,
     appBuildID: geckoProfile.meta.appBuildID,
     // A link to the source code revision for this build.
     sourceURL: geckoProfile.meta.sourceURL,
@@ -1048,10 +1263,41 @@ export function processProfile(
     updateChannel: geckoProfile.meta.updateChannel,
   };
 
+  const profilerOverhead: ProfilerOverhead[] = nullableProfilerOverhead.reduce(
+    (acc, overhead) => {
+      if (overhead !== null) {
+        acc.push(overhead);
+      }
+      return acc;
+    },
+    []
+  );
+
+  // Convert JS tracer information into their own threads. This mutates
+  // the threads array.
+  for (const thread of threads.slice()) {
+    const { jsTracer } = thread;
+    if (jsTracer) {
+      const friendlyThreadName = getFriendlyThreadName(threads, thread);
+      const jsTracerThread = convertJsTracerToThread(
+        thread,
+        jsTracer,
+        meta.categories
+      );
+      jsTracerThread.isJsTracer = true;
+      jsTracerThread.name = `JS Tracer of ${friendlyThreadName}`;
+      threads.push(jsTracerThread);
+
+      // Delete the reference to the original jsTracer data, but keep it on this thread.
+      delete thread.jsTracer;
+    }
+  }
+
   const result = {
     meta,
     pages,
     counters,
+    profilerOverhead,
     threads,
   };
   return result;

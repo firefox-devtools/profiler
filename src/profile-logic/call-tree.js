@@ -4,7 +4,11 @@
 
 // @flow
 import { timeCode } from '../utils/time-code';
-import { getSampleCallNodes, getOriginAnnotationForFunc } from './profile-data';
+import {
+  getSampleIndexToCallNodeIndex,
+  getOriginAnnotationForFunc,
+  getCategoryPairLabel,
+} from './profile-data';
 import { resourceTypes } from './data-structures';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import type {
@@ -13,6 +17,9 @@ import type {
   FuncTable,
   ResourceTable,
   IndexIntoFuncTable,
+  SamplesTable,
+  JsAllocationsTable,
+  NativeAllocationsTable,
 } from '../types/profile';
 import type {
   CallNodeTable,
@@ -21,12 +28,11 @@ import type {
   CallNodeData,
   CallNodeDisplayData,
 } from '../types/profile-derived';
+import type { CallTreeSummaryStrategy } from '../types/actions';
 import type { Milliseconds } from '../types/units';
 import ExtensionIcon from '../../res/img/svg/extension.svg';
-import {
-  formatNumberDependingOnInterval,
-  formatPercent,
-} from '../utils/format-numbers';
+import { formatCallNodeNumber, formatPercent } from '../utils/format-numbers';
+import { assertExhaustiveCheck } from '../utils/flow';
 
 type CallNodeChildren = IndexIntoCallNodeTable[];
 type CallNodeTimes = {
@@ -72,7 +78,9 @@ export class CallTree {
   // integers, using an array directly is faster than going through a Map.
   _children: Array<CallNodeChildren>;
   _jsOnly: boolean;
-  _isIntegerInterval: boolean;
+  _interval: number;
+  _isHighPrecision: boolean;
+  _callTreeSummaryStrategy: CallTreeSummaryStrategy;
 
   constructor(
     { funcTable, resourceTable, stringTable }: Thread,
@@ -83,7 +91,9 @@ export class CallTree {
     rootTotalTime: number,
     rootCount: number,
     jsOnly: boolean,
-    isIntegerInterval: boolean
+    interval: number,
+    isHighPrecision: boolean,
+    strategy: CallTreeSummaryStrategy
   ) {
     this._categories = categories;
     this._callNodeTable = callNodeTable;
@@ -97,7 +107,9 @@ export class CallTree {
     this._displayDataByIndex = new Map();
     this._children = [];
     this._jsOnly = jsOnly;
-    this._isIntegerInterval = isIntegerInterval;
+    this._interval = interval;
+    this._isHighPrecision = isHighPrecision;
+    this._callTreeSummaryStrategy = strategy;
   }
 
   getRoots() {
@@ -118,16 +130,23 @@ export class CallTree {
         children.length < childCount;
         childCallNodeIndex++
       ) {
+        const childPrefixIndex = this._callNodeTable.prefix[childCallNodeIndex];
+        const childTotalTime = this._callNodeTimes.totalTime[
+          childCallNodeIndex
+        ];
+        const childChildCount = this._callNodeChildCount[childCallNodeIndex];
+
         if (
-          this._callNodeTable.prefix[childCallNodeIndex] === callNodeIndex &&
-          this._callNodeTimes.totalTime[childCallNodeIndex] !== 0
+          childPrefixIndex === callNodeIndex &&
+          (childTotalTime !== 0 || childChildCount !== 0)
         ) {
           children.push(childCallNodeIndex);
         }
       }
       children.sort(
         (a, b) =>
-          this._callNodeTimes.totalTime[b] - this._callNodeTimes.totalTime[a]
+          Math.abs(this._callNodeTimes.totalTime[b]) -
+          Math.abs(this._callNodeTimes.totalTime[a])
       );
       this._children[callNodeIndex] = children;
     }
@@ -200,6 +219,7 @@ export class CallTree {
       } = this.getNodeData(callNodeIndex);
       const funcIndex = this._callNodeTable.func[callNodeIndex];
       const categoryIndex = this._callNodeTable.category[callNodeIndex];
+      const subcategoryIndex = this._callNodeTable.subcategory[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
       const isJS = this._funcTable.isJS[funcIndex];
@@ -212,28 +232,62 @@ export class CallTree {
         icon = ExtensionIcon;
       }
 
-      const formattedTotalTime = formatNumberDependingOnInterval(
-        this._isIntegerInterval,
+      const formattedTotalTime = formatCallNodeNumber(
+        this._interval,
+        this._isHighPrecision,
         totalTime
       );
-      const formattedSelfTime = formatNumberDependingOnInterval(
-        this._isIntegerInterval,
+      const formattedSelfTime = formatCallNodeNumber(
+        this._interval,
+        this._isHighPrecision,
         selfTime
       );
+      const totalTimePercent = `${formatPercent(totalTimeRelative)}`;
+
+      let ariaLabel;
+      let totalTimeWithUnit;
+      let selfTimeWithUnit;
+      const strategy = this._callTreeSummaryStrategy;
+      switch (strategy) {
+        case 'timing': {
+          totalTimeWithUnit = `${formattedTotalTime}ms`;
+          selfTimeWithUnit = `${formattedSelfTime}ms`;
+          ariaLabel = `${funcName}, running time is ${totalTimeWithUnit} (${totalTimePercent}), self time is ${selfTimeWithUnit}`;
+          break;
+        }
+        case 'js-allocations':
+        case 'native-allocations':
+        case 'native-deallocations': {
+          totalTimeWithUnit = `${formattedTotalTime} bytes`;
+          selfTimeWithUnit = `${formattedSelfTime} bytes`;
+          ariaLabel = `${funcName}, total size is ${totalTimeWithUnit} (${totalTimePercent}), self size is ${selfTimeWithUnit}`;
+          break;
+        }
+        default:
+          throw assertExhaustiveCheck(
+            strategy,
+            'Unhandled callTreeSummaryStrategy.'
+          );
+      }
 
       displayData = {
-        totalTime: formattedTotalTime,
-        totalTimeWithUnit: formattedTotalTime + 'ms',
+        totalTime: totalTime === 0 ? '—' : formattedTotalTime,
+        totalTimeWithUnit: totalTime === 0 ? '—' : totalTimeWithUnit,
         selfTime: selfTime === 0 ? '—' : formattedSelfTime,
-        selfTimeWithUnit: selfTime === 0 ? '—' : formattedSelfTime + 'ms',
-        totalTimePercent: `${formatPercent(totalTimeRelative)}`,
+        selfTimeWithUnit: selfTime === 0 ? '—' : selfTimeWithUnit,
+        totalTimePercent,
         name: funcName,
         lib: libName.slice(0, 1000),
         // Dim platform pseudo-stacks.
         dim: !isJS && this._jsOnly,
-        categoryName: this._categories[categoryIndex].name,
+        categoryName: getCategoryPairLabel(
+          this._categories,
+          categoryIndex,
+          subcategoryIndex
+        ),
         categoryColor: this._categories[categoryIndex].color,
         icon,
+        ariaLabel,
       };
       this._displayDataByIndex.set(callNodeIndex, displayData);
     }
@@ -251,9 +305,10 @@ export class CallTree {
 }
 
 function _getInvertedStackSelfTimes(
-  thread: Thread,
+  // The samples could either be a SamplesTable, or a JsAllocationsTable.
+  samples: SamplesTable | JsAllocationsTable | NativeAllocationsTable,
   callNodeTable: CallNodeTable,
-  sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  sampleIndexToCallNodeIndex: Array<IndexIntoCallNodeTable | null>,
   interval: Milliseconds
 ): {
   // In an inverted profile, all the self time is accounted to the root nodes.
@@ -292,14 +347,17 @@ function _getInvertedStackSelfTimes(
   const callNodeLeafTime = new Float32Array(callNodeTable.length);
   for (
     let sampleIndex = 0;
-    sampleIndex < sampleCallNodes.length;
+    sampleIndex < sampleIndexToCallNodeIndex.length;
     sampleIndex++
   ) {
-    const callNodeIndex = sampleCallNodes[sampleIndex];
+    const callNodeIndex = sampleIndexToCallNodeIndex[sampleIndex];
     if (callNodeIndex !== null) {
       const rootIndex = callNodeToRoot[callNodeIndex];
-      callNodeSelfTime[rootIndex] += interval;
-      callNodeLeafTime[callNodeIndex] += interval;
+      const duration = samples.duration
+        ? samples.duration[sampleIndex]
+        : interval;
+      callNodeSelfTime[rootIndex] += duration;
+      callNodeLeafTime[callNodeIndex] += duration;
     }
   }
 
@@ -310,9 +368,9 @@ function _getInvertedStackSelfTimes(
  * This is a helper function to get the stack timings for un-inverted call trees.
  */
 function _getStackSelfTimes(
-  thread: Thread,
+  samples: SamplesTable | JsAllocationsTable | NativeAllocationsTable,
   callNodeTable: CallNodeTable,
-  sampleCallNodes: Array<null | IndexIntoCallNodeTable>,
+  sampleIndexToCallNodeIndex: Array<null | IndexIntoCallNodeTable>,
   interval: Milliseconds
 ): {
   callNodeSelfTime: Float32Array, // Milliseconds[]
@@ -322,12 +380,15 @@ function _getStackSelfTimes(
 
   for (
     let sampleIndex = 0;
-    sampleIndex < sampleCallNodes.length;
+    sampleIndex < sampleIndexToCallNodeIndex.length;
     sampleIndex++
   ) {
-    const callNodeIndex = sampleCallNodes[sampleIndex];
+    const callNodeIndex = sampleIndexToCallNodeIndex[sampleIndex];
     if (callNodeIndex !== null) {
-      callNodeSelfTime[callNodeIndex] += interval;
+      const duration = samples.duration
+        ? samples.duration[sampleIndex]
+        : interval;
+      callNodeSelfTime[callNodeIndex] += duration;
     }
   }
 
@@ -339,24 +400,29 @@ function _getStackSelfTimes(
  * It takes into account both the normal tree, and the inverted tree.
  */
 export function computeCallTreeCountsAndTimings(
-  thread: Thread,
+  samples: SamplesTable | JsAllocationsTable | NativeAllocationsTable,
   { callNodeTable, stackIndexToCallNodeIndex }: CallNodeInfo,
   interval: Milliseconds,
   invertCallstack: boolean
 ): CallTreeCountsAndTimings {
-  const sampleCallNodes = getSampleCallNodes(
-    thread.samples,
+  const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
+    samples.stack,
     stackIndexToCallNodeIndex
   );
   // Inverted trees need a different method for computing the timing.
   const { callNodeSelfTime, callNodeLeafTime } = invertCallstack
     ? _getInvertedStackSelfTimes(
-        thread,
+        samples,
         callNodeTable,
-        sampleCallNodes,
+        sampleIndexToCallNodeIndex,
         interval
       )
-    : _getStackSelfTimes(thread, callNodeTable, sampleCallNodes, interval);
+    : _getStackSelfTimes(
+        samples,
+        callNodeTable,
+        sampleIndexToCallNodeIndex,
+        interval
+      );
 
   // Compute the following variables:
   const callNodeTotalTime = new Float32Array(callNodeTable.length);
@@ -365,19 +431,24 @@ export function computeCallTreeCountsAndTimings(
   let rootCount = 0;
 
   // We loop the call node table in reverse, so that we find the children
-  // before their parents.
+  // before their parents, and the total time is known at the time we reach a
+  // node.
   for (
     let callNodeIndex = callNodeTable.length - 1;
     callNodeIndex >= 0;
     callNodeIndex--
   ) {
     callNodeTotalTime[callNodeIndex] += callNodeLeafTime[callNodeIndex];
-    if (callNodeTotalTime[callNodeIndex] === 0) {
+    rootTotalTime += Math.abs(callNodeLeafTime[callNodeIndex]);
+    const hasChildren = callNodeChildCount[callNodeIndex] !== 0;
+    const hasTotalTime = callNodeTotalTime[callNodeIndex] !== 0;
+
+    if (!hasChildren && !hasTotalTime) {
       continue;
     }
+
     const prefixCallNode = callNodeTable.prefix[callNodeIndex];
     if (prefixCallNode === -1) {
-      rootTotalTime += callNodeTotalTime[callNodeIndex];
       rootCount++;
     } else {
       callNodeTotalTime[prefixCallNode] += callNodeTotalTime[callNodeIndex];
@@ -407,7 +478,8 @@ export function getCallTree(
   callNodeInfo: CallNodeInfo,
   categories: CategoryList,
   implementationFilter: string,
-  callTreeCountsAndTimings: CallTreeCountsAndTimings
+  callTreeCountsAndTimings: CallTreeCountsAndTimings,
+  callTreeSummaryStrategy: CallTreeSummaryStrategy
 ): CallTree {
   return timeCode('getCallTree', () => {
     const {
@@ -418,8 +490,8 @@ export function getCallTree(
     } = callTreeCountsAndTimings;
 
     const jsOnly = implementationFilter === 'js';
-    const isIntegerInterval = Math.floor(interval) === interval;
 
+    // By default add a single decimal value, e.g 13.1, 0.3, 5234.4
     return new CallTree(
       thread,
       categories,
@@ -429,7 +501,9 @@ export function getCallTree(
       rootTotalTime,
       rootCount,
       jsOnly,
-      isIntegerInterval
+      interval,
+      Boolean(thread.isJsTracer),
+      callTreeSummaryStrategy
     );
   });
 }

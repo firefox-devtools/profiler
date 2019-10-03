@@ -9,7 +9,6 @@ import type {
   Profile,
   Thread,
   ThreadIndex,
-  IndexIntoRawMarkerTable,
   IndexIntoFuncTable,
   Pid,
 } from './profile';
@@ -19,12 +18,13 @@ import type {
   GlobalTrack,
   LocalTrack,
   TrackIndex,
+  MarkerIndex,
 } from './profile-derived';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState, UploadState } from '../types/state';
+import type { UrlState, UploadState, State } from '../types/state';
 import type { CssPixels, StartEndRange } from '../types/units';
 
 export type DataSource =
@@ -82,6 +82,12 @@ export type RequestedLib = {|
   +breakpadId: string,
 |};
 export type ImplementationFilter = 'combined' | 'js' | 'cpp';
+// Change the strategy for computing the summarizing information for the call tree.
+export type CallTreeSummaryStrategy =
+  | 'timing'
+  | 'js-allocations'
+  | 'native-allocations'
+  | 'native-deallocations';
 
 /**
  * This type determines what kind of information gets sanitized from published profiles.
@@ -93,6 +99,7 @@ export type CheckedSharingOptions = {|
   includeScreenshots: boolean,
   includeUrls: boolean,
   includeExtension: boolean,
+  includePreferenceValues: boolean,
 |};
 
 type ProfileAction =
@@ -117,6 +124,11 @@ type ProfileAction =
       +threadIndex: ThreadIndex,
     |}
   | {|
+      +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+      +threadIndex: ThreadIndex,
+      +callNodePath: CallNodePath | null,
+    |}
+  | {|
       +type: 'FOCUS_CALL_TREE',
     |}
   | {|
@@ -127,7 +139,12 @@ type ProfileAction =
   | {|
       +type: 'CHANGE_SELECTED_MARKER',
       +threadIndex: ThreadIndex,
-      +selectedMarker: IndexIntoRawMarkerTable | null,
+      +selectedMarker: MarkerIndex | null,
+    |}
+  | {|
+      +type: 'CHANGE_RIGHT_CLICKED_MARKER',
+      +threadIndex: ThreadIndex,
+      +markerIndex: MarkerIndex | null,
     |}
   | {|
       +type: 'UPDATE_PREVIEW_SELECTION',
@@ -171,6 +188,11 @@ type ProfileAction =
       hiddenLocalTracks: Set<TrackIndex>,
     |}
   | {|
+      // Isolate only the screenshot track
+      +type: 'ISOLATE_SCREENSHOT_TRACK',
+      +hiddenGlobalTracks: Set<TrackIndex>,
+    |}
+  | {|
       +type: 'CHANGE_LOCAL_TRACK_ORDER',
       +localTrackOrder: TrackIndex[],
       +pid: Pid,
@@ -194,8 +216,9 @@ type ProfileAction =
       +selectedThreadIndex: ThreadIndex,
     |}
   | {|
-      +type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
+      +type: 'SET_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
+      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
@@ -220,8 +243,14 @@ type ReceiveProfileAction =
       +error: Error,
     |}
   | {|
-      +type: 'VIEW_PROFILE',
+      +type: 'PROFILE_LOADED',
       +profile: Profile,
+      +pathInZipFile: ?string,
+      +implementationFilter: ?ImplementationFilter,
+      +transformStacks: ?TransformStacksPerThread,
+    |}
+  | {|
+      +type: 'VIEW_PROFILE',
       +selectedThreadIndex: ThreadIndex,
       +globalTracks: GlobalTrack[],
       +globalTrackOrder: TrackIndex[],
@@ -229,10 +258,6 @@ type ReceiveProfileAction =
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-      +pathInZipFile: ?string,
-      +implementationFilter: ?ImplementationFilter,
-      +transformStacks: ?TransformStacksPerThread,
-      +dataSource: DataSource,
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}
@@ -245,16 +270,21 @@ type ReceiveProfileAction =
   | {| +type: 'START_SYMBOLICATING' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_ADDON' |}
   | {| +type: 'WAITING_FOR_PROFILE_FROM_STORE' |}
-  | {| +type: 'WAITING_FOR_PROFILE_FROM_URL' |}
+  | {| +type: 'WAITING_FOR_PROFILE_FROM_URL', +profileUrl: ?string |}
   | {| +type: 'TRIGGER_LOADING_FROM_URL', +profileUrl: string |};
 
 type UrlEnhancerAction =
+  | {| +type: 'START_FETCHING_PROFILES' |}
   | {| +type: 'URL_SETUP_DONE' |}
   | {| +type: 'UPDATE_URL_STATE', +newUrlState: UrlState | null |};
 
 type UrlStateAction =
   | {| +type: 'WAITING_FOR_PROFILE_FROM_FILE' |}
-  | {| +type: 'PROFILE_PUBLISHED', +hash: string |}
+  | {|
+      +type: 'PROFILE_PUBLISHED',
+      +hash: string,
+      +prePublishedState: State | null,
+    |}
   | {| +type: 'CHANGE_SELECTED_TAB', +selectedTab: TabSlug |}
   | {| +type: 'COMMIT_RANGE', +start: number, +end: number |}
   | {| +type: 'POP_COMMITTED_RANGES', +firstPoppedFilterIndex: number |}
@@ -293,6 +323,10 @@ type UrlStateAction =
       +implementation: ImplementationFilter,
     |}
   | {|
+      type: 'CHANGE_CALL_TREE_SUMMARY_STRATEGY',
+      strategy: CallTreeSummaryStrategy,
+    |}
+  | {|
       +type: 'CHANGE_INVERT_CALLSTACK',
       +invertCallstack: boolean,
       +callTree: CallTree,
@@ -308,10 +342,15 @@ type UrlStateAction =
   | {| +type: 'CHANGE_PROFILES_TO_COMPARE', +profiles: string[] |}
   | {| +type: 'CHANGE_PROFILE_NAME', +profileName: string |}
   | {|
-      +type: 'SANITIZE_PROFILE',
+      +type: 'SANITIZED_PROFILE_PUBLISHED',
       +hash: string,
       +committedRanges: StartEndRange[] | null,
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+      +prePublishedState: State,
+    |}
+  | {|
+      +type: 'SET_DATA_SOURCE',
+      +dataSource: DataSource,
     |};
 
 type IconsAction =
@@ -338,10 +377,6 @@ type PublishAction =
       +uploadProgress: number,
     |}
   | {|
-      +type: 'UPLOAD_FINISHED',
-      +url: string,
-    |}
-  | {|
       +type: 'UPLOAD_FAILED',
       +error: mixed,
     |}
@@ -357,7 +392,12 @@ type PublishAction =
   | {|
       +type: 'CHANGE_UPLOAD_STATE',
       +changes: $Shape<UploadState>,
-    |};
+    |}
+  | {|
+      +type: 'REVERT_TO_PRE_PUBLISHED_STATE',
+      +prePublishedState: State,
+    |}
+  | {| +type: 'HIDE_STALE_PROFILE' |};
 
 export type Action =
   | ProfileAction

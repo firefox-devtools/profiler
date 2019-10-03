@@ -18,6 +18,7 @@ import { getSelectedThreadIndex } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
+import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { getBoundingBox } from '../fixtures/utils';
 
@@ -27,15 +28,29 @@ const RIGHT_CLICK = 2;
 describe('timeline/GlobalTrack', function() {
   /**
    *  getProfileWithNiceTracks() looks like: [
-   *    'show [thread GeckoMain process]',
-   *    'show [thread GeckoMain tab]',       <- use this global track.
+   *    'show [thread GeckoMain process]',   // Track index 0
+   *    'show [thread GeckoMain tab]',       // Track index 1 (default)
    *    '  - show [thread DOM Worker]',
    *    '  - show [thread Style]',
+   *    'show [process]',                    // Track index 2
+   *    '  - show [thread NoMain]'
    *  ]
    */
-  function setup() {
-    const trackIndex = 1;
+  const GECKOMAIN_TAB_TRACK_INDEX = 1;
+  const NO_THREAD_TRACK_INDEX = 2;
+  function setup(trackIndex = GECKOMAIN_TAB_TRACK_INDEX) {
     const profile = getProfileWithNiceTracks();
+    {
+      // Add another thread to highlight a thread-less global process track.
+      const {
+        profile: {
+          threads: [thread],
+        },
+      } = getProfileFromTextSamples('A');
+      thread.name = 'NoMain';
+      thread.pid = 5555;
+      profile.threads.push(thread);
+    }
     const store = storeWithProfile(profile);
     const { getState, dispatch } = store;
     const trackReference = { type: 'global', trackIndex };
@@ -45,9 +60,6 @@ describe('timeline/GlobalTrack', function() {
       throw new Error('Expected a process track.');
     }
     const threadIndex = track.mainThreadIndex;
-    if (threadIndex === null) {
-      throw new Error('Expected the track to have a thread index.');
-    }
 
     // Some child components render to canvas.
     jest
@@ -57,8 +69,10 @@ describe('timeline/GlobalTrack', function() {
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(400, 400));
 
-    // The assertions are simpler if this thread is not already selected.
-    dispatch(changeSelectedThread(threadIndex + 1));
+    if (threadIndex !== null) {
+      // The assertions are simpler if the GeckoMain tab thread is not already selected.
+      dispatch(changeSelectedThread(threadIndex + 1));
+    }
 
     const renderResult = render(
       <Provider store={store}>
@@ -92,8 +106,13 @@ describe('timeline/GlobalTrack', function() {
     };
   }
 
-  it('matches the snapshot of a global track', () => {
-    const { container } = setup();
+  it('matches the snapshot of a global process track', () => {
+    const { container } = setup(GECKOMAIN_TAB_TRACK_INDEX);
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('matches the snapshot of a global process track without a thread', () => {
+    const { container } = setup(NO_THREAD_TRACK_INDEX);
     expect(container.firstChild).toMatchSnapshot();
   });
 

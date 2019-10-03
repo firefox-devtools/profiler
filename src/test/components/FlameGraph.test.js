@@ -4,9 +4,15 @@
 
 // @flow
 import * as React from 'react';
-import FlameGraph from '../../components/flame-graph';
 import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
+
+// This module is mocked.
+import copy from 'copy-to-clipboard';
+
+import FlameGraph from '../../components/flame-graph';
+import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
+
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -17,13 +23,21 @@ import {
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import {
+  getEmptyThread,
+  getEmptyProfile,
+} from '../../profile-logic/data-structures';
+import {
   changeInvertCallstack,
   changeSelectedCallNode,
+  commitRange,
+  changeImplementationFilter,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getInvertCallstack } from '../../selectors/url-state';
 import { ensureExists } from '../../utils/flow';
+
+import type { CssPixels } from '../../types/units';
 
 const GRAPH_WIDTH = 200;
 const GRAPH_HEIGHT = 300;
@@ -33,8 +47,8 @@ describe('FlameGraph', function() {
   beforeEach(addRootOverlayElement);
 
   it('matches the snapshot', () => {
-    const { ctx, container } = setupFlameGraph();
-    const drawCalls = ctx.__flushDrawLog();
+    const { container, flushDrawLog } = setupFlameGraph();
+    const drawCalls = flushDrawLog();
 
     expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
@@ -61,7 +75,7 @@ describe('FlameGraph', function() {
     expect(getTooltip()).toBeTruthy();
   });
 
-  it('has a tooltip that matches the screenshot', () => {
+  it('has a tooltip that matches the snapshot', () => {
     const { getTooltip, moveMouse } = setupFlameGraph();
     moveMouse(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
     expect(getTooltip()).toMatchSnapshot();
@@ -98,6 +112,58 @@ describe('FlameGraph', function() {
     fireEvent.keyDown(div, { key: 'ArrowDown' });
     expect(selectedNode()).toBe('B');
   });
+
+  it('displays a context menu when rightclicking', () => {
+    // Fake timers are indicated when dealing with the context menus.
+    jest.useFakeTimers();
+
+    const { rightClick, clickMenuItem, getContextMenu } = setupFlameGraph();
+
+    rightClick(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 3);
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+    clickMenuItem('Copy function name');
+    expect(copy).toHaveBeenLastCalledWith('A');
+
+    jest.runAllTimers();
+
+    // Try another node to make sure the menu can handle other nodes than the first.
+    rightClick(GRAPH_WIDTH * 0.5, GRAPH_HEIGHT - 25);
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+    clickMenuItem('Copy function name');
+    expect(copy).toHaveBeenLastCalledWith('B');
+  });
+
+  describe('EmptyReasons', () => {
+    it('shows reasons when a profile has no samples', () => {
+      const profile = getEmptyProfile();
+      const thread = getEmptyThread();
+      thread.name = 'Empty Thread';
+      profile.threads.push(thread);
+
+      const store = storeWithProfile(profile);
+      const container = render(
+        <Provider store={store}>
+          <>
+            <FlameGraph />
+          </>
+        </Provider>
+      ).container;
+
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+
+    it('shows reasons when samples are out of range', () => {
+      const { dispatch, container } = setupFlameGraph();
+      dispatch(commitRange(5, 10));
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+
+    it('shows reasons when samples have been completely filtered out', function() {
+      const { dispatch, container } = setupFlameGraph();
+      dispatch(changeImplementationFilter('js'));
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+  });
 });
 
 function setupFlameGraph() {
@@ -123,31 +189,80 @@ function setupFlameGraph() {
     E[cat:Graphics]  G[cat:Graphics]
   `);
 
+  // Add some file and line number to the profile so that tooltips generate
+  // an interesting snapshot.
+  const { funcTable, stringTable } = profile.threads[0];
+  for (let funcIndex = 0; funcIndex < funcTable.length; funcIndex++) {
+    funcTable.lineNumber[funcIndex] = funcIndex + 10;
+    funcTable.columnNumber[funcIndex] = funcIndex + 100;
+    funcTable.fileName[funcIndex] = stringTable.indexForString('path/to/file');
+  }
+
   const store = storeWithProfile(profile);
 
-  const { container, getByText } = render(
+  const renderResult = render(
     <Provider store={store}>
-      <FlameGraph />
+      <>
+        <CallNodeContextMenu />
+        <FlameGraph />
+      </>
     </Provider>
   );
+  const { container, getByText } = renderResult;
 
   flushRafCalls();
 
-  function moveMouse(x, y) {
+  function getPositioningOptions(x, y) {
+    // These positioning options will be sent to all our mouse events. Note
+    // that the values aren't really consistent, especially offsetY and
+    // pageY shouldn't be the same, but in the context of our test this will
+    // be good enough.
+    // pageX/Y values control the position of the tooltip so it's not super
+    // important.
+    // offsetX/Y are more important as they're used to find which node is
+    // actually clicked.
+    // clientX/Y is used in the Viewport HOC when dragging and zooming.
+    const positioningOptions = {
+      offsetX: x,
+      offsetY: y,
+      clientX: x,
+      clientY: y,
+      pageX: x,
+      pageY: y,
+    };
+
+    return positioningOptions;
+  }
+
+  function fireMouseEvent(eventName, options) {
     fireEvent(
       ensureExists(
         container.querySelector('canvas'),
         'The container should contain a canvas element.'
       ),
-      getMouseEvent('mousemove', {
-        pageX: x,
-        pageY: y,
-        clientX: x,
-        clientY: y,
-        offsetX: x,
-        offsetY: y,
-      })
+      getMouseEvent(eventName, options)
     );
+  }
+
+  // Note to a future developer: the x/y values can be derived from the
+  // array returned by flushDrawLog().
+  function rightClick(x: CssPixels, y: CssPixels) {
+    const positioningOptions = getPositioningOptions(x, y);
+    const clickOptions = {
+      ...positioningOptions,
+      button: 2,
+      buttons: 2,
+    };
+
+    fireMouseEvent('mousemove', positioningOptions);
+    fireMouseEvent('mousedown', clickOptions);
+    fireMouseEvent('mouseup', clickOptions);
+    fireMouseEvent('contextmenu', clickOptions);
+    flushRafCalls();
+  }
+
+  function moveMouse(x, y) {
+    fireMouseEvent('mousemove', getPositioningOptions(x, y));
   }
 
   /**
@@ -167,14 +282,28 @@ function setupFlameGraph() {
     );
   }
 
+  // Context menu tools
+  const getContextMenu = () =>
+    ensureExists(
+      container.querySelector('.react-contextmenu'),
+      `Couldn't find the context menu.`
+    );
+
+  function clickMenuItem(strOrRegexp) {
+    fireEvent.click(getByText(strOrRegexp));
+  }
+
   return {
-    container,
+    ...store,
+    ...renderResult,
     funcNames,
-    getByText,
     ctx,
     moveMouse,
+    rightClick,
     getTooltip,
     getContentDiv,
-    ...store,
+    getContextMenu,
+    clickMenuItem,
+    flushDrawLog: () => ctx.__flushDrawLog(),
   };
 }

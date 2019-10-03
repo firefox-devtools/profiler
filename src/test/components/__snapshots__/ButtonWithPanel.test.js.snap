@@ -144,7 +144,7 @@ exports[`shared/ButtonWithPanel renders a button with a panel 1`] = `
     class="buttonWithPanelButtonWrapper"
   >
     <input
-      class="buttonWithPanelButton buttonButton"
+      class="buttonWithPanelButton"
       type="button"
       value="My Button"
     />

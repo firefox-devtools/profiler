@@ -24,6 +24,7 @@ import type { TransformStack } from '../../types/transforms';
 import type { UniqueStringArray } from '../../utils/unique-string-array';
 import type { JsTracerTiming } from '../../types/profile-derived';
 import type { $ReturnType } from '../../types/utils';
+import type { StartEndRange } from '../../types/units';
 
 /**
  * Infer the return type from the getThreadSelectorsPerThread function. This
@@ -45,6 +46,13 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = state =>
     getThread(state).samples;
+  const getThreadRange: Selector<StartEndRange> = state =>
+    // This function is already memoized in profile-data.js, so we don't need to
+    // memoize it here with `createSelector`.
+    ProfileData.getTimeRangeForThread(
+      getThread(state),
+      ProfileSelectors.getProfileInterval(state)
+    );
 
   /**
    * The first per-thread selectors filter out and transform a thread based on user's
@@ -132,6 +140,47 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     }
   );
 
+  /**
+   * This selector returns the offset to add to a sampleIndex when accessing the
+   * base thread, if your thread is a range filtered thread (all but the base
+   * `getThread` or the last `getPreviewFilteredThread`).
+   */
+  const getSampleIndexOffsetFromCommittedRange: Selector<number> = createSelector(
+    getThread,
+    ProfileSelectors.getCommittedRange,
+    ({ samples }, { start, end }) => {
+      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
+        samples,
+        start,
+        end
+      );
+      return beginSampleIndex;
+    }
+  );
+
+  /**
+   * This selector returns the offset to add to a sampleIndex when accessing the
+   * base thread, if your thread is the preview filtered thread.
+   */
+  const getSampleIndexOffsetFromPreviewRange: Selector<number> = createSelector(
+    getFilteredThread,
+    ProfileSelectors.getPreviewSelection,
+    getSampleIndexOffsetFromCommittedRange,
+    ({ samples }, previewSelection, sampleIndexFromCommittedRange) => {
+      if (!previewSelection.hasSelection) {
+        return sampleIndexFromCommittedRange;
+      }
+
+      const [beginSampleIndex] = ProfileData.getSampleIndexRangeForSelection(
+        samples,
+        previewSelection.selectionStart,
+        previewSelection.selectionEnd
+      );
+
+      return sampleIndexFromCommittedRange + beginSampleIndex;
+    }
+  );
+
   const getFriendlyThreadName: Selector<string> = createSelector(
     ProfileSelectors.getThreads,
     getThread,
@@ -154,6 +203,20 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     ProfileSelectors.getProfileViewOptions(state).perThread[threadIndex];
 
   /**
+   * Check to see if there are any JS allocations for this thread. This way we
+   * can display a custom thread.
+   */
+  const getHasJsAllocations: Selector<boolean> = state =>
+    Boolean(getThread(state).jsAllocations);
+
+  /**
+   * Check to see if there are any JS allocations for this thread. This way we
+   * can display a custom thread.
+   */
+  const getHasNativeAllocations: Selector<boolean> = state =>
+    Boolean(getThread(state).nativeAllocations);
+
+  /**
    * The JS tracer selectors are placed in the thread selectors since there are
    * not many of them. If this section grows, then consider breaking them out
    * into their own file.
@@ -170,11 +233,11 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     JsTracerTiming[] | null
   > = createSelector(
     getJsTracerTable,
-    getStringTable,
-    (jsTracerTable, stringTable) =>
+    getThread,
+    (jsTracerTable, thread) =>
       jsTracerTable === null
         ? null
-        : JsTracer.getJsTracerTiming(jsTracerTable, stringTable)
+        : JsTracer.getJsTracerTiming(jsTracerTable, thread)
   );
 
   /**
@@ -197,10 +260,13 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread,
     getStringTable,
     getSamplesTable,
+    getThreadRange,
     getFilteredThread,
     getRangeFilteredThread,
     getRangeAndTransformFilteredThread,
     getPreviewFilteredThread,
+    getSampleIndexOffsetFromCommittedRange,
+    getSampleIndexOffsetFromPreviewRange,
     getFriendlyThreadName,
     getThreadProcessDetails,
     getTransformLabels,
@@ -209,5 +275,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getJsTracerTable,
     getExpensiveJsTracerTiming,
     getExpensiveJsTracerLeafTiming,
+    getHasJsAllocations,
+    getHasNativeAllocations,
   };
 }

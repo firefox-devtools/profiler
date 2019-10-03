@@ -12,6 +12,7 @@ import type {
   AppViewState,
   IsSidebarOpenPerPanelState,
   Reducer,
+  UrlSetupPhase,
 } from '../types/state';
 import type { ThreadIndex } from '../types/profile';
 
@@ -19,11 +20,6 @@ const view: Reducer<AppViewState> = (
   state = { phase: 'INITIALIZING' },
   action
 ) => {
-  if (state.phase === 'DATA_LOADED') {
-    // Let's not come back at another phase if we're already displaying a profile
-    return state;
-  }
-
   switch (action.type) {
     case 'TEMPORARY_ERROR':
       return {
@@ -40,6 +36,11 @@ const view: Reducer<AppViewState> = (
       return { phase: 'INITIALIZING' };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
+    case 'REVERT_TO_PRE_PUBLISHED_STATE':
+    case 'SANITIZED_PROFILE_PUBLISHED':
+      return { phase: 'TRANSITIONING_FROM_STALE_PROFILE' };
+    case 'PROFILE_LOADED':
+      return { phase: 'PROFILE_LOADED' };
     case 'RECEIVE_ZIP_FILE':
     case 'VIEW_PROFILE':
       return { phase: 'DATA_LOADED' };
@@ -48,10 +49,15 @@ const view: Reducer<AppViewState> = (
   }
 };
 
-const isUrlSetupDone: Reducer<boolean> = (state = false, action) => {
+const urlSetupPhase: Reducer<UrlSetupPhase> = (
+  state = 'initial-load',
+  action
+) => {
   switch (action.type) {
+    case 'START_FETCHING_PROFILES':
+      return 'loading-profile';
     case 'URL_SETUP_DONE':
-      return true;
+      return 'done';
     default:
       return state;
   }
@@ -161,14 +167,31 @@ const trackThreadHeights: Reducer<Array<ThreadIndex | void>> = (
   }
 };
 
+/**
+ * This reducer holds the state for whether or not a profile was newly uploaded
+ * or not. This way we can show the permalink to the user.
+ */
+const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'PROFILE_PUBLISHED':
+    case 'SANITIZED_PROFILE_PUBLISHED':
+      return true;
+    case 'DISMISS_NEWLY_PUBLISHED':
+      return false;
+    default:
+      return state;
+  }
+};
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
-  isUrlSetupDone,
+  urlSetupPhase,
   hasZoomedViaMousewheel,
   isSidebarOpenPerPanel,
   panelLayoutGeneration,
   lastVisibleThreadTabSlug,
   trackThreadHeights,
+  isNewlyPublished,
 });
 
 export default appStateReducer;

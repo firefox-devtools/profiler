@@ -22,7 +22,7 @@ Clicking and dragging in the timeline creates a new range selection. The selecti
 
 ## The committed range selections
 
-![A screenshot highlighting the commit ranges int he top toolbar](images/ui-tour-ranges.jpg)
+![A screenshot highlighting the commit ranges in the top toolbar](images/ui-tour-ranges.jpg)
 
 Committing a range selection by clicking the zoom button is a useful way to zoom in on a useful selection. It can be helpful to commit several ranges to hone in on specific parts of a profile.
 

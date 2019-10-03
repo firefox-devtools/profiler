@@ -66,13 +66,13 @@ We have one import path for profiles of this format, which is located in the fil
 When the Gecko profile format changes (due to a change in Gecko):
 
  - The version number (`profile.meta.version`) needs to be incremented in Gecko.
- - In [gecko-profile-versioning.js](../src/profile-logic/gecko-profile-versioning.js), `CURRENT_VERSION` needs to be set to that new version number, and a conversion function from the old to the new version needs to be added to `_updaters`.
+ - In [app-logic/constants.js](../src/app-logic/constants.js), `GECKO_PROFILE_VERSION` needs to be set to that new version number, and a conversion function from the old to the new version needs to be added to `_updaters`.
  - Profile processing may need to be adjusted to parse the new Gecko profile format version.
 
 When the processed profile format changes (e.g. because a different data format seems adequate, or because new data from the Gecko profile needs to be accommodated):
 
  - `processProfile` needs to be changed to output the new format.
- - In [processed-profile-versioning.js](../src/profile-logic/processed-profile-versioning.js), `CURRENT_VERSION` needs to be incremented and an update function needs to be added to `_updaters`.
+ - In [app-logic/constants.js](../src/app-logic/constants.js), `PROCESSED_PROFILE_VERSION` needs to be incremented and an update function needs to be added to `_updaters`.
 
 At all times, `processProfile` only has code that converts the latest version
 of the Gecko profile format into the latest version of the processed profile

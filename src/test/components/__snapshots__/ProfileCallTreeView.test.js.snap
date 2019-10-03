@@ -1,5 +1,1958 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS allocations 1`] = `
+<div
+  aria-labelledby="calltree-tab-button"
+  class="treeAndSidebarWrapper"
+  id="calltree-tab"
+  role="tabpanel"
+>
+  <div
+    class="stackSettings"
+  >
+    <ul
+      class="stackSettingsList"
+    >
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          title="Summarize using sampled stacks of executed code over time"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-strategy"
+            type="radio"
+            value="timing"
+          />
+          Timing
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          title="Summarize using bytes of JavaScript allocated (no de-allocations)"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-strategy"
+            type="radio"
+            value="js-allocations"
+          />
+          JavaScript Allocations
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+    </ul>
+    <div
+      class="panelSearchField stackSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index="0"
+      title="Complete \\"Empty\\""
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete "Empty"
+      </span>
+    </li>
+  </ol>
+  <div
+    class="treeView"
+  >
+    <div
+      class="treeViewHeader"
+    >
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+      >
+        Total Size (bytes)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+      >
+        Self (bytes)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn icon"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewMainColumn name"
+      />
+    </div>
+    <div
+      class="react-contextmenu-wrapper treeViewContextMenu"
+    >
+      <div
+        aria-activedescendant="treeViewRow-8"
+        aria-label="Call tree"
+        class="treeViewBody"
+        role="tree"
+        tabindex="0"
+      >
+        <div
+          class="treeViewBodyInnerWrapper"
+        >
+          <div
+            class="treeViewBodyInner treeViewBodyInner0"
+            style="height: 112px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner0InnerChunk"
+            >
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="15"
+                >
+                  15
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="15"
+                >
+                  15
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="80%"
+                >
+                  80%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="12"
+                >
+                  12
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="80%"
+                >
+                  80%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="12"
+                >
+                  12
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="5"
+                >
+                  5
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="47%"
+                >
+                  47%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="7"
+                >
+                  7
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd isSelected"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="47%"
+                >
+                  47%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="7"
+                >
+                  7
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="7"
+                >
+                  7
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="20%"
+                >
+                  20%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="3"
+                >
+                  3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="treeViewBodyInner treeViewBodyInner1"
+            style="height: 112px; width: 3000px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner1TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner1InnerChunk"
+            >
+              <div
+                aria-expanded="true"
+                aria-label="A, total size is 15 bytes (100%), self size is 0 bytes"
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-0"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  A
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="B, total size is 15 bytes (100%), self size is 0 bytes"
+                aria-level="2"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-1"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 10px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  B
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="Fjs, total size is 12 bytes (80%), self size is 0 bytes"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-5"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  Fjs
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="Gjs, total size is 12 bytes (80%), self size is 5 bytes"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  Gjs
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="Hjs, total size is 7 bytes (47%), self size is 0 bytes"
+                aria-level="5"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-7"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  Hjs
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="I, total size is 7 bytes (47%), self size is 7 bytes"
+                aria-level="6"
+                aria-selected="true"
+                class="treeViewRow treeViewRowScrolledColumns odd isSelected"
+                id="treeViewRow-8"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 50px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  I
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="C, total size is 3 bytes (20%), self size is 0 bytes"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-2"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ProfileCallTreeView with Native Allocations matches the snapshot for native allocations 1`] = `
+<div
+  aria-labelledby="calltree-tab-button"
+  class="treeAndSidebarWrapper"
+  id="calltree-tab"
+  role="tabpanel"
+>
+  <div
+    class="stackSettings"
+  >
+    <ul
+      class="stackSettingsList"
+    >
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          title="Summarize using sampled stacks of executed code over time"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-strategy"
+            type="radio"
+            value="timing"
+          />
+          Timing
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          title="Summarize using bytes of memory allocated"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-strategy"
+            type="radio"
+            value="native-allocations"
+          />
+          Allocations
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          title="Summarize using bytes of memory deallocated"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-strategy"
+            type="radio"
+            value="native-deallocations"
+          />
+          Deallocations
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+    </ul>
+    <div
+      class="panelSearchField stackSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index="0"
+      title="Complete \\"Empty\\""
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete "Empty"
+      </span>
+    </li>
+  </ol>
+  <div
+    class="treeView"
+  >
+    <div
+      class="treeViewHeader"
+    >
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+      >
+        Total Size (bytes)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+      >
+        Self (bytes)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn icon"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewMainColumn name"
+      />
+    </div>
+    <div
+      class="react-contextmenu-wrapper treeViewContextMenu"
+    >
+      <div
+        aria-activedescendant="treeViewRow-8"
+        aria-label="Call tree"
+        class="treeViewBody"
+        role="tree"
+        tabindex="0"
+      >
+        <div
+          class="treeViewBodyInnerWrapper"
+        >
+          <div
+            class="treeViewBodyInner treeViewBodyInner0"
+            style="height: 112px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner0InnerChunk"
+            >
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="15"
+                >
+                  15
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="100%"
+                >
+                  100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="15"
+                >
+                  15
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="80%"
+                >
+                  80%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="12"
+                >
+                  12
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="80%"
+                >
+                  80%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="12"
+                >
+                  12
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="5"
+                >
+                  5
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="47%"
+                >
+                  47%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="7"
+                >
+                  7
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd isSelected"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="47%"
+                >
+                  47%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="7"
+                >
+                  7
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="7"
+                >
+                  7
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="20%"
+                >
+                  20%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="3"
+                >
+                  3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="treeViewBodyInner treeViewBodyInner1"
+            style="height: 112px; width: 3000px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner1TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner1InnerChunk"
+            >
+              <div
+                aria-expanded="true"
+                aria-label="A, total size is 15 bytes (100%), self size is 0 bytes"
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-0"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  A
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="B, total size is 15 bytes (100%), self size is 0 bytes"
+                aria-level="2"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-1"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 10px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  B
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="Fjs, total size is 12 bytes (80%), self size is 0 bytes"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-5"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  Fjs
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="Gjs, total size is 12 bytes (80%), self size is 5 bytes"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  Gjs
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="Hjs, total size is 7 bytes (47%), self size is 0 bytes"
+                aria-level="5"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-7"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  Hjs
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="I, total size is 7 bytes (47%), self size is 7 bytes"
+                aria-level="6"
+                aria-selected="true"
+                class="treeViewRow treeViewRowScrolledColumns odd isSelected"
+                id="treeViewRow-8"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 50px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  I
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="C, total size is 3 bytes (20%), self size is 0 bytes"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-2"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ProfileCallTreeView with Native Allocations matches the snapshot for native deallocations 1`] = `
+<div
+  aria-labelledby="calltree-tab-button"
+  class="treeAndSidebarWrapper"
+  id="calltree-tab"
+  role="tabpanel"
+>
+  <div
+    class="stackSettings"
+  >
+    <ul
+      class="stackSettingsList"
+    >
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          title="Summarize using sampled stacks of executed code over time"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-strategy"
+            type="radio"
+            value="timing"
+          />
+          Timing
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          title="Summarize using bytes of memory allocated"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-strategy"
+            type="radio"
+            value="native-allocations"
+          />
+          Allocations
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+          title="Summarize using bytes of memory deallocated"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-strategy"
+            type="radio"
+            value="native-deallocations"
+          />
+          Deallocations
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+    </ul>
+    <div
+      class="panelSearchField stackSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index="0"
+      title="Complete \\"Empty\\""
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete "Empty"
+      </span>
+    </li>
+  </ol>
+  <div
+    class="treeView"
+  >
+    <div
+      class="treeViewHeader"
+    >
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+      >
+        Total Size (bytes)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+      >
+        Self (bytes)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn icon"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewMainColumn name"
+      />
+    </div>
+    <div
+      class="react-contextmenu-wrapper treeViewContextMenu"
+    >
+      <div
+        aria-activedescendant="treeViewRow-8"
+        aria-label="Call tree"
+        class="treeViewBody"
+        role="tree"
+        tabindex="0"
+      >
+        <div
+          class="treeViewBodyInnerWrapper"
+        >
+          <div
+            class="treeViewBodyInner treeViewBodyInner0"
+            style="height: 112px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner0InnerChunk"
+            >
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="-100%"
+                >
+                  -100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="-41"
+                >
+                  -41
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="-100%"
+                >
+                  -100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="-41"
+                >
+                  -41
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="-73%"
+                >
+                  -73%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="-30"
+                >
+                  -30
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="-73%"
+                >
+                  -73%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="-30"
+                >
+                  -30
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="-13"
+                >
+                  -13
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="-41%"
+                >
+                  -41%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="-17"
+                >
+                  -17
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd isSelected"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="-41%"
+                >
+                  -41%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="-17"
+                >
+                  -17
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="-17"
+                >
+                  -17
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="-27%"
+                >
+                  -27%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="-11"
+                >
+                  -11
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="—"
+                >
+                  —
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="treeViewBodyInner treeViewBodyInner1"
+            style="height: 112px; width: 3000px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner1TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner1InnerChunk"
+            >
+              <div
+                aria-expanded="true"
+                aria-label="A, total size is -41 bytes (-100%), self size is 0 bytes"
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-0"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  A
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="B, total size is -41 bytes (-100%), self size is 0 bytes"
+                aria-level="2"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-1"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 10px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  B
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="Fjs, total size is -30 bytes (-73%), self size is 0 bytes"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-5"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  Fjs
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="Gjs, total size is -30 bytes (-73%), self size is -13 bytes"
+                aria-level="4"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd"
+                id="treeViewRow-6"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 30px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  Gjs
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="Hjs, total size is -17 bytes (-41%), self size is 0 bytes"
+                aria-level="5"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-7"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 40px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  Hjs
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="I, total size is -17 bytes (-41%), self size is -17 bytes"
+                aria-level="6"
+                aria-selected="true"
+                class="treeViewRow treeViewRowScrolledColumns odd isSelected"
+                id="treeViewRow-8"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 50px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-yellow"
+                    title="JavaScript"
+                  />
+                  I
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="false"
+                aria-label="C, total size is -11 bytes (-27%), self size is 0 bytes"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even"
+                id="treeViewRow-2"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tree with no samples 1`] = `
 <div
   aria-labelledby="calltree-tab-button"
@@ -69,14 +2022,14 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -94,7 +2047,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -202,14 +2155,14 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -227,7 +2180,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -335,14 +2288,14 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -360,7 +2313,7 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -453,1361 +2406,6 @@ exports[`calltree/ProfileCallTreeView TransformNavigator renders with multiple t
 </ol>
 `;
 
-exports[`calltree/ProfileCallTreeView computes a width for a call tree of a really deep stack 1`] = `
-<div
-  aria-labelledby="calltree-tab-button"
-  class="treeAndSidebarWrapper"
-  id="calltree-tab"
-  role="tabpanel"
->
-  <div
-    class="stackSettings"
-  >
-    <ul
-      class="stackSettingsList"
-    >
-      <li
-        class="stackSettingsListItem stackSettingsFilter"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-        >
-          <input
-            checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="combined"
-          />
-          All stacks
-        </label>
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-        >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="js"
-          />
-          JavaScript
-        </label>
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-        >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-filter"
-            title="Filter stack frames to a type."
-            type="radio"
-            value="cpp"
-          />
-          Native
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Invert call stack
-        </label>
-      </li>
-    </ul>
-    <div
-      class="stackSearchField stackSettingsSearchField"
-    >
-      <label
-        class="stackSearchFieldLabel"
-      >
-        Filter stacks: 
-        <form
-          class="idleSearchField stackSearchFieldInput"
-        >
-          <input
-            class="idleSearchFieldInput photon-input"
-            name="search"
-            placeholder="Enter filter terms"
-            required=""
-            title="Only display stacks which contain a function whose name matches this substring"
-            type="search"
-            value=""
-          />
-          <input
-            class="idleSearchFieldButton"
-            tabindex="-1"
-            type="reset"
-          />
-        </form>
-        <div
-          class="stackSearchFieldIntroduction isHidden"
-        >
-          Did you know you can use the comma (,) to search using several terms?
-        </div>
-      </label>
-    </div>
-  </div>
-  <ol
-    class="filterNavigatorBar calltreeTransformNavigator"
-  >
-    <li
-      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
-      data-index="0"
-      title="Complete \\"Empty\\""
-    >
-      <span
-        class="filterNavigatorBarItemContent"
-      >
-        Complete "Empty"
-      </span>
-    </li>
-  </ol>
-  <div
-    class="treeView"
-  >
-    <div
-      class="treeViewHeader"
-    >
-      <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
-      />
-      <span
-        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
-      >
-        Running Time (ms)
-      </span>
-      <span
-        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
-      >
-        Self (ms)
-      </span>
-      <span
-        class="treeViewHeaderColumn treeViewFixedColumn icon"
-      />
-      <span
-        class="treeViewHeaderColumn treeViewMainColumn name"
-      />
-    </div>
-    <div
-      class="react-contextmenu-wrapper treeViewContextMenu"
-    >
-      <div
-        aria-activedescendant="treeViewRow-17"
-        aria-label="Call tree"
-        class="treeViewBody"
-        role="tree"
-        tabindex="0"
-      >
-        <div
-          class="treeViewBodyInnerWrapper"
-        >
-          <div
-            class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 304px;"
-          >
-            <div
-              class="treeViewBodyInner treeViewBodyInner0TopSpacer"
-              style="height: 0px;"
-            />
-            <div
-              class="treeViewBodyInner treeViewBodyInner0InnerChunk"
-            >
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-            </div>
-            <div
-              class="treeViewBodyInner treeViewBodyInner0InnerChunk"
-            >
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns odd selected"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even "
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
-                  title="100%"
-                >
-                  100%
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn totalTime"
-                  title="1"
-                >
-                  1
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn selfTime"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn icon"
-                  title=""
-                >
-                  <div
-                    class="nodeIcon "
-                  />
-                </span>
-              </div>
-            </div>
-          </div>
-          <div
-            class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 304px; width: 3130px;"
-          >
-            <div
-              class="treeViewBodyInner treeViewBodyInner1TopSpacer"
-              style="height: 0px;"
-            />
-            <div
-              class="treeViewBodyInner treeViewBodyInner1InnerChunk"
-            >
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="1"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
-                id="treeViewRow-0"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 0px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="2"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
-                id="treeViewRow-1"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 10px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="3"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
-                id="treeViewRow-2"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 20px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="4"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
-                id="treeViewRow-3"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 30px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="5"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
-                id="treeViewRow-4"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 40px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="6"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
-                id="treeViewRow-5"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 50px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="7"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
-                id="treeViewRow-6"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 60px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="8"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
-                id="treeViewRow-7"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 70px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="9"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
-                id="treeViewRow-8"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 80px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="10"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
-                id="treeViewRow-9"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 90px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="11"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
-                id="treeViewRow-10"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 100px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="12"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
-                id="treeViewRow-11"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 110px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="13"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
-                id="treeViewRow-12"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 120px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="14"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
-                id="treeViewRow-13"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 130px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="15"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
-                id="treeViewRow-14"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 140px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="16"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
-                id="treeViewRow-15"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 150px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-            </div>
-            <div
-              class="treeViewBodyInner treeViewBodyInner1InnerChunk"
-            >
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="17"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
-                id="treeViewRow-16"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 160px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="true"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="18"
-                aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns odd selected "
-                id="treeViewRow-17"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 170px;"
-                />
-                <span
-                  class="treeRowToggleButton expanded canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-              <div
-                aria-expanded="false"
-                aria-label="name, running time is 1ms (100%), self time is 0ms"
-                aria-level="19"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
-                id="treeViewRow-18"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 180px;"
-                />
-                <span
-                  class="treeRowToggleButton collapsed canBeExpanded"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  <span
-                    class="colored-square category-color-grey"
-                    title="Other"
-                  />
-                  name
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewAppendageColumn lib"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-`;
-
 exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
 <div
   aria-labelledby="calltree-tab-button"
@@ -1878,14 +2476,14 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -1903,7 +2501,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -1976,7 +2574,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2007,7 +2605,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2038,7 +2636,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2069,7 +2667,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2100,7 +2698,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2131,7 +2729,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2162,7 +2760,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2210,7 +2808,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="Z, running time is 2ms (67%), self time is 2ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2240,7 +2838,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="Y, running time is 2ms (67%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-6"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2270,7 +2868,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="X, running time is 2ms (67%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2300,7 +2898,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="B, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-8"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2329,7 +2927,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="A, running time is 1ms (33%), self time is 0ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-9"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2359,7 +2957,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="C, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-10"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2389,7 +2987,7 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
                 aria-label="E, running time is 1ms (33%), self time is 1ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2492,14 +3090,14 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -2517,7 +3115,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -2590,7 +3188,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2621,7 +3219,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2652,7 +3250,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2683,7 +3281,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2714,7 +3312,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2745,7 +3343,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2776,7 +3374,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -2824,7 +3422,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="A, running time is 3ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2854,7 +3452,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="B, running time is 3ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2884,7 +3482,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="C, running time is 2ms (67%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2914,7 +3512,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="D, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2943,7 +3541,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="E, running time is 1ms (33%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -2973,7 +3571,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="F, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3003,7 +3601,7 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
                 aria-label="H, running time is 1ms (33%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3106,14 +3704,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -3131,7 +3729,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -3204,7 +3802,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3235,7 +3833,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3266,7 +3864,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3297,7 +3895,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3328,7 +3926,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3359,7 +3957,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3390,7 +3988,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3438,7 +4036,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 3ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3468,7 +4066,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 3ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3498,7 +4096,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 2ms (67%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3528,7 +4126,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3557,7 +4155,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (33%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3587,7 +4185,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (33%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3617,7 +4215,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="H, running time is 1ms (33%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-7"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -3720,14 +4318,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -3745,7 +4343,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -3818,7 +4416,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3849,7 +4447,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3880,7 +4478,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3911,7 +4509,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3942,7 +4540,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -3973,7 +4571,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4021,7 +4619,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 2ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4053,7 +4651,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 2ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4085,7 +4683,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 2ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4123,7 +4721,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4154,7 +4752,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (50%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4186,7 +4784,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4291,14 +4889,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -4316,7 +4914,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -4389,7 +4987,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4420,7 +5018,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4451,7 +5049,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4482,7 +5080,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4513,7 +5111,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4544,7 +5142,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4592,7 +5190,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 2ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4624,7 +5222,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 2ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4656,7 +5254,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 2ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4694,7 +5292,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4725,7 +5323,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (50%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4757,7 +5355,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -4862,14 +5460,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -4887,7 +5485,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -4960,7 +5558,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -4991,7 +5589,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5022,7 +5620,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5053,7 +5651,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5101,7 +5699,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 1ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5133,7 +5731,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 1ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5165,7 +5763,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 1ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5203,7 +5801,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (100%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5314,14 +5912,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -5339,7 +5937,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -5412,7 +6010,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5443,7 +6041,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5474,7 +6072,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5505,7 +6103,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5553,7 +6151,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 1ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5585,7 +6183,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 1ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5617,7 +6215,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 1ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5655,7 +6253,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (100%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -5766,14 +6364,14 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
       </li>
     </ul>
     <div
-      class="stackSearchField stackSettingsSearchField"
+      class="panelSearchField stackSettingsSearchField"
     >
       <label
-        class="stackSearchFieldLabel"
+        class="panelSearchFieldLabel"
       >
         Filter stacks: 
         <form
-          class="idleSearchField stackSearchFieldInput"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -5791,7 +6389,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
           />
         </form>
         <div
-          class="stackSearchFieldIntroduction isHidden"
+          class="panelSearchFieldIntroduction isHidden"
         >
           Did you know you can use the comma (,) to search using several terms?
         </div>
@@ -5864,7 +6462,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5895,7 +6493,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5926,7 +6524,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5957,7 +6555,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -5988,7 +6586,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even selected"
+                class="treeViewRow treeViewRowFixedColumns even isSelected"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -6019,7 +6617,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -6067,7 +6665,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="A, running time is 2ms (100%), self time is 0ms"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6099,7 +6697,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="B, running time is 2ms (100%), self time is 0ms"
                 aria-level="2"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6131,7 +6729,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="C, running time is 2ms (100%), self time is 0ms"
                 aria-level="3"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6169,7 +6767,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="D, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-3"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6200,7 +6798,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="E, running time is 1ms (50%), self time is 1ms"
                 aria-level="5"
                 aria-selected="true"
-                class="treeViewRow treeViewRowScrolledColumns even selected "
+                class="treeViewRow treeViewRowScrolledColumns even isSelected"
                 id="treeViewRow-4"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -6238,7 +6836,7 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
                 aria-label="F, running time is 1ms (50%), self time is 0ms"
                 aria-level="4"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-5"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"

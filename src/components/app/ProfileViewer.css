@@ -7,10 +7,53 @@
   }
 }
 
+@keyframes profileViewerFadeInSanitized {
+  0% {
+    opacity: 0;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes profileViewerFadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+.profileViewerWrapper {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+}
+
+.profileViewerWrapperBackground {
+  background-color: var(--grey-40);
+}
+
 .profileViewer {
   animation-duration: 200ms;
   animation-name: profileViewerFadeIn;
   background-color: #fff;
+}
+
+.profileViewerFadeOut {
+  /* Keep this duration in sync with the value in hideStaleProfile() */
+  animation-duration: 300ms;
+  animation-name: profileViewerFadeOut;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.profileViewerFadeInSanitized {
+  animation-duration: 500ms;
+  animation-name: profileViewerFadeInSanitized;
 }
 
 .profileViewerName {
@@ -30,8 +73,8 @@
   /* Box */
   flex: none;
   padding: 0;
-  margin: 3px 0 3px 3px;
   border: 1px solid var(--green-60);
+  margin: 3px 0 3px 3px;
 
   /* Other */
   background: var(--green-50) url(../../../res/img/svg/back-arrow.svg) center

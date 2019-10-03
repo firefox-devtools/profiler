@@ -17,6 +17,10 @@ import {
   getStackAndSampleSelectorsPerThread,
   type StackAndSampleSelectorsPerThread,
 } from './stack-sample';
+import {
+  getComposedSelectorsPerThread,
+  type ComposedSelectorsPerThread,
+} from './composed';
 import * as ProfileSelectors from '../profile';
 
 import type { ThreadIndex } from '../../types/profile';
@@ -34,6 +38,7 @@ export type ThreadSelectors = {|
   ...ThreadSelectorsPerThread,
   ...MarkerSelectorsPerThread,
   ...StackAndSampleSelectorsPerThread,
+  ...ComposedSelectorsPerThread,
 |};
 
 /**
@@ -50,11 +55,21 @@ export const getThreadSelectors = (
   threadIndex: ThreadIndex
 ): ThreadSelectors => {
   if (!(threadIndex in _threadSelectorsCache)) {
-    const threadSelectors = getThreadSelectorsPerThread(threadIndex);
+    // We define the thread selectors in 3 steps to ensure clarity in the
+    // separate files.
+    // 1. The basic selectors.
+    let selectors = getThreadSelectorsPerThread(threadIndex);
+    // 2. Stack, sample and marker selectors that need the previous basic
+    // selectors for their own definition.
+    selectors = {
+      ...selectors,
+      ...getStackAndSampleSelectorsPerThread(selectors),
+      ...getMarkerSelectorsPerThread(selectors),
+    };
+    // 3. Other selectors that need selectors from different files to be defined.
     _threadSelectorsCache[threadIndex] = {
-      ...threadSelectors,
-      ...getStackAndSampleSelectorsPerThread(threadSelectors),
-      ...getMarkerSelectorsPerThread(threadSelectors),
+      ...selectors,
+      ...getComposedSelectorsPerThread(selectors),
     };
   }
   return _threadSelectorsCache[threadIndex];
@@ -132,6 +147,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
     selectedThreadSelectors.getPreviewFilteredThread,
+    selectedThreadSelectors.getThread,
+    selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
     ProfileSelectors.getCategories,
     ProfileData.getTimingsForPath
   );

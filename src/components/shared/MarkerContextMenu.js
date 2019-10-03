@@ -7,7 +7,10 @@ import React, { PureComponent } from 'react';
 import { MenuItem } from 'react-contextmenu';
 import ContextMenu from '../shared/ContextMenu';
 import explicitConnect from '../../utils/connect';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import {
+  setContextMenuVisibility,
+  updatePreviewSelection,
+} from '../../actions/profile-view';
 import {
   getPreviewSelection,
   getCommittedRange,
@@ -41,11 +44,12 @@ type StateProps = {|
 
 type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
+  +setContextMenuVisibility: typeof setContextMenuVisibility,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-class MarkersContextMenu extends PureComponent<Props> {
+class MarkerContextMenu extends PureComponent<Props> {
   setStartRange = () => {
     const {
       selectedMarker,
@@ -159,11 +163,66 @@ class MarkersContextMenu extends PureComponent<Props> {
 
   copyMarkerCause = () => {
     const { selectedMarker } = this.props;
-
     if (selectedMarker && selectedMarker.data && selectedMarker.data.cause) {
       const stack = this._convertStackToString(selectedMarker.data.cause.stack);
-      copy(stack);
+      if (stack) {
+        copy(stack);
+      } else {
+        copy(
+          'The stack is empty because all of its frames are filtered out by the implementation filter. Switch the implementation filter in the call tree to see more frames.'
+        );
+      }
     }
+  };
+
+  copyUrl = () => {
+    const { selectedMarker } = this.props;
+
+    if (
+      selectedMarker &&
+      selectedMarker.data &&
+      selectedMarker.data.type === 'Network'
+    ) {
+      copy(selectedMarker.data.URI);
+    }
+  };
+
+  // Using setTimeout here is a bit complex, but is necessary to make the menu
+  // work fine when we want to display it somewhere when it's already open
+  // somewhere else.
+  // This is the order of events in such a situation:
+  // 0. The menu is open somewhere, it means the user right clicked somewhere
+  //     previously, and as a result some marker has the "right clicked" status.
+  // 1. The user right clicks on another marker. This is actually happening in
+  //    several events, the first event is "mousedown": this is where our own
+  //    components react for right click (both our TreeView and our charts)
+  //    and thus this is when the "right clicked" item is set in our store. BTW
+  //    this triggers a rerender of this component.
+  // 2. Then the event "mouseup" happens but we don't do anything for it for right
+  //    clicks.
+  // 3. Then the event "contextmenu" is triggered. This is the event that the
+  //    context menu library reacts to: first it closes the previous menu, then
+  //    opens the new one. This means that `_onHide` is called first for the
+  //    first menu, then `_onShow` for the second menu.
+  //    The problem here is that the call to `setContextMenuVisibility` we do in
+  //    `onHide` resets the value for the "right clicked" item. This is normally
+  //    what we want when the user closes the menu, but in this case where the
+  //    menu is still open but for another node, we don't want to reset this
+  //    value which was set earlier when handling the "mousedown" event.
+  //    To avoid this problem we use this `setTimeout` call to delay the reset
+  //    just a bit, just in case we get a `_onShow` call right after that.
+  _hidingTimeout: TimeoutID | null = null;
+
+  _onHide = () => {
+    this._hidingTimeout = setTimeout(() => {
+      this._hidingTimeout = null;
+      this.props.setContextMenuVisibility(false);
+    });
+  };
+
+  _onShow = () => {
+    clearTimeout(this._hidingTimeout);
+    this.props.setContextMenuVisibility(true);
   };
 
   render() {
@@ -174,7 +233,11 @@ class MarkersContextMenu extends PureComponent<Props> {
     }
 
     return (
-      <ContextMenu id="MarkersContextMenu">
+      <ContextMenu
+        id="MarkerContextMenu"
+        onShow={this._onShow}
+        onHide={this._onHide}
+      >
         <MenuItem onClick={this.setStartRange}>
           Set selection start time here
         </MenuItem>
@@ -187,13 +250,14 @@ class MarkersContextMenu extends PureComponent<Props> {
         >
           Set selection from duration
         </MenuItem>
-        <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
-        <MenuItem onClick={this.copyMarkerDescription}>
-          Copy marker description
-        </MenuItem>
+        <MenuItem onClick={this.copyMarkerDescription}>Copy</MenuItem>
         {selectedMarker.data && selectedMarker.data.cause ? (
           <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
         ) : null}
+        {selectedMarker.data && selectedMarker.data.type === 'Network' ? (
+          <MenuItem onClick={this.copyUrl}>Copy URL</MenuItem>
+        ) : null}
+        <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
       </ContextMenu>
     );
   }
@@ -205,8 +269,8 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     committedRange: getCommittedRange(state),
     thread: selectedThreadSelectors.getThread(state),
     implementationFilter: getImplementationFilter(state),
-    selectedMarker: selectedThreadSelectors.getSelectedMarker(state),
+    selectedMarker: selectedThreadSelectors.getRightClickedMarker(state),
   }),
-  mapDispatchToProps: { updatePreviewSelection },
-  component: MarkersContextMenu,
+  mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
+  component: MarkerContextMenu,
 });

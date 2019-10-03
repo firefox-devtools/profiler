@@ -19,7 +19,6 @@ import type {
 } from '../../types/profile-derived';
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
-import type { Milliseconds } from '../../types/units';
 
 /**
  * Infer the return type from the getMarkerSelectorsPerThread function. This
@@ -71,20 +70,13 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerData.extractMarkerDataFromName
   );
 
-  const _getFirstSampleTime: Selector<Milliseconds> = state =>
-    threadSelectors.getThread(state).samples.time[0] || 0;
-  const _getLastSampleTime: Selector<Milliseconds> = state =>
-    threadSelectors.getThread(state).samples.time.slice(-1)[0] || 0;
-
   /* This selector exposes the result of the processing of the raw marker table
    * into our Marker structure that we use in the rest of our code. This is the
    * very start of our marker pipeline. */
   const _getDerivedMarkers: Selector<Marker[]> = createSelector(
     getProcessedRawMarkerTable,
     threadSelectors.getStringTable,
-    _getFirstSampleTime,
-    _getLastSampleTime,
-    ProfileSelectors.getProfileInterval,
+    threadSelectors.getThreadRange,
     MarkerData.deriveMarkersFromRawMarkerTable
   );
 
@@ -93,7 +85,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    */
   const _getDerivedJankMarkers: Selector<Marker[]> = createSelector(
     threadSelectors.getSamplesTable,
-    samples => MarkerData.deriveJankMarkers(samples, 50)
+    ProfileSelectors.getDefaultCategory,
+    (samples, defaultCategory) =>
+      MarkerData.deriveJankMarkers(samples, 50, defaultCategory)
   );
 
   /**
@@ -237,7 +231,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    UrlState.getMarkersSearchString,
+    UrlState.getMarkersSearchStringsAsRegExp,
     MarkerData.getSearchFilteredMarkerIndexes
   );
 
@@ -289,14 +283,14 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = createSelector(
     getMarkerGetter,
     getNetworkMarkerIndexes,
-    UrlState.getNetworkSearchString,
+    UrlState.getNetworkSearchStringsAsRegExp,
     MarkerData.getSearchFilteredMarkerIndexes
   );
 
   /**
    * Returns whether there's any marker besides network markers.
    */
-  const getIsMarkerChartEmptyInFullRange: Selector<boolean> = createSelector(
+  const getAreMarkerPanelsEmptyInFullRange: Selector<boolean> = createSelector(
     getFullMarkerList,
     markers => markers.every(marker => MarkerData.isNetworkMarker(marker))
   );
@@ -319,7 +313,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = createSelector(
     getMarkerGetter,
     getMarkerChartMarkerIndexes,
-    UrlState.getMarkersSearchString,
+    UrlState.getMarkersSearchStringsAsRegExp,
     MarkerData.getSearchFilteredMarkerIndexes
   );
 
@@ -393,6 +387,27 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     return getMarker(selectedMarkerIndex);
   };
 
+  /**
+   * This returns the marker index for the currently right clicked marker.
+   */
+  const getRightClickedMarkerIndex: Selector<MarkerIndex | null> = state =>
+    threadSelectors.getViewOptions(state).rightClickedMarker;
+
+  /**
+   * From the previous value, this returns the full marker object for the
+   * selected marker.
+   */
+  const getRightClickedMarker: Selector<Marker | null> = state => {
+    const getMarker = getMarkerGetter(state);
+    const rightClickedMarkerIndex = getRightClickedMarkerIndex(state);
+
+    if (rightClickedMarkerIndex === null) {
+      return null;
+    }
+
+    return getMarker(rightClickedMarkerIndex);
+  };
+
   return {
     getMarkerGetter,
     getJankMarkerIndexesForHeader,
@@ -400,7 +415,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getFullMarkerListIndexes,
     getNetworkMarkerIndexes,
     getSearchFilteredNetworkMarkerIndexes,
-    getIsMarkerChartEmptyInFullRange,
+    getAreMarkerPanelsEmptyInFullRange,
     getMarkerChartMarkerIndexes,
     getSearchFilteredMarkerChartMarkerIndexes,
     getMarkerChartTiming,
@@ -415,6 +430,8 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getPreviewFilteredMarkerIndexes,
     getSelectedMarkerIndex,
     getSelectedMarker,
+    getRightClickedMarkerIndex,
+    getRightClickedMarker,
     getIsNetworkChartEmptyInFullRange,
   };
 }

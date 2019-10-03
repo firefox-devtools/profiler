@@ -4,7 +4,7 @@
 // @flow
 
 import { unserializeProfileOfArbitraryFormat } from '../../profile-logic/process-profile';
-import { CURRENT_VERSION as CURRENT_GECKO_VERSION } from '../../profile-logic/gecko-profile-versioning';
+import { GECKO_PROFILE_VERSION } from '../../app-logic/constants';
 
 describe('converting Linux perf profile', function() {
   it('should import a perf profile', async function() {
@@ -25,7 +25,30 @@ describe('converting Linux perf profile', function() {
       console.log(e);
       // probably file not found
     }
-    expect(version).toEqual(CURRENT_GECKO_VERSION);
+    expect(version).toEqual(GECKO_PROFILE_VERSION);
+  });
+
+  it('should import a simple perf profile', async function() {
+    let version = -1;
+    try {
+      const fs = require('fs');
+      const zlib = require('zlib');
+      const buffer = fs.readFileSync(
+        'src/test/fixtures/upgrades/simple-perf.txt.gz'
+      );
+      const decompressedArrayBuffer = zlib.gunzipSync(buffer);
+      const text = decompressedArrayBuffer.toString('utf8');
+      const profile = await unserializeProfileOfArbitraryFormat(text);
+      if (profile === undefined) {
+        throw new Error('Unable to parse the profile.');
+      }
+      version = profile.meta.version;
+      expect(profile).toMatchSnapshot();
+    } catch (e) {
+      console.log(e);
+      // probably file not found
+    }
+    expect(version).toEqual(GECKO_PROFILE_VERSION);
   });
 });
 

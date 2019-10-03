@@ -7,12 +7,24 @@ import * as React from 'react';
 import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 
+// This module is mocked.
+import copy from 'copy-to-clipboard';
+
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
 } from '../../app-logic/constants';
 import StackChartGraph from '../../components/stack-chart';
-import { changeSelectedCallNode } from '../../actions/profile-view';
+import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
+import {
+  getEmptyThread,
+  getEmptyProfile,
+} from '../../profile-logic/data-structures';
+import {
+  changeSelectedCallNode,
+  commitRange,
+  changeImplementationFilter,
+} from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
@@ -26,6 +38,8 @@ import {
   removeRootOverlayElement,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+
+import type { CssPixels } from '../../types/units';
 
 jest.useFakeTimers();
 
@@ -65,14 +79,15 @@ describe('StackChart', function() {
     );
 
     const store = storeWithProfile(profile);
-    const { getState, dispatch } = store;
-
     const renderResult = render(
       <Provider store={store}>
-        <StackChartGraph />
+        <>
+          <CallNodeContextMenu />
+          <StackChartGraph />
+        </>
       </Provider>
     );
-    const { container } = renderResult;
+    const { container, getByText } = renderResult;
 
     flushRafCalls();
 
@@ -80,14 +95,95 @@ describe('StackChart', function() {
       container.querySelector('.chartCanvas.stackChartCanvas'),
       `Couldn't find the stack chart canvas, with selector .chartCanvas.stackChartCanvas`
     );
+
+    // Mouse event tools
+    function getPositioningOptions({ x, y }) {
+      // These positioning options will be sent to all our mouse events. Note
+      // that the values aren't really consistent, especially offsetY and
+      // pageY shouldn't be the same, but in the context of our test this will
+      // be good enough.
+      // pageX/Y values control the position of the tooltip so it's not super
+      // important.
+      // offsetX/Y are more important as they're used to find which node is
+      // actually clicked.
+      // clientX/Y is used in the Viewport HOC when dragging and zooming.
+      const positioningOptions = {
+        offsetX: x,
+        offsetY: y,
+        clientX: x,
+        clientY: y,
+        pageX: x,
+        pageY: y,
+      };
+
+      return positioningOptions;
+    }
+
+    function fireMouseEvent(eventName, options) {
+      fireEvent(stackChartCanvas, getMouseEvent(eventName, options));
+    }
+
+    type Position = { x: CssPixels, y: CssPixels };
+
+    // Note to a future developer: the x/y values can be derived from the
+    // array returned by flushDrawLog().
+    function leftClick(where: Position) {
+      const positioningOptions = getPositioningOptions(where);
+      const clickOptions = {
+        ...positioningOptions,
+        button: 0,
+        buttons: 0,
+      };
+
+      fireMouseEvent('mousemove', positioningOptions);
+      fireMouseEvent('mousedown', clickOptions);
+      fireMouseEvent('mouseup', clickOptions);
+      fireMouseEvent('click', clickOptions);
+      flushRafCalls();
+    }
+
+    function rightClick(where: Position) {
+      const positioningOptions = getPositioningOptions(where);
+      const clickOptions = {
+        ...positioningOptions,
+        button: 2,
+        buttons: 2,
+      };
+
+      fireMouseEvent('mousemove', positioningOptions);
+      fireMouseEvent('mousedown', clickOptions);
+      fireMouseEvent('mouseup', clickOptions);
+      fireMouseEvent('contextmenu', clickOptions);
+      flushRafCalls();
+    }
+
+    function moveMouse(where) {
+      fireMouseEvent('mousemove', getPositioningOptions(where));
+    }
+
+    // Context menu tools
+    const getContextMenu = () =>
+      ensureExists(
+        container.querySelector('.react-contextmenu'),
+        `Couldn't find the context menu.`
+      );
+
+    function clickMenuItem(strOrRegexp) {
+      fireEvent.click(getByText(strOrRegexp));
+    }
+
     return {
       ...renderResult,
-      dispatch,
-      getState,
+      ...store,
       funcNames,
       ctx,
       flushRafCalls,
       stackChartCanvas,
+      moveMouse,
+      leftClick,
+      rightClick,
+      clickMenuItem,
+      getContextMenu,
     };
   }
 
@@ -99,7 +195,7 @@ describe('StackChart', function() {
   });
 
   it('can select a call node when clicking the chart', function() {
-    const { dispatch, getState, stackChartCanvas } = setup();
+    const { dispatch, getState, leftClick } = setup();
 
     // Start out deselected
     dispatch(changeSelectedCallNode(0, []));
@@ -108,34 +204,56 @@ describe('StackChart', function() {
     );
 
     // Click the first frame
-    fireEvent(
-      stackChartCanvas,
-      getMouseEvent('mousemove', {
-        offsetX: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
-        offsetY: 10,
-      })
-    );
-    fireEvent.mouseDown(stackChartCanvas);
-    fireEvent.mouseUp(stackChartCanvas);
+    leftClick({
+      x: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
+      y: 10,
+    });
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       0
     );
 
     // Click on a region without any drawn box to deselect
-    fireEvent(
-      stackChartCanvas,
-      getMouseEvent('mousemove', {
-        offsetX: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
-        offsetY: 100,
-      })
-    );
-    fireEvent.mouseDown(stackChartCanvas);
-    fireEvent.mouseUp(stackChartCanvas);
+    leftClick({
+      x: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
+      y: 100,
+    });
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
       null
     );
+  });
+
+  it('can display a context menu when right clicking the chart', function() {
+    // Fake timers are indicated when dealing with the context menus.
+    jest.useFakeTimers();
+
+    const { rightClick, getContextMenu, clickMenuItem } = setup();
+
+    // Right click the first frame
+    rightClick({
+      x: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
+      y: 10,
+    });
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+    clickMenuItem('Copy function name');
+    expect(copy).toHaveBeenLastCalledWith('A');
+
+    // The menu should be closed now.
+    expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
+
+    // Run the timers to have a clean state.
+    jest.runAllTimers();
+
+    // Try another to make sure the menu works for other stacks too.
+    // Right click the first frame
+    rightClick({
+      x: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
+      y: 20,
+    });
+    expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
+    clickMenuItem('Copy function name');
+    expect(copy).toHaveBeenLastCalledWith('B');
   });
 
   function getDrawnFrames(ctx) {
@@ -173,5 +291,37 @@ describe('StackChart', function() {
     drawnFrames = getDrawnFrames(ctx);
     expect(drawnFrames).toContain('A');
     expect(drawnFrames).not.toContain('Z');
+  });
+
+  describe('EmptyReasons', () => {
+    it('shows reasons when a profile has no samples', () => {
+      const profile = getEmptyProfile();
+      const thread = getEmptyThread();
+      thread.name = 'Empty Thread';
+      profile.threads.push(thread);
+
+      const store = storeWithProfile(profile);
+      const container = render(
+        <Provider store={store}>
+          <>
+            <StackChartGraph />
+          </>
+        </Provider>
+      ).container;
+
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+
+    it('shows reasons when samples are out of range', () => {
+      const { dispatch, container } = setup();
+      dispatch(commitRange(5, 10));
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
+
+    it('shows reasons when samples have been completely filtered out', function() {
+      const { dispatch, container } = setup();
+      dispatch(changeImplementationFilter('js'));
+      expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
+    });
   });
 });

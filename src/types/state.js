@@ -9,6 +9,7 @@ import type {
   DataSource,
   PreviewSelection,
   ImplementationFilter,
+  CallTreeSummaryStrategy,
   RequestedLib,
   TrackReference,
   TimelineType,
@@ -36,8 +37,10 @@ export type Reducer<T> = (T | void, Action) => T;
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
+  +rightClickedCallNodePath: CallNodePath | null,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
+  +rightClickedMarker: MarkerIndex | null,
 |};
 
 export type ProfileViewState = {|
@@ -50,7 +53,6 @@ export type ProfileViewState = {|
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
     rightClickedTrack: TrackReference | null,
-    isCallNodeContextMenuVisible: boolean,
   |},
   +globalTracks: GlobalTrack[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
@@ -59,6 +61,8 @@ export type ProfileViewState = {|
 
 export type AppViewState =
   | {| +phase: 'ROUTE_NOT_FOUND' |}
+  | {| +phase: 'TRANSITIONING_FROM_STALE_PROFILE' |}
+  | {| +phase: 'PROFILE_LOADED' |}
   | {| +phase: 'DATA_LOADED' |}
   | {| +phase: 'FATAL_ERROR', +error: Error |}
   | {|
@@ -106,14 +110,17 @@ export type ZipFileState =
 
 export type IsSidebarOpenPerPanelState = { [TabSlug]: boolean };
 
+export type UrlSetupPhase = 'initial-load' | 'loading-profile' | 'done';
+
 export type AppState = {|
   +view: AppViewState,
-  +isUrlSetupDone: boolean,
+  +urlSetupPhase: UrlSetupPhase,
   +hasZoomedViaMousewheel: boolean,
   +isSidebarOpenPerPanel: IsSidebarOpenPerPanelState,
   +panelLayoutGeneration: number,
   +lastVisibleThreadTabSlug: TabSlug,
   +trackThreadHeights: Array<ThreadIndex | void>,
+  +isNewlyPublished: boolean,
 |};
 
 export type UploadPhase =
@@ -127,14 +134,25 @@ export type UploadState = {|
   phase: UploadPhase,
   uploadProgress: number,
   error: Error | mixed,
-  url: string,
   abortFunction: () => void,
   generation: number,
+|};
+
+/**
+ * This holds the state of the profile before it was uploaded.
+ */
+export type PrePublishedState = {|
+  +profile: Profile,
+  +urlState: UrlState,
+  +zipFileState: ZipFileState,
 |};
 
 export type PublishState = {|
   +checkedSharingOptions: CheckedSharingOptions,
   +upload: UploadState,
+  +isHidingStaleProfile: boolean,
+  +hasSanitizedProfile: boolean,
+  +prePublishedState: State | null,
 |};
 
 export type ZippedProfilesState = {
@@ -157,7 +175,6 @@ export type UrlState = {|
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
   +profileName: string,
-  +isNewlyPublished: boolean,
   +profileSpecific: {|
     selectedThread: ThreadIndex | null,
     globalTrackOrder: TrackIndex[],
@@ -165,6 +182,7 @@ export type UrlState = {|
     hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
     localTrackOrderByPid: Map<Pid, TrackIndex[]>,
     implementation: ImplementationFilter,
+    callTreeSummaryStrategy: CallTreeSummaryStrategy,
     invertCallstack: boolean,
     showJsTracerSummary: boolean,
     committedRanges: StartEndRange[],

@@ -15,14 +15,15 @@
   align-content: start; /* the grid isn't vertically stretched */
   align-items: center;
   grid-gap: 2px 5px;
-  grid-template-columns: 1fr 1fr min-content;
+  grid-template-columns: 1fr 1fr;
 }
 
 .sidebar-titlegroup,
 .sidebar-title2,
-.sidebar-title3 {
+.sidebar-title3,
+.sidebar-categorylist {
   min-width: 0; /* With this, the cell's minimum size is 0 instead of min-content */
-  grid-column-start: span 3;
+  grid-column-start: span 2;
 }
 
 .sidebar-titlegroup {
@@ -39,8 +40,8 @@
 
 /* This will be used on both the title and the subtitle */
 .can-select-content-input {
-  width: 100%;
   all: unset;
+  width: 100%;
   text-overflow: ellipsis;
 }
 
@@ -83,5 +84,20 @@
 
 .sidebar-value {
   text-align: right;
+  white-space: nowrap;
+}
+
+.sidebar-categorylist {
+  display: grid;
+  align-content: start; /* the grid isn't vertically stretched */
+  align-items: center;
+  grid-gap: 2px 5px;
+  grid-template-columns: 1fr max-content;
+}
+
+.sidebar-subcategoryname {
+  overflow: hidden;
+  padding-left: 25px;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }

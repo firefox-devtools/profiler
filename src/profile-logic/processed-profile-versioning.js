@@ -21,8 +21,7 @@ import {
 } from './convert-markers';
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { timeCode } from '../utils/time-code';
-
-export const CURRENT_VERSION = 22; // The current version of the "processed" profile format.
+import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 
 // Processed profiles before version 1 did not have a profile.meta.preprocessedProfileVersion
 // field. Treat those as version zero.
@@ -52,22 +51,22 @@ export function isProcessedProfile(profile: Object): boolean {
 export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
   const profileVersion =
     profile.meta.preprocessedProfileVersion || UNANNOTATED_VERSION;
-  if (profileVersion === CURRENT_VERSION) {
+  if (profileVersion === PROCESSED_PROFILE_VERSION) {
     return;
   }
 
-  if (profileVersion > CURRENT_VERSION) {
+  if (profileVersion > PROCESSED_PROFILE_VERSION) {
     throw new Error(
       `Unable to parse a processed profile of version ${profileVersion}, most likely profiler.firefox.com needs to be refreshed. ` +
-        `The most recent version understood by this version of profiler.firefox.com is version ${CURRENT_VERSION}.\n` +
+        `The most recent version understood by this version of profiler.firefox.com is version ${PROCESSED_PROFILE_VERSION}.\n` +
         'You can try refreshing this page in case profiler.firefox.com has updated in the meantime.'
     );
   }
 
-  // Convert to CURRENT_VERSION, one step at a time.
+  // Convert to PROCESSED_PROFILE_VERSION, one step at a time.
   for (
     let destVersion = profileVersion + 1;
-    destVersion <= CURRENT_VERSION;
+    destVersion <= PROCESSED_PROFILE_VERSION;
     destVersion++
   ) {
     if (destVersion in _upgraders) {
@@ -75,7 +74,7 @@ export function upgradeProcessedProfileToCurrentVersion(profile: Object) {
     }
   }
 
-  profile.meta.preprocessedProfileVersion = CURRENT_VERSION;
+  profile.meta.preprocessedProfileVersion = PROCESSED_PROFILE_VERSION;
 }
 
 function _archFromAbi(abi) {
@@ -941,6 +940,121 @@ const _upgraders = {
           data.type = 'FileIO';
           thread.markers.name[i] = fileIoStringIndex;
         }
+      }
+    }
+  },
+  [23]: profile => {
+    // profile.meta.categories now has a subcategories property on each element,
+    // with an array of subcategories for that category, with at least one
+    // subcategory per category.
+    // And the frameTable and stackTable have another column, subcategory, which
+    // is non-null whenever the category column is non-null.
+    for (const category of profile.meta.categories) {
+      category.subcategories = ['Other'];
+    }
+    for (const thread of profile.threads) {
+      const { frameTable, stackTable } = thread;
+      frameTable.subcategory = frameTable.category.map(c =>
+        c === null ? null : 0
+      );
+      stackTable.subcategory = stackTable.category.map(c =>
+        c === null ? null : 0
+      );
+    }
+  },
+  [24]: profile => {
+    // Markers now have a category field. For older profiles, guess the marker category.
+
+    // [key, categoryName]
+    const keyToCategoryName = [
+      ['DOMEvent', 'DOM'],
+      ['Navigation::DOMComplete', 'DOM'],
+      ['Navigation::DOMInteractive', 'DOM'],
+      ['Navigation::Start', 'DOM'],
+      ['UserTiming', 'DOM'],
+
+      ['CC', 'GC / CC'],
+      ['GCMajor', 'GC / CC'],
+      ['GCMinor', 'GC / CC'],
+      ['GCSlice', 'GC / CC'],
+
+      ['Paint', 'Graphics'],
+      ['VsyncTimestamp', 'Graphics'],
+      ['CompositorScreenshot', 'Graphics'],
+
+      ['JS allocation', 'JavaScript'],
+
+      ['Styles', 'Layout'],
+      ['nsRefreshDriver::Tick waiting for paint', 'Layout'],
+
+      ['Navigation', 'Network'],
+      ['Network', 'Network'],
+
+      // Explicitly 'Other'
+      ['firstLoadURI', 'Other'],
+      ['IPC', 'Other'],
+      ['Text', 'Other'],
+      ['MainThreadLongTask', 'Other'],
+      ['FileIO', 'Other'],
+      ['Log', 'Other'],
+      ['PreferenceRead', 'Other'],
+      ['BHR-detected hang', 'Other'],
+      ['MainThreadLongTask', 'Other'],
+    ];
+
+    // Make sure the default categories are present since we may want to refer them.
+    for (const defaultCategory of [
+      { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
+      { name: 'Other', color: 'grey', subcategories: ['Other'] },
+      { name: 'Layout', color: 'purple', subcategories: ['Other'] },
+      { name: 'JavaScript', color: 'yellow', subcategories: ['Other'] },
+      { name: 'GC / CC', color: 'orange', subcategories: ['Other'] },
+      { name: 'Network', color: 'lightblue', subcategories: ['Other'] },
+      { name: 'Graphics', color: 'green', subcategories: ['Other'] },
+      { name: 'DOM', color: 'blue', subcategories: ['Other'] },
+    ]) {
+      const index = profile.meta.categories.findIndex(
+        category => category.name === defaultCategory.name
+      );
+      if (index === -1) {
+        // Add on any unknown categories.
+        profile.meta.categories.push(defaultCategory);
+      }
+    }
+
+    const otherCategory = profile.meta.categories.findIndex(
+      category => category.name === 'Other'
+    );
+
+    const keyToCategoryIndex: Map<string, number> = new Map(
+      keyToCategoryName.map(([key, categoryName]) => {
+        const index = profile.meta.categories.findIndex(
+          category => category.name === categoryName
+        );
+        if (index === -1) {
+          throw new Error('Could not find a category index to map to.');
+        }
+        return [key, index];
+      })
+    );
+
+    for (const thread of profile.threads) {
+      const { markers, stringArray } = thread;
+      markers.category = [];
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        const nameIndex = markers.name[markerIndex];
+        const data = markers.data[markerIndex];
+
+        let key: string = stringArray[nameIndex];
+        if (data && data.type) {
+          key = data.type === 'tracing' ? data.category : data.type;
+        }
+        let categoryIndex = keyToCategoryIndex.get(key);
+        if (categoryIndex === undefined) {
+          categoryIndex = otherCategory;
+        }
+
+        markers.category[markerIndex] = categoryIndex;
       }
     }
   },

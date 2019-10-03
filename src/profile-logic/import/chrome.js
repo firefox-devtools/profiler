@@ -213,7 +213,7 @@ async function processTracingEvents(
         if (funcId === undefined) {
           // The function did not exist.
           funcId = funcTable.length++;
-          funcTable.address.push(0);
+          funcTable.address.push(-1);
           funcTable.isJS.push(true);
           funcTable.relevantForJS.push(false);
           funcTable.name.push(stringTable.indexForString(functionName));
@@ -238,8 +238,9 @@ async function processTracingEvents(
             'Unable to find the prefix stack index from a node index.'
           );
         }
-        frameTable.address[frameIndex] = stringTable.indexForString('');
+        frameTable.address[frameIndex] = -1;
         frameTable.category[frameIndex] = javascriptCategoryIndex;
+        frameTable.subcategory[frameIndex] = 0;
         frameTable.func[frameIndex] = funcId;
         frameTable.implementation[frameIndex] = null;
         frameTable.line[frameIndex] =
@@ -251,6 +252,7 @@ async function processTracingEvents(
 
         stackTable.frame.push(frameIndex);
         stackTable.category.push(javascriptCategoryIndex);
+        stackTable.subcategory.push(0);
         stackTable.prefix.push(prefixStackIndex);
         nodeIdToStackId.set(nodeIndex, stackTable.length++);
       }
@@ -324,6 +326,16 @@ async function extractScreenshots(
     screenshots[0]
   );
 
+  const graphicsIndex = profile.meta.categories.findIndex(
+    category => category.name === 'Graphics'
+  );
+
+  if (graphicsIndex === -1) {
+    throw new Error(
+      "Could not find the Graphics category in the profile's category list."
+    );
+  }
+
   for (const screenshot of screenshots) {
     const urlString = 'data:image/jpg;base64,' + screenshot.args.snapshot;
     const size = await getImageSize(urlString);
@@ -342,6 +354,7 @@ async function extractScreenshots(
       thread.stringTable.indexForString('CompositorScreenshot')
     );
     thread.markers.time.push(screenshot.ts / 1000);
+    thread.markers.category.push(graphicsIndex);
     thread.markers.length++;
   }
 }

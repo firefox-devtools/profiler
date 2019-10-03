@@ -13,6 +13,7 @@ import type {
   IndexIntoCategoryList,
   Thread,
 } from '../../../types/profile';
+import type { SelectedState } from '../../../types/profile-derived';
 import type {
   Milliseconds,
   DevicePixels,
@@ -42,7 +43,7 @@ type RenderedComponentSettings = {|
     IndexIntoSamplesTable
   ) => number,
   +greyCategoryIndex: IndexIntoCategoryList,
-  +samplesSelectedStates: ?Array<boolean>,
+  +samplesSelectedStates: null | Array<SelectedState>,
   +categoryDrawStyles: CategoryDrawStyles,
 |};
 

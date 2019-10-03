@@ -4,7 +4,13 @@
 
 // @flow
 
-import type { Milliseconds, MemoryOffset, Microseconds } from './units';
+import type {
+  Milliseconds,
+  MemoryOffset,
+  Microseconds,
+  Bytes,
+  Nanoseconds,
+} from './units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
 import type { MarkerPayload } from './markers';
 export type IndexIntoStackTable = number;
@@ -16,6 +22,7 @@ export type IndexIntoFuncTable = number;
 export type IndexIntoResourceTable = number;
 export type IndexIntoLibs = number;
 export type IndexIntoCategoryList = number;
+export type IndexIntoSubcategoryListForCategory = number;
 export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 export type IndexIntoJsTracerEvents = number;
@@ -72,12 +79,13 @@ export type Pid = number | string;
  * category would be lost if it wasn't inherited into the
  * nsAttrAndChildArray::InsertChildAt stack before transforms are applied.
  */
-export type StackTable = {
+export type StackTable = {|
   frame: IndexIntoFrameTable[],
   category: IndexIntoCategoryList[],
+  subcategory: IndexIntoSubcategoryListForCategory[],
   prefix: Array<IndexIntoStackTable | null>,
   length: number,
-};
+|};
 
 /**
  * The Gecko Profiler records samples of what function was currently being executed, and
@@ -86,12 +94,47 @@ export type StackTable = {
  * information that is needed to represent that sampled function. Most of the entries
  * are indices into other tables.
  */
-export type SamplesTable = {
+export type SamplesTable = {|
   responsiveness: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
+  duration?: Milliseconds[],
   length: number,
-};
+|};
+
+/**
+ * JS allocations are recorded as a marker payload, but in profile processing they
+ * are moved to the Thread. This allows them to be part of the stack processing pipeline.
+ */
+export type JsAllocationsTable = {|
+  time: Milliseconds[],
+  className: string[],
+  typeName: string[], // Currently only 'JSObject'
+  coarseType: string[], // Currently only 'Object',
+  // "duration" is a bit odd of a name for this field, but it's "duck typing" the byte
+  // size so that we can use a SamplesTable and JsAllocationsTable in the same call tree
+  // computation functions.
+  duration: Bytes[],
+  inNursery: boolean[],
+  stack: Array<IndexIntoStackTable | null>,
+  length: number,
+|};
+
+/**
+ * Native allocations are recorded as a marker payload, but in profile processing they
+ * are moved to the Thread. This allows them to be part of the stack processing pipeline.
+ * Currently they include native allocations and deallocations. However, both
+ * of them are sampled independently, so they will be unbalanced if summed togther.
+ */
+export type NativeAllocationsTable = {|
+  time: Milliseconds[],
+  // "duration" is a bit odd of a name for this field, but it's "duck typing" the byte
+  // size so that we can use a SamplesTable and NativeAllocationsTable in the same call
+  // tree computation functions.
+  duration: Bytes[],
+  stack: Array<IndexIntoStackTable | null>,
+  length: number,
+|};
 
 /**
  * This is the base abstract class that marker payloads inherit from. This probably isn't
@@ -117,27 +160,30 @@ export type ProfilerMarkerPayload = {
  * create markers with durations, or even take a string-only marker and parse
  * it into a structured marker.
  */
-export type RawMarkerTable = {
+export type RawMarkerTable = {|
   data: MarkerPayload[],
   name: IndexIntoStringTable[],
   time: number[],
+  category: IndexIntoCategoryList[],
   length: number,
-};
+|};
 
 /**
  * Frames contain the context information about the function execution at the moment in
  * time. The relationship between frames is defined by the StackTable.
  */
-export type FrameTable = {
-  address: IndexIntoStringTable[],
+export type FrameTable = {|
+  // The address is a copy from the FuncTable entry.
+  address: Array<MemoryOffset | -1>,
   category: (IndexIntoCategoryList | null)[],
+  subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   column: (number | null)[],
   optimizations: ({} | null)[],
   length: number,
-};
+|};
 
 /**
  * Multiple frames represent individual invocations of a function, while the FuncTable
@@ -146,39 +192,42 @@ export type FrameTable = {
  * these samples are collapsed to point to a single function rather than multiple memory
  * locations.
  */
-export type FuncTable = {
-  address: MemoryOffset[],
+export type FuncTable = {|
+  // This is relevant for native entries only.
+  address: Array<MemoryOffset | -1>,
   isJS: boolean[],
   length: number,
   name: IndexIntoStringTable[],
+  // The resource is -1 if we couldn't extract a function name as a native or JS
+  // function. This is most often the case for frame labels.
   resource: Array<IndexIntoResourceTable | -1>,
   relevantForJS: Array<boolean>,
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
   columnNumber: Array<number | null>,
-};
+|};
 
 /**
  * The ResourceTable holds additional information about functions. It tends to contain
  * sparse arrays. Multiple functions can point to the same resource.
  */
-export type ResourceTable = {
+export type ResourceTable = {|
   length: number,
   // lib SHOULD be void in this case, but some profiles in the store have null or -1
   // here. We should investigate and provide an upgrader.
   // See https://github.com/firefox-devtools/profiler/issues/652
   lib: Array<IndexIntoLibs | void | null | -1>,
   name: Array<IndexIntoStringTable | -1>,
-  host: Array<IndexIntoStringTable | void>,
+  host: Array<IndexIntoStringTable | void | null>,
   type: resourceTypeEnum[],
-};
+|};
 
 /**
  * Information about libraries, for instance the Firefox executables, and its memory
  * offsets. This information is used for symbolicating C++ memory addresses into
  * actual function names. For instance turning 0x23459234 into "void myFuncName()".
  */
-export type Lib = {
+export type Lib = {|
   start: MemoryOffset,
   end: MemoryOffset,
   offset: MemoryOffset,
@@ -188,12 +237,13 @@ export type Lib = {
   debugName: string, // e.g. "firefox"
   debugPath: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
   breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
-};
+|};
 
-export type Category = {
+export type Category = {|
   name: string,
   color: string,
-};
+  subcategories: string[],
+|};
 
 export type CategoryList = Array<Category>;
 
@@ -219,21 +269,21 @@ export type PageList = Array<Page>;
 /**
  * Information about a period of time during which no samples were collected.
  */
-export type PausedRange = {
+export type PausedRange = {|
   // null if the profiler was already paused at the beginning of the period of
   // time that was present in the profile buffer
   startTime: Milliseconds | null,
   // null if the profiler was still paused when the profile was captured
   endTime: Milliseconds | null,
   reason: 'profiler-paused' | 'collecting',
-};
+|};
 
 export type JsTracerTable = {|
   events: Array<IndexIntoStringTable>,
   timestamps: Array<Microseconds>,
   durations: Array<Microseconds | null>,
-  lines: Array<number | null>, // Line number.
-  columns: Array<number | null>, // Column number.
+  line: Array<number | null>, // Line number.
+  column: Array<number | null>, // Column number.
   length: number,
 |};
 
@@ -259,10 +309,67 @@ export type Counter = {|
 |};
 
 /**
+ * The statistics about profiler overhead. It includes max/min/mean values of
+ * individual and overall overhead timings.
+ */
+export type ProfilerOverheadStats = {|
+  maxCleaning: Nanoseconds,
+  maxCounter: Nanoseconds,
+  maxInterval: Nanoseconds,
+  maxLockings: Nanoseconds,
+  maxOverhead: Nanoseconds,
+  maxThread: Nanoseconds,
+  meanCleaning: Nanoseconds,
+  meanCounter: Nanoseconds,
+  meanInterval: Nanoseconds,
+  meanLockings: Nanoseconds,
+  meanOverhead: Nanoseconds,
+  meanThread: Nanoseconds,
+  minCleaning: Nanoseconds,
+  minCounter: Nanoseconds,
+  minInterval: Nanoseconds,
+  minLockings: Nanoseconds,
+  minOverhead: Nanoseconds,
+  minThread: Nanoseconds,
+  overheadDurations: Nanoseconds,
+  overheadPercentage: Nanoseconds,
+  profiledDuration: Nanoseconds,
+  samplingCount: Nanoseconds,
+|};
+
+/**
+ * Gecko Profiler records profiler overhead samples of specific tasks that take time.
+ * counters: Time spent during collecting counter samples.
+ * expiredMarkerCleaning: Time spent during expired marker cleanup
+ * lockings: Time spent during acquiring locks.
+ * threads: Time spent during threads sampling and marker collection.
+ */
+export type ProfilerOverheadSamplesTable = {|
+  counters: Array<Nanoseconds>,
+  expiredMarkerCleaning: Array<Nanoseconds>,
+  locking: Array<Nanoseconds>,
+  threads: Array<Nanoseconds>,
+  time: Array<Milliseconds>,
+  length: number,
+|};
+
+/**
+ * Information about profiler overhead. It includes overhead timings for
+ * counters, expired marker cleanings, mutex locking and threads. Also it
+ * includes statistics about those individual and overall overhead.
+ */
+export type ProfilerOverhead = {|
+  samples: ProfilerOverheadSamplesTable,
+  statistics: ProfilerOverheadStats,
+  pid: Pid,
+  mainThreadIndex: ThreadIndex,
+|};
+
+/**
  * Gecko has one or more processes. There can be multiple threads per processes. Each
  * thread has a unique set of tables for its data.
  */
-export type Thread = {
+export type Thread = {|
   // This list of process types is defined here:
   // https://searchfox.org/mozilla-central/rev/819cd31a93fd50b7167979607371878c4d6f18e8/xpcom/build/nsXULAppAPI.h#383
   processType:
@@ -285,9 +392,12 @@ export type Thread = {
   pausedRanges: PausedRange[],
   name: string,
   processName?: string,
+  isJsTracer?: boolean,
   pid: Pid,
   tid: number | void,
   samples: SamplesTable,
+  jsAllocations?: JsAllocationsTable,
+  nativeAllocations?: NativeAllocationsTable,
   markers: RawMarkerTable,
   stackTable: StackTable,
   frameTable: FrameTable,
@@ -298,7 +408,7 @@ export type Thread = {
   funcTable: FuncTable,
   resourceTable: ResourceTable,
   jsTracer?: JsTracerTable,
-};
+|};
 
 export type ExtensionTable = {|
   baseURL: string[],
@@ -402,11 +512,15 @@ export type ProfileMeta = {|
 /**
  * All of the data for a processed profile.
  */
-export type Profile = {
+export type Profile = {|
   meta: ProfileMeta,
   pages?: PageList,
   // The counters list is optional only because old profilers may not have them.
   // An upgrader could be written to make this non-optional.
   counters?: Counter[],
+  // The profilerOverhead list is optional only because old profilers may not
+  // have them. An upgrader could be written to make this non-optional.
+  // This is list because there is a profiler overhead per process.
+  profilerOverhead?: ProfilerOverhead[],
   threads: Thread[],
-};
+|};

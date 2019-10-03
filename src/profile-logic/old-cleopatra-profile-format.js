@@ -5,7 +5,7 @@
 // @flow
 import { UniqueStringArray } from '../utils/unique-string-array';
 import { resourceTypes } from './data-structures';
-import { CURRENT_VERSION } from './gecko-profile-versioning.js';
+import { GECKO_PROFILE_VERSION } from '../app-logic/constants';
 
 /**
  * The "old cleopatra format" is the profile format that was used by the
@@ -385,7 +385,7 @@ export function convertOldCleopatraProfile(
   );
 
   return {
-    meta: Object.assign({}, meta, { version: CURRENT_VERSION }),
+    meta: Object.assign({}, meta, { version: GECKO_PROFILE_VERSION }),
     threads: threads.map(t =>
       _convertThread(t, meta.interval, symbolicationTable)
     ),

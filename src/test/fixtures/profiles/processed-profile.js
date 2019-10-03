@@ -8,7 +8,11 @@ import {
   getEmptyThread,
   getEmptyJsTracerTable,
   resourceTypes,
+  getEmptyJsAllocationsTable,
+  getEmptyNativeAllocationsTable,
 } from '../../../profile-logic/data-structures';
+import { mergeProfiles } from '../../../profile-logic/comparison';
+import { stateFromLocation } from '../../../app-logic/url-handling';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
 
 import type {
@@ -78,55 +82,13 @@ export function addMarkersToThreadWithCorrespondingSamples(
   const stringTable = thread.stringTable;
   const markersTable = thread.markers;
 
-  const allTimes = new Set();
-
   markers.forEach(([name, time, data]) => {
     markersTable.name.push(stringTable.indexForString(name));
     markersTable.time.push(time);
     markersTable.data.push(_refineMockPayload(data));
+    markersTable.category.push(0);
     markersTable.length++;
-
-    // Try to get a consistent profile containing all markers
-    allTimes.add(time);
-    if (data) {
-      if (typeof data.startTime === 'number') {
-        allTimes.add(data.startTime);
-      }
-      if (typeof data.endTime === 'number') {
-        allTimes.add(data.endTime);
-      }
-    }
   });
-
-  const firstMarkerTime = Math.min(...allTimes);
-  const lastMarkerTime = Math.max(...allTimes);
-
-  const { samples } = thread;
-
-  // The first marker time should be added if there's no sample before this time.
-  const shouldAddFirstMarkerTime =
-    samples.length === 0 || samples.time[0] > firstMarkerTime;
-
-  // The last marker time should be added if there's no sample after this time,
-  // but only if it's different than the other time.
-  const shouldAddLastMarkerTime =
-    (samples.length === 0 ||
-      samples.time[samples.length - 1] < lastMarkerTime) &&
-    firstMarkerTime !== lastMarkerTime;
-
-  if (shouldAddFirstMarkerTime) {
-    samples.time.unshift(firstMarkerTime);
-    samples.stack.unshift(null);
-    samples.responsiveness.unshift(null);
-    samples.length++;
-  }
-
-  if (shouldAddLastMarkerTime) {
-    samples.time.push(lastMarkerTime);
-    samples.stack.push(null);
-    samples.responsiveness.push(null);
-    samples.length++;
-  }
 }
 
 export function getThreadWithMarkers(markers: TestDefinedMarkers) {
@@ -339,17 +301,38 @@ function _findJitTypeFromFuncName(funcNameWithModifier: string): string | null {
   return null;
 }
 
+function _isJsFunctionName(funcName) {
+  return funcName.endsWith('js');
+}
+
 function _findCategoryFromFuncName(
   funcNameWithModifier: string,
+  funcName: string,
   categories: CategoryList
 ): IndexIntoCategoryList | null {
   const findCategoryResult = /\[cat:([^\]]+)\]/.exec(funcNameWithModifier);
+  let categoryName;
   if (findCategoryResult) {
-    const categoryName = findCategoryResult[1];
+    categoryName = findCategoryResult[1];
+  } else if (_isJsFunctionName(funcName)) {
+    categoryName = 'JavaScript';
+  }
+
+  if (categoryName) {
     const category = categories.findIndex(c => c.name === categoryName);
     if (category !== -1) {
       return category;
     }
+  }
+
+  return null;
+}
+
+function _findLibNameFromFuncName(funcNameWithModifier: string): string | null {
+  const findLibNameResult = /\[lib:([^\]]+)\]/.exec(funcNameWithModifier);
+  if (findLibNameResult) {
+    const libName = findLibNameResult[1];
+    return libName;
   }
 
   return null;
@@ -372,17 +355,15 @@ function _buildThreadFromTextOnlyStacks(
     libs,
   } = thread;
 
-  const resourceIndexCache = {};
-
   // Create the FuncTable.
   funcNames.forEach(funcName => {
     funcTable.name.push(stringTable.indexForString(funcName));
     funcTable.address.push(
-      funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : 0
+      funcName.startsWith('0x') ? parseInt(funcName.substr(2), 16) : -1
     );
     funcTable.fileName.push(null);
     funcTable.relevantForJS.push(funcName.endsWith('js-relevant'));
-    funcTable.isJS.push(funcName.endsWith('js'));
+    funcTable.isJS.push(_isJsFunctionName(funcName));
     funcTable.lineNumber.push(null);
     funcTable.columnNumber.push(null);
     // Ignore resources for now, this way funcNames have really nice string indexes.
@@ -390,40 +371,10 @@ function _buildThreadFromTextOnlyStacks(
     funcTable.length++;
   });
 
-  // Go back through and create resources as needed.
-  funcNames.forEach(funcName => {
-    // See if this sample has a resource like "funcName:libraryName".
-    const [, libraryName] = funcName.match(/\w+:(\w+)/) || [];
-    let resourceIndex = resourceIndexCache[libraryName];
-    if (resourceIndex === undefined) {
-      const libIndex = libs.length;
-      if (libraryName) {
-        libs.push({
-          start: 0,
-          end: 0,
-          offset: 0,
-          arch: '',
-          name: libraryName,
-          path: '/path/to/' + libraryName,
-          debugName: libraryName,
-          debugPath: '/path/to/' + libraryName,
-          breakpadId: 'SOMETHING_FAKE',
-        });
-        resourceIndex = resourceTable.length++;
-        resourceTable.lib.push(libIndex);
-        resourceTable.name.push(stringTable.indexForString(libraryName));
-        resourceTable.type.push(resourceTypes.library);
-        resourceTable.host.push(undefined);
-      } else {
-        resourceIndex = -1;
-      }
-      resourceIndexCache[libraryName] = resourceIndex;
-    }
-
-    funcTable.resource.push(resourceIndex);
-  });
-
   const categoryOther = categories.findIndex(c => c.name === 'Other');
+
+  // This map caches resource indexes for library names.
+  const resourceIndexCache = {};
 
   // Create the samples, stacks, and frames.
   textOnlyStacks.forEach((column, columnIndex) => {
@@ -435,11 +386,42 @@ function _buildThreadFromTextOnlyStacks(
       // the indexes can double as both string indexes and func indexes.
       const funcIndex = stringTable.indexForString(funcName);
 
+      // Find the library name from the function name and create an entry if needed.
+      const libraryName = _findLibNameFromFuncName(funcNameWithModifier);
+      let resourceIndex = -1;
+      if (libraryName) {
+        resourceIndex = resourceIndexCache[libraryName];
+        if (resourceIndex === undefined) {
+          libs.push({
+            start: 0,
+            end: 0,
+            offset: 0,
+            arch: '',
+            name: libraryName,
+            path: '/path/to/' + libraryName,
+            debugName: libraryName,
+            debugPath: '/path/to/' + libraryName,
+            breakpadId: 'SOMETHING_FAKE',
+          });
+
+          resourceTable.lib.push(libs.length - 1); // The lastly inserted item.
+          resourceTable.name.push(stringTable.indexForString(libraryName));
+          resourceTable.type.push(resourceTypes.library);
+          resourceTable.host.push(undefined);
+          resourceIndex = resourceTable.length++;
+
+          resourceIndexCache[libraryName] = resourceIndex;
+        }
+      }
+
+      funcTable.resource[funcIndex] = resourceIndex;
+
       // Find the wanted jit type from the function name
       const jitType = _findJitTypeFromFuncName(funcNameWithModifier);
       const jitTypeIndex = jitType ? stringTable.indexForString(jitType) : null;
       const category = _findCategoryFromFuncName(
         funcNameWithModifier,
+        funcName,
         categories
       );
 
@@ -459,8 +441,9 @@ function _buildThreadFromTextOnlyStacks(
 
       if (frameIndex === undefined) {
         frameTable.func.push(funcIndex);
-        frameTable.address.push(0);
+        frameTable.address.push(funcTable.address[funcIndex]);
         frameTable.category.push(category);
+        frameTable.subcategory.push(0);
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(null);
         frameTable.column.push(null);
@@ -483,14 +466,20 @@ function _buildThreadFromTextOnlyStacks(
       // If we couldn't find a stack, go ahead and create it.
       if (stackIndex === undefined) {
         const frameCategory = frameTable.category[frameIndex];
+        const frameSubcategory = frameTable.subcategory[frameIndex];
         const prefixCategory =
           prefix === null ? categoryOther : stackTable.category[prefix];
+        const prefixSubcategory =
+          prefix === null ? 0 : stackTable.subcategory[prefix];
         const stackCategory =
           frameCategory === null ? prefixCategory : frameCategory;
+        const stackSubcategory =
+          frameSubcategory === null ? prefixSubcategory : frameSubcategory;
 
         stackTable.frame.push(frameIndex);
         stackTable.prefix.push(prefix);
         stackTable.category.push(stackCategory);
+        stackTable.subcategory.push(stackSubcategory);
         stackIndex = stackTable.length++;
       }
 
@@ -504,6 +493,37 @@ function _buildThreadFromTextOnlyStacks(
     samples.time.push(columnIndex);
   });
   return thread;
+}
+
+/**
+ * This returns a merged profile from a number of profile strings.
+ */
+export function getMergedProfileFromTextSamples(
+  ...profileStrings: string[]
+): {
+  profile: Profile,
+  funcNamesPerThread: Array<string[]>,
+  funcNamesDictPerThread: Array<{ [funcName: string]: number }>,
+} {
+  const profilesAndFuncNames = profileStrings.map(str =>
+    getProfileFromTextSamples(str)
+  );
+  const profiles = profilesAndFuncNames.map(({ profile }) => profile);
+  const profileState = stateFromLocation({
+    pathname: '/public/fakehash1/',
+    search: '?thread=0&v=3',
+    hash: '',
+  });
+  const { profile } = mergeProfiles(profiles, profiles.map(() => profileState));
+  return {
+    profile,
+    funcNamesPerThread: profilesAndFuncNames.map(
+      ({ funcNamesPerThread }) => funcNamesPerThread[0]
+    ),
+    funcNamesDictPerThread: profilesAndFuncNames.map(
+      ({ funcNamesDictPerThread }) => funcNamesDictPerThread[0]
+    ),
+  };
 }
 
 type NetworkMarkersOptions = {|
@@ -643,7 +663,7 @@ export function getNetworkTrackProfile() {
 }
 
 export function getScreenshotTrackProfile() {
-  return getProfileWithMarkers(
+  const screenshotMarkersForWindowId = windowID =>
     Array(10)
       .fill()
       .map((_, i) => [
@@ -652,12 +672,15 @@ export function getScreenshotTrackProfile() {
         {
           type: 'CompositorScreenshot',
           url: 0, // Some arbitrary string.
-          windowID: '0',
+          windowID,
           windowWidth: 300,
           windowHeight: 150,
         },
-      ])
-  );
+      ]);
+  return getProfileWithMarkers([
+    ...screenshotMarkersForWindowId('0'),
+    ...screenshotMarkersForWindowId('1'),
+  ]);
 }
 
 export function getJsTracerTable(
@@ -671,8 +694,8 @@ export function getJsTracerTable(
     jsTracer.events.push(stringIndex);
     jsTracer.timestamps.push(start * 1000);
     jsTracer.durations.push((end - start) * 1000);
-    jsTracer.lines.push(null);
-    jsTracer.columns.push(null);
+    jsTracer.line.push(null);
+    jsTracer.column.push(null);
     jsTracer.length++;
   }
 
@@ -751,4 +774,139 @@ export function getCounterForThread(
     },
   };
   return counter;
+}
+
+/**
+ * Get a profile with JS allocations. The allocations will form the following call tree.
+ *
+ * - A (total: 15, self: —)
+ *   - B (total: 15, self: —)
+ *     - Fjs (total: 12, self: —)
+ *       - Gjs (total: 12, self: 5)
+ *         - Hjs (total: 7, self: —)
+ *           - I (total: 7, self: 7)
+ *     - C (total: 3, self: —)
+ *       - D (total: 3, self: —)
+ *         - E (total: 3, self: 3)
+ */
+
+export function getProfileWithJsAllocations(): * {
+  // First create a normal sample-based profile.
+  const {
+    profile,
+    funcNamesDictPerThread: [funcNamesDict],
+  } = getProfileFromTextSamples(`
+    A  A     A
+    B  B     B
+    C  Fjs   Fjs
+    D  Gjs   Gjs
+    E        Hjs
+             I
+  `);
+
+  // Now add a JsAllocationsTable.
+  const jsAllocations = getEmptyJsAllocationsTable();
+  profile.threads[0].jsAllocations = jsAllocations;
+
+  // The stack table is built sequentially, so we can assume that the stack indexes
+  // match the func indexes.
+  const { E, I, Gjs } = funcNamesDict;
+
+  // Create a list of allocations.
+  const allocations = [
+    { byteSize: 3, stack: E },
+    { byteSize: 5, stack: Gjs },
+    { byteSize: 7, stack: I },
+  ];
+
+  // Loop through and add them to the table.
+  let time = 0;
+  for (const { byteSize, stack } of allocations) {
+    const thisTime = time++;
+    jsAllocations.time.push(thisTime);
+    jsAllocations.className.push('Function');
+    jsAllocations.typeName.push('JSObject');
+    jsAllocations.coarseType.push('Object');
+    jsAllocations.duration.push(byteSize);
+    jsAllocations.inNursery.push(true);
+    jsAllocations.stack.push(stack);
+    jsAllocations.length++;
+  }
+
+  return { profile, funcNamesDict };
+}
+
+/**
+ * Get a profile with Native allocations. The allocations will form the following trees.
+ *
+ * Allocations:
+ *
+ * - A (total: 15, self: —)
+ *   - B (total: 15, self: —)
+ *     - Fjs (total: 12, self: —)
+ *       - Gjs (total: 12, self: 5)
+ *         - Hjs (total: 7, self: —)
+ *           - I (total: 7, self: 7)
+ *     - C (total: 3, self: —)
+ *       - D (total: 3, self: —)
+ *         - E (total: 3, self: 3)
+ *
+ * Deallocations:
+ *
+ * - A (total: -41, self: —)
+ *   - B (total: -41, self: —)
+ *     - Fjs (total: -30, self: —)
+ *       - Gjs (total: -30, self: -13)
+ *         - Hjs (total: -17, self: —)
+ *           - I (total: -17, self: -17)
+ *     - C (total: -11, self: —)
+ *       - D (total: -11, self: —)
+ *         - E (total: -11, self: -11)
+ */
+
+export function getProfileWithNativeAllocations(): * {
+  // First create a normal sample-based profile.
+  const {
+    profile,
+    funcNamesDictPerThread: [funcNamesDict],
+  } = getProfileFromTextSamples(`
+    A  A     A
+    B  B     B
+    C  Fjs   Fjs
+    D  Gjs   Gjs
+    E        Hjs
+             I
+  `);
+
+  // Now add a JsAllocationsTable.
+  const nativeAllocations = getEmptyNativeAllocationsTable();
+  profile.threads[0].nativeAllocations = nativeAllocations;
+
+  // The stack table is built sequentially, so we can assume that the stack indexes
+  // match the func indexes.
+  const { E, I, Gjs } = funcNamesDict;
+
+  // Create a list of allocations.
+  const allocations = [
+    // Allocations:
+    { byteSize: 3, stack: E },
+    { byteSize: 5, stack: Gjs },
+    { byteSize: 7, stack: I },
+    // Deallocations:
+    { byteSize: -11, stack: E },
+    { byteSize: -13, stack: Gjs },
+    { byteSize: -17, stack: I },
+  ];
+
+  // Loop through and add them to the table.
+  let time = 0;
+  for (const { byteSize, stack } of allocations) {
+    const thisTime = time++;
+    nativeAllocations.time.push(thisTime);
+    nativeAllocations.duration.push(byteSize);
+    nativeAllocations.stack.push(stack);
+    nativeAllocations.length++;
+  }
+
+  return { profile, funcNamesDict };
 }

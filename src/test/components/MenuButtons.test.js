@@ -5,13 +5,19 @@
 // @flow
 import * as React from 'react';
 import MenuButtons from '../../components/app/MenuButtons';
-import { render, fireEvent } from 'react-testing-library';
+import { MenuButtonsMetaInfo } from '../../components/app/MenuButtons/MetaInfo';
+import { render, fireEvent, wait } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { ensureExists } from '../../utils/flow';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+} from '../fixtures/profiles/processed-profile';
+import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
+import { processProfile } from '../../profile-logic/process-profile';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -51,9 +57,36 @@ describe('app/MenuButtons', function() {
     return { resolveUpload, rejectUpload };
   }
 
-  function setup(updateChannel = 'release') {
+  function createSimpleProfile(updateChannel = 'release') {
     const { profile } = getProfileFromTextSamples('A');
     profile.meta.updateChannel = updateChannel;
+    return { profile };
+  }
+
+  function createPreferenceReadProfile(updateChannel = 'release') {
+    const profile = getProfileWithMarkers([
+      [
+        'PreferenceRead',
+        1,
+        {
+          type: 'PreferenceRead',
+          startTime: 0,
+          endTime: 1,
+          prefAccessTime: 0,
+          prefName: 'testing',
+          prefKind: 'testing',
+          prefType: 'testing',
+          prefValue: 'testing',
+        },
+      ],
+    ]);
+    profile.meta.updateChannel = updateChannel;
+    return { profile };
+  }
+
+  function setup(profile) {
+    jest.useFakeTimers();
+
     const store = storeWithProfile(profile);
     const { resolveUpload, rejectUpload } = mockUpload();
 
@@ -72,21 +105,33 @@ describe('app/MenuButtons', function() {
       </Provider>
     );
 
-    const { container, getByTestId, getByText } = renderResult;
+    const { container, getByTestId, getByText, queryByText } = renderResult;
     const getPublishButton = () => getByText('Publish…');
+    const getErrorButton = () => getByText('Error publishing…');
+    const getCancelButton = () => getByText('Cancel Upload');
     const getPanelForm = () =>
       ensureExists(
         container.querySelector('form'),
         'Could not find the form in the panel'
       );
+    const queryPreferenceCheckbox = () =>
+      queryByText('Include preference values');
     const getPanel = () => getByTestId('MenuButtonsPublish-container');
+    const clickAndRunTimers = where => {
+      fireEvent.click(where);
+      jest.runAllTimers();
+    };
 
     return {
       store,
       ...renderResult,
       getPanel,
       getPublishButton,
+      getErrorButton,
+      getCancelButton,
       getPanelForm,
+      queryPreferenceCheckbox,
+      clickAndRunTimers,
       resolveUpload,
       rejectUpload,
     };
@@ -122,53 +167,120 @@ describe('app/MenuButtons', function() {
     });
 
     it('matches the snapshot for the closed state', () => {
-      const { container } = setup();
+      const { profile } = createSimpleProfile();
+      const { container } = setup(profile);
       expect(container).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a nightly profile', () => {
-      const { getPanel, getPublishButton } = setup('nightly');
-      fireEvent.click(getPublishButton());
+      const { profile } = createSimpleProfile('nightly');
+      const { getPanel, getPublishButton, clickAndRunTimers } = setup(profile);
+      clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
 
     it('matches the snapshot for the opened panel for a release profile', () => {
-      const { getPanel, getPublishButton } = setup('release');
-      fireEvent.click(getPublishButton());
+      const { profile } = createSimpleProfile('release');
+      const { getPanel, getPublishButton, clickAndRunTimers } = setup(profile);
+      clickAndRunTimers(getPublishButton());
       expect(getPanel()).toMatchSnapshot();
     });
 
-    it('matches the snapshot for the uploading panel', () => {
-      const { getPanel, getPublishButton, getPanelForm } = setup();
-      fireEvent.click(getPublishButton());
-      fireEvent.submit(getPanelForm());
-      expect(getPanel()).toMatchSnapshot();
+    it('shows the Include preference values checkbox when a PreferenceRead marker is in the profile', () => {
+      const { profile } = createPreferenceReadProfile('release');
+      const {
+        getPublishButton,
+        clickAndRunTimers,
+        queryPreferenceCheckbox,
+      } = setup(profile);
+      clickAndRunTimers(getPublishButton());
+      expect(queryPreferenceCheckbox()).toBeTruthy();
     });
 
-    it('matches the snapshot for the completed upload panel', () => {
+    it('does not show the Include preference values checkbox when a PreferenceRead marker is in the profile', () => {
+      const { profile } = createSimpleProfile('release');
+      const {
+        getPublishButton,
+        clickAndRunTimers,
+        queryPreferenceCheckbox,
+      } = setup(profile);
+      clickAndRunTimers(getPublishButton());
+      expect(queryPreferenceCheckbox()).toBeFalsy();
+    });
+
+    it('can publish, cancel, and then publish again', () => {
+      const { profile } = createSimpleProfile();
       const {
         getPanel,
         getPublishButton,
+        getCancelButton,
         getPanelForm,
         resolveUpload,
-      } = setup();
-      fireEvent.click(getPublishButton());
+        clickAndRunTimers,
+      } = setup(profile);
+      clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
       resolveUpload();
-      expect(getPanel()).toMatchSnapshot();
+
+      // These shouldn't exist anymore.
+      expect(() => getPanel()).toThrow();
+      expect(() => getPublishButton()).toThrow();
+
+      clickAndRunTimers(getCancelButton());
+
+      expect(getPublishButton()).toBeTruthy();
     });
 
-    it('matches the snapshot for an error', () => {
+    it('matches the snapshot for an error', async () => {
+      const { profile } = createSimpleProfile();
       const {
         getPanel,
         getPublishButton,
+        getErrorButton,
         getPanelForm,
         rejectUpload,
-      } = setup();
-      fireEvent.click(getPublishButton());
+        clickAndRunTimers,
+      } = setup(profile);
+
+      clickAndRunTimers(getPublishButton());
       fireEvent.submit(getPanelForm());
       rejectUpload('This is a mock error');
+
+      // Wait until the error button is visible.
+      await wait(() => {
+        getErrorButton();
+      });
+
+      // Now click the error button, and get a snapshot of the panel.
+      clickAndRunTimers(getErrorButton());
       expect(getPanel()).toMatchSnapshot();
+    });
+  });
+
+  describe('<MenuButtonsMetaInfo>', function() {
+    it('matches the snapshot', async () => {
+      jest.useFakeTimers();
+      jest
+        .spyOn(Date.prototype, 'toLocaleString')
+        .mockImplementation(function() {
+          // eslint-disable-next-line babel/no-invalid-this
+          return 'toLocaleString ' + this.toUTCString();
+        });
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processProfile(createGeckoProfile());
+      const store = storeWithProfile(profile);
+
+      const { container, getByValue } = render(
+        <Provider store={store}>
+          <MenuButtonsMetaInfo profile={profile} />
+        </Provider>
+      );
+
+      const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
+      fireEvent.click(metaInfoButton);
+      jest.runAllTimers();
+
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 });

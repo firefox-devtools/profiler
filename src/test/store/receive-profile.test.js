@@ -6,33 +6,45 @@
 import type { Profile } from '../../types/profile';
 
 import sinon from 'sinon';
+import { oneLineTrim } from 'common-tags';
 
 import { getEmptyProfile } from '../../profile-logic/data-structures';
+import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
 import * as UrlStateSelectors from '../../selectors/url-state';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import { getView } from '../../selectors/app';
+import { urlFromState } from '../../app-logic/url-handling';
 import {
   viewProfile,
+  finalizeProfileView,
   retrieveProfileFromAddon,
   retrieveProfileFromStore,
   retrieveProfileOrZipFromUrl,
   retrieveProfileFromFile,
   retrieveProfilesToCompare,
   _fetchProfile,
+  getProfilesFromRawUrl,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
-import { serializeProfile } from '../../profile-logic/process-profile';
+import {
+  serializeProfile,
+  processProfile,
+} from '../../profile-logic/process-profile';
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
+import { waitUntilState } from '../fixtures/utils';
+
+import { compress } from '../../utils/gz';
 
 // Mocking SymbolStoreDB. By default the functions will return undefined, which
 // will make the symbolication move forward with some bogus information.
@@ -48,7 +60,7 @@ jest.mock('../../profile-logic/symbol-store-db');
 import { expandUrl } from '../../utils/shorten-url';
 jest.mock('../../utils/shorten-url');
 
-import { TextDecoder } from 'util';
+import { TextEncoder, TextDecoder } from 'util';
 
 function simulateSymbolStoreHasNoCache() {
   // SymbolStoreDB is a mock, but Flow doesn't know this. That's why we use
@@ -127,7 +139,11 @@ describe('actions/receive-profile', function() {
 
       const [idleThread, workThread] = profile.threads;
       const idleCategoryIndex = profile.meta.categories.length;
-      profile.meta.categories.push({ name: 'Idle', color: '#fff' });
+      profile.meta.categories.push({
+        name: 'Idle',
+        color: '#fff',
+        subcategories: ['Other'],
+      });
       workThread.name = 'Work Thread';
       idleThread.name = 'Idle Thread';
       idleThread.stackTable.category = idleThread.stackTable.category.map(
@@ -209,6 +225,27 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
+    it('will not hide the only global track', function() {
+      const store = blankStore();
+      const { profile } = getProfileFromTextSamples(
+        `A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]`,
+        `work work work work work`
+      );
+      const [threadA, threadB] = profile.threads;
+      threadA.name = 'GeckoMain';
+      threadA.processType = 'tab';
+      threadA.pid = 111;
+      threadB.name = 'Other';
+      threadB.processType = 'default';
+      threadB.pid = 111;
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread GeckoMain tab] SELECTED',
+        '  - show [thread Other]',
+      ]);
+    });
+
     it('will hide idle content threads with no RefreshDriverTick markers', function() {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
@@ -268,14 +305,71 @@ describe('actions/receive-profile', function() {
         'show [thread GeckoMain tab]',
       ]);
     });
+
+    it('will hide an empty global track when all child tracks are hidden', function() {
+      const store = blankStore();
+      const { profile } = getProfileFromTextSamples(
+        `work work work work work`, // pid 1
+        `work work work work work`, // pid 1
+        `idle[cat:Idle] idle[cat:Idle] idle[cat:Idle] idle[cat:Idle] idle[cat:Idle]`, // pid 2
+        `work work work work work` // pid 3
+      );
+
+      profile.threads[0].name = 'Work A';
+      profile.threads[1].name = 'Work B';
+      profile.threads[2].name = 'Idle C';
+      profile.threads[3].name = 'Work E';
+
+      profile.threads[0].pid = 1;
+      profile.threads[1].pid = 1;
+      profile.threads[2].pid = 2;
+      profile.threads[3].pid = 3;
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [process]',
+        '  - show [thread Work A] SELECTED',
+        '  - show [thread Work B]',
+        'hide [process]', // <- Ensure this process is hidden.
+        '  - hide [thread Idle C]',
+        'show [process]',
+        '  - show [thread Work E]',
+      ]);
+    });
   });
 
   describe('retrieveProfileFromAddon', function() {
-    function setup() {
+    function toUint8Array(json) {
+      return new TextEncoder().encode(JSON.stringify(json));
+    }
+
+    function setup(profileAs = 'json') {
       jest.useFakeTimers();
 
+      const profileJSON = createGeckoProfile();
+      let mockGetProfile;
+      switch (profileAs) {
+        case 'json':
+          mockGetProfile = jest.fn().mockResolvedValue(profileJSON);
+          break;
+        case 'arraybuffer':
+          mockGetProfile = jest
+            .fn()
+            .mockResolvedValue(toUint8Array(profileJSON).buffer);
+          break;
+        case 'gzip':
+          mockGetProfile = jest
+            .fn()
+            .mockReturnValue(
+              compress(toUint8Array(profileJSON)).then(x => x.buffer)
+            );
+          break;
+        default:
+          throw new Error('unknown profiler format');
+      }
+
       const geckoProfiler = {
-        getProfile: jest.fn().mockResolvedValue(createGeckoProfile()),
+        getProfile: mockGetProfile,
         getSymbolTable: jest
           .fn()
           .mockRejectedValue(new Error('No symbol tables available')),
@@ -307,18 +401,26 @@ describe('actions/receive-profile', function() {
       delete window.fetch;
     });
 
-    it('can retrieve a profile from the addon', async function() {
-      const { dispatch, getState } = setup();
-      await dispatch(retrieveProfileFromAddon());
+    for (const profileAs of ['json', 'arraybuffer', 'gzip']) {
+      const desc = 'can retrieve a profile from the addon as ' + profileAs;
+      it(desc, async function() {
+        const { dispatch, getState } = setup(profileAs);
+        await dispatch(retrieveProfileFromAddon());
 
-      const state = getState();
-      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
-        start: 0,
-        end: 1007,
+        const state = getState();
+        expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
+        expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+          start: 0,
+          // The end can be computed as the sum of:
+          // - difference of the starts of the subprocess and the main process (1000)
+          // - the max of the last marker or sample. (in this case, last marker's time is 28)
+          // - the interval (1)
+          end: 1029,
+        });
+        // not empty
+        expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3);
       });
-      expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
-    });
+    }
 
     it('tries to symbolicate the received profile', async () => {
       const { dispatch, geckoProfiler } = setup();
@@ -360,23 +462,24 @@ describe('actions/receive-profile', function() {
           additionalData: { attempt: null, message: errorMessage },
         }, // when the error happens
         { phase: 'INITIALIZING' }, // when we could connect to the addon but waiting for the profile
-        { phase: 'DATA_LOADED' }, // yay, we got a profile!
+        { phase: 'PROFILE_LOADED' }, // yay, we got a profile!
       ]);
 
       const state = store.getState();
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1007,
+        end: 1029, // see the above test for more explanation on this value
       });
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
   });
 
   describe('retrieveProfileFromStore', function() {
-    const fetch403Response = { ok: false, status: 403 };
-    const fetch500Response = { ok: false, status: 500 };
-    const fetch200Response = {
+    // Force type-casting to Response to allow to be used as return value for fetch
+    const fetch403Response = (({ ok: false, status: 403 }: any): Response);
+    const fetch500Response = (({ ok: false, status: 500 }: any): Response);
+    const fetch200Response = (({
       ok: true,
       status: 200,
       headers: {
@@ -384,14 +487,13 @@ describe('actions/receive-profile', function() {
       },
       json: () =>
         Promise.resolve(JSON.parse(serializeProfile(_getSimpleProfile()))),
-    };
+    }: any): Response);
 
     beforeEach(function() {
       // The stub makes it easy to return different values for different
       // arguments. Here we define the default return value because there is no
       // argument specified.
-      window.fetch = sinon.stub();
-      window.fetch.resolves(fetch403Response);
+      window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
       sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
     });
@@ -403,8 +505,13 @@ describe('actions/receive-profile', function() {
 
     it('can retrieve a profile from the web and save it to state', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-      const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
-      window.fetch.withArgs(expectedUrl).resolves(fetch200Response);
+      const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
+
+      window.fetch = jest.fn(url =>
+        Promise.resolve(
+          url === expectedUrl ? fetch200Response : fetch403Response
+        )
+      );
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
@@ -420,15 +527,19 @@ describe('actions/receive-profile', function() {
 
     it('symbolicates a profile if it is not symbolicated yet', async () => {
       const { profile: unsymbolicatedProfile } = getProfileFromTextSamples(
-        '0xA:libxul'
+        '0xA[lib:libxul]'
       );
       unsymbolicatedProfile.meta.symbolicated = false;
 
-      window.fetch.resolves({
-        ...fetch200Response,
-        json: () =>
-          Promise.resolve(JSON.parse(serializeProfile(unsymbolicatedProfile))),
-      });
+      window.fetch = jest.fn().mockResolvedValue(
+        (({
+          ...fetch200Response,
+          json: () =>
+            Promise.resolve(
+              JSON.parse(serializeProfile(unsymbolicatedProfile))
+            ),
+        }: any): Response)
+      );
 
       simulateSymbolStoreHasNoCache();
 
@@ -438,21 +549,24 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore('FAKEHASH'));
 
-      sinon.assert.calledWithMatch(
-        window.fetch,
+      expect(window.fetch).toHaveBeenLastCalledWith(
         'https://symbols.mozilla.org/symbolicate/v5',
-        { body: sinon.match(/memoryMap.*libxul/) }
+        expect.objectContaining({
+          body: expect.stringMatching(/memoryMap.*libxul/),
+        })
       );
     });
 
     it('requests several times in case of 403', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-      const expectedUrl = `https://profile-store.commondatastorage.googleapis.com/${hash}`;
-      // The first call will still be a 403 -- remember, it's the default return value.
+      const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
       window.fetch
-        .withArgs(expectedUrl)
-        .onSecondCall()
-        .resolves(fetch200Response);
+        .mockImplementationOnce(_ => Promise.resolve(fetch403Response))
+        .mockImplementationOnce(url =>
+          Promise.resolve(
+            url === expectedUrl ? fetch200Response : fetch403Response
+          )
+        );
 
       const store = blankStore();
       const views = (await observeStoreStateChanges(store, () =>
@@ -469,6 +583,7 @@ describe('actions/receive-profile', function() {
             message: errorMessage,
           },
         },
+        { phase: 'PROFILE_LOADED' },
         { phase: 'DATA_LOADED' },
       ]);
 
@@ -505,7 +620,7 @@ describe('actions/receive-profile', function() {
 
     it('fails in case the fetch returns a server error', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
-      window.fetch.resolves(fetch500Response);
+      window.fetch = jest.fn().mockResolvedValue(fetch500Response);
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
@@ -517,9 +632,10 @@ describe('actions/receive-profile', function() {
   });
 
   describe('retrieveProfileOrZipFromUrl', function() {
-    const fetch403Response = { ok: false, status: 403 };
-    const fetch500Response = { ok: false, status: 500 };
-    const fetch200Response = {
+    // Force type-casting to Response to allow to be used as return value for fetch
+    const fetch403Response = (({ ok: false, status: 403 }: any): Response);
+    const fetch500Response = (({ ok: false, status: 500 }: any): Response);
+    const fetch200Response = (({
       ok: true,
       status: 200,
       headers: {
@@ -527,14 +643,13 @@ describe('actions/receive-profile', function() {
       },
       json: () =>
         Promise.resolve(JSON.parse(serializeProfile(_getSimpleProfile()))),
-    };
+    }: any): Response);
 
     beforeEach(function() {
       // The stub makes it easy to return different values for different
       // arguments. Here we define the default return value because there is no
       // argument specified.
-      window.fetch = sinon.stub();
-      window.fetch.resolves(fetch403Response);
+      window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
       sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
     });
@@ -546,7 +661,11 @@ describe('actions/receive-profile', function() {
 
     it('can retrieve a profile from the web and save it to state', async function() {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch.withArgs(expectedUrl).resolves(fetch200Response);
+      window.fetch = jest.fn(url =>
+        Promise.resolve(
+          url === expectedUrl ? fetch200Response : fetch403Response
+        )
+      );
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -564,9 +683,12 @@ describe('actions/receive-profile', function() {
       const expectedUrl = 'https://profiles.club/shared.json';
       // The first call will still be a 403 -- remember, it's the default return value.
       window.fetch
-        .withArgs(expectedUrl)
-        .onSecondCall()
-        .resolves(fetch200Response);
+        .mockResolvedValueOnce(fetch403Response)
+        .mockImplementationOnce(url =>
+          Promise.resolve(
+            url === expectedUrl ? fetch200Response : fetch403Response
+          )
+        );
 
       const store = blankStore();
       const views = (await observeStoreStateChanges(store, () =>
@@ -583,6 +705,7 @@ describe('actions/receive-profile', function() {
             message: errorMessage,
           },
         },
+        { phase: 'PROFILE_LOADED' },
         { phase: 'DATA_LOADED' },
       ]);
 
@@ -619,7 +742,7 @@ describe('actions/receive-profile', function() {
 
     it('fails in case the fetch returns a server error', async function() {
       const expectedUrl = 'https://profiles.club/shared.json';
-      window.fetch.resolves(fetch500Response);
+      window.fetch = jest.fn().mockResolvedValue(fetch500Response);
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
@@ -1051,16 +1174,45 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    function setupWithLongUrl(urlSearch1: string, urlSearch2: string): * {
+    function getSomeProfiles() {
+      const { profile: profile1 } = getProfileFromTextSamples(
+        `A  B  C  D  E`,
+        `G  H  I  J  K`
+      );
+      const { profile: profile2 } = getProfileFromTextSamples(
+        `L  M  N  O  P  Ex  Ex  Ex  Ex`,
+        `Q  R  S  T  U  Ex  Ex  Ex  Ex`
+      );
+
+      return { profile1, profile2 };
+    }
+
+    type SetupProfileParams = {|
+      profile1: Profile,
+      profile2: Profile,
+    |};
+
+    type SetupUrlSearchParams = {|
+      urlSearch1: string,
+      urlSearch2: string,
+    |};
+
+    function setupWithLongUrl(
+      profiles: SetupProfileParams,
+      { urlSearch1, urlSearch2 }: SetupUrlSearchParams = {
+        urlSearch1: 'thread=0',
+        urlSearch2: 'thread=0',
+      }
+    ): * {
       const fakeUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
       const fakeUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
 
-      return setup(fakeUrl1, fakeUrl2);
+      return setup(profiles, { url1: fakeUrl1, url2: fakeUrl2 });
     }
 
     async function setupWithShortUrl(
-      urlSearch1: string,
-      urlSearch2: string
+      profiles: SetupProfileParams,
+      { urlSearch1, urlSearch2 }: SetupUrlSearchParams
     ): * {
       const longUrl1 = `https://fakeurl.com/public/fakehash1/?${urlSearch1}&v=3`;
       const longUrl2 = `https://fakeurl.com/public/fakehash2/?${urlSearch2}&v=3`;
@@ -1078,7 +1230,11 @@ describe('actions/receive-profile', function() {
         }
       });
 
-      const setupResult = await setup(shortUrl1, shortUrl2);
+      const setupResult = await setup(profiles, {
+        url1: shortUrl1,
+        url2: shortUrl2,
+      });
+
       return {
         ...setupResult,
         shortUrl1,
@@ -1086,16 +1242,15 @@ describe('actions/receive-profile', function() {
       };
     }
 
-    async function setup(fakeUrl1: string, fakeUrl2: string): * {
-      const { profile: profile1 } = getProfileFromTextSamples(
-        `A  B  C  D  E`,
-        `G  H  I  J  K`
-      );
-      const { profile: profile2 } = getProfileFromTextSamples(
-        `L  M  N  O  P  Ex  Ex  Ex  Ex`,
-        `Q  R  S  T  U  Ex  Ex  Ex  Ex`
-      );
+    type SetupUrlParams = {|
+      url1: string,
+      url2: string,
+    |};
 
+    async function setup(
+      { profile1, profile2 }: SetupProfileParams,
+      { url1, url2 }: SetupUrlParams
+    ): * {
       profile1.threads.forEach(thread =>
         addMarkersToThreadWithCorrespondingSamples(thread, [
           ['A', 1, { startTime: 1, endTime: 3 }],
@@ -1121,7 +1276,7 @@ describe('actions/receive-profile', function() {
         .mockResolvedValueOnce(fetch200Response(serializeProfile(profile2)));
 
       const { dispatch, getState } = blankStore();
-      await dispatch(retrieveProfilesToCompare([fakeUrl1, fakeUrl2]));
+      await dispatch(retrieveProfilesToCompare([url1, url2]));
 
       // To find stupid mistakes more easily, check that we didn't get a fatal
       // error here. If we got one, let's rethrow the error.
@@ -1165,18 +1320,30 @@ describe('actions/receive-profile', function() {
         resultProfile,
         globalTracks,
         rootRange,
-      } = await setupWithLongUrl('thread=0', 'thread=1');
+      } = await setupWithLongUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0',
+        urlSearch2: 'thread=1',
+      });
 
       const expectedThreads = [profile1.threads[0], profile2.threads[1]].map(
         (thread, i) => ({
           ...thread,
           pid: `${thread.pid} from profile ${i + 1}`,
           processName: `Profile ${i + 1}: ${thread.name}`,
-          unregisterTime: thread.samples.length,
+          unregisterTime: getTimeRangeForThread(thread, 1).end,
+        })
+      );
+
+      // comparison thread
+      expectedThreads.push(
+        expect.objectContaining({
+          processType: 'comparison',
+          pid: 'Diff between 1 and 2',
+          name: 'Diff between 1 and 2',
         })
       );
       expect(resultProfile.threads).toEqual(expectedThreads);
-      expect(globalTracks).toHaveLength(2);
+      expect(globalTracks).toHaveLength(3); // each thread + comparison track
       expect(rootRange).toEqual({ start: 0, end: 9 });
     });
 
@@ -1186,10 +1353,13 @@ describe('actions/receive-profile', function() {
         shortUrl2,
         globalTracks,
         rootRange,
-      } = await setupWithShortUrl('thread=0', 'thread=1');
+      } = await setupWithShortUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0',
+        urlSearch2: 'thread=1',
+      });
 
       // Reuse some expectations from the previous test
-      expect(globalTracks).toHaveLength(2);
+      expect(globalTracks).toHaveLength(3); // each thread + comparison track
       expect(rootRange).toEqual({ start: 0, end: 9 });
 
       // Check that expandUrl has been called
@@ -1198,28 +1368,28 @@ describe('actions/receive-profile', function() {
     });
 
     it('filters samples and markers, according to the URL', async function() {
-      const { resultProfile } = await setupWithLongUrl(
-        'thread=0&range=0.0011_0.0043',
-        'thread=1'
-      );
+      const { resultProfile } = await setupWithLongUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0&range=0.0011_0.0043',
+        urlSearch2: 'thread=1',
+      });
       expect(resultProfile.threads[0].samples).toHaveLength(3);
       expect(resultProfile.threads[0].markers).toHaveLength(4);
     });
 
     it('reuses the implementation information if both profiles used it', async function() {
-      const { getState } = await setupWithLongUrl(
-        'thread=0&implementation=js',
-        'thread=1&implementation=js'
-      );
+      const { getState } = await setupWithLongUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0&implementation=js',
+        urlSearch2: 'thread=1&implementation=js',
+      });
 
       expect(UrlStateSelectors.getImplementationFilter(getState())).toBe('js');
     });
 
     it('does not reuse the implementation information if one profile used it', async function() {
-      const { getState } = await setupWithLongUrl(
-        'thread=0&implementation=js',
-        'thread=1'
-      );
+      const { getState } = await setupWithLongUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0&implementation=js',
+        urlSearch2: 'thread=1',
+      });
 
       expect(UrlStateSelectors.getImplementationFilter(getState())).not.toBe(
         'js'
@@ -1227,10 +1397,10 @@ describe('actions/receive-profile', function() {
     });
 
     it('reuses transforms', async function() {
-      const { getState } = await setupWithLongUrl(
-        'thread=0&transforms=ff-42',
-        'thread=1'
-      );
+      const { getState } = await setupWithLongUrl(getSomeProfiles(), {
+        urlSearch1: 'thread=0&transforms=ff-42',
+        urlSearch2: 'thread=1',
+      });
 
       expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
         {
@@ -1238,6 +1408,221 @@ describe('actions/receive-profile', function() {
           funcIndex: 42,
         },
       ]);
+    });
+
+    it('creates a diff thread that computes properly diff timings', async function() {
+      const { profile: baseProfile } = getProfileFromTextSamples('A  A');
+      const { profile: regressionProfile } = getProfileFromTextSamples(
+        'A  A  A  A  A  A'
+      );
+      const { resultProfile, getState } = await setupWithLongUrl({
+        profile1: baseProfile,
+        profile2: regressionProfile,
+      });
+
+      expect(resultProfile.threads).toHaveLength(3);
+      const selectors = getThreadSelectors(2);
+      const callTree = selectors.getCallTree(getState());
+      const [firstChild] = callTree.getRoots();
+      const nodeData = callTree.getNodeData(firstChild);
+      expect(nodeData.selfTime).toBe(4);
+    });
+  });
+
+  describe('getProfilesFromRawUrl', function() {
+    function fetch200Response(profile: string) {
+      return {
+        ok: true,
+        status: 200,
+        headers: {
+          get: () => 'application/json',
+        },
+        json: () => Promise.resolve(JSON.parse(profile)),
+      };
+    }
+
+    async function setup(location: Object, requiredProfile: number = 1) {
+      const profile = _getSimpleProfile();
+      const geckoProfile = createGeckoProfile();
+
+      // Add mock fetch response for the required number of times.
+      // Usually it's 1 but it can be also 2 for `compare` dataSource.
+      for (let i = 0; i < requiredProfile; i++) {
+        window.fetch.mockResolvedValueOnce(
+          fetch200Response(serializeProfile(profile))
+        );
+      }
+
+      const geckoProfiler = {
+        getProfile: jest.fn().mockResolvedValue(geckoProfile),
+        getSymbolTable: jest
+          .fn()
+          .mockRejectedValue(new Error('No symbol tables available')),
+      };
+      window.geckoProfilerPromise = Promise.resolve(geckoProfiler);
+
+      simulateSymbolStoreHasNoCache();
+
+      // Silence the logs coming from the promise rejections above.
+      jest.spyOn(console, 'log').mockImplementation(() => {});
+
+      const store = blankStore();
+      await store.dispatch(getProfilesFromRawUrl(location));
+
+      // To find stupid mistakes more easily, check that we didn't get a fatal
+      // error here. If we got one, let's rethrow the error.
+      const view = getView(store.getState());
+      if (view.phase === 'FATAL_ERROR') {
+        throw view.error;
+      }
+
+      const waitUntilPhase = phase =>
+        waitUntilState(store, state => getView(state).phase === phase);
+
+      const waitUntilSymbolication = () =>
+        waitUntilState(
+          store,
+          state => ProfileViewSelectors.getSymbolicationStatus(state) === 'DONE'
+        );
+
+      return {
+        profile,
+        geckoProfile,
+        waitUntilPhase,
+        waitUntilSymbolication,
+        ...store,
+      };
+    }
+
+    beforeEach(function() {
+      // The stub makes it easy to return different values for different
+      // arguments. Here we define the default return value because there is no
+      // argument specified.
+      window.fetch = jest.fn();
+      window.fetch.mockImplementation(() =>
+        Promise.reject(new Error('No more answers have been configured.'))
+      );
+    });
+
+    afterEach(function() {
+      delete window.fetch;
+      delete window.geckoProfilerPromise;
+    });
+
+    it('retrieves profile from a `public` data source and loads it', async function() {
+      const { profile, getState, dispatch } = await setup({
+        pathname: '/public/fakehash/',
+        search: '?thread=0&v=4',
+        hash: '',
+      });
+
+      // Check if we loaded the profile data successfully.
+      expect(ProfileViewSelectors.getProfile(getState())).toEqual(profile);
+      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+
+      // Check if we can successfully finalize the profile view.
+      await dispatch(finalizeProfileView());
+      expect(getView(getState()).phase).toBe('DATA_LOADED');
+    });
+
+    it('retrieves profile from a `from-url` data source and loads it', async function() {
+      const { profile, getState, dispatch } = await setup({
+        // '/from-url/https://fakeurl.com/fakeprofile.json/'
+        pathname: '/from-url/https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json/',
+        search: '',
+        hash: '',
+      });
+
+      // Check if we loaded the profile data successfully.
+      expect(ProfileViewSelectors.getProfile(getState())).toEqual(profile);
+      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+
+      // Check if we can successfully finalize the profile view.
+      await dispatch(finalizeProfileView());
+      expect(getView(getState()).phase).toBe('DATA_LOADED');
+    });
+
+    it('keeps the `from-url` value in the URL', async function() {
+      const { getState, dispatch } = await setup({
+        // '/from-url/https://fakeurl.com/fakeprofile.json/'
+        pathname: '/from-url/https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json/',
+        search: '',
+        hash: '',
+      });
+      await dispatch(finalizeProfileView());
+      const [, fromAddon, urlString] = urlFromState(
+        UrlStateSelectors.getUrlState(getState())
+      ).split('/');
+      expect(fromAddon).toEqual('from-url');
+      expect(urlString).toEqual('https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json');
+    });
+
+    it('retrieves profile from a `compare` data source and loads it', async function() {
+      const url1 = 'http://fake-url.com/public/1?thread=0';
+      const url2 = 'http://fake-url.com/public/2?thread=0';
+      const { getState, dispatch } = await setup(
+        {
+          pathname: '/compare/FAKEURL/',
+          search: oneLineTrim`
+            ?profiles[]=${encodeURIComponent(url1)}
+            &profiles[]=${encodeURIComponent(url2)}
+          `,
+          hash: '',
+        },
+        2
+      );
+
+      // Check if we loaded the profile data successfully.
+      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+
+      // Check if we can successfully finalize the profile view.
+      await dispatch(finalizeProfileView());
+      expect(getView(getState()).phase).toBe('DATA_LOADED');
+    });
+
+    it('retrieves profile from a `from-addon` data source and loads it', async function() {
+      const { geckoProfile, getState, waitUntilPhase } = await setup(
+        {
+          pathname: '/from-addon/',
+          search: '',
+          hash: '',
+        },
+        0
+      );
+
+      // Differently, `from-addon` calls the finalizeProfileView internally,
+      // we don't need to call it again.
+      await waitUntilPhase('DATA_LOADED');
+      const processedProfile = processProfile(geckoProfile);
+      expect(ProfileViewSelectors.getProfile(getState())).toEqual(
+        processedProfile
+      );
+    });
+
+    it('finishes symbolication for `from-addon` data source', async function() {
+      const { waitUntilSymbolication } = await setup(
+        {
+          pathname: '/from-addon/',
+          search: '',
+          hash: '',
+        },
+        0
+      );
+
+      // It should successfully symbolicate the profiles that are loaded from addon.
+      await waitUntilSymbolication();
+    });
+
+    it('does not retrieve profile from other data sources', async function() {
+      ['/none/', '/from-file/', 'local'].forEach(async sourcePath => {
+        await expect(
+          setup({
+            pathname: sourcePath,
+            search: '',
+            hash: '',
+          })
+        ).rejects.toThrow();
+      });
     });
   });
 });

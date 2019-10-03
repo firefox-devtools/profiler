@@ -11,20 +11,24 @@ import * as FlameGraph from '../../profile-logic/flame-graph';
 import * as CallTree from '../../profile-logic/call-tree';
 import { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
+import { assertExhaustiveCheck, ensureExists } from '../../utils/flow';
 
 import type {
-  IndexIntoCategoryList,
   Thread,
+  SamplesTable,
+  JsAllocationsTable,
+  NativeAllocationsTable,
+  IndexIntoCategoryList,
   IndexIntoSamplesTable,
 } from '../../types/profile';
 import type {
   CallNodeInfo,
   CallNodePath,
   IndexIntoCallNodeTable,
+  SelectedState,
 } from '../../types/profile-derived';
 import type { StartEndRange } from '../../types/units';
 import type { Selector } from '../../types/store';
-import type { SelectedState } from '../../profile-logic/profile-data';
 import type { $ReturnType } from '../../types/utils';
 import type { ThreadSelectorsPerThread } from './thread';
 
@@ -97,6 +101,21 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
+  const getRightClickedCallNodePath: Selector<CallNodePath | null> = state =>
+    threadSelectors.getViewOptions(state).rightClickedCallNodePath;
+
+  const getRightClickedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> = createSelector(
+    getCallNodeInfo,
+    getRightClickedCallNodePath,
+    ({ callNodeTable }, callNodePath): IndexIntoCallNodeTable | null => {
+      if (callNodePath === null) {
+        return null;
+      }
+
+      return ProfileData.getCallNodeIndexFromPath(callNodePath, callNodeTable);
+    }
+  );
+
   const getExpandedCallNodePaths: Selector<PathSet> = createSelector(
     threadSelectors.getViewOptions,
     threadViewOptions => threadViewOptions.expandedCallNodePaths
@@ -115,7 +134,7 @@ export function getStackAndSampleSelectorsPerThread(
   );
 
   const getSamplesSelectedStatesInFilteredThread: Selector<
-    SelectedState[]
+    null | SelectedState[]
   > = createSelector(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
@@ -125,13 +144,17 @@ export function getStackAndSampleSelectorsPerThread(
       { callNodeTable, stackIndexToCallNodeIndex },
       selectedCallNode
     ) => {
-      const sampleCallNodes = ProfileData.getSampleCallNodes(
-        thread.samples,
+      if (thread.isJsTracer) {
+        // This is currently to slow to compute in JS Tracer threads.
+        return null;
+      }
+      const sampleIndexToCallNodeIndex = ProfileData.getSampleIndexToCallNodeIndex(
+        thread.samples.stack,
         stackIndexToCallNodeIndex
       );
       return ProfileData.getSamplesSelectedStates(
         callNodeTable,
-        sampleCallNodes,
+        sampleIndexToCallNodeIndex,
         selectedCallNode
       );
     }
@@ -143,16 +166,53 @@ export function getStackAndSampleSelectorsPerThread(
     threadSelectors.getFilteredThread,
     getCallNodeInfo,
     (thread, { callNodeTable, stackIndexToCallNodeIndex }) => {
-      const sampleCallNodes = ProfileData.getSampleCallNodes(
-        thread.samples,
+      const sampleIndexToCallNodeIndex = ProfileData.getSampleIndexToCallNodeIndex(
+        thread.samples.stack,
         stackIndexToCallNodeIndex
       );
-      return ProfileData.getTreeOrderComparator(callNodeTable, sampleCallNodes);
+      return ProfileData.getTreeOrderComparator(
+        callNodeTable,
+        sampleIndexToCallNodeIndex
+      );
+    }
+  );
+
+  const getSamplesForCallTree: Selector<
+    SamplesTable | JsAllocationsTable | NativeAllocationsTable
+  > = createSelector(
+    threadSelectors.getPreviewFilteredThread,
+    UrlState.getCallTreeSummaryStrategy,
+    (thread, strategy) => {
+      switch (strategy) {
+        case 'timing':
+          return thread.samples;
+        case 'js-allocations':
+          return ensureExists(
+            thread.jsAllocations,
+            'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
+          );
+        case 'native-allocations':
+          return ProfileData.filterToAllocations(
+            ensureExists(
+              thread.nativeAllocations,
+              'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
+            )
+          );
+        case 'native-deallocations':
+          return ProfileData.filterToDeallocations(
+            ensureExists(
+              thread.nativeAllocations,
+              'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
+            )
+          );
+        default:
+          throw assertExhaustiveCheck(strategy);
+      }
     }
   );
 
   const getCallTreeCountsAndTimings: Selector<CallTree.CallTreeCountsAndTimings> = createSelector(
-    threadSelectors.getPreviewFilteredThread,
+    getSamplesForCallTree,
     getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
@@ -166,6 +226,7 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileSelectors.getCategories,
     UrlState.getImplementationFilter,
     getCallTreeCountsAndTimings,
+    UrlState.getCallTreeSummaryStrategy,
     CallTree.getCallTree
   );
 
@@ -196,6 +257,8 @@ export function getStackAndSampleSelectorsPerThread(
     getCallNodeMaxDepth,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
+    getRightClickedCallNodePath,
+    getRightClickedCallNodeIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSamplesSelectedStatesInFilteredThread,

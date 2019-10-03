@@ -24,4 +24,29 @@ afterEach(() => {
   //
   // See https://github.com/facebook/jest/issues/7654
   jest.resetAllMocks();
+  jest.clearAllTimers();
+});
+
+expect.extend({
+  toHaveClass(received, className) {
+    if (!(received instanceof Element)) {
+      throw new Error(
+        `expected value ${received} to be an instance of Element.`
+      );
+    }
+    const pass = received.classList.contains(className);
+    if (pass) {
+      return {
+        message: () => `expected element to not have class ${className}`,
+        pass: true,
+      };
+    }
+    return {
+      message: () =>
+        `expected element to have class ${className}, current classes are ${
+          received.className
+        }`,
+      pass: false,
+    };
+  },
 });

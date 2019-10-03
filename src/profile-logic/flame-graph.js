@@ -213,9 +213,13 @@ export function getFlameGraphTiming(
       timing[depth] = row;
     }
 
-    const totalTimeRelative =
-      callNodeTimes.totalTime[nodeIndex] / rootTotalTime;
-    const selfTimeRelative = callNodeTimes.selfTime[nodeIndex] / rootTotalTime;
+    // Take the absolute time, as native deallocations can be negative.
+    const totalTimeRelative = Math.abs(
+      callNodeTimes.totalTime[nodeIndex] / rootTotalTime
+    );
+    const selfTimeRelative = Math.abs(
+      callNodeTimes.selfTime[nodeIndex] / rootTotalTime
+    );
 
     // Compute the timing information.
     row.start.push(timeOffset[depth]);

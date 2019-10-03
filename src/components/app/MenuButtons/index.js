@@ -5,24 +5,31 @@
 // @flow
 
 import * as React from 'react';
+import classNames from 'classnames';
 import explicitConnect from '../../../utils/connect';
 import { getProfile, getProfileRootRange } from '../../../selectors/profile';
-import {
-  getDataSource,
-  getIsNewlyPublished,
-} from '../../../selectors/url-state';
+import { getDataSource } from '../../../selectors/url-state';
+import { getIsNewlyPublished } from '../../../selectors/app';
 import { MenuButtonsMetaInfo } from './MetaInfo';
 import { MenuButtonsPublish } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';
-import { assertExhaustiveCheck } from '../../../utils/flow';
 import ArrowPanel from '../../shared/ArrowPanel';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
+import {
+  revertToPrePublishedState,
+  abortUpload,
+} from '../../../actions/publish';
 import { dismissNewlyPublished } from '../../../actions/app';
+import {
+  getUploadPhase,
+  getHasPrePublishedState,
+} from '../../../selectors/publish';
 
 import type { StartEndRange } from '../../../types/units';
 import type { Profile } from '../../../types/profile';
 import type { DataSource } from '../../../types/actions';
 import type { ConnectedProps } from '../../../utils/connect';
+import type { UploadPhase } from '../../../types/state';
 
 require('./index.css');
 
@@ -39,10 +46,14 @@ type StateProps = {|
   +rootRange: StartEndRange,
   +dataSource: DataSource,
   +isNewlyPublished: boolean,
+  +uploadPhase: UploadPhase,
+  +hasPrePublishedState: boolean,
 |};
 
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
+  +revertToPrePublishedState: typeof revertToPrePublishedState,
+  +abortUpload: typeof abortUpload,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -53,23 +64,94 @@ class MenuButtons extends React.PureComponent<Props> {
     this.props.dismissNewlyPublished();
   }
 
+  _renderPublishPanel() {
+    const { uploadPhase, dataSource, abortUpload } = this.props;
+
+    const isUploading =
+      uploadPhase === 'uploading' || uploadPhase === 'compressing';
+
+    if (isUploading) {
+      return (
+        <button
+          type="button"
+          className="buttonWithPanelButton menuButtonsAbortUploadButton"
+          onClick={abortUpload}
+        >
+          Cancel Upload
+        </button>
+      );
+    }
+
+    const isRepublish = dataSource === 'public' || dataSource === 'compare';
+    const isError = uploadPhase === 'error';
+
+    let label = 'Publish…';
+    if (isRepublish) {
+      label = 'Re-publish…';
+    }
+    if (isError) {
+      label = 'Error publishing…';
+    }
+
+    return (
+      <ButtonWithPanel
+        className={classNames({
+          menuButtonsShareButton: true,
+          menuButtonsShareButtonOriginal: !isRepublish && !isError,
+          menuButtonsShareButtonError: isError,
+        })}
+        label={label}
+        panel={
+          <ArrowPanel className="menuButtonsPublishPanel">
+            <MenuButtonsPublish isRepublish={isRepublish} />
+          </ArrowPanel>
+        }
+      />
+    );
+  }
+
+  _renderPermalink() {
+    const { dataSource, isNewlyPublished, injectedUrlShortener } = this.props;
+
+    const showPermalink =
+      dataSource === 'public' ||
+      dataSource === 'from-url' ||
+      dataSource === 'compare';
+
+    return showPermalink ? (
+      <MenuButtonsPermalink
+        isNewlyPublished={isNewlyPublished}
+        injectedUrlShortener={injectedUrlShortener}
+      />
+    ) : null;
+  }
+
+  _renderRevertProfile() {
+    const { hasPrePublishedState, revertToPrePublishedState } = this.props;
+    if (!hasPrePublishedState) {
+      return null;
+    }
+    return (
+      <button
+        type="button"
+        className="buttonWithPanelButton menuButtonsRevertButton"
+        onClick={revertToPrePublishedState}
+      >
+        Revert to Original Profile
+      </button>
+    );
+  }
+
   render() {
-    const {
-      profile,
-      dataSource,
-      isNewlyPublished,
-      injectedUrlShortener,
-    } = this.props;
+    const { profile } = this.props;
     return (
       <>
         {/* Place the info button outside of the menu buttons to allow it to shrink. */}
         <MenuButtonsMetaInfo profile={profile} />
         <div className="menuButtons">
-          <PublishOrPermalinkButtons
-            dataSource={dataSource}
-            isNewlyPublished={isNewlyPublished}
-            injectedUrlShortener={injectedUrlShortener}
-          />
+          {this._renderRevertProfile()}
+          {this._renderPublishPanel()}
+          {this._renderPermalink()}
           <a
             href="/docs/"
             target="_blank"
@@ -85,51 +167,19 @@ class MenuButtons extends React.PureComponent<Props> {
   }
 }
 
-const PublishOrPermalinkButtons = ({
-  dataSource,
-  isNewlyPublished,
-  injectedUrlShortener,
-}) => {
-  switch (dataSource) {
-    case 'from-addon':
-    case 'from-file':
-    case 'local':
-      return (
-        <ButtonWithPanel
-          className="menuButtonsShareButton"
-          label="Publish…"
-          panel={
-            <ArrowPanel className="menuButtonsPublishPanel">
-              <MenuButtonsPublish />
-            </ArrowPanel>
-          }
-        />
-      );
-    case 'public':
-    case 'from-url':
-    case 'compare':
-      return (
-        <MenuButtonsPermalink
-          isNewlyPublished={isNewlyPublished}
-          injectedUrlShortener={injectedUrlShortener}
-        />
-      );
-    case 'none':
-      return null;
-    default:
-      throw assertExhaustiveCheck(dataSource);
-  }
-};
-
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     profile: getProfile(state),
     rootRange: getProfileRootRange(state),
     dataSource: getDataSource(state),
     isNewlyPublished: getIsNewlyPublished(state),
+    uploadPhase: getUploadPhase(state),
+    hasPrePublishedState: getHasPrePublishedState(state),
   }),
   mapDispatchToProps: {
     dismissNewlyPublished,
+    revertToPrePublishedState,
+    abortUpload,
   },
   component: MenuButtons,
 });

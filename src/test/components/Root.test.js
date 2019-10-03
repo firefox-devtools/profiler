@@ -29,7 +29,8 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render } from 'react-testing-library';
 
-import { ProfileViewWhenReady } from '../../components/app/Root';
+import { AppViewRouter } from '../../components/app/AppViewRouter';
+import { ProfileLoader } from '../../components/app/ProfileLoader';
 import { updateUrlState, changeProfilesToCompare } from '../../actions/app';
 // Because this module is mocked but we want the real actions in the test, we
 // use `jest.requireActual` here.
@@ -52,7 +53,7 @@ import { TemporaryError } from '../../utils/errors';
 import { blankStore } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-describe('app/ProfileViewWhenReady', function() {
+describe('app/AppViewRouter', function() {
   it('renders an initial home', function() {
     const { container } = setup();
 
@@ -161,7 +162,10 @@ function setup() {
   const store = blankStore();
   const renderResult = render(
     <Provider store={store}>
-      <ProfileViewWhenReady />
+      <>
+        <ProfileLoader />
+        <AppViewRouter />
+      </>
     </Provider>
   );
 

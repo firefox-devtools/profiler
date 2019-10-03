@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/ProfileViewWhenReady does not try to retrieve a profile when moving from from-addon to public 1`] = `<profile-viewer />`;
+exports[`app/AppViewRouter does not try to retrieve a profile when moving from from-addon to public 1`] = `<profile-viewer />`;
 
-exports[`app/ProfileViewWhenReady renders an home when the user pressed back after an error 1`] = `
+exports[`app/AppViewRouter renders an home when the user pressed back after an error 1`] = `
 <div
   class="rootMessageContainer"
 >
@@ -38,11 +38,11 @@ exports[`app/ProfileViewWhenReady renders an home when the user pressed back aft
 </div>
 `;
 
-exports[`app/ProfileViewWhenReady renders an home when the user pressed back after an error 2`] = `<home />`;
+exports[`app/AppViewRouter renders an home when the user pressed back after an error 2`] = `<home />`;
 
-exports[`app/ProfileViewWhenReady renders an initial home 1`] = `<home />`;
+exports[`app/AppViewRouter renders an initial home 1`] = `<home />`;
 
-exports[`app/ProfileViewWhenReady renders temporary errors 1`] = `
+exports[`app/AppViewRouter renders temporary errors 1`] = `
 <div
   class="rootMessageContainer"
 >
@@ -112,7 +112,7 @@ exports[`app/ProfileViewWhenReady renders temporary errors 1`] = `
 </div>
 `;
 
-exports[`app/ProfileViewWhenReady renders the addon loading page, and the profile view after capturing 1`] = `
+exports[`app/AppViewRouter renders the addon loading page, and the profile view after capturing 1`] = `
 <div
   class="rootMessageContainer"
 >
@@ -167,9 +167,9 @@ exports[`app/ProfileViewWhenReady renders the addon loading page, and the profil
 </div>
 `;
 
-exports[`app/ProfileViewWhenReady renders the addon loading page, and the profile view after capturing 2`] = `<profile-viewer />`;
+exports[`app/AppViewRouter renders the addon loading page, and the profile view after capturing 2`] = `<profile-viewer />`;
 
-exports[`app/ProfileViewWhenReady renders the profile view 1`] = `
+exports[`app/AppViewRouter renders the profile view 1`] = `
 <div
   class="rootMessageContainer"
 >
@@ -224,4 +224,4 @@ exports[`app/ProfileViewWhenReady renders the profile view 1`] = `
 </div>
 `;
 
-exports[`app/ProfileViewWhenReady renders the profile view 2`] = `<profile-viewer />`;
+exports[`app/AppViewRouter renders the profile view 2`] = `<profile-viewer />`;

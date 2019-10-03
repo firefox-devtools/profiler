@@ -4,11 +4,13 @@ environment:
 platform: x64 # flow needs 64b platforms
 # Install scripts. (runs after repo cloning)
 install:
-  # 1. Yarn 1.2.1 is already preinstalled, so no need to install yarn.
-  #- choco install yarn
-  # But we need to select the right node
+  # 1. Yarn 1.9.4 is preinstalled, but we need a newer version, so let's install it.
+  # Go to https://www.appveyor.com/docs/windows-images-software/#tools to check if a
+  # newer version is preinstalled in the future.
+  - choco install yarn
+  # 2. Select the right node
   - ps: Install-Product node $env:nodejs_version $env:platform
-  # 2. Setup the project
+  # 3. Setup the project
   - yarn install
 
 # Post-install test scripts.
@@ -17,10 +19,9 @@ test_script:
   - yarn versions
   # run tests
   - yarn license-check
+  - yarn test-alex
   - yarn lint
-  - yarn flow --quiet
-  # stop flow to recover some memory
-  - yarn flow-stop
+  - yarn flow:ci
   - yarn test
   - yarn build-prod:quiet
 

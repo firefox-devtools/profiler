@@ -305,6 +305,7 @@ describe('ordering and hiding', function() {
       const { getState } = storeWithProfile(getScreenshotTrackProfile());
       expect(getHumanReadableTracks(getState())).toEqual([
         'show [screenshots]',
+        'show [screenshots]',
         'show [process]',
         '  - show [thread Empty] SELECTED',
       ]);
@@ -316,9 +317,11 @@ describe('ordering and hiding', function() {
         'process',
         // Screenshots are last.
         'screenshots',
+        'screenshots',
       ];
       const userFacingSortOrder = [
         // Screenshots are first.
+        'screenshots',
         'screenshots',
         'process',
         'process',

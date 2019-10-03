@@ -4,8 +4,10 @@
 
 // @flow
 import { UniqueStringArray } from '../utils/unique-string-array';
-import { CURRENT_VERSION as GECKO_PROFILE_VERSION } from './gecko-profile-versioning';
-import { CURRENT_VERSION as PROCESSED_PROFILE_VERSION } from './processed-profile-versioning';
+import {
+  GECKO_PROFILE_VERSION,
+  PROCESSED_PROFILE_VERSION,
+} from '../app-logic/constants';
 
 import type {
   Thread,
@@ -14,6 +16,8 @@ import type {
   StackTable,
   FuncTable,
   RawMarkerTable,
+  JsAllocationsTable,
+  NativeAllocationsTable,
   ResourceTable,
   Profile,
   ExtensionTable,
@@ -34,6 +38,7 @@ export function getEmptyStackTable(): StackTable {
     frame: [],
     prefix: [],
     category: [],
+    subcategory: [],
     length: 0,
   };
 }
@@ -59,6 +64,7 @@ export function getEmptyFrameTable(): FrameTable {
     // be caught by the type system.
     address: [],
     category: [],
+    subcategory: [],
     func: [],
     implementation: [],
     line: [],
@@ -76,6 +82,7 @@ export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
     // be caught by the type system.
     address: frameTable.address.slice(),
     category: frameTable.category.slice(),
+    subcategory: frameTable.subcategory.slice(),
     func: frameTable.func.slice(),
     implementation: frameTable.implementation.slice(),
     line: frameTable.line.slice(),
@@ -144,6 +151,37 @@ export function getEmptyRawMarkerTable(): RawMarkerTable {
     data: [],
     name: [],
     time: [],
+    category: [],
+    length: 0,
+  };
+}
+
+export function getEmptyJsAllocationsTable(): JsAllocationsTable {
+  // Important!
+  // If modifying this structure, please update all callers of this function to ensure
+  // that they are pushing on correctly to the data structure. These pushes may not
+  // be caught by the type system.
+  return {
+    time: [],
+    className: [],
+    typeName: [],
+    coarseType: [],
+    duration: [],
+    inNursery: [],
+    stack: [],
+    length: 0,
+  };
+}
+
+export function getEmptyNativeAllocationsTable(): NativeAllocationsTable {
+  // Important!
+  // If modifying this structure, please update all callers of this function to ensure
+  // that they are pushing on correctly to the data structure. These pushes may not
+  // be caught by the type system.
+  return {
+    time: [],
+    duration: [],
+    stack: [],
     length: 0,
   };
 }
@@ -159,6 +197,7 @@ export function shallowCloneRawMarkerTable(
     data: markerTable.data.slice(),
     name: markerTable.name.slice(),
     time: markerTable.time.slice(),
+    category: markerTable.category.slice(),
     length: markerTable.length,
   };
 }
@@ -196,14 +235,14 @@ export function getEmptyExtensions(): ExtensionTable {
 
 export function getDefaultCategories(): CategoryList {
   return [
-    { name: 'Idle', color: 'transparent' },
-    { name: 'Other', color: 'grey' },
-    { name: 'Layout', color: 'purple' },
-    { name: 'JavaScript', color: 'yellow' },
-    { name: 'GC / CC', color: 'orange' },
-    { name: 'Network', color: 'lightblue' },
-    { name: 'Graphics', color: 'green' },
-    { name: 'DOM', color: 'blue' },
+    { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
+    { name: 'Other', color: 'grey', subcategories: ['Other'] },
+    { name: 'Layout', color: 'purple', subcategories: ['Other'] },
+    { name: 'JavaScript', color: 'yellow', subcategories: ['Other'] },
+    { name: 'GC / CC', color: 'orange', subcategories: ['Other'] },
+    { name: 'Network', color: 'lightblue', subcategories: ['Other'] },
+    { name: 'Graphics', color: 'green', subcategories: ['Other'] },
+    { name: 'DOM', color: 'blue', subcategories: ['Other'] },
   ];
 }
 
@@ -216,8 +255,8 @@ export function getEmptyJsTracerTable(): JsTracerTable {
     events: [],
     timestamps: [],
     durations: [],
-    lines: [],
-    columns: [],
+    line: [],
+    column: [],
     length: 0,
   };
 }

@@ -5,6 +5,7 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import { getDataSource } from '../../selectors/url-state';
 import { getView } from '../../selectors/app';
@@ -99,12 +100,21 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
     const { dataSource } = this.props;
     const { installStatus, isNoticeDisplayed } = this.state;
 
-    if (
-      dataSource !== 'none' &&
-      dataSource !== 'public' &&
-      dataSource !== 'from-url'
-    ) {
-      return null;
+    switch (dataSource) {
+      case 'from-file':
+      case 'from-addon':
+        // We should not propose to reload the page for these data sources,
+        // because we'd lose the data.
+        return null;
+      case 'none':
+      case 'public':
+      case 'from-url':
+      case 'compare':
+      case 'local':
+        // But for these data sources it should be fine.
+        break;
+      default:
+        throw assertExhaustiveCheck(dataSource);
     }
 
     if (installStatus !== 'ready') {

@@ -29,7 +29,7 @@ import {
 } from '../selectors/url-state';
 import {
   getCallNodePathFromIndex,
-  getSampleCallNodes,
+  getSampleIndexToCallNodeIndex,
   getSampleCategories,
   findBestAncestorCallNode,
 } from '../profile-logic/profile-data';
@@ -40,22 +40,20 @@ import { objectShallowEquals } from '../utils/index';
 import type {
   PreviewSelection,
   ImplementationFilter,
+  CallTreeSummaryStrategy,
   TrackReference,
   TimelineType,
+  DataSource,
 } from '../types/actions';
 import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
-import type {
-  ThreadIndex,
-  IndexIntoRawMarkerTable,
-  Pid,
-  IndexIntoSamplesTable,
-} from '../types/profile';
+import type { ThreadIndex, Pid, IndexIntoSamplesTable } from '../types/profile';
 import type {
   CallNodePath,
   CallNodeInfo,
   IndexIntoCallNodeTable,
   TrackIndex,
+  MarkerIndex,
 } from '../types/profile-derived';
 import type { Transform } from '../types/transforms';
 
@@ -95,6 +93,22 @@ export function changeSelectedCallNode(
     selectedCallNodePath,
     optionalExpandedToCallNodePath,
     threadIndex,
+  };
+}
+
+/**
+ * This action is used when the user right clicks on a call node (in panels such
+ * as the call tree, the flame chart, or the stack chart). It's especially used
+ * to display the context menu.
+ */
+export function changeRightClickedCallNode(
+  threadIndex: ThreadIndex,
+  callNodePath: CallNodePath | null
+) {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
+    threadIndex,
+    callNodePath,
   };
 }
 
@@ -150,11 +164,11 @@ export function selectBestAncestorCallNodeAndExpandCallTree(
     }
 
     const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
-    const sampleCallNodes = getSampleCallNodes(
-      filteredThread.samples,
+    const sampleIndexToCallNodeIndex = getSampleIndexToCallNodeIndex(
+      filteredThread.samples.stack,
       stackIndexToCallNodeIndex
     );
-    const clickedCallNode = sampleCallNodes[sampleIndex];
+    const clickedCallNode = sampleIndexToCallNodeIndex[sampleIndex];
     const clickedCategory = fullThread.stackTable.category[unfilteredStack];
 
     if (clickedCallNode === null) {
@@ -167,7 +181,7 @@ export function selectBestAncestorCallNodeAndExpandCallTree(
     );
     const bestAncestorCallNode = findBestAncestorCallNode(
       callNodeInfo,
-      sampleCallNodes,
+      sampleIndexToCallNodeIndex,
       sampleCategories,
       clickedCallNode,
       clickedCategory
@@ -276,13 +290,13 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
       }
     }
 
-    if (
-      selectedTab === 'js-tracer' &&
-      getThreadSelectors(selectedThreadIndex).getJsTracerTable(getState()) ===
-        null
-    ) {
-      // If the user switches to another thread that doesn't have JS Tracer information,
-      // then switch to the calltree.
+    const doesNextTrackHaveSelectedTab = getThreadSelectors(selectedThreadIndex)
+      .getUsefulTabs(getState())
+      .includes(selectedTab);
+
+    if (!doesNextTrackHaveSelectedTab) {
+      // If the user switches to another track that doesn't have the current
+      // selectedTab then switch to the calltree.
       selectedTab = 'calltree';
     }
 
@@ -320,10 +334,16 @@ export function changeRightClickedTrack(
   };
 }
 
-export function setCallNodeContextMenuVisibility(isVisible: boolean): Action {
-  return {
-    type: 'SET_CALL_NODE_CONTEXT_MENU_VISIBILITY',
-    isVisible,
+export function setContextMenuVisibility(
+  isVisible: boolean
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const selectedThreadIndex = getSelectedThreadIndex(getState());
+    dispatch({
+      type: 'SET_CONTEXT_MENU_VISIBILITY',
+      threadIndex: selectedThreadIndex,
+      isVisible,
+    });
   };
 }
 
@@ -485,6 +505,44 @@ export function isolateProcess(
       ),
       isolatedTrackIndex,
       selectedThreadIndex,
+    });
+  };
+}
+
+/**
+ * This function helps to show only the current screenshot and hide all other screenshots.
+ */
+export function isolateScreenshot(
+  isolatedTrackIndex: TrackIndex
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const globalTracks = getGlobalTracks(getState());
+    const track = globalTracks[isolatedTrackIndex];
+    if (track.type !== 'screenshots') {
+      // Do not isolate the track unless it is a screenshot track.
+      return;
+    }
+    const selectedThreadIndex = track.threadIndex;
+    if (selectedThreadIndex === null) {
+      // Make sure that a thread really exists.
+      return;
+    }
+    const hiddenGlobalTracks = new Set(getHiddenGlobalTracks(getState()));
+    for (let i = 0; i < globalTracks.length; i++) {
+      const track = globalTracks[i];
+      if (track.type === 'screenshots' && i !== isolatedTrackIndex) {
+        hiddenGlobalTracks.add(i);
+      }
+    }
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'timeline',
+      eventAction: 'isolate screenshot track',
+    });
+
+    dispatch({
+      type: 'ISOLATE_SCREENSHOT_TRACK',
+      hiddenGlobalTracks,
     });
   };
 }
@@ -852,12 +910,27 @@ export function changeExpandedCallNodes(
 
 export function changeSelectedMarker(
   threadIndex: ThreadIndex,
-  selectedMarker: IndexIntoRawMarkerTable | null
+  selectedMarker: MarkerIndex | null
 ): Action {
   return {
     type: 'CHANGE_SELECTED_MARKER',
     selectedMarker,
     threadIndex,
+  };
+}
+
+/**
+ * This action is used when the user right clicks a marker, and is especially
+ * used to display its context menu.
+ */
+export function changeRightClickedMarker(
+  threadIndex: ThreadIndex,
+  markerIndex: MarkerIndex | null
+): Action {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_MARKER',
+    threadIndex,
+    markerIndex,
   };
 }
 
@@ -902,6 +975,27 @@ export function changeImplementationFilter(
       transformedThread,
       previousImplementation,
     });
+  };
+}
+
+/**
+ * This action changes the strategy used to build and display the call tree. This could
+ * use sample data, or build a new call tree based off of allocation information stored
+ * in markers.
+ */
+export function changeCallTreeSummaryStrategy(
+  strategy: CallTreeSummaryStrategy
+): Action {
+  sendAnalytics({
+    hitType: 'event',
+    eventCategory: 'profile',
+    eventAction: 'change call tree summary strategy',
+    eventLabel: strategy,
+  });
+
+  return {
+    type: 'CHANGE_CALL_TREE_SUMMARY_STRATEGY',
+    strategy,
   };
 }
 
@@ -1031,5 +1125,12 @@ export function changeProfileName(profileName: string): Action {
   return {
     type: 'CHANGE_PROFILE_NAME',
     profileName,
+  };
+}
+
+export function setDataSource(dataSource: DataSource): Action {
+  return {
+    type: 'SET_DATA_SOURCE',
+    dataSource,
   };
 }

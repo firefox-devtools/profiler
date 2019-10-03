@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const OfflinePlugin = require('@mstange/offline-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 const includes = [path.join(__dirname, 'src'), path.join(__dirname, 'res')];
 
 const es6modules = ['pretty-bytes'];
@@ -62,6 +63,14 @@ const config = {
     process: false,
   },
   plugins: [
+    new CircularDependencyPlugin({
+      // exclude node_modules
+      exclude: /node_modules/,
+      // add errors to webpack instead of warnings
+      failOnError: true,
+      // set the current working directory for displaying module paths
+      cwd: process.cwd(),
+    }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
     }),

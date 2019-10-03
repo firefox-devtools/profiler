@@ -10,6 +10,7 @@ import type {
   ThreadIndex,
   Pid,
   IndexIntoJsTracerEvents,
+  IndexIntoCategoryList,
   CounterIndex,
 } from './profile';
 export type IndexIntoCallNodeTable = number;
@@ -43,6 +44,7 @@ export type CallNodeTable = {
   prefix: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCallNodeTable | -1
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
+  subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
   depth: number[],
   length: number,
 };
@@ -76,6 +78,7 @@ export type Marker = {|
   dur: Milliseconds,
   name: string,
   title: string | null,
+  category: IndexIntoCategoryList,
   data: MarkerPayload,
   incomplete?: boolean,
 |};
@@ -112,6 +115,7 @@ export type CallNodeDisplayData = $Exact<
     categoryName: string,
     categoryColor: string,
     icon: string | null,
+    ariaLabel: string,
   }>
 >;
 
@@ -135,6 +139,7 @@ export type JsTracerTiming = {
   index: IndexIntoJsTracerEvents[],
   label: string[],
   name: string,
+  func: Array<IndexIntoFuncTable | null>,
   length: number,
 };
 
@@ -181,4 +186,24 @@ export type RemoveProfileInformation = {
   shouldRemoveUrls: boolean,
   // Remove the extension list if it's true.
   shouldRemoveExtensions: boolean,
+  // Remove the preference values if it's true.
+  shouldRemovePreferenceValues: boolean,
 };
+
+/**
+ * This type is used to decide how to highlight and stripe areas in the
+ * timeline.
+ */
+export type SelectedState =
+  // Samples can be filtered through various operations, like searching, or
+  // call tree transforms.
+  | 'FILTERED_OUT'
+  // This sample is selected because either the tip or an ancestor call node matches
+  // the currently selected call node.
+  | 'SELECTED'
+  // This call node is not selected, and the stacks are ordered before the selected
+  // call node as sorted by the getTreeOrderComparator.
+  | 'UNSELECTED_ORDERED_BEFORE_SELECTED'
+  // This call node is not selected, and the stacks are ordered after the selected
+  // call node as sorted by the getTreeOrderComparator.
+  | 'UNSELECTED_ORDERED_AFTER_SELECTED';

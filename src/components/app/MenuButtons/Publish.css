@@ -2,35 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-.menuButtonsCompositeButtonContainer {
-  display: flex;
-  flex-flow: column nowrap;
-  border-right: 1px solid var(--grey-30);
-  border-left: 1px solid var(--grey-30);
-}
-
 .menuButtonsShareButton,
-.menuButtonsUploadingButton,
 .menuButtonsPermalinkButton,
-.menuButtonsUploadErrorButton {
+.menuButtonsRevertButton,
+.menuButtonsAbortUploadButton {
   height: 24px;
+  border-left: 1px solid var(--grey-30);
   margin-bottom: -24px;
 }
 
-.menuButtonsPermalinkButton {
-  border-left: 1px solid var(--grey-30);
-}
-
-.menuButtonsUploadingButton {
-  overflow: hidden;
-}
-
-.menuButtonsUploadingButtonInner {
-  display: flex;
-  overflow: hidden;
-  height: 100%;
-  flex-flow: column nowrap;
-  align-items: stretch;
+.menuButtonsAbortUploadButton {
+  background-color: var(--green-70);
+  color: #fff;
 }
 
 .menuButtonsUploadingButtonLabel {
@@ -40,78 +23,21 @@
   cursor: default;
   line-height: 24px;
   text-align: center;
-  -moz-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-/* The button width needs to be large enough so that the text "Share Without URLs" fits */
-.menuButtonsUploadingButtonInner,
-.menuButtonsPermalinkButtonButton,
-.menuButtonsUploadErrorButtonButton {
-  width: 115px;
-}
-
-/* The button will be larger during symbolication to fit the text:
-"Sharing will be enabled once symbolication is complete" */
-.menuButtonsShareButtonButton {
-  min-width: 115px;
-  background-color: #0d8730;
+.menuButtonsShareButtonOriginal {
+  background-color: var(--green-70);
   color: white;
 }
 
-.menuButtonsUploadingButtonProgress {
-  width: 100%;
-  height: 24px;
-  margin-bottom: -24px;
-  border: 0;
-  background: var(--internal-uploading-button-background-color);
-  transform-origin: bottom left;
+.menuButtonsShareButtonError {
+  background-color: var(--red-60);
+  color: white;
 }
 
-.menuButtonsUploadingButtonProgress::-moz-progress-bar {
-  background: var(--internal-uploading-progress-fill-color);
-}
-
-/* CSSTransition */
-.buttonWithPanelButton,
-.menuButtonsUploadingButtonInner {
-  transition: opacity 200ms ease-in-out, transform 200ms ease-in-out;
-}
-
-.menuButtonsTransitionUp-enter .buttonWithPanelButton,
-.menuButtonsTransitionUp-enter .menuButtonsUploadingButtonInner {
-  opacity: 0;
-  transform: translateY(100%);
-}
-
-.menuButtonsTransitionUp-enter-active .buttonWithPanelButton,
-.menuButtonsTransitionUp-enter-active .menuButtonsUploadingButtonInner {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.menuButtonsTransitionUp-exit .buttonWithPanelButton,
-.menuButtonsTransitionUp-exit .menuButtonsUploadingButtonInner {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.menuButtonsTransitionUp-exit-active .buttonWithPanelButton,
-.menuButtonsTransitionUp-exit-active .menuButtonsUploadingButtonInner {
-  opacity: 0;
-  transform: translateY(-100%);
-}
-
-/* end of CSSTransition */
-
-/* permalink button is hidden whenever uploading is in progress, but is
- * moved up when uploading is finished. */
-.currentButtonIsUploadingButton .menuButtonsPermalinkButtonButton {
-  opacity: 0;
-  transform: translateY(100%);
-}
-
-.menuButtonsPublishPanel,
-.menuButtonsUploadErrorPanel {
+.menuButtonsPublishPanel {
   --width: 500px;
 }
 
@@ -120,27 +46,6 @@
   height: 19px;
   padding: 0 4px;
   margin: 5px -5px;
-}
-
-.menuButtonsShareNetworkUrlsContainer {
-  margin: 20px 0;
-  -moz-user-select: none;
-  user-select: none;
-}
-
-.menuButtonsShareNetworkUrlsCheckbox {
-  position: relative;
-  bottom: 1px;
-  vertical-align: middle;
-}
-
-.menuButtonsProfileDownloadPanel {
-  --offset-from-right: 25px;
-  --width: 30em;
-}
-
-.menuButtonsDownloadLink {
-  white-space: nowrap;
 }
 
 .menuButtonsPublishContent {
@@ -265,7 +170,9 @@
 }
 
 .menuButtonsPublishUploadBarInner {
-  height: 5px;
+  position: absolute;
+  top: 0;
+  height: 3px;
   animation: animate-stripes 1s linear infinite;
   background-color: var(--blue-50);
   background-image: linear-gradient(
@@ -280,37 +187,13 @@
     transparent 80%
   );
   background-size: 21px 20px, 100% 100%, 100% 100%;
-  border-radius: 2px;
+  border-radius: 0 2px 2px 0;
 }
 
 @keyframes animate-stripes {
   100% {
     background-position: -21px 0;
   }
-}
-
-.menuButtonsPublishUrl {
-  padding: 10px;
-  margin: 10px 0 35px;
-  border: 1px solid var(--grey-30);
-  background: #fff;
-  border-radius: 3px;
-}
-
-.menuButtonsPublishMessage {
-  margin: 14px 0;
-  font-size: 13px;
-}
-
-.menuButtonsPublishPreviousUrl {
-  margin: 17px 5px -15px;
-}
-
-.menuButtonsPublishPreviousUrlTitle {
-  margin-bottom: 10px;
-  color: var(--grey-70);
-  font-size: 14px;
-  font-weight: bold;
 }
 
 .menuButtonsPublishError {

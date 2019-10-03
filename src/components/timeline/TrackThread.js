@@ -48,6 +48,7 @@ import type { Milliseconds, StartEndRange } from '../../types/units';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
+  SelectedState,
 } from '../../types/profile-derived';
 import type { State } from '../../types/state';
 import type { ConnectedProps } from '../../utils/connect';
@@ -69,6 +70,7 @@ type StateProps = {|
   +categories: CategoryList,
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
+  +samplesSelectedStates: null | SelectedState[],
 |};
 
 type DispatchProps = {|
@@ -132,6 +134,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       timelineType,
       hasFileIoMarkers,
       showMemoryMarkers,
+      samplesSelectedStates,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -176,7 +179,7 @@ class TimelineTrackThread extends PureComponent<Props> {
             onSelect={this._onMarkerSelect}
           />
         ) : null}
-        {timelineType === 'category' ? (
+        {timelineType === 'category' && !filteredThread.isJsTracer ? (
           <ThreadActivityGraph
             className="threadActivityGraph"
             interval={interval}
@@ -185,6 +188,7 @@ class TimelineTrackThread extends PureComponent<Props> {
             rangeEnd={rangeEnd}
             onSampleClick={this._onSampleClick}
             categories={categories}
+            samplesSelectedStates={samplesSelectedStates}
           />
         ) : (
           <ThreadStackGraph
@@ -217,14 +221,15 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
     const committedRange = getCommittedRange(state);
+    const selectedCallNodeIndex =
+      threadIndex === selectedThread
+        ? selectors.getSelectedCallNodeIndex(state)
+        : null;
     return {
       filteredThread: selectors.getFilteredThread(state),
       fullThread: selectors.getRangeFilteredThread(state),
       callNodeInfo: selectors.getCallNodeInfo(state),
-      selectedCallNodeIndex:
-        threadIndex === selectedThread
-          ? selectors.getSelectedCallNodeIndex(state)
-          : -1,
+      selectedCallNodeIndex,
       unfilteredSamplesRange: selectors.unfilteredSamplesRange(state),
       interval: getProfileInterval(state),
       rangeStart: committedRange.start,
@@ -232,6 +237,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       categories: getCategories(state),
       timelineType: getTimelineType(state),
       hasFileIoMarkers: selectors.getFileIoMarkerIndexes(state).length !== 0,
+      samplesSelectedStates: selectors.getSamplesSelectedStatesInFilteredThread(
+        state
+      ),
     };
   },
   mapDispatchToProps: {

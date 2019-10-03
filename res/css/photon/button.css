@@ -5,8 +5,8 @@
 /* See https://design.firefox.com/photon/components/buttons.html for the spec */
 .photon-button {
   padding: 0 8px;
-  margin: 0;
   border: none;
+  margin: 0;
 
   /* reset default styles */
   background: none;

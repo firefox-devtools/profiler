@@ -359,6 +359,20 @@ describe('TooltipMarker', function() {
           },
         },
       ],
+      [
+        'PreferenceRead',
+        114.9,
+        {
+          type: 'PreferenceRead',
+          startTime: 114.9,
+          endTime: 114.9,
+          prefAccessTime: 114.9,
+          prefName: 'layout.css.dpi',
+          prefKind: 'User',
+          prefType: 'Int',
+          prefValue: '-1',
+        },
+      ],
     ]);
     const store = storeWithProfile(profile);
     const state = store.getState();

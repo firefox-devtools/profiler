@@ -6,9 +6,12 @@ import * as React from 'react';
 
 import { getStackType } from '../../profile-logic/transforms';
 import { objectEntries } from '../../utils/flow';
-import { formatNumberDependingOnInterval } from '../../utils/format-numbers';
+import { formatCallNodeNumber } from '../../utils/format-numbers';
 import NodeIcon from '../shared/NodeIcon';
-import { getFriendlyStackTypeName } from '../../profile-logic/profile-data';
+import {
+  getFriendlyStackTypeName,
+  getCategoryPairLabel,
+} from '../../profile-logic/profile-data';
 
 import type { CallTree } from '../../profile-logic/call-tree';
 import type { Thread, CategoryList } from '../../types/profile';
@@ -19,6 +22,7 @@ import type {
 } from '../../types/profile-derived';
 import type { TimingsForPath } from '../../profile-logic/profile-data';
 import type { Milliseconds } from '../../types/units';
+import type { CallTreeSummaryStrategy } from '../../types/actions';
 
 import './CallNode.css';
 
@@ -26,16 +30,17 @@ const GRAPH_WIDTH = 150;
 const GRAPH_HEIGHT = 10;
 
 type Props = {|
-  thread: Thread,
-  callNodeIndex: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo,
-  categories: CategoryList,
-  interval: Milliseconds,
+  +thread: Thread,
+  +callNodeIndex: IndexIntoCallNodeTable,
+  +callNodeInfo: CallNodeInfo,
+  +categories: CategoryList,
+  +interval: Milliseconds,
   // Since this tooltip can be used in different context, provide some kind of duration
   // label, e.g. "100ms" or "33%".
-  durationText: string,
-  callTree?: CallTree,
-  timings?: TimingsForPath,
+  +durationText: string,
+  +callTree?: CallTree,
+  +timings?: TimingsForPath,
+  +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
 
 /**
@@ -59,8 +64,10 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     const sortedTotalBreakdownByImplementation = objectEntries(
       totalTime.breakdownByImplementation
     ).sort((a, b) => b[1] - a[1]);
-    const { interval } = this.props;
-    const isIntegerInterval = Number.isInteger(interval);
+    const { interval, thread } = this.props;
+
+    // JS Tracer threads have data relevant to the microsecond level.
+    const isHighPrecision = Boolean(thread.isJsTracer);
 
     return (
       <div className="tooltipCallNodeImplementation">
@@ -122,13 +129,14 @@ export class TooltipCallNode extends React.PureComponent<Props> {
                   />
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
-                  {formatNumberDependingOnInterval(isIntegerInterval, time)}ms
+                  {formatCallNodeNumber(interval, isHighPrecision, time)}ms
                 </div>
                 <div className="tooltipCallNodeImplementationTiming">
                   {selfTimeValue === 0
                     ? '—'
-                    : `${formatNumberDependingOnInterval(
-                        isIntegerInterval,
+                    : `${formatCallNodeNumber(
+                        interval,
+                        isHighPrecision,
                         selfTimeValue
                       )}ms`}
                 </div>
@@ -148,10 +156,12 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       categories,
       callTree,
       timings,
+      callTreeSummaryStrategy,
       callNodeInfo: { callNodeTable },
     } = this.props;
     const categoryIndex = callNodeTable.category[callNodeIndex];
-    const category = categories[categoryIndex];
+    const categoryColor = categories[categoryIndex].color;
+    const subcategoryIndex = callNodeTable.subcategory[callNodeIndex];
     const funcIndex = callNodeTable.func[callNodeIndex];
     const funcStringIndex = thread.funcTable.name[funcIndex];
     const funcName = thread.stringTable.getString(funcStringIndex);
@@ -165,6 +175,16 @@ export class TooltipCallNode extends React.PureComponent<Props> {
     // Only JavaScript functions have a filename.
     const fileNameIndex = thread.funcTable.fileName[funcIndex];
     if (fileNameIndex !== null) {
+      let fileName = thread.stringTable.getString(fileNameIndex);
+      const lineNumber = thread.funcTable.lineNumber[funcIndex];
+      if (lineNumber !== null) {
+        fileName += ':' + lineNumber;
+        const columnNumber = thread.funcTable.columnNumber[funcIndex];
+        if (columnNumber !== null) {
+          fileName += ':' + columnNumber;
+        }
+      }
+
       // Because of our use of Grid Layout, all our elements need to be direct
       // children of the grid parent. That's why we use arrays here, to add
       // the elements as direct children.
@@ -172,7 +192,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         <div className="tooltipLabel" key="file">
           File:
         </div>,
-        thread.stringTable.getString(fileNameIndex),
+        fileName,
       ];
     } else {
       const resourceIndex = thread.funcTable.resource[funcIndex];
@@ -229,6 +249,18 @@ export class TooltipCallNode extends React.PureComponent<Props> {
         </div>
         <div className="tooltipCallNodeDetails">
           {this._renderTimings(timings, displayData)}
+          {callTreeSummaryStrategy !== 'timing' && displayData ? (
+            <div className="tooltipDetails tooltipCallNodeDetailsLeft">
+              {/* Everything in this div needs to come in pairs of two in order to
+                respect the CSS grid. */}
+              <div className="tooltipLabel">Total Bytes:</div>
+              <div>{displayData.totalTimeWithUnit}</div>
+              {/* --------------------------------------------------------------- */}
+              <div className="tooltipLabel">Self Bytes:</div>
+              <div>{displayData.selfTimeWithUnit}</div>
+              {/* --------------------------------------------------------------- */}
+            </div>
+          ) : null}
           <div className="tooltipDetails tooltipCallNodeDetailsLeft">
             {/* Everything in this div needs to come in pairs of two in order to
                 respect the CSS grid. */}
@@ -238,9 +270,13 @@ export class TooltipCallNode extends React.PureComponent<Props> {
             <div className="tooltipLabel">Category:</div>
             <div>
               <span
-                className={`colored-square category-color-${category.color}`}
+                className={`colored-square category-color-${categoryColor}`}
               />
-              {category.name}
+              {getCategoryPairLabel(
+                categories,
+                categoryIndex,
+                subcategoryIndex
+              )}
             </div>
             {/* --------------------------------------------------------------- */}
             {resourceOrFileName}

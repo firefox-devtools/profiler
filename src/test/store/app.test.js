@@ -10,12 +10,6 @@ import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { isolateProcess } from '../../actions/profile-view';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
-import {
-  getProfileFromTextSamples,
-  getProfileWithMarkers,
-  getNetworkMarkers,
-  getProfileWithJsTracerEvents,
-} from '../fixtures/profiles/processed-profile';
 
 import * as AppActions from '../../actions/app';
 
@@ -47,52 +41,12 @@ describe('app actions', function() {
     });
   });
 
-  describe('visibleTabs', function() {
-    it('hides the network chart and JS tracer when no data is in the thread', function() {
-      const { profile } = getProfileFromTextSamples('A');
-      const { getState } = storeWithProfile(profile);
-      expect(AppSelectors.getVisibleTabs(getState())).toEqual([
-        'calltree',
-        'flame-graph',
-        'stack-chart',
-        'marker-chart',
-        'marker-table',
-      ]);
-    });
-
-    it('shows the network chart when network markers are present in the thread', function() {
-      const profile = getProfileWithMarkers(getNetworkMarkers());
-      const { getState } = storeWithProfile(profile);
-      expect(AppSelectors.getVisibleTabs(getState())).toEqual([
-        'calltree',
-        'flame-graph',
-        'stack-chart',
-        'marker-chart',
-        'marker-table',
-        'network-chart',
-      ]);
-    });
-
-    it('shows the js tracer when it is available in a thread', function() {
-      const profile = getProfileWithJsTracerEvents([['A', 0, 10]]);
-      const { getState } = storeWithProfile(profile);
-      expect(AppSelectors.getVisibleTabs(getState())).toEqual([
-        'calltree',
-        'flame-graph',
-        'stack-chart',
-        'marker-chart',
-        'marker-table',
-        'js-tracer',
-      ]);
-    });
-  });
-
   describe('urlSetupDone', function() {
     it('will remember when url setup is done', function() {
       const { dispatch, getState } = storeWithSimpleProfile();
-      expect(AppSelectors.getIsUrlSetupDone(getState())).toEqual(false);
+      expect(AppSelectors.getUrlSetupPhase(getState())).toEqual('initial-load');
       dispatch(AppActions.urlSetupDone());
-      expect(AppSelectors.getIsUrlSetupDone(getState())).toEqual(true);
+      expect(AppSelectors.getUrlSetupPhase(getState())).toEqual('done');
     });
 
     it('records analytics events for pageview and datasource', function() {

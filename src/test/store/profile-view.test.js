@@ -8,6 +8,7 @@ import type { TabSlug } from '../../app-logic/tabs-handling';
 
 import {
   getProfileFromTextSamples,
+  getMergedProfileFromTextSamples,
   getProfileWithMarkers,
   getNetworkTrackProfile,
   getScreenshotTrackProfile,
@@ -34,6 +35,9 @@ import {
   selectedNodeSelectors,
   getThreadSelectors,
 } from '../../selectors/per-thread';
+
+import type { Milliseconds } from '../../types/units';
+import type { BreakdownByCategory } from '../../profile-logic/profile-data';
 
 describe('call node paths on implementation filter change', function() {
   const {
@@ -443,6 +447,33 @@ describe('actions/ProfileView', function() {
       });
     });
 
+    describe('with a comparison profile', function() {
+      it('selects the calltree tab when selecting the diffing track', function() {
+        const diffingTrackReference = {
+          type: 'global',
+          trackIndex: 2,
+        };
+
+        const { profile } = getMergedProfileFromTextSamples(
+          'A  B  C',
+          'A  B  B'
+        );
+        const { getState, dispatch } = storeWithProfile(profile);
+
+        dispatch(App.changeSelectedTab('flame-graph'));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'flame-graph'
+        );
+
+        dispatch(ProfileView.selectTrack(diffingTrackReference));
+        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(2);
+        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
+          'calltree'
+        );
+      });
+    });
+
     describe('when the loaded panel is not the call tree', function() {
       it('stays in the same panel when selecting another track', function() {
         const { getState, dispatch, parentTrack } = setup('marker-chart');
@@ -667,6 +698,28 @@ describe('actions/ProfileView', function() {
       dispatch(ProfileView.changeMarkersSearchString('a'));
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('a');
     });
+
+    it('filters the markers', function() {
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+        ['c', 2, null],
+      ]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(3);
+      dispatch(ProfileView.changeMarkersSearchString('A, b'));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
+    });
   });
 
   describe('changeNetworkSearchString', function() {
@@ -678,6 +731,7 @@ describe('actions/ProfileView', function() {
       dispatch(ProfileView.changeNetworkSearchString('a'));
       expect(UrlStateSelectors.getNetworkSearchString(getState())).toEqual('a');
     });
+
     it('filters the network markers', function() {
       const profile = getNetworkTrackProfile();
       const { dispatch, getState } = storeWithProfile(profile);
@@ -698,6 +752,27 @@ describe('actions/ProfileView', function() {
       expect(
         getMarker(markerIndexes[0]).name.includes(networkSearchString)
       ).toBeTruthy();
+    });
+
+    it('filters multiple network markers', function() {
+      const profile = getNetworkTrackProfile();
+      const { dispatch, getState } = storeWithProfile(profile);
+      const networkSearchString = '3, 4';
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+          getState()
+        )
+      ).toHaveLength(10);
+      dispatch(ProfileView.changeNetworkSearchString(networkSearchString));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const markerIndexes = selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('3')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('4')).toBeTruthy();
     });
   });
 
@@ -992,13 +1067,16 @@ describe('actions/ProfileView', function() {
         getState()
       );
       const keys = [...screenshotMarkersById.keys()];
-      expect(keys.length).toEqual(1);
+      expect(keys.length).toEqual(2);
 
       const [screenshots] = [...screenshotMarkersById.values()];
       if (!screenshots) {
         throw new Error('No screenshots found.');
       }
-      expect(screenshots.length).toEqual(profile.threads[0].markers.length);
+      // The profile contains the same markers twice, but with different window ids.
+      // `screenshots` contains the screenshots for only one window id.
+      // That's why we need to halve the markers length when comparing the 2 lengths.
+      expect(screenshots.length).toEqual(profile.threads[0].markers.length / 2);
       for (const screenshot of screenshots) {
         expect(screenshot.name).toEqual('CompositorScreenshot');
       }
@@ -1011,7 +1089,7 @@ describe('actions/ProfileView', function() {
 
       // Double check that there are 10 markers in the test data, and commit a
       // subsection of that range.
-      expect(markers.length).toBe(10);
+      expect(markers.length).toBe(20);
       const startIndex = 3;
       const endIndex = 8;
       const startTime = markers.time[startIndex];
@@ -1314,6 +1392,700 @@ describe('snapshots of selectors/profile', function() {
   });
 });
 
+describe('getTimingsForSidebar', () => {
+  function setup() {
+    const { profile, funcNamesDictPerThread } = getProfileFromTextSamples(`
+      A    A                  A             A             A              A
+      B    B                  B             B             B              B
+      Cjs  Cjs                Cjs           Cjs           H[cat:Layout]  H[cat:Layout]
+      D    D                  D             F             I[cat:Idle]
+      E    Ejs[jit:baseline]  Ejs[jit:ion]  Ejs[jit:ion]
+    `);
+
+    const store = storeWithProfile(profile);
+
+    // Committing a range exercizes the offset code for committed ranges.
+    // Note that we'll exercize the offset code for preview selections in a
+    // specific test below.
+    store.dispatch(ProfileView.commitRange(1, 6));
+
+    const getTimingsForPath = path => {
+      store.dispatch(ProfileView.changeSelectedCallNode(0, path));
+      return selectedNodeSelectors.getTimingsForSidebar(store.getState());
+    };
+
+    return {
+      ...store,
+      funcNamesDict: funcNamesDictPerThread[0],
+      getTimingsForPath,
+    };
+  }
+
+  // Creates a BreakdownByCategory for the case where every category has just one
+  // subcategory (the "Other" subcategory), so that it's easier to write the
+  // reference structures.
+  function withSingleSubcategory(
+    categoryBreakdown: Milliseconds[]
+  ): BreakdownByCategory {
+    return categoryBreakdown.map(value => ({
+      entireCategoryValue: value,
+      subcategoryBreakdown: [value],
+    }));
+  }
+
+  describe('in a non-inverted tree', function() {
+    it('returns good timings for a root node', () => {
+      const {
+        funcNamesDict: { A },
+        getTimingsForPath,
+      } = setup();
+
+      // This is a root node: it should have no self time but all the total time.
+      const timings = getTimingsForPath([A]);
+      expect(timings).toEqual({
+        forPath: {
+          selfTime: {
+            value: 0,
+            breakdownByImplementation: null,
+            breakdownByCategory: null,
+          },
+          totalTime: {
+            value: 5,
+            breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
+            breakdownByCategory: withSingleSubcategory([
+              1, // Idle
+              0, // Other
+              1, // Layout
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        forFunc: {
+          selfTime: {
+            value: 0,
+            breakdownByImplementation: null,
+            breakdownByCategory: null,
+          },
+          totalTime: {
+            value: 5,
+            breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
+            breakdownByCategory: withSingleSubcategory([
+              1, // Idle
+              0, // Other
+              1, // Layout
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        rootTime: 5,
+      });
+    });
+
+    it('returns good timings for a leaf node, also present in other stacks', () => {
+      const {
+        getTimingsForPath,
+        funcNamesDict: { A, B, Cjs, D, Ejs },
+      } = setup();
+
+      // This is a leaf node: it should have some self time and some total time
+      // holding the same value.
+      //
+      // This is also a JS node so it should have some js engine implementation
+      // implementations.
+      //
+      // The same func is also present in 2 different stacks so it should have
+      // different timings for the `forFunc` property.
+      const timings = getTimingsForPath([A, B, Cjs, D, Ejs]);
+      expect(timings).toEqual({
+        forPath: {
+          selfTime: {
+            value: 2,
+            breakdownByImplementation: { ion: 1, baseline: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0, // Idle
+              0, // Other
+              0, // Layout
+              2, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+          totalTime: {
+            value: 2,
+            breakdownByImplementation: { ion: 1, baseline: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0, // Idle
+              0, // Other
+              0, // Layout
+              2, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        forFunc: {
+          selfTime: {
+            value: 3,
+            breakdownByImplementation: { ion: 2, baseline: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              0,
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+          totalTime: {
+            value: 3,
+            breakdownByImplementation: { ion: 2, baseline: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              0,
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        rootTime: 5,
+      });
+    });
+
+    it('returns good timings for a node that has both children and self time', () => {
+      const {
+        getTimingsForPath,
+        funcNamesDict: { A, B, H },
+      } = setup();
+
+      // This is a node that has both children and some self time. So it should
+      // have some running time that's different than the self time.
+      const timings = getTimingsForPath([A, B, H]);
+      expect(timings).toEqual({
+        forPath: {
+          selfTime: {
+            value: 1,
+            breakdownByImplementation: { native: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              1, // Layout
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+          totalTime: {
+            value: 2,
+            breakdownByImplementation: { native: 2 },
+
+            breakdownByCategory: withSingleSubcategory([
+              1, // Idle
+              0,
+              1, // Layout
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        forFunc: {
+          selfTime: {
+            value: 1,
+            breakdownByImplementation: { native: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              1, // Layout
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+          totalTime: {
+            value: 2,
+            breakdownByImplementation: { native: 2 },
+            breakdownByCategory: withSingleSubcategory([
+              1, // Idle
+              0,
+              1, // Layout
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        rootTime: 5,
+      });
+    });
+
+    it('returns good timings for preview selections', () => {
+      const {
+        dispatch,
+        funcNamesDict: { A },
+        getTimingsForPath,
+      } = setup();
+
+      dispatch(
+        ProfileView.updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 3,
+          selectionEnd: 5,
+        })
+      );
+
+      const timings = getTimingsForPath([A]);
+
+      // We don't test the whole object, just one part, because in this test
+      // we're more interested in testing if the offset logic is working.
+      expect(timings.rootTime).toEqual(2);
+      expect(timings.forPath.totalTime).toEqual({
+        value: 2,
+        breakdownByImplementation: { native: 1, ion: 1 },
+        breakdownByCategory: withSingleSubcategory([
+          1, // Idle
+          0, // Other
+          0, // Layout
+          1, // JavaScript
+          0,
+          0,
+          0,
+          0,
+        ]),
+      });
+    });
+  });
+
+  describe('for an inverted tree', function() {
+    function setupForInvertedTree() {
+      const setupResult = setup();
+      const { dispatch } = setupResult;
+
+      dispatch(ProfileView.changeInvertCallstack(true));
+      // Now the profile should look like this:
+      //
+      // E    Ejs  Ejs  Ejs  I[cat:Idle]    H[cat:Layout]
+      // D    D    D    F    H[cat:Layout]  B
+      // Cjs  Cjs  Cjs  Cjs  B              A
+      // B    B    B    B    A
+      // A    A    A    A
+
+      return setupResult;
+    }
+
+    it('returns good timings for a root node', () => {
+      const {
+        getTimingsForPath,
+        funcNamesDict: { Ejs },
+      } = setupForInvertedTree();
+      const timings = getTimingsForPath([Ejs]);
+      expect(timings).toEqual({
+        forPath: {
+          selfTime: {
+            value: 3,
+            breakdownByImplementation: null,
+            breakdownByCategory: null,
+          },
+          totalTime: {
+            value: 3,
+            breakdownByImplementation: { ion: 2, baseline: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0, // Idle
+              0, // Other
+              0, // Layout
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        forFunc: {
+          selfTime: {
+            value: 3,
+            breakdownByImplementation: { ion: 2, baseline: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              0,
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+          totalTime: {
+            value: 3,
+            breakdownByImplementation: { ion: 2, baseline: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              0,
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        rootTime: 5,
+      });
+    });
+
+    it('returns good timings for a node present in several stacks without self time', () => {
+      const {
+        getTimingsForPath,
+        funcNamesDict: { Ejs, D, Cjs, B },
+      } = setupForInvertedTree();
+      const timings = getTimingsForPath([Ejs, D, Cjs, B]);
+      expect(timings).toEqual({
+        forPath: {
+          selfTime: {
+            value: 0,
+            breakdownByImplementation: null,
+            breakdownByCategory: null,
+          },
+          totalTime: {
+            value: 2,
+            breakdownByImplementation: { ion: 1, baseline: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              0,
+              2, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        forFunc: {
+          selfTime: {
+            value: 0,
+            breakdownByImplementation: null,
+            breakdownByCategory: null,
+          },
+          totalTime: {
+            value: 5,
+            breakdownByImplementation: {
+              ion: 2,
+              baseline: 1,
+              native: 2,
+            },
+            breakdownByCategory: withSingleSubcategory([
+              1, // Idle
+              0, // Other
+              1, // Layout
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        rootTime: 5,
+      });
+    });
+
+    it('returns good timings for a node present in several stacks with self time', () => {
+      const {
+        getTimingsForPath,
+        funcNamesDict: { I, H },
+      } = setupForInvertedTree();
+
+      // Select the function as a root node
+      let timings = getTimingsForPath([H]);
+      expect(timings).toEqual({
+        forPath: {
+          selfTime: {
+            value: 1,
+            breakdownByImplementation: null,
+            breakdownByCategory: null,
+          },
+          totalTime: {
+            value: 1,
+            breakdownByImplementation: { native: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              1, // Layout
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        forFunc: {
+          selfTime: {
+            value: 1,
+            breakdownByImplementation: { native: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              1, // Layout
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+          totalTime: {
+            value: 2,
+            breakdownByImplementation: { native: 2 },
+            breakdownByCategory: withSingleSubcategory([
+              1, // Idle
+              0, // Other
+              1, // Layout
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        rootTime: 5,
+      });
+
+      // Select the same function, but this time when it's not a root node
+      timings = getTimingsForPath([I, H]);
+      expect(timings).toEqual({
+        forPath: {
+          selfTime: {
+            value: 0,
+            breakdownByImplementation: null,
+            breakdownByCategory: null,
+          },
+          totalTime: {
+            value: 1,
+            breakdownByImplementation: { native: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              1, // Idle
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        forFunc: {
+          selfTime: {
+            value: 1,
+            breakdownByImplementation: { native: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              1, // Layout
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+          totalTime: {
+            value: 2,
+            breakdownByImplementation: { native: 2 },
+            breakdownByCategory: withSingleSubcategory([
+              1, // Idle
+              0,
+              1, // Layout
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        rootTime: 5,
+      });
+    });
+
+    it('returns good timings for a leaf node', () => {
+      const {
+        getTimingsForPath,
+        funcNamesDict: { H, B, A },
+      } = setupForInvertedTree();
+      const timings = getTimingsForPath([H, B, A]);
+      expect(timings).toEqual({
+        forPath: {
+          selfTime: {
+            value: 0,
+            breakdownByImplementation: null,
+            breakdownByCategory: null,
+          },
+          totalTime: {
+            value: 1,
+            breakdownByImplementation: { native: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              0,
+              0,
+              1, // Layout
+              0,
+              0,
+              0,
+              0,
+              0,
+            ]),
+          },
+        },
+        forFunc: {
+          selfTime: {
+            value: 0,
+            breakdownByImplementation: null,
+            breakdownByCategory: null,
+          },
+          totalTime: {
+            value: 5,
+            breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
+            breakdownByCategory: withSingleSubcategory([
+              1, // Idle
+              0,
+              1, // Layout
+              3, // JavaScript
+              0,
+              0,
+              0,
+              0,
+            ]), // [Idle, Other, Layout, JavaScript]
+          },
+        },
+        rootTime: 5,
+      });
+    });
+
+    it('returns good timings for preview selections', () => {
+      const {
+        dispatch,
+        funcNamesDict: { Ejs },
+        getTimingsForPath,
+      } = setupForInvertedTree();
+
+      dispatch(
+        ProfileView.updatePreviewSelection({
+          hasSelection: true,
+          isModifying: false,
+          selectionStart: 3,
+          selectionEnd: 5,
+        })
+      );
+
+      const timings = getTimingsForPath([Ejs]);
+
+      // We don't test the whole object, just one part, because in this test
+      // we're more interested in testing if the offset logic is working.
+      expect(timings.rootTime).toEqual(2);
+      expect(timings.forPath.totalTime).toEqual({
+        value: 1,
+        breakdownByImplementation: { ion: 1 },
+        breakdownByCategory: withSingleSubcategory([
+          0, // Idle
+          0, // Other
+          0, // Layout
+          1, // JavaScript
+          0,
+          0,
+          0,
+          0,
+        ]),
+      });
+    });
+  });
+
+  describe('for a diffing track', function() {
+    function setup() {
+      const {
+        profile,
+        funcNamesDictPerThread,
+      } = getMergedProfileFromTextSamples(
+        `
+        A              A  A
+        B              B  C
+        D[cat:Layout]  E  F
+      `,
+        `
+        A                  A  A
+        B                  B  B
+        G[cat:JavaScript]  I  E
+      `
+      );
+
+      const store = storeWithProfile(profile);
+      store.dispatch(ProfileView.changeSelectedThread(2));
+
+      const getTimingsForPath = path => {
+        store.dispatch(ProfileView.changeSelectedCallNode(2, path));
+        return selectedNodeSelectors.getTimingsForSidebar(store.getState());
+      };
+
+      return {
+        getTimingsForPath,
+        funcNamesDictPerThread,
+      };
+    }
+
+    it('computes the right breakdowns', () => {
+      const {
+        getTimingsForPath,
+        funcNamesDictPerThread: [{ A }],
+      } = setup();
+      const timings = getTimingsForPath([A]);
+      expect(timings.forPath).toEqual({
+        selfTime: {
+          breakdownByCategory: null,
+          breakdownByImplementation: null,
+          value: 0,
+        },
+        totalTime: {
+          breakdownByCategory: withSingleSubcategory([0, 0, -1, 1, 0, 0, 0, 0]), // Idle, Other, Layout, JavaScript, etc.
+          breakdownByImplementation: {
+            native: 0,
+          },
+          value: 0,
+        },
+      });
+    });
+  });
+});
+
 // Verify that getFriendlyThreadName gives the expected names for threads with or without processName.
 describe('getFriendlyThreadName', function() {
   // Setup a profile with threads based on the given overrides.
@@ -1339,12 +2111,14 @@ describe('getFriendlyThreadName', function() {
       { name: 'GeckoMain', processType: 'tab' },
       { name: 'GeckoMain', processType: 'gpu' },
       { name: 'GeckoMain', processType: 'plugin' },
+      { name: 'GeckoMain', processType: 'socket' },
     ]);
     expect(getFriendlyThreadNames()).toEqual([
       'Parent Process',
       'Content Process',
       'GPU Process',
       'Plugin Process',
+      'Socket Process',
     ]);
   });
 
@@ -1354,12 +2128,14 @@ describe('getFriendlyThreadName', function() {
       { name: 'GeckoMain', processType: 'tab' },
       { name: 'GeckoMain', processType: 'gpu' },
       { name: 'GeckoMain', processType: 'tab' },
+      { name: 'GeckoMain', processType: 'socket' },
     ]);
     expect(getFriendlyThreadNames()).toEqual([
       'Parent Process',
       'Content Process (1/2)',
       'GPU Process',
       'Content Process (2/2)',
+      'Socket Process',
     ]);
   });
 
@@ -1470,5 +2246,18 @@ describe('counter selectors', function() {
       maxCount: 30,
       minCount: -12,
     });
+  });
+});
+
+describe('call tree summary strategy', function() {
+  it('can change the call tree strategy', function() {
+    const { dispatch, getState } = storeWithProfile();
+    expect(UrlStateSelectors.getCallTreeSummaryStrategy(getState())).toEqual(
+      'timing'
+    );
+    dispatch(ProfileView.changeCallTreeSummaryStrategy('js-allocations'));
+    expect(UrlStateSelectors.getCallTreeSummaryStrategy(getState())).toEqual(
+      'js-allocations'
+    );
   });
 });

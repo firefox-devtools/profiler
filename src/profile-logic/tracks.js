@@ -483,13 +483,13 @@ export function getVisibleThreads(
     globalTrackIndex < globalTracks.length;
     globalTrackIndex++
   ) {
+    if (hiddenGlobalTracks.has(globalTrackIndex)) {
+      continue;
+    }
     const globalTrack = globalTracks[globalTrackIndex];
     if (globalTrack.type === 'process') {
       const { mainThreadIndex, pid } = globalTrack;
-      if (
-        mainThreadIndex !== null &&
-        !hiddenGlobalTracks.has(globalTrackIndex)
-      ) {
+      if (mainThreadIndex !== null) {
         visibleThreads.push(mainThreadIndex);
       }
       const tracks = ensureExists(

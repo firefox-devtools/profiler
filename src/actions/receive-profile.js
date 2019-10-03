@@ -4,6 +4,7 @@
 
 // @flow
 import { oneLine } from 'common-tags';
+import queryString from 'query-string';
 import {
   processProfile,
   unserializeProfileOfArbitraryFormat,
@@ -17,7 +18,6 @@ import { expandUrl } from '../utils/shorten-url';
 import { TemporaryError } from '../utils/errors';
 import JSZip from 'jszip';
 import {
-  getDataSource,
   getSelectedThreadIndexOrNull,
   getGlobalTrackOrder,
   getHiddenGlobalTracks,
@@ -26,7 +26,10 @@ import {
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
 } from '../selectors/url-state';
-import { stateFromLocation } from '../app-logic/url-handling';
+import {
+  stateFromLocation,
+  getDataSourceFromPathParts,
+} from '../app-logic/url-handling';
 import {
   initializeLocalTrackOrderByPid,
   initializeHiddenLocalTracksByPid,
@@ -37,6 +40,9 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
+import { getProfileOrNull } from '../selectors/profile';
+import { getView } from '../selectors/app';
+import { setDataSource } from './profile-view';
 
 import type {
   FunctionsUpdatePerThread,
@@ -51,6 +57,7 @@ import type {
   ThreadIndex,
   IndexIntoFuncTable,
 } from '../types/profile';
+import { assertExhaustiveCheck } from '../utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -72,23 +79,19 @@ export function waitingForProfileFromAddon(): Action {
 
 /**
  * Call this function once the profile has been fetched and pre-processed from whatever
- * source (url, addon, file, etc). This function will take the view information from the
- * URL, such as hiding and sorting information, and it will validate it against the
- * profile. If there is no pre-existing view information, this function will compute the
- * defaults. There is a decent amount of complexity to making all of these decisions,
- * which has been collected in a bunch of functions in the src/profile-logic/tracks.js
- * file.
+ * source (url, addon, file, etc).
  */
-export function viewProfile(
+export function loadProfile(
   profile: Profile,
   config: $Shape<{|
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
-    geckoProfiler: $GeckoProfiler,
-  |}> = {}
+    geckoProfiler?: $GeckoProfiler,
+  |}> = {},
+  initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
-  return async (dispatch, getState) => {
+  return async dispatch => {
     if (profile.threads.length === 0) {
       console.error('This profile has no threads.', profile);
       dispatch(
@@ -98,6 +101,47 @@ export function viewProfile(
           )
         )
       );
+      return;
+    }
+
+    // We have a 'PROFILE_LOADED' dispatch here and a second dispatch for
+    // `finalizeProfileView`. Normally this is an anti-pattern but that was
+    // necessary for initial load url handling. We are not dispatching
+    // `finalizeProfileView` here if it's initial load, instead are getting the
+    // url, upgrading the url and then creating a UrlState that we can use
+    // first. That is necessary because we need a UrlState inside `finalizeProfileView`.
+    // If this is not the initial load, we are dispatching both of them.
+    dispatch({
+      type: 'PROFILE_LOADED',
+      profile,
+      pathInZipFile: config.pathInZipFile,
+      implementationFilter: config.implementationFilter,
+      transformStacks: config.transformStacks,
+    });
+
+    // During initial load, we are upgrading the URL and generating the UrlState
+    // before finalizing profile view. That's why we are dispatching this action
+    // after completing those steps inside `setupInitialUrlState`.
+    if (initialLoad === false) {
+      await dispatch(finalizeProfileView(config.geckoProfiler));
+    }
+  };
+}
+
+/**
+ * This function will take the view information from the URL, such as hiding and sorting
+ * information, and it will validate it against the profile. If there is no pre-existing
+ * view information, this function will compute the defaults. There is a decent amount of
+ * complexity to making all of these decisions, which has been collected in a bunch of
+ * functions in the src/profile-logic/tracks.js file.
+ */
+export function finalizeProfileView(
+  geckoProfiler?: $GeckoProfiler
+): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    const profile = getProfileOrNull(getState());
+    if (profile === null || getView(getState()).phase !== 'PROFILE_LOADED') {
+      // Profile load was not successful. Do not continue.
       return;
     }
 
@@ -160,9 +204,30 @@ export function viewProfile(
       profile
     );
 
+    // If all of the local tracks were hidden for a process, and the main thread was
+    // not recorded for that process, hide the (empty) process track as well.
+    for (const [pid, localTracks] of localTracksByPid) {
+      const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
+      if (!hiddenLocalTracks) {
+        continue;
+      }
+      if (hiddenLocalTracks.size === localTracks.length) {
+        // All of the local tracks were hidden.
+        const globalTrackIndex = globalTracks.findIndex(
+          globalTrack =>
+            globalTrack.type === 'process' &&
+            globalTrack.pid === pid &&
+            globalTrack.mainThreadIndex === null
+        );
+        if (globalTrackIndex !== -1) {
+          // An empty global track was found, hide it.
+          hiddenGlobalTracks.add(globalTrackIndex);
+        }
+      }
+    }
+
     dispatch({
       type: 'VIEW_PROFILE',
-      profile,
       selectedThreadIndex,
       globalTracks,
       globalTrackOrder,
@@ -170,18 +235,34 @@ export function viewProfile(
       localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
-      pathInZipFile: config.pathInZipFile,
-      implementationFilter: config.implementationFilter,
-      transformStacks: config.transformStacks,
-      dataSource: getDataSource(getState()),
     });
 
     // Note we kick off symbolication only for the profiles we know for sure
     // that they weren't symbolicated.
     if (profile.meta.symbolicated === false) {
-      const symbolStore = getSymbolStore(dispatch, config.geckoProfiler);
+      const symbolStore = getSymbolStore(dispatch, geckoProfiler);
       await doSymbolicateProfile(dispatch, profile, symbolStore);
     }
+  };
+}
+
+// Previously `loadProfile` and `finalizeProfileView` functions were a single
+// function called `viewProfile`. Then we had to split it because of the changes
+// of url/profile loading mechanism. We kept the `viewProfile` function with the
+// same functionality as previous `viewProfile` because many of the tests use this.
+// This function will simply call `loadProfile` (and `finalizeProfileView` inside
+// `loadProfile`) and wait until symbolication finishes.
+export function viewProfile(
+  profile: Profile,
+  config: $Shape<{|
+    pathInZipFile: string,
+    implementationFilter: ImplementationFilter,
+    transformStacks: TransformStacksPerThread,
+    geckoProfiler: $GeckoProfiler,
+  |}> = {}
+): ThunkAction<Promise<void>> {
+  return async dispatch => {
+    await dispatch(loadProfile(profile, config, false));
   };
 }
 
@@ -345,10 +426,20 @@ export function assignFunctionNames(
  * If the profile object we got from the add-on is an ArrayBuffer, convert it
  * to a gecko profile object by parsing the JSON.
  */
-function _unpackGeckoProfileFromAddon(profile) {
+async function _unpackGeckoProfileFromAddon(profile) {
   if (profile instanceof ArrayBuffer) {
+    const profileBytes = new Uint8Array(profile);
+    let decompressedProfile;
+    // Check for the gzip magic number in the header. If we find it, decompress
+    // the data first.
+    if (profileBytes[0] === 0x1f && profileBytes[1] === 0x8b) {
+      decompressedProfile = await decompress(profileBytes);
+    } else {
+      decompressedProfile = profile;
+    }
+
     const textDecoder = new TextDecoder();
-    return JSON.parse(textDecoder.decode(profile));
+    return JSON.parse(textDecoder.decode(decompressedProfile));
   }
   return profile;
 }
@@ -361,8 +452,9 @@ async function getProfileFromAddon(
 
   // XXX update state to show that we're connected to the profiler addon
   const rawGeckoProfile = await geckoProfiler.getProfile();
-  const profile = processProfile(_unpackGeckoProfileFromAddon(rawGeckoProfile));
-  await dispatch(viewProfile(profile, { geckoProfiler }));
+  const unpackedProfile = await _unpackGeckoProfileFromAddon(rawGeckoProfile);
+  const profile = processProfile(unpackedProfile);
+  await dispatch(loadProfile(profile, { geckoProfiler }));
 
   return profile;
 }
@@ -480,9 +572,10 @@ export function waitingForProfileFromStore(): Action {
   };
 }
 
-export function waitingForProfileFromUrl(): Action {
+export function waitingForProfileFromUrl(profileUrl?: string): Action {
   return {
     type: 'WAITING_FOR_PROFILE_FROM_URL',
+    profileUrl,
   };
 }
 
@@ -688,13 +781,20 @@ async function _extractJsonFromResponse(
 }
 
 function getProfileUrlForHash(hash: string): string {
-  return `https://profile-store.commondatastorage.googleapis.com/${hash}`;
+  // See https://cloud.google.com/storage/docs/access-public-data
+  // The URL is https://storage.googleapis.com/<BUCKET>/<FILEPATH>.
+  // https://<BUCKET>.storage.googleapis.com/<FILEPATH> seems to also work but
+  // is not documented nowadays.
+  // By convention, "profile-store" is the name of our bucket, and the file path
+  // is the hash we receive in the URL.
+  return `https://storage.googleapis.com/profile-store/${hash}`;
 }
 
 export function retrieveProfileFromStore(
-  hash: string
+  hash: string,
+  initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
-  return retrieveProfileOrZipFromUrl(getProfileUrlForHash(hash));
+  return retrieveProfileOrZipFromUrl(getProfileUrlForHash(hash), initialLoad);
 }
 
 /**
@@ -703,10 +803,11 @@ export function retrieveProfileFromStore(
  * into the store so that the user can then choose which file to load.
  */
 export function retrieveProfileOrZipFromUrl(
-  profileUrl: string
+  profileUrl: string,
+  initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async function(dispatch) {
-    dispatch(waitingForProfileFromUrl());
+    dispatch(waitingForProfileFromUrl(profileUrl));
 
     try {
       const response = await _fetchProfile({
@@ -726,7 +827,7 @@ export function retrieveProfileOrZipFromUrl(
           throw new Error('Unable to parse the profile.');
         }
 
-        await dispatch(viewProfile(profile));
+        await dispatch(loadProfile(profile, {}, initialLoad));
       } else if (zip) {
         await dispatch(receiveZipFile(zip));
       } else {
@@ -836,7 +937,8 @@ export function retrieveProfileFromFile(
  * information contained in the query.
  */
 export function retrieveProfilesToCompare(
-  profileViewUrls: string[]
+  profileViewUrls: string[],
+  initialLoad: boolean = false
 ): ThunkAction<Promise<void>> {
   return async dispatch => {
     dispatch(waitingForProfileFromUrl());
@@ -902,13 +1004,84 @@ export function retrieveProfilesToCompare(
       }
 
       await dispatch(
-        viewProfile(resultProfile, {
-          transformStacks,
-          implementationFilter,
-        })
+        loadProfile(
+          resultProfile,
+          {
+            transformStacks,
+            implementationFilter,
+          },
+          initialLoad
+        )
       );
     } catch (error) {
       dispatch(fatalError(error));
     }
+  };
+}
+
+// This function takes location(most probably `window.location`) as parameter
+// and loads the profile in that given location, then returns the profile data.
+// This function is being used to get the initial profile data before upgrading
+// the url and processing the UrlState.
+export function getProfilesFromRawUrl(
+  location: Location
+): ThunkAction<
+  Promise<{| profile: Profile | null, shouldSetupInitialUrlState: boolean |}>
+> {
+  return async (dispatch, getState) => {
+    const pathParts = location.pathname.split('/').filter(d => d);
+    let dataSource = getDataSourceFromPathParts(pathParts);
+    if (dataSource === 'from-file') {
+      // Redirect to 'none' if `dataSource` is 'from-file' since initial urls can't
+      // be 'from-file' and needs to be redirected to home page.
+      dataSource = 'none';
+    }
+    dispatch(setDataSource(dataSource));
+
+    let shouldSetupInitialUrlState = true;
+    switch (dataSource) {
+      case 'from-addon':
+        shouldSetupInitialUrlState = false;
+        // We don't need to `await` the result because there's no url upgrading
+        // when retrieving the profile from the addon and we don't need to wait
+        // for the process. Moreover we don't want to wait for the end of
+        // symbolication and rather want to show the UI as soon as we get
+        // the profile data.
+        dispatch(retrieveProfileFromAddon());
+        break;
+      case 'public':
+        await dispatch(retrieveProfileFromStore(pathParts[1], true));
+        break;
+      case 'from-url':
+        await dispatch(
+          retrieveProfileOrZipFromUrl(decodeURIComponent(pathParts[1]), true)
+        );
+        break;
+      case 'compare': {
+        const query = queryString.parse(location.search.substr(1), {
+          arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+        });
+        if (Array.isArray(query.profiles)) {
+          await dispatch(retrieveProfilesToCompare(query.profiles, true));
+        }
+        break;
+      }
+      case 'none':
+      case 'from-file':
+      case 'local':
+        throw new Error(`There is no profile to download`);
+      default:
+        throw assertExhaustiveCheck(
+          dataSource,
+          `Unknown dataSource ${dataSource}.`
+        );
+    }
+
+    // Profile may be null only for the `from-addon` dataSource since we do
+    // not `await` for retrieveProfileFromAddon function.
+    return {
+      profile: getProfileOrNull(getState()),
+      shouldSetupInitialUrlState,
+    };
   };
 }

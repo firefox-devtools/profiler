@@ -164,6 +164,7 @@ class LoadFromUrl extends React.PureComponent<
           placeholder="https://"
           value={this.state.value}
           onChange={this.handleChange}
+          autoFocus
         />
         <input
           type="submit"

@@ -9,34 +9,58 @@ Object {
       Object {
         "color": "transparent",
         "name": "Idle",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "grey",
         "name": "Other",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "purple",
         "name": "Layout",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "yellow",
         "name": "JavaScript",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "orange",
         "name": "GC / CC",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "lightblue",
         "name": "Network",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "green",
         "name": "Graphics",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "blue",
         "name": "DOM",
+        "subcategories": Array [
+          "Other",
+        ],
       },
     ],
     "extensions": Object {
@@ -51,7 +75,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 22,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -59,22 +83,22 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 15,
+    "version": 16,
   },
   "pages": Array [],
   "threads": Array [
     Object {
       "frameTable": Object {
         "address": Array [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
         ],
         "category": Array [
           null,
@@ -143,18 +167,29 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "funcTable": Object {
         "address": Array [
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
-          0,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
         ],
         "columnNumber": Array [
           null,
@@ -237,6 +272,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -327,6 +363,17 @@ Object {
           1,
           7,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -365,6 +412,7 @@ Object {
         "length": 0,
         "line": Array [],
         "optimizations": Array [],
+        "subcategory": Array [],
       },
       "funcTable": Object {
         "address": Array [],
@@ -379,6 +427,18 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
         "data": Array [
           null,
           null,
@@ -464,25 +524,17 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "length": 2,
-        "responsiveness": Array [
-          null,
-          null,
-        ],
-        "stack": Array [
-          null,
-          null,
-        ],
-        "time": Array [
-          0,
-          8,
-        ],
+        "length": 0,
+        "responsiveness": Array [],
+        "stack": Array [],
+        "time": Array [],
       },
       "stackTable": Object {
         "category": Array [],
         "frame": Array [],
         "length": 0,
         "prefix": Array [],
+        "subcategory": Array [],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -522,15 +574,15 @@ Array [
   Object {
     "frameTable": Object {
       "address": Array [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
       ],
       "category": Array [
         null,
@@ -599,18 +651,29 @@ Array [
         null,
         null,
       ],
+      "subcategory": Array [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
     },
     "funcTable": Object {
       "address": Array [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
+        -1,
       ],
       "columnNumber": Array [
         null,
@@ -693,6 +756,7 @@ Array [
     },
     "libs": Array [],
     "markers": Object {
+      "category": Array [],
       "data": Array [],
       "length": 0,
       "name": Array [],
@@ -783,6 +847,17 @@ Array [
         1,
         7,
       ],
+      "subcategory": Array [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
     },
     "stringTable": UniqueStringArray {
       "_array": Array [
@@ -821,6 +896,7 @@ Array [
       "length": 0,
       "line": Array [],
       "optimizations": Array [],
+      "subcategory": Array [],
     },
     "funcTable": Object {
       "address": Array [],
@@ -835,6 +911,18 @@ Array [
     },
     "libs": Array [],
     "markers": Object {
+      "category": Array [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ],
       "data": Array [
         null,
         null,
@@ -920,25 +1008,17 @@ Array [
       "type": Array [],
     },
     "samples": Object {
-      "length": 2,
-      "responsiveness": Array [
-        null,
-        null,
-      ],
-      "stack": Array [
-        null,
-        null,
-      ],
-      "time": Array [
-        0,
-        8,
-      ],
+      "length": 0,
+      "responsiveness": Array [],
+      "stack": Array [],
+      "time": Array [],
     },
     "stackTable": Object {
       "category": Array [],
       "frame": Array [],
       "length": 0,
       "prefix": Array [],
+      "subcategory": Array [],
     },
     "stringTable": UniqueStringArray {
       "_array": Array [
@@ -975,6 +1055,7 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexes 1`] = `
 Array [
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "D",
@@ -982,6 +1063,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "E",
@@ -989,6 +1071,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "F",
@@ -996,6 +1079,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 7,
@@ -1017,6 +1101,7 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexesForHeader 1`] = `
 Array [
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "D",
@@ -1024,6 +1109,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "E",
@@ -1031,6 +1117,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "F",
@@ -1043,6 +1130,7 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getFullMarkerListIndexes 1`] = `
 Array [
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "A",
@@ -1050,6 +1138,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "B",
@@ -1057,6 +1146,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "C",
@@ -1064,6 +1154,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "D",
@@ -1071,6 +1162,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "E",
@@ -1078,6 +1170,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "F",
@@ -1085,6 +1178,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 7,
@@ -1101,6 +1195,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 8,
@@ -1174,6 +1269,18 @@ Array [
 
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getProcessedRawMarkerTable 1`] = `
 Object {
+  "category": Array [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+  ],
   "data": Array [
     null,
     null,
@@ -1249,6 +1356,7 @@ Object {
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getSearchFilteredMarkerIndexes 1`] = `
 Array [
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "D",
@@ -1256,6 +1364,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "E",
@@ -1263,6 +1372,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": null,
     "dur": 0,
     "name": "F",
@@ -1270,6 +1380,7 @@ Array [
     "title": null,
   },
   Object {
+    "category": 0,
     "data": Object {
       "URI": "https://mozilla.org",
       "endTime": 7,
@@ -1298,14 +1409,54 @@ Object {
     },
     "totalTime": Object {
       "breakdownByCategory": Array [
-        0,
-        2,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 2,
+          "subcategoryBreakdown": Array [
+            2,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
       ],
       "breakdownByImplementation": Object {
         "native": 2,
@@ -1321,14 +1472,54 @@ Object {
     },
     "totalTime": Object {
       "breakdownByCategory": Array [
-        0,
-        2,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 2,
+          "subcategoryBreakdown": Array [
+            2,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
       ],
       "breakdownByImplementation": Object {
         "native": 2,
@@ -1383,6 +1574,16 @@ Object {
       4,
       1,
       6,
+    ],
+    "subcategory": Int32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
   },
   "stackIndexToCallNodeIndex": Uint32Array [
@@ -1452,6 +1653,16 @@ CallTree {
       1,
       6,
     ],
+    "subcategory": Int32Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "_callNodeTimes": Object {
     "selfTime": Float32Array [
@@ -1475,53 +1686,78 @@ CallTree {
       0,
     ],
   },
+  "_callTreeSummaryStrategy": "timing",
   "_categories": Array [
     Object {
       "color": "transparent",
       "name": "Idle",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "grey",
       "name": "Other",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "purple",
       "name": "Layout",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "yellow",
       "name": "JavaScript",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "orange",
       "name": "GC / CC",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "lightblue",
       "name": "Network",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "green",
       "name": "Graphics",
+      "subcategories": Array [
+        "Other",
+      ],
     },
     Object {
       "color": "blue",
       "name": "DOM",
+      "subcategories": Array [
+        "Other",
+      ],
     },
   ],
   "_children": Array [],
   "_displayDataByIndex": Map {},
   "_funcTable": Object {
     "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
     ],
     "columnNumber": Array [
       null,
@@ -1602,7 +1838,8 @@ CallTree {
       -1,
     ],
   },
-  "_isIntegerInterval": true,
+  "_interval": 1,
+  "_isHighPrecision": false,
   "_jsOnly": false,
   "_resourceTable": Object {
     "host": Array [],
@@ -1644,15 +1881,15 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "frameTable": Object {
     "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
     ],
     "category": Array [
       null,
@@ -1721,18 +1958,29 @@ Object {
       null,
       null,
     ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "funcTable": Object {
     "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
     ],
     "columnNumber": Array [
       null,
@@ -1815,6 +2063,7 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
+    "category": Array [],
     "data": Array [],
     "length": 0,
     "name": Array [],
@@ -1835,6 +2084,7 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "duration": undefined,
     "length": 4,
     "responsiveness": Array [
       0,
@@ -1886,6 +2136,16 @@ Object {
       4,
       1,
       6,
+    ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
   },
   "stringTable": UniqueStringArray {
@@ -1985,6 +2245,7 @@ Array [
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getJankMarkersForHeader 1`] = `
 Array [
   Object {
+    "category": 1,
     "data": null,
     "dur": 100,
     "name": "Jank",
@@ -1998,15 +2259,15 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "frameTable": Object {
     "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
     ],
     "category": Array [
       null,
@@ -2075,18 +2336,29 @@ Object {
       null,
       null,
     ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "funcTable": Object {
     "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
     ],
     "columnNumber": Array [
       null,
@@ -2169,6 +2441,7 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
+    "category": Array [],
     "data": Array [],
     "length": 0,
     "name": Array [],
@@ -2189,6 +2462,7 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "duration": undefined,
     "length": 2,
     "responsiveness": Array [
       100,
@@ -2235,6 +2509,16 @@ Object {
       1,
       6,
     ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "stringTable": UniqueStringArray {
     "_array": Array [
@@ -2269,15 +2553,15 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "frameTable": Object {
     "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
     ],
     "category": Array [
       null,
@@ -2346,18 +2630,29 @@ Object {
       null,
       null,
     ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "funcTable": Object {
     "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
     ],
     "columnNumber": Array [
       null,
@@ -2440,6 +2735,7 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
+    "category": Array [],
     "data": Array [],
     "length": 0,
     "name": Array [],
@@ -2460,6 +2756,7 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "duration": undefined,
     "length": 4,
     "responsiveness": Array [
       0,
@@ -2512,6 +2809,16 @@ Object {
       1,
       6,
     ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "stringTable": UniqueStringArray {
     "_array": Array [
@@ -2546,15 +2853,15 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedT
 Object {
   "frameTable": Object {
     "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
     ],
     "category": Array [
       null,
@@ -2623,18 +2930,29 @@ Object {
       null,
       null,
     ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
   },
   "funcTable": Object {
     "address": Array [
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
+      -1,
     ],
     "columnNumber": Array [
       null,
@@ -2717,6 +3035,7 @@ Object {
   },
   "libs": Array [],
   "markers": Object {
+    "category": Array [],
     "data": Array [],
     "length": 0,
     "name": Array [],
@@ -2737,6 +3056,7 @@ Object {
     "type": Array [],
   },
   "samples": Object {
+    "duration": undefined,
     "length": 4,
     "responsiveness": Array [
       0,
@@ -2791,6 +3111,17 @@ Object {
       5,
       1,
       7,
+    ],
+    "subcategory": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
   },
   "stringTable": UniqueStringArray {
@@ -2840,6 +3171,8 @@ Object {
       ],
     },
   },
+  "rightClickedCallNodePath": null,
+  "rightClickedMarker": null,
   "selectedCallNodePath": Array [
     0,
     1,

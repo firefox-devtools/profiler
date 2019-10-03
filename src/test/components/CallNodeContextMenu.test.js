@@ -8,7 +8,11 @@ import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { render, fireEvent } from 'react-testing-library';
-import { changeSelectedCallNode } from '../../actions/profile-view';
+import {
+  changeRightClickedCallNode,
+  changeExpandedCallNodes,
+  setContextMenuVisibility,
+} from '../../actions/profile-view';
 import { Provider } from 'react-redux';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
@@ -20,30 +24,29 @@ describe('calltree/CallNodeContextMenu', function() {
     // Create a profile that every transform can be applied to.
     const {
       profile,
-      funcNamesPerThread: [funcNames],
+      funcNamesDictPerThread: [{ A, B }],
     } = getProfileFromTextSamples(`
-      A          A          A
-      B:library  B:library  B:library
-      B:library  B:library  B:library
-      B:library  B:library  B:library
-      C          C          H
-      D          F          I
-      E          E
+      A               A               A
+      B[lib:library]  B[lib:library]  B[lib:library]
+      B[lib:library]  B[lib:library]  B[lib:library]
+      B[lib:library]  B[lib:library]  B[lib:library]
+      C               C               H
+      D               F               I
+      E               E
     `);
     const store = storeWithProfile(profile);
-    store.dispatch(
-      changeSelectedCallNode(0, [
-        funcNames.indexOf('A'),
-        funcNames.indexOf('B:library'),
-      ])
-    );
+
+    store.dispatch(changeExpandedCallNodes(0, [[A]]));
+    store.dispatch(changeRightClickedCallNode(0, [A, B]));
     return store;
   }
 
-  function setup(store = createStore(), forceOpenForTests = true) {
+  function setup(store = createStore(), openMenuState = true) {
+    store.dispatch(setContextMenuVisibility(openMenuState));
+
     const renderResult = render(
       <Provider store={store}>
-        <CallNodeContextMenu forceOpenForTests={forceOpenForTests} />
+        <CallNodeContextMenu />
       </Provider>
     );
 
@@ -51,16 +54,10 @@ describe('calltree/CallNodeContextMenu', function() {
   }
 
   describe('basic rendering', function() {
-    it('renders a blank context menu (with only 1 div) before it is open', () => {
+    it('does not render the context menu when it is closed', () => {
       const isContextMenuOpen = false;
       const { container } = setup(createStore(), isContextMenuOpen);
-      expect(
-        ensureExists(
-          container.querySelector('.react-contextmenu'),
-          `Couldn't find the context menu root component .react-contextmenu`
-        ).children
-      ).toHaveLength(1);
-      expect(container.firstChild).toMatchSnapshot();
+      expect(container.querySelector('.react-contextmenu')).toBeNull();
     });
 
     it('renders a full context menu when open, with many nav items', () => {
@@ -120,7 +117,7 @@ describe('calltree/CallNodeContextMenu', function() {
       jest.spyOn(window, 'open').mockImplementation(() => {});
       fireEvent.click(getByText(/Searchfox/));
       expect(window.open).toBeCalledWith(
-        'https://searchfox.org/mozilla-central/search?q=B%3Alibrary',
+        'https://searchfox.org/mozilla-central/search?q=B',
         '_blank'
       );
     });
@@ -129,7 +126,7 @@ describe('calltree/CallNodeContextMenu', function() {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
       fireEvent.click(getByText('Copy function name'));
-      expect(copy).toBeCalledWith('B:library');
+      expect(copy).toBeCalledWith('B');
     });
 
     it('can copy a script URL', function() {
@@ -147,7 +144,7 @@ describe('calltree/CallNodeContextMenu', function() {
       );
 
       const store = storeWithProfile(profile);
-      store.dispatch(changeSelectedCallNode(0, [funcIndex]));
+      store.dispatch(changeRightClickedCallNode(0, [funcIndex]));
       const { getByText } = setup(store);
 
       // Copy is a mocked module, clear it both before and after.
@@ -159,7 +156,7 @@ describe('calltree/CallNodeContextMenu', function() {
       const { getByText } = setup();
       // Copy is a mocked module, clear it both before and after.
       fireEvent.click(getByText('Copy stack'));
-      expect(copy).toBeCalledWith(`B:library\nA\n`);
+      expect(copy).toBeCalledWith(`B\nA\n`);
     });
   });
 });

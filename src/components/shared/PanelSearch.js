@@ -4,40 +4,25 @@
 
 // @flow
 import * as React from 'react';
-import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import IdleSearchField from './IdleSearchField';
-import { changeCallTreeSearchString } from '../../actions/profile-view';
-import {
-  getCurrentSearchString,
-  getSearchStrings,
-} from '../../selectors/url-state';
 
-import type { ConnectedProps } from '../../utils/connect';
+import './PanelSearch.css';
 
-import './StackSearchField.css';
-
-type OwnProps = {|
+type Props = {|
   +className: string,
-|};
-
-type StateProps = {|
+  +label: string,
+  +title: string,
   +currentSearchString: string,
-  +searchStrings: string[] | null,
+  +onSearch: string => void,
 |};
-
-type DispatchProps = {|
-  +changeCallTreeSearchString: typeof changeCallTreeSearchString,
-|};
-
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 type State = {| searchFieldFocused: boolean |};
 
-class StackSearchField extends React.PureComponent<Props, State> {
+class PanelSearch extends React.PureComponent<Props, State> {
   state = { searchFieldFocused: false };
   _onSearchFieldIdleAfterChange = (value: string) => {
-    this.props.changeCallTreeSearchString(value);
+    this.props.onSearch(value);
   };
 
   _onSearchFieldFocus = () => {
@@ -49,20 +34,19 @@ class StackSearchField extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { currentSearchString, searchStrings, className } = this.props;
+    const { label, title, currentSearchString, className } = this.props;
     const { searchFieldFocused } = this.state;
     const showIntroduction =
       searchFieldFocused &&
-      searchStrings &&
-      searchStrings.length &&
+      currentSearchString &&
       !currentSearchString.includes(',');
     return (
-      <div className={classNames('stackSearchField', className)}>
-        <label className="stackSearchFieldLabel">
-          {'Filter stacks: '}
+      <div className={classNames('panelSearchField', className)}>
+        <label className="panelSearchFieldLabel">
+          {label}
           <IdleSearchField
-            className="stackSearchFieldInput"
-            title="Only display stacks which contain a function whose name matches this substring"
+            className="panelSearchFieldInput"
+            title={title}
             idlePeriod={200}
             defaultValue={currentSearchString}
             onIdleAfterChange={this._onSearchFieldIdleAfterChange}
@@ -70,7 +54,7 @@ class StackSearchField extends React.PureComponent<Props, State> {
             onFocus={this._onSearchFieldFocus}
           />
           <div
-            className={classNames('stackSearchFieldIntroduction', {
+            className={classNames('panelSearchFieldIntroduction', {
               isHidden: !showIntroduction,
               isDisplayed: showIntroduction,
             })}
@@ -84,11 +68,4 @@ class StackSearchField extends React.PureComponent<Props, State> {
   }
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    currentSearchString: getCurrentSearchString(state),
-    searchStrings: getSearchStrings(state),
-  }),
-  mapDispatchToProps: { changeCallTreeSearchString },
-  component: StackSearchField,
-});
+export default PanelSearch;

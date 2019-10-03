@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Milliseconds, Microseconds, Seconds } from './units';
+import type { Milliseconds, Microseconds, Seconds, Bytes } from './units';
 import type { GeckoMarkerStack } from './gecko-profile';
 import type { IndexIntoStackTable, IndexIntoStringTable } from './profile';
 
@@ -286,7 +286,7 @@ export type BailoutPayload = {|
   where: string,
   script: string,
   bailoutLine: number,
-  functionLine: number,
+  functionLine: number | null,
   startTime: Milliseconds,
   endTime: Milliseconds,
 |};
@@ -297,7 +297,7 @@ export type BailoutPayload = {|
 export type InvalidationPayload = {|
   type: 'Invalidation',
   url: string,
-  line: string,
+  line: number | null,
   startTime: Milliseconds,
   endTime: Milliseconds,
 |};
@@ -413,9 +413,19 @@ export type DOMEventMarkerPayload = {|
   interval: 'start' | 'end',
   eventType: string,
   phase: 0 | 1 | 2 | 3,
-  cause?: CauseBacktrace,
   docShellId?: string,
   docshellHistoryId?: number,
+|};
+
+export type PrefMarkerPayload = {|
+  type: 'PreferenceRead',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  prefAccessTime: Milliseconds,
+  prefName: string,
+  prefKind: string,
+  prefType: string,
+  prefValue: string,
 |};
 
 export type NavigationMarkerPayload = {|
@@ -479,13 +489,32 @@ export type FrameConstructionMarkerPayload = {|
   type: 'tracing',
   category: 'Frame Construction',
   interval: 'start' | 'end',
-  cause?: CauseBacktrace,
 |};
 
 export type DummyForTestsMarkerPayload = {|
   type: 'DummyForTests',
   startTime: Milliseconds,
   endTime: Milliseconds,
+|};
+
+export type JsAllocationPayload_Gecko = {|
+  type: 'JS allocation',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  className: string,
+  typeName: string, // Currently only 'JSObject'
+  coarseType: string, // Currently only 'Object',
+  size: Bytes,
+  inNursery: boolean,
+  stack: GeckoMarkerStack,
+|};
+
+export type NativeAllocationPayload_Gecko = {|
+  type: 'Native allocation',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  size: Bytes,
+  stack: GeckoMarkerStack,
 |};
 
 /**
@@ -516,6 +545,7 @@ export type MarkerPayload =
   | FrameConstructionMarkerPayload
   | DummyForTestsMarkerPayload
   | NavigationMarkerPayload
+  | PrefMarkerPayload
   | null;
 
 export type MarkerPayload_Gecko =
@@ -535,6 +565,9 @@ export type MarkerPayload_Gecko =
   | CcMarkerTracing
   | ArbitraryEventTracing
   | NavigationMarkerPayload
+  | JsAllocationPayload_Gecko
+  | NativeAllocationPayload_Gecko
+  | PrefMarkerPayload
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.

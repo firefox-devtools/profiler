@@ -48,15 +48,17 @@ type VirtualListRowProps<Item> = {|
   +columnIndex: number,
   // These properties are not used directly, but are needed for strict equality
   // checks so that the components update correctly.
-  // * `isSpecial` is used when we want to update one row or a few rows only,
+  // * `forceRenderControl` is used when we want to update one row or a few rows only,
   //   this is typically when the selection changes and both the old and the new
   //   selection need to be changed.
-  +isSpecial: boolean,
+  //   It needs to change whenever the row should be updated, so it should be
+  //   computed from the values that control these update.
+  +forceRenderItem: string,
   // * `items` contains the full items, so that we update the whole list
   //   whenever the source changes. This is necessary because often `item` is a
   //   native value (eg a number), and shallow checking only `item` won't always
   //   give the expected behavior.
-  +items: Item[],
+  +items: $ReadOnlyArray<Item>,
   // * `forceRender` is passed through directly from the main VirtualList
   //   component to the row as a way to update the full list for reasons
   //   unbeknownst to this component. This can be used for example in chart-like
@@ -77,8 +79,8 @@ class VirtualListRow<Item> extends React.PureComponent<
 type VirtualListInnerChunkProps<Item> = {|
   +className: string,
   +renderItem: RenderItem<Item>,
-  +items: Item[],
-  +specialItems: Item[],
+  +items: $ReadOnlyArray<Item>,
+  +specialItems: $ReadOnlyArray<Item | void>,
   +visibleRangeStart: number,
   +visibleRangeEnd: number,
   +columnIndex: number,
@@ -107,6 +109,17 @@ class VirtualListInnerChunk<Item> extends React.PureComponent<
           Math.max(visibleRangeStart, visibleRangeEnd)
         ).map(i => {
           const item = items[i];
+
+          // We compute forceRenderItem from the first position of item in the list,
+          // and the number of occurrences. Indeed we want to rerender this
+          // specific item whenever one of these values changes.
+          const firstPosOfItem = specialItems.indexOf(item);
+          const countOfItem = specialItems.reduce(
+            (acc, specialItem) => (specialItem === item ? acc + 1 : acc),
+            0
+          );
+          const forceRenderItem = `${firstPosOfItem}|${countOfItem}`;
+
           return (
             <VirtualListRow
               key={i}
@@ -115,7 +128,7 @@ class VirtualListInnerChunk<Item> extends React.PureComponent<
               renderItem={renderItem}
               item={item}
               items={items}
-              isSpecial={specialItems.includes(item)}
+              forceRenderItem={forceRenderItem}
               forceRender={forceRender}
             />
           );
@@ -129,8 +142,8 @@ type VirtualListInnerProps<Item> = {|
   +itemHeight: CssPixels,
   +className: string,
   +renderItem: RenderItem<Item>,
-  +items: Item[],
-  +specialItems: Item[],
+  +items: $ReadOnlyArray<Item>,
+  +specialItems: $ReadOnlyArray<Item | void>,
   +visibleRangeStart: number,
   +visibleRangeEnd: number,
   +columnIndex: number,
@@ -217,9 +230,9 @@ type VirtualListProps<Item> = {|
   +itemHeight: CssPixels,
   +className: string,
   +renderItem: RenderItem<Item>,
-  +items: Item[],
+  +items: $ReadOnlyArray<Item>,
   +focusable: boolean,
-  +specialItems: Item[],
+  +specialItems: $ReadOnlyArray<Item | void>,
   +onKeyDown: KeyboardEvent => void,
   +onCopy: Event => void,
   // Set `disableOverscan` to `true` when you expect a lot of updates in a short

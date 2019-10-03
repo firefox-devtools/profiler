@@ -5,22 +5,24 @@
 // @flow
 import { uploadBinaryProfileData } from '../profile-logic/profile-store';
 import { sendAnalytics } from '../utils/analytics';
-import { getUrlState } from '../selectors/url-state';
 import {
   getAbortFunction,
   getUploadGeneration,
   getSanitizedProfile,
   getSanitizedProfileData,
   getRemoveProfileInformation,
+  getPrePublishedState,
 } from '../selectors/publish';
-import { urlFromState } from '../app-logic/url-handling';
-import { profilePublished } from './app';
-import urlStateReducer from '../reducers/url-state';
+import { getDataSource } from '../selectors/url-state';
+import { viewProfile } from './receive-profile';
+import { ensureExists } from '../utils/flow';
+import { setHistoryReplaceState } from '../app-logic/url-handling';
 
 import type { Action, ThunkAction } from '../types/store';
 import type { CheckedSharingOptions } from '../types/actions';
 import type { StartEndRange } from '../types/units';
 import type { ThreadIndex } from '../types/profile';
+import type { State } from '../types/state';
 
 export function toggleCheckedSharingOptions(
   slug: $Keys<CheckedSharingOptions>
@@ -59,13 +61,6 @@ export function updateUploadProgress(uploadProgress: number): Action {
 }
 
 /**
- * A profile upload finished.
- */
-export function uploadFinished(url: string): Action {
-  return { type: 'UPLOAD_FINISHED', url };
-}
-
-/**
  * A profile upload failed.
  */
 export function uploadFailed(error: mixed): Action {
@@ -92,6 +87,8 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
         eventCategory: 'profile upload',
         eventAction: 'start',
       });
+      // Grab the original pre-published state, so that we can revert back to it if needed.
+      const prePublishedState = getState();
 
       // Get the current generation of this request. It can be aborted midway through.
       // This way we can check inside this async function if we need to bail out early.
@@ -125,32 +122,52 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       }
 
       const removeProfileInformation = getRemoveProfileInformation(getState());
-      let urlState;
       if (removeProfileInformation) {
-        const { committedRanges, oldThreadIndexToNew } = getSanitizedProfile(
-          getState()
+        const {
+          committedRanges,
+          oldThreadIndexToNew,
+          profile,
+        } = getSanitizedProfile(getState());
+        // Hide the old UI gracefully.
+        await dispatch(hideStaleProfile());
+
+        // Update the UrlState so that we are sanitized.
+        dispatch(
+          profileSanitized(
+            hash,
+            committedRanges,
+            oldThreadIndexToNew,
+            prePublishedState
+          )
         );
-        urlState = urlStateReducer(
-          getUrlState(getState()),
-          profileSanitized(hash, committedRanges, oldThreadIndexToNew)
-        );
+        // Swap out the URL state, since the view profile calculates all of the default
+        // settings. If we don't do this then we can go back in history to where we
+        // are trying to view a profile without valid view settings.
+        setHistoryReplaceState(true);
+        // Multiple dispatches are usually to be avoided, but viewProfile requires
+        // the next UrlState in place. It could be rewritten to have a UrlState passed
+        // in as a paremeter, but that doesn't seem worth it at the time of this writing.
+        dispatch(viewProfile(profile));
+        setHistoryReplaceState(false);
       } else {
-        urlState = urlStateReducer(
-          getUrlState(getState()),
-          profilePublished(hash)
+        dispatch(
+          profilePublished(
+            hash,
+            // Only include the pre-published state if we want to be able to revert
+            // the profile. If we are viewing from-addon, then it's only a single
+            // profile.
+            getDataSource(getState()) === 'from-addon'
+              ? null
+              : prePublishedState
+          )
         );
       }
-      const url = window.location.origin + urlFromState(urlState);
-
-      dispatch(uploadFinished(url));
 
       sendAnalytics({
         hitType: 'event',
         eventCategory: 'profile upload',
         eventAction: 'succeeded',
       });
-
-      window.open(url, '_blank');
     } catch (error) {
       dispatch(uploadFailed(error));
       sendAnalytics({
@@ -194,12 +211,56 @@ export function resetUploadState(): Action {
 export function profileSanitized(
   hash: string,
   committedRanges: StartEndRange[] | null,
-  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null
+  oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
+  prePublishedState: State
 ): Action {
   return {
-    type: 'SANITIZE_PROFILE',
+    type: 'SANITIZED_PROFILE_PUBLISHED',
     hash,
     committedRanges,
     oldThreadIndexToNew,
+    prePublishedState,
+  };
+}
+
+/**
+ * Report that the profile was published, but not sanitized.
+ */
+export function profilePublished(
+  hash: string,
+  // If we're publishing from a URL or Zip file, then offer to revert to the previous
+  // state.
+  prePublishedState: State | null
+): Action {
+  return {
+    type: 'PROFILE_PUBLISHED',
+    hash,
+    prePublishedState,
+  };
+}
+
+export function revertToPrePublishedState(): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    const prePublishedState = ensureExists(
+      getPrePublishedState(getState()),
+      'Expected to find an original profile when reverting to it.'
+    );
+
+    await dispatch(hideStaleProfile());
+
+    dispatch({
+      type: 'REVERT_TO_PRE_PUBLISHED_STATE',
+      prePublishedState: prePublishedState,
+    });
+  };
+}
+
+export function hideStaleProfile(): ThunkAction<Promise<void>> {
+  return dispatch => {
+    dispatch({ type: 'HIDE_STALE_PROFILE' });
+    return new Promise(resolve => {
+      // This timing should match .profileViewerFadeOut.
+      setTimeout(resolve, 300);
+    });
   };
 }

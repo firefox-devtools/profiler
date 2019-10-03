@@ -3,6 +3,7 @@
 
   /* Box */
   overflow: hidden;
+  max-width: 35em;
   max-height: var(--max-height);
   padding: 0;
   margin: 5px;
@@ -32,7 +33,6 @@
   /* Position */
   display: block;
   overflow: hidden;
-  max-width: 35em;
 
   /* Box */
   padding: 0;

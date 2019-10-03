@@ -31,14 +31,14 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
       class="networkSettingsSpacer"
     />
     <div
-      class="networkSettingsSearchbar"
+      class="panelSearchField networkSettingsSearchField"
     >
       <label
-        class="networkSettingsSearchbarLabel"
+        class="panelSearchFieldLabel"
       >
         Filter Networks: 
         <form
-          class="idleSearchField networkSettingsSearchField"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -55,375 +55,384 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
             type="reset"
           />
         </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
       </label>
     </div>
   </div>
   <div
-    class="treeViewBody"
-    tabindex="0"
+    class="react-contextmenu-wrapper treeViewContextMenu"
   >
     <div
-      class="treeViewBodyInnerWrapper"
+      class="treeViewBody"
+      tabindex="0"
     >
       <div
-        class="treeViewBodyInner treeViewBodyInner0"
-        style="height: 160px;"
+        class="treeViewBodyInnerWrapper"
       >
         <div
-          class="treeViewBodyInner treeViewBodyInner0TopSpacer"
-          style="height: 0px;"
-        />
-        <div
-          class="treeViewBodyInner treeViewBodyInner0InnerChunk"
+          class="treeViewBodyInner treeViewBodyInner0"
+          style="height: 160px;"
         >
           <div
-            class="networkChartRowItem network-color-other"
-          >
-            <div
-              class="networkChartRowItemLabel"
-            >
-              <span
-                class="networkChartRowItemUriOptional"
-              >
-                https://
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                mozilla.org
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                /
-              </span>
-            </div>
-            <div
-              class="networkChartRowItemBar"
-              style="width: 68.9655172413793px; left: 150px;"
-            >
-              <div
-                aria-label="startTime to endTime: 1.0 milliseconds"
-                class="networkChartRowItemBarPhase"
-                data-name="endTime"
-                data-value="4"
-                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
-              />
-            </div>
-          </div>
+            class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+            style="height: 0px;"
+          />
           <div
-            class="networkChartRowItem network-color-other odd"
+            class="treeViewBodyInner treeViewBodyInner0InnerChunk"
           >
             <div
-              class="networkChartRowItemLabel"
-            >
-              <span
-                class="networkChartRowItemUriOptional"
-              >
-                https://
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                mozilla.org
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                /
-              </span>
-            </div>
-            <div
-              class="networkChartRowItemBar"
-              style="width: 68.96551724137927px; left: 156.89655172413794px;"
+              class="networkChartRowItem network-color-other"
             >
               <div
-                aria-label="startTime to endTime: 1.00 milliseconds"
-                class="networkChartRowItemBarPhase"
-                data-name="endTime"
-                data-value="4.1"
-                style="left: 0px; width: 68.96551724137927px; opacity: 1;"
-              />
+                class="networkChartRowItemLabel"
+              >
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </div>
+              <div
+                class="networkChartRowItemBar"
+                style="width: 68.9655172413793px; left: 150px;"
+              >
+                <div
+                  aria-label="startTime to endTime: 1.0 milliseconds"
+                  class="networkChartRowItemBarPhase"
+                  data-name="endTime"
+                  data-value="4"
+                  style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            class="networkChartRowItem network-color-other"
-          >
             <div
-              class="networkChartRowItemLabel"
-            >
-              <span
-                class="networkChartRowItemUriOptional"
-              >
-                https://
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                mozilla.org
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                /
-              </span>
-            </div>
-            <div
-              class="networkChartRowItemBar"
-              style="width: 68.9655172413793px; left: 163.79310344827587px;"
+              class="networkChartRowItem network-color-other odd"
             >
               <div
-                aria-label="startTime to endTime: 1.0 milliseconds"
-                class="networkChartRowItemBarPhase"
-                data-name="endTime"
-                data-value="4.2"
-                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
-              />
+                class="networkChartRowItemLabel"
+              >
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </div>
+              <div
+                class="networkChartRowItemBar"
+                style="width: 68.96551724137927px; left: 156.89655172413794px;"
+              >
+                <div
+                  aria-label="startTime to endTime: 1.00 milliseconds"
+                  class="networkChartRowItemBarPhase"
+                  data-name="endTime"
+                  data-value="4.1"
+                  style="left: 0px; width: 68.96551724137927px; opacity: 1;"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            class="networkChartRowItem network-color-other odd"
-          >
             <div
-              class="networkChartRowItemLabel"
-            >
-              <span
-                class="networkChartRowItemUriOptional"
-              >
-                https://
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                mozilla.org
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                /
-              </span>
-            </div>
-            <div
-              class="networkChartRowItemBar"
-              style="width: 68.9655172413793px; left: 170.68965517241378px;"
+              class="networkChartRowItem network-color-other"
             >
               <div
-                aria-label="startTime to endTime: 1.0 milliseconds"
-                class="networkChartRowItemBarPhase"
-                data-name="endTime"
-                data-value="4.3"
-                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
-              />
+                class="networkChartRowItemLabel"
+              >
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </div>
+              <div
+                class="networkChartRowItemBar"
+                style="width: 68.9655172413793px; left: 163.79310344827587px;"
+              >
+                <div
+                  aria-label="startTime to endTime: 1.0 milliseconds"
+                  class="networkChartRowItemBarPhase"
+                  data-name="endTime"
+                  data-value="4.2"
+                  style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            class="networkChartRowItem network-color-other"
-          >
             <div
-              class="networkChartRowItemLabel"
-            >
-              <span
-                class="networkChartRowItemUriOptional"
-              >
-                https://
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                mozilla.org
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                /
-              </span>
-            </div>
-            <div
-              class="networkChartRowItemBar"
-              style="width: 68.96551724137933px; left: 177.58620689655172px;"
+              class="networkChartRowItem network-color-other odd"
             >
               <div
-                aria-label="startTime to endTime: 1.0 milliseconds"
-                class="networkChartRowItemBarPhase"
-                data-name="endTime"
-                data-value="4.4"
-                style="left: 0px; width: 68.96551724137933px; opacity: 1;"
-              />
+                class="networkChartRowItemLabel"
+              >
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </div>
+              <div
+                class="networkChartRowItemBar"
+                style="width: 68.9655172413793px; left: 170.68965517241378px;"
+              >
+                <div
+                  aria-label="startTime to endTime: 1.0 milliseconds"
+                  class="networkChartRowItemBarPhase"
+                  data-name="endTime"
+                  data-value="4.3"
+                  style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            class="networkChartRowItem network-color-other odd"
-          >
             <div
-              class="networkChartRowItemLabel"
-            >
-              <span
-                class="networkChartRowItemUriOptional"
-              >
-                https://
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                mozilla.org
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                /
-              </span>
-            </div>
-            <div
-              class="networkChartRowItemBar"
-              style="width: 68.9655172413793px; left: 184.48275862068965px;"
+              class="networkChartRowItem network-color-other"
             >
               <div
-                aria-label="startTime to endTime: 1.0 milliseconds"
-                class="networkChartRowItemBarPhase"
-                data-name="endTime"
-                data-value="4.5"
-                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
-              />
+                class="networkChartRowItemLabel"
+              >
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </div>
+              <div
+                class="networkChartRowItemBar"
+                style="width: 68.96551724137933px; left: 177.58620689655172px;"
+              >
+                <div
+                  aria-label="startTime to endTime: 1.0 milliseconds"
+                  class="networkChartRowItemBarPhase"
+                  data-name="endTime"
+                  data-value="4.4"
+                  style="left: 0px; width: 68.96551724137933px; opacity: 1;"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            class="networkChartRowItem network-color-other"
-          >
             <div
-              class="networkChartRowItemLabel"
-            >
-              <span
-                class="networkChartRowItemUriOptional"
-              >
-                https://
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                mozilla.org
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                /
-              </span>
-            </div>
-            <div
-              class="networkChartRowItemBar"
-              style="width: 68.96551724137927px; left: 191.3793103448276px;"
+              class="networkChartRowItem network-color-other odd"
             >
               <div
-                aria-label="startTime to endTime: 1.00 milliseconds"
-                class="networkChartRowItemBarPhase"
-                data-name="endTime"
-                data-value="4.6"
-                style="left: 0px; width: 68.96551724137927px; opacity: 1;"
-              />
+                class="networkChartRowItemLabel"
+              >
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </div>
+              <div
+                class="networkChartRowItemBar"
+                style="width: 68.9655172413793px; left: 184.48275862068965px;"
+              >
+                <div
+                  aria-label="startTime to endTime: 1.0 milliseconds"
+                  class="networkChartRowItemBarPhase"
+                  data-name="endTime"
+                  data-value="4.5"
+                  style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            class="networkChartRowItem network-color-other odd"
-          >
             <div
-              class="networkChartRowItemLabel"
-            >
-              <span
-                class="networkChartRowItemUriOptional"
-              >
-                https://
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                mozilla.org
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                /
-              </span>
-            </div>
-            <div
-              class="networkChartRowItemBar"
-              style="width: 68.9655172413793px; left: 198.27586206896552px;"
+              class="networkChartRowItem network-color-other"
             >
               <div
-                aria-label="startTime to endTime: 1.0 milliseconds"
-                class="networkChartRowItemBarPhase"
-                data-name="endTime"
-                data-value="4.7"
-                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
-              />
+                class="networkChartRowItemLabel"
+              >
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </div>
+              <div
+                class="networkChartRowItemBar"
+                style="width: 68.96551724137927px; left: 191.3793103448276px;"
+              >
+                <div
+                  aria-label="startTime to endTime: 1.00 milliseconds"
+                  class="networkChartRowItemBarPhase"
+                  data-name="endTime"
+                  data-value="4.6"
+                  style="left: 0px; width: 68.96551724137927px; opacity: 1;"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            class="networkChartRowItem network-color-other"
-          >
             <div
-              class="networkChartRowItemLabel"
-            >
-              <span
-                class="networkChartRowItemUriOptional"
-              >
-                https://
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                mozilla.org
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                /
-              </span>
-            </div>
-            <div
-              class="networkChartRowItemBar"
-              style="width: 68.9655172413793px; left: 205.17241379310343px;"
+              class="networkChartRowItem network-color-other odd"
             >
               <div
-                aria-label="startTime to endTime: 1.0 milliseconds"
-                class="networkChartRowItemBarPhase"
-                data-name="endTime"
-                data-value="4.8"
-                style="left: 0px; width: 68.9655172413793px; opacity: 1;"
-              />
+                class="networkChartRowItemLabel"
+              >
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </div>
+              <div
+                class="networkChartRowItemBar"
+                style="width: 68.9655172413793px; left: 198.27586206896552px;"
+              >
+                <div
+                  aria-label="startTime to endTime: 1.0 milliseconds"
+                  class="networkChartRowItemBarPhase"
+                  data-name="endTime"
+                  data-value="4.7"
+                  style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+                />
+              </div>
             </div>
-          </div>
-          <div
-            class="networkChartRowItem network-color-other odd"
-          >
             <div
-              class="networkChartRowItemLabel"
-            >
-              <span
-                class="networkChartRowItemUriOptional"
-              >
-                https://
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                mozilla.org
-              </span>
-              <span
-                class="networkChartRowItemUriRequired"
-              >
-                /
-              </span>
-            </div>
-            <div
-              class="networkChartRowItemBar"
-              style="width: 68.96551724137933px; left: 212.06896551724137px;"
+              class="networkChartRowItem network-color-other"
             >
               <div
-                aria-label="startTime to endTime: 1.0 milliseconds"
-                class="networkChartRowItemBarPhase"
-                data-name="endTime"
-                data-value="4.9"
-                style="left: 0px; width: 68.96551724137933px; opacity: 1;"
-              />
+                class="networkChartRowItemLabel"
+              >
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </div>
+              <div
+                class="networkChartRowItemBar"
+                style="width: 68.9655172413793px; left: 205.17241379310343px;"
+              >
+                <div
+                  aria-label="startTime to endTime: 1.0 milliseconds"
+                  class="networkChartRowItemBarPhase"
+                  data-name="endTime"
+                  data-value="4.8"
+                  style="left: 0px; width: 68.9655172413793px; opacity: 1;"
+                />
+              </div>
+            </div>
+            <div
+              class="networkChartRowItem network-color-other odd"
+            >
+              <div
+                class="networkChartRowItemLabel"
+              >
+                <span
+                  class="networkChartRowItemUriOptional"
+                >
+                  https://
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  mozilla.org
+                </span>
+                <span
+                  class="networkChartRowItemUriRequired"
+                >
+                  /
+                </span>
+              </div>
+              <div
+                class="networkChartRowItemBar"
+                style="width: 68.96551724137933px; left: 212.06896551724137px;"
+              >
+                <div
+                  aria-label="startTime to endTime: 1.0 milliseconds"
+                  class="networkChartRowItemBarPhase"
+                  data-name="endTime"
+                  data-value="4.9"
+                  style="left: 0px; width: 68.96551724137933px; opacity: 1;"
+                />
+              </div>
             </div>
           </div>
         </div>

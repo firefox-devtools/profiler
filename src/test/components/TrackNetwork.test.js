@@ -7,10 +7,11 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render, getByTestId, fireEvent } from 'react-testing-library';
 
-import TrackNetwork, {
-  ROW_HEIGHT,
-  ROW_REPEAT,
-} from '../../components/timeline/TrackNetwork';
+import TrackNetwork from '../../components/timeline/TrackNetwork';
+import {
+  TRACK_NETWORK_ROW_HEIGHT,
+  TRACK_NETWORK_ROW_REPEAT,
+} from '../../app-logic/constants';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -27,7 +28,7 @@ import { ensureExists } from '../../utils/flow';
 // The graph is 400 pixels wide based on the getBoundingBox mock, and the graph height
 // mimicks what is computed by the actual component.
 const GRAPH_WIDTH = 400;
-const GRAPH_HEIGHT = ROW_HEIGHT * ROW_REPEAT;
+const GRAPH_HEIGHT = TRACK_NETWORK_ROW_HEIGHT * TRACK_NETWORK_ROW_REPEAT;
 
 describe('timeline/TrackNetwork', function() {
   it('matches the component snapshot', () => {

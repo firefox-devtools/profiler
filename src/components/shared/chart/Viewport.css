@@ -10,9 +10,9 @@
 }
 
 .chartViewport.expanded {
-  margin-bottom: 5px;
   border-top: 1px solid var(--grey-30);
   border-bottom: 1px solid var(--grey-30);
+  margin-bottom: 5px;
   cursor: -webkit-grab;
   cursor: grab;
 }
@@ -64,8 +64,8 @@
   top: -1px;
   display: inline-block;
   padding: 0 0.5em;
-  margin: 0 0.2em;
   border: 1px solid #ccc;
+  margin: 0 0.2em;
   background-color: #f6f6f6;
   border-radius: 0.2em;
   box-shadow: -0.1em 0.1em 0 #bbb;

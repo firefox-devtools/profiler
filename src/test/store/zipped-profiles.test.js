@@ -53,6 +53,7 @@ describe('reducer zipFileState', function() {
         'foo/bar/profile1.json',
         'foo/profile2.json',
         'baz/profile3.json',
+        'profile4.json',
       ]);
 
       await dispatch(
@@ -67,7 +68,23 @@ describe('reducer zipFileState', function() {
     it('computes a profile name from the loaded file', async function() {
       const { getState } = await setup();
 
-      const expectedName = 'profile1.json';
+      const expectedName = 'bar/profile1.json';
+      expect(UrlStateSelectors.getProfileName(getState())).toBe(expectedName);
+    });
+
+    it('computes a profile when no folder present', async function() {
+      const { dispatch, getState } = await storeWithZipFile([
+        'foo/bar/profile1.json',
+        'foo/profile2.json',
+        'baz/profile3.json',
+        'profile4.json',
+      ]);
+
+      await dispatch(
+        ZippedProfilesActions.viewProfileFromPathInZipFile('profile4.json')
+      );
+
+      const expectedName = 'profile4.json';
       expect(UrlStateSelectors.getProfileName(getState())).toBe(expectedName);
     });
 

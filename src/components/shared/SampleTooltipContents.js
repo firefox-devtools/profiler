@@ -10,6 +10,7 @@ import type {
   Thread,
 } from '../../types/profile';
 import Backtrace from './Backtrace';
+import { getCategoryPairLabel } from '../../profile-logic/profile-data';
 
 type Props = {|
   +sampleIndex: IndexIntoSamplesTable,
@@ -30,7 +31,8 @@ export default class SampleTooltipContents extends React.PureComponent<Props> {
       return 'No stack information';
     }
     const categoryIndex = stackTable.category[stackIndex];
-    const category = categories[categoryIndex];
+    const subcategoryIndex = stackTable.subcategory[stackIndex];
+    const categoryColor = categories[categoryIndex].color;
 
     return (
       <>
@@ -38,9 +40,9 @@ export default class SampleTooltipContents extends React.PureComponent<Props> {
           <div className="tooltipLabel">Category:</div>
           <div>
             <span
-              className={`colored-square category-color-${category.color}`}
+              className={`colored-square category-color-${categoryColor}`}
             />
-            {category.name}
+            {getCategoryPairLabel(categories, categoryIndex, subcategoryIndex)}
           </div>
         </div>
         <div className="tooltipDetails">

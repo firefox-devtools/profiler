@@ -21,9 +21,10 @@ import selectSidebar from '../sidebar';
 
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
 import { getSelectedTab } from '../../selectors/url-state';
-import { getIsSidebarOpen, getVisibleTabs } from '../../selectors/app';
+import { getIsSidebarOpen } from '../../selectors/app';
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
-import MarkerTableContextMenu from '../marker-table/ContextMenu';
+import MarkerContextMenu from '../shared/MarkerContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';
 import { toValidTabSlug } from '../../utils/flow';
 
@@ -105,7 +106,7 @@ class ProfileViewer extends PureComponent<Props> {
           }
         </ErrorBoundary>
         <CallNodeContextMenu />
-        <MarkerTableContextMenu />
+        <MarkerContextMenu />
         <TimelineTrackContextMenu />
       </div>
     );
@@ -114,7 +115,7 @@ class ProfileViewer extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    visibleTabs: getVisibleTabs(state),
+    visibleTabs: selectedThreadSelectors.getUsefulTabs(state),
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
   }),

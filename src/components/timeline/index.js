@@ -28,6 +28,7 @@ import {
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
+  TIMELINE_SETTINGS_HEIGHT,
 } from '../../app-logic/constants';
 
 import './index.css';
@@ -50,8 +51,6 @@ import type {
 } from '../../types/actions';
 import type { Milliseconds, StartEndRange } from '../../types/units';
 import type { ConnectedProps } from '../../utils/connect';
-
-export const TIMELINE_SETTINGS_HEIGHT = 26;
 
 type StateProps = {|
   +committedRange: StartEndRange,

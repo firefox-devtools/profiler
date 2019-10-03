@@ -67,7 +67,7 @@ export function getStackTimingByDepth(
   thread: Thread,
   callNodeInfo: CallNodeInfo,
   maxDepth: number,
-  interval: number
+  interval: Milliseconds
 ): StackTimingByDepth {
   const { callNodeTable, stackIndexToCallNodeIndex } = callNodeInfo;
   const stackTimingByDepth = Array.from({ length: maxDepth }, () => ({
@@ -125,8 +125,8 @@ export function getStackTimingByDepth(
   }
 
   // Pop the remaining stacks
-  const endingTime =
-    thread.samples.time[thread.samples.time.length - 1] + interval;
+  const lastIndex = thread.samples.length - 1;
+  const endingTime = thread.samples.time[lastIndex] + interval;
   _popStacks(stackTimingByDepth, lastSeen, -1, previousDepth, endingTime);
 
   return stackTimingByDepth;

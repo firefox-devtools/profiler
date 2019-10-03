@@ -5,11 +5,11 @@
 // @flow
 
 import React, { PureComponent } from 'react';
+import { TIMELINE_RULER_HEIGHT } from '../../app-logic/constants';
+
 import './Ruler.css';
 
 import type { Milliseconds, CssPixels } from '../../types/units';
-
-export const TIMELINE_RULER_HEIGHT = 20;
 
 type Props = {|
   +zeroAt: Milliseconds,

@@ -55,6 +55,8 @@ type OwnProps = {|
   +callNodeInfo: CallNodeInfo,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
+  +onRightClick: (IndexIntoCallNodeTable | null) => void,
+  +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
 |};
 
@@ -388,8 +390,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
       stackTimingByDepth,
       categories,
       callNodeInfo,
+      shouldDisplayTooltips,
       interval,
     } = this.props;
+
+    if (!shouldDisplayTooltips()) {
+      return null;
+    }
 
     const stackTiming = stackTimingByDepth[depth];
     const callNodeIndex = stackTiming.callNode[stackTimingIndex];
@@ -403,6 +410,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}
         categories={categories}
+        // The stack chart doesn't support other call tree summary types.
+        callTreeSummaryStrategy="timing"
         durationText={formatMilliseconds(duration)}
       />
     );
@@ -422,16 +431,28 @@ class StackChartCanvas extends React.PureComponent<Props> {
     });
   };
 
+  _getCallNodeIndexFromHoveredItem(
+    hoveredItem: HoveredStackTiming | null
+  ): IndexIntoCallNodeTable | null {
+    if (hoveredItem === null) {
+      return null;
+    }
+
+    const { depth, stackTimingIndex } = hoveredItem;
+    const { stackTimingByDepth } = this.props;
+    const callNodeIndex = stackTimingByDepth[depth].callNode[stackTimingIndex];
+    return callNodeIndex;
+  }
   _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
-    let callNodeIndex = null;
-    if (hoveredItem !== null) {
-      const { depth, stackTimingIndex } = hoveredItem;
-      const { stackTimingByDepth } = this.props;
-      callNodeIndex = stackTimingByDepth[depth].callNode[stackTimingIndex];
-    }
+    const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
     this.props.onSelectionChange(callNodeIndex);
+  };
+
+  _onRightClick = (hoveredItem: HoveredStackTiming | null) => {
+    const callNodeIndex = this._getCallNodeIndexFromHoveredItem(hoveredItem);
+    this.props.onRightClick(callNodeIndex);
   };
 
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
@@ -484,6 +505,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         drawCanvas={this._drawCanvas}
         hitTest={this._hitTest}
         onSelectItem={this._onSelectItem}
+        onRightClick={this._onRightClick}
       />
     );
   }

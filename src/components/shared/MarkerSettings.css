@@ -13,21 +13,3 @@
 .markerSettingsSpacer {
   flex: 1;
 }
-
-.markerSettingsLabel {
-  display: inline-flex;
-  height: 25px;
-  flex-flow: row nowrap;
-  align-items: center;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  user-select: none;
-}
-
-.markerSettingsSearchbar {
-  padding: 0 5px;
-}
-
-.markerSettingsSearchField {
-  width: 250px;
-}

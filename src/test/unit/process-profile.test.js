@@ -13,8 +13,15 @@ import { UniqueStringArray } from '../../utils/unique-string-array';
 import {
   createGeckoProfile,
   createGeckoCounter,
+  createGeckoMarkerStack,
+  createGeckoProfilerOverhead,
 } from '../fixtures/profiles/gecko-profile';
 import { ensureExists } from '../../utils/flow';
+import type {
+  JsAllocationPayload_Gecko,
+  NativeAllocationPayload_Gecko,
+} from '../../types/markers';
+import type { GeckoThread } from '../../types/gecko-profile';
 
 describe('extract functions and resource from location strings', function() {
   // These location strings are turned into the proper funcs.
@@ -121,7 +128,7 @@ describe('extract functions and resource from location strings', function() {
             resourceTable.name[resourceIndex]
           );
           host =
-            hostStringIndex === undefined
+            hostStringIndex === undefined || hostStringIndex === null
               ? null
               : stringTable.getString(hostStringIndex);
           resourceType = resourceTable.type[resourceIndex];
@@ -174,7 +181,19 @@ describe('gecko counters processing', function() {
       findMainThread(parentGeckoProfile)
     );
     const childCounter = createGeckoCounter(findMainThread(childGeckoProfile));
-    parentGeckoProfile.counters = [parentCounter];
+
+    // Due to a bug in Gecko, it's possible that we have a counter that has no
+    // sample data. This is likely a Gecko problem that we'll need to fix.
+    // See https://github.com/firefox-devtools/profiler/issues/2248 and
+    // https://bugzilla.mozilla.org/show_bug.cgi?id=1584190
+    const incorrectCounterEntry = {
+      name: 'Incorrect counter',
+      category: 'Some category',
+      description: 'Some description',
+      sample_groups: {},
+    };
+
+    parentGeckoProfile.counters = [parentCounter, incorrectCounterEntry];
     childGeckoProfile.counters = [childCounter];
     return {
       parentGeckoProfile,
@@ -217,8 +236,12 @@ describe('gecko counters processing', function() {
     const originalTime = [0, 1, 2, 3, 4, 5, 6];
     const offsetTime = originalTime.map(n => n + 1000);
 
-    const extractTime = counter =>
-      counter.sample_groups.samples.data.map(tuple => tuple[0]);
+    const extractTime = counter => {
+      if (!counter.sample_groups.samples) {
+        return [];
+      }
+      return counter.sample_groups.samples.data.map(tuple => tuple[0]);
+    };
 
     // The original times and parent process are not offset.
     expect(extractTime(parentCounter)).toEqual(originalTime);
@@ -229,6 +252,88 @@ describe('gecko counters processing', function() {
 
     // The subprocess times are offset when processed:
     expect(processedCounters[1].sampleGroups.samples.time).toEqual(offsetTime);
+  });
+});
+
+describe('gecko profilerOverhead processing', function() {
+  function setup() {
+    // Create a gecko profile with profilerOverhead.
+    const findMainThread = profile =>
+      ensureExists(
+        profile.threads.find(thread => thread.name === 'GeckoMain'),
+        'There should be a GeckoMain thread in the Gecko profile'
+      );
+
+    const parentGeckoProfile = createGeckoProfile();
+    const [childGeckoProfile] = parentGeckoProfile.processes;
+
+    const parentPid = findMainThread(parentGeckoProfile).pid;
+    const childPid = findMainThread(childGeckoProfile).pid;
+    expect(parentPid).toEqual(3333);
+    expect(childPid).toEqual(2222);
+
+    const parentOverhead = createGeckoProfilerOverhead(
+      findMainThread(parentGeckoProfile)
+    );
+    const childOverhead = createGeckoProfilerOverhead(
+      findMainThread(childGeckoProfile)
+    );
+    parentGeckoProfile.profilerOverhead = parentOverhead;
+    childGeckoProfile.profilerOverhead = childOverhead;
+    return {
+      parentGeckoProfile,
+      parentPid,
+      childPid,
+      parentOverhead,
+      childOverhead,
+    };
+  }
+
+  it('can extract the overhead information correctly', function() {
+    const { parentGeckoProfile, parentPid, childPid } = setup();
+    const processedProfile = processProfile(parentGeckoProfile);
+    const overhead = ensureExists(
+      processedProfile.profilerOverhead,
+      'Expected to find profilerOverhead on the processed profile'
+    );
+    expect(overhead.length).toBe(2);
+    expect(overhead[0].pid).toBe(parentPid);
+    expect(overhead[1].pid).toBe(childPid);
+
+    const findMainThreadIndexByPid = (pid: number): number =>
+      processedProfile.threads.findIndex(
+        thread => thread.name === 'GeckoMain' && thread.pid === pid
+      );
+
+    expect(overhead[0].mainThreadIndex).toBe(
+      findMainThreadIndexByPid(parentPid)
+    );
+    expect(overhead[1].mainThreadIndex).toBe(
+      findMainThreadIndexByPid(childPid)
+    );
+  });
+
+  it('offsets the overhead timing for child processes', function() {
+    const { parentGeckoProfile, parentOverhead, childOverhead } = setup();
+    const processedProfile = processProfile(parentGeckoProfile);
+    const processedOverheads = ensureExists(processedProfile.profilerOverhead);
+
+    const originalTime = [0, 1000, 2000, 3000, 4000, 5000, 6000];
+    const processedTime = originalTime.map(n => n / 1000);
+    const offsetTime = processedTime.map(n => n + 1000);
+
+    const extractTime = overhead =>
+      overhead.samples.data.map(tuple => tuple[0]);
+
+    // The original times are not offset and in microseconds.
+    expect(extractTime(parentOverhead)).toEqual(originalTime);
+    expect(extractTime(childOverhead)).toEqual(originalTime);
+
+    // The parent process times are not offset and in milliseconds.
+    expect(processedOverheads[0].samples.time).toEqual(processedTime);
+
+    // The subprocess times are offset and in milliseconds when processed
+    expect(processedOverheads[1].samples.time).toEqual(offsetTime);
   });
 });
 
@@ -252,5 +357,142 @@ describe('serializeProfile', function() {
       secondSerialized
     );
     expect(roundtrip).toEqual(secondRountrip);
+  });
+});
+
+describe('js allocation processing', function() {
+  function getAllocationMarkerHelper(geckoThread: GeckoThread) {
+    let time = 0;
+    return ({ byteSize, stackIndex }) => {
+      const thisTime = time++;
+      // Opt out of type checking, due to the schema look-up not being type checkable.
+      const markerTuple: any = [];
+      const payload: JsAllocationPayload_Gecko = {
+        type: 'JS allocation',
+        startTime: thisTime,
+        endTime: thisTime,
+        className: 'Function',
+        typeName: 'JSObject',
+        coarseType: 'Object',
+        size: byteSize,
+        inNursery: true,
+        stack: createGeckoMarkerStack({ stackIndex, time: thisTime }),
+      };
+
+      markerTuple[geckoThread.markers.schema.name] = 'JS allocation';
+      markerTuple[geckoThread.markers.schema.time] = thisTime;
+      markerTuple[geckoThread.markers.schema.data] = payload;
+      markerTuple[geckoThread.markers.schema.category] = 0;
+
+      geckoThread.markers.data.push(markerTuple);
+    };
+  }
+
+  it('should process JS allocation markers into a JS allocation table', function() {
+    const geckoProfile = createGeckoProfile();
+    const geckoThread = geckoProfile.threads[0];
+    const createAllocation = getAllocationMarkerHelper(geckoThread);
+
+    // Verify the test found the parent process' main thread.
+    expect(geckoThread.name).toBe('GeckoMain');
+    expect(geckoThread.processType).toBe('default');
+
+    // Create 3 allocations, and note the marker lengths.
+    const originalMarkersLength = geckoThread.markers.data.length;
+    createAllocation({ byteSize: 3, stackIndex: 11 });
+    createAllocation({ byteSize: 5, stackIndex: 13 });
+    createAllocation({ byteSize: 7, stackIndex: null });
+    const markersAndAllocationsLength = geckoThread.markers.data.length;
+
+    // Do a simple assertion to verify that the allocations were added by the test
+    // fixture as expected.
+    expect(markersAndAllocationsLength).toEqual(originalMarkersLength + 3);
+
+    // Process the profile and get out the new thread.
+    const processedProfile = processProfile(geckoProfile);
+    const processedThread = processedProfile.threads[0];
+
+    // Check for the existence of the allocations.
+    const { jsAllocations } = processedThread;
+    if (!jsAllocations) {
+      throw new Error('Could not find the jsAllocations on the main thread.');
+    }
+
+    // Assert that the transformation makes sense.
+    expect(jsAllocations.time).toEqual([0, 1, 2]);
+    expect(jsAllocations.duration).toEqual([3, 5, 7]);
+    expect(jsAllocations.stack).toEqual([11, 13, null]);
+  });
+});
+
+describe('native allocation processing', function() {
+  type CreateAllocation = ({
+    byteSize: number,
+    stackIndex: number | null,
+  }) => void;
+
+  // This helper will create a function that can be used to easily add allocations to
+  // the GeckoThread.
+  function getAllocationMarkerHelper(
+    geckoThread: GeckoThread
+  ): CreateAllocation {
+    let time = 0;
+    return ({ byteSize, stackIndex }) => {
+      const thisTime = time++;
+      // Opt out of type checking, due to the schema look-up not being type checkable.
+      const markerTuple: any = [];
+      const payload: NativeAllocationPayload_Gecko = {
+        type: 'Native allocation',
+        startTime: thisTime,
+        endTime: thisTime,
+        size: byteSize,
+        stack: createGeckoMarkerStack({ stackIndex, time: thisTime }),
+      };
+
+      markerTuple[geckoThread.markers.schema.name] = 'Native allocation';
+      markerTuple[geckoThread.markers.schema.time] = thisTime;
+      markerTuple[geckoThread.markers.schema.data] = payload;
+      markerTuple[geckoThread.markers.schema.category] = 0;
+
+      geckoThread.markers.data.push(markerTuple);
+    };
+  }
+
+  it('should process native allocation markers into a native allocation table', function() {
+    const geckoProfile = createGeckoProfile();
+    const geckoThread = geckoProfile.threads[0];
+    const createAllocation = getAllocationMarkerHelper(geckoThread);
+
+    // Verify the test found the parent process' main thread.
+    expect(geckoThread.name).toBe('GeckoMain');
+    expect(geckoThread.processType).toBe('default');
+
+    // Create 3 allocations, and note the marker lengths.
+    const originalMarkersLength = geckoThread.markers.data.length;
+    createAllocation({ byteSize: 3, stackIndex: 11 });
+    createAllocation({ byteSize: 5, stackIndex: 13 });
+    createAllocation({ byteSize: 7, stackIndex: null });
+    const markersAndAllocationsLength = geckoThread.markers.data.length;
+
+    // Do a simple assertion to verify that the allocations were added by the test
+    // fixture as expected.
+    expect(markersAndAllocationsLength).toEqual(originalMarkersLength + 3);
+
+    // Process the profile and get out the new thread.
+    const processedProfile = processProfile(geckoProfile);
+    const processedThread = processedProfile.threads[0];
+
+    // Check for the existence of the allocations.
+    const { nativeAllocations } = processedThread;
+    if (!nativeAllocations) {
+      throw new Error(
+        'Could not find the nativeAllocations on the main thread.'
+      );
+    }
+
+    // Assert that the transformation makes sense.
+    expect(nativeAllocations.time).toEqual([0, 1, 2]);
+    expect(nativeAllocations.duration).toEqual([3, 5, 7]);
+    expect(nativeAllocations.stack).toEqual([11, 13, null]);
   });
 });

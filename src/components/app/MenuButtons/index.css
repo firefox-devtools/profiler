@@ -3,19 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 .menuButtons {
-  --internal-share-button-background-color: var(
-    --share-button-background-color,
-    hsl(137, 81%, 44%)
-  );
-  --internal-uploading-button-background-color: var(
-    --uploading-button-background-color,
-    #38445f
-  );
-  --internal-uploading-progress-fill-color: var(
-    --uploading-progress-fill-color,
-    #7990c8
-  );
-
   display: flex;
   height: 100%;
   flex-flow: row nowrap;
@@ -24,7 +11,7 @@
 .menuButtonsLink {
   position: relative;
   height: 24px;
-  padding: 0 10px;
+  padding: 0 20px;
   border-left: 1px solid var(--grey-30);
   color: var(--grey-90);
   cursor: default;

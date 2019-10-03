@@ -10,34 +10,58 @@ Object {
       Object {
         "color": "transparent",
         "name": "Idle",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "grey",
         "name": "Other",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "yellow",
         "name": "JavaScript",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "purple",
         "name": "Layout",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "green",
         "name": "Graphics",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "blue",
         "name": "DOM",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "orange",
         "name": "GC / CC",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "lightblue",
         "name": "Network",
+        "subcategories": Array [
+          "Other",
+        ],
       },
     ],
     "debug": false,
@@ -53,7 +77,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 22,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": undefined,
@@ -62,9 +86,10 @@ Object {
     "symbolicated": true,
     "toolkit": undefined,
     "updateChannel": undefined,
-    "version": 15,
+    "version": 16,
   },
   "pages": Array [],
+  "profilerOverhead": Array [],
   "threads": Array [
     Object {
       "frameTable": Object {
@@ -130,6 +155,16 @@ Object {
           null,
         ],
         "optimizations": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
+        "subcategory": Array [
           null,
           null,
           null,
@@ -225,6 +260,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -319,6 +355,17 @@ Object {
           4,
           null,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -383,6 +430,11 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -429,6 +481,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -487,6 +540,11 @@ Object {
           0,
           1,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -541,6 +599,11 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -587,6 +650,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -644,6 +708,11 @@ Object {
           null,
           0,
           1,
+        ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
         ],
       },
       "stringTable": UniqueStringArray {
@@ -776,6 +845,22 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -910,6 +995,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1004,6 +1090,22 @@ Object {
           11,
           12,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -1087,6 +1189,12 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -1141,6 +1249,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1204,6 +1313,13 @@ Object {
           1,
           null,
           3,
+        ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
       },
       "stringTable": UniqueStringArray {
@@ -1282,6 +1398,14 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -1352,6 +1476,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1443,6 +1568,17 @@ Object {
           null,
           0,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -1496,6 +1632,10 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -1534,6 +1674,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1589,6 +1730,10 @@ Object {
           null,
           0,
         ],
+        "subcategory": Array [
+          0,
+          0,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -1641,6 +1786,11 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -1687,6 +1837,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1745,6 +1896,11 @@ Object {
           0,
           1,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -1799,6 +1955,11 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -1845,6 +2006,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -1906,6 +2068,12 @@ Object {
           1,
           null,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -1960,6 +2128,11 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -2006,6 +2179,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -2063,6 +2237,11 @@ Object {
           null,
           0,
           1,
+        ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
         ],
       },
       "stringTable": UniqueStringArray {
@@ -2125,6 +2304,12 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -2179,6 +2364,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -2260,6 +2446,19 @@ Object {
           7,
           0,
           9,
+        ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
       },
       "stringTable": UniqueStringArray {
@@ -2520,6 +2719,40 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -2798,6 +3031,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -2948,6 +3182,42 @@ Object {
           30,
           31,
           32,
+        ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
       },
       "stringTable": UniqueStringArray {
@@ -3264,6 +3534,40 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -3542,6 +3846,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -3692,6 +3997,42 @@ Object {
           30,
           31,
           32,
+        ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
       },
       "stringTable": UniqueStringArray {
@@ -4008,6 +4349,40 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -4286,6 +4661,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -4439,6 +4815,43 @@ Object {
           31,
           32,
           null,
+        ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
       },
       "stringTable": UniqueStringArray {
@@ -4755,6 +5168,40 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -5033,6 +5480,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -5186,6 +5634,43 @@ Object {
           31,
           32,
           null,
+        ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
       },
       "stringTable": UniqueStringArray {
@@ -5418,6 +5903,28 @@ Object {
           null,
           null,
         ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+        ],
       },
       "funcTable": Object {
         "address": Array [
@@ -5600,6 +6107,7 @@ Object {
       },
       "libs": Array [],
       "markers": Object {
+        "category": Array [],
         "data": Array [],
         "length": 0,
         "name": Array [],
@@ -5700,6 +6208,28 @@ Object {
           17,
           18,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringTable": UniqueStringArray {
         "_array": Array [
@@ -5794,34 +6324,58 @@ Object {
       Object {
         "color": "transparent",
         "name": "Idle",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "grey",
         "name": "Other",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "yellow",
         "name": "JavaScript",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "purple",
         "name": "Layout",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "green",
         "name": "Graphics",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "blue",
         "name": "DOM",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "orange",
         "name": "GC / CC",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "lightblue",
         "name": "Network",
+        "subcategories": Array [
+          "Other",
+        ],
       },
     ],
     "interval": 1,
@@ -5834,7 +6388,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 15,
+    "version": 16,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -5877,34 +6431,58 @@ Object {
           Object {
             "color": "transparent",
             "name": "Idle",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "grey",
             "name": "Other",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "yellow",
             "name": "JavaScript",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "purple",
             "name": "Layout",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "green",
             "name": "Graphics",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "blue",
             "name": "DOM",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "orange",
             "name": "GC / CC",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "lightblue",
             "name": "Network",
+            "subcategories": Array [
+              "Other",
+            ],
           },
         ],
         "interval": 1,
@@ -5945,6 +6523,7 @@ Object {
                 4391,
                 null,
                 1,
+                0,
               ],
               Array [
                 7,
@@ -5962,6 +6541,7 @@ Object {
               "location": 0,
               "optimizations": 3,
               "relevantForJS": 1,
+              "subcategory": 7,
             },
           },
           "markers": Object {
@@ -5973,6 +6553,7 @@ Object {
                   "type": "VsyncTimestamp",
                   "vsync": 0,
                 },
+                4,
               ],
               Array [
                 5,
@@ -6010,6 +6591,7 @@ Object {
                   },
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 10,
@@ -6019,6 +6601,7 @@ Object {
                   "interval": "start",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 10,
@@ -6028,6 +6611,7 @@ Object {
                   "interval": "end",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 5,
@@ -6037,6 +6621,7 @@ Object {
                   "interval": "end",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 9,
@@ -6045,6 +6630,7 @@ Object {
                   "endTime": 12,
                   "startTime": 11,
                 },
+                1,
               ],
               Array [
                 8,
@@ -6057,6 +6643,7 @@ Object {
                   "timeStamp": undefined,
                   "type": "tracing",
                 },
+                5,
               ],
               Array [
                 8,
@@ -6069,9 +6656,11 @@ Object {
                   "timeStamp": undefined,
                   "type": "tracing",
                 },
+                5,
               ],
             ],
             "schema": Object {
+              "category": 3,
               "data": 2,
               "name": 0,
               "time": 1,
@@ -6198,6 +6787,7 @@ Object {
             4391,
             null,
             1,
+            0,
           ],
           Array [
             7,
@@ -6215,6 +6805,7 @@ Object {
           "location": 0,
           "optimizations": 3,
           "relevantForJS": 1,
+          "subcategory": 7,
         },
       },
       "markers": Object {
@@ -6226,6 +6817,7 @@ Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
+            4,
           ],
           Array [
             5,
@@ -6263,6 +6855,7 @@ Object {
               },
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -6272,6 +6865,7 @@ Object {
               "interval": "start",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -6281,6 +6875,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             5,
@@ -6290,6 +6885,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             9,
@@ -6298,6 +6894,7 @@ Object {
               "endTime": 12,
               "startTime": 11,
             },
+            1,
           ],
           Array [
             8,
@@ -6310,6 +6907,7 @@ Object {
               "timeStamp": undefined,
               "type": "tracing",
             },
+            5,
           ],
           Array [
             8,
@@ -6322,9 +6920,11 @@ Object {
               "timeStamp": undefined,
               "type": "tracing",
             },
+            5,
           ],
         ],
         "schema": Object {
+          "category": 3,
           "data": 2,
           "name": 0,
           "time": 1,
@@ -6447,6 +7047,7 @@ Object {
             4391,
             null,
             1,
+            0,
           ],
           Array [
             7,
@@ -6464,6 +7065,7 @@ Object {
           "location": 0,
           "optimizations": 3,
           "relevantForJS": 1,
+          "subcategory": 7,
         },
       },
       "markers": Object {
@@ -6475,6 +7077,7 @@ Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
+            4,
           ],
           Array [
             5,
@@ -6512,6 +7115,7 @@ Object {
               },
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -6521,6 +7125,7 @@ Object {
               "interval": "start",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -6530,6 +7135,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             5,
@@ -6539,6 +7145,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             9,
@@ -6547,6 +7154,7 @@ Object {
               "endTime": 12,
               "startTime": 11,
             },
+            1,
           ],
           Array [
             8,
@@ -6559,6 +7167,7 @@ Object {
               "timeStamp": undefined,
               "type": "tracing",
             },
+            5,
           ],
           Array [
             8,
@@ -6571,9 +7180,11 @@ Object {
               "timeStamp": undefined,
               "type": "tracing",
             },
+            5,
           ],
         ],
         "schema": Object {
+          "category": 3,
           "data": 2,
           "name": 0,
           "time": 1,
@@ -6717,34 +7328,58 @@ Object {
       Object {
         "color": "transparent",
         "name": "Idle",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "grey",
         "name": "Other",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "yellow",
         "name": "JavaScript",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "purple",
         "name": "Layout",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "green",
         "name": "Graphics",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "blue",
         "name": "DOM",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "orange",
         "name": "GC / CC",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "lightblue",
         "name": "Network",
+        "subcategories": Array [
+          "Other",
+        ],
       },
     ],
     "interval": 1,
@@ -6757,7 +7392,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 15,
+    "version": 16,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -6800,34 +7435,58 @@ Object {
           Object {
             "color": "transparent",
             "name": "Idle",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "grey",
             "name": "Other",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "yellow",
             "name": "JavaScript",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "purple",
             "name": "Layout",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "green",
             "name": "Graphics",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "blue",
             "name": "DOM",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "orange",
             "name": "GC / CC",
+            "subcategories": Array [
+              "Other",
+            ],
           },
           Object {
             "color": "lightblue",
             "name": "Network",
+            "subcategories": Array [
+              "Other",
+            ],
           },
         ],
         "interval": 1,
@@ -6868,6 +7527,7 @@ Object {
                 4391,
                 null,
                 1,
+                0,
               ],
               Array [
                 7,
@@ -6884,6 +7544,7 @@ Object {
                 null,
                 null,
                 2,
+                0,
               ],
               Array [
                 12,
@@ -6893,6 +7554,7 @@ Object {
                 null,
                 null,
                 5,
+                0,
               ],
             ],
             "schema": Object {
@@ -6903,6 +7565,7 @@ Object {
               "location": 0,
               "optimizations": 3,
               "relevantForJS": 1,
+              "subcategory": 7,
             },
           },
           "markers": Object {
@@ -6914,6 +7577,7 @@ Object {
                   "type": "VsyncTimestamp",
                   "vsync": 0,
                 },
+                4,
               ],
               Array [
                 5,
@@ -6951,6 +7615,7 @@ Object {
                   },
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 10,
@@ -6960,6 +7625,7 @@ Object {
                   "interval": "start",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 10,
@@ -6969,6 +7635,7 @@ Object {
                   "interval": "end",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 5,
@@ -6978,6 +7645,7 @@ Object {
                   "interval": "end",
                   "type": "tracing",
                 },
+                4,
               ],
               Array [
                 9,
@@ -6986,6 +7654,7 @@ Object {
                   "endTime": 12,
                   "startTime": 11,
                 },
+                1,
               ],
               Array [
                 8,
@@ -6997,6 +7666,7 @@ Object {
                   "phase": 3,
                   "type": "tracing",
                 },
+                5,
               ],
               Array [
                 8,
@@ -7008,6 +7678,7 @@ Object {
                   "phase": 3,
                   "type": "tracing",
                 },
+                5,
               ],
               Array [
                 11,
@@ -7031,6 +7702,7 @@ Object {
                   "tcpConnectEnd": 7,
                   "type": "Network",
                 },
+                7,
               ],
               Array [
                 16,
@@ -7047,9 +7719,11 @@ Object {
                   "startTime": 13.5,
                   "type": "FileIO",
                 },
+                1,
               ],
             ],
             "schema": Object {
+              "category": 3,
               "data": 2,
               "name": 0,
               "time": 1,
@@ -7190,6 +7864,7 @@ Object {
             4391,
             null,
             1,
+            0,
           ],
           Array [
             7,
@@ -7207,6 +7882,7 @@ Object {
           "location": 0,
           "optimizations": 3,
           "relevantForJS": 1,
+          "subcategory": 7,
         },
       },
       "markers": Object {
@@ -7218,6 +7894,7 @@ Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
+            4,
           ],
           Array [
             5,
@@ -7255,6 +7932,7 @@ Object {
               },
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -7264,6 +7942,7 @@ Object {
               "interval": "start",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -7273,6 +7952,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             5,
@@ -7282,6 +7962,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             9,
@@ -7290,6 +7971,7 @@ Object {
               "endTime": 12,
               "startTime": 11,
             },
+            1,
           ],
           Array [
             8,
@@ -7301,6 +7983,7 @@ Object {
               "phase": 3,
               "type": "tracing",
             },
+            5,
           ],
           Array [
             8,
@@ -7312,6 +7995,7 @@ Object {
               "phase": 3,
               "type": "tracing",
             },
+            5,
           ],
           Array [
             11,
@@ -7335,9 +8019,11 @@ Object {
               "tcpConnectEnd": 7,
               "type": "Network",
             },
+            7,
           ],
         ],
         "schema": Object {
+          "category": 3,
           "data": 2,
           "name": 0,
           "time": 1,
@@ -7461,6 +8147,7 @@ Object {
             4391,
             null,
             1,
+            0,
           ],
           Array [
             7,
@@ -7478,6 +8165,7 @@ Object {
           "location": 0,
           "optimizations": 3,
           "relevantForJS": 1,
+          "subcategory": 7,
         },
       },
       "markers": Object {
@@ -7489,6 +8177,7 @@ Object {
               "type": "VsyncTimestamp",
               "vsync": 0,
             },
+            4,
           ],
           Array [
             5,
@@ -7526,6 +8215,7 @@ Object {
               },
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -7535,6 +8225,7 @@ Object {
               "interval": "start",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             10,
@@ -7544,6 +8235,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             5,
@@ -7553,6 +8245,7 @@ Object {
               "interval": "end",
               "type": "tracing",
             },
+            4,
           ],
           Array [
             9,
@@ -7561,6 +8254,7 @@ Object {
               "endTime": 12,
               "startTime": 11,
             },
+            1,
           ],
           Array [
             8,
@@ -7572,6 +8266,7 @@ Object {
               "phase": 3,
               "type": "tracing",
             },
+            5,
           ],
           Array [
             8,
@@ -7583,9 +8278,11 @@ Object {
               "phase": 3,
               "type": "tracing",
             },
+            5,
           ],
         ],
         "schema": Object {
+          "category": 3,
           "data": 2,
           "name": 0,
           "time": 1,
@@ -7697,41 +8394,65 @@ Object {
       Object {
         "color": "transparent",
         "name": "Idle",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "grey",
         "name": "Other",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "yellow",
         "name": "JavaScript",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "purple",
         "name": "Layout",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "green",
         "name": "Graphics",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "blue",
         "name": "DOM",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "orange",
         "name": "GC / CC",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "lightblue",
         "name": "Network",
+        "subcategories": Array [
+          "Other",
+        ],
       },
     ],
     "interval": 1,
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 22,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -7822,6 +8543,13 @@ Object {
           null,
           null,
           null,
+          null,
+        ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          0,
           null,
         ],
       },
@@ -7917,6 +8645,16 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -8082,6 +8820,13 @@ Object {
           1,
           1,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringArray": Array [
         "(root)",
@@ -8151,6 +8896,13 @@ Object {
           null,
           null,
           null,
+          null,
+        ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          0,
           null,
         ],
       },
@@ -8246,6 +8998,16 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -8411,6 +9173,13 @@ Object {
           1,
           1,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringArray": Array [
         "(root)",
@@ -8480,6 +9249,13 @@ Object {
           null,
           null,
           null,
+          null,
+        ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          0,
           null,
         ],
       },
@@ -8575,6 +9351,16 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -8740,6 +9526,13 @@ Object {
           1,
           1,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringArray": Array [
         "(root)",
@@ -8771,41 +9564,65 @@ Object {
       Object {
         "color": "transparent",
         "name": "Idle",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "grey",
         "name": "Other",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "yellow",
         "name": "JavaScript",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "purple",
         "name": "Layout",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "green",
         "name": "Graphics",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "blue",
         "name": "DOM",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "orange",
         "name": "GC / CC",
+        "subcategories": Array [
+          "Other",
+        ],
       },
       Object {
         "color": "lightblue",
         "name": "Network",
+        "subcategories": Array [
+          "Other",
+        ],
       },
     ],
     "interval": 1,
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 22,
+    "preprocessedProfileVersion": 24,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -8896,6 +9713,13 @@ Object {
           null,
           null,
           null,
+          null,
+        ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          0,
           null,
         ],
       },
@@ -8991,6 +9815,17 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+          7,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -9177,6 +10012,13 @@ Object {
           1,
           1,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringArray": Array [
         "(root)",
@@ -9249,6 +10091,13 @@ Object {
           null,
           null,
           null,
+          null,
+        ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          0,
           null,
         ],
       },
@@ -9344,6 +10193,16 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -9509,6 +10368,13 @@ Object {
           1,
           1,
         ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+        ],
       },
       "stringArray": Array [
         "(root)",
@@ -9593,6 +10459,15 @@ Object {
           null,
           null,
           null,
+        ],
+        "subcategory": Array [
+          null,
+          null,
+          null,
+          0,
+          null,
+          0,
+          0,
         ],
       },
       "funcTable": Object {
@@ -9703,6 +10578,17 @@ Object {
         },
       ],
       "markers": Object {
+        "category": Array [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+          7,
+        ],
         "data": Array [
           Object {
             "type": "VsyncTimestamp",
@@ -9906,6 +10792,15 @@ Object {
           2,
           4,
           5,
+        ],
+        "subcategory": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
       },
       "stringArray": Array [

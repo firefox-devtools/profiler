@@ -5,12 +5,15 @@
 // @flow
 import { oneLine } from 'common-tags';
 import * as React from 'react';
+import memoize from 'memoize-immutable';
+
 import explicitConnect from '../../utils/connect';
 import NetworkSettings from '../shared/NetworkSettings';
 import VirtualList from '../shared/VirtualList';
 import { withSize } from '../shared/WithSize';
 import NetworkChartEmptyReasons from './NetworkChartEmptyReasons';
 import NetworkChartRow from './NetworkChartRow';
+import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 
 import {
   getPreviewSelection,
@@ -18,7 +21,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { updatePreviewSelection } from '../../actions/profile-view';
+import { changeRightClickedMarker } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
 import type { NetworkPayload } from '../../types/markers';
@@ -32,12 +35,13 @@ const ROW_HEIGHT = 16;
 
 // The SizeProps are injected by the WithSize higher order component.
 type DispatchProps = {|
-  +updatePreviewSelection: typeof updatePreviewSelection,
+  +changeRightClickedMarker: typeof changeRightClickedMarker,
 |};
 
 type StateProps = {|
   +markerIndexes: MarkerIndex[],
   +getMarker: MarkerIndex => Marker,
+  +rightClickedMarkerIndex: MarkerIndex | null,
   +disableOverscan: boolean,
   +timeRange: StartEndRange,
   +threadIndex: number,
@@ -48,9 +52,20 @@ type OwnProps = {| ...SizeProps |};
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class NetworkChart extends React.PureComponent<Props> {
-  // This isn't used at the moment, but we need a fixed instance so that a
-  // rerender isn't triggered in VirtualList.
-  _specialItems = [];
+  _memoizedGetSpecialItems = memoize(
+    rightClickedMarkerIndex => {
+      if (rightClickedMarkerIndex !== null) {
+        return [rightClickedMarkerIndex];
+      }
+      return [];
+    },
+    { limit: 1 }
+  );
+
+  _getSpecialItems = () => {
+    const { rightClickedMarkerIndex } = this.props;
+    return this._memoizedGetSpecialItems(rightClickedMarkerIndex);
+  };
 
   _onCopy = (_event: Event) => {
     // Not implemented.
@@ -60,8 +75,21 @@ class NetworkChart extends React.PureComponent<Props> {
     // Not implemented.
   };
 
+  _onRightClick = (markerIndex: MarkerIndex) => {
+    const { threadIndex, changeRightClickedMarker } = this.props;
+    changeRightClickedMarker(threadIndex, markerIndex);
+  };
+
+  _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
+
   _renderRow = (markerIndex: MarkerIndex, index: number): React.Node => {
-    const { threadIndex, getMarker, timeRange, width } = this.props;
+    const {
+      threadIndex,
+      getMarker,
+      rightClickedMarkerIndex,
+      timeRange,
+      width,
+    } = this.props;
     const marker = getMarker(markerIndex);
 
     // Since our type definition for Marker can't refine to just Network
@@ -80,10 +108,14 @@ class NetworkChart extends React.PureComponent<Props> {
       <NetworkChartRow
         index={index}
         marker={marker}
+        markerIndex={markerIndex}
         networkPayload={networkPayload}
         threadIndex={threadIndex}
         timeRange={timeRange}
         width={width}
+        shouldDisplayTooltips={this._shouldDisplayTooltips}
+        isRightClicked={rightClickedMarkerIndex === markerIndex}
+        onRightClick={this._onRightClick}
       />
     );
   };
@@ -109,20 +141,25 @@ class NetworkChart extends React.PureComponent<Props> {
         {markerIndexes.length === 0 ? (
           <NetworkChartEmptyReasons />
         ) : (
-          <VirtualList
-            className="treeViewBody"
-            items={markerIndexes}
-            renderItem={this._renderRow}
-            itemHeight={ROW_HEIGHT}
-            columnCount={1}
-            focusable={true}
-            specialItems={this._specialItems}
-            containerWidth={width}
-            forceRender={forceRenderKey}
-            disableOverscan={disableOverscan}
-            onCopy={this._onCopy}
-            onKeyDown={this._onKeyDown}
-          />
+          <ContextMenuTrigger
+            id="MarkerContextMenu"
+            attributes={{ className: 'treeViewContextMenu' }}
+          >
+            <VirtualList
+              className="treeViewBody"
+              items={markerIndexes}
+              renderItem={this._renderRow}
+              itemHeight={ROW_HEIGHT}
+              columnCount={1}
+              focusable={true}
+              specialItems={this._getSpecialItems()}
+              containerWidth={width}
+              forceRender={forceRenderKey}
+              disableOverscan={disableOverscan}
+              onCopy={this._onCopy}
+              onKeyDown={this._onKeyDown}
+            />
+          </ContextMenuTrigger>
         )}
       </div>
     );
@@ -141,11 +178,15 @@ const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
           state
         ),
         getMarker: selectedThreadSelectors.getMarkerGetter(state),
+        rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
+          state
+        ),
         timeRange: getPreviewSelectionRange(state),
         disableOverscan: getPreviewSelection(state).isModifying,
         threadIndex: getSelectedThreadIndex(state),
       };
     },
+    mapDispatchToProps: { changeRightClickedMarker },
     component: NetworkChart,
   }
 );

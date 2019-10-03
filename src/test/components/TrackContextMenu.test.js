@@ -7,6 +7,7 @@
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
+import { ensureExists } from '../../utils/flow';
 
 import {
   changeSelectedThread,
@@ -22,6 +23,8 @@ import {
   getProfileWithNiceTracks,
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
+import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
+
 import { storeWithProfile } from '../fixtures/stores';
 
 describe('timeline/TrackContextMenu', function() {
@@ -63,10 +66,8 @@ describe('timeline/TrackContextMenu', function() {
         trackIndex: trackIndex,
       };
       const track = getGlobalTracks(getState())[trackIndex];
-      if (track.type !== 'process') {
-        throw new Error('Expected a process track.');
-      }
-      const threadIndex = track.mainThreadIndex;
+      const threadIndex =
+        track.type === 'process' ? track.mainThreadIndex : null;
       if (threadIndex !== null) {
         // Explicitly select the global thread. Tests can pass in a custom profile,
         // so don't fail if this doesn't exist.
@@ -78,6 +79,8 @@ describe('timeline/TrackContextMenu', function() {
       const isolateProcessMainThreadItem = () =>
         getByText(/Only show "Content Process"/);
       const trackItem = () => getByText('Content Process');
+      const isolateScreenshotTrack = () =>
+        getByText(/Hide other screenshot tracks/);
 
       return {
         ...results,
@@ -86,12 +89,18 @@ describe('timeline/TrackContextMenu', function() {
         threadIndex,
         isolateProcessItem,
         isolateProcessMainThreadItem,
+        isolateScreenshotTrack,
         trackItem,
       };
     }
 
     it('matches the snapshot of a global track', () => {
       const { container } = setupGlobalTrack();
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('matches the snapshot of a global non-process track', () => {
+      const { container } = setupGlobalTrack(getScreenshotTrackProfile());
       expect(container.firstChild).toMatchSnapshot();
     });
 
@@ -151,6 +160,19 @@ describe('timeline/TrackContextMenu', function() {
         'show [process]',
         '  - show [thread DOM Worker] SELECTED',
         '  - show [thread Style]',
+      ]);
+    });
+
+    it('isolates a screenshot track', () => {
+      const { isolateScreenshotTrack, getState } = setupGlobalTrack(
+        getScreenshotTrackProfile()
+      );
+      fireEvent.click(isolateScreenshotTrack());
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [screenshots]',
+        'hide [screenshots]',
+        'show [process]',
+        '  - show [thread Empty] SELECTED',
       ]);
     });
 
@@ -245,6 +267,65 @@ describe('timeline/TrackContextMenu', function() {
 
     xit('can isolate a non-thread track, as long as there process has a thread index', function() {
       // TODO - We should wait until we have some real non-thread tracks
+    });
+  });
+
+  describe('global / local track visibility interplay', function() {
+    function setupTracks() {
+      const results = setup();
+      const { getByText, dispatch, getState } = results;
+
+      const trackIndex = 1;
+      const trackReference = {
+        type: 'global',
+        trackIndex: trackIndex,
+      };
+      const track = getGlobalTracks(getState())[trackIndex];
+      if (track.type !== 'process') {
+        throw new Error('Expected a process track.');
+      }
+      const threadIndex = ensureExists(
+        track.mainThreadIndex,
+        `Couldn't get the mainThreadIndex of global track`
+      );
+
+      dispatch(changeSelectedThread(threadIndex));
+      dispatch(changeRightClickedTrack(trackReference));
+
+      const globalTrackItem = () => getByText('Content Process');
+      const localTrackItem = () => getByText('DOM Worker');
+
+      return {
+        ...results,
+        globalTrackItem,
+        localTrackItem,
+      };
+    }
+
+    it('will unhide the global track when unhiding one of its local tracks', function() {
+      const { getState, globalTrackItem, localTrackItem } = setupTracks();
+      // Hide the global track.
+      fireEvent.click(globalTrackItem());
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        // The "GeckoMain tab" process is now hidden.
+        'hide [thread GeckoMain tab]',
+        // These are still shown as visible, which reflects their
+        // internal state, but in the UI they'll appear hidden.
+        '  - show [thread DOM Worker]',
+        '  - show [thread Style]',
+      ]);
+
+      // Unhide "DOM Worker" local track.
+      fireEvent.click(localTrackItem());
+      expect(getHumanReadableTracks(getState())).toEqual([
+        'show [thread GeckoMain process] SELECTED',
+        // The "GeckoMain tab" process is visible again.
+        'show [thread GeckoMain tab]',
+        // Only the "DOM Worker" local track is visible.
+        '  - show [thread DOM Worker]',
+        '  - hide [thread Style]',
+      ]);
     });
   });
 });

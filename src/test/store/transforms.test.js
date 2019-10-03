@@ -3,7 +3,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithNativeAllocations,
+  getProfileWithJsAllocations,
+} from '../fixtures/profiles/processed-profile';
 import { formatTree } from '../fixtures/utils';
 import { storeWithProfile } from '../fixtures/stores';
 import { assertSetContainsOnly } from '../fixtures/custom-assertions';
@@ -14,6 +18,7 @@ import {
   changeInvertCallstack,
   changeImplementationFilter,
   changeSelectedCallNode,
+  changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 
@@ -614,13 +619,14 @@ describe('"focus-function" transform', function() {
 describe('"collapse-resource" transform', function() {
   describe('combined implementation', function() {
     /**
-     *               A                                   A
-     *             /   \                                 |
-     *            v     v        Collapse firefox        v
-     *    B:firefox    E:firefox       ->             firefox
-     *        |            |                         /       \
-     *        v            v                        D        F
-     *    C:firefox        F
+     *                A
+     *          -----´ `-----                                  A
+     *         /             \                                 |
+     *        v               v        Collapse firefox        v
+     *  B[lib:firefox]  E[lib:firefox]       ->             firefox
+     *        |               |                            /       \
+     *        v               v                           D         F
+     *  C[lib:firefox]        F
      *        |
      *        v
      *        D
@@ -629,9 +635,9 @@ describe('"collapse-resource" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A          A
-      B:firefox  E:firefox
-      C:firefox  F
+      A               A
+      B[lib:firefox]  E[lib:firefox]
+      C[lib:firefox]  F
       D
     `);
     const collapsedFuncNames = [...funcNames, 'firefox'];
@@ -657,10 +663,10 @@ describe('"collapse-resource" transform', function() {
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
         '- A (total: 2, self: —)',
-        '  - B:firefox (total: 1, self: —)',
-        '    - C:firefox (total: 1, self: —)',
+        '  - B (total: 1, self: —)',
+        '    - C (total: 1, self: —)',
         '      - D (total: 1, self: 1)',
-        '  - E:firefox (total: 1, self: —)',
+        '  - E (total: 1, self: —)',
         '    - F (total: 1, self: 1)',
       ]);
     });
@@ -684,9 +690,7 @@ describe('"collapse-resource" transform', function() {
       dispatch(
         changeSelectedCallNode(
           threadIndex,
-          ['A', 'B:firefox', 'C:firefox', 'D'].map(name =>
-            collapsedFuncNames.indexOf(name)
-          )
+          ['A', 'B', 'C', 'D'].map(name => collapsedFuncNames.indexOf(name))
         )
       );
       dispatch(addTransformToStack(threadIndex, collapseTransform));
@@ -730,10 +734,10 @@ describe('"collapse-resource" transform', function() {
       profile,
       funcNamesPerThread: [funcNames],
     } = getProfileFromTextSamples(`
-      A.js           A.js
-      B.cpp:firefox  H.cpp:firefox
-      C.js           I.js
-      D.cpp:firefox
+      A.js                A.js
+      B.cpp[lib:firefox]  H.cpp[lib:firefox]
+      C.js                I.js
+      D.cpp[lib:firefox]
       E.js
       F.cpp
       G.js
@@ -761,13 +765,13 @@ describe('"collapse-resource" transform', function() {
         formatTree(selectedThreadSelectors.getCallTree(getState()))
       ).toEqual([
         '- A.js (total: 2, self: —)',
-        '  - B.cpp:firefox (total: 1, self: —)',
+        '  - B.cpp (total: 1, self: —)',
         '    - C.js (total: 1, self: —)',
-        '      - D.cpp:firefox (total: 1, self: —)',
+        '      - D.cpp (total: 1, self: —)',
         '        - E.js (total: 1, self: —)',
         '          - F.cpp (total: 1, self: —)',
         '            - G.js (total: 1, self: 1)',
-        '  - H.cpp:firefox (total: 1, self: —)',
+        '  - H.cpp (total: 1, self: —)',
         '    - I.js (total: 1, self: 1)',
       ]);
     });
@@ -795,9 +799,7 @@ describe('"collapse-resource" transform', function() {
       dispatch(
         changeSelectedCallNode(
           threadIndex,
-          ['B.cpp:firefox', 'D.cpp:firefox'].map(name =>
-            collapsedFuncNames.indexOf(name)
-          )
+          ['B.cpp', 'D.cpp'].map(name => collapsedFuncNames.indexOf(name))
         )
       );
       dispatch(changeImplementationFilter('cpp'));
@@ -1263,6 +1265,150 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
         // Expanded nodes:
         [Z],
         [Z, X],
+      ]
+    );
+  });
+});
+
+describe('transform js allocations', function() {
+  const threadIndex = 0;
+
+  it('can render a normal call tree', function() {
+    const { profile } = getProfileWithJsAllocations();
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeCallTreeSummaryStrategy('js-allocations'));
+
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 15, self: —)',
+        '  - B (total: 15, self: —)',
+        '    - Fjs (total: 12, self: —)',
+        '      - Gjs (total: 12, self: 5)',
+        '        - Hjs (total: 7, self: —)',
+        '          - I (total: 7, self: 7)',
+        '    - C (total: 3, self: —)',
+        '      - D (total: 3, self: —)',
+        '        - E (total: 3, self: 3)',
+      ]
+    );
+  });
+
+  it('is modified when performing a transform to the stacks', function() {
+    const {
+      profile,
+      funcNamesDict: { Fjs },
+    } = getProfileWithJsAllocations();
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeCallTreeSummaryStrategy('js-allocations'));
+    dispatch(
+      addTransformToStack(threadIndex, {
+        type: 'focus-function',
+        funcIndex: Fjs,
+      })
+    );
+
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- Fjs (total: 12, self: —)',
+        '  - Gjs (total: 12, self: 5)',
+        '    - Hjs (total: 7, self: —)',
+        '      - I (total: 7, self: 7)',
+      ]
+    );
+  });
+});
+
+describe('transform native allocations', function() {
+  const threadIndex = 0;
+
+  it('can render a normal call tree', function() {
+    const { profile } = getProfileWithNativeAllocations();
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeCallTreeSummaryStrategy('native-allocations'));
+
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 15, self: —)',
+        '  - B (total: 15, self: —)',
+        '    - Fjs (total: 12, self: —)',
+        '      - Gjs (total: 12, self: 5)',
+        '        - Hjs (total: 7, self: —)',
+        '          - I (total: 7, self: 7)',
+        '    - C (total: 3, self: —)',
+        '      - D (total: 3, self: —)',
+        '        - E (total: 3, self: 3)',
+      ]
+    );
+  });
+
+  it('is modified when performing a transform to the stacks', function() {
+    const {
+      profile,
+      funcNamesDict: { Fjs },
+    } = getProfileWithNativeAllocations();
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeCallTreeSummaryStrategy('native-allocations'));
+    dispatch(
+      addTransformToStack(threadIndex, {
+        type: 'focus-function',
+        funcIndex: Fjs,
+      })
+    );
+
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- Fjs (total: 12, self: —)',
+        '  - Gjs (total: 12, self: 5)',
+        '    - Hjs (total: 7, self: —)',
+        '      - I (total: 7, self: 7)',
+      ]
+    );
+  });
+});
+
+describe('transform native deallocations', function() {
+  const threadIndex = 0;
+
+  it('can render a normal call tree', function() {
+    const { profile } = getProfileWithNativeAllocations();
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeCallTreeSummaryStrategy('native-deallocations'));
+
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: -41, self: —)',
+        '  - B (total: -41, self: —)',
+        '    - Fjs (total: -30, self: —)',
+        '      - Gjs (total: -30, self: -13)',
+        '        - Hjs (total: -17, self: —)',
+        '          - I (total: -17, self: -17)',
+        '    - C (total: -11, self: —)',
+        '      - D (total: -11, self: —)',
+        '        - E (total: -11, self: -11)',
+      ]
+    );
+  });
+
+  it('is modified when performing a transform to the stacks', function() {
+    const {
+      profile,
+      funcNamesDict: { Fjs },
+    } = getProfileWithNativeAllocations();
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeCallTreeSummaryStrategy('native-deallocations'));
+    dispatch(
+      addTransformToStack(threadIndex, {
+        type: 'focus-function',
+        funcIndex: Fjs,
+      })
+    );
+
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- Fjs (total: -30, self: —)',
+        '  - Gjs (total: -30, self: -13)',
+        '    - Hjs (total: -17, self: —)',
+        '      - I (total: -17, self: -17)',
       ]
     );
   });

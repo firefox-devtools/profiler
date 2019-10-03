@@ -6,6 +6,7 @@
 import * as React from 'react';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
 import ArrowPanel from '../../shared/ArrowPanel';
+import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 
 import type { Profile, ProfileMeta } from '../../../types/profile';
 
@@ -20,11 +21,12 @@ type Props = {
  */
 export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
   render() {
-    const meta = this.props.profile.meta;
+    const { meta, profilerOverhead } = this.props.profile;
 
     return (
       <ButtonWithPanel
         className="menuButtonsMetaInfoButton"
+        buttonClassName="menuButtonsMetaInfoButtonButton"
         label={_formatLabel(meta) || 'Profile information'}
         panel={
           <ArrowPanel className="arrowPanelOpenMetaInfo">
@@ -122,6 +124,13 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                 </div>
               ) : null}
             </div>
+            {/*
+              Older profiles(before FF 70) don't have any overhead info.
+              Don't show anything if that's the case.
+            */}
+            {profilerOverhead ? (
+              <MetaOverheadStatistics profilerOverhead={profilerOverhead} />
+            ) : null}
           </ArrowPanel>
         }
       />
@@ -139,7 +148,14 @@ function _mapMetaInfoExtensionNames(data: string[]): React.DOM {
 }
 
 function _formatDate(timestamp: number): string {
-  const timestampDate = new Date(timestamp).toUTCString();
+  const timestampDate = new Date(timestamp).toLocaleString(undefined, {
+    month: 'short',
+    year: 'numeric',
+    day: 'numeric',
+    weekday: 'short',
+    hour: 'numeric',
+    minute: 'numeric',
+  });
   return timestampDate;
 }
 

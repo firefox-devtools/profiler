@@ -12,11 +12,15 @@ import CallTreeSidebar from '../../components/sidebar/CallTreeSidebar';
 import {
   changeSelectedCallNode,
   changeInvertCallstack,
+  changeSelectedThread,
 } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getMergedProfileFromTextSamples,
+} from '../fixtures/profiles/processed-profile';
 
 import type { CallNodePath } from '../../types/profile-derived';
 
@@ -128,5 +132,40 @@ describe('CallTreeSidebar', function() {
     const categoryLabel = getByText(/Other/);
     const categoryValue = ensureExists(categoryLabel.nextElementSibling);
     expect(categoryValue.textContent).toEqual('17.5ms (100%)');
+  });
+
+  it("doesn't show implementation breakdowns when self and total time in profile is zero", () => {
+    const {
+      profile,
+      funcNamesDictPerThread: [{ A, B, D }],
+    } = getMergedProfileFromTextSamples(
+      `
+      A  A  A
+      B  B  C
+      D  E  F
+    `,
+      `
+      A  A  A
+      B  B  B
+      G  I  E
+    `
+    );
+
+    const store = storeWithProfile(profile);
+
+    store.dispatch(changeSelectedThread(2));
+    store.dispatch(changeSelectedCallNode(2, [A]));
+
+    const { queryByText, getByText } = render(
+      <Provider store={store}>
+        <CallTreeSidebar />
+      </Provider>
+    );
+
+    expect(queryByText(/Implementation/)).toBe(null);
+
+    store.dispatch(changeSelectedCallNode(2, [A, B, D]));
+
+    expect(getByText(/Implementation/)).not.toBe(null);
   });
 });

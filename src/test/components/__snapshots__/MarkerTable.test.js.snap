@@ -1,6 +1,40 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`MarkerTable renders some basic markers 1`] = `
+exports[`MarkerTable EmptyReasons shows reasons when a profile has no non-network markers 1`] = `
+<div
+  class="EmptyReasons"
+>
+  <h3>
+    The 
+    marker table
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    This thread contains no markers for this table.
+  </p>
+</div>
+`;
+
+exports[`MarkerTable EmptyReasons shows reasons when all non-network markers have been filtered out 1`] = `
+<div
+  class="EmptyReasons"
+>
+  <h3>
+    The 
+    marker table
+     is empty for “
+    Empty
+    ”
+  </h3>
+  <p>
+    All markers were filtered out by the current selection or search term.
+  </p>
+</div>
+`;
+
+exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
 <div
   aria-labelledby="marker-table-tab-button"
   class="markerTable"
@@ -14,14 +48,14 @@ exports[`MarkerTable renders some basic markers 1`] = `
       class="markerSettingsSpacer"
     />
     <div
-      class="markerSettingsSearchbar"
+      class="panelSearchField markerSettingsSearchField"
     >
       <label
-        class="markerSettingsSearchbarLabel"
+        class="panelSearchFieldLabel"
       >
         Filter Markers: 
         <form
-          class="idleSearchField markerSettingsSearchField"
+          class="idleSearchField panelSearchFieldInput"
         >
           <input
             class="idleSearchFieldInput photon-input"
@@ -38,6 +72,11 @@ exports[`MarkerTable renders some basic markers 1`] = `
             type="reset"
           />
         </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
       </label>
     </div>
   </div>
@@ -92,7 +131,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
               class="treeViewBodyInner treeViewBodyInner0InnerChunk"
             >
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -115,7 +154,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns odd "
+                class="treeViewRow treeViewRowFixedColumns odd"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -138,7 +177,7 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
               </div>
               <div
-                class="treeViewRow treeViewRowFixedColumns even "
+                class="treeViewRow treeViewRowFixedColumns even"
                 style="height: 16px; line-height: 16px;"
               >
                 <span
@@ -174,10 +213,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
               class="treeViewBodyInner treeViewBodyInner1InnerChunk"
             >
               <div
-                aria-label="foobar, running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-0"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -196,10 +234,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
               </div>
               <div
-                aria-label="NotifyDidPaint, running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns odd  "
+                class="treeViewRow treeViewRowScrolledColumns odd"
                 id="treeViewRow-1"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"
@@ -218,10 +255,9 @@ exports[`MarkerTable renders some basic markers 1`] = `
                 </span>
               </div>
               <div
-                aria-label="setTimeout — 5.5, running time is undefined (undefined), self time is undefined"
                 aria-level="1"
                 aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even  "
+                class="treeViewRow treeViewRowScrolledColumns even"
                 id="treeViewRow-2"
                 role="treeitem"
                 style="height: 16px; line-height: 16px;"

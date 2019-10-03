@@ -3,17 +3,106 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import type { Lib } from '../../../types/profile';
+import type { Lib, ProfilerOverheadStats } from '../../../types/profile';
 
 import type {
   GeckoProfile,
-  GeckoProfileMeta,
+  GeckoSubprocessProfile,
+  GeckoProfileFullMeta,
+  GeckoProfileShortMeta,
   GeckoThread,
   GeckoCounter,
   GeckoMarkerStack,
+  GeckoProfilerOverhead,
 } from '../../../types/gecko-profile';
 
-import { CURRENT_VERSION } from '../../../profile-logic/gecko-profile-versioning';
+import { GECKO_PROFILE_VERSION } from '../../../app-logic/constants';
+
+export function createGeckoMarkerStack({
+  stackIndex,
+  time,
+}: {
+  stackIndex: number | null,
+  time: number,
+}): GeckoMarkerStack {
+  const markerStack = {
+    registerTime: null,
+    unregisterTime: null,
+    processType: 'default',
+    tid: 1111,
+    pid: 2222,
+    markers: { schema: { name: 0, time: 1, category: 2, data: 3 }, data: [] },
+    name: 'SyncProfile',
+    samples: {
+      schema: {
+        stack: 0,
+        time: 1,
+        responsiveness: 2,
+      },
+      data: [],
+    },
+  };
+
+  if (stackIndex !== null) {
+    // Only add a sample if the stack exists. There have been some cases observed
+    // on profiles where a sample wasn't collected here. This is probably an error
+    // in the GeckoProfiler mechanism, but the front-end should be able to handle
+    // it. See Bug 1566576.
+    markerStack.samples.data.push([stackIndex, time, 0]);
+  }
+
+  return markerStack;
+}
+
+export function createGeckoSubprocessProfile(
+  parentProfile: GeckoProfile
+): GeckoSubprocessProfile {
+  const contentProcessMeta: GeckoProfileShortMeta = {
+    version: parentProfile.meta.version,
+    // content process was launched 1 second after parent process:
+    startTime: parentProfile.meta.startTime + 1000,
+    shutdownTime: null,
+    categories: parentProfile.meta.categories,
+  };
+
+  const contentProcessBinary: Lib = {
+    breakpadId: '9F950E2CE3CD3E1ABD06D80788B606E60',
+    debugName: 'firefox-webcontent',
+    name: 'firefox-webcontent',
+    path:
+      '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
+    debugPath:
+      '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
+    offset: 0,
+    start: 0x100000000,
+    end: 0x100000000 + 10000,
+    arch: 'x86_64',
+  };
+
+  const contentProcessProfile: GeckoSubprocessProfile = {
+    meta: contentProcessMeta,
+    pausedRanges: [],
+    libs: [contentProcessBinary, ...parentProfile.libs.slice(1)], // libs are stringified in the Gecko profile
+    pages: [
+      {
+        docshellId: '{e18794dd-3960-3543-b101-e5ed287ab617}',
+        historyId: 1,
+        url: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
+        isSubFrame: false,
+      },
+    ],
+    threads: [
+      {
+        ..._createGeckoThread(),
+        name: 'GeckoMain',
+        processType: 'tab',
+      },
+    ],
+    processes: [],
+  };
+
+  return contentProcessProfile;
+}
 
 /**
  * export defaults one object that is an example profile, in the Gecko format,
@@ -26,20 +115,6 @@ export function createGeckoProfile(): GeckoProfile {
     name: 'firefox',
     path: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox',
     debugPath: '/Applications/FirefoxNightly.app/Contents/MacOS/firefox',
-    offset: 0,
-    start: 0x100000000,
-    end: 0x100000000 + 10000,
-    arch: 'x86_64',
-  };
-
-  const contentProcessBinary: Lib = {
-    breakpadId: '9F950E2CE3CD3E1ABD06D80788B606E60',
-    debugName: 'firefox-webcontent',
-    name: 'firefox-webcontent',
-    path:
-      '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
-    debugPath:
-      '/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent',
     offset: 0,
     start: 0x100000000,
     end: 0x100000000 + 10000,
@@ -71,7 +146,7 @@ export function createGeckoProfile(): GeckoProfile {
     },
   ];
 
-  const parentProcessMeta: GeckoProfileMeta = {
+  const parentProcessMeta: GeckoProfileFullMeta = {
     abi: 'x86_64-gcc3',
     appBuildID: '20181126165837',
     interval: 1,
@@ -85,15 +160,18 @@ export function createGeckoProfile(): GeckoProfile {
     startTime: 1460221352723.438,
     shutdownTime: 1560221352723,
     toolkit: 'cocoa',
-    version: CURRENT_VERSION,
+    version: GECKO_PROFILE_VERSION,
     logicalCPUs: 8,
     physicalCPUs: 4,
     sourceURL: '',
     updateChannel: 'nightly',
+    gcpoison: 0,
+    asyncstack: 1,
     categories: [
       {
         name: 'Other',
         color: 'grey',
+        subcategories: ['Other'],
       },
     ],
     extensions: {
@@ -118,13 +196,6 @@ export function createGeckoProfile(): GeckoProfile {
     },
   };
 
-  const contentProcessMeta: GeckoProfileMeta = {
-    ...parentProcessMeta,
-    processType: 2,
-    // content process was launched 1 second after parent process:
-    startTime: parentProcessMeta.startTime + 1000,
-  };
-
   const parentProcessThreads: GeckoThread[] = [
     {
       ..._createGeckoThread(),
@@ -144,37 +215,25 @@ export function createGeckoProfile(): GeckoProfile {
     createGeckoCounter(parentProcessThreads[0]),
   ];
 
-  const contentProcessProfile: GeckoProfile = {
-    meta: contentProcessMeta,
-    pausedRanges: [],
-    libs: [contentProcessBinary].concat(extraBinaries), // libs are stringified in the Gecko profile
-    pages: [
-      {
-        docshellId: '{e18794dd-3960-3543-b101-e5ed287ab617}',
-        historyId: 1,
-        url: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
-        isSubFrame: false,
-      },
-    ],
-    threads: [
-      {
-        ..._createGeckoThread(),
-        name: 'GeckoMain',
-        processType: 'tab',
-      },
-    ],
-    processes: [],
-  };
+  const parentProcessOverhead: GeckoProfilerOverhead = createGeckoProfilerOverhead(
+    parentProcessThreads[0]
+  );
 
-  return {
+  const profile = {
     meta: parentProcessMeta,
     libs: [parentProcessBinary].concat(extraBinaries),
     pages: [],
     counters: parentProcessCounters,
+    profilerOverhead: parentProcessOverhead,
     pausedRanges: [],
     threads: parentProcessThreads,
-    processes: [contentProcessProfile],
+    processes: [],
   };
+
+  const contentProcessProfile = createGeckoSubprocessProfile(profile);
+  profile.processes.push(contentProcessProfile);
+
+  return profile;
 }
 
 function _createGeckoThread(): GeckoThread {
@@ -220,17 +279,18 @@ function _createGeckoThread(): GeckoThread {
         line: 4,
         column: 5,
         category: 6,
+        subcategory: 7,
       },
       data: [
-        [0, false, null, null, null, null], // (root)
-        [1, false, null, null, null, null], // 0x100000f84
-        [2, false, null, null, null, null], // 0x100001a45
-        [3, false, null, null, 4391, 0], // Startup::XRE_Main, line 4391, category Other
-        [7, false, 6, null, 34, null], // frobnicate, implementation 'baseline', line 34
+        [0, false, null, null, null, null, null], // (root)
+        [1, false, null, null, null, null, null], // 0x100000f84
+        [2, false, null, null, null, null, null], // 0x100001a45
+        [3, false, null, null, 4391, 0, 0], // Startup::XRE_Main, line 4391, category Other, subcategory Other
+        [7, false, 6, null, 34, null, null], // frobnicate, implementation 'baseline', line 34
       ],
     },
     markers: {
-      schema: { name: 0, time: 1, data: 2 },
+      schema: { name: 0, time: 1, category: 2, data: 3 },
       data: [
         // Please keep the next marker at the start if you add more markers in
         // this structure.
@@ -239,6 +299,7 @@ function _createGeckoThread(): GeckoThread {
         [
           10, // Rasterize
           1,
+          0, // Other
           {
             category: 'Paint',
             interval: 'end',
@@ -246,36 +307,22 @@ function _createGeckoThread(): GeckoThread {
           },
         ],
         // This marker is filtered out
-        [4, 2, { type: 'VsyncTimestamp' }],
+        [4, 2, 0, { type: 'VsyncTimestamp' }],
         [
           5, // Reflow
           3,
+          0, // Other
           {
             category: 'Paint',
             interval: 'start',
-            stack: ({
-              registerTime: null,
-              unregisterTime: null,
-              processType: 'default',
-              tid: 1111,
-              pid: 2222,
-              markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
-              name: 'SyncProfile',
-              samples: {
-                schema: {
-                  stack: 0,
-                  time: 1,
-                  responsiveness: 2,
-                },
-                data: [[2, 1, 0]], // (root), 0x100000f84, 0x100001a45
-              },
-            }: GeckoMarkerStack),
+            stack: createGeckoMarkerStack({ stackIndex: 2, time: 1 }), // (root), 0x100000f84, 0x100001a45
             type: 'tracing',
           },
         ],
         [
           10, // Rasterize
           4,
+          0, // Other
           {
             category: 'Paint',
             interval: 'start',
@@ -285,6 +332,7 @@ function _createGeckoThread(): GeckoThread {
         [
           10, // Rasterize
           5,
+          0, // Other
           {
             category: 'Paint',
             interval: 'end',
@@ -294,6 +342,7 @@ function _createGeckoThread(): GeckoThread {
         [
           5, // Reflow
           8,
+          0, // Other
           {
             category: 'Paint',
             interval: 'end',
@@ -303,6 +352,7 @@ function _createGeckoThread(): GeckoThread {
         [
           9,
           11, // Note: this marker is out of order on purpose, to test we correctly sort
+          0, // Other
           {
             // MinorGC at time 11ms from 11ms to 12ms
             type: 'GCMinor',
@@ -313,6 +363,7 @@ function _createGeckoThread(): GeckoThread {
         [
           8,
           9,
+          0, // Other
           {
             // DOMEvent at time 9ms from 9ms to 10ms, this is the start marker
             type: 'tracing',
@@ -326,6 +377,7 @@ function _createGeckoThread(): GeckoThread {
         [
           8,
           10,
+          0, // Other
           {
             // DOMEvent at time 9ms from 9ms to 10ms, this is the end marker
             type: 'tracing',
@@ -339,6 +391,7 @@ function _createGeckoThread(): GeckoThread {
         [
           11, // UserTiming
           12,
+          0, // Other
           {
             startTime: 12,
             endTime: 13,
@@ -351,11 +404,15 @@ function _createGeckoThread(): GeckoThread {
         [
           5, // Reflow
           13,
+          0, // Other
           {
             category: 'Paint',
             interval: 'start',
             stack: {
-              markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+              markers: {
+                schema: { name: 0, time: 1, category: 2, data: 3 },
+                data: [],
+              },
               name: 'SyncProfile',
               registerTime: null,
               unregisterTime: null,
@@ -377,11 +434,15 @@ function _createGeckoThread(): GeckoThread {
         [
           5, // Reflow
           14,
+          0, // Other
           {
             category: 'Paint',
             interval: 'start',
             stack: {
-              markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+              markers: {
+                schema: { name: 0, time: 1, category: 2, data: 3 },
+                data: [],
+              },
               name: 'SyncProfile',
               registerTime: null,
               unregisterTime: null,
@@ -403,6 +464,7 @@ function _createGeckoThread(): GeckoThread {
         [
           5, // Reflow
           15,
+          0, // Other
           {
             category: 'Paint',
             interval: 'end',
@@ -412,6 +474,7 @@ function _createGeckoThread(): GeckoThread {
         [
           5, // Reflow
           18,
+          0, // Other
           {
             category: 'Paint',
             interval: 'end',
@@ -421,6 +484,7 @@ function _createGeckoThread(): GeckoThread {
         [
           12, // ArbitraryName
           21,
+          0, // Other
           {
             category: 'ArbitraryCategory',
             type: 'tracing',
@@ -429,6 +493,7 @@ function _createGeckoThread(): GeckoThread {
         [
           13, // Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5
           23,
+          0, // Other
           {
             type: 'Network',
             startTime: 22,
@@ -443,6 +508,7 @@ function _createGeckoThread(): GeckoThread {
         [
           13, // Load 32: https://github.com/rustwasm/wasm-bindgen/issues/5
           24,
+          0, // Other
           {
             type: 'Network',
             startTime: 23,
@@ -466,6 +532,7 @@ function _createGeckoThread(): GeckoThread {
         [
           14, // FileIO
           24,
+          0, // Other
           {
             type: 'FileIO',
             startTime: 22,
@@ -474,7 +541,10 @@ function _createGeckoThread(): GeckoThread {
             filename: '/foo/bar/',
             operation: 'create/open',
             stack: {
-              markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+              markers: {
+                schema: { name: 0, time: 1, category: 2, data: 3 },
+                data: [],
+              },
               name: 'SyncProfile',
               registerTime: null,
               unregisterTime: null,
@@ -495,6 +565,7 @@ function _createGeckoThread(): GeckoThread {
         [
           15, // CompositorScreenshot
           25,
+          0, // Other
           {
             type: 'CompositorScreenshot',
             url: 16, // data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUD
@@ -504,12 +575,31 @@ function _createGeckoThread(): GeckoThread {
           },
         ],
 
+        [
+          17, // PreferenceRead
+          27,
+          0, // Other
+          {
+            type: 'PreferenceRead',
+            startTime: 26,
+            endTime: 27,
+            prefAccessTime: 114.9,
+            prefName: 'layout.css.dpi',
+            prefKind: 'User',
+            prefType: 'Int',
+            prefValue: '-1',
+          },
+        ],
+
         // INSERT NEW MARKERS HERE
+        // Please make sure that the marker below always have a time
+        // larger than the previous ones.
 
         // Start a tracing marker but never finish it.
         [
           10, // Rasterize
-          20,
+          28,
+          0, // Other
           {
             category: 'Paint',
             interval: 'start',
@@ -539,6 +629,7 @@ function _createGeckoThread(): GeckoThread {
       'FileIO', // 14
       'CompositorScreenshot', // 15
       'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUD', // 16
+      'PreferenceRead', // 17
     ],
   };
 }
@@ -610,21 +701,22 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
         line: 4,
         column: 5,
         category: 6,
+        subcategory: 7,
       },
       data: [
-        [0, false, null, null, null, null], // 0: (root)
-        [1, false, null, null, null, null], // 1: 0x100000f84
-        [2, false, null, null, null, null], // 2: 0x100001a45
-        [3, false, null, null, 4391, 16], // 3: Startup::XRE_Main, line 4391, category 16
-        [7, false, 6, null, 1, null], // 4: javascriptOne, implementation 'baseline', line 1
-        [8, false, 6, null, 2, null], // 5: javascriptTwo, implementation 'baseline', line 2
-        [9, false, null, null, null, null], // 6: 0x10000f0f0
-        [10, false, null, null, null, null], // 7: 0x100fefefe
-        [11, false, null, null, 3, null], // 8: javascriptThree, implementation null, line 3
+        [0, false, null, null, null, null, null], // 0: (root)
+        [1, false, null, null, null, null, null], // 1: 0x100000f84
+        [2, false, null, null, null, null, null], // 2: 0x100001a45
+        [3, false, null, null, 4391, 0, 0], // 3: Startup::XRE_Main, line 4391, category 16
+        [7, false, 6, null, 1, null, null], // 4: javascriptOne, implementation 'baseline', line 1
+        [8, false, 6, null, 2, null, null], // 5: javascriptTwo, implementation 'baseline', line 2
+        [9, false, null, null, null, null, null], // 6: 0x10000f0f0
+        [10, false, null, null, null, null, null], // 7: 0x100fefefe
+        [11, false, null, null, 3, null, null], // 8: javascriptThree, implementation null, line 3
       ],
     },
     markers: {
-      schema: { name: 0, time: 1, data: 2 },
+      schema: { name: 0, time: 1, category: 2, data: 3 },
       data: [],
     },
     stringTable: [
@@ -645,7 +737,7 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
 }
 
 export function createGeckoCounter(thread: GeckoThread): GeckoCounter {
-  const geckoCounter: GeckoCounter = {
+  const geckoCounter = {
     name: 'My Counter',
     category: 'My Category',
     description: 'My Description',
@@ -671,4 +763,99 @@ export function createGeckoCounter(thread: GeckoThread): GeckoCounter {
     geckoCounter.sample_groups.samples.data.push([time, number, count]);
   }
   return geckoCounter;
+}
+
+export function createGeckoProfilerOverhead(
+  thread: GeckoThread
+): GeckoProfilerOverhead {
+  // Helper class to calculate statistics.
+  class ProfilerStats {
+    n = 0;
+    sum = 0;
+    min = Number.MAX_SAFE_INTEGER;
+    max = 0;
+    count(val: number) {
+      ++this.n;
+      this.sum += val;
+      if (val < this.min) {
+        this.min = val;
+      }
+      if (val > this.max) {
+        this.max = val;
+      }
+    }
+  }
+
+  const intervals = new ProfilerStats();
+  const overheads = new ProfilerStats();
+  const lockings = new ProfilerStats();
+  const cleanings = new ProfilerStats();
+  const counters = new ProfilerStats();
+  const threads = new ProfilerStats();
+
+  // Fill the profiler overhead data.
+  const data = [];
+  for (let i = 0; i < thread.samples.data.length; i++) {
+    // Go through all the thread samples and create a corresponding counter entry.
+    const time = thread.samples.data[i][1] * 1000;
+    const prevTime = i === 0 ? 0 : thread.samples.data[i - 1][1] * 1000;
+    // Create some arbitrary (positive integer) values for the individual overheads.
+    const lockingTime = Math.floor(50 * Math.sin(i) + 50);
+    const cleaningTime = Math.floor(50 * Math.sin(i) + 55);
+    const counterTime = Math.floor(50 * Math.sin(i) + 60);
+    const threadTime = Math.floor(50 * Math.sin(i) + 65);
+    const interval = time - prevTime;
+
+    intervals.count(interval);
+    lockings.count(lockingTime);
+    cleanings.count(cleaningTime);
+    counters.count(counterTime);
+    threads.count(threadTime);
+    overheads.count(lockingTime + cleaningTime + counterTime + threadTime);
+
+    data.push([time, lockingTime, cleaningTime, counterTime, threadTime]);
+  }
+
+  const profiledDuration =
+    thread.samples.data[thread.samples.data.length - 1][1] -
+    thread.samples.data[0][1];
+  const statistics: ProfilerOverheadStats = {
+    profiledDuration,
+    samplingCount: overheads.n,
+    overheadDurations: overheads.sum,
+    overheadPercentage: overheads.sum / profiledDuration,
+    // Individual statistics
+    maxCleaning: cleanings.max,
+    maxCounter: counters.max,
+    maxInterval: intervals.max,
+    maxLockings: lockings.max,
+    maxOverhead: overheads.max,
+    maxThread: threads.max,
+    meanCleaning: cleanings.sum / cleanings.n,
+    meanCounter: counters.sum / counters.n,
+    meanInterval: intervals.sum / intervals.n,
+    meanLockings: lockings.sum / lockings.n,
+    meanOverhead: overheads.sum / overheads.n,
+    meanThread: threads.sum / threads.n,
+    minCleaning: cleanings.min,
+    minCounter: counters.min,
+    minInterval: intervals.min,
+    minLockings: lockings.min,
+    minOverhead: overheads.min,
+    minThread: threads.min,
+  };
+
+  return {
+    samples: {
+      schema: {
+        time: 0,
+        locking: 1,
+        expiredMarkerCleaning: 2,
+        counters: 3,
+        threads: 4,
+      },
+      data: data,
+    },
+    statistics: statistics,
+  };
 }
