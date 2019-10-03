@@ -23,8 +23,6 @@ import {
   getMouseEvent,
 } from '../fixtures/utils';
 
-import { BLUE_50, BLUE_60 } from 'photon-colors';
-
 import { getVisualProgressTrackProfile } from '../fixtures/profiles/processed-profile';
 
 // The following constants determine the size of the drawn graph.
@@ -74,9 +72,6 @@ describe('TrackVisualProgress', function() {
       <Provider store={store}>
         <TrackVisualProgress
           progressGraphData={VisualProgress}
-          graphStrokeColor={BLUE_50}
-          graphFillColor="#0a84ff88" // Blue 50 with transparency.
-          graphDotColor={BLUE_60}
           graphDotTooltipText=" visual completeness at this time"
           windowId="0"
         />

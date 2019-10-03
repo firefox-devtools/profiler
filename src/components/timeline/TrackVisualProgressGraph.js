@@ -11,6 +11,7 @@ import { formatPercent } from '../../utils/format-numbers';
 import { getCommittedRange, getProfileInterval } from '../../selectors/profile';
 import Tooltip from '../tooltip/Tooltip';
 import bisection from 'bisection';
+import { BLUE_50, BLUE_60 } from 'photon-colors';
 
 import type { ProgressGraphData } from '../../types/profile';
 import type { Milliseconds, CssPixels } from '../../types/units';
@@ -30,8 +31,6 @@ type CanvasProps = {|
   +width: CssPixels,
   +height: CssPixels,
   +lineWidth: CssPixels,
-  +graphStrokeColor: string,
-  +graphFillColor: string,
 |};
 
 /**
@@ -52,8 +51,6 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
       width,
       lineWidth,
       interval,
-      graphStrokeColor,
-      graphFillColor,
     } = this.props;
     if (width === 0) {
       // This is attempting to draw before the canvas was laid out.
@@ -86,8 +83,8 @@ class TrackVisualProgressCanvas extends React.PureComponent<CanvasProps> {
       // Draw the chart.
       const rangeLength = rangeEnd - rangeStart;
       ctx.lineWidth = deviceLineWidth;
-      ctx.strokeStyle = graphStrokeColor;
-      ctx.fillStyle = graphFillColor;
+      ctx.strokeStyle = BLUE_50;
+      ctx.fillStyle = '#0a84ff88'; // Blue 50 with transparency.
       ctx.beginPath();
 
       // The x and y are used after the loop.
@@ -171,9 +168,6 @@ type OwnProps = {|
   +progressGraphData: ProgressGraphData[],
   +lineWidth: CssPixels,
   +graphHeight: CssPixels,
-  +graphStrokeColor: string,
-  +graphFillColor: string,
-  +graphDotColor: string,
   +graphDotTooltipText: string,
 |};
 
@@ -278,7 +272,6 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
       graphHeight,
       width,
       lineWidth,
-      graphDotColor,
     } = this.props;
     const rangeLength = rangeEnd - rangeStart;
     const left =
@@ -292,7 +285,7 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
 
     return (
       <div
-        style={{ left, top, '--dot-color': graphDotColor }}
+        style={{ left, top, '--dot-color': BLUE_60 }}
         className="timelineTrackVisualProgressGraphDot"
       />
     );
@@ -308,8 +301,6 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
       width,
       lineWidth,
       progressGraphData,
-      graphStrokeColor,
-      graphFillColor,
     } = this.props;
 
     return (
@@ -326,8 +317,6 @@ class TrackVisualProgressGraphImpl extends React.PureComponent<Props, State> {
           width={width}
           lineWidth={lineWidth}
           interval={interval}
-          graphStrokeColor={graphStrokeColor}
-          graphFillColor={graphFillColor}
         />
         {hoveredVisualProgress === null ? null : (
           <>

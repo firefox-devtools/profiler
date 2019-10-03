@@ -22,9 +22,6 @@ import './TrackVisualProgress.css';
 
 type OwnProps = {|
   +progressGraphData: ProgressGraphData[],
-  +graphStrokeColor: string,
-  +graphFillColor: string,
-  +graphDotColor: string,
   +graphDotTooltipText: string,
   +windowId: string,
 |};
@@ -50,13 +47,7 @@ type State = {||};
  */
 export class TrackVisualProgressImpl extends React.PureComponent<Props, State> {
   render() {
-    const {
-      progressGraphData,
-      graphStrokeColor,
-      graphFillColor,
-      graphDotColor,
-      graphDotTooltipText,
-    } = this.props;
+    const { progressGraphData, graphDotTooltipText } = this.props;
     return (
       <div
         className="timelineTrackVisualProgress"
@@ -69,9 +60,6 @@ export class TrackVisualProgressImpl extends React.PureComponent<Props, State> {
           progressGraphData={progressGraphData}
           lineWidth={TRACK_VISUAL_PROGRESS_LINE_WIDTH}
           graphHeight={TRACK_VISUAL_PROGRESS_HEIGHT}
-          graphStrokeColor={graphStrokeColor}
-          graphFillColor={graphFillColor}
-          graphDotColor={graphDotColor}
           graphDotTooltipText={graphDotTooltipText}
         />
       </div>

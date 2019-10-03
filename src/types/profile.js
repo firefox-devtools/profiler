@@ -440,15 +440,15 @@ export type ProgressGraphData = {|
  */
 export type VisualMetrics = {|
   // ContentfulSpeedIndex and ContentfulSpeedIndexProgress generated here
-  // https://github.com/mozilla/browsertime/blob/master/vendor/visualmetrics.py#L1331
+  // https://github.com/mozilla/browsertime/blob/f453e93152003c7befb9a062feab86e25a4e9550/vendor/visualmetrics.py#L1330
   ContentfulSpeedIndex: number,
   ContentfulSpeedIndexProgress: ProgressGraphData[],
   // PerceptualSpeedIndex and PerceptualSpeedIndexProgress generated here
-  // https://github.com/mozilla/browsertime/blob/master/vendor/visualmetrics.py#L1320
+  // https://github.com/mozilla/browsertime/blob/f453e93152003c7befb9a062feab86e25a4e9550/vendor/visualmetrics.py#L1319
   PerceptualSpeedIndex: number,
   PerceptualSpeedIndexProgress: ProgressGraphData[],
   // FirstVisualChange, LastVisualChange, SpeedIndex generated here
-  // https://github.com/mozilla/browsertime/blob/master/vendor/visualmetrics.py#L1312
+  // https://github.com/mozilla/browsertime/blob/f453e93152003c7befb9a062feab86e25a4e9550/vendor/visualmetrics.py#L1310
   FirstVisualChange: number,
   LastVisualChange: number,
   SpeedIndex: number,

@@ -36,14 +36,6 @@ import TimelineLocalTrack from './LocalTrack';
 import { TrackVisualProgress } from './TrackVisualProgress';
 import Reorderable from '../shared/Reorderable';
 import { TRACK_PROCESS_BLANK_HEIGHT } from '../../app-logic/constants';
-import {
-  BLUE_50,
-  BLUE_60,
-  GREEN_50,
-  GREEN_60,
-  RED_50,
-  RED_60,
-} from 'photon-colors';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
 import type { GlobalTrackReference } from '../../types/actions';
@@ -142,9 +134,6 @@ class GlobalTrackComponent extends PureComponent<Props> {
         return (
           <TrackVisualProgress
             progressGraphData={progressGraphData}
-            graphStrokeColor={BLUE_50}
-            graphFillColor="#0a84ff88" // Blue 50 with transparency.
-            graphDotColor={BLUE_60}
             graphDotTooltipText=" visual completeness at this time"
             windowId={globalTrack.id}
           />
@@ -157,9 +146,6 @@ class GlobalTrackComponent extends PureComponent<Props> {
         return (
           <TrackVisualProgress
             progressGraphData={progressGraphData}
-            graphStrokeColor={GREEN_50}
-            graphFillColor="#30e60b88" // Green 50 with transparency.
-            graphDotColor={GREEN_60}
             graphDotTooltipText=" perceptual visual completeness at this time"
             windowId={globalTrack.id}
           />
@@ -172,9 +158,6 @@ class GlobalTrackComponent extends PureComponent<Props> {
         return (
           <TrackVisualProgress
             progressGraphData={progressGraphData}
-            graphStrokeColor={RED_50}
-            graphFillColor="#ff003988" // Red 50 with transparency.
-            graphDotColor={RED_60}
             graphDotTooltipText=" contentful visual completeness at this time"
             windowId={globalTrack.id}
           />
@@ -319,12 +302,15 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       case 'screenshots':
         break;
       case 'visual-progress':
+        titleText = 'Visual Progress';
         progressGraphData = getVisualProgress(state);
         break;
       case 'perceptual-visual-progress':
+        titleText = 'Perceptual Visual Progress';
         progressGraphData = getPerceptualSpeedIndexProgress(state);
         break;
       case 'contentful-visual-progress':
+        titleText = 'Contentful Visual Progress';
         progressGraphData = getContentfulSpeedIndexProgress(state);
         break;
       default:
