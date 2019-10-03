@@ -50,6 +50,13 @@ export class MetaOverheadStatistics extends React.PureComponent<Props> {
 
     for (const overhead of profilerOverhead) {
       const { statistics } = overhead;
+
+      // Statistics can be undefined in case there is no sample in the
+      // profilerOverhead object. Ignore it and continue if that's the case.
+      if (statistics === undefined) {
+        continue;
+      }
+
       const { samplingCount } = statistics;
 
       // Calculation the single values without any loop, it's not worth it.
