@@ -360,7 +360,8 @@ export type ProfilerOverheadSamplesTable = {|
  */
 export type ProfilerOverhead = {|
   samples: ProfilerOverheadSamplesTable,
-  statistics: ProfilerOverheadStats,
+  // There is no statistics object if there is no sample.
+  statistics?: ProfilerOverheadStats,
   pid: Pid,
   mainThreadIndex: ThreadIndex,
 |};
