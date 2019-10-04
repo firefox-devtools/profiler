@@ -53,14 +53,14 @@ describe('TooltipMarker', function() {
 
     // Connect a page to one of the markers so that we render a URL in
     // its tooltip.
-    const docShellId = '{c03a6ebd-2430-7949-b25b-95ba9776bdbf}';
-    const docshellHistoryId = 1;
+    const browsingContextID = 123123;
+    const innerWindowID = 1;
     profile.pages = [
       {
-        docshellId: docShellId,
-        historyId: docshellHistoryId,
+        browsingContextID: browsingContextID,
+        innerWindowID: innerWindowID,
         url: 'https://developer.mozilla.org/en-US/',
-        isSubFrame: false,
+        embedderInnerWindowID: 0,
       },
     ];
     profile.threads[0].name = 'Main Thread';
@@ -77,8 +77,7 @@ describe('TooltipMarker', function() {
           eventType: 'commandupdate',
           interval: 'start',
           phase: 2,
-          docShellId,
-          docshellHistoryId,
+          innerWindowID: innerWindowID,
         },
       ],
       [
