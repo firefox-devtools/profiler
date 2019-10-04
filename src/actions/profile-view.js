@@ -250,7 +250,10 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
           break;
         }
         case 'screenshots':
-          // Do not allow selecting screenshots.
+        case 'visual-progress':
+        case 'perceptual-visual-progress':
+        case 'contentful-visual-progress':
+          // Do not allow selecting these tracks.
           return;
         default:
           throw assertExhaustiveCheck(

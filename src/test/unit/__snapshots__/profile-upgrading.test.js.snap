@@ -87,6 +87,7 @@ Object {
     "toolkit": undefined,
     "updateChannel": undefined,
     "version": 16,
+    "visualMetrics": undefined,
   },
   "pages": Array [],
   "profilerOverhead": Array [],
