@@ -238,7 +238,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
     const isGlobalTrackHidden = hiddenGlobalTracks.has(globalTrackIndex);
     const localTrackOrder = localTrackOrderByPid.get(pid);
-    console.log('localTrackOrder', localTrackOrder);
     const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
     const localTrackNames = localTrackNamesByPid.get(pid);
 
@@ -504,7 +503,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
         {isolateScreenshot}
         {separator}
         {globalTrackOrder.map(globalTrackIndex => {
-          console.log('Global Track Index', globalTrackIndex);
           const globalTrack = globalTracks[globalTrackIndex];
           return (
             <div key={globalTrackIndex}>
