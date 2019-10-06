@@ -282,5 +282,39 @@ describe('app/MenuButtons', function() {
 
       expect(container.firstChild).toMatchSnapshot();
     });
+
+    it('with no statistics object should not make the app crash', async () => {
+      jest.useFakeTimers();
+      jest
+        .spyOn(Date.prototype, 'toLocaleString')
+        .mockImplementation(function() {
+          // eslint-disable-next-line babel/no-invalid-this
+          return 'toLocaleString ' + this.toUTCString();
+        });
+      // Using gecko profile because it has metadata and profilerOverhead data in it.
+      const profile = processProfile(createGeckoProfile());
+
+      // We are removing statistics objects from all overhead objects to test
+      // the robustness of our handling code.
+      if (profile.profilerOverhead) {
+        for (const overhead of profile.profilerOverhead) {
+          delete overhead.statistics;
+        }
+      }
+
+      const store = storeWithProfile(profile);
+
+      const { container, getByValue } = render(
+        <Provider store={store}>
+          <MenuButtonsMetaInfo profile={profile} />
+        </Provider>
+      );
+
+      const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
+      fireEvent.click(metaInfoButton);
+      jest.runAllTimers();
+
+      expect(container.firstChild).toMatchSnapshot();
+    });
   });
 });

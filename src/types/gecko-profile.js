@@ -201,7 +201,8 @@ export type GeckoProfilerOverhead = {|
       [Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds, Nanoseconds]
     >,
   |},
-  statistics: ProfilerOverheadStats,
+  // There is no statistics object if there is no sample.
+  statistics?: ProfilerOverheadStats,
 |};
 
 /* This meta object is used in subprocesses profiles.
