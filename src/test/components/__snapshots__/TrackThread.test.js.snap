@@ -8,9 +8,13 @@ exports[`timeline/TrackThread matches the snapshot 1`] = `
     class="timelineMarkers selected"
     data-testid="TimelineMarkersJank"
   >
-    <canvas
-      class="timelineMarkersCanvas"
-    />
+    <div
+      class="react-contextmenu-wrapper"
+    >
+      <canvas
+        class="timelineMarkersCanvas"
+      />
+    </div>
   </div>
   <div
     class="threadStackGraph"

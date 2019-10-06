@@ -15,7 +15,8 @@ import {
   getPreviewSelection,
   getCommittedRange,
 } from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getThreadSelectors } from '../../selectors/per-thread';
+import { getThreadIndexWithSelectedMarker } from '../../selectors/per-thread/thread';
 import copy from 'copy-to-clipboard';
 
 import type { Marker } from '../../types/profile-derived';
@@ -26,7 +27,11 @@ import type {
 } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
 import { getImplementationFilter } from '../../selectors/url-state';
-import type { Thread, IndexIntoStackTable } from '../../types/profile';
+import type {
+  Thread,
+  ThreadIndex,
+  IndexIntoStackTable,
+} from '../../types/profile';
 import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
 import {
   convertStackToCallNodePath,
@@ -38,8 +43,11 @@ type StateProps = {|
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
   +selectedMarker: Marker | null,
-  +thread: Thread,
+  +threadIndex: ThreadIndex | null,
+  +thread: Thread | null,
   +implementationFilter: ImplementationFilter,
+
+  +selectedMarkerIndex: any,
 |};
 
 type DispatchProps = {|
@@ -126,6 +134,10 @@ class MarkerContextMenu extends PureComponent<Props> {
   _convertStackToString(stack: IndexIntoStackTable): string {
     const { thread, implementationFilter } = this.props;
 
+    if (thread === null) {
+      return '';
+    }
+
     const callNodePath = filterCallNodePathByImplementation(
       thread,
       implementationFilter,
@@ -136,6 +148,7 @@ class MarkerContextMenu extends PureComponent<Props> {
       callNodePath,
       thread
     );
+
     return funcNamesAndOrigins
       .map(({ funcName, origin }) => `${funcName} [${origin}]`)
       .join('\n');
@@ -192,7 +205,7 @@ class MarkerContextMenu extends PureComponent<Props> {
   // somewhere else.
   // This is the order of events in such a situation:
   // 0. The menu is open somewhere, it means the user right clicked somewhere
-  //     previously, and as a result some marker has the "right clicked" status.
+  //    previously, and as a result some marker has the "right clicked" status.
   // 1. The user right clicks on another marker. This is actually happening in
   //    several events, the first event is "mousedown": this is where our own
   //    components react for right click (both our TreeView and our charts)
@@ -216,13 +229,17 @@ class MarkerContextMenu extends PureComponent<Props> {
   _onHide = () => {
     this._hidingTimeout = setTimeout(() => {
       this._hidingTimeout = null;
-      this.props.setContextMenuVisibility(false);
+      if (this.props.threadIndex !== null) {
+        this.props.setContextMenuVisibility(false, this.props.threadIndex);
+      }
     });
   };
 
   _onShow = () => {
     clearTimeout(this._hidingTimeout);
-    this.props.setContextMenuVisibility(true);
+    if (this.props.threadIndex !== null) {
+      this.props.setContextMenuVisibility(true, this.props.threadIndex);
+    }
   };
 
   render() {
@@ -264,13 +281,25 @@ class MarkerContextMenu extends PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    previewSelection: getPreviewSelection(state),
-    committedRange: getCommittedRange(state),
-    thread: selectedThreadSelectors.getThread(state),
-    implementationFilter: getImplementationFilter(state),
-    selectedMarker: selectedThreadSelectors.getRightClickedMarker(state),
-  }),
+  mapStateToProps: state => {
+    const threadIndex = getThreadIndexWithSelectedMarker(state);
+    const threadSelectors =
+      threadIndex !== null ? getThreadSelectors(threadIndex) : null;
+
+    return {
+      previewSelection: getPreviewSelection(state),
+      committedRange: getCommittedRange(state),
+      implementationFilter: getImplementationFilter(state),
+      threadIndex,
+      thread: threadSelectors ? threadSelectors.getThread(state) : null,
+      selectedMarker: threadSelectors
+        ? threadSelectors.getRightClickedMarker(state)
+        : null,
+      selectedMarkerIndex: threadSelectors
+        ? threadSelectors.getRightClickedMarkerIndex(state)
+        : null,
+    };
+  },
   mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
   component: MarkerContextMenu,
 });

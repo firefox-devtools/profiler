@@ -68,7 +68,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
   // somewhere else.
   // This is the order of events in such a situation:
   // 0. The menu is open somewhere, it means the user right clicked somewhere
-  //     previously, and as a result some node has the "right clicked" status.
+  //    previously, and as a result some node has the "right clicked" status.
   // 1. The user right clicks on another node. This is actually happening in
   //    several events, the first event is "mousedown": this is where our own
   //    components react for right click (both our TreeView and our charts)
@@ -89,13 +89,13 @@ class CallNodeContextMenu extends PureComponent<Props> {
   //    just a bit, just in case we get a `_onShow` call right after that.
   _onShow = () => {
     clearTimeout(this._hidingTimeout);
-    this.props.setContextMenuVisibility(true);
+    this.props.setContextMenuVisibility(true, this.props.threadIndex);
   };
 
   _onHide = () => {
     this._hidingTimeout = setTimeout(() => {
       this._hidingTimeout = null;
-      this.props.setContextMenuVisibility(false);
+      this.props.setContextMenuVisibility(false, this.props.threadIndex);
     });
   };
 

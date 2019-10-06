@@ -35,6 +35,17 @@ export type ThreadSelectorsPerThread = $ReturnType<
   typeof getThreadSelectorsPerThread
 >;
 
+export const getThreadIndexWithSelectedMarker: Selector<ThreadIndex | null> = createSelector(
+  ProfileSelectors.getProfileViewOptions,
+  viewOptions => {
+    const threadIndex = viewOptions.perThread.findIndex(
+      thread => thread.rightClickedMarker !== null
+    );
+
+    return threadIndex === -1 ? null : threadIndex;
+  }
+);
+
 /**
  * Create the selectors for a thread that have to do with an entire thread. This includes
  * the general filtering pipeline for threads.

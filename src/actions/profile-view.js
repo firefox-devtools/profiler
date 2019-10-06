@@ -338,15 +338,13 @@ export function changeRightClickedTrack(
 }
 
 export function setContextMenuVisibility(
-  isVisible: boolean
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const selectedThreadIndex = getSelectedThreadIndex(getState());
-    dispatch({
-      type: 'SET_CONTEXT_MENU_VISIBILITY',
-      threadIndex: selectedThreadIndex,
-      isVisible,
-    });
+  isVisible: boolean,
+  threadIndex: ThreadIndex
+): Action {
+  return {
+    type: 'SET_CONTEXT_MENU_VISIBILITY',
+    threadIndex,
+    isVisible,
   };
 }
 

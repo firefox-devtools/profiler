@@ -29,9 +29,13 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
           class="timelineMarkers timelineMarkersMemory"
           data-testid="TimelineMarkersMemory"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
         <div
           class="timelineTrackMemoryGraph"
@@ -141,9 +145,13 @@ process: \\"tab\\" (222)"
           class="timelineMarkers"
           data-testid="TimelineMarkersJank"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
         <div
           class="threadActivityGraph"

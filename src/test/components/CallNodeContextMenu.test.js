@@ -42,7 +42,7 @@ describe('calltree/CallNodeContextMenu', function() {
   }
 
   function setup(store = createStore(), openMenuState = true) {
-    store.dispatch(setContextMenuVisibility(openMenuState));
+    store.dispatch(setContextMenuVisibility(openMenuState, 0));
 
     const renderResult = render(
       <Provider store={store}>
