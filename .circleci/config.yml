@@ -1,24 +1,79 @@
-version: 2
+version: 2.1
 jobs:
-  build:
+  deps:
     docker:
       - image: circleci/node:10.15
     steps:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
-          - v1-dependencies-{{ checksum "package.json" }}
-          - v1-dependencies-
+            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
       - run: yarn install
       - save_cache:
           paths:
+            - .git
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+
+  lint:
+    docker:
+      - image: circleci/node:10.15
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - run: yarn lint
+
+  tests:
+    docker:
+      - image: circleci/node:10.15
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - run: yarn test --coverage --runInBand
+      - run: bash <(curl -s https://codecov.io/bash)
+
+  build-prod:
+    docker:
+      - image: circleci/node:10.15
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - run: yarn build-prod:quiet
+
+  others:
+    docker:
+      - image: circleci/node:10.15
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - run: yarn flow:ci
       - run: yarn license-check
       - run: yarn test-alex
-      - run: yarn lint
-      - run: yarn flow:ci
-      - run: yarn test --coverage --runInBand
-      - run: yarn build-prod:quiet
-      - run: bash <(curl -s https://codecov.io/bash)
+
+workflows:
+  version: 2
+  master:
+    jobs:
+      - deps
+      - tests:
+          requires:
+            - deps
+      - lint:
+          requires:
+            - deps
+      - build-prod:
+          requires:
+            - deps
+      - others:
+          requires:
+            - deps
