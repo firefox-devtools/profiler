@@ -455,7 +455,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     if (rightClickedTrack.type === 'local') {
       return null;
     }
-    
+
     const track = globalTracks[rightClickedTrack.trackIndex];
     if (track.type !== 'screenshots') {
       // Only process screenshot tracks
