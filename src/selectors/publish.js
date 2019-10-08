@@ -10,6 +10,7 @@ import {
   getCommittedRange,
   getGlobalTracks,
   getLocalTracksByPid,
+  getHasPreferenceMarkers,
 } from './profile';
 import { compress } from '../utils/gz';
 import { serializeProfile } from '../profile-logic/process-profile';
@@ -69,6 +70,7 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
   getHiddenLocalTracksByPid,
   getGlobalTracks,
   getLocalTracksByPid,
+  getHasPreferenceMarkers,
   (
     checkedSharingOptions,
     profile,
@@ -76,11 +78,19 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
     hiddenGlobalTracks,
     hiddenLocalTracksByPid,
     globalTracks,
-    localTracksByPid
+    localTracksByPid,
+    hasPreferenceMarkers
   ) => {
     let isIncludingEverything = true;
-    for (const value of Object.values(checkedSharingOptions)) {
-      isIncludingEverything = isIncludingEverything && value;
+    for (const prop in checkedSharingOptions) {
+      // Do not include preference values checkbox if it's hidden.
+      // Even though `includePreferenceValues` is not taken into account, it's
+      // is false, if the profile updateChannel is not nightly or custom build.
+      if (prop === 'includePreferenceValues' && !hasPreferenceMarkers) {
+        continue;
+      }
+      isIncludingEverything =
+        isIncludingEverything && checkedSharingOptions[prop];
     }
     if (isIncludingEverything) {
       // No sanitization is happening, bail out early.
