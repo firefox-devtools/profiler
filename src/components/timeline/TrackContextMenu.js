@@ -252,7 +252,6 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       );
       return null;
     }
-
     return localTrackOrder.map(trackIndex => (
       <MenuItem
         key={trackIndex}
