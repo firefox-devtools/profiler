@@ -254,7 +254,7 @@ export type CategoryList = Array<Category>;
  * used to navigate over many pages and they are not unique for frames. The
  * Inner Window IDs represent JS `window` objects in each Document. And they are
  * unique for each frame. That's why it's enough to keep only inner Window IDs
- * inside marker payloads.
+ * inside marker payloads. 0 means null(no embedder) for Embedder Window ID.
  *
  * The unique value for a page is innerWindowID.
  */
@@ -262,6 +262,7 @@ export type Page = {|
   browsingContextID: number,
   innerWindowID: number,
   url: string,
+  // 0 means no embedder
   embedderInnerWindowID: number,
 |};
 
