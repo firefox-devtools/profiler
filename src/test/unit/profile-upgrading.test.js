@@ -165,7 +165,7 @@ describe('upgrading processed profiles', function() {
   });
   it('should upgrade processed-3.json all the way to the current version', async function() {
     // This tests:
-    //  - Doesn't test anything yet.
+    //  - Upgrading pages array and page information inside markers
     await testProfileUpgrading(
       require('../fixtures/upgrades/processed-3.json')
     );
