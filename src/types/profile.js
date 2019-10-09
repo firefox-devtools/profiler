@@ -248,20 +248,22 @@ export type Category = {|
 export type CategoryList = Array<Category>;
 
 /**
- * A Page describes all of the pages the browser profiled. In Firefox, there exists
- * the idea of a docshell, which a large collection of useful things associated
- * with a particular tab or iframe. However, this docshell can be used to navigate
- * over many pages. The historyId property represents current history position
- * of that given the docshell.
+ * A Page describes the page the browser profiled. In Firefox, there exists
+ * the idea of a Browsing Context, which a large collection of useful things
+ * associated with a particular tab. However, the same Browsing Context can be
+ * used to navigate over many pages and they are not unique for frames. The
+ * Inner Window IDs represent JS `window` objects in each Document. And they are
+ * unique for each frame. That's why it's enough to keep only inner Window IDs
+ * inside marker payloads. 0 means null(no embedder) for Embedder Window ID.
  *
- * The unique value for a page is then represented by the combination of the docshellId
- * and the historyId.
+ * The unique value for a page is innerWindowID.
  */
 export type Page = {|
-  docshellId: string,
-  historyId: number,
+  browsingContextID: number,
+  innerWindowID: number,
   url: string,
-  isSubFrame: boolean,
+  // 0 means no embedder
+  embedderInnerWindowID: number,
 |};
 
 export type PageList = Array<Page>;

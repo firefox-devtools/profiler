@@ -55,6 +55,20 @@
       "name": "examplebinary2"
     }
   ],
+  "pages": [
+    {
+      "docshellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+      "historyId": 1,
+      "url": "https://github.com/rustwasm/wasm-bindgen/issues/1",
+      "isSubFrame": false
+    },
+    {
+      "docshellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+      "historyId": 2,
+      "url": "https://github.com/rustwasm/wasm-bindgen/issues/2",
+      "isSubFrame": false
+    }
+  ],
   "processes": [
     {
       "threads": [
@@ -178,7 +192,9 @@
                   "category": "DOMEvent",
                   "interval": "start",
                   "eventType": "mouseout",
-                  "phase": 3
+                  "phase": 3,
+                  "docShellId": "{d03a6ebd-2430-7949-b25b-95ba9776adae}",
+                  "docshellHistoryId": 1
                 }
               ],
               [
@@ -189,7 +205,9 @@
                   "category": "DOMEvent",
                   "interval": "end",
                   "eventType": "mouseout",
-                  "phase": 3
+                  "phase": 3,
+                  "docShellId": "{d03a6ebd-2430-7949-b25b-95ba9776adae}",
+                  "docshellHistoryId": 1
                 }
               ],
               [
@@ -294,6 +312,20 @@
           "breakpadId": "100000000000000000000000000000A27",
           "debugPath": ""
         }
+      ],
+      "pages": [
+        {
+          "docshellId": "{d03a6ebd-2430-7949-b25b-95ba9776adae}",
+          "historyId": 1,
+          "url": "https://profiler.firefox.com",
+          "isSubFrame": false
+        },
+        {
+          "docshellId": "{d03a6ebd-2430-7949-b25b-95ba9776adae}",
+          "historyId": 2,
+          "url": "about:blank",
+          "isSubFrame": true
+        }
       ]
     }
   ],
@@ -371,7 +403,9 @@
               "category": "DOMEvent",
               "interval": "start",
               "eventType": "mouseout",
-              "phase": 3
+              "phase": 3,
+              "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+              "docshellHistoryId": 1
             }
           ],
           [
@@ -382,7 +416,9 @@
               "category": "DOMEvent",
               "interval": "end",
               "eventType": "mouseout",
-              "phase": 3
+              "phase": 3,
+              "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+              "docshellHistoryId": 1
             }
           ],
           [
@@ -523,7 +559,9 @@
               "category": "DOMEvent",
               "interval": "start",
               "eventType": "mouseout",
-              "phase": 3
+              "phase": 3,
+              "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+              "docshellHistoryId": 2
             }
           ],
           [
@@ -534,7 +572,9 @@
               "category": "DOMEvent",
               "interval": "end",
               "eventType": "mouseout",
-              "phase": 3
+              "phase": 3,
+              "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+              "docshellHistoryId": 2
             }
           ]
         ]
