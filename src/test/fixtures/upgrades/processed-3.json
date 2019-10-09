@@ -1,0 +1,1308 @@
+{
+  "meta": {
+    "abi": "x86_64-gcc3",
+    "interval": 1,
+    "misc": "rv:48.0",
+    "oscpu": "Intel Mac OS X 10.11",
+    "platform": "Macintosh",
+    "processType": 0,
+    "product": "Firefox",
+    "stackwalk": 1,
+    "startTime": 1460221352723.438,
+    "toolkit": "cocoa",
+    "version": 4,
+    "preprocessedProfileVersion": 24,
+    "categories": [
+      {
+        "name": "Idle",
+        "color": "transparent",
+        "subcategories": [
+          "Other"
+        ]
+      },
+      {
+        "name": "Other",
+        "color": "grey",
+        "subcategories": [
+          "Other"
+        ]
+      },
+      {
+        "name": "JavaScript",
+        "color": "yellow",
+        "subcategories": [
+          "Other"
+        ]
+      },
+      {
+        "name": "Layout",
+        "color": "purple",
+        "subcategories": [
+          "Other"
+        ]
+      },
+      {
+        "name": "Graphics",
+        "color": "green",
+        "subcategories": [
+          "Other"
+        ]
+      },
+      {
+        "name": "DOM",
+        "color": "blue",
+        "subcategories": [
+          "Other"
+        ]
+      },
+      {
+        "name": "GC / CC",
+        "color": "orange",
+        "subcategories": [
+          "Other"
+        ]
+      },
+      {
+        "name": "Network",
+        "color": "lightblue",
+        "subcategories": [
+          "Other"
+        ]
+      }
+    ]
+  },
+  "pages": [
+    {
+      "docshellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+      "historyId": 1,
+      "url": "https://github.com/rustwasm/wasm-bindgen/issues/1",
+      "isSubFrame": false
+    },
+    {
+      "docshellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+      "historyId": 2,
+      "url": "https://github.com/rustwasm/wasm-bindgen/issues/2",
+      "isSubFrame": false
+    },
+    {
+      "docshellId": "{d03a6ebd-2430-7949-b25b-95ba9776adae}",
+      "historyId": 1,
+      "url": "https://profiler.firefox.com",
+      "isSubFrame": false
+    },
+    {
+      "docshellId": "{d03a6ebd-2430-7949-b25b-95ba9776adae}",
+      "historyId": 2,
+      "url": "about:blank",
+      "isSubFrame": true
+    }
+  ],
+  "threads": [
+    {
+      "name": "GeckoMain",
+      "processType": "default",
+      "pausedRanges": [],
+      "processStartupTime": 0,
+      "processShutdownTime": null,
+      "registerTime": 0,
+      "unregisterTime": null,
+      "libs": [
+        {
+          "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "firefox",
+          "name": "firefox",
+          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+          "start": 4294967296,
+          "end": 4294977296
+        },
+        {
+          "breakpadId": "1000000000000000000000000000000A1",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary",
+          "name": "examplebinary",
+          "path": "/tmp/examplebinary",
+          "start": 8589934592,
+          "end": 8589934612
+        },
+        {
+          "breakpadId": "100000000000000000000000000000A27",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary2.pdb",
+          "name": "examplebinary2",
+          "path": "C:\\examplebinary2",
+          "start": 8589934612,
+          "end": 8589934632
+        }
+      ],
+      "frameTable": {
+        "length": 5,
+        "implementation": [
+          null,
+          null,
+          null,
+          null,
+          6
+        ],
+        "optimizations": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "line": [
+          null,
+          null,
+          null,
+          4391,
+          34
+        ],
+        "category": [
+          null,
+          null,
+          null,
+          1,
+          null
+        ],
+        "func": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1
+        ],
+        "column": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "subcategory": [
+          null,
+          null,
+          null,
+          0,
+          null
+        ]
+      },
+      "funcTable": {
+        "length": 5,
+        "name": [
+          0,
+          1,
+          2,
+          3,
+          13
+        ],
+        "resource": [
+          -1,
+          0,
+          0,
+          -1,
+          1
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1
+        ],
+        "isJS": [
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "fileName": [
+          null,
+          null,
+          null,
+          null,
+          12
+        ],
+        "lineNumber": [
+          null,
+          null,
+          null,
+          null,
+          34
+        ],
+        "relevantForJS": [
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "columnNumber": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "resourceTable": {
+        "length": 2,
+        "type": [
+          1,
+          5
+        ],
+        "name": [
+          11,
+          12
+        ],
+        "lib": [
+          0
+        ],
+        "icon": [],
+        "addonId": [],
+        "host": []
+      },
+      "stackTable": {
+        "length": 5,
+        "prefix": [
+          null,
+          0,
+          1,
+          1,
+          1
+        ],
+        "frame": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "category": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "subcategory": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "markers": {
+        "length": 9,
+        "name": [
+          4,
+          5,
+          10,
+          10,
+          5,
+          8,
+          8,
+          9,
+          14
+        ],
+        "time": [
+          0,
+          2,
+          4,
+          5,
+          8,
+          9,
+          10,
+          11,
+          13
+        ],
+        "data": [
+          {
+            "type": "VsyncTimestamp",
+            "vsync": 0
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "type": "tracing",
+            "cause": {
+              "time": 1,
+              "stack": 2
+            }
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "type": "tracing",
+            "category": "DOMEvent",
+            "interval": "start",
+            "eventType": "mouseout",
+            "phase": 3,
+            "docShellId": "{d03a6ebd-2430-7949-b25b-95ba9776adae}",
+            "docshellHistoryId": 1
+          },
+          {
+            "type": "tracing",
+            "category": "DOMEvent",
+            "interval": "end",
+            "eventType": "mouseout",
+            "phase": 3,
+            "docShellId": "{d03a6ebd-2430-7949-b25b-95ba9776adae}",
+            "docshellHistoryId": 1
+          },
+          {
+            "startTime": 11,
+            "endTime": 12
+          },
+          {
+            "type": "Network",
+            "startTime": 3,
+            "endTime": 13,
+            "id": 388634410746504,
+            "status": "STATUS_STOP",
+            "pri": -20,
+            "count": 37838,
+            "URI": "https://github.com/rustwasm/wasm-bindgen/issues/3",
+            "domainLookupStart": 4,
+            "domainLookupEnd": 5,
+            "connectStart": 6,
+            "tcpConnectEnd": 7,
+            "secureConnectionStart": 8,
+            "connectEnd": 9,
+            "requestStart": 10,
+            "responseStart": 11,
+            "responseEnd": 12
+          }
+        ],
+        "category": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+          7
+        ]
+      },
+      "samples": {
+        "length": 7,
+        "stack": [
+          1,
+          2,
+          2,
+          3,
+          0,
+          1,
+          4
+        ],
+        "time": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "responsiveness": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "uss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "stringArray": [
+        "(root)",
+        "0x100000f84",
+        "0x100001a45",
+        "Startup::XRE_Main",
+        "VsyncTimestamp",
+        "Reflow",
+        "baseline",
+        "frobnicate (chrome://blargh:34)",
+        "DOMEvent",
+        "MinorGC",
+        "Rasterize",
+        "firefox",
+        "chrome://blargh",
+        "frobnicate",
+        "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/3",
+        "DiskIO",
+        "FileIO"
+      ],
+      "pid": "Unknown Process 1"
+    },
+    {
+      "name": "Compositor",
+      "processType": "default",
+      "pausedRanges": [],
+      "processStartupTime": 0,
+      "processShutdownTime": null,
+      "registerTime": 0,
+      "unregisterTime": null,
+      "libs": [
+        {
+          "breakpadId": "F1D957D30B413D55A539BBA06F90DD8F0",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "firefox",
+          "name": "firefox",
+          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox",
+          "start": 4294967296,
+          "end": 4294977296
+        },
+        {
+          "breakpadId": "1000000000000000000000000000000A1",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary",
+          "name": "examplebinary",
+          "path": "/tmp/examplebinary",
+          "start": 8589934592,
+          "end": 8589934612
+        },
+        {
+          "breakpadId": "100000000000000000000000000000A27",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary2.pdb",
+          "name": "examplebinary2",
+          "path": "C:\\examplebinary2",
+          "start": 8589934612,
+          "end": 8589934632
+        }
+      ],
+      "frameTable": {
+        "length": 5,
+        "implementation": [
+          null,
+          null,
+          null,
+          null,
+          6
+        ],
+        "optimizations": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "line": [
+          null,
+          null,
+          null,
+          4391,
+          34
+        ],
+        "category": [
+          null,
+          null,
+          null,
+          1,
+          null
+        ],
+        "func": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1
+        ],
+        "column": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "subcategory": [
+          null,
+          null,
+          null,
+          0,
+          null
+        ]
+      },
+      "funcTable": {
+        "length": 5,
+        "name": [
+          0,
+          1,
+          2,
+          3,
+          13
+        ],
+        "resource": [
+          -1,
+          0,
+          0,
+          -1,
+          1
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1
+        ],
+        "isJS": [
+          false,
+          false,
+          false,
+          false,
+          true
+        ],
+        "fileName": [
+          null,
+          null,
+          null,
+          null,
+          12
+        ],
+        "lineNumber": [
+          null,
+          null,
+          null,
+          null,
+          34
+        ],
+        "relevantForJS": [
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "columnNumber": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "resourceTable": {
+        "length": 2,
+        "type": [
+          1,
+          5
+        ],
+        "name": [
+          11,
+          12
+        ],
+        "lib": [
+          0
+        ],
+        "icon": [],
+        "addonId": [],
+        "host": []
+      },
+      "stackTable": {
+        "length": 5,
+        "prefix": [
+          null,
+          0,
+          1,
+          1,
+          1
+        ],
+        "frame": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "category": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "subcategory": [
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "markers": {
+        "length": 8,
+        "name": [
+          4,
+          5,
+          10,
+          10,
+          5,
+          8,
+          8,
+          9
+        ],
+        "time": [
+          0,
+          2,
+          4,
+          5,
+          8,
+          9,
+          10,
+          11
+        ],
+        "data": [
+          {
+            "type": "VsyncTimestamp",
+            "vsync": 0
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "type": "tracing",
+            "cause": {
+              "time": 1,
+              "stack": 2
+            }
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "type": "tracing",
+            "category": "DOMEvent",
+            "interval": "start",
+            "eventType": "mouseout",
+            "phase": 3,
+            "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+            "docshellHistoryId": 1
+          },
+          {
+            "type": "tracing",
+            "category": "DOMEvent",
+            "interval": "end",
+            "eventType": "mouseout",
+            "phase": 3,
+            "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+            "docshellHistoryId": 1
+          },
+          {
+            "startTime": 11,
+            "endTime": 12
+          }
+        ],
+        "category": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1
+        ]
+      },
+      "samples": {
+        "length": 7,
+        "stack": [
+          1,
+          2,
+          2,
+          3,
+          0,
+          1,
+          4
+        ],
+        "time": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "responsiveness": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "uss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "stringArray": [
+        "(root)",
+        "0x100000f84",
+        "0x100001a45",
+        "Startup::XRE_Main",
+        "VsyncTimestamp",
+        "Reflow",
+        "baseline",
+        "frobnicate (chrome://blargh:34)",
+        "DOMEvent",
+        "MinorGC",
+        "Rasterize",
+        "firefox",
+        "chrome://blargh",
+        "frobnicate"
+      ],
+      "pid": "Unknown Process 2"
+    },
+    {
+      "name": "GeckoMain",
+      "processType": "tab",
+      "pausedRanges": [],
+      "processStartupTime": 1000,
+      "processShutdownTime": null,
+      "registerTime": 1000,
+      "unregisterTime": null,
+      "libs": [
+        {
+          "breakpadId": "9F950E2CE3CD3E1ABD06D80788B606E60",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "firefox-webcontent",
+          "name": "firefox-webcontent",
+          "path": "/Applications/FirefoxNightly.app/Contents/MacOS/firefox-webcontent.app/Contents/MacOS/firefox-webcontent",
+          "start": 4294967296,
+          "end": 4294977296
+        },
+        {
+          "breakpadId": "1000000000000000000000000000000A1",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary",
+          "name": "examplebinary",
+          "path": "/tmp/examplebinary",
+          "start": 8589934592,
+          "end": 8589934612
+        },
+        {
+          "breakpadId": "100000000000000000000000000000A27",
+          "arch": "x86_64",
+          "debugPath": "",
+          "debugName": "examplebinary2.pdb",
+          "name": "examplebinary2",
+          "path": "C:\\examplebinary2",
+          "start": 8589934612,
+          "end": 8589934632
+        }
+      ],
+      "frameTable": {
+        "length": 7,
+        "implementation": [
+          null,
+          null,
+          null,
+          null,
+          6,
+          null,
+          null
+        ],
+        "optimizations": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "line": [
+          null,
+          null,
+          null,
+          4391,
+          34,
+          null,
+          null
+        ],
+        "category": [
+          null,
+          null,
+          null,
+          1,
+          null,
+          2,
+          5
+        ],
+        "func": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "column": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "subcategory": [
+          null,
+          null,
+          null,
+          0,
+          null,
+          0,
+          0
+        ]
+      },
+      "funcTable": {
+        "length": 7,
+        "name": [
+          0,
+          1,
+          2,
+          3,
+          13,
+          17,
+          15
+        ],
+        "resource": [
+          -1,
+          0,
+          0,
+          -1,
+          1,
+          -1,
+          -1
+        ],
+        "address": [
+          -1,
+          3972,
+          6725,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "isJS": [
+          false,
+          false,
+          false,
+          false,
+          true,
+          false,
+          false
+        ],
+        "fileName": [
+          null,
+          null,
+          null,
+          null,
+          12,
+          null,
+          null
+        ],
+        "lineNumber": [
+          null,
+          null,
+          null,
+          null,
+          34,
+          null,
+          null
+        ],
+        "relevantForJS": [
+          false,
+          false,
+          false,
+          false,
+          false,
+          true,
+          true
+        ],
+        "columnNumber": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "resourceTable": {
+        "length": 2,
+        "type": [
+          1,
+          5
+        ],
+        "name": [
+          11,
+          12
+        ],
+        "lib": [
+          0,
+          null
+        ],
+        "icon": [
+          null,
+          null
+        ],
+        "addonId": [
+          null,
+          null
+        ],
+        "host": [
+          null,
+          null
+        ]
+      },
+      "stackTable": {
+        "length": 7,
+        "prefix": [
+          null,
+          0,
+          1,
+          1,
+          2,
+          4,
+          5
+        ],
+        "frame": [
+          0,
+          1,
+          2,
+          3,
+          5,
+          4,
+          6
+        ],
+        "category": [
+          1,
+          1,
+          1,
+          1,
+          2,
+          2,
+          5
+        ],
+        "subcategory": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "markers": {
+        "length": 9,
+        "name": [
+          4,
+          5,
+          10,
+          10,
+          5,
+          8,
+          8,
+          9,
+          11
+        ],
+        "time": [
+          1000,
+          1002,
+          1004,
+          1005,
+          1008,
+          1009,
+          1010,
+          1011,
+          1013
+        ],
+        "data": [
+          {
+            "type": "VsyncTimestamp",
+            "vsync": 0
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "type": "tracing",
+            "cause": {
+              "time": 1001,
+              "stack": 2
+            }
+          },
+          {
+            "category": "Paint",
+            "interval": "start",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "category": "Paint",
+            "interval": "end",
+            "type": "tracing"
+          },
+          {
+            "type": "tracing",
+            "category": "DOMEvent",
+            "timeStamp": 1001,
+            "interval": "start",
+            "eventType": "mouseout",
+            "phase": 3,
+            "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+            "docshellHistoryId": 2
+          },
+          {
+            "type": "tracing",
+            "category": "DOMEvent",
+            "timeStamp": 1001,
+            "interval": "end",
+            "eventType": "mouseout",
+            "phase": 3,
+            "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
+            "docshellHistoryId": 2
+          },
+          {
+            "startTime": 1011,
+            "endTime": 1012
+          },
+          {
+            "type": "Network",
+            "startTime": 1003,
+            "endTime": 1013,
+            "id": 388634410746504,
+            "status": "STATUS_STOP",
+            "pri": -20,
+            "count": 37838,
+            "URI": "https://github.com/rustwasm/wasm-bindgen/issues/4",
+            "domainLookupStart": 1004,
+            "domainLookupEnd": 1005,
+            "connectStart": 1006,
+            "tcpConnectEnd": 1007,
+            "secureConnectionStart": 1008,
+            "connectEnd": 1009,
+            "requestStart": 1010,
+            "responseStart": 1011,
+            "responseEnd": 1012
+          }
+        ],
+        "category": [
+          4,
+          4,
+          4,
+          4,
+          4,
+          5,
+          5,
+          1,
+          7
+        ]
+      },
+      "samples": {
+        "length": 7,
+        "stack": [
+          1,
+          2,
+          2,
+          3,
+          0,
+          1,
+          6
+        ],
+        "time": [
+          1000,
+          1001,
+          1002,
+          1003,
+          1004,
+          1005,
+          1006
+        ],
+        "responsiveness": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "rss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "uss": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "stringArray": [
+        "(root)",
+        "0x100000f84",
+        "0x100001a45",
+        "Startup::XRE_Main",
+        "VsyncTimestamp",
+        "Reflow",
+        "baseline",
+        "frobnicate (chrome://blargh:34)",
+        "DOMEvent",
+        "MinorGC",
+        "Rasterize",
+        "firefox-webcontent",
+        "chrome://blargh",
+        "frobnicate",
+        "AutoEntryScript setTimeout handler",
+        "Element.getBoundingClientRect",
+        "Load 32: https://github.com/rustwasm/wasm-bindgen/issues/4",
+        "setTimeout handler"
+      ],
+      "pid": "Unknown Process 3"
+    }
+  ],
+  "tasktracer": {
+    "taskTable": {
+      "length": 0,
+      "dispatchTime": [],
+      "sourceEventId": [],
+      "sourceEventType": [],
+      "parentTaskId": [],
+      "beginTime": [],
+      "processId": [],
+      "threadIndex": [],
+      "endTime": [],
+      "ipdlMsg": [],
+      "label": [],
+      "address": []
+    },
+    "tasksIdToTaskIndexMap": [],
+    "addressTable": {
+      "length": 0,
+      "address": [],
+      "className": [],
+      "lib": []
+    },
+    "addressIndicesByLib": [],
+    "threadTable": {
+      "length": 0,
+      "tid": [],
+      "name": [],
+      "start": []
+    },
+    "tidToThreadIndexMap": [],
+    "stringArray": []
+  }
+}

@@ -591,15 +591,15 @@ export function getNetworkTrackProfile() {
     );
   const profile = getProfileWithMarkers([].concat(...arrayOfNetworkMarkers));
 
-  const docShellId = '{c03a6ebd-2430-7949-b25b-95ba9776bdbf}';
-  const docshellHistoryId = 1;
+  const browsingContextID = 123123;
+  const innerWindowID = 1;
 
   profile.pages = [
     {
-      docshellId: docShellId,
-      historyId: docshellHistoryId,
+      browsingContextID: browsingContextID,
+      innerWindowID: innerWindowID,
       url: 'https://developer.mozilla.org/en-US/',
-      isSubFrame: false,
+      embedderInnerWindowID: 0,
     },
   ];
 
@@ -609,16 +609,14 @@ export function getNetworkTrackProfile() {
     type: 'tracing',
     category: 'Navigation',
     eventType: 'load',
-    docShellId,
-    docshellHistoryId,
+    innerWindowID: innerWindowID,
   };
 
   const domContentLoadedBase = {
     type: 'tracing',
     category: 'Navigation',
     interval: 'start',
-    docShellId,
-    docshellHistoryId,
+    innerWindowID: innerWindowID,
   };
 
   addMarkersToThreadWithCorrespondingSamples(thread, [
@@ -681,6 +679,47 @@ export function getScreenshotTrackProfile() {
     ...screenshotMarkersForWindowId('0'),
     ...screenshotMarkersForWindowId('1'),
   ]);
+}
+
+export function getVisualProgressTrackProfile(profileString: string): Profile {
+  const { profile } = getProfileFromTextSamples(profileString);
+  profile.meta.visualMetrics = {
+    SpeedIndex: 2942,
+    FirstVisualChange: 960,
+    LastVisualChange: 10480,
+    VisualProgress: [
+      { timestamp: 4431.321044921875, percent: 0 },
+      { timestamp: 5391.321044921875, percent: 17 },
+      { timestamp: 5511.321044921875, percent: 17 },
+      { timestamp: 5591.321044921875, percent: 22 },
+      { timestamp: 5631.321044921875, percent: 42 },
+      { timestamp: 5751.321044921875, percent: 70 },
+      { timestamp: 5911.321044921875, percent: 76 },
+    ],
+    ContentfulSpeedIndex: 2303,
+    ContentfulSpeedIndexProgress: [
+      { timestamp: 4431.321044921875, percent: 0 },
+      { timestamp: 5391.321044921875, percent: 41 },
+      { timestamp: 5511.321044921875, percent: 46 },
+      { timestamp: 5591.321044921875, percent: 48 },
+      { timestamp: 5631.321044921875, percent: 49 },
+      { timestamp: 5751.321044921875, percent: 49 },
+    ],
+    PerceptualSpeedIndex: 8314,
+    PerceptualSpeedIndexProgress: [
+      { timestamp: 4431.321044921875, percent: 0 },
+      { timestamp: 5391.321044921875, percent: 11 },
+      { timestamp: 5511.321044921875, percent: 12 },
+      { timestamp: 5591.321044921875, percent: 13 },
+      { timestamp: 5631.321044921875, percent: 13 },
+      { timestamp: 5751.321044921875, percent: 15 },
+    ],
+    VisualReadiness: 9520,
+    VisualComplete85: 6480,
+    VisualComplete95: 10200,
+    VisualComplete99: 10200,
+  };
+  return profile;
 }
 
 export function getJsTracerTable(

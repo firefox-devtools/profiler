@@ -1058,5 +1058,85 @@ const _upgraders = {
       }
     }
   },
+  [25]: profile => {
+    // Previously, we had DocShell ID and DocShell History ID in the page object
+    // to identify a specific page. We changed these IDs in the gecko side to
+    // Browsing Context ID and Inner Window ID. Inner Window ID is enough to
+    // identify a specific frame now. We were keeping two field in marker
+    // payloads, but now we are only keeping innerWindowID. Browsing Context IDs
+    // are necessary to identify which frame belongs to which tab. Browsing
+    // Contexts doesn't change after a navigation.
+    if (profile.pages && profile.pages.length > 0) {
+      const oldKeysToNewKey: Map<string, number> = new Map();
+      const docShellIDtoBrowsingContextID: Map<string, number> = new Map();
+      let browsingContextID = 1;
+      let innerWindowID = 1;
+
+      for (const page of profile.pages) {
+        // Constructing our old keys to new key map so we can use it for markers.
+        oldKeysToNewKey.set(
+          `d${page.docshellId}h${page.historyId}`,
+          innerWindowID
+        );
+
+        // There are multiple pages with same DocShell IDs. We are checking to
+        // see if we assigned a Browsing Context ID to that DocShell ID
+        // before. Otherwise assigning one.
+        let currentBrowsingContextID = docShellIDtoBrowsingContextID.get(
+          page.docshellId
+        );
+        if (!currentBrowsingContextID) {
+          currentBrowsingContextID = browsingContextID++;
+          docShellIDtoBrowsingContextID.set(
+            page.docshellId,
+            currentBrowsingContextID
+          );
+        }
+
+        // Putting DocShell ID to this field. It fully doesn't correspond to a
+        // Browsing Context ID but that's the closest we have right now.
+        page.browsingContextID = currentBrowsingContextID;
+        // Putting a unique Inner Window ID to each page.
+        page.innerWindowID = innerWindowID;
+        // This information is new. We had isSubFrame field but that's not
+        // useful for us to determine the embedders. Therefore setting older
+        // pages to 0 which means null.
+        page.embedderInnerWindowID = 0;
+
+        innerWindowID++;
+        delete page.docshellId;
+        delete page.historyId;
+        delete page.isSubFrame;
+      }
+
+      for (const thread of profile.threads) {
+        const { markers } = thread;
+        markers.data = markers.data.map(data => {
+          if (
+            data &&
+            data.docShellId !== undefined &&
+            data.docshellHistoryId !== undefined
+          ) {
+            const newKey = oldKeysToNewKey.get(
+              `d${data.docShellId}h${data.docshellHistoryId}`
+            );
+            if (newKey === undefined) {
+              console.error(
+                'No page found with given docShellId and historyId'
+              );
+            } else {
+              // We don't need to add the browsingContextID here because we only
+              // need innerWindowID since it's unique for each page.
+              data.innerWindowID = newKey;
+            }
+
+            delete data.docShellId;
+            delete data.docshellHistoryId;
+          }
+          return data;
+        });
+      }
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

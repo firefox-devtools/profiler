@@ -413,8 +413,7 @@ export type DOMEventMarkerPayload = {|
   interval: 'start' | 'end',
   eventType: string,
   phase: 0 | 1 | 2 | 3,
-  docShellId?: string,
-  docshellHistoryId?: number,
+  innerWindowID?: number,
 |};
 
 export type PrefMarkerPayload = {|
@@ -433,8 +432,7 @@ export type NavigationMarkerPayload = {|
   category: 'Navigation',
   interval: 'start' | 'end',
   eventType?: string,
-  docShellId?: string,
-  docshellHistoryId?: number,
+  innerWindowID?: number,
 |};
 
 type VsyncTimestampPayload = {|

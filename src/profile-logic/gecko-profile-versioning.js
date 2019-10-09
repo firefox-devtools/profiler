@@ -710,5 +710,98 @@ const _upgraders = {
     }
     addMarkerCategoriesRecursively(profile);
   },
+  [17]: profile => {
+    // Previously, we had DocShell ID and DocShell History ID in the page object
+    // to identify a specific page. We changed these IDs in the gecko side to
+    // Browsing Context ID and Inner Window ID. Inner Window ID is enough to
+    // identify a specific frame now. We were keeping two field in marker
+    // payloads, but now we are only keeping innerWindowID. Browsing Context IDs
+    // are necessary to identify which frame belongs to which tab. Browsing
+    // Contexts doesn't change after a navigation.
+    let browsingContextID = 1;
+    let innerWindowID = 1;
+    function convertToVersion17Recursive(p) {
+      if (p.pages && p.pages.length > 0) {
+        // It's not possible to have a marker belongs to a different DocShell in
+        // different processes currently(pre-fission). It's not necessary to put
+        // those maps outside of the function.
+        const oldKeysToNewKey: Map<string, number> = new Map();
+        const docShellIDtoBrowsingContextID: Map<string, number> = new Map();
+
+        for (const page of p.pages) {
+          // Constructing our old keys to new key map so we can use it for markers.
+          oldKeysToNewKey.set(
+            `d${page.docshellId}h${page.historyId}`,
+            innerWindowID
+          );
+
+          // There are multiple pages with same DocShell IDs. We are checking to
+          // see if we assigned a Browsing Context ID to that DocShell ID
+          // before. Otherwise assigning one.
+          let currentBrowsingContextID = docShellIDtoBrowsingContextID.get(
+            page.docshellId
+          );
+          if (!currentBrowsingContextID) {
+            currentBrowsingContextID = browsingContextID++;
+            docShellIDtoBrowsingContextID.set(
+              page.docshellId,
+              currentBrowsingContextID
+            );
+          }
+
+          // Putting DocShell ID to this field. It fully doesn't correspond to a
+          // Browsing Context ID but that's the closest we have right now.
+          page.browsingContextID = currentBrowsingContextID;
+          // Putting a unique Inner Window ID to each page.
+          page.innerWindowID = innerWindowID;
+          // This information is new. We had isSubFrame field but that's not
+          // useful for us to determine the embedders. Therefore setting older
+          // pages to 0 which means null.
+          page.embedderInnerWindowID = 0;
+
+          innerWindowID++;
+          delete page.docshellId;
+          delete page.historyId;
+          delete page.isSubFrame;
+        }
+
+        for (const thread of p.threads) {
+          const { markers } = thread;
+          const dataIndex = markers.schema.data;
+          for (let i = 0; i < thread.markers.data.length; i++) {
+            const markerData = thread.markers.data[i];
+            const payload = markerData[dataIndex];
+
+            if (
+              payload &&
+              payload.docShellId !== undefined &&
+              payload.docshellHistoryId !== undefined
+            ) {
+              const newKey = oldKeysToNewKey.get(
+                `d${payload.docShellId}h${payload.docshellHistoryId}`
+              );
+              if (newKey === undefined) {
+                console.error(
+                  'No page found with given docShellId and historyId'
+                );
+              } else {
+                // We don't need to add the browsingContextID here because we
+                // only need innerWindowID since it's unique for each page.
+                payload.innerWindowID = newKey;
+              }
+
+              delete payload.docShellId;
+              delete payload.docshellHistoryId;
+            }
+          }
+        }
+      }
+
+      for (const subprocessProfile of p.processes) {
+        convertToVersion17Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion17Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */

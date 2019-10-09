@@ -62,7 +62,7 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> matches the snapshot 1`] = `
             >
               Profile Version:
             </span>
-            24
+            25
           </div>
         </div>
         <h2
@@ -318,6 +318,203 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> matches the snapshot 1`] = `
             </div>
           </div>
         </details>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`app/MenuButtons <MenuButtonsMetaInfo> with no statistics object should not make the app crash 1`] = `
+<div
+  class="buttonWithPanel menuButtonsMetaInfoButton open"
+>
+  <div
+    class="buttonWithPanelButtonWrapper"
+  >
+    <input
+      class="buttonWithPanelButton menuButtonsMetaInfoButtonButton"
+      type="button"
+      value="Firefox (48.0) Intel Mac OS X 10.11"
+    />
+  </div>
+  <div
+    class="arrowPanelAnchor"
+  >
+    <div
+      class="arrowPanel open arrowPanelOpenMetaInfo"
+    >
+      <div
+        class="arrowPanelArrow"
+      />
+      <div
+        class="arrowPanelContent"
+      >
+        <h2
+          class="arrowPanelSubTitle"
+        >
+          Timing
+        </h2>
+        <div
+          class="arrowPanelSection"
+        >
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Recording started:
+            </span>
+            toLocaleString Sat, 09 Apr 2016 17:02:32 GMT
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Interval:
+            </span>
+            1
+            ms
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Profile Version:
+            </span>
+            25
+          </div>
+        </div>
+        <h2
+          class="arrowPanelSubTitle"
+        >
+          Application
+        </h2>
+        <div
+          class="arrowPanelSection"
+        >
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Name:
+            </span>
+            Firefox
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Version:
+            </span>
+            48.0
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Update Channel:
+            </span>
+            nightly
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Build ID:
+            </span>
+            20181126165837
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Build Type:
+            </span>
+            Debug
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Extensions:
+            </span>
+            <ul
+              class="metaInfoList"
+            >
+              <li
+                class="metaInfoListItem"
+              >
+                Form Autofill
+              </li>
+              <li
+                class="metaInfoListItem"
+              >
+                Firefox Screenshots
+              </li>
+              <li
+                class="metaInfoListItem"
+              >
+                Gecko Profiler
+              </li>
+            </ul>
+          </div>
+        </div>
+        <h2
+          class="arrowPanelSubTitle"
+        >
+          Platform
+        </h2>
+        <div
+          class="arrowPanelSection"
+        >
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Platform:
+            </span>
+            Macintosh
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              OS:
+            </span>
+            Intel Mac OS X 10.11
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              ABI:
+            </span>
+            x86_64-gcc3
+          </div>
+        </div>
       </div>
     </div>
   </div>

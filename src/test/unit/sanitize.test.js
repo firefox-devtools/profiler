@@ -9,6 +9,13 @@ import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
 import type { RemoveProfileInformation } from '../../types/profile-derived';
+import { storeWithProfile } from '../fixtures/stores';
+import { getHasPreferenceMarkers } from '../../selectors/profile';
+import {
+  getCheckedSharingOptions,
+  getRemoveProfileInformation,
+} from '../../selectors/publish';
+import { toggleCheckedSharingOptions } from '../../actions/publish';
 
 describe('sanitizePII', function() {
   function getRemoveProfileInformation(
@@ -331,5 +338,23 @@ describe('sanitizePII', function() {
         marker.type === 'PreferenceRead' &&
         marker.prefValue === ''
     ).toBeTruthy();
+  });
+});
+
+describe('getRemoveProfileInformation', function() {
+  it('should bail out early when there is no preference marker in the profile', function() {
+    const { getState, dispatch } = storeWithProfile();
+    // Checking to see that we don't have Preference markers.
+    expect(getHasPreferenceMarkers(getState())).toEqual(false);
+
+    // Setting includePreferenceValues option to false
+    dispatch(toggleCheckedSharingOptions('includePreferenceValues'));
+    expect(
+      getCheckedSharingOptions(getState()).includePreferenceValues
+    ).toEqual(false);
+
+    const removeProfileInformation = getRemoveProfileInformation(getState());
+    // It should return early with null value.
+    expect(removeProfileInformation).toEqual(null);
   });
 });
