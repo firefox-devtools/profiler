@@ -7,6 +7,7 @@ import * as React from 'react';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
 import ArrowPanel from '../../shared/ArrowPanel';
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
+import { formatBytes } from '../../../utils/format-numbers';
 
 import type { Profile, ProfileMeta } from '../../../types/profile';
 
@@ -22,6 +23,7 @@ type Props = {
 export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
   render() {
     const { meta, profilerOverhead } = this.props.profile;
+    const { configuration } = meta;
 
     return (
       <ButtonWithPanel
@@ -30,7 +32,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
         label={_formatLabel(meta) || 'Profile information'}
         panel={
           <ArrowPanel className="arrowPanelOpenMetaInfo">
-            <h2 className="arrowPanelSubTitle">Timing</h2>
+            <h2 className="arrowPanelSubTitle">Profile Information</h2>
             <div className="arrowPanelSection">
               {meta.startTime ? (
                 <div className="metaInfoRow">
@@ -49,6 +51,34 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                   <span className="metaInfoLabel">Profile Version:</span>
                   {meta.preprocessedProfileVersion}
                 </div>
+              ) : null}
+              {configuration ? (
+                <>
+                  <div className="metaInfoRow">
+                    <span className="metaInfoLabel">Buffer Capacity:</span>
+                    {formatBytes(configuration.capacity)}
+                  </div>
+                  <div className="metaInfoRow">
+                    <span className="metaInfoLabel">Buffer Duration:</span>
+                    {configuration.duration
+                      ? `${configuration.duration} seconds`
+                      : 'Unlimited'}
+                  </div>
+                  <div className="arrowPanelSection">
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">Features:</span>
+                      <ul className="metaInfoList">
+                        {_mapInfoListItem(configuration.features)}
+                      </ul>
+                    </div>
+                    <div className="metaInfoRow">
+                      <span className="metaInfoLabel">Threads Filter:</span>
+                      <ul className="metaInfoList">
+                        {_mapInfoListItem(configuration.threads)}
+                      </ul>
+                    </div>
+                  </div>
+                </>
               ) : null}
             </div>
             <h2 className="arrowPanelSubTitle">Application</h2>
@@ -98,7 +128,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">Extensions:</span>
                   <ul className="metaInfoList">
-                    {_mapMetaInfoExtensionNames(meta.extensions.name)}
+                    {_mapInfoListItem(meta.extensions.name)}
                   </ul>
                 </div>
               ) : null}
@@ -161,13 +191,12 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
   }
 }
 
-function _mapMetaInfoExtensionNames(data: string[]): React.DOM {
-  const extensionList = data.map(d => (
+function _mapInfoListItem(data: string[]): React.DOM {
+  return data.map(d => (
     <li className="metaInfoListItem" key={d}>
       {d}
     </li>
   ));
-  return extensionList;
 }
 
 function _formatDate(timestamp: number): string {
