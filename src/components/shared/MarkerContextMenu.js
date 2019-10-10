@@ -187,6 +187,13 @@ class MarkerContextMenu extends PureComponent<Props> {
     }
   };
 
+  copyMarkerName = () => {
+    const { selectedMarker } = this.props;
+    if (selectedMarker && selectedMarker.data && selectedMarker.data.name) {
+      copy(selectedMarker.data.name);
+    }
+  };
+
   // Using setTimeout here is a bit complex, but is necessary to make the menu
   // work fine when we want to display it somewhere when it's already open
   // somewhere else.
@@ -258,6 +265,9 @@ class MarkerContextMenu extends PureComponent<Props> {
           <MenuItem onClick={this.copyUrl}>Copy URL</MenuItem>
         ) : null}
         <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
+        {selectedMarker.data && typeof selectedMarker.data.name === 'string' ? (
+          <MenuItem onClick={this.copyMarkerName}>Copy Marker Name</MenuItem>
+        ) : null}
       </ContextMenu>
     );
   }
