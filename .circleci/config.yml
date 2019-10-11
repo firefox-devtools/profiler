@@ -1,8 +1,13 @@
 version: 2.1
-jobs:
-  deps:
+
+executors:
+  node:
     docker:
       - image: circleci/node:10.15
+
+commands:
+  checkout-and-dependencies:
+    description: "Checkout and install dependencies, managing a cache"
     steps:
       - checkout
       - restore_cache:
@@ -17,63 +22,52 @@ jobs:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
 
+# Important: if you add a job here, don't forget to add it to the workflow below too.
+jobs:
   lint:
-    docker:
-      - image: circleci/node:10.15
+    executor: node
     steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - checkout-and-dependencies
       - run: yarn lint
 
   tests:
-    docker:
-      - image: circleci/node:10.15
+    executor: node
     steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - checkout-and-dependencies
       - run: yarn test --coverage --runInBand
       - run: bash <(curl -s https://codecov.io/bash)
 
   build-prod:
-    docker:
-      - image: circleci/node:10.15
+    executor: node
     steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+      - checkout-and-dependencies
       - run: yarn build-prod:quiet
 
-  others:
-    docker:
-      - image: circleci/node:10.15
+  licence-check:
+    executor: node
     steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
-      - run: yarn flow:ci
+      - checkout-and-dependencies
       - run: yarn license-check
+
+  flow:
+    executor: node
+    steps:
+      - checkout-and-dependencies
+      - run: yarn flow:ci
+
+  alex:
+    executor: node
+    steps:
+      - checkout-and-dependencies
       - run: yarn test-alex
 
 workflows:
   version: 2
   master:
     jobs:
-      - deps
-      - tests:
-          requires:
-            - deps
-      - lint:
-          requires:
-            - deps
-      - build-prod:
-          requires:
-            - deps
-      - others:
-          requires:
-            - deps
+      - tests
+      - lint
+      - build-prod
+      - flow
+      - licence-check
+      - alex
