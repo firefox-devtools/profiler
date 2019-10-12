@@ -201,6 +201,9 @@ body,
   background-color: highlight;
   color: highlighttext;
 }
+.treeViewBody:focus .treeViewRow.isSelected a {
+  color: inherit;
+}
 
 .treeViewHighlighting {
   padding: 1px 0;

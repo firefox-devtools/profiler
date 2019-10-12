@@ -591,15 +591,15 @@ export function getNetworkTrackProfile() {
     );
   const profile = getProfileWithMarkers([].concat(...arrayOfNetworkMarkers));
 
-  const docShellId = '{c03a6ebd-2430-7949-b25b-95ba9776bdbf}';
-  const docshellHistoryId = 1;
+  const browsingContextID = 123123;
+  const innerWindowID = 1;
 
   profile.pages = [
     {
-      docshellId: docShellId,
-      historyId: docshellHistoryId,
+      browsingContextID: browsingContextID,
+      innerWindowID: innerWindowID,
       url: 'https://developer.mozilla.org/en-US/',
-      isSubFrame: false,
+      embedderInnerWindowID: 0,
     },
   ];
 
@@ -609,16 +609,14 @@ export function getNetworkTrackProfile() {
     type: 'tracing',
     category: 'Navigation',
     eventType: 'load',
-    docShellId,
-    docshellHistoryId,
+    innerWindowID: innerWindowID,
   };
 
   const domContentLoadedBase = {
     type: 'tracing',
     category: 'Navigation',
     interval: 'start',
-    docShellId,
-    docshellHistoryId,
+    innerWindowID: innerWindowID,
   };
 
   addMarkersToThreadWithCorrespondingSamples(thread, [

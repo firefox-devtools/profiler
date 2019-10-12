@@ -6,9 +6,8 @@ Array [
     "category": 0,
     "data": Object {
       "category": "Navigation",
-      "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
-      "docshellHistoryId": 1,
       "eventType": "load",
+      "innerWindowID": 1,
       "interval": "start",
       "type": "tracing",
     },
@@ -29,8 +28,7 @@ Array [
     "category": 0,
     "data": Object {
       "category": "Navigation",
-      "docShellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
-      "docshellHistoryId": 1,
+      "innerWindowID": 1,
       "interval": "start",
       "type": "tracing",
     },

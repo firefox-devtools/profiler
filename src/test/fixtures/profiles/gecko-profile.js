@@ -85,10 +85,10 @@ export function createGeckoSubprocessProfile(
     libs: [contentProcessBinary, ...parentProfile.libs.slice(1)], // libs are stringified in the Gecko profile
     pages: [
       {
-        docshellId: '{e18794dd-3960-3543-b101-e5ed287ab617}',
-        historyId: 1,
+        browsingContextID: 123123,
+        innerWindowID: 1,
         url: 'https://github.com/rustwasm/wasm-bindgen/issues/5',
-        isSubFrame: false,
+        embedderInnerWindowID: 0,
       },
     ],
     threads: [

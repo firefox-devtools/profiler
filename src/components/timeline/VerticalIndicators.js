@@ -80,12 +80,10 @@ class VerticalIndicatorsImpl extends React.PureComponent<Props> {
             data.type === 'tracing' &&
             data.category === 'Navigation'
           ) {
-            const docshellId = data.docShellId;
-            const historyId = data.docshellHistoryId;
-            if (docshellId) {
+            const innerWindowID = data.innerWindowID;
+            if (innerWindowID) {
               const page = pages.find(
-                page =>
-                  page.docshellId === docshellId && page.historyId === historyId
+                page => page.innerWindowID === innerWindowID
               );
               if (page) {
                 url = (

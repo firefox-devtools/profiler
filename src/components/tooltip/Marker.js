@@ -663,15 +663,12 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
   _getUrl = (marker: Marker): string | null => {
     const { pages } = this.props;
 
-    if (!(pages && marker.data && marker.data.docShellId)) {
+    if (!(pages && marker.data && marker.data.innerWindowID)) {
       return null;
     }
 
-    const docshellId = marker.data.docShellId;
-    const historyId = marker.data.docshellHistoryId;
-    const page = pages.find(
-      page => page.docshellId === docshellId && page.historyId === historyId
-    );
+    const innerWindowID = marker.data.innerWindowID;
+    const page = pages.find(page => page.innerWindowID === innerWindowID);
     return page ? page.url : null;
   };
 
