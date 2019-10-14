@@ -32,7 +32,7 @@
     "start-docs": "docsify serve ./docs-user",
     "start-photon": "node res/photon/server",
     "test": "cross-env LC_ALL=C NODE_ENV=test NODE_OPTIONS=--experimental-worker jest",
-    "test-all": "run-p flow license-check lint test test-alex test-lockfile",
+    "test-all": "run-p --max-parallel 4 flow license-check lint test test-alex test-lockfile",
     "test-build-coverage": "jest --coverage --coverageReporters=html",
     "test-serve-coverage": "ws -d coverage/ -p 4343",
     "test-coverage": "run-s test-build-coverage test-serve-coverage",
