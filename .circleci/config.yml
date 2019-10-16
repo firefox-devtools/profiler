@@ -1,24 +1,73 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+
+executors:
+  node:
     docker:
       - image: circleci/node:10.15
+
+commands:
+  checkout-and-dependencies:
+    description: "Checkout and install dependencies, managing a cache"
     steps:
       - checkout
       - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
-          - v1-dependencies-{{ checksum "package.json" }}
-          - v1-dependencies-
+            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
       - run: yarn install
       - save_cache:
           paths:
+            - .git
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
-      - run: yarn license-check
-      - run: yarn test-alex
+
+# Important: if you add a job here, don't forget to add it to the workflow below too.
+jobs:
+  lint:
+    executor: node
+    steps:
+      - checkout-and-dependencies
       - run: yarn lint
-      - run: yarn flow:ci
+
+  tests:
+    executor: node
+    steps:
+      - checkout-and-dependencies
       - run: yarn test --coverage --runInBand
-      - run: yarn build-prod:quiet
       - run: bash <(curl -s https://codecov.io/bash)
+
+  build-prod:
+    executor: node
+    steps:
+      - checkout-and-dependencies
+      - run: yarn build-prod:quiet
+
+  licence-check:
+    executor: node
+    steps:
+      - checkout-and-dependencies
+      - run: yarn license-check
+
+  flow:
+    executor: node
+    steps:
+      - checkout-and-dependencies
+      - run: yarn flow:ci
+
+  alex:
+    executor: node
+    steps:
+      - checkout-and-dependencies
+      - run: yarn test-alex
+
+workflows:
+  version: 2
+  master:
+    jobs:
+      - tests
+      - lint
+      - build-prod
+      - flow
+      - licence-check
+      - alex
