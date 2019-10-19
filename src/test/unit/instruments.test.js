@@ -18,9 +18,9 @@ class MockFileSystemEntry {
   name: string;
   fullPath: string;
 
-  //private properties
+  //profiler-specific properties
   _zip: typeof JSZip;
-  _zipDir: any;
+  _zipDir: typeof JSZip;
   _zipFile: JSZip.JSZipObject | null;
 
   constructor(zip: typeof JSZip, fullPath: string) {
@@ -56,6 +56,8 @@ class MockFileSystemEntry {
     return undefined;
   }
 
+  // In real FileSystemEntry class, createReader function would be present only when the zipDir is true,
+  // I've kept it here regardless the value of zipDir for simplicity
   createReader() {
     return {
       readEntries: (

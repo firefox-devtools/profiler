@@ -7,8 +7,8 @@ import {
   getEmptyProfile,
   getEmptyThread,
 } from '../../../profile-logic/data-structures';
-import BinaryPlistParser, { UID } from './BinaryPlistParser';
-import BinReader from './BinReader';
+import { BinaryPlistParser, UID } from './BinaryPlistParser';
+import { BinReader } from './BinReader';
 import MaybeCompressedReader from './MaybeCompressedReader';
 import { ensureExists } from '../../../utils/flow';
 
@@ -621,8 +621,14 @@ async function extractDirectoryTree(entry: {
 // This function checks weather the given profile is of Instruments type or not by checking the extension as a 'trace'
 export function isInstrumentsProfile(file: mixed): boolean {
   let fileName = '';
-  if (file && typeof file === 'object' && typeof file.name === 'string') {
-    fileName = file.name;
+  let isDirectory = false;
+  if (file && typeof file === 'object') {
+    if (typeof file.name === 'string') {
+      fileName = file.name;
+    }
+    if (typeof file.isDirectory === 'boolean') {
+      isDirectory = file.isDirectory;
+    }
   }
 
   const fileMetaData = fileName.split('.');
@@ -632,7 +638,8 @@ export function isInstrumentsProfile(file: mixed): boolean {
   ) {
     return false;
   }
-  return fileMetaData.pop() === 'trace';
+
+  return fileMetaData.pop() === 'trace' && isDirectory;
 }
 
 // This function return an index of function from funcTable if it already exists otherwise

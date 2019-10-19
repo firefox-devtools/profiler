@@ -3,7 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-class BinReader {
+// This class is inspired from here: https://github.com/jlfwong/speedscope/blob/master/src/import/instruments.ts#L200
+export class BinReader {
   view: DataView;
   bytePos: number;
 
@@ -62,5 +63,3 @@ class BinReader {
     );
   }
 }
-
-export default BinReader;

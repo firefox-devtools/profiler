@@ -11,7 +11,8 @@ export class UID {
   }
 }
 
-class BinaryPlistParser {
+// This class is inspired from here:https://github.com/jlfwong/speedscope/blob/master/src/import/instruments.ts#L828
+export class BinaryPlistParser {
   view: DataView;
   referenceSize: number;
   offsetTable: Array<number>;
@@ -217,5 +218,3 @@ class BinaryPlistParser {
     }
   }
 }
-
-export default BinaryPlistParser;
