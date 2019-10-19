@@ -14,7 +14,7 @@ This project is made up of a cross section of different parts of Mozilla, includ
 | ![][julienw] | Julien Wajsberg | [@julienw](https://github.com/julienw) | Firefox Frontend Engineer |
 | ![][brisad] | Michael Hoffmann | [@brisad](https://github.com/brisad) | Engineer and Contributor |
 | ![][squelart] | Gérald Squelart | [@squelart](https://github.com/squelart) | Firefox Platform Engineer |
-| ![][canaltinova] | Nazim Can Altinova| [@canaltinova](https://github.com/canaltinova) | Firefox Platform and Frontend Engineer |
+| ![][canova] | Nazim Can Altinova| [@canova](https://github.com/canova) | Firefox Platform and Frontend Engineer |
 
 [digitarald]:https://avatars.githubusercontent.com/digitarald?size=56
 [mstange]:https://avatars.githubusercontent.com/mstange?size=56
@@ -22,7 +22,7 @@ This project is made up of a cross section of different parts of Mozilla, includ
 [julienw]:https://avatars.githubusercontent.com/julienw?size=56
 [brisad]:https://avatars.githubusercontent.com/brisad?size=56
 [squelart]:https://avatars.githubusercontent.com/squelart?size=56
-[canaltinova]:https://avatars.githubusercontent.com/canaltinova?size=56
+[canova]:https://avatars.githubusercontent.com/canova?size=56
 
 We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-slack.herokuapp.com/) in the #perf channel. Come chat with us if you have any questions about the project.
 
