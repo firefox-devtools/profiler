@@ -4,6 +4,7 @@
 // @flow
 import { inflate } from 'pako';
 
+// This class is inspired from here: https://github.com/jlfwong/speedscope/blob/master/src/import/utils.ts#L27
 class MaybeCompressedDataReader {
   uncompressedData: Promise<ArrayBuffer>;
   namePromise: Promise<string>;

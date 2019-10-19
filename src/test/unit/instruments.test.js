@@ -69,10 +69,9 @@ class MockFileSystemEntry {
         }
         const ret = [];
         this._zipDir.forEach((relativePath: string, file: { name: string }) => {
-          if (
-            relativePath.split('/').length ===
-            (relativePath.endsWith('/') ? 2 : 1)
-          ) {
+          const relativePathLength = relativePath.endsWith('/') ? 2 : 1;
+
+          if (relativePath.split('/').length === relativePathLength) {
             ret.push(new MockFileSystemEntry(this._zip, file.name));
           }
         });
