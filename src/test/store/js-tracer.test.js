@@ -138,6 +138,40 @@ describe('convertJsTracerToThread', function() {
       '    - Interpreter (total: 2, self: 2)',
     ]);
   });
+
+  it('can generate the frameTable implementations correctly', function() {
+    const existingProfile = getProfileWithJsTracerEvents([
+      // [mozilla                  ]
+      //  [int   ][ion          ]
+      //   [A  ]    [B       ]
+      ['https://mozilla.org', 0, 20],
+      ['Interpreter', 1, 5],
+      ['FuncA', 2, 4],
+      ['IonMonkey', 5, 19],
+      ['FuncB', 6, 18],
+    ]);
+    const existingThread = existingProfile.threads[0];
+    const categories = existingProfile.meta.categories;
+    const jsTracer = ensureExists(existingThread.jsTracer);
+    const thread = convertJsTracerToThread(
+      existingThread,
+      jsTracer,
+      categories
+    );
+    const implementationNames = thread.frameTable.implementation.map(
+      implementation =>
+        implementation === null
+          ? null
+          : thread.stringTable.getString(implementation)
+    );
+    expect(implementationNames).toEqual([
+      null, // 'https://mozilla.org'
+      'interpreter', // 'Interpreter'
+      'interpreter', // 'FuncA'
+      'ion', // 'IonMonkey'
+      'ion', // 'FuncB'
+    ]);
+  });
 });
 
 describe('selectors/getJsTracerTiming', function() {
