@@ -60,6 +60,12 @@ jobs:
       - checkout-and-dependencies
       - run: yarn test-alex
 
+  yarn_lock:
+    executor: node
+    steps:
+      - checkout-and-dependencies
+      - run: yarn test-lockfile
+
 workflows:
   version: 2
   master:
@@ -70,3 +76,4 @@ workflows:
       - flow
       - licence-check
       - alex
+      - yarn_lock
