@@ -11,7 +11,7 @@ install:
   # 2. Select the right node
   - ps: Install-Product node $env:nodejs_version $env:platform
   # 3. Setup the project
-  - yarn install
+  - yarn install --frozen-lockfile
 
 # Post-install test scripts.
 test_script:
