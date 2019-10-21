@@ -12,15 +12,14 @@ commands:
       - checkout
       - restore_cache:
           keys:
-            - v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
-            - v1-dependencies-{{ checksum "package.json" }}
-            - v1-dependencies-
+            - v2-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+            - v2-dependencies-{{ checksum "package.json" }}
+            - v2-dependencies-
       - run: yarn install
       - save_cache:
           paths:
-            - .git
             - node_modules
-          key: v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
+          key: v2-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
 
 # Important: if you add a job here, don't forget to add it to the workflow below too.
 jobs:
