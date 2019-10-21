@@ -84,7 +84,15 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     canvas.height = Math.round(deviceHeight);
     ctx.clearRect(0, 0, deviceWidth, deviceHeight);
 
-    const samples = counter.sampleGroups.samples;
+    const sampleGroups = counter.sampleGroups;
+    if (sampleGroups.length !== 1) {
+      // Either gecko failed to capture samples for some reason or gave us more
+      // than one sample group for memory track. Both cases shouldn't happen for
+      // malloc counter. Do not draw anything.
+      return;
+    }
+
+    const samples = counter.sampleGroups[0].samples;
     if (samples.length === 0) {
       // There's no reason to draw the samples, there are none.
       return;
@@ -220,7 +228,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     const { width, rangeStart, rangeEnd, counter, interval } = this.props;
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
-    const { samples } = counter.sampleGroups;
+    const { samples } = counter.sampleGroups[0];
     if (
       timeAtMouse < samples.time[0] ||
       timeAtMouse > samples.time[samples.length - 1] + interval
@@ -283,7 +291,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       lineWidth,
       accumulatedSamples,
     } = this.props;
-    const { samples } = counter.sampleGroups;
+    const { samples } = counter.sampleGroups[0];
     const rangeLength = rangeEnd - rangeStart;
     const left =
       (width * (samples.time[counterIndex] - rangeStart)) / rangeLength;
@@ -365,7 +373,9 @@ export const TrackMemoryGraph = explicitConnect<
     return {
       counter,
       threadIndex: counter.mainThreadIndex,
-      accumulatedSamples: counterSelectors.getAccumulateCounterSamples(state),
+      accumulatedSamples: counterSelectors.getAccumulateCounterSamples(
+        state
+      )[0],
       rangeStart: start,
       rangeEnd: end,
       interval: getProfileInterval(state),

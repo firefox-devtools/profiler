@@ -170,23 +170,17 @@ export type GeckoCounter = {|
   name: string,
   category: string,
   description: string,
-  sample_groups:
-    | {|
-        id: number,
-        samples: {|
-          schema: {|
-            time: 0,
-            number: 1,
-            count: 2,
-          |},
-          data: Array<[number, number, number]>,
-        |},
-      |}
-    // Due to a bug in Gecko, it's possible that we have a counter that has no
-    // sample data. This is likely a Gecko problem that we'll need to fix.
-    // See https://github.com/firefox-devtools/profiler/issues/2248 and
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=1584190
-    | {||},
+  sample_groups: Array<{|
+    id: number,
+    samples: {|
+      schema: {|
+        time: 0,
+        number: 1,
+        count: 2,
+      |},
+      data: Array<[number, number, number]>,
+    |},
+  |}>,
 |};
 
 export type GeckoProfilerOverhead = {|

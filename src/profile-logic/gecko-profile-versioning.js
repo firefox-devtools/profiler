@@ -803,5 +803,28 @@ const _upgraders = {
     }
     convertToVersion17Recursive(profile);
   },
+  [18]: profile => {
+    // Due to a bug in gecko side, we were keeping the sample_group inside an
+    // object instead of an array. Usually there is only one sample group, that's
+    // why it wasn't a problem before. To future proof it, we are fixing it
+    // by moving it inside an array.
+    function convertToVersion18Recursive(p) {
+      if (p.counters && p.counters.length > 0) {
+        for (const counter of p.counters) {
+          // It's possible to have an empty sample_groups object due to gecko bug.
+          // Remove it if that's the case.
+          if (Object.entries(counter.sample_groups).length === 0) {
+            counter.sample_groups = [];
+          } else {
+            counter.sample_groups = [counter.sample_groups];
+          }
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersion18Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion18Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */

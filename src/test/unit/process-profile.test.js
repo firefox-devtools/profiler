@@ -183,14 +183,12 @@ describe('gecko counters processing', function() {
     const childCounter = createGeckoCounter(findMainThread(childGeckoProfile));
 
     // Due to a bug in Gecko, it's possible that we have a counter that has no
-    // sample data. This is likely a Gecko problem that we'll need to fix.
-    // See https://github.com/firefox-devtools/profiler/issues/2248 and
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=1584190
+    // sample data. In that case, we'll have an empty sample_groups array.
     const incorrectCounterEntry = {
       name: 'Incorrect counter',
       category: 'Some category',
       description: 'Some description',
-      sample_groups: {},
+      sample_groups: [],
     };
 
     parentGeckoProfile.counters = [parentCounter, incorrectCounterEntry];
@@ -237,21 +235,26 @@ describe('gecko counters processing', function() {
     const offsetTime = originalTime.map(n => n + 1000);
 
     const extractTime = counter => {
-      if (!counter.sample_groups.samples) {
+      if (
+        counter.sample_groups.length !== 1 ||
+        !counter.sample_groups[0].samples
+      ) {
         return [];
       }
-      return counter.sample_groups.samples.data.map(tuple => tuple[0]);
+      return counter.sample_groups[0].samples.data.map(tuple => tuple[0]);
     };
 
     // The original times and parent process are not offset.
     expect(extractTime(parentCounter)).toEqual(originalTime);
     expect(extractTime(childCounter)).toEqual(originalTime);
-    expect(processedCounters[0].sampleGroups.samples.time).toEqual(
+    expect(processedCounters[0].sampleGroups[0].samples.time).toEqual(
       originalTime
     );
 
     // The subprocess times are offset when processed:
-    expect(processedCounters[1].sampleGroups.samples.time).toEqual(offsetTime);
+    expect(processedCounters[1].sampleGroups[0].samples.time).toEqual(
+      offsetTime
+    );
   });
 });
 

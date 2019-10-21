@@ -2203,7 +2203,7 @@ describe('counter selectors', function() {
     // range.
     dispatch(ProfileView.commitRange(3.5, 5.5));
     const originalCounter = getCounterSelectors(0).getCounter(getState());
-    expect(originalCounter.sampleGroups.samples.time).toEqual([
+    expect(originalCounter.sampleGroups[0].samples.time).toEqual([
       0,
       1,
       2,
@@ -2219,12 +2219,12 @@ describe('counter selectors', function() {
     const filteredCounter = getCounterSelectors(
       0
     ).getCommittedRangeFilteredCounter(getState());
-    expect(filteredCounter.sampleGroups.samples.time).toEqual([3, 4, 5, 6]);
+    expect(filteredCounter.sampleGroups[0].samples.time).toEqual([3, 4, 5, 6]);
   });
 
   it('can accumulate samples', function() {
     const { getState, counterA } = setup();
-    counterA.sampleGroups.samples.count = [
+    counterA.sampleGroups[0].samples.count = [
       // The first value gets zeroed out due to a work-around for Bug 1520587. It
       // can be much larger than all the rest of the values, as it doesn't ever
       // get reset.
@@ -2240,7 +2240,7 @@ describe('counter selectors', function() {
       23,
     ];
     expect(
-      getCounterSelectors(0).getAccumulateCounterSamples(getState())
+      getCounterSelectors(0).getAccumulateCounterSamples(getState())[0]
     ).toEqual({
       accumulatedCounts: [0, -2, 1, -4, 3, -8, 5, -12, 7, 30],
       countRange: 42,

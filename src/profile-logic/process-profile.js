@@ -818,15 +818,21 @@ function _processCounters(
 
   return geckoCounters.reduce(
     (result, { name, category, description, sample_groups }) => {
-      if (
-        sample_groups.id === undefined ||
-        sample_groups.samples === undefined
-      ) {
-        // Due to a bug in Gecko, it's possible that we have a counter that has no
-        // sample data. This is likely a Gecko problem that we'll need to fix.
-        // See https://github.com/firefox-devtools/profiler/issues/2248 and
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=1584190
+      // Due to a bug in Gecko, it's possible that we have a counter that has no
+      // sample data. Remove that counter in that case.
+      if (sample_groups.length === 0) {
         return result;
+      }
+
+      const sampleGroups = [];
+      for (const sampleGroup of sample_groups) {
+        sampleGroups.push({
+          id: sampleGroup.id,
+          samples: adjustTableTimestamps(
+            _toStructOfArrays(sampleGroup.samples),
+            delta
+          ),
+        });
       }
 
       result.push({
@@ -835,13 +841,7 @@ function _processCounters(
         description,
         pid: mainThread.pid,
         mainThreadIndex,
-        sampleGroups: {
-          id: sample_groups.id,
-          samples: adjustTableTimestamps(
-            _toStructOfArrays(sample_groups.samples),
-            delta
-          ),
-        },
+        sampleGroups,
       });
       return result;
     },

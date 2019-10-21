@@ -55,6 +55,32 @@
       "name": "examplebinary2"
     }
   ],
+  "counters": [
+    {
+      "name": "malloc",
+      "category": "Memory",
+      "description": "Amount of allocated memory",
+      "sample_groups": {
+        "id": 0,
+        "samples": {
+          "schema": {
+            "time": 0,
+            "number": 1,
+            "count": 2
+          },
+          "data": [
+            [0, 1, 1],
+            [2, 2, 2],
+            [4, 3, 3],
+            [5, 4, 4],
+            [8, 5, 5],
+            [9, 6, 6],
+            [10, 7, 7]
+          ]
+        }
+      }
+    }
+  ],
   "pages": [
     {
       "docshellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",

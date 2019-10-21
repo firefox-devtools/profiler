@@ -1112,49 +1112,55 @@ export function filterCounterToRange(
   rangeStart: number,
   rangeEnd: number
 ): Counter {
-  const samples = counter.sampleGroups.samples;
-  let [sBegin, sEnd] = getSampleIndexRangeForSelection(
-    samples,
-    rangeStart,
-    rangeEnd
-  );
+  const filteredGroups = [];
+  for (let i = 0; i < counter.sampleGroups.length; i++) {
+    const sampleGroup = counter.sampleGroups[i];
+    const samples = sampleGroup.samples;
+    let [sBegin, sEnd] = getSampleIndexRangeForSelection(
+      samples,
+      rangeStart,
+      rangeEnd
+    );
 
-  // Include the samples just before and after the selection range, so that charts will
-  // not be cut off at the edges.
-  if (sBegin > 0) {
-    sBegin--;
-  }
-  if (sEnd < samples.length) {
-    sEnd++;
-  }
+    // Include the samples just before and after the selection range, so that charts will
+    // not be cut off at the edges.
+    if (sBegin > 0) {
+      sBegin--;
+    }
+    if (sEnd < samples.length) {
+      sEnd++;
+    }
 
-  const count = samples.count.slice(sBegin, sEnd);
-  const number = samples.number.slice(sBegin, sEnd);
+    const count = samples.count.slice(sBegin, sEnd);
+    const number = samples.number.slice(sBegin, sEnd);
 
-  if (sBegin === 0) {
-    // These lines zero out the first values of the counters, as they are unreliable. In
-    // addition, there are probably some missed counts in the memory counters, so the
-    // first memory number slowly creeps up over time, and becomes very unrealistic.
-    // In order to not be affected by these platform limitations, zero out the first
-    // counter values.
-    //
-    // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
-    // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
-    count[0] = 0;
-    number[0] = 0;
-  }
+    if (sBegin === 0) {
+      // These lines zero out the first values of the counters, as they are unreliable. In
+      // addition, there are probably some missed counts in the memory counters, so the
+      // first memory number slowly creeps up over time, and becomes very unrealistic.
+      // In order to not be affected by these platform limitations, zero out the first
+      // counter values.
+      //
+      // "Memory counter in Gecko Profiler isn't cleared when starting a new capture"
+      // https://bugzilla.mozilla.org/show_bug.cgi?id=1520587
+      count[0] = 0;
+      number[0] = 0;
+    }
 
-  return {
-    ...counter,
-    sampleGroups: {
-      ...counter.sampleGroups,
+    filteredGroups[i] = {
+      ...sampleGroup,
       samples: {
         time: samples.time.slice(sBegin, sEnd),
         number,
         count,
         length: sEnd - sBegin,
       },
-    },
+    };
+  }
+
+  return {
+    ...counter,
+    sampleGroups: filteredGroups,
   };
 }
 
@@ -1165,21 +1171,31 @@ export function filterCounterToRange(
  * accumulatedCounts array.
  */
 export function accumulateCounterSamples(
-  samples: CounterSamplesTable
-): AccumulatedCounterSamples {
-  let minCount = 0;
-  let maxCount = 0;
-  let accumulated = 0;
-  const accumulatedCounts = [];
-  for (let i = 0; i < samples.length; i++) {
-    accumulated += samples.count[i];
-    minCount = Math.min(accumulated, minCount);
-    maxCount = Math.max(accumulated, maxCount);
-    accumulatedCounts[i] = accumulated;
-  }
-  const countRange = maxCount - minCount;
+  samplesArray: Array<CounterSamplesTable>
+): Array<AccumulatedCounterSamples> {
+  const accumulatedSamples = [];
+  for (const samples of samplesArray) {
+    let minCount = 0;
+    let maxCount = 0;
+    let accumulated = 0;
+    const accumulatedCounts = [];
+    for (let i = 0; i < samples.length; i++) {
+      accumulated += samples.count[i];
+      minCount = Math.min(accumulated, minCount);
+      maxCount = Math.max(accumulated, maxCount);
+      accumulatedCounts[i] = accumulated;
+    }
+    const countRange = maxCount - minCount;
 
-  return { minCount, maxCount, countRange, accumulatedCounts };
+    accumulatedSamples.push({
+      minCount,
+      maxCount,
+      countRange,
+      accumulatedCounts,
+    });
+  }
+
+  return accumulatedSamples;
 }
 
 // --------------- CallNodePath and CallNodeIndex manipulations ---------------

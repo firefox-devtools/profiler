@@ -304,10 +304,10 @@ export type Counter = {|
   description: string,
   pid: Pid,
   mainThreadIndex: ThreadIndex,
-  sampleGroups: {|
+  sampleGroups: Array<{|
     id: number,
     samples: CounterSamplesTable,
-  |},
+  |}>,
 |};
 
 /**
