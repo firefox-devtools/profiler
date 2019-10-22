@@ -64,6 +64,7 @@ Object {
         ],
       },
     ],
+    "configuration": undefined,
     "debug": false,
     "extensions": Object {
       "baseURL": Array [],
