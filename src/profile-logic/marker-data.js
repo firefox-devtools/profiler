@@ -1099,6 +1099,10 @@ export function isMemoryMarker(marker: Marker): boolean {
   );
 }
 
+export function isIPCMarker(marker: Marker): boolean {
+  return !!(marker.data && marker.data.type === 'IPC');
+}
+
 export function filterForNetworkChart(markers: Marker[]): Marker[] {
   return markers.filter(marker => isNetworkMarker(marker));
 }

@@ -28,6 +28,7 @@ import type {
   MarkerPayload,
   NetworkPayload,
   NavigationMarkerPayload,
+  IPCMarkerPayload,
 } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
@@ -658,6 +659,46 @@ export function getNetworkTrackProfile() {
   ]);
 
   return profile;
+}
+
+type IPCMarkersOptions = {|
+  startTime: number,
+  endTime: number,
+  otherPid: number,
+  messageType: string,
+  messageSeqno: number,
+  side: 'parent' | 'child',
+  direction: 'sending' | 'receiving',
+  sync: boolean,
+|};
+
+function _getIPCMarkers(options: $Shape<IPCMarkersOptions> = {}) {
+  const payload: IPCMarkerPayload = {
+    type: 'IPC',
+    startTime: 0,
+    endTime: (options.startTime || 0) + 0.1,
+    otherPid: 1234,
+    messageType: 'PContent::Msg_PreferenceUpdate',
+    messageSeqno: 0,
+    side: 'parent',
+    direction: 'sending',
+    sync: false,
+    ...options,
+  };
+
+  return [['IPC', payload.endTime, payload]];
+}
+
+export function getIPCTrackProfile() {
+  const arrayOfIPCMarkers = Array(10)
+    .fill()
+    .map((_, i) =>
+      _getIPCMarkers({
+        messageSeqno: i,
+        startTime: 3 + 0.1 * i,
+      })
+    );
+  return getProfileWithMarkers([].concat(...arrayOfIPCMarkers));
 }
 
 export function getScreenshotTrackProfile() {

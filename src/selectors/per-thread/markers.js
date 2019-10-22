@@ -204,7 +204,8 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
         !MarkerData.isNetworkMarker(marker) &&
         !MarkerData.isFileIoMarker(marker) &&
         !MarkerData.isNavigationMarker(marker) &&
-        !MarkerData.isMemoryMarker(marker)
+        !MarkerData.isMemoryMarker(marker) &&
+        !MarkerData.isIPCMarker(marker)
     )
   );
 
@@ -351,6 +352,15 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   /**
+   * This returns only IPC markers.
+   */
+  const getIPCMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
+    filterMarkerIndexesCreator(MarkerData.isIPCMarker)
+  );
+
+  /**
    * This organizes the network markers in rows so that they're nicely displayed
    * in the header.
    */
@@ -429,6 +439,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getTimelineVerticalMarkerIndexes,
     getFileIoMarkerIndexes,
     getMemoryMarkerIndexes,
+    getIPCMarkerIndexes,
     getNetworkTrackTiming,
     getRangeFilteredScreenshotsById,
     getSearchFilteredMarkerIndexes,

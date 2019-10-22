@@ -475,3 +475,24 @@ export const TimelineMarkersMemory = explicitConnect<
   },
   component: TimelineMarkers,
 });
+
+/**
+ * Create a component for IPC-related markers.
+ */
+export const TimelineMarkersIPC = explicitConnect<OwnProps, StateProps, {||}>({
+  mapStateToProps: (state, props) => {
+    const { threadIndex } = props;
+    const selectors = getThreadSelectors(threadIndex);
+    const selectedThread = getSelectedThreadIndex(state);
+
+    return {
+      getMarker: selectors.getMarkerGetter(state),
+      markerIndexes: selectors.getIPCMarkerIndexes(state),
+      isSelected: threadIndex === selectedThread,
+      isModifyingSelection: getPreviewSelection(state).isModifying,
+      additionalClassName: 'timelineMarkersIPC',
+      testId: 'TimelineMarkersIPC',
+    };
+  },
+  component: TimelineMarkers,
+});
