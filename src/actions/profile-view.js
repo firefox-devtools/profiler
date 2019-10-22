@@ -279,6 +279,10 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
           selectedThreadIndex = localTrack.threadIndex;
           selectedTab = 'network-chart';
           break;
+        case 'ipc':
+          selectedThreadIndex = localTrack.threadIndex;
+          selectedTab = 'marker-chart';
+          break;
         case 'memory': {
           const { counterIndex } = localTrack;
           const counterSelectors = getCounterSelectors(counterIndex);

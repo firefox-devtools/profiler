@@ -34,6 +34,10 @@ export const TRACK_MEMORY_HEIGHT =
   TRACK_MEMORY_GRAPH_HEIGHT + TRACK_MEMORY_MARKERS_HEIGHT;
 export const TRACK_MEMORY_LINE_WIDTH = 2;
 
+// The following values are for IPC track.
+export const TRACK_IPC_MARKERS_HEIGHT = 25;
+export const TRACK_IPC_HEIGHT = TRACK_IPC_MARKERS_HEIGHT;
+
 // Height of the blank area in process track.
 export const TRACK_PROCESS_BLANK_HEIGHT = 30;
 

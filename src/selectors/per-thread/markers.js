@@ -70,13 +70,18 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerData.extractMarkerDataFromName
   );
 
+  const _getThreadId: Selector<number | void> = state =>
+    threadSelectors.getThread(state).tid;
+
   /* This selector exposes the result of the processing of the raw marker table
    * into our Marker structure that we use in the rest of our code. This is the
    * very start of our marker pipeline. */
   const _getDerivedMarkers: Selector<Marker[]> = createSelector(
     getProcessedRawMarkerTable,
     threadSelectors.getStringTable,
+    _getThreadId,
     threadSelectors.getThreadRange,
+    ProfileSelectors.getIPCMarkerCorrelations,
     MarkerData.deriveMarkersFromRawMarkerTable
   );
 
@@ -199,7 +204,8 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
         !MarkerData.isNetworkMarker(marker) &&
         !MarkerData.isFileIoMarker(marker) &&
         !MarkerData.isNavigationMarker(marker) &&
-        !MarkerData.isMemoryMarker(marker)
+        !MarkerData.isMemoryMarker(marker) &&
+        !MarkerData.isIPCMarker(marker)
     )
   );
 
@@ -346,6 +352,15 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   /**
+   * This returns only IPC markers.
+   */
+  const getIPCMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
+    getMarkerGetter,
+    getCommittedRangeFilteredMarkerIndexes,
+    filterMarkerIndexesCreator(MarkerData.isIPCMarker)
+  );
+
+  /**
    * This organizes the network markers in rows so that they're nicely displayed
    * in the header.
    */
@@ -424,6 +439,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getTimelineVerticalMarkerIndexes,
     getFileIoMarkerIndexes,
     getMemoryMarkerIndexes,
+    getIPCMarkerIndexes,
     getNetworkTrackTiming,
     getRangeFilteredScreenshotsById,
     getSearchFilteredMarkerIndexes,

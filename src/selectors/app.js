@@ -16,6 +16,7 @@ import {
   TRACK_SCREENSHOT_HEIGHT,
   TRACK_NETWORK_HEIGHT,
   TRACK_MEMORY_HEIGHT,
+  TRACK_IPC_HEIGHT,
   TRACK_PROCESS_BLANK_HEIGHT,
   TIMELINE_RULER_HEIGHT,
   TIMELINE_SETTINGS_HEIGHT,
@@ -150,6 +151,9 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
               break;
             case 'memory':
               height += TRACK_MEMORY_HEIGHT + border;
+              break;
+            case 'ipc':
+              height += TRACK_IPC_HEIGHT + border;
               break;
             default:
               throw assertExhaustiveCheck(localTrack);

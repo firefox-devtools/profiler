@@ -169,7 +169,8 @@ export type GlobalTrack =
 export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}
   | {| +type: 'network', +threadIndex: ThreadIndex |}
-  | {| +type: 'memory', +counterIndex: CounterIndex |};
+  | {| +type: 'memory', +counterIndex: CounterIndex |}
+  | {| +type: 'ipc', +threadIndex: ThreadIndex |};
 
 export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;

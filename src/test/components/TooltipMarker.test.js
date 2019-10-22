@@ -359,6 +359,21 @@ describe('TooltipMarker', function() {
         },
       ],
       [
+        'IPC',
+        120,
+        {
+          type: 'IPC',
+          startTime: 120,
+          endTime: 120,
+          otherPid: 2222,
+          messageType: 'PContent::Msg_PreferenceUpdate',
+          messageSeqno: 1,
+          side: 'parent',
+          direction: 'sending',
+          sync: false,
+        },
+      ],
+      [
         'PreferenceRead',
         114.9,
         {

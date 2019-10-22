@@ -26,6 +26,7 @@ import { getThreadSelectors } from '../../selectors/per-thread';
 import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
+import { TrackIPC } from './TrackIPC';
 import type { TrackReference } from '../../types/actions';
 import type { Pid } from '../../types/profile';
 import type { TrackIndex, LocalTrack } from '../../types/profile-derived';
@@ -83,6 +84,8 @@ class LocalTrackComponent extends PureComponent<Props> {
         return <TrackNetwork threadIndex={localTrack.threadIndex} />;
       case 'memory':
         return <TrackMemory counterIndex={localTrack.counterIndex} />;
+      case 'ipc':
+        return <TrackIPC threadIndex={localTrack.threadIndex} />;
       default:
         console.error('Unhandled localTrack type', (localTrack: empty));
         return null;
@@ -161,6 +164,14 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         titleText = getCounterSelectors(localTrack.counterIndex).getDescription(
           state
         );
+        break;
+      }
+      case 'ipc': {
+        const threadIndex = localTrack.threadIndex;
+        const selectedThreadIndex = getSelectedThreadIndex(state);
+        const selectedTab = getSelectedTab(state);
+        isSelected =
+          threadIndex === selectedThreadIndex && selectedTab === 'marker-chart';
         break;
       }
       default:

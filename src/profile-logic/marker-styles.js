@@ -152,6 +152,17 @@ export const markerStyles: MarkerStyles = {
     ...defaultStyle,
     background: colors.BLUE_50,
   },
+
+  IPCOut: {
+    ...defaultStyle,
+    background: colors.TEAL_50,
+    top: 5,
+  },
+  IPCIn: {
+    ...defaultStyle,
+    background: colors.PURPLE_50,
+    top: 10,
+  },
 };
 
 export const overlayFills = {
