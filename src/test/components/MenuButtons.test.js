@@ -268,6 +268,12 @@ describe('app/MenuButtons', function() {
         });
       // Using gecko profile because it has metadata and profilerOverhead data in it.
       const profile = processProfile(createGeckoProfile());
+      profile.meta.configuration = {
+        features: ['js', 'threads'],
+        threads: ['GeckoMain', 'DOM Worker'],
+        capacity: Math.pow(2, 14),
+        duration: 20,
+      };
       const store = storeWithProfile(profile);
 
       const { container, getByValue } = render(
