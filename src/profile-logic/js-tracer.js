@@ -23,6 +23,7 @@ import type {
 import type { JsTracerTiming } from '../types/profile-derived';
 import type { Microseconds } from '../types/units';
 import type { UniqueStringArray } from '../utils/unique-string-array';
+import type { JsImplementation } from '../profile-logic/profile-data';
 
 // See the function below for more information.
 type ScriptLocationToFuncIndex = Map<string, IndexIntoFuncTable | null>;
@@ -528,6 +529,12 @@ export function convertJsTracerToThreadWithoutSamples(
   // Build up maps between index values.
   const funcMap: Map<IndexIntoStringTable, IndexIntoFuncTable> = new Map();
   const stackMap: Map<IndexIntoJsTracerEvents, IndexIntoStackTable> = new Map();
+  // The implementationMap maps to index in the string table, that refers to a frame's
+  // implementation. e.g. the number 132 which maps to the string "IonMonkey".
+  const implementationMap: Map<
+    IndexIntoJsTracerEvents,
+    IndexIntoStringTable | null
+  > = new Map();
 
   // Get some computed values before entering the loop.
   const blankStringIndex = stringTable.indexForString('');
@@ -536,6 +543,14 @@ export function convertJsTracerToThreadWithoutSamples(
     throw new Error("Expected to find an 'Other' category.");
   }
   const scriptLocationToFuncIndex = getScriptLocationToFuncIndex(thread);
+  const eventNameToImplementationStringIndex = {
+    Interpreter: stringTable.indexForString(('interpreter': JsImplementation)),
+    Baseline: stringTable.indexForString(('baseline': JsImplementation)),
+    IonMonkey: stringTable.indexForString(('ion': JsImplementation)),
+  };
+  const frameEventTypes = new Set(
+    Object.keys(eventNameToImplementationStringIndex)
+  );
 
   // Go through all of the JS tracer events, and build up the func, stack, and
   // frame tables.
@@ -596,14 +611,29 @@ export function convertJsTracerToThreadWithoutSamples(
       unmatchedIndex--;
     }
 
+    // Figure out the frame implementation for this event.
+    let implementation: null | IndexIntoStringTable = null;
+    if (frameEventTypes.has(eventName)) {
+      // The current event matches a known frame type, switch to that frame type.
+      implementation = eventNameToImplementationStringIndex[eventName];
+    } else if (prefixIndex !== null) {
+      // Look up the implementation of the prefix.
+      const prefixImplementation = implementationMap.get(prefixIndex);
+      if (prefixImplementation === undefined) {
+        throw new Error(
+          `Expected to find an implementation from a js tracer prefix index prefixIndex: ${prefixIndex}`
+        );
+      }
+      implementation = prefixImplementation;
+    }
+    implementationMap.set(tracerEventIndex, implementation);
+
     // Every event gets a unique frame entry.
     const frameIndex = frameTable.length++;
     frameTable.address.push(blankStringIndex);
     frameTable.category.push(otherCategory);
     frameTable.func.push(funcIndex);
-    // TODO - We could figure out the implementation, by tracking what the callee was.
-    // See https://github.com/firefox-devtools/profiler/issues/2244
-    frameTable.implementation.push(null);
+    frameTable.implementation.push(implementation);
     frameTable.line.push(line);
     frameTable.column.push(column);
     frameTable.column.push(null);
