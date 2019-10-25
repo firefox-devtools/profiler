@@ -818,22 +818,19 @@ function _processCounters(
 
   return geckoCounters.reduce(
     (result, { name, category, description, sample_groups }) => {
-      // Due to a bug in Gecko, it's possible that we have a counter that has no
-      // sample data. Remove that counter in that case.
       if (sample_groups.length === 0) {
+        // It's possible that no sample has been collected during our capture
+        // session, ignore this counter if that's the case.
         return result;
       }
 
-      const sampleGroups = [];
-      for (const sampleGroup of sample_groups) {
-        sampleGroups.push({
-          id: sampleGroup.id,
-          samples: adjustTableTimestamps(
-            _toStructOfArrays(sampleGroup.samples),
-            delta
-          ),
-        });
-      }
+      const sampleGroups = sample_groups.map(sampleGroup => ({
+        id: sampleGroup.id,
+        samples: adjustTableTimestamps(
+          _toStructOfArrays(sampleGroup.samples),
+          delta
+        ),
+      }));
 
       result.push({
         name,

@@ -170,7 +170,7 @@ export type GeckoCounter = {|
   name: string,
   category: string,
   description: string,
-  sample_groups: Array<{|
+  sample_groups: $ReadOnlyArray<{|
     id: number,
     samples: {|
       schema: {|
@@ -178,7 +178,7 @@ export type GeckoCounter = {|
         number: 1,
         count: 2,
       |},
-      data: Array<[number, number, number]>,
+      data: $ReadOnlyArray<[number, number, number]>,
     |},
   |}>,
 |};

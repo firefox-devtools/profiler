@@ -304,7 +304,7 @@ export type Counter = {|
   description: string,
   pid: Pid,
   mainThreadIndex: ThreadIndex,
-  sampleGroups: Array<{|
+  sampleGroups: $ReadOnlyArray<{|
     id: number,
     samples: CounterSamplesTable,
   |}>,

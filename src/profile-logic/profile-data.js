@@ -1112,9 +1112,7 @@ export function filterCounterToRange(
   rangeStart: number,
   rangeEnd: number
 ): Counter {
-  const filteredGroups = [];
-  for (let i = 0; i < counter.sampleGroups.length; i++) {
-    const sampleGroup = counter.sampleGroups[i];
+  const filteredGroups = counter.sampleGroups.map(sampleGroup => {
     const samples = sampleGroup.samples;
     let [sBegin, sEnd] = getSampleIndexRangeForSelection(
       samples,
@@ -1147,7 +1145,7 @@ export function filterCounterToRange(
       number[0] = 0;
     }
 
-    filteredGroups[i] = {
+    return {
       ...sampleGroup,
       samples: {
         time: samples.time.slice(sBegin, sEnd),
@@ -1156,7 +1154,7 @@ export function filterCounterToRange(
         length: sEnd - sBegin,
       },
     };
-  }
+  });
 
   return {
     ...counter,
@@ -1173,8 +1171,7 @@ export function filterCounterToRange(
 export function accumulateCounterSamples(
   samplesArray: Array<CounterSamplesTable>
 ): Array<AccumulatedCounterSamples> {
-  const accumulatedSamples = [];
-  for (const samples of samplesArray) {
+  const accumulatedSamples = samplesArray.map(samples => {
     let minCount = 0;
     let maxCount = 0;
     let accumulated = 0;
@@ -1187,13 +1184,13 @@ export function accumulateCounterSamples(
     }
     const countRange = maxCount - minCount;
 
-    accumulatedSamples.push({
+    return {
       minCount,
       maxCount,
       countRange,
       accumulatedCounts,
-    });
-  }
+    };
+  });
 
   return accumulatedSamples;
 }

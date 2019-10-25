@@ -182,16 +182,16 @@ describe('gecko counters processing', function() {
     );
     const childCounter = createGeckoCounter(findMainThread(childGeckoProfile));
 
-    // Due to a bug in Gecko, it's possible that we have a counter that has no
-    // sample data. In that case, we'll have an empty sample_groups array.
-    const incorrectCounterEntry = {
-      name: 'Incorrect counter',
+    // It's possible that no sample has been collected during our capture
+    // session, ignore this counter if that's the case.
+    const emptyCounterEntry = {
+      name: 'Empty counter',
       category: 'Some category',
       description: 'Some description',
       sample_groups: [],
     };
 
-    parentGeckoProfile.counters = [parentCounter, incorrectCounterEntry];
+    parentGeckoProfile.counters = [parentCounter, emptyCounterEntry];
     childGeckoProfile.counters = [childCounter];
     return {
       parentGeckoProfile,
@@ -235,10 +235,7 @@ describe('gecko counters processing', function() {
     const offsetTime = originalTime.map(n => n + 1000);
 
     const extractTime = counter => {
-      if (
-        counter.sample_groups.length !== 1 ||
-        !counter.sample_groups[0].samples
-      ) {
+      if (counter.sample_groups.length === 0) {
         return [];
       }
       return counter.sample_groups[0].samples.data.map(tuple => tuple[0]);
