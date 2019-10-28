@@ -88,8 +88,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     if (sampleGroups.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and do not draw anything.
-      console.error('No sample group found for memory counter');
-      return;
+      throw new Error('No sample group found for memory counter');
     }
 
     const samples = counter.sampleGroups[0].samples;
@@ -104,8 +103,7 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     if (accumulatedSamples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
-      console.error('No accumulated sample found for memory counter');
-      return;
+      throw new Error('No accumulated sample found for memory counter');
     }
     const { minCount, countRange, accumulatedCounts } = accumulatedSamples[0];
 
@@ -238,8 +236,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     if (counter.sampleGroups.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
-      console.error('No sample group found for memory counter');
-      return;
+      throw new Error('No sample group found for memory counter');
     }
     const { samples } = counter.sampleGroups[0];
 
@@ -270,8 +267,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     if (this.props.accumulatedSamples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
-      console.error('No accumulated sample found for memory counter');
-      return null;
+      throw new Error('No accumulated sample found for memory counter');
     }
     const {
       minCount,
@@ -315,8 +311,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     if (counter.sampleGroups.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
-      console.error('No sample group found for memory counter');
-      return null;
+      throw new Error('No sample group found for memory counter');
     }
     const { samples } = counter.sampleGroups[0];
     const rangeLength = rangeEnd - rangeStart;
@@ -326,8 +321,7 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     if (accumulatedSamples.length === 0) {
       // Gecko failed to capture samples for some reason and it shouldn't happen for
       // malloc counter. Print an error and bail out early.
-      console.error('No accumulated sample found for memory counter');
-      return null;
+      throw new Error('No accumulated sample found for memory counter');
     }
     const { minCount, countRange, accumulatedCounts } = accumulatedSamples[0];
     const unitSampleCount =
