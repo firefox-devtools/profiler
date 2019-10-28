@@ -39,7 +39,7 @@ type CanvasProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +counter: Counter,
-  +accumulatedSamples: AccumulatedCounterSamples,
+  +accumulatedSamples: AccumulatedCounterSamples[],
   +interval: Milliseconds,
   +width: CssPixels,
   +height: CssPixels,
@@ -84,7 +84,14 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     canvas.height = Math.round(deviceHeight);
     ctx.clearRect(0, 0, deviceWidth, deviceHeight);
 
-    const samples = counter.sampleGroups.samples;
+    const sampleGroups = counter.sampleGroups;
+    if (sampleGroups.length === 0) {
+      // Gecko failed to capture samples for some reason and it shouldn't happen for
+      // malloc counter. Print an error and do not draw anything.
+      throw new Error('No sample group found for memory counter');
+    }
+
+    const samples = counter.sampleGroups[0].samples;
     if (samples.length === 0) {
       // There's no reason to draw the samples, there are none.
       return;
@@ -93,7 +100,12 @@ class TrackMemoryCanvas extends React.PureComponent<CanvasProps> {
     // Take the sample information, and convert it into chart coordinates. Use a slightly
     // smaller space than the deviceHeight, so that the stroke will be fully visible
     // both at the top and bottom of the chart.
-    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
+    if (accumulatedSamples.length === 0) {
+      // Gecko failed to capture samples for some reason and it shouldn't happen for
+      // malloc counter. Print an error and bail out early.
+      throw new Error('No accumulated sample found for memory counter');
+    }
+    const { minCount, countRange, accumulatedCounts } = accumulatedSamples[0];
 
     {
       // Draw the chart.
@@ -179,7 +191,7 @@ type StateProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
   +counter: Counter,
-  +accumulatedSamples: AccumulatedCounterSamples,
+  +accumulatedSamples: AccumulatedCounterSamples[],
   +interval: Milliseconds,
   +filteredThread: Thread,
   +unfilteredSamplesRange: StartEndRange | null,
@@ -220,7 +232,14 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
     const { width, rangeStart, rangeEnd, counter, interval } = this.props;
     const rangeLength = rangeEnd - rangeStart;
     const timeAtMouse = rangeStart + ((mouseX - left) / width) * rangeLength;
-    const { samples } = counter.sampleGroups;
+
+    if (counter.sampleGroups.length === 0) {
+      // Gecko failed to capture samples for some reason and it shouldn't happen for
+      // malloc counter. Print an error and bail out early.
+      throw new Error('No sample group found for memory counter');
+    }
+    const { samples } = counter.sampleGroups[0];
+
     if (
       timeAtMouse < samples.time[0] ||
       timeAtMouse > samples.time[samples.length - 1] + interval
@@ -245,11 +264,16 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
   };
 
   _renderTooltip(counterIndex: number): React.Node {
+    if (this.props.accumulatedSamples.length === 0) {
+      // Gecko failed to capture samples for some reason and it shouldn't happen for
+      // malloc counter. Print an error and bail out early.
+      throw new Error('No accumulated sample found for memory counter');
+    }
     const {
       minCount,
       countRange,
       accumulatedCounts,
-    } = this.props.accumulatedSamples;
+    } = this.props.accumulatedSamples[0];
     const bytes = accumulatedCounts[counterIndex] - minCount;
     return (
       <div className="timelineTrackMemoryTooltip">
@@ -283,12 +307,23 @@ class TrackMemoryGraphImpl extends React.PureComponent<Props, State> {
       lineWidth,
       accumulatedSamples,
     } = this.props;
-    const { samples } = counter.sampleGroups;
+
+    if (counter.sampleGroups.length === 0) {
+      // Gecko failed to capture samples for some reason and it shouldn't happen for
+      // malloc counter. Print an error and bail out early.
+      throw new Error('No sample group found for memory counter');
+    }
+    const { samples } = counter.sampleGroups[0];
     const rangeLength = rangeEnd - rangeStart;
     const left =
       (width * (samples.time[counterIndex] - rangeStart)) / rangeLength;
 
-    const { minCount, countRange, accumulatedCounts } = accumulatedSamples;
+    if (accumulatedSamples.length === 0) {
+      // Gecko failed to capture samples for some reason and it shouldn't happen for
+      // malloc counter. Print an error and bail out early.
+      throw new Error('No accumulated sample found for memory counter');
+    }
+    const { minCount, countRange, accumulatedCounts } = accumulatedSamples[0];
     const unitSampleCount =
       (accumulatedCounts[counterIndex] - minCount) / countRange;
     const innerTrackHeight = graphHeight - lineWidth / 2;

@@ -185,9 +185,14 @@ function _createCounterSelectors(counterIndex: CounterIndex): * {
     (counters, range) => filterCounterToRange(counters, range.start, range.end)
   );
 
-  const getAccumulateCounterSamples: Selector<AccumulatedCounterSamples> = createSelector(
+  const getAccumulateCounterSamples: Selector<
+    Array<AccumulatedCounterSamples>
+  > = createSelector(
     getCommittedRangeFilteredCounter,
-    counters => accumulateCounterSamples(counters.sampleGroups.samples)
+    counters =>
+      accumulateCounterSamples(
+        counters.sampleGroups.map(group => group.samples)
+      )
   );
 
   return {

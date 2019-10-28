@@ -304,10 +304,10 @@ export type Counter = {|
   description: string,
   pid: Pid,
   mainThreadIndex: ThreadIndex,
-  sampleGroups: {|
+  sampleGroups: $ReadOnlyArray<{|
     id: number,
     samples: CounterSamplesTable,
-  |},
+  |}>,
 |};
 
 /**

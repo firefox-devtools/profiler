@@ -807,17 +807,19 @@ export function createGeckoCounter(thread: GeckoThread): GeckoCounter {
     name: 'My Counter',
     category: 'My Category',
     description: 'My Description',
-    sample_groups: {
-      id: 0,
-      samples: {
-        schema: {
-          time: 0,
-          number: 1,
-          count: 2,
+    sample_groups: [
+      {
+        id: 0,
+        samples: {
+          schema: {
+            time: 0,
+            number: 1,
+            count: 2,
+          },
+          data: [],
         },
-        data: [],
       },
-    },
+    ],
   };
   for (let i = 0; i < thread.samples.data.length; i++) {
     // Go through all the thread samples and create a corresponding counter entry.
@@ -826,7 +828,7 @@ export function createGeckoCounter(thread: GeckoThread): GeckoCounter {
     const number = Math.floor(50 * Math.sin(i) + 50);
     // Create some arbitrary values for the count.
     const count = Math.sin(i);
-    geckoCounter.sample_groups.samples.data.push([time, number, count]);
+    geckoCounter.sample_groups[0].samples.data.push([time, number, count]);
   }
   return geckoCounter;
 }

@@ -71,6 +71,48 @@
       }
     ]
   },
+  "counters": [
+    {
+      "name": "malloc",
+      "category": "Memory",
+      "description": "Amount of allocated memory",
+      "pid": 11111,
+      "mainThreadIndex": 0,
+      "sampleGroups": {
+        "id": 0,
+        "samples": {
+          "time": [
+            0,
+            2,
+            4,
+            5,
+            8,
+            9,
+            10
+          ],
+          "number": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "count": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7
+          ],
+          "length": 7
+        }
+      }
+    }
+  ],
   "pages": [
     {
       "docshellId": "{c03a6ebd-2430-7949-b25b-95ba9776bdbf}",
