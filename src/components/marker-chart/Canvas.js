@@ -12,6 +12,7 @@ import {
 import ChartCanvas from '../shared/chart/Canvas';
 import { TooltipMarker } from '../tooltip/Marker';
 import TextMeasurement from '../../utils/text-measurement';
+import memoize from 'memoize-immutable';
 import {
   typeof updatePreviewSelection as UpdatePreviewSelection,
   typeof changeRightClickedMarker as ChangeRightClickedMarker,
@@ -31,7 +32,6 @@ import type {
 } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
-
 type MarkerDrawingInformation = {
   x: CssPixels,
   y: CssPixels,
@@ -76,7 +76,9 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
   drawCanvas = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: MarkerIndex | null
+    hoveredItem: MarkerIndex | null,
+    prevHoveredItem: MarkerIndex | null,
+    isHoveredOnlyDifferent: boolean
   ) => {
     const {
       rowHeight,
@@ -95,12 +97,70 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       markerTimingAndBuckets.length
     );
 
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, containerWidth, containerHeight);
+    if (isHoveredOnlyDifferent) {
+      // Only re-draw the rows that have been updated if only the hovering information
+      // is different.
+      const markerIndexToTimingRow = this._getMarkerIndexToTimingRow(
+        markerTimingAndBuckets
+      );
 
-    this.drawMarkers(ctx, hoveredItem, startRow, endRow);
-    this.drawSeparatorsAndLabels(ctx, startRow, endRow);
+      const oldRow: number | void =
+        prevHoveredItem === null
+          ? undefined
+          : markerIndexToTimingRow.get(prevHoveredItem);
+      const newRow: number | void =
+        hoveredItem === null
+          ? undefined
+          : markerIndexToTimingRow.get(hoveredItem);
+
+      if (newRow !== undefined) {
+        this.clearRow(ctx, newRow);
+        this.drawMarkers(ctx, hoveredItem, newRow, newRow + 1);
+      }
+      if (oldRow !== undefined && oldRow !== newRow) {
+        this.clearRow(ctx, oldRow);
+        this.drawMarkers(ctx, hoveredItem, oldRow, oldRow + 1);
+      }
+    } else {
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, containerWidth, containerHeight);
+
+      this.drawMarkers(ctx, hoveredItem, startRow, endRow);
+      this.drawSeparatorsAndLabels(ctx, startRow, endRow);
+    }
   };
+
+  /**
+   * When re-drawing markers, it's helpful to isolate the operations to a single row
+   * in order to make the drawing faster. This memoized function computes the map
+   * of a marker index to its row in the marker timing.
+   */
+  _getMarkerIndexToTimingRow = memoize(
+    (
+      markerTimingAndBuckets: MarkerTimingAndBuckets
+    ): Map<MarkerIndex, number> => {
+      const markerIndexToTimingRow = new Map();
+      for (
+        let rowIndex = 0;
+        rowIndex < markerTimingAndBuckets.length;
+        rowIndex++
+      ) {
+        const markerTiming = markerTimingAndBuckets[rowIndex];
+        if (typeof markerTiming === 'string') {
+          continue;
+        }
+        for (
+          let timingIndex = 0;
+          timingIndex < markerTiming.length;
+          timingIndex++
+        ) {
+          markerIndexToTimingRow.set(markerTiming.index[timingIndex], rowIndex);
+        }
+      }
+      return markerIndexToTimingRow;
+    },
+    { cache: new WeakMap() }
+  );
 
   // Note: we used a long argument list instead of an object parameter on
   // purpose, to reduce GC pressure while drawing.
@@ -265,6 +325,21 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         'HighlightText' // foreground color
       );
     });
+  }
+
+  clearRow(ctx: CanvasRenderingContext2D, rowIndex: number) {
+    const {
+      rowHeight,
+      viewport: { viewportTop, containerWidth },
+    } = this.props;
+
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(
+      TIMELINE_MARGIN_LEFT,
+      rowIndex * rowHeight - viewportTop + 1, // Add plus one for borders.
+      containerWidth - TIMELINE_MARGIN_LEFT,
+      rowHeight - 2 // Subtract 2 for borders.
+    );
   }
 
   /**
