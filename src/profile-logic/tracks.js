@@ -32,11 +32,13 @@ const LOCAL_TRACK_INDEX_ORDER = {
   thread: 0,
   network: 1,
   memory: 2,
+  ipc: 3,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
   network: 0,
   memory: 1,
   thread: 2,
+  ipc: 3,
 };
 const GLOBAL_TRACK_INDEX_ORDER = {
   process: 0,
@@ -229,6 +231,11 @@ export function computeLocalTracksByPid(
     if (thread.markers.data.some(datum => datum && datum.type === 'Network')) {
       // This thread has network markers.
       tracks.push({ type: 'network', threadIndex });
+    }
+
+    if (thread.markers.data.some(datum => datum && datum.type === 'IPC')) {
+      // This thread has IPC markers.
+      tracks.push({ type: 'ipc', threadIndex });
     }
   }
 
@@ -576,6 +583,11 @@ export function getLocalTrackName(
       return 'Network';
     case 'memory':
       return 'Memory';
+    case 'ipc':
+      return `IPC — ${getFriendlyThreadName(
+        threads,
+        threads[localTrack.threadIndex]
+      )}`;
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }

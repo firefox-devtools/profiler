@@ -11,6 +11,10 @@ import {
   filterCounterToRange,
   accumulateCounterSamples,
 } from '../profile-logic/profile-data';
+import {
+  IPCMarkerCorrelations,
+  correlateIPCMarkers,
+} from '../profile-logic/marker-data';
 
 import type {
   Profile,
@@ -181,9 +185,14 @@ function _createCounterSelectors(counterIndex: CounterIndex): * {
     (counters, range) => filterCounterToRange(counters, range.start, range.end)
   );
 
-  const getAccumulateCounterSamples: Selector<AccumulatedCounterSamples> = createSelector(
+  const getAccumulateCounterSamples: Selector<
+    Array<AccumulatedCounterSamples>
+  > = createSelector(
     getCommittedRangeFilteredCounter,
-    counters => accumulateCounterSamples(counters.sampleGroups.samples)
+    counters =>
+      accumulateCounterSamples(
+        counters.sampleGroups.map(group => group.samples)
+      )
   );
 
   return {
@@ -194,6 +203,11 @@ function _createCounterSelectors(counterIndex: CounterIndex): * {
     getAccumulateCounterSamples,
   };
 }
+
+export const getIPCMarkerCorrelations: Selector<IPCMarkerCorrelations> = createSelector(
+  getThreads,
+  correlateIPCMarkers
+);
 
 /**
  * Tracks

@@ -162,3 +162,40 @@ process: \\"tab\\" (222)"
   </div>
 </li>
 `;
+
+exports[`timeline/LocalTrack with an IPC track matches the snapshot of the IPC track 1`] = `
+<li
+  class="timelineTrack timelineTrackLocal"
+>
+  <div
+    class="timelineTrackRow timelineTrackLocalRow"
+  >
+    <div
+      class="react-contextmenu-wrapper timelineTrackLabel timelineTrackLocalLabel timelineTrackLocalGrippy"
+    >
+      <button
+        class="timelineTrackNameButton"
+        type="button"
+      >
+        IPC — Empty
+      </button>
+    </div>
+    <div
+      class="timelineTrackTrack"
+    >
+      <div
+        style="height: 25px;"
+      >
+        <div
+          class="timelineMarkers timelineMarkersIPC"
+          data-testid="TimelineMarkersIPC"
+        >
+          <canvas
+            class="timelineMarkersCanvas"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</li>
+`;

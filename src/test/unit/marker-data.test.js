@@ -6,6 +6,7 @@
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { processProfile } from '../../profile-logic/process-profile';
 import {
+  IPCMarkerCorrelations,
   deriveMarkersFromRawMarkerTable,
   filterRawMarkerTableToRange,
   filterRawMarkerTableToRangeWithMarkersToDelete,
@@ -60,9 +61,9 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     expect(contentThread.processType).toBe('tab');
   });
 
-  it('creates 15 markers given the test data', function() {
+  it('creates 17 markers given the test data', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(15);
+    expect(markers.length).toEqual(17);
   });
   it('creates a marker even if there is no start or end time', function() {
     const { markers } = setup();
@@ -84,7 +85,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   });
   it('should fold the two reflow markers into one marker', function() {
     const { markers } = setup();
-    expect(markers.length).toEqual(15);
+    expect(markers.length).toEqual(17);
     expect(markers[2]).toMatchObject({
       start: 3,
       dur: 5,
@@ -139,8 +140,8 @@ describe('deriveMarkersFromRawMarkerTable', function() {
   });
   it('should handle markers without an end', function() {
     const { markers } = setup();
-    expect(markers[14]).toMatchObject({
-      start: 28,
+    expect(markers[16]).toMatchObject({
+      start: 100,
       // This is the last marker; as a result, the time range is computed by
       // adding the interval to its time. Because it's incomplete, it lasts
       // until the end of the range, and as a result its duration is the same as
@@ -213,7 +214,67 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       title: null,
       category: 0,
     });
-    expect(contentMarkers[10]).toEqual({
+    expect(markers[14]).toEqual({
+      data: {
+        type: 'IPC',
+        startTime: 30,
+        endTime: 1031,
+        otherPid: 2222,
+        otherTid: 1111,
+        otherThreadName: 'Content Process (Thread ID: 1111)',
+        messageSeqno: 1,
+        messageType: 'PContent::Msg_PreferenceUpdate',
+        side: 'parent',
+        direction: 'sending',
+        sync: false,
+      },
+      dur: 1001,
+      name: 'IPCOut',
+      start: 30,
+      title: 'IPC — sent to Content Process (Thread ID: 1111)',
+      category: 0,
+    });
+    expect(markers[15]).toEqual({
+      data: {
+        type: 'IPC',
+        startTime: 40,
+        endTime: 40,
+        otherPid: 9999,
+        messageSeqno: 2,
+        messageType: 'PContent::Msg_PreferenceUpdate',
+        side: 'parent',
+        direction: 'sending',
+        sync: false,
+      },
+      dur: 0,
+      incomplete: true,
+      name: 'IPCOut',
+      start: 40,
+      title: 'IPC — sent to 9999',
+      category: 0,
+    });
+
+    expect(contentMarkers[0]).toEqual({
+      data: {
+        type: 'IPC',
+        startTime: 30,
+        endTime: 1031,
+        otherPid: 3333,
+        otherTid: 3333,
+        otherThreadName: 'Parent Process (Thread ID: 3333)',
+        messageSeqno: 1,
+        messageType: 'PContent::Msg_PreferenceUpdate',
+        side: 'child',
+        direction: 'receiving',
+        sync: false,
+      },
+      dur: 1001,
+      name: 'IPCIn',
+      start: 30,
+      title: 'IPC — received from Parent Process (Thread ID: 3333)',
+      category: 0,
+    });
+    expect(contentMarkers[11]).toEqual({
       data: {
         type: 'Network',
         startTime: 1022,
@@ -240,7 +301,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       title: null,
       category: 0,
     });
-    expect(contentMarkers[11]).toEqual({
+    expect(contentMarkers[12]).toEqual({
       data: {
         // Stack property is converted to a cause.
         cause: {
@@ -274,9 +335,9 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       name: 'CompositorScreenshot',
       start: 25,
       // Because the last compositor screenshot lasts until the end of the
-      // range, and the range ends at 29 (because of the last marker's time is
-      // at 28), the duration is 4 accordingly.
-      dur: 4,
+      // range, and the range ends at 101 (because of the last marker's time is
+      // at 100), the duration is 76 accordingly.
+      dur: 76,
       title: null,
     });
   });
@@ -399,7 +460,9 @@ describe('filterRawMarkerTableToRange', () => {
     const processedMarkers = deriveMarkersFromRawMarkerTable(
       filteredThread.markers,
       filteredThread.stringTable,
-      threadRange
+      1 /* thread id */,
+      threadRange,
+      new IPCMarkerCorrelations()
     ).sort((markerA, markerB) => markerA.start - markerB.start);
     expect(processedMarkers.map(marker => marker.name)).toEqual([
       '0',
@@ -433,7 +496,9 @@ describe('filterRawMarkerTableToRange', () => {
     const processedMarkers = deriveMarkersFromRawMarkerTable(
       filteredThread.markers,
       filteredThread.stringTable,
-      threadRange
+      1 /* thread id */,
+      threadRange,
+      new IPCMarkerCorrelations()
     ).sort((markerA, markerB) => markerA.start - markerB.start);
     expect(processedMarkers).toHaveLength(1);
     // Only the marker starting from 0 and ending at 6 is kept. The marker
@@ -465,7 +530,9 @@ describe('filterRawMarkerTableToRange', () => {
     const processedMarkers = deriveMarkersFromRawMarkerTable(
       filteredThread.markers,
       filteredThread.stringTable,
-      threadRange
+      1 /* thread id */,
+      threadRange,
+      new IPCMarkerCorrelations()
     );
     const markerNames = processedMarkers.map(marker => marker.name);
 
@@ -633,7 +700,9 @@ describe('filterRawMarkerTableToRange', () => {
     const processedMarkers = deriveMarkersFromRawMarkerTable(
       filteredThread.markers,
       filteredThread.stringTable,
-      threadRange
+      1 /* thread id */,
+      threadRange,
+      new IPCMarkerCorrelations()
     );
 
     expect(
@@ -735,7 +804,9 @@ describe('filterRawMarkerTableToRange', () => {
     const processedMarkers = deriveMarkersFromRawMarkerTable(
       filteredThread.markers,
       filteredThread.stringTable,
-      threadRange
+      1 /* thread id */,
+      threadRange,
+      new IPCMarkerCorrelations()
     );
     expect(
       processedMarkers.map(marker => [
@@ -835,7 +906,9 @@ describe('filterRawMarkerTableToRange', () => {
     const processedMarkers = deriveMarkersFromRawMarkerTable(
       filteredThread.markers,
       filteredThread.stringTable,
-      threadRange
+      1 /* thread id */,
+      threadRange,
+      new IPCMarkerCorrelations()
     );
     expect(
       processedMarkers.map(marker => [
@@ -960,7 +1033,9 @@ describe('filterRawMarkerTableToRange', () => {
     const processedMarkers = deriveMarkersFromRawMarkerTable(
       filteredThread.markers,
       filteredThread.stringTable,
-      threadRange
+      1 /* thread id */,
+      threadRange,
+      new IPCMarkerCorrelations()
     );
 
     expect(

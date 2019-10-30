@@ -4,8 +4,10 @@
 // @flow
 
 import { getEmptyRawMarkerTable } from './data-structures';
+import { getFriendlyThreadName } from './profile-data';
 
 import type {
+  Thread,
   SamplesTable,
   RawMarkerTable,
   IndexIntoStringTable,
@@ -14,6 +16,7 @@ import type {
 } from '../types/profile';
 import type { Marker, MarkerIndex } from '../types/profile-derived';
 import type {
+  IPCPairData,
   BailoutPayload,
   NetworkPayload,
   PrefMarkerPayload,
@@ -116,7 +119,17 @@ export function getSearchFilteredMarkerIndexes(
           newMarkers.push(markerIndex);
           continue;
         }
+      } else if (data.type === 'IPC') {
+        const { messageType, otherPid } = data;
+        if (
+          searchRegExp.test(messageType) ||
+          searchRegExp.test(otherPid.toString())
+        ) {
+          newMarkers.push(markerIndex);
+          continue;
+        }
       }
+
       if (
         typeof data.eventType === 'string' &&
         searchRegExp.test(data.eventType)
@@ -243,10 +256,131 @@ export function extractMarkerDataFromName(
   return newMarkers;
 }
 
+/**
+ * This class is a specialized Map for IPC marker data, using the thread ID and
+ * marker index as the key, and storing IPCPairData (which holds the start/end
+ * times for the IPC message.
+ */
+export class IPCMarkerCorrelations {
+  _correlations: Map<string, IPCPairData>;
+
+  constructor() {
+    this._correlations = new Map();
+  }
+
+  _makeKey(tid: number, index: number) {
+    return `${tid},${index}`;
+  }
+
+  set(tid: number, index: number, data: IPCPairData): void {
+    this._correlations.set(this._makeKey(tid, index), data);
+  }
+
+  get(tid: number, index: number): ?IPCPairData {
+    return this._correlations.get(this._makeKey(tid, index));
+  }
+}
+
+/**
+ * This function correlates the sender and recipient sides of IPC markers so
+ * that we can share data between the two during profile processing.
+ */
+export function correlateIPCMarkers(threads: Thread[]): IPCMarkerCorrelations {
+  // Create a unique ID constructed from the source PID, destination PID,
+  // message seqno, and message type. Since the seqno is only unique for each
+  // message channel pair, we use the PIDs and message type as a way of
+  // identifying which channel pair generated this message.
+  function makeMarkerID(srcPid, destPid, data) {
+    return `${srcPid},${destPid},${data.messageSeqno},${data.messageType}`;
+  }
+
+  function formatThreadName(tid) {
+    const name = threadNames.get(tid);
+    if (name === undefined) {
+      throw new Error('unable to find thread name');
+    }
+    return `${name} (Thread ID: ${tid})`;
+  }
+
+  // First, construct a mapping of marker IDs to destination markers for
+  // faster lookup. We also collect the friendly thread names while we have
+  // access to all the threads. It's considerably more difficult to do this
+  // processing later.
+  const dstMarkers: Map<string, Object> = new Map();
+  const threadNames: Map<number, string> = new Map();
+  for (const thread of threads) {
+    // Don't bother checking for IPC markers if this thread's string table
+    // doesn't have the string "IPC". This lets us avoid looping over all the
+    // markers when we don't have to.
+    if (!thread.stringTable.hasString('IPC')) {
+      continue;
+    }
+    if (typeof thread.tid === 'number') {
+      const tid: number = thread.tid;
+      threadNames.set(thread.tid, getFriendlyThreadName(threads, thread));
+
+      for (let index = 0; index < thread.markers.length; index++) {
+        const data = thread.markers.data[index];
+        if (!data || data.type !== 'IPC' || data.direction !== 'receiving') {
+          continue;
+        }
+        const key = makeMarkerID(data.otherPid, thread.pid, data);
+        if (dstMarkers.has(key)) {
+          console.warn('Duplicate IPC marker found for key', key);
+        } else {
+          dstMarkers.set(key, { tid, index, data });
+        }
+      }
+    }
+  }
+
+  // Now iterate over all the source markers and find the corresponding
+  // destination marker (if any).
+  const correlations = new IPCMarkerCorrelations();
+  for (const thread of threads) {
+    if (!thread.stringTable.hasString('IPC')) {
+      continue;
+    }
+    if (typeof thread.tid === 'number') {
+      const tid: number = thread.tid;
+      for (let index = 0; index < thread.markers.length; index++) {
+        const data = thread.markers.data[index];
+        if (!data || data.type !== 'IPC' || data.direction !== 'sending') {
+          continue;
+        }
+
+        const key = makeMarkerID(thread.pid, data.otherPid, data);
+        const dstInfo = dstMarkers.get(key);
+        if (!dstInfo) {
+          continue;
+        }
+
+        const pairData = {
+          startTime: data.startTime,
+          endTime: dstInfo.data.startTime,
+        };
+        correlations.set(tid, index, {
+          ...pairData,
+          otherTid: dstInfo.tid,
+          otherThreadName: formatThreadName(dstInfo.tid),
+        });
+        correlations.set(dstInfo.tid, dstInfo.index, {
+          ...pairData,
+          otherTid: tid,
+          otherThreadName: formatThreadName(tid),
+        });
+      }
+    }
+  }
+  return correlations;
+}
+
 export function deriveMarkersFromRawMarkerTable(
   rawMarkers: RawMarkerTable,
   stringTable: UniqueStringArray,
-  threadRange: StartEndRange
+  threadId: number,
+  threadRange: StartEndRange,
+  ipcCorrelations: IPCMarkerCorrelations
 ): Marker[] {
   // This is the resulting array.
   const matchedMarkers: Marker[] = [];
@@ -474,6 +608,37 @@ export function deriveMarkersFromRawMarkerTable(
         }
 
         previousScreenshotMarker = i;
+
+        break;
+      }
+
+      case 'IPC': {
+        const pairData = ipcCorrelations.get(threadId, i);
+        const name = data.direction === 'sending' ? 'IPCOut' : 'IPCIn';
+        const dir = data.direction === 'sending' ? 'sent to' : 'received from';
+        if (pairData) {
+          matchedMarkers.push({
+            start: pairData.startTime,
+            dur: pairData.endTime - pairData.startTime,
+            name,
+            title: `IPC — ${dir} ${pairData.otherThreadName}`,
+            category,
+            data: {
+              ...data,
+              ...pairData,
+            },
+          });
+        } else {
+          matchedMarkers.push({
+            start: data.startTime,
+            dur: 0,
+            name,
+            title: `IPC — ${dir} ${data.otherPid}`,
+            category,
+            data,
+            incomplete: true,
+          });
+        }
 
         break;
       }
@@ -934,6 +1099,10 @@ export function isMemoryMarker(marker: Marker): boolean {
   );
 }
 
+export function isIPCMarker(marker: Marker): boolean {
+  return !!(marker.data && marker.data.type === 'IPC');
+}
+
 export function filterForNetworkChart(markers: Marker[]): Marker[] {
   return markers.filter(marker => isNetworkMarker(marker));
 }
@@ -1085,6 +1254,11 @@ export function getMarkerFullDescription(marker: Marker) {
       case 'Text':
         description += ` — ${data.name}`;
         break;
+      case 'IPC':
+        description = `${data.messageType} — ${
+          data.direction === 'sending' ? 'sent to' : 'received from'
+        } ${data.otherThreadName || data.otherPid}`;
+        break;
       default:
     }
   }
@@ -1115,6 +1289,9 @@ export function getMarkerCategory(marker: Marker) {
         break;
       case 'Text':
         category = 'Text';
+        break;
+      case 'IPC':
+        category = data.direction === 'sending' ? 'IPC out' : 'IPC in';
         break;
       default:
     }

@@ -620,6 +620,15 @@ function getMarkerDetails(
         }
         break;
       }
+      case 'IPC': {
+        tooltipDetails = (
+          <TooltipDetails>
+            <TooltipDetail label="Type">{data.messageType}</TooltipDetail>
+            <TooltipDetail label="Sync">{data.sync.toString()}</TooltipDetail>
+          </TooltipDetails>
+        );
+        break;
+      }
       default:
         return null;
     }

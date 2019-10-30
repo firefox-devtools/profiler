@@ -28,6 +28,7 @@ import type {
   MarkerPayload,
   NetworkPayload,
   NavigationMarkerPayload,
+  IPCMarkerPayload,
 } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
@@ -660,6 +661,46 @@ export function getNetworkTrackProfile() {
   return profile;
 }
 
+type IPCMarkersOptions = {|
+  startTime: number,
+  endTime: number,
+  otherPid: number,
+  messageType: string,
+  messageSeqno: number,
+  side: 'parent' | 'child',
+  direction: 'sending' | 'receiving',
+  sync: boolean,
+|};
+
+function _getIPCMarkers(options: $Shape<IPCMarkersOptions> = {}) {
+  const payload: IPCMarkerPayload = {
+    type: 'IPC',
+    startTime: 0,
+    endTime: (options.startTime || 0) + 0.1,
+    otherPid: 1234,
+    messageType: 'PContent::Msg_PreferenceUpdate',
+    messageSeqno: 0,
+    side: 'parent',
+    direction: 'sending',
+    sync: false,
+    ...options,
+  };
+
+  return [['IPC', payload.endTime, payload]];
+}
+
+export function getIPCTrackProfile() {
+  const arrayOfIPCMarkers = Array(10)
+    .fill()
+    .map((_, i) =>
+      _getIPCMarkers({
+        messageSeqno: i,
+        startTime: 3 + 0.1 * i,
+      })
+    );
+  return getProfileWithMarkers([].concat(...arrayOfIPCMarkers));
+}
+
 export function getScreenshotTrackProfile() {
   const screenshotMarkersForWindowId = windowID =>
     Array(10)
@@ -798,19 +839,21 @@ export function getCounterForThread(
     description: 'My Description',
     pid: thread.pid,
     mainThreadIndex,
-    sampleGroups: {
-      id: 0,
-      samples: {
-        time: thread.samples.time.slice(),
-        // Create some arbitrary (positive integer) values for the number.
-        number: thread.samples.time.map((_, i) =>
-          Math.floor(50 * Math.sin(i) + 50)
-        ),
-        // Create some arbitrary values for the count.
-        count: thread.samples.time.map((_, i) => Math.sin(i)),
-        length: thread.samples.length,
+    sampleGroups: [
+      {
+        id: 0,
+        samples: {
+          time: thread.samples.time.slice(),
+          // Create some arbitrary (positive integer) values for the number.
+          number: thread.samples.time.map((_, i) =>
+            Math.floor(50 * Math.sin(i) + 50)
+          ),
+          // Create some arbitrary values for the count.
+          count: thread.samples.time.map((_, i) => Math.sin(i)),
+          length: thread.samples.length,
+        },
       },
-    },
+    ],
   };
   return counter;
 }

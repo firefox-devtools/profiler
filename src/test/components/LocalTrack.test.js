@@ -26,7 +26,10 @@ import {
 import { ensureExists } from '../../utils/flow';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
-import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
+import {
+  getNetworkTrackProfile,
+  getIPCTrackProfile,
+} from '../fixtures/profiles/processed-profile';
 import {
   getProfileWithNiceTracks,
   getStoreWithMemoryTrack,
@@ -127,6 +130,18 @@ describe('timeline/LocalTrack', function() {
 
     it('matches the snapshot of the memory track', () => {
       const { container } = setupWithMemory();
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  describe('with an IPC track', function() {
+    it('correctly renders the IPC label', function() {
+      const { getLocalTrackLabel } = setupWithIPC();
+      expect(getLocalTrackLabel().textContent).toBe('IPC — Empty');
+    });
+
+    it('matches the snapshot of the IPC track', () => {
+      const { container } = setupWithIPC();
       expect(container.firstChild).toMatchSnapshot();
     });
   });
@@ -242,4 +257,25 @@ function setupWithMemory() {
     threadIndex,
   } = getStoreWithMemoryTrack(PID);
   return setup(store, trackReference, localTrack, threadIndex);
+}
+
+/**
+ * Set up a profile with an IPC message track.
+ */
+function setupWithIPC() {
+  // Select the 2nd track, which will be the IPC track.
+  const trackIndex = 1;
+  const profile = getIPCTrackProfile();
+  profile.threads[0].pid = PID;
+
+  const store = storeWithProfile(profile);
+  const trackReference = { type: 'local', pid: PID, trackIndex };
+  const localTrack = getLocalTrackFromReference(
+    store.getState(),
+    trackReference
+  );
+  if (localTrack.type !== 'ipc') {
+    throw new Error('Expected an IPC track.');
+  }
+  return setup(store, trackReference, localTrack, localTrack.threadIndex);
 }

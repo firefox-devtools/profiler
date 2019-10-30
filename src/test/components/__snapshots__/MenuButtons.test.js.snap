@@ -28,7 +28,7 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> matches the snapshot 1`] = `
         <h2
           class="arrowPanelSubTitle"
         >
-          Timing
+          Profile Information
         </h2>
         <div
           class="arrowPanelSection"
@@ -62,7 +62,77 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> matches the snapshot 1`] = `
             >
               Profile Version:
             </span>
-            25
+            26
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Buffer Capacity:
+            </span>
+            16.0KB
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Buffer Duration:
+            </span>
+            20 seconds
+          </div>
+          <div
+            class="arrowPanelSection"
+          >
+            <div
+              class="metaInfoRow"
+            >
+              <span
+                class="metaInfoLabel"
+              >
+                Features:
+              </span>
+              <ul
+                class="metaInfoList"
+              >
+                <li
+                  class="metaInfoListItem"
+                >
+                  js
+                </li>
+                <li
+                  class="metaInfoListItem"
+                >
+                  threads
+                </li>
+              </ul>
+            </div>
+            <div
+              class="metaInfoRow"
+            >
+              <span
+                class="metaInfoLabel"
+              >
+                Threads Filter:
+              </span>
+              <ul
+                class="metaInfoList"
+              >
+                <li
+                  class="metaInfoListItem"
+                >
+                  GeckoMain
+                </li>
+                <li
+                  class="metaInfoListItem"
+                >
+                  DOM Worker
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
         <h2
@@ -352,7 +422,7 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> with no statistics object should 
         <h2
           class="arrowPanelSubTitle"
         >
-          Timing
+          Profile Information
         </h2>
         <div
           class="arrowPanelSection"
@@ -386,7 +456,7 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> with no statistics object should 
             >
               Profile Version:
             </span>
-            25
+            26
           </div>
         </div>
         <h2

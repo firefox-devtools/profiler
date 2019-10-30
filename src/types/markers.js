@@ -19,6 +19,17 @@ export type CauseBacktrace = {|
 |};
 
 /**
+ * This type holds data that should be synchronized between the sender and
+ * recipient sides of an IPC marker.
+ */
+export type IPCPairData = {|
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  otherTid: number,
+  otherThreadName: string,
+|};
+
+/**
  * This utility type removes the "cause" property from a payload, and replaces it with
  * a stack. This effectively converts it from a processed payload to a Gecko payload.
  */
@@ -515,6 +526,20 @@ export type NativeAllocationPayload_Gecko = {|
   stack: GeckoMarkerStack,
 |};
 
+export type IPCMarkerPayload = {|
+  type: 'IPC',
+  startTime: Milliseconds,
+  endTime: Milliseconds,
+  otherPid: number,
+  otherTid?: number,
+  otherThreadName?: string,
+  messageType: string,
+  messageSeqno: number,
+  side: 'parent' | 'child',
+  direction: 'sending' | 'receiving',
+  sync: boolean,
+|};
+
 /**
  * The union of all the different marker payloads that profiler.firefox.com knows about,
  * this is not guaranteed to be all the payloads that we actually get from the Gecko
@@ -544,6 +569,7 @@ export type MarkerPayload =
   | DummyForTestsMarkerPayload
   | NavigationMarkerPayload
   | PrefMarkerPayload
+  | IPCMarkerPayload
   | null;
 
 export type MarkerPayload_Gecko =
@@ -566,6 +592,7 @@ export type MarkerPayload_Gecko =
   | JsAllocationPayload_Gecko
   | NativeAllocationPayload_Gecko
   | PrefMarkerPayload
+  | IPCMarkerPayload
   // The following payloads come in with a stack property. During the profile processing
   // the "stack" property is are converted into a "cause". See the CauseBacktrace type
   // for more information.

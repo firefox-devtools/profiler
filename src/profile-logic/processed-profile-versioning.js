@@ -1138,5 +1138,16 @@ const _upgraders = {
       }
     }
   },
+  [26]: profile => {
+    // Due to a bug in gecko side, we were keeping the sample_group inside an
+    // object instead of an array. Usually there is only one sample group, that's
+    // why it wasn't a problem before. To future proof it, we are fixing it by
+    // moving it inside an array. See: https://bugzilla.mozilla.org/show_bug.cgi?id=1584190
+    if (profile.counters && profile.counters.length > 0) {
+      for (const counter of profile.counters) {
+        counter.sampleGroups = [counter.sampleGroups];
+      }
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

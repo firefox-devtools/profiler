@@ -64,6 +64,7 @@ Object {
         ],
       },
     ],
+    "configuration": undefined,
     "debug": false,
     "extensions": Object {
       "baseURL": Array [],
@@ -77,7 +78,7 @@ Object {
     "oscpu": undefined,
     "physicalCPUs": undefined,
     "platform": undefined,
-    "preprocessedProfileVersion": 25,
+    "preprocessedProfileVersion": 26,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": undefined,
@@ -86,7 +87,7 @@ Object {
     "symbolicated": true,
     "toolkit": undefined,
     "updateChannel": undefined,
-    "version": 17,
+    "version": 18,
     "visualMetrics": undefined,
   },
   "pages": Array [],
@@ -6389,7 +6390,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 17,
+    "version": 18,
   },
   "pausedRanges": Array [],
   "processes": Array [
@@ -7291,6 +7292,62 @@ Object {
 
 exports[`upgrading gecko profiles should upgrade gecko-2.json all the way to the current version 1`] = `
 Object {
+  "counters": Array [
+    Object {
+      "category": "Memory",
+      "description": "Amount of allocated memory",
+      "name": "malloc",
+      "sample_groups": Array [
+        Object {
+          "id": 0,
+          "samples": Object {
+            "data": Array [
+              Array [
+                0,
+                1,
+                1,
+              ],
+              Array [
+                2,
+                2,
+                2,
+              ],
+              Array [
+                4,
+                3,
+                3,
+              ],
+              Array [
+                5,
+                4,
+                4,
+              ],
+              Array [
+                8,
+                5,
+                5,
+              ],
+              Array [
+                9,
+                6,
+                6,
+              ],
+              Array [
+                10,
+                7,
+                7,
+              ],
+            ],
+            "schema": Object {
+              "count": 2,
+              "number": 1,
+              "time": 0,
+            },
+          },
+        },
+      ],
+    },
+  ],
   "libs": Array [
     Object {
       "arch": "x86_64",
@@ -7393,7 +7450,7 @@ Object {
     "stackwalk": 1,
     "startTime": 1460221352723.438,
     "toolkit": "cocoa",
-    "version": 17,
+    "version": 18,
   },
   "pages": Array [
     Object {
@@ -8487,7 +8544,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 25,
+    "preprocessedProfileVersion": 26,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -9657,7 +9714,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 25,
+    "preprocessedProfileVersion": 26,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,
@@ -10866,6 +10923,50 @@ Object {
 
 exports[`upgrading processed profiles should upgrade processed-3.json all the way to the current version 1`] = `
 Object {
+  "counters": Array [
+    Object {
+      "category": "Memory",
+      "description": "Amount of allocated memory",
+      "mainThreadIndex": 0,
+      "name": "malloc",
+      "pid": 11111,
+      "sampleGroups": Array [
+        Object {
+          "id": 0,
+          "samples": Object {
+            "count": Array [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+            ],
+            "length": 7,
+            "number": Array [
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              7,
+            ],
+            "time": Array [
+              0,
+              2,
+              4,
+              5,
+              8,
+              9,
+              10,
+            ],
+          },
+        },
+      ],
+    },
+  ],
   "meta": Object {
     "abi": "x86_64-gcc3",
     "categories": Array [
@@ -10930,7 +11031,7 @@ Object {
     "misc": "rv:48.0",
     "oscpu": "Intel Mac OS X 10.11",
     "platform": "Macintosh",
-    "preprocessedProfileVersion": 25,
+    "preprocessedProfileVersion": 26,
     "processType": 0,
     "product": "Firefox",
     "stackwalk": 1,

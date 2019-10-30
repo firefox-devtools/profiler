@@ -5,10 +5,10 @@
 // @flow
 
 // The current version of the Gecko profile format.
-export const GECKO_PROFILE_VERSION = 17;
+export const GECKO_PROFILE_VERSION = 18;
 
 // The current version of the "processed" profile format.
-export const PROCESSED_PROFILE_VERSION = 25;
+export const PROCESSED_PROFILE_VERSION = 26;
 
 // The following are the margin sizes for the left and right of the timeline. Independent
 // components need to share these values.
@@ -33,6 +33,10 @@ export const TRACK_MEMORY_MARKERS_HEIGHT = 15;
 export const TRACK_MEMORY_HEIGHT =
   TRACK_MEMORY_GRAPH_HEIGHT + TRACK_MEMORY_MARKERS_HEIGHT;
 export const TRACK_MEMORY_LINE_WIDTH = 2;
+
+// The following values are for IPC track.
+export const TRACK_IPC_MARKERS_HEIGHT = 25;
+export const TRACK_IPC_HEIGHT = TRACK_IPC_MARKERS_HEIGHT;
 
 // Height of the blank area in process track.
 export const TRACK_PROCESS_BLANK_HEIGHT = 30;
