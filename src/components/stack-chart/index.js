@@ -17,6 +17,7 @@ import {
   getPreviewSelection,
   getScrollToSelectionGeneration,
   getCategories,
+  getPageList,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
@@ -31,7 +32,7 @@ import {
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
-import type { Thread, CategoryList } from '../../types/profile';
+import type { Thread, CategoryList, PageList } from '../../types/profile';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -50,6 +51,7 @@ const STACK_FRAME_HEIGHT = 16;
 
 type StateProps = {|
   +thread: Thread,
+  +pages: PageList | null,
   +maxStackDepth: number,
   +stackTimingByDepth: StackTimingByDepth,
   +timeRange: { start: Milliseconds, end: Milliseconds },
@@ -140,6 +142,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       categories,
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
+      pages,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -177,6 +180,7 @@ class StackChartGraph extends React.PureComponent<Props> {
                 chartProps={{
                   interval,
                   thread,
+                  pages,
                   stackTimingByDepth,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
@@ -223,6 +227,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
         state
       ),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+      pages: getPageList(state),
     };
   },
   mapDispatchToProps: {

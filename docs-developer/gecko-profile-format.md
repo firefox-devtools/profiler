@@ -72,6 +72,17 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
     }
   },
 
+  // Array of visited pages during the profiling session.
+
+  pages: [
+    {
+      browsingContextID: 10,
+      innerWindowID: 2,
+      url: "https://profiler.firefox.com",
+      embedderInnerWindowID: 0,
+    }
+  ],
+
   // Array of shared library data.
 
   libs: [
@@ -189,12 +200,13 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
         schema: {
           location: 0,
           relevantForJS: 1,
-          implementation: 2,
-          optimizations: 3,
-          line: 4,
-          column: 5,
-          category: 6,
-          subcategory: 7
+          innerWindowID: 2
+          implementation: 3,
+          optimizations: 4,
+          line: 5,
+          column: 6,
+          category: 7,
+          subcategory: 8,
         },
         data: [
           [
@@ -202,6 +214,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
                    // JS: "Startup::XRE_Main"
                    // C++: "0x7fff7d962da1"
             false, // for label frames, whether this label should be shown in "JS only" stacks
+            2      // for JS frames, an innerWindowID that corresponds to a page object in the profile.pages array.
             40,    // for JS frames, an index into the string table, usually "Baseline" or "Ion"
             null,  // JSON info about JIT optimizations.
             1536,  // The line of code

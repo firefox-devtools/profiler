@@ -22,7 +22,7 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
 
-import type { Thread, CategoryList } from '../../types/profile';
+import type { Thread, CategoryList, PageList } from '../../types/profile';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -43,6 +43,7 @@ import type { WrapFunctionInDispatch } from '../../utils/connect';
 
 type OwnProps = {|
   +thread: Thread,
+  +pages: PageList | null,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -392,6 +393,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
       callNodeInfo,
       shouldDisplayTooltips,
       interval,
+      pages,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -406,6 +408,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     return (
       <TooltipCallNode
         thread={thread}
+        pages={pages}
         interval={interval}
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}

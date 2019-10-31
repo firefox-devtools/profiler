@@ -242,6 +242,7 @@ async function processTracingEvents(
         frameTable.category[frameIndex] = javascriptCategoryIndex;
         frameTable.subcategory[frameIndex] = 0;
         frameTable.func[frameIndex] = funcId;
+        frameTable.innerWindowID[frameIndex] = 0;
         frameTable.implementation[frameIndex] = null;
         frameTable.line[frameIndex] =
           lineNumber === undefined ? null : lineNumber;

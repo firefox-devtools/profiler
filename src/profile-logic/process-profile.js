@@ -521,6 +521,7 @@ function _processFrameTable(
     category: geckoFrameStruct.category,
     subcategory: geckoFrameStruct.subcategory,
     func: frameFuncs,
+    innerWindowID: geckoFrameStruct.innerWindowID,
     implementation: geckoFrameStruct.implementation,
     line: geckoFrameStruct.line,
     column: geckoFrameStruct.column,

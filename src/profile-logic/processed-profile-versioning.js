@@ -1149,5 +1149,13 @@ const _upgraders = {
       }
     }
   },
+  [27]: profile => {
+    // Profiles now have an innerWindowID property in the funcTable.
+    // We are filling this array with 0 values because we have no idea what that value might be.
+    for (const thread of profile.threads) {
+      const { funcTable } = thread;
+      funcTable.innerWindowID = new Array(funcTable.length).fill(0);
+    }
+  },
 };
 /* eslint-enable no-useless-computed-key */

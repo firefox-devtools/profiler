@@ -105,12 +105,13 @@ export type GeckoFrameTable = {|
   schema: {|
     location: 0,
     relevantForJS: 1,
-    implementation: 2,
-    optimizations: 3,
-    line: 4,
-    column: 5,
-    category: 6,
-    subcategory: 7,
+    innerWindowID: 2,
+    implementation: 3,
+    optimizations: 4,
+    line: 5,
+    column: 6,
+    category: 7,
+    subcategory: 8,
   |},
   data: Array<
     [
@@ -120,6 +121,9 @@ export type GeckoFrameTable = {|
       IndexIntoStringTable,
       // for label frames, whether this frame should be shown in "JS only" stacks
       boolean,
+      // innerWindowID of JS frames. It corresponds to innerWindowID of a page in the pages array.
+      // `0` for others and the JS frames that's been failed to get the ID.
+      null | number,
       // for JS frames, an index into the string table, usually "Baseline" or "Ion"
       null | IndexIntoStringTable,
       // JSON info about JIT optimizations.
@@ -145,6 +149,7 @@ export type GeckoFrameStruct = {|
   column: Array<null | number>,
   category: Array<null | number>,
   subcategory: Array<null | number>,
+  innerWindowID: Array<null | number>,
   length: number,
 |};
 

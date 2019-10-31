@@ -337,19 +337,20 @@ function _createGeckoThread(extraMarkers = []): GeckoThread {
       schema: {
         location: 0,
         relevantForJS: 1,
-        implementation: 2,
-        optimizations: 3,
-        line: 4,
-        column: 5,
-        category: 6,
-        subcategory: 7,
+        innerWindowID: 2,
+        implementation: 3,
+        optimizations: 4,
+        line: 5,
+        column: 6,
+        category: 7,
+        subcategory: 8,
       },
       data: [
-        [0, false, null, null, null, null, null, null], // (root)
-        [1, false, null, null, null, null, null, null], // 0x100000f84
-        [2, false, null, null, null, null, null, null], // 0x100001a45
-        [3, false, null, null, 4391, null, 0, 0], // Startup::XRE_Main, line 4391, category Other, subcategory Other
-        [7, false, 6, null, 34, null, null, null], // frobnicate, implementation 'baseline', line 34
+        [0, false, 0, null, null, null, null, null, null], // (root)
+        [1, false, 0, null, null, null, null, null, null], // 0x100000f84
+        [2, false, 0, null, null, null, null, null, null], // 0x100001a45
+        [3, false, 0, null, null, 4391, null, 0, 0], // Startup::XRE_Main, line 4391, category Other, subcategory Other
+        [7, false, 0, 6, null, 34, null, null, null], // frobnicate, implementation 'baseline', line 34
       ],
     },
     markers: {
@@ -762,23 +763,24 @@ function _createGeckoThreadWithJsTimings(name: string): GeckoThread {
       schema: {
         location: 0,
         relevantForJS: 1,
-        implementation: 2,
-        optimizations: 3,
-        line: 4,
-        column: 5,
-        category: 6,
-        subcategory: 7,
+        innerWindowID: 2,
+        implementation: 3,
+        optimizations: 4,
+        line: 5,
+        column: 6,
+        category: 7,
+        subcategory: 8,
       },
       data: [
-        [0, false, null, null, null, null, null, null], // 0: (root)
-        [1, false, null, null, null, null, null, null], // 1: 0x100000f84
-        [2, false, null, null, null, null, null, null], // 2: 0x100001a45
-        [3, false, null, null, 4391, null, 0, 0], // 3: Startup::XRE_Main, line 4391, category 16
-        [7, false, 6, null, 1, null, null, null], // 4: javascriptOne, implementation 'baseline', line 1
-        [8, false, 6, null, 2, null, null, null], // 5: javascriptTwo, implementation 'baseline', line 2
-        [9, false, null, null, null, null, null, null], // 6: 0x10000f0f0
-        [10, false, null, null, null, null, null, null], // 7: 0x100fefefe
-        [11, false, null, null, 3, null, null, null], // 8: javascriptThree, implementation null, line 3
+        [0, false, 0, null, null, null, null, null, null], // 0: (root)
+        [1, false, 0, null, null, null, null, null, null], // 1: 0x100000f84
+        [2, false, 0, null, null, null, null, null, null], // 2: 0x100001a45
+        [3, false, 0, null, null, 4391, null, 0, 0], // 3: Startup::XRE_Main, line 4391, category 16
+        [7, false, 0, 6, null, 1, null, null, null], // 4: javascriptOne, implementation 'baseline', line 1
+        [8, false, 0, 6, null, 2, null, null, null], // 5: javascriptTwo, implementation 'baseline', line 2
+        [9, false, 0, null, null, null, null, null, null], // 6: 0x10000f0f0
+        [10, false, 0, null, null, null, null, null, null], // 7: 0x100fefefe
+        [11, false, 0, null, null, 3, null, null, null], // 8: javascriptThree, implementation null, line 3
       ],
     },
     markers: {

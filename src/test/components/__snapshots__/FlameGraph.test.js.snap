@@ -180,7 +180,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
         <div
           class="tooltipLabel"
         >
-          File:
+          Script URL:
         </div>
         path/to/file:10:100
       </div>

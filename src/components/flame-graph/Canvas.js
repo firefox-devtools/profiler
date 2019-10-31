@@ -16,7 +16,7 @@ import { TooltipCallNode } from '../tooltip/CallNode';
 import { getTimingsForCallNodeIndex } from '../../profile-logic/profile-data';
 import MixedTupleMap from 'mixedtuplemap';
 
-import type { Thread, CategoryList } from '../../types/profile';
+import type { Thread, CategoryList, PageList } from '../../types/profile';
 import type { CssPixels, Milliseconds } from '../../types/units';
 import type {
   FlameGraphTiming,
@@ -34,6 +34,7 @@ import type { CallTreeSummaryStrategy } from '../../types/actions';
 
 export type OwnProps = {|
   +thread: Thread,
+  +pages: PageList | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
   +maxStackDepth: number,
@@ -260,6 +261,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       interval,
       isInverted,
       callTreeSummaryStrategy,
+      pages,
     } = this.props;
 
     if (!shouldDisplayTooltips()) {
@@ -285,6 +287,7 @@ class FlameGraphCanvas extends React.PureComponent<Props> {
       // doesn't over-render.
       <TooltipCallNode
         thread={thread}
+        pages={pages}
         interval={interval}
         callNodeIndex={callNodeIndex}
         callNodeInfo={callNodeInfo}

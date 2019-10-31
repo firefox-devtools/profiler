@@ -27,6 +27,7 @@ export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 export type IndexIntoJsTracerEvents = number;
 export type CounterIndex = number;
+export type InnerWindowID = number;
 
 /**
  * If a pid is a number, then it is the int value that came from the profiler.
@@ -185,6 +186,7 @@ export type FrameTable = {|
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
+  innerWindowID: (InnerWindowID | null)[],
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   column: (number | null)[],
@@ -267,7 +269,7 @@ export type CategoryList = Array<Category>;
  */
 export type Page = {|
   browsingContextID: number,
-  innerWindowID: number,
+  innerWindowID: InnerWindowID,
   url: string,
   // 0 means no embedder
   embedderInnerWindowID: number,

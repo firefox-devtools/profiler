@@ -826,5 +826,38 @@ const _upgraders = {
     }
     convertToVersion18Recursive(profile);
   },
+  [19]: profile => {
+    // Profiles now have an innerWindowID property in the funcTable.
+    // We are filling this array with 0 values because we have no idea what that value might be.
+    function convertToVersion19Recursive(p) {
+      for (const thread of p.threads) {
+        const { frameTable } = thread;
+        frameTable.schema = {
+          location: 0,
+          relevantForJS: 1,
+          innerWindowID: 2,
+          implementation: 3,
+          optimizations: 4,
+          line: 5,
+          column: 6,
+          category: 7,
+          subcategory: 8,
+        };
+        for (
+          let frameIndex = 0;
+          frameIndex < frameTable.data.length;
+          frameIndex++
+        ) {
+          // Adding 0 for every frame.
+          const innerWindowIDIndex = frameTable.schema.innerWindowID;
+          frameTable.data[frameIndex].splice(innerWindowIDIndex, 0, 0);
+        }
+      }
+      for (const subprocessProfile of p.processes) {
+        convertToVersion19Recursive(subprocessProfile);
+      }
+    }
+    convertToVersion19Recursive(profile);
+  },
 };
 /* eslint-enable no-useless-computed-key */

@@ -567,6 +567,7 @@ function combineFrameTables(
       // really implement one.
       newFrameTable.subcategory.push(frameTable.subcategory[i]);
       newFrameTable.func.push(newFunc);
+      newFrameTable.innerWindowID.push(frameTable.innerWindowID[i]);
       newFrameTable.implementation.push(
         implementation === null
           ? null

@@ -14,7 +14,7 @@ import {
 } from '../../profile-logic/profile-data';
 
 import type { CallTree } from '../../profile-logic/call-tree';
-import type { Thread, CategoryList } from '../../types/profile';
+import type { Thread, CategoryList, PageList } from '../../types/profile';
 import type {
   IndexIntoCallNodeTable,
   CallNodeDisplayData,
@@ -31,6 +31,7 @@ const GRAPH_HEIGHT = 10;
 
 type Props = {|
   +thread: Thread,
+  +pages: PageList | null,
   +callNodeIndex: IndexIntoCallNodeTable,
   +callNodeInfo: CallNodeInfo,
   +categories: CategoryList,
@@ -157,12 +158,14 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       callTree,
       timings,
       callTreeSummaryStrategy,
+      pages,
       callNodeInfo: { callNodeTable },
     } = this.props;
     const categoryIndex = callNodeTable.category[callNodeIndex];
     const categoryColor = categories[categoryIndex].color;
     const subcategoryIndex = callNodeTable.subcategory[callNodeIndex];
     const funcIndex = callNodeTable.func[callNodeIndex];
+    const innerWindowID = callNodeTable.innerWindowID[callNodeIndex];
     const funcStringIndex = thread.funcTable.name[funcIndex];
     const funcName = thread.stringTable.getString(funcStringIndex);
 
@@ -190,7 +193,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
       // the elements as direct children.
       resourceOrFileName = [
         <div className="tooltipLabel" key="file">
-          File:
+          Script URL:
         </div>,
         fileName,
       ];
@@ -207,6 +210,45 @@ export class TooltipCallNode extends React.PureComponent<Props> {
               Resource:
             </div>,
             thread.stringTable.getString(resourceNameIndex),
+          ];
+        }
+      }
+    }
+
+    // Finding current frame and parent frame URL(if there is).
+    let pageAndParentPageURL;
+    if (pages) {
+      const page = pages.find(p => p.innerWindowID === innerWindowID);
+      if (page) {
+        if (page.embedderInnerWindowID !== 0) {
+          // This is an iframe since it has an embedder.
+          pageAndParentPageURL = [
+            <div className="tooltipLabel" key="iframe">
+              iframe URL:
+            </div>,
+            <div key="iframeVal">{page.url}</div>,
+          ];
+
+          // Getting the embedder URL now.
+          const parentPage = pages.find(
+            p => p.innerWindowID === page.embedderInnerWindowID
+          );
+          // Ideally it should find a page.
+          if (parentPage) {
+            pageAndParentPageURL.push(
+              <div className="tooltipLabel" key="page">
+                Page URL:
+              </div>,
+              <div key="pageVal">{parentPage.url}</div>
+            );
+          }
+        } else {
+          // This is a regular page without an embedder.
+          pageAndParentPageURL = [
+            <div className="tooltipLabel" key="page">
+              Page URL:
+            </div>,
+            <div key="pageVal">{page.url}</div>,
           ];
         }
       }
@@ -278,6 +320,8 @@ export class TooltipCallNode extends React.PureComponent<Props> {
                 subcategoryIndex
               )}
             </div>
+            {/* --------------------------------------------------------------- */}
+            {pageAndParentPageURL}
             {/* --------------------------------------------------------------- */}
             {resourceOrFileName}
           </div>
