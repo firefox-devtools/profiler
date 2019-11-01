@@ -22,6 +22,10 @@ import {
   getImplementationFilter,
   getInvertCallstack,
 } from '../../selectors/url-state';
+import {
+  getRightClickedCallNodePath,
+  getRightClickedCallNodeIndex,
+} from '../../selectors/right-clicked-call-node-path';
 
 import {
   convertToTransformType,
@@ -508,8 +512,8 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
     implementation: getImplementationFilter(state),
     inverted: getInvertCallstack(state),
-    callNodePath: selectedThreadSelectors.getRightClickedCallNodePath(state),
-    callNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(state),
+    callNodePath: getRightClickedCallNodePath(state),
+    callNodeIndex: getRightClickedCallNodeIndex(state),
     selectedTab: getSelectedTab(state),
   }),
   mapDispatchToProps: {
