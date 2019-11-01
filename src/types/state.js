@@ -43,6 +43,11 @@ export type ThreadViewOptions = {|
   +rightClickedMarker: MarkerIndex | null,
 |};
 
+export type RightClickedCallNodePath = {|
+  +threadIndex: ThreadIndex,
+  +callNodePath: CallNodePath,
+|};
+
 export type ProfileViewState = {|
   +viewOptions: {|
     perThread: ThreadViewOptions[],
@@ -53,6 +58,7 @@ export type ProfileViewState = {|
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
     rightClickedTrack: TrackReference | null,
+    rightClickedCallNodePath: RightClickedCallNodePath | null,
   |},
   +globalTracks: GlobalTrack[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
