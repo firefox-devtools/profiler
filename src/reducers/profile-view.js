@@ -25,6 +25,7 @@ import type {
   ProfileViewState,
   SymbolicationStatus,
   ThreadViewOptions,
+  RightClickedCallNodePath,
 } from '../types/state';
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
@@ -499,6 +500,53 @@ const rightClickedTrack: Reducer<TrackReference | null> = (
   }
 };
 
+const rightClickedCallNodePath: Reducer<RightClickedCallNodePath | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'COALESCED_FUNCTIONS_UPDATE': {
+      const { functionsUpdatePerThread } = action;
+
+      if (state === null || !functionsUpdatePerThread[state.threadIndex]) {
+        return state;
+      }
+
+      const { oldFuncToNewFuncMap } = functionsUpdatePerThread[
+        state.threadIndex
+      ];
+
+      const mapOldFuncToNewFunc = oldFunc => {
+        const newFunc = oldFuncToNewFuncMap.get(oldFunc);
+        return newFunc === undefined ? oldFunc : newFunc;
+      };
+
+      return {
+        ...state,
+        callNodePath: state.callNodePath.map(mapOldFuncToNewFunc),
+      };
+    }
+    case 'CHANGE_RIGHT_CLICKED_CALL_NODE':
+      if (action.callNodePath !== null) {
+        return {
+          threadIndex: action.threadIndex,
+          callNodePath: action.callNodePath,
+        };
+      }
+
+      return null;
+    case 'SET_CONTEXT_MENU_VISIBILITY':
+      // We want to change the state only when the menu is hidden.
+      if (action.isVisible) {
+        return state;
+      }
+
+      return null;
+    default:
+      return state;
+  }
+};
+
 /**
  * Provide a mechanism to wrap the reducer in a special function that can reset
  * the state to the default values. This is useful when viewing multiple profiles
@@ -533,6 +581,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       focusCallTreeGeneration,
       rootRange,
       rightClickedTrack,
+      rightClickedCallNodePath,
     }),
     globalTracks,
     localTracksByPid,
