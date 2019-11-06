@@ -21,18 +21,23 @@ const MAX_STACKING_DEPTH = 300;
 
 /**
  * This function computes the timing information for laying out the markers in the
- * MarkerChart component. Each marker is put into a single row based on its name.
+ * MarkerChart component. Each marker is put into a single row based on its name. In
+ * addition they are grouped by "buckets", which is based off of their category.
+ * This structure is a simple array, as it makes it very easy to loop through the
+ * fixed height rows in the canvas, and draw only what is in view.
  *
  * e.g. An array of 15 markers named either "A", "B", or "C" would be translated into
  *      something that looks like:
  *
  *  [
+ *    "DOM", // The bucket.
  *    {
  *      name: "A",
  *      start: [0, 23, 35, 65, 75],
  *      end: [1, 25, 37, 67, 77],
  *      index: [0, 2, 5, 6, 8],
  *      label: ["Aye", "Aye", "Aye", "Aye", "Aye"]
+ *      bucket: "DOM"
  *    }
  *    {
  *      name: "B",
@@ -40,13 +45,16 @@ const MAX_STACKING_DEPTH = 300;
  *      end: [2, 29, 49, 70, 77],
  *      index: [1, 3, 7, 9, 10],
  *      label: ["Bee", "Bee", "Bee", "Bee", "Bee"]
+ *      bucket: "DOM"
  *    }
+ *    "Other", // The bucket.
  *    {
  *      name: "C",
  *      start: [10, 33, 45, 75, 85],
  *      end: [11, 35, 47, 77, 87],
  *      index: [4, 11, 12, 13, 14],
  *      label: ["Sea", "Sea", "Sea", "Sea", "Sea"]
+ *      bucket: "Other"
  *    }
  *  ]
  *
@@ -56,13 +64,13 @@ const MAX_STACKING_DEPTH = 300;
  *
  * This structure allows the markers to easily be laid out like this example below:
  *    ____________________________________________
- *   | GC           | *--*       *--*        *--* |
- *   |              |                             |
- *   | Scripts      | *---------------------*     |
- *   |              |                             |
- *   | User Timings |    *----------------*       |
- *   | User Timings |       *------------*        |
- *   | User Timings |       *--*     *---*        |
+ *   |              | GC/CC                       | <- Bucket, represented as a `string`
+ *   | GCMajor      | *---------------------*     | <- MarkerTimingRow
+ *   | GCMinor      | *--*       *--*        *--* | <- MarkerTimingRow
+ *   |              | DOM                         | <- Bucket
+ *   | User Timings |    *----------------*       | <- MarkerTimingRow
+ *   | User Timings |       *------------*        | <- MarkerTimingRow
+ *   | User Timings |       *--*     *---*        | <- MarkerTimingRow
  *   |______________|_____________________________|
  */
 export function getMarkerTimingAndBuckets(
@@ -74,35 +82,24 @@ export function getMarkerTimingAndBuckets(
 ): MarkerTimingAndBuckets {
   // Each marker type will have it's own timing information, later collapse these into
   // a single array.
-  type MarkerTimingsByName = Map<string, MarkerTiming[]>;
-  const markerTimingsBuckets: Map<string, MarkerTimingsByName> = new Map();
-  const allMarkerTimings = [];
+  const markerTimingsMap: Map<string, MarkerTiming[]> = new Map();
 
   // Go through all of the markers.
   for (const markerIndex of markerIndexes) {
     const marker = getMarker(markerIndex);
 
-    // Look up a bucket of marker timings, this breaks each marker into coarse group
-    // levels.
-    const bucketName = categories ? categories[marker.category].name : 'None';
-    let markerTimingsBucket = markerTimingsBuckets.get(bucketName);
-    if (markerTimingsBucket === undefined) {
-      markerTimingsBucket = new Map();
-      markerTimingsBuckets.set(bucketName, markerTimingsBucket);
-    }
-
-    // Inside this bucket, look if marker timings already exist, if not, create a new
-    // list of marker timings.
-    let markerTimings = markerTimingsBucket.get(marker.name);
-    if (markerTimings === undefined) {
-      markerTimings = [];
-      markerTimingsBucket.set(marker.name, markerTimings);
+    let markerTimingsByName = markerTimingsMap.get(marker.name);
+    if (markerTimingsByName === undefined) {
+      markerTimingsByName = [];
+      markerTimingsMap.set(marker.name, markerTimingsByName);
     }
 
     // Place the marker in the closest row that is empty.
     for (let i = 0; i < MAX_STACKING_DEPTH; i++) {
+      const bucketName = categories ? categories[marker.category].name : 'None';
+
       // Get or create a row for marker timings.
-      let markerTiming = markerTimings[i];
+      let markerTiming = markerTimingsByName[i];
       if (!markerTiming) {
         markerTiming = {
           start: [],
@@ -113,8 +110,7 @@ export function getMarkerTimingAndBuckets(
           bucket: bucketName,
           length: 0,
         };
-        markerTimings.push(markerTiming);
-        allMarkerTimings.push(markerTiming);
+        markerTimingsByName.push(markerTiming);
       }
 
       // Since the markers are sorted, look at the last added marker in this row. If
@@ -130,6 +126,9 @@ export function getMarkerTimingAndBuckets(
       }
     }
   }
+
+  // Flatten out the map into a single array.
+  const allMarkerTimings = [].concat(...markerTimingsMap.values());
 
   // Sort all the marker timings in place, first by the bucket, then by their names.
   allMarkerTimings.sort((a, b) => {
