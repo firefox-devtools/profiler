@@ -158,7 +158,7 @@ export function mapCategoryColorNameToStyles(colorName: string): ColorStyles {
       };
     default:
       console.error(
-        'Unknown color name encountered. Consider updating this code to handle it.'
+        `Unknown color name '${colorName}' encountered. Consider updating this code to handle it.`
       );
       return {
         selectedFillStyle: GREY_30,
