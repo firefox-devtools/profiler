@@ -16,6 +16,7 @@ import type {
   MarkerIndex,
   Marker,
   MarkerTiming,
+  MarkerTimingAndBuckets,
 } from '../../types/profile-derived';
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
@@ -327,9 +328,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * This organizes the result of the previous selector in rows to be nicely
    * displayed in the marker chart.
    */
-  const getMarkerChartTimingAndBuckets: Selector<
-    Array<string | MarkerTiming>
-  > = createSelector(
+  const getMarkerChartTimingAndBuckets: Selector<MarkerTimingAndBuckets> = createSelector(
     getMarkerGetter,
     getSearchFilteredMarkerChartMarkerIndexes,
     ProfileSelectors.getCategories,

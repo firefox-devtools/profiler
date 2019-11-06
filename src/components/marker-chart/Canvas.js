@@ -26,7 +26,7 @@ import type {
 import type { ThreadIndex } from '../../types/profile';
 import type {
   Marker,
-  MarkerTiming,
+  MarkerTimingAndBuckets,
   MarkerIndex,
 } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
@@ -44,7 +44,7 @@ type MarkerDrawingInformation = {
 type OwnProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +markerTimingAndBuckets: Array<string | MarkerTiming>,
+  +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +rowHeight: CssPixels,
   +getMarker: MarkerIndex => Marker,
   +threadIndex: ThreadIndex,

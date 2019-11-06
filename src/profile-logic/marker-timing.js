@@ -13,6 +13,7 @@ import type {
   Marker,
   MarkerIndex,
   MarkerTiming,
+  MarkerTimingAndBuckets,
 } from '../types/profile-derived';
 
 // Arbitrarily set an upper limit for adding marker depths, avoiding an infinite loop.
@@ -70,7 +71,7 @@ export function getMarkerTimingAndBuckets(
   // Categories can be null for things like Network Markers, where we don't care to
   // break things up by category.
   categories: ?CategoryList
-): Array<string | MarkerTiming> {
+): MarkerTimingAndBuckets {
   // Each marker type will have it's own timing information, later collapse these into
   // a single array.
   type MarkerTimingsByName = Map<string, MarkerTiming[]>;
@@ -151,7 +152,7 @@ export function getMarkerTimingAndBuckets(
   });
 
   // Interleave the bucket names in between the marker timings.
-  const markerTimingsAndBuckets: Array<string | MarkerTiming> = [];
+  const markerTimingsAndBuckets: MarkerTimingAndBuckets = [];
   let prevBucket;
   for (const markerTiming of allMarkerTimings) {
     if (markerTiming.bucket !== prevBucket) {

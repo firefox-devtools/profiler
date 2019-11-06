@@ -29,7 +29,7 @@ import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import type {
   Marker,
   MarkerIndex,
-  MarkerTiming,
+  MarkerTimingAndBuckets,
 } from '../../types/profile-derived';
 import type {
   Milliseconds,
@@ -49,7 +49,7 @@ type DispatchProps = {|
 
 type StateProps = {|
   +getMarker: MarkerIndex => Marker,
-  +markerTimingAndBuckets: Array<string | MarkerTiming>,
+  +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +maxMarkerRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
@@ -160,8 +160,8 @@ class MarkerChart extends React.PureComponent<Props> {
 
 // This function is given the MarkerChartCanvas's chartProps.
 function viewportNeedsUpdate(
-  prevProps: { +markerTimingAndBuckets: Array<string | MarkerTiming> },
-  newProps: { +markerTimingAndBuckets: Array<string | MarkerTiming> }
+  prevProps: { +markerTimingAndBuckets: MarkerTimingAndBuckets },
+  newProps: { +markerTimingAndBuckets: MarkerTimingAndBuckets }
 ) {
   return prevProps.markerTimingAndBuckets !== newProps.markerTimingAndBuckets;
 }
