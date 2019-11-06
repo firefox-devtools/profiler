@@ -126,6 +126,8 @@ export type GeckoFrameTable = {|
       null | Object,
       // The line of code
       null | number,
+      // The column of code
+      null | number,
       // index into profile.meta.categories
       null | number,
       // index into profile.meta.categories[category].subcategories. Always non-null if category is non-null.
