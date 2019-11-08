@@ -222,7 +222,7 @@ export class SymbolStore {
         errorCb(
           request,
           new SymbolsNotFoundError(
-            `Failed to symbolicate library ${debugName}`,
+            `Failed to symbolicate library ${debugName}/${breakpadId}`,
             request.lib,
             new Error('Invalid debugName or breakpadId')
           )
@@ -326,17 +326,11 @@ export class SymbolStore {
 
           // Did not throw, option 2 was successful!
           successCb(request, results);
-        } catch (error) {
+        } catch (error1) {
           // The symbolication API did not have any symbols for this library,
           // or an error occurred when parsing the results. We want to continue
-          // to search for symbol information from other sources in both cases,
-          // so we swallow the error and keep going. But in order to catch
-          // problems with the API we should still log these errors.
-          console.log(
-            `The symbolication API request was not successful for ${request.lib.debugName}/${request.lib.breakpadId}:`,
-            error
-          );
-
+          // to search for symbol information from other sources in both cases.
+          // We keep the error around so that we can report it if all avenues fail.
           const { lib, addresses } = request;
           try {
             // Option 3: Request a symbol table from the add-on.
@@ -357,15 +351,16 @@ export class SymbolStore {
 
             // Store the symbol table in the database.
             await this._storeSymbolTableInDB(lib, symbolTable);
-          } catch (error) {
+          } catch (error2) {
             // None of the symbolication methods were successful.
             // Call the error callback.
             errorCb(
               request,
               new SymbolsNotFoundError(
-                `Failed to symbolicate library ${lib.debugName}`,
+                `Could not obtain symbols for ${lib.debugName}/${lib.breakpadId}.`,
                 lib,
-                error
+                error1,
+                error2
               )
             );
           }

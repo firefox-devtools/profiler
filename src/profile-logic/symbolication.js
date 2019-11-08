@@ -281,6 +281,7 @@ export async function symbolicateProfile(
         throw error;
       }
       // We could not find symbols for this library.
+      console.warn(error);
     }
   );
 }

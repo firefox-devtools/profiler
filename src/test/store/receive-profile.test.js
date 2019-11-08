@@ -556,8 +556,23 @@ describe('actions/receive-profile', function() {
 
       window.TextDecoder = TextDecoder;
 
-      // Silence the logs coming from the promise rejections above.
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      // Silence the warnings coming from the failed symbolication attempts, and
+      // make sure that the logged error contains our error messages.
+      jest.spyOn(console, 'warn').mockImplementation(error => {
+        expect(error).toBeInstanceOf(SymbolsNotFoundError);
+        expect(error.errors).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              errors: expect.arrayContaining([
+                expect.objectContaining({
+                  message: 'No symbolication API in place',
+                }),
+              ]),
+            }),
+            expect.objectContaining({ message: 'No symbol tables available' }),
+          ])
+        );
+      });
 
       const store = blankStore();
 
@@ -579,6 +594,7 @@ describe('actions/receive-profile', function() {
       it(desc, async function() {
         const { dispatch, getState } = setup(profileAs);
         await dispatch(retrieveProfileFromAddon());
+        expect(console.warn).toHaveBeenCalledTimes(2);
 
         const state = getState();
         expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
@@ -717,7 +733,7 @@ describe('actions/receive-profile', function() {
       simulateSymbolStoreHasNoCache();
 
       // Silence console logs coming from the previous rejection
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore('FAKEHASH'));
@@ -726,6 +742,16 @@ describe('actions/receive-profile', function() {
         'https://symbols.mozilla.org/symbolicate/v5',
         expect.objectContaining({
           body: expect.stringMatching(/memoryMap.*libxul/),
+        })
+      );
+
+      expect(console.warn).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          message:
+            'Could not obtain symbols for libxul/SOMETHING_FAKE.\n' +
+            ' - SymbolsNotFoundError: There was a problem with the JSON returned by the symbolication API.\n' +
+            ' - Error: Expected an object with property `results`\n' +
+            " - Error: There's no connection to the gecko profiler add-on.",
         })
       );
     });
@@ -1197,7 +1223,7 @@ describe('actions/receive-profile', function() {
         .mockRejectedValue(new Error('No symbolication API in place'));
 
       // Silence console logs coming from the previous rejections
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const profile = createGeckoProfile();
 
@@ -1649,7 +1675,7 @@ describe('actions/receive-profile', function() {
       simulateSymbolStoreHasNoCache();
 
       // Silence the logs coming from the promise rejections above.
-      jest.spyOn(console, 'log').mockImplementation(() => {});
+      jest.spyOn(console, 'warn').mockImplementation(() => {});
 
       const store = blankStore();
       await store.dispatch(getProfilesFromRawUrl(location));
