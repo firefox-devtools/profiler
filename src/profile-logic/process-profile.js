@@ -771,8 +771,13 @@ function _processMarkerPayload(
  * Explicitly recreate the markers here to help enforce our assumptions about types.
  */
 function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
+  // TODO: Do the pre-processing for event delay here.
+  const responsiveness = geckoSamples.eventDelay
+    ? geckoSamples.eventDelay
+    : geckoSamples.responsiveness;
+
   return {
-    responsiveness: geckoSamples.responsiveness,
+    responsiveness,
     stack: geckoSamples.stack,
     time: geckoSamples.time,
     length: geckoSamples.length,
@@ -1167,6 +1172,10 @@ export function processProfile(
     _processProfilerOverhead(geckoProfile, threads, 0),
   ];
 
+  const hasEventDelay =
+    geckoProfile.threads[0].samples.schema.eventDelay &&
+    geckoProfile.threads[0].samples.schema.eventDelay !== undefined;
+
   for (const subprocessProfile of geckoProfile.processes) {
     const adjustTimestampsBy =
       subprocessProfile.meta.startTime - geckoProfile.meta.startTime;
@@ -1260,6 +1269,7 @@ export function processProfile(
     // already symbolicated, otherwise we indicate it needs to be symbolicated.
     symbolicated: !!geckoProfile.meta.presymbolicated,
     updateChannel: geckoProfile.meta.updateChannel,
+    hasEventDelay,
   };
 
   const profilerOverhead: ProfilerOverhead[] = nullableProfilerOverhead.reduce(

@@ -576,6 +576,8 @@ export type ProfileMeta = {|
   // The configuration of the profiler at the time of recording. Optional since older
   // versions of Firefox did not include it.
   configuration?: ProfilerConfiguration,
+  // True if profile has the new event delay values instead of responsiveness values.
+  hasEventDelay?: boolean,
 |};
 
 /**

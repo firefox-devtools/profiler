@@ -72,6 +72,7 @@ Object {
       "length": 0,
       "name": Array [],
     },
+    "hasEventDelay": undefined,
     "interval": 1,
     "logicalCPUs": undefined,
     "misc": undefined,

@@ -310,6 +310,7 @@ export function getEmptyProfile(): Profile {
       physicalCPUs: 0,
       logicalCPUs: 0,
       symbolicated: true,
+      hasEventDelay: false,
     },
     pages: [],
     threads: [],
