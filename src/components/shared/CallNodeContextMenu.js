@@ -7,7 +7,7 @@ import React, { PureComponent, Fragment } from 'react';
 import { MenuItem } from 'react-contextmenu';
 import ContextMenu from '../shared/ContextMenu';
 import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getThreadSelectors } from '../../selectors/per-thread';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 import { getFunctionName } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';
@@ -18,10 +18,14 @@ import {
 } from '../../actions/profile-view';
 import {
   getSelectedTab,
-  getSelectedThreadIndex,
   getImplementationFilter,
   getInvertCallstack,
 } from '../../selectors/url-state';
+import {
+  getRightClickedCallNodeThreadIndex,
+  getRightClickedCallNodePath,
+  getRightClickedCallNodeIndex,
+} from '../../selectors/right-clicked-call-node';
 
 import {
   convertToTransformType,
@@ -40,13 +44,15 @@ import type { Thread, ThreadIndex } from '../../types/profile';
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
-  +thread: Thread,
-  +threadIndex: ThreadIndex,
-  +callNodeInfo: CallNodeInfo,
+  +rightClickedCallNode: {|
+    +thread: Thread,
+    +threadIndex: ThreadIndex,
+    +callNodeInfo: CallNodeInfo,
+    +callNodePath: CallNodePath,
+    +callNodeIndex: IndexIntoCallNodeTable,
+  |} | null,
   +implementation: ImplementationFilter,
   +inverted: boolean,
-  +callNodePath: CallNodePath | null,
-  +callNodeIndex: IndexIntoCallNodeTable | null,
   +selectedTab: TabSlug,
 |};
 
@@ -100,17 +106,19 @@ class CallNodeContextMenu extends PureComponent<Props> {
   };
 
   _getFunctionName(): string {
-    const {
-      callNodeIndex,
-      thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { rightClickedCallNode } = this.props;
 
-    if (callNodeIndex === null) {
+    if (rightClickedCallNode === null) {
       throw new Error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
     }
+
+    const {
+      callNodeIndex,
+      thread: { stringTable, funcTable },
+      callNodeInfo: { callNodeTable },
+    } = rightClickedCallNode;
 
     const funcIndex = callNodeTable.func[callNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
@@ -135,17 +143,19 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 
   copyUrl(): void {
-    const {
-      callNodeIndex,
-      thread: { stringTable, funcTable },
-      callNodeInfo: { callNodeTable },
-    } = this.props;
+    const { rightClickedCallNode } = this.props;
 
-    if (callNodeIndex === null) {
+    if (rightClickedCallNode === null) {
       throw new Error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
     }
+
+    const {
+      callNodeIndex,
+      thread: { stringTable, funcTable },
+      callNodeInfo: { callNodeTable },
+    } = rightClickedCallNode;
 
     const funcIndex = callNodeTable.func[callNodeIndex];
     const stringIndex = funcTable.fileName[funcIndex];
@@ -156,18 +166,19 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 
   copyStack(): void {
-    const {
-      callNodeIndex,
-      thread: { stringTable, funcTable },
+    const { rightClickedCallNode } = this.props;
 
-      callNodeInfo: { callNodeTable },
-    } = this.props;
-
-    if (callNodeIndex === null) {
+    if (rightClickedCallNode === null) {
       throw new Error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
     }
+
+    const {
+      callNodeIndex,
+      thread: { stringTable, funcTable },
+      callNodeInfo: { callNodeTable },
+    } = rightClickedCallNode;
 
     let stack = '';
     let curCallNodeIndex = callNodeIndex;
@@ -215,19 +226,18 @@ class CallNodeContextMenu extends PureComponent<Props> {
   addTransformToStack(type: TransformType): void {
     const {
       addTransformToStack,
-      threadIndex,
       implementation,
-      callNodePath,
       inverted,
-      thread,
+      rightClickedCallNode,
     } = this.props;
 
-    if (callNodePath === null) {
+    if (rightClickedCallNode === null) {
       throw new Error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
     }
 
+    const { threadIndex, callNodePath, thread } = rightClickedCallNode;
     const selectedFunc = callNodePath[callNodePath.length - 1];
 
     switch (type) {
@@ -299,32 +309,32 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 
   expandAll(): void {
-    const {
-      expandAllCallNodeDescendants,
-      threadIndex,
-      callNodeIndex,
-      callNodeInfo,
-    } = this.props;
-    if (callNodeIndex === null) {
+    const { expandAllCallNodeDescendants, rightClickedCallNode } = this.props;
+
+    if (rightClickedCallNode === null) {
       throw new Error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
     }
+
+    const { threadIndex, callNodeIndex, callNodeInfo } = rightClickedCallNode;
 
     expandAllCallNodeDescendants(threadIndex, callNodeIndex, callNodeInfo);
   }
 
   getNameForSelectedResource(): string | null {
-    const {
-      callNodePath,
-      thread: { funcTable, stringTable, resourceTable, libs },
-    } = this.props;
+    const { rightClickedCallNode } = this.props;
 
-    if (callNodePath === null) {
+    if (rightClickedCallNode === null) {
       throw new Error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
     }
+
+    const {
+      callNodePath,
+      thread: { funcTable, stringTable, resourceTable, libs },
+    } = rightClickedCallNode;
 
     const funcIndex = callNodePath[callNodePath.length - 1];
     if (funcIndex === undefined) {
@@ -353,19 +363,22 @@ class CallNodeContextMenu extends PureComponent<Props> {
    * Determine if this CallNode represent a recursive function call.
    */
   isRecursiveCall(): boolean {
-    const { callNodePath, thread, implementation } = this.props;
+    const { rightClickedCallNode, implementation } = this.props;
 
-    if (callNodePath === null) {
+    if (rightClickedCallNode === null) {
       console.error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
       return false;
     }
 
+    const { callNodePath, thread } = rightClickedCallNode;
     const funcIndex = callNodePath[callNodePath.length - 1];
+
     if (funcIndex === undefined) {
       return false;
     }
+
     // Do the easy thing first, see if this function was called by itself.
     if (callNodePath[callNodePath.length - 2] === funcIndex) {
       return true;
@@ -376,20 +389,20 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 
   renderContextMenuContents() {
-    const {
-      callNodeIndex,
-      inverted,
-      thread: { funcTable },
-      callNodeInfo: { callNodeTable },
-      selectedTab,
-    } = this.props;
+    const { inverted, selectedTab, rightClickedCallNode } = this.props;
 
-    if (callNodeIndex === null) {
+    if (rightClickedCallNode === null) {
       console.error(
         "The context menu assumes there is a selected call node and there wasn't one."
       );
       return <div />;
     }
+
+    const {
+      callNodeIndex,
+      thread: { funcTable },
+      callNodeInfo: { callNodeTable },
+    } = rightClickedCallNode;
 
     const funcIndex = callNodeTable.func[callNodeIndex];
     const isJS = funcTable.isJS[funcIndex];
@@ -483,9 +496,9 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 
   render() {
-    const { callNodeIndex } = this.props;
+    const { rightClickedCallNode } = this.props;
 
-    if (callNodeIndex === null) {
+    if (rightClickedCallNode === null) {
       return null;
     }
 
@@ -502,16 +515,32 @@ class CallNodeContextMenu extends PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    thread: selectedThreadSelectors.getFilteredThread(state),
-    threadIndex: getSelectedThreadIndex(state),
-    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-    implementation: getImplementationFilter(state),
-    inverted: getInvertCallstack(state),
-    callNodePath: selectedThreadSelectors.getRightClickedCallNodePath(state),
-    callNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(state),
-    selectedTab: getSelectedTab(state),
-  }),
+  mapStateToProps: state => {
+    const threadIndex = getRightClickedCallNodeThreadIndex(state);
+    const callNodePath = getRightClickedCallNodePath(state);
+    const callNodeIndex = getRightClickedCallNodeIndex(state);
+    const threadSelectors =
+      threadIndex !== null && getThreadSelectors(threadIndex);
+
+    return {
+      rightClickedCallNode:
+        threadIndex !== null &&
+        callNodePath !== null &&
+        callNodeIndex !== null &&
+        threadSelectors
+          ? {
+              threadIndex,
+              thread: threadSelectors.getFilteredThread(state),
+              callNodeInfo: threadSelectors.getCallNodeInfo(state),
+              callNodePath,
+              callNodeIndex,
+            }
+          : null,
+      implementation: getImplementationFilter(state),
+      inverted: getInvertCallstack(state),
+      selectedTab: getSelectedTab(state),
+    };
+  },
   mapDispatchToProps: {
     addTransformToStack,
     expandAllCallNodeDescendants,
