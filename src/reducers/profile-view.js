@@ -131,7 +131,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
     case 'PROFILE_LOADED':
       return action.profile.threads.map(() => ({
         selectedCallNodePath: [],
-        rightClickedCallNodePath: null,
         expandedCallNodePaths: new PathSet(),
         selectedMarker: null,
         rightClickedMarker: null,
@@ -154,9 +153,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
           selectedCallNodePath: threadViewOptions.selectedCallNodePath.map(
             mapOldFuncToNewFunc
           ),
-          rightClickedCallNodePath:
-            threadViewOptions.rightClickedCallNodePath &&
-            threadViewOptions.rightClickedCallNodePath.map(mapOldFuncToNewFunc),
           expandedCallNodePaths: new PathSet(
             Array.from(threadViewOptions.expandedCallNodePaths).map(oldPath =>
               oldPath.map(mapOldFuncToNewFunc)
@@ -218,17 +214,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         ...state.slice(threadIndex + 1),
       ];
     }
-    case 'CHANGE_RIGHT_CLICKED_CALL_NODE': {
-      const { callNodePath, threadIndex } = action;
-      return [
-        ...state.slice(0, threadIndex),
-        {
-          ...state[threadIndex],
-          rightClickedCallNodePath: callNodePath,
-        },
-        ...state.slice(threadIndex + 1),
-      ];
-    }
     case 'CHANGE_INVERT_CALLSTACK': {
       const { callTree, callNodeTable, selectedThreadIndex } = action;
       return state.map((viewOptions, threadIndex) => {
@@ -250,9 +235,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
           return {
             ...viewOptions,
             selectedCallNodePath,
-            // `rightClickedCallNodePath` is most likely null already, but we
-            // force it because we don't want to risk that it's incorrect.
-            rightClickedCallNodePath: null,
             expandedCallNodePaths,
           };
         }
@@ -300,7 +282,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         ...state.slice(0, threadIndex),
         {
           ...state[threadIndex],
-          rightClickedCallNodePath: null,
           rightClickedMarker: null,
         },
         ...state.slice(threadIndex + 1),
@@ -331,9 +312,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         {
           ...state[threadIndex],
           selectedCallNodePath,
-          // `rightClickedCallNodePath` is most likely null already, but we
-          // force it because we don't want to risk that it's incorrect.
-          rightClickedCallNodePath: null,
           expandedCallNodePaths,
         },
         ...state.slice(threadIndex + 1),
@@ -348,7 +326,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         {
           ...state[threadIndex],
           selectedCallNodePath: [],
-          rightClickedCallNodePath: null,
           expandedCallNodePaths: new PathSet(),
         },
         ...state.slice(threadIndex + 1),
@@ -404,9 +381,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         {
           ...state[threadIndex],
           selectedCallNodePath,
-          // `rightClickedCallNodePath` is most likely null already, but we
-          // force it because we don't want to risk that it's incorrect.
-          rightClickedCallNodePath: null,
           expandedCallNodePaths,
         },
         ...state.slice(threadIndex + 1),

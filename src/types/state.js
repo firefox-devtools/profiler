@@ -37,7 +37,6 @@ export type Reducer<T> = (T | void, Action) => T;
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
-  +rightClickedCallNodePath: CallNodePath | null,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
   +rightClickedMarker: MarkerIndex | null,

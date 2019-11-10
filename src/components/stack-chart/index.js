@@ -20,6 +20,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getRightClickedCallNodeIndex } from '../../selectors/right-clicked-call-node';
 import StackChartEmptyReasons from './StackChartEmptyReasons';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import StackSettings from '../shared/StackSettings';
@@ -31,6 +32,7 @@ import {
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
+
 import type { Thread, CategoryList } from '../../types/profile';
 import type {
   CallNodeInfo,
@@ -219,9 +221,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
-        state
-      ),
+      rightClickedCallNodeIndex: getRightClickedCallNodeIndex(state),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     };
   },

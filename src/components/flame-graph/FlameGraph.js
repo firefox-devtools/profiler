@@ -26,6 +26,7 @@ import {
   changeRightClickedCallNode,
 } from '../../actions/profile-view';
 import { getIconsWithClassNames } from '../../selectors/icons';
+import { getRightClickedCallNodeIndex } from '../../selectors/right-clicked-call-node';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
 import type { Thread, CategoryList } from '../../types/profile';
@@ -358,9 +359,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
-        state
-      ),
+      rightClickedCallNodeIndex: getRightClickedCallNodeIndex(state),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       icons: getIconsWithClassNames(state),
       interval: getProfileInterval(state),

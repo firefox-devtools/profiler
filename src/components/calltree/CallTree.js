@@ -23,6 +23,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getIconsWithClassNames } from '../../selectors/icons';
+import { getRightClickedCallNodeIndex } from '../../selectors/right-clicked-call-node';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
@@ -249,9 +250,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
       state
     ),
-    rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
-      state
-    ),
+    rightClickedCallNodeIndex: getRightClickedCallNodeIndex(state),
     expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
       state
     ),
