@@ -134,7 +134,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         selectedCallNodePath: [],
         expandedCallNodePaths: new PathSet(),
         selectedMarker: null,
-        rightClickedMarker: null,
       }));
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;
@@ -258,33 +257,6 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
       return [
         ...state.slice(0, threadIndex),
         { ...state[threadIndex], selectedMarker },
-        ...state.slice(threadIndex + 1),
-      ];
-    }
-    case 'CHANGE_RIGHT_CLICKED_MARKER': {
-      const { threadIndex, markerIndex } = action;
-      return [
-        ...state.slice(0, threadIndex),
-        {
-          ...state[threadIndex],
-          rightClickedMarker: markerIndex,
-        },
-        ...state.slice(threadIndex + 1),
-      ];
-    }
-    case 'SET_CONTEXT_MENU_VISIBILITY': {
-      // We want to change the state only when the menu is hidden.
-      if (action.isVisible) {
-        return state;
-      }
-
-      const { threadIndex } = action;
-      return [
-        ...state.slice(0, threadIndex),
-        {
-          ...state[threadIndex],
-          rightClickedMarker: null,
-        },
         ...state.slice(threadIndex + 1),
       ];
     }

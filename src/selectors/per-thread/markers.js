@@ -402,27 +402,6 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     return getMarker(selectedMarkerIndex);
   };
 
-  /**
-   * This returns the marker index for the currently right clicked marker.
-   */
-  const getRightClickedMarkerIndex: Selector<MarkerIndex | null> = state =>
-    threadSelectors.getViewOptions(state).rightClickedMarker;
-
-  /**
-   * From the previous value, this returns the full marker object for the
-   * selected marker.
-   */
-  const getRightClickedMarker: Selector<Marker | null> = state => {
-    const getMarker = getMarkerGetter(state);
-    const rightClickedMarkerIndex = getRightClickedMarkerIndex(state);
-
-    if (rightClickedMarkerIndex === null) {
-      return null;
-    }
-
-    return getMarker(rightClickedMarkerIndex);
-  };
-
   return {
     getMarkerGetter,
     getJankMarkerIndexesForHeader,
@@ -446,8 +425,6 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getPreviewFilteredMarkerIndexes,
     getSelectedMarkerIndex,
     getSelectedMarker,
-    getRightClickedMarkerIndex,
-    getRightClickedMarker,
     getIsNetworkChartEmptyInFullRange,
   };
 }

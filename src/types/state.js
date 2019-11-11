@@ -39,7 +39,6 @@ export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
-  +rightClickedMarker: MarkerIndex | null,
 |};
 
 export type RightClickedCallNodePath = {|
