@@ -16,6 +16,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getRightClickedMarkerIndex } from '../../selectors/right-clicked-marker';
 import {
   changeSelectedMarker,
   changeRightClickedMarker,
@@ -242,9 +243,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       state
     ),
     selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
-    rightClickedMarker: selectedThreadSelectors.getRightClickedMarkerIndex(
-      state
-    ),
+    rightClickedMarker: getRightClickedMarkerIndex(state),
     zeroAt: getZeroAt(state),
   }),
   mapDispatchToProps: { changeSelectedMarker, changeRightClickedMarker },

@@ -21,6 +21,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getRightClickedMarkerIndex } from '../../selectors/right-clicked-marker';
 import { changeRightClickedMarker } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -178,9 +179,7 @@ const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
           state
         ),
         getMarker: selectedThreadSelectors.getMarkerGetter(state),
-        rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
-          state
-        ),
+        rightClickedMarkerIndex: getRightClickedMarkerIndex(state),
         timeRange: getPreviewSelectionRange(state),
         disableOverscan: getPreviewSelection(state).isModifying,
         threadIndex: getSelectedThreadIndex(state),
