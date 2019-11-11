@@ -15,7 +15,11 @@ import {
   getPreviewSelection,
   getCommittedRange,
 } from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getThreadSelectors } from '../../selectors/per-thread';
+import {
+  getRightClickedMarker,
+  getRightClickedMarkerThreadIndex,
+} from '../../selectors/right-clicked-marker';
 import copy from 'copy-to-clipboard';
 
 import type { Marker } from '../../types/profile-derived';
@@ -37,8 +41,10 @@ import { getMarkerFullDescription } from '../../profile-logic/marker-data';
 type StateProps = {|
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +selectedMarker: Marker | null,
-  +thread: Thread,
+  +rightClickedMarker: {|
+    +marker: Marker,
+    +thread: Thread,
+  |} | null,
   +implementationFilter: ImplementationFilter,
 |};
 
@@ -52,15 +58,17 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 class MarkerContextMenu extends PureComponent<Props> {
   setStartRange = () => {
     const {
-      selectedMarker,
+      rightClickedMarker,
       updatePreviewSelection,
       previewSelection,
       committedRange,
     } = this.props;
 
-    if (selectedMarker === null) {
+    if (rightClickedMarker === null) {
       return;
     }
+
+    const { marker } = rightClickedMarker;
 
     const selectionEnd = previewSelection.hasSelection
       ? previewSelection.selectionEnd
@@ -69,22 +77,24 @@ class MarkerContextMenu extends PureComponent<Props> {
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: selectedMarker.start,
+      selectionStart: marker.start,
       selectionEnd,
     });
   };
 
   setEndRange = () => {
     const {
-      selectedMarker,
+      rightClickedMarker,
       updatePreviewSelection,
       committedRange,
       previewSelection,
     } = this.props;
 
-    if (selectedMarker === null) {
+    if (rightClickedMarker === null) {
       return;
     }
+
+    const { marker } = rightClickedMarker;
 
     const selectionStart = previewSelection.hasSelection
       ? previewSelection.selectionStart
@@ -96,26 +106,28 @@ class MarkerContextMenu extends PureComponent<Props> {
       selectionStart,
       // For markers without a duration, add an arbitrarily small bit of time at
       // the end to make sure the selected marker doesn't disappear from view.
-      selectionEnd: selectedMarker.start + (selectedMarker.dur || 0.0001),
+      selectionEnd: marker.start + (marker.dur || 0.0001),
     });
   };
 
   setRangeByDuration = () => {
-    const { selectedMarker, updatePreviewSelection } = this.props;
+    const { rightClickedMarker, updatePreviewSelection } = this.props;
 
-    if (selectedMarker === null) {
+    if (rightClickedMarker === null) {
       return;
     }
 
-    if (this._isZeroDurationMarker(selectedMarker)) {
+    const { marker } = rightClickedMarker;
+
+    if (this._isZeroDurationMarker(marker)) {
       return;
     }
 
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: selectedMarker.start,
-      selectionEnd: selectedMarker.start + selectedMarker.dur,
+      selectionStart: marker.start,
+      selectionEnd: marker.start + marker.dur,
     });
   };
 
@@ -124,7 +136,13 @@ class MarkerContextMenu extends PureComponent<Props> {
   }
 
   _convertStackToString(stack: IndexIntoStackTable): string {
-    const { thread, implementationFilter } = this.props;
+    const { rightClickedMarker, implementationFilter } = this.props;
+
+    if (rightClickedMarker === null) {
+      return '';
+    }
+
+    const { thread } = rightClickedMarker;
 
     const callNodePath = filterCallNodePathByImplementation(
       thread,
@@ -142,29 +160,40 @@ class MarkerContextMenu extends PureComponent<Props> {
   }
 
   copyMarkerJSON = () => {
-    const { selectedMarker } = this.props;
+    const { rightClickedMarker } = this.props;
 
-    if (selectedMarker === null) {
+    if (rightClickedMarker === null) {
       return;
     }
 
-    copy(JSON.stringify(selectedMarker, null, 2));
+    const { marker } = rightClickedMarker;
+
+    copy(JSON.stringify(marker, null, 2));
   };
 
   copyMarkerDescription = () => {
-    const { selectedMarker } = this.props;
+    const { rightClickedMarker } = this.props;
 
-    if (selectedMarker === null) {
+    if (rightClickedMarker === null) {
       return;
     }
 
-    copy(getMarkerFullDescription(selectedMarker));
+    const { marker } = rightClickedMarker;
+
+    copy(getMarkerFullDescription(marker));
   };
 
   copyMarkerCause = () => {
-    const { selectedMarker } = this.props;
-    if (selectedMarker && selectedMarker.data && selectedMarker.data.cause) {
-      const stack = this._convertStackToString(selectedMarker.data.cause.stack);
+    const { rightClickedMarker } = this.props;
+
+    if (rightClickedMarker === null) {
+      return;
+    }
+
+    const { marker } = rightClickedMarker;
+
+    if (marker.data && marker.data.cause) {
+      const stack = this._convertStackToString(marker.data.cause.stack);
       if (stack) {
         copy(stack);
       } else {
@@ -176,14 +205,16 @@ class MarkerContextMenu extends PureComponent<Props> {
   };
 
   copyUrl = () => {
-    const { selectedMarker } = this.props;
+    const { rightClickedMarker } = this.props;
 
-    if (
-      selectedMarker &&
-      selectedMarker.data &&
-      selectedMarker.data.type === 'Network'
-    ) {
-      copy(selectedMarker.data.URI);
+    if (rightClickedMarker === null) {
+      return;
+    }
+
+    const { marker } = rightClickedMarker;
+
+    if (marker.data && marker.data.type === 'Network') {
+      copy(marker.data.URI);
     }
   };
 
@@ -226,11 +257,13 @@ class MarkerContextMenu extends PureComponent<Props> {
   };
 
   render() {
-    const { selectedMarker } = this.props;
+    const { rightClickedMarker } = this.props;
 
-    if (selectedMarker === null) {
+    if (rightClickedMarker === null) {
       return null;
     }
+
+    const { marker } = rightClickedMarker;
 
     return (
       <ContextMenu
@@ -246,15 +279,15 @@ class MarkerContextMenu extends PureComponent<Props> {
         </MenuItem>
         <MenuItem
           onClick={this.setRangeByDuration}
-          disabled={this._isZeroDurationMarker(selectedMarker)}
+          disabled={this._isZeroDurationMarker(marker)}
         >
           Set selection from duration
         </MenuItem>
         <MenuItem onClick={this.copyMarkerDescription}>Copy</MenuItem>
-        {selectedMarker.data && selectedMarker.data.cause ? (
+        {marker.data && marker.data.cause ? (
           <MenuItem onClick={this.copyMarkerCause}>Copy marker cause</MenuItem>
         ) : null}
-        {selectedMarker.data && selectedMarker.data.type === 'Network' ? (
+        {marker.data && marker.data.type === 'Network' ? (
           <MenuItem onClick={this.copyUrl}>Copy URL</MenuItem>
         ) : null}
         <MenuItem onClick={this.copyMarkerJSON}>Copy marker JSON</MenuItem>
@@ -264,13 +297,23 @@ class MarkerContextMenu extends PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    previewSelection: getPreviewSelection(state),
-    committedRange: getCommittedRange(state),
-    thread: selectedThreadSelectors.getThread(state),
-    implementationFilter: getImplementationFilter(state),
-    selectedMarker: selectedThreadSelectors.getRightClickedMarker(state),
-  }),
+  mapStateToProps: state => {
+    const threadIndex = getRightClickedMarkerThreadIndex(state);
+    const marker = getRightClickedMarker(state);
+
+    return {
+      previewSelection: getPreviewSelection(state),
+      committedRange: getCommittedRange(state),
+      implementationFilter: getImplementationFilter(state),
+      rightClickedMarker:
+        threadIndex !== null && marker !== null
+          ? {
+              marker,
+              thread: getThreadSelectors(threadIndex).getThread(state),
+            }
+          : null,
+    };
+  },
   mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
   component: MarkerContextMenu,
 });
