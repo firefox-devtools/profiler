@@ -960,7 +960,7 @@ export function getProfileWithNativeAllocations(): * {
              I
   `);
 
-  // Now add a JsAllocationsTable.
+  // Now add a NativeAllocationsTable.
   const nativeAllocations = getEmptyNativeAllocationsTable();
   profile.threads[0].nativeAllocations = nativeAllocations;
 
