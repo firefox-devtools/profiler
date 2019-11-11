@@ -26,6 +26,7 @@ import type {
   SymbolicationStatus,
   ThreadViewOptions,
   RightClickedCallNodePath,
+  RightClickedMarker,
 } from '../types/state';
 
 const profile: Reducer<Profile | null> = (state = null, action) => {
@@ -536,6 +537,34 @@ const rightClickedCallNodePath: Reducer<RightClickedCallNodePath | null> = (
   }
 };
 
+const rightClickedMarker: Reducer<RightClickedMarker | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_RIGHT_CLICKED_MARKER':
+      if (action.markerIndex !== null) {
+        return {
+          threadIndex: action.threadIndex,
+          markerIndex: action.markerIndex,
+        };
+      }
+
+      return null;
+    case 'SET_CONTEXT_MENU_VISIBILITY':
+      // We want to change the state only when the menu is hidden.
+      if (action.isVisible) {
+        return state;
+      }
+
+      return null;
+    case 'PROFILE_LOADED':
+      return null;
+    default:
+      return state;
+  }
+};
+
 /**
  * Provide a mechanism to wrap the reducer in a special function that can reset
  * the state to the default values. This is useful when viewing multiple profiles
@@ -571,6 +600,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rootRange,
       rightClickedTrack,
       rightClickedCallNodePath,
+      rightClickedMarker,
     }),
     globalTracks,
     localTracksByPid,
