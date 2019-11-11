@@ -217,6 +217,19 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     Boolean(getThread(state).nativeAllocations);
 
   /**
+   * We can only compute the retained memory in the versions of the native allocations
+   * format that provide the memory address. The earlier versions did not have
+   * balanced allocations and deallocations.
+   */
+  const getCanShowRetainedMemory: Selector<boolean> = state => {
+    const { nativeAllocations } = getThread(state);
+    if (!nativeAllocations) {
+      return false;
+    }
+    return 'memoryAddress' in nativeAllocations;
+  };
+
+  /**
    * The JS tracer selectors are placed in the thread selectors since there are
    * not many of them. If this section grows, then consider breaking them out
    * into their own file.
@@ -277,5 +290,6 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getExpensiveJsTracerLeafTiming,
     getHasJsAllocations,
     getHasNativeAllocations,
+    getCanShowRetainedMemory,
   };
 }

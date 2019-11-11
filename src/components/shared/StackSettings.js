@@ -44,6 +44,7 @@ type StateProps = {|
   +currentSearchString: string,
   +hasJsAllocations: boolean,
   +hasNativeAllocations: boolean,
+  +canShowRetainedMemory: boolean,
 |};
 
 type DispatchProps = {|
@@ -124,6 +125,7 @@ class StackSettings extends PureComponent<Props> {
       currentSearchString,
       hasJsAllocations,
       hasNativeAllocations,
+      canShowRetainedMemory,
       disableCallTreeSummaryButtons,
     } = this.props;
 
@@ -152,6 +154,13 @@ class StackSettings extends PureComponent<Props> {
                         'JavaScript Allocations',
                         'js-allocations',
                         'Summarize using bytes of JavaScript allocated (no de-allocations)'
+                      )
+                    : null}
+                  {canShowRetainedMemory
+                    ? this._renderCallTreeStrategyOption(
+                        'Retained Allocations',
+                        'native-retained-allocations',
+                        'Summarize using bytes of memory that were allocated, and never freed while profiling'
                       )
                     : null}
                   {hasNativeAllocations
@@ -205,6 +214,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     currentSearchString: getCurrentSearchString(state),
     hasJsAllocations: selectedThreadSelectors.getHasJsAllocations(state),
     hasNativeAllocations: selectedThreadSelectors.getHasNativeAllocations(
+      state
+    ),
+    canShowRetainedMemory: selectedThreadSelectors.getCanShowRetainedMemory(
       state
     ),
     callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),

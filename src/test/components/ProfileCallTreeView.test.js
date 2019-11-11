@@ -22,6 +22,7 @@ import {
   getProfileFromTextSamples,
   getProfileWithJsAllocations,
   getProfileWithUnbalancedNativeAllocations,
+  getProfileWithBalancedNativeAllocations,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getCallTreeSummaryStrategy } from '../../selectors/url-state';
@@ -590,6 +591,11 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     getByText('Self (bytes)');
   });
 
+  it('does not have the retained memory option', function() {
+    const { queryByText } = setup();
+    expect(queryByText('Retained Allocations')).toBeFalsy();
+  });
+
   it('matches the snapshot for native allocations', function() {
     const { container, changeSelect } = setup();
     changeSelect({ from: 'Timing Data', to: 'Allocations' });
@@ -599,6 +605,59 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
   it('matches the snapshot for native deallocations', function() {
     const { container, changeSelect } = setup();
     changeSelect({ from: 'Timing Data', to: 'Deallocations' });
+    expect(container.firstChild).toMatchSnapshot();
+  });
+});
+
+describe('ProfileCallTreeView with balanced native allocations', function() {
+  function setup() {
+    const { profile } = getProfileWithBalancedNativeAllocations();
+    const store = storeWithProfile(profile);
+    const renderResult = render(
+      <Provider store={store}>
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
+      </Provider>
+    );
+    const changeSelect = createSelectChanger(renderResult);
+
+    return { profile, ...renderResult, changeSelect, ...store };
+  }
+
+  it('can switch to retained allocations and back to timing', function() {
+    const { getState, changeSelect } = setup();
+
+    // It starts out with timing.
+    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+
+    // Switch to retained memory native allocations.
+    changeSelect({ from: 'Timing Data', to: 'Retained Allocations' });
+
+    expect(getCallTreeSummaryStrategy(getState())).toEqual(
+      'native-retained-allocations'
+    );
+
+    // And finally it can be switched back.
+    changeSelect({ from: 'Retained Allocations', to: 'Timing Data' });
+    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+  });
+
+  it('shows byte related labels for retained allocations', function() {
+    const { getByText, queryByText, changeSelect } = setup();
+
+    // These labels do not exist.
+    expect(queryByText('Total Size (bytes)')).toBe(null);
+    expect(queryByText('Self (bytes)')).toBe(null);
+
+    changeSelect({ from: 'Timing Data', to: 'Retained Allocations' });
+
+    // After changing to retained allocations, they do.
+    getByText('Total Size (bytes)');
+    getByText('Self (bytes)');
+  });
+
+  it('matches the snapshot for retained allocations', function() {
+    const { container, changeSelect } = setup();
+    changeSelect({ from: 'Timing Data', to: 'Retained Allocations' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });
