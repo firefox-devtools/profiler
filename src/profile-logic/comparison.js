@@ -17,11 +17,11 @@ import {
 import {
   getEmptyProfile,
   getEmptyResourceTable,
-  getEmptySamplesTable,
   getEmptyFrameTable,
   getEmptyFuncTable,
   getEmptyStackTable,
   getEmptyRawMarkerTable,
+  getEmptySamplesTableWithEventDelay,
 } from './data-structures';
 import {
   filterThreadSamplesToRange,
@@ -675,7 +675,7 @@ function combineSamplesDiffing(
   ] = threadsAndIntervals;
 
   const newSamples = {
-    ...getEmptySamplesTable(),
+    ...getEmptySamplesTableWithEventDelay(),
     duration: [],
   };
 
@@ -706,7 +706,9 @@ function combineSamplesDiffing(
         `);
       }
       newSamples.stack.push(newStackIndex);
-      newSamples.responsiveness.push(samples1.responsiveness[i]);
+      // Diffing event delay values doesn't make sense since interleaved values
+      // of eventDelay/responsiveness don't mean anything.
+      newSamples.eventDelay.push(null);
       newSamples.time.push(samples1.time[i]);
       // We add the first thread with a negative duration, because this is the
       // base profile.
@@ -729,7 +731,9 @@ function combineSamplesDiffing(
         `);
       }
       newSamples.stack.push(newStackIndex);
-      newSamples.responsiveness.push(samples2.responsiveness[j]);
+      // Diffing event delay values doesn't make sense since interleaved values
+      // of eventDelay/responsiveness don't mean anything.
+      newSamples.eventDelay.push(null);
       newSamples.time.push(samples2.time[j]);
       newSamples.duration.push(interval2);
 

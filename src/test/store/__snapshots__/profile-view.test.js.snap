@@ -69,7 +69,6 @@ Object {
       "length": 0,
       "name": Array [],
     },
-    "hasEventDelay": false,
     "interval": 1,
     "logicalCPUs": 0,
     "misc": "",
@@ -294,8 +293,7 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "length": 9,
-        "responsiveness": Array [
+        "eventDelay": Array [
           0,
           0,
           0,
@@ -306,6 +304,7 @@ Object {
           0,
           0,
         ],
+        "length": 9,
         "stack": Array [
           4,
           4,
@@ -525,8 +524,8 @@ Object {
         "type": Array [],
       },
       "samples": Object {
+        "eventDelay": Array [],
         "length": 0,
-        "responsiveness": Array [],
         "stack": Array [],
         "time": Array [],
       },
@@ -778,8 +777,7 @@ Array [
       "type": Array [],
     },
     "samples": Object {
-      "length": 9,
-      "responsiveness": Array [
+      "eventDelay": Array [
         0,
         0,
         0,
@@ -790,6 +788,7 @@ Array [
         0,
         0,
       ],
+      "length": 9,
       "stack": Array [
         4,
         4,
@@ -1009,8 +1008,8 @@ Array [
       "type": Array [],
     },
     "samples": Object {
+      "eventDelay": Array [],
       "length": 0,
-      "responsiveness": Array [],
       "stack": Array [],
       "time": Array [],
     },
@@ -2086,13 +2085,13 @@ Object {
   },
   "samples": Object {
     "duration": undefined,
-    "length": 4,
-    "responsiveness": Array [
+    "eventDelay": Array [
       0,
       100,
       0,
       0,
     ],
+    "length": 4,
     "stack": Array [
       5,
       5,
@@ -2464,11 +2463,11 @@ Object {
   },
   "samples": Object {
     "duration": undefined,
-    "length": 2,
-    "responsiveness": Array [
+    "eventDelay": Array [
       100,
       0,
     ],
+    "length": 2,
     "stack": Array [
       5,
       5,
@@ -2758,13 +2757,13 @@ Object {
   },
   "samples": Object {
     "duration": undefined,
-    "length": 4,
-    "responsiveness": Array [
+    "eventDelay": Array [
       0,
       100,
       0,
       0,
     ],
+    "length": 4,
     "stack": Array [
       5,
       5,
@@ -3058,13 +3057,13 @@ Object {
   },
   "samples": Object {
     "duration": undefined,
-    "length": 4,
-    "responsiveness": Array [
+    "eventDelay": Array [
       0,
       100,
       0,
       0,
     ],
+    "length": 4,
     "stack": Array [
       6,
       6,

@@ -81,21 +81,25 @@ export type GeckoSamples = {|
   >,
 |};
 
-export type OldGeckoSampleStruct = {|
+// Older profiles have samples with `responsiveness` values.
+export type GeckoSampleStructWithResponsiveness = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   responsiveness: Array<?Milliseconds>,
   length: number,
 |};
 
-export type NewGeckoSampleStruct = {|
+// Newer profiler have the improved version of `responsiveness`, `eventDelay`.
+export type GeckoSampleStructWithEventDelay = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   eventDelay: Array<?Milliseconds>,
   length: number,
 |};
 
-export type GeckoSampleStruct = OldGeckoSampleStruct | NewGeckoSampleStruct;
+export type GeckoSampleStruct =
+  | GeckoSampleStructWithResponsiveness
+  | GeckoSampleStructWithEventDelay;
 
 export type GeckoFrameTable = {|
   schema: {|

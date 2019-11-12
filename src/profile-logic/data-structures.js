@@ -43,7 +43,20 @@ export function getEmptyStackTable(): StackTable {
   };
 }
 
-export function getEmptySamplesTable(): SamplesTable {
+export function getEmptySamplesTableWithEventDelay(): SamplesTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    eventDelay: [],
+    stack: [],
+    time: [],
+    length: 0,
+  };
+}
+
+export function getEmptySamplesTableWithResponsiveness(): SamplesTable {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -272,7 +285,8 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     name: 'Empty',
     pid: 0,
     tid: 0,
-    samples: getEmptySamplesTable(),
+    // Creating samples with event delay since it's the new samples table.
+    samples: getEmptySamplesTableWithEventDelay(),
     markers: getEmptyRawMarkerTable(),
     stackTable: getEmptyStackTable(),
     frameTable: getEmptyFrameTable(),
@@ -310,7 +324,6 @@ export function getEmptyProfile(): Profile {
       physicalCPUs: 0,
       logicalCPUs: 0,
       symbolicated: true,
-      hasEventDelay: false,
     },
     pages: [],
     threads: [],

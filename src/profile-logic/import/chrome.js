@@ -283,7 +283,7 @@ async function processTracingEvents(
           nodeIdToStackId.get(nodeIndex),
           'Could not find the stack information for a sample when decoding a Chrome profile.'
         );
-        samplesTable.responsiveness.push(null);
+        ensureExists(samplesTable.eventDelay).push(null);
         samplesTable.stack.push(stackIndex);
         samplesTable.time.push(threadInfo.lastSampledTime);
         samplesTable.length++;

@@ -69,7 +69,6 @@ Object {
       "length": 0,
       "name": Array [],
     },
-    "hasEventDelay": false,
     "interval": 0.5,
     "logicalCPUs": 0,
     "misc": "",
@@ -558,8 +557,7 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "length": 905,
-        "responsiveness": Array [
+        "eventDelay": Array [
           null,
           null,
           null,
@@ -1466,6 +1464,7 @@ Object {
           null,
           null,
         ],
+        "length": 905,
         "stack": Array [
           1,
           2,
@@ -3807,8 +3806,8 @@ Object {
         "type": Array [],
       },
       "samples": Object {
+        "eventDelay": Array [],
         "length": 0,
-        "responsiveness": Array [],
         "stack": Array [],
         "time": Array [],
       },
@@ -3966,7 +3965,6 @@ Object {
       "length": 0,
       "name": Array [],
     },
-    "hasEventDelay": undefined,
     "interval": 1,
     "logicalCPUs": undefined,
     "misc": undefined,
@@ -10253,7 +10251,6 @@ Object {
       "length": 0,
       "name": Array [],
     },
-    "hasEventDelay": undefined,
     "interval": 1,
     "logicalCPUs": undefined,
     "misc": undefined,
