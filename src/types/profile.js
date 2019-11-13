@@ -95,7 +95,14 @@ export type StackTable = {|
  * are indices into other tables.
  */
 export type SamplesTable = {|
-  responsiveness: Array<?Milliseconds>,
+  // Responsiveness is the older version of eventDelay. It injects events every 16ms.
+  // This is optional because newer profiles don't have that field anymore.
+  responsiveness?: Array<?Milliseconds>,
+  // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
+  // view of jank by inferring what would be the delay of a hypothetical input event at
+  // any point in time. It requires a pre-processing to be able to visualize properly.
+  // This is optional because older profiles didn't have that field.
+  eventDelay?: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
   duration?: Milliseconds[],

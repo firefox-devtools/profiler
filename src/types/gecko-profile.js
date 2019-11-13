@@ -59,11 +59,17 @@ export type GeckoMarkerStack = {|
 |};
 
 export type GeckoSamples = {|
-  schema: {|
-    stack: 0,
-    time: 1,
-    responsiveness: 2,
-  |},
+  schema:
+    | {|
+        stack: 0,
+        time: 1,
+        responsiveness: 2,
+      |}
+    | {|
+        stack: 0,
+        time: 1,
+        eventDelay: 2,
+      |},
   data: Array<
     [
       null | IndexIntoGeckoStackTable,
@@ -75,12 +81,25 @@ export type GeckoSamples = {|
   >,
 |};
 
-export type GeckoSampleStruct = {|
+// Older profiles have samples with `responsiveness` values.
+export type GeckoSampleStructWithResponsiveness = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],
   responsiveness: Array<?Milliseconds>,
   length: number,
 |};
+
+// Newer profiles have the improved version of `responsiveness`, `eventDelay`.
+export type GeckoSampleStructWithEventDelay = {|
+  stack: Array<null | IndexIntoGeckoStackTable>,
+  time: Milliseconds[],
+  eventDelay: Array<?Milliseconds>,
+  length: number,
+|};
+
+export type GeckoSampleStruct =
+  | GeckoSampleStructWithResponsiveness
+  | GeckoSampleStructWithEventDelay;
 
 export type GeckoFrameTable = {|
   schema: {|

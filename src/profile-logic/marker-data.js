@@ -64,7 +64,13 @@ export function deriveJankMarkers(
   let lastTimestamp: number = 0;
   const jankInstances = [];
   for (let i = 0; i < samples.length; i++) {
-    const currentResponsiveness = samples.responsiveness[i];
+    let currentResponsiveness;
+    if (samples.eventDelay) {
+      currentResponsiveness = samples.eventDelay[i];
+    } else if (samples.responsiveness) {
+      currentResponsiveness = samples.responsiveness[i];
+    }
+
     if (currentResponsiveness === null || currentResponsiveness === undefined) {
       // Ignore anything that's not numeric. This can happen if there is no responsiveness
       // information, or if the sampler failed to collect a responsiveness value. This

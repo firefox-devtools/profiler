@@ -165,7 +165,7 @@ The source data format is de-duplicated to make it quicker to transfer in the JS
         schema: {
           stack: 0,
           time: 1,
-          responsiveness: 2,
+          eventDelay: 2,
         },
         data: [
           [
