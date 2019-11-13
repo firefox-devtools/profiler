@@ -89,7 +89,7 @@ export type GeckoSampleStructWithResponsiveness = {|
   length: number,
 |};
 
-// Newer profiler have the improved version of `responsiveness`, `eventDelay`.
+// Newer profiles have the improved version of `responsiveness`, `eventDelay`.
 export type GeckoSampleStructWithEventDelay = {|
   stack: Array<null | IndexIntoGeckoStackTable>,
   time: Milliseconds[],

@@ -783,7 +783,7 @@ function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
     samples.responsiveness = geckoSamples.responsiveness;
   } else {
     throw new Error(
-      'There is no eventDelay or responsiveness array in the samples table!'
+      'The profile processor expected an eventDelay or responsiveness array in the samples table, but none was found.'
     );
   }
 

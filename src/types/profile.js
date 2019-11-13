@@ -96,12 +96,12 @@ export type StackTable = {|
  */
 export type SamplesTable = {|
   // Responsiveness is the older version of eventDelay. It injects events every 16ms.
-  // Either this or eventDelay must be present, they can't be present at the same time!
+  // This is optional because newer profiles don't have that field anymore.
   responsiveness?: Array<?Milliseconds>,
   // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
   // view of jank by inferring what would be the delay of a hypothetical input event at
   // any point in time. It requires a pre-processing to be able to visualize properly.
-  // Either this or responsiveness must be present, they can't be present at the same time!
+  // This is optional because older profiles didn't have that field.
   eventDelay?: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],

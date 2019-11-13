@@ -69,10 +69,6 @@ export function deriveJankMarkers(
       currentResponsiveness = samples.eventDelay[i];
     } else if (samples.responsiveness) {
       currentResponsiveness = samples.responsiveness[i];
-    } else {
-      throw new Error(
-        'There is no eventDelay or responsiveness array in the samples table!'
-      );
     }
 
     if (currentResponsiveness === null || currentResponsiveness === undefined) {

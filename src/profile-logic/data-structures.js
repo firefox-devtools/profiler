@@ -43,6 +43,11 @@ export function getEmptyStackTable(): StackTable {
   };
 }
 
+/**
+ * Returns an empty samples table with eventDelay field instead of responsiveness.
+ * eventDelay is a new field and it replaced responsiveness. We should still
+ * account for older profiles and use both of the flavors if needed.
+ */
 export function getEmptySamplesTableWithEventDelay(): SamplesTable {
   return {
     // Important!
@@ -56,6 +61,11 @@ export function getEmptySamplesTableWithEventDelay(): SamplesTable {
   };
 }
 
+/**
+ * Returns an empty samples table with responsiveness field instead of eventDelay.
+ * responsiveness is the older field and replaced with eventDelay. We should
+ * account for older profiles and use both of the flavors if needed.
+ */
 export function getEmptySamplesTableWithResponsiveness(): SamplesTable {
   return {
     // Important!

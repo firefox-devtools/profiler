@@ -1067,10 +1067,6 @@ export function filterThreadSamplesToRange(
       beginSampleIndex,
       endSampleIndex
     );
-  } else {
-    throw new Error(
-      'There is no eventDelay or responsiveness array in the samples table!'
-    );
   }
 
   const newThread: Thread = {
