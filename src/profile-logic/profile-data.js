@@ -1048,18 +1048,26 @@ export function filterThreadSamplesToRange(
     rangeStart,
     rangeEnd
   );
-  const newSamples = {
+  const newSamples: SamplesTable = {
     length: endSampleIndex - beginSampleIndex,
     time: samples.time.slice(beginSampleIndex, endSampleIndex),
     duration: samples.duration
       ? samples.duration.slice(beginSampleIndex, endSampleIndex)
       : undefined,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
-    responsiveness: samples.responsiveness.slice(
+  };
+
+  if (samples.eventDelay) {
+    newSamples.eventDelay = samples.eventDelay.slice(
       beginSampleIndex,
       endSampleIndex
-    ),
-  };
+    );
+  } else if (samples.responsiveness) {
+    newSamples.responsiveness = samples.responsiveness.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
 
   const newThread: Thread = {
     ...thread,

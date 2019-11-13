@@ -36,6 +36,7 @@ import {
   selectedNodeSelectors,
   getThreadSelectors,
 } from '../../selectors/per-thread';
+import { ensureExists } from '../../utils/flow';
 
 import type { Milliseconds } from '../../types/units';
 import type { BreakdownByCategory } from '../../profile-logic/profile-data';
@@ -154,12 +155,13 @@ describe('call node paths on implementation filter change', function() {
 });
 
 describe('getJankMarkersForHeader', function() {
-  function setup({ sampleCount, responsiveness }) {
+  function setupWithResponsiveness({ sampleCount, responsiveness }) {
     const { profile } = getProfileFromTextSamples(
       Array(sampleCount)
         .fill('A')
         .join('  ')
     );
+    delete profile.threads[0].samples.eventDelay;
     profile.threads[0].samples.responsiveness = responsiveness;
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
@@ -168,8 +170,23 @@ describe('getJankMarkersForHeader', function() {
       .map(getMarker);
   }
 
+  function setupWithEventDelay({ sampleCount, eventDelay }) {
+    const { profile } = getProfileFromTextSamples(
+      Array(sampleCount)
+        .fill('A')
+        .join('  ')
+    );
+    delete profile.threads[0].samples.eventDelay;
+    profile.threads[0].samples.eventDelay = eventDelay;
+    const { getState } = storeWithProfile(profile);
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    return selectedThreadSelectors
+      .getJankMarkerIndexesForHeader(getState())
+      .map(getMarker);
+  }
+
   it('will not create any jank markers for undefined responsiveness', function() {
-    const jankInstances = setup({
+    const jankInstances = setupWithResponsiveness({
       sampleCount: 10,
       responsiveness: [],
     });
@@ -178,7 +195,7 @@ describe('getJankMarkersForHeader', function() {
 
   it('will not create any jank markers for null responsiveness', function() {
     const responsiveness = Array(10).fill(null);
-    const jankInstances = setup({
+    const jankInstances = setupWithResponsiveness({
       sampleCount: responsiveness.length,
       responsiveness,
     });
@@ -188,9 +205,20 @@ describe('getJankMarkersForHeader', function() {
   it('will create a jank instance', function() {
     const breakingPoint = 70;
     const responsiveness = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
-    const jankInstances = setup({
+    const jankInstances = setupWithResponsiveness({
       sampleCount: responsiveness.length,
       responsiveness,
+    });
+    expect(jankInstances.length).toEqual(1);
+    expect(jankInstances[0].dur).toEqual(breakingPoint);
+  });
+
+  it('will create a jank instance with eventDelay values', function() {
+    const breakingPoint = 70;
+    const eventDelay = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
+    const jankInstances = setupWithEventDelay({
+      sampleCount: eventDelay.length,
+      eventDelay,
     });
     expect(jankInstances.length).toEqual(1);
     expect(jankInstances[0].dur).toEqual(breakingPoint);
@@ -199,7 +227,7 @@ describe('getJankMarkersForHeader', function() {
   it('will skip null responsiveness values', function() {
     const breakingPoint = 70;
     const responsiveness = [0, 20, 40, null, breakingPoint, null, 0, 20, 40];
-    const jankInstances = setup({
+    const jankInstances = setupWithResponsiveness({
       sampleCount: responsiveness.length,
       responsiveness,
     });
@@ -210,7 +238,7 @@ describe('getJankMarkersForHeader', function() {
   it('will skip null responsiveness values after a breaking point', function() {
     const breakingPoint = 70;
     const responsiveness = [0, 20, 40, 60, breakingPoint, null, 10, 20];
-    const jankInstances = setup({
+    const jankInstances = setupWithResponsiveness({
       sampleCount: responsiveness.length,
       responsiveness,
     });
@@ -1152,7 +1180,7 @@ describe('snapshots of selectors/profile', function() {
     samplesThread.name = 'Thread with samples';
     markersThread.name = 'Thread with markers';
     // This is a jank sample:
-    samplesThread.samples.responsiveness[4] = 100;
+    ensureExists(samplesThread.samples.eventDelay)[4] = 100;
     const mergeFunction = {
       type: 'merge-function',
       funcIndex: C,
