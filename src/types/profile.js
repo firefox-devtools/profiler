@@ -186,6 +186,10 @@ export type FrameTable = {|
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
+  // Inner window ID of JS frames. JS frames can be correlated to a Page through this value.
+  // It's used to determine which JS frame belongs to which web page so we can display
+  // that information and filter for single tab profiling.
+  // `0` for others and the JS frames that's been failed to get the ID.
   innerWindowID: (InnerWindowID | null)[],
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],

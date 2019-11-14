@@ -121,7 +121,9 @@ export type GeckoFrameTable = {|
       IndexIntoStringTable,
       // for label frames, whether this frame should be shown in "JS only" stacks
       boolean,
-      // innerWindowID of JS frames. It corresponds to innerWindowID of a page in the pages array.
+      // innerWindowID of JS frames. JS frames can be correlated to a Page through this value.
+      // It's used to determine which JS frame belongs to which web page so we can display
+      // that information and filter for single tab profiling.
       // `0` for others and the JS frames that's been failed to get the ID.
       null | number,
       // for JS frames, an index into the string table, usually "Baseline" or "Ion"

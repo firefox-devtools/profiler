@@ -827,7 +827,7 @@ const _upgraders = {
     convertToVersion18Recursive(profile);
   },
   [19]: profile => {
-    // Profiles now have an innerWindowID property in the funcTable.
+    // Profiles now have an innerWindowID property in the frameTable.
     // We are filling this array with 0 values because we have no idea what that value might be.
     function convertToVersion19Recursive(p) {
       for (const thread of p.threads) {
