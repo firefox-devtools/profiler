@@ -255,6 +255,41 @@ describe('MarkerChart', function() {
     ).toMatchSnapshot();
   });
 
+  it('only renders a single row when hovering', () => {
+    window.devicePixelRatio = 1;
+
+    const profile = getProfileWithMarkers(MARKERS);
+    const {
+      flushRafCalls,
+      dispatch,
+      flushDrawLog,
+      fireMouseEvent,
+    } = setupWithProfile(profile);
+
+    dispatch(changeSelectedTab('marker-chart'));
+    flushRafCalls();
+
+    const drawLogBefore = flushDrawLog();
+
+    const { x, y } = findFillTextPositionFromDrawLog(drawLogBefore, 'Marker B');
+
+    // Move the mouse on top of an item.
+    fireMouseEvent('mousemove', {
+      offsetX: x,
+      offsetY: y,
+      pageX: x,
+      pageY: y,
+    });
+
+    flushRafCalls();
+
+    const drawLogAfter = flushDrawLog();
+
+    // As a rough test of better performance, assert that at least half as many draw
+    // calls were issued for a hovered event.
+    expect(drawLogBefore.length > drawLogAfter.length * 2).toBe(true);
+  });
+
   describe('context menus', () => {
     beforeEach(() => {
       // Always use fake timers when dealing with context menus.
