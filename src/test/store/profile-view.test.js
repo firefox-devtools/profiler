@@ -15,6 +15,8 @@ import {
   getNetworkMarkers,
   getCounterForThread,
   getVisualProgressTrackProfile,
+  getProfileWithNativeAllocations,
+  getProfileWithJsAllocations,
 } from '../fixtures/profiles/processed-profile';
 import {
   getEmptyThread,
@@ -500,6 +502,88 @@ describe('actions/ProfileView', function() {
         expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
           'calltree'
         );
+      });
+    });
+
+    describe('with allocation-based tracks', function() {
+      function setup() {
+        const { profile } = getProfileWithNativeAllocations();
+        profile.threads.push(
+          getProfileWithJsAllocations().profile.threads[0],
+          getEmptyThread()
+        );
+
+        for (const thread of profile.threads) {
+          thread.pid = 0;
+        }
+
+        // Create some references in the same order that the threads were created
+        // in the threads array.
+        const nativeAllocationsThread: TrackReference = {
+          type: 'local',
+          trackIndex: 0,
+          pid: 0,
+        };
+        const jsAllocationsThread: TrackReference = {
+          type: 'local',
+          trackIndex: 1,
+          pid: 0,
+        };
+        const timingOnlyThread: TrackReference = {
+          type: 'local',
+          trackIndex: 2,
+          pid: 0,
+        };
+
+        return {
+          profile,
+          nativeAllocationsThread,
+          timingOnlyThread,
+          jsAllocationsThread,
+          ...storeWithProfile(profile),
+        };
+      }
+
+      it('will switch to a "timing" summary strategy when clicking from a native allocation, to a timings-only thread', function() {
+        const { profile, nativeAllocationsThread, timingOnlyThread } = setup();
+        const { dispatch, getState } = storeWithProfile(profile);
+
+        // Setup the test to view native allocations.
+        dispatch(ProfileView.selectTrack(nativeAllocationsThread));
+        dispatch(
+          ProfileView.changeCallTreeSummaryStrategy('native-allocations')
+        );
+        expect(
+          UrlStateSelectors.getCallTreeSummaryStrategy(getState())
+        ).toEqual('native-allocations');
+
+        // Switch to a thread without native allocations.
+        dispatch(ProfileView.selectTrack(timingOnlyThread));
+
+        // Expect that it switches the summary strategy to one it supports.
+        expect(
+          UrlStateSelectors.getCallTreeSummaryStrategy(getState())
+        ).toEqual('timing');
+      });
+
+      it('will switch to a "timing" summary strategy when clicking from a js allocation, to a timings-only thread', function() {
+        const { profile, jsAllocationsThread, timingOnlyThread } = setup();
+        const { dispatch, getState } = storeWithProfile(profile);
+
+        // Setup the test to view js allocations.
+        dispatch(ProfileView.selectTrack(jsAllocationsThread));
+        dispatch(ProfileView.changeCallTreeSummaryStrategy('js-allocations'));
+        expect(
+          UrlStateSelectors.getCallTreeSummaryStrategy(getState())
+        ).toEqual('js-allocations');
+
+        // Switch to a thread without js allocations.
+        dispatch(ProfileView.selectTrack(timingOnlyThread));
+
+        // Expect that it switches the summary strategy to one it supports.
+        expect(
+          UrlStateSelectors.getCallTreeSummaryStrategy(getState())
+        ).toEqual('timing');
       });
     });
 
