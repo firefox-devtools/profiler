@@ -21,7 +21,7 @@ import { getBoundingBox, createSelectChanger } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
   getProfileWithJsAllocations,
-  getProfileWithNativeAllocations,
+  getProfileWithUnbalancedNativeAllocations,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { getCallTreeSummaryStrategy } from '../../selectors/url-state';
@@ -544,9 +544,9 @@ describe('ProfileCallTreeView with JS Allocations', function() {
   });
 });
 
-describe('ProfileCallTreeView with Native Allocations', function() {
+describe('ProfileCallTreeView with unbalanced native allocations', function() {
   function setup() {
-    const { profile } = getProfileWithNativeAllocations();
+    const { profile } = getProfileWithUnbalancedNativeAllocations();
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>

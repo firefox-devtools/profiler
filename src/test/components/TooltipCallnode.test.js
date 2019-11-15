@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import { TooltipCallNode } from '../../components/tooltip/CallNode';
 import { render } from 'react-testing-library';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithNativeAllocations } from '../fixtures/profiles/processed-profile';
+import { getProfileWithUnbalancedNativeAllocations } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import * as ProfileSelectors from '../../selectors/profile';
 import * as UrlState from '../../selectors/url-state';
@@ -50,7 +50,10 @@ describe('TooltipCallNode', function() {
   }
 
   it('handles native allocations', () => {
-    const { profile, funcNamesDict } = getProfileWithNativeAllocations();
+    const {
+      profile,
+      funcNamesDict,
+    } = getProfileWithUnbalancedNativeAllocations();
     const threadIndex = 0;
     const callNodePath = ['A', 'B', 'Fjs', 'Gjs'].map(
       name => funcNamesDict[name]

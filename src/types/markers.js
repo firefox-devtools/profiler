@@ -524,6 +524,9 @@ export type NativeAllocationPayload_Gecko = {|
   endTime: Milliseconds,
   size: Bytes,
   stack: GeckoMarkerStack,
+  // Older versions of the Gecko format did not have these values.
+  memoryAddress?: number,
+  threadId?: number,
 |};
 
 export type IPCMarkerPayload = {|

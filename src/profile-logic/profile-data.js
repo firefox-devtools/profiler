@@ -6,7 +6,7 @@
 
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
-import { getEmptyNativeAllocationsTable } from './data-structures';
+import { getEmptyUnbalancedNativeAllocationsTable } from './data-structures';
 
 import type {
   Profile,
@@ -2000,7 +2000,7 @@ export function getCategoryPairLabel(
 export function filterToAllocations(
   nativeAllocations: NativeAllocationsTable
 ): NativeAllocationsTable {
-  const newNativeAllocations = getEmptyNativeAllocationsTable();
+  const newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
   for (let i = 0; i < nativeAllocations.length; i++) {
     const duration = nativeAllocations.duration[i];
     if (duration > 0) {
@@ -2020,7 +2020,7 @@ export function filterToAllocations(
 export function filterToDeallocations(
   nativeAllocations: NativeAllocationsTable
 ): NativeAllocationsTable {
-  const newNativeAllocations = getEmptyNativeAllocationsTable();
+  const newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
   for (let i = 0; i < nativeAllocations.length; i++) {
     const duration = nativeAllocations.duration[i];
     if (duration < 0) {

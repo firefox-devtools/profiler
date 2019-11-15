@@ -13,7 +13,7 @@ import {
   getEmptyResourceTable,
   getEmptyRawMarkerTable,
   getEmptyJsAllocationsTable,
-  getEmptyNativeAllocationsTable,
+  getEmptyUnbalancedNativeAllocationsTable,
 } from './data-structures';
 import { immutableUpdate } from '../utils/flow';
 import {
@@ -630,7 +630,7 @@ function _processMarkers(
 |} {
   const markers = getEmptyRawMarkerTable();
   const jsAllocations = getEmptyJsAllocationsTable();
-  const nativeAllocations = getEmptyNativeAllocationsTable();
+  const nativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
 
   for (let markerIndex = 0; markerIndex < geckoMarkers.length; markerIndex++) {
     const geckoPayload: MarkerPayload_Gecko = geckoMarkers.data[markerIndex];

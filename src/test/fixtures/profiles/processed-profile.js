@@ -9,7 +9,7 @@ import {
   getEmptyJsTracerTable,
   resourceTypes,
   getEmptyJsAllocationsTable,
-  getEmptyNativeAllocationsTable,
+  getEmptyUnbalancedNativeAllocationsTable,
 } from '../../../profile-logic/data-structures';
 import { mergeProfiles } from '../../../profile-logic/comparison';
 import { stateFromLocation } from '../../../app-logic/url-handling';
@@ -921,9 +921,12 @@ export function getProfileWithJsAllocations(): * {
 }
 
 /**
- * Get a profile with Native allocations. The allocations will form the following trees.
+ * Get a profile with unbalanced native allocations. The allocations will form the
+ * following trees. The profile is unbalanced because the allocations do not have
+ * the memory addresses where they were allocated/deallocated from, and so
+ * cannot be matched up to form a balanced view.
  *
- * Allocations:
+ * Retained Allocations:
  *
  * - A (total: 15, self: —)
  *   - B (total: 15, self: —)
@@ -947,8 +950,7 @@ export function getProfileWithJsAllocations(): * {
  *       - D (total: -11, self: —)
  *         - E (total: -11, self: -11)
  */
-
-export function getProfileWithNativeAllocations(): * {
+export function getProfileWithUnbalancedNativeAllocations(): * {
   // First create a normal sample-based profile.
   const {
     profile,
@@ -963,7 +965,7 @@ export function getProfileWithNativeAllocations(): * {
   `);
 
   // Now add a NativeAllocationsTable.
-  const nativeAllocations = getEmptyNativeAllocationsTable();
+  const nativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
   profile.threads[0].nativeAllocations = nativeAllocations;
 
   // The stack table is built sequentially, so we can assume that the stack indexes

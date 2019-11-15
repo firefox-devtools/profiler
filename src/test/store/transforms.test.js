@@ -5,7 +5,7 @@
 // @flow
 import {
   getProfileFromTextSamples,
-  getProfileWithNativeAllocations,
+  getProfileWithUnbalancedNativeAllocations,
   getProfileWithJsAllocations,
 } from '../fixtures/profiles/processed-profile';
 import { formatTree } from '../fixtures/utils';
@@ -1322,7 +1322,7 @@ describe('transform native allocations', function() {
   const threadIndex = 0;
 
   it('can render a normal call tree', function() {
-    const { profile } = getProfileWithNativeAllocations();
+    const { profile } = getProfileWithUnbalancedNativeAllocations();
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-allocations'));
 
@@ -1345,7 +1345,7 @@ describe('transform native allocations', function() {
     const {
       profile,
       funcNamesDict: { Fjs },
-    } = getProfileWithNativeAllocations();
+    } = getProfileWithUnbalancedNativeAllocations();
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-allocations'));
     dispatch(
@@ -1370,7 +1370,7 @@ describe('transform native deallocations', function() {
   const threadIndex = 0;
 
   it('can render a normal call tree', function() {
-    const { profile } = getProfileWithNativeAllocations();
+    const { profile } = getProfileWithUnbalancedNativeAllocations();
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-deallocations'));
 
@@ -1393,7 +1393,7 @@ describe('transform native deallocations', function() {
     const {
       profile,
       funcNamesDict: { Fjs },
-    } = getProfileWithNativeAllocations();
+    } = getProfileWithUnbalancedNativeAllocations();
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-deallocations'));
     dispatch(
