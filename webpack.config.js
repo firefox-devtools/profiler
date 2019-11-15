@@ -99,10 +99,6 @@ const config = {
     chunkFilename: '[id].[hash].bundle.js',
     publicPath: '/',
   },
-  optimization: {
-    // Workaround for https://github.com/webpack/webpack/issues/7760
-    usedExports: false,
-  },
 };
 
 if (process.env.NODE_ENV === 'development') {
