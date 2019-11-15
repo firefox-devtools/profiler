@@ -29,6 +29,7 @@ describe('TooltipCallNode', function() {
         <Provider store={store}>
           <TooltipCallNode
             thread={selectedThreadSelectors.getThread(getState())}
+            pages={ProfileSelectors.getPageList(getState())}
             callNodeIndex={ensureExists(
               selectedThreadSelectors.getSelectedCallNodeIndex(getState()),
               'Unable to find a selected call node index.'
