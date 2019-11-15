@@ -8,7 +8,10 @@ import { Provider } from 'react-redux';
 import { TooltipCallNode } from '../../components/tooltip/CallNode';
 import { render } from 'react-testing-library';
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithUnbalancedNativeAllocations } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileWithUnbalancedNativeAllocations,
+  getProfileFromTextSamples,
+} from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import * as ProfileSelectors from '../../selectors/profile';
 import {
@@ -63,6 +66,86 @@ describe('TooltipCallNode', function() {
     dispatch(changeCallTreeSummaryStrategy('native-allocations'));
     const { container } = renderTooltip();
 
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('displays Page URL for non-iframe pages', () => {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(`
+      A
+      Bjs
+      Cjs
+    `);
+    const threadIndex = 0;
+    // Add an item to Pages array.
+    const pageUrl = 'https://developer.mozilla.org/en-US/';
+    profile.pages = [
+      {
+        browsingContextID: 1,
+        innerWindowID: 123123,
+        url: pageUrl,
+        embedderInnerWindowID: 0,
+      },
+    ];
+
+    const { frameTable } = profile.threads[threadIndex];
+
+    for (let i = 1; i < frameTable.length; i++) {
+      frameTable.innerWindowID[i] = profile.pages[0].innerWindowID;
+    }
+
+    const callNodePath = ['A', 'Bjs', 'Cjs'].map(name => funcNamesDict[name]);
+    const { dispatch, renderTooltip } = setup(profile);
+    dispatch(changeSelectedCallNode(threadIndex, callNodePath));
+    const { container, getByText } = renderTooltip();
+
+    expect(getByText(pageUrl)).toBeTruthy();
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('displays Page URL for iframe pages', () => {
+    const {
+      profile,
+      funcNamesDictPerThread: [funcNamesDict],
+    } = getProfileFromTextSamples(`
+      A
+      Bjs
+      Cjs
+    `);
+    const threadIndex = 0;
+    // Add a parent and an iframe page to Pages array.
+    const pageUrl = 'https://developer.mozilla.org/en-US/';
+    const iframeUrl = 'https://iframe.example.com/';
+    profile.pages = [
+      {
+        browsingContextID: 1,
+        innerWindowID: 111111,
+        url: pageUrl,
+        embedderInnerWindowID: 0,
+      },
+      {
+        browsingContextID: 1,
+        innerWindowID: 123123,
+        url: iframeUrl,
+        embedderInnerWindowID: 111111,
+      },
+    ];
+
+    const { frameTable } = profile.threads[threadIndex];
+
+    for (let i = 1; i < frameTable.length; i++) {
+      frameTable.innerWindowID[i] = profile.pages[1].innerWindowID;
+    }
+
+    const callNodePath = ['A', 'Bjs', 'Cjs'].map(name => funcNamesDict[name]);
+    const { dispatch, renderTooltip } = setup(profile);
+    dispatch(changeSelectedCallNode(threadIndex, callNodePath));
+    const { container, getByText } = renderTooltip();
+
+    expect(getByText(iframeUrl)).toBeTruthy();
+    expect(getByText(pageUrl)).toBeTruthy();
     expect(container.firstChild).toMatchSnapshot();
   });
 });
