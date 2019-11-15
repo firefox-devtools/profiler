@@ -446,6 +446,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.address.push(funcTable.address[funcIndex]);
         frameTable.category.push(category);
         frameTable.subcategory.push(0);
+        frameTable.innerWindowID.push(0);
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(null);
         frameTable.column.push(null);

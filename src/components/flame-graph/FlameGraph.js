@@ -12,6 +12,7 @@ import {
   getPreviewSelection,
   getScrollToSelectionGeneration,
   getProfileInterval,
+  getPageList,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
@@ -28,7 +29,7 @@ import {
 import { getIconsWithClassNames } from '../../selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
-import type { Thread, CategoryList } from '../../types/profile';
+import type { Thread, CategoryList, PageList } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
 import type {
@@ -57,6 +58,7 @@ const SELECTABLE_THRESHOLD = 0.001;
 
 type StateProps = {|
   +thread: Thread,
+  +pages: PageList | null,
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
   +maxStackDepth: number,
@@ -268,6 +270,7 @@ class FlameGraph extends React.PureComponent<Props> {
       categories,
       interval,
       isInverted,
+      pages,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -305,6 +308,7 @@ class FlameGraph extends React.PureComponent<Props> {
             // FlameGraphCanvas props
             chartProps={{
               thread,
+              pages,
               unfilteredThread,
               sampleIndexOffset,
               maxStackDepth,
@@ -366,6 +370,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       interval: getProfileInterval(state),
       isInverted: getInvertCallstack(state),
       callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),
+      pages: getPageList(state),
     };
   },
   mapDispatchToProps: {

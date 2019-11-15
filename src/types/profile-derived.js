@@ -45,6 +45,7 @@ export type CallNodeTable = {
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
+  innerWindowID: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
   depth: number[],
   length: number,
 };
