@@ -1375,10 +1375,10 @@ describe('snapshots of selectors/profile', function() {
       markerThreadSelectors.getFullMarkerListIndexes(getState()).map(getMarker)
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of markerThreadSelectors.getMarkerChartTiming', function() {
+  it('matches the last stored run of markerThreadSelectors.getMarkerChartTimingAndBuckets', function() {
     const { getState, markerThreadSelectors } = setupStore();
     expect(
-      markerThreadSelectors.getMarkerChartTiming(getState())
+      markerThreadSelectors.getMarkerChartTimingAndBuckets(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexes', function() {

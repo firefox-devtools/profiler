@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { GREY_20 } from 'photon-colors';
+import { GREY_20, GREY_30 } from 'photon-colors';
 import * as React from 'react';
 import {
   withChartViewport,
@@ -17,7 +17,7 @@ import {
   typeof changeRightClickedMarker as ChangeRightClickedMarker,
 } from '../../actions/profile-view';
 import { BLUE_40 } from '../../utils/colors';
-
+import { TIMELINE_MARGIN_LEFT } from '../../app-logic/constants';
 import type {
   Milliseconds,
   CssPixels,
@@ -26,7 +26,7 @@ import type {
 import type { ThreadIndex } from '../../types/profile';
 import type {
   Marker,
-  MarkerTimingRows,
+  MarkerTimingAndBuckets,
   MarkerIndex,
 } from '../../types/profile-derived';
 import type { Viewport } from '../shared/chart/Viewport';
@@ -44,7 +44,7 @@ type MarkerDrawingInformation = {
 type OwnProps = {|
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
-  +markerTimingRows: MarkerTimingRows,
+  +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +rowHeight: CssPixels,
   +getMarker: MarkerIndex => Marker,
   +threadIndex: ThreadIndex,
@@ -80,7 +80,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
   ) => {
     const {
       rowHeight,
-      markerTimingRows,
+      markerTimingAndBuckets,
       viewport: {
         viewportTop,
         viewportBottom,
@@ -92,7 +92,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const startRow = Math.floor(viewportTop / rowHeight);
     const endRow = Math.min(
       Math.ceil(viewportBottom / rowHeight),
-      markerTimingRows.length
+      markerTimingAndBuckets.length
     );
 
     ctx.fillStyle = '#ffffff';
@@ -159,7 +159,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const {
       rangeStart,
       rangeEnd,
-      markerTimingRows,
+      markerTimingAndBuckets,
       rowHeight,
       marginLeft,
       marginRight,
@@ -190,9 +190,10 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     // Only draw the stack frames that are vertically within view.
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
       // Get the timing information for a row of stack frames.
-      const markerTiming = markerTimingRows[rowIndex];
+      const markerTiming = markerTimingAndBuckets[rowIndex];
 
-      if (!markerTiming) {
+      if (!markerTiming || typeof markerTiming === 'string') {
+        // This marker timing either didn't exist, or was a bucket.
         continue;
       }
 
@@ -283,7 +284,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     endRow: number
   ) {
     const {
-      markerTimingRows,
+      markerTimingAndBuckets,
       rowHeight,
       marginLeft,
       viewport: { viewportTop, containerWidth, containerHeight },
@@ -301,17 +302,48 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
     const textMeasurement = this._getTextMeasurement(ctx);
 
-    // Draw the text
+    // Draw the marker names in the left margin.
     ctx.fillStyle = '#000000';
     for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
-      // Get the timing information for a row of stack frames.
-      const { name } = markerTimingRows[rowIndex];
-      if (rowIndex > 0 && name === markerTimingRows[rowIndex - 1].name) {
+      const markerTiming = markerTimingAndBuckets[rowIndex];
+      if (typeof markerTiming === 'string') {
         continue;
       }
-      const fittedText = textMeasurement.getFittedText(name, marginLeft);
+      // Draw the marker name.
+      const { name } = markerTiming;
+      if (rowIndex > 0 && name === markerTimingAndBuckets[rowIndex - 1].name) {
+        continue;
+      }
+
       const y = rowIndex * rowHeight - viewportTop;
+      const fittedText = textMeasurement.getFittedText(
+        name,
+        TIMELINE_MARGIN_LEFT
+      );
       ctx.fillText(fittedText, 5, y + TEXT_OFFSET_TOP);
+    }
+
+    // Draw the bucket names.
+    for (let rowIndex = startRow; rowIndex < endRow; rowIndex++) {
+      // Get the timing information for a row of stack frames.
+      const bucketName = markerTimingAndBuckets[rowIndex];
+      if (typeof bucketName !== 'string') {
+        continue;
+      }
+      const y = rowIndex * rowHeight - viewportTop;
+
+      // Draw the backgound.
+      ctx.fillStyle = GREY_20;
+      ctx.fillRect(0, y, containerWidth, rowHeight);
+
+      // Draw the borders.
+      ctx.fillStyle = GREY_30;
+      ctx.fillRect(0, y - 1, containerWidth, 1);
+      ctx.fillRect(0, y + rowHeight, containerWidth, 1);
+
+      // Draw the text.
+      ctx.fillStyle = '#000000';
+      ctx.fillText(bucketName, 5 + TIMELINE_MARGIN_LEFT, y + TEXT_OFFSET_TOP);
     }
   }
 
@@ -319,7 +351,7 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
     const {
       rangeStart,
       rangeEnd,
-      markerTimingRows,
+      markerTimingAndBuckets,
       rowHeight,
       marginLeft,
       marginRight,
@@ -341,9 +373,9 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
       rangeLength *
       viewportLength *
       ((rowHeight * 2 * MARKER_DOT_RADIUS) / markerContainerWidth);
-    const markerTiming = markerTimingRows[rowIndex];
+    const markerTiming = markerTimingAndBuckets[rowIndex];
 
-    if (!markerTiming) {
+    if (!markerTiming || typeof markerTiming === 'string') {
       return null;
     }
 

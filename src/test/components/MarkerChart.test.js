@@ -31,6 +31,7 @@ import {
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
+import type { UserTimingMarkerPayload } from '../../types/markers';
 import type { CssPixels } from '../../types/units';
 
 const MARKERS = [
@@ -84,6 +85,7 @@ const MARKERS = [
       interval: 'start',
     },
   ],
+  getUserTiming('Marker B', 2, 8),
 ];
 
 function setupWithProfile(profile) {
@@ -219,36 +221,51 @@ describe('MarkerChart', function() {
 
     dispatch(changeSelectedTab('marker-chart'));
     flushRafCalls();
-    flushDrawLog();
-
     // No tooltip displayed yet
     expect(document.querySelector('.tooltip')).toBeFalsy();
 
-    // Move the mouse on top of an item.
-    fireMouseEvent('mousemove', {
-      offsetX: 200,
-      offsetY: 5,
-      pageX: 200,
-      pageY: 5,
-    });
+    {
+      const drawLog = flushDrawLog();
+
+      const { x, y } = findFillTextPositionFromDrawLog(drawLog, 'Marker B');
+
+      // Move the mouse on top of an item.
+      fireMouseEvent('mousemove', {
+        offsetX: x,
+        offsetY: y,
+        pageX: x,
+        pageY: y,
+      });
+    }
 
     flushRafCalls();
 
-    const drawCalls = flushDrawLog();
-    expect(drawCalls).toMatchSnapshot();
+    const drawLog = flushDrawLog();
+    if (drawLog.length === 0) {
+      throw new Error('The mouse move produced no draw commands.');
+    }
+    expect(drawLog).toMatchSnapshot();
 
     // The tooltip should be displayed
-    expect(document.querySelector('.tooltip')).toMatchSnapshot();
+    expect(
+      ensureExists(
+        document.querySelector('.tooltip'),
+        'A tooltip component must exist for this test.'
+      )
+    ).toMatchSnapshot();
   });
 
-  describe('displays context menus', () => {
+  describe('context menus', () => {
     beforeEach(() => {
       // Always use fake timers when dealing with context menus.
       jest.useFakeTimers();
     });
 
-    function setup() {
-      const profile = getProfileWithMarkers(MARKERS);
+    function setupForContextMenus() {
+      const profile = getProfileWithMarkers([
+        getUserTiming('UserTiming A', 0, 10),
+        getUserTiming('UserTiming B', 2, 8),
+      ]);
       const setupResult = setupWithProfile(profile);
       const {
         flushRafCalls,
@@ -261,7 +278,7 @@ describe('MarkerChart', function() {
 
       dispatch(changeSelectedTab('marker-chart'));
       flushRafCalls();
-      flushDrawLog();
+      const drawLog = flushDrawLog();
 
       function getPositioningOptions({ x, y }) {
         // These positioning options will be sent to all our mouse events. Note
@@ -284,8 +301,6 @@ describe('MarkerChart', function() {
         return positioningOptions;
       }
 
-      // Note to a future developer: the x/y values can be derived from the
-      // array returned by flushDrawLog().
       function rightClick(where: { x: CssPixels, y: CssPixels }) {
         const positioningOptions = getPositioningOptions(where);
         const clickOptions = {
@@ -313,6 +328,12 @@ describe('MarkerChart', function() {
         fireEvent.click(getByText(stringOrRegexp));
       }
 
+      function findFillTextPosition(
+        fillText: string
+      ): {| x: number, y: number |} {
+        return findFillTextPositionFromDrawLog(drawLog, fillText);
+      }
+
       const getContextMenu = () =>
         ensureExists(
           container.querySelector('.react-contextmenu'),
@@ -324,51 +345,65 @@ describe('MarkerChart', function() {
         rightClick,
         mouseOver,
         getContextMenu,
+        findFillTextPosition,
         clickOnMenuItem,
       };
     }
 
-    it('when right clicking on a marker', () => {
-      const { rightClick, clickOnMenuItem, getContextMenu } = setup();
+    it('displays when right clicking on a marker', () => {
+      const {
+        rightClick,
+        clickOnMenuItem,
+        getContextMenu,
+        findFillTextPosition,
+      } = setupForContextMenus();
 
-      // The "Marker A" marker is drawn from 150,1 to 275,13.
-      rightClick({ x: 200, y: 5 });
+      rightClick(findFillTextPosition('UserTiming A'));
+
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       clickOnMenuItem('Copy');
-      expect(copy).toHaveBeenLastCalledWith('Marker A');
+      expect(copy).toHaveBeenLastCalledWith('UserTiming A');
       expect(getContextMenu()).not.toHaveClass('react-contextmenu--visible');
 
       jest.runAllTimers();
       expect(document.querySelector('react-contextmenu')).toBeFalsy();
     });
 
-    it('when right clicking on markers in a sequence', () => {
-      const { rightClick, clickOnMenuItem, getContextMenu } = setup();
+    it('displays when right clicking on markers in a sequence', () => {
+      const {
+        rightClick,
+        clickOnMenuItem,
+        getContextMenu,
+        findFillTextPosition,
+      } = setupForContextMenus();
 
-      // The "Marker A" marker is drawn from 150,1 to 275,13.
-      rightClick({ x: 200, y: 5 });
+      rightClick(findFillTextPosition('UserTiming A'));
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
-      // The "click" DOMEvent marker is drawn from 213,82 to 275.5,93.
-      rightClick({ x: 220, y: 90 });
+      rightClick(findFillTextPosition('UserTiming B'));
       jest.runAllTimers();
 
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
       clickOnMenuItem('Copy');
-      expect(copy).toHaveBeenLastCalledWith('click');
+      expect(copy).toHaveBeenLastCalledWith('UserTiming B');
     });
 
-    it('and still highlights other markers when hovering them', () => {
-      const { rightClick, mouseOver, flushDrawLog, getContextMenu } = setup();
+    it('displays and still highlights other markers when hovering them', () => {
+      const {
+        rightClick,
+        mouseOver,
+        flushDrawLog,
+        getContextMenu,
+        findFillTextPosition,
+      } = setupForContextMenus();
 
-      // The "Marker A" marker is drawn from 150,1 to 275,13.
-      rightClick({ x: 200, y: 5 });
+      rightClick(findFillTextPosition('UserTiming A'));
       expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
 
       flushDrawLog();
-      // The "click" DOMEvent marker is drawn from 213,82 to 275.5,93.
-      mouseOver({ x: 220, y: 90 });
+      // The "click" DOMEvent marker is drawn from 213,129 to 275.5,109.
+      mouseOver(findFillTextPosition('UserTiming B'));
 
       // Expect that we have 2 markers drawn with this color.
       const drawCalls = flushDrawLog();
@@ -414,8 +449,7 @@ describe('MarkerChart', function() {
       flushRafCalls();
 
       const text = getFillTextCalls(flushDrawLog());
-      expect(text.length).toBe(1);
-      expect(text[0]).toBe(searchString);
+      expect(text).toEqual(['Dot marker E', 'Idle']);
     });
   });
 
@@ -438,3 +472,42 @@ describe('MarkerChart', function() {
     });
   });
 });
+
+/**
+ * Find a single x/y position for a ctx.fillText call.
+ */
+function findFillTextPositionFromDrawLog(
+  drawLog: any[],
+  fillText: string
+): {| x: number, y: number |} {
+  const positions = drawLog
+    .filter(([cmd, text]) => cmd === 'fillText' && text === fillText)
+    .map(([, , x, y]) => ({ x, y }));
+
+  if (positions.length === 0) {
+    throw new Error('Could not find a fillText command for ' + fillText);
+  }
+
+  if (positions.length > 1) {
+    throw new Error('More than one fillText() call was found for ' + fillText);
+  }
+
+  return positions[0];
+}
+
+/**
+ * This is a quick helper to create UserTiming markers.
+ */
+function getUserTiming(name: string, startTime: number, endTime: number): * {
+  return [
+    'UserTiming',
+    startTime,
+    ({
+      type: 'UserTiming',
+      startTime,
+      endTime,
+      name,
+      entryType: 'measure',
+    }: UserTimingMarkerPayload),
+  ];
+}
