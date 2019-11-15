@@ -57,30 +57,23 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
       <li
         class="stackSettingsListItem stackSettingsFilter"
       >
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-          title="Summarize using sampled stacks of executed code over time"
-        >
-          <input
-            checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-strategy"
-            type="radio"
-            value="timing"
-          />
-          Timing
-        </label>
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-          title="Summarize using bytes of JavaScript allocated (no de-allocations)"
-        >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-strategy"
-            type="radio"
-            value="js-allocations"
-          />
-          JavaScript Allocations
+        <label>
+          Summarize:
+           
+          <select>
+            <option
+              title="Summarize using sampled stacks of executed code over time"
+              value="timing"
+            >
+              Timing Data
+            </option>
+            <option
+              title="Summarize using bytes of JavaScript allocated (no de-allocations)"
+              value="js-allocations"
+            >
+              JavaScript Allocations
+            </option>
+          </select>
         </label>
       </li>
       <li
@@ -700,42 +693,29 @@ exports[`ProfileCallTreeView with Native Allocations matches the snapshot for na
       <li
         class="stackSettingsListItem stackSettingsFilter"
       >
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-          title="Summarize using sampled stacks of executed code over time"
-        >
-          <input
-            checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-strategy"
-            type="radio"
-            value="timing"
-          />
-          Timing
-        </label>
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-          title="Summarize using bytes of memory allocated"
-        >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-strategy"
-            type="radio"
-            value="native-allocations"
-          />
-          Allocations
-        </label>
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-          title="Summarize using bytes of memory deallocated"
-        >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-strategy"
-            type="radio"
-            value="native-deallocations"
-          />
-          Deallocations
+        <label>
+          Summarize:
+           
+          <select>
+            <option
+              title="Summarize using sampled stacks of executed code over time"
+              value="timing"
+            >
+              Timing Data
+            </option>
+            <option
+              title="Summarize using bytes of memory allocated"
+              value="native-allocations"
+            >
+              Allocations
+            </option>
+            <option
+              title="Summarize using bytes of memory deallocated"
+              value="native-deallocations"
+            >
+              Deallocations
+            </option>
+          </select>
         </label>
       </li>
       <li
@@ -1355,42 +1335,29 @@ exports[`ProfileCallTreeView with Native Allocations matches the snapshot for na
       <li
         class="stackSettingsListItem stackSettingsFilter"
       >
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-          title="Summarize using sampled stacks of executed code over time"
-        >
-          <input
-            checked=""
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-strategy"
-            type="radio"
-            value="timing"
-          />
-          Timing
-        </label>
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-          title="Summarize using bytes of memory allocated"
-        >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-strategy"
-            type="radio"
-            value="native-allocations"
-          />
-          Allocations
-        </label>
-        <label
-          class="photon-label photon-label-micro stackSettingsFilterLabel"
-          title="Summarize using bytes of memory deallocated"
-        >
-          <input
-            class="photon-radio photon-radio-micro stackSettingsFilterInput"
-            name="stack-settings-strategy"
-            type="radio"
-            value="native-deallocations"
-          />
-          Deallocations
+        <label>
+          Summarize:
+           
+          <select>
+            <option
+              title="Summarize using sampled stacks of executed code over time"
+              value="timing"
+            >
+              Timing Data
+            </option>
+            <option
+              title="Summarize using bytes of memory allocated"
+              value="native-allocations"
+            >
+              Allocations
+            </option>
+            <option
+              title="Summarize using bytes of memory deallocated"
+              value="native-deallocations"
+            >
+              Deallocations
+            </option>
+          </select>
         </label>
       </li>
       <li

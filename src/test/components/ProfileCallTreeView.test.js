@@ -17,7 +17,7 @@ import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
+import { getBoundingBox, createSelectChanger } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
   getProfileWithJsAllocations,
@@ -503,33 +503,34 @@ describe('ProfileCallTreeView with JS Allocations', function() {
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
+    const changeSelect = createSelectChanger(renderResult);
 
-    return { profile, ...renderResult, ...store };
+    return { profile, changeSelect, ...renderResult, ...store };
   }
 
   it('can switch to JS allocations and back to timing', function() {
-    const { getByText, getState } = setup();
+    const { changeSelect, getState } = setup();
 
     // It starts out with timing.
     expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
 
     // It switches to JS allocations.
-    getByText('JavaScript Allocations').click();
+    changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
     expect(getCallTreeSummaryStrategy(getState())).toEqual('js-allocations');
 
     // And finally it can be switched back.
-    getByText('Timing').click();
+    changeSelect({ from: 'JavaScript Allocations', to: 'Timing Data' });
     expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
   });
 
   it('shows byte related labels for JS allocations', function() {
-    const { getByText, queryByText } = setup();
+    const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
     expect(queryByText('Total Size (bytes)')).toBe(null);
     expect(queryByText('Self (bytes)')).toBe(null);
 
-    getByText('JavaScript Allocations').click();
+    changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
 
     // After clicking, they do.
     getByText('Total Size (bytes)');
@@ -537,8 +538,8 @@ describe('ProfileCallTreeView with JS Allocations', function() {
   });
 
   it('matches the snapshot for JS allocations', function() {
-    const { getByText, container } = setup();
-    getByText('JavaScript Allocations').click();
+    const { changeSelect, container } = setup();
+    changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });
@@ -552,50 +553,52 @@ describe('ProfileCallTreeView with Native Allocations', function() {
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
+    const changeSelect = createSelectChanger(renderResult);
 
-    return { profile, ...renderResult, ...store };
+    return { profile, ...renderResult, changeSelect, ...store };
   }
 
   it('can switch to native allocations and back to timing', function() {
-    const { getByText, getState } = setup();
+    const { getState, changeSelect } = setup();
 
     // It starts out with timing.
     expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
 
-    // It switches to native allocations.
-    getByText('Allocations').click();
+    // Switch to native allocations.
+    changeSelect({ from: 'Timing Data', to: 'Allocations' });
+
     expect(getCallTreeSummaryStrategy(getState())).toEqual(
       'native-allocations'
     );
 
     // And finally it can be switched back.
-    getByText('Timing').click();
+    changeSelect({ from: 'Allocations', to: 'Timing Data' });
     expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
   });
 
   it('shows byte related labels for native allocations', function() {
-    const { getByText, queryByText } = setup();
+    const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
     expect(queryByText('Total Size (bytes)')).toBe(null);
     expect(queryByText('Self (bytes)')).toBe(null);
 
-    getByText('Allocations').click();
+    changeSelect({ from: 'Timing Data', to: 'Allocations' });
 
-    // After clicking, they do.
+    // After changing to native allocations, they do.
     getByText('Total Size (bytes)');
     getByText('Self (bytes)');
   });
 
   it('matches the snapshot for native allocations', function() {
-    const { getByText, container } = setup();
-    getByText('Allocations').click();
+    const { container, changeSelect } = setup();
+    changeSelect({ from: 'Timing Data', to: 'Allocations' });
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshot for native deallocations', function() {
-    const { getByText, container } = setup();
-    getByText('Deallocations').click();
+    const { container, changeSelect } = setup();
+    changeSelect({ from: 'Timing Data', to: 'Deallocations' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });
