@@ -189,7 +189,10 @@ export type FrameTable = {|
   // Inner window ID of JS frames. JS frames can be correlated to a Page through this value.
   // It's used to determine which JS frame belongs to which web page so we can display
   // that information and filter for single tab profiling.
-  // `0` for others and the JS frames that's been failed to get the ID.
+  // `0` for non-JS frames and the JS frames that failed to get the ID. `0` means "null value"
+  // because that's what Firefox platform DOM side assigns when it fails to get the ID or
+  // something bad happens during that process. It's not `null` or `-1` because that information
+  // is being stored as `uint64_t` there.
   innerWindowID: (InnerWindowID | null)[],
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
