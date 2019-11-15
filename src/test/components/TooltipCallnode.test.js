@@ -11,7 +11,6 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithUnbalancedNativeAllocations } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import * as ProfileSelectors from '../../selectors/profile';
-import * as UrlState from '../../selectors/url-state';
 import {
   changeSelectedCallNode,
   changeCallTreeSummaryStrategy,
@@ -39,7 +38,7 @@ describe('TooltipCallNode', function() {
             interval={ProfileSelectors.getProfileInterval(getState())}
             durationText="Fake Duration Text"
             callTree={selectedThreadSelectors.getCallTree(getState())}
-            callTreeSummaryStrategy={UrlState.getCallTreeSummaryStrategy(
+            callTreeSummaryStrategy={selectedThreadSelectors.getCallTreeSummaryStrategy(
               getState()
             )}
           />
