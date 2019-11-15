@@ -163,21 +163,23 @@ describe('MarkerChart', function() {
 
   it('does not render several dot markers on the same pixel', () => {
     window.devicePixelRatio = 1;
+    const rowName = 'TestMarker';
+
     const markers = [
-      // 'Marker first' and 'Marker last' define our range.
-      ['Marker first', 0, null],
-      // Then 2 very close dot markers with the same name. They shouldn't be
-      // drawn both together.
-      ['Marker A', 5000, null],
-      ['Marker A', 5001, null],
-      // This is a longer marker, it should always be drawn even if it starts at
-      // the same location as a dot marker
-      ['Marker A', 5001, { startTime: 5001, endTime: 7000 }],
-      [
-        'Marker last',
-        15000,
-        null,
-      ] /* add a marker that's quite far away to have a big range */,
+      // RENDERED: This marker defines the start of our range.
+      [rowName, 0, null],
+      // RENDERED: Now create three "dot" markers that should only be rendered once.
+      [rowName, 5000, null],
+      // NOT-RENDERED: This marker has a duration, but it's very small, and would get
+      // rendered as a dot.
+      [rowName, 5001, { startTime: 5001, endTime: 5001.1 }],
+      // NOT-RENDERED: The final dot marker
+      [rowName, 5002, null],
+      // RENDERED: This is a longer marker, it should always be drawn even if it starts
+      // at the same location as a dot marker
+      [rowName, 5002, { startTime: 5002, endTime: 7000 }],
+      // RENDERED: Add a final marker that's quite far away to have a big time range.
+      [rowName, 15000, null],
     ];
 
     const profile = getProfileWithMarkers(markers);

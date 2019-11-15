@@ -70,6 +70,7 @@ const TEXT_OFFSET_TOP = 11;
 const TWO_PI = Math.PI * 2;
 const MARKER_DOT_RADIUS = 0.25;
 const TEXT_OFFSET_START = 3;
+const DOT_WIDTH = 10;
 
 class MarkerChartCanvas extends React.PureComponent<Props, State> {
   _textMeasurement: null | TextMeasurement;
@@ -257,7 +258,8 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
         continue;
       }
 
-      let previousDrawnPixel: number | null = null;
+      // Track the last drawn marker X position, so that we can avoid overdrawing.
+      let previousMarkerDrawnAtX: number | null = null;
 
       for (let i = 0; i < markerTiming.length; i++) {
         // Only draw samples that are in bounds.
@@ -285,10 +287,10 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
             w = w - marginLeft + x;
             x = marginLeft;
           }
-          if (uncutWidth < 10) {
+          if (uncutWidth < DOT_WIDTH) {
             // Ensure that small durations render as a dot, but markers cut by the margins
             // are rendered as squares.
-            w = 10;
+            w = DOT_WIDTH;
           }
 
           x = Math.round(x * devicePixelRatio) / devicePixelRatio;
@@ -301,9 +303,14 @@ class MarkerChartCanvas extends React.PureComponent<Props, State> {
 
           if (isHighlighted) {
             highlightedMarkers.push({ x, y, w, h, uncutWidth, text });
-          } else if (x !== previousDrawnPixel || uncutWidth > 0) {
-            // We avoid to draw several dot markers in the same place.
-            previousDrawnPixel = x;
+          } else if (
+            // Always render non-dot markers.
+            uncutWidth > DOT_WIDTH ||
+            // Do not render dot markers that occupy the same pixel, as this can take
+            // a lot of time, and not change the visual display of the chart.
+            x !== previousMarkerDrawnAtX
+          ) {
+            previousMarkerDrawnAtX = x;
             this.drawOneMarker(ctx, x, y, w, h, uncutWidth, text);
           }
         }
