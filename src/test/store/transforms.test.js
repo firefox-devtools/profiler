@@ -6,6 +6,7 @@
 import {
   getProfileFromTextSamples,
   getProfileWithUnbalancedNativeAllocations,
+  getProfileWithBalancedNativeAllocations,
   getProfileWithJsAllocations,
 } from '../fixtures/profiles/processed-profile';
 import { formatTree } from '../fixtures/utils';
@@ -1409,6 +1410,54 @@ describe('transform native deallocations', function() {
         '  - Gjs (total: -30, self: -13)',
         '    - Hjs (total: -17, self: —)',
         '      - I (total: -17, self: -17)',
+      ]
+    );
+  });
+});
+
+describe('transform retained native allocations', function() {
+  const threadIndex = 0;
+
+  it('can render a normal call tree', function() {
+    const { profile } = getProfileWithBalancedNativeAllocations();
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeCallTreeSummaryStrategy('native-retained-allocations'));
+
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- A (total: 41, self: —)',
+        '  - B (total: 41, self: —)',
+        '    - Fjs (total: 30, self: —)',
+        '      - Gjs (total: 30, self: 13)',
+        '        - Hjs (total: 17, self: —)',
+        '          - I (total: 17, self: 17)',
+        '    - C (total: 11, self: —)',
+        '      - D (total: 11, self: —)',
+        '        - E (total: 11, self: 11)',
+      ]
+    );
+  });
+
+  it('is modified when performing a transform to the stacks', function() {
+    const {
+      profile,
+      funcNamesDict: { Fjs },
+    } = getProfileWithBalancedNativeAllocations();
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(changeCallTreeSummaryStrategy('native-allocations'));
+    dispatch(
+      addTransformToStack(threadIndex, {
+        type: 'focus-function',
+        funcIndex: Fjs,
+      })
+    );
+
+    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
+      [
+        '- Fjs (total: 42, self: —)',
+        '  - Gjs (total: 42, self: 18)',
+        '    - Hjs (total: 24, self: —)',
+        '      - I (total: 24, self: 24)',
       ]
     );
   });

@@ -15,7 +15,7 @@ import {
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
 } from './data-structures';
-import { immutableUpdate } from '../utils/flow';
+import { immutableUpdate, ensureExists } from '../utils/flow';
 import {
   upgradeProcessedProfileToCurrentVersion,
   isProcessedProfile,
@@ -630,7 +630,12 @@ function _processMarkers(
 |} {
   const markers = getEmptyRawMarkerTable();
   const jsAllocations = getEmptyJsAllocationsTable();
-  const nativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
+  const inProgressNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
+  const memoryAddress: number[] = [];
+  const threadId: number[] = [];
+
+  // Determine if native allocations have memory addresses.
+  let hasMemoryAddresses;
 
   for (let markerIndex = 0; markerIndex < geckoMarkers.length; markerIndex++) {
     const geckoPayload: MarkerPayload_Gecko = geckoMarkers.data[markerIndex];
@@ -653,15 +658,33 @@ function _processMarkers(
           continue;
         }
         case 'Native allocation': {
+          if (hasMemoryAddresses === undefined) {
+            // If one payload as the memory address, then all of them should.
+            hasMemoryAddresses = 'memoryAddress' in geckoPayload;
+          }
           // Build up a separate table for the native allocation data, and do not
           // include it in the marker information.
-          nativeAllocations.time.push(geckoPayload.startTime);
-          nativeAllocations.duration.push(geckoPayload.size);
-          nativeAllocations.stack.push(
+          inProgressNativeAllocations.time.push(geckoPayload.startTime);
+          inProgressNativeAllocations.duration.push(geckoPayload.size);
+          inProgressNativeAllocations.stack.push(
             _convertPayloadStackToIndex(geckoPayload)
           );
-          nativeAllocations.length++;
+          inProgressNativeAllocations.length++;
 
+          if (hasMemoryAddresses) {
+            memoryAddress.push(
+              ensureExists(
+                geckoPayload.memoryAddress,
+                'Could not find the memoryAddress property on a gecko marker payload.'
+              )
+            );
+            threadId.push(
+              ensureExists(
+                geckoPayload.threadId,
+                'Could not find a threadId property on a gecko marker payload.'
+              )
+            );
+          }
           // Do not process the marker and add it to the marker list.
           continue;
         }
@@ -681,11 +704,35 @@ function _processMarkers(
     markers.length++;
   }
 
+  // Properly handle the different cases of native allocations.
+  let nativeAllocations;
+  if (inProgressNativeAllocations.length === 0) {
+    // There are none, don't add it.
+    nativeAllocations = null;
+  } else if (hasMemoryAddresses) {
+    // This is the newer native allocations with memory addresses.
+    nativeAllocations = {
+      time: inProgressNativeAllocations.time,
+      duration: inProgressNativeAllocations.duration,
+      stack: inProgressNativeAllocations.stack,
+      memoryAddress,
+      threadId,
+      length: inProgressNativeAllocations.length,
+    };
+  } else {
+    // There is the older native allocations, without memory addresses.
+    nativeAllocations = {
+      time: inProgressNativeAllocations.time,
+      duration: inProgressNativeAllocations.duration,
+      stack: inProgressNativeAllocations.stack,
+      length: inProgressNativeAllocations.length,
+    };
+  }
+
   return {
     markers: markers,
     jsAllocations: jsAllocations.length === 0 ? null : jsAllocations,
-    nativeAllocations:
-      nativeAllocations.length === 0 ? null : nativeAllocations,
+    nativeAllocations,
   };
 }
 

@@ -86,6 +86,7 @@ export type ImplementationFilter = 'combined' | 'js' | 'cpp';
 export type CallTreeSummaryStrategy =
   | 'timing'
   | 'js-allocations'
+  | 'native-retained-allocations'
   | 'native-allocations'
   | 'native-deallocations';
 

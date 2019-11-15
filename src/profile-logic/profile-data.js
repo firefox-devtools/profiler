@@ -6,7 +6,10 @@
 
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
-import { getEmptyUnbalancedNativeAllocationsTable } from './data-structures';
+import {
+  getEmptyUnbalancedNativeAllocationsTable,
+  getEmptyBalancedNativeAllocationsTable,
+} from './data-structures';
 
 import type {
   Profile,
@@ -28,6 +31,7 @@ import type {
   CounterSamplesTable,
   NativeAllocationsTable,
   InnerWindowID,
+  BalancedNativeAllocationsTable,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -811,6 +815,7 @@ export function toValidCallTreeSummaryStrategy(
   switch (strategy) {
     case 'timing':
     case 'js-allocations':
+    case 'native-retained-allocations':
     case 'native-allocations':
     case 'native-deallocations':
       return strategy;
@@ -1113,15 +1118,36 @@ export function filterThreadSamplesToRange(
       rangeStart,
       rangeEnd
     );
-    newThread.nativeAllocations = {
-      time: nativeAllocations.time.slice(startAllocIndex, endAllocIndex),
-      duration: nativeAllocations.duration.slice(
-        startAllocIndex,
-        endAllocIndex
-      ),
-      stack: nativeAllocations.stack.slice(startAllocIndex, endAllocIndex),
-      length: endAllocIndex - startAllocIndex,
-    };
+    const time = nativeAllocations.time.slice(startAllocIndex, endAllocIndex);
+    const duration = nativeAllocations.duration.slice(
+      startAllocIndex,
+      endAllocIndex
+    );
+    const stack = nativeAllocations.stack.slice(startAllocIndex, endAllocIndex);
+    const length = endAllocIndex - startAllocIndex;
+    if (nativeAllocations.memoryAddress) {
+      newThread.nativeAllocations = {
+        time,
+        duration,
+        stack,
+        memoryAddress: nativeAllocations.memoryAddress.slice(
+          startAllocIndex,
+          endAllocIndex
+        ),
+        threadId: nativeAllocations.threadId.slice(
+          startAllocIndex,
+          endAllocIndex
+        ),
+        length,
+      };
+    } else {
+      newThread.nativeAllocations = {
+        time,
+        duration,
+        stack,
+        length,
+      };
+    }
   }
 
   return newThread;
@@ -1989,6 +2015,82 @@ export function getCategoryPairLabel(
 }
 
 /**
+ * This function filters to only positive memory size values in the native allocations.
+ * It removes all of the deallocation information.
+ */
+export function filterToAllocations(
+  nativeAllocations: NativeAllocationsTable
+): NativeAllocationsTable {
+  let newNativeAllocations;
+  if (nativeAllocations.memoryAddress) {
+    newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
+    for (let i = 0; i < nativeAllocations.length; i++) {
+      const duration = nativeAllocations.duration[i];
+      if (duration > 0) {
+        newNativeAllocations.time.push(nativeAllocations.time[i]);
+        newNativeAllocations.stack.push(nativeAllocations.stack[i]);
+        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.memoryAddress.push(
+          nativeAllocations.memoryAddress[i]
+        );
+        newNativeAllocations.threadId.push(nativeAllocations.threadId[i]);
+        newNativeAllocations.length++;
+      }
+    }
+  } else {
+    newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
+    for (let i = 0; i < nativeAllocations.length; i++) {
+      const duration = nativeAllocations.duration[i];
+      if (duration > 0) {
+        newNativeAllocations.time.push(nativeAllocations.time[i]);
+        newNativeAllocations.stack.push(nativeAllocations.stack[i]);
+        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.length++;
+      }
+    }
+  }
+  return newNativeAllocations;
+}
+
+/**
+ * This function filters to only negative memory size values in the native allocations.
+ * It shows all of the memory frees.
+ */
+export function filterToDeallocations(
+  nativeAllocations: NativeAllocationsTable
+): NativeAllocationsTable {
+  let newNativeAllocations;
+  if (nativeAllocations.memoryAddress) {
+    newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
+    for (let i = 0; i < nativeAllocations.length; i++) {
+      const duration = nativeAllocations.duration[i];
+      if (duration < 0) {
+        newNativeAllocations.time.push(nativeAllocations.time[i]);
+        newNativeAllocations.stack.push(nativeAllocations.stack[i]);
+        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.memoryAddress.push(
+          nativeAllocations.memoryAddress[i]
+        );
+        newNativeAllocations.threadId.push(nativeAllocations.threadId[i]);
+        newNativeAllocations.length++;
+      }
+    }
+  } else {
+    newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
+    for (let i = 0; i < nativeAllocations.length; i++) {
+      const duration = nativeAllocations.duration[i];
+      if (duration < 0) {
+        newNativeAllocations.time.push(nativeAllocations.time[i]);
+        newNativeAllocations.stack.push(nativeAllocations.stack[i]);
+        newNativeAllocations.duration.push(duration);
+        newNativeAllocations.length++;
+      }
+    }
+  }
+  return newNativeAllocations;
+}
+
+/**
  * Currently the native allocations naively collect allocations and deallocations.
  * There is no attempt to match up the sampled allocations with the deallocations.
  * Because of this, if a calltree were to combine both allocations and deallocations,
@@ -1997,38 +2099,61 @@ export function getCategoryPairLabel(
  *
  * This function filters to only positive values.
  */
-export function filterToAllocations(
-  nativeAllocations: NativeAllocationsTable
+export function filterToRetainedAllocations(
+  nativeAllocations: BalancedNativeAllocationsTable
 ): NativeAllocationsTable {
-  const newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
-  for (let i = 0; i < nativeAllocations.length; i++) {
-    const duration = nativeAllocations.duration[i];
-    if (duration > 0) {
-      newNativeAllocations.time.push(nativeAllocations.time[i]);
-      newNativeAllocations.stack.push(nativeAllocations.stack[i]);
-      newNativeAllocations.duration.push(duration);
-      newNativeAllocations.length++;
-    }
-  }
-  return newNativeAllocations;
-}
+  // A-----D------A-------D
+  type Address = number;
+  type IndexIntoAllocations = number;
+  const memoryAddressToAllocation: Map<
+    Address,
+    IndexIntoAllocations
+  > = new Map();
+  const retainedAllocation = [];
+  for (
+    let allocationIndex = 0;
+    allocationIndex < nativeAllocations.length;
+    allocationIndex++
+  ) {
+    const duration = nativeAllocations.duration[allocationIndex];
+    const memoryAddress = nativeAllocations.memoryAddress[allocationIndex];
+    if (duration >= 0) {
+      // Handle the allocation.
 
-/**
- * See filterToAllocations for detailed documentation. This function filters to only
- * negative values.
- */
-export function filterToDeallocations(
-  nativeAllocations: NativeAllocationsTable
-): NativeAllocationsTable {
-  const newNativeAllocations = getEmptyUnbalancedNativeAllocationsTable();
+      // Provide a map back to this index.
+      memoryAddressToAllocation.set(memoryAddress, allocationIndex);
+      retainedAllocation[allocationIndex] = true;
+    } else {
+      // Do not retain deallocations.
+      retainedAllocation[allocationIndex] = false;
+
+      // Lookup the previous allocation.
+      const previousAllocationIndex = memoryAddressToAllocation.get(
+        memoryAddress
+      );
+      if (previousAllocationIndex !== undefined) {
+        // This deallocation matches a previous allocation. Remove the allocation.
+        retainedAllocation[previousAllocationIndex] = false;
+        // There is a match, so delete this old association.
+        memoryAddressToAllocation.delete(memoryAddress);
+      }
+    }
+  }
+
+  const newNativeAllocations = getEmptyBalancedNativeAllocationsTable();
   for (let i = 0; i < nativeAllocations.length; i++) {
     const duration = nativeAllocations.duration[i];
-    if (duration < 0) {
+    if (retainedAllocation[i]) {
       newNativeAllocations.time.push(nativeAllocations.time[i]);
       newNativeAllocations.stack.push(nativeAllocations.stack[i]);
       newNativeAllocations.duration.push(duration);
+      newNativeAllocations.memoryAddress.push(
+        nativeAllocations.memoryAddress[i]
+      );
+      newNativeAllocations.threadId.push(nativeAllocations.threadId[i]);
       newNativeAllocations.length++;
     }
   }
+
   return newNativeAllocations;
 }

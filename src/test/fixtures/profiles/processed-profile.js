@@ -10,6 +10,7 @@ import {
   resourceTypes,
   getEmptyJsAllocationsTable,
   getEmptyUnbalancedNativeAllocationsTable,
+  getEmptyBalancedNativeAllocationsTable,
 } from '../../../profile-logic/data-structures';
 import { mergeProfiles } from '../../../profile-logic/comparison';
 import { stateFromLocation } from '../../../app-logic/url-handling';
@@ -991,6 +992,85 @@ export function getProfileWithUnbalancedNativeAllocations(): * {
     nativeAllocations.time.push(thisTime);
     nativeAllocations.duration.push(byteSize);
     nativeAllocations.stack.push(stack);
+    nativeAllocations.length++;
+  }
+
+  return { profile, funcNamesDict };
+}
+
+/**
+ * Get a profile with balanced native allocations. The allocations will form the
+ * following trees. The profile is balanced because the allocations have memory
+ * addresses, so the allocations and deallocations can be balanced based on the
+ * allocation site.
+ *
+ * Retained Allocations:
+ *
+ * - A (total: 30, self: —)
+ *   - B (total: 30, self: —)
+ *     - C (total: 17, self: —)
+ *       - D (total: 17, self: —)
+ *         - E (total: 17, self: 17)
+ *     - Fjs (total: 13, self: —)
+ *       - Gjs (total: 13, self: 13)
+ */
+
+export function getProfileWithBalancedNativeAllocations(): * {
+  // First create a normal sample-based profile.
+  const {
+    profile,
+    funcNamesDictPerThread: [funcNamesDict],
+  } = getProfileFromTextSamples(`
+    A  A     A
+    B  B     B
+    C  Fjs   Fjs
+    D  Gjs   Gjs
+    E        Hjs
+             I
+  `);
+
+  // Now add a NativeAllocationsTable.
+  const nativeAllocations = getEmptyBalancedNativeAllocationsTable();
+  const [thread] = profile.threads;
+  thread.nativeAllocations = nativeAllocations;
+  const threadId = ensureExists(
+    thread.tid,
+    'Expected there to be a tid on the thread'
+  );
+
+  // The stack table is built sequentially, so we can assume that the stack indexes
+  // match the func indexes.
+  const { E, I, Gjs } = funcNamesDict;
+
+  // Create a list of allocations.
+  const allocations = [
+    // Matched allocations:
+    { byteSize: 3, stack: E, memoryAddress: 0x10 },
+    { byteSize: 5, stack: Gjs, memoryAddress: 0x11 },
+    { byteSize: 7, stack: I, memoryAddress: 0x12 },
+    // Unmatched allocations:
+    { byteSize: 11, stack: E, memoryAddress: 0x20 },
+    { byteSize: 13, stack: Gjs, memoryAddress: 0x21 },
+    { byteSize: 17, stack: I, memoryAddress: 0x22 },
+    // Deallocations that match the first group.
+    { byteSize: -3, stack: E, memoryAddress: 0x10 },
+    { byteSize: -5, stack: Gjs, memoryAddress: 0x11 },
+    { byteSize: -7, stack: I, memoryAddress: 0x12 },
+    // Unmatched deallocations:
+    { byteSize: -19, stack: E, memoryAddress: 0x30 },
+    { byteSize: -23, stack: Gjs, memoryAddress: 0x31 },
+    { byteSize: -29, stack: I, memoryAddress: 0x32 },
+  ];
+
+  // Loop through and add them to the table.
+  let time = 0;
+  for (const { byteSize, stack, memoryAddress } of allocations) {
+    const thisTime = time++;
+    nativeAllocations.time.push(thisTime);
+    nativeAllocations.duration.push(byteSize);
+    nativeAllocations.stack.push(stack);
+    nativeAllocations.memoryAddress.push(memoryAddress);
+    nativeAllocations.threadId.push(threadId);
     nativeAllocations.length++;
   }
 
