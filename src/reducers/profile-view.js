@@ -462,12 +462,7 @@ const rightClickedCallNodePath: Reducer<RightClickedCallNodePath | null> = (
       const functionUpdate = functionsUpdatePerThread[state.threadIndex];
 
       if (!functionUpdate) {
-        console.error(
-          `We couldn't find an update function for thread \`${
-            state.threadIndex
-          }\`, this is probably a programming mistake.`
-        );
-        return null;
+        return state;
       }
 
       const { oldFuncToNewFuncMap } = functionUpdate;
