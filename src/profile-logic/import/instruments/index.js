@@ -37,7 +37,7 @@ type TraceDirectoryTree = {|
 type InstrumentsFrameInfo = {|
   +key: string | number,
   +name: string,
-  file?: string,
+  +file: string | null,
   +line?: number,
   +col?: number,
 |};
@@ -55,7 +55,7 @@ function readAsText(file: File): Promise<string> {
   return MaybeCompressedReader.fromFile(file).readAsText();
 }
 
-function parseBinaryPlist(bytes) {
+function parseBinaryPlist(bytes: Uint8Array) {
   const text = 'bplist00';
   for (let i = 0; i < 8; i++) {
     if (bytes[i] !== text.charCodeAt(i)) {
@@ -77,7 +77,10 @@ function decodeUTF8(bytes: Uint8Array): string {
   return textDecoder.decode(bytes);
 }
 
-function followUID(objects: any[], value: any): any {
+function followUID(
+  objects: any[],
+  value: UID
+): { $classes: Array<string>, $classname: string } {
   return value instanceof UID ? objects[value.index] : value;
 }
 
@@ -497,6 +500,7 @@ async function getSamples(args: {
     const rawAddressFrame: InstrumentsFrameInfo = {
       key: k,
       name: `0x${zeroPad(k.toString(16), 16)}`,
+      file: null,
     };
     addressToFrameMap.set(k, rawAddressFrame);
     stack.push(k);
@@ -558,10 +562,8 @@ async function readFormTemplateFile(tree) {
             const frame: InstrumentsFrameInfo = {
               key: `${sourcePath}:${name}`,
               name: name,
+              file: sourcePath || null,
             };
-            if (sourcePath) {
-              frame.file = sourcePath;
-            }
             return frame;
           });
         }
