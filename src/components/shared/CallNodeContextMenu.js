@@ -7,7 +7,6 @@ import React, { PureComponent, Fragment } from 'react';
 import { MenuItem } from 'react-contextmenu';
 import ContextMenu from '../shared/ContextMenu';
 import explicitConnect from '../../utils/connect';
-import { getThreadSelectors } from '../../selectors/per-thread';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 import { getFunctionName } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';
@@ -21,11 +20,7 @@ import {
   getImplementationFilter,
   getInvertCallstack,
 } from '../../selectors/url-state';
-import {
-  getRightClickedCallNodeThreadIndex,
-  getRightClickedCallNodePath,
-  getRightClickedCallNodeIndex,
-} from '../../selectors/right-clicked-call-node';
+import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
 
 import {
   convertToTransformType,
@@ -35,22 +30,11 @@ import {
 import type { TransformType } from '../../types/transforms';
 import type { ImplementationFilter } from '../../types/actions';
 import type { TabSlug } from '../../app-logic/tabs-handling';
-import type {
-  IndexIntoCallNodeTable,
-  CallNodeInfo,
-  CallNodePath,
-} from '../../types/profile-derived';
-import type { Thread, ThreadIndex } from '../../types/profile';
 import type { ConnectedProps } from '../../utils/connect';
+import type { RightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
 
 type StateProps = {|
-  +rightClickedCallNode: {|
-    +thread: Thread,
-    +threadIndex: ThreadIndex,
-    +callNodeInfo: CallNodeInfo,
-    +callNodePath: CallNodePath,
-    +callNodeIndex: IndexIntoCallNodeTable,
-  |} | null,
+  +rightClickedCallNode: RightClickedCallNodeInfo | null,
   +implementation: ImplementationFilter,
   +inverted: boolean,
   +selectedTab: TabSlug,
@@ -515,32 +499,12 @@ class CallNodeContextMenu extends PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    const threadIndex = getRightClickedCallNodeThreadIndex(state);
-    const callNodePath = getRightClickedCallNodePath(state);
-    const callNodeIndex = getRightClickedCallNodeIndex(state);
-    const threadSelectors =
-      threadIndex !== null && getThreadSelectors(threadIndex);
-
-    return {
-      rightClickedCallNode:
-        threadIndex !== null &&
-        callNodePath !== null &&
-        callNodeIndex !== null &&
-        threadSelectors
-          ? {
-              threadIndex,
-              thread: threadSelectors.getFilteredThread(state),
-              callNodeInfo: threadSelectors.getCallNodeInfo(state),
-              callNodePath,
-              callNodeIndex,
-            }
-          : null,
-      implementation: getImplementationFilter(state),
-      inverted: getInvertCallstack(state),
-      selectedTab: getSelectedTab(state),
-    };
-  },
+  mapStateToProps: state => ({
+    rightClickedCallNode: getRightClickedCallNodeInfo(state),
+    implementation: getImplementationFilter(state),
+    inverted: getInvertCallstack(state),
+    selectedTab: getSelectedTab(state),
+  }),
   mapDispatchToProps: {
     addTransformToStack,
     expandAllCallNodeDescendants,

@@ -8,42 +8,80 @@ import { getCallNodeIndexFromPath } from '../profile-logic/profile-data';
 import { getThreadSelectors } from './per-thread';
 import { getProfileViewOptions } from './profile';
 
-import type { ThreadIndex } from '../types/profile';
+import type { Thread, ThreadIndex } from '../types/profile';
 import type {
   IndexIntoCallNodeTable,
   CallNodePath,
+  CallNodeInfo,
 } from '../types/profile-derived';
 import type { Selector } from '../types/store';
 
-export const getRightClickedCallNodeThreadIndex: Selector<ThreadIndex | null> = createSelector(
-  getProfileViewOptions,
-  ({ rightClickedCallNodePath }) =>
-    rightClickedCallNodePath ? rightClickedCallNodePath.threadIndex : null
-);
+export type RightClickedCallNodeInfo = {|
+  +threadIndex: ThreadIndex,
+  +thread: Thread,
+  +callNodePath: CallNodePath,
+  +callNodeIndex: IndexIntoCallNodeTable,
+  +callNodeInfo: CallNodeInfo,
+|};
 
-export const getRightClickedCallNodePath: Selector<CallNodePath | null> = createSelector(
+export const getRightClickedCallNodeInfo: Selector<RightClickedCallNodeInfo | null> = createSelector(
   getProfileViewOptions,
-  ({ rightClickedCallNodePath }) =>
-    rightClickedCallNodePath ? rightClickedCallNodePath.callNodePath : null
-);
-
-export const getRightClickedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> = createSelector(
-  getRightClickedCallNodePath,
   state => {
-    const threadIndex = getRightClickedCallNodeThreadIndex(state);
+    const { rightClickedCallNodePath } = getProfileViewOptions(state);
 
-    if (threadIndex !== null) {
-      const { getCallNodeInfo } = getThreadSelectors(threadIndex);
-      const { callNodeTable } = getCallNodeInfo(state);
+    if (rightClickedCallNodePath !== null) {
+      const { getFilteredThread } = getThreadSelectors(
+        rightClickedCallNodePath.threadIndex
+      );
 
-      return callNodeTable;
+      return getFilteredThread(state);
     }
 
     return null;
   },
-  (callNodePath, callNodeTable) => {
-    if (callNodePath && callNodeTable) {
-      return getCallNodeIndexFromPath(callNodePath, callNodeTable);
+  state => {
+    const { rightClickedCallNodePath } = getProfileViewOptions(state);
+
+    if (rightClickedCallNodePath !== null) {
+      const { getCallNodeInfo } = getThreadSelectors(
+        rightClickedCallNodePath.threadIndex
+      );
+      const { callNodeTable } = getCallNodeInfo(state);
+
+      return getCallNodeIndexFromPath(
+        rightClickedCallNodePath.callNodePath,
+        callNodeTable
+      );
+    }
+
+    return null;
+  },
+  state => {
+    const { rightClickedCallNodePath } = getProfileViewOptions(state);
+
+    if (rightClickedCallNodePath !== null) {
+      const { getCallNodeInfo } = getThreadSelectors(
+        rightClickedCallNodePath.threadIndex
+      );
+
+      return getCallNodeInfo(state);
+    }
+
+    return null;
+  },
+  ({ rightClickedCallNodePath }, thread, callNodeIndex, callNodeInfo) => {
+    if (
+      rightClickedCallNodePath !== null &&
+      thread !== null &&
+      callNodeIndex !== null &&
+      callNodeInfo !== null
+    ) {
+      return {
+        ...rightClickedCallNodePath,
+        thread,
+        callNodeIndex,
+        callNodeInfo,
+      };
     }
 
     return null;

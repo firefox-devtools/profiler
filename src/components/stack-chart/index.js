@@ -20,7 +20,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { getRightClickedCallNodeIndex } from '../../selectors/right-clicked-call-node';
+import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
 import StackChartEmptyReasons from './StackChartEmptyReasons';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import StackSettings from '../shared/StackSettings';
@@ -207,6 +207,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
       state
     );
+    const callNodeInfo = getRightClickedCallNodeInfo(state);
 
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
@@ -221,7 +222,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      rightClickedCallNodeIndex: getRightClickedCallNodeIndex(state),
+      rightClickedCallNodeIndex: callNodeInfo
+        ? callNodeInfo.callNodeIndex
+        : null,
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     };
   },

@@ -26,7 +26,7 @@ import {
   changeRightClickedCallNode,
 } from '../../actions/profile-view';
 import { getIconsWithClassNames } from '../../selectors/icons';
-import { getRightClickedCallNodeIndex } from '../../selectors/right-clicked-call-node';
+import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
 import type { Thread, CategoryList } from '../../types/profile';
@@ -340,6 +340,8 @@ function viewportNeedsUpdate() {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
+    const callNodeInfo = getRightClickedCallNodeInfo(state);
+
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
       unfilteredThread: selectedThreadSelectors.getThread(state),
@@ -359,7 +361,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      rightClickedCallNodeIndex: getRightClickedCallNodeIndex(state),
+      rightClickedCallNodeIndex: callNodeInfo
+        ? callNodeInfo.callNodeIndex
+        : null,
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       icons: getIconsWithClassNames(state),
       interval: getProfileInterval(state),

@@ -23,7 +23,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getIconsWithClassNames } from '../../selectors/icons';
-import { getRightClickedCallNodeIndex } from '../../selectors/right-clicked-call-node';
+import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
@@ -241,27 +241,33 @@ class CallTreeComponent extends PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: (state: State) => ({
-    threadIndex: getSelectedThreadIndex(state),
-    scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    focusCallTreeGeneration: getFocusCallTreeGeneration(state),
-    tree: selectedThreadSelectors.getCallTree(state),
-    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-    selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-      state
-    ),
-    rightClickedCallNodeIndex: getRightClickedCallNodeIndex(state),
-    expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
-      state
-    ),
-    searchStringsRegExp: getSearchStringsAsRegExp(state),
-    disableOverscan: getPreviewSelection(state).isModifying,
-    invertCallstack: getInvertCallstack(state),
-    implementationFilter: getImplementationFilter(state),
-    icons: getIconsWithClassNames(state),
-    callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
-    callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),
-  }),
+  mapStateToProps: (state: State) => {
+    const callNodeInfo = getRightClickedCallNodeInfo(state);
+
+    return {
+      threadIndex: getSelectedThreadIndex(state),
+      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+      focusCallTreeGeneration: getFocusCallTreeGeneration(state),
+      tree: selectedThreadSelectors.getCallTree(state),
+      callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
+        state
+      ),
+      rightClickedCallNodeIndex: callNodeInfo
+        ? callNodeInfo.callNodeIndex
+        : null,
+      expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
+        state
+      ),
+      searchStringsRegExp: getSearchStringsAsRegExp(state),
+      disableOverscan: getPreviewSelection(state).isModifying,
+      invertCallstack: getInvertCallstack(state),
+      implementationFilter: getImplementationFilter(state),
+      icons: getIconsWithClassNames(state),
+      callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
+      callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),
+    };
+  },
   mapDispatchToProps: {
     changeSelectedCallNode,
     changeRightClickedCallNode,
