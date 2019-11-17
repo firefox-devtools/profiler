@@ -7,35 +7,50 @@ import { createSelector } from 'reselect';
 import { getThreadSelectors } from './per-thread';
 import { getProfileViewOptions } from './profile';
 
-import type { ThreadIndex } from '../types/profile';
+import type { ThreadIndex, Thread } from '../types/profile';
 import type { MarkerIndex, Marker } from '../types/profile-derived';
 import type { Selector } from '../types/store';
 
-export const getRightClickedMarkerThreadIndex: Selector<ThreadIndex | null> = createSelector(
-  getProfileViewOptions,
-  ({ rightClickedMarker }) =>
-    rightClickedMarker ? rightClickedMarker.threadIndex : null
-);
+export type RightClickedMarkerInfo = {|
+  +threadIndex: ThreadIndex,
+  +thread: Thread,
+  +markerIndex: MarkerIndex,
+  +marker: Marker,
+|};
 
-export const getRightClickedMarkerIndex: Selector<MarkerIndex | null> = createSelector(
+export const getRightClickedMarkerInfo: Selector<RightClickedMarkerInfo | null> = createSelector(
   getProfileViewOptions,
-  ({ rightClickedMarker }) =>
-    rightClickedMarker ? rightClickedMarker.markerIndex : null
-);
-
-export const getRightClickedMarker: Selector<Marker | null> = createSelector(
-  getRightClickedMarkerIndex,
   state => {
-    const threadIndex = getRightClickedMarkerThreadIndex(state);
-    if (threadIndex !== null) {
-      return getThreadSelectors(threadIndex).getMarkerGetter(state);
+    const { rightClickedMarker } = getProfileViewOptions(state);
+
+    if (rightClickedMarker !== null) {
+      const markerGetter = getThreadSelectors(
+        rightClickedMarker.threadIndex
+      ).getMarkerGetter(state);
+
+      return markerGetter(rightClickedMarker.markerIndex);
     }
 
     return null;
   },
-  (markerIndex, getMarker) => {
-    if (markerIndex !== null && getMarker !== null) {
-      return getMarker(markerIndex);
+  state => {
+    const { rightClickedMarker } = getProfileViewOptions(state);
+
+    if (rightClickedMarker !== null) {
+      return getThreadSelectors(rightClickedMarker.threadIndex).getThread(
+        state
+      );
+    }
+
+    return null;
+  },
+  ({ rightClickedMarker }, marker, thread) => {
+    if (rightClickedMarker && marker && thread) {
+      return {
+        ...rightClickedMarker,
+        thread,
+        marker,
+      };
     }
 
     return null;

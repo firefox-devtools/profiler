@@ -20,7 +20,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { getRightClickedMarkerIndex } from '../../selectors/right-clicked-marker';
+import { getRightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
@@ -172,6 +172,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     const markerTimingRows = selectedThreadSelectors.getMarkerChartTiming(
       state
     );
+    const markerInfo = getRightClickedMarkerInfo(state);
     return {
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       markerTimingRows,
@@ -180,7 +181,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       previewSelection: getPreviewSelection(state),
-      rightClickedMarker: getRightClickedMarkerIndex(state),
+      rightClickedMarker: markerInfo ? markerInfo.markerIndex : null,
     };
   },
   mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },

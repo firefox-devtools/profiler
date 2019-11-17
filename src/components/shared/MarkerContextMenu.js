@@ -15,11 +15,8 @@ import {
   getPreviewSelection,
   getCommittedRange,
 } from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
-import {
-  getRightClickedMarker,
-  getRightClickedMarkerThreadIndex,
-} from '../../selectors/right-clicked-marker';
+import { getRightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
+import type { RightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
 import copy from 'copy-to-clipboard';
 
 import type { Marker } from '../../types/profile-derived';
@@ -30,7 +27,7 @@ import type {
 } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
 import { getImplementationFilter } from '../../selectors/url-state';
-import type { Thread, IndexIntoStackTable } from '../../types/profile';
+import type { IndexIntoStackTable } from '../../types/profile';
 import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
 import {
   convertStackToCallNodePath,
@@ -41,10 +38,7 @@ import { getMarkerFullDescription } from '../../profile-logic/marker-data';
 type StateProps = {|
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +rightClickedMarker: {|
-    +marker: Marker,
-    +thread: Thread,
-  |} | null,
+  +rightClickedMarker: RightClickedMarkerInfo | null,
   +implementationFilter: ImplementationFilter,
 |};
 
@@ -297,23 +291,12 @@ class MarkerContextMenu extends PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    const threadIndex = getRightClickedMarkerThreadIndex(state);
-    const marker = getRightClickedMarker(state);
-
-    return {
-      previewSelection: getPreviewSelection(state),
-      committedRange: getCommittedRange(state),
-      implementationFilter: getImplementationFilter(state),
-      rightClickedMarker:
-        threadIndex !== null && marker !== null
-          ? {
-              marker,
-              thread: getThreadSelectors(threadIndex).getThread(state),
-            }
-          : null,
-    };
-  },
+  mapStateToProps: state => ({
+    previewSelection: getPreviewSelection(state),
+    committedRange: getCommittedRange(state),
+    implementationFilter: getImplementationFilter(state),
+    rightClickedMarker: getRightClickedMarkerInfo(state),
+  }),
   mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
   component: MarkerContextMenu,
 });
