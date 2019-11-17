@@ -14,6 +14,7 @@ import {
 import { mergeProfiles } from '../../../profile-logic/comparison';
 import { stateFromLocation } from '../../../app-logic/url-handling';
 import { UniqueStringArray } from '../../../utils/unique-string-array';
+import { ensureExists } from '../../../utils/flow';
 
 import type {
   Profile,
@@ -445,6 +446,7 @@ function _buildThreadFromTextOnlyStacks(
         frameTable.address.push(funcTable.address[funcIndex]);
         frameTable.category.push(category);
         frameTable.subcategory.push(0);
+        frameTable.innerWindowID.push(0);
         frameTable.implementation.push(jitTypeIndex);
         frameTable.line.push(null);
         frameTable.column.push(null);
@@ -489,7 +491,7 @@ function _buildThreadFromTextOnlyStacks(
 
     // Add a single sample for each column.
     samples.length++;
-    samples.responsiveness.push(0);
+    ensureExists(samples.eventDelay).push(0);
     samples.stack.push(prefix);
     samples.time.push(columnIndex);
   });
@@ -805,7 +807,7 @@ export function getThreadWithJsTracerEvents(
 
   // Re-create the table so that it creates a Flow error if we don't handle part of it.
   thread.samples = {
-    responsiveness: Array(endOfEvents).fill(null),
+    eventDelay: Array(endOfEvents).fill(null),
     stack: Array(endOfEvents).fill(null),
     time: Array(endOfEvents)
       .fill(0)
@@ -960,7 +962,7 @@ export function getProfileWithNativeAllocations(): * {
              I
   `);
 
-  // Now add a JsAllocationsTable.
+  // Now add a NativeAllocationsTable.
   const nativeAllocations = getEmptyNativeAllocationsTable();
   profile.threads[0].nativeAllocations = nativeAllocations;
 

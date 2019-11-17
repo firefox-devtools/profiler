@@ -45,6 +45,7 @@ export type CallNodeTable = {
   func: Int32Array, // IndexIntoCallNodeTable -> IndexIntoFuncTable
   category: Int32Array, // IndexIntoCallNodeTable -> IndexIntoCategoryList
   subcategory: Int32Array, // IndexIntoCallNodeTable -> IndexIntoSubcategoryListForCategory
+  innerWindowID: Float64Array, // IndexIntoCallNodeTable -> InnerWindowID
   depth: number[],
   length: number,
 };
@@ -119,6 +120,10 @@ export type CallNodeDisplayData = $Exact<
   }>
 >;
 
+/**
+ * The marker timing contains the necessary information to draw markers very quickly
+ * in the marker chart. It represents a single row of markers in the chart.
+ */
 export type MarkerTiming = {
   // Start time in milliseconds.
   start: number[],
@@ -127,9 +132,19 @@ export type MarkerTiming = {
   index: MarkerIndex[],
   label: string[],
   name: string,
+  bucket: string,
   length: number,
 };
-export type MarkerTimingRows = Array<MarkerTiming>;
+
+/**
+ * This type contains the necessary information to fully draw the marker chart. Each
+ * entry in the array represents a single fixed height row in the chart. The MarkerTiming
+ * represents the markers, and a bare string represents a marker "bucket". It is drawn
+ * as a single row in the marker chart, and serves as a separator between different
+ * areas. This flat array structure was chosen because it makes it really easy to
+ * loop through each row, and only draw the current subset on the screen.
+ */
+export type MarkerTimingAndBuckets = Array<MarkerTiming | string>;
 
 export type JsTracerTiming = {
   // Start time in milliseconds.

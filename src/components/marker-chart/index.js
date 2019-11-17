@@ -30,7 +30,7 @@ import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import type {
   Marker,
   MarkerIndex,
-  MarkerTimingRows,
+  MarkerTimingAndBuckets,
 } from '../../types/profile-derived';
 import type {
   Milliseconds,
@@ -50,7 +50,7 @@ type DispatchProps = {|
 
 type StateProps = {|
   +getMarker: MarkerIndex => Marker,
-  +markerTimingRows: MarkerTimingRows,
+  +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +maxMarkerRows: number,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
@@ -95,7 +95,7 @@ class MarkerChart extends React.PureComponent<Props> {
       maxMarkerRows,
       timeRange,
       threadIndex,
-      markerTimingRows,
+      markerTimingAndBuckets,
       getMarker,
       previewSelection,
       updatePreviewSelection,
@@ -137,7 +137,7 @@ class MarkerChart extends React.PureComponent<Props> {
                 containerRef: this._takeViewportRef,
               }}
               chartProps={{
-                markerTimingRows,
+                markerTimingAndBuckets,
                 getMarker,
                 // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                 updatePreviewSelection,
@@ -161,22 +161,22 @@ class MarkerChart extends React.PureComponent<Props> {
 
 // This function is given the MarkerChartCanvas's chartProps.
 function viewportNeedsUpdate(
-  prevProps: { +markerTimingRows: MarkerTimingRows },
-  newProps: { +markerTimingRows: MarkerTimingRows }
+  prevProps: { +markerTimingAndBuckets: MarkerTimingAndBuckets },
+  newProps: { +markerTimingAndBuckets: MarkerTimingAndBuckets }
 ) {
-  return prevProps.markerTimingRows !== newProps.markerTimingRows;
+  return prevProps.markerTimingAndBuckets !== newProps.markerTimingAndBuckets;
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
-    const markerTimingRows = selectedThreadSelectors.getMarkerChartTiming(
+    const markerTimingAndBuckets = selectedThreadSelectors.getMarkerChartTimingAndBuckets(
       state
     );
     const markerInfo = getRightClickedMarkerInfo(state);
     return {
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
-      markerTimingRows,
-      maxMarkerRows: markerTimingRows.length,
+      markerTimingAndBuckets,
+      maxMarkerRows: markerTimingAndBuckets.length,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),

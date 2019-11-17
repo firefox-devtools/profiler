@@ -27,6 +27,7 @@ export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 export type IndexIntoJsTracerEvents = number;
 export type CounterIndex = number;
+export type InnerWindowID = number;
 
 /**
  * If a pid is a number, then it is the int value that came from the profiler.
@@ -95,7 +96,14 @@ export type StackTable = {|
  * are indices into other tables.
  */
 export type SamplesTable = {|
-  responsiveness: Array<?Milliseconds>,
+  // Responsiveness is the older version of eventDelay. It injects events every 16ms.
+  // This is optional because newer profiles don't have that field anymore.
+  responsiveness?: Array<?Milliseconds>,
+  // Event delay is the newer version of responsiveness. It allow us to get a finer-grained
+  // view of jank by inferring what would be the delay of a hypothetical input event at
+  // any point in time. It requires a pre-processing to be able to visualize properly.
+  // This is optional because older profiles didn't have that field.
+  eventDelay?: Array<?Milliseconds>,
   stack: Array<IndexIntoStackTable | null>,
   time: Milliseconds[],
   duration?: Milliseconds[],
@@ -178,6 +186,14 @@ export type FrameTable = {|
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
+  // Inner window ID of JS frames. JS frames can be correlated to a Page through this value.
+  // It's used to determine which JS frame belongs to which web page so we can display
+  // that information and filter for single tab profiling.
+  // `0` for non-JS frames and the JS frames that failed to get the ID. `0` means "null value"
+  // because that's what Firefox platform DOM side assigns when it fails to get the ID or
+  // something bad happens during that process. It's not `null` or `-1` because that information
+  // is being stored as `uint64_t` there.
+  innerWindowID: (InnerWindowID | null)[],
   implementation: (IndexIntoStringTable | null)[],
   line: (number | null)[],
   column: (number | null)[],
@@ -260,7 +276,7 @@ export type CategoryList = Array<Category>;
  */
 export type Page = {|
   browsingContextID: number,
-  innerWindowID: number,
+  innerWindowID: InnerWindowID,
   url: string,
   // 0 means no embedder
   embedderInnerWindowID: number,

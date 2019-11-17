@@ -62,7 +62,7 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> matches the snapshot 1`] = `
             >
               Profile Version:
             </span>
-            26
+            27
           </div>
           <div
             class="metaInfoRow"
@@ -456,7 +456,7 @@ exports[`app/MenuButtons <MenuButtonsMetaInfo> with no statistics object should 
             >
               Profile Version:
             </span>
-            26
+            27
           </div>
         </div>
         <h2

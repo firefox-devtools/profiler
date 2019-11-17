@@ -43,7 +43,30 @@ export function getEmptyStackTable(): StackTable {
   };
 }
 
-export function getEmptySamplesTable(): SamplesTable {
+/**
+ * Returns an empty samples table with eventDelay field instead of responsiveness.
+ * eventDelay is a new field and it replaced responsiveness. We should still
+ * account for older profiles and use both of the flavors if needed.
+ */
+export function getEmptySamplesTableWithEventDelay(): SamplesTable {
+  return {
+    // Important!
+    // If modifying this structure, please update all callers of this function to ensure
+    // that they are pushing on correctly to the data structure. These pushes may not
+    // be caught by the type system.
+    eventDelay: [],
+    stack: [],
+    time: [],
+    length: 0,
+  };
+}
+
+/**
+ * Returns an empty samples table with responsiveness field instead of eventDelay.
+ * responsiveness is the older field and replaced with eventDelay. We should
+ * account for older profiles and use both of the flavors if needed.
+ */
+export function getEmptySamplesTableWithResponsiveness(): SamplesTable {
   return {
     // Important!
     // If modifying this structure, please update all callers of this function to ensure
@@ -66,6 +89,7 @@ export function getEmptyFrameTable(): FrameTable {
     category: [],
     subcategory: [],
     func: [],
+    innerWindowID: [],
     implementation: [],
     line: [],
     column: [],
@@ -84,6 +108,7 @@ export function shallowCloneFrameTable(frameTable: FrameTable): FrameTable {
     category: frameTable.category.slice(),
     subcategory: frameTable.subcategory.slice(),
     func: frameTable.func.slice(),
+    innerWindowID: frameTable.innerWindowID.slice(),
     implementation: frameTable.implementation.slice(),
     line: frameTable.line.slice(),
     column: frameTable.column.slice(),
@@ -272,7 +297,8 @@ export function getEmptyThread(overrides?: $Shape<Thread>): Thread {
     name: 'Empty',
     pid: 0,
     tid: 0,
-    samples: getEmptySamplesTable(),
+    // Creating samples with event delay since it's the new samples table.
+    samples: getEmptySamplesTableWithEventDelay(),
     markers: getEmptyRawMarkerTable(),
     stackTable: getEmptyStackTable(),
     frameTable: getEmptyFrameTable(),

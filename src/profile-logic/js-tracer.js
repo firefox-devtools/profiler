@@ -6,7 +6,7 @@
 import {
   getEmptyFrameTable,
   getEmptyStackTable,
-  getEmptySamplesTable,
+  getEmptySamplesTableWithEventDelay,
   getEmptyRawMarkerTable,
 } from './data-structures';
 import { ensureExists } from '../utils/flow';
@@ -503,7 +503,7 @@ export function convertJsTracerToThreadWithoutSamples(
   const frameTable = getEmptyFrameTable();
   const stackTable = getEmptyStackTable();
   const samples: SamplesTable = {
-    ...getEmptySamplesTable(),
+    ...getEmptySamplesTableWithEventDelay(),
     duration: [],
   };
   const markers = getEmptyRawMarkerTable();
@@ -633,6 +633,7 @@ export function convertJsTracerToThreadWithoutSamples(
     frameTable.address.push(blankStringIndex);
     frameTable.category.push(otherCategory);
     frameTable.func.push(funcIndex);
+    frameTable.innerWindowID.push(0);
     frameTable.implementation.push(implementation);
     frameTable.line.push(line);
     frameTable.column.push(column);
@@ -822,7 +823,7 @@ export function getSelfTimeSamplesFromJsTracer(
   // Each event type will have it's own timing information, later collapse these into
   // a single array.
   const { stringTable } = thread;
-  const samples = getEmptySamplesTable();
+  const samples = getEmptySamplesTableWithEventDelay();
   const sampleWeights = [];
   samples.duration = sampleWeights;
 

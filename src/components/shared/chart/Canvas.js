@@ -18,7 +18,12 @@ type Props<HoveredItem> = {|
   +onRightClick?: (HoveredItem | null) => void,
   +onDoubleClickItem: (HoveredItem | null) => void,
   +getHoveredItemInfo: HoveredItem => React.Node,
-  +drawCanvas: (CanvasRenderingContext2D, HoveredItem | null) => void,
+  +drawCanvas: (
+    CanvasRenderingContext2D,
+    hoveredItem: HoveredItem | null,
+    prevHoveredItem: HoveredItem | null,
+    isHoveredOnlyDifferent: boolean
+  ) => void,
   +isDragging: boolean,
   // Applies ctx.scale() to the canvas to draw using CssPixels rather than DevicePixels.
   +scaleCtxToCssPixels: boolean,
@@ -75,7 +80,10 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     pageY: 0,
   };
 
-  _scheduleDraw() {
+  _scheduleDraw(
+    isHoveredOnlyDifferent: boolean = false,
+    prevHoveredItem: HoveredItem | null = null
+  ) {
     const { className, drawCanvas } = this.props;
     if (this._isDrawScheduled) {
       return;
@@ -86,7 +94,12 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       if (this._canvas) {
         timeCode(`${className} render`, () => {
           this._prepCanvas();
-          drawCanvas(this._ctx, this.state.hoveredItem);
+          drawCanvas(
+            this._ctx,
+            this.state.hoveredItem,
+            prevHoveredItem,
+            isHoveredOnlyDifferent
+          );
         });
       }
     });
@@ -243,11 +256,13 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     prevProps: Props<HoveredItem>,
     prevState: State<HoveredItem>
   ) {
-    if (
-      prevProps !== this.props ||
+    if (prevProps !== this.props) {
+      this._scheduleDraw();
+    } else if (
       !hoveredItemsAreEqual(prevState.hoveredItem, this.state.hoveredItem)
     ) {
-      this._scheduleDraw();
+      // Only the hovered items changed.
+      this._scheduleDraw(true, prevState.hoveredItem);
     }
   }
 

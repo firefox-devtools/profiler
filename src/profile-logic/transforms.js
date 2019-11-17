@@ -794,6 +794,9 @@ export function collapseResource(
             newFrameTable.func.push(collapsedFuncIndex);
             newFrameTable.line.push(frameTable.line[frameIndex]);
             newFrameTable.column.push(frameTable.column[frameIndex]);
+            newFrameTable.innerWindowID.push(
+              frameTable.innerWindowID[frameIndex]
+            );
             newFrameTable.implementation.push(
               frameTable.implementation[frameIndex]
             );

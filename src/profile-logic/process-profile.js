@@ -521,6 +521,7 @@ function _processFrameTable(
     category: geckoFrameStruct.category,
     subcategory: geckoFrameStruct.subcategory,
     func: frameFuncs,
+    innerWindowID: geckoFrameStruct.innerWindowID,
     implementation: geckoFrameStruct.implementation,
     line: geckoFrameStruct.line,
     column: geckoFrameStruct.column,
@@ -771,12 +772,23 @@ function _processMarkerPayload(
  * Explicitly recreate the markers here to help enforce our assumptions about types.
  */
 function _processSamples(geckoSamples: GeckoSampleStruct): SamplesTable {
-  return {
-    responsiveness: geckoSamples.responsiveness,
+  const samples: SamplesTable = {
     stack: geckoSamples.stack,
     time: geckoSamples.time,
     length: geckoSamples.length,
   };
+
+  if (geckoSamples.eventDelay) {
+    samples.eventDelay = geckoSamples.eventDelay;
+  } else if (geckoSamples.responsiveness) {
+    samples.responsiveness = geckoSamples.responsiveness;
+  } else {
+    throw new Error(
+      'The profile processor expected an eventDelay or responsiveness array in the samples table, but none was found.'
+    );
+  }
+
+  return samples;
 }
 
 /**

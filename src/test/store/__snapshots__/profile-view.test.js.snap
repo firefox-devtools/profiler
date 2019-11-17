@@ -75,7 +75,7 @@ Object {
     "oscpu": "",
     "physicalCPUs": 0,
     "platform": "",
-    "preprocessedProfileVersion": 26,
+    "preprocessedProfileVersion": 27,
     "processType": 0,
     "product": "Firefox",
     "sourceURL": "",
@@ -83,7 +83,7 @@ Object {
     "startTime": 0,
     "symbolicated": true,
     "toolkit": "",
-    "version": 18,
+    "version": 19,
   },
   "pages": Array [],
   "threads": Array [
@@ -143,6 +143,17 @@ Object {
           null,
           null,
           null,
+        ],
+        "innerWindowID": Array [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
         ],
         "length": 9,
         "line": Array [
@@ -293,8 +304,7 @@ Object {
         "type": Array [],
       },
       "samples": Object {
-        "length": 9,
-        "responsiveness": Array [
+        "eventDelay": Array [
           0,
           0,
           0,
@@ -305,6 +315,7 @@ Object {
           0,
           0,
         ],
+        "length": 9,
         "stack": Array [
           4,
           4,
@@ -409,6 +420,7 @@ Object {
         "column": Array [],
         "func": Array [],
         "implementation": Array [],
+        "innerWindowID": Array [],
         "length": 0,
         "line": Array [],
         "optimizations": Array [],
@@ -524,8 +536,8 @@ Object {
         "type": Array [],
       },
       "samples": Object {
+        "eventDelay": Array [],
         "length": 0,
-        "responsiveness": Array [],
         "stack": Array [],
         "time": Array [],
       },
@@ -627,6 +639,17 @@ Array [
         null,
         null,
         null,
+      ],
+      "innerWindowID": Array [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
       ],
       "length": 9,
       "line": Array [
@@ -777,8 +800,7 @@ Array [
       "type": Array [],
     },
     "samples": Object {
-      "length": 9,
-      "responsiveness": Array [
+      "eventDelay": Array [
         0,
         0,
         0,
@@ -789,6 +811,7 @@ Array [
         0,
         0,
       ],
+      "length": 9,
       "stack": Array [
         4,
         4,
@@ -893,6 +916,7 @@ Array [
       "column": Array [],
       "func": Array [],
       "implementation": Array [],
+      "innerWindowID": Array [],
       "length": 0,
       "line": Array [],
       "optimizations": Array [],
@@ -1008,8 +1032,8 @@ Array [
       "type": Array [],
     },
     "samples": Object {
+      "eventDelay": Array [],
       "length": 0,
-      "responsiveness": Array [],
       "stack": Array [],
       "time": Array [],
     },
@@ -1214,9 +1238,11 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getMarkerChartTiming 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getMarkerChartTimingAndBuckets 1`] = `
 Array [
+  "Idle",
   Object {
+    "bucket": "Idle",
     "end": Array [
       3,
     ],
@@ -1233,6 +1259,7 @@ Array [
     ],
   },
   Object {
+    "bucket": "Idle",
     "end": Array [
       4,
     ],
@@ -1249,6 +1276,7 @@ Array [
     ],
   },
   Object {
+    "bucket": "Idle",
     "end": Array [
       5,
     ],
@@ -1564,6 +1592,16 @@ Object {
       7,
       8,
     ],
+    "innerWindowID": Float64Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "length": 8,
     "prefix": Int32Array [
       -1,
@@ -1641,6 +1679,16 @@ CallTree {
       6,
       7,
       8,
+    ],
+    "innerWindowID": Float64Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
     ],
     "length": 8,
     "prefix": Int32Array [
@@ -1935,6 +1983,17 @@ Object {
       null,
       null,
     ],
+    "innerWindowID": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "length": 9,
     "line": Array [
       null,
@@ -2085,13 +2144,13 @@ Object {
   },
   "samples": Object {
     "duration": undefined,
-    "length": 4,
-    "responsiveness": Array [
+    "eventDelay": Array [
       0,
       100,
       0,
       0,
     ],
+    "length": 4,
     "stack": Array [
       5,
       5,
@@ -2313,6 +2372,17 @@ Object {
       null,
       null,
     ],
+    "innerWindowID": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "length": 9,
     "line": Array [
       null,
@@ -2463,11 +2533,11 @@ Object {
   },
   "samples": Object {
     "duration": undefined,
-    "length": 2,
-    "responsiveness": Array [
+    "eventDelay": Array [
       100,
       0,
     ],
+    "length": 2,
     "stack": Array [
       5,
       5,
@@ -2607,6 +2677,17 @@ Object {
       null,
       null,
     ],
+    "innerWindowID": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "length": 9,
     "line": Array [
       null,
@@ -2757,13 +2838,13 @@ Object {
   },
   "samples": Object {
     "duration": undefined,
-    "length": 4,
-    "responsiveness": Array [
+    "eventDelay": Array [
       0,
       100,
       0,
       0,
     ],
+    "length": 4,
     "stack": Array [
       5,
       5,
@@ -2907,6 +2988,17 @@ Object {
       null,
       null,
     ],
+    "innerWindowID": Array [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+    ],
     "length": 9,
     "line": Array [
       null,
@@ -3057,13 +3149,13 @@ Object {
   },
   "samples": Object {
     "duration": undefined,
-    "length": 4,
-    "responsiveness": Array [
+    "eventDelay": Array [
       0,
       100,
       0,
       0,
     ],
+    "length": 4,
     "stack": Array [
       6,
       6,

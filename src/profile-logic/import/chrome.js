@@ -242,6 +242,7 @@ async function processTracingEvents(
         frameTable.category[frameIndex] = javascriptCategoryIndex;
         frameTable.subcategory[frameIndex] = 0;
         frameTable.func[frameIndex] = funcId;
+        frameTable.innerWindowID[frameIndex] = 0;
         frameTable.implementation[frameIndex] = null;
         frameTable.line[frameIndex] =
           lineNumber === undefined ? null : lineNumber;
@@ -283,7 +284,10 @@ async function processTracingEvents(
           nodeIdToStackId.get(nodeIndex),
           'Could not find the stack information for a sample when decoding a Chrome profile.'
         );
-        samplesTable.responsiveness.push(null);
+        ensureExists(
+          samplesTable.eventDelay,
+          'Could not find the eventDelay in samplesTable inside the newly created Chrome profile thread.'
+        ).push(null);
         samplesTable.stack.push(stackIndex);
         samplesTable.time.push(threadInfo.lastSampledTime);
         samplesTable.length++;

@@ -27,6 +27,7 @@ import type {
   Counter,
   CounterSamplesTable,
   NativeAllocationsTable,
+  InnerWindowID,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -80,6 +81,7 @@ export function getCallNodeInfo(
     const func: Array<IndexIntoFuncTable> = [];
     const category: Array<IndexIntoCategoryList> = [];
     const subcategory: Array<IndexIntoSubcategoryListForCategory> = [];
+    const innerWindowID: Array<InnerWindowID> = [];
     const depth: Array<number> = [];
     let length = 0;
 
@@ -87,13 +89,15 @@ export function getCallNodeInfo(
       prefixIndex: IndexIntoCallNodeTable,
       funcIndex: IndexIntoFuncTable,
       categoryIndex: IndexIntoCategoryList,
-      subcategoryIndex: IndexIntoSubcategoryListForCategory
+      subcategoryIndex: IndexIntoSubcategoryListForCategory,
+      windowID: InnerWindowID
     ) {
       const index = length++;
       prefix[index] = prefixIndex;
       func[index] = funcIndex;
       category[index] = categoryIndex;
       subcategory[index] = subcategoryIndex;
+      innerWindowID[index] = windowID;
       if (prefixIndex === -1) {
         depth[index] = 0;
       } else {
@@ -112,6 +116,7 @@ export function getCallNodeInfo(
       const frameIndex = stackTable.frame[stackIndex];
       const categoryIndex = stackTable.category[stackIndex];
       const subcategoryIndex = stackTable.subcategory[stackIndex];
+      const windowID = frameTable.innerWindowID[frameIndex] || 0;
       const funcIndex = frameTable.func[frameIndex];
       const prefixCallNodeAndFuncIndex = prefixCallNode * funcCount + funcIndex;
       let callNodeIndex = prefixCallNodeAndFuncToCallNodeMap.get(
@@ -119,7 +124,13 @@ export function getCallNodeInfo(
       );
       if (callNodeIndex === undefined) {
         callNodeIndex = length;
-        addCallNode(prefixCallNode, funcIndex, categoryIndex, subcategoryIndex);
+        addCallNode(
+          prefixCallNode,
+          funcIndex,
+          categoryIndex,
+          subcategoryIndex,
+          windowID
+        );
         prefixCallNodeAndFuncToCallNodeMap.set(
           prefixCallNodeAndFuncIndex,
           callNodeIndex
@@ -140,6 +151,7 @@ export function getCallNodeInfo(
       func: new Int32Array(func),
       category: new Int32Array(category),
       subcategory: new Int32Array(subcategory),
+      innerWindowID: new Float64Array(innerWindowID),
       depth,
       length,
     };
@@ -1048,18 +1060,26 @@ export function filterThreadSamplesToRange(
     rangeStart,
     rangeEnd
   );
-  const newSamples = {
+  const newSamples: SamplesTable = {
     length: endSampleIndex - beginSampleIndex,
     time: samples.time.slice(beginSampleIndex, endSampleIndex),
     duration: samples.duration
       ? samples.duration.slice(beginSampleIndex, endSampleIndex)
       : undefined,
     stack: samples.stack.slice(beginSampleIndex, endSampleIndex),
-    responsiveness: samples.responsiveness.slice(
+  };
+
+  if (samples.eventDelay) {
+    newSamples.eventDelay = samples.eventDelay.slice(
       beginSampleIndex,
       endSampleIndex
-    ),
-  };
+    );
+  } else if (samples.responsiveness) {
+    newSamples.responsiveness = samples.responsiveness.slice(
+      beginSampleIndex,
+      endSampleIndex
+    );
+  }
 
   const newThread: Thread = {
     ...thread,
