@@ -227,7 +227,6 @@ function expandKeyedArchive(
     );
   }
 
-  // Reconstruct the DAG from the parse tree
   const visit = (object: any) => {
     if (object instanceof UID) {
       return root.$objects[object.index];
@@ -524,7 +523,14 @@ async function getSamples(args: {
 
 // This function reads the 'form.template' file which contains all the important information about
 // addressToFrameMap and Instruments' version
-async function readFormTemplateFile(tree) {
+async function readFormTemplateFile(
+  tree
+): Promise<{
+  version: number,
+  instrumentType: string,
+  selectedRunNumber: number,
+  runs: Array<FormTemplateRunData>,
+}> {
   const formTemplate = tree.files.get('form.template');
   const archive =
     typeof formTemplate !== 'undefined'
@@ -546,7 +552,9 @@ async function readFormTemplateFile(tree) {
 
   const runs: FormTemplateRunData[] = [];
   for (const runNumber of allRunData.runNumbers) {
-    const runData = ensureExists(allRunData.runData.get(runNumber));
+    const runData: Map<string, any> = ensureExists(
+      allRunData.runData.get(runNumber)
+    );
     const symbolsByPid = ensureExists(runData.get('symbolsByPid'));
 
     const addressToFrameMap = new Map<number, InstrumentsFrameInfo>();
