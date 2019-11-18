@@ -241,7 +241,8 @@ const callTreeSummaryStrategy: Reducer<CallTreeSummaryStrategy> = (
 ) => {
   switch (action.type) {
     case 'CHANGE_CALL_TREE_SUMMARY_STRATEGY':
-      return action.strategy;
+    case 'SELECT_TRACK':
+      return action.callTreeSummaryStrategy;
     default:
       return state;
   }

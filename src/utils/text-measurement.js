@@ -48,7 +48,7 @@ class TextMeasurement {
    */
   getTextWidth(text: string): number {
     const cachedWidth = this._cache[text];
-    if (cachedWidth) {
+    if (cachedWidth !== undefined) {
       return cachedWidth;
     }
     const metrics = this._ctx.measureText(text);

@@ -68,6 +68,7 @@ describe('getUsefulTabs', function() {
       type: 'SELECT_TRACK',
       selectedThreadIndex: 2,
       selectedTab: 'calltree',
+      callTreeSummaryStrategy: 'timing',
     });
     expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
       'calltree',

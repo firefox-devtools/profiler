@@ -293,6 +293,7 @@ type UrlStateAction =
       +type: 'SELECT_TRACK',
       +selectedThreadIndex: ThreadIndex,
       +selectedTab: TabSlug,
+      +callTreeSummaryStrategy: CallTreeSummaryStrategy,
     |}
   | {|
       +type: 'CHANGE_RIGHT_CLICKED_TRACK',
@@ -324,7 +325,7 @@ type UrlStateAction =
     |}
   | {|
       type: 'CHANGE_CALL_TREE_SUMMARY_STRATEGY',
-      strategy: CallTreeSummaryStrategy,
+      callTreeSummaryStrategy: CallTreeSummaryStrategy,
     |}
   | {|
       +type: 'CHANGE_INVERT_CALLSTACK',

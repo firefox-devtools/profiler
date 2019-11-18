@@ -1238,9 +1238,11 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getMarkerChartTiming 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getMarkerChartTimingAndBuckets 1`] = `
 Array [
+  "Idle",
   Object {
+    "bucket": "Idle",
     "end": Array [
       3,
     ],
@@ -1257,6 +1259,7 @@ Array [
     ],
   },
   Object {
+    "bucket": "Idle",
     "end": Array [
       4,
     ],
@@ -1273,6 +1276,7 @@ Array [
     ],
   },
   Object {
+    "bucket": "Idle",
     "end": Array [
       5,
     ],
