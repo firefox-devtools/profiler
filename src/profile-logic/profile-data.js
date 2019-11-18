@@ -2115,9 +2115,9 @@ export function filterToRetainedAllocations(
     allocationIndex < nativeAllocations.length;
     allocationIndex++
   ) {
-    const duration = nativeAllocations.duration[allocationIndex];
+    const bytes = nativeAllocations.duration[allocationIndex];
     const memoryAddress = nativeAllocations.memoryAddress[allocationIndex];
-    if (duration >= 0) {
+    if (bytes >= 0) {
       // Handle the allocation.
 
       // Provide a map back to this index.

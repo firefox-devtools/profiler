@@ -17,6 +17,7 @@ import type {
   ThreadIndex,
   JsTracerTable,
   SamplesTable,
+  NativeAllocationsTable,
 } from '../../types/profile';
 import type { Selector } from '../../types/store';
 import type { ThreadViewOptions } from '../../types/state';
@@ -46,6 +47,8 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = state =>
     getThread(state).samples;
+  const getNativeAllocations: Selector<NativeAllocationsTable | void> = state =>
+    getThread(state).nativeAllocations;
   const getThreadRange: Selector<StartEndRange> = state =>
     // This function is already memoized in profile-data.js, so we don't need to
     // memoize it here with `createSelector`.
@@ -222,7 +225,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
    * balanced allocations and deallocations.
    */
   const getCanShowRetainedMemory: Selector<boolean> = state => {
-    const { nativeAllocations } = getThread(state);
+    const nativeAllocations = getNativeAllocations(state);
     if (!nativeAllocations) {
       return false;
     }
@@ -273,6 +276,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread,
     getStringTable,
     getSamplesTable,
+    getNativeAllocations,
     getThreadRange,
     getFilteredThread,
     getRangeFilteredThread,

@@ -92,7 +92,7 @@ describe('Native allocation call trees', function() {
     });
   });
 
-  describe('with balanced allocations', function() {
+  describe('with unbalanced allocations', function() {
     it('can create a call tree from allocations only', function() {
       const { getState } = setup('unbalanced', 'native-allocations');
       const callTree = selectedThreadSelectors.getCallTree(getState());

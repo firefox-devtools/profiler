@@ -107,12 +107,7 @@ class StackSettings extends PureComponent<Props> {
     tooltip: string
   ) {
     return (
-      <option
-        title={tooltip}
-        key={strategy}
-        value={strategy}
-        checked={this.props.callTreeSummaryStrategy === strategy}
-      >
+      <option title={tooltip} key={strategy} value={strategy}>
         {label}
       </option>
     );
@@ -147,7 +142,7 @@ class StackSettings extends PureComponent<Props> {
                 <select
                   className="stackSettingsSelect"
                   onChange={this._onCallTreeSummaryStrategyChange}
-                  defaultValue={callTreeSummaryStrategy}
+                  value={callTreeSummaryStrategy}
                 >
                   {this._renderCallTreeStrategyOption(
                     'Timing Data',
