@@ -17,6 +17,7 @@ import type {
   ThreadIndex,
   JsTracerTable,
   SamplesTable,
+  NativeAllocationsTable,
 } from '../../types/profile';
 import type { Selector } from '../../types/store';
 import type { ThreadViewOptions } from '../../types/state';
@@ -46,6 +47,8 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread(state).stringTable;
   const getSamplesTable: Selector<SamplesTable> = state =>
     getThread(state).samples;
+  const getNativeAllocations: Selector<NativeAllocationsTable | void> = state =>
+    getThread(state).nativeAllocations;
   const getThreadRange: Selector<StartEndRange> = state =>
     // This function is already memoized in profile-data.js, so we don't need to
     // memoize it here with `createSelector`.
@@ -217,6 +220,19 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     Boolean(getThread(state).nativeAllocations);
 
   /**
+   * We can only compute the retained memory in the versions of the native allocations
+   * format that provide the memory address. The earlier versions did not have
+   * balanced allocations and deallocations.
+   */
+  const getCanShowRetainedMemory: Selector<boolean> = state => {
+    const nativeAllocations = getNativeAllocations(state);
+    if (!nativeAllocations) {
+      return false;
+    }
+    return 'memoryAddress' in nativeAllocations;
+  };
+
+  /**
    * The JS tracer selectors are placed in the thread selectors since there are
    * not many of them. If this section grows, then consider breaking them out
    * into their own file.
@@ -260,6 +276,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getThread,
     getStringTable,
     getSamplesTable,
+    getNativeAllocations,
     getThreadRange,
     getFilteredThread,
     getRangeFilteredThread,
@@ -277,5 +294,6 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getExpensiveJsTracerLeafTiming,
     getHasJsAllocations,
     getHasNativeAllocations,
+    getCanShowRetainedMemory,
   };
 }

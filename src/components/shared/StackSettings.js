@@ -44,6 +44,7 @@ type StateProps = {|
   +currentSearchString: string,
   +hasJsAllocations: boolean,
   +hasNativeAllocations: boolean,
+  +canShowRetainedMemory: boolean,
 |};
 
 type DispatchProps = {|
@@ -100,27 +101,15 @@ class StackSettings extends PureComponent<Props> {
     );
   }
 
-  _renderCallTreeStrategyRadioButton(
+  _renderCallTreeStrategyOption(
     label: string,
     strategy: CallTreeSummaryStrategy,
     tooltip: string
   ) {
     return (
-      <label
-        className="photon-label photon-label-micro stackSettingsFilterLabel"
-        title={tooltip}
-        key={strategy}
-      >
-        <input
-          type="radio"
-          className="photon-radio photon-radio-micro stackSettingsFilterInput"
-          value={strategy}
-          name="stack-settings-strategy"
-          onChange={this._onCallTreeSummaryStrategyChange}
-          checked={this.props.callTreeSummaryStrategy === strategy}
-        />
+      <option title={tooltip} key={strategy} value={strategy}>
         {label}
-      </label>
+      </option>
     );
   }
 
@@ -131,7 +120,9 @@ class StackSettings extends PureComponent<Props> {
       currentSearchString,
       hasJsAllocations,
       hasNativeAllocations,
+      canShowRetainedMemory,
       disableCallTreeSummaryButtons,
+      callTreeSummaryStrategy,
     } = this.props;
 
     const hasAllocations = hasJsAllocations || hasNativeAllocations;
@@ -146,32 +137,48 @@ class StackSettings extends PureComponent<Props> {
           </li>
           {hasAllocations && !disableCallTreeSummaryButtons ? (
             <li className="stackSettingsListItem stackSettingsFilter">
-              {this._renderCallTreeStrategyRadioButton(
-                'Timing',
-                'timing',
-                'Summarize using sampled stacks of executed code over time'
-              )}
-              {hasJsAllocations
-                ? this._renderCallTreeStrategyRadioButton(
-                    'JavaScript Allocations',
-                    'js-allocations',
-                    'Summarize using bytes of JavaScript allocated (no de-allocations)'
-                  )
-                : null}
-              {hasNativeAllocations
-                ? [
-                    this._renderCallTreeStrategyRadioButton(
-                      'Allocations',
-                      'native-allocations',
-                      'Summarize using bytes of memory allocated'
-                    ),
-                    this._renderCallTreeStrategyRadioButton(
-                      'Deallocations',
-                      'native-deallocations',
-                      'Summarize using bytes of memory deallocated'
-                    ),
-                  ]
-                : null}
+              <label>
+                Summarize:{' '}
+                <select
+                  className="stackSettingsSelect"
+                  onChange={this._onCallTreeSummaryStrategyChange}
+                  value={callTreeSummaryStrategy}
+                >
+                  {this._renderCallTreeStrategyOption(
+                    'Timing Data',
+                    'timing',
+                    'Summarize using sampled stacks of executed code over time'
+                  )}
+                  {hasJsAllocations
+                    ? this._renderCallTreeStrategyOption(
+                        'JavaScript Allocations',
+                        'js-allocations',
+                        'Summarize using bytes of JavaScript allocated (no de-allocations)'
+                      )
+                    : null}
+                  {canShowRetainedMemory
+                    ? this._renderCallTreeStrategyOption(
+                        'Retained Allocations',
+                        'native-retained-allocations',
+                        'Summarize using bytes of memory that were allocated, and never freed while profiling'
+                      )
+                    : null}
+                  {hasNativeAllocations
+                    ? this._renderCallTreeStrategyOption(
+                        'Allocations',
+                        'native-allocations',
+                        'Summarize using bytes of memory allocated'
+                      )
+                    : null}
+                  {hasNativeAllocations
+                    ? this._renderCallTreeStrategyOption(
+                        'Deallocations',
+                        'native-deallocations',
+                        'Summarize using bytes of memory deallocated'
+                      )
+                    : null}
+                </select>
+              </label>
             </li>
           ) : null}
           {hideInvertCallstack ? null : (
@@ -207,6 +214,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     currentSearchString: getCurrentSearchString(state),
     hasJsAllocations: selectedThreadSelectors.getHasJsAllocations(state),
     hasNativeAllocations: selectedThreadSelectors.getHasNativeAllocations(
+      state
+    ),
+    canShowRetainedMemory: selectedThreadSelectors.getCanShowRetainedMemory(
       state
     ),
     callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),

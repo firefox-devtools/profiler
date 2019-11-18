@@ -257,6 +257,7 @@ export class CallTree {
         }
         case 'js-allocations':
         case 'native-allocations':
+        case 'native-retained-allocations':
         case 'native-deallocations': {
           totalTimeWithUnit = `${formattedTotalTime} bytes`;
           selfTimeWithUnit = `${formattedSelfTime} bytes`;

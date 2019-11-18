@@ -6,6 +6,7 @@ import { CallTree } from '../../profile-logic/call-tree';
 import type { IndexIntoCallNodeTable } from '../../types/profile-derived';
 import type { Store, State } from '../../types/store';
 import { ensureExists } from '../../utils/flow';
+import { fireEvent, type RenderResult } from 'react-testing-library';
 
 export function getBoundingBox(width: number, height: number) {
   return {
@@ -209,4 +210,22 @@ export function removeRootOverlayElement() {
       'Expected to find a root overlay element to clean up.'
     )
   );
+}
+
+/**
+ * You can't change <select>s by just clicking them using react-testing-library. This
+ * utility makes it so that selects can be changed by the text that is in them.
+ *
+ * Usage:
+ * changeSelect({ from: 'Timing Data', to: 'Deallocations' });
+ */
+export function createSelectChanger(renderResult: RenderResult) {
+  return function changeSelect({ from, to }: {| from: string, to: string |}) {
+    // Look up the <option> with the text label.
+    const option = renderResult.getByText(to);
+    // Fire a change event to the select.
+    fireEvent.change(renderResult.getByDisplayValue(from), {
+      target: { value: option.getAttribute('value') },
+    });
+  };
 }
