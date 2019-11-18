@@ -41,3 +41,8 @@
   align-items: center;
   padding: 0 5px 0 0;
 }
+
+.stackSettingsSelect {
+  height: 24px;
+  font-size: inherit;
+}

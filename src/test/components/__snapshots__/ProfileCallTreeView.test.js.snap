@@ -60,7 +60,9 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
         <label>
           Summarize:
            
-          <select>
+          <select
+            class="stackSettingsSelect"
+          >
             <option
               selected=""
               title="Summarize using sampled stacks of executed code over time"
@@ -697,7 +699,9 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
         <label>
           Summarize:
            
-          <select>
+          <select
+            class="stackSettingsSelect"
+          >
             <option
               selected=""
               title="Summarize using sampled stacks of executed code over time"
@@ -1346,7 +1350,9 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         <label>
           Summarize:
            
-          <select>
+          <select
+            class="stackSettingsSelect"
+          >
             <option
               selected=""
               title="Summarize using sampled stacks of executed code over time"
@@ -1989,7 +1995,9 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
         <label>
           Summarize:
            
-          <select>
+          <select
+            class="stackSettingsSelect"
+          >
             <option
               selected=""
               title="Summarize using sampled stacks of executed code over time"

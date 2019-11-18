@@ -145,6 +145,7 @@ class StackSettings extends PureComponent<Props> {
               <label>
                 Summarize:{' '}
                 <select
+                  className="stackSettingsSelect"
                   onChange={this._onCallTreeSummaryStrategyChange}
                   defaultValue={callTreeSummaryStrategy}
                 >
