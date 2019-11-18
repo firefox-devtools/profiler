@@ -46,8 +46,8 @@ export const getAllCommittedRanges: Selector<StartEndRange[]> = state =>
   getProfileSpecificState(state).committedRanges;
 export const getImplementationFilter: Selector<ImplementationFilter> = state =>
   getProfileSpecificState(state).implementation;
-export const getCallTreeSummaryStrategy: Selector<CallTreeSummaryStrategy> = state =>
-  getProfileSpecificState(state).callTreeSummaryStrategy;
+export const getLastSelectedCallTreeSummaryStrategy: Selector<CallTreeSummaryStrategy> = state =>
+  getProfileSpecificState(state).lastSelectedCallTreeSummaryStrategy;
 export const getInvertCallstack: Selector<boolean> = state =>
   getProfileSpecificState(state).invertCallstack;
 export const getShowJsTracerSummary: Selector<boolean> = state =>

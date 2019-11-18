@@ -10,6 +10,7 @@ import { render, fireEvent } from 'react-testing-library';
 import copy from 'copy-to-clipboard';
 import fakeIndexedDB from 'fake-indexeddb';
 
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { processProfile } from '../../profile-logic/process-profile';
@@ -25,7 +26,6 @@ import {
   getProfileWithBalancedNativeAllocations,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import { getCallTreeSummaryStrategy } from '../../selectors/url-state';
 
 import {
   getEmptyThread,
@@ -513,15 +513,21 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     const { changeSelect, getState } = setup();
 
     // It starts out with timing.
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
 
     // It switches to JS allocations.
     changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('js-allocations');
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('js-allocations');
 
     // And finally it can be switched back.
     changeSelect({ from: 'JavaScript Allocations', to: 'Timing Data' });
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
   });
 
   it('shows byte related labels for JS allocations', function() {
@@ -563,18 +569,22 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     const { getState, changeSelect } = setup();
 
     // It starts out with timing.
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
 
     // Switch to native allocations.
     changeSelect({ from: 'Timing Data', to: 'Allocations' });
 
-    expect(getCallTreeSummaryStrategy(getState())).toEqual(
-      'native-allocations'
-    );
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('native-allocations');
 
     // And finally it can be switched back.
     changeSelect({ from: 'Allocations', to: 'Timing Data' });
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
   });
 
   it('shows byte related labels for native allocations', function() {
@@ -627,18 +637,22 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     const { getState, changeSelect } = setup();
 
     // It starts out with timing.
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
 
     // Switch to retained memory native allocations.
     changeSelect({ from: 'Timing Data', to: 'Retained Allocations' });
 
-    expect(getCallTreeSummaryStrategy(getState())).toEqual(
-      'native-retained-allocations'
-    );
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('native-retained-allocations');
 
     // And finally it can be switched back.
     changeSelect({ from: 'Retained Allocations', to: 'Timing Data' });
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
   });
 
   it('shows byte related labels for retained allocations', function() {

@@ -192,7 +192,7 @@ export type UrlState = {|
     hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
     localTrackOrderByPid: Map<Pid, TrackIndex[]>,
     implementation: ImplementationFilter,
-    callTreeSummaryStrategy: CallTreeSummaryStrategy,
+    lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
     invertCallstack: boolean,
     showJsTracerSummary: boolean,
     committedRanges: StartEndRange[],

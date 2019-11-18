@@ -844,26 +844,29 @@ describe('compare', function() {
   });
 });
 
-describe('call tree summary strategy', function() {
-  const { getCallTreeSummaryStrategy } = urlStateReducers;
-
+describe('last requested call tree summary strategy', function() {
+  const { getLastSelectedCallTreeSummaryStrategy } = urlStateReducers;
   it('defaults to timing', function() {
     const { getState } = _getStoreWithURL();
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(
+      'timing'
+    );
   });
 
   it('can be js allocations', function() {
     const { getState } = _getStoreWithURL({
       search: '?ctSummary=js-allocations',
     });
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('js-allocations');
+    expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(
+      'js-allocations'
+    );
   });
 
   it('can be native allocations', function() {
     const { getState } = _getStoreWithURL({
       search: '?ctSummary=native-allocations',
     });
-    expect(getCallTreeSummaryStrategy(getState())).toEqual(
+    expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(
       'native-allocations'
     );
   });
@@ -872,6 +875,8 @@ describe('call tree summary strategy', function() {
     const { getState } = _getStoreWithURL({
       search: '?ctSummary=unknown-value',
     });
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(
+      'timing'
+    );
   });
 });

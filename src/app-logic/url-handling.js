@@ -246,9 +246,10 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
           ) || undefined;
       }
       query.ctSummary =
-        urlState.profileSpecific.callTreeSummaryStrategy === 'timing'
+        urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy ===
+        'timing'
           ? undefined
-          : urlState.profileSpecific.callTreeSummaryStrategy;
+          : urlState.profileSpecific.lastSelectedCallTreeSummaryStrategy;
       break;
     }
     case 'marker-table':
@@ -366,7 +367,9 @@ export function stateFromLocation(
     profileName: query.profileName,
     profileSpecific: {
       implementation,
-      callTreeSummaryStrategy: toValidCallTreeSummaryStrategy(query.ctSummary),
+      lastSelectedCallTreeSummaryStrategy: toValidCallTreeSummaryStrategy(
+        query.ctSummary
+      ),
       invertCallstack: query.invertCallstack !== undefined,
       showJsTracerSummary: query.summary !== undefined,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
