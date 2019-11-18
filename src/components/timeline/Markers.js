@@ -395,14 +395,9 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
     const { rightClickedMarker } = this.props;
     const { hoveredItem, mouseDownItem } = this.state;
 
-    if (rightClickedMarker) {
-      if (rightClickedMarker === marker) {
-        return 'PRESSED';
-      }
-
-      return 'NONE';
+    if (rightClickedMarker === marker) {
+      return 'PRESSED';
     }
-
     if (mouseDownItem !== null) {
       if (marker === mouseDownItem && marker === hoveredItem) {
         return 'PRESSED';
