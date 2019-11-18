@@ -127,6 +127,7 @@ class StackSettings extends PureComponent<Props> {
       hasNativeAllocations,
       canShowRetainedMemory,
       disableCallTreeSummaryButtons,
+      callTreeSummaryStrategy,
     } = this.props;
 
     const hasAllocations = hasJsAllocations || hasNativeAllocations;
@@ -143,7 +144,10 @@ class StackSettings extends PureComponent<Props> {
             <li className="stackSettingsListItem stackSettingsFilter">
               <label>
                 Summarize:{' '}
-                <select onChange={this._onCallTreeSummaryStrategyChange}>
+                <select
+                  onChange={this._onCallTreeSummaryStrategyChange}
+                  defaultValue={callTreeSummaryStrategy}
+                >
                   {this._renderCallTreeStrategyOption(
                     'Timing Data',
                     'timing',
