@@ -17,7 +17,8 @@ import type {
   FuncTable,
   RawMarkerTable,
   JsAllocationsTable,
-  NativeAllocationsTable,
+  UnbalancedNativeAllocationsTable,
+  BalancedNativeAllocationsTable,
   ResourceTable,
   Profile,
   ExtensionTable,
@@ -198,7 +199,11 @@ export function getEmptyJsAllocationsTable(): JsAllocationsTable {
   };
 }
 
-export function getEmptyNativeAllocationsTable(): NativeAllocationsTable {
+/**
+ * The native allocation tables come in two varieties. Get one of the members of the
+ * union.
+ */
+export function getEmptyUnbalancedNativeAllocationsTable(): UnbalancedNativeAllocationsTable {
   // Important!
   // If modifying this structure, please update all callers of this function to ensure
   // that they are pushing on correctly to the data structure. These pushes may not
@@ -207,6 +212,25 @@ export function getEmptyNativeAllocationsTable(): NativeAllocationsTable {
     time: [],
     duration: [],
     stack: [],
+    length: 0,
+  };
+}
+
+/**
+ * The native allocation tables come in two varieties. Get one of the members of the
+ * union.
+ */
+export function getEmptyBalancedNativeAllocationsTable(): BalancedNativeAllocationsTable {
+  // Important!
+  // If modifying this structure, please update all callers of this function to ensure
+  // that they are pushing on correctly to the data structure. These pushes may not
+  // be caught by the type system.
+  return {
+    time: [],
+    duration: [],
+    stack: [],
+    memoryAddress: [],
+    threadId: [],
     length: 0,
   };
 }

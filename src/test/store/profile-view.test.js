@@ -15,7 +15,7 @@ import {
   getNetworkMarkers,
   getCounterForThread,
   getVisualProgressTrackProfile,
-  getProfileWithNativeAllocations,
+  getProfileWithUnbalancedNativeAllocations,
   getProfileWithJsAllocations,
 } from '../fixtures/profiles/processed-profile';
 import {
@@ -507,7 +507,7 @@ describe('actions/ProfileView', function() {
 
     describe('with allocation-based tracks', function() {
       function setup() {
-        const { profile } = getProfileWithNativeAllocations();
+        const { profile } = getProfileWithUnbalancedNativeAllocations();
         profile.threads.push(
           getProfileWithJsAllocations().profile.threads[0],
           getEmptyThread()

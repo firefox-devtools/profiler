@@ -333,6 +333,7 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
           }
           break;
         case 'native-allocations':
+        case 'native-retained-allocations':
         case 'native-deallocations':
           if (!selectedThread.nativeAllocations) {
             // Attempting to view a thread with no native allocations, switch back

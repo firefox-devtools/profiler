@@ -206,6 +206,7 @@ class CallTreeComponent extends PureComponent<Props> {
       case 'timing':
         fixedColumns = this._fixedColumnsTiming;
         break;
+      case 'native-retained-allocations':
       case 'native-allocations':
       case 'native-deallocations':
       case 'js-allocations':
