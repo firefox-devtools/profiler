@@ -86,6 +86,7 @@ export type ImplementationFilter = 'combined' | 'js' | 'cpp';
 export type CallTreeSummaryStrategy =
   | 'timing'
   | 'js-allocations'
+  | 'native-retained-allocations'
   | 'native-allocations'
   | 'native-deallocations';
 
@@ -293,7 +294,6 @@ type UrlStateAction =
       +type: 'SELECT_TRACK',
       +selectedThreadIndex: ThreadIndex,
       +selectedTab: TabSlug,
-      +callTreeSummaryStrategy: CallTreeSummaryStrategy,
     |}
   | {|
       +type: 'CHANGE_RIGHT_CLICKED_TRACK',

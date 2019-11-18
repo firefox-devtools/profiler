@@ -12,7 +12,6 @@ import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,
   getImplementationFilter,
-  getCallTreeSummaryStrategy,
   getSearchStringsAsRegExp,
   getSelectedThreadIndex,
 } from '../../selectors/url-state';
@@ -206,6 +205,7 @@ class CallTreeComponent extends PureComponent<Props> {
       case 'timing':
         fixedColumns = this._fixedColumnsTiming;
         break;
+      case 'native-retained-allocations':
       case 'native-allocations':
       case 'native-deallocations':
       case 'js-allocations':
@@ -261,7 +261,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     implementationFilter: getImplementationFilter(state),
     icons: getIconsWithClassNames(state),
     callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
-    callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),
+    callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
+      state
+    ),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,

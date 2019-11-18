@@ -10,6 +10,7 @@ import { render, fireEvent } from 'react-testing-library';
 import copy from 'copy-to-clipboard';
 import fakeIndexedDB from 'fake-indexeddb';
 
+import { selectedThreadSelectors } from '../../selectors/per-thread';
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { processProfile } from '../../profile-logic/process-profile';
@@ -17,14 +18,14 @@ import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { storeWithProfile } from '../fixtures/stores';
-import { getBoundingBox } from '../fixtures/utils';
+import { getBoundingBox, createSelectChanger } from '../fixtures/utils';
 import {
   getProfileFromTextSamples,
   getProfileWithJsAllocations,
-  getProfileWithNativeAllocations,
+  getProfileWithUnbalancedNativeAllocations,
+  getProfileWithBalancedNativeAllocations,
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
-import { getCallTreeSummaryStrategy } from '../../selectors/url-state';
 
 import {
   getEmptyThread,
@@ -503,33 +504,40 @@ describe('ProfileCallTreeView with JS Allocations', function() {
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
+    const changeSelect = createSelectChanger(renderResult);
 
-    return { profile, ...renderResult, ...store };
+    return { profile, changeSelect, ...renderResult, ...store };
   }
 
   it('can switch to JS allocations and back to timing', function() {
-    const { getByText, getState } = setup();
+    const { changeSelect, getState } = setup();
 
     // It starts out with timing.
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
 
     // It switches to JS allocations.
-    getByText('JavaScript Allocations').click();
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('js-allocations');
+    changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('js-allocations');
 
     // And finally it can be switched back.
-    getByText('Timing').click();
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    changeSelect({ from: 'JavaScript Allocations', to: 'Timing Data' });
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
   });
 
   it('shows byte related labels for JS allocations', function() {
-    const { getByText, queryByText } = setup();
+    const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
     expect(queryByText('Total Size (bytes)')).toBe(null);
     expect(queryByText('Self (bytes)')).toBe(null);
 
-    getByText('JavaScript Allocations').click();
+    changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
 
     // After clicking, they do.
     getByText('Total Size (bytes)');
@@ -537,65 +545,133 @@ describe('ProfileCallTreeView with JS Allocations', function() {
   });
 
   it('matches the snapshot for JS allocations', function() {
-    const { getByText, container } = setup();
-    getByText('JavaScript Allocations').click();
+    const { changeSelect, container } = setup();
+    changeSelect({ from: 'Timing Data', to: 'JavaScript Allocations' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });
 
-describe('ProfileCallTreeView with Native Allocations', function() {
+describe('ProfileCallTreeView with unbalanced native allocations', function() {
   function setup() {
-    const { profile } = getProfileWithNativeAllocations();
+    const { profile } = getProfileWithUnbalancedNativeAllocations();
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>
         <ProfileCallTreeView hideThreadActivityGraph={true} />
       </Provider>
     );
+    const changeSelect = createSelectChanger(renderResult);
 
-    return { profile, ...renderResult, ...store };
+    return { profile, ...renderResult, changeSelect, ...store };
   }
 
   it('can switch to native allocations and back to timing', function() {
-    const { getByText, getState } = setup();
+    const { getState, changeSelect } = setup();
 
     // It starts out with timing.
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
 
-    // It switches to native allocations.
-    getByText('Allocations').click();
-    expect(getCallTreeSummaryStrategy(getState())).toEqual(
-      'native-allocations'
-    );
+    // Switch to native allocations.
+    changeSelect({ from: 'Timing Data', to: 'Allocations' });
+
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('native-allocations');
 
     // And finally it can be switched back.
-    getByText('Timing').click();
-    expect(getCallTreeSummaryStrategy(getState())).toEqual('timing');
+    changeSelect({ from: 'Allocations', to: 'Timing Data' });
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
   });
 
   it('shows byte related labels for native allocations', function() {
-    const { getByText, queryByText } = setup();
+    const { getByText, queryByText, changeSelect } = setup();
 
     // These labels do not exist.
     expect(queryByText('Total Size (bytes)')).toBe(null);
     expect(queryByText('Self (bytes)')).toBe(null);
 
-    getByText('Allocations').click();
+    changeSelect({ from: 'Timing Data', to: 'Allocations' });
 
-    // After clicking, they do.
+    // After changing to native allocations, they do.
     getByText('Total Size (bytes)');
     getByText('Self (bytes)');
   });
 
+  it('does not have the retained memory option', function() {
+    const { queryByText } = setup();
+    expect(queryByText('Retained Allocations')).toBeFalsy();
+  });
+
   it('matches the snapshot for native allocations', function() {
-    const { getByText, container } = setup();
-    getByText('Allocations').click();
+    const { container, changeSelect } = setup();
+    changeSelect({ from: 'Timing Data', to: 'Allocations' });
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshot for native deallocations', function() {
-    const { getByText, container } = setup();
-    getByText('Deallocations').click();
+    const { container, changeSelect } = setup();
+    changeSelect({ from: 'Timing Data', to: 'Deallocations' });
+    expect(container.firstChild).toMatchSnapshot();
+  });
+});
+
+describe('ProfileCallTreeView with balanced native allocations', function() {
+  function setup() {
+    const { profile } = getProfileWithBalancedNativeAllocations();
+    const store = storeWithProfile(profile);
+    const renderResult = render(
+      <Provider store={store}>
+        <ProfileCallTreeView hideThreadActivityGraph={true} />
+      </Provider>
+    );
+    const changeSelect = createSelectChanger(renderResult);
+
+    return { profile, ...renderResult, changeSelect, ...store };
+  }
+
+  it('can switch to retained allocations and back to timing', function() {
+    const { getState, changeSelect } = setup();
+
+    // It starts out with timing.
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
+
+    // Switch to retained memory native allocations.
+    changeSelect({ from: 'Timing Data', to: 'Retained Allocations' });
+
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('native-retained-allocations');
+
+    // And finally it can be switched back.
+    changeSelect({ from: 'Retained Allocations', to: 'Timing Data' });
+    expect(
+      selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+    ).toEqual('timing');
+  });
+
+  it('shows byte related labels for retained allocations', function() {
+    const { getByText, queryByText, changeSelect } = setup();
+
+    // These labels do not exist.
+    expect(queryByText('Total Size (bytes)')).toBe(null);
+    expect(queryByText('Self (bytes)')).toBe(null);
+
+    changeSelect({ from: 'Timing Data', to: 'Retained Allocations' });
+
+    // After changing to retained allocations, they do.
+    getByText('Total Size (bytes)');
+    getByText('Self (bytes)');
+  });
+
+  it('matches the snapshot for retained allocations', function() {
+    const { container, changeSelect } = setup();
+    changeSelect({ from: 'Timing Data', to: 'Retained Allocations' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });

@@ -30,6 +30,7 @@ import type {
 import type { StartEndRange } from '../../types/units';
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
+import type { CallTreeSummaryStrategy } from '../../types/actions';
 import type { ThreadSelectorsPerThread } from './thread';
 
 /**
@@ -177,11 +178,50 @@ export function getStackAndSampleSelectorsPerThread(
     }
   );
 
+  /**
+   * The CallTreeSummaryStrategy determines how the call tree summarizes the
+   * the current thread. By default, this is done by timing, but other
+   * methods are also available. This selectors also ensures that the current
+   * thread supports the last selected call tree summary strategy.
+   */
+  const getCallTreeSummaryStrategy: Selector<CallTreeSummaryStrategy> = createSelector(
+    threadSelectors.getThread,
+    UrlState.getLastSelectedCallTreeSummaryStrategy,
+    (thread, lastSelectedCallTreeSummaryStrategy) => {
+      switch (lastSelectedCallTreeSummaryStrategy) {
+        case 'timing':
+          // Timing is valid everywhere.
+          break;
+        case 'js-allocations':
+          if (!thread.jsAllocations) {
+            // Attempting to view a thread with no JS allocations, switch back to timing.
+            return 'timing';
+          }
+          break;
+        case 'native-allocations':
+        case 'native-retained-allocations':
+        case 'native-deallocations':
+          if (!thread.nativeAllocations) {
+            // Attempting to view a thread with no native allocations, switch back
+            // to timing.
+            return 'timing';
+          }
+          break;
+        default:
+          assertExhaustiveCheck(
+            lastSelectedCallTreeSummaryStrategy,
+            'Unhandled call tree sumary strategy.'
+          );
+      }
+      return lastSelectedCallTreeSummaryStrategy;
+    }
+  );
+
   const getSamplesForCallTree: Selector<
     SamplesTable | JsAllocationsTable | NativeAllocationsTable
   > = createSelector(
     threadSelectors.getPreviewFilteredThread,
-    UrlState.getCallTreeSummaryStrategy,
+    getCallTreeSummaryStrategy,
     (thread, strategy) => {
       switch (strategy) {
         case 'timing':
@@ -189,20 +229,33 @@ export function getStackAndSampleSelectorsPerThread(
         case 'js-allocations':
           return ensureExists(
             thread.jsAllocations,
-            'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
+            'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
           );
+        case 'native-retained-allocations': {
+          const nativeAllocations = ensureExists(
+            thread.nativeAllocations,
+            'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
+          );
+
+          if (!nativeAllocations.memoryAddress) {
+            throw new Error(
+              'Attempting to filter by retained allocations data that is missing the memory addresses.'
+            );
+          }
+          return ProfileData.filterToRetainedAllocations(nativeAllocations);
+        }
         case 'native-allocations':
           return ProfileData.filterToAllocations(
             ensureExists(
               thread.nativeAllocations,
-              'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
+              'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
             )
           );
         case 'native-deallocations':
           return ProfileData.filterToDeallocations(
             ensureExists(
               thread.nativeAllocations,
-              'Expected the JsAllocationTable to exist when using a "js-allocation" strategy'
+              'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
             )
           );
         default:
@@ -226,7 +279,7 @@ export function getStackAndSampleSelectorsPerThread(
     ProfileSelectors.getCategories,
     UrlState.getImplementationFilter,
     getCallTreeCountsAndTimings,
-    UrlState.getCallTreeSummaryStrategy,
+    getCallTreeSummaryStrategy,
     CallTree.getCallTree
   );
 
@@ -263,6 +316,7 @@ export function getStackAndSampleSelectorsPerThread(
     getExpandedCallNodeIndexes,
     getSamplesSelectedStatesInFilteredThread,
     getTreeOrderComparatorInFilteredThread,
+    getCallTreeSummaryStrategy,
     getCallTree,
     getStackTimingByDepth,
     getCallNodeMaxDepthForFlameGraph,

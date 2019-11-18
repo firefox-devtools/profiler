@@ -41,3 +41,11 @@
   align-items: center;
   padding: 0 5px 0 0;
 }
+
+.stackSettingsSelect {
+  /* Create a new stacking context for the select using a position:relative. This way
+   * the focus ring around the select breaks out of its surrounding container. */
+  position: relative;
+  height: 24px;
+  font-size: inherit;
+}

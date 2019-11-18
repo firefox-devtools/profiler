@@ -232,16 +232,16 @@ const implementation: Reducer<ImplementationFilter> = (
 };
 
 /**
- * Represents the current strategy used to summarize numeric information in the call
- * call tree.
+ * Represents the last selected call tree summary strategy, which will be used to
+ * summarize the the call tree. A strategy can be selected that is not supported
+ * by the current thread, in this case it will default back to timing.
  */
-const callTreeSummaryStrategy: Reducer<CallTreeSummaryStrategy> = (
+const lastSelectedCallTreeSummaryStrategy: Reducer<CallTreeSummaryStrategy> = (
   state = 'timing',
   action
 ) => {
   switch (action.type) {
     case 'CHANGE_CALL_TREE_SUMMARY_STRATEGY':
-    case 'SELECT_TRACK':
       return action.callTreeSummaryStrategy;
     default:
       return state;
@@ -402,7 +402,7 @@ const profileSpecific = combineReducers({
   hiddenLocalTracksByPid,
   localTrackOrderByPid,
   implementation,
-  callTreeSummaryStrategy,
+  lastSelectedCallTreeSummaryStrategy,
   invertCallstack,
   showJsTracerSummary,
   committedRanges,

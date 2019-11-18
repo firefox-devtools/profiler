@@ -129,12 +129,10 @@ export type JsAllocationsTable = {|
 |};
 
 /**
- * Native allocations are recorded as a marker payload, but in profile processing they
- * are moved to the Thread. This allows them to be part of the stack processing pipeline.
- * Currently they include native allocations and deallocations. However, both
- * of them are sampled independently, so they will be unbalanced if summed togther.
+ * This variant is the original version of the table, before the memory address
+ * and threadId were added.
  */
-export type NativeAllocationsTable = {|
+export type UnbalancedNativeAllocationsTable = {|
   time: Milliseconds[],
   // "duration" is a bit odd of a name for this field, but it's "duck typing" the byte
   // size so that we can use a SamplesTable and NativeAllocationsTable in the same call
@@ -143,6 +141,25 @@ export type NativeAllocationsTable = {|
   stack: Array<IndexIntoStackTable | null>,
   length: number,
 |};
+
+/**
+ * The memory address and thread ID were added later.
+ */
+export type BalancedNativeAllocationsTable = {|
+  ...UnbalancedNativeAllocationsTable,
+  memoryAddress: number[],
+  threadId: number[],
+|};
+
+/**
+ * Native allocations are recorded as a marker payload, but in profile processing they
+ * are moved to the Thread. This allows them to be part of the stack processing pipeline.
+ * Currently they include native allocations and deallocations. However, both
+ * of them are sampled independently, so they will be unbalanced if summed togther.
+ */
+export type NativeAllocationsTable =
+  | UnbalancedNativeAllocationsTable
+  | BalancedNativeAllocationsTable;
 
 /**
  * This is the base abstract class that marker payloads inherit from. This probably isn't

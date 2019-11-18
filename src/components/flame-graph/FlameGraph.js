@@ -18,7 +18,6 @@ import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
   getSelectedThreadIndex,
   getInvertCallstack,
-  getCallTreeSummaryStrategy,
 } from '../../selectors/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
@@ -369,7 +368,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       icons: getIconsWithClassNames(state),
       interval: getProfileInterval(state),
       isInverted: getInvertCallstack(state),
-      callTreeSummaryStrategy: getCallTreeSummaryStrategy(state),
+      callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
+        state
+      ),
       pages: getPageList(state),
     };
   },

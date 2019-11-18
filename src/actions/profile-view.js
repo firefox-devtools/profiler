@@ -13,7 +13,6 @@ import {
   getLocalTrackFromReference,
   getGlobalTrackFromReference,
   getPreviewSelection,
-  getThreads,
 } from '../selectors/profile';
 import {
   getThreadSelectors,
@@ -27,7 +26,6 @@ import {
   getLocalTrackOrder,
   getHiddenLocalTracks,
   getSelectedTab,
-  getCallTreeSummaryStrategy,
 } from '../selectors/url-state';
 import {
   getCallNodePathFromIndex,
@@ -229,7 +227,6 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
     // These get assigned based on the track type.
     let selectedThreadIndex = null;
     let selectedTab = currentlySelectedTab;
-    let callTreeSummaryStrategy = getCallTreeSummaryStrategy(getState());
 
     if (trackReference.type === 'global') {
       // Handle the case of global tracks.
@@ -317,42 +314,10 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
       return;
     }
 
-    {
-      // Verify that the call tree summary strategy is still valid for the new tab.
-      // Otherwise, switch back to "timing", which is valid everywhere.
-      const strategy = callTreeSummaryStrategy;
-      const selectedThread = getThreads(getState())[selectedThreadIndex];
-      switch (strategy) {
-        case 'timing':
-          // Timing is valid everywhere.
-          break;
-        case 'js-allocations':
-          if (!selectedThread.jsAllocations) {
-            // Attempting to view a thread with no JS allocations, switch back to timing.
-            callTreeSummaryStrategy = 'timing';
-          }
-          break;
-        case 'native-allocations':
-        case 'native-deallocations':
-          if (!selectedThread.nativeAllocations) {
-            // Attempting to view a thread with no native allocations, switch back
-            // to timing.
-            callTreeSummaryStrategy = 'timing';
-          }
-          break;
-        default:
-          assertExhaustiveCheck(
-            strategy,
-            'Unhandled call tree sumary strategy.'
-          );
-      }
-    }
-
     dispatch({
       type: 'SELECT_TRACK',
       selectedThreadIndex,
       selectedTab,
-      callTreeSummaryStrategy,
     });
   };
 }
