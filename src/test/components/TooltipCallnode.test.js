@@ -69,83 +69,73 @@ describe('TooltipCallNode', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
-  it('displays Page URL for non-iframe pages', () => {
-    const {
-      profile,
-      funcNamesDictPerThread: [funcNamesDict],
-    } = getProfileFromTextSamples(`
-      A
-      Bjs
-      Cjs
-    `);
-    const threadIndex = 0;
-    // Add an item to Pages array.
-    const pageUrl = 'https://developer.mozilla.org/en-US/';
-    profile.pages = [
-      {
-        browsingContextID: 1,
-        innerWindowID: 123123,
-        url: pageUrl,
-        embedderInnerWindowID: 0,
-      },
-    ];
+  describe('with page information', function() {
+    function setupWithPageInformation(pageUrl: string, iframeUrl?: string) {
+      const {
+        profile,
+        funcNamesDictPerThread: [funcNamesDict],
+      } = getProfileFromTextSamples(`
+        A
+        Bjs
+        Cjs
+      `);
+      const threadIndex = 0;
+      // Add items to Pages array.
+      profile.pages = [
+        {
+          browsingContextID: 1,
+          innerWindowID: 111111,
+          url: pageUrl,
+          embedderInnerWindowID: 0,
+        },
+      ];
 
-    const { frameTable } = profile.threads[threadIndex];
+      if (iframeUrl) {
+        profile.pages.push({
+          browsingContextID: 1,
+          innerWindowID: 123123,
+          url: iframeUrl,
+          embedderInnerWindowID: 111111,
+        });
+      }
 
-    for (let i = 1; i < frameTable.length; i++) {
-      frameTable.innerWindowID[i] = profile.pages[0].innerWindowID;
+      const { frameTable } = profile.threads[threadIndex];
+
+      for (let i = 1; i < frameTable.length; i++) {
+        frameTable.innerWindowID[i] =
+          profile.pages[profile.pages.length - 1].innerWindowID;
+      }
+
+      const callNodePath = ['A', 'Bjs', 'Cjs'].map(name => funcNamesDict[name]);
+      const { dispatch, renderTooltip } = setup(profile);
+      dispatch(changeSelectedCallNode(threadIndex, callNodePath));
+      const renderResults = renderTooltip();
+      return {
+        ...renderResults,
+        pageUrl,
+        iframeUrl,
+      };
     }
 
-    const callNodePath = ['A', 'Bjs', 'Cjs'].map(name => funcNamesDict[name]);
-    const { dispatch, renderTooltip } = setup(profile);
-    dispatch(changeSelectedCallNode(threadIndex, callNodePath));
-    const { container, getByText } = renderTooltip();
+    it('displays Page URL for non-iframe pages', () => {
+      const pageUrl = 'https://developer.mozilla.org/en-US/';
+      const { getByText, container } = setupWithPageInformation(pageUrl);
 
-    expect(getByText(pageUrl)).toBeTruthy();
-    expect(container.firstChild).toMatchSnapshot();
-  });
+      expect(getByText(pageUrl)).toBeTruthy();
+      expect(container.firstChild).toMatchSnapshot();
+    });
 
-  it('displays Page URL for iframe pages', () => {
-    const {
-      profile,
-      funcNamesDictPerThread: [funcNamesDict],
-    } = getProfileFromTextSamples(`
-      A
-      Bjs
-      Cjs
-    `);
-    const threadIndex = 0;
-    // Add a parent and an iframe page to Pages array.
-    const pageUrl = 'https://developer.mozilla.org/en-US/';
-    const iframeUrl = 'https://iframe.example.com/';
-    profile.pages = [
-      {
-        browsingContextID: 1,
-        innerWindowID: 111111,
-        url: pageUrl,
-        embedderInnerWindowID: 0,
-      },
-      {
-        browsingContextID: 1,
-        innerWindowID: 123123,
-        url: iframeUrl,
-        embedderInnerWindowID: 111111,
-      },
-    ];
+    it('displays Page URL for iframe pages', () => {
+      const pageUrl = 'https://developer.mozilla.org/en-US/';
+      const iframeUrl = 'https://iframe.example.com/';
+      const { getByText, container } = setupWithPageInformation(
+        pageUrl,
+        iframeUrl
+      );
 
-    const { frameTable } = profile.threads[threadIndex];
-
-    for (let i = 1; i < frameTable.length; i++) {
-      frameTable.innerWindowID[i] = profile.pages[1].innerWindowID;
-    }
-
-    const callNodePath = ['A', 'Bjs', 'Cjs'].map(name => funcNamesDict[name]);
-    const { dispatch, renderTooltip } = setup(profile);
-    dispatch(changeSelectedCallNode(threadIndex, callNodePath));
-    const { container, getByText } = renderTooltip();
-
-    expect(getByText(iframeUrl)).toBeTruthy();
-    expect(getByText(pageUrl)).toBeTruthy();
-    expect(container.firstChild).toMatchSnapshot();
+      expect(getByText(iframeUrl)).toBeTruthy();
+      expect(getByText(pageUrl)).toBeTruthy();
+      expect(container.firstChild).toMatchSnapshot();
+    });
   });
 });
