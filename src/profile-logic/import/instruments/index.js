@@ -56,13 +56,6 @@ function readAsText(file: File): Promise<string> {
 }
 
 function parseBinaryPlist(bytes: Uint8Array) {
-  const text = 'bplist00';
-  for (let i = 0; i < 8; i++) {
-    if (bytes[i] !== text.charCodeAt(i)) {
-      throw new Error('File is not a binary plist');
-    }
-  }
-
   return new BinaryPlistParser(
     new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
   ).parseRoot();
@@ -85,10 +78,12 @@ function followUID(
 }
 
 // This function constructs an object from given interpreter class and property list
+// I have taken inspiration for this function from here:
+// https://github.com/jlfwong/speedscope/blob/9edd5ce7ed6aaf9290d57e85f125c648a3b66d1f/import/instruments.ts#L648
 function patternMatchObjectiveC(
   objects: any[],
   value: any,
-  interpretClass: ($classname: string, obj: any) => any = x => x
+  interpretClass: ($classname: string, obj: any) => any
 ): any {
   if (isDictionary(value) && value.$class) {
     const name = followUID(objects, value.$class).$classname;
@@ -133,7 +128,7 @@ function patternMatchObjectiveC(
         if ('NS.objects' in value) {
           return value['NS.objects'];
         }
-        const array: any[] = [];
+        const array: number[] = [];
         while (true) {
           const object = 'NS.object.' + array.length;
           if (!(object in value)) {
@@ -200,8 +195,13 @@ function isDictionary(value: any): boolean {
 // This function populates data fields with given interpretClass(decided by various datatypes
 // from readInstrumentsArchive function)
 function expandKeyedArchive(
-  root: any,
-  interpretClass: ($classname: string, obj: any) => any = x => x
+  root: {
+    $archiver: string,
+    $version: number,
+    $objects: Array<any>,
+    $top: any,
+  },
+  interpretClass: ($classname: string, obj: any) => any
 ): any {
   // Sanity checks
   if (
@@ -227,7 +227,7 @@ function expandKeyedArchive(
     );
   }
 
-  const visit = (object: any) => {
+  const visit = (object: any): any => {
     if (object instanceof UID) {
       return root.$objects[object.index];
     } else if (Array.isArray(object)) {
@@ -270,7 +270,7 @@ function readInstrumentsArchive(buffer) {
         const ret = Object.create(null);
         ret.symbolName = object.$0;
         ret.sourcePath = object.$1;
-        ret.addressToLine = new Map<any, any>();
+        ret.addressToLine = new Map<number, number>();
         for (let i = 3; ; i += 2) {
           const address = object['$' + i];
           const line = object['$' + (i + 1)];
@@ -376,7 +376,6 @@ async function getIntegerArrays(
   );
   const datareader = new BinReader(await readAsArrayBuffer(integeruniquerdata));
 
-  // Header we don't care about
   indexreader.seek(32);
 
   const arrays: number[][] = [];
@@ -608,7 +607,7 @@ async function extractDirectoryTree(entry: {
     // I have checked in Firefox and Chrome. It's working fine in it.
     // We will remove FlowFixMe once it becomes a standard function (issue #2218)
     // $FlowFixMe createReader is not present in entry
-    entry.createReader().readEntries((entries: any[]) => {
+    entry.createReader().readEntries((entries: Array<any>) => {
       resolve(entries);
     }, reject);
   });
