@@ -25,7 +25,6 @@ type InstrumentsSample = {|
   +timestamp: number,
   +threadID: number,
   +backtraceID: number,
-  backtraceStack?: Array<number>,
 |};
 
 type TraceDirectoryTree = {|
@@ -254,7 +253,7 @@ function expandKeyedArchive(
 }
 
 // This function creates an archived data for given buffer by interpreting various Instruments specific data types
-function readInstrumentsArchive(buffer) {
+function readInstrumentsArchive(buffer: ArrayBuffer) {
   const byteArray = new Uint8Array(buffer);
   const parsedPlist = parseBinaryPlist(byteArray);
 
@@ -347,10 +346,7 @@ function setIfAbsent<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V | K {
 }
 
 // This function extracts arrays of backtraceIDs which contains information about backtrace in recursive manner
-async function getIntegerArrays(
-  samples: InstrumentsSample[],
-  core: TraceDirectoryTree
-): Promise<number[][]> {
+async function getIntegerArrays(core: TraceDirectoryTree): Promise<number[][]> {
   const uniquing = ensureExists(core.subdirectories.get('uniquing'));
   const arrayUniquer = ensureExists(
     uniquing.subdirectories.get('arrayUniquer')
@@ -471,12 +467,15 @@ async function getSamples(args: {
   tree: TraceDirectoryTree,
   addressToFrameMap: Map<number, InstrumentsFrameInfo>,
   runNumber: number,
-}): Promise<Array<InstrumentsSample>> {
+}): Promise<{
+  samples: Array<InstrumentsSample>,
+  backtraceIDtoStack: Map<number, Array<number>>,
+}> {
   const { tree, addressToFrameMap, runNumber } = args;
   const core = getCoreDirForRun(tree, runNumber);
   const samples = await getRawSampleList(core);
-  const arrays = await getIntegerArrays(samples, core);
-  const backtraceIDtoStack = new Map<number, number[]>();
+  const arrays = await getIntegerArrays(core);
+  const backtraceIDtoStack = new Map<number, Array<number>>();
 
   function appendRecursive(k: number, stack: Array<number>) {
     const frame = addressToFrameMap.get(k);
@@ -513,11 +512,7 @@ async function getSamples(args: {
     });
   }
 
-  for (const sample of samples) {
-    sample.backtraceStack = backtraceIDtoStack.get(sample.backtraceID);
-  }
-
-  return Promise.resolve(samples);
+  return Promise.resolve({ samples, backtraceIDtoStack });
 }
 
 // This function reads the 'form.template' file which contains all the important information about
@@ -719,7 +714,12 @@ function createStack(
 // This function returns a processed thread with all the tables filled( funcTable, frameTable, stackTable, stringTable and samples)
 // addressToFrame map here is a map between frameAddress and details for that frame.
 // Each sample is a tuple made up of (timestamp, threadID, backtraceID, backtraceStack)
-function getProcessedThread(threadId, samples, addressToFrameMap) {
+function getProcessedThread(
+  threadId: number,
+  samples: Array<InstrumentsSample>,
+  addressToFrameMap: Map<number, InstrumentsFrameInfo>,
+  backtraceIDtoStack: Map<number, Array<number>>
+) {
   const thread = getEmptyThread();
   const {
     funcTable,
@@ -799,7 +799,7 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
   }
 
   for (const sample of samples) {
-    const stackTrace = sample.backtraceStack;
+    const stackTrace = backtraceIDtoStack.get(sample.backtraceID);
     let parentIndex = stackKeyToIndex.get(rootStackKey);
     if (stackTrace) {
       for (let index = 0; index < stackTrace.length; index++) {
@@ -848,7 +848,11 @@ function getProcessedThread(threadId, samples, addressToFrameMap) {
 }
 
 // This function creates a thread for each group of samples(by threadID)
-function getProcessedProfile(addressToFrameMap, samples): Profile {
+function getProcessedProfile(
+  addressToFrameMap: Map<number, InstrumentsFrameInfo>,
+  samples: Array<InstrumentsSample>,
+  backtraceIDtoStack: Map<number, Array<number>>
+): Profile {
   const threadIDToSamples = new Map();
   const profile = getEmptyProfile();
   for (const sample of samples) {
@@ -867,7 +871,8 @@ function getProcessedProfile(addressToFrameMap, samples): Profile {
       processedThread = getProcessedThread(
         threadID,
         samples,
-        addressToFrameMap
+        addressToFrameMap,
+        backtraceIDtoStack
       );
     }
     profile.threads.push(processedThread);
@@ -896,13 +901,17 @@ export async function convertInstrumentsProfile(entry: {
   // In future, we will add support for processing every runs (issue #2215)
   const { addressToFrameMap, number } = runs[0];
 
-  const samples = await getSamples({
+  const { samples, backtraceIDtoStack } = await getSamples({
     tree,
     addressToFrameMap,
     runNumber: number,
   });
 
-  const processedProfile = getProcessedProfile(addressToFrameMap, samples);
+  const processedProfile = getProcessedProfile(
+    addressToFrameMap,
+    samples,
+    backtraceIDtoStack
+  );
 
   return processedProfile;
 }
