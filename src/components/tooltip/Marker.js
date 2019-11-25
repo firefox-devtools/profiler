@@ -699,13 +699,7 @@ class MarkerTooltipContents extends React.PureComponent<Props> {
       zeroAt
     );
     return (
-      <div
-        className={classNames('tooltipMarker', className)}
-        style={{
-          width: 'auto',
-          height: 'auto',
-        }}
-      >
+      <div className={classNames('tooltipMarker', className)}>
         <div className={classNames({ tooltipHeader: details })}>
           <div className="tooltipOneLine">
             <div className="tooltipTiming">

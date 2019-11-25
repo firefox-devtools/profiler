@@ -1246,13 +1246,13 @@ Array [
     "end": Array [
       3,
     ],
+    "index": Array [
+      3,
+    ],
     "label": Array [
       "",
     ],
     "length": 1,
-    "markerIndex": Array [
-      3,
-    ],
     "name": "D",
     "start": Array [
       3,
@@ -1263,13 +1263,13 @@ Array [
     "end": Array [
       4,
     ],
+    "index": Array [
+      4,
+    ],
     "label": Array [
       "",
     ],
     "length": 1,
-    "markerIndex": Array [
-      4,
-    ],
     "name": "E",
     "start": Array [
       4,
@@ -1280,13 +1280,13 @@ Array [
     "end": Array [
       5,
     ],
+    "index": Array [
+      5,
+    ],
     "label": Array [
       "",
     ],
     "length": 1,
-    "markerIndex": Array [
-      5,
-    ],
     "name": "F",
     "start": Array [
       5,

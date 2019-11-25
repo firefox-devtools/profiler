@@ -97,7 +97,7 @@ export function getMarkerTimingAndBuckets(
     // Place the marker in the closest row that is empty.
     for (let i = 0; i < MAX_STACKING_DEPTH; i++) {
       const bucketName =
-        categories && marker.category
+        categories && marker.category !== null
           ? categories[marker.category].name
           : 'None';
 
