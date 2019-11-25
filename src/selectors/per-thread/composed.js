@@ -13,8 +13,12 @@ import type { Thread, JsTracerTable } from '../../types/profile';
 import type {
   MarkerTimingRows,
   CombinedTimingRows,
+  MarkerTiming,
 } from '../../types/profile-derived';
-import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
+import type {
+  StackTiming,
+  StackTimingByDepth,
+} from '../../profile-logic/stack-timing';
 
 /**
  * Infer the return type from the getStackAndSampleSelectorsPerThread function. This
@@ -80,7 +84,10 @@ export function getComposedSelectorsPerThread(
   const getCombinedTimingRows: Selector<CombinedTimingRows> = createSelector(
     threadSelectors.getUserTimingMarkerTiming,
     threadSelectors.getStackTimingByDepth,
-    (userTimingMarkerTiming, stackTimingByDepth) => [
+    (
+      userTimingMarkerTiming,
+      stackTimingByDepth
+    ): Array<MarkerTiming | StackTiming> => [
       ...userTimingMarkerTiming,
       ...stackTimingByDepth,
     ]

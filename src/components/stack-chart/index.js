@@ -42,7 +42,6 @@ import type {
   CombinedTimingRows,
   MarkerIndex,
 } from '../../types/profile-derived';
-import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
 import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
@@ -58,7 +57,7 @@ type StateProps = {|
   +thread: Thread,
   +pages: PageList | null,
   +maxStackDepth: number,
-  +combinedTimingRows: CombinedTimingRows | StackTimingByDepth,
+  +combinedTimingRows: CombinedTimingRows,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
