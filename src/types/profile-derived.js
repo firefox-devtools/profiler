@@ -96,6 +96,7 @@ export type Marker = {|
 export type MarkerIndex = number;
 
 export type CallNodeData = {
+  funcIndex: number,
   funcName: string,
   totalTime: number,
   totalTimeRelative: number,

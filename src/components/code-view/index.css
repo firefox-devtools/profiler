@@ -1,0 +1,36 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.codeView {
+  display: flex;
+  flex: 1;
+  flex-flow: column nowrap;
+}
+
+.codeViewTable {
+  display: flex;
+  flex: 1;
+  flex-flow: column nowrap;
+  cursor: default;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.treeViewFixedColumn.codeSelfTime {
+  left: 0;
+  width: 80px;
+  padding-right: 5px;
+  text-align: right;
+}
+
+.treeViewFixedColumn.codeRunningTime {
+  left: 80px;
+  width: 80px;
+  padding-right: 5px;
+  text-align: right;
+}
+
+.treeViewMainColumn.codeText {
+  left: 175px;
+}

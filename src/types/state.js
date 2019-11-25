@@ -41,6 +41,8 @@ export type ThreadViewOptions = {|
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
   +rightClickedMarker: MarkerIndex | null,
+  +selectedCodeLine: number | null,
+  +expandedCodeLines: Array<number | null>,
 |};
 
 export type ProfileViewState = {|

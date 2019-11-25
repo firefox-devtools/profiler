@@ -134,6 +134,8 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         expandedCallNodePaths: new PathSet(),
         selectedMarker: null,
         rightClickedMarker: null,
+        selectedCodeLine: null,
+        expandedCodeLines: [],
       }));
     case 'COALESCED_FUNCTIONS_UPDATE': {
       const { functionsUpdatePerThread } = action;
@@ -288,6 +290,23 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         ...state.slice(threadIndex + 1),
       ];
     }
+    case 'CHANGE_EXPANDED_CODE_LINES': {
+      const { threadIndex, expandedCodeLines } = action;
+      return [
+        ...state.slice(0, threadIndex),
+        { ...state[threadIndex], expandedCodeLines },
+        ...state.slice(threadIndex + 1),
+      ];
+    }
+    case 'CHANGE_SELECTED_CODE_LINE': {
+      const { threadIndex, selectedCodeLine } = action;
+      return [
+        ...state.slice(0, threadIndex),
+        { ...state[threadIndex], selectedCodeLine },
+        ...state.slice(threadIndex + 1),
+      ];
+    }
+
     case 'SET_CONTEXT_MENU_VISIBILITY': {
       // We want to change the state only when the menu is hidden.
       if (action.isVisible) {

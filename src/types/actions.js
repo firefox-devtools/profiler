@@ -148,6 +148,16 @@ type ProfileAction =
       +markerIndex: MarkerIndex | null,
     |}
   | {|
+      +type: 'CHANGE_EXPANDED_CODE_LINES',
+      +threadIndex: ThreadIndex,
+      +expandedCodeLines: Array<number | null>,
+    |}
+  | {|
+      +type: 'CHANGE_SELECTED_CODE_LINE',
+      +threadIndex: ThreadIndex,
+      +selectedCodeLine: number,
+    |}
+  | {|
       +type: 'UPDATE_PREVIEW_SELECTION',
       +previewSelection: PreviewSelection,
     |}

@@ -230,6 +230,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   switch (selectedTab) {
     case 'stack-chart':
     case 'flame-graph':
+    case 'code-view':
     case 'calltree': {
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack

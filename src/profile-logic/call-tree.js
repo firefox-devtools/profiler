@@ -200,6 +200,7 @@ export class CallTree {
     const selfTimeRelative = selfTime / this._rootTotalTime;
 
     return {
+      funcIndex,
       funcName,
       totalTime,
       totalTimeRelative,

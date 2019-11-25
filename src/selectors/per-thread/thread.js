@@ -205,6 +205,12 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
   const getViewOptions: Selector<ThreadViewOptions> = state =>
     ProfileSelectors.getProfileViewOptions(state).perThread[threadIndex];
 
+  const getSelectedCodeLine: Selector<number | null> = state =>
+    getViewOptions(state).selectedCodeLine;
+
+  const getExpandedCodeLines: Selector<Array<number | null>> = state =>
+    getViewOptions(state).expandedCodeLines;
+
   /**
    * Check to see if there are any JS allocations for this thread. This way we
    * can display a custom thread.
@@ -289,6 +295,8 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getTransformLabels,
     getTransformStack,
     getViewOptions,
+    getSelectedCodeLine,
+    getExpandedCodeLines,
     getJsTracerTable,
     getExpensiveJsTracerTiming,
     getExpensiveJsTracerLeafTiming,

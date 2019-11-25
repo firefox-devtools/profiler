@@ -84,6 +84,7 @@ const config = {
       { from: 'res/_redirects' },
       { from: 'docs-user', to: 'docs' },
       { from: 'res/zee-worker.js' },
+      { from: 'res/92196893a1cdcf9d6cfb.bundle.js.txt' },
       { from: 'res/before-load.js' },
       { from: 'res/contribute.json' },
     ]),

@@ -991,6 +991,28 @@ export function changeNetworkSearchString(searchString: string): Action {
   };
 }
 
+export function changeSelectedCodeLine(
+  threadIndex: ThreadIndex,
+  selectedCodeLine: number
+): Action {
+  return {
+    type: 'CHANGE_SELECTED_CODE_LINE',
+    threadIndex,
+    selectedCodeLine,
+  };
+}
+
+export function changeExpandedCodeLines(
+  threadIndex: ThreadIndex,
+  expandedCodeLines: Array<number | null>
+): Action {
+  return {
+    type: 'CHANGE_EXPANDED_CODE_LINES',
+    expandedCodeLines,
+    threadIndex,
+  };
+}
+
 export function changeImplementationFilter(
   implementation: ImplementationFilter
 ): ThunkAction<void> {
