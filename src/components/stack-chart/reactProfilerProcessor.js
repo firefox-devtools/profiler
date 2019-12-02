@@ -41,21 +41,25 @@ export default function reactProfilerProcessor(rawData) {
 
   const metadata = {
     high: {
+      hasInProgressCommit: false,
       hasUncommittedWork: false,
       previousStartTime: null,
       previousStopTime: null,
     },
     normal: {
+      hasInProgressCommit: false,
       hasUncommittedWork: false,
       previousStartTime: null,
       previousStopTime: null,
     },
     low: {
+      hasInProgressCommit: false,
       hasUncommittedWork: false,
       previousStartTime: null,
       previousStopTime: null,
     },
     unscheduled: {
+      hasInProgressCommit: false,
       hasUncommittedWork: false,
       previousStartTime: null,
       previousStopTime: null,
@@ -183,6 +187,7 @@ export default function reactProfilerProcessor(rawData) {
         });
       }
 
+      currentMetadata.hasInProgressCommit = true;
       currentMetadata.previousStartTime = timestamp;
     } else if (name === '--commit-stop') {
       if (currentMetadata.previousStartTime === null) {
@@ -195,9 +200,50 @@ export default function reactProfilerProcessor(rawData) {
         });
       }
 
+      currentMetadata.hasInProgressCommit = false;
       currentMetadata.hasUncommittedWork = false;
       currentMetadata.previousStartTime = null;
       currentMetadata.previousStopTime = null;
+    } else if (
+      name === '--layout-effects-start' ||
+      name === '--passive-effects-start'
+    ) {
+      if (currentMetadata.hasInProgressCommit) {
+        currentProcessedGroup.reactWork.push({
+          type: 'commit-work',
+          timestamp: currentMetadata.previousStartTime,
+          duration: timestamp - currentMetadata.previousStartTime,
+        });
+      } else if (
+        currentMetadata.hasUncommittedWork &&
+        currentMetadata.previousStopTime !== null
+      ) {
+        currentProcessedGroup.reactWork.push({
+          type: 'render-idle',
+          timestamp: currentMetadata.previousStopTime,
+          duration: timestamp - currentMetadata.previousStopTime,
+        });
+      }
+
+      currentMetadata.previousStartTime = timestamp;
+    } else if (
+      name === '--layout-effects-stop' ||
+      name === '--passive-effects-stop'
+    ) {
+      currentProcessedGroup.reactWork.push({
+        type:
+          name === '--layout-effects-stop'
+            ? 'layout-effects'
+            : 'passive-effects',
+        timestamp: currentMetadata.previousStartTime,
+        duration: timestamp - currentMetadata.previousStartTime,
+      });
+
+      if (currentMetadata.hasInProgressCommit) {
+        currentMetadata.previousStartTime = timestamp;
+      } else {
+        currentMetadata.previousStartTime = null;
+      }
     } else if (name.startsWith('--schedule-render')) {
       currentProcessedGroup.reactEvents.push({
         type: 'schedule-render',

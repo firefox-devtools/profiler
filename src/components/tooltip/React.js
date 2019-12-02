@@ -5,7 +5,6 @@
 // @flow
 
 import * as React from 'react';
-import classNames from 'classnames';
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
 import { formatMilliseconds } from '../../utils/format-numbers';
 import './React.css';
@@ -114,6 +113,12 @@ export function TooltipReactWork({ data, priority }) {
       break;
     case 'render-work':
       label = '⚛️ render';
+      break;
+    case 'layout-effects':
+      label = '⚛️ layout effects';
+      break;
+    case 'passive-effects':
+      label = '⚛️ passive effects';
       break;
     default:
       break;

@@ -113,8 +113,12 @@ const REACT_DEVTOOLS_COLORS = {
   REACT_IDLE_HOVER: '#d7d7db',
   REACT_RENDER: '#9fc3f3',
   REACT_RENDER_HOVER: '#298ff6',
-  REACT_COMMIT: '#ff718e',
-  REACT_COMMIT_HOVER: '#ff335f',
+  REACT_COMMIT: '#ffd79f',
+  REACT_COMMIT_HOVER: '#ff9400',
+  REACT_LAYOUT_EFFECTS: '#ff718e',
+  REACT_LAYOUT_EFFECTS_HOVER: '#ff335f',
+  REACT_PASSIVE_EFFECTS: '#ff718e',
+  REACT_PASSIVE_EFFECTS_HOVER: '#ff335f',
   REACT_SCHEDULE: '#a6e59f',
   REACT_SCHEDULE_HOVER: '#13bc00',
   REACT_SUSPEND: '#c49edd',
@@ -359,12 +363,14 @@ class StackChartCanvas extends React.PureComponent<Props> {
       case 'commit-work': // eslint-disable-line no-case-declarations
       case 'render-idle': // eslint-disable-line no-case-declarations
       case 'render-work': // eslint-disable-line no-case-declarations
+      case 'layout-effects': // eslint-disable-line no-case-declarations
+      case 'passive-effects': // eslint-disable-line no-case-declarations
         const startTime: UnitIntervalOfProfileRange =
           (timestamp - rangeStart) / rangeLength;
         const endTime: UnitIntervalOfProfileRange =
           (timestamp + duration - rangeStart) / rangeLength;
         x = pixelAtViewportPosition(startTime);
-        const width = pixelAtViewportPosition(endTime) - x;
+        const width = Math.max(1, pixelAtViewportPosition(endTime) - x);
 
         if (timestamp + duration < timeAtStart || timestamp > timeAtEnd) {
           return; // Not in view
@@ -398,8 +404,24 @@ class StackChartCanvas extends React.PureComponent<Props> {
               ? REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER
               : null;
             break;
+          case 'layout-effects':
+            fillStyle = isHovered
+              ? REACT_DEVTOOLS_COLORS.REACT_LAYOUT_EFFECTS
+              : REACT_DEVTOOLS_COLORS.REACT_LAYOUT_EFFECTS_HOVER;
+            strokeStyle = isSelected
+              ? REACT_DEVTOOLS_COLORS.REACT_LAYOUT_EFFECTS_HOVER
+              : null;
+            break;
+          case 'passive-effects':
+            fillStyle = isHovered
+              ? REACT_DEVTOOLS_COLORS.REACT_PASSIVE_EFFECTS
+              : REACT_DEVTOOLS_COLORS.REACT_PASSIVE_EFFECTS_HOVER;
+            strokeStyle = isSelected
+              ? REACT_DEVTOOLS_COLORS.REACT_PASSIVE_EFFECTS_HOVER
+              : null;
+            break;
           default:
-            console.warn(`Unexpected work type "${type}"`);
+            console.warn(`Unexpected type "${type}"`);
             break;
         }
 
@@ -846,6 +868,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
         case 'commit-work':
         case 'render-idle':
         case 'render-work':
+        case 'layout-effects':
+        case 'passive-effects':
           return <TooltipReactWork data={event} priority={priority} />;
         case 'schedule-render':
         case 'schedule-state-update':
