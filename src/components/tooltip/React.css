@@ -1,12 +1,17 @@
+.priority {
+  text-transform: capitalize;
+}
+
 .componentStack {
+  white-space: pre;
+
   --gradient-height: calc(5em);
 
   /* Box */
   overflow: hidden;
   max-width: 35em;
   max-height: 10em;
-  padding: 0;
-  margin: 5px;
+  margin: 0;
 
   /* Other */
   font-size: 0.9em;

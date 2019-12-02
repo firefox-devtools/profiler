@@ -5,6 +5,7 @@
 // @flow
 
 import * as React from 'react';
+import classNames from 'classnames';
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
 import { formatMilliseconds } from '../../utils/format-numbers';
 import './React.css';
@@ -12,6 +13,10 @@ import './React.css';
 function formatComponentStack(componentStack) {
   const lines = componentStack.split('\n').map(line => line.trim());
   lines.shift();
+
+  if (lines.length > 5) {
+    return lines.slice(0, 5).join('\n') + '\n...';
+  }
   return lines.join('\n');
 }
 
@@ -81,7 +86,9 @@ export function TooltipReactEvent({ data, priority }) {
         </div>
       </div>
       <TooltipDetails>
-        <TooltipDetail label="Priority">{priority}</TooltipDetail>
+        <TooltipDetail label="Priority">
+          <div className="priority">{priority}</div>
+        </TooltipDetail>
         {componentStack && (
           <TooltipDetail label="Component stack">
             <pre className="componentStack">
@@ -121,7 +128,9 @@ export function TooltipReactWork({ data, priority }) {
         </div>
       </div>
       <TooltipDetails>
-        <TooltipDetail label="Priority">{priority}</TooltipDetail>
+        <TooltipDetail label="Priority">
+          <div className="priority">{priority}</div>
+        </TooltipDetail>
       </TooltipDetails>
     </div>
   );
