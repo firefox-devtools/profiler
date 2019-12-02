@@ -395,19 +395,22 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
 
     if (fillStyle !== null) {
+      const circumference = REACT_EVENT_SIZE * devicePixelRatio;
       const y =
-        REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex * devicePixelRatio +
-        (REACT_GUTTER_SIZE + REACT_EVENT_SIZE / 2) * devicePixelRatio;
+        (REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex +
+          REACT_GUTTER_SIZE +
+          REACT_EVENT_SIZE / 2) *
+        devicePixelRatio;
 
       ctx.beginPath();
       ctx.fillStyle = fillStyle;
-      ctx.arc(x, y, REACT_EVENT_SIZE, 0, 2 * Math.PI);
+      ctx.arc(x, y, circumference / 2, 0, 2 * Math.PI);
       ctx.fill();
       if (strokeStyle !== null) {
         ctx.beginPath();
         ctx.lineWidth = 2;
         ctx.strokeStyle = strokeStyle;
-        ctx.arc(x, y, REACT_EVENT_SIZE / 2, 0, 2 * Math.PI);
+        ctx.arc(x, y, circumference / 2, 0, 2 * Math.PI);
         ctx.stroke();
       }
     }
@@ -467,16 +470,20 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
 
     const y =
-      REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex * devicePixelRatio +
-      (REACT_GUTTER_SIZE + REACT_EVENT_SIZE + REACT_GUTTER_SIZE) *
-        devicePixelRatio;
+      (REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex +
+        REACT_GUTTER_SIZE +
+        REACT_EVENT_SIZE +
+        REACT_GUTTER_SIZE) *
+      devicePixelRatio;
+
+    const height = REACT_WORK_SIZE * devicePixelRatio;
 
     ctx.fillStyle = fillStyle;
     ctx.fillRect(
       Math.floor(x),
       Math.floor(y),
       Math.floor(width),
-      Math.floor(REACT_WORK_SIZE * devicePixelRatio)
+      Math.floor(height)
     );
     if (strokeStyle !== null) {
       ctx.lineWidth = 2;
@@ -485,7 +492,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         Math.floor(x + 1),
         Math.floor(y + 1),
         Math.floor(width - 2),
-        Math.floor(REACT_WORK_SIZE * devicePixelRatio - 2)
+        Math.floor(height - 2)
       );
     }
   }
