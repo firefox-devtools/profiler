@@ -620,7 +620,10 @@ export function deriveMarkersFromRawMarkerTable(
 
       case 'IPC': {
         const pairData = ipcCorrelations.get(threadId, i);
-        const name = data.direction === 'sending' ? 'IPCOut' : 'IPCIn';
+        let name = data.direction === 'sending' ? 'IPCOut' : 'IPCIn';
+        if (data.sync) {
+          name = 'Sync' + name;
+        }
         const dir = data.direction === 'sending' ? 'sent to' : 'received from';
         if (pairData) {
           matchedMarkers.push({
