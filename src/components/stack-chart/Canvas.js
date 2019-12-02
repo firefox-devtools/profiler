@@ -22,6 +22,8 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
+import { TooltipReactEvent, TooltipReactWork } from '../tooltip/React';
+import reactProfilerProcessor from './reactProfilerProcessor';
 
 import type {
   Thread,
@@ -88,9 +90,59 @@ const TEXT_CSS_PIXELS_OFFSET_TOP = 11;
 const FONT_SIZE = 10;
 const BORDER_OPACITY = 0.4;
 
+const REACT_DEVTOOLS_FONT_SIZE = 12;
+const REACT_GUTTER_SIZE = 4;
+const REACT_EVENT_SIZE = 4;
+const REACT_WORK_SIZE = 8;
+const REACT_BORDER_SIZE = 1;
+const REACT_DEVTOOLS_PRIORITY_SIZE =
+  REACT_GUTTER_SIZE * 3 +
+  REACT_EVENT_SIZE +
+  REACT_WORK_SIZE +
+  REACT_BORDER_SIZE;
+const REACT_PRIORITIES = ['unscheduled', 'high', 'normal', 'low'];
+const REACT_DEVTOOLS_CANVAS_HEIGHT =
+  REACT_DEVTOOLS_PRIORITY_SIZE * REACT_PRIORITIES.length;
+const REACT_DEVTOOLS_COLORS = {
+  BACKGROUND: '#ffffff',
+  PRIORITY_BACKGROUND: '#ededf0',
+  PRIORITY_BORDER: '#d7d7db',
+  PRIORITY_LABEL: '#272727',
+  REACT_IDLE: '#f0f0f1',
+  REACT_IDLE_HOVER: '#d7d7db',
+  REACT_RENDER: '#9fc3f3',
+  REACT_RENDER_HOVER: '#298ff6',
+  REACT_COMMIT: '#ff718e',
+  REACT_COMMIT_HOVER: '#ff335f',
+  REACT_SCHEDULE: '#a6e59f',
+  REACT_SCHEDULE_HOVER: '#13bc00',
+  REACT_SUSPEND: '#c49edd',
+  REACT_SUSPEND_HOVER: '#6200a4',
+};
+
 class StackChartCanvas extends React.PureComponent<Props> {
   _leftMarginGradient: null | CanvasGradient = null;
   _rightMarginGradient: null | CanvasGradient = null;
+
+  state = {
+    rawData: null,
+    reactProfilerData: null,
+  };
+
+  // TODO (bvaughn) This should be moved into a selector to better fit the architecture.
+  static getDerivedStateFromProps(nextProps, prevState) {
+    if (prevState.rawData === nextProps.thread.markers.data) {
+      return prevState;
+    }
+
+    const rawData = nextProps.thread.markers.data;
+    const reactProfilerData = reactProfilerProcessor(rawData);
+
+    return {
+      rawData,
+      reactProfilerData,
+    };
+  }
 
   componentDidUpdate(prevProps) {
     // We want to scroll the selection into view when this component
@@ -135,6 +187,309 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
   };
 
+  _drawCanvasReact = (
+    ctx: CanvasRenderingContext2D,
+    hoveredItem: Object | null
+  ) => {
+    const {
+      rangeStart,
+      rangeEnd,
+      viewport: { containerWidth, viewportLeft, viewportRight },
+    } = this.props;
+
+    const { devicePixelRatio } = window;
+
+    const devicePixelsWidth = containerWidth * devicePixelRatio;
+    const devicePixelsHeight = REACT_DEVTOOLS_CANVAS_HEIGHT * devicePixelRatio;
+
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+
+    const innerContainerWidth =
+      containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+    const innerDevicePixelsWidth = innerContainerWidth * devicePixelRatio;
+
+    const pixelAtViewportPosition = (
+      viewportPosition: UnitIntervalOfProfileRange
+    ): DevicePixels =>
+      devicePixelRatio *
+      // The right hand side of this formula is all in CSS pixels.
+      (TIMELINE_MARGIN_LEFT +
+        ((viewportPosition - viewportLeft) * innerContainerWidth) /
+          viewportLength);
+
+    ctx.fillStyle = REACT_DEVTOOLS_COLORS.BACKGROUND;
+    ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
+
+    //
+    // Draw markers
+    //
+
+    const pixelsInViewport = viewportLength * innerDevicePixelsWidth;
+    const timePerPixel = rangeLength / pixelsInViewport;
+
+    // Decide which samples to actually draw
+    const timeAtStart: Milliseconds =
+      rangeStart +
+      rangeLength * viewportLeft -
+      timePerPixel * TIMELINE_MARGIN_LEFT;
+    const timeAtEnd: Milliseconds = rangeStart + rangeLength * viewportRight;
+
+    const { reactProfilerData } = this.state;
+    if (reactProfilerData !== null) {
+      REACT_PRIORITIES.forEach((priority, priorityIndex) => {
+        const currentPriority = reactProfilerData[priority];
+        currentPriority.reactEvents.forEach(event => {
+          this._renderReactEvent({
+            ctx,
+            event,
+            isHovered: false,
+            pixelAtViewportPosition,
+            priorityIndex,
+            rangeLength,
+            rangeStart,
+            timeAtStart,
+            timeAtEnd,
+          });
+        });
+        currentPriority.reactWork.forEach(event => {
+          this._renderReactWork({
+            ctx,
+            event,
+            isHovered: false,
+            pixelAtViewportPosition,
+            priorityIndex,
+            rangeLength,
+            rangeStart,
+            timeAtStart,
+            timeAtEnd,
+          });
+        });
+
+        if (hoveredItem !== undefined && hoveredItem !== null) {
+          const { event, priorityIndex } = hoveredItem;
+
+          switch (event.type) {
+            case 'commit-work':
+            case 'render-idle':
+            case 'render-work':
+              this._renderReactWork({
+                ctx,
+                event,
+                isHovered: true,
+                pixelAtViewportPosition,
+                priorityIndex,
+                rangeLength,
+                rangeStart,
+                timeAtStart,
+                timeAtEnd,
+              });
+              break;
+            case 'schedule-render':
+            case 'schedule-state-update':
+            case 'suspend':
+              this._renderReactEvent({
+                ctx,
+                event,
+                isHovered: true,
+                pixelAtViewportPosition,
+                priorityIndex,
+                rangeLength,
+                rangeStart,
+                timeAtStart,
+                timeAtEnd,
+              });
+              break;
+            default:
+              console.warn(`Unexpected type "${event.type}"`);
+              break;
+          }
+        }
+      });
+    }
+
+    //
+    // Draw fixed left priority labels
+    //
+
+    ctx.fillStyle = REACT_DEVTOOLS_COLORS.PRIORITY_BACKGROUND;
+    ctx.fillRect(
+      0,
+      0,
+      TIMELINE_MARGIN_LEFT * devicePixelRatio,
+      devicePixelsHeight
+    );
+
+    ctx.fillStyle = REACT_DEVTOOLS_COLORS.PRIORITY_BORDER;
+    ctx.fillRect(
+      TIMELINE_MARGIN_LEFT * devicePixelRatio,
+      0,
+      devicePixelRatio,
+      devicePixelsHeight
+    );
+
+    REACT_PRIORITIES.forEach((priority, priorityIndex) => {
+      ctx.fillStyle = REACT_DEVTOOLS_COLORS.PRIORITY_BORDER;
+      ctx.fillRect(
+        0,
+        (REACT_DEVTOOLS_PRIORITY_SIZE * (priorityIndex + 1) -
+          REACT_BORDER_SIZE) *
+          devicePixelRatio,
+        devicePixelsWidth,
+        REACT_BORDER_SIZE * devicePixelRatio
+      );
+
+      ctx.fillStyle = REACT_DEVTOOLS_COLORS.PRIORITY_LABEL;
+      ctx.textBaseline = 'middle';
+      ctx.font = `${REACT_DEVTOOLS_FONT_SIZE * devicePixelRatio}px sans-serif`;
+      ctx.fillText(
+        priority,
+        10 * devicePixelRatio,
+        REACT_DEVTOOLS_PRIORITY_SIZE * devicePixelRatio * priorityIndex +
+          12 * devicePixelRatio
+      );
+    });
+  };
+
+  _renderReactEvent({
+    ctx,
+    event,
+    isHovered,
+    pixelAtViewportPosition,
+    priorityIndex,
+    rangeLength,
+    rangeStart,
+    timeAtStart,
+    timeAtEnd,
+  }) {
+    const { timestamp, type } = event;
+
+    const time: UnitIntervalOfProfileRange =
+      (timestamp - rangeStart) / rangeLength;
+    const x = pixelAtViewportPosition(time);
+
+    if (timestamp < timeAtStart || timestamp > timeAtEnd) {
+      return; // Not in view
+    }
+
+    let fillStyle = null;
+    const strokeStyle = null;
+    switch (type) {
+      case 'schedule-render':
+      case 'schedule-state-update':
+        fillStyle = isHovered
+          ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER
+          : REACT_DEVTOOLS_COLORS.REACT_SCHEDULE;
+        // strokeStyle = event === selectedEvent ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER : null;
+        break;
+      case 'suspend':
+        fillStyle = isHovered
+          ? REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER
+          : REACT_DEVTOOLS_COLORS.REACT_SUSPEND;
+        // strokeStyle = event === selectedEvent ? REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER : null;
+        break;
+      default:
+        console.warn(`Unexpected event type "${type}"`);
+        break;
+    }
+
+    if (fillStyle !== null) {
+      const y =
+        REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex * devicePixelRatio +
+        (REACT_GUTTER_SIZE + REACT_EVENT_SIZE / 2) * devicePixelRatio;
+
+      ctx.beginPath();
+      ctx.fillStyle = fillStyle;
+      ctx.arc(x, y, REACT_EVENT_SIZE, 0, 2 * Math.PI);
+      ctx.fill();
+      if (strokeStyle !== null) {
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = strokeStyle;
+        ctx.arc(x, y, REACT_EVENT_SIZE / 2, 0, 2 * Math.PI);
+        ctx.stroke();
+      }
+    }
+  }
+
+  _renderReactWork({
+    ctx,
+    event,
+    isHovered,
+    pixelAtViewportPosition,
+    priorityIndex,
+    rangeLength,
+    rangeStart,
+    timeAtStart,
+    timeAtEnd,
+  }) {
+    const { duration, timestamp, type } = event;
+
+    const startTime: UnitIntervalOfProfileRange =
+      (timestamp - rangeStart) / rangeLength;
+    const endTime: UnitIntervalOfProfileRange =
+      (timestamp + duration - rangeStart) / rangeLength;
+    const x = pixelAtViewportPosition(startTime);
+    const width = pixelAtViewportPosition(endTime) - x;
+
+    if (timestamp + duration < timeAtStart || timestamp > timeAtEnd) {
+      return; // Not in view
+    }
+
+    let fillStyle = null;
+    const strokeStyle = null;
+    switch (type) {
+      case 'commit-work':
+        fillStyle = isHovered
+          ? REACT_DEVTOOLS_COLORS.REACT_COMMIT_HOVER
+          : REACT_DEVTOOLS_COLORS.REACT_COMMIT;
+        //strokeStyle = event === selectedEvent ? REACT_DEVTOOLS_COLORS.REACT_COMMIT_HOVER : null;
+        break;
+      case 'render-idle':
+        // We could render idle time as diagonal hashes.
+        // This looks nicer when zoomed in, but not so nice when zoomed out.
+        // color = ctx.createPattern(getIdlePattern(), 'repeat');
+        fillStyle = isHovered
+          ? REACT_DEVTOOLS_COLORS.REACT_IDLE_HOVER
+          : REACT_DEVTOOLS_COLORS.REACT_IDLE;
+        //strokeStyle = event === selectedEvent ? REACT_DEVTOOLS_COLORS.REACT_IDLE_HOVER : null;
+        break;
+      case 'render-work':
+        fillStyle = isHovered
+          ? REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER
+          : REACT_DEVTOOLS_COLORS.REACT_RENDER;
+        //strokeStyle = event === selectedEvent ? REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER : null;
+        break;
+      default:
+        console.warn(`Unexpected work type "${type}"`);
+        break;
+    }
+
+    const y =
+      REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex * devicePixelRatio +
+      (REACT_GUTTER_SIZE + REACT_EVENT_SIZE + REACT_GUTTER_SIZE) *
+        devicePixelRatio;
+
+    ctx.fillStyle = fillStyle;
+    ctx.fillRect(
+      Math.floor(x),
+      Math.floor(y),
+      Math.floor(width),
+      Math.floor(REACT_WORK_SIZE * devicePixelRatio)
+    );
+    if (strokeStyle !== null) {
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = strokeStyle;
+      ctx.strokeRect(
+        Math.floor(x + 1),
+        Math.floor(y + 1),
+        Math.floor(width - 2),
+        Math.floor(REACT_WORK_SIZE * devicePixelRatio - 2)
+      );
+    }
+  }
+
   /**
    * Draw the canvas.
    *
@@ -176,7 +531,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
     const textMeasurement = new TextMeasurement(ctx);
 
     const devicePixelsWidth = containerWidth * devicePixelRatio;
-    const devicePixelsHeight = containerHeight * devicePixelRatio;
+    const devicePixelsHeight =
+      (containerHeight - REACT_DEVTOOLS_CANVAS_HEIGHT) * devicePixelRatio;
 
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
@@ -398,6 +754,111 @@ class StackChartCanvas extends React.PureComponent<Props> {
     );
   };
 
+  _hitTestReact = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
+    const {
+      rangeStart,
+      rangeEnd,
+      viewport: { containerWidth, viewportLeft, viewportRight },
+    } = this.props;
+
+    const innerDevicePixelsWidth =
+      containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+    const rangeLength = rangeEnd - rangeStart;
+    const viewportLength = viewportRight - viewportLeft;
+
+    const { reactProfilerData } = this.state;
+    if (reactProfilerData !== null) {
+      const priorityIndex = Math.floor(y / REACT_DEVTOOLS_PRIORITY_SIZE);
+      const priority = REACT_PRIORITIES[priorityIndex];
+      const baseY = REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex;
+      const eventMinY = baseY + REACT_GUTTER_SIZE / 2;
+      const eventMaxY = eventMinY + REACT_EVENT_SIZE + REACT_GUTTER_SIZE;
+      const workMinY = eventMaxY;
+      const workMaxY = workMinY + REACT_WORK_SIZE + REACT_GUTTER_SIZE;
+
+      let events = null;
+      if (y >= eventMinY && y <= eventMaxY) {
+        events = reactProfilerData[priority].reactEvents;
+      } else if (y >= workMinY && y <= workMaxY) {
+        events = reactProfilerData[priority].reactWork;
+      }
+
+      if (events !== null) {
+        const positionToTime = x =>
+          rangeStart +
+          (viewportLeft +
+            viewportLength *
+              ((x - TIMELINE_MARGIN_LEFT) / innerDevicePixelsWidth)) *
+            rangeLength;
+
+        const pointerTime = positionToTime(x);
+
+        let startIndex = 0;
+        let stopIndex = events.length - 1;
+        while (startIndex <= stopIndex) {
+          const index = Math.floor((startIndex + stopIndex) / 2);
+
+          const event = events[index];
+          const { duration, timestamp } = event;
+
+          if (duration === undefined || duration === null) {
+            const timeToPosition = time =>
+              Math.round(
+                (((time - rangeStart) / rangeLength - viewportLeft) /
+                  viewportLength) *
+                  innerDevicePixelsWidth +
+                  TIMELINE_MARGIN_LEFT
+              );
+
+            const eventX = timeToPosition(timestamp);
+            const startX = eventX - REACT_EVENT_SIZE / 2;
+            const stopX = eventX + REACT_EVENT_SIZE / 2;
+            if (x >= startX && x <= stopX) {
+              return { event, priorityIndex };
+            }
+          } else {
+            if (
+              pointerTime >= timestamp &&
+              pointerTime <= timestamp + duration
+            ) {
+              return { event, priorityIndex };
+            }
+          }
+
+          if (timestamp < pointerTime) {
+            startIndex = index + 1;
+          } else {
+            stopIndex = index - 1;
+          }
+        }
+      }
+    }
+
+    return null;
+  };
+
+  _getHoveredStackInfoReact = data => {
+    if (data !== undefined && data !== null) {
+      const { event } = data;
+      const { type } = event;
+      switch (type) {
+        case 'commit-work':
+        case 'render-idle':
+        case 'render-work':
+          return <TooltipReactWork work={event} />;
+        case 'schedule-render':
+        case 'schedule-state-update':
+        case 'suspend':
+          return <TooltipReactEvent event={event} />;
+        default:
+          console.warn(`Unexpected type "${type}"`);
+          break;
+      }
+    }
+
+    return null;
+  };
+
   // Provide a memoized function that maps the category color names to specific color
   // choices that are used across this project's charts.
   _mapCategoryColorNameToStyles = memoize(
@@ -553,23 +1014,41 @@ class StackChartCanvas extends React.PureComponent<Props> {
     return null;
   };
 
+  _noop = () => {};
+
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
 
     return (
-      <ChartCanvas
-        scaleCtxToCssPixels={false}
-        className="stackChartCanvas"
-        containerWidth={containerWidth}
-        containerHeight={containerHeight}
-        isDragging={isDragging}
-        onDoubleClickItem={this._onDoubleClickStack}
-        getHoveredItemInfo={this._getHoveredStackInfo}
-        drawCanvas={this._drawCanvas}
-        hitTest={this._hitTest}
-        onSelectItem={this._onSelectItem}
-        onRightClick={this._onRightClick}
-      />
+      <React.Fragment>
+        <ChartCanvas
+          scaleCtxToCssPixels={false}
+          className="stackChartCanvas"
+          containerWidth={containerWidth}
+          containerHeight={REACT_DEVTOOLS_CANVAS_HEIGHT}
+          isDragging={isDragging}
+          onDoubleClickItem={this._noop}
+          getHoveredItemInfo={this._getHoveredStackInfoReact}
+          drawCanvas={this._drawCanvasReact}
+          hitTest={this._hitTestReact}
+          onSelectItem={this._noop}
+          onRightClick={this._noop}
+        />
+        <ChartCanvas
+          scaleCtxToCssPixels={false}
+          className="stackChartCanvas"
+          containerWidth={containerWidth}
+          containerHeight={containerHeight - REACT_DEVTOOLS_CANVAS_HEIGHT}
+          isDragging={isDragging}
+          onDoubleClickItem={this._onDoubleClickStack}
+          getHoveredItemInfo={this._getHoveredStackInfo}
+          drawCanvas={this._drawCanvas}
+          hitTest={this._hitTest}
+          onSelectItem={this._onSelectItem}
+          onRightClick={this._onRightClick}
+          style={{ top: REACT_DEVTOOLS_CANVAS_HEIGHT }}
+        />
+      </React.Fragment>
     );
   }
 }

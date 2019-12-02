@@ -282,6 +282,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
       <div>
         <canvas
           className={className}
+          style={this.props.style}
           ref={this._takeCanvasRef}
           onMouseDown={this._onMouseDown}
           onMouseUp={this._onMouseUp}

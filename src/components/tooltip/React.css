@@ -1,0 +1,14 @@
+.componentStack {
+  margin: 0.5rem;
+  font-size: 10px;
+}
+
+.componentNameStateUpdate {
+  color: #74d869;
+  font-weight: bold;
+}
+
+.componentNameSuspended {
+  color: #a369ca;
+  font-weight: bold;
+}
