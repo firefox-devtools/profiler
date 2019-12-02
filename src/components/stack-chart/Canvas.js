@@ -92,8 +92,8 @@ const BORDER_OPACITY = 0.4;
 
 const REACT_DEVTOOLS_FONT_SIZE = 12;
 const REACT_GUTTER_SIZE = 4;
-const REACT_EVENT_SIZE = 4;
-const REACT_WORK_SIZE = 8;
+const REACT_EVENT_SIZE = 6;
+const REACT_WORK_SIZE = 10;
 const REACT_SELECTED_BORDER_SIZE = 1;
 const REACT_PRIORITY_BORDER_SIZE = 1;
 const REACT_DEVTOOLS_PRIORITY_SIZE =
@@ -815,14 +815,14 @@ class StackChartCanvas extends React.PureComponent<Props> {
             const startX = eventX - REACT_EVENT_SIZE / 2;
             const stopX = eventX + REACT_EVENT_SIZE / 2;
             if (x >= startX && x <= stopX) {
-              return { event, priorityIndex };
+              return { event, priority, priorityIndex };
             }
           } else {
             if (
               pointerTime >= timestamp &&
               pointerTime <= timestamp + duration
             ) {
-              return { event, priorityIndex };
+              return { event, priority, priorityIndex };
             }
           }
 
@@ -840,17 +840,17 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
   _getHoveredStackInfoReact = data => {
     if (data !== undefined && data !== null) {
-      const { event } = data;
+      const { event, priority } = data;
       const { type } = event;
       switch (type) {
         case 'commit-work':
         case 'render-idle':
         case 'render-work':
-          return <TooltipReactWork work={event} />;
+          return <TooltipReactWork data={event} priority={priority} />;
         case 'schedule-render':
         case 'schedule-state-update':
         case 'suspend':
-          return <TooltipReactEvent event={event} />;
+          return <TooltipReactEvent data={event} priority={priority} />;
         default:
           console.warn(`Unexpected type "${type}"`);
           break;

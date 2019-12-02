@@ -5,17 +5,13 @@
 // @flow
 
 import * as React from 'react';
-import classNames from 'classnames';
+import { TooltipDetails, TooltipDetail } from './TooltipDetails';
 import { formatMilliseconds } from '../../utils/format-numbers';
 import './React.css';
 
 function formatComponentStack(componentStack) {
   const lines = componentStack.split('\n').map(line => line.trim());
   lines.shift();
-
-  if (lines.length > 5) {
-    return lines.slice(0, 5).join('\n') + '\n...';
-  }
   return lines.join('\n');
 }
 
@@ -51,22 +47,22 @@ function getComponentNameFromStack(componentStack) {
   return null;
 }
 
-export function TooltipReactEvent({ event }) {
-  const { componentStack, type } = event;
+export function TooltipReactEvent({ data, priority }) {
+  const { componentStack, type } = data;
 
   let className = null;
   let label = null;
   switch (type) {
     case 'schedule-render':
-      label = 'Render scheduled';
+      label = '⚛️ render scheduled';
       break;
     case 'schedule-state-update':
       className = 'componentNameStateUpdate';
-      label = 'State update scheduled';
+      label = 'state update scheduled';
       break;
     case 'suspend':
       className = 'componentNameSuspended';
-      label = 'Suspended';
+      label = 'suspended';
       break;
     default:
       break;
@@ -76,7 +72,7 @@ export function TooltipReactEvent({ event }) {
 
   return (
     <div className="tooltipMarker">
-      <div className={classNames({ tooltipHeader: componentStack })}>
+      <div className="tooltipHeader">
         <div className="tooltipOneLine">
           {componentName && (
             <div className={className}>{componentName}&nbsp;</div>
@@ -84,28 +80,33 @@ export function TooltipReactEvent({ event }) {
           <div className="tooltipTitle">{label}</div>
         </div>
       </div>
-      {componentStack && (
-        <pre className="componentStack">
-          {formatComponentStack(componentStack)}
-        </pre>
-      )}
+      <TooltipDetails>
+        <TooltipDetail label="Priority">{priority}</TooltipDetail>
+        {componentStack && (
+          <TooltipDetail label="Component stack">
+            <pre className="componentStack">
+              {formatComponentStack(componentStack)}
+            </pre>
+          </TooltipDetail>
+        )}
+      </TooltipDetails>
     </div>
   );
 }
 
-export function TooltipReactWork({ work }) {
-  const { duration, type } = work;
+export function TooltipReactWork({ data, priority }) {
+  const { duration, type } = data;
 
   let label = null;
   switch (type) {
     case 'commit-work':
-      label = 'Commit';
+      label = '⚛️ commit';
       break;
     case 'render-idle':
-      label = 'Idle';
+      label = '⚛️ idle';
       break;
     case 'render-work':
-      label = 'Render';
+      label = '⚛️ render';
       break;
     default:
       break;
@@ -113,10 +114,15 @@ export function TooltipReactWork({ work }) {
 
   return (
     <div className="tooltipMarker">
-      <div className="tooltipOneLine">
-        <div className="tooltipTiming">{formatMilliseconds(duration)}</div>
-        <div className="tooltipTitle">{label}</div>
+      <div className="tooltipHeader">
+        <div className="tooltipOneLine">
+          <div className="tooltipTiming">{formatMilliseconds(duration)}</div>
+          <div className="tooltipTitle">{label}</div>
+        </div>
       </div>
+      <TooltipDetails>
+        <TooltipDetail label="Priority">{priority}</TooltipDetail>
+      </TooltipDetails>
     </div>
   );
 }
