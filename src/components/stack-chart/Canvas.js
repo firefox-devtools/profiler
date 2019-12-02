@@ -94,12 +94,13 @@ const REACT_DEVTOOLS_FONT_SIZE = 12;
 const REACT_GUTTER_SIZE = 4;
 const REACT_EVENT_SIZE = 4;
 const REACT_WORK_SIZE = 8;
-const REACT_BORDER_SIZE = 1;
+const REACT_SELECTED_BORDER_SIZE = 1;
+const REACT_PRIORITY_BORDER_SIZE = 1;
 const REACT_DEVTOOLS_PRIORITY_SIZE =
   REACT_GUTTER_SIZE * 3 +
   REACT_EVENT_SIZE +
   REACT_WORK_SIZE +
-  REACT_BORDER_SIZE;
+  REACT_PRIORITY_BORDER_SIZE;
 const REACT_PRIORITIES = ['unscheduled', 'high', 'normal', 'low'];
 const REACT_DEVTOOLS_CANVAS_HEIGHT =
   REACT_DEVTOOLS_PRIORITY_SIZE * REACT_PRIORITIES.length;
@@ -127,6 +128,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
   state = {
     rawData: null,
     reactProfilerData: null,
+    selectedItem: null,
   };
 
   // TODO (bvaughn) This should be moved into a selector to better fit the architecture.
@@ -192,32 +194,14 @@ class StackChartCanvas extends React.PureComponent<Props> {
     hoveredItem: Object | null
   ) => {
     const {
-      rangeStart,
-      rangeEnd,
-      viewport: { containerWidth, viewportLeft, viewportRight },
+      viewport: { containerWidth },
     } = this.props;
+    const { selectedItem } = this.state;
 
     const { devicePixelRatio } = window;
 
     const devicePixelsWidth = containerWidth * devicePixelRatio;
     const devicePixelsHeight = REACT_DEVTOOLS_CANVAS_HEIGHT * devicePixelRatio;
-
-    const rangeLength: Milliseconds = rangeEnd - rangeStart;
-    const viewportLength: UnitIntervalOfProfileRange =
-      viewportRight - viewportLeft;
-
-    const innerContainerWidth =
-      containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
-    const innerDevicePixelsWidth = innerContainerWidth * devicePixelRatio;
-
-    const pixelAtViewportPosition = (
-      viewportPosition: UnitIntervalOfProfileRange
-    ): DevicePixels =>
-      devicePixelRatio *
-      // The right hand side of this formula is all in CSS pixels.
-      (TIMELINE_MARGIN_LEFT +
-        ((viewportPosition - viewportLeft) * innerContainerWidth) /
-          viewportLength);
 
     ctx.fillStyle = REACT_DEVTOOLS_COLORS.BACKGROUND;
     ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
@@ -226,84 +210,61 @@ class StackChartCanvas extends React.PureComponent<Props> {
     // Draw markers
     //
 
-    const pixelsInViewport = viewportLength * innerDevicePixelsWidth;
-    const timePerPixel = rangeLength / pixelsInViewport;
-
-    // Decide which samples to actually draw
-    const timeAtStart: Milliseconds =
-      rangeStart +
-      rangeLength * viewportLeft -
-      timePerPixel * TIMELINE_MARGIN_LEFT;
-    const timeAtEnd: Milliseconds = rangeStart + rangeLength * viewportRight;
-
     const { reactProfilerData } = this.state;
     if (reactProfilerData !== null) {
       REACT_PRIORITIES.forEach((priority, priorityIndex) => {
         const currentPriority = reactProfilerData[priority];
         currentPriority.reactEvents.forEach(event => {
-          this._renderReactEvent({
+          this._renderReact({
             ctx,
             event,
             isHovered: false,
-            pixelAtViewportPosition,
+            isSelected: false,
             priorityIndex,
-            rangeLength,
-            rangeStart,
-            timeAtStart,
-            timeAtEnd,
           });
         });
         currentPriority.reactWork.forEach(event => {
-          this._renderReactWork({
+          this._renderReact({
             ctx,
             event,
             isHovered: false,
-            pixelAtViewportPosition,
+            isSelected: false,
             priorityIndex,
-            rangeLength,
-            rangeStart,
-            timeAtStart,
-            timeAtEnd,
           });
         });
 
-        if (hoveredItem !== undefined && hoveredItem !== null) {
-          const { event, priorityIndex } = hoveredItem;
-
-          switch (event.type) {
-            case 'commit-work':
-            case 'render-idle':
-            case 'render-work':
-              this._renderReactWork({
+        // Draw the hovered and/or selected items on top so they stand out.
+        // This is helpful if there are multiple (overlapping) items close to each other.
+        if (hoveredItem || selectedItem) {
+          const hoveredEvent = hoveredItem ? hoveredItem.event : null;
+          const selectedEvent = selectedItem ? selectedItem.event : null;
+          if (hoveredEvent === selectedEvent) {
+            this._renderReact({
+              ctx,
+              event: hoveredEvent,
+              isHovered: true,
+              isSelected: true,
+              priorityIndex: hoveredItem.priorityIndex,
+            });
+          } else {
+            if (selectedEvent) {
+              this._renderReact({
                 ctx,
-                event,
-                isHovered: true,
-                pixelAtViewportPosition,
-                priorityIndex,
-                rangeLength,
-                rangeStart,
-                timeAtStart,
-                timeAtEnd,
+                event: selectedEvent,
+                isHovered: false,
+                isSelected: true,
+                priorityIndex: selectedItem.priorityIndex,
               });
-              break;
-            case 'schedule-render':
-            case 'schedule-state-update':
-            case 'suspend':
-              this._renderReactEvent({
+            }
+            if (hoveredEvent) {
+              this._renderReact({
                 ctx,
-                event,
+                event: hoveredEvent,
                 isHovered: true,
-                pixelAtViewportPosition,
-                priorityIndex,
-                rangeLength,
-                rangeStart,
-                timeAtStart,
-                timeAtEnd,
+                isSelected: false,
+                priorityIndex: hoveredItem.priorityIndex,
               });
-              break;
-            default:
-              console.warn(`Unexpected type "${event.type}"`);
-              break;
+            }
           }
         }
       });
@@ -334,10 +295,10 @@ class StackChartCanvas extends React.PureComponent<Props> {
       ctx.fillRect(
         0,
         (REACT_DEVTOOLS_PRIORITY_SIZE * (priorityIndex + 1) -
-          REACT_BORDER_SIZE) *
+          REACT_PRIORITY_BORDER_SIZE) *
           devicePixelRatio,
         devicePixelsWidth,
-        REACT_BORDER_SIZE * devicePixelRatio
+        REACT_PRIORITY_BORDER_SIZE * devicePixelRatio
       );
 
       ctx.fillStyle = REACT_DEVTOOLS_COLORS.PRIORITY_LABEL;
@@ -352,148 +313,181 @@ class StackChartCanvas extends React.PureComponent<Props> {
     });
   };
 
-  _renderReactEvent({
-    ctx,
-    event,
-    isHovered,
-    pixelAtViewportPosition,
-    priorityIndex,
-    rangeLength,
-    rangeStart,
-    timeAtStart,
-    timeAtEnd,
-  }) {
-    const { timestamp, type } = event;
-
-    const time: UnitIntervalOfProfileRange =
-      (timestamp - rangeStart) / rangeLength;
-    const x = pixelAtViewportPosition(time);
-
-    if (timestamp < timeAtStart || timestamp > timeAtEnd) {
-      return; // Not in view
-    }
-
-    let fillStyle = null;
-    const strokeStyle = null;
-    switch (type) {
-      case 'schedule-render':
-      case 'schedule-state-update':
-        fillStyle = isHovered
-          ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER
-          : REACT_DEVTOOLS_COLORS.REACT_SCHEDULE;
-        // strokeStyle = event === selectedEvent ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER : null;
-        break;
-      case 'suspend':
-        fillStyle = isHovered
-          ? REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER
-          : REACT_DEVTOOLS_COLORS.REACT_SUSPEND;
-        // strokeStyle = event === selectedEvent ? REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER : null;
-        break;
-      default:
-        console.warn(`Unexpected event type "${type}"`);
-        break;
-    }
-
-    if (fillStyle !== null) {
-      const circumference = REACT_EVENT_SIZE * devicePixelRatio;
-      const y =
-        (REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex +
-          REACT_GUTTER_SIZE +
-          REACT_EVENT_SIZE / 2) *
-        devicePixelRatio;
-
-      ctx.beginPath();
-      ctx.fillStyle = fillStyle;
-      ctx.arc(x, y, circumference / 2, 0, 2 * Math.PI);
-      ctx.fill();
-      if (strokeStyle !== null) {
-        ctx.beginPath();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = strokeStyle;
-        ctx.arc(x, y, circumference / 2, 0, 2 * Math.PI);
-        ctx.stroke();
-      }
-    }
-  }
-
-  _renderReactWork({
-    ctx,
-    event,
-    isHovered,
-    pixelAtViewportPosition,
-    priorityIndex,
-    rangeLength,
-    rangeStart,
-    timeAtStart,
-    timeAtEnd,
-  }) {
+  _renderReact({ ctx, event, isHovered, isSelected, priorityIndex }) {
     const { duration, timestamp, type } = event;
 
-    const startTime: UnitIntervalOfProfileRange =
-      (timestamp - rangeStart) / rangeLength;
-    const endTime: UnitIntervalOfProfileRange =
-      (timestamp + duration - rangeStart) / rangeLength;
-    const x = pixelAtViewportPosition(startTime);
-    const width = pixelAtViewportPosition(endTime) - x;
+    const {
+      rangeStart,
+      rangeEnd,
+      viewport: { containerWidth, viewportLeft, viewportRight },
+    } = this.props;
 
-    if (timestamp + duration < timeAtStart || timestamp > timeAtEnd) {
-      return; // Not in view
-    }
+    const { devicePixelRatio } = window;
+
+    const rangeLength: Milliseconds = rangeEnd - rangeStart;
+    const viewportLength: UnitIntervalOfProfileRange =
+      viewportRight - viewportLeft;
+
+    const innerContainerWidth =
+      containerWidth - TIMELINE_MARGIN_LEFT - TIMELINE_MARGIN_RIGHT;
+    const innerDevicePixelsWidth = innerContainerWidth * devicePixelRatio;
+
+    const pixelAtViewportPosition = (
+      viewportPosition: UnitIntervalOfProfileRange
+    ): DevicePixels =>
+      devicePixelRatio *
+      // The right hand side of this formula is all in CSS pixels.
+      (TIMELINE_MARGIN_LEFT +
+        ((viewportPosition - viewportLeft) * innerContainerWidth) /
+          viewportLength);
+
+    const pixelsInViewport = viewportLength * innerDevicePixelsWidth;
+    const timePerPixel = rangeLength / pixelsInViewport;
+
+    // Decide which samples to actually draw
+    const timeAtStart: Milliseconds =
+      rangeStart +
+      rangeLength * viewportLeft -
+      timePerPixel * TIMELINE_MARGIN_LEFT;
+    const timeAtEnd: Milliseconds = rangeStart + rangeLength * viewportRight;
 
     let fillStyle = null;
-    const strokeStyle = null;
-    switch (type) {
-      case 'commit-work':
-        fillStyle = isHovered
-          ? REACT_DEVTOOLS_COLORS.REACT_COMMIT_HOVER
-          : REACT_DEVTOOLS_COLORS.REACT_COMMIT;
-        //strokeStyle = event === selectedEvent ? REACT_DEVTOOLS_COLORS.REACT_COMMIT_HOVER : null;
+    let strokeStyle = null;
+    let x;
+
+    switch (event.type) {
+      case 'commit-work': // eslint-disable-line no-case-declarations
+      case 'render-idle': // eslint-disable-line no-case-declarations
+      case 'render-work': // eslint-disable-line no-case-declarations
+        const startTime: UnitIntervalOfProfileRange =
+          (timestamp - rangeStart) / rangeLength;
+        const endTime: UnitIntervalOfProfileRange =
+          (timestamp + duration - rangeStart) / rangeLength;
+        x = pixelAtViewportPosition(startTime);
+        const width = pixelAtViewportPosition(endTime) - x;
+
+        if (timestamp + duration < timeAtStart || timestamp > timeAtEnd) {
+          return; // Not in view
+        }
+
+        switch (type) {
+          case 'commit-work':
+            fillStyle = isHovered
+              ? REACT_DEVTOOLS_COLORS.REACT_COMMIT_HOVER
+              : REACT_DEVTOOLS_COLORS.REACT_COMMIT;
+            strokeStyle = isSelected
+              ? REACT_DEVTOOLS_COLORS.REACT_COMMIT_HOVER
+              : null;
+            break;
+          case 'render-idle':
+            // We could render idle time as diagonal hashes.
+            // This looks nicer when zoomed in, but not so nice when zoomed out.
+            // color = ctx.createPattern(getIdlePattern(), 'repeat');
+            fillStyle = isHovered
+              ? REACT_DEVTOOLS_COLORS.REACT_IDLE_HOVER
+              : REACT_DEVTOOLS_COLORS.REACT_IDLE;
+            strokeStyle = isSelected
+              ? REACT_DEVTOOLS_COLORS.REACT_IDLE_HOVER
+              : null;
+            break;
+          case 'render-work':
+            fillStyle = isHovered
+              ? REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER
+              : REACT_DEVTOOLS_COLORS.REACT_RENDER;
+            strokeStyle = isSelected
+              ? REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER
+              : null;
+            break;
+          default:
+            console.warn(`Unexpected work type "${type}"`);
+            break;
+        }
+
+        const y =
+          (REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex +
+            REACT_GUTTER_SIZE +
+            REACT_EVENT_SIZE +
+            REACT_GUTTER_SIZE) *
+          devicePixelRatio;
+
+        const height = REACT_WORK_SIZE * devicePixelRatio;
+
+        ctx.fillStyle = fillStyle;
+        ctx.fillRect(
+          Math.floor(x),
+          Math.floor(y),
+          Math.floor(width),
+          Math.floor(height)
+        );
+        if (strokeStyle !== null) {
+          ctx.lineWidth = REACT_SELECTED_BORDER_SIZE * devicePixelRatio;
+          ctx.strokeStyle = strokeStyle;
+          ctx.strokeRect(
+            Math.floor(x),
+            Math.floor(y),
+            Math.floor(width),
+            Math.floor(height)
+          );
+        }
         break;
-      case 'render-idle':
-        // We could render idle time as diagonal hashes.
-        // This looks nicer when zoomed in, but not so nice when zoomed out.
-        // color = ctx.createPattern(getIdlePattern(), 'repeat');
-        fillStyle = isHovered
-          ? REACT_DEVTOOLS_COLORS.REACT_IDLE_HOVER
-          : REACT_DEVTOOLS_COLORS.REACT_IDLE;
-        //strokeStyle = event === selectedEvent ? REACT_DEVTOOLS_COLORS.REACT_IDLE_HOVER : null;
-        break;
-      case 'render-work':
-        fillStyle = isHovered
-          ? REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER
-          : REACT_DEVTOOLS_COLORS.REACT_RENDER;
-        //strokeStyle = event === selectedEvent ? REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER : null;
+      case 'schedule-render': // eslint-disable-line no-case-declarations
+      case 'schedule-state-update': // eslint-disable-line no-case-declarations
+      case 'suspend': // eslint-disable-line no-case-declarations
+        const time: UnitIntervalOfProfileRange =
+          (timestamp - rangeStart) / rangeLength;
+        x = pixelAtViewportPosition(time);
+
+        if (timestamp < timeAtStart || timestamp > timeAtEnd) {
+          return; // Not in view
+        }
+
+        switch (type) {
+          case 'schedule-render':
+          case 'schedule-state-update':
+            fillStyle = isHovered
+              ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER
+              : REACT_DEVTOOLS_COLORS.REACT_SCHEDULE;
+            strokeStyle = isSelected
+              ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER
+              : null;
+            break;
+          case 'suspend':
+            fillStyle = isHovered
+              ? REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER
+              : REACT_DEVTOOLS_COLORS.REACT_SUSPEND;
+            strokeStyle = isSelected
+              ? REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER
+              : null;
+            break;
+          default:
+            console.warn(`Unexpected event type "${type}"`);
+            break;
+        }
+
+        if (fillStyle !== null) {
+          const circumference = REACT_EVENT_SIZE * devicePixelRatio;
+          const y =
+            (REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex +
+              REACT_GUTTER_SIZE +
+              REACT_EVENT_SIZE / 2) *
+            devicePixelRatio;
+
+          ctx.beginPath();
+          ctx.fillStyle = fillStyle;
+          ctx.arc(x, y, circumference / 2, 0, 2 * Math.PI);
+          ctx.fill();
+          if (strokeStyle !== null) {
+            ctx.beginPath();
+            ctx.lineWidth = REACT_SELECTED_BORDER_SIZE * devicePixelRatio;
+            ctx.strokeStyle = strokeStyle;
+            ctx.arc(x, y, circumference / 2, 0, 2 * Math.PI);
+            ctx.stroke();
+          }
+        }
         break;
       default:
-        console.warn(`Unexpected work type "${type}"`);
+        console.warn(`Unexpected type "${event.type}"`);
         break;
-    }
-
-    const y =
-      (REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex +
-        REACT_GUTTER_SIZE +
-        REACT_EVENT_SIZE +
-        REACT_GUTTER_SIZE) *
-      devicePixelRatio;
-
-    const height = REACT_WORK_SIZE * devicePixelRatio;
-
-    ctx.fillStyle = fillStyle;
-    ctx.fillRect(
-      Math.floor(x),
-      Math.floor(y),
-      Math.floor(width),
-      Math.floor(height)
-    );
-    if (strokeStyle !== null) {
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = strokeStyle;
-      ctx.strokeRect(
-        Math.floor(x + 1),
-        Math.floor(y + 1),
-        Math.floor(width - 2),
-        Math.floor(height - 2)
-      );
     }
   }
 
@@ -966,6 +960,10 @@ class StackChartCanvas extends React.PureComponent<Props> {
     return null;
   }
 
+  _onSelectItemReact = (data: Object | null) => {
+    this.setState({ selectedItem: data });
+  };
+
   _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {
     // Change our selection to the hovered item, or deselect (with
     // null) if there's nothing hovered.
@@ -1038,7 +1036,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
           getHoveredItemInfo={this._getHoveredStackInfoReact}
           drawCanvas={this._drawCanvasReact}
           hitTest={this._hitTestReact}
-          onSelectItem={this._noop}
+          onSelectItem={this._onSelectItemReact}
           onRightClick={this._noop}
         />
         <ChartCanvas
