@@ -68,6 +68,10 @@ export default function reactProfilerProcessor(rawData) {
 
   let currentPriority = null;
 
+  // TODO (brian) Re-implement this to use a per-priority stack (where things get started/stopped each time the stack is:
+  // 1. pushed with a length > 0
+  // 2. popped
+
   for (let i = 0; i < rawData.length; i++) {
     const currentEvent = rawData[i];
 
@@ -251,17 +255,21 @@ export default function reactProfilerProcessor(rawData) {
         timestamp,
       });
     } else if (name.startsWith('--schedule-state-update-')) {
+      const [componentName, componentStack] = name.substr(24).split('-');
       currentProcessedGroup.reactEvents.push({
         type: 'schedule-state-update',
         priority: currentPriority, // TODO Change to target priority
         timestamp,
-        componentStack: name.substr(24),
+        componentName,
+        componentStack,
       });
     } else if (name.startsWith('--suspend-')) {
+      const [componentName, componentStack] = name.substr(10).split('-');
       currentProcessedGroup.reactEvents.push({
         type: 'suspend',
         timestamp,
-        componentStack: name.substr(10),
+        componentName,
+        componentStack,
       });
     }
   }

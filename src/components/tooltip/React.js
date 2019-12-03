@@ -19,40 +19,8 @@ function formatComponentStack(componentStack) {
   return lines.join('\n');
 }
 
-// TODO This is an ugly hack.
-function getComponentNameFromStack(componentStack) {
-  if (componentStack) {
-    // Find the top component in the stack; this is the one that performed the action.
-    let index = componentStack.indexOf('in ');
-    if (index > 0) {
-      let displayName = componentStack.slice(
-        index + 3,
-        componentStack.indexOf('\n', index)
-      );
-
-      // Remove any (FB specific) appended module name.
-      index = displayName.indexOf(' (created by');
-      if (index > 0) {
-        displayName = displayName.slice(0, index);
-      }
-
-      // Remove HOC badges.
-      // General technique copied from DevTools
-      if (displayName.indexOf('(') >= 0) {
-        const matches = displayName.match(/[^()]+/g);
-        if (matches !== null) {
-          return matches.pop();
-        }
-      }
-
-      return displayName;
-    }
-  }
-  return null;
-}
-
 export function TooltipReactEvent({ data, priority }) {
-  const { componentStack, type } = data;
+  const { componentName, componentStack, type } = data;
 
   let className = null;
   let label = null;
@@ -71,8 +39,6 @@ export function TooltipReactEvent({ data, priority }) {
     default:
       break;
   }
-
-  const componentName = getComponentNameFromStack(componentStack);
 
   return (
     <div className="tooltipMarker">
