@@ -380,6 +380,10 @@ export type ProfilerConfiguration = {|
   features: string[],
   capacity: Bytes,
   duration?: number,
+  // Optional because that field is introduced in Firefox 72.
+  // Active BrowsingContext ID indicates a Firefox tab. That field allows us to
+  // create an "active tab view".
+  activeBrowsingContextID?: number,
 |};
 
 /**
