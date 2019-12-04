@@ -372,6 +372,9 @@ export const withChartViewport: WithChartViewport<*, *> =
           -getNormalizedScrollDelta(event, containerHeight, 'deltaX'),
           -getNormalizedScrollDelta(event, containerHeight, 'deltaY')
         );
+
+        // Chrome will still navigate from a wheel event unless you return false.
+        return false;
       };
 
       /**
