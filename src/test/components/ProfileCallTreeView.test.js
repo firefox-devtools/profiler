@@ -65,7 +65,7 @@ describe('calltree/ProfileCallTreeView', function() {
       profile = getProfileFromTextSamples(`
         A  A  A
         B  B  B
-        C  C  H
+        C  C  H[lib:libH.so]
         D  F  I
         E  E
       `).profile;
@@ -124,12 +124,12 @@ describe('calltree/ProfileCallTreeView', function() {
 
   it('renders an inverted call tree', () => {
     const profileForInvertedTree = getProfileFromTextSamples(`
-      A  A  A
-      B  B  B
-      C  X  C
-      D  Y  X
-      E  Z  Y
-            Z
+      A  A               A
+      B  B               B
+      C  X[lib:libX.so]  C
+      D  Y               X[lib:libX.so]
+      E  Z               Y
+                         Z
     `).profile;
 
     // Note: we're not using the setup function because we want to change the
