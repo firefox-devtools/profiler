@@ -93,8 +93,9 @@ const BORDER_OPACITY = 0.4;
 const REACT_DEVTOOLS_FONT_SIZE = 12;
 const REACT_GUTTER_SIZE = 4;
 const REACT_EVENT_SIZE = 6;
-const REACT_WORK_SIZE = 10;
-const REACT_SELECTED_BORDER_SIZE = 1;
+const REACT_WORK_SIZE = 12;
+const REACT_WORK_DEPTH_OFFSET = 3;
+const REACT_EVENT_BORDER_SIZE = 1;
 const REACT_PRIORITY_BORDER_SIZE = 1;
 const REACT_DEVTOOLS_PRIORITY_SIZE =
   REACT_GUTTER_SIZE * 3 +
@@ -109,20 +110,28 @@ const REACT_DEVTOOLS_COLORS = {
   PRIORITY_BACKGROUND: '#ededf0',
   PRIORITY_BORDER: '#d7d7db',
   PRIORITY_LABEL: '#272727',
-  REACT_IDLE: '#f0f0f1',
-  REACT_IDLE_HOVER: '#d7d7db',
+  REACT_IDLE: '#edf6ff',
+  REACT_IDLE_SELECTED: '#EDF6FF',
+  REACT_IDLE_HOVER: '#EDF6FF',
   REACT_RENDER: '#9fc3f3',
+  REACT_RENDER_SELECTED: '#64A9F5',
   REACT_RENDER_HOVER: '#298ff6',
-  REACT_COMMIT: '#c49edd',
-  REACT_COMMIT_HOVER: '#6200a4',
-  REACT_LAYOUT_EFFECTS: '#ff718e',
-  REACT_LAYOUT_EFFECTS_HOVER: '#ff335f',
-  REACT_PASSIVE_EFFECTS: '#ff718e',
-  REACT_PASSIVE_EFFECTS_HOVER: '#ff335f',
-  REACT_SCHEDULE: '#ffd79f',
-  REACT_SCHEDULE_HOVER: '#ff9400',
+  REACT_COMMIT: '#ff718e',
+  REACT_COMMIT_SELECTED: '#FF5277',
+  REACT_COMMIT_HOVER: '#ff335f',
+  REACT_LAYOUT_EFFECTS: '#c49edd',
+  REACT_LAYOUT_EFFECTS_SELECTED: '#934FC1',
+  REACT_LAYOUT_EFFECTS_HOVER: '#6200a4',
+  REACT_PASSIVE_EFFECTS: '#c49edd',
+  REACT_PASSIVE_EFFECTS_SELECTED: '#934FC1',
+  REACT_PASSIVE_EFFECTS_HOVER: '#6200a4',
+  REACT_SCHEDULE: '#9fc3f3',
+  REACT_SCHEDULE_HOVER: '#298ff6',
+  REACT_SCHEDULE_CASCADING: '#ff718e',
+  REACT_SCHEDULE_CASCADING_HOVER: '#ff335f',
   REACT_SUSPEND: '#a6e59f',
   REACT_SUSPEND_HOVER: '#13bc00',
+  REACT_WORK_BORDER: '#ffffff',
 };
 
 class StackChartCanvas extends React.PureComponent<Props> {
@@ -132,7 +141,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
   state = {
     rawData: null,
     reactProfilerData: null,
-    selectedItem: null,
+    // selectedItem: null,
   };
 
   // TODO (bvaughn) This should be moved into a selector to better fit the architecture.
@@ -200,7 +209,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     const {
       viewport: { containerWidth },
     } = this.props;
-    const { selectedItem } = this.state;
+    // const { selectedItem } = this.state;
 
     const { devicePixelRatio } = window;
 
@@ -214,62 +223,47 @@ class StackChartCanvas extends React.PureComponent<Props> {
     // Draw markers
     //
 
+    let drawHoveredItemOnTop = false;
+
     const { reactProfilerData } = this.state;
     if (reactProfilerData !== null) {
       REACT_PRIORITIES.forEach((priority, priorityIndex) => {
         const currentPriority = reactProfilerData[priority];
-        currentPriority.reactEvents.forEach(event => {
+        currentPriority.events.forEach(event => {
+          const showHoverHighlight = hoveredItem && hoveredItem.event === event;
+          if (showHoverHighlight) {
+            drawHoveredItemOnTop = true;
+          }
           this._renderReact({
             ctx,
             event,
-            isHovered: false,
-            isSelected: false,
+            showHoverHighlight,
             priorityIndex,
           });
         });
-        currentPriority.reactWork.forEach(event => {
+        currentPriority.work.forEach(event => {
+          const showHoverHighlight = hoveredItem && hoveredItem.event === event;
+          //const showGroupHighlight = selectedItem && selectedItem.event.batchUID === event.batchUID;
+          const showGroupHighlight =
+            hoveredItem && hoveredItem.event.batchUID === event.batchUID;
           this._renderReact({
             ctx,
             event,
-            isHovered: false,
-            isSelected: false,
             priorityIndex,
+            showGroupHighlight,
+            showHoverHighlight,
           });
         });
 
         // Draw the hovered and/or selected items on top so they stand out.
         // This is helpful if there are multiple (overlapping) items close to each other.
-        if (hoveredItem || selectedItem) {
-          const hoveredEvent = hoveredItem ? hoveredItem.event : null;
-          const selectedEvent = selectedItem ? selectedItem.event : null;
-          if (hoveredEvent === selectedEvent) {
-            this._renderReact({
-              ctx,
-              event: hoveredEvent,
-              isHovered: true,
-              isSelected: true,
-              priorityIndex: hoveredItem.priorityIndex,
-            });
-          } else {
-            if (selectedEvent) {
-              this._renderReact({
-                ctx,
-                event: selectedEvent,
-                isHovered: false,
-                isSelected: true,
-                priorityIndex: selectedItem.priorityIndex,
-              });
-            }
-            if (hoveredEvent) {
-              this._renderReact({
-                ctx,
-                event: hoveredEvent,
-                isHovered: true,
-                isSelected: false,
-                priorityIndex: hoveredItem.priorityIndex,
-              });
-            }
-          }
+        if (drawHoveredItemOnTop) {
+          this._renderReact({
+            ctx,
+            event: hoveredItem.event,
+            showHoverHighlight: true,
+            priorityIndex: hoveredItem.priorityIndex,
+          });
         }
       });
     }
@@ -317,8 +311,14 @@ class StackChartCanvas extends React.PureComponent<Props> {
     });
   };
 
-  _renderReact({ ctx, event, isHovered, isSelected, priorityIndex }) {
-    const { duration, timestamp, type } = event;
+  _renderReact({
+    ctx,
+    event,
+    priorityIndex,
+    showGroupHighlight,
+    showHoverHighlight,
+  }) {
+    const { depth, duration, isCascading, timestamp, type } = event;
 
     const {
       rangeStart,
@@ -356,7 +356,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
     const timeAtEnd: Milliseconds = rangeStart + rangeLength * viewportRight;
 
     let fillStyle = null;
-    let strokeStyle = null;
+    let hoveredFillStyle = null;
+    let groupSelectedFillStyle = null;
     let x;
 
     switch (event.type) {
@@ -370,55 +371,49 @@ class StackChartCanvas extends React.PureComponent<Props> {
         const endTime: UnitIntervalOfProfileRange =
           (timestamp + duration - rangeStart) / rangeLength;
         x = pixelAtViewportPosition(startTime);
-        const width = Math.max(1, pixelAtViewportPosition(endTime) - x);
+        let width = Math.floor(pixelAtViewportPosition(endTime) - x);
 
-        if (timestamp + duration < timeAtStart || timestamp > timeAtEnd) {
+        if (
+          timestamp + duration < timeAtStart ||
+          timestamp > timeAtEnd ||
+          width === 0
+        ) {
           return; // Not in view
         }
 
         switch (type) {
           case 'commit-work':
-            fillStyle = isHovered
-              ? REACT_DEVTOOLS_COLORS.REACT_COMMIT_HOVER
-              : REACT_DEVTOOLS_COLORS.REACT_COMMIT;
-            strokeStyle = isSelected
-              ? REACT_DEVTOOLS_COLORS.REACT_COMMIT_HOVER
-              : null;
+            fillStyle = REACT_DEVTOOLS_COLORS.REACT_COMMIT;
+            hoveredFillStyle = REACT_DEVTOOLS_COLORS.REACT_COMMIT_HOVER;
+            groupSelectedFillStyle =
+              REACT_DEVTOOLS_COLORS.REACT_COMMIT_SELECTED;
             break;
           case 'render-idle':
             // We could render idle time as diagonal hashes.
             // This looks nicer when zoomed in, but not so nice when zoomed out.
             // color = ctx.createPattern(getIdlePattern(), 'repeat');
-            fillStyle = isHovered
-              ? REACT_DEVTOOLS_COLORS.REACT_IDLE_HOVER
-              : REACT_DEVTOOLS_COLORS.REACT_IDLE;
-            strokeStyle = isSelected
-              ? REACT_DEVTOOLS_COLORS.REACT_IDLE_HOVER
-              : null;
+            fillStyle = REACT_DEVTOOLS_COLORS.REACT_IDLE;
+            hoveredFillStyle = REACT_DEVTOOLS_COLORS.REACT_IDLE_HOVER;
+            groupSelectedFillStyle = REACT_DEVTOOLS_COLORS.REACT_IDLE_SELECTED;
             break;
           case 'render-work':
-            fillStyle = isHovered
-              ? REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER
-              : REACT_DEVTOOLS_COLORS.REACT_RENDER;
-            strokeStyle = isSelected
-              ? REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER
-              : null;
+            fillStyle = REACT_DEVTOOLS_COLORS.REACT_RENDER;
+            hoveredFillStyle = REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER;
+            groupSelectedFillStyle =
+              REACT_DEVTOOLS_COLORS.REACT_RENDER_SELECTED;
             break;
           case 'layout-effects':
-            fillStyle = isHovered
-              ? REACT_DEVTOOLS_COLORS.REACT_LAYOUT_EFFECTS
-              : REACT_DEVTOOLS_COLORS.REACT_LAYOUT_EFFECTS_HOVER;
-            strokeStyle = isSelected
-              ? REACT_DEVTOOLS_COLORS.REACT_LAYOUT_EFFECTS_HOVER
-              : null;
+            fillStyle = REACT_DEVTOOLS_COLORS.REACT_LAYOUT_EFFECTS;
+            hoveredFillStyle = REACT_DEVTOOLS_COLORS.REACT_LAYOUT_EFFECTS_HOVER;
+            groupSelectedFillStyle =
+              REACT_DEVTOOLS_COLORS.REACT_LAYOUT_EFFECTS_SELECTED;
             break;
           case 'passive-effects':
-            fillStyle = isHovered
-              ? REACT_DEVTOOLS_COLORS.REACT_PASSIVE_EFFECTS
-              : REACT_DEVTOOLS_COLORS.REACT_PASSIVE_EFFECTS_HOVER;
-            strokeStyle = isSelected
-              ? REACT_DEVTOOLS_COLORS.REACT_PASSIVE_EFFECTS_HOVER
-              : null;
+            fillStyle = REACT_DEVTOOLS_COLORS.REACT_PASSIVE_EFFECTS;
+            hoveredFillStyle =
+              REACT_DEVTOOLS_COLORS.REACT_PASSIVE_EFFECTS_HOVER;
+            groupSelectedFillStyle =
+              REACT_DEVTOOLS_COLORS.REACT_PASSIVE_EFFECTS_SELECTED;
             break;
           default:
             console.warn(`Unexpected type "${type}"`);
@@ -432,25 +427,42 @@ class StackChartCanvas extends React.PureComponent<Props> {
             REACT_GUTTER_SIZE) *
           devicePixelRatio;
 
-        const height = REACT_WORK_SIZE * devicePixelRatio;
+        let height =
+          (REACT_WORK_SIZE - REACT_WORK_DEPTH_OFFSET * depth) *
+          devicePixelRatio;
 
-        ctx.fillStyle = fillStyle;
+        const lineWidth = Math.floor(
+          REACT_EVENT_BORDER_SIZE * devicePixelRatio
+        );
+
+        if (depth > 0) {
+          ctx.fillStyle = REACT_DEVTOOLS_COLORS.REACT_WORK_BORDER;
+          ctx.fillRect(
+            Math.floor(x),
+            Math.floor(y),
+            Math.floor(width),
+            Math.floor(height)
+          );
+
+          height -= lineWidth;
+
+          if (width > lineWidth * 2) {
+            width -= lineWidth * 2;
+            x += lineWidth;
+          }
+        }
+
+        ctx.fillStyle = showHoverHighlight
+          ? hoveredFillStyle
+          : showGroupHighlight
+          ? groupSelectedFillStyle
+          : fillStyle;
         ctx.fillRect(
           Math.floor(x),
           Math.floor(y),
           Math.floor(width),
           Math.floor(height)
         );
-        if (strokeStyle !== null) {
-          ctx.lineWidth = REACT_SELECTED_BORDER_SIZE * devicePixelRatio;
-          ctx.strokeStyle = strokeStyle;
-          ctx.strokeRect(
-            Math.floor(x),
-            Math.floor(y),
-            Math.floor(width),
-            Math.floor(height)
-          );
-        }
         break;
       case 'schedule-render': // eslint-disable-line no-case-declarations
       case 'schedule-state-update': // eslint-disable-line no-case-declarations
@@ -466,20 +478,20 @@ class StackChartCanvas extends React.PureComponent<Props> {
         switch (type) {
           case 'schedule-render':
           case 'schedule-state-update':
-            fillStyle = isHovered
-              ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER
-              : REACT_DEVTOOLS_COLORS.REACT_SCHEDULE;
-            strokeStyle = isSelected
-              ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER
-              : null;
+            if (isCascading) {
+              fillStyle = showHoverHighlight
+                ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_CASCADING_HOVER
+                : REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_CASCADING;
+            } else {
+              fillStyle = showHoverHighlight
+                ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER
+                : REACT_DEVTOOLS_COLORS.REACT_SCHEDULE;
+            }
             break;
           case 'suspend':
-            fillStyle = isHovered
+            fillStyle = showHoverHighlight
               ? REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER
               : REACT_DEVTOOLS_COLORS.REACT_SUSPEND;
-            strokeStyle = isSelected
-              ? REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER
-              : null;
             break;
           default:
             console.warn(`Unexpected event type "${type}"`);
@@ -498,13 +510,6 @@ class StackChartCanvas extends React.PureComponent<Props> {
           ctx.fillStyle = fillStyle;
           ctx.arc(x, y, circumference / 2, 0, 2 * Math.PI);
           ctx.fill();
-          if (strokeStyle !== null) {
-            ctx.beginPath();
-            ctx.lineWidth = REACT_SELECTED_BORDER_SIZE * devicePixelRatio;
-            ctx.strokeStyle = strokeStyle;
-            ctx.arc(x, y, circumference / 2, 0, 2 * Math.PI);
-            ctx.stroke();
-          }
         }
         break;
       default:
@@ -709,7 +714,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
             isSelected = selectedCallNodeIndex === markerIndex;
           }
 
-          const isHovered =
+          const showHoverHighlight =
             hoveredItem &&
             depth === hoveredItem.depth &&
             i === hoveredItem.stackTimingIndex;
@@ -719,7 +724,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
           );
           // Draw the box.
           fastFillStyle.set(
-            isHovered || isSelected
+            showHoverHighlight || isSelected
               ? colorStyles.selectedFillStyle
               : colorStyles.unselectedFillStyle
           );
@@ -750,7 +755,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
             const fittedText = textMeasurement.getFittedText(text, textW);
             if (fittedText) {
               fastFillStyle.set(
-                isHovered || isSelected
+                showHoverHighlight || isSelected
                   ? colorStyles.selectedTextColor
                   : '#000000'
               );
@@ -801,9 +806,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
       let events = null;
       if (y >= eventMinY && y <= eventMaxY) {
-        events = reactProfilerData[priority].reactEvents;
+        events = reactProfilerData[priority].events;
       } else if (y >= workMinY && y <= workMaxY) {
-        events = reactProfilerData[priority].reactWork;
+        events = reactProfilerData[priority].work;
       }
 
       if (events !== null) {
@@ -816,11 +821,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
         const pointerTime = positionToTime(x);
 
-        let startIndex = 0;
-        let stopIndex = events.length - 1;
-        while (startIndex <= stopIndex) {
-          const index = Math.floor((startIndex + stopIndex) / 2);
-
+        // Because data ranges may overlap, wew ant to find the last intersecting item.
+        // This will always be the one on "top" (the one the user is hovering over).
+        for (let index = events.length - 1; index >= 0; index--) {
           const event = events[index];
           const { duration, timestamp } = event;
 
@@ -847,12 +850,6 @@ class StackChartCanvas extends React.PureComponent<Props> {
               return { event, priority, priorityIndex };
             }
           }
-
-          if (timestamp < pointerTime) {
-            startIndex = index + 1;
-          } else {
-            stopIndex = index - 1;
-          }
         }
       }
     }
@@ -863,7 +860,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
   _getHoveredStackInfoReact = data => {
     if (data !== undefined && data !== null) {
       const { event, priority } = data;
-      const { type } = event;
+      const { isCascading, type } = event;
       switch (type) {
         case 'commit-work':
         case 'render-idle':
@@ -872,9 +869,28 @@ class StackChartCanvas extends React.PureComponent<Props> {
         case 'passive-effects':
           return <TooltipReactWork data={event} priority={priority} />;
         case 'schedule-render':
-        case 'schedule-state-update':
+          return (
+            <TooltipReactEvent
+              color={REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER}
+              data={event}
+              priority={priority}
+            />
+          );
+        case 'schedule-state-update': // eslint-disable-line no-case-declarations
+          const color = isCascading
+            ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_CASCADING_HOVER
+            : REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER;
+          return (
+            <TooltipReactEvent color={color} data={event} priority={priority} />
+          );
         case 'suspend':
-          return <TooltipReactEvent data={event} priority={priority} />;
+          return (
+            <TooltipReactEvent
+              color={REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER}
+              data={event}
+              priority={priority}
+            />
+          );
         default:
           console.warn(`Unexpected type "${type}"`);
           break;
@@ -984,8 +1000,9 @@ class StackChartCanvas extends React.PureComponent<Props> {
     return null;
   }
 
+  // eslint-disable-next-line no-unused-vars
   _onSelectItemReact = (data: Object | null) => {
-    this.setState({ selectedItem: data });
+    // this.setState({ selectedItem: data });
   };
 
   _onSelectItem = (hoveredItem: HoveredStackTiming | null) => {

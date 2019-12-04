@@ -22,55 +22,130 @@ export default function reactProfilerProcessor(rawData) {
   const processedData = {
     // Prioritized "events" marked by React and Scheduler packages:
     high: {
-      reactWork: [],
-      reactEvents: [],
+      events: [],
+      work: [],
     },
     normal: {
-      reactWork: [],
-      reactEvents: [],
+      events: [],
+      work: [],
     },
     low: {
-      reactWork: [],
-      reactEvents: [],
+      events: [],
+      work: [],
     },
     unscheduled: {
-      reactWork: [],
-      reactEvents: [],
+      events: [],
+      work: [],
     },
   };
+
+  let currentMetadata = null;
+  let currentPriority = null;
+  let currentProcessedGroup = null;
+  let uidCounter = 0;
 
   const metadata = {
     high: {
-      hasInProgressCommit: false,
-      hasUncommittedWork: false,
-      previousStartTime: null,
-      previousStopTime: null,
+      nextRenderShouldGenerateNewBatchID: true,
+      batchUID: null,
+      stack: [],
     },
     normal: {
-      hasInProgressCommit: false,
-      hasUncommittedWork: false,
-      previousStartTime: null,
-      previousStopTime: null,
+      nextRenderShouldGenerateNewBatchID: true,
+      batchUID: null,
+      stack: [],
     },
     low: {
-      hasInProgressCommit: false,
-      hasUncommittedWork: false,
-      previousStartTime: null,
-      previousStopTime: null,
+      nextRenderShouldGenerateNewBatchID: true,
+      batchUID: null,
+      stack: [],
     },
     unscheduled: {
-      hasInProgressCommit: false,
-      hasUncommittedWork: false,
-      previousStartTime: null,
-      previousStopTime: null,
+      nextRenderShouldGenerateNewBatchID: true,
+      batchUID: null,
+      stack: [],
     },
   };
 
-  let currentPriority = null;
+  const getLastType = () => {
+    const { stack } = currentMetadata;
+    if (stack.length > 0) {
+      const { type } = stack[stack.length - 1];
+      return type;
+    }
+    return null;
+  };
 
-  // TODO (brian) Re-implement this to use a per-priority stack (where things get started/stopped each time the stack is:
-  // 1. pushed with a length > 0
-  // 2. popped
+  const getDepth = () => {
+    const { stack } = currentMetadata;
+    if (stack.length > 0) {
+      const { depth, type } = stack[stack.length - 1];
+      return type === 'render-idle' ? depth : depth + 1;
+    }
+    return 0;
+  };
+
+  const markWorkCompleted = (type, stopTime) => {
+    const { stack } = currentMetadata;
+    if (stack.length === 0) {
+      console.error(
+        `Unexpected type "${type}" completed while stack is empty.`
+      );
+    } else {
+      const last = stack[stack.length - 1];
+      if (last.type !== type) {
+        console.error(
+          `Unexpected type "${type}" completed before "${last.type}" completed.`
+        );
+      } else {
+        const { index, startTime } = stack.pop();
+
+        const work = currentProcessedGroup.work[index];
+        if (!work) {
+          console.error(
+            `Could not find matching work entry for type "${type}".`
+          );
+        } else {
+          work.duration = stopTime - startTime;
+        }
+      }
+    }
+  };
+
+  const markWorkStarted = (type, startTime) => {
+    const { batchUID, stack } = currentMetadata;
+
+    const index = currentProcessedGroup.work.length;
+    const depth = getDepth();
+
+    stack.push({
+      depth,
+      index,
+      startTime,
+      type,
+    });
+
+    currentProcessedGroup.work.push({
+      type,
+      batchUID,
+      depth,
+      priority: currentPriority,
+      timestamp: startTime,
+    });
+  };
+
+  const throwIfIncomplete = type => {
+    const { stack } = currentMetadata;
+    const lastIndex = stack.length - 1;
+    if (lastIndex >= 0) {
+      const last = stack[lastIndex];
+      if (last.stopTime === undefined && last.type === type) {
+        throw new Error(
+          `Unexpected type "${type}" started before "${last.type}" completed.`
+        );
+      }
+    }
+  };
 
   for (let i = 0; i < rawData.length; i++) {
     const currentEvent = rawData[i];
@@ -82,20 +157,17 @@ export default function reactProfilerProcessor(rawData) {
       continue;
     }
 
-    const currentMetadata = metadata[currentPriority || 'unscheduled'];
+    currentMetadata = metadata[currentPriority || 'unscheduled'];
     if (!currentMetadata) {
-      console.warn('Unexpected priority', currentPriority);
+      console.error('Unexpected priority', currentPriority);
     }
 
-    const currentProcessedGroup =
-      processedData[currentPriority || 'unscheduled'];
+    currentProcessedGroup = processedData[currentPriority || 'unscheduled'];
     if (!currentProcessedGroup) {
-      console.warn('Unexpected priority', currentPriority);
+      console.error('Unexpected priority', currentPriority);
     }
 
     const { name, startTime } = currentEvent;
-
-    const timestamp = startTime;
 
     if (name.startsWith('--scheduler-start-')) {
       if (currentPriority !== null) {
@@ -116,163 +188,82 @@ export default function reactProfilerProcessor(rawData) {
 
       currentPriority = null;
     } else if (name === '--render-start') {
-      if (currentMetadata.previousStartTime !== null) {
-        console.warn('Unexpected render start');
+      if (currentMetadata.nextRenderShouldGenerateNewBatchID) {
+        currentMetadata.nextRenderShouldGenerateNewBatchID = false;
+        currentMetadata.batchUID = uidCounter++;
       }
-
-      if (
-        currentMetadata.hasUncommittedWork &&
-        currentMetadata.previousStopTime !== null
-      ) {
-        currentProcessedGroup.reactWork.push({
-          type: 'render-idle',
-          timestamp: currentMetadata.previousStopTime,
-          duration: timestamp - currentMetadata.previousStopTime,
-        });
+      throwIfIncomplete('render-work');
+      if (getLastType() !== 'render-idle') {
+        markWorkStarted('render-idle', startTime);
       }
-
-      currentMetadata.hasUncommittedWork = true;
-      currentMetadata.previousStartTime = timestamp;
-      currentMetadata.previousStopTime = null;
+      markWorkStarted('render-work', startTime);
     } else if (name === '--render-stop') {
-      if (currentMetadata.previousStartTime === null) {
-        console.warn('Unexpected render stop');
-      } else {
-        currentProcessedGroup.reactWork.push({
-          type: 'render-work',
-          timestamp: currentMetadata.previousStartTime,
-          duration: timestamp - currentMetadata.previousStartTime,
-        });
-      }
-
-      currentMetadata.previousStartTime = null;
-      currentMetadata.previousStopTime = timestamp;
+      markWorkCompleted('render-work', startTime);
     } else if (name === '--render-yield') {
-      if (currentMetadata.previousStartTime === null) {
-        console.warn('Unexpected render stop');
-      } else {
-        currentProcessedGroup.reactWork.push({
-          type: 'render-work',
-          timestamp: currentMetadata.previousStartTime,
-          duration: timestamp - currentMetadata.previousStartTime,
-        });
-      }
-
-      currentMetadata.previousStartTime = null;
-      currentMetadata.previousStopTime = timestamp;
+      markWorkCompleted('render-work', startTime);
     } else if (name === '--render-cancel') {
-      if (currentMetadata.previousStartTime === null) {
-        console.warn('Unexpected render stop');
-      } else {
-        currentProcessedGroup.reactWork.push({
-          type: 'render-work',
-          timestamp: currentMetadata.previousStartTime,
-          duration: timestamp - currentMetadata.previousStartTime,
-        });
-      }
-
-      currentMetadata.hasUncommittedWork = false;
-      currentMetadata.previousStartTime = null;
-      currentMetadata.previousStopTime = null;
+      currentMetadata.nextRenderShouldGenerateNewBatchID = true;
+      markWorkCompleted('render-work', startTime);
+      markWorkCompleted('render-idle', startTime);
     } else if (name === '--commit-start') {
-      if (currentMetadata.previousStartTime !== null) {
-        console.warn('Unexpected commit start');
-      }
-
-      if (
-        currentMetadata.hasUncommittedWork &&
-        currentMetadata.previousStopTime !== null &&
-        currentMetadata.previousStopTime < timestamp
-      ) {
-        currentProcessedGroup.reactWork.push({
-          type: 'render-idle',
-          timestamp: currentMetadata.previousStopTime,
-          duration: timestamp - currentMetadata.previousStopTime,
-        });
-      }
-
-      currentMetadata.hasInProgressCommit = true;
-      currentMetadata.previousStartTime = timestamp;
+      currentMetadata.nextRenderShouldGenerateNewBatchID = true;
+      markWorkStarted('commit-work', startTime);
     } else if (name === '--commit-stop') {
-      if (currentMetadata.previousStartTime === null) {
-        console.warn('Unexpected commit stop');
-      } else {
-        currentProcessedGroup.reactWork.push({
-          type: 'commit-work',
-          timestamp: currentMetadata.previousStartTime,
-          duration: timestamp - currentMetadata.previousStartTime,
-        });
-      }
-
-      currentMetadata.hasInProgressCommit = false;
-      currentMetadata.hasUncommittedWork = false;
-      currentMetadata.previousStartTime = null;
-      currentMetadata.previousStopTime = null;
+      markWorkCompleted('commit-work', startTime);
+      markWorkCompleted('render-idle', startTime);
     } else if (
       name === '--layout-effects-start' ||
       name === '--passive-effects-start'
     ) {
-      if (currentMetadata.hasInProgressCommit) {
-        currentProcessedGroup.reactWork.push({
-          type: 'commit-work',
-          timestamp: currentMetadata.previousStartTime,
-          duration: timestamp - currentMetadata.previousStartTime,
-        });
-      } else if (
-        currentMetadata.hasUncommittedWork &&
-        currentMetadata.previousStopTime !== null
-      ) {
-        currentProcessedGroup.reactWork.push({
-          type: 'render-idle',
-          timestamp: currentMetadata.previousStopTime,
-          duration: timestamp - currentMetadata.previousStopTime,
-        });
-      }
-
-      currentMetadata.previousStartTime = timestamp;
+      const type =
+        name === '--layout-effects-start'
+          ? 'layout-effects'
+          : 'passive-effects';
+      throwIfIncomplete(type);
+      markWorkStarted(type, startTime);
     } else if (
       name === '--layout-effects-stop' ||
       name === '--passive-effects-stop'
     ) {
-      currentProcessedGroup.reactWork.push({
-        type:
-          name === '--layout-effects-stop'
-            ? 'layout-effects'
-            : 'passive-effects',
-        timestamp: currentMetadata.previousStartTime,
-        duration: timestamp - currentMetadata.previousStartTime,
-      });
-
-      if (currentMetadata.hasInProgressCommit) {
-        currentMetadata.previousStartTime = timestamp;
-      } else {
-        currentMetadata.previousStartTime = null;
-      }
+      const type =
+        name === '--layout-effects-stop' ? 'layout-effects' : 'passive-effects';
+      markWorkCompleted(type, startTime);
     } else if (name.startsWith('--schedule-render')) {
-      currentProcessedGroup.reactEvents.push({
+      currentProcessedGroup.events.push({
         type: 'schedule-render',
         priority: currentPriority, // TODO Change to target priority
-        timestamp,
+        timestamp: startTime,
       });
     } else if (name.startsWith('--schedule-state-update-')) {
       const [componentName, componentStack] = name.substr(24).split('-');
-      currentProcessedGroup.reactEvents.push({
+      const isCascading = !!currentMetadata.stack.find(
+        ({ type }) => type === 'commit-work'
+      );
+      currentProcessedGroup.events.push({
         type: 'schedule-state-update',
         priority: currentPriority, // TODO Change to target priority
-        timestamp,
+        isCascading,
+        timestamp: startTime,
         componentName,
         componentStack,
       });
     } else if (name.startsWith('--suspend-')) {
       const [componentName, componentStack] = name.substr(10).split('-');
-      currentProcessedGroup.reactEvents.push({
+      currentProcessedGroup.events.push({
         type: 'suspend',
-        timestamp,
+        timestamp: startTime,
         componentName,
         componentStack,
       });
     }
   }
+
+  Object.entries(metadata).forEach(([priority, metadata]) => {
+    const { stack } = metadata;
+    if (stack.length > 0) {
+      console.error(`Incomplete work entries for priority ${priority}`, stack);
+    }
+  });
 
   return processedData;
 }

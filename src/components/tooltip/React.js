@@ -19,21 +19,18 @@ function formatComponentStack(componentStack) {
   return lines.join('\n');
 }
 
-export function TooltipReactEvent({ data, priority }) {
+export function TooltipReactEvent({ color, data, priority }) {
   const { componentName, componentStack, type } = data;
 
-  let className = null;
   let label = null;
   switch (type) {
     case 'schedule-render':
       label = '⚛️ render scheduled';
       break;
     case 'schedule-state-update':
-      className = 'componentNameStateUpdate';
       label = 'state update scheduled';
       break;
     case 'suspend':
-      className = 'componentNameSuspended';
       label = 'suspended';
       break;
     default:
@@ -45,7 +42,9 @@ export function TooltipReactEvent({ data, priority }) {
       <div className="tooltipHeader">
         <div className="tooltipOneLine">
           {componentName && (
-            <div className={className}>{componentName}&nbsp;</div>
+            <div className="componentName" style={{ color }}>
+              {componentName}&nbsp;
+            </div>
           )}
           <div className="tooltipTitle">{label}</div>
         </div>
