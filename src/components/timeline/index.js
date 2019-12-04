@@ -20,10 +20,12 @@ import {
   getGlobalTracks,
   getGlobalTrackReferences,
   getHiddenTrackCount,
+  getProfilerConfiguration,
 } from '../../selectors/profile';
 import {
   getGlobalTrackOrder,
   getTimelineType,
+  getShowTabOnly,
 } from '../../selectors/url-state';
 import {
   TIMELINE_MARGIN_LEFT,
@@ -41,9 +43,12 @@ import {
   commitRange,
   changeTimelineType,
   changeRightClickedTrack,
+  changeShowTabOnly,
 } from '../../actions/profile-view';
 
+import type { BrowsingContextID } from '../../types/profile';
 import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
+
 import type {
   GlobalTrackReference,
   TimelineType,
@@ -61,6 +66,8 @@ type StateProps = {|
   +zeroAt: Milliseconds,
   +timelineType: TimelineType,
   +hiddenTrackCount: HiddenTrackCount,
+  +activeBrowsingContextID: BrowsingContextID | null,
+  +showTabOnly: BrowsingContextID | null,
 |};
 
 type DispatchProps = {|
@@ -69,6 +76,7 @@ type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeTimelineType: typeof changeTimelineType,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
+  +changeShowTabOnly: typeof changeShowTabOnly,
 |};
 
 type Props = {|
@@ -153,6 +161,49 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
   }
 }
 
+class TimelineSettingsActiveTabView extends React.PureComponent<{|
+  +activeBrowsingContextID: BrowsingContextID | null,
+  +showTabOnly: BrowsingContextID | null,
+  +changeShowTabOnly: typeof changeShowTabOnly,
+|}> {
+  _toggleShowTabOnly = () => {
+    const {
+      showTabOnly,
+      changeShowTabOnly,
+      activeBrowsingContextID,
+    } = this.props;
+    if (showTabOnly === null) {
+      changeShowTabOnly(activeBrowsingContextID);
+    } else {
+      changeShowTabOnly(null);
+    }
+  };
+
+  render() {
+    const { activeBrowsingContextID, showTabOnly } = this.props;
+    if (activeBrowsingContextID === null) {
+      return null;
+    }
+
+    return (
+      <form>
+        <div className="timelineSettingsToggle">
+          <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
+            <input
+              type="checkbox"
+              name="timelineSettingsActiveTabToggle"
+              className="photon-checkbox photon-checkbox-micro"
+              onChange={this._toggleShowTabOnly}
+              checked={showTabOnly !== null}
+            />
+            Show active tab only
+          </label>
+        </div>
+      </form>
+    );
+  }
+}
+
 class Timeline extends React.PureComponent<Props> {
   render() {
     const {
@@ -168,6 +219,9 @@ class Timeline extends React.PureComponent<Props> {
       hiddenTrackCount,
       changeTimelineType,
       changeRightClickedTrack,
+      activeBrowsingContextID,
+      showTabOnly,
+      changeShowTabOnly,
     } = this.props;
 
     // Do not include the left and right margins when computing the timeline width.
@@ -188,6 +242,11 @@ class Timeline extends React.PureComponent<Props> {
           <TimelineSettingsHiddenTracks
             hiddenTrackCount={hiddenTrackCount}
             changeRightClickedTrack={changeRightClickedTrack}
+          />
+          <TimelineSettingsActiveTabView
+            activeBrowsingContextID={activeBrowsingContextID}
+            showTabOnly={showTabOnly}
+            changeShowTabOnly={changeShowTabOnly}
           />
         </div>
         <TimelineSelection width={timelineWidth}>
@@ -227,22 +286,31 @@ class Timeline extends React.PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    globalTracks: getGlobalTracks(state),
-    globalTrackOrder: getGlobalTrackOrder(state),
-    globalTrackReferences: getGlobalTrackReferences(state),
-    committedRange: getCommittedRange(state),
-    zeroAt: getZeroAt(state),
-    panelLayoutGeneration: getPanelLayoutGeneration(state),
-    timelineType: getTimelineType(state),
-    hiddenTrackCount: getHiddenTrackCount(state),
-  }),
+  mapStateToProps: state => {
+    const configuration = getProfilerConfiguration(state);
+    const activeBrowsingContextID = configuration
+      ? configuration.activeBrowsingContextID || null
+      : null;
+    return {
+      globalTracks: getGlobalTracks(state),
+      globalTrackOrder: getGlobalTrackOrder(state),
+      globalTrackReferences: getGlobalTrackReferences(state),
+      committedRange: getCommittedRange(state),
+      zeroAt: getZeroAt(state),
+      panelLayoutGeneration: getPanelLayoutGeneration(state),
+      timelineType: getTimelineType(state),
+      hiddenTrackCount: getHiddenTrackCount(state),
+      activeBrowsingContextID: activeBrowsingContextID,
+      showTabOnly: getShowTabOnly(state),
+    };
+  },
   mapDispatchToProps: {
     changeGlobalTrackOrder,
     updatePreviewSelection,
     commitRange,
     changeTimelineType,
     changeRightClickedTrack,
+    changeShowTabOnly,
   },
   component: withSize<Props>(Timeline),
 });
