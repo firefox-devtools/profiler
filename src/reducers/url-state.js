@@ -7,7 +7,7 @@ import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/flow';
 
-import type { ThreadIndex, Pid } from '../types/profile';
+import type { ThreadIndex, Pid, BrowsingContextID } from '../types/profile';
 import type { TrackIndex } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type { TransformStacksPerThread } from '../types/transforms';
@@ -404,6 +404,18 @@ const profileName: Reducer<string> = (state = '', action) => {
   }
 };
 
+const showTabOnly: Reducer<BrowsingContextID | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CHANGE_SHOW_TAB_ONLY':
+      return action.showTabOnly;
+    default:
+      return state;
+  }
+};
+
 /**
  * These values are specific to an individual profile.
  */
@@ -471,6 +483,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     pathInZipFile,
     profileSpecific,
     profileName,
+    showTabOnly,
   })
 );
 
