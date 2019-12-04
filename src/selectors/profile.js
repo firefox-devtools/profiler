@@ -29,6 +29,7 @@ import type {
   ProfileMeta,
   VisualMetrics,
   ProgressGraphData,
+  ProfilerConfiguration,
 } from '../types/profile';
 import type {
   LocalTrack,
@@ -149,6 +150,8 @@ export const getPerceptualSpeedIndexProgress: Selector<
 export const getContentfulSpeedIndexProgress: Selector<
   ProgressGraphData[]
 > = state => getVisualMetrics(state).ContentfulSpeedIndexProgress;
+export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
+  getMeta(state).configuration;
 
 type CounterSelectors = $ReturnType<typeof _createCounterSelectors>;
 
