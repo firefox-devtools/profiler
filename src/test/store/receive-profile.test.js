@@ -413,9 +413,9 @@ describe('actions/receive-profile', function() {
           start: 0,
           // The end can be computed as the sum of:
           // - difference of the starts of the subprocess and the main process (1000)
-          // - the max of the last marker or sample. (in this case, last marker's time is 100)
+          // - the max of the last sample. (in this case, last sample's time is 6.
           // - the interval (1)
-          end: 1101,
+          end: 1007,
         });
         // not empty
         expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3);
@@ -469,7 +469,7 @@ describe('actions/receive-profile', function() {
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1101, // see the above test for more explanation on this value
+        end: 1007, // see the above test for more explanation on this value
       });
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
