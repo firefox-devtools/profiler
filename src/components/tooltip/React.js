@@ -4,6 +4,7 @@
 
 // @flow
 
+import memoize from 'memoize-immutable';
 import * as React from 'react';
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
 import { formatMilliseconds } from '../../utils/format-numbers';
@@ -19,13 +20,46 @@ function formatComponentStack(componentStack) {
   return lines.join('\n');
 }
 
-export function TooltipReactEvent({ color, data, priority }) {
-  const { componentName, componentStack, type } = data;
+const getTotalDuration = memoize(
+  (data, priority, reactProfilerData) => {
+    const { batchUID } = data;
+    const work = reactProfilerData[priority].work;
+
+    let startTime = 0;
+    let stopTime = Infinity;
+
+    let i = 0;
+
+    for (i; i < work.length; i++) {
+      const item = work[i];
+      if (item.batchUID === batchUID) {
+        startTime = item.timestamp;
+        break;
+      }
+    }
+
+    for (i; i < work.length; i++) {
+      const item = work[i];
+      stopTime = item.timestamp;
+      if (item.batchUID !== batchUID) {
+        break;
+      }
+    }
+
+    return stopTime - startTime;
+  },
+  {
+    limit: 1,
+  }
+);
+
+export function TooltipReactEvent({ color, data, priority, zeroAt }) {
+  const { componentName, componentStack, timestamp, type } = data;
 
   let label = null;
   switch (type) {
     case 'schedule-render':
-      label = '⚛️ render scheduled';
+      label = 'render scheduled';
       break;
     case 'schedule-state-update':
       label = 'state update scheduled';
@@ -50,8 +84,8 @@ export function TooltipReactEvent({ color, data, priority }) {
         </div>
       </div>
       <TooltipDetails>
-        <TooltipDetail label="Priority">
-          <div className="priority">{priority}</div>
+        <TooltipDetail label="Timestamp">
+          {formatMilliseconds(timestamp - zeroAt)}
         </TooltipDetail>
         {componentStack && (
           <TooltipDetail label="Component stack">
@@ -65,25 +99,30 @@ export function TooltipReactEvent({ color, data, priority }) {
   );
 }
 
-export function TooltipReactWork({ data, priority }) {
-  const { duration, type } = data;
+export function TooltipReactWork({
+  data,
+  priority,
+  reactProfilerData,
+  zeroAt,
+}) {
+  const { duration, timestamp, type } = data;
 
   let label = null;
   switch (type) {
     case 'commit-work':
-      label = '⚛️ commit';
+      label = 'commit';
       break;
     case 'render-idle':
-      label = '⚛️ idle';
+      label = 'idle';
       break;
     case 'render-work':
-      label = '⚛️ render';
+      label = 'render';
       break;
     case 'layout-effects':
-      label = '⚛️ layout effects';
+      label = 'layout effects';
       break;
     case 'passive-effects':
-      label = '⚛️ passive effects';
+      label = 'passive effects';
       break;
     default:
       break;
@@ -98,8 +137,13 @@ export function TooltipReactWork({ data, priority }) {
         </div>
       </div>
       <TooltipDetails>
-        <TooltipDetail label="Priority">
-          <div className="priority">{priority}</div>
+        <TooltipDetail label="Timestamp">
+          {formatMilliseconds(timestamp - zeroAt)}
+        </TooltipDetail>
+        <TooltipDetail label="Batch duration">
+          {formatMilliseconds(
+            getTotalDuration(data, priority, reactProfilerData)
+          )}
         </TooltipDetail>
       </TooltipDetails>
     </div>

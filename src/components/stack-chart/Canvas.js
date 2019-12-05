@@ -70,6 +70,7 @@ type OwnProps = {|
   +onRightClick: (IndexIntoCallNodeTable | null) => void,
   +shouldDisplayTooltips: () => boolean,
   +scrollToSelectionGeneration: number,
+  +zeroAt: number,
 |};
 
 type Props = $ReadOnly<{|
@@ -306,7 +307,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         priority,
         10 * devicePixelRatio,
         REACT_DEVTOOLS_PRIORITY_SIZE * devicePixelRatio * priorityIndex +
-          12 * devicePixelRatio
+          (REACT_DEVTOOLS_PRIORITY_SIZE / 2) * devicePixelRatio
       );
     });
   };
@@ -861,19 +862,29 @@ class StackChartCanvas extends React.PureComponent<Props> {
     if (data !== undefined && data !== null) {
       const { event, priority } = data;
       const { isCascading, type } = event;
+      const { zeroAt } = this.props;
+      const { reactProfilerData } = this.state;
       switch (type) {
         case 'commit-work':
         case 'render-idle':
         case 'render-work':
         case 'layout-effects':
         case 'passive-effects':
-          return <TooltipReactWork data={event} priority={priority} />;
+          return (
+            <TooltipReactWork
+              data={event}
+              priority={priority}
+              reactProfilerData={reactProfilerData}
+              zeroAt={zeroAt}
+            />
+          );
         case 'schedule-render':
           return (
             <TooltipReactEvent
               color={REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER}
               data={event}
               priority={priority}
+              zeroAt={zeroAt}
             />
           );
         case 'schedule-state-update': // eslint-disable-line no-case-declarations
@@ -881,7 +892,12 @@ class StackChartCanvas extends React.PureComponent<Props> {
             ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_CASCADING_HOVER
             : REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER;
           return (
-            <TooltipReactEvent color={color} data={event} priority={priority} />
+            <TooltipReactEvent
+              color={color}
+              data={event}
+              priority={priority}
+              zeroAt={zeroAt}
+            />
           );
         case 'suspend':
           return (
@@ -889,6 +905,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
               color={REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER}
               data={event}
               priority={priority}
+              zeroAt={zeroAt}
             />
           );
         default:
@@ -1061,6 +1078,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
   };
 
   _noop = () => {};
+
+  // TODO (brian) Add context menu
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;

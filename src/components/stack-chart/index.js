@@ -18,6 +18,7 @@ import {
   getScrollToSelectionGeneration,
   getCategories,
   getPageList,
+  getZeroAt,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
@@ -159,6 +160,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       pages,
       getMarker,
       userTimings,
+      zeroAt,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -212,6 +214,7 @@ class StackChartGraph extends React.PureComponent<Props> {
                   onRightClick: this._onRightClickedCallNodeChange,
                   shouldDisplayTooltips: this._shouldDisplayTooltips,
                   scrollToSelectionGeneration,
+                  zeroAt,
                 }}
               />
             </div>
@@ -249,6 +252,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       pages: getPageList(state),
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
+      zeroAt: getZeroAt(state),
     };
   },
   mapDispatchToProps: {
