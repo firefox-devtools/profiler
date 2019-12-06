@@ -321,7 +321,7 @@ describe('unfiltered call tree', function() {
       it('gets a node for a given callNodeIndex', function() {
         expect(callTree.getDisplayData(A)).toEqual({
           ariaLabel: 'A, running time is 3ms (100%), self time is 0ms',
-          dim: true,
+          isFrameLabel: true,
           icon: null,
           lib: '',
           name: 'A',
@@ -335,7 +335,7 @@ describe('unfiltered call tree', function() {
         });
         expect(callTree.getDisplayData(I)).toEqual({
           ariaLabel: 'I, running time is 1ms (33%), self time is 1ms',
-          dim: false,
+          isFrameLabel: false,
           icon: null,
           lib: 'libI.so',
           name: 'I',

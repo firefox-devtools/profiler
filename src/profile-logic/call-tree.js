@@ -280,7 +280,7 @@ export class CallTree {
         name: funcName,
         lib: libName.slice(0, 1000),
         // Dim platform pseudo-stacks.
-        dim: isFrameLabel,
+        isFrameLabel,
         categoryName: getCategoryPairLabel(
           this._categories,
           categoryIndex,
