@@ -30,8 +30,6 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
-require('./ReactContextMenu.css');
-
 class ReactContextMenu extends PureComponent<Props> {
   _hidingTimeout: TimeoutID | null = null;
 

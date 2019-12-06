@@ -3,9 +3,6 @@
 }
 
 .componentStack {
-  white-space: pre;
-
-  --gradient-height: calc(5em);
 
   /* Box */
   overflow: hidden;
@@ -32,6 +29,9 @@
     white var(--gradient-height),
     transparent
   );
+  white-space: pre;
+
+  --gradient-height: calc(5em);
 }
 
 .componentName {

@@ -22,8 +22,8 @@
 
 .tooltipOneLine {
   display: flex;
-  align-items: center;
   max-width: 100%;
+  align-items: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
