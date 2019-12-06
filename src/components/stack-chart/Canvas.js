@@ -24,6 +24,7 @@ import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
 import { TooltipReactEvent, TooltipReactWork } from '../tooltip/React';
 import reactProfilerProcessor from './reactProfilerProcessor';
+import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 
 import type {
   Thread,
@@ -859,6 +860,11 @@ class StackChartCanvas extends React.PureComponent<Props> {
   };
 
   _getHoveredStackInfoReact = data => {
+    const { shouldDisplayTooltipsReact } = this.props;
+    if (!shouldDisplayTooltipsReact()) {
+      return null;
+    }
+
     if (data !== undefined && data !== null) {
       const { event, priority } = data;
       const { isCascading, type } = event;
@@ -979,6 +985,20 @@ class StackChartCanvas extends React.PureComponent<Props> {
     );
   };
 
+  _onDoubleClickReact = (data: Object | null) => {
+    if (data === null) {
+      return;
+    }
+    const {duration, timestamp} = data.event;
+    const { updatePreviewSelection } = this.props;
+    updatePreviewSelection({
+      hasSelection: true,
+      isModifying: false,
+      selectionStart: timestamp,
+      selectionEnd: timestamp + duration,
+    });
+  };
+
   _onDoubleClickStack = (hoveredItem: HoveredStackTiming | null) => {
     if (hoveredItem === null) {
       return;
@@ -1042,6 +1062,13 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
   };
 
+  _onRightClickReact = (data: Object | null) => {
+    console.log('_onRightClickReact()', data);
+    if (data) {
+      this.props.onRightClickReact(data);
+    }
+  };
+
   _hitTest = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
     const {
       rangeStart,
@@ -1077,42 +1104,52 @@ class StackChartCanvas extends React.PureComponent<Props> {
     return null;
   };
 
-  _noop = () => {};
-
-  // TODO (brian) Add context menu
-
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
 
     return (
       <React.Fragment>
-        <ChartCanvas
-          scaleCtxToCssPixels={false}
-          className="stackChartCanvas"
-          containerWidth={containerWidth}
-          containerHeight={REACT_DEVTOOLS_CANVAS_HEIGHT}
-          isDragging={isDragging}
-          onDoubleClickItem={this._noop}
-          getHoveredItemInfo={this._getHoveredStackInfoReact}
-          drawCanvas={this._drawCanvasReact}
-          hitTest={this._hitTestReact}
-          onSelectItem={this._onSelectItemReact}
-          onRightClick={this._noop}
-        />
-        <ChartCanvas
-          scaleCtxToCssPixels={false}
-          className="stackChartCanvas"
-          containerWidth={containerWidth}
-          containerHeight={containerHeight - REACT_DEVTOOLS_CANVAS_HEIGHT}
-          isDragging={isDragging}
-          onDoubleClickItem={this._onDoubleClickStack}
-          getHoveredItemInfo={this._getHoveredStackInfo}
-          drawCanvas={this._drawCanvas}
-          hitTest={this._hitTest}
-          onSelectItem={this._onSelectItem}
-          onRightClick={this._onRightClick}
-          style={{ top: REACT_DEVTOOLS_CANVAS_HEIGHT }}
-        />
+        <ContextMenuTrigger
+          id="ReactContextMenu"
+          attributes={{
+            className: 'treeViewContextMenu',
+          }}
+        >
+          <ChartCanvas
+            scaleCtxToCssPixels={false}
+            className="stackChartCanvas"
+            containerWidth={containerWidth}
+            containerHeight={REACT_DEVTOOLS_CANVAS_HEIGHT}
+            isDragging={isDragging}
+            onDoubleClickItem={this._onDoubleClickReact}
+            getHoveredItemInfo={this._getHoveredStackInfoReact}
+            drawCanvas={this._drawCanvasReact}
+            hitTest={this._hitTestReact}
+            onSelectItem={this._onSelectItemReact}
+            onRightClick={this._onRightClickReact}
+          />
+        </ContextMenuTrigger>
+        <ContextMenuTrigger
+          id="CallNodeContextMenu"
+          attributes={{
+            className: 'treeViewContextMenu',
+          }}
+        >
+          <ChartCanvas
+            scaleCtxToCssPixels={false}
+            className="stackChartCanvas"
+            containerWidth={containerWidth}
+            containerHeight={containerHeight - REACT_DEVTOOLS_CANVAS_HEIGHT}
+            isDragging={isDragging}
+            onDoubleClickItem={this._onDoubleClickStack}
+            getHoveredItemInfo={this._getHoveredStackInfo}
+            drawCanvas={this._drawCanvas}
+            hitTest={this._hitTest}
+            onSelectItem={this._onSelectItem}
+            onRightClick={this._onRightClick}
+            style={{ top: REACT_DEVTOOLS_CANVAS_HEIGHT }}
+          />
+        </ContextMenuTrigger>
       </React.Fragment>
     );
   }

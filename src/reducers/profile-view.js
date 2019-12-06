@@ -131,6 +131,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
       return action.profile.threads.map(() => ({
         selectedCallNodePath: [],
         rightClickedCallNodePath: null,
+        rightClickedReactData: null,
         expandedCallNodePaths: new PathSet(),
         selectedMarker: null,
         rightClickedMarker: null,
@@ -213,6 +214,17 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
           ...state[threadIndex],
           selectedCallNodePath,
           expandedCallNodePaths,
+        },
+        ...state.slice(threadIndex + 1),
+      ];
+    }
+    case 'CHANGE_RIGHT_CLICKED_REACT': {
+      const { data, threadIndex } = action;
+      return [
+        ...state.slice(0, threadIndex),
+        {
+          ...state[threadIndex],
+          rightClickedReactData: data,
         },
         ...state.slice(threadIndex + 1),
       ];
@@ -300,6 +312,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         {
           ...state[threadIndex],
           rightClickedCallNodePath: null,
+          rightClickedReactData: null,
           rightClickedMarker: null,
         },
         ...state.slice(threadIndex + 1),

@@ -105,6 +105,9 @@ export function getStackAndSampleSelectorsPerThread(
   const getRightClickedCallNodePath: Selector<CallNodePath | null> = state =>
     threadSelectors.getViewOptions(state).rightClickedCallNodePath;
 
+  const getRightClickedReactData: Selector<CallNodePath | null> = state =>
+    threadSelectors.getViewOptions(state).rightClickedReactData;
+
   const getRightClickedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> = createSelector(
     getCallNodeInfo,
     getRightClickedCallNodePath,
@@ -321,5 +324,6 @@ export function getStackAndSampleSelectorsPerThread(
     getStackTimingByDepth,
     getCallNodeMaxDepthForFlameGraph,
     getFlameGraphTiming,
+    getRightClickedReactData,
   };
 }

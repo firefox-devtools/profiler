@@ -26,13 +26,13 @@ import {
   getSelectedThreadIndex,
 } from '../../selectors/url-state';
 import StackChartEmptyReasons from './StackChartEmptyReasons';
-import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import StackSettings from '../shared/StackSettings';
 import TransformNavigator from '../shared/TransformNavigator';
 import {
   updatePreviewSelection,
   changeSelectedCallNode,
   changeRightClickedCallNode,
+  changeRightClickedReact,
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
@@ -75,6 +75,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
+  +changeRightClickedReact: typeof changeRightClickedReact,
   +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
@@ -109,6 +110,13 @@ class StackChartGraph extends React.PureComponent<Props> {
     );
   };
 
+  _onRightClickReact = (data: Object | null) => {
+    console.log('index _onRightClick()', data);
+    const { threadIndex, changeRightClickedReact } = this.props;
+
+    changeRightClickedReact(threadIndex, data);
+  };
+
   _onRightClickedCallNodeChange = (
     callNodeorMarkerIndex: IndexIntoCallNodeTable | null
   ) => {
@@ -128,6 +136,7 @@ class StackChartGraph extends React.PureComponent<Props> {
   };
 
   _shouldDisplayTooltips = () => this.props.rightClickedCallNodeIndex === null;
+  _shouldDisplayTooltipsReact = () => this.props.rightClickedReactData === null;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
     this._viewport = viewport;
@@ -177,48 +186,43 @@ class StackChartGraph extends React.PureComponent<Props> {
         {maxStackDepth === 0 && userTimings.length === 0 ? (
           <StackChartEmptyReasons />
         ) : (
-          <ContextMenuTrigger
-            id="CallNodeContextMenu"
-            attributes={{
-              className: 'treeViewContextMenu',
-            }}
-          >
-            <div className="stackChartContent">
-              <StackChartCanvas
-                viewportProps={{
-                  previewSelection,
-                  timeRange,
-                  maxViewportHeight,
-                  viewportNeedsUpdate,
-                  marginLeft: TIMELINE_MARGIN_LEFT,
-                  marginRight: TIMELINE_MARGIN_RIGHT,
-                  maximumZoom: this.getMaximumZoom(),
-                  containerRef: this._takeViewportRef,
-                }}
-                chartProps={{
-                  interval,
-                  thread,
-                  pages,
-                  threadIndex,
-                  combinedTimingRows,
-                  getMarker,
-                  // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-                  updatePreviewSelection,
-                  rangeStart: timeRange.start,
-                  rangeEnd: timeRange.end,
-                  stackFrameHeight: STACK_FRAME_HEIGHT,
-                  callNodeInfo,
-                  categories,
-                  selectedCallNodeIndex,
-                  onSelectionChange: this._onSelectedCallNodeChange,
-                  onRightClick: this._onRightClickedCallNodeChange,
-                  shouldDisplayTooltips: this._shouldDisplayTooltips,
-                  scrollToSelectionGeneration,
-                  zeroAt,
-                }}
-              />
-            </div>
-          </ContextMenuTrigger>
+          <div className="stackChartContent">
+            <StackChartCanvas
+              viewportProps={{
+                previewSelection,
+                timeRange,
+                maxViewportHeight,
+                viewportNeedsUpdate,
+                marginLeft: TIMELINE_MARGIN_LEFT,
+                marginRight: TIMELINE_MARGIN_RIGHT,
+                maximumZoom: this.getMaximumZoom(),
+                containerRef: this._takeViewportRef,
+              }}
+              chartProps={{
+                interval,
+                thread,
+                pages,
+                threadIndex,
+                combinedTimingRows,
+                getMarker,
+                // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
+                updatePreviewSelection,
+                rangeStart: timeRange.start,
+                rangeEnd: timeRange.end,
+                stackFrameHeight: STACK_FRAME_HEIGHT,
+                callNodeInfo,
+                categories,
+                selectedCallNodeIndex,
+                onSelectionChange: this._onSelectedCallNodeChange,
+                onRightClick: this._onRightClickedCallNodeChange,
+                onRightClickReact: this._onRightClickReact,
+                shouldDisplayTooltipsReact: this._shouldDisplayTooltipsReact,
+                shouldDisplayTooltips: this._shouldDisplayTooltips,
+                scrollToSelectionGeneration,
+                zeroAt,
+              }}
+            />
+          </div>
         )}
       </div>
     );
@@ -245,6 +249,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
+      rightClickedReactData: selectedThreadSelectors.getRightClickedReactData(
+        state
+      ),
       rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
         state
       ),
@@ -258,6 +265,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     changeSelectedCallNode,
     changeRightClickedCallNode,
+    changeRightClickedReact,
     updatePreviewSelection,
   },
   component: StackChartGraph,

@@ -62,6 +62,26 @@ type LastSeen = {
   callNodeIndexByDepth: IndexIntoCallNodeTable[],
 };
 
+function getFilteredFileNames(thread) {
+  let reactFileName = null;
+  let schedulerFileName = null;
+  for (let i = 0; i < thread.funcTable.length; i++) {
+    if (thread.funcTable.isJS[i]) {
+      const fileNameIndex = thread.funcTable.fileName[i];
+      const fileName = thread.stringTable.getString(fileNameIndex);
+      const functionNameIndex = thread.funcTable.name[i];
+      const functionName = thread.stringTable.getString(functionNameIndex);
+
+      if (functionName === 'flushSyncCallbackQueueImpl') {
+        reactFileName = fileName;
+      } else if (functionName === 'unstable_runWithPriority') {
+        schedulerFileName = fileName;
+      }
+    }
+  }
+  return [reactFileName, schedulerFileName];
+}
+
 /**
  * Build a StackTimingByDepth table from a given thread.
  */
@@ -84,12 +104,17 @@ export function getStackTimingByDepth(
     callNodeIndexByDepth: [],
   };
 
+  const filteredFileNames = getFilteredFileNames(thread);
+  console.log('getStackTimingByDepth() filteredFileNames:', filteredFileNames);
+
   // Go through each sample, and push/pop it on the stack to build up
   // the stackTimingByDepth.
   let previousDepth = -1;
   for (let i = 0; i < thread.samples.length; i++) {
     const stackIndex = thread.samples.stack[i];
     const sampleTime = thread.samples.time[i];
+
+    // TODO Filter by filteredFileNames
 
     // If this stack index is null (for instance if it was filtered out) then pop back
     // down to the base stack.

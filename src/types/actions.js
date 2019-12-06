@@ -125,6 +125,11 @@ type ProfileAction =
       +threadIndex: ThreadIndex,
     |}
   | {|
+      +type: 'CHANGE_RIGHT_CLICKED_REACT',
+      +threadIndex: ThreadIndex,
+      +data: Object | null,
+    |}
+  | {|
       +type: 'CHANGE_RIGHT_CLICKED_CALL_NODE',
       +threadIndex: ThreadIndex,
       +callNodePath: CallNodePath | null,

@@ -97,6 +97,17 @@ export function changeSelectedCallNode(
   };
 }
 
+export function changeRightClickedReact(
+  threadIndex: ThreadIndex,
+  data: Objet | null
+) {
+  return {
+    type: 'CHANGE_RIGHT_CLICKED_REACT',
+    data,
+    threadIndex,
+  };
+}
+
 /**
  * This action is used when the user right clicks on a call node (in panels such
  * as the call tree, the flame chart, or the stack chart). It's especially used

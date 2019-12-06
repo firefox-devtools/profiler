@@ -53,7 +53,7 @@ const getTotalDuration = memoize(
   }
 );
 
-export function TooltipReactEvent({ color, data, priority, zeroAt }) {
+export function TooltipReactEvent({ color, data, zeroAt }) {
   const { componentName, componentStack, timestamp, type } = data;
 
   let label = null;
