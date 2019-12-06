@@ -49,6 +49,7 @@ import type {
 } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
+import type { ReactHoverContextInfo } from '../../types/react';
 
 require('./index.css');
 
@@ -67,9 +68,11 @@ type StateProps = {|
   +categories: CategoryList,
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
+  +rightClickedReactData: ReactHoverContextInfo | null,
   +scrollToSelectionGeneration: number,
   getMarker: Function,
   +userTimings: MarkerIndex[],
+  zeroAt: Milliseconds,
 |};
 
 type DispatchProps = {|
@@ -111,7 +114,6 @@ class StackChartGraph extends React.PureComponent<Props> {
   };
 
   _onRightClickReact = (data: Object | null) => {
-    console.log('index _onRightClick()', data);
     const { threadIndex, changeRightClickedReact } = this.props;
 
     changeRightClickedReact(threadIndex, data);

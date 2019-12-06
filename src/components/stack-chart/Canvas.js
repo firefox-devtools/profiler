@@ -22,9 +22,10 @@ import { updatePreviewSelection } from '../../actions/profile-view';
 import { mapCategoryColorNameToStackChartStyles } from '../../utils/colors';
 import { TooltipCallNode } from '../tooltip/CallNode';
 import { TooltipMarker } from '../tooltip/Marker';
-import { TooltipReactEvent, TooltipReactWork } from '../tooltip/React';
+import { TooltipReactEvent, TooltipReactMeasure } from '../tooltip/React';
 import reactProfilerProcessor from './reactProfilerProcessor';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import { getBatchRange } from '../../utils/react';
 
 import type {
   Thread,
@@ -32,7 +33,10 @@ import type {
   PageList,
   ThreadIndex,
 } from '../../types/profile';
-import type { UserTimingMarkerPayload } from '../../types/markers';
+import type {
+  MarkerPayload,
+  UserTimingMarkerPayload,
+} from '../../types/markers';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
@@ -50,6 +54,12 @@ import type {
 } from '../../profile-logic/stack-timing';
 import type { Viewport } from '../shared/chart/Viewport';
 import type { WrapFunctionInDispatch } from '../../utils/connect';
+import type {
+  ReactHoverContextInfo,
+  ReactEvent,
+  ReactMeasure,
+  ReactProfilerData,
+} from '../../types/react';
 
 type OwnProps = {|
   +thread: Thread,
@@ -69,7 +79,9 @@ type OwnProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +onSelectionChange: (IndexIntoCallNodeTable | null) => void,
   +onRightClick: (IndexIntoCallNodeTable | null) => void,
+  +onRightClickReact: (ReactHoverContextInfo | null) => void,
   +shouldDisplayTooltips: () => boolean,
+  +shouldDisplayTooltipsReact: () => boolean,
   +scrollToSelectionGeneration: number,
   +zeroAt: number,
 |};
@@ -78,6 +90,11 @@ type Props = $ReadOnly<{|
   ...OwnProps,
   +viewport: Viewport,
 |}>;
+
+type State = {|
+  +markerPayload: MarkerPayload[] | null,
+  +reactProfilerData: ReactProfilerData | null,
+|};
 
 type HoveredStackTiming = {|
   +depth: StackTimingDepth,
@@ -136,27 +153,26 @@ const REACT_DEVTOOLS_COLORS = {
   REACT_WORK_BORDER: '#ffffff',
 };
 
-class StackChartCanvas extends React.PureComponent<Props> {
+class StackChartCanvas extends React.PureComponent<Props, State> {
   _leftMarginGradient: null | CanvasGradient = null;
   _rightMarginGradient: null | CanvasGradient = null;
 
-  state = {
-    rawData: null,
+  state: State = {
+    markerPayload: null,
     reactProfilerData: null,
-    // selectedItem: null,
   };
 
   // TODO (bvaughn) This should be moved into a selector to better fit the architecture.
   static getDerivedStateFromProps(nextProps, prevState) {
-    if (prevState.rawData === nextProps.thread.markers.data) {
+    if (prevState.markerPayload === nextProps.thread.markers.data) {
       return prevState;
     }
 
-    const rawData = nextProps.thread.markers.data;
-    const reactProfilerData = reactProfilerProcessor(rawData);
+    const markerPayload = nextProps.thread.markers.data;
+    const reactProfilerData = reactProfilerProcessor(markerPayload);
 
     return {
-      rawData,
+      markerPayload,
       reactProfilerData,
     };
   }
@@ -206,7 +222,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
   _drawCanvasReact = (
     ctx: CanvasRenderingContext2D,
-    hoveredItem: Object | null
+    hoveredItem: ReactHoverContextInfo | null
   ) => {
     const {
       viewport: { containerWidth },
@@ -225,32 +241,30 @@ class StackChartCanvas extends React.PureComponent<Props> {
     // Draw markers
     //
 
-    let drawHoveredItemOnTop = false;
-
     const { reactProfilerData } = this.state;
     if (reactProfilerData !== null) {
       REACT_PRIORITIES.forEach((priority, priorityIndex) => {
         const currentPriority = reactProfilerData[priority];
         currentPriority.events.forEach(event => {
           const showHoverHighlight = hoveredItem && hoveredItem.event === event;
-          if (showHoverHighlight) {
-            drawHoveredItemOnTop = true;
-          }
           this._renderReact({
             ctx,
-            event,
+            eventOrMeasure: event,
+            showGroupHighlight: false,
             showHoverHighlight,
             priorityIndex,
           });
         });
-        currentPriority.work.forEach(event => {
-          const showHoverHighlight = hoveredItem && hoveredItem.event === event;
-          //const showGroupHighlight = selectedItem && selectedItem.event.batchUID === event.batchUID;
+        currentPriority.measures.forEach(measure => {
+          const showHoverHighlight =
+            hoveredItem && hoveredItem.measure === measure;
           const showGroupHighlight =
-            hoveredItem && hoveredItem.event.batchUID === event.batchUID;
+            hoveredItem &&
+            hoveredItem.measure !== null &&
+            hoveredItem.measure.batchUID === measure.batchUID;
           this._renderReact({
             ctx,
-            event,
+            eventOrMeasure: measure,
             priorityIndex,
             showGroupHighlight,
             showHoverHighlight,
@@ -259,10 +273,11 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
         // Draw the hovered and/or selected items on top so they stand out.
         // This is helpful if there are multiple (overlapping) items close to each other.
-        if (drawHoveredItemOnTop) {
+        if (hoveredItem !== null && hoveredItem.event !== null) {
           this._renderReact({
             ctx,
-            event: hoveredItem.event,
+            eventOrMeasure: hoveredItem.event,
+            showGroupHighlight: false,
             showHoverHighlight: true,
             priorityIndex: hoveredItem.priorityIndex,
           });
@@ -315,18 +330,17 @@ class StackChartCanvas extends React.PureComponent<Props> {
 
   _renderReact({
     ctx,
-    event,
+    eventOrMeasure,
     priorityIndex,
     showGroupHighlight,
     showHoverHighlight,
   }) {
-    const { depth, duration, isCascading, timestamp, type } = event;
-
     const {
       rangeStart,
       rangeEnd,
       viewport: { containerWidth, viewportLeft, viewportRight },
     } = this.props;
+    const { timestamp, type } = eventOrMeasure;
 
     const { devicePixelRatio } = window;
 
@@ -362,12 +376,14 @@ class StackChartCanvas extends React.PureComponent<Props> {
     let groupSelectedFillStyle = null;
     let x;
 
-    switch (event.type) {
-      case 'commit-work': // eslint-disable-line no-case-declarations
+    switch (type) {
+      case 'commit': // eslint-disable-line no-case-declarations
       case 'render-idle': // eslint-disable-line no-case-declarations
-      case 'render-work': // eslint-disable-line no-case-declarations
+      case 'render': // eslint-disable-line no-case-declarations
       case 'layout-effects': // eslint-disable-line no-case-declarations
       case 'passive-effects': // eslint-disable-line no-case-declarations
+        const { depth, duration } = ((eventOrMeasure: any): ReactMeasure);
+
         const startTime: UnitIntervalOfProfileRange =
           (timestamp - rangeStart) / rangeLength;
         const endTime: UnitIntervalOfProfileRange =
@@ -384,7 +400,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         }
 
         switch (type) {
-          case 'commit-work':
+          case 'commit':
             fillStyle = REACT_DEVTOOLS_COLORS.REACT_COMMIT;
             hoveredFillStyle = REACT_DEVTOOLS_COLORS.REACT_COMMIT_HOVER;
             groupSelectedFillStyle =
@@ -398,7 +414,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
             hoveredFillStyle = REACT_DEVTOOLS_COLORS.REACT_IDLE_HOVER;
             groupSelectedFillStyle = REACT_DEVTOOLS_COLORS.REACT_IDLE_SELECTED;
             break;
-          case 'render-work':
+          case 'render':
             fillStyle = REACT_DEVTOOLS_COLORS.REACT_RENDER;
             hoveredFillStyle = REACT_DEVTOOLS_COLORS.REACT_RENDER_HOVER;
             groupSelectedFillStyle =
@@ -454,6 +470,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
           }
         }
 
+        // $FlowFixMe We know these won't be null
         ctx.fillStyle = showHoverHighlight
           ? hoveredFillStyle
           : showGroupHighlight
@@ -469,6 +486,8 @@ class StackChartCanvas extends React.PureComponent<Props> {
       case 'schedule-render': // eslint-disable-line no-case-declarations
       case 'schedule-state-update': // eslint-disable-line no-case-declarations
       case 'suspend': // eslint-disable-line no-case-declarations
+        const { isCascading } = ((eventOrMeasure: any): ReactEvent);
+
         const time: UnitIntervalOfProfileRange =
           (timestamp - rangeStart) / rangeLength;
         x = pixelAtViewportPosition(time);
@@ -496,7 +515,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
               : REACT_DEVTOOLS_COLORS.REACT_SUSPEND;
             break;
           default:
-            console.warn(`Unexpected event type "${type}"`);
+            console.warn(`Unexpected event or measure type "${type}"`);
             break;
         }
 
@@ -515,7 +534,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
         }
         break;
       default:
-        console.warn(`Unexpected type "${event.type}"`);
+        console.warn(`Unexpected event or measure type "${type}"`);
         break;
     }
   }
@@ -784,11 +803,15 @@ class StackChartCanvas extends React.PureComponent<Props> {
     );
   };
 
-  _hitTestReact = (x: CssPixels, y: CssPixels): HoveredStackTiming | null => {
+  _hitTestReact = (
+    x: CssPixels,
+    y: CssPixels
+  ): ReactHoverContextInfo | null => {
     const {
       rangeStart,
       rangeEnd,
       viewport: { containerWidth, viewportLeft, viewportRight },
+      zeroAt,
     } = this.props;
 
     const innerDevicePixelsWidth =
@@ -803,54 +826,69 @@ class StackChartCanvas extends React.PureComponent<Props> {
       const baseY = REACT_DEVTOOLS_PRIORITY_SIZE * priorityIndex;
       const eventMinY = baseY + REACT_GUTTER_SIZE / 2;
       const eventMaxY = eventMinY + REACT_EVENT_SIZE + REACT_GUTTER_SIZE;
-      const workMinY = eventMaxY;
-      const workMaxY = workMinY + REACT_WORK_SIZE + REACT_GUTTER_SIZE;
+      const measureMinY = eventMaxY;
+      const measureMaxY = measureMinY + REACT_WORK_SIZE + REACT_GUTTER_SIZE;
 
-      let events = null;
+      let events = null,
+        measures = null;
       if (y >= eventMinY && y <= eventMaxY) {
         events = reactProfilerData[priority].events;
-      } else if (y >= workMinY && y <= workMaxY) {
-        events = reactProfilerData[priority].work;
+      } else if (y >= measureMinY && y <= measureMaxY) {
+        measures = reactProfilerData[priority].measures;
       }
 
+      const positionToTime = x =>
+        rangeStart +
+        (viewportLeft +
+          viewportLength *
+            ((x - TIMELINE_MARGIN_LEFT) / innerDevicePixelsWidth)) *
+          rangeLength;
+
+      const pointerTime = positionToTime(x);
+
       if (events !== null) {
-        const positionToTime = x =>
-          rangeStart +
-          (viewportLeft +
-            viewportLength *
-              ((x - TIMELINE_MARGIN_LEFT) / innerDevicePixelsWidth)) *
-            rangeLength;
-
-        const pointerTime = positionToTime(x);
-
-        // Because data ranges may overlap, wew ant to find the last intersecting item.
-        // This will always be the one on "top" (the one the user is hovering over).
         for (let index = events.length - 1; index >= 0; index--) {
           const event = events[index];
-          const { duration, timestamp } = event;
+          const { timestamp } = event;
 
-          if (duration === undefined || duration === null) {
-            const timeToPosition = time =>
-              Math.round(
-                (((time - rangeStart) / rangeLength - viewportLeft) /
-                  viewportLength) *
-                  innerDevicePixelsWidth +
-                  TIMELINE_MARGIN_LEFT
-              );
+          const timeToPosition = time =>
+            Math.round(
+              (((time - rangeStart) / rangeLength - viewportLeft) /
+                viewportLength) *
+                innerDevicePixelsWidth +
+                TIMELINE_MARGIN_LEFT
+            );
 
-            const eventX = timeToPosition(timestamp);
-            const startX = eventX - REACT_EVENT_SIZE / 2;
-            const stopX = eventX + REACT_EVENT_SIZE / 2;
-            if (x >= startX && x <= stopX) {
-              return { event, priority, priorityIndex };
-            }
-          } else {
-            if (
-              pointerTime >= timestamp &&
-              pointerTime <= timestamp + duration
-            ) {
-              return { event, priority, priorityIndex };
-            }
+          const x = timeToPosition(timestamp);
+          const startX = x - REACT_EVENT_SIZE / 2;
+          const stopX = x + REACT_EVENT_SIZE / 2;
+          if (x >= startX && x <= stopX) {
+            return {
+              event,
+              measure: null,
+              priorityIndex,
+              reactProfilerData,
+              zeroAt,
+            };
+          }
+        }
+      }
+
+      if (measures !== null) {
+        // Because data ranges may overlap, wew ant to find the last intersecting item.
+        // This will always be the one on "top" (the one the user is hovering over).
+        for (let index = measures.length - 1; index >= 0; index--) {
+          const measure = measures[index];
+          const { duration, timestamp } = measure;
+
+          if (pointerTime >= timestamp && pointerTime <= timestamp + duration) {
+            return {
+              event: null,
+              measure,
+              priorityIndex,
+              reactProfilerData,
+              zeroAt,
+            };
           }
         }
       }
@@ -866,57 +904,59 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
 
     if (data !== undefined && data !== null) {
-      const { event, priority } = data;
-      const { isCascading, type } = event;
+      const { event, measure } = data;
       const { zeroAt } = this.props;
       const { reactProfilerData } = this.state;
-      switch (type) {
-        case 'commit-work':
-        case 'render-idle':
-        case 'render-work':
-        case 'layout-effects':
-        case 'passive-effects':
-          return (
-            <TooltipReactWork
-              data={event}
-              priority={priority}
-              reactProfilerData={reactProfilerData}
-              zeroAt={zeroAt}
-            />
-          );
-        case 'schedule-render':
-          return (
-            <TooltipReactEvent
-              color={REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER}
-              data={event}
-              priority={priority}
-              zeroAt={zeroAt}
-            />
-          );
-        case 'schedule-state-update': // eslint-disable-line no-case-declarations
-          const color = isCascading
-            ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_CASCADING_HOVER
-            : REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER;
-          return (
-            <TooltipReactEvent
-              color={color}
-              data={event}
-              priority={priority}
-              zeroAt={zeroAt}
-            />
-          );
-        case 'suspend':
-          return (
-            <TooltipReactEvent
-              color={REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER}
-              data={event}
-              priority={priority}
-              zeroAt={zeroAt}
-            />
-          );
-        default:
-          console.warn(`Unexpected type "${type}"`);
-          break;
+
+      if (event !== null) {
+        switch (event.type) {
+          case 'schedule-render':
+            return (
+              <TooltipReactEvent
+                color={REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER}
+                event={event}
+                zeroAt={zeroAt}
+              />
+            );
+          case 'schedule-state-update': // eslint-disable-line no-case-declarations
+            const color = event.isCascading
+              ? REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_CASCADING_HOVER
+              : REACT_DEVTOOLS_COLORS.REACT_SCHEDULE_HOVER;
+            return (
+              <TooltipReactEvent color={color} event={event} zeroAt={zeroAt} />
+            );
+          case 'suspend':
+            return (
+              <TooltipReactEvent
+                color={REACT_DEVTOOLS_COLORS.REACT_SUSPEND_HOVER}
+                event={event}
+                zeroAt={zeroAt}
+              />
+            );
+          default:
+            console.warn(`Unexpected event type "${event.type}"`);
+            break;
+        }
+      } else if (measure !== null) {
+        switch (measure.type) {
+          case 'commit':
+          case 'render-idle':
+          case 'render':
+          case 'layout-effects':
+          case 'passive-effects':
+            return (
+              <TooltipReactMeasure
+                measure={measure}
+                reactProfilerData={
+                  ((reactProfilerData: any): ReactProfilerData)
+                }
+                zeroAt={zeroAt}
+              />
+            );
+          default:
+            console.warn(`Unexpected measure type "${measure.type}"`);
+            break;
+        }
       }
     }
 
@@ -985,17 +1025,25 @@ class StackChartCanvas extends React.PureComponent<Props> {
     );
   };
 
-  _onDoubleClickReact = (data: Object | null) => {
-    if (data === null) {
+  _onDoubleClickReact = (data: ReactHoverContextInfo | null) => {
+    if (data === null || data.measure === null) {
       return;
     }
-    const {duration, timestamp} = data.event;
+
     const { updatePreviewSelection } = this.props;
+    const { reactProfilerData } = this.state;
+    const { batchUID, priority } = data.measure;
+    const [startTime, stopTime] = getBatchRange(
+      batchUID,
+      priority,
+      ((reactProfilerData: any): ReactProfilerData)
+    );
+
     updatePreviewSelection({
       hasSelection: true,
       isModifying: false,
-      selectionStart: timestamp,
-      selectionEnd: timestamp + duration,
+      selectionStart: startTime,
+      selectionEnd: stopTime,
     });
   };
 
@@ -1038,7 +1086,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
   }
 
   // eslint-disable-next-line no-unused-vars
-  _onSelectItemReact = (data: Object | null) => {
+  _onSelectItemReact = (data: ReactHoverContextInfo | null) => {
     // this.setState({ selectedItem: data });
   };
 
@@ -1062,8 +1110,7 @@ class StackChartCanvas extends React.PureComponent<Props> {
     }
   };
 
-  _onRightClickReact = (data: Object | null) => {
-    console.log('_onRightClickReact()', data);
+  _onRightClickReact = (data: ReactHoverContextInfo | null) => {
     if (data) {
       this.props.onRightClickReact(data);
     }

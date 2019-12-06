@@ -4,65 +4,81 @@
 
 // @flow
 
+import type { MarkerPayload } from '../../types/markers';
+import type {
+  BatchUID,
+  ReactPriority,
+  ReactProfilerData,
+  ReactProfilerDataPriority,
+} from '../../types/react';
+
 // TODO Combine yields/starts that are closer than some threshold with the previous event to reduce renders.
 
-export default function reactProfilerProcessor(rawData) {
+type Metadata = {|
+  nextRenderShouldGenerateNewBatchID: boolean,
+  batchUID: BatchUID,
+  +stack: Array<any>,
+|};
+
+export default function reactProfilerProcessor(
+  markerPayload: MarkerPayload
+): ReactProfilerData | null {
   // Filter null entries and sort by timestamp.
   // I would not expect to have to do either of this,
   // but some of the data being passed in requires it.
-  rawData = rawData
+  // $FlowFixMe Flow does not recognize Array methods like .filter()
+  markerPayload = markerPayload
     .filter(Boolean)
     .filter(d => d.type === 'UserTiming' && d.name.startsWith('--'))
     .sort((a, b) => (a.startTime > b.startTime ? 1 : -1));
 
-  if (rawData.length === 0) {
+  if (markerPayload.length === 0) {
     return null;
   }
 
-  const processedData = {
-    // Prioritized "events" marked by React and Scheduler packages:
+  const reactProfilerData: ReactProfilerData = {
     high: {
       events: [],
-      work: [],
+      measures: [],
     },
     normal: {
       events: [],
-      work: [],
+      measures: [],
     },
     low: {
       events: [],
-      work: [],
+      measures: [],
     },
     unscheduled: {
       events: [],
-      work: [],
+      measures: [],
     },
   };
 
-  let currentMetadata = null;
-  let currentPriority = null;
-  let currentProcessedGroup = null;
+  let currentMetadata: Metadata = ((null: any): Metadata);
+  let currentPriority: ReactPriority = 'unscheduled';
+  let currentProfilerDataGroup: ReactProfilerDataPriority = ((null: any): ReactProfilerDataPriority);
   let uidCounter = 0;
 
   const metadata = {
     high: {
       nextRenderShouldGenerateNewBatchID: true,
-      batchUID: null,
+      batchUID: 0,
       stack: [],
     },
     normal: {
       nextRenderShouldGenerateNewBatchID: true,
-      batchUID: null,
+      batchUID: 0,
       stack: [],
     },
     low: {
       nextRenderShouldGenerateNewBatchID: true,
-      batchUID: null,
+      batchUID: 0,
       stack: [],
     },
     unscheduled: {
       nextRenderShouldGenerateNewBatchID: true,
-      batchUID: null,
+      batchUID: 0,
       stack: [],
     },
   };
@@ -100,13 +116,16 @@ export default function reactProfilerProcessor(rawData) {
       } else {
         const { index, startTime } = stack.pop();
 
-        const work = currentProcessedGroup.work[index];
-        if (!work) {
-          console.error(
-            `Could not find matching work entry for type "${type}".`
-          );
-        } else {
-          work.duration = stopTime - startTime;
+        if (currentProfilerDataGroup) {
+          const measure = currentProfilerDataGroup.measures[index];
+          if (!measure) {
+            console.error(
+              `Could not find matching measure for type "${type}".`
+            );
+          } else {
+            // $FlowFixMe This property should not be writable outside of this function.
+            measure.duration = stopTime - startTime;
+          }
         }
       }
     }
@@ -115,7 +134,7 @@ export default function reactProfilerProcessor(rawData) {
   const markWorkStarted = (type, startTime) => {
     const { batchUID, stack } = currentMetadata;
 
-    const index = currentProcessedGroup.work.length;
+    const index = currentProfilerDataGroup.measures.length;
     const depth = getDepth();
 
     stack.push({
@@ -125,12 +144,13 @@ export default function reactProfilerProcessor(rawData) {
       type,
     });
 
-    currentProcessedGroup.work.push({
+    currentProfilerDataGroup.measures.push({
       type,
       batchUID,
       depth,
       priority: currentPriority,
       timestamp: startTime,
+      duration: 0,
     });
   };
 
@@ -147,8 +167,8 @@ export default function reactProfilerProcessor(rawData) {
     }
   };
 
-  for (let i = 0; i < rawData.length; i++) {
-    const currentEvent = rawData[i];
+  for (let i = 0; i < markerPayload.length; i++) {
+    const currentEvent = markerPayload[i];
 
     if (
       currentEvent.type !== 'UserTiming' ||
@@ -157,59 +177,63 @@ export default function reactProfilerProcessor(rawData) {
       continue;
     }
 
-    currentMetadata = metadata[currentPriority || 'unscheduled'];
+    currentMetadata = metadata[currentPriority] || metadata.unscheduled;
     if (!currentMetadata) {
       console.error('Unexpected priority', currentPriority);
     }
 
-    currentProcessedGroup = processedData[currentPriority || 'unscheduled'];
-    if (!currentProcessedGroup) {
+    currentProfilerDataGroup =
+      reactProfilerData[currentPriority || 'unscheduled'];
+    if (!currentProfilerDataGroup) {
       console.error('Unexpected priority', currentPriority);
     }
 
     const { name, startTime } = currentEvent;
 
     if (name.startsWith('--scheduler-start-')) {
-      if (currentPriority !== null) {
+      if (currentPriority !== 'unscheduled') {
         console.error(
           `Unexpected scheduler start: "${name}" with current priority: "${currentPriority}"`
         );
         continue; // TODO Should we throw? Will this corrupt our data?
       }
 
-      currentPriority = name.substr(18);
+      currentPriority = ((name.substr(18): any): ReactPriority);
     } else if (name.startsWith('--scheduler-stop-')) {
-      if (currentPriority === null || currentPriority !== name.substr(17)) {
+      if (
+        currentPriority === 'unscheduled' ||
+        currentPriority !== name.substr(17)
+      ) {
         console.error(
           `Unexpected scheduler stop: "${name}" with current priority: "${currentPriority}"`
         );
         continue; // TODO Should we throw? Will this corrupt our data?
       }
 
-      currentPriority = null;
+      currentPriority = 'unscheduled';
     } else if (name === '--render-start') {
       if (currentMetadata.nextRenderShouldGenerateNewBatchID) {
         currentMetadata.nextRenderShouldGenerateNewBatchID = false;
-        currentMetadata.batchUID = uidCounter++;
+        currentMetadata.batchUID = ((uidCounter++: any): BatchUID);
       }
-      throwIfIncomplete('render-work');
+      throwIfIncomplete('render');
       if (getLastType() !== 'render-idle') {
         markWorkStarted('render-idle', startTime);
       }
-      markWorkStarted('render-work', startTime);
+      markWorkStarted('render', startTime);
     } else if (name === '--render-stop') {
-      markWorkCompleted('render-work', startTime);
+      markWorkCompleted('render', startTime);
     } else if (name === '--render-yield') {
-      markWorkCompleted('render-work', startTime);
+      markWorkCompleted('render', startTime);
     } else if (name === '--render-cancel') {
       currentMetadata.nextRenderShouldGenerateNewBatchID = true;
-      markWorkCompleted('render-work', startTime);
+      markWorkCompleted('render', startTime);
       markWorkCompleted('render-idle', startTime);
     } else if (name === '--commit-start') {
       currentMetadata.nextRenderShouldGenerateNewBatchID = true;
-      markWorkStarted('commit-work', startTime);
+      markWorkStarted('commit', startTime);
     } else if (name === '--commit-stop') {
-      markWorkCompleted('commit-work', startTime);
+      markWorkCompleted('commit', startTime);
       markWorkCompleted('render-idle', startTime);
     } else if (
       name === '--layout-effects-start' ||
@@ -229,7 +253,7 @@ export default function reactProfilerProcessor(rawData) {
         name === '--layout-effects-stop' ? 'layout-effects' : 'passive-effects';
       markWorkCompleted(type, startTime);
     } else if (name.startsWith('--schedule-render')) {
-      currentProcessedGroup.events.push({
+      currentProfilerDataGroup.events.push({
         type: 'schedule-render',
         priority: currentPriority, // TODO Change to target priority
         timestamp: startTime,
@@ -237,9 +261,9 @@ export default function reactProfilerProcessor(rawData) {
     } else if (name.startsWith('--schedule-state-update-')) {
       const [componentName, componentStack] = name.substr(24).split('-');
       const isCascading = !!currentMetadata.stack.find(
-        ({ type }) => type === 'commit-work'
+        ({ type }) => type === 'commit'
       );
-      currentProcessedGroup.events.push({
+      currentProfilerDataGroup.events.push({
         type: 'schedule-state-update',
         priority: currentPriority, // TODO Change to target priority
         isCascading,
@@ -249,8 +273,9 @@ export default function reactProfilerProcessor(rawData) {
       });
     } else if (name.startsWith('--suspend-')) {
       const [componentName, componentStack] = name.substr(10).split('-');
-      currentProcessedGroup.events.push({
+      currentProfilerDataGroup.events.push({
         type: 'suspend',
+        priority: currentPriority, // TODO Change to target priority
         timestamp: startTime,
         componentName,
         componentStack,
@@ -259,11 +284,14 @@ export default function reactProfilerProcessor(rawData) {
   }
 
   Object.entries(metadata).forEach(([priority, metadata]) => {
-    const { stack } = metadata;
+    const { stack } = ((metadata: any): Metadata);
     if (stack.length > 0) {
-      console.error(`Incomplete work entries for priority ${priority}`, stack);
+      console.error(
+        `Incomplete events or measures for priority ${priority}`,
+        stack
+      );
     }
   });
 
-  return processedData;
+  return reactProfilerData;
 }

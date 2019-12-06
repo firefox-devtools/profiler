@@ -4,11 +4,18 @@
 
 // @flow
 
-import memoize from 'memoize-immutable';
 import * as React from 'react';
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';
 import { formatMilliseconds } from '../../utils/format-numbers';
+import { getBatchRange } from '../../utils/react';
 import './React.css';
+
+import type {
+  ReactEvent,
+  ReactMeasure,
+  ReactProfilerData,
+} from '../../types/react';
+import type { Milliseconds } from '../../types/units';
 
 function formatComponentStack(componentStack) {
   const lines = componentStack.split('\n').map(line => line.trim());
@@ -20,41 +27,16 @@ function formatComponentStack(componentStack) {
   return lines.join('\n');
 }
 
-const getTotalDuration = memoize(
-  (data, priority, reactProfilerData) => {
-    const { batchUID } = data;
-    const work = reactProfilerData[priority].work;
-
-    let startTime = 0;
-    let stopTime = Infinity;
-
-    let i = 0;
-
-    for (i; i < work.length; i++) {
-      const item = work[i];
-      if (item.batchUID === batchUID) {
-        startTime = item.timestamp;
-        break;
-      }
-    }
-
-    for (i; i < work.length; i++) {
-      const item = work[i];
-      stopTime = item.timestamp;
-      if (item.batchUID !== batchUID) {
-        break;
-      }
-    }
-
-    return stopTime - startTime;
-  },
-  {
-    limit: 1,
-  }
-);
-
-export function TooltipReactEvent({ color, data, zeroAt }) {
-  const { componentName, componentStack, timestamp, type } = data;
+export function TooltipReactEvent({
+  color,
+  event,
+  zeroAt,
+}: {|
+  color: string,
+  event: ReactEvent,
+  zeroAt: Milliseconds,
+|}) {
+  const { componentName, componentStack, timestamp, type } = event;
 
   let label = null;
   switch (type) {
@@ -87,35 +69,38 @@ export function TooltipReactEvent({ color, data, zeroAt }) {
         <TooltipDetail label="Timestamp">
           {formatMilliseconds(timestamp - zeroAt)}
         </TooltipDetail>
-        {componentStack && (
+        {componentStack ? (
           <TooltipDetail label="Component stack">
             <pre className="componentStack">
               {formatComponentStack(componentStack)}
             </pre>
           </TooltipDetail>
-        )}
+        ) : null}
       </TooltipDetails>
     </div>
   );
 }
 
-export function TooltipReactWork({
-  data,
-  priority,
+export function TooltipReactMeasure({
+  measure,
   reactProfilerData,
   zeroAt,
-}) {
-  const { duration, timestamp, type } = data;
+}: {|
+  measure: ReactMeasure,
+  reactProfilerData: ReactProfilerData,
+  zeroAt: Milliseconds,
+|}) {
+  const { batchUID, duration, priority, timestamp, type } = measure;
 
   let label = null;
   switch (type) {
-    case 'commit-work':
+    case 'commit':
       label = 'commit';
       break;
     case 'render-idle':
       label = 'idle';
       break;
-    case 'render-work':
+    case 'render':
       label = 'render';
       break;
     case 'layout-effects':
@@ -127,6 +112,12 @@ export function TooltipReactWork({
     default:
       break;
   }
+
+  const [startTime, stopTime] = getBatchRange(
+    batchUID,
+    priority,
+    reactProfilerData
+  );
 
   return (
     <div className="tooltipMarker">
@@ -141,9 +132,7 @@ export function TooltipReactWork({
           {formatMilliseconds(timestamp - zeroAt)}
         </TooltipDetail>
         <TooltipDetail label="Batch duration">
-          {formatMilliseconds(
-            getTotalDuration(data, priority, reactProfilerData)
-          )}
+          {formatMilliseconds(stopTime - startTime)}
         </TooltipDetail>
       </TooltipDetails>
     </div>

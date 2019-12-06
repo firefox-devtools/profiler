@@ -18,6 +18,7 @@ import type {
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { StartEndRange } from './units';
 import type { Profile, ThreadIndex, Pid } from './profile';
+import type { ReactHoverContextInfo } from './react';
 
 import type {
   CallNodePath,
@@ -38,6 +39,7 @@ export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
   +rightClickedCallNodePath: CallNodePath | null,
+  +rightClickedReactData: ReactHoverContextInfo | null,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
   +rightClickedMarker: MarkerIndex | null,

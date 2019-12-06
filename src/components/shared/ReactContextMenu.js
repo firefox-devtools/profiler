@@ -8,38 +8,24 @@ import { MenuItem } from 'react-contextmenu';
 import ContextMenu from '../shared/ContextMenu';
 import explicitConnect from '../../utils/connect';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { formatMilliseconds } from '../../utils/format-numbers';
 import copy from 'copy-to-clipboard';
 import {
-  addTransformToStack,
-  expandAllCallNodeDescendants,
   setContextMenuVisibility,
+  updatePreviewSelection,
 } from '../../actions/profile-view';
+import { getBatchRange } from '../../utils/react';
 
-import type { ImplementationFilter } from '../../types/actions';
-import type { TabSlug } from '../../app-logic/tabs-handling';
-import type {
-  IndexIntoCallNodeTable,
-  CallNodeInfo,
-  CallNodePath,
-} from '../../types/profile-derived';
-import type { Thread, ThreadIndex } from '../../types/profile';
+import type { ReactHoverContextInfo } from '../../types/react';
 import type { ConnectedProps } from '../../utils/connect';
 
 type StateProps = {|
-  +thread: Thread,
-  +threadIndex: ThreadIndex,
-  +callNodeInfo: CallNodeInfo,
-  +implementation: ImplementationFilter,
-  +inverted: boolean,
-  +callNodePath: CallNodePath | null,
-  +callNodeIndex: IndexIntoCallNodeTable | null,
-  +selectedTab: TabSlug,
+  +data: ReactHoverContextInfo | null,
 |};
 
 type DispatchProps = {|
-  +addTransformToStack: typeof addTransformToStack,
-  +expandAllCallNodeDescendants: typeof expandAllCallNodeDescendants,
   +setContextMenuVisibility: typeof setContextMenuVisibility,
+  +updatePreviewSelection: typeof updatePreviewSelection,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -87,20 +73,57 @@ class ReactContextMenu extends PureComponent<Props> {
 
   _copyComponentName = () => {
     const { data } = this.props;
-    copy(data.event.componentName);
+    if (data !== null && data.event !== null) {
+      copy(data.event.componentName || '');
+    }
   };
 
   _copyComponentStack = () => {
     const { data } = this.props;
-    copy(data.event.componentStack);
+    if (data !== null && data.event !== null) {
+      copy(data.event.componentStack || '');
+    }
   };
 
   _copySummary = () => {
-    console.log('_copySummary()'); // TODO (brian)
+    const { data } = this.props;
+    if (data !== null && data.measure !== null) {
+      const { batchUID, duration, priority, timestamp, type } = data.measure;
+
+      const [startTime, stopTime] = getBatchRange(
+        batchUID,
+        priority,
+        data.reactProfilerData
+      );
+
+      copy(
+        JSON.stringify({
+          type,
+          timestamp: formatMilliseconds(timestamp - data.zeroAt),
+          duration: formatMilliseconds(duration),
+          batchDuration: formatMilliseconds(stopTime - startTime),
+        })
+      );
+    }
   };
 
   _zoomToBatch = () => {
-    console.log('_zoomToBatch()'); // TODO (brian)
+    const { data } = this.props;
+    if (data !== null && data.measure !== null) {
+      const { batchUID, priority } = data.measure;
+      const [startTime, stopTime] = getBatchRange(
+        batchUID,
+        priority,
+        data.reactProfilerData
+      );
+
+      this.props.updatePreviewSelection({
+        hasSelection: true,
+        isModifying: false,
+        selectionStart: startTime,
+        selectionEnd: stopTime,
+      });
+    }
   };
 
   renderContextMenuContents() {
@@ -113,54 +136,62 @@ class ReactContextMenu extends PureComponent<Props> {
       return <div />;
     }
 
-    switch (data.event.type) {
-      case 'commit-work': // eslint-disable-line no-case-declarations
-      case 'render-idle': // eslint-disable-line no-case-declarations
-      case 'render-work': // eslint-disable-line no-case-declarations
-      case 'layout-effects': // eslint-disable-line no-case-declarations
-      case 'passive-effects': // eslint-disable-line no-case-declarations
-        return (
-          <Fragment>
-            <MenuItem
-              onClick={this._zoomToBatch}
-              data={{ type: 'merge-call-node' }}
-            >
-              Zoom to batch
-            </MenuItem>
-            <div className="react-contextmenu-separator" />
-            <MenuItem
-              onClick={this._copySummary}
-              data={{ type: 'merge-call-node' }}
-            >
-              Copy summary
-            </MenuItem>
-          </Fragment>
-        );
-      case 'schedule-render': // eslint-disable-line no-case-declarations
-      case 'schedule-state-update': // eslint-disable-line no-case-declarations
-      case 'suspend': // eslint-disable-line no-case-declarations
-        return (
-          <Fragment>
-            <MenuItem
-              onClick={this._copyComponentName}
-              data={{ type: 'merge-call-node' }}
-            >
-              Copy component name
-            </MenuItem>
-            <MenuItem
-              onClick={this._copyComponentStack}
-              data={{ type: 'merge-call-node' }}
-            >
-              Copy component stack
-            </MenuItem>
-          </Fragment>
-        );
-      default:
-        console.warn(`Unexpected type "${event.type}"`);
-        break;
+    if (data.event !== null) {
+      switch (data.event.type) {
+        case 'schedule-render': // eslint-disable-line no-case-declarations
+        case 'schedule-state-update': // eslint-disable-line no-case-declarations
+        case 'suspend': // eslint-disable-line no-case-declarations
+          return (
+            <Fragment>
+              <MenuItem
+                onClick={this._copyComponentName}
+                data={{ type: 'merge-call-node' }}
+              >
+                Copy component name
+              </MenuItem>
+              <MenuItem
+                onClick={this._copyComponentStack}
+                data={{ type: 'merge-call-node' }}
+              >
+                Copy component stack
+              </MenuItem>
+            </Fragment>
+          );
+        default:
+          console.warn(`Unexpected event type "${data.event.type}"`);
+          break;
+      }
+    } else if (data.measure !== null) {
+      switch (data.measure.type) {
+        case 'commit': // eslint-disable-line no-case-declarations
+        case 'render-idle': // eslint-disable-line no-case-declarations
+        case 'render': // eslint-disable-line no-case-declarations
+        case 'layout-effects': // eslint-disable-line no-case-declarations
+        case 'passive-effects': // eslint-disable-line no-case-declarations
+          return (
+            <Fragment>
+              <MenuItem
+                onClick={this._zoomToBatch}
+                data={{ type: 'merge-call-node' }}
+              >
+                Zoom to batch
+              </MenuItem>
+              <div className="react-contextmenu-separator" />
+              <MenuItem
+                onClick={this._copySummary}
+                data={{ type: 'merge-call-node' }}
+              >
+                Copy summary
+              </MenuItem>
+            </Fragment>
+          );
+        default:
+          console.warn(`Unexpected measure type "${data.measure.type}"`);
+          break;
+      }
     }
 
-    return 'hi';
+    return null;
   }
 
   render() {
@@ -188,6 +219,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     setContextMenuVisibility,
+    updatePreviewSelection,
   },
   component: ReactContextMenu,
 });

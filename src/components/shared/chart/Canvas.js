@@ -28,6 +28,7 @@ type Props<HoveredItem> = {|
   // Applies ctx.scale() to the canvas to draw using CssPixels rather than DevicePixels.
   +scaleCtxToCssPixels: boolean,
   +hitTest: (x: CssPixels, y: CssPixels) => HoveredItem | null,
+  +style?: Object,
 |};
 
 // The naming of the X and Y coordinates here correspond to the ones

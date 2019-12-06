@@ -27,6 +27,7 @@ import type {
   IndexIntoCallNodeTable,
   SelectedState,
 } from '../../types/profile-derived';
+import type { ReactHoverContextInfo } from '../../types/react';
 import type { StartEndRange } from '../../types/units';
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
@@ -105,7 +106,7 @@ export function getStackAndSampleSelectorsPerThread(
   const getRightClickedCallNodePath: Selector<CallNodePath | null> = state =>
     threadSelectors.getViewOptions(state).rightClickedCallNodePath;
 
-  const getRightClickedReactData: Selector<CallNodePath | null> = state =>
+  const getRightClickedReactData: Selector<ReactHoverContextInfo | null> = state =>
     threadSelectors.getViewOptions(state).rightClickedReactData;
 
   const getRightClickedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> = createSelector(

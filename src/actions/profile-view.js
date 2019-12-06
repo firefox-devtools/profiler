@@ -48,6 +48,7 @@ import type {
 import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
 import type { ThreadIndex, Pid, IndexIntoSamplesTable } from '../types/profile';
+import type { ReactHoverContextInfo } from '../types/react';
 import type {
   CallNodePath,
   CallNodeInfo,
@@ -99,7 +100,7 @@ export function changeSelectedCallNode(
 
 export function changeRightClickedReact(
   threadIndex: ThreadIndex,
-  data: Objet | null
+  data: ReactHoverContextInfo | null
 ) {
   return {
     type: 'CHANGE_RIGHT_CLICKED_REACT',

@@ -68,14 +68,18 @@ function getFilteredFileNames(thread) {
   for (let i = 0; i < thread.funcTable.length; i++) {
     if (thread.funcTable.isJS[i]) {
       const fileNameIndex = thread.funcTable.fileName[i];
-      const fileName = thread.stringTable.getString(fileNameIndex);
-      const functionNameIndex = thread.funcTable.name[i];
-      const functionName = thread.stringTable.getString(functionNameIndex);
+      if (fileNameIndex !== null && fileNameIndex >= 0) {
+        const fileName = thread.stringTable.getString(fileNameIndex);
+        const functionNameIndex = thread.funcTable.name[i];
+        if (functionNameIndex !== null && functionNameIndex >= 0) {
+          const functionName = thread.stringTable.getString(functionNameIndex);
 
-      if (functionName === 'flushSyncCallbackQueueImpl') {
-        reactFileName = fileName;
-      } else if (functionName === 'unstable_runWithPriority') {
-        schedulerFileName = fileName;
+          if (functionName === 'flushSyncCallbackQueueImpl') {
+            reactFileName = fileName;
+          } else if (functionName === 'unstable_runWithPriority') {
+            schedulerFileName = fileName;
+          }
+        }
       }
     }
   }
