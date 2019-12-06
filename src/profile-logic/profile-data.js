@@ -1028,6 +1028,53 @@ export function filterThreadToSearchString(
   );
 }
 
+export function filterThreadByTab(
+  thread: Thread,
+  relevantPages: Set<InnerWindowID>
+): Thread {
+  return timeCode('filterThreadByTab', () => {
+    if (relevantPages.size === 0) {
+      return thread;
+    }
+
+    const { frameTable, stackTable } = thread;
+
+    const frameMatchesFilterCache = new Map();
+    function frameMatchesFilter(frame) {
+      let result = frameMatchesFilterCache.get(frame);
+      if (result === undefined) {
+        const innerWindowID = frameTable.innerWindowID[frame];
+        result = innerWindowID && relevantPages.has(innerWindowID);
+        frameMatchesFilterCache.set(frame, result);
+      }
+      return result;
+    }
+
+    const stackMatchesFilterCache = new Map();
+    function stackMatchesFilter(stackIndex) {
+      if (stackIndex === null) {
+        return false;
+      }
+      let result = stackMatchesFilterCache.get(stackIndex);
+      if (result === undefined) {
+        const prefix = stackTable.prefix[stackIndex];
+        if (stackMatchesFilter(prefix)) {
+          result = true;
+        } else {
+          const frame = stackTable.frame[stackIndex];
+          result = frameMatchesFilter(frame);
+        }
+        stackMatchesFilterCache.set(stackIndex, result);
+      }
+      return result;
+    }
+
+    return updateThreadStacks(thread, stackTable, stackIndex =>
+      stackMatchesFilter(stackIndex) ? stackIndex : null
+    );
+  });
+}
+
 /**
  * This function takes both a SamplesTable and can be used on CounterSamplesTable.
  */

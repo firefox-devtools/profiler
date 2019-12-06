@@ -116,8 +116,14 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     }
   );
 
-  const getFilteredThread: Selector<Thread> = createSelector(
+  const _getTabFilteredThread: Selector<Thread> = createSelector(
     _getImplementationAndSearchFilteredThread,
+    ProfileSelectors.getRelevantPagesForActiveTab,
+    ProfileData.filterThreadByTab
+  );
+
+  const getFilteredThread: Selector<Thread> = createSelector(
+    _getTabFilteredThread,
     UrlState.getInvertCallstack,
     ProfileSelectors.getDefaultCategory,
     (thread, shouldInvertCallstack, defaultCategory) => {

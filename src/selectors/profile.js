@@ -30,6 +30,7 @@ import type {
   VisualMetrics,
   ProgressGraphData,
   ProfilerConfiguration,
+  InnerWindowID,
 } from '../types/profile';
 import type {
   LocalTrack,
@@ -448,5 +449,45 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
     hidden += hiddenGlobalTracks.size;
 
     return { hidden, total };
+  }
+);
+
+export const getRelevantPagesForActiveTab: Selector<
+  Set<InnerWindowID>
+> = createSelector(
+  getPageList,
+  UrlState.getShowTabOnly,
+  (pageList, showTabOnly) => {
+    if (pageList === null || pageList.length === 0 || showTabOnly === null) {
+      // Return an empty set if we want to see everything or that data is not there.
+      return new Set();
+    }
+
+    const findRootPage = page => {
+      if (page.embedderInnerWindowID !== 0) {
+        const parent = pageList.find(
+          p => p.innerWindowID === page.embedderInnerWindowID
+        );
+        if (parent) {
+          return findRootPage(parent);
+        }
+      }
+      return page;
+    };
+
+    // Create a set from the pages that we want to retain.
+    const relevantPages = [];
+    for (const page of pageList) {
+      if (page.browsingContextID === showTabOnly) {
+        relevantPages.push(page.innerWindowID);
+      } else if (page.embedderInnerWindowID !== 0) {
+        const rootPage = findRootPage(page);
+        if (rootPage.browsingContextID === showTabOnly) {
+          relevantPages.push(page.innerWindowID);
+        }
+      }
+    }
+
+    return new Set(relevantPages);
   }
 );
