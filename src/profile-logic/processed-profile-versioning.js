@@ -201,8 +201,15 @@ function _guessMarkerCategories(profile: Object) {
 
   for (const thread of profile.threads) {
     const { markers, stringArray } = thread;
-    markers.category = [];
+    if (!markers.category) {
+      // Only create the category if it's needed.
+      markers.category = [];
+    }
     for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      if (typeof markers.category[markerIndex] === 'number') {
+        // This marker already has a category, skip it.
+        break;
+      }
       const nameIndex = markers.name[markerIndex];
       const data = markers.data[markerIndex];
 
@@ -1161,6 +1168,17 @@ const _upgraders = {
     for (const thread of profile.threads) {
       const { frameTable } = thread;
       frameTable.innerWindowID = new Array(frameTable.length).fill(0);
+    }
+  },
+  [28]: profile => {
+    // There was a bug where some markers got a null category during sanitization.
+    for (const thread of profile.threads) {
+      const { markers } = thread;
+      if (markers.category[0] === null) {
+        // This profile contains null markers, guess them here to fix it.
+        _guessMarkerCategories(profile);
+        return;
+      }
     }
   },
 };
