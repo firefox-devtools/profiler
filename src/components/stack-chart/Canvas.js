@@ -859,9 +859,9 @@ class StackChartCanvas extends React.PureComponent<Props, State> {
                 TIMELINE_MARGIN_LEFT
             );
 
-          const x = timeToPosition(timestamp);
-          const startX = x - REACT_EVENT_SIZE / 2;
-          const stopX = x + REACT_EVENT_SIZE / 2;
+          const eventX = timeToPosition(timestamp);
+          const startX = eventX - REACT_EVENT_SIZE / 2;
+          const stopX = eventX + REACT_EVENT_SIZE / 2;
           if (x >= startX && x <= stopX) {
             return {
               event,
@@ -872,9 +872,7 @@ class StackChartCanvas extends React.PureComponent<Props, State> {
             };
           }
         }
-      }
-
-      if (measures !== null) {
+      } else if (measures !== null) {
         // Because data ranges may overlap, wew ant to find the last intersecting item.
         // This will always be the one on "top" (the one the user is hovering over).
         for (let index = measures.length - 1; index >= 0; index--) {
