@@ -3265,6 +3265,7 @@ Object {
   },
   "rightClickedCallNodePath": null,
   "rightClickedMarker": null,
+  "rightClickedReactData": null,
   "selectedCallNodePath": Array [
     0,
     1,
