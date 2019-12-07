@@ -571,6 +571,8 @@ class StackChartCanvas extends React.PureComponent<Props, State> {
         viewportBottom,
       },
     } = this.props;
+    const { reactProfilerData } = this.state;
+
     const fastFillStyle = new FastFillStyle(ctx);
 
     const { devicePixelRatio } = window;
@@ -581,7 +583,9 @@ class StackChartCanvas extends React.PureComponent<Props, State> {
 
     const devicePixelsWidth = containerWidth * devicePixelRatio;
     const devicePixelsHeight =
-      (containerHeight - REACT_DEVTOOLS_CANVAS_HEIGHT) * devicePixelRatio;
+      (reactProfilerData !== null
+        ? containerHeight - REACT_DEVTOOLS_CANVAS_HEIGHT
+        : containerHeight) * devicePixelRatio;
 
     fastFillStyle.set('#ffffff');
     ctx.fillRect(0, 0, devicePixelsWidth, devicePixelsHeight);
@@ -1151,29 +1155,32 @@ class StackChartCanvas extends React.PureComponent<Props, State> {
 
   render() {
     const { containerWidth, containerHeight, isDragging } = this.props.viewport;
+    const { reactProfilerData } = this.state;
 
     return (
       <React.Fragment>
-        <ContextMenuTrigger
-          id="ReactContextMenu"
-          attributes={{
-            className: 'treeViewContextMenu',
-          }}
-        >
-          <ChartCanvas
-            scaleCtxToCssPixels={false}
-            className="stackChartCanvas"
-            containerWidth={containerWidth}
-            containerHeight={REACT_DEVTOOLS_CANVAS_HEIGHT}
-            isDragging={isDragging}
-            onDoubleClickItem={this._onDoubleClickReact}
-            getHoveredItemInfo={this._getHoveredStackInfoReact}
-            drawCanvas={this._drawCanvasReact}
-            hitTest={this._hitTestReact}
-            onSelectItem={this._onSelectItemReact}
-            onRightClick={this._onRightClickReact}
-          />
-        </ContextMenuTrigger>
+        {reactProfilerData !== null && (
+          <ContextMenuTrigger
+            id="ReactContextMenu"
+            attributes={{
+              className: 'treeViewContextMenu',
+            }}
+          >
+            <ChartCanvas
+              scaleCtxToCssPixels={false}
+              className="stackChartCanvas"
+              containerWidth={containerWidth}
+              containerHeight={REACT_DEVTOOLS_CANVAS_HEIGHT}
+              isDragging={isDragging}
+              onDoubleClickItem={this._onDoubleClickReact}
+              getHoveredItemInfo={this._getHoveredStackInfoReact}
+              drawCanvas={this._drawCanvasReact}
+              hitTest={this._hitTestReact}
+              onSelectItem={this._onSelectItemReact}
+              onRightClick={this._onRightClickReact}
+            />
+          </ContextMenuTrigger>
+        )}
         <ContextMenuTrigger
           id="CallNodeContextMenu"
           attributes={{
@@ -1184,7 +1191,11 @@ class StackChartCanvas extends React.PureComponent<Props, State> {
             scaleCtxToCssPixels={false}
             className="stackChartCanvas"
             containerWidth={containerWidth}
-            containerHeight={containerHeight - REACT_DEVTOOLS_CANVAS_HEIGHT}
+            containerHeight={
+              reactProfilerData !== null
+                ? containerHeight - REACT_DEVTOOLS_CANVAS_HEIGHT
+                : containerHeight
+            }
             isDragging={isDragging}
             onDoubleClickItem={this._onDoubleClickStack}
             getHoveredItemInfo={this._getHoveredStackInfo}
@@ -1192,7 +1203,10 @@ class StackChartCanvas extends React.PureComponent<Props, State> {
             hitTest={this._hitTest}
             onSelectItem={this._onSelectItem}
             onRightClick={this._onRightClick}
-            style={{ top: REACT_DEVTOOLS_CANVAS_HEIGHT }}
+            style={{
+              top:
+                reactProfilerData !== null ? REACT_DEVTOOLS_CANVAS_HEIGHT : 0,
+            }}
           />
         </ContextMenuTrigger>
       </React.Fragment>
