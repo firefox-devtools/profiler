@@ -159,20 +159,8 @@ exports[`StackChart with markers matches the snapshot for user timings 1`] = `
         <div>
           <canvas
             class="chartCanvas stackChartCanvas"
-            height="124"
-            style="width: 365px; height: 124px;"
-            width="365"
-          />
-        </div>
-      </div>
-      <div
-        class="react-contextmenu-wrapper treeViewContextMenu"
-      >
-        <div>
-          <canvas
-            class="chartCanvas stackChartCanvas"
-            height="176"
-            style="top: 124px; width: 365px; height: 176px;"
+            height="300"
+            style="top: 0px; width: 365px; height: 300px;"
             width="365"
           />
         </div>
@@ -201,155 +189,6 @@ exports[`StackChart with markers matches the snapshot for user timings 1`] = `
 exports[`StackChart with markers matches the snapshot for user timings 2`] = `
 Array [
   Array [
-    "set fillStyle",
-    "#ffffff",
-  ],
-  Array [
-    "fillRect",
-    0,
-    0,
-    365,
-    124,
-  ],
-  Array [
-    "set fillStyle",
-    "#ededf0",
-  ],
-  Array [
-    "fillRect",
-    0,
-    0,
-    150,
-    124,
-  ],
-  Array [
-    "set fillStyle",
-    "#d7d7db",
-  ],
-  Array [
-    "fillRect",
-    150,
-    0,
-    1,
-    124,
-  ],
-  Array [
-    "set fillStyle",
-    "#d7d7db",
-  ],
-  Array [
-    "fillRect",
-    0,
-    30,
-    365,
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "#272727",
-  ],
-  Array [
-    "set textBaseline",
-    "middle",
-  ],
-  Array [
-    "set font",
-    "12px sans-serif",
-  ],
-  Array [
-    "fillText",
-    "unscheduled",
-    10,
-    15.5,
-  ],
-  Array [
-    "set fillStyle",
-    "#d7d7db",
-  ],
-  Array [
-    "fillRect",
-    0,
-    61,
-    365,
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "#272727",
-  ],
-  Array [
-    "set textBaseline",
-    "middle",
-  ],
-  Array [
-    "set font",
-    "12px sans-serif",
-  ],
-  Array [
-    "fillText",
-    "high",
-    10,
-    46.5,
-  ],
-  Array [
-    "set fillStyle",
-    "#d7d7db",
-  ],
-  Array [
-    "fillRect",
-    0,
-    92,
-    365,
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "#272727",
-  ],
-  Array [
-    "set textBaseline",
-    "middle",
-  ],
-  Array [
-    "set font",
-    "12px sans-serif",
-  ],
-  Array [
-    "fillText",
-    "normal",
-    10,
-    77.5,
-  ],
-  Array [
-    "set fillStyle",
-    "#d7d7db",
-  ],
-  Array [
-    "fillRect",
-    0,
-    123,
-    365,
-    1,
-  ],
-  Array [
-    "set fillStyle",
-    "#272727",
-  ],
-  Array [
-    "set textBaseline",
-    "middle",
-  ],
-  Array [
-    "set font",
-    "12px sans-serif",
-  ],
-  Array [
-    "fillText",
-    "low",
-    10,
-    108.5,
-  ],
-  Array [
     "set font",
     "10px sans-serif",
   ],
@@ -370,7 +209,7 @@ Array [
     0,
     0,
     365,
-    176,
+    300,
   ],
   Array [
     "set fillStyle",
@@ -381,14 +220,14 @@ Array [
     150,
     0,
     1,
-    176,
+    300,
   ],
   Array [
     "fillRect",
     350,
     0,
     1,
-    176,
+    300,
   ],
 ]
 `;
