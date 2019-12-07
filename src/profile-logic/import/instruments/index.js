@@ -3,6 +3,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
+// This file is divided into 2 main parts:
+// 1) Understand the Instruments profile's file structure and extract the relevant data
+// 2) Fill all the data-structures within profile data-structure to support visualizing Instruments profiles into Firefox Profiler
+// For understanding the structure and extracting the important data from Instruments profiles,
+// I followed this great article: http://jamie-wong.com/post/reverse-engineering-instruments-file-format/
+
 import {
   getEmptyProfile,
   getEmptyThread,
