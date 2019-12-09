@@ -1,5 +1,80 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`app/Home renders a button to enable the popup when it is available 1`] = `
+<div
+  class="homeInstructions"
+  data-testid="home-enable-popup-instructions"
+>
+  <div
+    class="homeInstructionsLeft"
+  >
+    <div
+      style="text-align: center;"
+    >
+      <img
+        alt="screenshot of profiler.firefox.com"
+        class="homeSectionScreenshot"
+        src="test-file-stub"
+      />
+    </div>
+  </div>
+  <div
+    class="homeInstructionsRight"
+  >
+    <a
+      class="homeSectionButton"
+      href="#"
+    >
+      <span
+        class="homeSectionPlus"
+      >
+        +
+      </span>
+      Enable Profiler Menu Button
+    </a>
+    <a
+      class="homeSectionButton"
+      href="/docs/"
+    >
+      <span
+        class="homeSectionDocsIcon"
+      />
+      Documentation
+    </a>
+    <p>
+      Enable the profiler menu button to start recording a performance profile in Firefox, then analyze it and share it with profiler.firefox.com.
+    </p>
+    <div
+      class="homeSectionLoadProfile"
+    >
+      <div
+        class="homeSectionActionButtons"
+      >
+        <label
+          class="homeSectionButton"
+        >
+          <input
+            class="homeSectionUploadFromFileInput"
+            type="file"
+          />
+          Load a profile from file
+        </label>
+        <button
+          aria-expanded="false"
+          class="homeSectionButton"
+          type="button"
+        >
+          Load a profile from a URL
+        </button>
+      </div>
+      <p>
+        You can also drag and drop a profile file here to load it.
+      </p>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`app/Home renders the information screen for other browsers 1`] = `
 <div
   class="home"
@@ -62,6 +137,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
     >
       <div
         class="homeInstructions"
+        data-testid="home-other-browser-instructions"
       >
         <div
           class="homeInstructionsLeft"
@@ -206,6 +282,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
     >
       <div
         class="homeInstructions"
+        data-testid="home-install-addon-instructions"
       >
         <div
           class="homeInstructionsLeft"
@@ -351,13 +428,14 @@ exports[`app/Home renders the usage instructions for pages with the extension in
     >
       <div
         class="homeInstructions"
+        data-testid="home-record-instructions"
       >
         <div
           class="homeInstructionsLeft"
         >
           <p>
             <img
-              alt="Screenshot of the Gecko Profiler addon settings"
+              alt="Screenshot of the profiler settings from the Firefox menu."
               class="homeSectionScreenshot"
               src="test-file-stub"
             />
@@ -452,5 +530,101 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       </div>
     </div>
   </section>
+</div>
+`;
+
+exports[`app/Home renders the usage instructions for when the popup is enabled 1`] = `
+<div
+  class="homeInstructions homeTransition-enter homeTransition-enter-active"
+  data-testid="home-record-instructions"
+>
+  <div
+    class="homeInstructionsLeft"
+  >
+    <p>
+      <img
+        alt="Screenshot of the profiler settings from the Firefox menu."
+        class="homeSectionScreenshot"
+        src="test-file-stub"
+      />
+    </p>
+  </div>
+  <div
+    class="homeInstructionsRight"
+  >
+    <a
+      class="homeSectionButton"
+      href="/docs/"
+    >
+      <span
+        class="homeSectionDocsIcon"
+      />
+      Documentation
+    </a>
+    <p>
+      To start profiling, click on the profiling button, or use the keyboard shortcuts. The icon is blue when a profile is recording. Hit
+      <kbd>
+        Capture Profile
+      </kbd>
+       to load the data into profiler.firefox.com.
+    </p>
+    <div>
+      <p>
+        <kbd>
+          Ctrl
+        </kbd>
+        +
+        <kbd>
+          Shift
+        </kbd>
+        +
+        <kbd>
+          1
+        </kbd>
+         Stop and start profiling
+      </p>
+      <p>
+        <kbd>
+          Ctrl
+        </kbd>
+        +
+        <kbd>
+          Shift
+        </kbd>
+        +
+        <kbd>
+          2
+        </kbd>
+         Capture and load profile
+      </p>
+    </div>
+    <div
+      class="homeSectionLoadProfile"
+    >
+      <div
+        class="homeSectionActionButtons"
+      >
+        <label
+          class="homeSectionButton"
+        >
+          <input
+            class="homeSectionUploadFromFileInput"
+            type="file"
+          />
+          Load a profile from file
+        </label>
+        <button
+          aria-expanded="false"
+          class="homeSectionButton"
+          type="button"
+        >
+          Load a profile from a URL
+        </button>
+      </div>
+      <p>
+        You can also drag and drop a profile file here to load it.
+      </p>
+    </div>
+  </div>
 </div>
 `;

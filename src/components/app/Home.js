@@ -9,11 +9,18 @@ import explicitConnect from '../../utils/connect';
 import classNames from 'classnames';
 import AddonScreenshot from '../../../res/img/jpg/gecko-profiler-screenshot-2019-02-05.jpg';
 import PerfScreenshot from '../../../res/img/jpg/perf-screenshot-2019-02-05.jpg';
+import FirefoxPopupScreenshot from '../../../res/img/jpg/firefox-profiler-button-2019-12-09.jpg';
 import {
   retrieveProfileFromFile,
   triggerLoadingFromUrl,
 } from '../../actions/receive-profile';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import {
+  queryIsMenuButtonEnabled,
+  enableMenuButton,
+} from '../../app-logic/web-channel';
+import { assertExhaustiveCheck } from '../../utils/flow';
+
 import type {
   ConnectedProps,
   WrapFunctionInDispatch,
@@ -219,18 +226,55 @@ type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
 
 type HomeState = {
   isDragging: boolean,
-  isAddonInstalled: boolean,
+  popupAddonInstallPhase: PopupAddonInstallPhase,
 };
 
-class Home extends React.PureComponent<HomeProps, HomeState> {
-  _isFirefox: boolean = _isFirefox();
-  state = {
-    isDragging: false,
-    isAddonInstalled: Boolean(window.isGeckoProfilerAddonInstalled),
-  };
+type PopupAddonInstallPhase =
+  // Firefox Beta or Relase
+  | 'suggest-install-addon'
+  | 'addon-installed'
+  // Firefox Nightly:
+  | 'popup-enabled'
+  | 'suggest-enable-popup'
+  // Other browsers:
+  | 'other-browser';
 
-  addonInstalled() {
-    this.setState({ isAddonInstalled: true });
+class Home extends React.PureComponent<HomeProps, HomeState> {
+  constructor(props: HomeProps) {
+    super(props);
+    // Start by suggesting that we install the add-on.
+    let popupAddonInstallPhase = 'other-browser';
+
+    if (_isFirefox()) {
+      if (window.isGeckoProfilerAddonInstalled) {
+        popupAddonInstallPhase = 'addon-installed';
+      } else {
+        popupAddonInstallPhase = 'suggest-install-addon';
+      }
+
+      // Query the browser to see if the menu button is available.
+      queryIsMenuButtonEnabled().then(
+        isMenuButtonEnabled => {
+          this.setState({
+            popupAddonInstallPhase: isMenuButtonEnabled
+              ? 'popup-enabled'
+              : 'suggest-enable-popup',
+          });
+        },
+        () => {
+          // Do nothing if this request returns an error. It probably just means
+          // that we're talking to an older version of the browser.
+        }
+      );
+    }
+
+    this.state = {
+      isDragging: false,
+      popupAddonInstallPhase,
+    };
+
+    // Let the Gecko Profiler Add-on let the home-page know when it's been installed.
+    homeInstance = this;
   }
 
   componentDidMount() {
@@ -238,14 +282,30 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     document.addEventListener('drag', _dragPreventDefault, false);
     document.addEventListener('dragover', _dragPreventDefault, false);
     document.addEventListener('drop', _dragPreventDefault, false);
-    // Let the Gecko Profiler Add-on let the home-page know when it's been installed.
-    homeInstance = this;
   }
 
   componentWillUnmount() {
     document.removeEventListener('drag', _dragPreventDefault, false);
     document.removeEventListener('dragover', _dragPreventDefault, false);
     document.removeEventListener('drop', _dragPreventDefault, false);
+  }
+
+  /**
+   * This is a publicly accessible method, that the addon can use to signal
+   * that it is installed. This component races with the frame script installation,
+   * so provide a way for frame script to signal that it was loaded.
+   */
+  addonInstalled() {
+    this.setState(({ popupAddonInstallPhase }) => {
+      if (
+        popupAddonInstallPhase === 'popup-enabled' ||
+        popupAddonInstallPhase === 'suggest-enable-popup'
+      ) {
+        // The popup is available, ignore the addon.
+        return null;
+      }
+      return { popupAddonInstallPhase: 'addon-installed' };
+    });
   }
 
   _startDragging = (event: Event) => {
@@ -271,20 +331,88 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   };
 
   _renderInstructions() {
-    const { isAddonInstalled } = this.state;
-    if (isAddonInstalled) {
-      return this._renderRecordInstructions();
+    const { popupAddonInstallPhase } = this.state;
+    switch (popupAddonInstallPhase) {
+      case 'suggest-install-addon':
+        return this._renderInstallAddonInstructions();
+      case 'addon-installed':
+        return this._renderRecordInstructions(AddonScreenshot);
+      case 'popup-enabled':
+        return this._renderRecordInstructions(FirefoxPopupScreenshot);
+      case 'suggest-enable-popup':
+        return this._renderEnablePopupInstructions();
+      case 'other-browser':
+        return this._renderOtherBrowserInstructions();
+      default:
+        throw assertExhaustiveCheck(
+          popupAddonInstallPhase,
+          'Unhandled PopupAddonInstallPhase'
+        );
     }
-    if (this._isFirefox) {
-      return this._renderInstallInstructions();
-    }
-    return this._renderOtherBrowserInstructions();
   }
 
-  _renderInstallInstructions() {
+  _enableMenuButton = e => {
+    e.preventDefault();
+    enableMenuButton().then(
+      () => {
+        this.setState({ popupAddonInstallPhase: 'popup-enabled' });
+      },
+      error => {
+        // This error doesn't get surfaced in the UI, but it does in console.
+        console.error('Unable to enable the profiler popup button.', error);
+      }
+    );
+  };
+
+  _renderEnablePopupInstructions() {
     return (
       <InstructionTransition key={0}>
-        <div className="homeInstructions">
+        <div
+          className="homeInstructions"
+          data-testid="home-enable-popup-instructions"
+        >
+          <div className="homeInstructionsLeft">
+            <div style={{ textAlign: 'center' }}>
+              <img
+                className="homeSectionScreenshot"
+                src={PerfScreenshot}
+                alt="screenshot of profiler.firefox.com"
+              />
+            </div>
+          </div>
+          <div className="homeInstructionsRight">
+            <a
+              href="#"
+              className="homeSectionButton"
+              onClick={this._enableMenuButton}
+            >
+              <span className="homeSectionPlus">+</span>
+              Enable Profiler Menu Button
+            </a>
+            <DocsButton />
+            <p>
+              Enable the profiler menu button to start recording a performance
+              profile in Firefox, then analyze it and share it with
+              profiler.firefox.com.
+            </p>
+            <ActionButtons
+              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
+              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
+              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
+            />
+          </div>
+        </div>
+      </InstructionTransition>
+    );
+  }
+
+  _renderInstallAddonInstructions() {
+    return (
+      <InstructionTransition key={0}>
+        <div
+          className="homeInstructions"
+          data-testid="home-install-addon-instructions"
+        >
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
               <img
@@ -320,16 +448,19 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     );
   }
 
-  _renderRecordInstructions() {
+  _renderRecordInstructions(screenshotSrc: string) {
     return (
       <InstructionTransition key={1}>
-        <div className="homeInstructions">
+        <div
+          className="homeInstructions"
+          data-testid="home-record-instructions"
+        >
           <div className="homeInstructionsLeft">
             <p>
               <img
                 className="homeSectionScreenshot"
-                src={AddonScreenshot}
-                alt="Screenshot of the Gecko Profiler addon settings"
+                src={screenshotSrc}
+                alt="Screenshot of the profiler settings from the Firefox menu."
               />
             </p>
           </div>
@@ -357,7 +488,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   _renderOtherBrowserInstructions() {
     return (
       <InstructionTransition key={0}>
-        <div className="homeInstructions" key={0}>
+        <div
+          className="homeInstructions"
+          key={0}
+          data-testid="home-other-browser-instructions"
+        >
           <div className="homeInstructionsLeft">
             <div style={{ textAlign: 'center' }}>
               <img
@@ -402,6 +537,7 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   render() {
     const { isDragging } = this.state;
     const { specialMessage } = this.props;
+
     return (
       <div
         className="home"
