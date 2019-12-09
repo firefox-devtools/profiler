@@ -12,8 +12,6 @@ import createStore from '../../app-logic/create-store';
 // Provide a mechanism to overwrite the navigator.userAgent, which can't be set.
 const FIREFOX_WEBEXT =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:55.0) Gecko/20100101 Firefox/55.0';
-const FIREFOX_LEGACY =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.12; rv:53.0) Gecko/20100101 Firefox/53.0';
 const SAFARI =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/603.3.8 (KHTML, like Gecko) Version/10.1.2 Safari/603.3.8';
 let userAgent;
@@ -26,18 +24,6 @@ let userAgent;
 describe('app/Home', function() {
   it('renders the install screen for the extension', () => {
     userAgent = FIREFOX_WEBEXT;
-
-    const { container } = render(
-      <Provider store={createStore()}>
-        <Home specialMessage="This is a special message" />
-      </Provider>
-    );
-
-    expect(container.firstChild).toMatchSnapshot();
-  });
-
-  it('renders the install screen for the legacy add-on', () => {
-    userAgent = FIREFOX_LEGACY;
 
     const { container } = render(
       <Provider store={createStore()}>

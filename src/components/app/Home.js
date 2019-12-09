@@ -23,8 +23,6 @@ require('./Home.css');
 
 const ADDON_URL =
   'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
-const LEGACY_ADDON_URL =
-  'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler_legacy.xpi';
 
 type InstallButtonProps = {
   name: string,
@@ -225,7 +223,6 @@ type HomeState = {
 };
 
 class Home extends React.PureComponent<HomeProps, HomeState> {
-  _supportsWebExtensionAPI: boolean = _supportsWebExtensionAPI();
   _isFirefox: boolean = _isFirefox();
   state = {
     isDragging: false,
@@ -278,11 +275,8 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     if (isAddonInstalled) {
       return this._renderRecordInstructions();
     }
-    if (this._supportsWebExtensionAPI) {
-      return this._renderInstallInstructions();
-    }
     if (this._isFirefox) {
-      return this._renderLegacyInstructions();
+      return this._renderInstallInstructions();
     }
     return this._renderOtherBrowserInstructions();
   }
@@ -347,44 +341,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
               Hit
               <kbd>Capture Profile</kbd> to load the data into
               profiler.firefox.com.
-            </p>
-            {this._renderShortcuts()}
-            <ActionButtons
-              // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
-              retrieveProfileFromFile={this.props.retrieveProfileFromFile}
-              triggerLoadingFromUrl={this.props.triggerLoadingFromUrl}
-            />
-          </div>
-        </div>
-      </InstructionTransition>
-    );
-  }
-
-  _renderLegacyInstructions() {
-    return (
-      <InstructionTransition key={2}>
-        <div className="homeInstructions">
-          <div className="homeInstructionsLeft">
-            <div style={{ textAlign: 'center' }}>
-              <img
-                className="homeSectionScreenshot"
-                src={PerfScreenshot}
-                alt="screenshot of profiler.firefox.com"
-              />
-            </div>
-          </div>
-          <div className="homeInstructionsRight">
-            <DocsButton />
-            <p>
-              To start recording a performance profile in Firefox, first install
-              the{' '}
-              <InstallButton name="Gecko Profiler" xpiUrl={LEGACY_ADDON_URL}>
-                Gecko Profiler Add-on
-              </InstallButton>
-              . Then use the button added to the browser, or use the following
-              shortcuts to record a profile. The button’s icon is blue when a
-              profile is recording. Hit <kbd>Capture Profile</kbd> to load the
-              data into profiler.firefox.com.
             </p>
             {this._renderShortcuts()}
             <ActionButtons
@@ -509,12 +465,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
 
 function _dragPreventDefault(event: DragEvent) {
   event.preventDefault();
-}
-
-function _supportsWebExtensionAPI(): boolean {
-  const matched = navigator.userAgent.match(/Firefox\/(\d+\.\d+)/);
-  const minimumSupportedFirefox = 55;
-  return matched ? parseFloat(matched[1]) >= minimumSupportedFirefox : false;
 }
 
 function _isFirefox(): boolean {
