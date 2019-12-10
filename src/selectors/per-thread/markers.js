@@ -187,15 +187,27 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   /**
-   * This selector filters out markers that are usually too long to be displayed
-   * in the header, because they would obscure the header, or that are displayed
-   * in other tracks already.
+   * This selector applies the committed range to the full list of markers.
    */
-  const getCommittedRangeFilteredMarkerIndexesForHeader: Selector<
+  const getCommittedRangeAndTabFilteredMarkerIndexes: Selector<
     MarkerIndex[]
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
+    ProfileSelectors.getRelevantPagesForActiveTab,
+    MarkerData.getTabFilteredMarkerIndexes
+  );
+
+  /**
+   * This selector filters out markers that are usually too long to be displayed
+   * in the header, because they would obscure the header, or that are displayed
+   * in other tracks already.
+   */
+  const getCommittedRangeAndTabFilteredMarkerIndexesForHeader: Selector<
+    MarkerIndex[]
+  > = createSelector(
+    getMarkerGetter,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
     filterMarkerIndexesCreator(
       marker =>
         marker.name !== 'BHR-detected hang' &&
@@ -217,7 +229,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerIndex[]
   > = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
     filterMarkerIndexesCreator(MarkerData.isNavigationMarker)
   );
 
@@ -226,7 +238,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    */
   const getJankMarkerIndexesForHeader: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
     filterMarkerIndexesCreator(marker => marker.name === 'Jank')
   );
 
@@ -237,7 +249,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     MarkerIndex[]
   > = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
     UrlState.getMarkersSearchStringsAsRegExp,
     MarkerData.getSearchFilteredMarkerIndexes
   );
@@ -314,7 +326,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    */
   const getMarkerChartMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
     MarkerData.filterForMarkerChart
   );
 
@@ -346,7 +358,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    */
   const getFileIoMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
     filterMarkerIndexesCreator(MarkerData.isFileIoMarker)
   );
 
@@ -355,7 +367,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    */
   const getMemoryMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
     filterMarkerIndexesCreator(MarkerData.isMemoryMarker)
   );
 
@@ -364,7 +376,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    */
   const getIPCMarkerIndexes: Selector<MarkerIndex[]> = createSelector(
     getMarkerGetter,
-    getCommittedRangeFilteredMarkerIndexes,
+    getCommittedRangeAndTabFilteredMarkerIndexes,
     filterMarkerIndexesCreator(MarkerData.isIPCMarker)
   );
 
@@ -453,7 +465,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getSearchFilteredMarkerChartMarkerIndexes,
     getMarkerChartTimingAndBuckets,
     getCommittedRangeFilteredMarkerIndexes,
-    getCommittedRangeFilteredMarkerIndexesForHeader,
+    getCommittedRangeAndTabFilteredMarkerIndexesForHeader,
     getTimelineVerticalMarkerIndexes,
     getFileIoMarkerIndexes,
     getMemoryMarkerIndexes,

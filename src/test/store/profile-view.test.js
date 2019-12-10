@@ -1391,11 +1391,11 @@ describe('snapshots of selectors/profile', function() {
         .map(getMarker)
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexesForHeader', function() {
+  it('matches the last stored run of markerThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexesForHeader', function() {
     const { getState, markerThreadSelectors, getMarker } = setupStore();
     expect(
       markerThreadSelectors
-        .getCommittedRangeFilteredMarkerIndexesForHeader(getState())
+        .getCommittedRangeAndTabFilteredMarkerIndexesForHeader(getState())
         .map(getMarker)
     ).toMatchSnapshot();
   });

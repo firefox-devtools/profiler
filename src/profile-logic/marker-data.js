@@ -13,6 +13,7 @@ import type {
   IndexIntoStringTable,
   IndexIntoRawMarkerTable,
   IndexIntoCategoryList,
+  InnerWindowID,
 } from '../types/profile';
 import type { Marker, MarkerIndex } from '../types/profile-derived';
 import type {
@@ -159,6 +160,27 @@ export function getSearchFilteredMarkerIndexes(
       }
     }
   }
+  return newMarkers;
+}
+
+export function getTabFilteredMarkerIndexes(
+  getMarker: MarkerIndex => Marker,
+  markerIndexes: MarkerIndex[],
+  relevantPages: Set<InnerWindowID>
+): MarkerIndex[] {
+  if (relevantPages.size === 0) {
+    return markerIndexes;
+  }
+
+  const newMarkers: MarkerIndex[] = [];
+  for (const markerIndex of markerIndexes) {
+    const { data } = getMarker(markerIndex);
+
+    if (data && data.innerWindowID && relevantPages.has(data.innerWindowID)) {
+      newMarkers.push(markerIndex);
+    }
+  }
+
   return newMarkers;
 }
 

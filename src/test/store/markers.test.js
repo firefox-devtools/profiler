@@ -316,7 +316,7 @@ describe('memory markers', function() {
   it('ignores memory markers in getCommittedRangeFilteredMarkersForHeader', function() {
     const { getState } = setup();
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getCommittedRangeFilteredMarkerIndexesForHeader(
+    const markerIndexes = selectedThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexesForHeader(
       getState()
     );
     expect(

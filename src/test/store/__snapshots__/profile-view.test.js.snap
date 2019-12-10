@@ -1076,6 +1076,35 @@ Array [
 ]
 `;
 
+exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexesForHeader 1`] = `
+Array [
+  Object {
+    "category": 0,
+    "data": null,
+    "dur": 0,
+    "name": "D",
+    "start": 3,
+    "title": null,
+  },
+  Object {
+    "category": 0,
+    "data": null,
+    "dur": 0,
+    "name": "E",
+    "start": 4,
+    "title": null,
+  },
+  Object {
+    "category": 0,
+    "data": null,
+    "dur": 0,
+    "name": "F",
+    "start": 5,
+    "title": null,
+  },
+]
+`;
+
 exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexes 1`] = `
 Array [
   Object {
@@ -1117,35 +1146,6 @@ Array [
     "dur": 1,
     "name": "Load 6: https://mozilla.org",
     "start": 6,
-    "title": null,
-  },
-]
-`;
-
-exports[`snapshots of selectors/profile matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexesForHeader 1`] = `
-Array [
-  Object {
-    "category": 0,
-    "data": null,
-    "dur": 0,
-    "name": "D",
-    "start": 3,
-    "title": null,
-  },
-  Object {
-    "category": 0,
-    "data": null,
-    "dur": 0,
-    "name": "E",
-    "start": 4,
-    "title": null,
-  },
-  Object {
-    "category": 0,
-    "data": null,
-    "dur": 0,
-    "name": "F",
-    "start": 5,
     "title": null,
   },
 ]
