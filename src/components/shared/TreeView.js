@@ -256,7 +256,7 @@ class TreeViewRowScrolledColumns<
           odd: index % 2 !== 0,
           isSelected,
           isRightClicked,
-          dim: displayData.dim,
+          dim: displayData.isFrameLabel,
         })}
         style={rowHeightStyle}
         onMouseDown={this._onMouseDown}

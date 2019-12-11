@@ -885,8 +885,8 @@ export function getProfileWithJsAllocations(): * {
     B  B     B
     C  Fjs   Fjs
     D  Gjs   Gjs
-    E        Hjs
-             I
+    E        Hjs[lib:jQuery.js]
+             I[lib:libI.so]
   `);
 
   // Now add a JsAllocationsTable.
@@ -961,8 +961,8 @@ export function getProfileWithUnbalancedNativeAllocations(): * {
     B  B     B
     C  Fjs   Fjs
     D  Gjs   Gjs
-    E        Hjs
-             I
+    E        Hjs[lib:jQuery.js]
+             I[lib:libI.so]
   `);
 
   // Now add a NativeAllocationsTable.
@@ -1025,8 +1025,8 @@ export function getProfileWithBalancedNativeAllocations(): * {
     B  B     B
     C  Fjs   Fjs
     D  Gjs   Gjs
-    E        Hjs
-             I
+    E        Hjs[lib:jQuery.js]
+             I[lib:libI.so]
   `);
 
   // Now add a NativeAllocationsTable.
