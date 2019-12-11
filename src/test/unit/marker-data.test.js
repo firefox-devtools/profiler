@@ -142,11 +142,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
     const { markers } = setup();
     expect(markers[16]).toMatchObject({
       start: 100,
-      // This is the last marker; as a result, the time range is computed by
-      // adding the interval to its time. Because it's incomplete, it lasts
-      // until the end of the range, and as a result its duration is the same as
-      // the interval, which is 1.
-      dur: 1,
+      dur: 0,
       name: 'Rasterize',
       title: null,
       incomplete: true,
@@ -334,10 +330,7 @@ describe('deriveMarkersFromRawMarkerTable', function() {
       },
       name: 'CompositorScreenshot',
       start: 25,
-      // Because the last compositor screenshot lasts until the end of the
-      // range, and the range ends at 101 (because of the last marker's time is
-      // at 100), the duration is 76 accordingly.
-      dur: 76,
+      dur: 0,
       title: null,
     });
   });
