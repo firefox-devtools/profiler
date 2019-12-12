@@ -678,12 +678,10 @@ function _getTimeRangeForThread(
     const lastSampleIndex = samples.length - 1;
     result.start = samples.time[0];
     result.end = samples.time[lastSampleIndex] + interval;
-  }
-
-  if (markers.length) {
+  } else if (markers.length) {
+    // Looking at the markers only if there are no samples in the profile.
+    // We need to look at those because it can be a marker only profile(no-sampling mode).
     // Finding start and end times sadly requires looping through all markers :(
-    let startTime = +Infinity;
-    let endTime = -Infinity;
     for (let i = 0; i < markers.length; i++) {
       const thisStartTime =
         markers.data[i] && typeof markers.data[i].startTime === 'number'
@@ -699,12 +697,9 @@ function _getTimeRangeForThread(
           ? markers.data[i].endTime + interval
           : markers.time[i] + interval;
 
-      startTime = Math.min(startTime, thisStartTime);
-      endTime = Math.max(endTime, thisEndTime);
+      result.start = Math.min(result.start, thisStartTime);
+      result.end = Math.max(result.end, thisEndTime);
     }
-
-    result.start = Math.min(result.start, startTime);
-    result.end = Math.max(result.end, endTime);
   }
 
   if (jsAllocations) {

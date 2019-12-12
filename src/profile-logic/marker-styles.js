@@ -155,13 +155,23 @@ export const markerStyles: MarkerStyles = {
 
   IPCOut: {
     ...defaultStyle,
-    background: colors.TEAL_50,
-    top: 5,
+    background: colors.BLUE_50,
+    top: 2,
+  },
+  SyncIPCOut: {
+    ...defaultStyle,
+    background: colors.BLUE_70,
+    top: 6,
   },
   IPCIn: {
     ...defaultStyle,
-    background: colors.PURPLE_50,
-    top: 10,
+    background: colors.PURPLE_40,
+    top: 13,
+  },
+  SyncIPCIn: {
+    ...defaultStyle,
+    background: colors.PURPLE_70,
+    top: 17,
   },
 };
 
