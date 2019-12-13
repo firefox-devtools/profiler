@@ -267,31 +267,31 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
       return;
     }
 
-    const {
-      files,
-      items: [firstItem],
-    } = event.dataTransfer;
+    const { files, items } = event.dataTransfer;
 
-    let webkitEntry = null;
+    if (items && items.length > 0) {
+      const [firstItem] = items;
+      let webkitEntry = null;
 
-    if ('webkitGetAsEntry' in firstItem) {
-      // DataTransferItem.webkitGetAsEntry() is a non-standard function for now.
-      // I have checked in Firefox and Chrome. It's working fine in it.
-      // We will remove FlowFixMe once it becomes a standard function (issue #2217)
-      // $FlowFixMe webkitGetAsEntry is not present in DataTransferItem
-      webkitEntry = firstItem.webkitGetAsEntry();
-    } else if ('getAsEntry' in firstItem) {
-      // $FlowFixMe getAsEntry is not present in DataTransferItem (issue #2230)
-      webkitEntry = firstItem.getAsEntry();
-    }
+      if ('webkitGetAsEntry' in firstItem) {
+        // DataTransferItem.webkitGetAsEntry() is a non-standard function for now.
+        // I have checked in Firefox and Chrome. It's working fine in it.
+        // We will remove FlowFixMe once it becomes a standard function (issue #2217)
+        // $FlowFixMe webkitGetAsEntry is not present in DataTransferItem
+        webkitEntry = firstItem.webkitGetAsEntry();
+      } else if ('getAsEntry' in firstItem) {
+        // $FlowFixMe getAsEntry is not present in DataTransferItem (issue #2230)
+        webkitEntry = firstItem.getAsEntry();
+      }
 
-    if (
-      webkitEntry !== null &&
-      webkitEntry.isDirectory &&
-      webkitEntry.name.endsWith('.trace')
-    ) {
-      this.props.retrieveProfileFromFile(webkitEntry);
-      return;
+      if (
+        webkitEntry !== null &&
+        webkitEntry.isDirectory &&
+        webkitEntry.name.endsWith('.trace')
+      ) {
+        this.props.retrieveProfileFromFile(webkitEntry);
+        return;
+      }
     }
 
     if (files.length > 0) {

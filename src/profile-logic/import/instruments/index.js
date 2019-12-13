@@ -340,7 +340,7 @@ function readInstrumentsArchive(buffer: ArrayBuffer) {
 
 // This function adds a padding ahead of given string to make its length equal to a given width value
 function zeroPad(s: string, width: number) {
-  return new Array(Math.max(width - s.length, 0) + 1).join('0') + s;
+  return s.padStart(width, '0');
 }
 
 function setIfAbsent<K, V>(map: Map<K, V>, k: K, fallback: (k: K) => V): V | K {

@@ -45,13 +45,10 @@ class MockFileSystemEntry {
       return errCb(new Error('Failed to extract file'));
     }
 
-    this._zipFile
-      .async('blob')
-      .then(blob => {
-        blob.name = this.name;
-        cb(blob);
-      })
-      .catch(errCb);
+    this._zipFile.async('blob').then(blob => {
+      blob.name = this.name;
+      cb(blob);
+    }, errCb);
 
     return undefined;
   }
@@ -83,27 +80,13 @@ class MockFileSystemEntry {
 
 describe('convertInstrumentsProfile function', () => {
   async function importFromTrace(tracePath: string, fileName: string) {
-    const zip = await new Promise((resolve, reject) => {
-      return fs.readFile(tracePath, (err, data) => {
-        if (err) {
-          return reject(err);
-        }
-        return JSZip.loadAsync(data).then(resolve);
-      });
-    });
-
+    const data = fs.readFileSync(tracePath);
+    const zip = await JSZip.loadAsync(data);
     const root = new MockFileSystemEntry(zip, fileName);
     const profile = await convertInstrumentsProfile(root);
 
     return profile;
   }
-
-  test('Can import Instruments 8.3.3 profile', async () => {
-    await importFromTrace(
-      'src/test/fixtures/upgrades/simple-time-profile-8_3_3.trace.zip',
-      'simple-time-profile.trace'
-    );
-  });
 
   test('Can import Instruments 9.3.1 profile', async () => {
     await importFromTrace(
