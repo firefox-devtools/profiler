@@ -20,7 +20,7 @@ import {
   getGlobalTracks,
   getGlobalTrackReferences,
   getHiddenTrackCount,
-  getProfilerConfiguration,
+  getActiveBrowsingContextID,
 } from '../../selectors/profile';
 import {
   getGlobalTrackOrder,
@@ -286,24 +286,18 @@ class Timeline extends React.PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => {
-    const configuration = getProfilerConfiguration(state);
-    const activeBrowsingContextID = configuration
-      ? configuration.activeBrowsingContextID || null
-      : null;
-    return {
-      globalTracks: getGlobalTracks(state),
-      globalTrackOrder: getGlobalTrackOrder(state),
-      globalTrackReferences: getGlobalTrackReferences(state),
-      committedRange: getCommittedRange(state),
-      zeroAt: getZeroAt(state),
-      panelLayoutGeneration: getPanelLayoutGeneration(state),
-      timelineType: getTimelineType(state),
-      hiddenTrackCount: getHiddenTrackCount(state),
-      activeBrowsingContextID: activeBrowsingContextID,
-      showTabOnly: getShowTabOnly(state),
-    };
-  },
+  mapStateToProps: state => ({
+    globalTracks: getGlobalTracks(state),
+    globalTrackOrder: getGlobalTrackOrder(state),
+    globalTrackReferences: getGlobalTrackReferences(state),
+    committedRange: getCommittedRange(state),
+    zeroAt: getZeroAt(state),
+    panelLayoutGeneration: getPanelLayoutGeneration(state),
+    timelineType: getTimelineType(state),
+    hiddenTrackCount: getHiddenTrackCount(state),
+    activeBrowsingContextID: getActiveBrowsingContextID(state),
+    showTabOnly: getShowTabOnly(state),
+  }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
     updatePreviewSelection,

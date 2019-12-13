@@ -31,6 +31,7 @@ import type {
   ProgressGraphData,
   ProfilerConfiguration,
   InnerWindowID,
+  BrowsingContextID,
 } from '../types/profile';
 import type {
   LocalTrack,
@@ -153,6 +154,17 @@ export const getContentfulSpeedIndexProgress: Selector<
 > = state => getVisualMetrics(state).ContentfulSpeedIndexProgress;
 export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
   getMeta(state).configuration;
+
+export const getActiveBrowsingContextID: Selector<BrowsingContextID | null> = state => {
+  const configuration = getProfilerConfiguration(state);
+  if (configuration) {
+    // BrowsingContext ID can be `0` and that means Firefox has failed to get
+    // the BrowsingContextID of the active tab. We are converting that `0` to
+    // `null` here to explicitly indicate that we don't have that information.
+    return configuration.activeBrowsingContextID || null;
+  }
+  return null;
+};
 
 type CounterSelectors = $ReturnType<typeof _createCounterSelectors>;
 
