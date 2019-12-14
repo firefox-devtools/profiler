@@ -85,6 +85,9 @@ function followUID(
 // This function constructs an object from given interpreter class and property list
 // I have taken inspiration for this function from here:
 // https://github.com/jlfwong/speedscope/blob/9edd5ce7ed6aaf9290d57e85f125c648a3b66d1f/import/instruments.ts#L648
+// Apple BinaryPlist data format is very unstructured.
+// For example, objects (first parameter in patternMatchObjectiveC function)
+// So it's hard to define a type for this kind of arrays or objects. That's why I had to put any types for these kinds of instances.
 function patternMatchObjectiveC(
   objects: any[],
   value: any,
