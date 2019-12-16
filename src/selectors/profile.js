@@ -6,7 +6,7 @@
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   filterCounterToRange,
   accumulateCounterSamples,
@@ -503,3 +503,40 @@ export const getRelevantPagesForActiveTab: Selector<
     return new Set(relevantPages);
   }
 );
+
+export const getIsLocalTrackHidden: DangerousSelectorWithArguments<
+  boolean,
+  Pid,
+  TrackIndex
+> = (state, pid, trackIndex) => {
+  const hiddenLocalTracks = ensureExists(
+    UrlState.getHiddenLocalTracks(state, pid),
+    'Unable to get the tracks for the given pid.'
+  );
+
+  if (hiddenLocalTracks.has(trackIndex)) {
+    return true;
+  }
+
+  if (UrlState.getShowTabOnly(state)) {
+    const tracks = ensureExists(
+      getLocalTracksByPid(state).get(pid),
+      'A local track was expected to exist for the given pid.'
+    );
+    const trackType = tracks[trackIndex].type;
+    switch (trackType) {
+      case 'network':
+      case 'memory':
+      case 'ipc':
+        // Hide those local track types because we want to hide as much as
+        // possible from web developers for now.
+        return true;
+      case 'thread':
+        break;
+      default:
+        throw assertExhaustiveCheck(trackType, `Unhandled LocalTrack type.`);
+    }
+  }
+
+  return false;
+};
