@@ -6,11 +6,8 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
-import {
-  getCommittedRange,
-  getPreviewSelection,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+import { getCommittedRange, getPreviewSelection } from 'selectors/profile';
+import { getThreadSelectors } from 'selectors/per-thread';
 import { withSize, type SizeProps } from '../shared/WithSize';
 import { createPortal } from 'react-dom';
 import { TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';

@@ -21,7 +21,7 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
 

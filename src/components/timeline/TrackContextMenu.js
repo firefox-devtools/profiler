@@ -26,13 +26,13 @@ import {
   getLocalTrackNamesByPid,
   getGlobalTrackNames,
   getLocalTracksByPid,
-} from '../../selectors/profile';
+} from 'selectors/profile';
 import {
   getGlobalTrackOrder,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getLocalTrackOrderByPid,
-} from '../../selectors/url-state';
+} from 'selectors/url-state';
 import classNames from 'classnames';
 
 import type { Thread, ThreadIndex, Pid } from '../../types/profile';

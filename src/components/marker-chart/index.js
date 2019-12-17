@@ -17,9 +17,9 @@ import {
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+} from 'selectors/profile';
+import { selectedThreadSelectors } from 'selectors/per-thread';
+import { getSelectedThreadIndex } from 'selectors/url-state';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,

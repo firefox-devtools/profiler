@@ -30,14 +30,14 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
 import { viewProfile } from '../../actions/receive-profile';
-import * as ProfileViewSelectors from '../../selectors/profile';
-import * as UrlStateSelectors from '../../selectors/url-state';
+import * as ProfileViewSelectors from 'selectors/profile';
+import * as UrlStateSelectors from 'selectors/url-state';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
   getThreadSelectors,
-} from '../../selectors/per-thread';
+} from 'selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
 import type { Milliseconds } from '../../types/units';

@@ -12,8 +12,8 @@ import {
   getSanitizedProfileData,
   getRemoveProfileInformation,
   getPrePublishedState,
-} from '../selectors/publish';
-import { getDataSource } from '../selectors/url-state';
+} from 'selectors/publish';
+import { getDataSource } from 'selectors/url-state';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from '../utils/flow';
 import { setHistoryReplaceState } from '../app-logic/url-handling';

@@ -16,13 +16,10 @@ import {
   getSelectedThreadIndex,
   getHiddenLocalTracks,
   getSelectedTab,
-} from '../../selectors/url-state';
+} from 'selectors/url-state';
 import explicitConnect from '../../utils/connect';
-import {
-  getLocalTrackName,
-  getCounterSelectors,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+import { getLocalTrackName, getCounterSelectors } from 'selectors/profile';
+import { getThreadSelectors } from 'selectors/per-thread';
 import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';

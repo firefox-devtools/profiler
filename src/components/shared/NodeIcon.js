@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
-import { getIconClassNameForCallNode } from '../../selectors/icons';
+import { getIconClassNameForCallNode } from 'selectors/icons';
 import { iconStartLoading } from '../../actions/icons';
 
 import type { CallNodeDisplayData } from '../../types/profile-derived';

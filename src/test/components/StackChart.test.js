@@ -25,7 +25,7 @@ import {
   commitRange,
   changeImplementationFilter,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';

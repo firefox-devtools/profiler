@@ -12,8 +12,8 @@ import {
   getProfileWithUnbalancedNativeAllocations,
   getProfileFromTextSamples,
 } from '../fixtures/profiles/processed-profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import * as ProfileSelectors from '../../selectors/profile';
+import { selectedThreadSelectors } from 'selectors/per-thread';
+import * as ProfileSelectors from 'selectors/profile';
 import {
   changeSelectedCallNode,
   changeCallTreeSummaryStrategy,

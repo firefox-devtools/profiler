@@ -7,8 +7,8 @@
 import * as React from 'react';
 
 import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { selectedThreadSelectors } from 'selectors/per-thread';
+import { getSelectedThreadIndex } from 'selectors/url-state';
 import { TooltipMarker } from '../tooltip/Marker';
 
 import type { ConnectedProps } from '../../utils/connect';

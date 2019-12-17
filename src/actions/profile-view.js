@@ -4,7 +4,7 @@
 
 // @flow
 import { oneLine } from 'common-tags';
-import { getLastVisibleThreadTabSlug } from '../selectors/app';
+import { getLastVisibleThreadTabSlug } from 'selectors/app';
 import {
   getCounterSelectors,
   getGlobalTracks,
@@ -13,11 +13,11 @@ import {
   getLocalTrackFromReference,
   getGlobalTrackFromReference,
   getPreviewSelection,
-} from '../selectors/profile';
+} from 'selectors/profile';
 import {
   getThreadSelectors,
   selectedThreadSelectors,
-} from '../selectors/per-thread';
+} from 'selectors/per-thread';
 import {
   getImplementationFilter,
   getSelectedThreadIndex,
@@ -26,7 +26,7 @@ import {
   getLocalTrackOrder,
   getHiddenLocalTracks,
   getSelectedTab,
-} from '../selectors/url-state';
+} from 'selectors/url-state';
 import {
   getCallNodePathFromIndex,
   getSampleIndexToCallNodeIndex,

@@ -7,10 +7,10 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render } from 'react-testing-library';
 
-import { getUrlSetupPhase } from '../../selectors/app';
+import { getUrlSetupPhase } from 'selectors/app';
 import UrlManager from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
-import { getDataSource } from '../../selectors/url-state';
+import { getDataSource } from 'selectors/url-state';
 import { waitUntilState } from '../fixtures/utils';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import * as receiveProfile from '../../actions/receive-profile';

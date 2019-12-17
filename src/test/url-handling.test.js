@@ -5,7 +5,7 @@
 // @flow
 
 import { oneLineTrim } from 'common-tags';
-import * as urlStateReducers from '../selectors/url-state';
+import * as urlStateReducers from 'selectors/url-state';
 import {
   changeCallTreeSearchString,
   changeMarkersSearchString,
@@ -30,7 +30,7 @@ import {
   getProfileWithNiceTracks,
 } from './fixtures/profiles/tracks';
 import { getProfileFromTextSamples } from './fixtures/profiles/processed-profile';
-import { selectedThreadSelectors } from '../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 import { uintArrayToString } from '../utils/uintarray-encoding';
 
 function _getStoreWithURL(

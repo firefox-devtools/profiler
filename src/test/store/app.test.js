@@ -4,8 +4,8 @@
 // @flow
 
 import { storeWithSimpleProfile, storeWithProfile } from '../fixtures/stores';
-import * as UrlStateSelectors from '../../selectors/url-state';
-import * as AppSelectors from '../../selectors/app';
+import * as UrlStateSelectors from 'selectors/url-state';
+import * as AppSelectors from 'selectors/app';
 import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { isolateProcess } from '../../actions/profile-view';

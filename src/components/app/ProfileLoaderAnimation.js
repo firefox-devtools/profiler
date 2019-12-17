@@ -8,8 +8,8 @@ import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
 import { ProfileRootMessage } from './ProfileRootMessage';
-import { getView } from '../../selectors/app';
-import { getDataSource } from '../../selectors/url-state';
+import { getView } from 'selectors/app';
+import { getDataSource } from 'selectors/url-state';
 
 import type { AppViewState, State } from '../../types/state';
 import type { DataSource } from '../../types/actions';

@@ -18,9 +18,9 @@ import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
   getPreviewSelection,
   getPreviewSelectionRange,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+} from 'selectors/profile';
+import { selectedThreadSelectors } from 'selectors/per-thread';
+import { getSelectedThreadIndex } from 'selectors/url-state';
 import { changeRightClickedMarker } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';

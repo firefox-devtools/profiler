@@ -21,7 +21,7 @@ import {
   changeSelectedCallNode,
   changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 
 describe('"focus-subtree" transform', function() {
   describe('on a call tree', function() {

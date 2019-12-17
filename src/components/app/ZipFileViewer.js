@@ -21,8 +21,8 @@ import {
   getSelectedZipFileIndex,
   getExpandedZipFileIndexes,
   getZipFileErrorMessage,
-} from '../../selectors/zipped-profiles';
-import { getPathInZipFileFromUrl } from '../../selectors/url-state';
+} from 'selectors/zipped-profiles';
+import { getPathInZipFileFromUrl } from 'selectors/url-state';
 import TreeView from '../shared/TreeView';
 import ProfileViewer from './ProfileViewer';
 

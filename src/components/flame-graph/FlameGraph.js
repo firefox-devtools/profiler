@@ -13,19 +13,19 @@ import {
   getScrollToSelectionGeneration,
   getProfileInterval,
   getPageList,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+} from 'selectors/profile';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 import {
   getSelectedThreadIndex,
   getInvertCallstack,
-} from '../../selectors/url-state';
+} from 'selectors/url-state';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
 } from '../../actions/profile-view';
-import { getIconsWithClassNames } from '../../selectors/icons';
+import { getIconsWithClassNames } from 'selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
 import type { Thread, CategoryList, PageList } from '../../types/profile';

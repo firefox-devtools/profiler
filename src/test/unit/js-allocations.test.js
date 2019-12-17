@@ -14,7 +14,7 @@ import {
   commitRange,
   updatePreviewSelection,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 
 /**
  * Test that the JsAllocationTable structure can by used with all of the call tree

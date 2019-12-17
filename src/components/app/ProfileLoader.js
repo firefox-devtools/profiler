@@ -18,7 +18,7 @@ import {
   getHash,
   getProfileUrl,
   getProfilesToCompare,
-} from '../../selectors/url-state';
+} from 'selectors/url-state';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type { DataSource } from '../../types/actions';

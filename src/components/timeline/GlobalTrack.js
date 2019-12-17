@@ -17,7 +17,7 @@ import {
   getHiddenGlobalTracks,
   getLocalTrackOrder,
   getSelectedTab,
-} from '../../selectors/url-state';
+} from 'selectors/url-state';
 import explicitConnect from '../../utils/connect';
 import {
   getGlobalTracks,
@@ -27,8 +27,8 @@ import {
   getVisualProgress,
   getPerceptualSpeedIndexProgress,
   getContentfulSpeedIndexProgress,
-} from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
+} from 'selectors/profile';
+import { getThreadSelectors } from 'selectors/per-thread';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';

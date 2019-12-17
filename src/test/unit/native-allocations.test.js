@@ -16,7 +16,7 @@ import {
   commitRange,
   updatePreviewSelection,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 import type { CallTreeSummaryStrategy } from '../../types/actions';
 
 /**

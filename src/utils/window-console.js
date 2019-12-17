@@ -4,7 +4,7 @@
 // @flow
 import { stripIndent } from 'common-tags';
 import type { GetState, Dispatch } from '../types/store';
-import selectors from '../selectors';
+import selectors from 'selectors';
 import actions from '../actions';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still

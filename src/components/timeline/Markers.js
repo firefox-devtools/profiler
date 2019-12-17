@@ -11,9 +11,9 @@ import Tooltip from '../tooltip/Tooltip';
 import { TooltipMarker } from '../tooltip/Marker';
 import { markerStyles, overlayFills } from '../../profile-logic/marker-styles';
 import explicitConnect from '../../utils/connect';
-import { getPreviewSelection } from '../../selectors/profile';
-import { getThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getPreviewSelection } from 'selectors/profile';
+import { getThreadSelectors } from 'selectors/per-thread';
+import { getSelectedThreadIndex } from 'selectors/url-state';
 import './Markers.css';
 
 import type { Milliseconds, CssPixels } from '../../types/units';

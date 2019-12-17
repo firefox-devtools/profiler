@@ -12,12 +12,9 @@ import {
 import explicitConnect from '../../utils/connect';
 import JsTracerCanvas from './Canvas';
 
-import {
-  getCommittedRange,
-  getPreviewSelection,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { getCommittedRange, getPreviewSelection } from 'selectors/profile';
+import { selectedThreadSelectors } from 'selectors/per-thread';
+import { getSelectedThreadIndex } from 'selectors/url-state';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 

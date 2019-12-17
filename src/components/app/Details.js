@@ -20,9 +20,9 @@ import JsTracer from '../js-tracer/';
 import selectSidebar from '../sidebar';
 
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
-import { getSelectedTab } from '../../selectors/url-state';
-import { getIsSidebarOpen } from '../../selectors/app';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { getSelectedTab } from 'selectors/url-state';
+import { getIsSidebarOpen } from 'selectors/app';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerContextMenu from '../shared/MarkerContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';

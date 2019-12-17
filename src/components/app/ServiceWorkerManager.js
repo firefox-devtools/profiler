@@ -7,8 +7,8 @@ import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
-import { getDataSource } from '../../selectors/url-state';
-import { getView } from '../../selectors/app';
+import { getDataSource } from 'selectors/url-state';
+import { getView } from 'selectors/app';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type { DataSource } from '../../types/actions';

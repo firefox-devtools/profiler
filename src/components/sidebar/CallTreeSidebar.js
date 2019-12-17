@@ -10,9 +10,9 @@ import explicitConnect from '../../utils/connect';
 import {
   selectedThreadSelectors,
   selectedNodeSelectors,
-} from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { getCategories, getProfileInterval } from '../../selectors/profile';
+} from 'selectors/per-thread';
+import { getSelectedThreadIndex } from 'selectors/url-state';
+import { getCategories, getProfileInterval } from 'selectors/profile';
 import { getFunctionName } from '../../profile-logic/function-info';
 import {
   getFriendlyStackTypeName,

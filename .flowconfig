@@ -2,6 +2,8 @@
 suppress_comment=\\(.\\|\n\\)*\\$FlowExpectError
 suppress_comment=\\(.\\|\n\\)*\\$FlowFixMe
 include_warnings=true
+module.name_mapper='^selectors\/\(.*\)$' -> '<PROJECT_ROOT>/src/selectors/\1'
+module.name_mapper='^selectors$' -> '<PROJECT_ROOT>/src/selectors'
 
 [ignore]
 .*node_modules/.*

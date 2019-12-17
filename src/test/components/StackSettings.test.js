@@ -10,7 +10,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import {
   getImplementationFilter,
   getCurrentSearchString,
-} from '../../selectors/url-state';
+} from 'selectors/url-state';
 
 describe('StackSettings', function() {
   function setup() {

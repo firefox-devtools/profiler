@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getUrlSetupPhase } from '../../selectors/app';
+import { getUrlSetupPhase } from 'selectors/app';
 import {
   updateUrlState,
   startFetchingProfiles,

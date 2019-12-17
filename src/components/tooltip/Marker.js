@@ -16,9 +16,9 @@ import {
   formatValueTotal,
 } from '../../utils/format-numbers';
 import explicitConnect from '../../utils/connect';
-import { getThreadSelectors } from '../../selectors/per-thread';
-import { getImplementationFilter } from '../../selectors/url-state';
-import { getPageList, getZeroAt } from '../../selectors/profile';
+import { getThreadSelectors } from 'selectors/per-thread';
+import { getImplementationFilter } from 'selectors/url-state';
+import { getPageList, getZeroAt } from 'selectors/profile';
 
 import { TooltipNetworkMarker } from './NetworkMarker';
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';

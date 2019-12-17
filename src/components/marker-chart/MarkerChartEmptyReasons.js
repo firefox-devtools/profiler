@@ -6,7 +6,7 @@
 import React, { PureComponent } from 'react';
 
 import EmptyReasons from '../shared/EmptyReasons';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 

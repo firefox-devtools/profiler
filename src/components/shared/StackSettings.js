@@ -15,14 +15,14 @@ import {
   getImplementationFilter,
   getInvertCallstack,
   getCurrentSearchString,
-} from '../../selectors/url-state';
+} from 'selectors/url-state';
 import PanelSearch from '../shared/PanelSearch';
 import {
   toValidImplementationFilter,
   toValidCallTreeSummaryStrategy,
 } from '../../profile-logic/profile-data';
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 
 import './StackSettings.css';
 

@@ -32,9 +32,9 @@ import {
   commitRange,
   changeImplementationFilter,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
-import { getInvertCallstack } from '../../selectors/url-state';
+import { getInvertCallstack } from 'selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 
 import type { CssPixels } from '../../types/units';

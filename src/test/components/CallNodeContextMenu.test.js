@@ -14,7 +14,7 @@ import {
   setContextMenuVisibility,
 } from '../../actions/profile-view';
 import { Provider } from 'react-redux';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 import copy from 'copy-to-clipboard';
 

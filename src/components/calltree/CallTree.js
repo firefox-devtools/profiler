@@ -14,14 +14,14 @@ import {
   getImplementationFilter,
   getSearchStringsAsRegExp,
   getSelectedThreadIndex,
-} from '../../selectors/url-state';
+} from 'selectors/url-state';
 import {
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelection,
-} from '../../selectors/profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getIconsWithClassNames } from '../../selectors/icons';
+} from 'selectors/profile';
+import { selectedThreadSelectors } from 'selectors/per-thread';
+import { getIconsWithClassNames } from 'selectors/icons';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,

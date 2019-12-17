@@ -7,7 +7,7 @@ import React, { PureComponent, Fragment } from 'react';
 import { MenuItem } from 'react-contextmenu';
 import ContextMenu from '../shared/ContextMenu';
 import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 import { getFunctionName } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';
@@ -21,7 +21,7 @@ import {
   getSelectedThreadIndex,
   getImplementationFilter,
   getInvertCallstack,
-} from '../../selectors/url-state';
+} from 'selectors/url-state';
 
 import {
   convertToTransformType,

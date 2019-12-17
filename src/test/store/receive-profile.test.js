@@ -12,11 +12,11 @@ import { getEmptyProfile } from '../../profile-logic/data-structures';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
-import * as ProfileViewSelectors from '../../selectors/profile';
-import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
-import * as UrlStateSelectors from '../../selectors/url-state';
-import { getThreadSelectors } from '../../selectors/per-thread';
-import { getView } from '../../selectors/app';
+import * as ProfileViewSelectors from 'selectors/profile';
+import * as ZippedProfilesSelectors from 'selectors/zipped-profiles';
+import * as UrlStateSelectors from 'selectors/url-state';
+import { getThreadSelectors } from 'selectors/per-thread';
+import { getView } from 'selectors/app';
 import { urlFromState } from '../../app-logic/url-handling';
 import {
   viewProfile,

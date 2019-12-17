@@ -3,8 +3,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getSelectedTab, getDataSource } from '../selectors/url-state';
-import { getTrackThreadHeights } from '../selectors/app';
+import { getSelectedTab, getDataSource } from 'selectors/url-state';
+import { getTrackThreadHeights } from 'selectors/app';
 import { sendAnalytics } from '../utils/analytics';
 import { stateFromLocation } from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';

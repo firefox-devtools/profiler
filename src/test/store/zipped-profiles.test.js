@@ -8,9 +8,9 @@ import {
   storeWithZipFile,
 } from '../fixtures/profiles/zip-file';
 import { procureInitialInterestingExpandedNodes } from '../../profile-logic/zip-files';
-import * as ProfileViewSelectors from '../../selectors/profile';
-import * as ZippedProfilesSelectors from '../../selectors/zipped-profiles';
-import * as UrlStateSelectors from '../../selectors/url-state';
+import * as ProfileViewSelectors from 'selectors/profile';
+import * as ZippedProfilesSelectors from 'selectors/zipped-profiles';
+import * as UrlStateSelectors from 'selectors/url-state';
 import createStore from '../../app-logic/create-store';
 import { ensureExists } from '../../utils/flow';
 import JSZip from 'jszip';

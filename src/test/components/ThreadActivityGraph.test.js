@@ -12,7 +12,7 @@ import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 
 import SelectedThreadActivityGraph from '../../components/shared/thread/SelectedActivityGraph';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
+import { selectedThreadSelectors } from 'selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';

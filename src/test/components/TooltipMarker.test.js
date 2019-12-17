@@ -14,8 +14,8 @@ import {
   getNetworkMarkers,
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
-import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import { selectedThreadSelectors } from 'selectors/per-thread';
+import { getSelectedThreadIndex } from 'selectors/url-state';
 
 describe('TooltipMarker', function() {
   it('renders tooltips for various markers', () => {
