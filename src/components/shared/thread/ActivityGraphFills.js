@@ -70,7 +70,7 @@ export type CategoryDrawStyles = $ReadOnlyArray<{|
   +gravity: number,
   +selectedFillStyle: string,
   +unselectedFillStyle: string,
-  +filteredOutFillStyle: CanvasPattern,
+  +filteredOutByTransformFillStyle: CanvasPattern,
   +selectedTextColor: string,
 |}>;
 
@@ -79,7 +79,8 @@ type SelectedPercentageAtPixelBuffers = {|
   +beforeSelectedPercentageAtPixel: Float32Array,
   +selectedPercentageAtPixel: Float32Array,
   +afterSelectedPercentageAtPixel: Float32Array,
-  +filteredOutPercentageAtPixel: Float32Array,
+  +filteredOutByTransformPercentageAtPixel: Float32Array,
+  +filteredOutByTabPercentageAtPixel: Float32Array,
 |};
 
 const BOX_BLUR_RADII = [3, 2, 2];
@@ -327,8 +328,10 @@ export class ActivityGraphFillComputer {
       return percentageBuffers.selectedPercentageAtPixel;
     }
     switch (samplesSelectedStates[sampleIndex]) {
-      case 'FILTERED_OUT':
-        return percentageBuffers.filteredOutPercentageAtPixel;
+      case 'FILTERED_OUT_BY_TRANSFORM':
+        return percentageBuffers.filteredOutByTransformPercentageAtPixel;
+      case 'FILTERED_OUT_BY_ACTIVE_TAB':
+        return percentageBuffers.filteredOutByTabPercentageAtPixel;
       case 'UNSELECTED_ORDERED_BEFORE_SELECTED':
         return percentageBuffers.beforeSelectedPercentageAtPixel;
       case 'SELECTED':
@@ -605,7 +608,10 @@ function _createSelectedPercentageAtPixelBuffers({
     beforeSelectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
     selectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
     afterSelectedPercentageAtPixel: new Float32Array(canvasPixelWidth),
-    filteredOutPercentageAtPixel: new Float32Array(canvasPixelWidth),
+    filteredOutByTransformPercentageAtPixel: new Float32Array(canvasPixelWidth),
+    // Unlike other fields, we do not mutate that array and we keep that zero
+    // array to indicate that we don't want to draw anything for this case.
+    filteredOutByTabPercentageAtPixel: new Float32Array(canvasPixelWidth),
   }));
 }
 
@@ -616,7 +622,7 @@ function _createSelectedPercentageAtPixelBuffers({
  * 'UNSELECTED_ORDERED_BEFORE_SELECTED',
  * 'SELECTED',
  * 'UNSELECTED_ORDERED_AFTER_SELECTED',
- * 'FILTERED_OUT'
+ * 'FILTERED_OUT_BY_TRANSFORM'
  */
 function _getCategoryFills(
   categoryDrawStyles: CategoryDrawStyles,
@@ -661,8 +667,8 @@ function _getCategoryFills(
         },
         {
           category: categoryDrawStyle.category,
-          fillStyle: categoryDrawStyle.filteredOutFillStyle,
-          perPixelContribution: buffer.filteredOutPercentageAtPixel,
+          fillStyle: categoryDrawStyle.filteredOutByTransformFillStyle,
+          perPixelContribution: buffer.filteredOutByTransformPercentageAtPixel,
           accumulatedUpperEdge: new Float32Array(
             buffer.beforeSelectedPercentageAtPixel.length
           ),

@@ -811,7 +811,12 @@ describe('getSamplesSelectedStates', function() {
 
   it('determines the selection status of all the samples', function() {
     expect(
-      getSamplesSelectedStates(callNodeTable, sampleCallNodes, A_B)
+      getSamplesSelectedStates(
+        callNodeTable,
+        sampleCallNodes,
+        sampleCallNodes,
+        A_B
+      )
     ).toEqual([
       'SELECTED',
       'UNSELECTED_ORDERED_AFTER_SELECTED',
@@ -820,7 +825,12 @@ describe('getSamplesSelectedStates', function() {
       'UNSELECTED_ORDERED_AFTER_SELECTED',
     ]);
     expect(
-      getSamplesSelectedStates(callNodeTable, sampleCallNodes, A_D)
+      getSamplesSelectedStates(
+        callNodeTable,
+        sampleCallNodes,
+        sampleCallNodes,
+        A_D
+      )
     ).toEqual([
       'UNSELECTED_ORDERED_BEFORE_SELECTED',
       'SELECTED',
@@ -829,7 +839,12 @@ describe('getSamplesSelectedStates', function() {
       'SELECTED',
     ]);
     expect(
-      getSamplesSelectedStates(callNodeTable, sampleCallNodes, A_B_F)
+      getSamplesSelectedStates(
+        callNodeTable,
+        sampleCallNodes,
+        sampleCallNodes,
+        A_B_F
+      )
     ).toEqual([
       'UNSELECTED_ORDERED_BEFORE_SELECTED',
       'UNSELECTED_ORDERED_AFTER_SELECTED',
@@ -838,7 +853,12 @@ describe('getSamplesSelectedStates', function() {
       'UNSELECTED_ORDERED_AFTER_SELECTED',
     ]);
     expect(
-      getSamplesSelectedStates(callNodeTable, sampleCallNodes, A_D_E)
+      getSamplesSelectedStates(
+        callNodeTable,
+        sampleCallNodes,
+        sampleCallNodes,
+        A_D_E
+      )
     ).toEqual([
       'UNSELECTED_ORDERED_BEFORE_SELECTED',
       'SELECTED',

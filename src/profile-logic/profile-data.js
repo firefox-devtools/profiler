@@ -182,7 +182,7 @@ export function getSampleIndexToCallNodeIndex(
 /**
  * Go through the samples, and determine their current state.
  *
- * For samples that are neither 'FILTERED_OUT' nor 'SELECTED', this function compares
+ * For samples that are neither 'FILTERED_OUT_*' nor 'SELECTED', this function compares
  * the sample's call node to the selected call node, in tree order. It uses the same
  * ordering as the function compareCallNodes in getTreeOrderComparator. But it does not
  * call compareCallNodes with the selected node for each sample's call node, because doing
@@ -193,6 +193,7 @@ export function getSampleIndexToCallNodeIndex(
 export function getSamplesSelectedStates(
   callNodeTable: CallNodeTable,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
 ): SelectedState[] {
   const result = new Array(sampleCallNodes.length);
@@ -222,11 +223,16 @@ export function getSamplesSelectedStates(
    * Take a call node, and compute its selected state.
    */
   function getSelectedStateFromCallNode(
-    callNode: IndexIntoCallNodeTable | null
+    callNode: IndexIntoCallNodeTable | null,
+    activeTabFilteredCallNode: IndexIntoCallNodeTable | null
   ): SelectedState {
     let callNodeIndex = callNode;
     if (callNodeIndex === null) {
-      return 'FILTERED_OUT';
+      return activeTabFilteredCallNode === null
+        ? // This sample was not part of the active tab.
+          'FILTERED_OUT_BY_ACTIVE_TAB'
+        : // This sample was filtered out in the transform pipeline.
+          'FILTERED_OUT_BY_TRANSFORM';
     }
 
     // When there's no selected call node, we don't want to shadow everything
@@ -289,7 +295,8 @@ export function getSamplesSelectedStates(
     sampleIndex++
   ) {
     result[sampleIndex] = getSelectedStateFromCallNode(
-      sampleCallNodes[sampleIndex]
+      sampleCallNodes[sampleIndex],
+      activeTabFilteredCallNodes[sampleIndex]
     );
   }
   return result;
@@ -1042,13 +1049,15 @@ export function filterThreadByTab(
 
     const frameMatchesFilterCache = new Map();
     function frameMatchesFilter(frame) {
-      let result = frameMatchesFilterCache.get(frame);
-      if (result === undefined) {
-        const innerWindowID = frameTable.innerWindowID[frame];
-        result = innerWindowID && relevantPages.has(innerWindowID);
-        frameMatchesFilterCache.set(frame, result);
+      const cache = frameMatchesFilterCache.get(frame);
+      if (cache !== undefined) {
+        return cache;
       }
-      return result;
+
+      const innerWindowID = frameTable.innerWindowID[frame];
+      const matches = innerWindowID && relevantPages.has(innerWindowID);
+      frameMatchesFilterCache.set(frame, matches);
+      return matches;
     }
 
     const stackMatchesFilterCache = new Map();
@@ -1056,18 +1065,21 @@ export function filterThreadByTab(
       if (stackIndex === null) {
         return false;
       }
-      let result = stackMatchesFilterCache.get(stackIndex);
-      if (result === undefined) {
-        const prefix = stackTable.prefix[stackIndex];
-        if (stackMatchesFilter(prefix)) {
-          result = true;
-        } else {
-          const frame = stackTable.frame[stackIndex];
-          result = frameMatchesFilter(frame);
-        }
-        stackMatchesFilterCache.set(stackIndex, result);
+      const cache = stackMatchesFilterCache.get(stackIndex);
+      if (cache !== undefined) {
+        return cache;
       }
-      return result;
+
+      const prefix = stackTable.prefix[stackIndex];
+      if (stackMatchesFilter(prefix)) {
+        stackMatchesFilterCache.set(stackIndex, true);
+        return true;
+      }
+
+      const frame = stackTable.frame[stackIndex];
+      const matches = frameMatchesFilter(frame);
+      stackMatchesFilterCache.set(stackIndex, matches);
+      return matches;
     }
 
     return updateThreadStacks(thread, stackTable, stackIndex =>
