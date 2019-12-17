@@ -50,6 +50,8 @@ export const getLastSelectedCallTreeSummaryStrategy: Selector<CallTreeSummaryStr
   getProfileSpecificState(state).lastSelectedCallTreeSummaryStrategy;
 export const getInvertCallstack: Selector<boolean> = state =>
   getProfileSpecificState(state).invertCallstack;
+export const getShowUserTimings: Selector<boolean> = state =>
+  getProfileSpecificState(state).showUserTimings;
 export const getShowJsTracerSummary: Selector<boolean> = state =>
   getProfileSpecificState(state).showJsTracerSummary;
 

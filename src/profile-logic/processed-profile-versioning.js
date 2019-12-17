@@ -122,6 +122,111 @@ function _mutateProfileToEnsureCauseBacktraces(profile) {
   }
 }
 
+/**
+ * Guess the marker categories for a profile.
+ */
+function _guessMarkerCategories(profile: Object) {
+  // [key, categoryName]
+  const keyToCategoryName = [
+    ['DOMEvent', 'DOM'],
+    ['Navigation::DOMComplete', 'DOM'],
+    ['Navigation::DOMInteractive', 'DOM'],
+    ['Navigation::Start', 'DOM'],
+    ['UserTiming', 'DOM'],
+
+    ['CC', 'GC / CC'],
+    ['GCMajor', 'GC / CC'],
+    ['GCMinor', 'GC / CC'],
+    ['GCSlice', 'GC / CC'],
+
+    ['Paint', 'Graphics'],
+    ['VsyncTimestamp', 'Graphics'],
+    ['CompositorScreenshot', 'Graphics'],
+
+    ['JS allocation', 'JavaScript'],
+
+    ['Styles', 'Layout'],
+    ['nsRefreshDriver::Tick waiting for paint', 'Layout'],
+
+    ['Navigation', 'Network'],
+    ['Network', 'Network'],
+
+    // Explicitly 'Other'
+    ['firstLoadURI', 'Other'],
+    ['IPC', 'Other'],
+    ['Text', 'Other'],
+    ['MainThreadLongTask', 'Other'],
+    ['FileIO', 'Other'],
+    ['Log', 'Other'],
+    ['PreferenceRead', 'Other'],
+    ['BHR-detected hang', 'Other'],
+    ['MainThreadLongTask', 'Other'],
+  ];
+
+  // Make sure the default categories are present since we may want to refer them.
+  for (const defaultCategory of [
+    { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
+    { name: 'Other', color: 'grey', subcategories: ['Other'] },
+    { name: 'Layout', color: 'purple', subcategories: ['Other'] },
+    { name: 'JavaScript', color: 'yellow', subcategories: ['Other'] },
+    { name: 'GC / CC', color: 'orange', subcategories: ['Other'] },
+    { name: 'Network', color: 'lightblue', subcategories: ['Other'] },
+    { name: 'Graphics', color: 'green', subcategories: ['Other'] },
+    { name: 'DOM', color: 'blue', subcategories: ['Other'] },
+  ]) {
+    const index = profile.meta.categories.findIndex(
+      category => category.name === defaultCategory.name
+    );
+    if (index === -1) {
+      // Add on any unknown categories.
+      profile.meta.categories.push(defaultCategory);
+    }
+  }
+
+  const otherCategory = profile.meta.categories.findIndex(
+    category => category.name === 'Other'
+  );
+
+  const keyToCategoryIndex: Map<string, number> = new Map(
+    keyToCategoryName.map(([key, categoryName]) => {
+      const index = profile.meta.categories.findIndex(
+        category => category.name === categoryName
+      );
+      if (index === -1) {
+        throw new Error('Could not find a category index to map to.');
+      }
+      return [key, index];
+    })
+  );
+
+  for (const thread of profile.threads) {
+    const { markers, stringArray } = thread;
+    if (!markers.category) {
+      // Only create the category if it's needed.
+      markers.category = [];
+    }
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      if (typeof markers.category[markerIndex] === 'number') {
+        // This marker already has a category, skip it.
+        break;
+      }
+      const nameIndex = markers.name[markerIndex];
+      const data = markers.data[markerIndex];
+
+      let key: string = stringArray[nameIndex];
+      if (data && data.type) {
+        key = data.type === 'tracing' ? data.category : data.type;
+      }
+      let categoryIndex = keyToCategoryIndex.get(key);
+      if (categoryIndex === undefined) {
+        categoryIndex = otherCategory;
+      }
+
+      markers.category[markerIndex] = categoryIndex;
+    }
+  }
+}
+
 // _upgraders[i] converts from version i - 1 to version i.
 // Every "upgrader" takes the profile as its single argument and mutates it.
 /* eslint-disable no-useless-computed-key */
@@ -964,99 +1069,7 @@ const _upgraders = {
   },
   [24]: profile => {
     // Markers now have a category field. For older profiles, guess the marker category.
-
-    // [key, categoryName]
-    const keyToCategoryName = [
-      ['DOMEvent', 'DOM'],
-      ['Navigation::DOMComplete', 'DOM'],
-      ['Navigation::DOMInteractive', 'DOM'],
-      ['Navigation::Start', 'DOM'],
-      ['UserTiming', 'DOM'],
-
-      ['CC', 'GC / CC'],
-      ['GCMajor', 'GC / CC'],
-      ['GCMinor', 'GC / CC'],
-      ['GCSlice', 'GC / CC'],
-
-      ['Paint', 'Graphics'],
-      ['VsyncTimestamp', 'Graphics'],
-      ['CompositorScreenshot', 'Graphics'],
-
-      ['JS allocation', 'JavaScript'],
-
-      ['Styles', 'Layout'],
-      ['nsRefreshDriver::Tick waiting for paint', 'Layout'],
-
-      ['Navigation', 'Network'],
-      ['Network', 'Network'],
-
-      // Explicitly 'Other'
-      ['firstLoadURI', 'Other'],
-      ['IPC', 'Other'],
-      ['Text', 'Other'],
-      ['MainThreadLongTask', 'Other'],
-      ['FileIO', 'Other'],
-      ['Log', 'Other'],
-      ['PreferenceRead', 'Other'],
-      ['BHR-detected hang', 'Other'],
-      ['MainThreadLongTask', 'Other'],
-    ];
-
-    // Make sure the default categories are present since we may want to refer them.
-    for (const defaultCategory of [
-      { name: 'Idle', color: 'transparent', subcategories: ['Other'] },
-      { name: 'Other', color: 'grey', subcategories: ['Other'] },
-      { name: 'Layout', color: 'purple', subcategories: ['Other'] },
-      { name: 'JavaScript', color: 'yellow', subcategories: ['Other'] },
-      { name: 'GC / CC', color: 'orange', subcategories: ['Other'] },
-      { name: 'Network', color: 'lightblue', subcategories: ['Other'] },
-      { name: 'Graphics', color: 'green', subcategories: ['Other'] },
-      { name: 'DOM', color: 'blue', subcategories: ['Other'] },
-    ]) {
-      const index = profile.meta.categories.findIndex(
-        category => category.name === defaultCategory.name
-      );
-      if (index === -1) {
-        // Add on any unknown categories.
-        profile.meta.categories.push(defaultCategory);
-      }
-    }
-
-    const otherCategory = profile.meta.categories.findIndex(
-      category => category.name === 'Other'
-    );
-
-    const keyToCategoryIndex: Map<string, number> = new Map(
-      keyToCategoryName.map(([key, categoryName]) => {
-        const index = profile.meta.categories.findIndex(
-          category => category.name === categoryName
-        );
-        if (index === -1) {
-          throw new Error('Could not find a category index to map to.');
-        }
-        return [key, index];
-      })
-    );
-
-    for (const thread of profile.threads) {
-      const { markers, stringArray } = thread;
-      markers.category = [];
-      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
-        const nameIndex = markers.name[markerIndex];
-        const data = markers.data[markerIndex];
-
-        let key: string = stringArray[nameIndex];
-        if (data && data.type) {
-          key = data.type === 'tracing' ? data.category : data.type;
-        }
-        let categoryIndex = keyToCategoryIndex.get(key);
-        if (categoryIndex === undefined) {
-          categoryIndex = otherCategory;
-        }
-
-        markers.category[markerIndex] = categoryIndex;
-      }
-    }
+    _guessMarkerCategories(profile);
   },
   [25]: profile => {
     // Previously, we had DocShell ID and DocShell History ID in the page object
@@ -1155,6 +1168,17 @@ const _upgraders = {
     for (const thread of profile.threads) {
       const { frameTable } = thread;
       frameTable.innerWindowID = new Array(frameTable.length).fill(0);
+    }
+  },
+  [28]: profile => {
+    // There was a bug where some markers got a null category during sanitization.
+    for (const thread of profile.threads) {
+      const { markers } = thread;
+      if (markers.category[0] === null) {
+        // This profile contains null markers, guess them here to fix it.
+        _guessMarkerCategories(profile);
+        return;
+      }
     }
   },
 };
