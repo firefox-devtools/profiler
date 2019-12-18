@@ -110,10 +110,14 @@ describe('Viewport', function() {
       expect(isTimerVisible()).toBe(false);
     });
 
+    // testScrollingHint has assertions.
+    // eslint-disable-next-line jest/expect-expect
     it('will not show a ctrl scrolling hint after zooming once', function() {
       testScrollingHint({ ctrlKey: true });
     });
 
+    // testScrollingHint has assertions.
+    // eslint-disable-next-line jest/expect-expect
     it('will not show a shift scrolling hint after zooming once', function() {
       testScrollingHint({ shiftKey: true });
     });

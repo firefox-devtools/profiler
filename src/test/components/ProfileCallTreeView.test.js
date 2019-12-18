@@ -483,6 +483,9 @@ describe('calltree/ProfileCallTreeView TransformNavigator', () => {
 });
 
 describe('ProfileCallTreeView/end-to-end', () => {
+  // This next test explicitly does not have an assertion, disable the eslint rule
+  // requiring one.
+  // eslint-disable-next-line jest/expect-expect
   it('can display a gecko profile without crashing', () => {
     const geckoProfile = createGeckoProfile();
     const processedProfile = processProfile(geckoProfile);
