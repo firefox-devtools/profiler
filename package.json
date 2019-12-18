@@ -93,6 +93,7 @@
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.3.1",
     "babel-loader": "^8.0.5",
+    "babel-plugin-module-resolver": "^4.0.0",
     "browserslist": "^4.6.6",
     "caniuse-lite": "^1.0.30000989",
     "circular-dependency-plugin": "^5.0.2",

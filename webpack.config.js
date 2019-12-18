@@ -18,7 +18,6 @@ const config = {
       'redux-devtools/lib': path.join(__dirname, '..', '..', 'src'),
       'redux-devtools': path.join(__dirname, '..', '..', 'src'),
       react: path.join(__dirname, 'node_modules', 'react'),
-      selectors: path.join(__dirname, 'src', 'selectors'),
     },
     extensions: ['.js', '.wasm'],
   },
