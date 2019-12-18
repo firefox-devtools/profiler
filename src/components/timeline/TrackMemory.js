@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getCommittedRange, getCounterSelectors } from 'selectors/profile';
+import { getCommittedRange, getCounterSelectors } from 'selectors';
 import { TimelineMarkersMemory } from './Markers';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { TrackMemoryGraph } from './TrackMemoryGraph';

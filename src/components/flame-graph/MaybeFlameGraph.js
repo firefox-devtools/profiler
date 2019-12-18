@@ -5,8 +5,7 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getInvertCallstack } from 'selectors/url-state';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { getInvertCallstack, selectedThread } from 'selectors';
 import { changeInvertCallstack } from '../../actions/profile-view';
 import FlameGraphEmptyReasons from './FlameGraphEmptyReasons';
 import FlameGraph from './FlameGraph';
@@ -60,9 +59,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       invertCallstack: getInvertCallstack(state),
-      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
-        state
-      ),
+      maxStackDepth: selectedThread.getCallNodeMaxDepthForFlameGraph(state),
     };
   },
   mapDispatchToProps: {

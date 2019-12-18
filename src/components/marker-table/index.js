@@ -10,9 +10,12 @@ import memoize from 'memoize-immutable';
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import MarkerTableEmptyReasons from './MarkerTableEmptyReasons';
-import { getZeroAt, getScrollToSelectionGeneration } from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
-import { getSelectedThreadIndex } from 'selectors/url-state';
+import {
+  getZeroAt,
+  getScrollToSelectionGeneration,
+  selectedThread,
+  getSelectedThreadIndex,
+} from 'selectors';
 import {
   changeSelectedMarker,
   changeRightClickedMarker,
@@ -234,14 +237,10 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    getMarker: selectedThreadSelectors.getMarkerGetter(state),
-    markerIndexes: selectedThreadSelectors.getPreviewFilteredMarkerIndexes(
-      state
-    ),
-    selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
-    rightClickedMarker: selectedThreadSelectors.getRightClickedMarkerIndex(
-      state
-    ),
+    getMarker: selectedThread.getMarkerGetter(state),
+    markerIndexes: selectedThread.getPreviewFilteredMarkerIndexes(state),
+    selectedMarker: selectedThread.getSelectedMarkerIndex(state),
+    rightClickedMarker: selectedThread.getRightClickedMarkerIndex(state),
     zeroAt: getZeroAt(state),
   }),
   mapDispatchToProps: { changeSelectedMarker, changeRightClickedMarker },

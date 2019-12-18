@@ -12,11 +12,7 @@ import { getEmptyProfile } from '../../profile-logic/data-structures';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
-import * as ProfileViewSelectors from 'selectors/profile';
-import * as ZippedProfilesSelectors from 'selectors/zipped-profiles';
-import * as UrlStateSelectors from 'selectors/url-state';
-import { getThreadSelectors } from 'selectors/per-thread';
-import { getView } from 'selectors/app';
+import * as selectors from 'selectors';
 import { urlFromState } from '../../app-logic/url-handling';
 import {
   viewProfile,
@@ -106,28 +102,26 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
 
       expect(() => {
-        ProfileViewSelectors.getProfile(store.getState());
+        selectors.getProfile(store.getState());
       }).toThrow();
 
-      const initialProfile = ProfileViewSelectors.getProfileOrNull(
-        store.getState()
-      );
+      const initialProfile = selectors.getProfileOrNull(store.getState());
       expect(initialProfile).toBeNull();
       const profile = _getSimpleProfile();
       store.dispatch(viewProfile(profile));
-      expect(ProfileViewSelectors.getProfile(store.getState())).toBe(profile);
+      expect(selectors.getProfile(store.getState())).toBe(profile);
     });
 
     it('will be a fatal error if a profile has no threads', function() {
       const store = blankStore();
-      expect(getView(store.getState()).phase).toBe('INITIALIZING');
+      expect(selectors.getView(store.getState()).phase).toBe('INITIALIZING');
       const emptyProfile = getEmptyProfile();
 
       // Stop console.error from spitting out an error message:
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
       store.dispatch(viewProfile(emptyProfile));
-      expect(getView(store.getState()).phase).toBe('FATAL_ERROR');
+      expect(selectors.getView(store.getState()).phase).toBe('FATAL_ERROR');
       expect(spy).toHaveBeenCalled();
     });
 
@@ -408,8 +402,8 @@ describe('actions/receive-profile', function() {
         await dispatch(retrieveProfileFromAddon());
 
         const state = getState();
-        expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-        expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+        expect(selectors.getView(state)).toEqual({ phase: 'DATA_LOADED' });
+        expect(selectors.getCommittedRange(state)).toEqual({
           start: 0,
           // The end can be computed as the sum of:
           // - difference of the starts of the subprocess and the main process (1000)
@@ -418,7 +412,7 @@ describe('actions/receive-profile', function() {
           end: 1007,
         });
         // not empty
-        expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3);
+        expect(selectors.getProfile(state).threads).toHaveLength(3);
       });
     }
 
@@ -451,7 +445,7 @@ describe('actions/receive-profile', function() {
         jest.advanceTimersByTime(30000);
         return dispatchResultPromise;
       });
-      const views = states.map(state => getView(state));
+      const views = states.map(state => selectors.getView(state));
 
       const errorMessage =
         'We were unable to connect to the Gecko profiler add-on within thirty seconds. This might be because the profile is big or your machine is slower than usual. Still waiting...';
@@ -466,12 +460,12 @@ describe('actions/receive-profile', function() {
       ]);
 
       const state = store.getState();
-      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+      expect(selectors.getView(state)).toEqual({ phase: 'DATA_LOADED' });
+      expect(selectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1007, // see the above test for more explanation on this value
       });
-      expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
+      expect(selectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
   });
 
@@ -517,12 +511,12 @@ describe('actions/receive-profile', function() {
       await store.dispatch(retrieveProfileFromStore(hash));
 
       const state = store.getState();
-      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+      expect(selectors.getView(state)).toEqual({ phase: 'DATA_LOADED' });
+      expect(selectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
+      expect(selectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
     it('symbolicates a profile if it is not symbolicated yet', async () => {
@@ -571,7 +565,7 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
       const views = (await observeStoreStateChanges(store, () =>
         store.dispatch(retrieveProfileFromStore(hash))
-      )).map(state => getView(state));
+      )).map(state => selectors.getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -588,11 +582,11 @@ describe('actions/receive-profile', function() {
       ]);
 
       const state = store.getState();
-      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+      expect(selectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
+      expect(selectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
     it('fails in case the profile cannot be found after several tries', async function() {
@@ -600,7 +594,7 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
       const views = (await observeStoreStateChanges(store, () =>
         store.dispatch(retrieveProfileFromStore(hash))
-      )).map(state => getView(state));
+      )).map(state => selectors.getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -624,7 +618,7 @@ describe('actions/receive-profile', function() {
 
       const store = blankStore();
       await store.dispatch(retrieveProfileFromStore(hash));
-      expect(getView(store.getState())).toEqual({
+      expect(selectors.getView(store.getState())).toEqual({
         phase: 'FATAL_ERROR',
         error: expect.any(Error),
       });
@@ -671,12 +665,12 @@ describe('actions/receive-profile', function() {
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
 
       const state = store.getState();
-      expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
-      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+      expect(selectors.getView(state)).toEqual({ phase: 'DATA_LOADED' });
+      expect(selectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
+      expect(selectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
     it('requests several times in case of 403', async function() {
@@ -693,7 +687,7 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
       const views = (await observeStoreStateChanges(store, () =>
         store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
-      )).map(state => getView(state));
+      )).map(state => selectors.getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -710,11 +704,11 @@ describe('actions/receive-profile', function() {
       ]);
 
       const state = store.getState();
-      expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
+      expect(selectors.getCommittedRange(state)).toEqual({
         start: 0,
         end: 1,
       });
-      expect(ProfileViewSelectors.getProfile(state).threads.length).toBe(1); // not empty
+      expect(selectors.getProfile(state).threads.length).toBe(1); // not empty
     });
 
     it('fails in case the profile cannot be found after several tries', async function() {
@@ -722,7 +716,7 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
       const views = (await observeStoreStateChanges(store, () =>
         store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
-      )).map(state => getView(state));
+      )).map(state => selectors.getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -746,7 +740,7 @@ describe('actions/receive-profile', function() {
 
       const store = blankStore();
       await store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl));
-      expect(getView(store.getState())).toEqual({
+      expect(selectors.getView(store.getState())).toEqual({
         phase: 'FATAL_ERROR',
         error: expect.any(Error),
       });
@@ -985,7 +979,7 @@ describe('actions/receive-profile', function() {
       const file = mockFile(mockFileOptions);
       const { dispatch, getState } = blankStore();
       await dispatch(retrieveProfileFromFile(file, mockFileReader));
-      const view = getView(getState());
+      const view = selectors.getView(getState());
       return { getState, dispatch, view };
     }
 
@@ -998,7 +992,7 @@ describe('actions/receive-profile', function() {
         payload: serializeProfile(profile),
       });
       expect(view.phase).toBe('DATA_LOADED');
-      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+      expect(selectors.getProfile(getState()).meta.product).toEqual(
         'JSON Test'
       );
     });
@@ -1039,7 +1033,7 @@ describe('actions/receive-profile', function() {
         payload: serializeProfile(profile),
       });
       expect(view.phase).toBe('DATA_LOADED');
-      expect(ProfileViewSelectors.getProfile(getState()).meta.product).toEqual(
+      expect(selectors.getProfile(getState()).meta.product).toEqual(
         'JSON Test'
       );
     });
@@ -1092,7 +1086,7 @@ describe('actions/receive-profile', function() {
         serializeProfile(_getSimpleProfile())
       );
       expect(view.phase).toBe('DATA_LOADED');
-      const zipInStore = ZippedProfilesSelectors.getZipFile(getState());
+      const zipInStore = selectors.getZipFile(getState());
       if (zipInStore === null) {
         throw new Error('Expected zipInStore to exist.');
       }
@@ -1105,16 +1099,14 @@ describe('actions/receive-profile', function() {
         serializeProfile(_getSimpleProfile())
       );
 
-      expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
+      expect(selectors.getZipFileState(getState()).phase).toEqual(
         'LIST_FILES_IN_ZIP_FILE'
       );
       await dispatch(viewProfileFromPathInZipFile('profile.json'));
-      expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
+      expect(selectors.getZipFileState(getState()).phase).toEqual(
         'VIEW_PROFILE_IN_ZIP_FILE'
       );
-      const errorMessage = ZippedProfilesSelectors.getZipFileErrorMessage(
-        getState()
-      );
+      const errorMessage = selectors.getZipFileErrorMessage(getState());
       expect(errorMessage).toEqual(null);
     });
 
@@ -1124,27 +1116,23 @@ describe('actions/receive-profile', function() {
         serializeProfile(getEmptyProfile())
       );
 
-      expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
+      expect(selectors.getZipFileState(getState()).phase).toEqual(
         'LIST_FILES_IN_ZIP_FILE'
       );
-      expect(
-        ZippedProfilesSelectors.getZipFileErrorMessage(getState())
-      ).toEqual(null);
+      expect(selectors.getZipFileErrorMessage(getState())).toEqual(null);
 
       // Stop console.error from spitting out an error message:
       jest.spyOn(console, 'error').mockImplementation(() => {});
 
       await dispatch(viewProfileFromPathInZipFile('profile.json'));
 
-      expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
+      expect(selectors.getZipFileState(getState()).phase).toEqual(
         'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE'
       );
-      expect(ZippedProfilesSelectors.getZipFileState(getState()).phase).toEqual(
+      expect(selectors.getZipFileState(getState()).phase).toEqual(
         'FAILED_TO_PROCESS_PROFILE_FROM_ZIP_FILE'
       );
-      const errorMessage = ZippedProfilesSelectors.getZipFileErrorMessage(
-        getState()
-      );
+      const errorMessage = selectors.getZipFileErrorMessage(getState());
       expect(typeof errorMessage).toEqual('string');
       expect(errorMessage).toMatchSnapshot();
     });
@@ -1280,14 +1268,14 @@ describe('actions/receive-profile', function() {
 
       // To find stupid mistakes more easily, check that we didn't get a fatal
       // error here. If we got one, let's rethrow the error.
-      const view = getView(getState());
+      const view = selectors.getView(getState());
       if (view.phase === 'FATAL_ERROR') {
         throw view.error;
       }
 
-      const resultProfile = ProfileViewSelectors.getProfile(getState());
-      const globalTracks = ProfileViewSelectors.getGlobalTracks(getState());
-      const rootRange = ProfileViewSelectors.getProfileRootRange(getState());
+      const resultProfile = selectors.getProfile(getState());
+      const globalTracks = selectors.getGlobalTracks(getState());
+      const rootRange = selectors.getProfileRootRange(getState());
       return {
         profile1,
         profile2,
@@ -1382,7 +1370,7 @@ describe('actions/receive-profile', function() {
         urlSearch2: 'thread=1&implementation=js',
       });
 
-      expect(UrlStateSelectors.getImplementationFilter(getState())).toBe('js');
+      expect(selectors.getImplementationFilter(getState())).toBe('js');
     });
 
     it('does not reuse the implementation information if one profile used it', async function() {
@@ -1391,9 +1379,7 @@ describe('actions/receive-profile', function() {
         urlSearch2: 'thread=1',
       });
 
-      expect(UrlStateSelectors.getImplementationFilter(getState())).not.toBe(
-        'js'
-      );
+      expect(selectors.getImplementationFilter(getState())).not.toBe('js');
     });
 
     it('reuses transforms', async function() {
@@ -1402,7 +1388,7 @@ describe('actions/receive-profile', function() {
         urlSearch2: 'thread=1',
       });
 
-      expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
+      expect(selectors.getTransformStack(getState(), 0)).toEqual([
         {
           type: 'focus-function',
           funcIndex: 42,
@@ -1421,7 +1407,7 @@ describe('actions/receive-profile', function() {
       });
 
       expect(resultProfile.threads).toHaveLength(3);
-      const selectors = getThreadSelectors(2);
+      const selectors = selectors.getThreadSelectors(2);
       const callTree = selectors.getCallTree(getState());
       const [firstChild] = callTree.getRoots();
       const nodeData = callTree.getNodeData(firstChild);
@@ -1471,18 +1457,21 @@ describe('actions/receive-profile', function() {
 
       // To find stupid mistakes more easily, check that we didn't get a fatal
       // error here. If we got one, let's rethrow the error.
-      const view = getView(store.getState());
+      const view = selectors.getView(store.getState());
       if (view.phase === 'FATAL_ERROR') {
         throw view.error;
       }
 
       const waitUntilPhase = phase =>
-        waitUntilState(store, state => getView(state).phase === phase);
+        waitUntilState(
+          store,
+          state => selectors.getView(state).phase === phase
+        );
 
       const waitUntilSymbolication = () =>
         waitUntilState(
           store,
-          state => ProfileViewSelectors.getSymbolicationStatus(state) === 'DONE'
+          state => selectors.getSymbolicationStatus(state) === 'DONE'
         );
 
       return {
@@ -1517,12 +1506,12 @@ describe('actions/receive-profile', function() {
       });
 
       // Check if we loaded the profile data successfully.
-      expect(ProfileViewSelectors.getProfile(getState())).toEqual(profile);
-      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+      expect(selectors.getProfile(getState())).toEqual(profile);
+      expect(selectors.getView(getState()).phase).toBe('PROFILE_LOADED');
 
       // Check if we can successfully finalize the profile view.
       await dispatch(finalizeProfileView());
-      expect(getView(getState()).phase).toBe('DATA_LOADED');
+      expect(selectors.getView(getState()).phase).toBe('DATA_LOADED');
     });
 
     it('retrieves profile from a `from-url` data source and loads it', async function() {
@@ -1534,12 +1523,12 @@ describe('actions/receive-profile', function() {
       });
 
       // Check if we loaded the profile data successfully.
-      expect(ProfileViewSelectors.getProfile(getState())).toEqual(profile);
-      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+      expect(selectors.getProfile(getState())).toEqual(profile);
+      expect(selectors.getView(getState()).phase).toBe('PROFILE_LOADED');
 
       // Check if we can successfully finalize the profile view.
       await dispatch(finalizeProfileView());
-      expect(getView(getState()).phase).toBe('DATA_LOADED');
+      expect(selectors.getView(getState()).phase).toBe('DATA_LOADED');
     });
 
     it('keeps the `from-url` value in the URL', async function() {
@@ -1551,7 +1540,7 @@ describe('actions/receive-profile', function() {
       });
       await dispatch(finalizeProfileView());
       const [, fromAddon, urlString] = urlFromState(
-        UrlStateSelectors.getUrlState(getState())
+        selectors.getUrlState(getState())
       ).split('/');
       expect(fromAddon).toEqual('from-url');
       expect(urlString).toEqual('https%3A%2F%2Ffakeurl.com%2Ffakeprofile.json');
@@ -1573,11 +1562,11 @@ describe('actions/receive-profile', function() {
       );
 
       // Check if we loaded the profile data successfully.
-      expect(getView(getState()).phase).toBe('PROFILE_LOADED');
+      expect(selectors.getView(getState()).phase).toBe('PROFILE_LOADED');
 
       // Check if we can successfully finalize the profile view.
       await dispatch(finalizeProfileView());
-      expect(getView(getState()).phase).toBe('DATA_LOADED');
+      expect(selectors.getView(getState()).phase).toBe('DATA_LOADED');
     });
 
     it('retrieves profile from a `from-addon` data source and loads it', async function() {
@@ -1594,9 +1583,7 @@ describe('actions/receive-profile', function() {
       // we don't need to call it again.
       await waitUntilPhase('DATA_LOADED');
       const processedProfile = processProfile(geckoProfile);
-      expect(ProfileViewSelectors.getProfile(getState())).toEqual(
-        processedProfile
-      );
+      expect(selectors.getProfile(getState())).toEqual(processedProfile);
     });
 
     it('finishes symbolication for `from-addon` data source', async function() {

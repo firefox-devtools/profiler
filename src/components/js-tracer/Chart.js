@@ -12,9 +12,12 @@ import {
 import explicitConnect from '../../utils/connect';
 import JsTracerCanvas from './Canvas';
 
-import { getCommittedRange, getPreviewSelection } from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
-import { getSelectedThreadIndex } from 'selectors/url-state';
+import {
+  getCommittedRange,
+  getPreviewSelection,
+  selectedThread,
+  getSelectedThreadIndex,
+} from 'selectors';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 
@@ -130,13 +133,13 @@ const JsTracerExpensiveChart = explicitConnect<
 >({
   mapStateToProps: (state, ownProps) => ({
     timeRange: getCommittedRange(state),
-    stringTable: selectedThreadSelectors.getStringTable(state),
+    stringTable: selectedThread.getStringTable(state),
     threadIndex: getSelectedThreadIndex(state),
     previewSelection: getPreviewSelection(state),
     jsTracerTimingRows: ensureExists(
       ownProps.showJsTracerSummary
-        ? selectedThreadSelectors.getExpensiveJsTracerLeafTiming(state)
-        : selectedThreadSelectors.getExpensiveJsTracerTiming(state),
+        ? selectedThread.getExpensiveJsTracerLeafTiming(state)
+        : selectedThread.getExpensiveJsTracerTiming(state),
       'The JS tracer information must exist when mounting this component'
     ),
   }),

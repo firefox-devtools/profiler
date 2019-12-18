@@ -16,8 +16,6 @@ import {
   getProfile,
   getProfileRootRange,
   getHasPreferenceMarkers,
-} from 'selectors/profile';
-import {
   getCheckedSharingOptions,
   getFilenameString,
   getDownloadSize,
@@ -26,7 +24,7 @@ import {
   getUploadProgressString,
   getUploadError,
   getShouldSanitizeByDefault,
-} from 'selectors/publish';
+} from 'selectors';
 import { BlobUrlLink } from '../../shared/BlobUrlLink';
 import { assertExhaustiveCheck } from '../../../utils/flow';
 

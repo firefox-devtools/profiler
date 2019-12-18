@@ -14,8 +14,7 @@ import {
   getNetworkMarkers,
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
-import { getSelectedThreadIndex } from 'selectors/url-state';
+import { selectedThread, getSelectedThreadIndex } from 'selectors';
 
 describe('TooltipMarker', function() {
   it('renders tooltips for various markers', () => {
@@ -391,10 +390,8 @@ describe('TooltipMarker', function() {
     const store = storeWithProfile(profile);
     const state = store.getState();
     const threadIndex = getSelectedThreadIndex(state);
-    const getMarker = selectedThreadSelectors.getMarkerGetter(state);
-    const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
-      state
-    );
+    const getMarker = selectedThread.getMarkerGetter(state);
+    const markerIndexes = selectedThread.getFullMarkerListIndexes(state);
 
     markerIndexes.forEach(markerIndex => {
       const marker = getMarker(markerIndex);
@@ -427,10 +424,8 @@ describe('TooltipMarker', function() {
     const store = storeWithProfile(profile);
     const state = store.getState();
 
-    const getMarker = selectedThreadSelectors.getMarkerGetter(state);
-    const markerIndexes = selectedThreadSelectors.getFullMarkerListIndexes(
-      state
-    );
+    const getMarker = selectedThread.getMarkerGetter(state);
+    const markerIndexes = selectedThread.getFullMarkerListIndexes(state);
 
     // We render the first marker.
     const marker = getMarker(markerIndexes[0]);

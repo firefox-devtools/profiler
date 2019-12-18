@@ -21,7 +21,7 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
 
@@ -63,7 +63,7 @@ describe('VerticalIndicators', function() {
 
   it('creates the vertical indicators', function() {
     const { getIndicatorLines, getState } = setup();
-    const markerIndexes = selectedThreadSelectors.getTimelineVerticalMarkerIndexes(
+    const markerIndexes = selectedThread.getTimelineVerticalMarkerIndexes(
       getState()
     );
     const markerCount = 5;

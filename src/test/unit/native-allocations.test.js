@@ -16,7 +16,7 @@ import {
   commitRange,
   updatePreviewSelection,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 import type { CallTreeSummaryStrategy } from '../../types/actions';
 
 /**
@@ -42,7 +42,7 @@ describe('Native allocation call trees', function() {
   describe('with balanced allocations', function() {
     it('can create a call tree from allocations only', function() {
       const { getState } = setup('balanced', 'native-allocations');
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
 
       expect(formatTree(callTree)).toEqual([
         '- A (total: 56, self: —)',
@@ -59,7 +59,7 @@ describe('Native allocation call trees', function() {
 
     it('can create a call tree from deallocations only', function() {
       const { getState } = setup('balanced', 'native-deallocations');
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
 
       expect(formatTree(callTree)).toEqual([
         '- A (total: -86, self: —)',
@@ -76,7 +76,7 @@ describe('Native allocation call trees', function() {
 
     it('can create a call tree from retained allocations', function() {
       const { getState } = setup('balanced', 'native-retained-allocations');
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
 
       expect(formatTree(callTree)).toEqual([
         '- A (total: 41, self: —)',
@@ -95,7 +95,7 @@ describe('Native allocation call trees', function() {
   describe('with unbalanced allocations', function() {
     it('can create a call tree from allocations only', function() {
       const { getState } = setup('unbalanced', 'native-allocations');
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
 
       expect(formatTree(callTree)).toEqual([
         '- A (total: 15, self: —)',
@@ -112,7 +112,7 @@ describe('Native allocation call trees', function() {
 
     it('can create a call tree from deallocations only', function() {
       const { getState } = setup('unbalanced', 'native-deallocations');
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
 
       expect(formatTree(callTree)).toEqual([
         '- A (total: -41, self: —)',
@@ -130,7 +130,7 @@ describe('Native allocation call trees', function() {
     it('cannot create a call tree from retained allocations', function() {
       const { getState } = setup('unbalanced', 'native-retained-allocations');
       expect(() => {
-        selectedThreadSelectors.getCallTree(getState());
+        selectedThread.getCallTree(getState());
       }).toThrow();
     });
   });
@@ -138,7 +138,7 @@ describe('Native allocation call trees', function() {
   it('can search the allocations', function() {
     const { getState, dispatch } = setup('balanced', 'native-allocations');
     dispatch(changeCallTreeSearchString('Hjs'));
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- A (total: 24, self: —)',
@@ -153,7 +153,7 @@ describe('Native allocation call trees', function() {
   it('can invert the allocation tree', function() {
     const { getState, dispatch } = setup('balanced', 'native-allocations');
     dispatch(changeInvertCallstack(true));
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- I (total: 24, self: 24)',
@@ -177,7 +177,7 @@ describe('Native allocation call trees', function() {
   it('can use an implementation filter', function() {
     const { getState, dispatch } = setup('balanced', 'native-allocations');
     dispatch(changeImplementationFilter('js'));
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- Fjs (total: 42, self: —)',
@@ -190,7 +190,7 @@ describe('Native allocation call trees', function() {
     const { getState, dispatch } = setup('balanced', 'native-allocations');
 
     dispatch(commitRange(0, 1.5));
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- A (total: 8, self: —)',
@@ -215,7 +215,7 @@ describe('Native allocation call trees', function() {
         selectionEnd: 1,
       })
     );
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- A (total: 3, self: —)',

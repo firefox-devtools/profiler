@@ -10,11 +10,11 @@ import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
 import type { RemoveProfileInformation } from '../../types/profile-derived';
 import { storeWithProfile } from '../fixtures/stores';
-import { getHasPreferenceMarkers } from 'selectors/profile';
 import {
+  getHasPreferenceMarkers,
   getCheckedSharingOptions,
   getRemoveProfileInformation,
-} from 'selectors/publish';
+} from 'selectors';
 import { toggleCheckedSharingOptions } from '../../actions/publish';
 
 describe('sanitizePII', function() {

@@ -14,7 +14,7 @@ import {
   commitRange,
   updatePreviewSelection,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 
 /**
  * Test that the JsAllocationTable structure can by used with all of the call tree
@@ -32,7 +32,7 @@ describe('JS allocation call trees', function() {
 
   it('can create a call tree from JS allocations', function() {
     const { getState } = setup();
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- A (total: 15, self: —)',
@@ -50,7 +50,7 @@ describe('JS allocation call trees', function() {
   it('can search the allocations', function() {
     const { getState, dispatch } = setup();
     dispatch(changeCallTreeSearchString('H'));
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- A (total: 7, self: —)',
@@ -65,7 +65,7 @@ describe('JS allocation call trees', function() {
   it('can invert the allocation tree', function() {
     const { getState, dispatch } = setup();
     dispatch(changeInvertCallstack(true));
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- I (total: 7, self: 7)',
@@ -89,7 +89,7 @@ describe('JS allocation call trees', function() {
   it('can use an implementation filter', function() {
     const { getState, dispatch } = setup();
     dispatch(changeImplementationFilter('js'));
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- Fjs (total: 12, self: —)',
@@ -117,7 +117,7 @@ describe('JS allocation call trees', function() {
       })
     );
 
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- A (total: 15, self: —)',
@@ -135,7 +135,7 @@ describe('JS allocation call trees', function() {
     const { getState, dispatch } = setup();
 
     dispatch(commitRange(0, 1.5));
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- A (total: 8, self: —)',
@@ -160,7 +160,7 @@ describe('JS allocation call trees', function() {
         selectionEnd: 1,
       })
     );
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       '- A (total: 3, self: —)',

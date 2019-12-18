@@ -8,8 +8,7 @@ import ZipFileViewer from '../../components/app/ZipFileViewer';
 import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 
-import * as UrlStateSelectors from 'selectors/url-state';
-import * as ZippedProfileSelectors from 'selectors/zipped-profiles';
+import * as selectors from 'selectors';
 
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -74,7 +73,7 @@ describe('calltree/ZipFileTree', function() {
         waitUntilState(
           store,
           state =>
-            ZippedProfileSelectors.getZipFileState(state).phase ===
+            selectors.getZipFileState(state).phase ===
             'VIEW_PROFILE_IN_ZIP_FILE'
         );
 
@@ -92,7 +91,7 @@ describe('calltree/ZipFileTree', function() {
 
     it('starts out without any path in the zip file', async () => {
       const { getState, profileViewer } = await setupClickingTest();
-      expect(UrlStateSelectors.getPathInZipFileFromUrl(getState())).toBe(null);
+      expect(selectors.getPathInZipFileFromUrl(getState())).toBe(null);
       expect(profileViewer()).toBeFalsy();
     });
 
@@ -105,7 +104,7 @@ describe('calltree/ZipFileTree', function() {
         profileViewer,
       } = await setupClickingTest();
       fireEvent.click(profile1OpenLink);
-      expect(UrlStateSelectors.getPathInZipFileFromUrl(getState())).toBe(
+      expect(selectors.getPathInZipFileFromUrl(getState())).toBe(
         'foo/bar/profile1.json'
       );
 

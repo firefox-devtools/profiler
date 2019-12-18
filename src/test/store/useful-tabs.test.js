@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {
@@ -18,7 +18,7 @@ describe('getUsefulTabs', function() {
   it('hides the network chart and JS tracer when no data is in the thread', function() {
     const { profile } = getProfileFromTextSamples('A');
     const { getState } = storeWithProfile(profile);
-    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+    expect(selectedThread.getUsefulTabs(getState())).toEqual([
       'calltree',
       'flame-graph',
       'stack-chart',
@@ -30,7 +30,7 @@ describe('getUsefulTabs', function() {
   it('shows the network chart when network markers are present in the thread', function() {
     const profile = getProfileWithMarkers(getNetworkMarkers());
     const { getState } = storeWithProfile(profile);
-    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+    expect(selectedThread.getUsefulTabs(getState())).toEqual([
       'calltree',
       'flame-graph',
       'stack-chart',
@@ -43,7 +43,7 @@ describe('getUsefulTabs', function() {
   it('shows the js tracer when it is available in a thread', function() {
     const profile = getProfileWithJsTracerEvents([['A', 0, 10]]);
     const { getState } = storeWithProfile(profile);
-    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+    expect(selectedThread.getUsefulTabs(getState())).toEqual([
       'calltree',
       'flame-graph',
       'stack-chart',
@@ -56,7 +56,7 @@ describe('getUsefulTabs', function() {
   it('shows only the call tree when a diffing track is selected', function() {
     const { profile } = getMergedProfileFromTextSamples('A  B  C', 'A  B  B');
     const { getState, dispatch } = storeWithProfile(profile);
-    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
+    expect(selectedThread.getUsefulTabs(getState())).toEqual([
       'calltree',
       'flame-graph',
       'stack-chart',
@@ -69,8 +69,6 @@ describe('getUsefulTabs', function() {
       selectedThreadIndex: 2,
       selectedTab: 'calltree',
     });
-    expect(selectedThreadSelectors.getUsefulTabs(getState())).toEqual([
-      'calltree',
-    ]);
+    expect(selectedThread.getUsefulTabs(getState())).toEqual(['calltree']);
   });
 });

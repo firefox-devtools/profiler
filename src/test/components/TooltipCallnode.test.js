@@ -12,8 +12,7 @@ import {
   getProfileWithUnbalancedNativeAllocations,
   getProfileFromTextSamples,
 } from '../fixtures/profiles/processed-profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
-import * as ProfileSelectors from 'selectors/profile';
+import * as selectors from 'selectors';
 import {
   changeSelectedCallNode,
   changeCallTreeSummaryStrategy,
@@ -30,18 +29,18 @@ describe('TooltipCallNode', function() {
       return render(
         <Provider store={store}>
           <TooltipCallNode
-            thread={selectedThreadSelectors.getThread(getState())}
-            pages={ProfileSelectors.getPageList(getState())}
+            thread={selectors.selectedThread.getThread(getState())}
+            pages={selectors.getPageList(getState())}
             callNodeIndex={ensureExists(
-              selectedThreadSelectors.getSelectedCallNodeIndex(getState()),
+              selectors.selectedThread.getSelectedCallNodeIndex(getState()),
               'Unable to find a selected call node index.'
             )}
-            callNodeInfo={selectedThreadSelectors.getCallNodeInfo(getState())}
-            categories={ProfileSelectors.getCategories(getState())}
-            interval={ProfileSelectors.getProfileInterval(getState())}
+            callNodeInfo={selectors.selectedThread.getCallNodeInfo(getState())}
+            categories={selectors.getCategories(getState())}
+            interval={selectors.getProfileInterval(getState())}
             durationText="Fake Duration Text"
-            callTree={selectedThreadSelectors.getCallTree(getState())}
-            callTreeSummaryStrategy={selectedThreadSelectors.getCallTreeSummaryStrategy(
+            callTree={selectors.selectedThread.getCallTree(getState())}
+            callTreeSummaryStrategy={selectors.selectedThread.getCallTreeSummaryStrategy(
               getState()
             )}
           />

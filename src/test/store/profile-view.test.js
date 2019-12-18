@@ -30,14 +30,8 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
 import { viewProfile } from '../../actions/receive-profile';
-import * as ProfileViewSelectors from 'selectors/profile';
-import * as UrlStateSelectors from 'selectors/url-state';
+import * as selectors from 'selectors';
 import { stateFromLocation } from '../../app-logic/url-handling';
-import {
-  selectedThreadSelectors,
-  selectedNodeSelectors,
-  getThreadSelectors,
-} from 'selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
 import type { Milliseconds } from '../../types/units';
@@ -65,12 +59,12 @@ describe('call node paths on implementation filter change', function() {
   it('starts with combined CallNodePaths', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B, C, D, E]
-    );
+    expect(
+      selectors.selectedThread.getSelectedCallNodePath(getState())
+    ).toEqual([A, B, C, D, E]);
 
     assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      selectors.selectedThread.getExpandedCallNodePaths(getState()),
       [
         // Paths
         [A],
@@ -85,12 +79,12 @@ describe('call node paths on implementation filter change', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [B, D, E]
-    );
+    expect(
+      selectors.selectedThread.getSelectedCallNodePath(getState())
+    ).toEqual([B, D, E]);
 
     assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      selectors.selectedThread.getExpandedCallNodePaths(getState()),
       [
         // Paths
         [B],
@@ -103,12 +97,12 @@ describe('call node paths on implementation filter change', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
     dispatch(ProfileView.changeImplementationFilter('js'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [B, D, E]
-    );
+    expect(
+      selectors.selectedThread.getSelectedCallNodePath(getState())
+    ).toEqual([B, D, E]);
 
     assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      selectors.selectedThread.getExpandedCallNodePaths(getState()),
       [
         // Paths
         [B],
@@ -122,12 +116,12 @@ describe('call node paths on implementation filter change', function() {
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(ProfileView.changeImplementationFilter('combined'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B, C, D, E]
-    );
+    expect(
+      selectors.selectedThread.getSelectedCallNodePath(getState())
+    ).toEqual([A, B, C, D, E]);
 
     assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      selectors.selectedThread.getExpandedCallNodePaths(getState()),
       [
         // Paths
         [A],
@@ -143,11 +137,11 @@ describe('call node paths on implementation filter change', function() {
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(ProfileView.changeImplementationFilter('cpp'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, C]
-    );
+    expect(
+      selectors.selectedThread.getSelectedCallNodePath(getState())
+    ).toEqual([A, C]);
     assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      selectors.selectedThread.getExpandedCallNodePaths(getState()),
       [
         // Paths
         [A],
@@ -166,8 +160,8 @@ describe('getJankMarkersForHeader', function() {
     delete profile.threads[0].samples.eventDelay;
     profile.threads[0].samples.responsiveness = responsiveness;
     const { getState } = storeWithProfile(profile);
-    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    return selectedThreadSelectors
+    const getMarker = selectors.selectedThread.getMarkerGetter(getState());
+    return selectors.selectedThread
       .getJankMarkerIndexesForHeader(getState())
       .map(getMarker);
   }
@@ -181,8 +175,8 @@ describe('getJankMarkersForHeader', function() {
     delete profile.threads[0].samples.eventDelay;
     profile.threads[0].samples.eventDelay = eventDelay;
     const { getState } = storeWithProfile(profile);
-    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    return selectedThreadSelectors
+    const getMarker = selectors.selectedThread.getMarkerGetter(getState());
+    return selectors.selectedThread
       .getJankMarkerIndexesForHeader(getState())
       .map(getMarker);
   }
@@ -266,11 +260,11 @@ describe('actions/ProfileView', function() {
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
-        selectedThreadSelectors.getSelectedCallNodePath(getState())
+        selectors.selectedThread.getSelectedCallNodePath(getState())
       ).toEqual([]);
       dispatch(ProfileView.changeSelectedCallNode(0, [0, 1]));
       expect(
-        selectedThreadSelectors.getSelectedCallNodePath(getState())
+        selectors.selectedThread.getSelectedCallNodePath(getState())
       ).toEqual([0, 1]);
     });
   });
@@ -280,9 +274,9 @@ describe('actions/ProfileView', function() {
       const { profile } = getProfileFromTextSamples('A', 'B');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+      expect(selectors.getSelectedThreadIndex(getState())).toEqual(0);
       dispatch(ProfileView.changeSelectedThread(1));
-      expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(1);
+      expect(selectors.getSelectedThreadIndex(getState())).toEqual(1);
     });
   });
 
@@ -319,15 +313,15 @@ describe('actions/ProfileView', function() {
 
     function setup(tabSlug: TabSlug = 'calltree') {
       const { profile, dispatch, getState } = storeWithTab(tabSlug);
-      const parentTrack = ProfileViewSelectors.getGlobalTrackFromReference(
+      const parentTrack = selectors.getGlobalTrackFromReference(
         getState(),
         parentTrackReference
       );
-      const tabTrack = ProfileViewSelectors.getGlobalTrackFromReference(
+      const tabTrack = selectors.getGlobalTrackFromReference(
         getState(),
         tabTrackReference
       );
-      const workerTrack = ProfileViewSelectors.getLocalTrackFromReference(
+      const workerTrack = selectors.getLocalTrackFromReference(
         getState(),
         workerTrackReference
       );
@@ -350,7 +344,7 @@ describe('actions/ProfileView', function() {
     describe('with a thread tracks', function() {
       it('starts out with the tab thread selected', function() {
         const { getState, tabTrack } = setup();
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(
           tabTrack.mainThreadIndex
         );
       });
@@ -358,7 +352,7 @@ describe('actions/ProfileView', function() {
       it('can switch to another global track', function() {
         const { getState, dispatch, parentTrack } = setup();
         dispatch(ProfileView.selectTrack(parentTrackReference));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(
           parentTrack.mainThreadIndex
         );
       });
@@ -366,7 +360,7 @@ describe('actions/ProfileView', function() {
       it('can switch to a local track', function() {
         const { getState, dispatch, workerTrack } = setup();
         dispatch(ProfileView.selectTrack(workerTrackReference));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(
           workerTrack.threadIndex
         );
       });
@@ -386,38 +380,28 @@ describe('actions/ProfileView', function() {
       it('it starts out with the thread track and call tree selected', function() {
         const profile = getNetworkTrackProfile();
         const { getState } = storeWithProfile(profile);
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'calltree'
-        );
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(selectors.getSelectedTab(getState())).toEqual('calltree');
       });
       it('it can switch to the network track, which selects the network chart tab', function() {
         const profile = getNetworkTrackProfile();
         const { dispatch, getState } = storeWithProfile(profile);
         dispatch(ProfileView.selectTrack(networkTrack));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'network-chart'
-        );
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(selectors.getSelectedTab(getState())).toEqual('network-chart');
       });
       it('it can switch back to the thread, which remembers the last viewed panel', function() {
         const profile = getNetworkTrackProfile();
         const { dispatch, getState } = storeWithProfile(profile);
         dispatch(App.changeSelectedTab('flame-graph'));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'flame-graph'
-        );
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(selectors.getSelectedTab(getState())).toEqual('flame-graph');
         dispatch(ProfileView.selectTrack(networkTrack));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'network-chart'
-        );
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(selectors.getSelectedTab(getState())).toEqual('network-chart');
         dispatch(ProfileView.selectTrack(threadTrack));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'flame-graph'
-        );
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(selectors.getSelectedTab(getState())).toEqual('flame-graph');
       });
     });
 
@@ -447,7 +431,7 @@ describe('actions/ProfileView', function() {
 
         {
           // Verify the memory track reference is correct.
-          const memoryTrack = ProfileViewSelectors.getLocalTrackFromReference(
+          const memoryTrack = selectors.getLocalTrackFromReference(
             store.getState(),
             memoryTrackReference
           );
@@ -461,20 +445,16 @@ describe('actions/ProfileView', function() {
 
       it('changes the thread index when selected', function() {
         const { getState, dispatch } = setup();
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(1);
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(1);
         dispatch(ProfileView.selectTrack(memoryTrackReference));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(0);
       });
 
       it('does not change the tab when selected', function() {
         const { getState, dispatch } = setup();
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'calltree'
-        );
+        expect(selectors.getSelectedTab(getState())).toEqual('calltree');
         dispatch(ProfileView.selectTrack(memoryTrackReference));
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'calltree'
-        );
+        expect(selectors.getSelectedTab(getState())).toEqual('calltree');
       });
     });
 
@@ -492,16 +472,12 @@ describe('actions/ProfileView', function() {
         const { getState, dispatch } = storeWithProfile(profile);
 
         dispatch(App.changeSelectedTab('flame-graph'));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(0);
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'flame-graph'
-        );
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(0);
+        expect(selectors.getSelectedTab(getState())).toEqual('flame-graph');
 
         dispatch(ProfileView.selectTrack(diffingTrackReference));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(2);
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'calltree'
-        );
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(2);
+        expect(selectors.getSelectedTab(getState())).toEqual('calltree');
       });
     });
 
@@ -554,7 +530,7 @@ describe('actions/ProfileView', function() {
           ProfileView.changeCallTreeSummaryStrategy('native-allocations')
         );
         expect(
-          selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+          selectors.selectedThread.getCallTreeSummaryStrategy(getState())
         ).toEqual('native-allocations');
 
         // Switch to a thread without native allocations.
@@ -562,7 +538,7 @@ describe('actions/ProfileView', function() {
 
         // Expect that it switches the summary strategy to one it supports.
         expect(
-          selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+          selectors.selectedThread.getCallTreeSummaryStrategy(getState())
         ).toEqual('timing');
       });
 
@@ -574,7 +550,7 @@ describe('actions/ProfileView', function() {
         dispatch(ProfileView.selectTrack(jsAllocationsThread));
         dispatch(ProfileView.changeCallTreeSummaryStrategy('js-allocations'));
         expect(
-          selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+          selectors.selectedThread.getCallTreeSummaryStrategy(getState())
         ).toEqual('js-allocations');
 
         // Switch to a thread without js allocations.
@@ -582,7 +558,7 @@ describe('actions/ProfileView', function() {
 
         // Expect that it switches the summary strategy to one it supports.
         expect(
-          selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
+          selectors.selectedThread.getCallTreeSummaryStrategy(getState())
         ).toEqual('timing');
       });
     });
@@ -590,30 +566,22 @@ describe('actions/ProfileView', function() {
     describe('when the loaded panel is not the call tree', function() {
       it('stays in the same panel when selecting another track', function() {
         const { getState, dispatch, parentTrack } = setup('marker-chart');
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'marker-chart'
-        );
+        expect(selectors.getSelectedTab(getState())).toEqual('marker-chart');
         dispatch(ProfileView.selectTrack(parentTrackReference));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(
           parentTrack.mainThreadIndex
         );
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'marker-chart'
-        );
+        expect(selectors.getSelectedTab(getState())).toEqual('marker-chart');
       });
 
       it('moves to the call tree when then initial tab is the network chart', function() {
         const { getState, dispatch, parentTrack } = setup('network-chart');
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'network-chart'
-        );
+        expect(selectors.getSelectedTab(getState())).toEqual('network-chart');
         dispatch(ProfileView.selectTrack(parentTrackReference));
-        expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+        expect(selectors.getSelectedThreadIndex(getState())).toEqual(
           parentTrack.mainThreadIndex
         );
-        expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-          'calltree'
-        );
+        expect(selectors.getSelectedTab(getState())).toEqual('calltree');
       });
     });
   });
@@ -623,13 +591,9 @@ describe('actions/ProfileView', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(
-        ProfileViewSelectors.getFocusCallTreeGeneration(getState())
-      ).toEqual(0);
+      expect(selectors.getFocusCallTreeGeneration(getState())).toEqual(0);
       dispatch(ProfileView.focusCallTree());
-      expect(
-        ProfileViewSelectors.getFocusCallTreeGeneration(getState())
-      ).toEqual(1);
+      expect(selectors.getFocusCallTreeGeneration(getState())).toEqual(1);
     });
   });
 
@@ -638,13 +602,11 @@ describe('actions/ProfileView', function() {
       const { profile } = getProfileFromTextSamples('A', 'B');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual(
-        null
-      );
+      expect(selectors.getRightClickedTrack(getState())).toEqual(null);
       dispatch(
         ProfileView.changeRightClickedTrack({ trackIndex: 1, type: 'global' })
       );
-      expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual({
+      expect(selectors.getRightClickedTrack(getState())).toEqual({
         trackIndex: 1,
         type: 'global',
       });
@@ -657,13 +619,9 @@ describe('actions/ProfileView', function() {
       const { dispatch, getState } = storeWithProfile(profile);
 
       withAnalyticsMock(() => {
-        expect(UrlStateSelectors.getCurrentSearchString(getState())).toEqual(
-          ''
-        );
+        expect(selectors.getCurrentSearchString(getState())).toEqual('');
         dispatch(ProfileView.changeCallTreeSearchString('foobar'));
-        expect(UrlStateSelectors.getCurrentSearchString(getState())).toEqual(
-          'foobar'
-        );
+        expect(selectors.getCurrentSearchString(getState())).toEqual('foobar');
 
         expect(self.ga).toBeCalledWith('send', {
           eventAction: 'call tree search string',
@@ -700,11 +658,13 @@ describe('actions/ProfileView', function() {
 
     it('expands whole tree from root', function() {
       const { getState, dispatch, threadIndex, A, B, C, D, E } = setupStore();
-      const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
+      const callNodeInfo = selectors.selectedThread.getCallNodeInfo(getState());
 
       // Before expand all action is dispatched, nothing is expanded
       expect(
-        Array.from(selectedThreadSelectors.getExpandedCallNodePaths(getState()))
+        Array.from(
+          selectors.selectedThread.getExpandedCallNodePaths(getState())
+        )
       ).toEqual([]);
 
       dispatch(
@@ -716,7 +676,7 @@ describe('actions/ProfileView', function() {
       );
 
       assertSetContainsOnly(
-        selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+        selectors.selectedThread.getExpandedCallNodePaths(getState()),
         [
           // Paths
           [A],
@@ -734,11 +694,11 @@ describe('actions/ProfileView', function() {
       // First expand A by selecting B
       dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B]));
 
-      const callNodeInfo = selectedThreadSelectors.getCallNodeInfo(getState());
+      const callNodeInfo = selectors.selectedThread.getCallNodeInfo(getState());
 
       // Before expand all action is dispatched, only A is expanded
       assertSetContainsOnly(
-        selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+        selectors.selectedThread.getExpandedCallNodePaths(getState()),
         [
           // Paths
           [A],
@@ -754,7 +714,7 @@ describe('actions/ProfileView', function() {
       );
 
       assertSetContainsOnly(
-        selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+        selectors.selectedThread.getExpandedCallNodePaths(getState()),
         [
           // Paths
           [A],
@@ -777,11 +737,13 @@ describe('actions/ProfileView', function() {
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
-        Array.from(selectedThreadSelectors.getExpandedCallNodePaths(getState()))
+        Array.from(
+          selectors.selectedThread.getExpandedCallNodePaths(getState())
+        )
       ).toEqual([]);
       dispatch(ProfileView.changeExpandedCallNodes(0, [[0], [0, 1]]));
       assertSetContainsOnly(
-        selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+        selectors.selectedThread.getExpandedCallNodePaths(getState()),
         [[0], [0, 1]]
       );
     });
@@ -793,11 +755,11 @@ describe('actions/ProfileView', function() {
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
-        selectedThreadSelectors.getViewOptions(getState()).selectedMarker
+        selectors.selectedThread.getViewOptions(getState()).selectedMarker
       ).toEqual(null);
       dispatch(ProfileView.changeSelectedMarker(0, 0));
       expect(
-        selectedThreadSelectors.getViewOptions(getState()).selectedMarker
+        selectors.selectedThread.getViewOptions(getState()).selectedMarker
       ).toEqual(0);
     });
   });
@@ -807,9 +769,9 @@ describe('actions/ProfileView', function() {
       const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('');
+      expect(selectors.getMarkersSearchString(getState())).toEqual('');
       dispatch(ProfileView.changeMarkersSearchString('a'));
-      expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('a');
+      expect(selectors.getMarkersSearchString(getState())).toEqual('a');
     });
 
     it('filters the markers', function() {
@@ -821,12 +783,12 @@ describe('actions/ProfileView', function() {
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
-        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+        selectors.selectedThread.getSearchFilteredMarkerIndexes(getState())
       ).toHaveLength(3);
       dispatch(ProfileView.changeMarkersSearchString('A, b'));
 
-      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-      const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+      const getMarker = selectors.selectedThread.getMarkerGetter(getState());
+      const markerIndexes = selectors.selectedThread.getSearchFilteredMarkerIndexes(
         getState()
       );
       expect(markerIndexes).toHaveLength(2);
@@ -840,9 +802,9 @@ describe('actions/ProfileView', function() {
       const profile = getNetworkTrackProfile();
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(UrlStateSelectors.getNetworkSearchString(getState())).toEqual('');
+      expect(selectors.getNetworkSearchString(getState())).toEqual('');
       dispatch(ProfileView.changeNetworkSearchString('a'));
-      expect(UrlStateSelectors.getNetworkSearchString(getState())).toEqual('a');
+      expect(selectors.getNetworkSearchString(getState())).toEqual('a');
     });
 
     it('filters the network markers', function() {
@@ -851,14 +813,14 @@ describe('actions/ProfileView', function() {
       const networkSearchString = '3';
 
       expect(
-        selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+        selectors.selectedThread.getSearchFilteredNetworkMarkerIndexes(
           getState()
         )
       ).toHaveLength(10);
       dispatch(ProfileView.changeNetworkSearchString(networkSearchString));
 
-      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-      const markerIndexes = selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+      const getMarker = selectors.selectedThread.getMarkerGetter(getState());
+      const markerIndexes = selectors.selectedThread.getSearchFilteredNetworkMarkerIndexes(
         getState()
       );
       expect(markerIndexes).toHaveLength(1);
@@ -873,14 +835,14 @@ describe('actions/ProfileView', function() {
       const networkSearchString = '3, 4';
 
       expect(
-        selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+        selectors.selectedThread.getSearchFilteredNetworkMarkerIndexes(
           getState()
         )
       ).toHaveLength(10);
       dispatch(ProfileView.changeNetworkSearchString(networkSearchString));
 
-      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-      const markerIndexes = selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+      const getMarker = selectors.selectedThread.getMarkerGetter(getState());
+      const markerIndexes = selectors.selectedThread.getSearchFilteredNetworkMarkerIndexes(
         getState()
       );
       expect(markerIndexes).toHaveLength(2);
@@ -894,9 +856,7 @@ describe('actions/ProfileView', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(UrlStateSelectors.getImplementationFilter(getState())).toEqual(
-        'combined'
-      );
+      expect(selectors.getImplementationFilter(getState())).toEqual('combined');
       withAnalyticsMock(() => {
         dispatch(ProfileView.changeImplementationFilter('js'));
         expect(self.ga).toBeCalledWith('send', {
@@ -906,9 +866,7 @@ describe('actions/ProfileView', function() {
           hitType: 'event',
         });
       });
-      expect(UrlStateSelectors.getImplementationFilter(getState())).toEqual(
-        'js'
-      );
+      expect(selectors.getImplementationFilter(getState())).toEqual('js');
     });
   });
 
@@ -917,7 +875,7 @@ describe('actions/ProfileView', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(false);
+      expect(selectors.getInvertCallstack(getState())).toEqual(false);
       withAnalyticsMock(() => {
         dispatch(ProfileView.changeInvertCallstack(true));
         expect(self.ga).toBeCalledWith('send', {
@@ -926,7 +884,7 @@ describe('actions/ProfileView', function() {
           hitType: 'event',
         });
       });
-      expect(UrlStateSelectors.getInvertCallstack(getState())).toEqual(true);
+      expect(selectors.getInvertCallstack(getState())).toEqual(true);
     });
   });
 
@@ -935,7 +893,7 @@ describe('actions/ProfileView', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+      expect(selectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
       });
@@ -947,7 +905,7 @@ describe('actions/ProfileView', function() {
           selectionEnd: 1,
         })
       );
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+      expect(selectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionStart: 0,
@@ -961,31 +919,27 @@ describe('actions/ProfileView', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([]);
+      expect(selectors.getAllCommittedRanges(getState())).toEqual([]);
       dispatch(ProfileView.commitRange(0, 10));
-      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+      expect(selectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
       ]);
 
-      expect(ProfileViewSelectors.getPreviewSelectionRange(getState())).toEqual(
-        {
-          start: 0,
-          end: 10,
-        }
-      );
+      expect(selectors.getPreviewSelectionRange(getState())).toEqual({
+        start: 0,
+        end: 10,
+      });
 
       dispatch(ProfileView.commitRange(1, 9));
-      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+      expect(selectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
 
-      expect(ProfileViewSelectors.getPreviewSelectionRange(getState())).toEqual(
-        {
-          start: 1,
-          end: 9,
-        }
-      );
+      expect(selectors.getPreviewSelectionRange(getState())).toEqual({
+        start: 1,
+        end: 9,
+      });
     });
   });
 
@@ -1003,37 +957,33 @@ describe('actions/ProfileView', function() {
           selectionEnd: 9,
         })
       );
-      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+      expect(selectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
       ]);
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+      expect(selectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionStart: 1,
         selectionEnd: 9,
       });
-      expect(ProfileViewSelectors.getPreviewSelectionRange(getState())).toEqual(
-        {
-          start: 1,
-          end: 9,
-        }
-      );
+      expect(selectors.getPreviewSelectionRange(getState())).toEqual({
+        start: 1,
+        end: 9,
+      });
 
       dispatch(ProfileView.commitRange(2, 8));
-      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+      expect(selectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 2, end: 8 },
       ]);
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+      expect(selectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
       });
-      expect(ProfileViewSelectors.getPreviewSelectionRange(getState())).toEqual(
-        {
-          start: 2,
-          end: 8,
-        }
-      );
+      expect(selectors.getPreviewSelectionRange(getState())).toEqual({
+        start: 2,
+        end: 8,
+      });
     });
   });
 
@@ -1050,14 +1000,14 @@ describe('actions/ProfileView', function() {
 
     it('pops a committed range', function() {
       const { getState, dispatch } = setupStore();
-      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+      expect(selectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
         { start: 2, end: 8 },
         { start: 3, end: 7 },
       ]);
       dispatch(ProfileView.popCommittedRanges(2));
-      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+      expect(selectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
@@ -1073,13 +1023,13 @@ describe('actions/ProfileView', function() {
           selectionEnd: 9,
         })
       );
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+      expect(selectors.getPreviewSelection(getState())).toEqual({
         hasSelection: true,
         isModifying: false,
         selectionEnd: 9,
         selectionStart: 1,
       });
-      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+      expect(selectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
         { start: 2, end: 8 },
@@ -1087,11 +1037,11 @@ describe('actions/ProfileView', function() {
       ]);
 
       dispatch(ProfileView.popCommittedRanges(2));
-      expect(UrlStateSelectors.getAllCommittedRanges(getState())).toEqual([
+      expect(selectors.getAllCommittedRanges(getState())).toEqual([
         { start: 0, end: 10 },
         { start: 1, end: 9 },
       ]);
-      expect(ProfileViewSelectors.getPreviewSelection(getState())).toEqual({
+      expect(selectors.getPreviewSelection(getState())).toEqual({
         hasSelection: false,
         isModifying: false,
       });
@@ -1107,7 +1057,7 @@ describe('actions/ProfileView', function() {
         `);
       const { dispatch, getState } = storeWithProfile(profile);
 
-      expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([]);
+      expect(selectors.getTransformStack(getState(), 0)).toEqual([]);
       withAnalyticsMock(() => {
         dispatch(
           ProfileView.addTransformToStack(0, {
@@ -1122,7 +1072,7 @@ describe('actions/ProfileView', function() {
           hitType: 'event',
         });
       });
-      expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
+      expect(selectors.getTransformStack(getState(), 0)).toEqual([
         {
           type: 'merge-function',
           funcIndex: 1,
@@ -1152,7 +1102,7 @@ describe('actions/ProfileView', function() {
           funcIndex: 2,
         })
       );
-      expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
+      expect(selectors.getTransformStack(getState(), 0)).toEqual([
         {
           type: 'merge-function',
           funcIndex: 1,
@@ -1163,7 +1113,7 @@ describe('actions/ProfileView', function() {
         },
       ]);
       dispatch(ProfileView.popTransformsFromStack(1));
-      expect(UrlStateSelectors.getTransformStack(getState(), 0)).toEqual([
+      expect(selectors.getTransformStack(getState(), 0)).toEqual([
         {
           type: 'merge-function',
           funcIndex: 1,
@@ -1176,7 +1126,7 @@ describe('actions/ProfileView', function() {
     it('can extract some network markers and match the snapshot', function() {
       const profile = getScreenshotTrackProfile();
       const { getState } = storeWithProfile(profile);
-      const screenshotMarkersById = selectedThreadSelectors.getRangeFilteredScreenshotsById(
+      const screenshotMarkersById = selectors.selectedThread.getRangeFilteredScreenshotsById(
         getState()
       );
       const keys = [...screenshotMarkersById.keys()];
@@ -1210,7 +1160,7 @@ describe('actions/ProfileView', function() {
       dispatch(ProfileView.commitRange(startTime, endTime));
 
       // Get out the markers.
-      const screenshotMarkersById = selectedThreadSelectors.getRangeFilteredScreenshotsById(
+      const screenshotMarkersById = selectors.selectedThread.getRangeFilteredScreenshotsById(
         getState()
       );
       const [key] = [...screenshotMarkersById.keys()];
@@ -1287,8 +1237,8 @@ describe('snapshots of selectors/profile', function() {
       dispatch,
       samplesThread,
       mergeFunction,
-      markerThreadSelectors: getThreadSelectors(1),
-      getMarker: getThreadSelectors(1).getMarkerGetter(getState()),
+      markerThreadSelectors: selectors.getThreadSelectors(1),
+      getMarker: selectors.getThreadSelectors(1).getMarkerGetter(getState()),
       A,
       B,
       C,
@@ -1296,48 +1246,48 @@ describe('snapshots of selectors/profile', function() {
   }
   it('matches the last stored run of getProfile', function() {
     const { getState } = setupStore();
-    expect(ProfileViewSelectors.getProfile(getState())).toMatchSnapshot();
+    expect(selectors.getProfile(getState())).toMatchSnapshot();
   });
   it('matches the last stored run of getProfileInterval', function() {
     const { getState } = setupStore();
-    expect(ProfileViewSelectors.getProfileInterval(getState())).toEqual(1);
+    expect(selectors.getProfileInterval(getState())).toEqual(1);
   });
   it('matches the last stored run of getThreads', function() {
     const { getState } = setupStore();
-    expect(ProfileViewSelectors.getThreads(getState())).toMatchSnapshot();
+    expect(selectors.getThreads(getState())).toMatchSnapshot();
   });
   it('matches the last stored run of getThreadNames', function() {
     const { getState } = setupStore();
-    expect(ProfileViewSelectors.getThreadNames(getState())).toEqual([
+    expect(selectors.getThreadNames(getState())).toEqual([
       'Thread with samples',
       'Thread with markers',
     ]);
   });
   it('matches the last stored run of getRightClickedTrack', function() {
     const { getState } = setupStore();
-    expect(ProfileViewSelectors.getRightClickedTrack(getState())).toEqual(null);
+    expect(selectors.getRightClickedTrack(getState())).toEqual(null);
   });
   it('matches the last stored run of selectedThreadSelector.getThread', function() {
     const { getState, samplesThread } = setupStore();
-    expect(selectedThreadSelectors.getThread(getState())).toEqual(
+    expect(selectors.selectedThread.getThread(getState())).toEqual(
       samplesThread
     );
   });
   it('matches the last stored run of selectedThreadSelector.getViewOptions', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getViewOptions(getState())
+      selectors.selectedThread.getViewOptions(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getTransformStack', function() {
     const { getState, mergeFunction } = setupStore();
-    expect(selectedThreadSelectors.getTransformStack(getState())).toEqual([
+    expect(selectors.selectedThread.getTransformStack(getState())).toEqual([
       mergeFunction,
     ]);
   });
   it('matches the last stored run of selectedThreadSelector.getTransformLabels', function() {
     const { getState } = setupStore();
-    expect(selectedThreadSelectors.getTransformLabels(getState())).toEqual([
+    expect(selectors.selectedThread.getTransformLabels(getState())).toEqual([
       'Complete "Thread with samples"',
       'Merge: C',
     ]);
@@ -1345,20 +1295,20 @@ describe('snapshots of selectors/profile', function() {
   it('matches the last stored run of selectedThreadSelector.getRangeFilteredThread', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeFilteredThread(getState())
+      selectors.selectedThread.getRangeFilteredThread(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getRangeAndTransformFilteredThread', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getRangeAndTransformFilteredThread(getState())
+      selectors.selectedThread.getRangeAndTransformFilteredThread(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getJankMarkersForHeader', function() {
     const { getState } = setupStore();
-    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const getMarker = selectors.selectedThread.getMarkerGetter(getState());
     expect(
-      selectedThreadSelectors
+      selectors.selectedThread
         .getJankMarkerIndexesForHeader(getState())
         .map(getMarker)
     ).toMatchSnapshot();
@@ -1400,70 +1350,70 @@ describe('snapshots of selectors/profile', function() {
   it('matches the last stored run of selectedThreadSelector.getFilteredThread', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getFilteredThread(getState())
+      selectors.selectedThread.getFilteredThread(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getPreviewFilteredThread', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getPreviewFilteredThread(getState())
+      selectors.selectedThread.getPreviewFilteredThread(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getCallNodeInfo', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getCallNodeInfo(getState())
+      selectors.selectedThread.getCallNodeInfo(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getCallNodeMaxDepth', function() {
     const { getState } = setupStore();
-    expect(selectedThreadSelectors.getCallNodeMaxDepth(getState())).toEqual(4);
+    expect(selectors.selectedThread.getCallNodeMaxDepth(getState())).toEqual(4);
   });
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodePath', function() {
     const { getState, A, B } = setupStore();
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B]
-    );
+    expect(
+      selectors.selectedThread.getSelectedCallNodePath(getState())
+    ).toEqual([A, B]);
   });
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodeIndex', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getSelectedCallNodeIndex(getState())
+      selectors.selectedThread.getSelectedCallNodeIndex(getState())
     ).toEqual(1);
   });
   it('matches the last stored run of selectedThreadSelector.getExpandedCallNodePaths', function() {
     const { getState, A, B } = setupStore();
     assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      selectors.selectedThread.getExpandedCallNodePaths(getState()),
       [[A], [A, B]]
     );
   });
   it('matches the last stored run of selectedThreadSelector.getExpandedCallNodeIndexes', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
+      selectors.selectedThread.getExpandedCallNodeIndexes(getState())
     ).toEqual([0, 1]);
   });
   it('matches the last stored run of selectedThreadSelector.getCallTree', function() {
     const { getState } = setupStore();
-    expect(selectedThreadSelectors.getCallTree(getState())).toMatchSnapshot();
+    expect(selectors.selectedThread.getCallTree(getState())).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getFlameGraphTiming', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getFlameGraphTiming(getState())
+      selectors.selectedThread.getFlameGraphTiming(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getFriendlyThreadName', function() {
     const { getState } = setupStore();
-    expect(selectedThreadSelectors.getFriendlyThreadName(getState())).toEqual(
+    expect(selectors.selectedThread.getFriendlyThreadName(getState())).toEqual(
       'Thread with samples'
     );
   });
   it('matches the last stored run of selectedThreadSelector.getThreadProcessDetails', function() {
     const { getState } = setupStore();
     expect(
-      selectedThreadSelectors.getThreadProcessDetails(getState())
+      selectors.selectedThread.getThreadProcessDetails(getState())
     ).toMatchSnapshot();
   });
   it('matches the last stored run of markerThreadSelectors.getSearchFilteredMarkerIndexes', function() {
@@ -1476,31 +1426,33 @@ describe('snapshots of selectors/profile', function() {
   });
   it('matches the last stored run of selectedThreadSelector.unfilteredSamplesRange', function() {
     const { getState } = setupStore();
-    expect(selectedThreadSelectors.unfilteredSamplesRange(getState())).toEqual({
-      end: 9,
-      start: 0,
-    });
+    expect(selectors.selectedThread.unfilteredSamplesRange(getState())).toEqual(
+      {
+        end: 9,
+        start: 0,
+      }
+    );
   });
 
-  it('matches the last stored run of selectedNodeSelectors.getName', () => {
+  it('matches the last stored run of selectors.selectedNode.getName', () => {
     const { getState } = setupStore();
-    expect(selectedNodeSelectors.getName(getState())).toEqual('B');
+    expect(selectors.selectedNode.getName(getState())).toEqual('B');
   });
 
-  it('matches the last stored run of selectedNodeSelectors.getIsJS', () => {
+  it('matches the last stored run of selectors.selectedNode.getIsJS', () => {
     const { getState } = setupStore();
-    expect(selectedNodeSelectors.getIsJS(getState())).toEqual(false);
+    expect(selectors.selectedNode.getIsJS(getState())).toEqual(false);
   });
 
-  it('matches the last stored run of selectedNodeSelectors.getLib', () => {
+  it('matches the last stored run of selectors.selectedNode.getLib', () => {
     const { getState } = setupStore();
-    expect(selectedNodeSelectors.getLib(getState())).toEqual('');
+    expect(selectors.selectedNode.getLib(getState())).toEqual('');
   });
 
-  it('matches the last stored run of selectedNodeSelectors.getTimingsForSidebar', () => {
+  it('matches the last stored run of selectors.selectedNode.getTimingsForSidebar', () => {
     const { getState } = setupStore();
     expect(
-      selectedNodeSelectors.getTimingsForSidebar(getState())
+      selectors.selectedNode.getTimingsForSidebar(getState())
     ).toMatchSnapshot();
   });
 });
@@ -1524,7 +1476,7 @@ describe('getTimingsForSidebar', () => {
 
     const getTimingsForPath = path => {
       store.dispatch(ProfileView.changeSelectedCallNode(0, path));
-      return selectedNodeSelectors.getTimingsForSidebar(store.getState());
+      return selectors.selectedNode.getTimingsForSidebar(store.getState());
     };
 
     return {
@@ -2166,7 +2118,7 @@ describe('getTimingsForSidebar', () => {
 
       const getTimingsForPath = path => {
         store.dispatch(ProfileView.changeSelectedCallNode(2, path));
-        return selectedNodeSelectors.getTimingsForSidebar(store.getState());
+        return selectors.selectedNode.getTimingsForSidebar(store.getState());
       };
 
       return {
@@ -2212,7 +2164,9 @@ describe('getFriendlyThreadName', function() {
 
     const getFriendlyThreadNames = () =>
       profile.threads.map((_, threadIndex) =>
-        getThreadSelectors(threadIndex).getFriendlyThreadName(getState())
+        selectors
+          .getThreadSelectors(threadIndex)
+          .getFriendlyThreadName(getState())
       );
 
     return { profile, dispatch, getState, getFriendlyThreadNames };
@@ -2275,7 +2229,7 @@ describe('getFriendlyThreadName', function() {
 });
 
 describe('counter selectors', function() {
-  const { getCounterSelectors } = ProfileViewSelectors;
+  const { getCounterSelectors } = selectors;
   function setup() {
     const { profile } = getProfileFromTextSamples(
       Array(10)
@@ -2363,7 +2317,7 @@ describe('counter selectors', function() {
 });
 
 describe('meta selector', function() {
-  const { getMeta } = ProfileViewSelectors;
+  const { getMeta } = selectors;
   function setup() {
     const { profile } = getProfileFromTextSamples(
       Array(10)
@@ -2387,7 +2341,7 @@ describe('visual metrics selectors', function() {
     getVisualProgress,
     getPerceptualSpeedIndexProgress,
     getContentfulSpeedIndexProgress,
-  } = ProfileViewSelectors;
+  } = selectors;
   function setup() {
     const profile = getVisualProgressTrackProfile(
       Array(10)

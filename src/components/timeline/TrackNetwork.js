@@ -7,8 +7,12 @@
 import React, { PureComponent } from 'react';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
-import { getCommittedRange, getZeroAt, getPageList } from 'selectors/profile';
-import { getThreadSelectors } from 'selectors/per-thread';
+import {
+  getCommittedRange,
+  getZeroAt,
+  getPageList,
+  getThreadSelectors,
+} from 'selectors';
 import { VerticalIndicators } from './VerticalIndicators';
 import {
   TRACK_NETWORK_ROW_HEIGHT,

@@ -25,7 +25,7 @@ import {
   commitRange,
   changeImplementationFilter,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -199,9 +199,7 @@ describe('StackChart', function() {
 
     // Start out deselected
     dispatch(changeSelectedCallNode(0, []));
-    expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
-      null
-    );
+    expect(selectedThread.getSelectedCallNodeIndex(getState())).toBe(null);
 
     // Click the first frame
     leftClick({
@@ -209,9 +207,7 @@ describe('StackChart', function() {
       y: 10,
     });
 
-    expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
-      0
-    );
+    expect(selectedThread.getSelectedCallNodeIndex(getState())).toBe(0);
 
     // Click on a region without any drawn box to deselect
     leftClick({
@@ -219,9 +215,7 @@ describe('StackChart', function() {
       y: 100,
     });
 
-    expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
-      null
-    );
+    expect(selectedThread.getSelectedCallNodeIndex(getState())).toBe(null);
   });
 
   it('can display a context menu when right clicking the chart', function() {

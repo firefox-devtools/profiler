@@ -7,9 +7,14 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from '../../../utils/connect';
-import { getProfile, getProfileRootRange } from 'selectors/profile';
-import { getDataSource } from 'selectors/url-state';
-import { getIsNewlyPublished } from 'selectors/app';
+import {
+  getProfile,
+  getProfileRootRange,
+  getDataSource,
+  getIsNewlyPublished,
+  getUploadPhase,
+  getHasPrePublishedState,
+} from 'selectors';
 import { MenuButtonsMetaInfo } from './MetaInfo';
 import { MenuButtonsPublish } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';
@@ -20,7 +25,6 @@ import {
   abortUpload,
 } from '../../../actions/publish';
 import { dismissNewlyPublished } from '../../../actions/app';
-import { getUploadPhase, getHasPrePublishedState } from 'selectors/publish';
 
 import type { StartEndRange } from '../../../types/units';
 import type { Profile } from '../../../types/profile';

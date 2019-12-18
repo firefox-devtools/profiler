@@ -3,8 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import * as profileViewSelectors from 'selectors/profile';
-import * as urlStateReducers from 'selectors/url-state';
+import * as selectors from 'selectors';
 import {
   getProfileFromTextSamples,
   getCounterForThread,
@@ -39,12 +38,12 @@ import type { State } from '../../../types/state';
  * Local Track naming - `[thread ThreadName]` | `[TrackType]`
  */
 export function getHumanReadableTracks(state: State): string[] {
-  const threads = profileViewSelectors.getThreads(state);
-  const globalTracks = profileViewSelectors.getGlobalTracks(state);
-  const hiddenGlobalTracks = urlStateReducers.getHiddenGlobalTracks(state);
-  const selectedThreadIndex = urlStateReducers.getSelectedThreadIndex(state);
+  const threads = selectors.getThreads(state);
+  const globalTracks = selectors.getGlobalTracks(state);
+  const hiddenGlobalTracks = selectors.getHiddenGlobalTracks(state);
+  const selectedThreadIndex = selectors.getSelectedThreadIndex(state);
   const text: string[] = [];
-  for (const globalTrackIndex of urlStateReducers.getGlobalTrackOrder(state)) {
+  for (const globalTrackIndex of selectors.getGlobalTrackOrder(state)) {
     const globalTrack = globalTracks[globalTrackIndex];
     const globalHiddenText = hiddenGlobalTracks.has(globalTrackIndex)
       ? 'hide'
@@ -70,26 +69,20 @@ export function getHumanReadableTracks(state: State): string[] {
     }
 
     if (globalTrack.type === 'process') {
-      const trackOrder = urlStateReducers.getLocalTrackOrder(
-        state,
-        globalTrack.pid
-      );
-      const tracks = profileViewSelectors.getLocalTracks(
-        state,
-        globalTrack.pid
-      );
+      const trackOrder = selectors.getLocalTrackOrder(state, globalTrack.pid);
+      const tracks = selectors.getLocalTracks(state, globalTrack.pid);
 
       for (const trackIndex of trackOrder) {
         const track = tracks[trackIndex];
         let trackName;
         if (track.type === 'memory') {
-          trackName = profileViewSelectors
+          trackName = selectors
             .getCounterSelectors(track.counterIndex)
             .getPid(state);
         } else {
           trackName = threads[track.threadIndex].name;
         }
-        const hiddenTracks = urlStateReducers.getHiddenLocalTracks(
+        const hiddenTracks = selectors.getHiddenLocalTracks(
           state,
           globalTrack.pid
         );
@@ -170,7 +163,7 @@ export function getStoreWithMemoryTrack(pid: number = 222): * {
   }
 
   const store = storeWithProfile(profile);
-  const localTrack = profileViewSelectors.getLocalTrackFromReference(
+  const localTrack = selectors.getLocalTrackFromReference(
     store.getState(),
     trackReference
   );

@@ -14,7 +14,7 @@ import {
   setContextMenuVisibility,
 } from '../../actions/profile-view';
 import { Provider } from 'react-redux';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 import { ensureExists } from '../../utils/flow';
 import copy from 'copy-to-clipboard';
 
@@ -90,9 +90,7 @@ describe('calltree/CallNodeContextMenu', function() {
       it(`adds a transform for "${type}"`, function() {
         const { getState, getByText } = setup();
         fireEvent.click(getByText(matcher));
-        expect(
-          selectedThreadSelectors.getTransformStack(getState())[0].type
-        ).toBe(type);
+        expect(selectedThread.getTransformStack(getState())[0].type).toBe(type);
       });
     });
   });
@@ -101,14 +99,14 @@ describe('calltree/CallNodeContextMenu', function() {
     it('can expand all call nodes in the call tree', function() {
       const { getState, getByText } = setup();
       expect(
-        selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
+        selectedThread.getExpandedCallNodeIndexes(getState())
       ).toHaveLength(1);
 
       fireEvent.click(getByText('Expand all'));
 
       // This test only asserts that a bunch of call nodes were actually expanded.
       expect(
-        selectedThreadSelectors.getExpandedCallNodeIndexes(getState())
+        selectedThread.getExpandedCallNodeIndexes(getState())
       ).toHaveLength(11);
     });
 

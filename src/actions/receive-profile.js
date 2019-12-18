@@ -25,7 +25,9 @@ import {
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
-} from 'selectors/url-state';
+  getProfileOrNull,
+  getView,
+} from 'selectors';
 import {
   stateFromLocation,
   getDataSourceFromPathParts,
@@ -40,8 +42,6 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
-import { getProfileOrNull } from 'selectors/profile';
-import { getView } from 'selectors/app';
 import { setDataSource } from './profile-view';
 
 import type {

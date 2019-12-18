@@ -7,7 +7,6 @@ import React, { PureComponent, Fragment } from 'react';
 import { MenuItem } from 'react-contextmenu';
 import ContextMenu from '../shared/ContextMenu';
 import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from 'selectors/per-thread';
 import { funcHasRecursiveCall } from '../../profile-logic/transforms';
 import { getFunctionName } from '../../profile-logic/function-info';
 import copy from 'copy-to-clipboard';
@@ -21,7 +20,8 @@ import {
   getSelectedThreadIndex,
   getImplementationFilter,
   getInvertCallstack,
-} from 'selectors/url-state';
+  selectedThread,
+} from 'selectors';
 
 import {
   convertToTransformType,
@@ -503,13 +503,13 @@ class CallNodeContextMenu extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    thread: selectedThreadSelectors.getFilteredThread(state),
+    thread: selectedThread.getFilteredThread(state),
     threadIndex: getSelectedThreadIndex(state),
-    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+    callNodeInfo: selectedThread.getCallNodeInfo(state),
     implementation: getImplementationFilter(state),
     inverted: getInvertCallstack(state),
-    callNodePath: selectedThreadSelectors.getRightClickedCallNodePath(state),
-    callNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(state),
+    callNodePath: selectedThread.getRightClickedCallNodePath(state),
+    callNodeIndex: selectedThread.getRightClickedCallNodeIndex(state),
     selectedTab: getSelectedTab(state),
   }),
   mapDispatchToProps: {

@@ -6,7 +6,7 @@
 import React, { PureComponent } from 'react';
 
 import EmptyReasons from '../shared/EmptyReasons';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 import { oneLine } from 'common-tags';
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
@@ -53,9 +53,9 @@ class CallTreeEmptyReasons extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: (state: State) => ({
-    threadName: selectedThreadSelectors.getFriendlyThreadName(state),
-    thread: selectedThreadSelectors.getThread(state),
-    rangeFilteredThread: selectedThreadSelectors.getRangeFilteredThread(state),
+    threadName: selectedThread.getFriendlyThreadName(state),
+    thread: selectedThread.getThread(state),
+    rangeFilteredThread: selectedThread.getRangeFilteredThread(state),
   }),
   component: CallTreeEmptyReasons,
 });

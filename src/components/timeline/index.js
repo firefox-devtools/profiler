@@ -13,15 +13,16 @@ import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import Reorderable from '../shared/Reorderable';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
-import { getPanelLayoutGeneration } from 'selectors/app';
 import {
   getCommittedRange,
   getZeroAt,
   getGlobalTracks,
   getGlobalTrackReferences,
   getHiddenTrackCount,
-} from 'selectors/profile';
-import { getGlobalTrackOrder, getTimelineType } from 'selectors/url-state';
+  getPanelLayoutGeneration,
+  getGlobalTrackOrder,
+  getTimelineType,
+} from 'selectors';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,

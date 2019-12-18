@@ -32,9 +32,8 @@ import {
   commitRange,
   changeImplementationFilter,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread, getInvertCallstack } from 'selectors';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
-import { getInvertCallstack } from 'selectors/url-state';
 import { ensureExists } from '../../utils/flow';
 
 import type { CssPixels } from '../../types/units';
@@ -86,9 +85,7 @@ describe('FlameGraph', function() {
     const div = getContentDiv();
 
     function selectedNode() {
-      const callNodeIndex = selectedThreadSelectors.getSelectedCallNodeIndex(
-        getState()
-      );
+      const callNodeIndex = selectedThread.getSelectedCallNodeIndex(getState());
       return callNodeIndex && funcNames[callNodeIndex];
     }
 

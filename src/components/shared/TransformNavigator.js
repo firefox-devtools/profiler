@@ -5,7 +5,7 @@
 // @flow
 
 import explicitConnect from '../../utils/connect';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 import FilterNavigatorBar from './FilterNavigatorBar';
 import { popTransformsFromStack } from '../../actions/profile-view';
 
@@ -22,7 +22,7 @@ type StateProps = $Diff<Props, DispatchProps>;
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => {
-    const items = selectedThreadSelectors.getTransformLabels(state);
+    const items = selectedThread.getTransformLabels(state);
     return {
       className: 'calltreeTransformNavigator',
       items,

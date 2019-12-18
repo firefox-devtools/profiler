@@ -4,8 +4,7 @@
 // @flow
 
 import { storeWithSimpleProfile, storeWithProfile } from '../fixtures/stores';
-import * as UrlStateSelectors from 'selectors/url-state';
-import * as AppSelectors from 'selectors/app';
+import * as selectors from 'selectors';
 import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { isolateProcess } from '../../actions/profile-view';
@@ -17,11 +16,9 @@ describe('app actions', function() {
   describe('changeSelectedTab', function() {
     it('can change tabs', function() {
       const { dispatch, getState } = storeWithSimpleProfile();
-      expect(UrlStateSelectors.getSelectedTab(getState())).toEqual('calltree');
+      expect(selectors.getSelectedTab(getState())).toEqual('calltree');
       dispatch(AppActions.changeSelectedTab('stack-chart'));
-      expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-        'stack-chart'
-      );
+      expect(selectors.getSelectedTab(getState())).toEqual('stack-chart');
     });
 
     it('records an analytics event when changing tabs', function() {
@@ -44,9 +41,9 @@ describe('app actions', function() {
   describe('urlSetupDone', function() {
     it('will remember when url setup is done', function() {
       const { dispatch, getState } = storeWithSimpleProfile();
-      expect(AppSelectors.getUrlSetupPhase(getState())).toEqual('initial-load');
+      expect(selectors.getUrlSetupPhase(getState())).toEqual('initial-load');
       dispatch(AppActions.urlSetupDone());
-      expect(AppSelectors.getUrlSetupPhase(getState())).toEqual('done');
+      expect(selectors.getUrlSetupPhase(getState())).toEqual('done');
     });
 
     it('records analytics events for pageview and datasource', function() {
@@ -77,11 +74,11 @@ describe('app actions', function() {
   describe('show404', function() {
     it('tracks when the route is not found', function() {
       const { dispatch, getState } = createStore();
-      expect(AppSelectors.getView(getState())).toEqual({
+      expect(selectors.getView(getState())).toEqual({
         phase: 'INITIALIZING',
       });
       dispatch(AppActions.show404('http://foobar.com'));
-      expect(AppSelectors.getView(getState())).toEqual({
+      expect(selectors.getView(getState())).toEqual({
         phase: 'ROUTE_NOT_FOUND',
       });
     });
@@ -90,15 +87,15 @@ describe('app actions', function() {
   describe('isSidebarOpen', function() {
     it('can change the state of the sidebar', function() {
       const { dispatch, getState } = storeWithSimpleProfile();
-      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+      expect(selectors.getIsSidebarOpen(getState())).toEqual(false);
       dispatch(AppActions.changeSidebarOpenState('calltree', true));
-      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
+      expect(selectors.getIsSidebarOpen(getState())).toEqual(true);
       dispatch(AppActions.changeSelectedTab('flame-graph'));
-      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(false);
+      expect(selectors.getIsSidebarOpen(getState())).toEqual(false);
       dispatch(AppActions.changeSidebarOpenState('flame-graph', true));
-      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
+      expect(selectors.getIsSidebarOpen(getState())).toEqual(true);
       dispatch(AppActions.changeSidebarOpenState('calltree', false));
-      expect(AppSelectors.getIsSidebarOpen(getState())).toEqual(true);
+      expect(selectors.getIsSidebarOpen(getState())).toEqual(true);
     });
   });
 
@@ -107,49 +104,45 @@ describe('app actions', function() {
       const { dispatch, getState } = storeWithSimpleProfile();
 
       // The URL state starts out on the calltree tab.
-      const originalUrlState = UrlStateSelectors.getUrlState(getState());
-      expect(UrlStateSelectors.getSelectedTab(getState())).toEqual('calltree');
+      const originalUrlState = selectors.getUrlState(getState());
+      expect(selectors.getSelectedTab(getState())).toEqual('calltree');
 
       // Change it, and make sure the URL state updates.
       dispatch(AppActions.changeSelectedTab('stack-chart'));
-      expect(UrlStateSelectors.getSelectedTab(getState())).toEqual(
-        'stack-chart'
-      );
-      expect(UrlStateSelectors.getUrlState(getState())).not.toBe(
-        originalUrlState
-      );
+      expect(selectors.getSelectedTab(getState())).toEqual('stack-chart');
+      expect(selectors.getUrlState(getState())).not.toBe(originalUrlState);
 
       // Now revert it to the original, and make sure everything resets.
       dispatch(AppActions.updateUrlState(originalUrlState));
-      expect(UrlStateSelectors.getUrlState(getState())).toBe(originalUrlState);
-      expect(UrlStateSelectors.getSelectedTab(getState())).toEqual('calltree');
+      expect(selectors.getUrlState(getState())).toBe(originalUrlState);
+      expect(selectors.getSelectedTab(getState())).toEqual('calltree');
     });
   });
 
   describe('panelLayoutGeneration', function() {
     it('can be manually updated using an action', function() {
       const { dispatch, getState } = storeWithSimpleProfile();
-      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(0);
+      expect(selectors.getPanelLayoutGeneration(getState())).toBe(0);
       dispatch(AppActions.invalidatePanelLayout());
-      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(1);
+      expect(selectors.getPanelLayoutGeneration(getState())).toBe(1);
       dispatch(AppActions.invalidatePanelLayout());
-      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(2);
+      expect(selectors.getPanelLayoutGeneration(getState())).toBe(2);
     });
 
     it('will be updated when working with the sidebar', function() {
       const { dispatch, getState } = storeWithSimpleProfile();
-      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(0);
+      expect(selectors.getPanelLayoutGeneration(getState())).toBe(0);
       dispatch(AppActions.changeSidebarOpenState('flame-graph', false));
-      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(1);
+      expect(selectors.getPanelLayoutGeneration(getState())).toBe(1);
     });
 
     it('will be updated when working with the timeline', function() {
       const { dispatch, getState } = storeWithProfile(
         getProfileWithNiceTracks()
       );
-      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(0);
+      expect(selectors.getPanelLayoutGeneration(getState())).toBe(0);
       dispatch(isolateProcess(0));
-      expect(AppSelectors.getPanelLayoutGeneration(getState())).toBe(1);
+      expect(selectors.getPanelLayoutGeneration(getState())).toBe(1);
     });
   });
 });

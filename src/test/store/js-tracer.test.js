@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 import { ensureExists } from '../../utils/flow';
 import { changeShowJsTracerSummary } from '../../actions/profile-view';
 import {
@@ -127,7 +127,7 @@ describe('convertJsTracerToThread', function() {
       convertJsTracerToThread(existingThread, jsTracer, categories),
     ];
     const { getState } = storeWithProfile(profile);
-    const callTree = selectedThreadSelectors.getCallTree(getState());
+    const callTree = selectedThread.getCallTree(getState());
 
     expect(formatTree(callTree)).toEqual([
       // This is the real timing:
@@ -180,9 +180,9 @@ describe('selectors/getJsTracerTiming', function() {
       const { profile } = getProfileFromTextSamples('A');
       const { getState } = storeWithProfile(profile);
       expect(profile.threads[0].jsTracer).toBe(undefined);
-      expect(
-        selectedThreadSelectors.getExpensiveJsTracerTiming(getState())
-      ).toEqual(null);
+      expect(selectedThread.getExpensiveJsTracerTiming(getState())).toEqual(
+        null
+      );
     });
 
     it('has empty JS tracer timing if no events are in the js tracer table', function() {
@@ -442,8 +442,8 @@ function getHumanReadableJsTracerTiming({
   }
   const { dispatch, getState } = storeWithProfile(profile);
   const computeTiming = useSelfTime
-    ? selectedThreadSelectors.getExpensiveJsTracerLeafTiming
-    : selectedThreadSelectors.getExpensiveJsTracerTiming;
+    ? selectedThread.getExpensiveJsTracerLeafTiming
+    : selectedThread.getExpensiveJsTracerTiming;
   dispatch(changeShowJsTracerSummary(useSelfTime));
 
   return ensureExists(computeTiming(getState())).map(

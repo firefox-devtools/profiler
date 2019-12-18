@@ -13,10 +13,11 @@ import {
   getProfileInterval,
   getCommittedRange,
   getCategories,
-} from 'selectors/profile';
-import { getThreadSelectors } from 'selectors/per-thread';
+  getThreadSelectors,
+  getSelectedThreadIndex,
+  getTimelineType,
+} from 'selectors';
 
-import { getSelectedThreadIndex, getTimelineType } from 'selectors/url-state';
 import {
   TimelineMarkersJank,
   TimelineMarkersFileIo,

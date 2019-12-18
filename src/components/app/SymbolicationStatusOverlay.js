@@ -5,10 +5,7 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import {
-  getProfileViewOptions,
-  getSymbolicationStatus,
-} from 'selectors/profile';
+import { getProfileViewOptions, getSymbolicationStatus } from 'selectors';
 import explicitConnect from '../../utils/connect';
 
 import type { RequestedLib } from '../../types/actions';

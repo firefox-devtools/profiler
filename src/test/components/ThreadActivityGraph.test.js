@@ -12,7 +12,7 @@ import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 
 import SelectedThreadActivityGraph from '../../components/shared/thread/SelectedActivityGraph';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -103,7 +103,7 @@ describe('SelectedThreadActivityGraph', function() {
 
     // This function gets the selected call node path as a list of function names.
     function getCallNodePath() {
-      return selectedThreadSelectors
+      return selectedThread
         .getSelectedCallNodePath(getState())
         .map(funcIndex =>
           thread.stringTable.getString(thread.funcTable.name[funcIndex])

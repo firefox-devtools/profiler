@@ -5,7 +5,7 @@
 // @flow
 
 import { oneLineTrim } from 'common-tags';
-import * as urlStateReducers from 'selectors/url-state';
+import * as selectors from 'selectors';
 import {
   changeCallTreeSearchString,
   changeMarkersSearchString,
@@ -30,7 +30,6 @@ import {
   getProfileWithNiceTracks,
 } from './fixtures/profiles/tracks';
 import { getProfileFromTextSamples } from './fixtures/profiles/processed-profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
 import { uintArrayToString } from '../utils/uintarray-encoding';
 
 function _getStoreWithURL(
@@ -119,14 +118,14 @@ describe('selectedThread', function() {
 
   it('selects the right thread when receiving a profile from web', function() {
     const { getState } = setup(1);
-    expect(urlStateReducers.getSelectedThreadIndex(getState())).toBe(1);
+    expect(selectors.getSelectedThreadIndex(getState())).toBe(1);
   });
 
   it('selects a default thread when a wrong thread has been requested', function() {
     const { getState } = setup(100);
 
     // "2" is the content process' main tab
-    expect(urlStateReducers.getSelectedThreadIndex(getState())).toBe(2);
+    expect(selectors.getSelectedThreadIndex(getState())).toBe(2);
   });
 });
 
@@ -168,16 +167,14 @@ describe('url handling tracks', function() {
 
     it('will not accept invalid tracks in the thread order', function() {
       const { getState } = initWithSearchParams('?globalTrackOrder=1-0');
-      expect(urlStateReducers.getGlobalTrackOrder(getState())).toEqual([1, 0]);
+      expect(selectors.getGlobalTrackOrder(getState())).toEqual([1, 0]);
     });
 
     it('will not accept invalid hidden threads', function() {
       const { getState } = initWithSearchParams(
         '?hiddenGlobalTracks=0-8-2-a&thread=1'
       );
-      expect(urlStateReducers.getHiddenGlobalTracks(getState())).toEqual(
-        new Set([0])
-      );
+      expect(selectors.getHiddenGlobalTracks(getState())).toEqual(new Set([0]));
     });
   });
 
@@ -273,18 +270,18 @@ describe('url handling tracks', function() {
 describe('search strings', function() {
   it('properly handles the call tree search string stacks with 1 item', function() {
     const { getState } = _getStoreWithURL({ search: '?search=string' });
-    expect(urlStateReducers.getCurrentSearchString(getState())).toBe('string');
-    expect(urlStateReducers.getSearchStrings(getState())).toEqual(['string']);
+    expect(selectors.getCurrentSearchString(getState())).toBe('string');
+    expect(selectors.getSearchStrings(getState())).toEqual(['string']);
   });
 
   it('properly handles the call tree search string stacks with several items', function() {
     const { getState } = _getStoreWithURL({
       search: '?search=string,foo,%20bar',
     });
-    expect(urlStateReducers.getCurrentSearchString(getState())).toBe(
+    expect(selectors.getCurrentSearchString(getState())).toBe(
       'string,foo, bar'
     );
-    expect(urlStateReducers.getSearchStrings(getState())).toEqual([
+    expect(selectors.getSearchStrings(getState())).toEqual([
       'string',
       'foo',
       'bar',
@@ -295,19 +292,17 @@ describe('search strings', function() {
     const { getState } = _getStoreWithURL({
       search: '?markerSearch=otherString',
     });
-    expect(urlStateReducers.getMarkersSearchString(getState())).toBe(
-      'otherString'
-    );
+    expect(selectors.getMarkersSearchString(getState())).toBe('otherString');
   });
 
   it('properly handles showUserTimings strings', function() {
     const { getState } = _getStoreWithURL({ search: '' });
-    expect(urlStateReducers.getShowUserTimings(getState())).toBe(false);
+    expect(selectors.getShowUserTimings(getState())).toBe(false);
   });
 
   it('defaults to not showing user timings', function() {
     const { getState } = _getStoreWithURL();
-    expect(urlStateReducers.getShowUserTimings(getState())).toBe(false);
+    expect(selectors.getShowUserTimings(getState())).toBe(false);
   });
 
   it('serializes the call tree search strings in the URL', function() {
@@ -319,7 +314,7 @@ describe('search strings', function() {
 
     ['calltree', 'stack-chart', 'flame-graph'].forEach(tabSlug => {
       dispatch(changeSelectedTab(tabSlug));
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = selectors.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
       expect(query.search).toBe(callTreeSearchString);
     });
@@ -334,7 +329,7 @@ describe('search strings', function() {
 
     ['marker-chart', 'marker-table'].forEach(tabSlug => {
       dispatch(changeSelectedTab(tabSlug));
-      const urlState = urlStateReducers.getUrlState(getState());
+      const urlState = selectors.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
       expect(query.markerSearch).toBe(markerSearchString);
     });
@@ -347,7 +342,7 @@ describe('search strings', function() {
 
     dispatch(changeNetworkSearchString(networkSearchString));
     dispatch(changeSelectedTab('network-chart'));
-    const urlState = urlStateReducers.getUrlState(getState());
+    const urlState = selectors.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
     expect(query.networkSearch).toBe(networkSearchString);
   });
@@ -359,7 +354,7 @@ describe('profileName', function() {
     const profileName = 'Good Profile';
 
     dispatch(changeProfileName(profileName));
-    const urlState = urlStateReducers.getUrlState(getState());
+    const urlState = selectors.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
     expect(query.profileName).toBe(profileName);
   });
@@ -368,14 +363,14 @@ describe('profileName', function() {
     const { getState } = _getStoreWithURL({
       search: '?profileName=XXX',
     });
-    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('XXX');
-    expect(urlStateReducers.getProfileName(getState())).toBe('XXX');
+    expect(selectors.getProfileNameFromUrl(getState())).toBe('XXX');
+    expect(selectors.getProfileName(getState())).toBe('XXX');
   });
 
   it('returns empty string when profileName is not specified', function() {
     const { getState } = _getStoreWithURL();
-    expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('');
-    expect(urlStateReducers.getProfileName(getState())).toBe('');
+    expect(selectors.getProfileNameFromUrl(getState())).toBe('');
+    expect(selectors.getProfileName(getState())).toBe('');
   });
 });
 
@@ -391,7 +386,7 @@ describe('url upgrading', function() {
           '?callTreeFilters=prefix-012~prefixjs-123~postfix-234~postfixjs-345',
         v: false,
       });
-      const transforms = selectedThreadSelectors.getTransformStack(getState());
+      const transforms = selectors.selectedThread.getTransformStack(getState());
       expect(transforms).toEqual([
         {
           type: 'focus-subtree',
@@ -427,7 +422,7 @@ describe('url upgrading', function() {
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/timeline/',
         v: 1,
       });
-      expect(urlStateReducers.getSelectedTab(getState())).toBe('stack-chart');
+      expect(selectors.getSelectedTab(getState())).toBe('stack-chart');
     });
 
     it('switches to the marker-table when given a markers tab', function() {
@@ -435,7 +430,7 @@ describe('url upgrading', function() {
         pathname: '/public/e71ce9584da34298627fb66ac7f2f245ba5edbf5/markers/',
         v: false,
       });
-      expect(urlStateReducers.getSelectedTab(getState())).toBe('marker-table');
+      expect(selectors.getSelectedTab(getState())).toBe('marker-table');
     });
   });
 
@@ -446,7 +441,7 @@ describe('url upgrading', function() {
         search: '?hidePlatformDetails',
         v: 2,
       });
-      expect(urlStateReducers.getImplementationFilter(getState())).toBe('js');
+      expect(selectors.getImplementationFilter(getState())).toBe('js');
     });
   });
 
@@ -721,9 +716,7 @@ describe('url upgrading', function() {
     // state of the application, so we won't have 'markers' as result.
     // We should change this to something more meaningful when we have eg
     // converters that reuse query names.
-    expect(urlStateReducers.getSelectedTab(getState())).not.toBe(
-      'marker-table'
-    );
+    expect(selectors.getSelectedTab(getState())).not.toBe('marker-table');
   });
 });
 
@@ -736,7 +729,7 @@ describe('URL serialization of the transform stack', function() {
   });
 
   it('deserializes focus subtree transforms', function() {
-    const transformStack = selectedThreadSelectors.getTransformStack(
+    const transformStack = selectors.selectedThread.getTransformStack(
       getState()
     );
 
@@ -790,9 +783,7 @@ describe('URL serialization of the transform stack', function() {
   });
 
   it('re-serializes the focus subtree transforms', function() {
-    const { query } = urlStateToUrlObject(
-      urlStateReducers.getUrlState(getState())
-    );
+    const { query } = urlStateToUrlObject(selectors.getUrlState(getState()));
     expect(query.transforms).toBe(transformString);
   });
 });
@@ -828,7 +819,7 @@ describe('compare', function() {
       /* no profile */ null
     );
 
-    expect(urlStateReducers.getProfilesToCompare(store.getState())).toEqual([
+    expect(selectors.getProfilesToCompare(store.getState())).toEqual([
       url1,
       url2,
     ]);
@@ -840,22 +831,18 @@ describe('compare', function() {
       /* no profile */ null
     );
 
-    const initialUrl = urlFromState(
-      urlStateReducers.getUrlState(store.getState())
-    );
+    const initialUrl = urlFromState(selectors.getUrlState(store.getState()));
     expect(initialUrl).toEqual('/compare/');
 
     store.dispatch(changeProfilesToCompare([url1, url2]));
-    const resultingUrl = urlFromState(
-      urlStateReducers.getUrlState(store.getState())
-    );
+    const resultingUrl = urlFromState(selectors.getUrlState(store.getState()));
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url1)}`);
     expect(resultingUrl).toMatch(`profiles[]=${encodeURIComponent(url2)}`);
   });
 });
 
 describe('last requested call tree summary strategy', function() {
-  const { getLastSelectedCallTreeSummaryStrategy } = urlStateReducers;
+  const { getLastSelectedCallTreeSummaryStrategy } = selectors;
   it('defaults to timing', function() {
     const { getState } = _getStoreWithURL();
     expect(getLastSelectedCallTreeSummaryStrategy(getState())).toEqual(

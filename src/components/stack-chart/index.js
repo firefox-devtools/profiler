@@ -18,9 +18,9 @@ import {
   getScrollToSelectionGeneration,
   getCategories,
   getPageList,
-} from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
-import { getSelectedThreadIndex } from 'selectors/url-state';
+  selectedThread,
+  getSelectedThreadIndex,
+} from 'selectors';
 import StackChartEmptyReasons from './StackChartEmptyReasons';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import StackSettings from '../shared/StackSettings';
@@ -206,24 +206,20 @@ class StackChartGraph extends React.PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
-      state
-    );
+    const stackTimingByDepth = selectedThread.getStackTimingByDepth(state);
 
     return {
-      thread: selectedThreadSelectors.getFilteredThread(state),
-      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
+      thread: selectedThread.getFilteredThread(state),
+      maxStackDepth: selectedThread.getCallNodeMaxDepth(state),
       stackTimingByDepth,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       previewSelection: getPreviewSelection(state),
       threadIndex: getSelectedThreadIndex(state),
-      callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+      callNodeInfo: selectedThread.getCallNodeInfo(state),
       categories: getCategories(state),
-      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-        state
-      ),
-      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
+      selectedCallNodeIndex: selectedThread.getSelectedCallNodeIndex(state),
+      rightClickedCallNodeIndex: selectedThread.getRightClickedCallNodeIndex(
         state
       ),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),

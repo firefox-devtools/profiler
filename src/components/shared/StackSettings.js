@@ -15,14 +15,14 @@ import {
   getImplementationFilter,
   getInvertCallstack,
   getCurrentSearchString,
-} from 'selectors/url-state';
+  selectedThread,
+} from 'selectors';
 import PanelSearch from '../shared/PanelSearch';
 import {
   toValidImplementationFilter,
   toValidCallTreeSummaryStrategy,
 } from '../../profile-logic/profile-data';
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
-import { selectedThreadSelectors } from 'selectors/per-thread';
 
 import './StackSettings.css';
 
@@ -211,16 +211,10 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),
-    hasJsAllocations: selectedThreadSelectors.getHasJsAllocations(state),
-    hasNativeAllocations: selectedThreadSelectors.getHasNativeAllocations(
-      state
-    ),
-    canShowRetainedMemory: selectedThreadSelectors.getCanShowRetainedMemory(
-      state
-    ),
-    callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
-      state
-    ),
+    hasJsAllocations: selectedThread.getHasJsAllocations(state),
+    hasNativeAllocations: selectedThread.getHasNativeAllocations(state),
+    canShowRetainedMemory: selectedThread.getCanShowRetainedMemory(state),
+    callTreeSummaryStrategy: selectedThread.getCallTreeSummaryStrategy(state),
   }),
   mapDispatchToProps: {
     changeImplementationFilter,

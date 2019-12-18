@@ -22,13 +22,11 @@ import {
   getUploadError,
   getUploadProgress,
   getUploadGeneration,
-} from 'selectors/publish';
-import {
   getSelectedTab,
   getDataSource,
   getProfileName,
-} from 'selectors/url-state';
-import { getHasZipFile } from 'selectors/zipped-profiles';
+  getHasZipFile,
+} from 'selectors';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';

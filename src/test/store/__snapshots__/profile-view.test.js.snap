@@ -1427,7 +1427,7 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedNodeSelectors.getTimingsForSidebar 1`] = `
+exports[`snapshots of selectors/profile matches the last stored run of selectedNode.getTimingsForSidebar 1`] = `
 Object {
   "forFunc": Object {
     "selfTime": Object {

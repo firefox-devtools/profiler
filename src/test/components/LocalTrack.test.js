@@ -22,9 +22,9 @@ import {
   getRightClickedTrack,
   getLocalTrackFromReference,
   getProfile,
-} from 'selectors/profile';
+  getSelectedThreadIndex,
+} from 'selectors';
 import { ensureExists } from '../../utils/flow';
-import { getSelectedThreadIndex } from 'selectors/url-state';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import {
   getNetworkTrackProfile,

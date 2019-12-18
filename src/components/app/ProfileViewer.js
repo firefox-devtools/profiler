@@ -12,18 +12,18 @@ import MenuButtons from './MenuButtons';
 import WindowTitle from '../shared/WindowTitle';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import { returnToZipFileList } from '../../actions/zipped-profiles';
-import { getProfileName } from 'selectors/url-state';
 import Timeline from '../timeline';
-import { getHasZipFile } from 'selectors/zipped-profiles';
 import SplitterLayout from 'react-splitter-layout';
 import { invalidatePanelLayout } from '../../actions/app';
-import { getTimelineHeight } from 'selectors/app';
 import {
+  getProfileName,
+  getHasZipFile,
   getUploadProgressString,
   getUploadPhase,
+  getTimelineHeight,
   getIsHidingStaleProfile,
   getHasSanitizedProfile,
-} from 'selectors/publish';
+} from 'selectors';
 import classNames from 'classnames';
 
 import type { CssPixels } from '../../types/units';

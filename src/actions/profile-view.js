@@ -4,7 +4,6 @@
 
 // @flow
 import { oneLine } from 'common-tags';
-import { getLastVisibleThreadTabSlug } from 'selectors/app';
 import {
   getCounterSelectors,
   getGlobalTracks,
@@ -13,12 +12,8 @@ import {
   getLocalTrackFromReference,
   getGlobalTrackFromReference,
   getPreviewSelection,
-} from 'selectors/profile';
-import {
   getThreadSelectors,
-  selectedThreadSelectors,
-} from 'selectors/per-thread';
-import {
+  selectedThread,
   getImplementationFilter,
   getSelectedThreadIndex,
   getHiddenGlobalTracks,
@@ -26,7 +21,8 @@ import {
   getLocalTrackOrder,
   getHiddenLocalTracks,
   getSelectedTab,
-} from 'selectors/url-state';
+  getLastVisibleThreadTabSlug,
+} from 'selectors';
 import {
   getCallNodePathFromIndex,
   getSampleIndexToCallNodeIndex,
@@ -882,10 +878,10 @@ export function expandAllCallNodeDescendants(
   callNodeInfo: CallNodeInfo
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const expandedCallNodeIndexes = selectedThreadSelectors.getExpandedCallNodeIndexes(
+    const expandedCallNodeIndexes = selectedThread.getExpandedCallNodeIndexes(
       getState()
     );
-    const tree = selectedThreadSelectors.getCallTree(getState());
+    const tree = selectedThread.getCallTree(getState());
 
     // Create a set with the selected call node and its descendants
     const descendants = tree.getAllDescendants(callNodeIndex);
@@ -964,7 +960,7 @@ export function changeImplementationFilter(
       getSelectedThreadIndex(getState()),
       'Attempting to add an implementation filter when no thread is currently selected.'
     );
-    const transformedThread = selectedThreadSelectors.getRangeAndTransformFilteredThread(
+    const transformedThread = selectedThread.getRangeAndTransformFilteredThread(
       getState()
     );
 
@@ -1019,9 +1015,8 @@ export function changeInvertCallstack(
       type: 'CHANGE_INVERT_CALLSTACK',
       invertCallstack,
       selectedThreadIndex: getSelectedThreadIndex(getState()),
-      callTree: selectedThreadSelectors.getCallTree(getState()),
-      callNodeTable: selectedThreadSelectors.getCallNodeInfo(getState())
-        .callNodeTable,
+      callTree: selectedThread.getCallTree(getState()),
+      callNodeTable: selectedThread.getCallNodeInfo(getState()).callNodeTable,
     });
   };
 }

@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { getThreadSelectors } from 'selectors/per-thread';
+import { getThreadSelectors } from 'selectors';
 import { processProfile } from '../../profile-logic/process-profile';
 import {
   IPCMarkerCorrelations,

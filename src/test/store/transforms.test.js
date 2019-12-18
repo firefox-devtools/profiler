@@ -21,7 +21,7 @@ import {
   changeSelectedCallNode,
   changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 
 describe('"focus-subtree" transform', function() {
   describe('on a call tree', function() {
@@ -53,7 +53,7 @@ describe('"focus-subtree" transform', function() {
       E  G
     `);
     const { dispatch, getState } = storeWithProfile(profile);
-    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+    const originalCallTree = selectedThread.getCallTree(getState());
     const threadIndex = 0;
     const A = funcNames.indexOf('A');
     const B = funcNames.indexOf('B');
@@ -82,7 +82,7 @@ describe('"focus-subtree" transform', function() {
           inverted: false,
         })
       );
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
       expect(formatTree(callTree)).toEqual([
         '- C (total: 2, self: —)',
         '  - D (total: 1, self: —)',
@@ -94,7 +94,7 @@ describe('"focus-subtree" transform', function() {
 
     it('can remove the transform', function() {
       dispatch(popTransformsFromStack(0));
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
       const formattedTree = formatTree(callTree);
       expect(formattedTree).toEqual([
         '- A (total: 3, self: —)',
@@ -154,7 +154,7 @@ describe('"focus-subtree" transform', function() {
     dispatch(changeInvertCallstack(true));
 
     it('starts as an inverted call tree', function() {
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
       expect(formatTree(callTree)).toEqual([
         '- Z (total: 2, self: 2)',
         '  - Y (total: 2, self: —)',
@@ -186,7 +186,7 @@ describe('"focus-subtree" transform', function() {
           inverted: true,
         })
       );
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
       expect(formatTree(callTree)).toEqual([
         '- X (total: 2, self: 2)',
         '  - B (total: 1, self: —)',
@@ -199,7 +199,7 @@ describe('"focus-subtree" transform', function() {
 
     it('can be un-inverted and keep the transform', function() {
       dispatch(changeInvertCallstack(false));
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
       expect(formatTree(callTree)).toEqual([
         '- A (total: 2, self: —)',
         '  - B (total: 2, self: —)',
@@ -241,7 +241,7 @@ describe('"merge-call-node" transform', function() {
       E  G
     `);
     const { dispatch, getState } = storeWithProfile(profile);
-    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+    const originalCallTree = selectedThread.getCallTree(getState());
     const threadIndex = 0;
     const A = funcNames.indexOf('A');
     const B = funcNames.indexOf('B');
@@ -269,7 +269,7 @@ describe('"merge-call-node" transform', function() {
           implementation: 'combined',
         })
       );
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
       expect(formatTree(callTree)).toEqual([
         '- A (total: 3, self: —)',
         '  - B (total: 3, self: —)',
@@ -326,9 +326,7 @@ describe('"merge-call-node" transform', function() {
        *                   b
        */
       const { getState } = storeWithProfile(profile);
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- JS::RunScript.cpp (total: 3, self: —)',
         '  - onLoad.js (total: 3, self: —)',
         '    - js::jit::IonCannon.cpp (total: 2, self: —)',
@@ -349,9 +347,7 @@ describe('"merge-call-node" transform', function() {
        */
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(changeImplementationFilter('js'));
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- onLoad.js (total: 3, self: —)',
         '  - a.js (total: 3, self: —)',
         '    - b.js (total: 3, self: 3)',
@@ -367,9 +363,7 @@ describe('"merge-call-node" transform', function() {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(changeImplementationFilter('js'));
       dispatch(addTransformToStack(threadIndex, mergeJSPathAB));
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- onLoad.js (total: 3, self: —)',
         '  - b.js (total: 3, self: 3)',
       ]);
@@ -387,9 +381,7 @@ describe('"merge-call-node" transform', function() {
        */
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(addTransformToStack(threadIndex, mergeJSPathAB));
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- JS::RunScript.cpp (total: 3, self: —)',
         '  - onLoad.js (total: 3, self: —)',
         '    - js::jit::IonCannon.cpp (total: 2, self: —)',
@@ -409,9 +401,7 @@ describe('"merge-call-node" transform', function() {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(changeImplementationFilter('js'));
       dispatch(addTransformToStack(threadIndex, mergeCombinedPathToA));
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- onLoad.js (total: 3, self: —)',
         '  - a.js (total: 2, self: —)',
         '    - b.js (total: 2, self: 2)',
@@ -454,7 +444,7 @@ describe('"merge-function" transform', function() {
     const C = funcNames.indexOf('C');
 
     const { dispatch, getState } = storeWithProfile(profile);
-    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+    const originalCallTree = selectedThread.getCallTree(getState());
 
     it('starts as an unfiltered call tree', function() {
       expect(formatTree(originalCallTree)).toEqual([
@@ -477,7 +467,7 @@ describe('"merge-function" transform', function() {
           funcIndex: C,
         })
       );
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
       expect(formatTree(callTree)).toEqual([
         '- A (total: 3, self: —)',
         '  - B (total: 3, self: —)',
@@ -506,7 +496,7 @@ describe('"drop-function" transform', function() {
     const C = funcNames.indexOf('C');
 
     const { dispatch, getState } = storeWithProfile(profile);
-    const originalCallTree = selectedThreadSelectors.getCallTree(getState());
+    const originalCallTree = selectedThread.getCallTree(getState());
 
     it('starts as an unfiltered call tree', function() {
       expect(formatTree(originalCallTree)).toEqual([
@@ -526,7 +516,7 @@ describe('"drop-function" transform', function() {
           funcIndex: C,
         })
       );
-      const callTree = selectedThreadSelectors.getCallTree(getState());
+      const callTree = selectedThread.getCallTree(getState());
       expect(formatTree(callTree)).toEqual([
         '- A (total: 1, self: —)',
         '  - B (total: 1, self: —)',
@@ -579,9 +569,7 @@ describe('"focus-function" transform', function() {
 
     it('starts as an unfiltered call tree', function() {
       const { getState } = storeWithProfile(profile);
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- A (total: 3, self: —)',
         '  - B (total: 2, self: —)',
         '    - X (total: 2, self: —)',
@@ -603,9 +591,7 @@ describe('"focus-function" transform', function() {
           funcIndex: X,
         })
       );
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- X (total: 3, self: —)',
         '  - Y (total: 3, self: —)',
         '    - X (total: 2, self: —)',
@@ -660,9 +646,7 @@ describe('"collapse-resource" transform', function() {
 
     it('starts as an unfiltered call tree', function() {
       const { getState } = storeWithProfile(profile);
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- A (total: 2, self: —)',
         '  - B (total: 1, self: —)',
         '    - C (total: 1, self: —)',
@@ -675,9 +659,7 @@ describe('"collapse-resource" transform', function() {
     it('can collapse the "firefox" library', function() {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(addTransformToStack(threadIndex, collapseTransform));
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- A (total: 2, self: —)',
         '  - firefox (total: 2, self: —)',
         '    - D (total: 1, self: 1)',
@@ -695,9 +677,7 @@ describe('"collapse-resource" transform', function() {
         )
       );
       dispatch(addTransformToStack(threadIndex, collapseTransform));
-      expect(
-        selectedThreadSelectors.getSelectedCallNodePath(getState())
-      ).toEqual(
+      expect(selectedThread.getSelectedCallNodePath(getState())).toEqual(
         ['A', 'firefox', 'D'].map(name => collapsedFuncNames.indexOf(name))
       );
     });
@@ -762,9 +742,7 @@ describe('"collapse-resource" transform', function() {
 
     it('starts as an unfiltered call tree', function() {
       const { getState } = storeWithProfile(profile);
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- A.js (total: 2, self: —)',
         '  - B.cpp (total: 1, self: —)',
         '    - C.js (total: 1, self: —)',
@@ -783,9 +761,7 @@ describe('"collapse-resource" transform', function() {
         // Note the 'cpp' implementation filter.
         addTransformToStack(threadIndex, collapseTransform)
       );
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- A.js (total: 2, self: —)',
         '  - firefox (total: 2, self: 1)',
         '    - F.cpp (total: 1, self: —)',
@@ -805,9 +781,9 @@ describe('"collapse-resource" transform', function() {
       );
       dispatch(changeImplementationFilter('cpp'));
       dispatch(addTransformToStack(threadIndex, collapseTransform));
-      expect(
-        selectedThreadSelectors.getSelectedCallNodePath(getState())
-      ).toEqual(['firefox'].map(name => collapsedFuncNames.indexOf(name)));
+      expect(selectedThread.getSelectedCallNodePath(getState())).toEqual(
+        ['firefox'].map(name => collapsedFuncNames.indexOf(name))
+      );
     });
   });
 });
@@ -846,35 +822,31 @@ describe('"collapse-function-subtree" transform', function() {
 
   it('starts as an unfiltered call tree', function() {
     const { getState } = storeWithProfile(profile);
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- A (total: 4, self: —)',
-        '  - B (total: 4, self: —)',
-        '    - C (total: 2, self: —)', // <- C is here!
-        '      - D (total: 1, self: —)',
-        '        - E (total: 1, self: 1)',
-        '      - F (total: 1, self: —)',
-        '        - G (total: 1, self: 1)',
-        '    - H (total: 2, self: —)',
-        '      - C (total: 2, self: —)', // <- C is here!
-        '        - I (total: 1, self: 1)',
-        '        - J (total: 1, self: 1)',
-      ]
-    );
+    expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
+      '- A (total: 4, self: —)',
+      '  - B (total: 4, self: —)',
+      '    - C (total: 2, self: —)', // <- C is here!
+      '      - D (total: 1, self: —)',
+      '        - E (total: 1, self: 1)',
+      '      - F (total: 1, self: —)',
+      '        - G (total: 1, self: 1)',
+      '    - H (total: 2, self: —)',
+      '      - C (total: 2, self: —)', // <- C is here!
+      '        - I (total: 1, self: 1)',
+      '        - J (total: 1, self: 1)',
+    ]);
   });
 
   it('can collapse the C function', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(addTransformToStack(threadIndex, collapseTransform));
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- A (total: 4, self: —)',
-        '  - B (total: 4, self: —)',
-        '    - C (total: 2, self: 2)', // All children are gone, and the self time was applied.
-        '    - H (total: 2, self: —)',
-        '      - C (total: 2, self: 2)', // All children are gone, and the self time was applied.
-      ]
-    );
+    expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
+      '- A (total: 4, self: —)',
+      '  - B (total: 4, self: —)',
+      '    - C (total: 2, self: 2)', // All children are gone, and the self time was applied.
+      '    - H (total: 2, self: —)',
+      '      - C (total: 2, self: 2)', // All children are gone, and the self time was applied.
+    ]);
   });
 
   it('can update apply the transform to the selected CallNodePaths', function() {
@@ -886,16 +858,14 @@ describe('"collapse-function-subtree" transform', function() {
       )
     );
     dispatch(addTransformToStack(threadIndex, collapseTransform));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
+    expect(selectedThread.getSelectedCallNodePath(getState())).toEqual(
       ['A', 'B', 'C'].map(name => funcNames.indexOf(name))
     );
 
     // Popping transforms resets the selected path
     // see https://github.com/firefox-devtools/profiler/issues/882
     dispatch(popTransformsFromStack(0));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      []
-    );
+    expect(selectedThread.getSelectedCallNodePath(getState())).toEqual([]);
   });
 
   it('can update apply the transform to the expanded CallNodePaths', function() {
@@ -909,7 +879,7 @@ describe('"collapse-function-subtree" transform', function() {
       )
     );
     assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      selectedThread.getExpandedCallNodePaths(getState()),
       toIds([
         // Force Prettier to make this readable:
         ['A'],
@@ -920,7 +890,7 @@ describe('"collapse-function-subtree" transform', function() {
     );
     dispatch(addTransformToStack(threadIndex, collapseTransform));
     assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      selectedThread.getExpandedCallNodePaths(getState()),
       toIds([
         // Force Prettier to make this readable:
         ['A'],
@@ -933,7 +903,7 @@ describe('"collapse-function-subtree" transform', function() {
     // see https://github.com/firefox-devtools/profiler/issues/882
     dispatch(popTransformsFromStack(0));
     assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
+      selectedThread.getExpandedCallNodePaths(getState()),
       []
     );
   });
@@ -972,9 +942,7 @@ describe('"collapse-direct-recursion" transform', function() {
 
     it('starts as an unfiltered call tree', function() {
       const { getState } = storeWithProfile(profile);
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- A (total: 4, self: —)',
         '  - B (total: 3, self: —)',
         '    - B (total: 2, self: —)',
@@ -989,9 +957,7 @@ describe('"collapse-direct-recursion" transform', function() {
     it('can collapse the B function', function() {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(addTransformToStack(threadIndex, collapseDirectRecursion));
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- A (total: 4, self: —)',
         '  - B (total: 3, self: —)',
         '    - C (total: 1, self: 1)',
@@ -1011,9 +977,9 @@ describe('"collapse-direct-recursion" transform', function() {
         )
       );
       dispatch(addTransformToStack(threadIndex, collapseDirectRecursion));
-      expect(
-        selectedThreadSelectors.getSelectedCallNodePath(getState())
-      ).toEqual(['A', 'B', 'C'].map(name => funcNames.indexOf(name)));
+      expect(selectedThread.getSelectedCallNodePath(getState())).toEqual(
+        ['A', 'B', 'C'].map(name => funcNames.indexOf(name))
+      );
     });
   });
 
@@ -1055,9 +1021,7 @@ describe('"collapse-direct-recursion" transform', function() {
 
     it('starts as an unfiltered call tree', function() {
       const { getState } = storeWithProfile(profile);
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- A.js (total: 5, self: —)',
         '  - B.js (total: 4, self: —)',
         '    - B.js (total: 3, self: —)',
@@ -1073,9 +1037,7 @@ describe('"collapse-direct-recursion" transform', function() {
     it('can collapse the B function', function() {
       const { dispatch, getState } = storeWithProfile(profile);
       dispatch(addTransformToStack(threadIndex, collapseDirectRecursion));
-      expect(
-        formatTree(selectedThreadSelectors.getCallTree(getState()))
-      ).toEqual([
+      expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
         '- A.js (total: 5, self: —)',
         '  - B.js (total: 4, self: 1)',
         '    - D.js (total: 1, self: 1)',
@@ -1110,19 +1072,19 @@ describe('expanded and selected CallNodePaths', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     // This opens expands the call nodes up to this point.
     dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B, C, D]
-    );
+    expect(selectedThread.getSelectedCallNodePath(getState())).toEqual([
+      A,
+      B,
+      C,
+      D,
+    ]);
 
-    assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
-      [
-        // Expanded nodes:
-        [A],
-        [A, B],
-        [A, B, C],
-      ]
-    );
+    assertSetContainsOnly(selectedThread.getExpandedCallNodePaths(getState()), [
+      // Expanded nodes:
+      [A],
+      [A, B],
+      [A, B, C],
+    ]);
   });
 
   it('can update call node references for focusing a subtree', function() {
@@ -1138,17 +1100,16 @@ describe('expanded and selected CallNodePaths', function() {
       })
     );
 
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [B, C, D]
-    );
-    assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
-      [
-        // Expanded nodes:
-        [B],
-        [B, C],
-      ]
-    );
+    expect(selectedThread.getSelectedCallNodePath(getState())).toEqual([
+      B,
+      C,
+      D,
+    ]);
+    assertSetContainsOnly(selectedThread.getExpandedCallNodePaths(getState()), [
+      // Expanded nodes:
+      [B],
+      [B, C],
+    ]);
   });
 
   it('can update call node references for merging a node', function() {
@@ -1163,17 +1124,16 @@ describe('expanded and selected CallNodePaths', function() {
       })
     );
 
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, C, D]
-    );
-    assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
-      [
-        // Expanded nodes:
-        [A],
-        [A, C],
-      ]
-    );
+    expect(selectedThread.getSelectedCallNodePath(getState())).toEqual([
+      A,
+      C,
+      D,
+    ]);
+    assertSetContainsOnly(selectedThread.getExpandedCallNodePaths(getState()), [
+      // Expanded nodes:
+      [A],
+      [A, C],
+    ]);
   });
 });
 
@@ -1203,18 +1163,18 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
     dispatch(changeInvertCallstack(true));
     dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
 
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [Z, Y, X, B]
-    );
-    assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
-      [
-        // Expanded nodes:
-        [Z],
-        [Z, Y],
-        [Z, Y, X],
-      ]
-    );
+    expect(selectedThread.getSelectedCallNodePath(getState())).toEqual([
+      Z,
+      Y,
+      X,
+      B,
+    ]);
+    assertSetContainsOnly(selectedThread.getExpandedCallNodePaths(getState()), [
+      // Expanded nodes:
+      [Z],
+      [Z, Y],
+      [Z, Y, X],
+    ]);
   });
 
   it('can update call node references for focusing a subtree', function() {
@@ -1231,17 +1191,16 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
       })
     );
 
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [Y, X, B]
-    );
-    assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
-      [
-        // Expanded nodes:
-        [Y],
-        [Y, X],
-      ]
-    );
+    expect(selectedThread.getSelectedCallNodePath(getState())).toEqual([
+      Y,
+      X,
+      B,
+    ]);
+    assertSetContainsOnly(selectedThread.getExpandedCallNodePaths(getState()), [
+      // Expanded nodes:
+      [Y],
+      [Y, X],
+    ]);
   });
 
   it('can update call node references for merging a call node', function() {
@@ -1257,17 +1216,16 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
       })
     );
 
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [Z, X, B]
-    );
-    assertSetContainsOnly(
-      selectedThreadSelectors.getExpandedCallNodePaths(getState()),
-      [
-        // Expanded nodes:
-        [Z],
-        [Z, X],
-      ]
-    );
+    expect(selectedThread.getSelectedCallNodePath(getState())).toEqual([
+      Z,
+      X,
+      B,
+    ]);
+    assertSetContainsOnly(selectedThread.getExpandedCallNodePaths(getState()), [
+      // Expanded nodes:
+      [Z],
+      [Z, X],
+    ]);
   });
 });
 
@@ -1279,19 +1237,17 @@ describe('transform js allocations', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('js-allocations'));
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- A (total: 15, self: —)',
-        '  - B (total: 15, self: —)',
-        '    - Fjs (total: 12, self: —)',
-        '      - Gjs (total: 12, self: 5)',
-        '        - Hjs (total: 7, self: —)',
-        '          - I (total: 7, self: 7)',
-        '    - C (total: 3, self: —)',
-        '      - D (total: 3, self: —)',
-        '        - E (total: 3, self: 3)',
-      ]
-    );
+    expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
+      '- A (total: 15, self: —)',
+      '  - B (total: 15, self: —)',
+      '    - Fjs (total: 12, self: —)',
+      '      - Gjs (total: 12, self: 5)',
+      '        - Hjs (total: 7, self: —)',
+      '          - I (total: 7, self: 7)',
+      '    - C (total: 3, self: —)',
+      '      - D (total: 3, self: —)',
+      '        - E (total: 3, self: 3)',
+    ]);
   });
 
   it('is modified when performing a transform to the stacks', function() {
@@ -1308,14 +1264,12 @@ describe('transform js allocations', function() {
       })
     );
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- Fjs (total: 12, self: —)',
-        '  - Gjs (total: 12, self: 5)',
-        '    - Hjs (total: 7, self: —)',
-        '      - I (total: 7, self: 7)',
-      ]
-    );
+    expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
+      '- Fjs (total: 12, self: —)',
+      '  - Gjs (total: 12, self: 5)',
+      '    - Hjs (total: 7, self: —)',
+      '      - I (total: 7, self: 7)',
+    ]);
   });
 });
 
@@ -1327,19 +1281,17 @@ describe('transform native allocations', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-allocations'));
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- A (total: 15, self: —)',
-        '  - B (total: 15, self: —)',
-        '    - Fjs (total: 12, self: —)',
-        '      - Gjs (total: 12, self: 5)',
-        '        - Hjs (total: 7, self: —)',
-        '          - I (total: 7, self: 7)',
-        '    - C (total: 3, self: —)',
-        '      - D (total: 3, self: —)',
-        '        - E (total: 3, self: 3)',
-      ]
-    );
+    expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
+      '- A (total: 15, self: —)',
+      '  - B (total: 15, self: —)',
+      '    - Fjs (total: 12, self: —)',
+      '      - Gjs (total: 12, self: 5)',
+      '        - Hjs (total: 7, self: —)',
+      '          - I (total: 7, self: 7)',
+      '    - C (total: 3, self: —)',
+      '      - D (total: 3, self: —)',
+      '        - E (total: 3, self: 3)',
+    ]);
   });
 
   it('is modified when performing a transform to the stacks', function() {
@@ -1356,14 +1308,12 @@ describe('transform native allocations', function() {
       })
     );
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- Fjs (total: 12, self: —)',
-        '  - Gjs (total: 12, self: 5)',
-        '    - Hjs (total: 7, self: —)',
-        '      - I (total: 7, self: 7)',
-      ]
-    );
+    expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
+      '- Fjs (total: 12, self: —)',
+      '  - Gjs (total: 12, self: 5)',
+      '    - Hjs (total: 7, self: —)',
+      '      - I (total: 7, self: 7)',
+    ]);
   });
 });
 
@@ -1375,19 +1325,17 @@ describe('transform native deallocations', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-deallocations'));
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- A (total: -41, self: —)',
-        '  - B (total: -41, self: —)',
-        '    - Fjs (total: -30, self: —)',
-        '      - Gjs (total: -30, self: -13)',
-        '        - Hjs (total: -17, self: —)',
-        '          - I (total: -17, self: -17)',
-        '    - C (total: -11, self: —)',
-        '      - D (total: -11, self: —)',
-        '        - E (total: -11, self: -11)',
-      ]
-    );
+    expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
+      '- A (total: -41, self: —)',
+      '  - B (total: -41, self: —)',
+      '    - Fjs (total: -30, self: —)',
+      '      - Gjs (total: -30, self: -13)',
+      '        - Hjs (total: -17, self: —)',
+      '          - I (total: -17, self: -17)',
+      '    - C (total: -11, self: —)',
+      '      - D (total: -11, self: —)',
+      '        - E (total: -11, self: -11)',
+    ]);
   });
 
   it('is modified when performing a transform to the stacks', function() {
@@ -1404,14 +1352,12 @@ describe('transform native deallocations', function() {
       })
     );
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- Fjs (total: -30, self: —)',
-        '  - Gjs (total: -30, self: -13)',
-        '    - Hjs (total: -17, self: —)',
-        '      - I (total: -17, self: -17)',
-      ]
-    );
+    expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
+      '- Fjs (total: -30, self: —)',
+      '  - Gjs (total: -30, self: -13)',
+      '    - Hjs (total: -17, self: —)',
+      '      - I (total: -17, self: -17)',
+    ]);
   });
 });
 
@@ -1423,19 +1369,17 @@ describe('transform retained native allocations', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-retained-allocations'));
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- A (total: 41, self: —)',
-        '  - B (total: 41, self: —)',
-        '    - Fjs (total: 30, self: —)',
-        '      - Gjs (total: 30, self: 13)',
-        '        - Hjs (total: 17, self: —)',
-        '          - I (total: 17, self: 17)',
-        '    - C (total: 11, self: —)',
-        '      - D (total: 11, self: —)',
-        '        - E (total: 11, self: 11)',
-      ]
-    );
+    expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
+      '- A (total: 41, self: —)',
+      '  - B (total: 41, self: —)',
+      '    - Fjs (total: 30, self: —)',
+      '      - Gjs (total: 30, self: 13)',
+      '        - Hjs (total: 17, self: —)',
+      '          - I (total: 17, self: 17)',
+      '    - C (total: 11, self: —)',
+      '      - D (total: 11, self: —)',
+      '        - E (total: 11, self: 11)',
+    ]);
   });
 
   it('is modified when performing a transform to the stacks', function() {
@@ -1452,13 +1396,11 @@ describe('transform retained native allocations', function() {
       })
     );
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- Fjs (total: 42, self: —)',
-        '  - Gjs (total: 42, self: 18)',
-        '    - Hjs (total: 24, self: —)',
-        '      - I (total: 24, self: 24)',
-      ]
-    );
+    expect(formatTree(selectedThread.getCallTree(getState()))).toEqual([
+      '- Fjs (total: 42, self: —)',
+      '  - Gjs (total: 42, self: 18)',
+      '    - Hjs (total: 24, self: —)',
+      '      - I (total: 24, self: 24)',
+    ]);
   });
 });

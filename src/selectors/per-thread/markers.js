@@ -113,7 +113,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * This selector returns a function that's used to retrieve a marker object
    * from its MarkerIndex:
    *
-   *   const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+   *   const getMarker = selectedThread.getMarkerGetter(state);
    *   const marker = getMarker(markerIndex);
    *
    * This is essentially the same as using the full marker list, but it's more

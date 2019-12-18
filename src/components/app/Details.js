@@ -20,9 +20,7 @@ import JsTracer from '../js-tracer/';
 import selectSidebar from '../sidebar';
 
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
-import { getSelectedTab } from 'selectors/url-state';
-import { getIsSidebarOpen } from 'selectors/app';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { getSelectedTab, getIsSidebarOpen, selectedThread } from 'selectors';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerContextMenu from '../shared/MarkerContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';
@@ -115,7 +113,7 @@ class ProfileViewer extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    visibleTabs: selectedThreadSelectors.getUsefulTabs(state),
+    visibleTabs: selectedThread.getUsefulTabs(state),
     selectedTab: getSelectedTab(state),
     isSidebarOpen: getIsSidebarOpen(state),
   }),

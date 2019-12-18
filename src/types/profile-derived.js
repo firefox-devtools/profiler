@@ -90,7 +90,7 @@ export type Marker = {|
  * and the marker object is returned using the function `getMarker` as returned
  * by the selector `getMarkerGetter`:
  *
- *   const getMarker = selectedThreadSelectors.getMarkerGetter(state);
+ *   const getMarker = selectedThread.getMarkerGetter(state);
  *   const marker = getMarker(markerIndex);
  */
 export type MarkerIndex = number;

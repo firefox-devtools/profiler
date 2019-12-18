@@ -13,9 +13,9 @@ import {
   getPreviewSelection,
   getProfile,
   getCommittedRange,
-} from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
-import { getSelectedThreadIndex } from 'selectors/url-state';
+  selectedThread,
+  getSelectedThreadIndex,
+} from 'selectors';
 import {
   selectBestAncestorCallNodeAndExpandCallTree,
   focusCallTree,
@@ -243,19 +243,17 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     return {
       interval: getProfile(state).meta.interval,
       selectedThreadIndex: getSelectedThreadIndex(state),
-      fullThread: selectedThreadSelectors.getRangeFilteredThread(state),
-      filteredThread: selectedThreadSelectors.getFilteredThread(state),
+      fullThread: selectedThread.getRangeFilteredThread(state),
+      filteredThread: selectedThread.getFilteredThread(state),
       rangeStart,
       rangeEnd,
-      callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-        state
-      ),
+      callNodeInfo: selectedThread.getCallNodeInfo(state),
+      selectedCallNodeIndex: selectedThread.getSelectedCallNodeIndex(state),
       categories: getProfile(state).meta.categories,
-      samplesSelectedStates: selectedThreadSelectors.getSamplesSelectedStatesInFilteredThread(
+      samplesSelectedStates: selectedThread.getSamplesSelectedStatesInFilteredThread(
         state
       ),
-      treeOrderSampleComparator: selectedThreadSelectors.getTreeOrderComparatorInFilteredThread(
+      treeOrderSampleComparator: selectedThread.getTreeOrderComparatorInFilteredThread(
         state
       ),
       timeRange: getCommittedRange(state),

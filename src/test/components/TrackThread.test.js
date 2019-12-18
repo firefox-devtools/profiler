@@ -13,8 +13,7 @@ import { oneLine } from 'common-tags';
 
 import { changeTimelineType } from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
-import { getPreviewSelection } from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { getPreviewSelection, selectedThread } from 'selectors';
 import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -142,7 +141,7 @@ describe('timeline/TrackThread', function() {
 
     // Provide a quick helper for nicely asserting the call node path.
     const getCallNodePath = () =>
-      selectedThreadSelectors
+      selectedThread
         .getSelectedCallNodePath(getState())
         .map(funcIndex =>
           thread.stringTable.getString(thread.funcTable.name[funcIndex])

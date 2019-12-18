@@ -8,7 +8,7 @@ import * as React from 'react';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
 import { formatPercent } from '../../utils/format-numbers';
-import { getCommittedRange, getProfileInterval } from 'selectors/profile';
+import { getCommittedRange, getProfileInterval } from 'selectors';
 import Tooltip from '../tooltip/Tooltip';
 import bisection from 'bisection';
 import { BLUE_50, BLUE_60 } from 'photon-colors';

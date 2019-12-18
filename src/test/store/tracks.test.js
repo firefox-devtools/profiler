@@ -8,8 +8,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
-import * as ProfileViewSelectors from 'selectors/profile';
-import * as UrlStateSelectors from 'selectors/url-state';
+import * as selectors from 'selectors';
 import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,
@@ -48,7 +47,7 @@ describe('ordering and hiding', function() {
     );
     const parentPid = profile.threads[parentThreadIndex].pid;
     const tabPid = profile.threads[workerThreadIndex].pid;
-    const globalTracks = ProfileViewSelectors.getGlobalTracks(getState());
+    const globalTracks = selectors.getGlobalTracks(getState());
     const parentTrackIndex = globalTracks.findIndex(
       track =>
         track.type === 'process' && track.mainThreadIndex === parentThreadIndex
@@ -61,9 +60,7 @@ describe('ordering and hiding', function() {
       thread => thread.name === 'GeckoMain' && thread.processType === 'tab'
     );
     let styleTrackIndex, workerTrackIndex;
-    for (const [, tracks] of ProfileViewSelectors.getLocalTracksByPid(
-      getState()
-    )) {
+    for (const [, tracks] of selectors.getLocalTracksByPid(getState())) {
       for (let trackIndex = 0; trackIndex < tracks.length; trackIndex++) {
         const track = tracks[trackIndex];
         if (track.type === 'thread') {
@@ -260,11 +257,11 @@ describe('ordering and hiding', function() {
         tabThreadIndex,
         parentThreadIndex,
       } = init();
-      expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+      expect(selectors.getSelectedThreadIndex(getState())).toEqual(
         tabThreadIndex
       );
       dispatch(hideGlobalTrack(tabTrackIndex));
-      expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+      expect(selectors.getSelectedThreadIndex(getState())).toEqual(
         parentThreadIndex
       );
     });
@@ -277,11 +274,11 @@ describe('ordering and hiding', function() {
         parentThreadIndex,
         parentTrackIndex,
       } = init();
-      expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+      expect(selectors.getSelectedThreadIndex(getState())).toEqual(
         tabThreadIndex
       );
       dispatch(isolateProcess(parentTrackIndex));
-      expect(UrlStateSelectors.getSelectedThreadIndex(getState())).toEqual(
+      expect(selectors.getSelectedThreadIndex(getState())).toEqual(
         parentThreadIndex
       );
     });
@@ -339,8 +336,8 @@ describe('ordering and hiding', function() {
         threadA.pid = 2;
         const { getState } = storeWithProfile(profile);
         return {
-          globalTracks: ProfileViewSelectors.getGlobalTracks(getState()),
-          globalTrackOrder: UrlStateSelectors.getGlobalTrackOrder(getState()),
+          globalTracks: selectors.getGlobalTracks(getState()),
+          globalTrackOrder: selectors.getGlobalTrackOrder(getState()),
         };
       }
 
@@ -380,7 +377,7 @@ describe('ordering and hiding', function() {
     it('can count hidden local tracks', function() {
       const { getState, dispatch, workerTrackIndex, tabPid } = init();
       dispatch(hideLocalTrack(tabPid, workerTrackIndex));
-      expect(ProfileViewSelectors.getHiddenTrackCount(getState())).toEqual({
+      expect(selectors.getHiddenTrackCount(getState())).toEqual({
         hidden: 1,
         total: 4,
       });
@@ -389,7 +386,7 @@ describe('ordering and hiding', function() {
     it('can count hidden global tracks and their hidden local tracks', function() {
       const { getState, dispatch, tabTrackIndex } = init();
       dispatch(hideGlobalTrack(tabTrackIndex));
-      expect(ProfileViewSelectors.getHiddenTrackCount(getState())).toEqual({
+      expect(selectors.getHiddenTrackCount(getState())).toEqual({
         hidden: 3,
         total: 4,
       });
@@ -621,11 +618,8 @@ describe('ordering and hiding', function() {
         profile.threads[0].pid = pid;
         const { getState } = storeWithProfile(profile);
         return {
-          localTracks: ProfileViewSelectors.getLocalTracks(getState(), pid),
-          localTrackOrder: UrlStateSelectors.getLocalTrackOrder(
-            getState(),
-            pid
-          ),
+          localTracks: selectors.getLocalTracks(getState(), pid),
+          localTrackOrder: selectors.getLocalTrackOrder(getState(), pid),
         };
       }
 
@@ -644,12 +638,12 @@ describe('ordering and hiding', function() {
   });
 });
 
-describe('ProfileViewSelectors.getProcessesWithMemoryTrack', function() {
+describe('selectors.getProcessesWithMemoryTrack', function() {
   it('knows when a profile does not have a memory track', function() {
     const profile = getProfileWithNiceTracks();
     const [thread] = profile.threads;
     const { getState } = storeWithProfile(profile);
-    const processesWithMemoryTrack = ProfileViewSelectors.getProcessesWithMemoryTrack(
+    const processesWithMemoryTrack = selectors.getProcessesWithMemoryTrack(
       getState()
     );
     expect(processesWithMemoryTrack.has(thread.pid)).toEqual(false);
@@ -658,7 +652,7 @@ describe('ProfileViewSelectors.getProcessesWithMemoryTrack', function() {
   it('knows when a profile has a memory track', function() {
     const { getState, profile } = getStoreWithMemoryTrack();
     const [thread] = profile.threads;
-    const processesWithMemoryTrack = ProfileViewSelectors.getProcessesWithMemoryTrack(
+    const processesWithMemoryTrack = selectors.getProcessesWithMemoryTrack(
       getState()
     );
     expect(processesWithMemoryTrack.has(thread.pid)).toEqual(true);

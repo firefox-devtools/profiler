@@ -9,12 +9,12 @@ import JsTracerChart from './Chart';
 import JsTracerSettings from './Settings';
 import EmptyReasons from './EmptyReasons';
 
-import { getProfile } from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
 import {
+  getProfile,
+  selectedThread,
   getShowJsTracerSummary,
   getSelectedThreadIndex,
-} from 'selectors/url-state';
+} from 'selectors';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { Profile, JsTracerTable, ThreadIndex } from '../../types/profile';
@@ -70,7 +70,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     return {
       profile: getProfile(state),
       threadIndex: getSelectedThreadIndex(state),
-      jsTracerTable: selectedThreadSelectors.getJsTracerTable(state),
+      jsTracerTable: selectedThread.getJsTracerTable(state),
       showJsTracerSummary: getShowJsTracerSummary(state),
     };
   },

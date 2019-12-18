@@ -13,19 +13,17 @@ import {
   getScrollToSelectionGeneration,
   getProfileInterval,
   getPageList,
-} from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
-import {
+  selectedThread,
   getSelectedThreadIndex,
   getInvertCallstack,
-} from 'selectors/url-state';
+  getIconsWithClassNames,
+} from 'selectors';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
 } from '../../actions/profile-view';
-import { getIconsWithClassNames } from 'selectors/icons';
 import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
 import type { Thread, CategoryList, PageList } from '../../types/profile';
@@ -343,34 +341,28 @@ function viewportNeedsUpdate() {
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
-      thread: selectedThreadSelectors.getFilteredThread(state),
-      unfilteredThread: selectedThreadSelectors.getThread(state),
-      sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
+      thread: selectedThread.getFilteredThread(state),
+      unfilteredThread: selectedThread.getThread(state),
+      sampleIndexOffset: selectedThread.getSampleIndexOffsetFromCommittedRange(
         state
       ),
-      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
-        state
-      ),
-      flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
-      callTree: selectedThreadSelectors.getCallTree(state),
+      maxStackDepth: selectedThread.getCallNodeMaxDepthForFlameGraph(state),
+      flameGraphTiming: selectedThread.getFlameGraphTiming(state),
+      callTree: selectedThread.getCallTree(state),
       timeRange: getCommittedRange(state),
       previewSelection: getPreviewSelection(state),
-      callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+      callNodeInfo: selectedThread.getCallNodeInfo(state),
       categories: getCategories(state),
       threadIndex: getSelectedThreadIndex(state),
-      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-        state
-      ),
-      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
+      selectedCallNodeIndex: selectedThread.getSelectedCallNodeIndex(state),
+      rightClickedCallNodeIndex: selectedThread.getRightClickedCallNodeIndex(
         state
       ),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       icons: getIconsWithClassNames(state),
       interval: getProfileInterval(state),
       isInverted: getInvertCallstack(state),
-      callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
-        state
-      ),
+      callTreeSummaryStrategy: selectedThread.getCallTreeSummaryStrategy(state),
       pages: getPageList(state),
     };
   },

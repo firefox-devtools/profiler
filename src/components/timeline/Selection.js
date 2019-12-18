@@ -12,7 +12,7 @@ import {
   getPreviewSelection,
   getCommittedRange,
   getZeroAt,
-} from 'selectors/profile';
+} from 'selectors';
 import {
   updatePreviewSelection,
   commitRange,

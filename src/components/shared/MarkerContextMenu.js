@@ -11,8 +11,12 @@ import {
   setContextMenuVisibility,
   updatePreviewSelection,
 } from '../../actions/profile-view';
-import { getPreviewSelection, getCommittedRange } from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import {
+  getPreviewSelection,
+  getCommittedRange,
+  selectedThread,
+  getImplementationFilter,
+} from 'selectors';
 import copy from 'copy-to-clipboard';
 
 import type { Marker } from '../../types/profile-derived';
@@ -22,7 +26,6 @@ import type {
   ImplementationFilter,
 } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
-import { getImplementationFilter } from 'selectors/url-state';
 import type { Thread, IndexIntoStackTable } from '../../types/profile';
 import { filterCallNodePathByImplementation } from '../../profile-logic/transforms';
 import {
@@ -264,9 +267,9 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
-    thread: selectedThreadSelectors.getThread(state),
+    thread: selectedThread.getThread(state),
     implementationFilter: getImplementationFilter(state),
-    selectedMarker: selectedThreadSelectors.getRightClickedMarker(state),
+    selectedMarker: selectedThread.getRightClickedMarker(state),
   }),
   mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
   component: MarkerContextMenu,

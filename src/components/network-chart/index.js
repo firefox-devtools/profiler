@@ -18,9 +18,9 @@ import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
   getPreviewSelection,
   getPreviewSelectionRange,
-} from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
-import { getSelectedThreadIndex } from 'selectors/url-state';
+  selectedThread,
+  getSelectedThreadIndex,
+} from 'selectors';
 import { changeRightClickedMarker } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -174,11 +174,11 @@ const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
   {
     mapStateToProps: state => {
       return {
-        markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+        markerIndexes: selectedThread.getSearchFilteredNetworkMarkerIndexes(
           state
         ),
-        getMarker: selectedThreadSelectors.getMarkerGetter(state),
-        rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
+        getMarker: selectedThread.getMarkerGetter(state),
+        rightClickedMarkerIndex: selectedThread.getRightClickedMarkerIndex(
           state
         ),
         timeRange: getPreviewSelectionRange(state),

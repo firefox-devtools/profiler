@@ -12,14 +12,12 @@ import {
   selectTrack,
 } from '../../actions/profile-view';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
+import explicitConnect from '../../utils/connect';
 import {
   getSelectedThreadIndex,
   getHiddenGlobalTracks,
   getLocalTrackOrder,
   getSelectedTab,
-} from 'selectors/url-state';
-import explicitConnect from '../../utils/connect';
-import {
   getGlobalTracks,
   getLocalTracks,
   getGlobalTrackName,
@@ -27,8 +25,8 @@ import {
   getVisualProgress,
   getPerceptualSpeedIndexProgress,
   getContentfulSpeedIndexProgress,
-} from 'selectors/profile';
-import { getThreadSelectors } from 'selectors/per-thread';
+  getThreadSelectors,
+} from 'selectors';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';

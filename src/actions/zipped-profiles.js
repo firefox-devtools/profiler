@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { getZipFileTable, getZipFileState } from 'selectors/zipped-profiles';
+import { getZipFileTable, getZipFileState } from 'selectors';
 import { unserializeProfileOfArbitraryFormat } from '../profile-logic/process-profile';
 import { loadProfile } from './receive-profile';
 

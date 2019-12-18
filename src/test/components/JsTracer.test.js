@@ -20,7 +20,7 @@ import {
   removeRootOverlayElement,
 } from '../fixtures/utils';
 import { getProfileWithJsTracerEvents } from '../fixtures/profiles/processed-profile';
-import { getShowJsTracerSummary } from 'selectors/url-state';
+import { getShowJsTracerSummary } from 'selectors';
 jest.useFakeTimers();
 
 const GRAPH_BASE_WIDTH = 200;

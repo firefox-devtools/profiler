@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import { render, fireEvent, cleanup } from 'react-testing-library';
 
 import CompareHome from '../../components/app/CompareHome';
-import { getProfilesToCompare } from 'selectors/url-state';
+import { getProfilesToCompare } from 'selectors';
 
 import { blankStore } from '../fixtures/stores';
 

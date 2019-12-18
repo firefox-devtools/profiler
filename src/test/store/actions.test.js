@@ -4,8 +4,7 @@
 // @flow
 
 import { storeWithProfile } from '../fixtures/stores';
-import * as ProfileViewSelectors from 'selectors/profile';
-import * as UrlStateSelectors from 'selectors/url-state';
+import * as selectors from 'selectors';
 
 import {
   changeCallTreeSearchString,
@@ -17,7 +16,6 @@ import {
   changeShowUserTimings,
 } from '../../actions/profile-view';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
 
 describe('selectors/getStackTimingByDepth', function() {
   /**
@@ -38,7 +36,7 @@ describe('selectors/getStackTimingByDepth', function() {
 
   it('computes unfiltered stack timing by depth', function() {
     const store = storeWithProfile();
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
+    const stackTimingByDepth = selectors.selectedThread.getStackTimingByDepth(
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
@@ -60,7 +58,7 @@ describe('selectors/getStackTimingByDepth', function() {
   it('uses search strings', function() {
     const store = storeWithProfile();
     store.dispatch(changeCallTreeSearchString('javascript'));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
+    const stackTimingByDepth = selectors.selectedThread.getStackTimingByDepth(
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
@@ -93,7 +91,7 @@ describe('selectors/getStackTimingByDepth', function() {
   it('can handle inverted stacks', function() {
     const store = storeWithProfile();
     store.dispatch(changeInvertCallstack(true));
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
+    const stackTimingByDepth = selectors.selectedThread.getStackTimingByDepth(
       store.getState()
     );
     expect(stackTimingByDepth).toEqual([
@@ -136,10 +134,10 @@ describe('selectors/getFlameGraphTiming', function() {
    * "FunctionName1 (StartTime:EndTime) | FunctionName2 (StartTime:EndTime)"
    */
   function getHumanReadableFlameGraphRanges(store, funcNames) {
-    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+    const { callNodeTable } = selectors.selectedThread.getCallNodeInfo(
       store.getState()
     );
-    const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
+    const flameGraphTiming = selectors.selectedThread.getFlameGraphTiming(
       store.getState()
     );
 
@@ -166,10 +164,10 @@ describe('selectors/getFlameGraphTiming', function() {
    * "FunctionName1 (SelfTimeRelative) | ..."
    */
   function getHumanReadableFlameGraphTimings(store, funcNames) {
-    const { callNodeTable } = selectedThreadSelectors.getCallNodeInfo(
+    const { callNodeTable } = selectors.selectedThread.getCallNodeInfo(
       store.getState()
     );
-    const flameGraphTiming = selectedThreadSelectors.getFlameGraphTiming(
+    const flameGraphTiming = selectors.selectedThread.getFlameGraphTiming(
       store.getState()
     );
 
@@ -279,7 +277,7 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
     `);
 
     const store = storeWithProfile(profile);
-    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+    const allSamplesMaxDepth = selectors.selectedThread.getCallNodeMaxDepthForFlameGraph(
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(4);
@@ -288,7 +286,7 @@ describe('selectors/getCallNodeMaxDepthForFlameGraph', function() {
   it('returns zero if there are no samples', function() {
     const { profile } = getProfileFromTextSamples(` `);
     const store = storeWithProfile(profile);
-    const allSamplesMaxDepth = selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+    const allSamplesMaxDepth = selectors.selectedThread.getCallNodeMaxDepthForFlameGraph(
       store.getState()
     );
     expect(allSamplesMaxDepth).toEqual(0);
@@ -299,13 +297,13 @@ describe('actions/changeImplementationFilter', function() {
   const store = storeWithProfile();
 
   it('is initially set to filter to all', function() {
-    const filter = UrlStateSelectors.getImplementationFilter(store.getState());
+    const filter = selectors.getImplementationFilter(store.getState());
     expect(filter).toEqual('combined');
   });
 
   it('can be changed to cpp', function() {
     store.dispatch(changeImplementationFilter('cpp'));
-    const filter = UrlStateSelectors.getImplementationFilter(store.getState());
+    const filter = selectors.getImplementationFilter(store.getState());
     expect(filter).toEqual('cpp');
   });
 });
@@ -314,9 +312,7 @@ describe('actions/updatePreviewSelection', function() {
   it('can update the selection with new values', function() {
     const store = storeWithProfile();
 
-    const initialSelection = ProfileViewSelectors.getPreviewSelection(
-      store.getState()
-    );
+    const initialSelection = selectors.getPreviewSelection(store.getState());
     expect(initialSelection).toEqual({
       hasSelection: false,
       isModifying: false,
@@ -331,9 +327,7 @@ describe('actions/updatePreviewSelection', function() {
       })
     );
 
-    const secondSelection = ProfileViewSelectors.getPreviewSelection(
-      store.getState()
-    );
+    const secondSelection = selectors.getPreviewSelection(store.getState());
     expect(secondSelection).toEqual({
       hasSelection: true,
       isModifying: false,
@@ -366,11 +360,11 @@ describe('actions/changeInvertCallstack', function() {
   // Make tests more readable by grabbing the relevant paths, and transforming
   // them to their function names, rather than indexes.
   const getPaths = state => ({
-    selectedCallNodePath: selectedThreadSelectors
+    selectedCallNodePath: selectors.selectedThread
       .getSelectedCallNodePath(state)
       .map(index => funcNames[index]),
     expandedCallNodePaths: Array.from(
-      selectedThreadSelectors.getExpandedCallNodePaths(state)
+      selectors.selectedThread.getExpandedCallNodePaths(state)
     ).map(path => path.map(index => funcNames[index])),
   });
 
@@ -443,9 +437,9 @@ describe('actions/changeShowJsTracerSummary', function() {
   it('can change the view to show a summary', function() {
     const { profile } = getProfileFromTextSamples(`A`);
     const { dispatch, getState } = storeWithProfile(profile);
-    expect(UrlStateSelectors.getShowJsTracerSummary(getState())).toBe(false);
+    expect(selectors.getShowJsTracerSummary(getState())).toBe(false);
     dispatch(changeShowJsTracerSummary(true));
-    expect(UrlStateSelectors.getShowJsTracerSummary(getState())).toBe(true);
+    expect(selectors.getShowJsTracerSummary(getState())).toBe(true);
   });
 });
 
@@ -453,8 +447,8 @@ describe('actions/changeShowUserTimings', function() {
   it('can change the view to show a summary', function() {
     const { profile } = getProfileFromTextSamples(`A`);
     const { dispatch, getState } = storeWithProfile(profile);
-    expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(false);
+    expect(selectors.getShowUserTimings(getState())).toBe(false);
     dispatch(changeShowUserTimings(true));
-    expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(true);
+    expect(selectors.getShowUserTimings(getState())).toBe(true);
   });
 });

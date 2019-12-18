@@ -14,11 +14,12 @@ import {
   changeRightClickedTrack,
 } from '../../actions/profile-view';
 import TrackContextMenu from '../../components/timeline/TrackContextMenu';
-import { getGlobalTracks, getLocalTracks } from 'selectors/profile';
 import {
+  getGlobalTracks,
+  getLocalTracks,
   getHiddenGlobalTracks,
   getHiddenLocalTracks,
-} from 'selectors/url-state';
+} from 'selectors';
 import {
   getProfileWithNiceTracks,
   getHumanReadableTracks,

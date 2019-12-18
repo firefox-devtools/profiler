@@ -12,9 +12,12 @@ import ZipFileViewer from './ZipFileViewer';
 import Home from './Home';
 import CompareHome from './CompareHome';
 import { ProfileRootMessage } from './ProfileRootMessage';
-import { getView } from 'selectors/app';
-import { getHasZipFile } from 'selectors/zipped-profiles';
-import { getDataSource, getProfilesToCompare } from 'selectors/url-state';
+import {
+  getView,
+  getHasZipFile,
+  getDataSource,
+  getProfilesToCompare,
+} from 'selectors';
 import ServiceWorkerManager from './ServiceWorkerManager';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 

@@ -17,9 +17,9 @@ import {
   getCommittedRange,
   getProfileInterval,
   getPreviewSelection,
-} from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
-import { getSelectedThreadIndex } from 'selectors/url-state';
+  selectedThread,
+  getSelectedThreadIndex,
+} from 'selectors';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
@@ -168,20 +168,18 @@ function viewportNeedsUpdate(
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
-    const markerTimingAndBuckets = selectedThreadSelectors.getMarkerChartTimingAndBuckets(
+    const markerTimingAndBuckets = selectedThread.getMarkerChartTimingAndBuckets(
       state
     );
     return {
-      getMarker: selectedThreadSelectors.getMarkerGetter(state),
+      getMarker: selectedThread.getMarkerGetter(state),
       markerTimingAndBuckets,
       maxMarkerRows: markerTimingAndBuckets.length,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       previewSelection: getPreviewSelection(state),
-      rightClickedMarker: selectedThreadSelectors.getRightClickedMarkerIndex(
-        state
-      ),
+      rightClickedMarker: selectedThread.getRightClickedMarkerIndex(state),
     };
   },
   mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },

@@ -8,11 +8,12 @@ import * as React from 'react';
 
 import explicitConnect from '../../utils/connect';
 import {
-  selectedThreadSelectors,
-  selectedNodeSelectors,
-} from 'selectors/per-thread';
-import { getSelectedThreadIndex } from 'selectors/url-state';
-import { getCategories, getProfileInterval } from 'selectors/profile';
+  selectedThread,
+  selectedNode,
+  getSelectedThreadIndex,
+  getCategories,
+  getProfileInterval,
+} from 'selectors';
 import { getFunctionName } from '../../profile-logic/function-info';
 import {
   getFriendlyStackTypeName,
@@ -351,12 +352,12 @@ class CallTreeSidebar extends React.PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
-    selectedNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(state),
-    callNodeTable: selectedThreadSelectors.getCallNodeInfo(state).callNodeTable,
+    selectedNodeIndex: selectedThread.getSelectedCallNodeIndex(state),
+    callNodeTable: selectedThread.getCallNodeInfo(state).callNodeTable,
     selectedThreadIndex: getSelectedThreadIndex(state),
-    name: getFunctionName(selectedNodeSelectors.getName(state)),
-    lib: selectedNodeSelectors.getLib(state),
-    timings: selectedNodeSelectors.getTimingsForSidebar(state),
+    name: getFunctionName(selectedNode.getName(state)),
+    lib: selectedNode.getLib(state),
+    timings: selectedNode.getTimingsForSidebar(state),
     categoryList: getCategories(state),
     isIntervalInteger: Number.isInteger(getProfileInterval(state)),
   }),

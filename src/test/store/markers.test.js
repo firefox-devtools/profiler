@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 import { storeWithProfile } from '../fixtures/stores';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import { selectedThread } from 'selectors';
 import {
   getProfileWithMarkers,
   getNetworkTrackProfile,
@@ -13,7 +13,7 @@ describe('selectors/getMarkerChartTimingAndBuckets', function() {
   function getMarkerChartTimingAndBuckets(testMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
-    return selectedThreadSelectors.getMarkerChartTimingAndBuckets(getState());
+    return selectedThread.getMarkerChartTimingAndBuckets(getState());
   }
 
   it('has no marker timing if no markers are present', function() {
@@ -146,7 +146,7 @@ describe('getProcessedRawMarkerTable', function() {
   function setup(testMarkers) {
     const profile = getProfileWithMarkers(testMarkers);
     const { getState } = storeWithProfile(profile);
-    return selectedThreadSelectors.getProcessedRawMarkerTable(getState());
+    return selectedThread.getProcessedRawMarkerTable(getState());
   }
 
   it('can process Invalidation markers', function() {
@@ -247,13 +247,11 @@ describe('getProcessedRawMarkerTable', function() {
 describe('getTimelineVerticalMarkers', function() {
   it('gets the appropriate markers', function() {
     const { getState } = storeWithProfile(getNetworkTrackProfile());
-    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getTimelineVerticalMarkerIndexes(
+    const getMarker = selectedThread.getMarkerGetter(getState());
+    const markerIndexes = selectedThread.getTimelineVerticalMarkerIndexes(
       getState()
     );
-    const allMarkers = selectedThreadSelectors.getFullMarkerListIndexes(
-      getState()
-    );
+    const allMarkers = selectedThread.getFullMarkerListIndexes(getState());
 
     expect(allMarkers.length).toBeGreaterThan(markerIndexes.length);
     expect(markerIndexes).toHaveLength(5);
@@ -303,10 +301,8 @@ describe('memory markers', function() {
 
   it('can get memory markers using getMemoryMarkers', function() {
     const { getState } = setup();
-    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getMemoryMarkerIndexes(
-      getState()
-    );
+    const getMarker = selectedThread.getMarkerGetter(getState());
+    const markerIndexes = selectedThread.getMemoryMarkerIndexes(getState());
     expect(
       markerIndexes.map(markerIndex => getMarker(markerIndex).name)
     ).toEqual(['IdleForgetSkippable', 'GCMinor', 'GCMajor', 'GCSlice']);
@@ -314,8 +310,8 @@ describe('memory markers', function() {
 
   it('ignores memory markers in getCommittedRangeFilteredMarkersForHeader', function() {
     const { getState } = setup();
-    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getCommittedRangeFilteredMarkerIndexesForHeader(
+    const getMarker = selectedThread.getMarkerGetter(getState());
+    const markerIndexes = selectedThread.getCommittedRangeFilteredMarkerIndexesForHeader(
       getState()
     );
     expect(

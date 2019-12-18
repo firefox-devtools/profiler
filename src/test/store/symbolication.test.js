@@ -6,8 +6,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import exampleSymbolTable from '../fixtures/example-symbol-table';
 import { SymbolStore } from '../../profile-logic/symbol-store.js';
-import * as ProfileViewSelectors from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
+import * as selectors from 'selectors';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import { doSymbolicateProfile } from '../../actions/receive-profile';
 import {
@@ -85,7 +84,7 @@ describe('doSymbolicateProfile', function() {
     getExpandedCallNodePaths,
     getThread,
     getCallTree,
-  } = selectedThreadSelectors;
+  } = selectors.selectedThread;
 
   describe('doSymbolicateProfile', function() {
     it('can symbolicate a profile', async () => {
@@ -120,21 +119,17 @@ describe('doSymbolicateProfile', function() {
         symbolStore,
       } = init();
       // Starts out as DONE.
-      expect(ProfileViewSelectors.getSymbolicationStatus(getState())).toEqual(
-        'DONE'
-      );
+      expect(selectors.getSymbolicationStatus(getState())).toEqual('DONE');
       const symbolication = doSymbolicateProfile(
         dispatch,
         profile,
         symbolStore
       );
-      expect(ProfileViewSelectors.getSymbolicationStatus(getState())).toEqual(
+      expect(selectors.getSymbolicationStatus(getState())).toEqual(
         'SYMBOLICATING'
       );
       await symbolication;
-      expect(ProfileViewSelectors.getSymbolicationStatus(getState())).toEqual(
-        'DONE'
-      );
+      expect(selectors.getSymbolicationStatus(getState())).toEqual('DONE');
     });
   });
 

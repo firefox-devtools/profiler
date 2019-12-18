@@ -79,7 +79,7 @@ export const getThreadSelectors = (
  * Most of the time, we only want to work with the selected thread. This object
  * collects the selectors for the currently selected thread.
  */
-export const selectedThreadSelectors: ThreadSelectors = (() => {
+export const selectedThread: ThreadSelectors = (() => {
   const anyThreadSelectors: ThreadSelectors = getThreadSelectors(0);
   const result: $Shape<ThreadSelectors> = {};
   for (const key in anyThreadSelectors) {
@@ -97,10 +97,10 @@ export type NodeSelectors = {|
   +getTimingsForSidebar: Selector<TimingsForPath>,
 |};
 
-export const selectedNodeSelectors: NodeSelectors = (() => {
+export const selectedNode: NodeSelectors = (() => {
   const getName: Selector<string> = createSelector(
-    selectedThreadSelectors.getSelectedCallNodePath,
-    selectedThreadSelectors.getFilteredThread,
+    selectedThread.getSelectedCallNodePath,
+    selectedThread.getFilteredThread,
     (selectedPath, { stringTable, funcTable }) => {
       if (!selectedPath.length) {
         return '';
@@ -112,8 +112,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   );
 
   const getIsJS: Selector<boolean> = createSelector(
-    selectedThreadSelectors.getSelectedCallNodePath,
-    selectedThreadSelectors.getFilteredThread,
+    selectedThread.getSelectedCallNodePath,
+    selectedThread.getFilteredThread,
     (selectedPath, { funcTable }) => {
       if (!selectedPath.length) {
         return false;
@@ -125,8 +125,8 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   );
 
   const getLib: Selector<string> = createSelector(
-    selectedThreadSelectors.getSelectedCallNodePath,
-    selectedThreadSelectors.getFilteredThread,
+    selectedThread.getSelectedCallNodePath,
+    selectedThread.getFilteredThread,
     (selectedPath, { stringTable, funcTable, resourceTable }) => {
       if (!selectedPath.length) {
         return '';
@@ -142,13 +142,13 @@ export const selectedNodeSelectors: NodeSelectors = (() => {
   );
 
   const getTimingsForSidebar: Selector<TimingsForPath> = createSelector(
-    selectedThreadSelectors.getSelectedCallNodePath,
-    selectedThreadSelectors.getCallNodeInfo,
+    selectedThread.getSelectedCallNodePath,
+    selectedThread.getCallNodeInfo,
     ProfileSelectors.getProfileInterval,
     UrlState.getInvertCallstack,
-    selectedThreadSelectors.getPreviewFilteredThread,
-    selectedThreadSelectors.getThread,
-    selectedThreadSelectors.getSampleIndexOffsetFromPreviewRange,
+    selectedThread.getPreviewFilteredThread,
+    selectedThread.getThread,
+    selectedThread.getSampleIndexOffsetFromPreviewRange,
     ProfileSelectors.getCategories,
     ProfileData.getTimingsForPath
   );

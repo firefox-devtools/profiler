@@ -14,14 +14,12 @@ import {
   getImplementationFilter,
   getSearchStringsAsRegExp,
   getSelectedThreadIndex,
-} from 'selectors/url-state';
-import {
   getScrollToSelectionGeneration,
   getFocusCallTreeGeneration,
   getPreviewSelection,
-} from 'selectors/profile';
-import { selectedThreadSelectors } from 'selectors/per-thread';
-import { getIconsWithClassNames } from 'selectors/icons';
+  selectedThread,
+  getIconsWithClassNames,
+} from 'selectors';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
@@ -244,26 +242,20 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     threadIndex: getSelectedThreadIndex(state),
     scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
     focusCallTreeGeneration: getFocusCallTreeGeneration(state),
-    tree: selectedThreadSelectors.getCallTree(state),
-    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-    selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
+    tree: selectedThread.getCallTree(state),
+    callNodeInfo: selectedThread.getCallNodeInfo(state),
+    selectedCallNodeIndex: selectedThread.getSelectedCallNodeIndex(state),
+    rightClickedCallNodeIndex: selectedThread.getRightClickedCallNodeIndex(
       state
     ),
-    rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
-      state
-    ),
-    expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
-      state
-    ),
+    expandedCallNodeIndexes: selectedThread.getExpandedCallNodeIndexes(state),
     searchStringsRegExp: getSearchStringsAsRegExp(state),
     disableOverscan: getPreviewSelection(state).isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
     icons: getIconsWithClassNames(state),
-    callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
-    callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
-      state
-    ),
+    callNodeMaxDepth: selectedThread.getCallNodeMaxDepth(state),
+    callTreeSummaryStrategy: selectedThread.getCallTreeSummaryStrategy(state),
   }),
   mapDispatchToProps: {
     changeSelectedCallNode,
