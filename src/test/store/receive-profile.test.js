@@ -1057,12 +1057,14 @@ describe('actions/receive-profile', function() {
       ).toMatchSnapshot();
     });
 
-    xit('can load gzipped json', async function() {
+    // eslint-disable-next-line jest/no-disabled-tests
+    it.skip('can load gzipped json', async function() {
       // TODO - See issue #1023. The zee-worker is failing to compress/decompress
       // the profile.
     });
 
-    xit('will give an error when unable to parse gzipped profiles', async function() {
+    // eslint-disable-next-line jest/no-disabled-tests
+    it.skip('will give an error when unable to parse gzipped profiles', async function() {
       // TODO - See issue #1023. The zee-worker is failing to compress/decompress
       // the profile.
     });
@@ -1610,7 +1612,7 @@ describe('actions/receive-profile', function() {
       );
 
       // It should successfully symbolicate the profiles that are loaded from addon.
-      await waitUntilSymbolication();
+      return expect(waitUntilSymbolication()).resolves.toBe(undefined);
     });
 
     it('does not retrieve profile from other data sources', async function() {
