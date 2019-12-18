@@ -106,7 +106,7 @@ module.exports = {
     'import/resolver': {
       alias: {
         map: [
-          ['firefox-profiler/selectors', './src/selectors'],
+          ['firefox-profiler', './src'],
         ],
         extensions: ['.js']
       }
