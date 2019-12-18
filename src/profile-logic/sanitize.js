@@ -157,6 +157,7 @@ export function getShouldSanitizeByDefault(profile: Profile): boolean {
     case 'default': // Custom builds.
     case 'nightly':
     case 'nightly-try':
+    case 'nightly-autoland': // local build
       return false;
     default:
       return true;
