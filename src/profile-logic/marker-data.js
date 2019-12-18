@@ -174,7 +174,16 @@ export function getTabFilteredMarkerIndexes(
 
   const newMarkers: MarkerIndex[] = [];
   for (const markerIndex of markerIndexes) {
-    const { data } = getMarker(markerIndex);
+    const { name, data } = getMarker(markerIndex);
+
+    // We want to retain some markers even though they do not belong to a specific tab.
+    // We are checking those before and pushing those markers to the new array.
+    // As of now, those markers are:
+    // - Jank markers
+    if (name === 'Jank') {
+      newMarkers.push(markerIndex);
+      continue;
+    }
 
     if (data && data.innerWindowID && relevantPages.has(data.innerWindowID)) {
       newMarkers.push(markerIndex);
