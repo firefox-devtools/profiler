@@ -10,6 +10,10 @@ body {
   font: message-box;
   font-size: 11px;
 
+  /* Disable the "rubberband" overscrolling effect in Chrome. This happens when
+   * using the charts and the scroll wheel. */
+  overscroll-behavior: none;
+
   /* background-color is defined in the HTML file to prevent flashing a white screen. */
 }
 
