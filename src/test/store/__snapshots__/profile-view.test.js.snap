@@ -1427,138 +1427,6 @@ Array [
 ]
 `;
 
-exports[`snapshots of selectors/profile matches the last stored run of selectedNode.getTimingsForSidebar 1`] = `
-Object {
-  "forFunc": Object {
-    "selfTime": Object {
-      "breakdownByCategory": null,
-      "breakdownByImplementation": null,
-      "value": 0,
-    },
-    "totalTime": Object {
-      "breakdownByCategory": Array [
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 2,
-          "subcategoryBreakdown": Array [
-            2,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-      ],
-      "breakdownByImplementation": Object {
-        "native": 2,
-      },
-      "value": 2,
-    },
-  },
-  "forPath": Object {
-    "selfTime": Object {
-      "breakdownByCategory": null,
-      "breakdownByImplementation": null,
-      "value": 0,
-    },
-    "totalTime": Object {
-      "breakdownByCategory": Array [
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 2,
-          "subcategoryBreakdown": Array [
-            2,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-        Object {
-          "entireCategoryValue": 0,
-          "subcategoryBreakdown": Array [
-            0,
-          ],
-        },
-      ],
-      "breakdownByImplementation": Object {
-        "native": 2,
-      },
-      "value": 2,
-    },
-  },
-  "rootTime": 2,
-}
-`;
-
 exports[`snapshots of selectors/profile matches the last stored run of selectedThreadSelector.getCallNodeInfo 1`] = `
 Object {
   "callNodeTable": Object {
@@ -3270,5 +3138,137 @@ Object {
     1,
   ],
   "selectedMarker": 1,
+}
+`;
+
+exports[`snapshots of selectors/profile matches the last stored run of selectors.selectedNode.getTimingsForSidebar 1`] = `
+Object {
+  "forFunc": Object {
+    "selfTime": Object {
+      "breakdownByCategory": null,
+      "breakdownByImplementation": null,
+      "value": 0,
+    },
+    "totalTime": Object {
+      "breakdownByCategory": Array [
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 2,
+          "subcategoryBreakdown": Array [
+            2,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+      ],
+      "breakdownByImplementation": Object {
+        "native": 2,
+      },
+      "value": 2,
+    },
+  },
+  "forPath": Object {
+    "selfTime": Object {
+      "breakdownByCategory": null,
+      "breakdownByImplementation": null,
+      "value": 0,
+    },
+    "totalTime": Object {
+      "breakdownByCategory": Array [
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 2,
+          "subcategoryBreakdown": Array [
+            2,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+        Object {
+          "entireCategoryValue": 0,
+          "subcategoryBreakdown": Array [
+            0,
+          ],
+        },
+      ],
+      "breakdownByImplementation": Object {
+        "native": 2,
+      },
+      "value": 2,
+    },
+  },
+  "rootTime": 2,
 }
 `;
