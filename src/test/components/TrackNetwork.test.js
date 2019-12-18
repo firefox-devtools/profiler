@@ -21,7 +21,7 @@ import {
   addRootOverlayElement,
   removeRootOverlayElement,
 } from '../fixtures/utils';
-import { selectedThread } from 'selectors';
+import { selectedThread } from 'firefox-profiler/selectors';
 import { getNetworkTrackProfile } from '../fixtures/profiles/processed-profile';
 import { ensureExists } from '../../utils/flow';
 

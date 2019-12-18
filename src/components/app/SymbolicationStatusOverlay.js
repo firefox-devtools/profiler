@@ -5,7 +5,10 @@
 // @flow
 
 import React, { PureComponent } from 'react';
-import { getProfileViewOptions, getSymbolicationStatus } from 'selectors';
+import {
+  getProfileViewOptions,
+  getSymbolicationStatus,
+} from 'firefox-profiler/selectors';
 import explicitConnect from '../../utils/connect';
 
 import type { RequestedLib } from '../../types/actions';

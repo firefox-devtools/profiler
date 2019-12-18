@@ -25,7 +25,7 @@ import {
   commitRange,
   changeImplementationFilter,
 } from '../../actions/profile-view';
-import { selectedThread } from 'selectors';
+import { selectedThread } from 'firefox-profiler/selectors';
 import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';

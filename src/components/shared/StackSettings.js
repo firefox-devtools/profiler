@@ -16,7 +16,7 @@ import {
   getInvertCallstack,
   getCurrentSearchString,
   selectedThread,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import PanelSearch from '../shared/PanelSearch';
 import {
   toValidImplementationFilter,

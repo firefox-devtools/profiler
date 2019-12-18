@@ -8,7 +8,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { getEmptyThread } from '../../profile-logic/data-structures';
 import { storeWithProfile } from '../fixtures/stores';
-import * as selectors from 'selectors';
+import * as selectors from 'firefox-profiler/selectors';
 import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,

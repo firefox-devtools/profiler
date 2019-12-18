@@ -17,7 +17,7 @@ import {
   getSelectedThreadIndex,
   getInvertCallstack,
   getIconsWithClassNames,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {

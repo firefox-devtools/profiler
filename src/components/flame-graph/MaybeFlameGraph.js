@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getInvertCallstack, selectedThread } from 'selectors';
+import { getInvertCallstack, selectedThread } from 'firefox-profiler/selectors';
 import { changeInvertCallstack } from '../../actions/profile-view';
 import FlameGraphEmptyReasons from './FlameGraphEmptyReasons';
 import FlameGraph from './FlameGraph';

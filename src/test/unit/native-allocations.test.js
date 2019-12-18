@@ -16,7 +16,7 @@ import {
   commitRange,
   updatePreviewSelection,
 } from '../../actions/profile-view';
-import { selectedThread } from 'selectors';
+import { selectedThread } from 'firefox-profiler/selectors';
 import type { CallTreeSummaryStrategy } from '../../types/actions';
 
 /**

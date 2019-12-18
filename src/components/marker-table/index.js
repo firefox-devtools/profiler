@@ -15,7 +15,7 @@ import {
   getScrollToSelectionGeneration,
   selectedThread,
   getSelectedThreadIndex,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import {
   changeSelectedMarker,
   changeRightClickedMarker,

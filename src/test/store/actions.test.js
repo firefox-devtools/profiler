@@ -4,7 +4,7 @@
 // @flow
 
 import { storeWithProfile } from '../fixtures/stores';
-import * as selectors from 'selectors';
+import * as selectors from 'firefox-profiler/selectors';
 
 import {
   changeCallTreeSearchString,

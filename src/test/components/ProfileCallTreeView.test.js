@@ -10,7 +10,7 @@ import { render, fireEvent } from 'react-testing-library';
 import copy from 'copy-to-clipboard';
 import fakeIndexedDB from 'fake-indexeddb';
 
-import { selectedThread } from 'selectors';
+import { selectedThread } from 'firefox-profiler/selectors';
 import ProfileCallTreeView from '../../components/calltree/ProfileCallTreeView';
 import CallNodeContextMenu from '../../components/shared/CallNodeContextMenu';
 import { processProfile } from '../../profile-logic/process-profile';

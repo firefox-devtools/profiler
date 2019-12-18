@@ -8,7 +8,7 @@ import ZipFileViewer from '../../components/app/ZipFileViewer';
 import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 
-import * as selectors from 'selectors';
+import * as selectors from 'firefox-profiler/selectors';
 
 import { storeWithZipFile } from '../fixtures/profiles/zip-file';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';

@@ -10,7 +10,7 @@ import Details from './Details';
 import selectSidebar from '../sidebar';
 
 import { invalidatePanelLayout } from '../../actions/app';
-import { getSelectedTab, getIsSidebarOpen } from 'selectors';
+import { getSelectedTab, getIsSidebarOpen } from 'firefox-profiler/selectors';
 import explicitConnect from '../../utils/connect';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';

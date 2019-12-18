@@ -6,7 +6,7 @@
 
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getUrlSetupPhase } from 'selectors';
+import { getUrlSetupPhase } from 'firefox-profiler/selectors';
 import {
   updateUrlState,
   startFetchingProfiles,

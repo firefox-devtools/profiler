@@ -27,7 +27,7 @@ import {
   getLegacyHiddenThreads,
   getProfileOrNull,
   getView,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import {
   stateFromLocation,
   getDataSourceFromPathParts,

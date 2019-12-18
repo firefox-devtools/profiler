@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { selectedThread } from 'selectors';
+import { selectedThread } from 'firefox-profiler/selectors';
 
 import { storeWithProfile } from '../fixtures/stores';
 import {

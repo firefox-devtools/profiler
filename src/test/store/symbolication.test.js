@@ -6,7 +6,7 @@ import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import exampleSymbolTable from '../fixtures/example-symbol-table';
 import { SymbolStore } from '../../profile-logic/symbol-store.js';
-import * as selectors from 'selectors';
+import * as selectors from 'firefox-profiler/selectors';
 import { resourceTypes } from '../../profile-logic/data-structures';
 import { doSymbolicateProfile } from '../../actions/receive-profile';
 import {

@@ -12,7 +12,7 @@ import {
   getProfileWithUnbalancedNativeAllocations,
   getProfileFromTextSamples,
 } from '../fixtures/profiles/processed-profile';
-import * as selectors from 'selectors';
+import * as selectors from 'firefox-profiler/selectors';
 import {
   changeSelectedCallNode,
   changeCallTreeSummaryStrategy,

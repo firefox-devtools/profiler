@@ -7,7 +7,10 @@ import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import StackSettings from '../../components/shared/StackSettings';
 import { storeWithProfile } from '../fixtures/stores';
-import { getImplementationFilter, getCurrentSearchString } from 'selectors';
+import {
+  getImplementationFilter,
+  getCurrentSearchString,
+} from 'firefox-profiler/selectors';
 
 describe('StackSettings', function() {
   function setup() {

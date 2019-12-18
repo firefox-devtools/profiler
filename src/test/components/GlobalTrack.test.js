@@ -17,7 +17,7 @@ import {
   getGlobalTracks,
   getRightClickedTrack,
   getSelectedThreadIndex,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { ensureExists } from '../../utils/flow';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';

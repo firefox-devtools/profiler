@@ -26,7 +26,7 @@ import {
   getPerceptualSpeedIndexProgress,
   getContentfulSpeedIndexProgress,
   getThreadSelectors,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';

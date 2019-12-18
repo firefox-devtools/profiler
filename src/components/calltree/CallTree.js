@@ -19,7 +19,7 @@ import {
   getPreviewSelection,
   selectedThread,
   getIconsWithClassNames,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,

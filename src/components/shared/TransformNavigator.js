@@ -5,7 +5,7 @@
 // @flow
 
 import explicitConnect from '../../utils/connect';
-import { selectedThread } from 'selectors';
+import { selectedThread } from 'firefox-profiler/selectors';
 import FilterNavigatorBar from './FilterNavigatorBar';
 import { popTransformsFromStack } from '../../actions/profile-view';
 

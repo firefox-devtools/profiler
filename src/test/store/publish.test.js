@@ -26,7 +26,7 @@ import {
   getDataSource,
   getProfileName,
   getHasZipFile,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 import { TextEncoder } from 'util';

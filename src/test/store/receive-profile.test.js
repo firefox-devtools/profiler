@@ -12,7 +12,7 @@ import { getEmptyProfile } from '../../profile-logic/data-structures';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
-import * as selectors from 'selectors';
+import * as selectors from 'firefox-profiler/selectors';
 import { urlFromState } from '../../app-logic/url-handling';
 import {
   viewProfile,
@@ -1407,8 +1407,8 @@ describe('actions/receive-profile', function() {
       });
 
       expect(resultProfile.threads).toHaveLength(3);
-      const selectors = selectors.getThreadSelectors(2);
-      const callTree = selectors.getCallTree(getState());
+      const { getCallTree } = selectors.getThreadSelectors(2);
+      const callTree = getCallTree(getState());
       const [firstChild] = callTree.getRoots();
       const nodeData = callTree.getNodeData(firstChild);
       expect(nodeData.selfTime).toBe(4);

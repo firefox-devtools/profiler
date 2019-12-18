@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import * as selectors from 'selectors';
+import * as selectors from 'firefox-profiler/selectors';
 import {
   getProfileFromTextSamples,
   getCounterForThread,

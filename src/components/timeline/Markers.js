@@ -15,7 +15,7 @@ import {
   getPreviewSelection,
   getThreadSelectors,
   getSelectedThreadIndex,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import './Markers.css';
 
 import type { Milliseconds, CssPixels } from '../../types/units';

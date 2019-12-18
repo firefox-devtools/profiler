@@ -16,7 +16,7 @@ import {
   getCommittedRange,
   selectedThread,
   getImplementationFilter,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import copy from 'copy-to-clipboard';
 
 import type { Marker } from '../../types/profile-derived';

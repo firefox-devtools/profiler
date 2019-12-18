@@ -4,7 +4,7 @@
 // @flow
 
 import { storeWithSimpleProfile, storeWithProfile } from '../fixtures/stores';
-import * as selectors from 'selectors';
+import * as selectors from 'firefox-profiler/selectors';
 import createStore from '../../app-logic/create-store';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { isolateProcess } from '../../actions/profile-view';

@@ -22,7 +22,7 @@ import {
   getExpandedZipFileIndexes,
   getZipFileErrorMessage,
   getPathInZipFileFromUrl,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import TreeView from '../shared/TreeView';
 import ProfileViewer from './ProfileViewer';
 

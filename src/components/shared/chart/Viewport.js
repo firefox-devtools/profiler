@@ -6,7 +6,10 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from '../../../utils/connect';
-import { getHasZoomedViaMousewheel, getPanelLayoutGeneration } from 'selectors';
+import {
+  getHasZoomedViaMousewheel,
+  getPanelLayoutGeneration,
+} from 'firefox-profiler/selectors';
 import { setHasZoomedViaMousewheel } from '../../../actions/app';
 import { updatePreviewSelection } from '../../../actions/profile-view';
 

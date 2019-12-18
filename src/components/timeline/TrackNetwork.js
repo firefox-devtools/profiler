@@ -12,7 +12,7 @@ import {
   getZeroAt,
   getPageList,
   getThreadSelectors,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { VerticalIndicators } from './VerticalIndicators';
 import {
   TRACK_NETWORK_ROW_HEIGHT,

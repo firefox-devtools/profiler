@@ -13,7 +13,7 @@ import {
   getSelectedThreadIndex,
   getCategories,
   getProfileInterval,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { getFunctionName } from '../../profile-logic/function-info';
 import {
   getFriendlyStackTypeName,

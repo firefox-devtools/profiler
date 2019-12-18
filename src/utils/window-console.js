@@ -4,7 +4,7 @@
 // @flow
 import { stripIndent } from 'common-tags';
 import type { GetState, Dispatch } from '../types/store';
-import { selectorsForConsole } from 'selectors';
+import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from '../actions';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still

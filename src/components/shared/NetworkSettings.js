@@ -7,7 +7,7 @@
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import { changeNetworkSearchString } from '../../actions/profile-view';
-import { getNetworkSearchString } from 'selectors';
+import { getNetworkSearchString } from 'firefox-profiler/selectors';
 import PanelSearch from '../shared/PanelSearch';
 
 import type { ConnectedProps } from '../../utils/connect';

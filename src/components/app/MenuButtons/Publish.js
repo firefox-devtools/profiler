@@ -24,7 +24,7 @@ import {
   getUploadProgressString,
   getUploadError,
   getShouldSanitizeByDefault,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { BlobUrlLink } from '../../shared/BlobUrlLink';
 import { assertExhaustiveCheck } from '../../../utils/flow';
 

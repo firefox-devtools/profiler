@@ -7,7 +7,7 @@ import {
   getSelectedTab,
   getDataSource,
   getTrackThreadHeights,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { sendAnalytics } from '../utils/analytics';
 import { stateFromLocation } from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';

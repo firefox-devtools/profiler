@@ -8,7 +8,7 @@ import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
 import { ProfileRootMessage } from './ProfileRootMessage';
-import { getView, getDataSource } from 'selectors';
+import { getView, getDataSource } from 'firefox-profiler/selectors';
 
 import type { AppViewState, State } from '../../types/state';
 import type { DataSource } from '../../types/actions';

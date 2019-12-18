@@ -6,7 +6,10 @@
 
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getCommittedRange, getCounterSelectors } from 'selectors';
+import {
+  getCommittedRange,
+  getCounterSelectors,
+} from 'firefox-profiler/selectors';
 import { TimelineMarkersMemory } from './Markers';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { TrackMemoryGraph } from './TrackMemoryGraph';

@@ -13,7 +13,10 @@ import { oneLine } from 'common-tags';
 
 import { changeTimelineType } from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
-import { getPreviewSelection, selectedThread } from 'selectors';
+import {
+  getPreviewSelection,
+  selectedThread,
+} from 'firefox-profiler/selectors';
 import { ensureExists } from '../../utils/flow';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';

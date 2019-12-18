@@ -21,7 +21,7 @@ import {
   getImplementationFilter,
   getInvertCallstack,
   selectedThread,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 
 import {
   convertToTransformType,

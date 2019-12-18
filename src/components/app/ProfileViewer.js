@@ -23,7 +23,7 @@ import {
   getTimelineHeight,
   getIsHidingStaleProfile,
   getHasSanitizedProfile,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import classNames from 'classnames';
 
 import type { CssPixels } from '../../types/units';

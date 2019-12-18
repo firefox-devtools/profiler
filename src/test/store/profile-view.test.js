@@ -30,7 +30,7 @@ import { assertSetContainsOnly } from '../fixtures/custom-assertions';
 import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
 import { viewProfile } from '../../actions/receive-profile';
-import * as selectors from 'selectors';
+import * as selectors from 'firefox-profiler/selectors';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import { ensureExists } from '../../utils/flow';
 

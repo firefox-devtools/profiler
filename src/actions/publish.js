@@ -13,7 +13,7 @@ import {
   getRemoveProfileInformation,
   getPrePublishedState,
   getDataSource,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from '../utils/flow';
 import { setHistoryReplaceState } from '../app-logic/url-handling';

@@ -14,7 +14,10 @@ import {
   getNetworkMarkers,
   getProfileWithMarkers,
 } from '../fixtures/profiles/processed-profile';
-import { selectedThread, getSelectedThreadIndex } from 'selectors';
+import {
+  selectedThread,
+  getSelectedThreadIndex,
+} from 'firefox-profiler/selectors';
 
 describe('TooltipMarker', function() {
   it('renders tooltips for various markers', () => {

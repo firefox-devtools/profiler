@@ -20,7 +20,11 @@ import JsTracer from '../js-tracer/';
 import selectSidebar from '../sidebar';
 
 import { changeSelectedTab, changeSidebarOpenState } from '../../actions/app';
-import { getSelectedTab, getIsSidebarOpen, selectedThread } from 'selectors';
+import {
+  getSelectedTab,
+  getIsSidebarOpen,
+  selectedThread,
+} from 'firefox-profiler/selectors';
 import CallNodeContextMenu from '../shared/CallNodeContextMenu';
 import MarkerContextMenu from '../shared/MarkerContextMenu';
 import TimelineTrackContextMenu from '../timeline/TrackContextMenu';

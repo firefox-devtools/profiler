@@ -14,7 +14,7 @@ import {
   selectedThread,
   getShowJsTracerSummary,
   getSelectedThreadIndex,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { updatePreviewSelection } from '../../actions/profile-view';
 
 import type { Profile, JsTracerTable, ThreadIndex } from '../../types/profile';

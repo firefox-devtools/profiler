@@ -7,7 +7,7 @@ import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
-import { getDataSource, getView } from 'selectors';
+import { getDataSource, getView } from 'firefox-profiler/selectors';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type { DataSource } from '../../types/actions';

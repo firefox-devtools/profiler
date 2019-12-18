@@ -19,7 +19,7 @@ import {
   getLocalTracks,
   getHiddenGlobalTracks,
   getHiddenLocalTracks,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import {
   getProfileWithNiceTracks,
   getHumanReadableTracks,

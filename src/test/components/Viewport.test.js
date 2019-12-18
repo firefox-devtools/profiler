@@ -8,7 +8,10 @@ import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 
 import { withChartViewport } from '../../components/shared/chart/Viewport';
-import { getCommittedRange, getPreviewSelection } from 'selectors';
+import {
+  getCommittedRange,
+  getPreviewSelection,
+} from 'firefox-profiler/selectors';
 
 import { changeSidebarOpenState } from '../../actions/app';
 

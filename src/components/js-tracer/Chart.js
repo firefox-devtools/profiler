@@ -17,7 +17,7 @@ import {
   getPreviewSelection,
   selectedThread,
   getSelectedThreadIndex,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { updatePreviewSelection } from '../../actions/profile-view';
 import { ensureExists } from '../../utils/flow';
 

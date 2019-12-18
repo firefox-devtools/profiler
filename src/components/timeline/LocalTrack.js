@@ -19,7 +19,7 @@ import {
   getLocalTrackName,
   getCounterSelectors,
   getThreadSelectors,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import explicitConnect from '../../utils/connect';
 import TrackThread from './TrackThread';
 import TrackNetwork from './TrackNetwork';

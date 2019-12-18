@@ -32,7 +32,7 @@ import {
   commitRange,
   changeImplementationFilter,
 } from '../../actions/profile-view';
-import { selectedThread, getInvertCallstack } from 'selectors';
+import { selectedThread, getInvertCallstack } from 'firefox-profiler/selectors';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { ensureExists } from '../../utils/flow';
 

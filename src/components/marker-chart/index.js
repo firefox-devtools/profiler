@@ -19,7 +19,7 @@ import {
   getPreviewSelection,
   selectedThread,
   getSelectedThreadIndex,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,

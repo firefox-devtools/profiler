@@ -22,7 +22,7 @@ import {
   getPanelLayoutGeneration,
   getGlobalTrackOrder,
   getTimelineType,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,

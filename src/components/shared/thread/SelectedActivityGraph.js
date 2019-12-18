@@ -15,7 +15,7 @@ import {
   getCommittedRange,
   selectedThread,
   getSelectedThreadIndex,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import {
   selectBestAncestorCallNodeAndExpandCallTree,
   focusCallTree,

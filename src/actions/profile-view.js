@@ -22,7 +22,7 @@ import {
   getHiddenLocalTracks,
   getSelectedTab,
   getLastVisibleThreadTabSlug,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import {
   getCallNodePathFromIndex,
   getSampleIndexToCallNodeIndex,

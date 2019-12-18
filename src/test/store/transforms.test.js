@@ -21,7 +21,7 @@ import {
   changeSelectedCallNode,
   changeCallTreeSummaryStrategy,
 } from '../../actions/profile-view';
-import { selectedThread } from 'selectors';
+import { selectedThread } from 'firefox-profiler/selectors';
 
 describe('"focus-subtree" transform', function() {
   describe('on a call tree', function() {

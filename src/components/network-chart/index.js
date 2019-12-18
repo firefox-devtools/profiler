@@ -20,7 +20,7 @@ import {
   getPreviewSelectionRange,
   selectedThread,
   getSelectedThreadIndex,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { changeRightClickedMarker } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';

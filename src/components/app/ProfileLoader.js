@@ -18,7 +18,7 @@ import {
   getHash,
   getProfileUrl,
   getProfilesToCompare,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type { DataSource } from '../../types/actions';

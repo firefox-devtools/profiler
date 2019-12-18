@@ -12,7 +12,7 @@ import {
   getPreviewSelection,
   getCommittedRange,
   getZeroAt,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import {
   updatePreviewSelection,
   commitRange,

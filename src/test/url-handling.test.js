@@ -5,7 +5,7 @@
 // @flow
 
 import { oneLineTrim } from 'common-tags';
-import * as selectors from 'selectors';
+import * as selectors from 'firefox-profiler/selectors';
 import {
   changeCallTreeSearchString,
   changeMarkersSearchString,

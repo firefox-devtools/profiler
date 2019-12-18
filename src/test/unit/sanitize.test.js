@@ -14,7 +14,7 @@ import {
   getHasPreferenceMarkers,
   getCheckedSharingOptions,
   getRemoveProfileInformation,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { toggleCheckedSharingOptions } from '../../actions/publish';
 
 describe('sanitizePII', function() {

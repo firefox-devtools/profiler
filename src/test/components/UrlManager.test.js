@@ -7,7 +7,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render } from 'react-testing-library';
 
-import { getUrlSetupPhase, getDataSource } from 'selectors';
+import { getUrlSetupPhase, getDataSource } from 'firefox-profiler/selectors';
 import UrlManager from '../../components/app/UrlManager';
 import { blankStore } from '../fixtures/stores';
 import { waitUntilState } from '../fixtures/utils';

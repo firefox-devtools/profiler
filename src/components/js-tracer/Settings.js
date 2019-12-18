@@ -6,7 +6,7 @@
 
 import React, { PureComponent } from 'react';
 import { changeShowJsTracerSummary } from '../../actions/profile-view';
-import { getShowJsTracerSummary } from 'selectors';
+import { getShowJsTracerSummary } from 'firefox-profiler/selectors';
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';
 
 import './Settings.css';

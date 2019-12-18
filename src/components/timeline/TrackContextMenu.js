@@ -30,7 +30,7 @@ import {
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getLocalTrackOrderByPid,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import classNames from 'classnames';
 
 import type { Thread, ThreadIndex, Pid } from '../../types/profile';

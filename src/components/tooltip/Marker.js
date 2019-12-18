@@ -21,7 +21,7 @@ import {
   getImplementationFilter,
   getPageList,
   getZeroAt,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 
 import { TooltipNetworkMarker } from './NetworkMarker';
 import { TooltipDetails, TooltipDetail } from './TooltipDetails';

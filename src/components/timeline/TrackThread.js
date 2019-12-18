@@ -16,7 +16,7 @@ import {
   getThreadSelectors,
   getSelectedThreadIndex,
   getTimelineType,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 
 import {
   TimelineMarkersJank,

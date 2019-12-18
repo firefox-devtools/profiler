@@ -14,7 +14,7 @@ import {
   commitRange,
   updatePreviewSelection,
 } from '../../actions/profile-view';
-import { selectedThread } from 'selectors';
+import { selectedThread } from 'firefox-profiler/selectors';
 
 /**
  * Test that the JsAllocationTable structure can by used with all of the call tree

@@ -14,7 +14,7 @@ import {
   getIsNewlyPublished,
   getUploadPhase,
   getHasPrePublishedState,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { MenuButtonsMetaInfo } from './MetaInfo';
 import { MenuButtonsPublish } from './Publish';
 import { MenuButtonsPermalink } from './Permalink';

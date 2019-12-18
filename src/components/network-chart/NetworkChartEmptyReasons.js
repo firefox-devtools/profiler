@@ -6,7 +6,7 @@
 import React, { PureComponent } from 'react';
 
 import EmptyReasons from '../shared/EmptyReasons';
-import { selectedThread } from 'selectors';
+import { selectedThread } from 'firefox-profiler/selectors';
 import { oneLine } from 'common-tags';
 
 import explicitConnect, { type ConnectedProps } from '../../utils/connect';

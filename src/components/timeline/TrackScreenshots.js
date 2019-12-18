@@ -10,7 +10,7 @@ import {
   getCommittedRange,
   getPreviewSelection,
   getThreadSelectors,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { withSize, type SizeProps } from '../shared/WithSize';
 import { createPortal } from 'react-dom';
 import { TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';

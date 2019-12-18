@@ -7,7 +7,11 @@
 import { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 
-import { getProfileName, getDataSource, getProfile } from 'selectors';
+import {
+  getProfileName,
+  getDataSource,
+  getProfile,
+} from 'firefox-profiler/selectors';
 
 import type { Profile, ProfileMeta } from '../../types/profile';
 import type { ConnectedProps } from '../../utils/connect';

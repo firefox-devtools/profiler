@@ -13,7 +13,7 @@ import {
   getCounterSelectors,
   getProfileInterval,
   getThreadSelectors,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import { ORANGE_50 } from 'photon-colors';
 import Tooltip from '../tooltip/Tooltip';
 import EmptyThreadIndicator from './EmptyThreadIndicator';

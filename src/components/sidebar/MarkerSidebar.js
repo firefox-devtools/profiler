@@ -7,7 +7,10 @@
 import * as React from 'react';
 
 import explicitConnect from '../../utils/connect';
-import { selectedThread, getSelectedThreadIndex } from 'selectors';
+import {
+  selectedThread,
+  getSelectedThreadIndex,
+} from 'firefox-profiler/selectors';
 import { TooltipMarker } from '../tooltip/Marker';
 
 import type { ConnectedProps } from '../../utils/connect';

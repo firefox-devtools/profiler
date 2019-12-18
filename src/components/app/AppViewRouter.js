@@ -17,7 +17,7 @@ import {
   getHasZipFile,
   getDataSource,
   getProfilesToCompare,
-} from 'selectors';
+} from 'firefox-profiler/selectors';
 import ServiceWorkerManager from './ServiceWorkerManager';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
 
