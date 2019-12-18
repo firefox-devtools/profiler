@@ -185,7 +185,8 @@ describe('timeline/TrackContextMenu', function() {
       expect(getHiddenGlobalTracks(getState()).has(trackIndex)).toBe(false);
     });
 
-    xit('can present a disabled isolate item on non-process tracks', function() {
+    // eslint-disable-next-line jest/no-disabled-tests
+    it.skip('can present a disabled isolate item on non-process tracks', function() {
       // TODO - We should wait until we have some real tracks without a thread index.
     });
   });
@@ -265,7 +266,8 @@ describe('timeline/TrackContextMenu', function() {
       expect(getHiddenLocalTracks(getState(), pid).has(trackIndex)).toBe(false);
     });
 
-    xit('can isolate a non-thread track, as long as there process has a thread index', function() {
+    // eslint-disable-next-line jest/no-disabled-tests
+    it.skip('can isolate a non-thread track, as long as there process has a thread index', function() {
       // TODO - We should wait until we have some real non-thread tracks
     });
   });

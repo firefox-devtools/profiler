@@ -47,6 +47,8 @@ describe('calltree/ZipFileTree', function() {
     expect(container.firstChild).toMatchSnapshot();
   });
 
+  // getByText is an assertion, but eslint doesn't know that.
+  // eslint-disable-next-line jest/expect-expect
   it('contains a list of all the files', async () => {
     const { getByText } = await setup();
 

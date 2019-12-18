@@ -728,6 +728,8 @@ describe('actions/ProfileView', function() {
       );
     });
 
+    // assertSetContainsOnly is an assertion.
+    // eslint-disable-next-line jest/expect-expect
     it('expands subtrees', function() {
       const { getState, dispatch, threadIndex, A, B, C, D } = setupStore();
 
@@ -1195,7 +1197,7 @@ describe('actions/ProfileView', function() {
       }
     });
 
-    it('can extract some network markers and match the snapshot', function() {
+    it('only deliveres screenshots within a range selection', function() {
       const profile = getScreenshotTrackProfile();
       const [{ markers }] = profile.threads;
       const { dispatch, getState } = storeWithProfile(profile);
@@ -1431,6 +1433,8 @@ describe('snapshots of selectors/profile', function() {
       selectedThreadSelectors.getSelectedCallNodeIndex(getState())
     ).toEqual(1);
   });
+  // assertSetContainsOnly is an assertion
+  // eslint-disable-next-line jest/expect-expect
   it('matches the last stored run of selectedThreadSelector.getExpandedCallNodePaths', function() {
     const { getState, A, B } = setupStore();
     assertSetContainsOnly(

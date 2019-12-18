@@ -17,6 +17,10 @@ import {
   PROCESSED_PROFILE_VERSION,
 } from '../../app-logic/constants';
 
+/* eslint-disable jest/expect-expect */
+// testProfileUpgrading and testCleopatraProfile are assertions, although eslint
+// doesn't realize it. Disable the rule.
+
 describe('upgrading old cleopatra profiles', function() {
   const oldCleopatraProfile = require('../fixtures/upgrades/old-cleopatra-profile.sps.json');
   const ancientCleopatraProfile = require('../fixtures/upgrades/ancient-cleopatra-profile.sps.json');
