@@ -16,7 +16,7 @@ The graph visualization tracks the relative memory usage over the committed rang
 
 ## Native Memory Allocations (experimental)
 
-The profiler has experimental support for analyzing allocations in native code (C++ and Rust) via stack sampling. These features require Nightly and the new Profiler Toolbar Icon (directions below).
+The profiler has experimental support for analyzing allocations in native code (C++ and Rust) via stack sampling. These features require Nightly and the new Profiler Toolbar Icon (directions below). To follow along you can open this [example showing DevTools opening and closing](https://perfht.ml/2LKZsfY)
 
 The Native Allocations feature works by collecting the stack and size of memory allocations from native (C++ or Rust) code. It does not collect every allocation, but only samples a subset of them. The sampling is biased towards larger allocations and larger frees. Larger allocations are more likely show up in the profile, and will most likely be more representative of the actual memory usage. Keep in mind that since these allocations are only sampled, not all allocations will be recorded. This means that memory track (the orange graph at the top) will most likely report different numbers for memory usage.
 
@@ -24,9 +24,9 @@ The Native Allocations feature works by collecting the stack and size of memory 
 
 The allocations can be viewed in the call tree, and flame graph, but not the stack chart.
 
-![A screenshot of the call tree showing native allocations.](images/allocation-calltree.png)
+![A screenshot of the call tree showing native allocations.](images/allocation-calltree-2019-12-11.png)
 
-![A screenshot of the flame graph showing native allocations.](images/allocation-flame-graph.png)
+![A screenshot of the flame graph showing native allocations.](images/allocation-flame-graph-2019-12-11.png)
 
 ### Enable the Feature
 
@@ -40,17 +40,23 @@ The allocations can be viewed in the call tree, and flame graph, but not the sta
 
 ![A screenshot of the UI to turn on native allocations.](images/allocation-feature.png)
 
-### Limitations in Native Allocation Tracking
+### Native allocation summary strategies
 
-#### Limitation: Allocations tracked per-thread
+#### Summarize Retained allocations
 
-The allocations and deallocations are reported per thread. This means that one thread can allocate memory, and another could free it. In addition, the memory track (the orange line graph in the header) reports per *process*, which means that the line graph may not match the numbers in the call tree.
+In the profiler, the allocations are sampled, but de-allocations are matched against the sampled allocations. This means that the profiler can tell which allocations were retained, and which were not in a given time frame. In the UI, drag an interactive range selection to update which allocations were retained within the view. This can be helpful to identify potential memory leaks. For instance in [this profile of DevTools opening and closing](https://perfht.ml/2LKZsfY) you can create a range selection and scrub through the different parts of the profile. Ideally, after the window is closed, most of the allocations should be removed.
 
-### Limitation: Allocations and deallocations are sampled separately
+#### Summarize Allocations
 
-The native allocations feature samples allocations, and it samples deallocations in a different step. This means that we can sample a large allocation that may not be sampled when it gets freed. This means the call tree could potentially give misleading results if the deallocations were subtracted from the allocations.
+This option in the dropdown shows all allocations that were sampled, regardless if they were deallocated.
 
-Note: [Bug 1582741](https://bugzilla.mozilla.org/show_bug.cgi?id=1582741) tracks a feature to provide balanced allocations and frees.
+#### Summarize Deallocations
+
+This option shows all of the deallocations that were sampled. Keep in mind that this view will only show the deallocations for allocations that were tracked by the profiler. These deallocations are not independently sampled.
+
+### Limitations in native allocation tracking
+
+Some components inside of Gecko may implement their own memory management systems, and bypass the usage of system-level functions like `malloc` that are instrumented with this feature. For instance, some code could create a large buffer, and manage its own memory inside of that buffer. This feature would know about the allocation of the larger chunk of memory, but not how smaller allocations could be created inside of that buffer of memory. If this happens, information could be missing or misleading.
 
 ## JavaScript Allocations (experimental)
 

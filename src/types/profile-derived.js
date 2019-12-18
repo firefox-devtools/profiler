@@ -112,7 +112,7 @@ export type CallNodeDisplayData = $Exact<
     selfTimeWithUnit: string,
     name: string,
     lib: string,
-    dim: boolean,
+    isFrameLabel: boolean,
     categoryName: string,
     categoryColor: string,
     icon: string | null,

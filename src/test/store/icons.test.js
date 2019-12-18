@@ -42,7 +42,7 @@ describe('actions/icons', function() {
       selfTimeWithUnit: '0 ms',
       name: 'icon',
       lib: 'icon',
-      dim: false,
+      isFrameLabel: false,
       categoryName: 'Other',
       categoryColor: 'grey',
       icon,

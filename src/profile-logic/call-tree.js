@@ -222,7 +222,7 @@ export class CallTree {
       const subcategoryIndex = this._callNodeTable.subcategory[callNodeIndex];
       const resourceIndex = this._funcTable.resource[funcIndex];
       const resourceType = this._resourceTable.type[resourceIndex];
-      const isJS = this._funcTable.isJS[funcIndex];
+      const isFrameLabel = resourceIndex === -1;
       const libName = this._getOriginAnnotation(funcIndex);
 
       let icon = null;
@@ -280,7 +280,7 @@ export class CallTree {
         name: funcName,
         lib: libName.slice(0, 1000),
         // Dim platform pseudo-stacks.
-        dim: !isJS && this._jsOnly,
+        isFrameLabel,
         categoryName: getCategoryPairLabel(
           this._categories,
           categoryIndex,

@@ -14,6 +14,7 @@ import {
   changeImplementationFilter,
   changeSelectedCallNode,
   changeShowJsTracerSummary,
+  changeShowUserTimings,
 } from '../../actions/profile-view';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -445,5 +446,15 @@ describe('actions/changeShowJsTracerSummary', function() {
     expect(UrlStateSelectors.getShowJsTracerSummary(getState())).toBe(false);
     dispatch(changeShowJsTracerSummary(true));
     expect(UrlStateSelectors.getShowJsTracerSummary(getState())).toBe(true);
+  });
+});
+
+describe('actions/changeShowUserTimings', function() {
+  it('can change the view to show a summary', function() {
+    const { profile } = getProfileFromTextSamples(`A`);
+    const { dispatch, getState } = storeWithProfile(profile);
+    expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(false);
+    dispatch(changeShowUserTimings(true));
+    expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(true);
   });
 });

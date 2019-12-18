@@ -1004,7 +1004,7 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
     newMarkerTable.name.push(oldMarkers.name[index]);
     newMarkerTable.time.push(oldMarkers.time[index]);
     newMarkerTable.data.push(oldMarkers.data[index]);
-    newMarkerTable.category.push(newMarkerTable.category[index]);
+    newMarkerTable.category.push(oldMarkers.category[index]);
     newMarkerTable.length++;
   };
 
