@@ -16,7 +16,11 @@ import {
   changeShowJsTracerSummary,
   changeShowUserTimings,
 } from '../../actions/profile-view';
-import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  getProfileWithMarkers,
+  getUserTiming,
+} from '../fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 
 describe('selectors/getStackTimingByDepth', function() {
@@ -456,5 +460,80 @@ describe('actions/changeShowUserTimings', function() {
     expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(false);
     dispatch(changeShowUserTimings(true));
     expect(UrlStateSelectors.getShowUserTimings(getState())).toBe(true);
+  });
+});
+
+describe('selectors/getCombinedTimingRows', function() {
+  function setupUserTimings() {
+    // Approximately generate this type of graph with the following user timings.
+    //
+    // [renderFunction---------------------]
+    //   [componentA---------------------]
+    //     [componentB----]  [componentD]
+    //      [componentC-]
+    return getProfileWithMarkers([
+      getUserTiming('renderFunction', 0, 10),
+      getUserTiming('componentA', 1, 8),
+      getUserTiming('componentB', 2, 4),
+      getUserTiming('componentC', 3, 1),
+      getUserTiming('componentD', 7, 1),
+    ]);
+  }
+
+  function setupSamples() {
+    const { profile } = getProfileFromTextSamples(
+      `
+        A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
+        B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
+        C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
+        D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
+        E[cat:Graphics]  G[cat:Graphics]
+      `
+    );
+
+    return profile;
+  }
+  it('combined timings includes user and call timings', () => {
+    const markerProfile = setupUserTimings();
+    const stackProfile = setupSamples();
+    stackProfile.threads[0].markers = markerProfile.threads[0].markers;
+    const store = storeWithProfile(stackProfile);
+
+    expect(
+      selectedThreadSelectors.getCombinedTimingRows(store.getState())
+    ).toEqual([
+      {
+        start: [0],
+        end: [10],
+        index: [0],
+        label: ['renderFunction'],
+        name: 'A',
+        bucket: 'None',
+        length: 1,
+      },
+      {
+        start: [1],
+        end: [9],
+        index: [1],
+        label: ['componentA'],
+        name: 'A',
+        bucket: 'None',
+        length: 1,
+      },
+      {
+        start: [2],
+        end: [6],
+        index: [2],
+        label: ['componentB'],
+        name: 'A',
+        bucket: 'None',
+        length: 1,
+      },
+      { start: [0], end: [3], callNode: [0], length: 1 },
+      { start: [0], end: [3], callNode: [1], length: 1 },
+      { start: [0, 2], end: [2, 3], callNode: [2, 7], length: 2 },
+      { start: [0, 1, 2], end: [1, 2, 3], callNode: [3, 5, 8], length: 3 },
+      { start: [0, 1], end: [1, 2], callNode: [4, 6], length: 2 },
+    ]);
   });
 });

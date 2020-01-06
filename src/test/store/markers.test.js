@@ -5,6 +5,7 @@
 import { storeWithProfile } from '../fixtures/stores';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import {
+  getUserTiming,
   getProfileWithMarkers,
   getNetworkTrackProfile,
 } from '../fixtures/profiles/processed-profile';
@@ -321,5 +322,48 @@ describe('memory markers', function() {
     expect(
       markerIndexes.map(markerIndex => getMarker(markerIndex).name)
     ).toEqual(['A', 'B', 'C']);
+  });
+});
+
+describe('selectors/getUserTimingMarkerTiming', function() {
+  it('simple profile', function() {
+    const profile = getProfileWithMarkers([
+      getUserTiming('renderFunction', 0, 10),
+      getUserTiming('componentA', 1, 8),
+      getUserTiming('componentB', 2, 4),
+    ]);
+    const { getState } = storeWithProfile(profile);
+
+    expect(
+      selectedThreadSelectors.getUserTimingMarkerTiming(getState())
+    ).toEqual([
+      {
+        start: [0],
+        end: [10],
+        index: [0],
+        label: ['renderFunction'],
+        name: 'UserTiming',
+        bucket: 'None',
+        length: 1,
+      },
+      {
+        start: [1],
+        end: [9],
+        index: [1],
+        label: ['componentA'],
+        name: 'UserTiming',
+        bucket: 'None',
+        length: 1,
+      },
+      {
+        start: [2],
+        end: [6],
+        index: [2],
+        label: ['componentB'],
+        name: 'UserTiming',
+        bucket: 'None',
+        length: 1,
+      },
+    ]);
   });
 });
