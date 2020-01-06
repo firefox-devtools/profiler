@@ -8,7 +8,6 @@ import * as React from 'react';
 import clamp from 'clamp';
 import { getContentRect } from '../../utils/css-geometry-tools';
 import {
-  getProfileInterval,
   getPreviewSelection,
   getCommittedRange,
   getZeroAt,
@@ -39,7 +38,6 @@ type StateProps = {|
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
   +zeroAt: Milliseconds,
-  +minSelectionStartWidth: Milliseconds,
 |};
 
 type DispatchProps = {|
@@ -92,17 +90,20 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
     // browsers.
     event.preventDefault();
 
-    const { committedRange, minSelectionStartWidth } = this.props;
+    const { committedRange } = this.props;
+    const minSelectionStartWidth: CssPixels = 3;
+    const mouseDownX = event.pageX;
     const mouseDownTime =
-      ((event.pageX - rect.left) / rect.width) *
+      ((mouseDownX - rect.left) / rect.width) *
         (committedRange.end - committedRange.start) +
       committedRange.start;
 
     let isRangeSelecting = false;
 
     const mouseMoveHandler = event => {
+      const mouseMoveX = event.pageX;
       const mouseMoveTime =
-        ((event.pageX - rect.left) / rect.width) *
+        ((mouseMoveX - rect.left) / rect.width) *
           (committedRange.end - committedRange.start) +
         committedRange.start;
       const selectionStart = clamp(
@@ -117,7 +118,7 @@ class TimelineRulerAndSelection extends React.PureComponent<Props, State> {
       );
       if (
         isRangeSelecting ||
-        selectionEnd - selectionStart >= minSelectionStartWidth
+        Math.abs(mouseMoveX - mouseDownX) >= minSelectionStartWidth
       ) {
         isRangeSelecting = true;
         this.props.updatePreviewSelection({
@@ -372,7 +373,6 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
     zeroAt: getZeroAt(state),
-    minSelectionStartWidth: getProfileInterval(state),
   }),
   mapDispatchToProps: {
     updatePreviewSelection,
