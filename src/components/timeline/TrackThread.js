@@ -19,6 +19,7 @@ import { getThreadSelectors } from '../../selectors/per-thread';
 import {
   getSelectedThreadIndex,
   getTimelineType,
+  getInvertCallstack,
 } from '../../selectors/url-state';
 import {
   TimelineMarkersJank,
@@ -32,6 +33,7 @@ import {
   changeSelectedCallNode,
   focusCallTree,
   selectLeafCallNode,
+  selectRootCallNode,
 } from '../../actions/profile-view';
 import { reportTrackThreadHeight } from '../../actions/app';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
@@ -72,6 +74,7 @@ type StateProps = {|
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
   +samplesSelectedStates: null | SelectedState[],
+  +invertCallstack: boolean,
 |};
 
 type DispatchProps = {|
@@ -80,6 +83,7 @@ type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
   +selectLeafCallNode: typeof selectLeafCallNode,
+  +selectRootCallNode: typeof selectRootCallNode,
   +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 |};
 
@@ -94,8 +98,16 @@ class TimelineTrackThread extends PureComponent<Props> {
    * This will select the leaf-most stack frame or call node.
    */
   _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
-    const { threadIndex, selectLeafCallNode, focusCallTree } = this.props;
-    selectLeafCallNode(threadIndex, sampleIndex);
+    const {
+      threadIndex,
+      selectLeafCallNode,
+      selectRootCallNode,
+      focusCallTree,
+      invertCallstack,
+    } = this.props;
+    invertCallstack
+      ? selectRootCallNode(threadIndex, sampleIndex)
+      : selectLeafCallNode(threadIndex, sampleIndex);
     focusCallTree();
   };
 
@@ -229,6 +241,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         ? selectors.getSelectedCallNodeIndex(state)
         : null;
     return {
+      invertCallstack: getInvertCallstack(state),
       filteredThread: selectors.getFilteredThread(state),
       fullThread: selectors.getRangeFilteredThread(state),
       tabFilteredThread: selectors.getTabFilteredThread(state),
@@ -252,6 +265,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     changeSelectedCallNode,
     focusCallTree,
     selectLeafCallNode,
+    selectRootCallNode,
     reportTrackThreadHeight,
   },
   component: withSize<Props>(TimelineTrackThread),
