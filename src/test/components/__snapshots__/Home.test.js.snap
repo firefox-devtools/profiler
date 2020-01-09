@@ -132,15 +132,6 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       </div>
     </div>
   </section>
-  <div
-    class="homeDrop"
-  >
-    <div
-      class="homeDropMessage"
-    >
-      Drop a saved profile here
-    </div>
-  </div>
 </div>
 `;
 
@@ -277,15 +268,6 @@ exports[`app/Home renders the install screen for the extension 1`] = `
       </div>
     </div>
   </section>
-  <div
-    class="homeDrop"
-  >
-    <div
-      class="homeDropMessage"
-    >
-      Drop a saved profile here
-    </div>
-  </div>
 </div>
 `;
 
@@ -452,15 +434,6 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
       </div>
     </div>
   </section>
-  <div
-    class="homeDrop"
-  >
-    <div
-      class="homeDropMessage"
-    >
-      Drop a saved profile here
-    </div>
-  </div>
 </div>
 `;
 
@@ -618,14 +591,5 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       </div>
     </div>
   </section>
-  <div
-    class="homeDrop"
-  >
-    <div
-      class="homeDropMessage"
-    >
-      Drop a saved profile here
-    </div>
-  </div>
 </div>
 `;

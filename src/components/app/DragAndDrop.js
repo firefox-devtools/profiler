@@ -9,6 +9,8 @@ import classNames from 'classnames';
 import { retrieveProfileFromFile } from '../../actions/receive-profile';
 import type { ConnectedProps } from '../../utils/connect';
 
+import './DragAndDrop.css';
+
 function _dragPreventDefault(event: DragEvent) {
   event.preventDefault();
 }
@@ -81,13 +83,19 @@ class DragAndDrop extends React.PureComponent<
     const { className, children } = this.props;
 
     return (
-      <div
-        className={className}
-        onDragEnter={this._startDragging}
-        onDragExit={this._stopDragging}
-        onDrop={this._handleProfileDrop}
-      >
-        {children}
+      <>
+        <div
+          className={classNames(className, 'dragAndDropArea')}
+          onDragEnter={this._startDragging}
+          onDragExit={this._stopDragging}
+          onDrop={this._handleProfileDrop}
+        >
+          {children}
+        </div>
+        {/* Have the message div as a sibling to the area div
+          above. The area div creates its own stacking context, so
+          even if it contains children with high z-indexes, the
+          message div will still appear on top when shown.*/}
         <div
           className={classNames(
             'homeDrop',
@@ -96,7 +104,7 @@ class DragAndDrop extends React.PureComponent<
         >
           <div className="homeDropMessage">Drop a saved profile here</div>
         </div>
-      </div>
+      </>
     );
   }
 }
