@@ -105,9 +105,11 @@ class TimelineTrackThread extends PureComponent<Props> {
       focusCallTree,
       invertCallstack,
     } = this.props;
-    invertCallstack
-      ? selectRootCallNode(threadIndex, sampleIndex)
-      : selectLeafCallNode(threadIndex, sampleIndex);
+    if (invertCallstack) {
+      selectRootCallNode(threadIndex, sampleIndex);
+    } else {
+      selectLeafCallNode(threadIndex, sampleIndex);
+    }
     focusCallTree();
   };
 
