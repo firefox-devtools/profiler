@@ -33,6 +33,7 @@ const view: Reducer<AppViewState> = (
       return { phase: 'FATAL_ERROR', error: action.error };
     case 'WAITING_FOR_PROFILE_FROM_ADDON':
     case 'WAITING_FOR_PROFILE_FROM_URL':
+    case 'WAITING_FOR_PROFILE_FROM_FILE':
       return { phase: 'INITIALIZING' };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
