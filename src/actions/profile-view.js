@@ -34,6 +34,7 @@ import {
   getSampleIndexToCallNodeIndex,
   getSampleCategories,
   findBestAncestorCallNode,
+  findRootCallNode,
 } from '../profile-logic/profile-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
@@ -168,16 +169,10 @@ export function selectRootCallNode(
         ? -1
         : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
 
-    // The newSelectedCallNode is the topmost index of the selected sample's stack.
-    // Get the Call Node depth to the root of the current sample's stack.
-    const depth = callNodeInfo.callNodeTable.depth[newSelectedCallNode];
-    let key = newSelectedCallNode;
-    const prefixTable = callNodeInfo.callNodeTable.prefix;
-    // Get the prefix key for the Call Node root.
-    for (let i = 0; i < depth; i++) {
-      key = prefixTable[key];
-    }
-    const rootSelectedCallNode = key;
+    const rootSelectedCallNode = findRootCallNode(
+      newSelectedCallNode,
+      callNodeInfo
+    );
     dispatch(
       changeSelectedCallNode(
         threadIndex,
