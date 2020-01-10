@@ -12,39 +12,6 @@
   line-height: 1.5;
 }
 
-.homeDrop {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: flex;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  align-items: stretch;
-  justify-content: center;
-  padding: 1em;
-  background-color: rgba(255, 255, 255, 0.9);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 200ms;
-}
-
-.homeDropMessage {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  border: 2px dashed #888;
-  border-radius: 10px;
-  color: #666;
-  font-size: 30px;
-  text-align: center;
-}
-
-.homeDrop.dragging {
-  opacity: 1;
-}
-
 .homeSpecialMessage {
   padding: 8px 16px;
   border: 1px solid #000;

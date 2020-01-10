@@ -15,12 +15,12 @@ function _dragPreventDefault(event: DragEvent) {
   event.preventDefault();
 }
 
-type OwnDragAndDropProps = {|
+type OwnProps = {|
   +className: string,
   +children?: React.Node,
 |};
 
-type DispatchDragAndDropProps = {|
+type DispatchProps = {|
   +retrieveProfileFromFile: typeof retrieveProfileFromFile,
 |};
 
@@ -28,12 +28,12 @@ type DragAndDropState = {
   isDragging: boolean,
 };
 
-type DragAndDropProps = ConnectedProps<
-  OwnDragAndDropProps,
-  {||},
-  DispatchDragAndDropProps
->;
+type DragAndDropProps = ConnectedProps<OwnProps, {||}, DispatchProps>;
 
+/**
+ * Creates a target area to drop files on. A dropped file will be
+ * loaded into the profiler.
+ */
 class DragAndDrop extends React.PureComponent<
   DragAndDropProps,
   DragAndDropState
@@ -98,11 +98,11 @@ class DragAndDrop extends React.PureComponent<
           message div will still appear on top when shown.*/}
         <div
           className={classNames(
-            'homeDrop',
+            'dropMessageWrapper',
             this.state.isDragging ? 'dragging' : false
           )}
         >
-          <div className="homeDropMessage">Drop a saved profile here</div>
+          <div className="dropMessage">Drop a saved profile here</div>
         </div>
       </>
     );

@@ -1,3 +1,36 @@
 .dragAndDropArea {
   isolation: isolate;
 }
+
+.dropMessageWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  align-items: stretch;
+  justify-content: center;
+  padding: 1em;
+  background-color: rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms;
+}
+
+.dropMessageWrapper.dragging {
+  opacity: 1;
+}
+
+.dropMessage {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #888;
+  border-radius: 10px;
+  color: #666;
+  font-size: 30px;
+  text-align: center;
+}
