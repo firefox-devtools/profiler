@@ -16,7 +16,7 @@ function _dragPreventDefault(event: DragEvent) {
 }
 
 type OwnProps = {|
-  +className: string,
+  +className?: string,
   +children?: React.Node,
 |};
 

@@ -2,7 +2,7 @@
 
 exports[`app/Home renders the information screen for other browsers 1`] = `
 <div
-  class="home"
+  class="home dragAndDropArea"
 >
   <section
     class="homeSection"
@@ -137,7 +137,7 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
 
 exports[`app/Home renders the install screen for the extension 1`] = `
 <div
-  class="home"
+  class="home dragAndDropArea"
 >
   <section
     class="homeSection"
@@ -273,7 +273,7 @@ exports[`app/Home renders the install screen for the extension 1`] = `
 
 exports[`app/Home renders the install screen for the legacy add-on 1`] = `
 <div
-  class="home"
+  class="home dragAndDropArea"
 >
   <section
     class="homeSection"
@@ -439,7 +439,7 @@ exports[`app/Home renders the install screen for the legacy add-on 1`] = `
 
 exports[`app/Home renders the usage instructions for pages with the extension installed 1`] = `
 <div
-  class="home"
+  class="home dragAndDropArea"
 >
   <section
     class="homeSection"
