@@ -217,6 +217,13 @@ class StackGraph extends PureComponent<Props> {
         interval
       );
 
+      if (thread.samples.stack[sampleIndex] === null) {
+        // If the sample index refers to a null sample, that sample
+        // has been filtered out and means that there was no stack bar
+        // drawn at the place where the user clicked. Do nothing here.
+        return;
+      }
+
       this.props.onSampleClick(sampleIndex);
     }
   };

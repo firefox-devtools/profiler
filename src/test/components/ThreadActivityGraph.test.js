@@ -22,7 +22,10 @@ import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
 
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-import { commitRange } from '../../actions/profile-view';
+import {
+  commitRange,
+  changeCallTreeSearchString,
+} from '../../actions/profile-view';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -186,6 +189,30 @@ describe('SelectedThreadActivityGraph', function() {
       fireEvent(
         stackGraphCanvas,
         getMouseEvent('mouseup', { pageX: getSamplesPixelPosition(1) })
+      );
+      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
+    });
+
+    it('does nothing if a filtered out sample is clicked', function() {
+      const { dispatch, stackGraphCanvas, getCallNodePath } = setup();
+      // Get a selection by clicking a visible stack.
+      fireEvent(
+        stackGraphCanvas,
+        getMouseEvent('mouseup', { pageX: getSamplesPixelPosition(1) })
+      );
+      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
+
+      // Search for something that will cause a stack to hide.
+      dispatch(changeCallTreeSearchString('C'));
+
+      // Click on the position of the hidden stack, and confirm that
+      // the selection did not change.
+      fireEvent(
+        stackGraphCanvas,
+        // This clicks on the sample with index 2 (i.e., the third
+        // stack, which would be A -> B -> H -> I if it weren't
+        // hidden)
+        getMouseEvent('mouseup', { pageX: getSamplesPixelPosition(2) })
       );
       expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
     });
