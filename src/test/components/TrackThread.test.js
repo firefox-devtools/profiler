@@ -143,7 +143,7 @@ describe('timeline/TrackThread', function() {
     expect(ctx.__flushDrawLog()).toMatchSnapshot();
   });
 
-  it('can click a stack in the stack graph', function() {
+  it('can click a stack in the stack graph in normal call trees', function() {
     const { getState, stackGraphCanvas, thread } = setup(getSamplesProfile());
 
     // Provide a quick helper for nicely asserting the call node path.
@@ -177,6 +177,31 @@ describe('timeline/TrackThread', function() {
       getMouseEvent('mouseup', { pageX: STACK_4_X_POSITION })
     );
     expect(getCallNodePath()).toEqual(['j', 'k', 'l']);
+  });
+
+  it('can click a stack in the stack graph in inverted call trees', function() {
+    const { getState, stackGraphCanvas, thread } = setup(getSamplesProfile());
+
+    // Provide a quick helper for nicely asserting the inverted call node path.
+    const getInvertedCallNodePath = () =>
+      selectedThreadSelectors
+        .getSelectedCallNodePath(getState())
+        .map(funcIndex =>
+          thread.stringTable.getString(thread.funcTable.name[funcIndex])
+        )
+        .reverse();
+
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_1_X_POSITION })
+    );
+    expect(getInvertedCallNodePath()).toEqual(['c', 'b', 'a']);
+
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_3_X_POSITION })
+    );
+    expect(getInvertedCallNodePath()).toEqual(['i', 'h', 'g']);
   });
 
   it('can click a marker', function() {
