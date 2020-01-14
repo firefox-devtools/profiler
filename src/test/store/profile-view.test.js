@@ -1231,6 +1231,9 @@ describe('actions/ProfileView', function() {
  * of mechanically running through the selectors in tests.
  */
 describe('snapshots of selectors/profile', function() {
+  const browsingContextID = 123123;
+  const innerWindowID = 2;
+
   // Set up a profile that has some nice features that can show that the selectors work.
   function setupStore() {
     const {
@@ -1247,7 +1250,30 @@ describe('snapshots of selectors/profile', function() {
     const B = funcNames.indexOf('B');
     const C = funcNames.indexOf('C');
 
+    profile.pages = [
+      {
+        browsingContextID: browsingContextID,
+        innerWindowID: innerWindowID,
+        url: 'https://developer.mozilla.org/en-US/',
+        embedderInnerWindowID: 0,
+      },
+    ];
+
     const [samplesThread] = profile.threads;
+
+    // Add innerWindowID for G function
+    const G = funcNames.indexOf('G');
+    for (
+      let frameIdx = 0;
+      frameIdx < samplesThread.frameTable.length;
+      frameIdx++
+    ) {
+      const func = samplesThread.frameTable.func[frameIdx];
+      if (func === G) {
+        samplesThread.frameTable.innerWindowID[frameIdx] = innerWindowID;
+      }
+    }
+
     // Add in a thread with markers
     const {
       threads: [markersThread],
@@ -1343,6 +1369,14 @@ describe('snapshots of selectors/profile', function() {
       'Complete "Thread with samples"',
       'Merge: C',
     ]);
+  });
+  it('matches the last stored run of selectedThreadSelector.getTabFilteredThread', function() {
+    const { getState, dispatch } = setupStore();
+
+    dispatch(ProfileView.changeShowTabOnly(browsingContextID));
+    expect(
+      selectedThreadSelectors.getTabFilteredThread(getState())
+    ).toMatchSnapshot();
   });
   it('matches the last stored run of selectedThreadSelector.getRangeFilteredThread', function() {
     const { getState } = setupStore();
