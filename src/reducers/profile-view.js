@@ -451,6 +451,12 @@ const previewSelection: Reducer<PreviewSelection> = (
   }
 };
 
+/**
+ * When changing state in the UI, it's hard to know when we need to re-scroll a
+ * selection into view. This value is a generational value (it always increments by one).
+ * Anytime it increments, it signals that the current view needs to scroll the selection
+ * into view. This mechanism works will with memoization of props with React components.
+ */
 const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
     case 'CHANGE_INVERT_CALLSTACK':
@@ -466,6 +472,12 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
   }
 };
 
+/**
+ * When changing state in the UI, we need to know when the call tree needs to be focused.
+ * This value is a generational value (it always increments by one). Anytime it
+ * increments, it signals that the current view needs to focus the call tree
+ * This mechanism works will with memoization of props with React components.
+ */
 const focusCallTreeGeneration: Reducer<number> = (state = 0, action) => {
   switch (action.type) {
     case 'FOCUS_CALL_TREE':
