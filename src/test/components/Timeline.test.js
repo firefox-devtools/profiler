@@ -5,7 +5,7 @@
 // @flow
 import * as React from 'react';
 import Timeline from '../../components/timeline';
-import { render } from 'react-testing-library';
+import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -13,6 +13,7 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getBoundingBox } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
+import { getShowTabOnly } from '../../selectors/url-state';
 
 import type { Profile } from '../../types/profile';
 
@@ -106,5 +107,52 @@ describe('Timeline', function() {
     expect(drawCalls).toMatchSnapshot();
 
     delete window.devicePixelRatio;
+  });
+
+  describe('TimelineSettingsActiveTabView', function() {
+    it('"Show active tab only" checkbox should not present in a profile without active tab metadata', () => {
+      const ctx = mockCanvasContext();
+      jest
+        .spyOn(HTMLCanvasElement.prototype, 'getContext')
+        .mockImplementation(() => ctx);
+
+      const store = storeWithProfile();
+      const { queryByText } = render(
+        <Provider store={store}>
+          <Timeline />
+        </Provider>
+      );
+
+      expect(queryByText('Show active tab only')).toBeFalsy();
+    });
+
+    it('can switch between active tab view and advanced view', () => {
+      const ctx = mockCanvasContext();
+      jest
+        .spyOn(HTMLCanvasElement.prototype, 'getContext')
+        .mockImplementation(() => ctx);
+
+      const profile = _getProfileWithDroppedSamples();
+      profile.meta.configuration = {
+        threads: [],
+        features: [],
+        capacity: 1000000,
+        activeBrowsingContextID: 123,
+      };
+      const store = storeWithProfile(profile);
+      const { getByText } = render(
+        <Provider store={store}>
+          <Timeline />
+        </Provider>
+      );
+
+      expect(getShowTabOnly(store.getState())).toEqual(null);
+
+      fireEvent.click(getByText('Show active tab only'));
+      expect(getShowTabOnly(store.getState())).toEqual(123);
+
+      fireEvent.click(getByText('Show active tab only'));
+      expect(getShowTabOnly(store.getState())).toEqual(null);
+    });
   });
 });
