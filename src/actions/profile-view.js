@@ -1158,10 +1158,19 @@ export function changeProfileName(profileName: string): Action {
 
 export function changeShowTabOnly(
   showTabOnly: BrowsingContextID | null
-): Action {
-  return {
-    type: 'CHANGE_SHOW_TAB_ONLY',
-    showTabOnly,
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    let selectedTab = getSelectedTab(getState());
+
+    if (showTabOnly !== null && selectedTab === 'network-chart') {
+      selectedTab = getLastVisibleThreadTabSlug(getState());
+    }
+
+    dispatch({
+      type: 'CHANGE_SHOW_TAB_ONLY',
+      showTabOnly,
+      selectedTab,
+    });
   };
 }
 
