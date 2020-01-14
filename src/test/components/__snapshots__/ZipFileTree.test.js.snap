@@ -36,7 +36,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0"
-              style="height: 180px;"
+              style="height: 210px;"
             >
               <div
                 class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -73,7 +73,7 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
             </div>
             <div
               class="treeViewBodyInner treeViewBodyInner1"
-              style="height: 180px; width: 3000px;"
+              style="height: 210px; width: 3000px;"
             >
               <div
                 class="treeViewBodyInner treeViewBodyInner1TopSpacer"

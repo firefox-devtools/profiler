@@ -28,6 +28,7 @@ import {
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
+  findFillTextPositionFromDrawLog,
 } from '../fixtures/utils';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 
@@ -509,28 +510,6 @@ describe('MarkerChart', function() {
     });
   });
 });
-
-/**
- * Find a single x/y position for a ctx.fillText call.
- */
-function findFillTextPositionFromDrawLog(
-  drawLog: any[],
-  fillText: string
-): {| x: number, y: number |} {
-  const positions = drawLog
-    .filter(([cmd, text]) => cmd === 'fillText' && text === fillText)
-    .map(([, , x, y]) => ({ x, y }));
-
-  if (positions.length === 0) {
-    throw new Error('Could not find a fillText command for ' + fillText);
-  }
-
-  if (positions.length > 1) {
-    throw new Error('More than one fillText() call was found for ' + fillText);
-  }
-
-  return positions[0];
-}
 
 /**
  * This is a quick helper to create UserTiming markers.

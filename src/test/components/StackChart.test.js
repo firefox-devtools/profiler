@@ -36,9 +36,11 @@ import {
   getMouseEvent,
   addRootOverlayElement,
   removeRootOverlayElement,
+  findFillTextPositionFromDrawLog,
 } from '../fixtures/utils';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
+import type { Profile } from '../../types/profile';
 import type { CssPixels } from '../../types/units';
 
 jest.useFakeTimers();
@@ -52,150 +54,20 @@ describe('StackChart', function() {
   beforeEach(addRootOverlayElement);
   afterEach(removeRootOverlayElement);
 
-  function setup(samples) {
-    const flushRafCalls = mockRaf();
-    const ctx = mockCanvasContext();
-
-    jest
-      .spyOn(HTMLCanvasElement.prototype, 'getContext')
-      .mockImplementation(() => ctx);
-
-    jest
-      .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
-      .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
-
-    const {
-      profile,
-      funcNamesPerThread: [funcNames],
-    } = getProfileFromTextSamples(
-      samples ||
-        `
-          A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
-          B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
-          C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
-          D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
-          E[cat:Graphics]  G[cat:Graphics]
-        `
-    );
-
-    const store = storeWithProfile(profile);
-    const renderResult = render(
-      <Provider store={store}>
-        <>
-          <CallNodeContextMenu />
-          <StackChartGraph />
-        </>
-      </Provider>
-    );
-    const { container, getByText } = renderResult;
-
-    flushRafCalls();
-
-    const stackChartCanvas = ensureExists(
-      container.querySelector('.chartCanvas.stackChartCanvas'),
-      `Couldn't find the stack chart canvas, with selector .chartCanvas.stackChartCanvas`
-    );
-
-    // Mouse event tools
-    function getPositioningOptions({ x, y }) {
-      // These positioning options will be sent to all our mouse events. Note
-      // that the values aren't really consistent, especially offsetY and
-      // pageY shouldn't be the same, but in the context of our test this will
-      // be good enough.
-      // pageX/Y values control the position of the tooltip so it's not super
-      // important.
-      // offsetX/Y are more important as they're used to find which node is
-      // actually clicked.
-      // clientX/Y is used in the Viewport HOC when dragging and zooming.
-      const positioningOptions = {
-        offsetX: x,
-        offsetY: y,
-        clientX: x,
-        clientY: y,
-        pageX: x,
-        pageY: y,
-      };
-
-      return positioningOptions;
-    }
-
-    function fireMouseEvent(eventName, options) {
-      fireEvent(stackChartCanvas, getMouseEvent(eventName, options));
-    }
-
-    type Position = { x: CssPixels, y: CssPixels };
-
-    // Note to a future developer: the x/y values can be derived from the
-    // array returned by flushDrawLog().
-    function leftClick(where: Position) {
-      const positioningOptions = getPositioningOptions(where);
-      const clickOptions = {
-        ...positioningOptions,
-        button: 0,
-        buttons: 0,
-      };
-
-      fireMouseEvent('mousemove', positioningOptions);
-      fireMouseEvent('mousedown', clickOptions);
-      fireMouseEvent('mouseup', clickOptions);
-      fireMouseEvent('click', clickOptions);
-      flushRafCalls();
-    }
-
-    function rightClick(where: Position) {
-      const positioningOptions = getPositioningOptions(where);
-      const clickOptions = {
-        ...positioningOptions,
-        button: 2,
-        buttons: 2,
-      };
-
-      fireMouseEvent('mousemove', positioningOptions);
-      fireMouseEvent('mousedown', clickOptions);
-      fireMouseEvent('mouseup', clickOptions);
-      fireMouseEvent('contextmenu', clickOptions);
-      flushRafCalls();
-    }
-
-    function moveMouse(where) {
-      fireMouseEvent('mousemove', getPositioningOptions(where));
-    }
-
-    // Context menu tools
-    const getContextMenu = () =>
-      ensureExists(
-        container.querySelector('.react-contextmenu'),
-        `Couldn't find the context menu.`
-      );
-
-    function clickMenuItem(strOrRegexp) {
-      fireEvent.click(getByText(strOrRegexp));
-    }
-
-    return {
-      ...renderResult,
-      ...store,
-      funcNames,
-      ctx,
-      flushRafCalls,
-      stackChartCanvas,
-      moveMouse,
-      leftClick,
-      rightClick,
-      clickMenuItem,
-      getContextMenu,
-    };
-  }
-
   it('matches the snapshot', () => {
-    const { container, ctx } = setup();
+    const { container, ctx } = setupSamples();
     const drawCalls = ctx.__flushDrawLog();
     expect(container.firstChild).toMatchSnapshot();
     expect(drawCalls).toMatchSnapshot();
   });
 
   it('can select a call node when clicking the chart', function() {
-    const { dispatch, getState, leftClick } = setup();
+    const {
+      dispatch,
+      getState,
+      leftClick,
+      findFillTextPosition,
+    } = setupSamples();
 
     // Start out deselected
     dispatch(changeSelectedCallNode(0, []));
@@ -203,20 +75,23 @@ describe('StackChart', function() {
       null
     );
 
-    // Click the first frame
+    const { x, y } = findFillTextPosition('A');
+    const callNodeAIndex = 0;
+
+    // Click on function A's box.
     leftClick({
-      x: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
-      y: 10,
+      x,
+      y,
     });
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
-      0
+      callNodeAIndex
     );
 
-    // Click on a region without any drawn box to deselect
+    // Click on a region without any drawn box to deselect.
     leftClick({
-      x: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
-      y: 100,
+      x,
+      y: y + GRAPH_HEIGHT,
     });
 
     expect(selectedThreadSelectors.getSelectedCallNodeIndex(getState())).toBe(
@@ -228,13 +103,15 @@ describe('StackChart', function() {
     // Fake timers are indicated when dealing with the context menus.
     jest.useFakeTimers();
 
-    const { rightClick, getContextMenu, clickMenuItem } = setup();
+    const {
+      rightClick,
+      getContextMenu,
+      clickMenuItem,
+      findFillTextPosition,
+    } = setupSamples();
 
-    // Right click the first frame
-    rightClick({
-      x: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
-      y: 10,
-    });
+    rightClick(findFillTextPosition('A'));
+
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('A');
@@ -246,11 +123,8 @@ describe('StackChart', function() {
     jest.runAllTimers();
 
     // Try another to make sure the menu works for other stacks too.
-    // Right click the first frame
-    rightClick({
-      x: GRAPH_BASE_WIDTH / 2 + TIMELINE_MARGIN_LEFT,
-      y: 20,
-    });
+    rightClick(findFillTextPosition('B'));
+
     expect(getContextMenu()).toHaveClass('react-contextmenu--visible');
     clickMenuItem('Copy function name');
     expect(copy).toHaveBeenLastCalledWith('B');
@@ -267,7 +141,7 @@ describe('StackChart', function() {
     const frames = 'A B C D E F G H I J K L M N O P Q R S T U V W X Y Z'.split(
       ' '
     );
-    const { dispatch, ctx, funcNames, flushRafCalls } = setup(
+    const { dispatch, ctx, funcNames, flushRafCalls } = setupSamples(
       frames.join('\n')
     );
     ctx.__flushDrawLog();
@@ -313,15 +187,164 @@ describe('StackChart', function() {
     });
 
     it('shows reasons when samples are out of range', () => {
-      const { dispatch, container } = setup();
+      const { dispatch, container } = setupSamples();
       dispatch(commitRange(5, 10));
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
 
     it('shows reasons when samples have been completely filtered out', function() {
-      const { dispatch, container } = setup();
+      const { dispatch, container } = setupSamples();
       dispatch(changeImplementationFilter('js'));
       expect(container.querySelector('.EmptyReasons')).toMatchSnapshot();
     });
   });
 });
+
+/**
+ * Currently the stack chart only accepts samples, but in the future it will accept
+ * markers, see PR #2345.
+ */
+function setupSamples(
+  samples: string = `
+    A[cat:DOM]       A[cat:DOM]       A[cat:DOM]
+    B[cat:DOM]       B[cat:DOM]       B[cat:DOM]
+    C[cat:Graphics]  C[cat:Graphics]  H[cat:Network]
+    D[cat:Graphics]  F[cat:Graphics]  I[cat:Network]
+    E[cat:Graphics]  G[cat:Graphics]
+  `
+) {
+  const {
+    profile,
+    funcNamesPerThread: [funcNames],
+  } = getProfileFromTextSamples(samples);
+
+  return setup(profile, funcNames);
+}
+
+/**
+ * Setup the stack chart component with a profile.
+ */
+function setup(profile: Profile, funcNames: string[] = []): * {
+  const flushRafCalls = mockRaf();
+  const ctx = mockCanvasContext();
+
+  jest
+    .spyOn(HTMLCanvasElement.prototype, 'getContext')
+    .mockImplementation(() => ctx);
+
+  jest
+    .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
+    .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
+
+  const store = storeWithProfile(profile);
+  const renderResult = render(
+    <Provider store={store}>
+      <>
+        <CallNodeContextMenu />
+        <StackChartGraph />
+      </>
+    </Provider>
+  );
+  const { container, getByText } = renderResult;
+
+  flushRafCalls();
+
+  const stackChartCanvas = ensureExists(
+    container.querySelector('.chartCanvas.stackChartCanvas'),
+    `Couldn't find the stack chart canvas, with selector .chartCanvas.stackChartCanvas`
+  );
+
+  // Mouse event tools
+  function getPositioningOptions({ x, y }) {
+    // These positioning options will be sent to all our mouse events. Note
+    // that the values aren't really consistent, especially offsetY and
+    // pageY shouldn't be the same, but in the context of our test this will
+    // be good enough.
+    // pageX/Y values control the position of the tooltip so it's not super
+    // important.
+    // offsetX/Y are more important as they're used to find which node is
+    // actually clicked.
+    // clientX/Y is used in the Viewport HOC when dragging and zooming.
+    const positioningOptions = {
+      offsetX: x,
+      offsetY: y,
+      clientX: x,
+      clientY: y,
+      pageX: x,
+      pageY: y,
+    };
+
+    return positioningOptions;
+  }
+
+  function fireMouseEvent(eventName, options) {
+    fireEvent(stackChartCanvas, getMouseEvent(eventName, options));
+  }
+
+  type Position = {| x: CssPixels, y: CssPixels |};
+
+  // Use findFillTextPosition to determin the position.
+  function leftClick(where: Position) {
+    const positioningOptions = getPositioningOptions(where);
+    const clickOptions = {
+      ...positioningOptions,
+      button: 0,
+      buttons: 0,
+    };
+
+    fireMouseEvent('mousemove', positioningOptions);
+    fireMouseEvent('mousedown', clickOptions);
+    fireMouseEvent('mouseup', clickOptions);
+    fireMouseEvent('click', clickOptions);
+    flushRafCalls();
+  }
+
+  function rightClick(where: Position) {
+    const positioningOptions = getPositioningOptions(where);
+    const clickOptions = {
+      ...positioningOptions,
+      button: 2,
+      buttons: 2,
+    };
+
+    fireMouseEvent('mousemove', positioningOptions);
+    fireMouseEvent('mousedown', clickOptions);
+    fireMouseEvent('mouseup', clickOptions);
+    fireMouseEvent('contextmenu', clickOptions);
+    flushRafCalls();
+  }
+
+  function moveMouse(where) {
+    fireMouseEvent('mousemove', getPositioningOptions(where));
+  }
+
+  // Context menu tools
+  const getContextMenu = () =>
+    ensureExists(
+      container.querySelector('.react-contextmenu'),
+      `Couldn't find the context menu.`
+    );
+
+  function clickMenuItem(strOrRegexp) {
+    fireEvent.click(getByText(strOrRegexp));
+  }
+
+  function findFillTextPosition(fillText: string): Position {
+    return findFillTextPositionFromDrawLog(ctx.__flushDrawLog(), fillText);
+  }
+
+  return {
+    ...renderResult,
+    ...store,
+    funcNames,
+    ctx,
+    flushRafCalls,
+    stackChartCanvas,
+    moveMouse,
+    leftClick,
+    rightClick,
+    clickMenuItem,
+    getContextMenu,
+    findFillTextPosition,
+  };
+}

@@ -229,3 +229,25 @@ export function createSelectChanger(renderResult: RenderResult) {
     });
   };
 }
+
+/**
+ * Find a single x/y position for a ctx.fillText call.
+ */
+export function findFillTextPositionFromDrawLog(
+  drawLog: any[],
+  fillText: string
+): {| x: number, y: number |} {
+  const positions = drawLog
+    .filter(([cmd, text]) => cmd === 'fillText' && text === fillText)
+    .map(([, , x, y]) => ({ x, y }));
+
+  if (positions.length === 0) {
+    throw new Error('Could not find a fillText command for ' + fillText);
+  }
+
+  if (positions.length > 1) {
+    throw new Error('More than one fillText() call was found for ' + fillText);
+  }
+
+  return positions[0];
+}
