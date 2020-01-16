@@ -25,9 +25,9 @@ describe('app/DragAndDrop', () => {
     // It would be better if we could check that when dropping
     // something on the area we'd get a call to
     // `retrieveProfileFromFile`, but jsdom is not supporting
-    // `dataTransfer`. See
-    // https://github.com/testing-library/react-testing-library/issues/339
-    // for more info.
+    // `dataTransfer`. We should improve this test when that support
+    // is added:
+    // https://github.com/firefox-devtools/profiler/issues/2366
     const retrieveProfileFromFile = jest.fn();
     const { container } = render(
       <DragAndDrop retrieveProfileFromFile={retrieveProfileFromFile}>
