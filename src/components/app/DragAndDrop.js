@@ -18,6 +18,7 @@ function _dragPreventDefault(event: DragEvent) {
 type OwnProps = {|
   +className?: string,
   +children?: React.Node,
+  +render?: React.Node => React.Node,
 |};
 
 type DispatchProps = {|
@@ -29,6 +30,8 @@ type DragAndDropState = {
 };
 
 type DragAndDropProps = ConnectedProps<OwnProps, {||}, DispatchProps>;
+
+// TODO Add documentation
 
 /**
  * Creates a target area to drop files on. A dropped file will be
@@ -80,7 +83,18 @@ class DragAndDrop extends React.PureComponent<
   };
 
   render() {
-    const { className, children } = this.props;
+    const { className, children, render } = this.props;
+
+    const message = (
+      <div
+        className={classNames(
+          'dropMessageWrapper',
+          this.state.isDragging ? 'dragging' : false
+        )}
+      >
+        <div className="dropMessage">Drop a saved profile here</div>
+      </div>
+    );
 
     return (
       <>
@@ -90,20 +104,14 @@ class DragAndDrop extends React.PureComponent<
           onDragExit={this._stopDragging}
           onDrop={this._handleProfileDrop}
         >
-          {children}
+          {render ? render(message) : children}
         </div>
-        {/* Have the message div as a sibling to the area div
-          above. The area div creates its own stacking context, so
-          even if it contains children with high z-indexes, the
-          message div will still appear on top when shown.*/}
-        <div
-          className={classNames(
-            'dropMessageWrapper',
-            this.state.isDragging ? 'dragging' : false
-          )}
-        >
-          <div className="dropMessage">Drop a saved profile here</div>
-        </div>
+        {/* If we weren't provided a render prop, have the message div
+          as a sibling to the area div above. The area div creates its
+          own stacking context, so even if it contains children with
+          high z-indexes, the message div will still appear on top
+          when shown.*/
+        render === undefined && message}
       </>
     );
   }
