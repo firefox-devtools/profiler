@@ -56,7 +56,7 @@ type StateProps = {|
   +interval: Milliseconds,
   +threadIndex: number,
   +previewSelection: PreviewSelection,
-  +rightClickedMarker: MarkerIndex | null,
+  +rightClickedMarkerIndex: MarkerIndex | null,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -74,7 +74,7 @@ class MarkerChart extends React.PureComponent<Props> {
     return interval / (end - start);
   }
 
-  _shouldDisplayTooltips = () => this.props.rightClickedMarker === null;
+  _shouldDisplayTooltips = () => this.props.rightClickedMarkerIndex === null;
 
   _takeViewportRef = (viewport: HTMLDivElement | null) => {
     this._viewport = viewport;
@@ -100,7 +100,7 @@ class MarkerChart extends React.PureComponent<Props> {
       previewSelection,
       updatePreviewSelection,
       changeRightClickedMarker,
-      rightClickedMarker,
+      rightClickedMarkerIndex,
     } = this.props;
 
     // The viewport needs to know about the height of what it's drawing, calculate
@@ -148,7 +148,7 @@ class MarkerChart extends React.PureComponent<Props> {
                 threadIndex,
                 marginLeft: TIMELINE_MARGIN_LEFT,
                 marginRight: TIMELINE_MARGIN_RIGHT,
-                rightClickedMarker,
+                rightClickedMarkerIndex,
                 shouldDisplayTooltips: this._shouldDisplayTooltips,
               }}
             />
@@ -181,7 +181,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       interval: getProfileInterval(state),
       threadIndex: getSelectedThreadIndex(state),
       previewSelection: getPreviewSelection(state),
-      rightClickedMarker: markerInfo ? markerInfo.markerIndex : null,
+      rightClickedMarkerIndex: markerInfo ? markerInfo.markerIndex : null,
     };
   },
   mapDispatchToProps: { updatePreviewSelection, changeRightClickedMarker },

@@ -38,7 +38,7 @@ import { getMarkerFullDescription } from '../../profile-logic/marker-data';
 type StateProps = {|
   +previewSelection: PreviewSelection,
   +committedRange: StartEndRange,
-  +rightClickedMarker: RightClickedMarkerInfo | null,
+  +rightClickedMarkerInfo: RightClickedMarkerInfo | null,
   +implementationFilter: ImplementationFilter,
 |};
 
@@ -52,17 +52,17 @@ type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 class MarkerContextMenu extends PureComponent<Props> {
   setStartRange = () => {
     const {
-      rightClickedMarker,
+      rightClickedMarkerInfo,
       updatePreviewSelection,
       previewSelection,
       committedRange,
     } = this.props;
 
-    if (rightClickedMarker === null) {
+    if (rightClickedMarkerInfo === null) {
       return;
     }
 
-    const { marker } = rightClickedMarker;
+    const { marker } = rightClickedMarkerInfo;
 
     const selectionEnd = previewSelection.hasSelection
       ? previewSelection.selectionEnd
@@ -78,17 +78,17 @@ class MarkerContextMenu extends PureComponent<Props> {
 
   setEndRange = () => {
     const {
-      rightClickedMarker,
+      rightClickedMarkerInfo,
       updatePreviewSelection,
       committedRange,
       previewSelection,
     } = this.props;
 
-    if (rightClickedMarker === null) {
+    if (rightClickedMarkerInfo === null) {
       return;
     }
 
-    const { marker } = rightClickedMarker;
+    const { marker } = rightClickedMarkerInfo;
 
     const selectionStart = previewSelection.hasSelection
       ? previewSelection.selectionStart
@@ -105,13 +105,13 @@ class MarkerContextMenu extends PureComponent<Props> {
   };
 
   setRangeByDuration = () => {
-    const { rightClickedMarker, updatePreviewSelection } = this.props;
+    const { rightClickedMarkerInfo, updatePreviewSelection } = this.props;
 
-    if (rightClickedMarker === null) {
+    if (rightClickedMarkerInfo === null) {
       return;
     }
 
-    const { marker } = rightClickedMarker;
+    const { marker } = rightClickedMarkerInfo;
 
     if (this._isZeroDurationMarker(marker)) {
       return;
@@ -130,13 +130,13 @@ class MarkerContextMenu extends PureComponent<Props> {
   }
 
   _convertStackToString(stack: IndexIntoStackTable): string {
-    const { rightClickedMarker, implementationFilter } = this.props;
+    const { rightClickedMarkerInfo, implementationFilter } = this.props;
 
-    if (rightClickedMarker === null) {
+    if (rightClickedMarkerInfo === null) {
       return '';
     }
 
-    const { thread } = rightClickedMarker;
+    const { thread } = rightClickedMarkerInfo;
 
     const callNodePath = filterCallNodePathByImplementation(
       thread,
@@ -154,37 +154,37 @@ class MarkerContextMenu extends PureComponent<Props> {
   }
 
   copyMarkerJSON = () => {
-    const { rightClickedMarker } = this.props;
+    const { rightClickedMarkerInfo } = this.props;
 
-    if (rightClickedMarker === null) {
+    if (rightClickedMarkerInfo === null) {
       return;
     }
 
-    const { marker } = rightClickedMarker;
+    const { marker } = rightClickedMarkerInfo;
 
     copy(JSON.stringify(marker, null, 2));
   };
 
   copyMarkerDescription = () => {
-    const { rightClickedMarker } = this.props;
+    const { rightClickedMarkerInfo } = this.props;
 
-    if (rightClickedMarker === null) {
+    if (rightClickedMarkerInfo === null) {
       return;
     }
 
-    const { marker } = rightClickedMarker;
+    const { marker } = rightClickedMarkerInfo;
 
     copy(getMarkerFullDescription(marker));
   };
 
   copyMarkerCause = () => {
-    const { rightClickedMarker } = this.props;
+    const { rightClickedMarkerInfo } = this.props;
 
-    if (rightClickedMarker === null) {
+    if (rightClickedMarkerInfo === null) {
       return;
     }
 
-    const { marker } = rightClickedMarker;
+    const { marker } = rightClickedMarkerInfo;
 
     if (marker.data && marker.data.cause) {
       const stack = this._convertStackToString(marker.data.cause.stack);
@@ -199,13 +199,13 @@ class MarkerContextMenu extends PureComponent<Props> {
   };
 
   copyUrl = () => {
-    const { rightClickedMarker } = this.props;
+    const { rightClickedMarkerInfo } = this.props;
 
-    if (rightClickedMarker === null) {
+    if (rightClickedMarkerInfo === null) {
       return;
     }
 
-    const { marker } = rightClickedMarker;
+    const { marker } = rightClickedMarkerInfo;
 
     if (marker.data && marker.data.type === 'Network') {
       copy(marker.data.URI);
@@ -251,13 +251,13 @@ class MarkerContextMenu extends PureComponent<Props> {
   };
 
   render() {
-    const { rightClickedMarker } = this.props;
+    const { rightClickedMarkerInfo } = this.props;
 
-    if (rightClickedMarker === null) {
+    if (rightClickedMarkerInfo === null) {
       return null;
     }
 
-    const { marker } = rightClickedMarker;
+    const { marker } = rightClickedMarkerInfo;
 
     return (
       <ContextMenu
@@ -295,7 +295,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     previewSelection: getPreviewSelection(state),
     committedRange: getCommittedRange(state),
     implementationFilter: getImplementationFilter(state),
-    rightClickedMarker: getRightClickedMarkerInfo(state),
+    rightClickedMarkerInfo: getRightClickedMarkerInfo(state),
   }),
   mapDispatchToProps: { updatePreviewSelection, setContextMenuVisibility },
   component: MarkerContextMenu,
