@@ -413,9 +413,9 @@ describe('actions/receive-profile', function() {
           start: 0,
           // The end can be computed as the sum of:
           // - difference of the starts of the subprocess and the main process (1000)
-          // - the max of the last marker or sample. (in this case, last marker's time is 100)
+          // - the max of the last sample. (in this case, last sample's time is 6.
           // - the interval (1)
-          end: 1101,
+          end: 1007,
         });
         // not empty
         expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3);
@@ -469,7 +469,7 @@ describe('actions/receive-profile', function() {
       expect(getView(state)).toEqual({ phase: 'DATA_LOADED' });
       expect(ProfileViewSelectors.getCommittedRange(state)).toEqual({
         start: 0,
-        end: 1101, // see the above test for more explanation on this value
+        end: 1007, // see the above test for more explanation on this value
       });
       expect(ProfileViewSelectors.getProfile(state).threads).toHaveLength(3); // not empty
     });
@@ -1057,12 +1057,14 @@ describe('actions/receive-profile', function() {
       ).toMatchSnapshot();
     });
 
-    xit('can load gzipped json', async function() {
+    // eslint-disable-next-line jest/no-disabled-tests
+    it.skip('can load gzipped json', async function() {
       // TODO - See issue #1023. The zee-worker is failing to compress/decompress
       // the profile.
     });
 
-    xit('will give an error when unable to parse gzipped profiles', async function() {
+    // eslint-disable-next-line jest/no-disabled-tests
+    it.skip('will give an error when unable to parse gzipped profiles', async function() {
       // TODO - See issue #1023. The zee-worker is failing to compress/decompress
       // the profile.
     });
@@ -1610,7 +1612,7 @@ describe('actions/receive-profile', function() {
       );
 
       // It should successfully symbolicate the profiles that are loaded from addon.
-      await waitUntilSymbolication();
+      return expect(waitUntilSymbolication()).resolves.toBe(undefined);
     });
 
     it('does not retrieve profile from other data sources', async function() {

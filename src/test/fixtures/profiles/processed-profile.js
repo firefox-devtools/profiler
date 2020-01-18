@@ -31,6 +31,7 @@ import type {
   NetworkPayload,
   NavigationMarkerPayload,
   IPCMarkerPayload,
+  UserTimingMarkerPayload,
 } from '../../../types/markers';
 import type { Milliseconds } from '../../../types/units';
 
@@ -98,6 +99,24 @@ export function getThreadWithMarkers(markers: TestDefinedMarkers) {
   const thread = getEmptyThread();
   addMarkersToThreadWithCorrespondingSamples(thread, markers);
   return thread;
+}
+
+export function getUserTiming(
+  name: string,
+  startTime: number,
+  duration: number
+) {
+  return [
+    'UserTiming',
+    startTime,
+    ({
+      type: 'UserTiming',
+      startTime,
+      endTime: startTime + duration,
+      name,
+      entryType: 'measure',
+    }: UserTimingMarkerPayload),
+  ];
 }
 
 export function getProfileWithMarkers(
@@ -885,8 +904,8 @@ export function getProfileWithJsAllocations(): * {
     B  B     B
     C  Fjs   Fjs
     D  Gjs   Gjs
-    E        Hjs
-             I
+    E        Hjs[lib:jQuery.js]
+             I[lib:libI.so]
   `);
 
   // Now add a JsAllocationsTable.
@@ -961,8 +980,8 @@ export function getProfileWithUnbalancedNativeAllocations(): * {
     B  B     B
     C  Fjs   Fjs
     D  Gjs   Gjs
-    E        Hjs
-             I
+    E        Hjs[lib:jQuery.js]
+             I[lib:libI.so]
   `);
 
   // Now add a NativeAllocationsTable.
@@ -1025,8 +1044,8 @@ export function getProfileWithBalancedNativeAllocations(): * {
     B  B     B
     C  Fjs   Fjs
     D  Gjs   Gjs
-    E        Hjs
-             I
+    E        Hjs[lib:jQuery.js]
+             I[lib:libI.so]
   `);
 
   // Now add a NativeAllocationsTable.

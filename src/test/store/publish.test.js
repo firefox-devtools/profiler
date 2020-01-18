@@ -79,6 +79,10 @@ describe('getCheckedSharingOptions', function() {
       expect(getDefaultsWith('default')).toEqual(isNotFiltering);
     });
 
+    it('does not filter local builds', function() {
+      expect(getDefaultsWith('nightly-autoland')).toEqual(isNotFiltering);
+    });
+
     it('does filter with aurora', function() {
       expect(getDefaultsWith('aurora')).toEqual(isFiltering);
     });

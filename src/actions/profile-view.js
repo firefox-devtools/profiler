@@ -1020,6 +1020,22 @@ export function changeInvertCallstack(
   };
 }
 
+export function changeShowUserTimings(
+  showUserTimings: boolean
+): ThunkAction<void> {
+  return dispatch => {
+    sendAnalytics({
+      hitType: 'event',
+      eventCategory: 'profile',
+      eventAction: 'toggle user timings',
+    });
+    dispatch({
+      type: 'CHANGE_SHOW_USER_TIMINGS',
+      showUserTimings,
+    });
+  };
+}
+
 /**
  * This action toggles changes between using a summary view that shows only self time
  * for the JS tracer data, and a stack-based view (similar to the stack chart) for the

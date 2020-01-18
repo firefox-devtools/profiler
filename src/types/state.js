@@ -194,6 +194,7 @@ export type UrlState = {|
     implementation: ImplementationFilter,
     lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
     invertCallstack: boolean,
+    showUserTimings: boolean,
     showJsTracerSummary: boolean,
     committedRanges: StartEndRange[],
     callTreeSearchString: string,

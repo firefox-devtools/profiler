@@ -12,6 +12,7 @@ module.exports = {
     'prettier',
     'prettier/flowtype',
     'prettier/react',
+    'plugin:jest/recommended'
   ],
   parserOptions: {
     ecmaVersion: '2017',

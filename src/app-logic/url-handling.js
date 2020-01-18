@@ -123,6 +123,7 @@ type StackChartQuery = {|
   ...BaseQuery,
   search: string, // "js::RunScript"
   invertCallstack: null | void,
+  showUserTimings: null | void,
   implementation: string,
   ctSummary: string,
 |};
@@ -233,6 +234,9 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     case 'calltree': {
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack
+        ? null
+        : undefined;
+      query.showUserTimings = urlState.profileSpecific.showUserTimings
         ? null
         : undefined;
       query.implementation =
@@ -371,6 +375,7 @@ export function stateFromLocation(
         query.ctSummary
       ),
       invertCallstack: query.invertCallstack !== undefined,
+      showUserTimings: query.showUserTimings !== undefined,
       showJsTracerSummary: query.summary !== undefined,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
       selectedThread: selectedThread,

@@ -247,7 +247,7 @@ describe('unfiltered call tree', function() {
       A  A  A
       B  B  B
       C  C  H
-      D  F  I
+      D  F  I[lib:libI.so]
       E  G
     `);
     const callTree = callTreeFromProfile(profile);
@@ -321,7 +321,7 @@ describe('unfiltered call tree', function() {
       it('gets a node for a given callNodeIndex', function() {
         expect(callTree.getDisplayData(A)).toEqual({
           ariaLabel: 'A, running time is 3ms (100%), self time is 0ms',
-          dim: false,
+          isFrameLabel: true,
           icon: null,
           lib: '',
           name: 'A',
@@ -330,6 +330,20 @@ describe('unfiltered call tree', function() {
           totalTime: '3',
           totalTimeWithUnit: '3ms',
           totalTimePercent: '100%',
+          categoryColor: 'grey',
+          categoryName: 'Other',
+        });
+        expect(callTree.getDisplayData(I)).toEqual({
+          ariaLabel: 'I, running time is 1ms (33%), self time is 1ms',
+          isFrameLabel: false,
+          icon: null,
+          lib: 'libI.so',
+          name: 'I',
+          selfTime: '1',
+          selfTimeWithUnit: '1ms',
+          totalTime: '1',
+          totalTimeWithUnit: '1ms',
+          totalTimePercent: '33%',
           categoryColor: 'grey',
           categoryName: 'Other',
         });

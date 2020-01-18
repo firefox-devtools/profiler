@@ -193,8 +193,9 @@ class VirtualListInner<Item> extends React.PureComponent<
       <div
         className={className}
         ref={this._takeContainerRef}
+        // Add padding to list height to account for overlay scrollbars.
         style={{
-          height: `${items.length * itemHeight}px`,
+          height: `${(items.length + 1) * itemHeight}px`,
           width: columnIndex === 1 ? containerWidth : undefined,
         }}
       >

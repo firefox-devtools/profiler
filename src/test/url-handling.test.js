@@ -300,6 +300,16 @@ describe('search strings', function() {
     );
   });
 
+  it('properly handles showUserTimings strings', function() {
+    const { getState } = _getStoreWithURL({ search: '' });
+    expect(urlStateReducers.getShowUserTimings(getState())).toBe(false);
+  });
+
+  it('defaults to not showing user timings', function() {
+    const { getState } = _getStoreWithURL();
+    expect(urlStateReducers.getShowUserTimings(getState())).toBe(false);
+  });
+
   it('serializes the call tree search strings in the URL', function() {
     const { getState, dispatch } = _getStoreWithURL();
 

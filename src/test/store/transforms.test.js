@@ -898,6 +898,8 @@ describe('"collapse-function-subtree" transform', function() {
     );
   });
 
+  // assertSetContainsOnly is an assertion.
+  // eslint-disable-next-line jest/expect-expect
   it('can update apply the transform to the expanded CallNodePaths', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     const toIds = (paths: Array<string[]>) =>

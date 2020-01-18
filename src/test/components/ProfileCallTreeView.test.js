@@ -65,7 +65,7 @@ describe('calltree/ProfileCallTreeView', function() {
       profile = getProfileFromTextSamples(`
         A  A  A
         B  B  B
-        C  C  H
+        C  C  H[lib:libH.so]
         D  F  I
         E  E
       `).profile;
@@ -124,12 +124,12 @@ describe('calltree/ProfileCallTreeView', function() {
 
   it('renders an inverted call tree', () => {
     const profileForInvertedTree = getProfileFromTextSamples(`
-      A  A  A
-      B  B  B
-      C  X  C
-      D  Y  X
-      E  Z  Y
-            Z
+      A  A               A
+      B  B               B
+      C  X[lib:libX.so]  C
+      D  Y               X[lib:libX.so]
+      E  Z               Y
+                         Z
     `).profile;
 
     // Note: we're not using the setup function because we want to change the
@@ -483,6 +483,9 @@ describe('calltree/ProfileCallTreeView TransformNavigator', () => {
 });
 
 describe('ProfileCallTreeView/end-to-end', () => {
+  // This next test explicitly does not have an assertion, disable the eslint rule
+  // requiring one.
+  // eslint-disable-next-line jest/expect-expect
   it('can display a gecko profile without crashing', () => {
     const geckoProfile = createGeckoProfile();
     const processedProfile = processProfile(geckoProfile);

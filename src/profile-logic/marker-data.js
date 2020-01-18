@@ -620,7 +620,10 @@ export function deriveMarkersFromRawMarkerTable(
 
       case 'IPC': {
         const pairData = ipcCorrelations.get(threadId, i);
-        const name = data.direction === 'sending' ? 'IPCOut' : 'IPCIn';
+        let name = data.direction === 'sending' ? 'IPCOut' : 'IPCIn';
+        if (data.sync) {
+          name = 'Sync' + name;
+        }
         const dir = data.direction === 'sending' ? 'sent to' : 'received from';
         if (pairData) {
           matchedMarkers.push({
@@ -1001,7 +1004,7 @@ export function filterRawMarkerTableToRangeWithMarkersToDelete(
     newMarkerTable.name.push(oldMarkers.name[index]);
     newMarkerTable.time.push(oldMarkers.time[index]);
     newMarkerTable.data.push(oldMarkers.data[index]);
-    newMarkerTable.category.push(newMarkerTable.category[index]);
+    newMarkerTable.category.push(oldMarkers.category[index]);
     newMarkerTable.length++;
   };
 
@@ -1060,6 +1063,10 @@ export function filterMarkerIndexesToRange(
 
 export function isNetworkMarker(marker: Marker): boolean {
   return !!(marker.data && marker.data.type === 'Network');
+}
+
+export function isUserTimingMarker(marker: Marker): boolean {
+  return !!(marker.data && marker.data.type === 'UserTiming');
 }
 
 export function isNavigationMarker({ name, data }: Marker) {

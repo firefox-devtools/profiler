@@ -334,6 +334,10 @@ type UrlStateAction =
       +selectedThreadIndex: ThreadIndex,
     |}
   | {|
+      +type: 'CHANGE_SHOW_USER_TIMINGS',
+      +showUserTimings: boolean,
+    |}
+  | {|
       +type: 'CHANGE_SHOW_JS_TRACER_SUMMARY',
       +showSummary: boolean,
     |}

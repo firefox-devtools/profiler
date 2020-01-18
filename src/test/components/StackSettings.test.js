@@ -34,14 +34,21 @@ describe('StackSettings', function() {
     expect(container).toMatchSnapshot();
   });
 
-  it('can change the implementation filter to JavaScript', function() {
+  /**
+   * Get around the type constraints of refining an HTMLElement into a radio input.
+   */
+  function getCheckedState(element: HTMLElement): mixed {
+    return (element: any).checked;
+  }
+
+  it('can change the implementation filter to JavaScript', async function() {
     const { getByLabelText, getState } = setup();
     expect(getImplementationFilter(getState())).toEqual('combined');
     const radioButton = getByLabelText(/JavaScript/);
 
     radioButton.click();
 
-    expect(radioButton.hasAttribute('checked'));
+    expect(getCheckedState(radioButton)).toBe(true);
     expect(getImplementationFilter(getState())).toEqual('js');
   });
 
@@ -52,7 +59,7 @@ describe('StackSettings', function() {
 
     radioButton.click();
 
-    expect(radioButton.hasAttribute('checked'));
+    expect(getCheckedState(radioButton)).toBe(true);
     expect(getImplementationFilter(getState())).toEqual('cpp');
   });
 
@@ -64,7 +71,7 @@ describe('StackSettings', function() {
 
     radioButton.click();
 
-    expect(radioButton.hasAttribute('checked'));
+    expect(getCheckedState(radioButton)).toBe(true);
     expect(getImplementationFilter(getState())).toEqual('combined');
   });
 

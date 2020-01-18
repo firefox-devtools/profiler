@@ -75,7 +75,7 @@ exports[`NetworkChart renders NetworkChart correctly 1`] = `
       >
         <div
           class="treeViewBodyInner treeViewBodyInner0"
-          style="height: 160px;"
+          style="height: 176px;"
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0TopSpacer"
