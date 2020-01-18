@@ -25,65 +25,36 @@ export type RightClickedCallNodeInfo = {|
 |};
 
 export const getRightClickedCallNodeInfo: Selector<RightClickedCallNodeInfo | null> = createSelector(
-  getProfileViewOptions,
+  state => state,
   state => {
     const { rightClickedCallNode } = getProfileViewOptions(state);
 
-    if (rightClickedCallNode !== null) {
-      const { getFilteredThread } = getThreadSelectors(
-        rightClickedCallNode.threadIndex
-      );
-
-      return getFilteredThread(state);
+    if (rightClickedCallNode === null) {
+      return null;
     }
 
-    return null;
-  },
-  state => {
-    const { rightClickedCallNode } = getProfileViewOptions(state);
+    const { getFilteredThread, getCallNodeInfo } = getThreadSelectors(
+      rightClickedCallNode.threadIndex
+    );
 
-    if (rightClickedCallNode !== null) {
-      const { getCallNodeInfo } = getThreadSelectors(
-        rightClickedCallNode.threadIndex
-      );
-      const { callNodeTable } = getCallNodeInfo(state);
+    const thread = getFilteredThread(state);
 
-      return getCallNodeIndexFromPath(
-        rightClickedCallNode.callNodePath,
-        callNodeTable
-      );
+    const callNodeInfo = getCallNodeInfo(state);
+
+    const callNodeIndex = getCallNodeIndexFromPath(
+      rightClickedCallNode.callNodePath,
+      callNodeInfo.callNodeTable
+    );
+
+    if (callNodeIndex === null) {
+      return null;
     }
 
-    return null;
-  },
-  state => {
-    const { rightClickedCallNode } = getProfileViewOptions(state);
-
-    if (rightClickedCallNode !== null) {
-      const { getCallNodeInfo } = getThreadSelectors(
-        rightClickedCallNode.threadIndex
-      );
-
-      return getCallNodeInfo(state);
-    }
-
-    return null;
-  },
-  ({ rightClickedCallNode }, thread, callNodeIndex, callNodeInfo) => {
-    if (
-      rightClickedCallNode !== null &&
-      thread !== null &&
-      callNodeIndex !== null &&
-      callNodeInfo !== null
-    ) {
-      return {
-        ...rightClickedCallNode,
-        thread,
-        callNodeIndex,
-        callNodeInfo,
-      };
-    }
-
-    return null;
+    return {
+      ...rightClickedCallNode,
+      thread,
+      callNodeIndex,
+      callNodeInfo,
+    };
   }
 );

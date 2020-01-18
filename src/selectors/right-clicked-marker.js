@@ -19,40 +19,28 @@ export type RightClickedMarkerInfo = {|
 |};
 
 export const getRightClickedMarkerInfo: Selector<RightClickedMarkerInfo | null> = createSelector(
-  getProfileViewOptions,
+  state => state,
   state => {
     const { rightClickedMarker } = getProfileViewOptions(state);
 
-    if (rightClickedMarker !== null) {
-      const markerGetter = getThreadSelectors(
-        rightClickedMarker.threadIndex
-      ).getMarkerGetter(state);
-
-      return markerGetter(rightClickedMarker.markerIndex);
+    if (rightClickedMarker === null) {
+      return null;
     }
 
-    return null;
-  },
-  state => {
-    const { rightClickedMarker } = getProfileViewOptions(state);
+    const { getMarkerGetter, getThread } = getThreadSelectors(
+      rightClickedMarker.threadIndex
+    );
 
-    if (rightClickedMarker !== null) {
-      return getThreadSelectors(rightClickedMarker.threadIndex).getThread(
-        state
-      );
-    }
+    const thread = getThread(state);
 
-    return null;
-  },
-  ({ rightClickedMarker }, marker, thread) => {
-    if (rightClickedMarker && marker && thread) {
-      return {
-        ...rightClickedMarker,
-        thread,
-        marker,
-      };
-    }
+    const getMarker = getMarkerGetter(state);
 
-    return null;
+    const marker = getMarker(rightClickedMarker.markerIndex);
+
+    return {
+      ...rightClickedMarker,
+      thread,
+      marker,
+    };
   }
 );
