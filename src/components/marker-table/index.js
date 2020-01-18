@@ -16,7 +16,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { getRightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
+import { getRightClickedMarkerIndexForThread } from '../../selectors/right-clicked-marker';
 import {
   changeSelectedMarker,
   changeRightClickedMarker,
@@ -236,16 +236,19 @@ class MarkerTable extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
-    const markerInfo = getRightClickedMarkerInfo(state);
+    const threadIndex = getSelectedThreadIndex(state);
     return {
-      threadIndex: getSelectedThreadIndex(state),
+      threadIndex,
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       markerIndexes: selectedThreadSelectors.getPreviewFilteredMarkerIndexes(
         state
       ),
       selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
-      rightClickedMarkerIndex: markerInfo ? markerInfo.markerIndex : null,
+      rightClickedMarkerIndex: getRightClickedMarkerIndexForThread(
+        state,
+        threadIndex
+      ),
       zeroAt: getZeroAt(state),
     };
   },

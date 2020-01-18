@@ -9,7 +9,7 @@ import { getProfileViewOptions } from './profile';
 
 import type { ThreadIndex, Thread } from '../types/profile';
 import type { MarkerIndex, Marker } from '../types/profile-derived';
-import type { Selector } from '../types/store';
+import type { Selector, DangerousSelectorWithArguments } from '../types/store';
 
 export type RightClickedMarkerInfo = {|
   +threadIndex: ThreadIndex,
@@ -44,3 +44,19 @@ export const getRightClickedMarkerInfo: Selector<RightClickedMarkerInfo | null> 
     };
   }
 );
+
+export const getRightClickedMarkerIndexForThread: DangerousSelectorWithArguments<
+  MarkerIndex | null,
+  ThreadIndex
+> = (state, threadIndex) => {
+  const rightClickedMarkerInfo = getRightClickedMarkerInfo(state);
+
+  if (
+    !rightClickedMarkerInfo ||
+    rightClickedMarkerInfo.threadIndex !== threadIndex
+  ) {
+    return null;
+  }
+
+  return rightClickedMarkerInfo.markerIndex;
+};
