@@ -14,7 +14,7 @@ import type {
   CallNodePath,
   CallNodeInfo,
 } from '../types/profile-derived';
-import type { Selector } from '../types/store';
+import type { Selector, DangerousSelectorWithArguments } from '../types/store';
 
 export type RightClickedCallNodeInfo = {|
   +threadIndex: ThreadIndex,
@@ -58,3 +58,19 @@ export const getRightClickedCallNodeInfo: Selector<RightClickedCallNodeInfo | nu
     };
   }
 );
+
+export const getRightClickedCallNodeIndexForThread: DangerousSelectorWithArguments<
+  IndexIntoCallNodeTable | null,
+  ThreadIndex
+> = (state, threadIndex) => {
+  const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);
+
+  if (
+    !rightClickedCallNodeInfo ||
+    rightClickedCallNodeInfo.threadIndex !== threadIndex
+  ) {
+    return null;
+  }
+
+  return rightClickedCallNodeInfo.callNodeIndex;
+};

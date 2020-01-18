@@ -22,7 +22,7 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getIconsWithClassNames } from '../../selectors/icons';
-import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
+import { getRightClickedCallNodeIndexForThread } from '../../selectors/right-clicked-call-node';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
@@ -242,10 +242,9 @@ class CallTreeComponent extends PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: (state: State) => {
-    const callNodeInfo = getRightClickedCallNodeInfo(state);
-
+    const threadIndex = getSelectedThreadIndex(state);
     return {
-      threadIndex: getSelectedThreadIndex(state),
+      threadIndex,
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       focusCallTreeGeneration: getFocusCallTreeGeneration(state),
       tree: selectedThreadSelectors.getCallTree(state),
@@ -253,9 +252,10 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      rightClickedCallNodeIndex: callNodeInfo
-        ? callNodeInfo.callNodeIndex
-        : null,
+      rightClickedCallNodeIndex: getRightClickedCallNodeIndexForThread(
+        state,
+        threadIndex
+      ),
       expandedCallNodeIndexes: selectedThreadSelectors.getExpandedCallNodeIndexes(
         state
       ),
