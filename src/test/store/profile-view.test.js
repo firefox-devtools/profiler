@@ -32,6 +32,10 @@ import * as ProfileView from '../../actions/profile-view';
 import { viewProfile } from '../../actions/receive-profile';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
+import {
+  getRightClickedCallNodeInfo,
+  getRightClickedCallNodeIndexForThread,
+} from '../../selectors/right-clicked-call-node';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   selectedThreadSelectors,
@@ -2441,5 +2445,74 @@ describe('visual metrics selectors', function() {
     expect(getContentfulSpeedIndexProgress(getState())).toEqual(
       ContentfulSpeedIndexProgress
     );
+  });
+});
+
+describe('right clicked call node info', () => {
+  function setup() {
+    const profile = getProfileFromTextSamples(`
+      A
+      B
+      C
+    `);
+
+    return { ...storeWithProfile(profile.profile), ...profile };
+  }
+
+  it('should be empty on store creation', () => {
+    const { getState } = setup();
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+  });
+
+  it('sets right clicked call node info when right clicked call node action is dispatched', () => {
+    const { dispatch, getState } = setup();
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+
+    dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
+
+    expect(getRightClickedCallNodeInfo(getState())).toHaveProperty(
+      'threadIndex',
+      0
+    );
+
+    expect(getRightClickedCallNodeInfo(getState())).toHaveProperty(
+      'callNodePath',
+      [0, 1]
+    );
+  });
+
+  it('resets right clicked call node when context menu is hidden', () => {
+    const { dispatch, getState } = setup();
+
+    dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
+
+    expect(getRightClickedCallNodeInfo(getState())).toHaveProperty(
+      'threadIndex',
+      0
+    );
+
+    dispatch(ProfileView.setContextMenuVisibility(false));
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+  });
+
+  describe('getRightClickedCallNodeIndexForThread', () => {
+    it('returns a right clicked call node index for thread', () => {
+      const { dispatch, getState } = setup();
+
+      dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
+
+      expect(getRightClickedCallNodeIndexForThread(getState(), 0)).toBe(1);
+    });
+
+    it('returns null if the thread index is not the same as the right clicked call node thread', () => {
+      const { dispatch, getState } = setup();
+
+      dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
+
+      expect(getRightClickedCallNodeIndexForThread(getState(), 1)).toBeNull();
+    });
   });
 });
