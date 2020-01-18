@@ -27,11 +27,11 @@ export type RightClickedCallNodeInfo = {|
 export const getRightClickedCallNodeInfo: Selector<RightClickedCallNodeInfo | null> = createSelector(
   getProfileViewOptions,
   state => {
-    const { rightClickedCallNodePath } = getProfileViewOptions(state);
+    const { rightClickedCallNode } = getProfileViewOptions(state);
 
-    if (rightClickedCallNodePath !== null) {
+    if (rightClickedCallNode !== null) {
       const { getFilteredThread } = getThreadSelectors(
-        rightClickedCallNodePath.threadIndex
+        rightClickedCallNode.threadIndex
       );
 
       return getFilteredThread(state);
@@ -40,16 +40,16 @@ export const getRightClickedCallNodeInfo: Selector<RightClickedCallNodeInfo | nu
     return null;
   },
   state => {
-    const { rightClickedCallNodePath } = getProfileViewOptions(state);
+    const { rightClickedCallNode } = getProfileViewOptions(state);
 
-    if (rightClickedCallNodePath !== null) {
+    if (rightClickedCallNode !== null) {
       const { getCallNodeInfo } = getThreadSelectors(
-        rightClickedCallNodePath.threadIndex
+        rightClickedCallNode.threadIndex
       );
       const { callNodeTable } = getCallNodeInfo(state);
 
       return getCallNodeIndexFromPath(
-        rightClickedCallNodePath.callNodePath,
+        rightClickedCallNode.callNodePath,
         callNodeTable
       );
     }
@@ -57,11 +57,11 @@ export const getRightClickedCallNodeInfo: Selector<RightClickedCallNodeInfo | nu
     return null;
   },
   state => {
-    const { rightClickedCallNodePath } = getProfileViewOptions(state);
+    const { rightClickedCallNode } = getProfileViewOptions(state);
 
-    if (rightClickedCallNodePath !== null) {
+    if (rightClickedCallNode !== null) {
       const { getCallNodeInfo } = getThreadSelectors(
-        rightClickedCallNodePath.threadIndex
+        rightClickedCallNode.threadIndex
       );
 
       return getCallNodeInfo(state);
@@ -69,15 +69,15 @@ export const getRightClickedCallNodeInfo: Selector<RightClickedCallNodeInfo | nu
 
     return null;
   },
-  ({ rightClickedCallNodePath }, thread, callNodeIndex, callNodeInfo) => {
+  ({ rightClickedCallNode }, thread, callNodeIndex, callNodeInfo) => {
     if (
-      rightClickedCallNodePath !== null &&
+      rightClickedCallNode !== null &&
       thread !== null &&
       callNodeIndex !== null &&
       callNodeInfo !== null
     ) {
       return {
-        ...rightClickedCallNodePath,
+        ...rightClickedCallNode,
         thread,
         callNodeIndex,
         callNodeInfo,

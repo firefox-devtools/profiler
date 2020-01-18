@@ -25,7 +25,7 @@ import type {
   ProfileViewState,
   SymbolicationStatus,
   ThreadViewOptions,
-  RightClickedCallNodePath,
+  RightClickedCallNode,
   RightClickedMarker,
 } from '../types/state';
 
@@ -459,7 +459,7 @@ const rightClickedTrack: Reducer<TrackReference | null> = (
   }
 };
 
-const rightClickedCallNodePath: Reducer<RightClickedCallNodePath | null> = (
+const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
   state = null,
   action
 ) => {
@@ -578,7 +578,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       focusCallTreeGeneration,
       rootRange,
       rightClickedTrack,
-      rightClickedCallNodePath,
+      rightClickedCallNode,
       rightClickedMarker,
     }),
     globalTracks,
