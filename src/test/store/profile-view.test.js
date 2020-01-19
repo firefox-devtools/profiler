@@ -36,6 +36,10 @@ import {
   getRightClickedCallNodeInfo,
   getRightClickedCallNodeIndexForThread,
 } from '../../selectors/right-clicked-call-node';
+import {
+  getRightClickedMarkerInfo,
+  getRightClickedMarkerIndexForThread,
+} from '../../selectors/right-clicked-marker';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   selectedThreadSelectors,
@@ -2513,6 +2517,80 @@ describe('right clicked call node info', () => {
       dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
 
       expect(getRightClickedCallNodeIndexForThread(getState(), 1)).toBeNull();
+    });
+  });
+});
+
+describe('right clicked marker info', () => {
+  function setup() {
+    const profile = getProfileWithMarkers([
+      ['a', 0, null],
+      ['b', 1, null],
+      ['c', 2, null],
+    ]);
+
+    return storeWithProfile(profile);
+  }
+
+  it('should be empty on store creation', () => {
+    const { getState } = setup();
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+  });
+
+  it('sets right clicked marker info when right clicked marker action is dispatched', () => {
+    const { dispatch, getState } = setup();
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+
+    dispatch(ProfileView.changeRightClickedMarker(0, 0));
+
+    expect(getRightClickedMarkerInfo(getState())).toHaveProperty(
+      'threadIndex',
+      0
+    );
+
+    expect(getRightClickedMarkerInfo(getState())).toHaveProperty(
+      'markerIndex',
+      0
+    );
+
+    expect(getRightClickedMarkerInfo(getState())).toHaveProperty(
+      'marker.name',
+      'a'
+    );
+  });
+
+  it('resets right clicked marker when context menu is hidden', () => {
+    const { dispatch, getState } = setup();
+
+    dispatch(ProfileView.changeRightClickedMarker(0, 1));
+
+    expect(getRightClickedMarkerInfo(getState())).toHaveProperty(
+      'markerIndex',
+      1
+    );
+
+    dispatch(ProfileView.setContextMenuVisibility(false));
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+  });
+
+  describe('getRightClickedMarkerIndexForThread', () => {
+    it('returns a right clicked marker index for thread', () => {
+      const { dispatch, getState } = setup();
+
+      dispatch(ProfileView.changeRightClickedMarker(0, 2));
+
+      expect(getRightClickedMarkerIndexForThread(getState(), 0)).toBe(2);
+    });
+
+    it('returns null if the thread index is not the same as the right clicked marker thread', () => {
+      const { dispatch, getState } = setup();
+
+      dispatch(ProfileView.changeRightClickedMarker(0, 2));
+
+      expect(getRightClickedMarkerIndexForThread(getState(), 1)).toBeNull();
     });
   });
 });
