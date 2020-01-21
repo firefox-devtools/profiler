@@ -712,22 +712,22 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
               Timing Data
             </option>
             <option
-              title="Summarize using bytes of memory that were allocated, and never freed while profiling"
+              title="Summarize using bytes of memory that were allocated, and never freed in the current preview selection"
               value="native-retained-allocations"
             >
-              Retained Allocations
+              Retained Memory
             </option>
             <option
               title="Summarize using bytes of memory allocated"
               value="native-allocations"
             >
-              Allocations
+              Allocated Memory
             </option>
             <option
-              title="Summarize using bytes of memory deallocated"
-              value="native-deallocations"
+              title="Summarize using bytes of memory deallocated, by the site where the memory was deallocated"
+              value="native-deallocations-sites"
             >
-              Deallocations
+              Deallocation Sites
             </option>
           </select>
         </label>
@@ -1369,13 +1369,13 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
               title="Summarize using bytes of memory allocated"
               value="native-allocations"
             >
-              Allocations
+              Allocated Memory
             </option>
             <option
-              title="Summarize using bytes of memory deallocated"
-              value="native-deallocations"
+              title="Summarize using bytes of memory deallocated, by the site where the memory was deallocated"
+              value="native-deallocations-sites"
             >
-              Deallocations
+              Deallocation Sites
             </option>
           </select>
         </label>
@@ -2017,13 +2017,13 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
               title="Summarize using bytes of memory allocated"
               value="native-allocations"
             >
-              Allocations
+              Allocated Memory
             </option>
             <option
-              title="Summarize using bytes of memory deallocated"
-              value="native-deallocations"
+              title="Summarize using bytes of memory deallocated, by the site where the memory was deallocated"
+              value="native-deallocations-sites"
             >
-              Deallocations
+              Deallocation Sites
             </option>
           </select>
         </label>

@@ -169,23 +169,23 @@ class StackSettings extends PureComponent<Props> {
                     : null}
                   {canShowRetainedMemory
                     ? this._renderCallTreeStrategyOption(
-                        'Retained Allocations',
+                        'Retained Memory',
                         'native-retained-allocations',
-                        'Summarize using bytes of memory that were allocated, and never freed while profiling'
+                        'Summarize using bytes of memory that were allocated, and never freed in the current preview selection'
                       )
                     : null}
                   {hasNativeAllocations
                     ? this._renderCallTreeStrategyOption(
-                        'Allocations',
+                        'Allocated Memory',
                         'native-allocations',
                         'Summarize using bytes of memory allocated'
                       )
                     : null}
                   {hasNativeAllocations
                     ? this._renderCallTreeStrategyOption(
-                        'Deallocations',
-                        'native-deallocations',
-                        'Summarize using bytes of memory deallocated'
+                        'Deallocation Sites',
+                        'native-deallocations-sites',
+                        'Summarize using bytes of memory deallocated, by the site where the memory was deallocated'
                       )
                     : null}
                 </select>
