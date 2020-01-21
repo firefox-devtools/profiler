@@ -1,5 +1,913 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`CombinedChart renders combined stack chart 1`] = `
+<div
+  aria-labelledby="stack-chart-tab-button"
+  class="stackChart"
+  id="stack-chart-tab"
+  role="tabpanel"
+>
+  <div
+    class="stackSettings"
+  >
+    <ul
+      class="stackSettingsList"
+    >
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+           Show user timing
+        </label>
+      </li>
+    </ul>
+    <div
+      class="panelSearchField stackSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index="0"
+      title="Complete \\"Empty\\""
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete "Empty"
+      </span>
+    </li>
+  </ol>
+  <div
+    class="react-contextmenu-wrapper treeViewContextMenu"
+  >
+    <div
+      class="stackChartContent"
+    >
+      <div
+        class="chartViewport"
+        tabindex="0"
+      >
+        <div>
+          <canvas
+            class="chartCanvas stackChartCanvas"
+            height="300"
+            style="width: 365px; height: 300px;"
+            width="365"
+          />
+        </div>
+        <div
+          class="chartViewportScroll hidden"
+        >
+          Zoom Chart:
+          <kbd
+            class="chartViewportScrollKbd"
+          >
+            Ctrl + Scroll
+          </kbd>
+          or
+          <kbd
+            class="chartViewportScrollKbd"
+          >
+            Shift + Scroll
+          </kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CombinedChart renders combined stack chart 2`] = `
+Array [
+  Array [
+    "set font",
+    "10px sans-serif",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    365,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf060",
+  ],
+  Array [
+    "fillRect",
+    150,
+    0,
+    666.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "renderFunction",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "renderFunction",
+    153,
+    11,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf060",
+  ],
+  Array [
+    "fillRect",
+    216,
+    16,
+    533.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "componentA",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "componentA",
+    219.66666666666666,
+    27,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf060",
+  ],
+  Array [
+    "fillRect",
+    283,
+    32,
+    266.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "componentB",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "componentB",
+    286.3333333333333,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "fillRect",
+    150,
+    48,
+    199.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "A",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "A",
+    153,
+    59,
+  ],
+  Array [
+    "set fillStyle",
+    "#0060df60",
+  ],
+  Array [
+    "fillRect",
+    150,
+    64,
+    199.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "B",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "B",
+    153,
+    75,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    150,
+    80,
+    133.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "C",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "C",
+    153,
+    91,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "fillRect",
+    284,
+    80,
+    65.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "H",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "H",
+    286.3333333333333,
+    91,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    150,
+    96,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "D",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "D",
+    153,
+    107,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    217,
+    96,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "F",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "F",
+    219.66666666666666,
+    107,
+  ],
+  Array [
+    "set fillStyle",
+    "#45a1ff60",
+  ],
+  Array [
+    "fillRect",
+    284,
+    96,
+    65.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "I",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "I",
+    286.3333333333333,
+    107,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    150,
+    112,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "E",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "E",
+    153,
+    123,
+  ],
+  Array [
+    "set fillStyle",
+    "#12bc0060",
+  ],
+  Array [
+    "fillRect",
+    217,
+    112,
+    66.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "G",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "G",
+    219.66666666666666,
+    123,
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db",
+  ],
+  Array [
+    "fillRect",
+    150,
+    0,
+    1,
+    300,
+  ],
+  Array [
+    "fillRect",
+    350,
+    0,
+    1,
+    300,
+  ],
+]
+`;
+
+exports[`MarkerChart matches the snapshots for the component and draw log 1`] = `
+<div
+  aria-labelledby="stack-chart-tab-button"
+  class="stackChart"
+  id="stack-chart-tab"
+  role="tabpanel"
+>
+  <div
+    class="stackSettings"
+  >
+    <ul
+      class="stackSettingsList"
+    >
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+           Show user timing
+        </label>
+      </li>
+    </ul>
+    <div
+      class="panelSearchField stackSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index="0"
+      title="Complete \\"Empty\\""
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete "Empty"
+      </span>
+    </li>
+  </ol>
+  <div
+    class="react-contextmenu-wrapper treeViewContextMenu"
+  >
+    <div
+      class="stackChartContent"
+    >
+      <div
+        class="chartViewport"
+        tabindex="0"
+      >
+        <div>
+          <canvas
+            class="chartCanvas stackChartCanvas"
+            height="300"
+            style="width: 365px; height: 300px;"
+            width="365"
+          />
+        </div>
+        <div
+          class="chartViewportScroll hidden"
+        >
+          Zoom Chart:
+          <kbd
+            class="chartViewportScrollKbd"
+          >
+            Ctrl + Scroll
+          </kbd>
+          or
+          <kbd
+            class="chartViewportScrollKbd"
+          >
+            Shift + Scroll
+          </kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`MarkerChart matches the snapshots for the component and draw log 2`] = `
+Array [
+  Array [
+    "set font",
+    "10px sans-serif",
+  ],
+  Array [
+    "measureText",
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.()< /:-_",
+  ],
+  Array [
+    "measureText",
+    "…",
+  ],
+  Array [
+    "set fillStyle",
+    "#ffffff",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    365,
+    300,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf060",
+  ],
+  Array [
+    "fillRect",
+    150,
+    0,
+    181.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "renderFunction",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "renderFunction",
+    153,
+    11,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf060",
+  ],
+  Array [
+    "fillRect",
+    168,
+    16,
+    145.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "componentA",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "componentA",
+    171.1818181818182,
+    27,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf060",
+  ],
+  Array [
+    "fillRect",
+    186,
+    32,
+    72.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "componentB",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "componentB",
+    189.36363636363637,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf060",
+  ],
+  Array [
+    "fillRect",
+    277,
+    32,
+    18.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "componentD",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "c…",
+    280.27272727272725,
+    43,
+  ],
+  Array [
+    "set fillStyle",
+    "#ededf060",
+  ],
+  Array [
+    "fillRect",
+    204,
+    48,
+    18.4,
+    15,
+  ],
+  Array [
+    "measureText",
+    "componentC",
+  ],
+  Array [
+    "set fillStyle",
+    "#000000",
+  ],
+  Array [
+    "fillText",
+    "c…",
+    207.54545454545453,
+    59,
+  ],
+  Array [
+    "set fillStyle",
+    "#d7d7db",
+  ],
+  Array [
+    "fillRect",
+    150,
+    0,
+    1,
+    300,
+  ],
+  Array [
+    "fillRect",
+    350,
+    0,
+    1,
+    300,
+  ],
+]
+`;
+
+exports[`MarkerChart shows a tooltip when hovering 1`] = `
+<div
+  class="tooltip"
+  data-testid="tooltip"
+  style="left: 200.36363636363637px; top: 54px;"
+>
+  <div
+    class="tooltipMarker"
+  >
+    <div
+      class="tooltipHeader"
+    >
+      <div
+        class="tooltipOneLine"
+      >
+        <div
+          class="tooltipTiming"
+        >
+          4.0ms
+        </div>
+        <div
+          class="tooltipTitle"
+        >
+          UserTiming
+        </div>
+      </div>
+      <div
+        class="tooltipDetails"
+      >
+        <div
+          class="tooltipLabel"
+        >
+          Thread
+          :
+        </div>
+        Empty
+      </div>
+    </div>
+    <div
+      class="tooltipDetails"
+    >
+      <div
+        class="tooltipLabel"
+      >
+        Name
+        :
+      </div>
+      componentB
+    </div>
+  </div>
+</div>
+`;
+
 exports[`StackChart EmptyReasons shows reasons when a profile has no samples 1`] = `
 <div
   class="EmptyReasons"
@@ -116,6 +1024,19 @@ exports[`StackChart matches the snapshot 1`] = `
             type="checkbox"
           />
            Invert call stack
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+           Show user timing
         </label>
       </li>
     </ul>
