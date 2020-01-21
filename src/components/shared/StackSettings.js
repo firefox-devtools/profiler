@@ -181,6 +181,13 @@ class StackSettings extends PureComponent<Props> {
                         'Summarize using bytes of memory allocated'
                       )
                     : null}
+                  {canShowRetainedMemory
+                    ? this._renderCallTreeStrategyOption(
+                        'Deallocated Memory',
+                        'native-deallocations-memory',
+                        'Summarize using bytes of memory deallocated, by the site where the memory was allocated'
+                      )
+                    : null}
                   {hasNativeAllocations
                     ? this._renderCallTreeStrategyOption(
                         'Deallocation Sites',

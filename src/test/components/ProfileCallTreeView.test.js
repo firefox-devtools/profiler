@@ -677,4 +677,10 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });
+
+  it('matches the snapshot for deallocated memory', function() {
+    const { container, changeSelect } = setup();
+    changeSelect({ from: 'Timing Data', to: 'Deallocated Memory' });
+    expect(container.firstChild).toMatchSnapshot();
+  });
 });

@@ -57,8 +57,8 @@ describe('Native allocation call trees', function() {
       ]);
     });
 
-    it('can create a call tree from deallocations only', function() {
-      const { getState } = setup('balanced', 'native-deallocations');
+    it('can create a call tree from deallocation sites only', function() {
+      const { getState } = setup('balanced', 'native-deallocations-sites');
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
       expect(formatTree(callTree)).toEqual([
@@ -71,6 +71,17 @@ describe('Native allocation call trees', function() {
         '    - C (total: -22, self: —)',
         '      - D (total: -22, self: —)',
         '        - E (total: -22, self: -22)',
+      ]);
+    });
+
+    it('can create a call tree from deallocated memory', function() {
+      const { getState } = setup('balanced', 'native-deallocations-memory');
+      const callTree = selectedThreadSelectors.getCallTree(getState());
+
+      expect(formatTree(callTree)).toEqual([
+        '- A (total: -15, self: -3)',
+        '  - B (total: -12, self: -5)',
+        '    - C (total: -7, self: -7)',
       ]);
     });
 
@@ -111,7 +122,7 @@ describe('Native allocation call trees', function() {
     });
 
     it('can create a call tree from deallocations only', function() {
-      const { getState } = setup('unbalanced', 'native-deallocations');
+      const { getState } = setup('unbalanced', 'native-deallocations-sites');
       const callTree = selectedThreadSelectors.getCallTree(getState());
 
       expect(formatTree(callTree)).toEqual([
