@@ -88,11 +88,11 @@ class DragAndDrop extends React.PureComponent<
     const message = (
       <div
         className={classNames(
-          'dropMessageWrapper',
+          'dragAndDropMessageWrapper',
           this.state.isDragging ? 'dragging' : false
         )}
       >
-        <div className="dropMessage">Drop a saved profile here</div>
+        <div className="dragAndDropMessage">Drop a saved profile here</div>
       </div>
     );
 

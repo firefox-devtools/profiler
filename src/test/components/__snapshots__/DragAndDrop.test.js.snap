@@ -10,10 +10,10 @@ exports[`app/DragAndDrop matches the snapshot 1`] = `
 
 exports[`app/DragAndDrop matches the snapshot 2`] = `
 <div
-  class="dropMessageWrapper"
+  class="dragAndDropMessageWrapper"
 >
   <div
-    class="dropMessage"
+    class="dragAndDropMessage"
   >
     Drop a saved profile here
   </div>
