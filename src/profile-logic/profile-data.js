@@ -32,6 +32,7 @@ import type {
   NativeAllocationsTable,
   InnerWindowID,
   BalancedNativeAllocationsTable,
+  IndexIntoFrameTable,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -1047,7 +1048,10 @@ export function filterThreadByTab(
 
     const { frameTable, stackTable } = thread;
 
-    const frameMatchesFilterCache = new Map();
+    const frameMatchesFilterCache: Map<
+      IndexIntoFrameTable,
+      boolean
+    > = new Map();
     function frameMatchesFilter(frame) {
       const cache = frameMatchesFilterCache.get(frame);
       if (cache !== undefined) {
@@ -1055,12 +1059,18 @@ export function filterThreadByTab(
       }
 
       const innerWindowID = frameTable.innerWindowID[frame];
-      const matches = innerWindowID && relevantPages.has(innerWindowID);
+      const matches =
+        innerWindowID && innerWindowID > 0
+          ? relevantPages.has(innerWindowID)
+          : false;
       frameMatchesFilterCache.set(frame, matches);
       return matches;
     }
 
-    const stackMatchesFilterCache = new Map();
+    const stackMatchesFilterCache: Map<
+      IndexIntoStackTable,
+      boolean
+    > = new Map();
     function stackMatchesFilter(stackIndex) {
       if (stackIndex === null) {
         return false;
