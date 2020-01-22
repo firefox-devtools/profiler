@@ -20,7 +20,10 @@ import {
   getPageList,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getSelectedThreadIndex } from '../../selectors/url-state';
+import {
+  getShowUserTimings,
+  getSelectedThreadIndex,
+} from '../../selectors/url-state';
 import { getRightClickedCallNodeIndexForThread } from '../../selectors/right-clicked-call-node';
 import StackChartEmptyReasons from './StackChartEmptyReasons';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
@@ -38,12 +41,14 @@ import type { Thread, CategoryList, PageList } from '../../types/profile';
 import type {
   CallNodeInfo,
   IndexIntoCallNodeTable,
+  CombinedTimingRows,
+  MarkerIndex,
+  Marker,
 } from '../../types/profile-derived';
 import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
 } from '../../types/units';
-import type { StackTimingByDepth } from '../../profile-logic/stack-timing';
 import type { PreviewSelection } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -55,7 +60,7 @@ type StateProps = {|
   +thread: Thread,
   +pages: PageList | null,
   +maxStackDepth: number,
-  +stackTimingByDepth: StackTimingByDepth,
+  +combinedTimingRows: CombinedTimingRows,
   +timeRange: { start: Milliseconds, end: Milliseconds },
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
@@ -65,6 +70,8 @@ type StateProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
+  +getMarker: MarkerIndex => Marker,
+  +userTimings: MarkerIndex[],
 |};
 
 type DispatchProps = {|
@@ -101,14 +108,13 @@ class StackChartGraph extends React.PureComponent<Props> {
     );
   };
 
-  _onRightClickedCallNodeChange = (
-    callNodeIndex: IndexIntoCallNodeTable | null
-  ) => {
+  _onRightClickedCallNodeChange = (callNodeIndex: number | null) => {
     const {
       callNodeInfo,
       threadIndex,
       changeRightClickedCallNode,
     } = this.props;
+
     changeRightClickedCallNode(
       threadIndex,
       getCallNodePathFromIndex(callNodeIndex, callNodeInfo.callNodeTable)
@@ -134,8 +140,9 @@ class StackChartGraph extends React.PureComponent<Props> {
   render() {
     const {
       thread,
+      threadIndex,
       maxStackDepth,
-      stackTimingByDepth,
+      combinedTimingRows,
       timeRange,
       interval,
       previewSelection,
@@ -145,6 +152,8 @@ class StackChartGraph extends React.PureComponent<Props> {
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
       pages,
+      getMarker,
+      userTimings,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -158,7 +167,7 @@ class StackChartGraph extends React.PureComponent<Props> {
       >
         <StackSettings disableCallTreeSummaryButtons={true} />
         <TransformNavigator />
-        {maxStackDepth === 0 ? (
+        {maxStackDepth === 0 && userTimings.length === 0 ? (
           <StackChartEmptyReasons />
         ) : (
           <ContextMenuTrigger
@@ -183,7 +192,9 @@ class StackChartGraph extends React.PureComponent<Props> {
                   interval,
                   thread,
                   pages,
-                  stackTimingByDepth,
+                  threadIndex,
+                  combinedTimingRows,
+                  getMarker,
                   // $FlowFixMe Error introduced by upgrading to v0.96.0. See issue #1936.
                   updatePreviewSelection,
                   rangeStart: timeRange.start,
@@ -193,6 +204,7 @@ class StackChartGraph extends React.PureComponent<Props> {
                   categories,
                   selectedCallNodeIndex,
                   onSelectionChange: this._onSelectedCallNodeChange,
+                  // TODO: support right clicking user timing markers #2354.
                   onRightClick: this._onRightClickedCallNodeChange,
                   shouldDisplayTooltips: this._shouldDisplayTooltips,
                   scrollToSelectionGeneration,
@@ -208,15 +220,16 @@ class StackChartGraph extends React.PureComponent<Props> {
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
-    const stackTimingByDepth = selectedThreadSelectors.getStackTimingByDepth(
-      state
-    );
+    const showUserTimings = getShowUserTimings(state);
+    const combinedTimingRows = showUserTimings
+      ? selectedThreadSelectors.getCombinedTimingRows(state)
+      : selectedThreadSelectors.getStackTimingByDepth(state);
     const threadIndex = getSelectedThreadIndex(state);
 
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
       maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
-      stackTimingByDepth,
+      combinedTimingRows,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       previewSelection: getPreviewSelection(state),
@@ -232,6 +245,8 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       ),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       pages: getPageList(state),
+      getMarker: selectedThreadSelectors.getMarkerGetter(state),
+      userTimings: selectedThreadSelectors.getUserTimingMarkerIndexes(state),
     };
   },
   mapDispatchToProps: {
@@ -244,8 +259,8 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
 
 // This function is given the StackChartCanvas's chartProps.
 function viewportNeedsUpdate(
-  prevProps: { +stackTimingByDepth: StackTimingByDepth },
-  newProps: { +stackTimingByDepth: StackTimingByDepth }
+  prevProps: { +combinedTimingRows: CombinedTimingRows },
+  newProps: { +combinedTimingRows: CombinedTimingRows }
 ) {
-  return prevProps.stackTimingByDepth !== newProps.stackTimingByDepth;
+  return prevProps.combinedTimingRows !== newProps.combinedTimingRows;
 }

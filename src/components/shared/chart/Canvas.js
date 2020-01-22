@@ -109,28 +109,45 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     const canvas = this._canvas;
     const { containerWidth, containerHeight, scaleCtxToCssPixels } = this.props;
     const { devicePixelRatio } = window;
-    const devicePixelWidth: DevicePixels = containerWidth * devicePixelRatio;
-    const devicePixelHeight: DevicePixels = containerHeight * devicePixelRatio;
+
     if (!canvas) {
       return;
     }
-    // Satisfy the null check for Flow.
-    const ctx = this._ctx || canvas.getContext('2d', { alpha: false });
-    if (!this._ctx) {
+
+    let ctx = this._ctx;
+    if (!ctx) {
+      ctx = canvas.getContext('2d', { alpha: false });
       this._ctx = ctx;
     }
+
+    // The DevicePixels for the canvas are integers, but the CSS styles use float values.
+    // Use the "floor" function to make sure we assign the device pixel values how we
+    // expect.
+    const devicePixelWidth: DevicePixels = Math.floor(
+      containerWidth * devicePixelRatio
+    );
+    const devicePixelHeight: DevicePixels = Math.floor(
+      containerHeight * devicePixelRatio
+    );
+
     if (
       canvas.width !== devicePixelWidth ||
       canvas.height !== devicePixelHeight
     ) {
+      // The canvas needs to be sized to the container.
       canvas.width = devicePixelWidth;
       canvas.height = devicePixelHeight;
-      canvas.style.width = containerWidth + 'px';
-      canvas.style.height = containerHeight + 'px';
+      // Round the style width as well, so the canvas will be sized according to
+      // the integer pixel size.
+      // TODO #2370 - We should review the correctness of this approach, to make sure
+      // we don't have any blank pixels at the edge, or that we overflow.
+      canvas.style.width = Math.floor(containerWidth) + 'px';
+      canvas.style.height = Math.floor(containerHeight) + 'px';
       if (scaleCtxToCssPixels) {
         ctx.scale(this._devicePixelRatio, this._devicePixelRatio);
       }
     }
+
     if (this._devicePixelRatio !== devicePixelRatio) {
       if (scaleCtxToCssPixels) {
         // Make sure and multiply by the inverse of the previous ratio, as the scaling
