@@ -91,19 +91,6 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -758,19 +745,6 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -1417,19 +1391,6 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -2080,19 +2041,6 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -2711,19 +2659,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -2857,19 +2792,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -3001,19 +2923,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -3202,19 +3111,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -3833,19 +3729,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -4460,19 +4343,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -5091,19 +4961,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -5673,19 +5530,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -6259,19 +6103,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -6724,19 +6555,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -7187,19 +7005,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
