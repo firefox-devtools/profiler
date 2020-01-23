@@ -62,19 +62,6 @@ exports[`StackSettings matches the snapshot 1`] = `
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"

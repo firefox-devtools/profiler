@@ -26,6 +26,7 @@ import {
   commitRange,
   changeImplementationFilter,
 } from '../../actions/profile-view';
+import { changeSelectedTab } from '../../actions/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
@@ -366,6 +367,8 @@ function setup(profile: Profile, funcNames: string[] = []): * {
     .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
   const store = storeWithProfile(profile);
+  store.dispatch(changeSelectedTab('stack-chart'));
+
   const renderResult = render(
     <Provider store={store}>
       <>

@@ -15,6 +15,7 @@ import {
 import {
   getImplementationFilter,
   getInvertCallstack,
+  getSelectedTab,
   getShowUserTimings,
   getCurrentSearchString,
 } from '../../selectors/url-state';
@@ -41,6 +42,7 @@ type OwnProps = {|
 type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +selectedTab: string,
   +invertCallstack: boolean,
   +showUserTimings: boolean,
   +currentSearchString: string,
@@ -123,6 +125,7 @@ class StackSettings extends PureComponent<Props> {
   render() {
     const {
       invertCallstack,
+      selectedTab,
       showUserTimings,
       hideInvertCallstack,
       currentSearchString,
@@ -202,7 +205,7 @@ class StackSettings extends PureComponent<Props> {
               </label>
             </li>
           )}
-          {
+          {selectedTab !== 'stack-chart' ? null : (
             <li className="stackSettingsListItem">
               <label className="photon-label photon-label-micro stackSettingsLabel">
                 <input
@@ -214,7 +217,7 @@ class StackSettings extends PureComponent<Props> {
                 {' Show user timing'}
               </label>
             </li>
-          }
+          )}
         </ul>
         <PanelSearch
           className="stackSettingsSearchField"
@@ -231,6 +234,7 @@ class StackSettings extends PureComponent<Props> {
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     invertCallstack: getInvertCallstack(state),
+    selectedTab: getSelectedTab(state),
     showUserTimings: getShowUserTimings(state),
     implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),
