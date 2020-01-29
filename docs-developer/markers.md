@@ -32,7 +32,7 @@ Coming soon
 | ------------ | ------------------ | ----------- |
 | Paint        | RefreshDriverTick  | This is a container marker that wraps all phases of a refresh tick. |
 | Paint        | FireScrollEvent    | The time it took call event listeners for “scroll” events after the scroll position in a scrollable frame changed. |
-| Paint        | Scripts            | The time it takes to call JavaScript requestAnimationFrame callbacks during a refresh tick. |
+| Paint        | requestAnimationFrame callbacks | The time it takes to call JavaScript requestAnimationFrame callbacks during a refresh tick. |
 | Paint        | Styles             | The time it takes to recompute CSS style information on any changed elements in the document. |
 | Paint        | Reflow             | The time it took to recompute layout. |
 | Paint        | DispatchSynthMouseMove | The time it takes to fire mouseover and mouseout events (and running any JS event handlers) after a layout change or scroll caused the mouse to be over a different element. |
