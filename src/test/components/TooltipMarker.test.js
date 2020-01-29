@@ -287,7 +287,7 @@ describe('TooltipMarker', function() {
         },
       ],
       [
-        'TTFI',
+        'TimeToFirstInteractive (TTFI)',
         21.4,
         {
           type: 'Text',

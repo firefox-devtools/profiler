@@ -2422,7 +2422,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
 </div>
 `;
 
-exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
+exports[`TooltipMarker renders tooltips for various markers: TimeToFirstInteractive (TTFI)-21.4 1`] = `
 <div
   class="tooltipMarker propClass"
 >
@@ -2440,7 +2440,7 @@ exports[`TooltipMarker renders tooltips for various markers: TTFI-21.4 1`] = `
       <div
         class="tooltipTitle"
       >
-        TTFI
+        TimeToFirstInteractive (TTFI)
       </div>
     </div>
     <div
