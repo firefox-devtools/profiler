@@ -812,7 +812,8 @@ export function toValidCallTreeSummaryStrategy(
     case 'js-allocations':
     case 'native-retained-allocations':
     case 'native-allocations':
-    case 'native-deallocations':
+    case 'native-deallocations-sites':
+    case 'native-deallocations-memory':
       return strategy;
     default:
       // Default to "timing" if the strategy is not recognized. This value can come
@@ -2051,7 +2052,7 @@ export function filterToAllocations(
  * This function filters to only negative memory size values in the native allocations.
  * It shows all of the memory frees.
  */
-export function filterToDeallocations(
+export function filterToDeallocationsSites(
   nativeAllocations: NativeAllocationsTable
 ): NativeAllocationsTable {
   let newNativeAllocations;
@@ -2083,6 +2084,67 @@ export function filterToDeallocations(
     }
   }
   return newNativeAllocations;
+}
+
+/**
+ * This function filters to only negative memory size values in the native allocations.
+ * It rewrites the stacks to point back to the stack of the allocation.
+ */
+export function filterToDeallocationsMemory(
+  nativeAllocations: BalancedNativeAllocationsTable
+): NativeAllocationsTable {
+  // A-----D------A-------D
+  type Address = number;
+  type IndexIntoAllocations = number;
+  const memoryAddressToAllocation: Map<
+    Address,
+    IndexIntoAllocations
+  > = new Map();
+  const stackOfOriginalAllocation: Array<IndexIntoAllocations | null> = [];
+  for (
+    let allocationIndex = 0;
+    allocationIndex < nativeAllocations.length;
+    allocationIndex++
+  ) {
+    const bytes = nativeAllocations.duration[allocationIndex];
+    const memoryAddress = nativeAllocations.memoryAddress[allocationIndex];
+    if (bytes >= 0) {
+      // Handle the allocation.
+
+      // Provide a map back to this index.
+      memoryAddressToAllocation.set(memoryAddress, allocationIndex);
+      stackOfOriginalAllocation[allocationIndex] = null;
+    } else {
+      // Lookup the previous allocation.
+      const previousAllocationIndex = memoryAddressToAllocation.get(
+        memoryAddress
+      );
+      if (previousAllocationIndex === undefined) {
+        stackOfOriginalAllocation[allocationIndex] = null;
+      } else {
+        // This deallocation matches a previous allocation. Remove the allocation.
+        stackOfOriginalAllocation[allocationIndex] = previousAllocationIndex;
+        // There is a match, so delete this old association.
+        memoryAddressToAllocation.delete(memoryAddress);
+      }
+    }
+  }
+
+  const newDeallocations = getEmptyBalancedNativeAllocationsTable();
+  for (let i = 0; i < nativeAllocations.length; i++) {
+    const duration = nativeAllocations.duration[i];
+    const stackIndex = stackOfOriginalAllocation[i];
+    if (stackIndex !== null) {
+      newDeallocations.time.push(nativeAllocations.time[i]);
+      newDeallocations.stack.push(stackIndex);
+      newDeallocations.duration.push(duration);
+      newDeallocations.memoryAddress.push(nativeAllocations.memoryAddress[i]);
+      newDeallocations.threadId.push(nativeAllocations.threadId[i]);
+      newDeallocations.length++;
+    }
+  }
+
+  return newDeallocations;
 }
 
 /**

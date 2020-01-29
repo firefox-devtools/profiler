@@ -577,14 +577,14 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     ).toEqual('timing');
 
     // Switch to native allocations.
-    changeSelect({ from: 'Timing Data', to: 'Allocations' });
+    changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
 
     expect(
       selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
     ).toEqual('native-allocations');
 
     // And finally it can be switched back.
-    changeSelect({ from: 'Allocations', to: 'Timing Data' });
+    changeSelect({ from: 'Allocated Memory', to: 'Timing Data' });
     expect(
       selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
     ).toEqual('timing');
@@ -597,7 +597,7 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     expect(queryByText('Total Size (bytes)')).toBe(null);
     expect(queryByText('Self (bytes)')).toBe(null);
 
-    changeSelect({ from: 'Timing Data', to: 'Allocations' });
+    changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
 
     // After changing to native allocations, they do.
     getByText('Total Size (bytes)');
@@ -606,18 +606,18 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
 
   it('does not have the retained memory option', function() {
     const { queryByText } = setup();
-    expect(queryByText('Retained Allocations')).toBeFalsy();
+    expect(queryByText('Retained Memory')).toBeFalsy();
   });
 
   it('matches the snapshot for native allocations', function() {
     const { container, changeSelect } = setup();
-    changeSelect({ from: 'Timing Data', to: 'Allocations' });
+    changeSelect({ from: 'Timing Data', to: 'Allocated Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });
 
   it('matches the snapshot for native deallocations', function() {
     const { container, changeSelect } = setup();
-    changeSelect({ from: 'Timing Data', to: 'Deallocations' });
+    changeSelect({ from: 'Timing Data', to: 'Deallocation Sites' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });
@@ -636,7 +636,7 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     return { profile, ...renderResult, changeSelect, ...store };
   }
 
-  it('can switch to retained allocations and back to timing', function() {
+  it('can switch to retained memory and back to timing', function() {
     const { getState, changeSelect } = setup();
 
     // It starts out with timing.
@@ -645,14 +645,14 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     ).toEqual('timing');
 
     // Switch to retained memory native allocations.
-    changeSelect({ from: 'Timing Data', to: 'Retained Allocations' });
+    changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
 
     expect(
       selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
     ).toEqual('native-retained-allocations');
 
     // And finally it can be switched back.
-    changeSelect({ from: 'Retained Allocations', to: 'Timing Data' });
+    changeSelect({ from: 'Retained Memory', to: 'Timing Data' });
     expect(
       selectedThreadSelectors.getCallTreeSummaryStrategy(getState())
     ).toEqual('timing');
@@ -665,7 +665,7 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     expect(queryByText('Total Size (bytes)')).toBe(null);
     expect(queryByText('Self (bytes)')).toBe(null);
 
-    changeSelect({ from: 'Timing Data', to: 'Retained Allocations' });
+    changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
 
     // After changing to retained allocations, they do.
     getByText('Total Size (bytes)');
@@ -674,7 +674,13 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
 
   it('matches the snapshot for retained allocations', function() {
     const { container, changeSelect } = setup();
-    changeSelect({ from: 'Timing Data', to: 'Retained Allocations' });
+    changeSelect({ from: 'Timing Data', to: 'Retained Memory' });
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('matches the snapshot for deallocated memory', function() {
+    const { container, changeSelect } = setup();
+    changeSelect({ from: 'Timing Data', to: 'Deallocated Memory' });
     expect(container.firstChild).toMatchSnapshot();
   });
 });
