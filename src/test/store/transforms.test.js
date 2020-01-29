@@ -1375,7 +1375,7 @@ describe('transform native deallocations', function() {
   it('can render a normal call tree', function() {
     const { profile } = getProfileWithUnbalancedNativeAllocations();
     const { dispatch, getState } = storeWithProfile(profile);
-    dispatch(changeCallTreeSummaryStrategy('native-deallocations'));
+    dispatch(changeCallTreeSummaryStrategy('native-deallocations-sites'));
 
     expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
       [
@@ -1398,7 +1398,7 @@ describe('transform native deallocations', function() {
       funcNamesDict: { Fjs },
     } = getProfileWithUnbalancedNativeAllocations();
     const { dispatch, getState } = storeWithProfile(profile);
-    dispatch(changeCallTreeSummaryStrategy('native-deallocations'));
+    dispatch(changeCallTreeSummaryStrategy('native-deallocations-sites'));
     dispatch(
       addTransformToStack(threadIndex, {
         type: 'focus-function',
