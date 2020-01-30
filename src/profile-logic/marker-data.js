@@ -1267,6 +1267,9 @@ export function getMarkerFullDescription(marker: Marker) {
       case 'Text':
         description += ` — ${data.name}`;
         break;
+      case 'Log':
+        description += ` $(data.module): ${data.name}`;
+        break;
       case 'IPC':
         description = `${data.messageType} — ${
           data.direction === 'sending' ? 'sent to' : 'received from'
@@ -1302,6 +1305,9 @@ export function getMarkerCategory(marker: Marker) {
         break;
       case 'Text':
         category = 'Text';
+        break;
+      case 'Log':
+        category = 'Log';
         break;
       case 'IPC':
         category = data.direction === 'sending' ? 'IPC out' : 'IPC in';
