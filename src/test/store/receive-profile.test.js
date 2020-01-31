@@ -8,7 +8,10 @@ import type { Profile } from '../../types/profile';
 import sinon from 'sinon';
 import { oneLineTrim } from 'common-tags';
 
-import { getEmptyProfile } from '../../profile-logic/data-structures';
+import {
+  getEmptyProfile,
+  getEmptySamplesTableWithEventDelay,
+} from '../../profile-logic/data-structures';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
@@ -161,6 +164,29 @@ describe('actions/receive-profile', function() {
         'show [process]',
         '  - hide [thread Idle Thread]',
         '  - show [thread Work Thread] SELECTED',
+      ]);
+    });
+
+    it('will show the thread with no samples and with paint markers', function() {
+      const store = blankStore();
+      const { profile } = getProfileWithIdleAndWorkThread();
+
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+        [
+          'RefreshDriverTick',
+          0,
+          { type: 'tracing', category: 'Paint', interval: 'start' },
+        ],
+      ]);
+
+      // Clearing up the samples to test the no sampling mode.
+      profile.threads[0].samples = getEmptySamplesTableWithEventDelay();
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [process]',
+        '  - show [thread Idle Thread] SELECTED',
+        '  - show [thread Work Thread]',
       ]);
     });
 
