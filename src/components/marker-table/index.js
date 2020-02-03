@@ -21,11 +21,10 @@ import {
   changeRightClickedMarker,
 } from '../../actions/profile-view';
 import MarkerSettings from '../shared/MarkerSettings';
-import { formatSeconds } from '../../utils/format-numbers';
 import {
-  getMarkerFullDescription,
-  getMarkerCategory,
-} from '../../profile-logic/marker-data';
+  getMarkerTree,
+  type MarkerDisplayData,
+} from '../../profile-logic/marker-tree';
 
 import './index.css';
 
@@ -33,100 +32,6 @@ import type { ThreadIndex } from '../../types/profile';
 import type { Marker, MarkerIndex } from '../../types/profile-derived';
 import type { Milliseconds } from '../../types/units';
 import type { ConnectedProps } from '../../utils/connect';
-
-type MarkerDisplayData = {|
-  start: string,
-  duration: string,
-  name: string,
-  category: string,
-|};
-
-class MarkerTree {
-  _getMarker: MarkerIndex => Marker;
-  _markerIndexes: MarkerIndex[];
-  _zeroAt: Milliseconds;
-  _displayDataByIndex: Map<MarkerIndex, MarkerDisplayData>;
-
-  constructor(
-    getMarker: MarkerIndex => Marker,
-    markerIndexes: MarkerIndex[],
-    zeroAt: Milliseconds
-  ) {
-    this._getMarker = getMarker;
-    this._markerIndexes = markerIndexes;
-    this._zeroAt = zeroAt;
-    this._displayDataByIndex = new Map();
-  }
-
-  getRoots(): MarkerIndex[] {
-    return this._markerIndexes;
-  }
-
-  getChildren(markerIndex: MarkerIndex): MarkerIndex[] {
-    return markerIndex === -1 ? this.getRoots() : [];
-  }
-
-  hasChildren(_markerIndex: MarkerIndex): boolean {
-    return false;
-  }
-
-  getAllDescendants() {
-    return new Set();
-  }
-
-  getParent(): MarkerIndex {
-    // -1 isn't used, but needs to be compatible with the call tree.
-    return -1;
-  }
-
-  getDepth() {
-    return 0;
-  }
-
-  hasSameNodeIds(tree) {
-    return this._markerIndexes === tree._markerIndexes;
-  }
-
-  getDisplayData(markerIndex: MarkerIndex): MarkerDisplayData {
-    let displayData = this._displayDataByIndex.get(markerIndex);
-    if (displayData === undefined) {
-      const marker = this._getMarker(markerIndex);
-      const name = getMarkerFullDescription(marker);
-      const category = getMarkerCategory(marker);
-
-      displayData = {
-        start: _formatStart(marker.start, this._zeroAt),
-        duration: marker.incomplete ? 'unknown' : _formatDuration(marker.dur),
-        name,
-        category,
-      };
-      this._displayDataByIndex.set(markerIndex, displayData);
-    }
-    return displayData;
-  }
-}
-
-function _formatStart(start: number, zeroAt) {
-  return formatSeconds(start - zeroAt);
-}
-
-function _formatDuration(duration: number): string {
-  if (duration === 0) {
-    return '—';
-  }
-  let maximumFractionDigits = 1;
-  if (duration < 0.01) {
-    maximumFractionDigits = 3;
-  } else if (duration < 1) {
-    maximumFractionDigits = 2;
-  }
-  return (
-    duration.toLocaleString(undefined, {
-      minimumFractionDigits: 0,
-      maximumFractionDigits,
-    }) + 'ms'
-  );
-}
 
 type StateProps = {|
   +threadIndex: ThreadIndex,
@@ -157,7 +62,7 @@ class MarkerTable extends PureComponent<Props> {
   _treeView: ?TreeView<MarkerDisplayData>;
   _takeTreeViewRef = treeView => (this._treeView = treeView);
 
-  getMarkerTree = memoize((...args) => new MarkerTree(...args), { limit: 1 });
+  getMarkerTree = memoize(getMarkerTree, { limit: 1 });
 
   componentDidMount() {
     this.focus();
