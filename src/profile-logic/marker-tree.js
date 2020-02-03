@@ -5,7 +5,7 @@
 // @flow
 
 import { getMarkerFullDescription, getMarkerCategory } from './marker-data';
-import { ListTree } from './list-tree';
+import { ListOfNumbersTree } from './list-tree';
 import { formatSeconds } from '../utils/format-numbers';
 
 import type { Milliseconds } from '../types/units';
@@ -18,7 +18,7 @@ export type MarkerDisplayData = {|
   category: string,
 |};
 
-class MarkerTree extends ListTree<MarkerDisplayData> {
+class MarkerTree extends ListOfNumbersTree<MarkerDisplayData> {
   _getMarker: MarkerIndex => Marker;
   _zeroAt: Milliseconds;
   _displayDataByIndex: Map<MarkerIndex, MarkerDisplayData>;

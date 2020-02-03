@@ -4,17 +4,17 @@
 
 // @flow
 
-export class ListTree<DisplayData> {
-  _data: number[];
+export class ListTree<DataType, DisplayData> {
+  _data: DataType[];
   _displayDataByIndex: Map<number, DisplayData>;
 
-  constructor(data: number[]) {
+  constructor(data: DataType[]) {
     this._data = data;
     this._displayDataByIndex = new Map();
   }
 
   getRoots(): number[] {
-    return this._data;
+    return this._data.map((_, i) => i);
   }
 
   getChildren(index: number): number[] {
@@ -38,7 +38,7 @@ export class ListTree<DisplayData> {
     return 0;
   }
 
-  hasSameNodeIds(tree: ListTree<DisplayData>) {
+  hasSameNodeIds(tree: ListTree<DataType, DisplayData>) {
     return this._data === tree._data;
   }
 
@@ -53,5 +53,14 @@ export class ListTree<DisplayData> {
 
   _getDisplayData(_index: number): DisplayData {
     throw new Error('Please implement `_getDisplayData` in your extension.');
+  }
+}
+
+export class ListOfNumbersTree<DisplayData> extends ListTree<
+  number,
+  DisplayData
+> {
+  getRoots(): number[] {
+    return this._data;
   }
 }
