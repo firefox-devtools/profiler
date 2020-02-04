@@ -271,6 +271,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
         ? null
         : undefined;
       break;
+    case 'functions':
+      break;
     default:
       assertExhaustiveCheck(selectedTab);
   }

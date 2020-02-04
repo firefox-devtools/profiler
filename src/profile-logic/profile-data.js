@@ -2214,3 +2214,76 @@ export function filterToRetainedAllocations(
 
   return newNativeAllocations;
 }
+
+export function computeRunningTimesByFunc(
+  thread: Thread,
+  interval: Milliseconds,
+  isInvertedCallstack: boolean
+): Float32Array /* Map<funcIndex, Milliseconds> */ {
+  const { samples, stackTable, frameTable, funcTable } = thread;
+  const runningTimes = new Float32Array(stackTable.length);
+  const result = new Float32Array(funcTable.length);
+  if (isInvertedCallstack) {
+    // The algorithm works only with a non-inverted stack table.
+    return result;
+  }
+
+  // 1. Adds up all self time from the samples table.
+  for (let sampleIndex = 0; sampleIndex < samples.length; sampleIndex++) {
+    const stackIndex = samples.stack[sampleIndex];
+    if (stackIndex === null) {
+      continue;
+    }
+
+    const duration = samples.duration
+      ? samples.duration[sampleIndex]
+      : interval;
+
+    runningTimes[stackIndex] += duration;
+  }
+
+  // 2. Adds up running time from the self times.
+  // We loop over the stacktable from end to start so that we find children
+  // before their parents. Then parents' running time is already known when we
+  // find them.
+  for (let stackIndex = stackTable.length - 1; stackIndex >= 0; stackIndex--) {
+    const prefixStackIndex = stackTable.prefix[stackIndex];
+    if (prefixStackIndex !== null) {
+      // This adds this stack's running time to its parent's running time, if
+      // there's a parent.
+      runningTimes[prefixStackIndex] += runningTimes[stackIndex];
+    }
+  }
+
+  // 3. And lastly merge all the values for stacks into values for functions
+  const functionsForStackIndex: Array<Set<IndexIntoFuncTable>> = new Array(
+    stackTable.length
+  );
+
+  for (let stackIndex = 0; stackIndex < stackTable.length; stackIndex++) {
+    const prefixStackIndex = stackTable.prefix[stackIndex];
+    const prefixSet =
+      prefixStackIndex === null
+        ? null
+        : functionsForStackIndex[prefixStackIndex];
+
+    const frameIndex = stackTable.frame[stackIndex];
+    const funcIndex = frameTable.func[frameIndex];
+
+    if (prefixSet !== null && prefixSet.has(funcIndex)) {
+      // This function has already been counted for a node higher in the stack
+      // hierarchy. Because the counted value already includes this node's value
+      // we skip this node in the computation.
+      functionsForStackIndex[stackIndex] = prefixSet;
+    } else {
+      // We add up this node's running time value, and take a note that we
+      // counted this function in this branch.
+      result[funcIndex] += runningTimes[stackIndex];
+      const thisNodeSet = new Set(prefixSet);
+      thisNodeSet.add(funcIndex);
+      functionsForStackIndex[stackIndex] = thisNodeSet;
+    }
+  }
+
+  return result;
+}

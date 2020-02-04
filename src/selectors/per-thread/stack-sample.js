@@ -20,6 +20,7 @@ import type {
   NativeAllocationsTable,
   IndexIntoCategoryList,
   IndexIntoSamplesTable,
+  IndexIntoFuncTable,
 } from '../../types/profile';
 import type {
   CallNodeInfo,
@@ -324,6 +325,36 @@ export function getStackAndSampleSelectorsPerThread(
     FlameGraph.getFlameGraphTiming
   );
 
+  const getRunningTimesByFuncOrdered: Selector<
+    Array<{|
+      +funcIndex: IndexIntoFuncTable,
+      +count: number,
+    |}>
+  > = createSelector(
+    threadSelectors.getPreviewFilteredThread,
+    ProfileSelectors.getProfileInterval,
+    UrlState.getInvertCallstack,
+    (thread, interval, isInvertedCallstack) => {
+      const runningTimesbyFunc = ProfileData.computeRunningTimesByFunc(
+        thread,
+        interval,
+        isInvertedCallstack
+      );
+
+      const runningTimesArray = Array.from(
+        runningTimesbyFunc,
+        (count, funcIndex) => ({
+          count,
+          funcIndex,
+        })
+      );
+
+      return runningTimesArray.sort(
+        ({ count: countA }, { count: countB }) => countB - countA
+      );
+    }
+  );
+
   return {
     unfilteredSamplesRange,
     getCallNodeInfo,
@@ -341,5 +372,6 @@ export function getStackAndSampleSelectorsPerThread(
     getStackTimingByDepth,
     getCallNodeMaxDepthForFlameGraph,
     getFlameGraphTiming,
+    getRunningTimesByFuncOrdered,
   };
 }

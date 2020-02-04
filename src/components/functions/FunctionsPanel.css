@@ -1,0 +1,17 @@
+.functions-panel {
+  display: flex;
+  flex: 1;
+  background: var(--grey-30);
+}
+
+.functions-panel-details {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin-left: 0.5em;
+}
+
+.functions-panel-details .treeView {
+  margin: 0.5em 0;
+  background: white;
+}

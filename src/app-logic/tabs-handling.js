@@ -17,6 +17,7 @@ export const tabsWithTitle = {
   'marker-table': 'Marker Table',
   'network-chart': 'Network',
   'js-tracer': 'JS Tracer',
+  functions: 'Functions',
 };
 
 export type TabSlug = $Keys<typeof tabsWithTitle>;

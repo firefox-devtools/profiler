@@ -101,7 +101,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
       )
   );
 
-  const _getImplementationFilteredThread: Selector<Thread> = createSelector(
+  const getImplementationFilteredThread: Selector<Thread> = createSelector(
     getRangeAndTransformFilteredThread,
     UrlState.getImplementationFilter,
     ProfileSelectors.getDefaultCategory,
@@ -109,7 +109,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
   );
 
   const _getImplementationAndSearchFilteredThread: Selector<Thread> = createSelector(
-    _getImplementationFilteredThread,
+    getImplementationFilteredThread,
     UrlState.getSearchStrings,
     (thread, searchStrings) => {
       return ProfileData.filterThreadToSearchStrings(thread, searchStrings);
@@ -281,6 +281,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getFilteredThread,
     getRangeFilteredThread,
     getRangeAndTransformFilteredThread,
+    getImplementationFilteredThread,
     getPreviewFilteredThread,
     getSampleIndexOffsetFromCommittedRange,
     getSampleIndexOffsetFromPreviewRange,
