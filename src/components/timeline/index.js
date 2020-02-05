@@ -186,20 +186,18 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
     }
 
     return (
-      <form>
-        <div className="timelineSettingsToggle">
-          <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
-            <input
-              type="checkbox"
-              name="timelineSettingsActiveTabToggle"
-              className="photon-checkbox photon-checkbox-micro"
-              onChange={this._toggleShowTabOnly}
-              checked={showTabOnly !== null}
-            />
-            Show active tab only
-          </label>
-        </div>
-      </form>
+      <div className="timelineSettingsToggle">
+        <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
+          <input
+            type="checkbox"
+            name="timelineSettingsActiveTabToggle"
+            className="photon-checkbox photon-checkbox-micro"
+            onChange={this._toggleShowTabOnly}
+            checked={showTabOnly !== null}
+          />
+          Show active tab only
+        </label>
+      </div>
     );
   }
 }
