@@ -187,7 +187,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   );
 
   /**
-   * This selector applies the committed range to the full list of markers.
+   * This selector applies the tab filter(if in a single tab view) to the range filtered markers.
    */
   const getCommittedRangeAndTabFilteredMarkerIndexes: Selector<
     MarkerIndex[]

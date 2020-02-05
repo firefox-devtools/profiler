@@ -163,6 +163,11 @@ export function getSearchFilteredMarkerIndexes(
   return newMarkers;
 }
 
+/**
+ * Gets the markers and the web pages that are relevant to the current active tab
+ * and filters out the markers that don't belong to those revelant pages.
+ * If we don't have any item in relevantPages, return the whole marker list.
+ */
 export function getTabFilteredMarkerIndexes(
   getMarker: MarkerIndex => Marker,
   markerIndexes: MarkerIndex[],

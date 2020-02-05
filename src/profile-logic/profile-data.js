@@ -1036,6 +1036,15 @@ export function filterThreadToSearchString(
   );
 }
 
+/**
+ * We have page data(innerWindowID) inside the JS frames. Go through each sample
+ * and filter out the ones that don't include any JS frame with the relevant innerWindowID.
+ * Please note that it also keeps native frames if that sample has a relevant JS
+ * frame in any part of the stack. Also it doesn't mutate the stack itself, only
+ * nulls the stack array elements of samples object. Therefore, it doesn't
+ * invalidate transforms.
+ * If we don't have any item in relevantPages, returns all the samples.
+ */
 export function filterThreadByTab(
   thread: Thread,
   relevantPages: Set<InnerWindowID>
@@ -1048,6 +1057,8 @@ export function filterThreadByTab(
 
     const { frameTable, stackTable } = thread;
 
+    // innerWindowID array lives inside the frameTable. Check that and decide
+    // if we should keep that sample or not.
     const frameMatchesFilterCache: Map<
       IndexIntoFrameTable,
       boolean
@@ -1067,6 +1078,7 @@ export function filterThreadByTab(
       return matches;
     }
 
+    // Use the stackTable to navigate to frameTable and cache the result of it.
     const stackMatchesFilterCache: Map<
       IndexIntoStackTable,
       boolean
@@ -1092,6 +1104,9 @@ export function filterThreadByTab(
       return matches;
     }
 
+    // Update the stack array elements of samples object and make them null if
+    // they don't include any relevant JS frame.
+    // It doesn't mutate the stack itself.
     return updateThreadStacks(thread, stackTable, stackIndex =>
       stackMatchesFilter(stackIndex) ? stackIndex : null
     );
