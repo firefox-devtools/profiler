@@ -10,7 +10,7 @@ import { oneLineTrim } from 'common-tags';
 
 import {
   getEmptyProfile,
-  getEmptySamplesTableWithEventDelay,
+  getEmptyThread,
 } from '../../profile-logic/data-structures';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
@@ -169,9 +169,18 @@ describe('actions/receive-profile', function() {
 
     it('will show the thread with no samples and with paint markers', function() {
       const store = blankStore();
-      const { profile } = getProfileWithIdleAndWorkThread();
+      const profile = getEmptyProfile();
 
-      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+      profile.threads.push(
+        // This thread shouldn't be hidden because it's the main thread in the main process.
+        getEmptyThread({ name: 'GeckoMain', processType: 'default', pid: 1 }),
+        // This thread shouldn't be hidden because it will have useful markers even if it has no samples.
+        getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 2 }),
+        // This thread will be hidden because it has no samples and no markers.
+        getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 3 })
+      );
+
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
         [
           'RefreshDriverTick',
           0,
@@ -179,14 +188,11 @@ describe('actions/receive-profile', function() {
         ],
       ]);
 
-      // Clearing up the samples to test the no sampling mode.
-      profile.threads[0].samples = getEmptySamplesTableWithEventDelay();
-
       store.dispatch(viewProfile(profile));
       expect(getHumanReadableTracks(store.getState())).toEqual([
-        'show [process]',
-        '  - show [thread Idle Thread] SELECTED',
-        '  - show [thread Work Thread]',
+        'show [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        'hide [thread GeckoMain tab]',
       ]);
     });
 

@@ -611,7 +611,7 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
   }
 
   if (thread.samples.length === 0) {
-    // This is a profile without any sample(taken with no periodic sapling mode)
+    // This is a profile without any sample (taken with no periodic sampling mode)
     // and we can't take a look at the samples to decide whether that thread is
     // active or not. So we are checking if we have a paint marker instead.
     return _isThreadWithNoPaint(thread);
@@ -641,19 +641,13 @@ function _isContentThreadWithNoPaint(thread: Thread): boolean {
 // Returns true if the thread doesn't include any RefreshDriverTick. This
 // indicates they were not painted to, and most likely idle. This is just
 // a heuristic to help users.
-function _isThreadWithNoPaint(thread: Thread): boolean {
+function _isThreadWithNoPaint({ markers, stringTable }: Thread): boolean {
   let isPaintMarkerFound = false;
-  if (thread.stringTable.hasString('RefreshDriverTick')) {
-    const paintStringIndex = thread.stringTable.indexForString(
-      'RefreshDriverTick'
-    );
+  if (stringTable.hasString('RefreshDriverTick')) {
+    const paintStringIndex = stringTable.indexForString('RefreshDriverTick');
 
-    for (
-      let markerIndex = 0;
-      markerIndex < thread.markers.length;
-      markerIndex++
-    ) {
-      if (paintStringIndex === thread.markers.name[markerIndex]) {
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      if (paintStringIndex === markers.name[markerIndex]) {
         isPaintMarkerFound = true;
         break;
       }
