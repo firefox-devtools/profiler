@@ -157,11 +157,15 @@ export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state 
 
 export const getActiveBrowsingContextID: Selector<BrowsingContextID | null> = state => {
   const configuration = getProfilerConfiguration(state);
-  if (configuration) {
+  if (
+    configuration &&
+    configuration.activeBrowsingContextID &&
+    configuration.activeBrowsingContextID !== 0
+  ) {
     // BrowsingContext ID can be `0` and that means Firefox has failed to get
     // the BrowsingContextID of the active tab. We are converting that `0` to
     // `null` here to explicitly indicate that we don't have that information.
-    return configuration.activeBrowsingContextID || null;
+    return configuration.activeBrowsingContextID;
   }
   return null;
 };
