@@ -468,43 +468,105 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
   }
 );
 
+/**
+ * Get the pages array and construct a Map that we can use to easily get the
+ * InnerWindowIDs that are under one tab. The constructed map is
+ * `Map<BrowsingContextID,Set<InnerWindowID>>`. The BrowsingContextID we use in
+ * that map is the BrowsingContextID of the top most frame. That corresponds to
+ * a tab(Side note: don't tell any platform developer that this is a tab ID,
+ * they will freak out. Because in the platform world this isn't a tab ID, since
+ * the iframe has a different BrowsingContext than the parent. But outer most
+ * BrowsingContextID _acts_ like a tab ID).
+ * So we had to figure out the outer most BrowsingContextID of each element. And
+ * we constructed an intermediate map to quickly find that value.
+ */
+export const getPagesMap: Selector<Map<
+  BrowsingContextID,
+  Set<InnerWindowID>
+> | null> = createSelector(
+  getPageList,
+  pageList => {
+    if (pageList === null || pageList.length === 0) {
+      // There is no data, return null
+      return null;
+    }
+
+    // Constructing this map first so we won't have to walk through the page list
+    // all the time.
+    const innerWindowIDToPageMap: Map<
+      InnerWindowID,
+      {
+        browsingContextID: BrowsingContextID,
+        embedderInnerWindowID: InnerWindowID,
+      }
+    > = new Map();
+
+    for (const page of pageList) {
+      innerWindowIDToPageMap.set(page.innerWindowID, {
+        browsingContextID: page.browsingContextID,
+        embedderInnerWindowID: page.embedderInnerWindowID,
+      });
+    }
+
+    // Now we have a way to fastly traverse back with the previous Map.
+    // We can do construction of BrowsingContextID to set of InnerWindowID map.
+    const pageMap: Map<BrowsingContextID, Set<InnerWindowID>> = new Map();
+    const appendPageMap = (browsingContextID, innerWindowID) => {
+      const tabEntry = pageMap.get(browsingContextID);
+      if (tabEntry === undefined) {
+        const newTabEntry = new Set([innerWindowID]);
+        pageMap.set(browsingContextID, newTabEntry);
+      } else {
+        tabEntry.add(innerWindowID);
+      }
+    };
+
+    for (const page of pageList) {
+      if (page.embedderInnerWindowID === undefined) {
+        // This is the top most page, which means the web page itself.
+        appendPageMap(page.browsingContextID, page.innerWindowID);
+      } else {
+        // This is an iframe, we should find its parent to see find top most
+        // BrowsingContextID, which is the tab ID for our case.
+        const getTopMostParent = item => {
+          // We are using a Map to make this more performant.
+          // It should be 1-2 loop iteration in 99% of the cases.
+          const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
+          if (parent !== undefined) {
+            return getTopMostParent(parent);
+          }
+          return item;
+        };
+
+        const parent = getTopMostParent(page);
+        // Now we have the top most parent. We can append the pageMap.
+        appendPageMap(parent.browsingContextID, page.innerWindowID);
+      }
+    }
+
+    return pageMap;
+  }
+);
+
+/**
+ * Get the page map and the active tab ID, then return the InnerWindowIDs that
+ * are related to this active tab. This is a fairly simple map element access.
+ * The `BrowsingContextID -> Set<InnerWindowID>` construction happens inside
+ * the getPageMap selector.
+ */
 export const getRelevantPagesForActiveTab: Selector<
   Set<InnerWindowID>
 > = createSelector(
-  getPageList,
+  getPagesMap,
   UrlState.getShowTabOnly,
-  (pageList, showTabOnly) => {
-    if (pageList === null || pageList.length === 0 || showTabOnly === null) {
+  (pagesMap, showTabOnly) => {
+    if (pagesMap === null || pagesMap.size === 0 || showTabOnly === null) {
       // Return an empty set if we want to see everything or that data is not there.
       return new Set();
     }
 
-    const findRootPage = page => {
-      if (page.embedderInnerWindowID !== 0) {
-        const parent = pageList.find(
-          p => p.innerWindowID === page.embedderInnerWindowID
-        );
-        if (parent) {
-          return findRootPage(parent);
-        }
-      }
-      return page;
-    };
-
-    // Create a set from the pages that we want to retain.
-    const relevantPages = [];
-    for (const page of pageList) {
-      if (page.browsingContextID === showTabOnly) {
-        relevantPages.push(page.innerWindowID);
-      } else if (page.embedderInnerWindowID !== 0) {
-        const rootPage = findRootPage(page);
-        if (rootPage.browsingContextID === showTabOnly) {
-          relevantPages.push(page.innerWindowID);
-        }
-      }
-    }
-
-    return new Set(relevantPages);
+    const pageSet = pagesMap.get(showTabOnly);
+    return pageSet !== undefined ? pageSet : new Set();
   }
 );
 
