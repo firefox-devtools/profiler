@@ -610,6 +610,13 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     return false;
   }
 
+  if (thread.samples.length === 0) {
+    // This is a profile without any sample (taken with no periodic sampling mode)
+    // and we can't take a look at the samples to decide whether that thread is
+    // active or not. So we are checking if we have a paint marker instead.
+    return _isThreadWithNoPaint(thread);
+  }
+
   if (_isContentThreadWithNoPaint(thread)) {
     // If content thread doesn't have any paint markers, set it idle if the
     // thread has at least 80% idle samples.
@@ -624,29 +631,30 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
 }
 
 function _isContentThreadWithNoPaint(thread: Thread): boolean {
-  // Hide content threads with no RefreshDriverTick. This indicates they were
-  // not painted to, and most likely idle. This is just a heuristic to help users.
   if (thread.name === 'GeckoMain' && thread.processType === 'tab') {
-    let isPaintMarkerFound = false;
-    if (thread.stringTable.hasString('RefreshDriverTick')) {
-      const paintStringIndex = thread.stringTable.indexForString(
-        'RefreshDriverTick'
-      );
+    return _isThreadWithNoPaint(thread);
+  }
 
-      for (
-        let markerIndex = 0;
-        markerIndex < thread.markers.length;
-        markerIndex++
-      ) {
-        if (paintStringIndex === thread.markers.name[markerIndex]) {
-          isPaintMarkerFound = true;
-          break;
-        }
+  return false;
+}
+
+// Returns true if the thread doesn't include any RefreshDriverTick. This
+// indicates they were not painted to, and most likely idle. This is just
+// a heuristic to help users.
+function _isThreadWithNoPaint({ markers, stringTable }: Thread): boolean {
+  let isPaintMarkerFound = false;
+  if (stringTable.hasString('RefreshDriverTick')) {
+    const paintStringIndex = stringTable.indexForString('RefreshDriverTick');
+
+    for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+      if (paintStringIndex === markers.name[markerIndex]) {
+        isPaintMarkerFound = true;
+        break;
       }
     }
-    if (!isPaintMarkerFound) {
-      return true;
-    }
+  }
+  if (!isPaintMarkerFound) {
+    return true;
   }
   return false;
 }
