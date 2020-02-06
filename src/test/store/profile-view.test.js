@@ -190,7 +190,7 @@ describe('getJankMarkersForHeader', function() {
         .fill('A')
         .join('  ')
     );
-    delete profile.threads[0].samples.eventDelay;
+    delete profile.threads[0].samples.responsiveness;
     profile.threads[0].samples.eventDelay = eventDelay;
     const { getState } = storeWithProfile(profile);
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
@@ -235,14 +235,20 @@ describe('getJankMarkersForHeader', function() {
   });
 
   it('will create a jank instance with eventDelay values', function() {
-    const breakingPoint = 70;
-    const eventDelay = [0, 20, 40, 60, breakingPoint, 0, 20, 40];
+    const breakingPoint = 50;
+    // We need to fill the samples before, because the new algorithm is different
+    // and the numbers usually means that we have a delay before that time.
+    const eventDelay = Array(50).fill(0);
+    eventDelay.push(5, 10, 15, 25, 30, 40, breakingPoint, 1);
     const jankInstances = setupWithEventDelay({
       sampleCount: eventDelay.length,
       eventDelay,
     });
     expect(jankInstances.length).toEqual(1);
-    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint);
+    // This is breakingPoint + 2 because that means that the jank actually
+    // started two samples before that breaking point, this is done by the
+    // pre-processing.
+    expect(getJankInstantDuration(jankInstances[0])).toEqual(breakingPoint + 2);
   });
 
   it('will skip null responsiveness values', function() {
@@ -1603,8 +1609,21 @@ describe('snapshots of selectors/profile', function() {
     const { getState, dispatch } = storeWithProfile(profile);
     samplesThread.name = 'Thread with samples';
     markersThread.name = 'Thread with markers';
-    // This is a jank sample:
-    ensureExists(samplesThread.samples.eventDelay)[4] = 100;
+    // Creating jank sample
+    samplesThread.samples.eventDelay = Array(50).fill(0);
+    const eventDelay = ensureExists(samplesThread.samples.eventDelay);
+    eventDelay.push(10, 15, 25, 30, 40, 50, 0);
+    samplesThread.samples.time = Array(eventDelay.length)
+      .fill(0)
+      .map((_, i) => i);
+    // Since we addded some eventDelays, we also need to make sure to add null values for the rest of the samples
+    samplesThread.samples.stack = [
+      ...samplesThread.samples.stack,
+      ...Array(eventDelay.length - samplesThread.samples.stack.length).fill(
+        null
+      ),
+    ];
+    samplesThread.samples.length = eventDelay.length;
     const mergeFunction = {
       type: 'merge-function',
       funcIndex: C,
@@ -1829,7 +1848,7 @@ describe('snapshots of selectors/profile', function() {
   it('matches the last stored run of selectedThreadSelector.unfilteredSamplesRange', function() {
     const { getState } = setupStore();
     expect(selectedThreadSelectors.unfilteredSamplesRange(getState())).toEqual({
-      end: 9,
+      end: 57,
       start: 0,
     });
   });

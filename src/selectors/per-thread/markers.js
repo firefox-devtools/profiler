@@ -113,9 +113,10 @@ export function getMarkerSelectorsPerThread(
     Marker[]
   > = createSelector(
     threadSelectors.getSamplesTable,
+    threadSelectors.getProcessedEventDelays,
     ProfileSelectors.getDefaultCategory,
-    (samples, defaultCategory) =>
-      MarkerData.deriveJankMarkers(samples, 50, defaultCategory)
+    (samples, eventDelays, defaultCategory) =>
+      MarkerData.deriveJankMarkers(samples, 50, eventDelays, defaultCategory)
   );
 
   /**

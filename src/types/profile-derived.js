@@ -381,3 +381,16 @@ export type TracedTiming = {|
   +self: Float32Array,
   +running: Float32Array,
 |};
+
+/*
+ * Event delay table that holds the pre-processed event delay values and other
+ * statistics about it.
+ * Gecko sends the non processed event delay values to the front-end and we have
+ * to make a calculation to find out their real values.
+ */
+export type EventDelayTable = {|
+  +eventDelays: Milliseconds[],
+  +minDelay: Milliseconds,
+  +maxDelay: Milliseconds,
+  +delayRange: Milliseconds,
+|};
