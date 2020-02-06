@@ -238,8 +238,6 @@ export function computeLocalTracksByPid(
       tracks.push({ type: 'thread', threadIndex });
     }
 
-    tracks.push({ type: 'event-delay', threadIndex });
-
     if (thread.markers.data.some(datum => datum && datum.type === 'Network')) {
       // This thread has network markers.
       tracks.push({ type: 'network', threadIndex });
@@ -277,6 +275,46 @@ export function computeLocalTracksByPid(
   }
 
   return localTracksByPid;
+}
+
+/**
+ * Take a profile and figure out all of the local tracks, and organize them by PID.
+ */
+export function addEventDelayTracksForThreads(
+  threads: Thread[],
+  localTracksByPid: Map<Pid, LocalTrack[]>
+): Map<Pid, LocalTrack[]> {
+  const newLocalTracksByPid = new Map();
+
+  for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
+    const thread = threads[threadIndex];
+    const { pid } = thread;
+    // Get or create the tracks and trackOrder.
+    let tracks = newLocalTracksByPid.get(pid);
+    if (tracks === undefined) {
+      tracks = localTracksByPid.get(pid);
+      if (tracks === undefined) {
+        tracks = [];
+      }
+      // copy it so we don't mutate the state
+      tracks = [...tracks];
+    }
+
+    tracks.push({ type: 'event-delay', threadIndex });
+    newLocalTracksByPid.set(pid, tracks);
+  }
+
+  // When adding a new track type, this for loop ensures that the newer tracks are
+  // added at the end so that the local track indexes are stable and backwards compatible.
+  for (const localTracks of newLocalTracksByPid.values()) {
+    // In place sort!
+    localTracks.sort(
+      (a, b) =>
+        LOCAL_TRACK_INDEX_ORDER[a.type] - LOCAL_TRACK_INDEX_ORDER[b.type]
+    );
+  }
+
+  return newLocalTracksByPid;
 }
 
 /**

@@ -64,6 +64,8 @@ export const getTrackThreadHeights: Selector<
 > = state => getApp(state).trackThreadHeights;
 export const getIsNewlyPublished: Selector<boolean> = state =>
   getApp(state).isNewlyPublished;
+export const getIsEventDelayTracksEnabled: Selector<boolean> = state =>
+  getApp(state).isEventDelayTracksEnabled;
 
 export const getIsDragAndDropDragging: Selector<boolean> = state =>
   getApp(state).isDragAndDropDragging;

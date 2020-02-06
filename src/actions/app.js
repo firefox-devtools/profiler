@@ -8,13 +8,25 @@ import {
   getDataSource,
   getIsActiveTabResourcesPanelOpen,
   getSelectedThreadIndex,
+  getLocalTrackOrderByPid,
 } from '../selectors/url-state';
-import { getTrackThreadHeights } from '../selectors/app';
-import { getActiveTabMainTrack } from '../selectors/profile';
+import {
+  getTrackThreadHeights,
+  getIsEventDelayTracksEnabled,
+} from '../selectors/app';
+import {
+  getActiveTabMainTrack,
+  getLocalTracksByPid,
+  getThreads,
+} from '../selectors/profile';
 import { sendAnalytics } from '../utils/analytics';
 import { stateFromLocation } from '../app-logic/url-handling';
 import { finalizeProfileView } from './receive-profile';
 import { fatalError } from './errors';
+import {
+  addEventDelayTracksForThreads,
+  initializeLocalTrackOrderByPid,
+} from '../profile-logic/tracks';
 
 import type {
   Profile,
@@ -221,6 +233,37 @@ export function toggleResourcesPanel(): ThunkAction<void> {
     dispatch({
       type: 'TOGGLE_RESOURCES_PANEL',
       selectedThreadIndex,
+    });
+  };
+}
+/*
+ * This action enables the event delay tracks. They are hidden by default because
+ * they are usually for power users and not so meaningful for avarage users.
+ * There is no UI that triggers this action in the profiler interface. Instead,
+ * users have to anable this from the developer console by writing this line:
+ * `experimental.enableEventDelayTracks()`
+ */
+export function enableEventDelayTracks(): ThunkAction<void> {
+  return (dispatch, getState) => {
+    if (getIsEventDelayTracksEnabled(getState())) {
+      console.error('Event delay tracks are already enabled');
+      return;
+    }
+
+    const oldLocalTracks = getLocalTracksByPid(getState());
+    const localTracksByPid = addEventDelayTracksForThreads(
+      getThreads(getState()),
+      oldLocalTracks
+    );
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      getLocalTrackOrderByPid(getState()),
+      localTracksByPid,
+      null
+    );
+    dispatch({
+      type: 'ENABLE_EVENT_DELAY_TRACKS',
+      localTracksByPid,
+      localTrackOrderByPid,
     });
   };
 }

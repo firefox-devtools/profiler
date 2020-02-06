@@ -228,6 +228,21 @@ const isDragAndDropOverlayRegistered: Reducer<boolean> = (
   }
 };
 
+/*
+ * This reducer hold the state for wheter or not the event delay tracks are
+ * enabled. This way we can hide the event delay tracks by default and display
+ * if we change the state.
+ */
+const isEventDelayTracksEnabled: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'ENABLE_EVENT_DELAY_TRACKS': {
+      return true;
+    }
+    default:
+      return state;
+  }
+};
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   urlSetupPhase,
@@ -239,6 +254,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   isNewlyPublished,
   isDragAndDropDragging,
   isDragAndDropOverlayRegistered,
+  isEventDelayTracksEnabled,
 });
 
 export default appStateReducer;

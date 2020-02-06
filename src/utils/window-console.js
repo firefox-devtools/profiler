@@ -59,6 +59,17 @@ export function addDataToWindowObject(
     },
   });
 
+  defineProperty(target, 'experimental', {
+    enumerable: true,
+    get() {
+      return {
+        enableEventDelayTracks: async () => {
+          await dispatch(actions.enableEventDelayTracks());
+        },
+      };
+    },
+  });
+
   target.getState = getState;
   target.selectors = selectorsForConsole;
   target.dispatch = dispatch;
@@ -113,6 +124,7 @@ export function logFriendlyPreamble() {
       %cwindow.selectors%c - All the selectors that are used to get data from the Redux state.
       %cwindow.dispatch%c - The function to dispatch a Redux action to change the state.
       %cwindow.actions%c - All the actions that can be dispatched to change the state.
+      %cwindow.experimental%c - The object that holds flags of all the experimental features.
 
       The profile format is documented here:
       %chttps://github.com/firefox-devtools/profiler/blob/main/docs-developer/processed-profile-format.md%c
@@ -145,6 +157,9 @@ export function logFriendlyPreamble() {
     bold,
     reset,
     // "window.actions"
+    bold,
+    reset,
+    // "window.experimental"
     bold,
     reset,
     // "processed-profile-format.md"

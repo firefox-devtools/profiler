@@ -163,6 +163,7 @@ export type AppState = {|
   +isNewlyPublished: boolean,
   +isDragAndDropDragging: boolean,
   +isDragAndDropOverlayRegistered: boolean,
+  +isEventDelayTracksEnabled: boolean,
 |};
 
 export type UploadPhase =
