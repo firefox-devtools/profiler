@@ -814,7 +814,7 @@ describe('actions/ProfileView', function() {
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('a');
     });
 
-    it('filters the markers', function() {
+    it('filters the markers by name', function() {
       const profile = getProfileWithMarkers([
         ['a', 0, null],
         ['b', 1, null],
@@ -834,6 +834,40 @@ describe('actions/ProfileView', function() {
       expect(markerIndexes).toHaveLength(2);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
       expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
+    });
+
+    it('filters the markers by a potential JSON data payload', function() {
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+        ['c', 2, null],
+        [
+          'd',
+          3,
+          {
+            cause: { stack: 2, time: 1 },
+            endTime: 1024,
+            filename: '/foo/bar/',
+            operation: 'create/open',
+            source: 'PoisionOIInterposer',
+            startTime: 1022,
+            type: 'FileIO',
+          },
+        ],
+      ]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(4);
+      dispatch(ProfileView.changeMarkersSearchString('/foo/bar/'));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
     });
   });
 
