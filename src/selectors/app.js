@@ -263,6 +263,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                   height += TRACK_NETWORK_HEIGHT + border;
                   break;
                 case 'memory':
+                case 'event-delay':
                   height += TRACK_MEMORY_HEIGHT + border;
                   break;
                 case 'ipc':

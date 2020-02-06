@@ -24,6 +24,7 @@ import {
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import TrackThread from './TrackThread';
+import { TrackEventDelay } from './TrackEventDelay';
 import TrackNetwork from './TrackNetwork';
 import { TrackMemory } from './TrackMemory';
 import { TrackIPC } from './TrackIPC';
@@ -96,6 +97,8 @@ class LocalTrackComponent extends PureComponent<Props> {
         return <TrackMemory counterIndex={localTrack.counterIndex} />;
       case 'ipc':
         return <TrackIPC threadIndex={localTrack.threadIndex} />;
+      case 'event-delay':
+        return <TrackEventDelay threadIndex={localTrack.threadIndex} />;
       default:
         console.error('Unhandled localTrack type', (localTrack: empty));
         return null;
@@ -164,7 +167,8 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         const selectors = getThreadSelectors(threadIndex);
         isSelected =
           threadIndex === selectedThreadIndex &&
-          selectedTab !== 'network-chart';
+          selectedTab !== 'network-chart' &&
+          selectedTab !== 'event-delay';
         titleText = selectors.getThreadProcessDetails(state);
         break;
       }
@@ -189,6 +193,18 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         const selectedTab = getSelectedTab(state);
         isSelected =
           threadIndex === selectedThreadIndex && selectedTab === 'marker-chart';
+        break;
+      }
+      case 'event-delay': {
+        // Look up the thread information for the process if it exists.
+        const threadIndex = localTrack.threadIndex;
+        const selectedThreadIndex = getSelectedThreadIndex(state);
+        const selectedTab = getSelectedTab(state);
+        const selectors = getThreadSelectors(threadIndex);
+        isSelected =
+          threadIndex === selectedThreadIndex && selectedTab !== 'event-delay';
+        titleText =
+          'Event Delay of ' + selectors.getThreadProcessDetails(state);
         break;
       }
       default:

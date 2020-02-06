@@ -213,7 +213,8 @@ export type LocalTrack =
   | {| +type: 'thread', +threadIndex: ThreadIndex |}
   | {| +type: 'network', +threadIndex: ThreadIndex |}
   | {| +type: 'memory', +counterIndex: CounterIndex |}
-  | {| +type: 'ipc', +threadIndex: ThreadIndex |};
+  | {| +type: 'ipc', +threadIndex: ThreadIndex |}
+  | {| +type: 'event-delay', +threadIndex: ThreadIndex |};
 
 export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;

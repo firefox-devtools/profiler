@@ -37,13 +37,19 @@ const LOCAL_TRACK_INDEX_ORDER = {
   network: 1,
   memory: 2,
   ipc: 3,
+  'event-delay': 4,
 };
 const LOCAL_TRACK_DISPLAY_ORDER = {
-  network: 0,
-  memory: 1,
-  thread: 2,
-  ipc: 3,
+  // It's okay to make the event delay the first because it will be disabled by
+  // default. If a user wants to enable that track, that means they want to see
+  // that data first.
+  'event-delay': 0,
+  network: 1,
+  memory: 2,
+  thread: 3,
+  ipc: 4,
 };
+
 const GLOBAL_TRACK_INDEX_ORDER = {
   process: 0,
   screenshots: 1,
@@ -231,6 +237,8 @@ export function computeLocalTracksByPid(
       // This thread has not been added as a GlobalTrack, so add it as a local track.
       tracks.push({ type: 'thread', threadIndex });
     }
+
+    tracks.push({ type: 'event-delay', threadIndex });
 
     if (thread.markers.data.some(datum => datum && datum.type === 'Network')) {
       // This thread has network markers.
@@ -606,6 +614,11 @@ export function getLocalTrackName(
         threads,
         threads[localTrack.threadIndex]
       )}`;
+    case 'event-delay':
+      return (
+        getFriendlyThreadName(threads, threads[localTrack.threadIndex]) +
+        ' Event Delay'
+      );
     default:
       throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
   }
