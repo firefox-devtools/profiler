@@ -35,7 +35,7 @@ The latest GeckoView example Nightly always lives at this URL: [https://firefox-
 
 Here's a QR code for that URL:
 
-![QR code for the link above](./images/qr-gve-nightly.gif)
+![QR code for the link above](./images/qr-gve-nightly.png)
 
 ### Alternative: Download the reference browser
 
