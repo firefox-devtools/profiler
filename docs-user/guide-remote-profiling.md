@@ -31,7 +31,7 @@ So there are really only two good options: GeckoView-example and the reference b
 
 ### Download GeckoView example
 
-The latest GeckoView example Nightly always lives at this URL: [https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.nightly.latest.mobile.android-api-16-opt/artifacts/public/build/geckoview_example.apk](https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.nightly.latest.mobile.android-api-16-opt/artifacts/public/build/geckoview_example.apk)
+The latest GeckoView example Nightly always lives at this URL: [https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.latest.mobile.android-api-16-pgo/artifacts/public/build/geckoview_example.apk](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.latest.mobile.android-api-16-pgo/artifacts/public/build/geckoview_example.apk)
 
 Here's a QR code for that URL:
 
