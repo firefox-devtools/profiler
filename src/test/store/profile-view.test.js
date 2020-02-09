@@ -922,6 +922,61 @@ describe('actions/ProfileView', function() {
       expect(getMarker(markerIndexes[0]).name.includes('IPCIn')).toBeTruthy();
       expect(getMarker(markerIndexes[1]).name.includes('IPCOut')).toBeTruthy();
     });
+
+    it('filters the markers by other properties of a potential data payload', function() {
+      const profile = getProfileWithMarkers([
+        [
+          'a',
+          0,
+          {
+            type: 'tracing',
+            category: 'DOMEvent',
+            timeStamp: 1001,
+            interval: 'start',
+            eventType: 'mousedown',
+            phase: 1,
+          },
+        ],
+        [
+          'b',
+          1,
+          {
+            type: 'UserTiming',
+            startTime: 1002,
+            endTime: 1022,
+            name: 'mark-1',
+            entryType: 'mark',
+          },
+        ],
+        ['c', 2, null],
+        [
+          'd',
+          3,
+          {
+            type: 'UserTiming',
+            startTime: 1050,
+            endTime: 1100,
+            name: 'measure-1',
+            entryType: 'measure',
+          },
+        ],
+      ]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(4);
+      dispatch(ProfileView.changeMarkersSearchString('event, mark, measure'));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(3);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
+      expect(getMarker(markerIndexes[2]).name.includes('d')).toBeTruthy();
+    });
   });
 
   describe('changeNetworkSearchString', function() {
