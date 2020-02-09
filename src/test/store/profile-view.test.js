@@ -837,7 +837,7 @@ describe('actions/ProfileView', function() {
       expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
     });
 
-    it('filters the markers by a potential JSON data payload', function() {
+    it('filters the markers by a potential data payload of type FileIO', function() {
       const profile = getProfileWithMarkers([
         ['a', 0, null],
         ['b', 1, null],
@@ -870,6 +870,59 @@ describe('actions/ProfileView', function() {
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
     });
+  });
+
+  it('filters the markers by a potential data payload of type IPC', function() {
+    const profile = getProfileWithMarkers([
+      ['a', 0, null],
+      [
+        'b',
+        1,
+        {
+          type: 'IPC',
+          startTime: 30,
+          endTime: 1031,
+          otherPid: 3333,
+          otherTid: 3333,
+          otherThreadName: 'Parent Process (Thread ID: 3333)',
+          messageSeqno: 1,
+          messageType: 'PContent::Msg_PreferenceUpdate',
+          side: 'child',
+          direction: 'receiving',
+          sync: false,
+        },
+      ],
+      ['c', 2, null],
+      [
+        'd',
+        3,
+        {
+          type: 'IPC',
+          startTime: 40,
+          endTime: 40,
+          otherPid: 9999,
+          messageSeqno: 2,
+          messageType: 'PContent::Msg_PreferenceUpdate',
+          side: 'parent',
+          direction: 'sending',
+          sync: false,
+        },
+      ],
+    ]);
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    expect(
+      selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+    ).toHaveLength(4);
+    dispatch(ProfileView.changeMarkersSearchString('PContent'));
+
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+      getState()
+    );
+    expect(markerIndexes).toHaveLength(2);
+    expect(getMarker(markerIndexes[0]).name.includes('IPCIn')).toBeTruthy();
+    expect(getMarker(markerIndexes[1]).name.includes('IPCOut')).toBeTruthy();
   });
 
   describe('changeNetworkSearchString', function() {
