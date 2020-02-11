@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SelectedThreadActivityGraph matches the 2d canvas draw snapshot 1`] = `
+exports[`ThreadActivityGraph matches the 2d canvas draw snapshot 1`] = `
 Array [
   Array [
     "scale",
@@ -2521,117 +2521,32 @@ Array [
     "set fillStyle",
     Object {},
   ],
-  Array [
-    "set fillStyle",
-    "#45a1ff",
-  ],
-  Array [
-    "set fillStyle",
-    "#003eaa",
-  ],
-  Array [
-    "fillRect",
-    0,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "fillRect",
-    10,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "fillRect",
-    20,
-    0,
-    10,
-    7.5,
-  ],
-  Array [
-    "fillRect",
-    30,
-    0,
-    10,
-    7.5,
-  ],
-  Array [
-    "fillRect",
-    40,
-    0,
-    10,
-    7.5,
-  ],
-  Array [
-    "fillRect",
-    50,
-    0,
-    10,
-    7.5,
-  ],
-  Array [
-    "fillRect",
-    60,
-    0,
-    10,
-    7.5,
-  ],
-  Array [
-    "fillRect",
-    70,
-    0,
-    10,
-    10,
-  ],
-  Array [
-    "set fillStyle",
-    "#c5e1fe",
-  ],
 ]
 `;
 
-exports[`SelectedThreadActivityGraph matches the component snapshot 1`] = `
+exports[`ThreadActivityGraph matches the component snapshot 1`] = `
 <div
-  class="chartViewport selectedThreadActivityGraphViewport"
-  tabindex="0"
+  class="timelineTrackThread"
 >
-  <div>
-    <div
-      class="selectedThreadActivityGraph"
-    >
-      <canvas
-        class="selectedThreadActivityGraphCanvas threadActivityGraphCanvas"
-        height="10"
-        width="80"
-      />
-    </div>
-    <div
-      class="selectedThreadStackGraph"
-    >
-      <canvas
-        class="selectedThreadStackGraphCanvas threadStackGraphCanvas"
-        height="10"
-        width="80"
-      />
-    </div>
+  <div
+    class="timelineMarkers selected"
+    data-testid="TimelineMarkersJank"
+  >
+    <canvas
+      class="timelineMarkersCanvas"
+    />
   </div>
   <div
-    class="chartViewportScroll hidden"
+    class="threadActivityGraph"
   >
-    Zoom Chart:
-    <kbd
-      class="chartViewportScrollKbd"
-    >
-      Ctrl + Scroll
-    </kbd>
-    or
-    <kbd
-      class="chartViewportScrollKbd"
-    >
-      Shift + Scroll
-    </kbd>
+    <canvas
+      class="threadActivityGraphCanvas threadActivityGraphCanvas"
+      height="10"
+      width="80"
+    />
   </div>
+  <div
+    class="timelineEmptyThreadIndicator"
+  />
 </div>
 `;

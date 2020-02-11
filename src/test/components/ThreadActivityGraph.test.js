@@ -11,10 +11,9 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 
-import SelectedThreadActivityGraph from '../../components/shared/thread/SelectedActivityGraph';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
-
+import TrackThread from '../../components/timeline/TrackThread';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { storeWithProfile } from '../fixtures/stores';
@@ -22,10 +21,7 @@ import { getBoundingBox, getMouseEvent } from '../fixtures/utils';
 
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
 
-import {
-  commitRange,
-  changeCallTreeSearchString,
-} from '../../actions/profile-view';
+import { commitRange } from '../../actions/profile-view';
 
 // The following constants determine the size of the drawn graph.
 const SAMPLE_COUNT = 8;
@@ -39,12 +35,7 @@ function getSamplesPixelPosition(
   return sampleIndex * PIXELS_PER_SAMPLE + PIXELS_PER_SAMPLE * 0.5;
 }
 
-/**
- * This test is asserting behavior of the ThreadStackGraph component. It does this
- * by using the SelectedThreadActivityGraph component, which is a connected version
- * that is used in the CallTree.
- */
-describe('SelectedThreadActivityGraph', function() {
+describe('ThreadActivityGraph', function() {
   function getSamplesProfile() {
     return getProfileFromTextSamples(`
       A[cat:DOM]  A[cat:DOM]       A[cat:DOM]    A[cat:DOM]    A[cat:DOM]    A[cat:DOM]   A[cat:DOM]    A[cat:DOM]
@@ -72,7 +63,7 @@ describe('SelectedThreadActivityGraph', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <SelectedThreadActivityGraph />
+        <TrackThread threadIndex={0} />
       </Provider>
     );
     const { container } = renderResult;
@@ -83,10 +74,6 @@ describe('SelectedThreadActivityGraph', function() {
     const activityGraphCanvas = ensureExists(
       container.querySelector('.threadActivityGraphCanvas'),
       `Couldn't find the activity graph canvas, with selector .threadActivityGraphCanvas`
-    );
-    const stackGraphCanvas = ensureExists(
-      container.querySelector('.threadStackGraphCanvas'),
-      `Couldn't find the stack graph canvas, with selector .threadStackGraphCanvas`
     );
     const thread = profile.threads[0];
 
@@ -122,7 +109,6 @@ describe('SelectedThreadActivityGraph', function() {
       store,
       threadIndex,
       activityGraphCanvas,
-      stackGraphCanvas,
       clickActivityGraph,
       getCallNodePath,
       ctx,
@@ -176,45 +162,6 @@ describe('SelectedThreadActivityGraph', function() {
       expect(drawCalls.map(([fn]) => fn)).toContain(
         'set globalCompositeOperation'
       );
-    });
-  });
-
-  /**
-   * For completeness, test that the ThreadStackGraph is clickable, as it is using
-   * a different method than the ThreadActivityGraph to select a call node.
-   */
-  describe('ThreadStackGraph', function() {
-    it('can click a stack', function() {
-      const { stackGraphCanvas, getCallNodePath } = setup();
-      fireEvent(
-        stackGraphCanvas,
-        getMouseEvent('mouseup', { pageX: getSamplesPixelPosition(1) })
-      );
-      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
-    });
-
-    it('does nothing if a filtered out sample is clicked', function() {
-      const { dispatch, stackGraphCanvas, getCallNodePath } = setup();
-      // Get a selection by clicking a visible stack.
-      fireEvent(
-        stackGraphCanvas,
-        getMouseEvent('mouseup', { pageX: getSamplesPixelPosition(1) })
-      );
-      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
-
-      // Search for something that will cause a stack to hide.
-      dispatch(changeCallTreeSearchString('C'));
-
-      // Click on the position of the hidden stack, and confirm that
-      // the selection did not change.
-      fireEvent(
-        stackGraphCanvas,
-        // This clicks on the sample with index 2 (i.e., the third
-        // stack, which would be A -> B -> H -> I if it weren't
-        // hidden)
-        getMouseEvent('mouseup', { pageX: getSamplesPixelPosition(2) })
-      );
-      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
     });
   });
 });

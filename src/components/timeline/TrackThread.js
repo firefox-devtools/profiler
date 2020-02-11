@@ -32,6 +32,7 @@ import {
   changeSelectedCallNode,
   focusCallTree,
   selectLeafCallNode,
+  selectBestAncestorCallNodeAndExpandCallTree,
 } from '../../actions/profile-view';
 import { reportTrackThreadHeight } from '../../actions/app';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
@@ -79,6 +80,7 @@ type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
   +selectLeafCallNode: typeof selectLeafCallNode,
+  +selectBestAncestorCallNodeAndExpandCallTree: typeof selectBestAncestorCallNodeAndExpandCallTree,
   +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 |};
 
@@ -95,6 +97,16 @@ class TimelineTrackThread extends PureComponent<Props> {
   _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
     const { threadIndex, selectLeafCallNode, focusCallTree } = this.props;
     selectLeafCallNode(threadIndex, sampleIndex);
+    focusCallTree();
+  };
+
+  _onActivitySampleClick = (sampleIndex: IndexIntoSamplesTable) => {
+    const {
+      threadIndex,
+      selectBestAncestorCallNodeAndExpandCallTree,
+      focusCallTree,
+    } = this.props;
+    selectBestAncestorCallNodeAndExpandCallTree(threadIndex, sampleIndex);
     focusCallTree();
   };
 
@@ -186,7 +198,7 @@ class TimelineTrackThread extends PureComponent<Props> {
             fullThread={fullThread}
             rangeStart={rangeStart}
             rangeEnd={rangeEnd}
-            onSampleClick={this._onSampleClick}
+            onSampleClick={this._onActivitySampleClick}
             categories={categories}
             samplesSelectedStates={samplesSelectedStates}
           />
@@ -248,6 +260,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     changeSelectedCallNode,
     focusCallTree,
     selectLeafCallNode,
+    selectBestAncestorCallNodeAndExpandCallTree,
     reportTrackThreadHeight,
   },
   component: withSize<Props>(TimelineTrackThread),
