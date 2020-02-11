@@ -21,9 +21,9 @@ exports[`app/Home renders a button to enable the popup when it is available 1`] 
   <div
     class="homeInstructionsRight"
   >
-    <a
+    <button
       class="homeSectionButton"
-      href="#"
+      type="button"
     >
       <span
         class="homeSectionPlus"
@@ -31,7 +31,7 @@ exports[`app/Home renders a button to enable the popup when it is available 1`] 
         +
       </span>
       Enable Profiler Menu Button
-    </a>
+    </button>
     <a
       class="homeSectionButton"
       href="/docs/"

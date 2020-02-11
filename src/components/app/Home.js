@@ -381,14 +381,14 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
             </div>
           </div>
           <div className="homeInstructionsRight">
-            <a
-              href="#"
+            <button
+              type="button"
               className="homeSectionButton"
               onClick={this._enableMenuButton}
             >
               <span className="homeSectionPlus">+</span>
               Enable Profiler Menu Button
-            </a>
+            </button>
             <DocsButton />
             <p>
               Enable the profiler menu button to start recording a performance
@@ -490,7 +490,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
       <InstructionTransition key={0}>
         <div
           className="homeInstructions"
-          key={0}
           data-testid="home-other-browser-instructions"
         >
           <div className="homeInstructionsLeft">
