@@ -50,5 +50,16 @@ export function mockWebChannel() {
     messagesSentToBrowser,
     listeners,
     triggerResponse,
+    getLastRequestId: (): number => {
+      const message = messagesSentToBrowser[messagesSentToBrowser.length - 1];
+      if (!message) {
+        throw new Error('No messages were sent to the browser.');
+      }
+      const { requestId } = message.message;
+      if (typeof requestId !== 'number') {
+        throw new Error('Could not find the requestId in the message.');
+      }
+      return requestId;
+    },
   };
 }

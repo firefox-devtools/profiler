@@ -13,6 +13,7 @@ describe('event handlers for Firefox WebChannel events', function() {
       messagesSentToBrowser,
       listeners,
       triggerResponse,
+      getLastRequestId,
     } = mockWebChannel();
 
     // Initially there are no listeners
@@ -28,7 +29,11 @@ describe('event handlers for Firefox WebChannel events', function() {
     expect(messagesSentToBrowser[0].message.type).toEqual('STATUS_QUERY');
 
     // Trigger the response from the browser.
-    triggerResponse({ type: 'STATUS_RESPONSE', menuButtonIsEnabled: true });
+    triggerResponse({
+      type: 'STATUS_RESPONSE',
+      menuButtonIsEnabled: true,
+      requestId: getLastRequestId(),
+    });
 
     // Check that the response makes sense and the listeners are cleared.
     const isMenuButtonEnabled = await response;

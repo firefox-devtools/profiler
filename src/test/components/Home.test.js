@@ -60,7 +60,7 @@ describe('app/Home', function() {
   });
 
   it('renders a button to enable the popup when it is available', async () => {
-    const { listeners, triggerResponse } = mockWebChannel();
+    const { listeners, triggerResponse, getLastRequestId } = mockWebChannel();
 
     // No one has asked anything to the WebChannel.
     expect(listeners).toHaveLength(0);
@@ -71,7 +71,11 @@ describe('app/Home', function() {
     expect(listeners.length).toBeGreaterThan(0);
 
     // Respond from the browser that the menu button is available.
-    triggerResponse({ type: 'STATUS_RESPONSE', menuButtonIsEnabled: false });
+    triggerResponse({
+      type: 'STATUS_RESPONSE',
+      menuButtonIsEnabled: false,
+      requestId: getLastRequestId(),
+    });
 
     // The UI should update for the record instructions, which is an async
     // handle of the WebChannel message.
@@ -83,7 +87,7 @@ describe('app/Home', function() {
   });
 
   it('renders the usage instructions for when the popup is enabled', async () => {
-    const { listeners, triggerResponse } = mockWebChannel();
+    const { listeners, triggerResponse, getLastRequestId } = mockWebChannel();
 
     // No one has asked anything to the WebChannel.
     expect(listeners).toHaveLength(0);
@@ -94,7 +98,11 @@ describe('app/Home', function() {
     expect(listeners.length).toBeGreaterThan(0);
 
     // Respond from the browser that the menu button is available.
-    triggerResponse({ type: 'STATUS_RESPONSE', menuButtonIsEnabled: true });
+    triggerResponse({
+      type: 'STATUS_RESPONSE',
+      menuButtonIsEnabled: true,
+      requestId: getLastRequestId(),
+    });
 
     // The UI should update for the record instructions, which is an async
     // handle of the WebChannel message.
@@ -106,17 +114,24 @@ describe('app/Home', function() {
   // This test's assertions are that it can find elements through getByTestId.
   // eslint-disable-next-line jest/expect-expect
   it('will switch to recording instructions when enabling the popup', async () => {
-    const { triggerResponse } = mockWebChannel();
+    const { triggerResponse, getLastRequestId } = mockWebChannel();
     const { getInstructions, getByText } = setup(FIREFOX);
 
     // Respond back from the browser that the menu button is not yet enabled.
-    triggerResponse({ type: 'STATUS_RESPONSE', menuButtonIsEnabled: false });
+    triggerResponse({
+      type: 'STATUS_RESPONSE',
+      menuButtonIsEnabled: false,
+      requestId: getLastRequestId(),
+    });
     await getInstructions('home-enable-popup-instructions');
 
     getByText('Enable Profiler Menu Button').click();
 
     // Respond back from the browser that the menu button was enabled.
-    triggerResponse({ type: 'ENABLE_MENU_BUTTON_DONE' });
+    triggerResponse({
+      type: 'ENABLE_MENU_BUTTON_DONE',
+      requestId: getLastRequestId(),
+    });
     await getInstructions('home-record-instructions');
   });
 });
