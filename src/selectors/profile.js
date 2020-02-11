@@ -425,11 +425,13 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
   getLocalTracksByPid,
   UrlState.getHiddenLocalTracksByPid,
   UrlState.getHiddenGlobalTracks,
+  UrlState.getShowTabOnly,
   (
     globalTracks,
     localTracksByPid,
     hiddenLocalTracksByPid,
-    hiddenGlobalTracks
+    hiddenGlobalTracks,
+    showTabOnly
   ) => {
     let hidden = 0;
     let total = 0;
@@ -453,11 +455,31 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
       if (hiddenGlobalTracks.has(globalTrackIndex)) {
         // The entire process group is hidden, count all of the tracks.
         hidden += localTracks.length;
+        if (showTabOnly) {
+          // We hide some of the local tracks by default for single tab view.
+          hidden -= localTracks.filter(
+            track => Tracks.isLocalTrackAllowedForSingleTabView(track) === false
+          ).length;
+        }
       } else {
         // Only count the hidden local tracks.
         hidden += hiddenLocalTracks.size;
+        if (showTabOnly) {
+          // We hide some of the local tracks by default for single tab view.
+          hidden -= localTracks.filter(
+            (track, trackIndex) =>
+              hiddenLocalTracks.has(trackIndex) &&
+              Tracks.isLocalTrackAllowedForSingleTabView(track) === false
+          ).length;
+        }
       }
       total += localTracks.length;
+      if (showTabOnly) {
+        // We hide some of the local tracks by default for single tab view.
+        total -= localTracks.filter(
+          track => Tracks.isLocalTrackAllowedForSingleTabView(track) === false
+        ).length;
+      }
     }
 
     // Count up the global tracks
