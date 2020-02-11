@@ -601,7 +601,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for an error 1`] = `
   >
     Uh oh, something went wrong when publishing the profile.
     <button
-      class="photon-button photon-button-micro"
+      class="photon-button photon-button-micro photon-message-bar-action-button"
       type="button"
     >
       Try again
