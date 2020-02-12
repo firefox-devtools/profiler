@@ -17,6 +17,13 @@ declare type $GeckoProfiler = {
   ) => Promise<SymbolTableAsTuple>,
 };
 
+declare class WebChannelEvent {
+  detail: {
+    id: string,
+    message: mixed,
+  };
+}
+
 declare class Window extends EventTarget {
   // Google Analytics
   ga?: GoogleAnalytics;
@@ -28,6 +35,22 @@ declare class Window extends EventTarget {
   InstallTrigger?: {
     install: Object => {},
   };
+
+  // WebChannel events.
+  // https://searchfox.org/mozilla-central/source/toolkit/modules/WebChannel.jsm
+  addEventListener: $PropertyType<EventTarget, 'addEventListener'> &
+    ((
+      'WebChannelMessageToContent',
+      (event: WebChannelEvent) => void,
+      true
+    ) => void);
+
+  removeEventListener: $PropertyType<EventTarget, 'removeEventListener'> &
+    ((
+      'WebChannelMessageToContent',
+      (event: WebChannelEvent) => void,
+      true
+    ) => void);
 
   // Built-ins.
   getComputedStyle: (
