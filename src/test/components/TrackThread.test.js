@@ -129,12 +129,18 @@ describe('timeline/TrackThread', function() {
       threadIndex,
       stackGraphCanvas,
       markerCanvas,
+      ctx,
     };
   }
 
-  it('matches the snapshot', () => {
+  it('matches the snapshot for the component', () => {
     const { container } = setup(getSamplesProfile());
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('matches the 2d canvas draw snapshot', () => {
+    const { ctx } = setup(getSamplesProfile());
+    expect(ctx.__flushDrawLog()).toMatchSnapshot();
   });
 
   it('can click a stack in the stack graph', function() {
