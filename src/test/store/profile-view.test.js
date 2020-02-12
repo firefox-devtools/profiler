@@ -21,6 +21,7 @@ import {
 import {
   getEmptyThread,
   getEmptyProfile,
+  getEmptySamplesTableWithEventDelay,
 } from '../../profile-logic/data-structures';
 import { withAnalyticsMock } from '../fixtures/mocks/analytics';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
@@ -3411,5 +3412,189 @@ describe('traced timing', function() {
 
     const { getState } = storeWithProfile(profile);
     expect(selectedThreadSelectors.getTracedTiming(getState())).toBe(null);
+  });
+});
+
+// Verify that getProcessedEventDelays gives the correct values for event delays.
+describe('getProcessedEventDelays', function() {
+  // Setup a profile with meaningful event delay values.
+  function setup(eventDelay: ?Array<?Milliseconds>) {
+    const profile = getEmptyProfile();
+
+    // Create event delay values.
+    const samples = getEmptySamplesTableWithEventDelay();
+    if (eventDelay) {
+      samples.eventDelay = eventDelay;
+    } else {
+      samples.eventDelay = Array(50).fill(0);
+      samples.eventDelay.push(10, 20, 30, 40, 50, 0);
+      //                                      ^
+      //                                      |
+      //                              Event delay peak
+    }
+
+    // Set the samples object length.
+    samples.length = ensureExists(samples.eventDelay).length;
+    // Construct the time array that increments from 0 to `samples.length`.
+    samples.time = Array(samples.length)
+      .fill(0)
+      .map((_, i) => i);
+    profile.threads.push(getEmptyThread({ samples }));
+
+    const { dispatch, getState } = storeWithProfile(profile);
+
+    const getProcessedEventDelays = () =>
+      profile.threads.map((_, threadIndex) =>
+        getThreadSelectors(threadIndex).getProcessedEventDelays(getState())
+      );
+
+    return { profile, dispatch, getState, getProcessedEventDelays };
+  }
+
+  it('can process the event delay values and returns meaningful numbers', function() {
+    const { getProcessedEventDelays } = setup();
+    expect(getProcessedEventDelays()).toEqual([
+      {
+        maxDelay: 52,
+        minDelay: 1,
+        delayRange: 51,
+        eventDelays: [
+          0,
+          1,
+          1,
+          1,
+          1,
+          52, // <---- Event delay peak.
+          51,
+          50,
+          49,
+          48,
+          47,
+          46,
+          45,
+          44,
+          43,
+          42,
+          41,
+          40,
+          39,
+          38,
+          37,
+          36,
+          35,
+          34,
+          33,
+          32,
+          31,
+          30,
+          29,
+          28,
+          27,
+          26,
+          25,
+          24,
+          23,
+          22,
+          21,
+          20,
+          19,
+          18,
+          17,
+          16,
+          15,
+          14,
+          13,
+          12,
+          11,
+          10,
+          9,
+          7,
+          6,
+          5,
+          4,
+          3,
+          2,
+          1, // <---- goes down until it's done.
+        ],
+      },
+    ]);
+  });
+
+  it('can process the event delay values with two combined peaks and returns meaningful numbers', function() {
+    const eventDelay = Array(50).fill(0);
+    eventDelay.push(10, 20, 30, 40, 50, 0, 0, 10, 20, 0);
+    //                              ^             ^
+    //                              |             |
+    //                              First peak    Second peak
+    const { getProcessedEventDelays } = setup(eventDelay);
+    expect(getProcessedEventDelays()).toEqual([
+      {
+        maxDelay: 52,
+        minDelay: 1,
+        delayRange: 51,
+        eventDelays: [
+          0,
+          1,
+          1,
+          1,
+          1,
+          52, // <---- First event delay peak.
+          51,
+          50,
+          49,
+          48,
+          47,
+          46,
+          45,
+          44,
+          43,
+          42,
+          41,
+          40,
+          39,
+          38,
+          37,
+          36,
+          35,
+          34,
+          33,
+          32,
+          31,
+          30,
+          29,
+          28,
+          27,
+          26,
+          25,
+          24,
+          23,
+          22,
+          21,
+          20,
+          19,
+          39, // <---- Second event delay peak. This happens while we are still no done with the first even delay and sums up the both delay values.
+          37,
+          35,
+          33,
+          31,
+          29,
+          27,
+          25,
+          23,
+          21,
+          18,
+          16,
+          14,
+          12,
+          10,
+          8,
+          6,
+          4, // <--- First event delay is done here.
+          3,
+          2,
+          1, // <---- Second event delay is done now too.
+        ],
+      },
+    ]);
   });
 });
