@@ -100,6 +100,12 @@ class TimelineTrackThread extends PureComponent<Props> {
     focusCallTree();
   };
 
+  /**
+   * Handle when the ThreadActivityGraph is clicked. It uses a slightly different
+   * strategy of selecting the "best" ancestor call node for a given sample.
+   * This strategy should make for more interesting selections when clicking around
+   * the graph.
+   */
   _onActivitySampleClick = (sampleIndex: IndexIntoSamplesTable) => {
     const {
       threadIndex,
