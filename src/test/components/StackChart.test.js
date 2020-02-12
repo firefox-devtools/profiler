@@ -230,11 +230,11 @@ describe('MarkerChart', function() {
   });
 
   // TODO implement selecting user timing markers #2355
-  // eslint-disable-next-line jest/no-disabled-test
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('can select a marker when clicking the chart', function() {});
 
   // TODO implement selecting user timing markers #2355
-  // eslint-disable-next-line jest/no-disabled-test
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('can right click a marker and show a context menu', function() {});
 
   it('shows a tooltip when hovering', () => {
