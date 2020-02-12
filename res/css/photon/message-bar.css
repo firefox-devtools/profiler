@@ -16,6 +16,18 @@
   line-height: 1.4;
 }
 
+.photon-message-bar .photon-button {
+  margin-left: 8px;
+}
+
+.photon-message-bar .photon-message-bar-close-button {
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+  background: url(../../img/svg/close-dark.svg) no-repeat center / 16px 16px;
+  fill: currentColor;
+}
+
 .photon-message-bar-error {
   /* Note: 32px is: 4px (left padding for the message bar) + 4px (left padding
    * for the icon) + 16px (icon width) + 4px (right padding for the icon) + 4px
@@ -29,10 +41,42 @@
   color: #fff;
 }
 
-.photon-message-bar-error .photon-button:hover {
+.photon-message-bar-warning {
+  padding: 4px 4px 4px 32px;
+  background: url(../../img/svg/warning.svg) no-repeat 8px center / 16px 16px
+    var(--yellow-50);
+  color: var(--yellow-90);
+}
+
+.photon-message-bar-error .photon-message-bar-close-button {
+  background-image: url(../../img/svg/close-light.svg);
+}
+
+.photon-message-bar-error .photon-message-bar-action-button,
+.photon-message-bar-error .photon-message-bar-close-button:hover {
+  background-color: var(--red-70);
+  color: #fff;
+}
+
+.photon-message-bar-warning .photon-message-bar-action-button,
+.photon-message-bar-warning .photon-message-bar-close-button:hover {
+  background-color: var(--yellow-60);
+}
+
+.photon-message-bar-error .photon-message-bar-action-button:hover,
+.photon-message-bar-error .photon-message-bar-close-button:hover:active {
   background-color: var(--red-80);
 }
 
-.photon-message-bar-error .photon-button:hover:active {
+.photon-message-bar-warning .photon-message-bar-action-button:hover,
+.photon-message-bar-warning .photon-message-bar-close-button:hover:active {
+  background-color: var(--yellow-70);
+}
+
+.photon-message-bar-error .photon-message-bar-action-button:hover:active {
   background-color: var(--red-90);
+}
+
+.photon-message-bar-warning .photon-message-bar-action-button:hover:active {
+  background-color: var(--yellow-80);
 }
