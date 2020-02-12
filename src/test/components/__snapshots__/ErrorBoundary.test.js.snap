@@ -13,7 +13,7 @@ exports[`app/ErrorBoundary matches the snapshot 1`] = `
       Oops, there was an error
       <button
         aria-expanded="false"
-        class="photon-button photon-button-micro"
+        class="photon-button photon-button-micro photon-message-bar-action-button"
         type="button"
       >
         View full error details

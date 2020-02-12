@@ -251,7 +251,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
         <div className="photon-message-bar photon-message-bar-error">
           Uh oh, something went wrong when publishing the profile.
           <button
-            className="photon-button photon-button-micro"
+            className="photon-button photon-button-micro photon-message-bar-action-button"
             type="button"
             onClick={resetUploadState}
           >
