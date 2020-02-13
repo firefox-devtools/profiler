@@ -13,7 +13,7 @@
     "lint": "run-p lint-js lint-css",
     "lint-js": "eslint *.js bin src",
     "lint-fix-js": "yarn lint-js --fix",
-    "lint-css": "stylelint 'src/**/*.css' 'res/css/**/*.css'",
+    "lint-css": "stylelint 'src/**/*.css' 'res/**/*.css'",
     "lint-fix-css": "yarn lint-css --fix",
     "prettier-json": "prettier --write src/**/*.json",
     "flow": "flow --max-warnings 0",

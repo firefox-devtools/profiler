@@ -1,12 +1,13 @@
-body, html {
+body,
+html {
   font: message-box;
   font-size: 11px;
 }
 
 .row {
   padding: 0 3em 2em;
-  margin: 3em 0;
   border-left: 2px solid var(--grey-30);
+  margin: 3em 0;
 }
 
 .row pre {
