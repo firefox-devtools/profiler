@@ -119,6 +119,8 @@
 
 .homeSectionButton {
   display: block;
+  width: 100%;
+  box-sizing: border-box;
   padding: 0.5em;
   border: 2px solid var(--blue-60);
   margin: 15px 0;
@@ -127,6 +129,7 @@
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
+  line-height: 1.5;
   text-align: center;
   text-decoration: none;
   transition: background-color 300ms;

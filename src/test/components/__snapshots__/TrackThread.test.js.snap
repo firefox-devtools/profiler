@@ -1,6 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`timeline/TrackThread matches the snapshot 1`] = `
+exports[`timeline/TrackThread matches the 2d canvas draw snapshot 1`] = `
+Array [
+  Array [
+    "set fillStyle",
+    "#45a1ff",
+  ],
+  Array [
+    "set fillStyle",
+    "#003eaa",
+  ],
+  Array [
+    "fillRect",
+    0,
+    0,
+    100,
+    50,
+  ],
+  Array [
+    "fillRect",
+    100,
+    0,
+    100,
+    50,
+  ],
+  Array [
+    "fillRect",
+    200,
+    0,
+    100,
+    50,
+  ],
+  Array [
+    "fillRect",
+    300,
+    0,
+    100,
+    50,
+  ],
+  Array [
+    "set fillStyle",
+    "#c5e1fe",
+  ],
+]
+`;
+
+exports[`timeline/TrackThread matches the snapshot for the component 1`] = `
 <div
   class="timelineTrackThread"
 >
