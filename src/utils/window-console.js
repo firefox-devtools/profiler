@@ -4,7 +4,7 @@
 // @flow
 import { stripIndent } from 'common-tags';
 import type { GetState, Dispatch } from '../types/store';
-import selectors from '../selectors';
+import { selectorsForConsole } from 'firefox-profiler/selectors';
 import actions from '../actions';
 
 // Despite providing a good libdef for Object.defineProperty, Flow still
@@ -25,21 +25,23 @@ export function addDataToWindowObject(
   defineProperty(target, 'profile', {
     enumerable: true,
     get() {
-      return selectors.profile.getProfile(getState());
+      return selectorsForConsole.profile.getProfile(getState());
     },
   });
 
   defineProperty(target, 'filteredThread', {
     enumerable: true,
     get() {
-      return selectors.selectedThread.getPreviewFilteredThread(getState());
+      return selectorsForConsole.selectedThread.getPreviewFilteredThread(
+        getState()
+      );
     },
   });
 
   defineProperty(target, 'callTree', {
     enumerable: true,
     get() {
-      return selectors.selectedThread.getCallTree(getState());
+      return selectorsForConsole.selectedThread.getCallTree(getState());
     },
   });
 
@@ -47,8 +49,10 @@ export function addDataToWindowObject(
     enumerable: true,
     get() {
       const state = getState();
-      const getMarker = selectors.selectedThread.getMarkerGetter(state);
-      const markerIndexes = selectors.selectedThread.getPreviewFilteredMarkerIndexes(
+      const getMarker = selectorsForConsole.selectedThread.getMarkerGetter(
+        state
+      );
+      const markerIndexes = selectorsForConsole.selectedThread.getPreviewFilteredMarkerIndexes(
         state
       );
       return markerIndexes.map(getMarker);
@@ -56,7 +60,7 @@ export function addDataToWindowObject(
   });
 
   target.getState = getState;
-  target.selectors = selectors;
+  target.selectors = selectorsForConsole;
   target.dispatch = dispatch;
   target.actions = actions;
 }
