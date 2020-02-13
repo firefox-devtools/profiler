@@ -862,8 +862,35 @@ describe('actions/ProfileView', function() {
       ).toHaveLength(4);
       dispatch(ProfileView.changeMarkersSearchString('/foo/bar/'));
 
-      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-      const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+      let getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      let markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+
+      dispatch(ProfileView.changeMarkersSearchString('foo'));
+
+      getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+
+      dispatch(ProfileView.changeMarkersSearchString('open'));
+
+      getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+
+      dispatch(ProfileView.changeMarkersSearchString('Interposer'));
+
+      getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
         getState()
       );
       expect(markerIndexes).toHaveLength(1);
