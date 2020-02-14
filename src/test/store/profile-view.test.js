@@ -943,12 +943,28 @@ describe('actions/ProfileView', function() {
       dispatch(ProfileView.changeMarkersSearchString('PContent'));
 
       const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-      const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+      let markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
         getState()
       );
       expect(markerIndexes).toHaveLength(2);
       expect(getMarker(markerIndexes[0]).name.includes('IPCIn')).toBeTruthy();
       expect(getMarker(markerIndexes[1]).name.includes('IPCOut')).toBeTruthy();
+
+      dispatch(ProfileView.changeMarkersSearchString('3333'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('IPCIn')).toBeTruthy();
+
+      dispatch(ProfileView.changeMarkersSearchString('9'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('IPCOut')).toBeTruthy();
     });
 
     it('filters the markers by other properties of a potential data payload', function() {
