@@ -9,6 +9,7 @@ import {
   getProfileWithMarkers,
   getNetworkTrackProfile,
 } from '../fixtures/profiles/processed-profile';
+import { changeShowTabOnly } from '../../actions/profile-view';
 
 describe('selectors/getMarkerChartTimingAndBuckets', function() {
   function getMarkerChartTimingAndBuckets(testMarkers) {
@@ -313,10 +314,10 @@ describe('memory markers', function() {
     ).toEqual(['IdleForgetSkippable', 'GCMinor', 'GCMajor', 'GCSlice']);
   });
 
-  it('ignores memory markers in getCommittedRangeFilteredMarkersForHeader', function() {
+  it('ignores memory markers in getCommittedRangeAndTabFilteredMarkerIndexesForHeader', function() {
     const { getState } = setup();
     const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-    const markerIndexes = selectedThreadSelectors.getCommittedRangeFilteredMarkerIndexesForHeader(
+    const markerIndexes = selectedThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexesForHeader(
       getState()
     );
     expect(
@@ -365,5 +366,93 @@ describe('selectors/getUserTimingMarkerTiming', function() {
         length: 1,
       },
     ]);
+  });
+});
+
+describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
+  const browsingContextID = 123123;
+  const innerWindowID = 2;
+
+  function setup(showTabOnly, markers: ?Array<any>) {
+    const profile = getProfileWithMarkers(
+      markers || [
+        [
+          'Dummy 1',
+          10,
+          {
+            type: 'tracing',
+            category: 'Navigation',
+            interval: 'start',
+            innerWindowID,
+          },
+        ],
+        ['Dummy 2', 20, null],
+        [
+          'Dummy 3',
+          30,
+          {
+            type: 'tracing',
+            category: 'Navigation',
+            interval: 'start',
+            innerWindowID: 111111,
+          },
+        ],
+        [
+          'Dummy 4',
+          30,
+          {
+            type: 'tracing',
+            category: 'Navigation',
+            interval: 'start',
+            innerWindowID,
+          },
+        ],
+        ['Dummy 5', 40, null],
+      ]
+    );
+    profile.pages = [
+      {
+        browsingContextID: browsingContextID,
+        innerWindowID: innerWindowID,
+        url: 'https://developer.mozilla.org/en-US/',
+        embedderInnerWindowID: 0,
+      },
+    ];
+    const { getState, dispatch } = storeWithProfile(profile);
+
+    if (showTabOnly) {
+      dispatch(changeShowTabOnly(browsingContextID));
+    }
+    const markerIndexes = selectedThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexes(
+      getState()
+    );
+
+    const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+    return markerIndexes.map(markerIndex => getMarker(markerIndex).name);
+  }
+
+  it('does not filter markers if we are not in the single tab view', function() {
+    const markers = setup(false);
+    expect(markers).toEqual([
+      'Dummy 1',
+      'Dummy 2',
+      'Dummy 3',
+      'Dummy 4',
+      'Dummy 5',
+    ]);
+  });
+
+  it('filters markers by their tab if we are in the single tab view', function() {
+    const markers = setup(true);
+    expect(markers).toEqual(['Dummy 1', 'Dummy 4']);
+  });
+
+  it('preserves global markers', function() {
+    const markers = setup(true, [
+      ['Dummy 1', 20, null],
+      ['Jank', 20, null],
+      ['Dummy 2', 20, null],
+    ]);
+    expect(markers).toEqual(['Jank']);
   });
 });

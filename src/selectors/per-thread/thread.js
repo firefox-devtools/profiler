@@ -62,14 +62,22 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
    * interactions. The transforms are order dependendent.
    *
    * 1. Unfiltered getThread - The first selector gets the unmodified original thread.
-   * 2. Range - New samples table with only samples in the committed range.
-   * 3. Transform - Apply the transform stack that modifies the stacks and samples.
-   * 4. Implementation - Modify stacks and samples to only show a single implementation.
-   * 5. Search - Exclude samples that don't include some text in the stack.
-   * 6. Preview - Only include samples that are within a user's preview range selection.
+   * 2. Tab - New samples table with only samples that belongs to the active tab.
+   * 3. Range - New samples table with only samples in the committed range.
+   * 4. Transform - Apply the transform stack that modifies the stacks and samples.
+   * 5. Implementation - Modify stacks and samples to only show a single implementation.
+   * 6. Search - Exclude samples that don't include some text in the stack.
+   * 7. Preview - Only include samples that are within a user's preview range selection.
    */
-  const getRangeFilteredThread: Selector<Thread> = createSelector(
+
+  const getTabFilteredThread: Selector<Thread> = createSelector(
     getThread,
+    ProfileSelectors.getRelevantPagesForActiveTab,
+    ProfileData.filterThreadByTab
+  );
+
+  const getRangeFilteredThread: Selector<Thread> = createSelector(
+    getTabFilteredThread,
     ProfileSelectors.getCommittedRange,
     (thread, range) => {
       const { start, end } = range;
@@ -295,5 +303,6 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getHasJsAllocations,
     getHasNativeAllocations,
     getCanShowRetainedMemory,
+    getTabFilteredThread,
   };
 }

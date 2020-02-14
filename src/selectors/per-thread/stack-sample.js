@@ -138,10 +138,12 @@ export function getStackAndSampleSelectorsPerThread(
     null | SelectedState[]
   > = createSelector(
     threadSelectors.getFilteredThread,
+    threadSelectors.getTabFilteredThread,
     getCallNodeInfo,
     getSelectedCallNodeIndex,
     (
       thread,
+      tabFilteredThread,
       { callNodeTable, stackIndexToCallNodeIndex },
       selectedCallNode
     ) => {
@@ -153,9 +155,14 @@ export function getStackAndSampleSelectorsPerThread(
         thread.samples.stack,
         stackIndexToCallNodeIndex
       );
+      const activeTabFilteredCallNodeIndex = ProfileData.getSampleIndexToCallNodeIndex(
+        tabFilteredThread.samples.stack,
+        stackIndexToCallNodeIndex
+      );
       return ProfileData.getSamplesSelectedStates(
         callNodeTable,
         sampleIndexToCallNodeIndex,
+        activeTabFilteredCallNodeIndex,
         selectedCallNode
       );
     }

@@ -27,6 +27,7 @@ export type resourceTypeEnum = number;
 export type ThreadIndex = number;
 export type IndexIntoJsTracerEvents = number;
 export type CounterIndex = number;
+export type BrowsingContextID = number;
 export type InnerWindowID = number;
 
 /**
@@ -292,7 +293,7 @@ export type CategoryList = Array<Category>;
  * The unique value for a page is innerWindowID.
  */
 export type Page = {|
-  browsingContextID: number,
+  browsingContextID: BrowsingContextID,
   innerWindowID: InnerWindowID,
   url: string,
   // 0 means no embedder
@@ -380,6 +381,10 @@ export type ProfilerConfiguration = {|
   features: string[],
   capacity: Bytes,
   duration?: number,
+  // Optional because that field is introduced in Firefox 72.
+  // Active BrowsingContext ID indicates a Firefox tab. That field allows us to
+  // create an "active tab view".
+  activeBrowsingContextID?: BrowsingContextID,
 |};
 
 /**
