@@ -594,24 +594,6 @@ export function getLocalTrackName(
 }
 
 /**
- * Some of the local tracks are not allowed for the single tab view because they
- * are too much information for users and we would like to hide as much information
- * as possible to make the UI simpler for web developers.
- */
-export function isLocalTrackAllowedForSingleTabView(localTrack: LocalTrack) {
-  switch (localTrack.type) {
-    case 'thread':
-      return true;
-    case 'network':
-    case 'memory':
-    case 'ipc':
-      return false;
-    default:
-      throw assertExhaustiveCheck(localTrack, 'Unhandled LocalTrack type.');
-  }
-}
-
-/**
  * Determine if a thread is idle, so that it can be hidden. It is really annoying for an
  * end user to load a profile full of empty and idle threads. This function uses
  * various rules to determine if a thread is idle.

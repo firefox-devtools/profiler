@@ -5,14 +5,13 @@
 // @flow
 import { createSelector } from 'reselect';
 
+import { getDataSource, getSelectedTab, getShowTabOnly } from './url-state';
 import {
-  getDataSource,
-  getSelectedTab,
-  getHiddenGlobalTracks,
-  getHiddenLocalTracksByPid,
-  getShowTabOnly,
-} from './url-state';
-import { getGlobalTracks, getLocalTracksByPid } from './profile';
+  getGlobalTracks,
+  getLocalTracksByPid,
+  getComputedHiddenGlobalTracks,
+  getComputedHiddenLocalTracksByPid,
+} from './profile';
 import { getZipFileState } from './zipped-profiles.js';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
@@ -72,8 +71,8 @@ export const getIsDragAndDropOverlayRegistered: Selector<boolean> = state =>
 export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
   getGlobalTracks,
   getLocalTracksByPid,
-  getHiddenGlobalTracks,
-  getHiddenLocalTracksByPid,
+  getComputedHiddenGlobalTracks,
+  getComputedHiddenLocalTracksByPid,
   getTrackThreadHeights,
   getShowTabOnly,
   (

@@ -13,6 +13,8 @@ import {
   getLocalTrackFromReference,
   getGlobalTrackFromReference,
   getPreviewSelection,
+  getComputedHiddenGlobalTracks,
+  getComputedHiddenLocalTracks,
 } from '../selectors/profile';
 import {
   getThreadSelectors,
@@ -24,7 +26,6 @@ import {
   getHiddenGlobalTracks,
   getGlobalTrackOrder,
   getLocalTrackOrder,
-  getHiddenLocalTracks,
   getSelectedTab,
 } from '../selectors/url-state';
 import {
@@ -382,7 +383,7 @@ export function changeGlobalTrackOrder(globalTrackOrder: TrackIndex[]): Action {
  */
 export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   return (dispatch, getState) => {
-    const hiddenGlobalTracks = getHiddenGlobalTracks(getState());
+    const hiddenGlobalTracks = getComputedHiddenGlobalTracks(getState());
     if (hiddenGlobalTracks.has(trackIndex)) {
       // This track is already hidden, don't do anything.
       return;
@@ -638,7 +639,7 @@ function _findOtherVisibleThread(
 ): ThreadIndex | null {
   const globalTracks = getGlobalTracks(getState());
   const globalTrackOrder = getGlobalTrackOrder(getState());
-  const globalHiddenTracks = getHiddenGlobalTracks(getState());
+  const globalHiddenTracks = getComputedHiddenGlobalTracks(getState());
 
   for (const globalTrackIndex of globalTrackOrder) {
     const globalTrack = globalTracks[globalTrackIndex];
@@ -659,7 +660,10 @@ function _findOtherVisibleThread(
 
     const localTracks = getLocalTracks(getState(), globalTrack.pid);
     const localTrackOrder = getLocalTrackOrder(getState(), globalTrack.pid);
-    const hiddenLocalTracks = getHiddenLocalTracks(getState(), globalTrack.pid);
+    const hiddenLocalTracks = getComputedHiddenLocalTracks(
+      getState(),
+      globalTrack.pid
+    );
 
     for (const trackIndex of localTrackOrder) {
       const track = localTracks[trackIndex];
@@ -689,7 +693,7 @@ export function hideLocalTrack(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const localTracks = getLocalTracks(getState(), pid);
-    const hiddenLocalTracks = getHiddenLocalTracks(getState(), pid);
+    const hiddenLocalTracks = getComputedHiddenLocalTracks(getState(), pid);
     const localTrackToHide = localTracks[trackIndexToHide];
     const selectedThreadIndex = getSelectedThreadIndex(getState());
     let nextSelectedThreadIndex: ThreadIndex | null =
