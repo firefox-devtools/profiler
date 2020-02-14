@@ -863,7 +863,7 @@ describe('actions/ProfileView', function() {
       ).toHaveLength(4);
       dispatch(ProfileView.changeMarkersSearchString('/foo/bar/'));
 
-      let getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
       let markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
         getState()
       );
@@ -872,7 +872,6 @@ describe('actions/ProfileView', function() {
 
       dispatch(ProfileView.changeMarkersSearchString('foo'));
 
-      getMarker = selectedThreadSelectors.getMarkerGetter(getState());
       markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
         getState()
       );
@@ -881,7 +880,6 @@ describe('actions/ProfileView', function() {
 
       dispatch(ProfileView.changeMarkersSearchString('open'));
 
-      getMarker = selectedThreadSelectors.getMarkerGetter(getState());
       markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
         getState()
       );
@@ -890,7 +888,6 @@ describe('actions/ProfileView', function() {
 
       dispatch(ProfileView.changeMarkersSearchString('Interposer'));
 
-      getMarker = selectedThreadSelectors.getMarkerGetter(getState());
       markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
         getState()
       );
