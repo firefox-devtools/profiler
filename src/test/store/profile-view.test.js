@@ -1006,16 +1006,31 @@ describe('actions/ProfileView', function() {
       expect(
         selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
       ).toHaveLength(4);
-      dispatch(ProfileView.changeMarkersSearchString('event, mark, measure'));
+      dispatch(ProfileView.changeMarkersSearchString('mark, measure'));
 
       const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
-      const markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+      let markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
         getState()
       );
-      expect(markerIndexes).toHaveLength(3);
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('b')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('d')).toBeTruthy();
+
+      dispatch(ProfileView.changeMarkersSearchString('mouse'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
-      expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
-      expect(getMarker(markerIndexes[2]).name.includes('d')).toBeTruthy();
+
+      dispatch(ProfileView.changeMarkersSearchString('dom'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
     });
   });
 
