@@ -14,6 +14,7 @@ import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getBoundingBox } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
 import { getShowTabOnly } from '../../selectors/url-state';
+import { getRightClickedTrack } from '../../selectors/profile';
 
 import type { Profile } from '../../types/profile';
 
@@ -153,6 +154,34 @@ describe('Timeline', function() {
 
       fireEvent.click(getByText('Show active tab only'));
       expect(getShowTabOnly(store.getState())).toEqual(null);
+    });
+  });
+
+  describe('TimelineSettingsHiddenTracks', () => {
+    it('resets "rightClickedTrack" state when clicked', () => {
+      const profile = _getProfileWithDroppedSamples();
+      const ctx = mockCanvasContext();
+      jest
+        .spyOn(HTMLCanvasElement.prototype, 'getContext')
+        .mockImplementation(() => ctx);
+
+      const store = storeWithProfile(profile);
+      const { getByText } = render(
+        <Provider store={store}>
+          <Timeline />
+        </Provider>
+      );
+
+      expect(getRightClickedTrack(store.getState())).toEqual(null);
+
+      fireEvent.mouseDown(getByText('Process 0'), { button: 2 });
+      expect(getRightClickedTrack(store.getState())).toEqual({
+        trackIndex: 0,
+        type: 'global',
+      });
+
+      fireEvent.click(getByText('/ tracks visible'));
+      expect(getRightClickedTrack(store.getState())).toEqual(null);
     });
   });
 });
