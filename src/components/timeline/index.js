@@ -203,6 +203,14 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
 }
 
 class Timeline extends React.PureComponent<Props> {
+  state = {
+    intialSelected: null,
+  };
+
+  setInitialSelected = (el: HTMLElement) => {
+    this.setState({ intialSelected: el });
+  };
+
   render() {
     const {
       globalTracks,
@@ -257,6 +265,7 @@ class Timeline extends React.PureComponent<Props> {
           <OverflowEdgeIndicator
             className="timelineOverflowEdgeIndicator"
             panelLayoutGeneration={panelLayoutGeneration}
+            intialSelected={this.state.intialSelected}
           >
             {
               <Reorderable
@@ -272,6 +281,7 @@ class Timeline extends React.PureComponent<Props> {
                     key={trackIndex}
                     trackIndex={trackIndex}
                     trackReference={globalTrackReferences[trackIndex]}
+                    setInitialSelected={this.setInitialSelected}
                   />
                 ))}
               </Reorderable>
