@@ -130,7 +130,7 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
 |}> {
   _showMenu = (event: SyntheticMouseEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
-    changeRightClickedTrack(null);
+    this.props.changeRightClickedTrack(null);
     showMenu({
       data: null,
       id: 'TimelineTrackContextMenu',
