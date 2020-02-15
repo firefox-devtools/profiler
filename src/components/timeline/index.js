@@ -84,6 +84,10 @@ type Props = {|
   ...ConnectedProps<{||}, StateProps, DispatchProps>,
 |};
 
+type State = {
+  intialSelected: HTMLElement | null,
+};
+
 class TimelineSettingsGraphType extends React.PureComponent<{|
   +timelineType: TimelineType,
   +changeTimelineType: typeof changeTimelineType,
@@ -202,12 +206,12 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
   }
 }
 
-class Timeline extends React.PureComponent<Props> {
+class Timeline extends React.PureComponent<Props, State> {
   state = {
     intialSelected: null,
   };
 
-  setInitialSelected = (el: HTMLElement) => {
+  setInitialSelected = (el: HTMLElement | null) => {
     this.setState({ intialSelected: el });
   };
 

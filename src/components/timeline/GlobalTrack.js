@@ -51,7 +51,7 @@ type OwnProps = {|
   +trackReference: GlobalTrackReference,
   +trackIndex: TrackIndex,
   +style?: Object /* This is used by Reorderable */,
-  +setInitialSelected: (el: HTMLElement) => void,
+  +setInitialSelected: (el: HTMLElement | null) => void,
 |};
 
 type StateProps = {|
@@ -77,7 +77,7 @@ type DispatchProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class GlobalTrackComponent extends PureComponent<Props> {
-  _container: HTMLDivElement | null = null;
+  _container: HTMLElement | null = null;
   _isInitialSelectedPane: boolean | null = null;
   _onLabelMouseDown = (event: MouseEvent) => {
     const { changeRightClickedTrack, trackReference } = this.props;
@@ -204,7 +204,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
     );
   }
 
-  _takeContainerRef = (el: HTMLElement) => {
+  _takeContainerRef = (el: HTMLElement | null) => {
     const { isSelected } = this.props;
     this._container = el;
 

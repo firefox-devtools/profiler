@@ -56,6 +56,7 @@ describe('timeline/GlobalTrack', function() {
     const trackReference = { type: 'global', trackIndex };
     const tracks = getGlobalTracks(getState());
     const track = tracks[trackIndex];
+    const setInitialSelected = () => {};
     if (track.type !== 'process') {
       throw new Error('Expected a process track.');
     }
@@ -76,7 +77,11 @@ describe('timeline/GlobalTrack', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <GlobalTrack trackIndex={trackIndex} trackReference={trackReference} />
+        <GlobalTrack
+          trackIndex={trackIndex}
+          trackReference={trackReference}
+          setInitialSelected={setInitialSelected}
+        />
       </Provider>
     );
     const { container } = renderResult;

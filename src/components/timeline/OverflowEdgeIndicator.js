@@ -13,7 +13,7 @@ type Props = {
   className: string,
   children: React.Node,
   panelLayoutGeneration: number,
-  intialSelected: HTMLElement,
+  intialSelected: HTMLElement | null,
 };
 
 type State = {
@@ -53,7 +53,11 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
 
   componentDidUpdate() {
     this._updateIndicatorStatus();
-    if (!this._scrolledToInitialSelected && this.props.intialSelected) {
+    if (
+      !this._scrolledToInitialSelected &&
+      this.props.intialSelected &&
+      this._container
+    ) {
       this._container.scrollTop = this.props.intialSelected.offsetTop;
       this._scrolledToInitialSelected = true;
     }
