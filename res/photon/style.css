@@ -29,12 +29,6 @@ html {
   margin-bottom: 5px;
 }
 
-.flex-container {
-  display: flex;
-  flex-direction: column;
-}
-
-/* This makes these bars as small as possible */
-.flex-container .photon-message-bar {
-  margin-right: auto;
+.sized-to-content {
+  width: max-content;
 }

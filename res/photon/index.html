@@ -136,15 +136,34 @@
     </div>
 
     <h2>Photon Message Bars</h2>
-    <div class="row">
-      <h3>Photon Message Bar Generic</h3>
-      <pre>
+    <p>These components work well both when taking all the available space or
+    when they're smaller (sized in a flex component for example).</p>
+
+    <h3>Photon Message Bar Generic</h3>
+      <div class="row">
+        <pre>
 &lt;div class="photon-message-bar"&gt;
   This is a non-dismissable message bar.
   &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
     Call to action
   &lt;/button&gt;
 &lt;/div&gt;
+        </pre>
+        <div class="photon-message-bar">
+          This is a non-dismissable message bar.
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+        </div>
+        <div class="photon-message-bar sized-to-content">
+          This is a non-dismissable message bar.
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <pre>
 &lt;div class="photon-message-bar"&gt;
   This is a dismissable message bar.
   &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
@@ -154,45 +173,7 @@
     aria-label="Hide the message" title="Hide the message"&gt;
   &lt;/button&gt;
 &lt;/div&gt;
-&lt;div class="photon-message-bar"&gt;
-  &lt;div class='photon-message-bar-inner-content'&gt;
-    This is a dismissable message bar.
-  &lt;/div&gt;
-  &lt;button class="photon-button photon-message-bar-close-button" type="button"
-    aria-label="Hide the message" title="Hide the message"&gt;
-  &lt;/button&gt;
-&lt;/div&gt;
-      </pre>
-      <div class="photon-message-bar">
-        This is a non-dismissable message bar.
-        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-          Call to action
-        </button>
-      </div>
-      <div class="photon-message-bar">
-        This is a dismissable message bar.
-        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-          Call to action
-        </button>
-        <button class="photon-button photon-message-bar-close-button" type="button"
-          aria-label="Hide the message" title="Hide the message">
-        </button>
-      </div>
-      <div class="photon-message-bar">
-        <div class='photon-message-bar-inner-content'>
-          This is a dismissable message bar.
-        </div>
-        <button class="photon-button photon-message-bar-close-button" type="button"
-          aria-label="Hide the message" title="Hide the message">
-        </button>
-      </div>
-      <div class='flex-container'>
-        <div class="photon-message-bar">
-          This is a non-dismissable message bar.
-          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-            Call to action
-          </button>
-        </div>
+        </pre>
         <div class="photon-message-bar">
           This is a dismissable message bar.
           <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
@@ -202,7 +183,36 @@
             aria-label="Hide the message" title="Hide the message">
           </button>
         </div>
+        <div class="photon-message-bar sized-to-content">
+          This is a dismissable message bar.
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <pre>
+&lt;div class="photon-message-bar"&gt;
+  &lt;div class='photon-message-bar-inner-content'&gt;
+    This is a dismissable message bar.
+  &lt;/div&gt;
+  &lt;button class="photon-button photon-message-bar-close-button" type="button"
+    aria-label="Hide the message" title="Hide the message"&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+        </pre>
         <div class="photon-message-bar">
+          <div class='photon-message-bar-inner-content'>
+            This is a dismissable message bar.
+          </div>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
+        <div class="photon-message-bar sized-to-content">
           <div class='photon-message-bar-inner-content'>
             This is a dismissable message bar.
           </div>
@@ -213,15 +223,31 @@
       </div>
     </div>
   </div>
-    <div class="row">
       <h3>Photon Message Bar Error</h3>
-      <pre>
+      <div class="row">
+        <pre>
 &lt;div class="photon-message-bar photon-message-bar-error"&gt;
   This is a non-dismissable message bar.
   &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
     Call to action
   &lt;/button&gt;
 &lt;/div&gt;
+        </pre>
+        <div class="photon-message-bar photon-message-bar-error">
+          This is a non-dismissable message bar.
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+        </div>
+        <div class="photon-message-bar photon-message-bar-error sized-to-content">
+          This is a non-dismissable message bar.
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <pre>
 &lt;div class="photon-message-bar photon-message-bar-error"&gt;
   This is a dismissable message bar.
   &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
@@ -231,45 +257,7 @@
     aria-label="Hide the message" title="Hide the message"&gt;
   &lt;/button&gt;
 &lt;/div&gt;
-&lt;div class="photon-message-bar photon-message-bar-error"&gt;
-  &lt;div class='photon-message-bar-inner-content'&gt;
-    This is a dismissable message bar.
-  &lt;/div&gt;
-  &lt;button class="photon-button photon-message-bar-close-button" type="button"
-    aria-label="Hide the message" title="Hide the message"&gt;
-  &lt;/button&gt;
-&lt;/div&gt;
-      </pre>
-      <div class="photon-message-bar photon-message-bar-error">
-        This is a non-dismissable message bar.
-        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-          Call to action
-        </button>
-      </div>
-      <div class="photon-message-bar photon-message-bar-error">
-        This is a dismissable message bar.
-        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-          Call to action
-        </button>
-        <button class="photon-button photon-message-bar-close-button" type="button"
-          aria-label="Hide the message" title="Hide the message">
-        </button>
-      </div>
-      <div class="photon-message-bar photon-message-bar-error">
-        <div class='photon-message-bar-inner-content'>
-          This is a dismissable message bar.
-        </div>
-        <button class="photon-button photon-message-bar-close-button" type="button"
-          aria-label="Hide the message" title="Hide the message">
-        </button>
-      </div>
-      <div class='flex-container'>
-        <div class="photon-message-bar photon-message-bar-error">
-          This is a non-dismissable message bar.
-          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-            Call to action
-          </button>
-        </div>
+        </pre>
         <div class="photon-message-bar photon-message-bar-error">
           This is a dismissable message bar.
           <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
@@ -279,7 +267,36 @@
             aria-label="Hide the message" title="Hide the message">
           </button>
         </div>
+        <div class="photon-message-bar photon-message-bar-error sized-to-content">
+          This is a dismissable message bar.
+          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+            Call to action
+          </button>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
+      </div>
+      <div class="row">
+        <pre>
+&lt;div class="photon-message-bar photon-message-bar-error"&gt;
+  &lt;div class='photon-message-bar-inner-content'&gt;
+    This is a dismissable message bar.
+  &lt;/div&gt;
+  &lt;button class="photon-button photon-message-bar-close-button" type="button"
+    aria-label="Hide the message" title="Hide the message"&gt;
+  &lt;/button&gt;
+&lt;/div&gt;
+        </pre>
         <div class="photon-message-bar photon-message-bar-error">
+          <div class='photon-message-bar-inner-content'>
+            This is a dismissable message bar.
+          </div>
+          <button class="photon-button photon-message-bar-close-button" type="button"
+            aria-label="Hide the message" title="Hide the message">
+          </button>
+        </div>
+        <div class="photon-message-bar photon-message-bar-error sized-to-content">
           <div class='photon-message-bar-inner-content'>
             This is a dismissable message bar.
           </div>
@@ -291,15 +308,31 @@
     </div>
   </div>
 
-    <div class="row">
-      <h3>Photon Message Bar Warning</h3>
-      <pre>
+  <h3>Photon Message Bar Warning</h3>
+  <div class="row">
+    <pre>
 &lt;div class="photon-message-bar photon-message-bar-warning"&gt;
   This is a non-dismissable message bar.
   &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
     Call to action
   &lt;/button&gt;
 &lt;/div&gt;
+    </pre>
+    <div class="photon-message-bar photon-message-bar-warning">
+      This is a non-dismissable message bar.
+      <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+        Call to action
+      </button>
+    </div>
+    <div class="photon-message-bar photon-message-bar-warning sized-to-content">
+      This is a non-dismissable message bar.
+      <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+        Call to action
+      </button>
+    </div>
+  </div>
+  <div class="row">
+    <pre>
 &lt;div class="photon-message-bar photon-message-bar-warning"&gt;
   This is a dismissable message bar.
   &lt;button class="photon-button photon-button-micro photon-message-bar-action-button" type="button"&gt;
@@ -309,6 +342,28 @@
     aria-label="Hide the message" title="Hide the message"&gt;
   &lt;/button&gt;
 &lt;/div&gt;
+    </pre>
+      <div class="photon-message-bar photon-message-bar-warning">
+        This is a dismissable message bar.
+        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+          Call to action
+        </button>
+        <button class="photon-button photon-message-bar-close-button" type="button"
+          aria-label="Hide the message" title="Hide the message">
+        </button>
+      </div>
+      <div class="photon-message-bar photon-message-bar-warning sized-to-content">
+        This is a dismissable message bar.
+        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
+          Call to action
+        </button>
+        <button class="photon-button photon-message-bar-close-button" type="button"
+          aria-label="Hide the message" title="Hide the message">
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <pre>
 &lt;div class="photon-message-bar photon-message-bar-warning"&gt;
   &lt;div class='photon-message-bar-inner-content'&gt;
     This is a dismissable message bar.
@@ -319,21 +374,6 @@
 &lt;/div&gt;
       </pre>
       <div class="photon-message-bar photon-message-bar-warning">
-        This is a non-dismissable message bar.
-        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-          Call to action
-        </button>
-      </div>
-      <div class="photon-message-bar photon-message-bar-warning">
-        This is a dismissable message bar.
-        <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-          Call to action
-        </button>
-        <button class="photon-button photon-message-bar-close-button" type="button"
-          aria-label="Hide the message" title="Hide the message">
-        </button>
-      </div>
-      <div class="photon-message-bar photon-message-bar-warning">
         <div class='photon-message-bar-inner-content'>
           This is a dismissable message bar.
         </div>
@@ -341,30 +381,13 @@
           aria-label="Hide the message" title="Hide the message">
         </button>
       </div>
-      <div class='flex-container'>
-        <div class="photon-message-bar photon-message-bar-warning">
-          This is a non-dismissable message bar.
-          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-            Call to action
-          </button>
-        </div>
-        <div class="photon-message-bar photon-message-bar-warning">
+      <div class="photon-message-bar photon-message-bar-warning sized-to-content">
+        <div class='photon-message-bar-inner-content'>
           This is a dismissable message bar.
-          <button class="photon-button photon-button-micro photon-message-bar-action-button" type="button">
-            Call to action
-          </button>
-          <button class="photon-button photon-message-bar-close-button" type="button"
-            aria-label="Hide the message" title="Hide the message">
-          </button>
         </div>
-        <div class="photon-message-bar photon-message-bar-warning">
-          <div class='photon-message-bar-inner-content'>
-            This is a dismissable message bar.
-          </div>
-          <button class="photon-button photon-message-bar-close-button" type="button"
-            aria-label="Hide the message" title="Hide the message">
-          </button>
-        </div>
+        <button class="photon-button photon-message-bar-close-button" type="button"
+          aria-label="Hide the message" title="Hide the message">
+        </button>
       </div>
     </div>
   </body>
