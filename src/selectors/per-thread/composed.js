@@ -6,6 +6,7 @@
 import { createSelector } from 'reselect';
 
 import { tabSlugs, type TabSlug } from '../../app-logic/tabs-handling';
+import { getShowTabOnly } from '../url-state';
 
 import type { Selector } from '../../types/store';
 import type { $ReturnType } from '../../types/utils';
@@ -57,7 +58,8 @@ export function getComposedSelectorsPerThread(
     threadSelectors.getThread,
     threadSelectors.getIsNetworkChartEmptyInFullRange,
     threadSelectors.getJsTracerTable,
-    ({ processType }, isNetworkChartEmpty, jsTracerTable) => {
+    getShowTabOnly,
+    ({ processType }, isNetworkChartEmpty, jsTracerTable, showTabOnly) => {
       if (processType === 'comparison') {
         // For a diffing tracks, we display only the calltree tab for now, because
         // other views make no or not much sense.
@@ -65,7 +67,10 @@ export function getComposedSelectorsPerThread(
       }
 
       let visibleTabs = tabSlugs;
-      if (isNetworkChartEmpty) {
+      if (isNetworkChartEmpty || showTabOnly !== null) {
+        // We either don't show the network chart if it's empty or we don't show it
+        // for now when we are in single tab mode. This is because we don't know
+        // which network request belongs to which page currently.
         visibleTabs = visibleTabs.filter(
           tabSlug => tabSlug !== 'network-chart'
         );

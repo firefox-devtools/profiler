@@ -32,10 +32,17 @@ import {
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getLocalTrackOrderByPid,
+  getShowTabOnly,
 } from '../../selectors/url-state';
+import { isLocalTrackAllowedForSingleTabView } from '../../profile-logic/tracks';
 import classNames from 'classnames';
 
-import type { Thread, ThreadIndex, Pid } from '../../types/profile';
+import type {
+  Thread,
+  ThreadIndex,
+  Pid,
+  BrowsingContextID,
+} from '../../types/profile';
 import type {
   TrackIndex,
   GlobalTrack,
@@ -58,6 +65,7 @@ type StateProps = {|
   +globalTrackNames: string[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
   +localTrackNamesByPid: Map<Pid, string[]>,
+  +showTabOnly: BrowsingContextID | null,
 |};
 
 type DispatchProps = {|
@@ -234,17 +242,21 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       localTrackOrderByPid,
       localTrackNamesByPid,
       hiddenGlobalTracks,
+      localTracksByPid,
+      showTabOnly,
     } = this.props;
 
     const isGlobalTrackHidden = hiddenGlobalTracks.has(globalTrackIndex);
     const localTrackOrder = localTrackOrderByPid.get(pid);
     const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
     const localTrackNames = localTrackNamesByPid.get(pid);
+    const localTracks = localTracksByPid.get(pid);
 
     if (
       localTrackOrder === undefined ||
       hiddenLocalTracks === undefined ||
-      localTrackNames === undefined
+      localTrackNames === undefined ||
+      localTracks === undefined
     ) {
       console.error(
         'Unable to find local track information for the given pid:',
@@ -253,21 +265,34 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       return null;
     }
 
-    return localTrackOrder.map(trackIndex => (
-      <MenuItem
-        key={trackIndex}
-        preventClose={true}
-        data={{ pid, trackIndex, globalTrackIndex }}
-        onClick={this._toggleLocalTrackVisibility}
-        attributes={{
-          className: classNames('checkable indented', {
-            checked: !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
-          }),
-        }}
-      >
-        {localTrackNames[trackIndex]}
-      </MenuItem>
-    ));
+    const localTrackMenuItems = [];
+    for (const trackIndex of localTrackOrder) {
+      // We hide some of the local tracks by default for single tab view. If
+      // showTabOnly is not null, do not include that track if it's not allowed.
+      if (
+        showTabOnly === null ||
+        isLocalTrackAllowedForSingleTabView(localTracks[trackIndex])
+      ) {
+        localTrackMenuItems.push(
+          <MenuItem
+            key={trackIndex}
+            preventClose={true}
+            data={{ pid, trackIndex, globalTrackIndex }}
+            onClick={this._toggleLocalTrackVisibility}
+            attributes={{
+              className: classNames('checkable indented', {
+                checked:
+                  !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
+              }),
+            }}
+          >
+            {localTrackNames[trackIndex]}
+          </MenuItem>
+        );
+      }
+    }
+
+    return localTrackMenuItems;
   }
 
   getRightClickedTrackName(rightClickedTrack: TrackReference): string {
@@ -533,6 +558,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     globalTrackNames: getGlobalTrackNames(state),
     localTracksByPid: getLocalTracksByPid(state),
     localTrackNamesByPid: getLocalTrackNamesByPid(state),
+    showTabOnly: getShowTabOnly(state),
   }),
   mapDispatchToProps: {
     hideGlobalTrack,

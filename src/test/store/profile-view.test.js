@@ -42,6 +42,7 @@ import { ensureExists } from '../../utils/flow';
 
 import type { Milliseconds } from '../../types/units';
 import type { BreakdownByCategory } from '../../profile-logic/profile-data';
+import type { BrowsingContextID } from '../../types/profile';
 
 describe('call node paths on implementation filter change', function() {
   const {
@@ -1231,6 +1232,9 @@ describe('actions/ProfileView', function() {
  * of mechanically running through the selectors in tests.
  */
 describe('snapshots of selectors/profile', function() {
+  const browsingContextID = 123123;
+  const innerWindowID = 2;
+
   // Set up a profile that has some nice features that can show that the selectors work.
   function setupStore() {
     const {
@@ -1247,7 +1251,30 @@ describe('snapshots of selectors/profile', function() {
     const B = funcNames.indexOf('B');
     const C = funcNames.indexOf('C');
 
+    profile.pages = [
+      {
+        browsingContextID: browsingContextID,
+        innerWindowID: innerWindowID,
+        url: 'https://developer.mozilla.org/en-US/',
+        embedderInnerWindowID: 0,
+      },
+    ];
+
     const [samplesThread] = profile.threads;
+
+    // Add innerWindowID for G function
+    const G = funcNames.indexOf('G');
+    for (
+      let frameIdx = 0;
+      frameIdx < samplesThread.frameTable.length;
+      frameIdx++
+    ) {
+      const func = samplesThread.frameTable.func[frameIdx];
+      if (func === G) {
+        samplesThread.frameTable.innerWindowID[frameIdx] = innerWindowID;
+      }
+    }
+
     // Add in a thread with markers
     const {
       threads: [markersThread],
@@ -1344,6 +1371,14 @@ describe('snapshots of selectors/profile', function() {
       'Merge: C',
     ]);
   });
+  it('matches the last stored run of selectedThreadSelector.getTabFilteredThread', function() {
+    const { getState, dispatch } = setupStore();
+
+    dispatch(ProfileView.changeShowTabOnly(browsingContextID));
+    expect(
+      selectedThreadSelectors.getTabFilteredThread(getState())
+    ).toMatchSnapshot();
+  });
   it('matches the last stored run of selectedThreadSelector.getRangeFilteredThread', function() {
     const { getState } = setupStore();
     expect(
@@ -1391,11 +1426,11 @@ describe('snapshots of selectors/profile', function() {
         .map(getMarker)
     ).toMatchSnapshot();
   });
-  it('matches the last stored run of markerThreadSelectors.getCommittedRangeFilteredMarkerIndexesForHeader', function() {
+  it('matches the last stored run of markerThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexesForHeader', function() {
     const { getState, markerThreadSelectors, getMarker } = setupStore();
     expect(
       markerThreadSelectors
-        .getCommittedRangeFilteredMarkerIndexesForHeader(getState())
+        .getCommittedRangeAndTabFilteredMarkerIndexesForHeader(getState())
         .map(getMarker)
     ).toMatchSnapshot();
   });
@@ -2441,5 +2476,124 @@ describe('visual metrics selectors', function() {
     expect(getContentfulSpeedIndexProgress(getState())).toEqual(
       ContentfulSpeedIndexProgress
     );
+  });
+});
+
+describe('pages and active tab selectors', function() {
+  // Setting some IDs here so we can use those inside the setup and test functions.
+  const firstTabBrowsingContextID = 1;
+  const secondTabBrowsingContextID = 4;
+  const parentPageWithChildren = 11111111111;
+  const iframePageWithChild = 11111111112;
+  const fistTabInnerWindowIDs = [
+    parentPageWithChildren,
+    iframePageWithChild,
+    11111111113,
+    11111111115,
+  ];
+  const secondTabInnerWindowIDs = [11111111114, 11111111116];
+
+  // Setup an empty profile with pages array and activeBrowsingContextID
+  function setup(activeBrowsingContextID: BrowsingContextID) {
+    const profile = getEmptyProfile();
+    // Add a pages array with the following relationship:
+    // Tab #1                           Tab #2
+    // --------------                --------------
+    // Page #1                        Page #4
+    // |- Page #2                     |
+    // |  |- Page #3                  Page #6
+    // |
+    // Page #5
+    profile.pages = [
+      // A top most page in the first tab
+      {
+        browsingContextID: firstTabBrowsingContextID,
+        innerWindowID: parentPageWithChildren,
+        url: 'Page #1',
+        embedderInnerWindowID: 0,
+      },
+      // An iframe page inside the previous page
+      {
+        browsingContextID: 2,
+        innerWindowID: iframePageWithChild,
+        url: 'Page #2',
+        embedderInnerWindowID: parentPageWithChildren,
+      },
+      // Another iframe page inside the previous iframe
+      {
+        browsingContextID: 3,
+        innerWindowID: fistTabInnerWindowIDs[2],
+        url: 'Page #3',
+        embedderInnerWindowID: iframePageWithChild,
+      },
+      // A top most frame from the second tab
+      {
+        browsingContextID: secondTabBrowsingContextID,
+        innerWindowID: secondTabInnerWindowIDs[0],
+        url: 'Page #4',
+        embedderInnerWindowID: 0,
+      },
+      // Another top most frame from the first tab
+      // Their browsingContextIDs are the same because of that.
+      {
+        browsingContextID: firstTabBrowsingContextID,
+        innerWindowID: fistTabInnerWindowIDs[3],
+        url: 'Page #5',
+        embedderInnerWindowID: 0,
+      },
+      // Another top most frame from the second tab
+      {
+        browsingContextID: secondTabBrowsingContextID,
+        innerWindowID: secondTabInnerWindowIDs[1],
+        url: 'Page #4',
+        embedderInnerWindowID: 0,
+      },
+    ];
+
+    // Set the active BrowsingContext ID.
+    profile.meta.configuration = {
+      activeBrowsingContextID,
+      capacity: 1,
+      features: [],
+      threads: [],
+    };
+
+    // Adding an empty thread to the profile so the loadProfile function won't complain
+    profile.threads.push(getEmptyThread());
+
+    const { dispatch, getState } = storeWithProfile(profile);
+    dispatch(ProfileView.changeShowTabOnly(activeBrowsingContextID));
+    return { profile, dispatch, getState };
+  }
+
+  it('getPagesMap will construct the whole map correctly', function() {
+    const { getState } = setup(firstTabBrowsingContextID); // the given argument is not important for this test
+    const objectResult = [
+      [firstTabBrowsingContextID, new Set(fistTabInnerWindowIDs)],
+      [secondTabBrowsingContextID, new Set(secondTabInnerWindowIDs)],
+    ];
+    const result = new Map(objectResult);
+    expect(ProfileViewSelectors.getPagesMap(getState())).toEqual(result);
+  });
+
+  it('getRelevantPagesForActiveTab will get the correct InnerWindowIDs for the first tab', function() {
+    const { getState } = setup(firstTabBrowsingContextID);
+    expect(
+      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+    ).toEqual(new Set(fistTabInnerWindowIDs));
+  });
+
+  it('getRelevantPagesForActiveTab will get the correct InnerWindowIDs for the second tab', function() {
+    const { getState } = setup(secondTabBrowsingContextID);
+    expect(
+      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+    ).toEqual(new Set(secondTabInnerWindowIDs));
+  });
+
+  it('getRelevantPagesForActiveTab will return an empty set for an ID that is not in the array', function() {
+    const { getState } = setup(99999); // a non-existent BrowsingContextID
+    expect(
+      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+    ).toEqual(new Set());
   });
 });

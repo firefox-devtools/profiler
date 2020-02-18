@@ -14,13 +14,13 @@ import { assertExhaustiveCheck } from '../../utils/flow';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndex,
-  getHiddenLocalTracks,
   getSelectedTab,
 } from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
 import {
   getLocalTrackName,
   getCounterSelectors,
+  getIsLocalTrackHidden,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import TrackThread from './TrackThread';
@@ -182,7 +182,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       trackName: getLocalTrackName(state, pid, trackIndex),
       titleText,
       isSelected,
-      isHidden: getHiddenLocalTracks(state, pid).has(trackIndex),
+      isHidden: getIsLocalTrackHidden(state, pid, trackIndex),
     };
   },
   mapDispatchToProps: {
