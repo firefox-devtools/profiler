@@ -84,9 +84,9 @@ type Props = {|
   ...ConnectedProps<{||}, StateProps, DispatchProps>,
 |};
 
-type State = {
+type State = {|
   intialSelected: HTMLElement | null,
-};
+|};
 
 class TimelineSettingsGraphType extends React.PureComponent<{|
   +timelineType: TimelineType,
@@ -211,6 +211,10 @@ class Timeline extends React.PureComponent<Props, State> {
     intialSelected: null,
   };
 
+  /**
+   * This method collects the initially selected track's HTMLElement. This allows the timeline
+   * to scroll the initially selected track into view once the page is loaded.
+   */
   setInitialSelected = (el: HTMLElement | null) => {
     this.setState({ intialSelected: el });
   };
