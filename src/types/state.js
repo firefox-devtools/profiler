@@ -121,6 +121,8 @@ export type AppState = {|
   +lastVisibleThreadTabSlug: TabSlug,
   +trackThreadHeights: Array<ThreadIndex | void>,
   +isNewlyPublished: boolean,
+  +isDragAndDropDragging: boolean,
+  +isDragAndDropOverlayRegistered: boolean,
 |};
 
 export type UploadPhase =

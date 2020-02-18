@@ -1,8 +1,10 @@
 .dragAndDropArea {
+  display: inherit;
+  width: 100%;
   isolation: isolate;
 }
 
-.dragAndDropMessageWrapper {
+.dragAndDropOverlayWrapper {
   position: absolute;
   top: 0;
   left: 0;
@@ -19,11 +21,11 @@
   transition: opacity 200ms;
 }
 
-.dragAndDropMessageWrapper.dragging {
+.dragAndDropOverlayWrapper.dragging {
   opacity: 1;
 }
 
-.dragAndDropMessage {
+.dragAndDropOverlay {
   display: flex;
   width: 100%;
   align-items: center;

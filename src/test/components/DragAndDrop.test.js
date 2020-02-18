@@ -6,19 +6,36 @@
 
 import React from 'react';
 import { render, fireEvent } from 'react-testing-library';
-import DragAndDrop from '../../components/app/DragAndDrop';
+import { Provider } from 'react-redux';
+import createStore from '../../app-logic/create-store';
+import {
+  DragAndDrop,
+  DragAndDropOverlay,
+} from '../../components/app/DragAndDrop';
 
 describe('app/DragAndDrop', () => {
-  it('matches the snapshot', () => {
-    const retrieveProfileFromFile = jest.fn();
+  it('matches the snapshot with default overlay', () => {
     const { container } = render(
-      <DragAndDrop retrieveProfileFromFile={retrieveProfileFromFile}>
-        Target area here
-      </DragAndDrop>
+      <Provider store={createStore()}>
+        <DragAndDrop>Target area here</DragAndDrop>
+      </Provider>
     );
-    const [targetArea, message] = container.children;
-    expect(targetArea).toMatchSnapshot();
-    expect(message).toMatchSnapshot();
+    const [dragAndDrop, overlay] = container.children;
+    expect(dragAndDrop).toMatchSnapshot();
+    expect(overlay).toMatchSnapshot();
+  });
+
+  it('matches the snapshot with custom overlay', () => {
+    const { container } = render(
+      <Provider store={createStore()}>
+        <DragAndDrop>
+          Target area here
+          <DragAndDropOverlay />
+        </DragAndDrop>
+      </Provider>
+    );
+    const [dragAndDrop] = container.children;
+    expect(dragAndDrop).toMatchSnapshot();
   });
 
   it('responds to dragging', () => {
@@ -28,19 +45,18 @@ describe('app/DragAndDrop', () => {
     // `dataTransfer`. We should improve this test when that support
     // is added:
     // https://github.com/firefox-devtools/profiler/issues/2366
-    const retrieveProfileFromFile = jest.fn();
     const { container } = render(
-      <DragAndDrop retrieveProfileFromFile={retrieveProfileFromFile}>
-        Target area here
-      </DragAndDrop>
+      <Provider store={createStore()}>
+        <DragAndDrop>Target area here</DragAndDrop>
+      </Provider>
     );
-    const [targetArea, message] = container.children;
-    expect(message.classList).not.toContain('dragging');
+    const [dragAndDrop, overlay] = container.children;
+    expect(overlay.classList).not.toContain('dragging');
 
-    fireEvent.dragEnter(targetArea);
-    expect(message.classList).toContain('dragging');
+    fireEvent.dragEnter(dragAndDrop);
+    expect(overlay.classList).toContain('dragging');
 
-    fireEvent.dragExit(targetArea);
-    expect(message.classList).not.toContain('dragging');
+    fireEvent.dragExit(dragAndDrop);
+    expect(overlay.classList).not.toContain('dragging');
   });
 });

@@ -12,7 +12,6 @@ import MenuButtons from './MenuButtons';
 import WindowTitle from '../shared/WindowTitle';
 import SymbolicationStatusOverlay from './SymbolicationStatusOverlay';
 import { returnToZipFileList } from '../../actions/zipped-profiles';
-import { retrieveProfileFromFile } from '../../actions/receive-profile';
 import { getProfileName } from '../../selectors/url-state';
 import Timeline from '../timeline';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
@@ -26,7 +25,6 @@ import {
   getHasSanitizedProfile,
 } from '../../selectors/publish';
 import classNames from 'classnames';
-import DragAndDrop from './DragAndDrop';
 
 import type { CssPixels } from '../../types/units';
 import type { ConnectedProps } from '../../utils/connect';
@@ -46,7 +44,6 @@ type StateProps = {|
 type DispatchProps = {|
   +returnToZipFileList: typeof returnToZipFileList,
   +invalidatePanelLayout: typeof invalidatePanelLayout,
-  +retrieveProfileFromFile: typeof retrieveProfileFromFile,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
@@ -63,16 +60,14 @@ class ProfileViewer extends PureComponent<Props> {
       uploadProgress,
       isHidingStaleProfile,
       hasSanitizedProfile,
-      retrieveProfileFromFile,
     } = this.props;
 
     return (
-      <DragAndDrop
+      <div
         className={classNames({
           profileViewerWrapper: true,
           profileViewerWrapperBackground: hasSanitizedProfile,
         })}
-        retrieveProfileFromFile={retrieveProfileFromFile}
       >
         <div
           className={classNames({
@@ -132,7 +127,7 @@ class ProfileViewer extends PureComponent<Props> {
           <WindowTitle />
           <SymbolicationStatusOverlay />
         </div>
-      </DragAndDrop>
+      </div>
     );
   }
 }
@@ -150,7 +145,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapDispatchToProps: {
     returnToZipFileList,
     invalidatePanelLayout,
-    retrieveProfileFromFile,
   },
   component: ProfileViewer,
 });

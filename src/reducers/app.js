@@ -184,6 +184,31 @@ const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+const isDragAndDropDragging: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'START_DRAGGING':
+      return true;
+    case 'STOP_DRAGGING':
+      return false;
+    default:
+      return state;
+  }
+};
+
+const isDragAndDropOverlayRegistered: Reducer<boolean> = (
+  state = false,
+  action
+) => {
+  switch (action.type) {
+    case 'REGISTER_DRAG_AND_DROP_OVERLAY':
+      return true;
+    case 'UNREGISTER_DRAG_AND_DROP_OVERLAY':
+      return false;
+    default:
+      return state;
+  }
+};
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   urlSetupPhase,
@@ -193,6 +218,8 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   lastVisibleThreadTabSlug,
   trackThreadHeights,
   isNewlyPublished,
+  isDragAndDropDragging,
+  isDragAndDropOverlayRegistered,
 });
 
 export default appStateReducer;

@@ -151,3 +151,19 @@ export function reportTrackThreadHeight(
 export function dismissNewlyPublished(): Action {
   return { type: 'DISMISS_NEWLY_PUBLISHED' };
 }
+
+export function startDragging(): Action {
+  return { type: 'START_DRAGGING' };
+}
+
+export function stopDragging(): Action {
+  return { type: 'STOP_DRAGGING' };
+}
+
+export function registerDragAndDropOverlay(): Action {
+  return { type: 'REGISTER_DRAG_AND_DROP_OVERLAY' };
+}
+
+export function unregisterDragAndDropOverlay(): Action {
+  return { type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY' };
+}
