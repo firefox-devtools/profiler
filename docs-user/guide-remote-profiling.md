@@ -31,7 +31,7 @@ You can also profile [the "reference browser"](https://github.com/mozilla-mobile
 Your device needs to be connected to your computer before recording. You also need to have your Gecko-based Android app (such as Firefox Preview) running and set up for remote debugging via USB. This usually requires **two** settings:
 
  - Android itself needs to be configured to allow remote debugging over USB. This can be done in the system settings after entering "developer mode", which can be done by tapping on the Android build number repeatedly. See [the Android documentation](https://developer.android.com/studio/debug/dev-options.html) for details.
- - The app needs to be configured to allow remote debugging. There's usually a checkbox in the app's settings menu for that. The GeckoView-example app doesn't have a checkbox but it has remote debugging enabled by default.
+ - The app needs to be configured to allow remote debugging. There's usually a checkbox in the app's settings menu for that.
 
 ### Prepare `about:debugging`
 
@@ -46,7 +46,7 @@ On `about:debugging`, find your device/browser in the sidebar on the left and co
 
  - Is USB debugging enabled in the Android system preferences?
  - Is the browser you want to profile running? Try navigating to a page in order to make sure that Gecko has been initialized.
- - Is remote debugging enabled in the browser on the phone? If you've recently pushed a new version of this app to your phone, the settings from the previous version may have been lost, so you may need to enable the prefs again.
+ - Is remote debugging enabled in the browser on the phone? If you've recently pushed a new version of this app to your phone, the settings from the previous version may have been lost, so you may need to enable the pref again.
  - Is your phone's screen unlocked?
  - Double-check your cable connections.
  - If you have `adb` on your Desktop machine, check if `adb devices` sees the phone. If not, try to fix that first.
@@ -73,7 +73,57 @@ If you want to profile an Android build that the tryserver created for you, you 
 
 ### Local builds
 
-If you've compiled an Android Gecko build locally, and want to profile it, you have to jump through one small extra hoop: Before profiling, in the *Profile Performance* panel in `about:debugging`, open the *Local build* section and add your Android build's objdir to the list. Then profile as usual, and you should be getting full symbol information.
+If you've compiled an Android Gecko build locally, and want to profile it, you have to jump through one small extra hoop: Before profiling, in the *Profile Performance* panel in `about:debugging`, open the *Local build* section and add your Android build's objdir to the list. Then profile as usual, and you should be getting full symbol information. ... Except at the moment there is [a problem](https://bugzilla.mozilla.org/show_bug.cgi?id=1615066) that makes symbolication fail, unless you manually run a command to strip debug information from `libxul.so`. See the bug for more details.
+
+### Startup profiling
+
+For startup profiling, similar to [startup profiling on Desktop](https://developer.mozilla.org/en-US/docs/Mozilla/Performance/Profiling_with_the_Built-in_Profiler#Profiling_Firefox_Startup), you will need to manually set some `MOZ_PROFILER_STARTUP*` environment variables. The way to do this varies based on the app you want to profile (more details below). Once the app has been started with these environment variables, the profiler will be running. Then you can connect to the app using `about:debugging` as usual, and capture the profile with the regular UI. (This only works if you're running Desktop Firefox Nightly newer than February 18, 2020, because it requires the patch from [bug 1615436](https://bugzilla.mozilla.org/show_bug.cgi?id=1615436).)
+
+#### Startup profiling GeckoView-example (and Fennec)
+
+If you have compiled GeckoView-example locally, you can launch it with `./mach run` and specify environment variables as follows:
+
+```bash
+./mach run --setenv MOZ_PROFILER_STARTUP=1 \
+           --setenv MOZ_PROFILER_STARTUP_INTERVAL=5 \
+           --setenv MOZ_PROFILER_STARTUP_FEATURES=threads,js,stackwalk,leaf,screenshots,ipcmessages,java \
+           --setenv MOZ_PROFILER_STARTUP_FILTERS="GeckoMain,Compositor,Renderer,IPDL Background"
+```
+
+Alternatively, if you have installed GeckoView-example from another source, you can launch it from the command line using `adb` with environment variables specified like this:
+
+```bash
+adb shell am start -n org.mozilla.geckoview_example/.App \
+    --es env0 MOZ_PROFILER_STARTUP=1 \
+    --es env1 MOZ_PROFILER_STARTUP_INTERVAL=5 \
+    --es env2 MOZ_PROFILER_STARTUP_FEATURES=threads,js,stackwalk,leaf,screenshots,ipcmessages,java \
+    --es env3 MOZ_PROFILER_STARTUP_FILTERS="GeckoMain,Compositor,Renderer,IPDL Background"
+```
+
+#### Startup profiling Fenix
+
+The above doesn't work with Fenix (I'm guessing it doesn't pass environment variables along to Gecko the way GeckoView-example does), but the following works instead:
+
+ 1. Make sure you have a "debuggable" Fenix. The easiest way to do this is to make your own Fenix build with a *debug* profile. This Fenix has the app ID `org.mozilla.fenix.debug`.
+ 2. Push a file to your device that contains the environment variables as described in the [Reading configuration from a file](https://mozilla.github.io/geckoview/consumer/docs/automation#reading-configuration-from-a-file) section of the GeckoView docs.
+
+For example, you can create a file with the name `org.mozilla.fenix.debug-geckoview-config.yaml` on your Desktop machine and content of the following form:
+
+```
+env:
+  MOZ_PROFILER_STARTUP: 1
+  MOZ_PROFILER_STARTUP_INTERVAL: 5
+  MOZ_PROFILER_STARTUP_FEATURES: threads,js,stackwalk,leaf,screenshots,ipcmessages,java
+  MOZ_PROFILER_STARTUP_FILTERS: GeckoMain,Compositor,Renderer,IPDL Background
+```
+
+Now push this file to the device with `adb push org.mozilla.fenix.debug-geckoview-config.yaml /data/local/tmp/`.
+
+From now on, whenever you open your debuggable Fenix app, Gecko will be profiling itself automatically from the start, even if remote debugging is turned off. Then you can enable remote debugging, connect to the browser with `about:debugging`, and capture the profiling run.
+
+You can delete the file again when you want to stop this behavior, e.g. using `adb shell rm /data/local/tmp/org.mozilla.fenix.debug-geckoview-config.yaml`.
+
+[Here's an example profile captured using this method](https://perfht.ml/3bKTFCG).
 
 ## Tips
 
@@ -82,4 +132,5 @@ If you've compiled an Android Gecko build locally, and want to profile it, you h
 * Avoid clicking on any of the open tabs that are listed on the `about:debugging` page. Doing so will open a toolbox and add overhead by initializing content-side devtools code. For that reason, the profiling panel is separate from the toolbox.
 * Choose a more relaxed profiling interval in order to reduce profiling overhead. 2ms to 5ms work well. This will give you less data but more accurate timings.
 * To get maximally-realistic timings, consider using the "No Periodic Sampling" feature: This will cut down profiling overhead dramatically, but you won't have any stacks. If your workload is reproducible enough, you can take two profiles: one with stacks and one without. Then you can take your timings from the former and your information from the latter.
+* Startup profiling reveals some overhead caused by devtools code that is only run when remote debugging is enabled. In order to see what startup does when remote debugging is turned off, you can deactivate remote debugging before you quit the app, and re-activate it after startup.
 * If the recording doesn't start after clicking the start button, or if the button is inactive or in an otherwise confused state, it might be necessary to disconnect and reconnect to the phone to reset some state.
