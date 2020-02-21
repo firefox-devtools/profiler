@@ -80,12 +80,11 @@ type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +changeRightClickedCallNode: typeof changeRightClickedCallNode,
 |};
-type OwnProps = {|
-  +viewportRef?: (HTMLDivElement | null) => void,
-|};
-type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
+type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class FlameGraph extends React.PureComponent<Props> {
+  _viewport: HTMLDivElement | null = null;
+
   _onSelectedCallNodeChange = (
     callNodeIndex: IndexIntoCallNodeTable | null
   ) => {
@@ -111,6 +110,16 @@ class FlameGraph extends React.PureComponent<Props> {
   };
 
   _shouldDisplayTooltips = () => this.props.rightClickedCallNodeIndex === null;
+
+  _takeViewportRef = (viewport: HTMLDivElement | null) => {
+    this._viewport = viewport;
+  };
+
+  focus = () => {
+    if (this._viewport) {
+      this._viewport.focus();
+    }
+  };
 
   /**
    * Is the box for this call node wide enough to be selected?
@@ -257,7 +266,6 @@ class FlameGraph extends React.PureComponent<Props> {
       interval,
       isInverted,
       pages,
-      viewportRef,
     } = this.props;
 
     const maxViewportHeight = maxStackDepth * STACK_FRAME_HEIGHT;
@@ -290,7 +298,7 @@ class FlameGraph extends React.PureComponent<Props> {
               viewportNeedsUpdate,
               marginLeft: 0,
               marginRight: 0,
-              containerRef: viewportRef,
+              containerRef: this._takeViewportRef,
             }}
             // FlameGraphCanvas props
             chartProps={{
@@ -328,7 +336,7 @@ function viewportNeedsUpdate() {
   return false;
 }
 
-export default explicitConnect<OwnProps, StateProps, DispatchProps>({
+export default explicitConnect<{||}, StateProps, DispatchProps>({
   mapStateToProps: state => {
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
@@ -366,5 +374,6 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     changeSelectedCallNode,
     changeRightClickedCallNode,
   },
+  options: { forwardRef: true },
   component: FlameGraph,
 });

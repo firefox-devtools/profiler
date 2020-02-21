@@ -25,24 +25,17 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MaybeFlameGraph extends React.PureComponent<Props> {
-  _viewport: HTMLDivElement | null = null;
+  _flameGraph: {| current: HTMLDivElement | null |} = React.createRef();
 
   _onSwitchToNormalCallstackClick = () => {
     this.props.changeInvertCallstack(false);
   };
 
-  _takeViewportRef = (viewport: HTMLDivElement | null) => {
-    this._viewport = viewport;
-  };
-
-  _focusViewport = () => {
-    if (this._viewport) {
-      this._viewport.focus();
-    }
-  };
-
   componentDidMount() {
-    this._focusViewport();
+    const flameGraph = this._flameGraph.current;
+    if (flameGraph) {
+      flameGraph.focus();
+    }
   }
 
   render() {
@@ -68,7 +61,7 @@ class MaybeFlameGraph extends React.PureComponent<Props> {
         </div>
       );
     }
-    return <FlameGraph viewportRef={this._takeViewportRef} />;
+    return <FlameGraph ref={this._flameGraph} />;
   }
 }
 
