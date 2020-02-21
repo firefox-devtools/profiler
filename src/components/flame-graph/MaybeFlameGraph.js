@@ -25,9 +25,18 @@ type DispatchProps = {|
 type Props = ConnectedProps<{||}, StateProps, DispatchProps>;
 
 class MaybeFlameGraph extends React.PureComponent<Props> {
+  _flameGraph: {| current: HTMLDivElement | null |} = React.createRef();
+
   _onSwitchToNormalCallstackClick = () => {
     this.props.changeInvertCallstack(false);
   };
+
+  componentDidMount() {
+    const flameGraph = this._flameGraph.current;
+    if (flameGraph) {
+      flameGraph.focus();
+    }
+  }
 
   render() {
     const { maxStackDepth, invertCallstack } = this.props;
@@ -52,7 +61,7 @@ class MaybeFlameGraph extends React.PureComponent<Props> {
         </div>
       );
     }
-    return <FlameGraph />;
+    return <FlameGraph ref={this._flameGraph} />;
   }
 }
 
