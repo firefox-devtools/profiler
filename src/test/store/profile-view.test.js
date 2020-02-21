@@ -858,6 +858,7 @@ describe('actions/ProfileView', function() {
       ]);
       const { dispatch, getState } = storeWithProfile(profile);
 
+      // Tests the filename
       expect(
         selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
       ).toHaveLength(4);
@@ -870,6 +871,7 @@ describe('actions/ProfileView', function() {
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
 
+      // Tests the filename, but with a substring
       dispatch(ProfileView.changeMarkersSearchString('foo'));
 
       markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
@@ -878,6 +880,7 @@ describe('actions/ProfileView', function() {
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
 
+      // Tests the operation
       dispatch(ProfileView.changeMarkersSearchString('open'));
 
       markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
@@ -886,6 +889,7 @@ describe('actions/ProfileView', function() {
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
 
+      // Tests the source
       dispatch(ProfileView.changeMarkersSearchString('Interposer'));
 
       markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
@@ -937,6 +941,8 @@ describe('actions/ProfileView', function() {
       expect(
         selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
       ).toHaveLength(4);
+
+      // Tests the messageType
       dispatch(ProfileView.changeMarkersSearchString('PContent'));
 
       const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
@@ -947,6 +953,7 @@ describe('actions/ProfileView', function() {
       expect(getMarker(markerIndexes[0]).name.includes('IPCIn')).toBeTruthy();
       expect(getMarker(markerIndexes[1]).name.includes('IPCOut')).toBeTruthy();
 
+      // Tests otherPid
       dispatch(ProfileView.changeMarkersSearchString('3333'));
 
       markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
@@ -1007,6 +1014,8 @@ describe('actions/ProfileView', function() {
       expect(
         selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
       ).toHaveLength(4);
+
+      // Tests searching for the name of usertiming markers.
       dispatch(ProfileView.changeMarkersSearchString('mark, measure'));
 
       const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
@@ -1017,6 +1026,7 @@ describe('actions/ProfileView', function() {
       expect(getMarker(markerIndexes[0]).name.includes('b')).toBeTruthy();
       expect(getMarker(markerIndexes[1]).name.includes('d')).toBeTruthy();
 
+      // Tests searching for the DOMEVent type
       dispatch(ProfileView.changeMarkersSearchString('mouse'));
 
       markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
@@ -1025,6 +1035,7 @@ describe('actions/ProfileView', function() {
       expect(markerIndexes).toHaveLength(1);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
 
+      // This tests searching in the category.
       dispatch(ProfileView.changeMarkersSearchString('dom'));
 
       markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
