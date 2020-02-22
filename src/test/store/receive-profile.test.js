@@ -793,7 +793,7 @@ describe('actions/receive-profile', function() {
    */
   describe('_fetchProfile', function() {
     beforeEach(function() {
-      window.fetch = sinon.stub();
+      window.fetch = jest.fn();
       sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
     });
 
@@ -833,7 +833,7 @@ describe('actions/receive-profile', function() {
         json = () => Promise.resolve(profile);
       }
 
-      const zippedProfileResponse = {
+      const zippedProfileResponse = (({
         ok: true,
         status: 200,
         json,
@@ -850,8 +850,15 @@ describe('actions/receive-profile', function() {
             }
           },
         },
-      };
-      window.fetch.withArgs(url).resolves(zippedProfileResponse);
+      }: any): Response);
+      const fetch403Response = (({ ok: false, status: 403 }: any): Response);
+
+      window.fetch = jest.fn(actualUrl =>
+        Promise.resolve(
+          actualUrl === url ? zippedProfileResponse : fetch403Response
+        )
+      );
+
       const reportError = jest.fn();
       const args = {
         url,
