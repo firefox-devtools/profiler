@@ -81,22 +81,6 @@ function simulateSymbolStoreHasNoCache() {
   }));
 }
 
-/**
- * Advance timers and promises used for receive-profile's _wait().
- *
- * On a profile fetch failure, we wait one second and try again. To
- * facilitate testing, this code advances through these waits the
- * given number of times. This is unfortunately highly coupled to the
- * implementation details of receive-profile.
- */
-async function runThroughWaitDelay(times: number) {
-  for (let i = 0; i < times; i++) {
-    await Promise.resolve();
-    await Promise.resolve();
-    jest.runAllTimers();
-  }
-}
-
 describe('actions/receive-profile', function() {
   /**
    * This function allows to observe all state changes in a Redux store while
@@ -538,6 +522,12 @@ describe('actions/receive-profile', function() {
 
     beforeEach(function() {
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
+      jest.useFakeTimers();
+      // Call the argument of setTimeout asynchronously right away
+      // (instead of waiting for the timeout).
+      jest
+        .spyOn(window, 'setTimeout')
+        .mockImplementation(callback => process.nextTick(callback));
     });
 
     afterEach(function() {
@@ -599,7 +589,6 @@ describe('actions/receive-profile', function() {
     });
 
     it('requests several times in case of 403', async function() {
-      jest.useFakeTimers();
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const expectedUrl = `https://storage.googleapis.com/profile-store/${hash}`;
       window.fetch
@@ -611,13 +600,9 @@ describe('actions/receive-profile', function() {
         );
 
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, async () => {
-        const dispatchResultPromise = store.dispatch(
-          retrieveProfileFromStore(hash)
-        );
-        await runThroughWaitDelay(1);
-        return dispatchResultPromise;
-      })).map(state => getView(state));
+      const views = (await observeStoreStateChanges(store, () =>
+        store.dispatch(retrieveProfileFromStore(hash))
+      )).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -642,16 +627,11 @@ describe('actions/receive-profile', function() {
     });
 
     it('fails in case the profile cannot be found after several tries', async function() {
-      jest.useFakeTimers();
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, async () => {
-        const dispatchResultPromise = store.dispatch(
-          retrieveProfileFromStore(hash)
-        );
-        await runThroughWaitDelay(10);
-        return dispatchResultPromise;
-      })).map(state => getView(state));
+      const views = (await observeStoreStateChanges(store, () =>
+        store.dispatch(retrieveProfileFromStore(hash))
+      )).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -698,6 +678,12 @@ describe('actions/receive-profile', function() {
 
     beforeEach(function() {
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
+      jest.useFakeTimers();
+      // Call the argument of setTimeout asynchronously right away
+      // (instead of waiting for the timeout).
+      jest
+        .spyOn(window, 'setTimeout')
+        .mockImplementation(callback => process.nextTick(callback));
     });
 
     afterEach(function() {
@@ -725,7 +711,6 @@ describe('actions/receive-profile', function() {
     });
 
     it('requests several times in case of 403', async function() {
-      jest.useFakeTimers();
       const expectedUrl = 'https://profiles.club/shared.json';
       // The first call will still be a 403 -- remember, it's the default return value.
       window.fetch
@@ -737,13 +722,9 @@ describe('actions/receive-profile', function() {
         );
 
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, async () => {
-        const dispatchResultPromise = store.dispatch(
-          retrieveProfileOrZipFromUrl(expectedUrl)
-        );
-        await runThroughWaitDelay(1);
-        return dispatchResultPromise;
-      })).map(state => getView(state));
+      const views = (await observeStoreStateChanges(store, () =>
+        store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
+      )).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -768,16 +749,11 @@ describe('actions/receive-profile', function() {
     });
 
     it('fails in case the profile cannot be found after several tries', async function() {
-      jest.useFakeTimers();
       const expectedUrl = 'https://profiles.club/shared.json';
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, async () => {
-        const dispatchResultPromise = store.dispatch(
-          retrieveProfileOrZipFromUrl(expectedUrl)
-        );
-        await runThroughWaitDelay(10);
-        return dispatchResultPromise;
-      })).map(state => getView(state));
+      const views = (await observeStoreStateChanges(store, () =>
+        store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
+      )).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
