@@ -154,7 +154,6 @@ export function getSearchFilteredMarkerIndexes(
         typeof data.category === 'string' &&
         searchRegExp.test(data.category)
       ) {
-        // Match UserTiming's name.
         newMarkers.push(markerIndex);
         continue;
       }

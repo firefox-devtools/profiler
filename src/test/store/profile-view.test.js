@@ -815,7 +815,7 @@ describe('actions/ProfileView', function() {
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('a');
     });
 
-    it('filters the markers', function() {
+    it('filters the markers by name', function() {
       const profile = getProfileWithMarkers([
         ['a', 0, null],
         ['b', 1, null],
@@ -835,6 +835,214 @@ describe('actions/ProfileView', function() {
       expect(markerIndexes).toHaveLength(2);
       expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
       expect(getMarker(markerIndexes[1]).name.includes('b')).toBeTruthy();
+    });
+
+    it('filters the markers by a potential data payload of type FileIO', function() {
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+        ['c', 2, null],
+        [
+          'd',
+          3,
+          {
+            cause: { stack: 2, time: 1 },
+            endTime: 1024,
+            filename: '/foo/bar/',
+            operation: 'create/open',
+            source: 'PoisionOIInterposer',
+            startTime: 1022,
+            type: 'FileIO',
+          },
+        ],
+      ]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      // Tests the filename
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(4);
+      dispatch(ProfileView.changeMarkersSearchString('/foo/bar/'));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      let markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+
+      // Tests the filename, but with a substring
+      dispatch(ProfileView.changeMarkersSearchString('foo'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+
+      // Tests the operation
+      dispatch(ProfileView.changeMarkersSearchString('open'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+
+      // Tests the source
+      dispatch(ProfileView.changeMarkersSearchString('Interposer'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+    });
+
+    it('filters the markers by a potential data payload of type IPC', function() {
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        [
+          'b',
+          1,
+          {
+            type: 'IPC',
+            startTime: 30,
+            endTime: 1031,
+            otherPid: 3333,
+            otherTid: 3333,
+            otherThreadName: 'Parent Process (Thread ID: 3333)',
+            messageSeqno: 1,
+            messageType: 'PContent::Msg_PreferenceUpdate',
+            side: 'child',
+            direction: 'receiving',
+            sync: false,
+          },
+        ],
+        ['c', 2, null],
+        [
+          'd',
+          3,
+          {
+            type: 'IPC',
+            startTime: 40,
+            endTime: 40,
+            otherPid: 9999,
+            messageSeqno: 2,
+            messageType: 'PContent::Msg_PreferenceUpdate',
+            side: 'parent',
+            direction: 'sending',
+            sync: false,
+          },
+        ],
+      ]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(4);
+
+      // Tests the messageType
+      dispatch(ProfileView.changeMarkersSearchString('PContent'));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      let markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('IPCIn')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('IPCOut')).toBeTruthy();
+
+      // Tests otherPid
+      dispatch(ProfileView.changeMarkersSearchString('3333'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('IPCIn')).toBeTruthy();
+
+      dispatch(ProfileView.changeMarkersSearchString('9'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('IPCOut')).toBeTruthy();
+    });
+
+    it('filters the markers by other properties of a potential data payload', function() {
+      const profile = getProfileWithMarkers([
+        [
+          'a',
+          0,
+          {
+            type: 'tracing',
+            category: 'DOMEvent',
+            timeStamp: 1001,
+            interval: 'start',
+            eventType: 'mousedown',
+            phase: 1,
+          },
+        ],
+        [
+          'b',
+          1,
+          {
+            type: 'UserTiming',
+            startTime: 1002,
+            endTime: 1022,
+            name: 'mark-1',
+            entryType: 'mark',
+          },
+        ],
+        ['c', 2, null],
+        [
+          'd',
+          3,
+          {
+            type: 'UserTiming',
+            startTime: 1050,
+            endTime: 1100,
+            name: 'measure-1',
+            entryType: 'measure',
+          },
+        ],
+      ]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(4);
+
+      // Tests searching for the name of usertiming markers.
+      dispatch(ProfileView.changeMarkersSearchString('mark, measure'));
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+      let markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(2);
+      expect(getMarker(markerIndexes[0]).name.includes('b')).toBeTruthy();
+      expect(getMarker(markerIndexes[1]).name.includes('d')).toBeTruthy();
+
+      // Tests searching for the DOMEVent type
+      dispatch(ProfileView.changeMarkersSearchString('mouse'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
+
+      // This tests searching in the category.
+      dispatch(ProfileView.changeMarkersSearchString('dom'));
+
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('a')).toBeTruthy();
     });
   });
 
