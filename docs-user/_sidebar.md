@@ -19,4 +19,3 @@
 * [Case Studies](./case-studies.md)
   * [2D canvas and worker messaging](./bunny.md)
   * [Harnessing parallelism](./bunny-2.md)
-* [Cloud Migration](./cloud-migration.md)
