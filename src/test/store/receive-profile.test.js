@@ -32,7 +32,10 @@ import {
   getProfilesFromRawUrl,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
-import { changeShowTabOnly } from '../../actions/profile-view';
+import {
+  changeShowTabOnly,
+  changeSelectedThread,
+} from '../../actions/profile-view';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
@@ -374,7 +377,7 @@ describe('actions/receive-profile', function() {
     describe('with showTabOnly', function() {
       const browsingContextID = 123;
       const innerWindowID = 111111;
-      function setup(profile: ?Profile) {
+      function setup(profile: ?Profile, dispatchToShowTabOnly: boolean = true) {
         const store = blankStore();
 
         if (!profile) {
@@ -435,7 +438,9 @@ describe('actions/receive-profile', function() {
         ]);
 
         store.dispatch(viewProfile(profile));
-        store.dispatch(changeShowTabOnly(browsingContextID));
+        if (dispatchToShowTabOnly) {
+          store.dispatch(changeShowTabOnly(browsingContextID));
+        }
 
         return { ...store, profile };
       }
@@ -485,6 +490,55 @@ describe('actions/receive-profile', function() {
         expect(getHumanReadableTracks(getState())).toEqual([
           'show [thread GeckoMain tab] SELECTED',
           '  - show [thread Other2]',
+        ]);
+      });
+
+      it('should select the first visible thread during changeShowTabOnly action', function() {
+        const { profile } = getProfileFromTextSamples(
+          `work work work`,
+          `work work work`
+        );
+        // There is one main thread and two other threads that belong to the same process.
+        const [threadA, threadB] = profile.threads;
+        threadA.name = 'GeckoMain';
+        threadA.processType = 'tab';
+        threadA.pid = 111;
+        threadB.name = 'Other';
+        threadB.processType = 'default';
+        threadB.pid = 111;
+
+        // Other should be visible
+        threadB.frameTable.innerWindowID[0] = innerWindowID;
+
+        const { getState, dispatch } = setup(profile, false);
+
+        // Select the first thread
+        dispatch(changeSelectedThread(0));
+        // First thread should be selected. This will be hidden after the next dispatch.
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain default] SELECTED',
+          'show [thread GeckoMain tab]',
+          '  - show [network GeckoMain]',
+          '  - show [thread Other]',
+        ]);
+
+        // Switch to active tab view.
+        dispatch(changeShowTabOnly(browsingContextID));
+
+        // Now first visible thread should be selected. This was a breaking action.
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain tab] SELECTED',
+          '  - show [thread Other]',
+        ]);
+
+        // Switching back again.
+        dispatch(changeShowTabOnly(null));
+        // Now the selected thread should not change, since this is not a breaking action.
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain default]',
+          'show [thread GeckoMain tab] SELECTED',
+          '  - show [network GeckoMain] SELECTED',
+          '  - show [thread Other]',
         ]);
       });
     });

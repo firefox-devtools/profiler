@@ -365,6 +365,7 @@ type UrlStateAction =
       +type: 'CHANGE_SHOW_TAB_ONLY',
       +showTabOnly: BrowsingContextID | null,
       +selectedTab: TabSlug,
+      +selectedThreadIndex: ThreadIndex | null,
     |};
 
 type IconsAction =

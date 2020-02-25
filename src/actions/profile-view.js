@@ -15,6 +15,7 @@ import {
   getPreviewSelection,
   getComputedHiddenGlobalTracks,
   getComputedHiddenLocalTracks,
+  getActiveTabHiddenGlobalTracks,
 } from '../selectors/profile';
 import {
   getThreadSelectors,
@@ -633,23 +634,37 @@ export function changeLocalTrackOrder(
 function _findOtherVisibleThread(
   getState: () => State,
   // Either this global track is already hidden, or it has been taken into account.
-  globalTrackIndexToIgnore: TrackIndex,
+  globalTrackIndexToIgnore?: TrackIndex,
   // This is helpful when hiding a new local track index, it won't be selected.
-  localTrackIndexToIgnore?: TrackIndex
+  localTrackIndexToIgnore?: TrackIndex,
+  transitioningToActiveTab?: boolean = false
 ): ThreadIndex | null {
   const globalTracks = getGlobalTracks(getState());
   const globalTrackOrder = getGlobalTrackOrder(getState());
   const globalHiddenTracks = getComputedHiddenGlobalTracks(getState());
+  const activeTabHiddenGlobalTracks = getActiveTabHiddenGlobalTracks(
+    getState()
+  );
 
   for (const globalTrackIndex of globalTrackOrder) {
     const globalTrack = globalTracks[globalTrackIndex];
     if (
       // This track has already been accounted for.
-      globalTrackIndex === globalTrackIndexToIgnore ||
+      (globalTrackIndexToIgnore !== undefined &&
+        globalTrackIndex === globalTrackIndexToIgnore) ||
       // This global track is hidden.
       globalHiddenTracks.has(globalTrackIndex) ||
       globalTrack.type !== 'process'
     ) {
+      continue;
+    }
+
+    if (
+      transitioningToActiveTab &&
+      activeTabHiddenGlobalTracks.has(globalTrackIndex)
+    ) {
+      // We are transitioning to the active tab view. We should be able to select
+      // the track that is not hidden by it as well.
       continue;
     }
 
@@ -1170,10 +1185,22 @@ export function changeShowTabOnly(
       selectedTab = getLastVisibleThreadTabSlug(getState());
     }
 
+    let selectedThreadIndex = null;
+    if (showTabOnly !== null) {
+      // Select the first visible thread when we are transitioning to tab only view.
+      selectedThreadIndex = _findOtherVisibleThread(
+        getState,
+        undefined, // Do not filter out any track.
+        undefined,
+        true // ignore the hidden tracks by active tab
+      );
+    }
+
     dispatch({
       type: 'CHANGE_SHOW_TAB_ONLY',
       showTabOnly,
       selectedTab,
+      selectedThreadIndex,
     });
   };
 }
