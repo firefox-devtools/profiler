@@ -190,6 +190,12 @@ export function getTabFilteredMarkerIndexes(
         newMarkers.push(markerIndex);
         continue;
       }
+    } else {
+      if (data && data.type === 'Network') {
+        // Now network markers have innerWindowIDs inside their payloads but those markers
+        // can be inside the main thread and not be related to that specific thread.
+        continue;
+      }
     }
 
     if (data && data.innerWindowID && relevantPages.has(data.innerWindowID)) {
