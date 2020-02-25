@@ -44,6 +44,7 @@ import type {
   TrackIndex,
   GlobalTrack,
   LocalTrack,
+  InitialSelectedTrackReference,
 } from '../../types/profile-derived';
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -51,7 +52,7 @@ type OwnProps = {|
   +trackReference: GlobalTrackReference,
   +trackIndex: TrackIndex,
   +style?: Object /* This is used by Reorderable */,
-  +setInitialSelected: (el: HTMLElement | null) => void,
+  +setInitialSelected: (el: InitialSelectedTrackReference) => void,
 |};
 
 type StateProps = {|
@@ -218,7 +219,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
   };
 
   componentDidMount() {
-    if (this._isInitialSelectedPane) {
+    if (this._isInitialSelectedPane && this._container !== null) {
       this.props.setInitialSelected(this._container);
     }
   }

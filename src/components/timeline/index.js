@@ -47,8 +47,11 @@ import {
 } from '../../actions/profile-view';
 
 import type { BrowsingContextID } from '../../types/profile';
-import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
-
+import type {
+  TrackIndex,
+  GlobalTrack,
+  InitialSelectedTrackReference,
+} from '../../types/profile-derived';
 import type {
   GlobalTrackReference,
   TimelineType,
@@ -85,7 +88,7 @@ type Props = {|
 |};
 
 type State = {|
-  intialSelected: HTMLElement | null,
+  initialSelected: InitialSelectedTrackReference | null,
 |};
 
 class TimelineSettingsGraphType extends React.PureComponent<{|
@@ -208,15 +211,15 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
 
 class Timeline extends React.PureComponent<Props, State> {
   state = {
-    intialSelected: null,
+    initialSelected: null,
   };
 
   /**
    * This method collects the initially selected track's HTMLElement. This allows the timeline
    * to scroll the initially selected track into view once the page is loaded.
    */
-  setInitialSelected = (el: HTMLElement | null) => {
-    this.setState({ intialSelected: el });
+  setInitialSelected = (el: InitialSelectedTrackReference) => {
+    this.setState({ initialSelected: el });
   };
 
   render() {
@@ -273,7 +276,7 @@ class Timeline extends React.PureComponent<Props, State> {
           <OverflowEdgeIndicator
             className="timelineOverflowEdgeIndicator"
             panelLayoutGeneration={panelLayoutGeneration}
-            intialSelected={this.state.intialSelected}
+            initialSelected={this.state.initialSelected}
           >
             {
               <Reorderable

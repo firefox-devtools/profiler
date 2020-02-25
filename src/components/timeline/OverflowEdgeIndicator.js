@@ -6,6 +6,7 @@
 
 import * as React from 'react';
 import classNames from 'classnames';
+import type { InitialSelectedTrackReference } from '../../types/profile-derived';
 
 import './OverflowEdgeIndicator.css';
 
@@ -13,7 +14,7 @@ type Props = {
   className: string,
   children: React.Node,
   panelLayoutGeneration: number,
-  intialSelected: HTMLElement | null,
+  initialSelected: InitialSelectedTrackReference | null,
 };
 
 type State = {
@@ -55,10 +56,10 @@ class OverflowEdgeIndicator extends React.PureComponent<Props, State> {
     this._updateIndicatorStatus();
     if (
       !this._scrolledToInitialSelected &&
-      this.props.intialSelected &&
+      this.props.initialSelected &&
       this._container
     ) {
-      this._container.scrollTop = this.props.intialSelected.offsetTop;
+      this._container.scrollTop = this.props.initialSelected.offsetTop;
       this._scrolledToInitialSelected = true;
     }
   }
