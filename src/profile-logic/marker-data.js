@@ -1285,6 +1285,7 @@ export function getMarkerFullDescription(marker: Marker) {
           }
         }
         break;
+      case 'Log':
       case 'UserTiming':
         description = data.name;
         break;
@@ -1327,16 +1328,11 @@ export function getMarkerCategory(marker: Marker) {
         category = marker.name;
         break;
       case 'FileIO':
-        category = data.type;
-        break;
+      case 'Log':
       case 'Bailout':
-        category = 'Bailout';
-        break;
       case 'Network':
-        category = 'Network';
-        break;
       case 'Text':
-        category = 'Text';
+        category = data.type;
         break;
       case 'IPC':
         category = data.direction === 'sending' ? 'IPC out' : 'IPC in';
