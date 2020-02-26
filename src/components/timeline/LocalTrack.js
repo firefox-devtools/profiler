@@ -37,6 +37,7 @@ type OwnProps = {|
   +localTrack: LocalTrack,
   +trackIndex: TrackIndex,
   +style?: Object /* This is used by Reorderable */,
+  +setIsInitialSelectedPane: (value: boolean) => void,
 |};
 
 type StateProps = {|
@@ -89,6 +90,13 @@ class LocalTrackComponent extends PureComponent<Props> {
       default:
         console.error('Unhandled localTrack type', (localTrack: empty));
         return null;
+    }
+  }
+
+  componentDidMount() {
+    const { isSelected } = this.props;
+    if (isSelected) {
+      this.props.setIsInitialSelectedPane(true);
     }
   }
 

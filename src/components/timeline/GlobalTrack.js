@@ -44,6 +44,7 @@ import type {
   TrackIndex,
   GlobalTrack,
   LocalTrack,
+  InitialSelectedTrackReference,
 } from '../../types/profile-derived';
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -51,6 +52,7 @@ type OwnProps = {|
   +trackReference: GlobalTrackReference,
   +trackIndex: TrackIndex,
   +style?: Object /* This is used by Reorderable */,
+  +setInitialSelected: (el: InitialSelectedTrackReference) => void,
 |};
 
 type StateProps = {|
@@ -76,6 +78,8 @@ type DispatchProps = {|
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
 class GlobalTrackComponent extends PureComponent<Props> {
+  _container: HTMLElement | null = null;
+  _isInitialSelectedPane: boolean | null = null;
   _onLabelMouseDown = (event: MouseEvent) => {
     const { changeRightClickedTrack, trackReference } = this.props;
 
@@ -194,10 +198,30 @@ class GlobalTrackComponent extends PureComponent<Props> {
             pid={pid}
             localTrack={localTrack}
             trackIndex={trackIndex}
+            setIsInitialSelectedPane={this.setIsInitialSelectedPane}
           />
         ))}
       </Reorderable>
     );
+  }
+
+  _takeContainerRef = (el: HTMLElement | null) => {
+    const { isSelected } = this.props;
+    this._container = el;
+
+    if (isSelected) {
+      this.setIsInitialSelectedPane(true);
+    }
+  };
+
+  setIsInitialSelectedPane = (value: boolean) => {
+    this._isInitialSelectedPane = value;
+  };
+
+  componentDidMount() {
+    if (this._isInitialSelectedPane && this._container !== null) {
+      this.props.setInitialSelected(this._container);
+    }
   }
 
   render() {
@@ -219,7 +243,7 @@ class GlobalTrackComponent extends PureComponent<Props> {
     }
 
     return (
-      <li className="timelineTrack" style={style}>
+      <li ref={this._takeContainerRef} className="timelineTrack" style={style}>
         <div
           className={classNames('timelineTrackRow timelineTrackGlobalRow', {
             selected: isSelected,
