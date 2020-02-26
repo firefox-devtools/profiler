@@ -16,6 +16,7 @@ import {
 import { getDataSource } from '../selectors/url-state';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from '../utils/flow';
+import * as Jwt from '../utils/jwt';
 import { setHistoryReplaceState } from '../app-logic/url-handling';
 
 import type { Action, ThunkAction } from '../types/store';
@@ -68,6 +69,37 @@ export function uploadFailed(error: mixed): Action {
 }
 
 /**
+ * This function returns a profile token from a JWT token, if the passed string
+ * looks like a JWT token. Otherwise it just returns the passed string because
+ * this would be the hash directly, as returned by a previous version of the
+ * server.
+ * In the future when the server will be migrated we'll be able to remove this
+ * fallback.
+ */
+function extractProfileTokenFromJwt(hashOrToken: string): string {
+  if (Jwt.isValidJwtToken(hashOrToken)) {
+    // This is a JWT token, let's extract the hash out of it.
+    const jwtPayload = Jwt.extractAndDecodePayload(hashOrToken);
+    if (!jwtPayload) {
+      throw new Error(
+        `The JWT token that's been returned by the server is incorrect.`
+      );
+    }
+
+    const { profileToken } = jwtPayload;
+    if (!profileToken) {
+      throw new Error(
+        `The JWT token returned by the server doesn't contain a profile token.`
+      );
+    }
+    return profileToken;
+  }
+
+  // Then this is a good old hash.
+  return hashOrToken;
+}
+
+/**
  * This function starts the profile sharing process. Takes an optional argument that
  * indicates if the share attempt is being made for the second time. We have two share
  * buttons, one for sharing for the first time, and one for sharing after the initial
@@ -112,9 +144,11 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
 
       // Upload the profile, and notify it with the amount of data that has been
       // uploaded.
-      const hash = await startUpload(gzipData, uploadProgress => {
+      const hashOrToken = await startUpload(gzipData, uploadProgress => {
         dispatch(updateUploadProgress(uploadProgress));
       });
+
+      const hash = extractProfileTokenFromJwt(hashOrToken);
 
       // The previous line was async, check to make sure that this request is still valid.
       if (uploadGeneration !== getUploadGeneration(getState())) {
