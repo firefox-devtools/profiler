@@ -4,7 +4,11 @@
 // @flow
 import { oneLine } from 'common-tags';
 
+// This is the server we use to publish new profiles.
 const PUBLISHING_ENDPOINT = 'https://api.profiler.firefox.com/compressed-store';
+// Uncomment the following endpoint instead to use your local server.
+//const PUBLISHING_ENDPOINT = 'http://localhost:5252/compressed-store';
+
 const ACCEPT_HEADER_VALUE = 'application/vnd.firefox-profiler+json;version=1.0';
 
 export function uploadBinaryProfileData(): * {
