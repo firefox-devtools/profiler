@@ -522,9 +522,9 @@ describe('actions/receive-profile', function() {
 
     beforeEach(function() {
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
-      jest.useFakeTimers();
       // Call the argument of setTimeout asynchronously right away
       // (instead of waiting for the timeout).
+
       jest
         .spyOn(window, 'setTimeout')
         .mockImplementation(callback => process.nextTick(callback));
@@ -678,9 +678,9 @@ describe('actions/receive-profile', function() {
 
     beforeEach(function() {
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
-      jest.useFakeTimers();
       // Call the argument of setTimeout asynchronously right away
       // (instead of waiting for the timeout).
+
       jest
         .spyOn(window, 'setTimeout')
         .mockImplementation(callback => process.nextTick(callback));
