@@ -17,7 +17,6 @@ import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getDataSource, getProfilesToCompare } from '../../selectors/url-state';
 import ServiceWorkerManager from './ServiceWorkerManager';
 import { ProfileLoaderAnimation } from './ProfileLoaderAnimation';
-import { DowntimeWarning } from './DowntimeWarning';
 
 import type { AppViewState, State } from '../../types/state';
 import type { DataSource } from '../../types/actions';
@@ -96,7 +95,6 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
   render() {
     return (
       <Fragment>
-        <DowntimeWarning />
         <ServiceWorkerManager />
         {this.renderCurrentRoute()}
       </Fragment>
