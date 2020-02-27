@@ -26,9 +26,13 @@ export function extractAndDecodePayload(jwtToken: string): any {
   }
 }
 
-// This uses the base64url characters, that is base64 characters where + is
-// replaced by -, and / is replaced by _. Moreover the padding character isn't
-// used with JWT.
+// A JWT token is composed of 3 parts, separated by a period.
+// These parts all use the base64url characters, that is base64 characters where
+// "+" is replaced by "-", and "/" is replaced by "_". Moreover the padding
+// character "=" isn't used with JWT.
+// Here is an example:
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiP34_fj9-In0.KIumXQmDxL1bJ0RGNV2-mm-8h0LEQATKbtHUsCHMGcg
+//                  ╰ header                        ╰ payload                     ╰ signature
 const JWT_TOKEN_RE = /^(?:[a-zA-Z0-9_-])+\.(?:[a-zA-Z0-9_-])+\.(?:[a-zA-Z0-9_-])+$/;
 export function isValidJwtToken(jwtToken: string): boolean {
   return JWT_TOKEN_RE.test(jwtToken);
