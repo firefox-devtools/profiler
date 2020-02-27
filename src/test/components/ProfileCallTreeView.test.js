@@ -487,6 +487,12 @@ describe('ProfileCallTreeView/end-to-end', () => {
   // requiring one.
   // eslint-disable-next-line jest/expect-expect
   it('can display a gecko profile without crashing', () => {
+    // We use the fake indexeddb in this test because the symbolication kicks
+    // in. The fake indexeddb relies on setImmediate to run events. That's why
+    // we use useFakeTimers so that pending event handlers are canceled when the
+    // test runs and we don't get spurious messages.
+    jest.useFakeTimers();
+
     const geckoProfile = createGeckoProfile();
     const processedProfile = processProfile(geckoProfile);
     const store = storeWithProfile(processedProfile);

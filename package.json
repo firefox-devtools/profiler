@@ -130,7 +130,6 @@
     "raw-loader": "^1.0.0",
     "react-testing-library": "^6.0.0",
     "rimraf": "^2.6.3",
-    "sinon": "^7.2.7",
     "style-loader": "^0.23.1",
     "stylelint": "^9.10.1",
     "stylelint-config-idiomatic-order": "^7.0.2",
