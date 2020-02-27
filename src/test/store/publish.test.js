@@ -27,6 +27,7 @@ import {
   getSelectedTab,
   getDataSource,
   getProfileName,
+  getHash,
 } from '../../selectors/url-state';
 import { getHasZipFile } from '../../selectors/zipped-profiles';
 import { getProfileFromTextSamples } from '../fixtures/profiles/processed-profile';
@@ -115,6 +116,11 @@ describe('getCheckedSharingOptions', function() {
 });
 
 describe('attemptToPublish', function() {
+  // This token was built from jwt.io by setting a payload:
+  // { "profileToken": "FAKEHASH" }.
+  const JWT_TOKEN = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwcm9maWxlVG9rZW4iOiJGQUtFSEFTSCJ9.lrpqj6L1qu-vlV48Xp-3om2Lf3M7eztXuC8UlkePnKg`;
+  const BARE_PROFILE_TOKEN = 'FAKEHASH';
+
   beforeEach(function() {
     if ((window: any).TextEncoder) {
       throw new Error('A TextEncoder was already on the window object.');
@@ -184,11 +190,27 @@ describe('attemptToPublish', function() {
     expect(getUploadPhase(getState())).toEqual('local');
     const publishAttempt = dispatch(attemptToPublish());
     expect(getUploadPhase(getState())).toEqual('compressing');
-    resolveUpload('FAKEHASH');
+    resolveUpload(JWT_TOKEN);
 
     expect(await publishAttempt).toEqual(true);
 
     expect(getUploadPhase(getState())).toEqual('uploaded');
+    expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
+    expect(getDataSource(getState())).toEqual('public');
+  });
+
+  it('works when the server returns a bare hash instead of a JWT token', async function() {
+    const { dispatch, getState, resolveUpload } = setup();
+    expect(getUploadPhase(getState())).toEqual('local');
+    const publishAttempt = dispatch(attemptToPublish());
+    expect(getUploadPhase(getState())).toEqual('compressing');
+    resolveUpload(BARE_PROFILE_TOKEN);
+
+    expect(await publishAttempt).toEqual(true);
+
+    expect(getUploadPhase(getState())).toEqual('uploaded');
+    expect(getHash(getState())).toEqual(BARE_PROFILE_TOKEN);
+    expect(getDataSource(getState())).toEqual('public');
   });
 
   it('can handle upload errors', async function() {
@@ -223,7 +245,7 @@ describe('attemptToPublish', function() {
     updateUploadProgress(0.5);
     expect(getUploadProgress(getState())).toEqual(0.5);
 
-    resolveUpload('FAKEHASH');
+    resolveUpload(JWT_TOKEN);
 
     expect(await publishAttempt).toEqual(true);
 
@@ -233,7 +255,7 @@ describe('attemptToPublish', function() {
   it('can reset after a successful upload', async function() {
     const { dispatch, getState, resolveUpload } = setup();
     const publishAttempt = dispatch(attemptToPublish());
-    resolveUpload('FAKEHASH');
+    resolveUpload(JWT_TOKEN);
     expect(getUploadGeneration(getState())).toEqual(0);
 
     expect(await publishAttempt).toEqual(true);
@@ -278,7 +300,7 @@ describe('attemptToPublish', function() {
     expect(getUploadGeneration(getState())).toEqual(1);
 
     // Resolve the previous upload.
-    resolveUpload('FAKEHASH');
+    resolveUpload(JWT_TOKEN);
     await promise;
 
     // Make sure that the attemptToPublish workflow doesn't continue to the
@@ -306,7 +328,7 @@ describe('attemptToPublish', function() {
 
     // Now upload.
     const publishAttempt = dispatch(attemptToPublish());
-    resolveUpload('FAKEHASH');
+    resolveUpload(JWT_TOKEN);
     expect(await publishAttempt).toEqual(true);
 
     // Check that we are still on this tab.
@@ -344,7 +366,7 @@ describe('attemptToPublish', function() {
 
       // Upload the profile.
       const publishAttempt = dispatch(attemptToPublish());
-      resolveUpload('FAKEHASH');
+      resolveUpload(JWT_TOKEN);
       expect(await publishAttempt).toEqual(true);
 
       // Now check that we are reporting as being a public single profile.
@@ -360,7 +382,7 @@ describe('attemptToPublish', function() {
 
       // Now upload.
       const publishAttempt = dispatch(attemptToPublish());
-      resolveUpload('FAKEHASH');
+      resolveUpload(JWT_TOKEN);
       expect(await publishAttempt).toEqual(true);
 
       // Now check that we are reporting as being a public single profile.
@@ -381,7 +403,7 @@ describe('attemptToPublish', function() {
 
       // Now upload the SECOND profile.
       const publishAttempt2 = dispatch(attemptToPublish());
-      resolveUpload('FAKEHASH');
+      resolveUpload(JWT_TOKEN);
       expect(await publishAttempt2).toEqual(true);
 
       // For the second profile, check that we are reporting as being a public
