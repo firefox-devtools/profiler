@@ -71,3 +71,28 @@ describe('jwt/extractAndDecodePayload', () => {
     expect(Jwt.extractAndDecodePayload(fixture)).toBe(null);
   });
 });
+
+describe('jwt/extractProfileTokenFromJwt', () => {
+  // Main use cases are tested in the store/publish.test.js. In this unit test
+  // we'll focus on error cases.
+
+  it('errors when passing a badly formed token', () => {
+    jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    // This looks like a JWT token but it's clearly incorrect.
+    const incorrectBase64 = 'A.B.C';
+    expect(() => Jwt.extractProfileTokenFromJwt(incorrectBase64)).toThrow();
+
+    // This is the same one as in a previous test.
+    const incorrectJSON = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.c3RyaW5n.dCi-PvNARK1DvRcqTtkVaimRLFJTY_a7LZqSruor1Uw`;
+    expect(() => Jwt.extractProfileTokenFromJwt(incorrectJSON)).toThrow();
+  });
+
+  it(`errors when the token doesn't have the needed property`, () => {
+    // This token's payload is { "name": "John Doe" }
+    const tokenWithoutProfileToken = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiSm9obiBEb2UifQ.DjwRE2jZhren2Wt37t5hlVru6Myq4AhpGLiiefF69u8`;
+    expect(() =>
+      Jwt.extractProfileTokenFromJwt(tokenWithoutProfileToken)
+    ).toThrow();
+  });
+});

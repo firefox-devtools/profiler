@@ -46,3 +46,34 @@ export function decodeJwtBase64Url(base64UrlEncodedValue: string): string {
 
   return atob(base64EncodedValue);
 }
+
+/**
+ * This function returns a profile token from a JWT token, if the passed string
+ * looks like a JWT token. Otherwise it just returns the passed string because
+ * this would be the hash directly, as returned by a previous version of the
+ * server.
+ * In the future when the server will be migrated we'll be able to remove this
+ * fallback.
+ */
+export function extractProfileTokenFromJwt(hashOrToken: string): string {
+  if (isValidJwtToken(hashOrToken)) {
+    // This is a JWT token, let's extract the hash out of it.
+    const jwtPayload = extractAndDecodePayload(hashOrToken);
+    if (!jwtPayload) {
+      throw new Error(
+        `The JWT token that's been returned by the server is incorrect.`
+      );
+    }
+
+    const { profileToken } = jwtPayload;
+    if (!profileToken) {
+      throw new Error(
+        `The JWT token returned by the server doesn't contain a profile token.`
+      );
+    }
+    return profileToken;
+  }
+
+  // Then this is a good old hash.
+  return hashOrToken;
+}

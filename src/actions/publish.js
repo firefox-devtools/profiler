@@ -16,7 +16,7 @@ import {
 import { getDataSource } from '../selectors/url-state';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from '../utils/flow';
-import * as Jwt from '../utils/jwt';
+import { extractProfileTokenFromJwt } from '../utils/jwt';
 import { setHistoryReplaceState } from '../app-logic/url-handling';
 
 import type { Action, ThunkAction } from '../types/store';
@@ -66,37 +66,6 @@ export function updateUploadProgress(uploadProgress: number): Action {
  */
 export function uploadFailed(error: mixed): Action {
   return { type: 'UPLOAD_FAILED', error };
-}
-
-/**
- * This function returns a profile token from a JWT token, if the passed string
- * looks like a JWT token. Otherwise it just returns the passed string because
- * this would be the hash directly, as returned by a previous version of the
- * server.
- * In the future when the server will be migrated we'll be able to remove this
- * fallback.
- */
-function extractProfileTokenFromJwt(hashOrToken: string): string {
-  if (Jwt.isValidJwtToken(hashOrToken)) {
-    // This is a JWT token, let's extract the hash out of it.
-    const jwtPayload = Jwt.extractAndDecodePayload(hashOrToken);
-    if (!jwtPayload) {
-      throw new Error(
-        `The JWT token that's been returned by the server is incorrect.`
-      );
-    }
-
-    const { profileToken } = jwtPayload;
-    if (!profileToken) {
-      throw new Error(
-        `The JWT token returned by the server doesn't contain a profile token.`
-      );
-    }
-    return profileToken;
-  }
-
-  // Then this is a good old hash.
-  return hashOrToken;
 }
 
 /**
