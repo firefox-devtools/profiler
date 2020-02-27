@@ -971,6 +971,55 @@ describe('actions/ProfileView', function() {
       expect(getMarker(markerIndexes[0]).name.includes('IPCOut')).toBeTruthy();
     });
 
+    it('filters the markers by a potential data payload of type Log', function() {
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+        ['c', 2, null],
+        [
+          'd',
+          3,
+          {
+            type: 'Log',
+            module: 'nsJarProtocol',
+            name: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
+          },
+        ],
+      ]);
+      const { dispatch, getState } = storeWithProfile(profile);
+
+      // Tests the filename
+      expect(
+        selectedThreadSelectors.getSearchFilteredMarkerIndexes(getState())
+      ).toHaveLength(4);
+
+      const getMarker = selectedThreadSelectors.getMarkerGetter(getState());
+
+      // Test the module
+      dispatch(ProfileView.changeMarkersSearchString('Protocol'));
+      let markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+
+      // Test the payload name
+      dispatch(ProfileView.changeMarkersSearchString('jarchannel'));
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+
+      // Test the marker's name
+      dispatch(ProfileView.changeMarkersSearchString('log'));
+      markerIndexes = selectedThreadSelectors.getSearchFilteredMarkerIndexes(
+        getState()
+      );
+      expect(markerIndexes).toHaveLength(1);
+      expect(getMarker(markerIndexes[0]).name.includes('d')).toBeTruthy();
+    });
+
     it('filters the markers by other properties of a potential data payload', function() {
       const profile = getProfileWithMarkers([
         [

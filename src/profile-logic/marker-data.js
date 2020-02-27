@@ -116,6 +116,11 @@ export function getSearchFilteredMarkerIndexes(
       continue;
     }
     if (data && typeof data === 'object') {
+      if (searchRegExp.test(data.type)) {
+        newMarkers.push(markerIndex);
+        continue;
+      }
+
       if (data.type === 'FileIO') {
         const { filename, operation, source } = data;
         if (
@@ -132,6 +137,13 @@ export function getSearchFilteredMarkerIndexes(
           searchRegExp.test(messageType) ||
           searchRegExp.test(otherPid.toString())
         ) {
+          newMarkers.push(markerIndex);
+          continue;
+        }
+      } else if (data.type === 'Log') {
+        const { name, module } = data;
+
+        if (searchRegExp.test(name) || searchRegExp.test(module)) {
           newMarkers.push(markerIndex);
           continue;
         }
