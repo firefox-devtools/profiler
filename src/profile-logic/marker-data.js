@@ -1268,7 +1268,7 @@ export function getMarkerFullDescription(marker: Marker) {
         description += ` — ${data.name}`;
         break;
       case 'Log':
-        description += ` ${data.module}: ${data.name}`;
+        description = `(${data.module}) ${data.name}`;
         break;
       case 'IPC':
         description = `${data.messageType} — ${
