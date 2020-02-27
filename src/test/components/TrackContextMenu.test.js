@@ -12,6 +12,7 @@ import { ensureExists } from '../../utils/flow';
 import {
   changeSelectedThread,
   changeRightClickedTrack,
+  changeShowTabOnly,
 } from '../../actions/profile-view';
 import TrackContextMenu from '../../components/timeline/TrackContextMenu';
 import { getGlobalTracks, getLocalTracks } from '../../selectors/profile';
@@ -23,7 +24,10 @@ import {
   getProfileWithNiceTracks,
   getHumanReadableTracks,
 } from '../fixtures/profiles/tracks';
-import { getScreenshotTrackProfile } from '../fixtures/profiles/processed-profile';
+import {
+  getScreenshotTrackProfile,
+  getNetworkTrackProfile,
+} from '../fixtures/profiles/processed-profile';
 
 import { storeWithProfile } from '../fixtures/stores';
 
@@ -56,11 +60,10 @@ describe('timeline/TrackContextMenu', function() {
   }
 
   describe('selected global track', function() {
-    function setupGlobalTrack(profile) {
+    function setupGlobalTrack(profile, trackIndex = 1) {
       const results = setup(profile);
       const { getByText, dispatch, getState } = results;
 
-      const trackIndex = 1;
       const trackReference = {
         type: 'global',
         trackIndex: trackIndex,
@@ -188,6 +191,25 @@ describe('timeline/TrackContextMenu', function() {
     // eslint-disable-next-line jest/no-disabled-tests
     it.skip('can present a disabled isolate item on non-process tracks', function() {
       // TODO - We should wait until we have some real tracks without a thread index.
+    });
+
+    it('network track will be displayed when a number is not set for showTabOnly', () => {
+      const { container } = setupGlobalTrack(getNetworkTrackProfile(), 0);
+      // We can't use getHumanReadableTracks here because that function doesn't
+      // use the functions used by context menu directly and gives us wrong results.
+      expect(container.firstChild).toMatchSnapshot();
+    });
+
+    it('network track will be hidden when a number is set for showTabOnly', () => {
+      const { dispatch, container } = setupGlobalTrack(
+        getNetworkTrackProfile(),
+        0
+      );
+      // parameter doesn't matter here, it can be anything except null.
+      dispatch(changeShowTabOnly(111));
+      // We can't use getHumanReadableTracks here because that function doesn't
+      // use the functions used by context menu directly and gives us wrong results.
+      expect(container.firstChild).toMatchSnapshot();
     });
   });
 

@@ -228,7 +228,9 @@ export type RemoveProfileInformation = {
 export type SelectedState =
   // Samples can be filtered through various operations, like searching, or
   // call tree transforms.
-  | 'FILTERED_OUT'
+  | 'FILTERED_OUT_BY_TRANSFORM'
+  // Samples can be filtered out if they are not part of the active tab.
+  | 'FILTERED_OUT_BY_ACTIVE_TAB'
   // This sample is selected because either the tip or an ancestor call node matches
   // the currently selected call node.
   | 'SELECTED'
@@ -238,3 +240,9 @@ export type SelectedState =
   // This call node is not selected, and the stacks are ordered after the selected
   // call node as sorted by the getTreeOrderComparator.
   | 'UNSELECTED_ORDERED_AFTER_SELECTED';
+
+/**
+ * It holds the initially selected track's HTMLElement. This allows the timeline
+ * to scroll the initially selected track into view once the page is loaded.
+ */
+export type InitialSelectedTrackReference = HTMLElement;

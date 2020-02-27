@@ -111,7 +111,7 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
           return {
             ...styles,
             category: categoryIndex,
-            filteredOutFillStyle: _createDiagonalStripePattern(
+            filteredOutByTransformFillStyle: _createDiagonalStripePattern(
               ctx,
               styles.unselectedFillStyle
             ),

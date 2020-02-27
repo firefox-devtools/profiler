@@ -13,8 +13,7 @@ describe('the thing to be tested', function() {
 ```
 
 Assertions are written using [Jest's own Library](https://facebook.github.io/jest/docs/using-matchers.html#content).
-We use `async`/`await` to test asynchronous code. We also sometimes use [sinon's mock library](http://sinonjs.org/)
-when Jest's mocking capabilities are falling short. This should be used as a last resort only because better solutions usually exist.
+We use `async`/`await` to test asynchronous code.
 
 ## Code coverage
 

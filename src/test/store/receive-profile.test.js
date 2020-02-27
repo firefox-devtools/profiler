@@ -5,10 +5,12 @@
 
 import type { Profile } from '../../types/profile';
 
-import sinon from 'sinon';
 import { oneLineTrim } from 'common-tags';
 
-import { getEmptyProfile } from '../../profile-logic/data-structures';
+import {
+  getEmptyProfile,
+  getEmptyThread,
+} from '../../profile-logic/data-structures';
 import { getTimeRangeForThread } from '../../profile-logic/profile-data';
 import { viewProfileFromPathInZipFile } from '../../actions/zipped-profiles';
 import { blankStore } from '../fixtures/stores';
@@ -161,6 +163,35 @@ describe('actions/receive-profile', function() {
         'show [process]',
         '  - hide [thread Idle Thread]',
         '  - show [thread Work Thread] SELECTED',
+      ]);
+    });
+
+    it('will show the thread with no samples and with paint markers', function() {
+      const store = blankStore();
+      const profile = getEmptyProfile();
+
+      profile.threads.push(
+        // This thread shouldn't be hidden because it's the main thread in the main process.
+        getEmptyThread({ name: 'GeckoMain', processType: 'default', pid: 1 }),
+        // This thread shouldn't be hidden because it will have useful markers even if it has no samples.
+        getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 2 }),
+        // This thread will be hidden because it has no samples and no markers.
+        getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 3 })
+      );
+
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+        [
+          'RefreshDriverTick',
+          0,
+          { type: 'tracing', category: 'Paint', interval: 'start' },
+        ],
+      ]);
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [thread GeckoMain default]',
+        'show [thread GeckoMain tab] SELECTED',
+        'hide [thread GeckoMain tab]',
       ]);
     });
 
@@ -490,17 +521,17 @@ describe('actions/receive-profile', function() {
     }: any): Response);
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
-      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+      // Call the argument of setTimeout asynchronously right away
+      // (instead of waiting for the timeout).
+      jest
+        .spyOn(window, 'setTimeout')
+        .mockImplementation(callback => process.nextTick(callback));
     });
 
     afterEach(function() {
       delete window.fetch;
-      window.setTimeout.restore();
     });
 
     it('can retrieve a profile from the web and save it to state', async function() {
@@ -646,17 +677,17 @@ describe('actions/receive-profile', function() {
     }: any): Response);
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
-      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+      // Call the argument of setTimeout asynchronously right away
+      // (instead of waiting for the timeout).
+      jest
+        .spyOn(window, 'setTimeout')
+        .mockImplementation(callback => process.nextTick(callback));
     });
 
     afterEach(function() {
       delete window.fetch;
-      window.setTimeout.restore();
     });
 
     it('can retrieve a profile from the web and save it to state', async function() {
@@ -761,13 +792,11 @@ describe('actions/receive-profile', function() {
    */
   describe('_fetchProfile', function() {
     beforeEach(function() {
-      window.fetch = sinon.stub();
-      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+      window.fetch = jest.fn();
     });
 
     afterEach(function() {
       delete window.fetch;
-      window.setTimeout.restore();
     });
 
     /**
@@ -801,7 +830,7 @@ describe('actions/receive-profile', function() {
         json = () => Promise.resolve(profile);
       }
 
-      const zippedProfileResponse = {
+      const zippedProfileResponse = (({
         ok: true,
         status: 200,
         json,
@@ -818,8 +847,15 @@ describe('actions/receive-profile', function() {
             }
           },
         },
-      };
-      window.fetch.withArgs(url).resolves(zippedProfileResponse);
+      }: any): Response);
+      const fetch403Response = (({ ok: false, status: 403 }: any): Response);
+
+      window.fetch = jest.fn(actualUrl =>
+        Promise.resolve(
+          actualUrl === url ? zippedProfileResponse : fetch403Response
+        )
+      );
+
       const reportError = jest.fn();
       const args = {
         url,
@@ -1302,9 +1338,6 @@ describe('actions/receive-profile', function() {
     }
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
       window.fetch = jest.fn();
       window.fetch.mockImplementation(() =>
         Promise.reject(new Error('No more answers have been configured.'))
@@ -1497,9 +1530,6 @@ describe('actions/receive-profile', function() {
     }
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
       window.fetch = jest.fn();
       window.fetch.mockImplementation(() =>
         Promise.reject(new Error('No more answers have been configured.'))

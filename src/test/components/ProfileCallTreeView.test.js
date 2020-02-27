@@ -76,7 +76,7 @@ describe('calltree/ProfileCallTreeView', function() {
       <Provider store={store}>
         <>
           <CallNodeContextMenu />
-          <ProfileCallTreeView hideThreadActivityGraph={true} />
+          <ProfileCallTreeView />
         </>
       </Provider>
     );
@@ -140,7 +140,7 @@ describe('calltree/ProfileCallTreeView', function() {
 
     const { container } = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
 
@@ -322,7 +322,7 @@ describe('calltree/ProfileCallTreeView EmptyReasons', function() {
   function renderWithStore(store) {
     return render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     ).container.firstChild;
   }
@@ -356,7 +356,7 @@ describe('calltree/ProfileCallTreeView navigation keys', () => {
     const store = storeWithProfile(profile);
     const { container } = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
 
@@ -473,7 +473,7 @@ describe('calltree/ProfileCallTreeView TransformNavigator', () => {
 
     const { container } = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
     expect(
@@ -487,12 +487,18 @@ describe('ProfileCallTreeView/end-to-end', () => {
   // requiring one.
   // eslint-disable-next-line jest/expect-expect
   it('can display a gecko profile without crashing', () => {
+    // We use the fake indexeddb in this test because the symbolication kicks
+    // in. The fake indexeddb relies on setImmediate to run events. That's why
+    // we use useFakeTimers so that pending event handlers are canceled when the
+    // test runs and we don't get spurious messages.
+    jest.useFakeTimers();
+
     const geckoProfile = createGeckoProfile();
     const processedProfile = processProfile(geckoProfile);
     const store = storeWithProfile(processedProfile);
     render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
   });
@@ -504,7 +510,7 @@ describe('ProfileCallTreeView with JS Allocations', function() {
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
     const changeSelect = createSelectChanger(renderResult);
@@ -560,7 +566,7 @@ describe('ProfileCallTreeView with unbalanced native allocations', function() {
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
     const changeSelect = createSelectChanger(renderResult);
@@ -628,7 +634,7 @@ describe('ProfileCallTreeView with balanced native allocations', function() {
     const store = storeWithProfile(profile);
     const renderResult = render(
       <Provider store={store}>
-        <ProfileCallTreeView hideThreadActivityGraph={true} />
+        <ProfileCallTreeView />
       </Provider>
     );
     const changeSelect = createSelectChanger(renderResult);

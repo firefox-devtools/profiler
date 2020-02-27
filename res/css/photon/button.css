@@ -28,15 +28,6 @@
   background-color: var(--grey-90-a20);
 }
 
-.photon-message-bar-error .photon-button {
-  background-color: var(--red-70);
-  color: #fff;
-}
-
-.photon-message-bar .photon-button {
-  margin-left: 8px;
-}
-
 .photon-button:hover:active {
   background-color: var(--grey-90-a30);
 }
