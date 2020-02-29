@@ -154,6 +154,7 @@ function setup(
   threadIndex: ThreadIndex
 ) {
   const { getState, dispatch } = store;
+  const setIsInitialSelectedPane = () => {};
   // The assertions are simpler if this thread is not already selected.
   dispatch(changeSelectedThread(threadIndex + 1));
 
@@ -171,6 +172,7 @@ function setup(
         pid={PID}
         localTrack={localTrack}
         trackIndex={trackReference.trackIndex}
+        setIsInitialSelectedPane={setIsInitialSelectedPane}
       />
     </Provider>
   );

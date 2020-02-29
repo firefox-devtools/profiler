@@ -11,6 +11,7 @@ import {
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
+  changeShowTabOnly,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -376,6 +377,30 @@ describe('profileName', function() {
     const { getState } = _getStoreWithURL();
     expect(urlStateReducers.getProfileNameFromUrl(getState())).toBe('');
     expect(urlStateReducers.getProfileName(getState())).toBe('');
+  });
+});
+
+describe('showTabOnly', function() {
+  it('serializes the showTabOnly in the URL ', function() {
+    const { getState, dispatch } = _getStoreWithURL();
+    const showTabOnly = 123;
+
+    dispatch(changeShowTabOnly(showTabOnly));
+    const urlState = urlStateReducers.getUrlState(getState());
+    const { query } = urlStateToUrlObject(urlState);
+    expect(query.showTabOnly).toBe(showTabOnly);
+  });
+
+  it('reflects in the state from URL', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?showTabOnly=123',
+    });
+    expect(urlStateReducers.getShowTabOnly(getState())).toBe(123);
+  });
+
+  it('returns null when showTabOnly is not specified', function() {
+    const { getState } = _getStoreWithURL();
+    expect(urlStateReducers.getShowTabOnly(getState())).toBe(null);
   });
 });
 

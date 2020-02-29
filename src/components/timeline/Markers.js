@@ -456,7 +456,7 @@ export const TimelineMarkersOverview = explicitConnect<
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
-    const markerIndexes = selectors.getCommittedRangeFilteredMarkerIndexesForHeader(
+    const markerIndexes = selectors.getCommittedRangeAndTabFilteredMarkerIndexesForHeader(
       state
     );
     const markerInfo = getRightClickedMarkerInfo(state);

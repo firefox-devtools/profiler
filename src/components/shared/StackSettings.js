@@ -15,6 +15,7 @@ import {
 import {
   getImplementationFilter,
   getInvertCallstack,
+  getSelectedTab,
   getShowUserTimings,
   getCurrentSearchString,
 } from '../../selectors/url-state';
@@ -41,6 +42,7 @@ type OwnProps = {|
 type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +selectedTab: string,
   +invertCallstack: boolean,
   +showUserTimings: boolean,
   +currentSearchString: string,
@@ -123,6 +125,7 @@ class StackSettings extends PureComponent<Props> {
   render() {
     const {
       invertCallstack,
+      selectedTab,
       showUserTimings,
       hideInvertCallstack,
       currentSearchString,
@@ -166,23 +169,30 @@ class StackSettings extends PureComponent<Props> {
                     : null}
                   {canShowRetainedMemory
                     ? this._renderCallTreeStrategyOption(
-                        'Retained Allocations',
+                        'Retained Memory',
                         'native-retained-allocations',
-                        'Summarize using bytes of memory that were allocated, and never freed while profiling'
+                        'Summarize using bytes of memory that were allocated, and never freed in the current preview selection'
                       )
                     : null}
                   {hasNativeAllocations
                     ? this._renderCallTreeStrategyOption(
-                        'Allocations',
+                        'Allocated Memory',
                         'native-allocations',
                         'Summarize using bytes of memory allocated'
                       )
                     : null}
+                  {canShowRetainedMemory
+                    ? this._renderCallTreeStrategyOption(
+                        'Deallocated Memory',
+                        'native-deallocations-memory',
+                        'Summarize using bytes of memory deallocated, by the site where the memory was allocated'
+                      )
+                    : null}
                   {hasNativeAllocations
                     ? this._renderCallTreeStrategyOption(
-                        'Deallocations',
-                        'native-deallocations',
-                        'Summarize using bytes of memory deallocated'
+                        'Deallocation Sites',
+                        'native-deallocations-sites',
+                        'Summarize using bytes of memory deallocated, by the site where the memory was deallocated'
                       )
                     : null}
                 </select>
@@ -202,7 +212,7 @@ class StackSettings extends PureComponent<Props> {
               </label>
             </li>
           )}
-          {
+          {selectedTab !== 'stack-chart' ? null : (
             <li className="stackSettingsListItem">
               <label className="photon-label photon-label-micro stackSettingsLabel">
                 <input
@@ -214,7 +224,7 @@ class StackSettings extends PureComponent<Props> {
                 {' Show user timing'}
               </label>
             </li>
-          }
+          )}
         </ul>
         <PanelSearch
           className="stackSettingsSearchField"
@@ -231,6 +241,7 @@ class StackSettings extends PureComponent<Props> {
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     invertCallstack: getInvertCallstack(state),
+    selectedTab: getSelectedTab(state),
     showUserTimings: getShowUserTimings(state),
     implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),

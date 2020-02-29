@@ -34,7 +34,7 @@ type ConnectOptions = {
   areStatePropsEqual?: boolean,
   areMergedPropsEqual?: boolean,
   storeKey?: boolean,
-  withRef?: boolean,
+  forwardRef?: boolean,
 };
 
 /**

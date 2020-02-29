@@ -32,6 +32,7 @@ import type {
   NativeAllocationsTable,
   InnerWindowID,
   BalancedNativeAllocationsTable,
+  IndexIntoFrameTable,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -182,7 +183,7 @@ export function getSampleIndexToCallNodeIndex(
 /**
  * Go through the samples, and determine their current state.
  *
- * For samples that are neither 'FILTERED_OUT' nor 'SELECTED', this function compares
+ * For samples that are neither 'FILTERED_OUT_*' nor 'SELECTED', this function compares
  * the sample's call node to the selected call node, in tree order. It uses the same
  * ordering as the function compareCallNodes in getTreeOrderComparator. But it does not
  * call compareCallNodes with the selected node for each sample's call node, because doing
@@ -193,6 +194,7 @@ export function getSampleIndexToCallNodeIndex(
 export function getSamplesSelectedStates(
   callNodeTable: CallNodeTable,
   sampleCallNodes: Array<IndexIntoCallNodeTable | null>,
+  activeTabFilteredCallNodes: Array<IndexIntoCallNodeTable | null>,
   selectedCallNodeIndex: IndexIntoCallNodeTable | null
 ): SelectedState[] {
   const result = new Array(sampleCallNodes.length);
@@ -222,11 +224,16 @@ export function getSamplesSelectedStates(
    * Take a call node, and compute its selected state.
    */
   function getSelectedStateFromCallNode(
-    callNode: IndexIntoCallNodeTable | null
+    callNode: IndexIntoCallNodeTable | null,
+    activeTabFilteredCallNode: IndexIntoCallNodeTable | null
   ): SelectedState {
     let callNodeIndex = callNode;
     if (callNodeIndex === null) {
-      return 'FILTERED_OUT';
+      return activeTabFilteredCallNode === null
+        ? // This sample was not part of the active tab.
+          'FILTERED_OUT_BY_ACTIVE_TAB'
+        : // This sample was filtered out in the transform pipeline.
+          'FILTERED_OUT_BY_TRANSFORM';
     }
 
     // When there's no selected call node, we don't want to shadow everything
@@ -289,7 +296,8 @@ export function getSamplesSelectedStates(
     sampleIndex++
   ) {
     result[sampleIndex] = getSelectedStateFromCallNode(
-      sampleCallNodes[sampleIndex]
+      sampleCallNodes[sampleIndex],
+      activeTabFilteredCallNodes[sampleIndex]
     );
   }
   return result;
@@ -812,7 +820,8 @@ export function toValidCallTreeSummaryStrategy(
     case 'js-allocations':
     case 'native-retained-allocations':
     case 'native-allocations':
-    case 'native-deallocations':
+    case 'native-deallocations-sites':
+    case 'native-deallocations-memory':
       return strategy;
     default:
       // Default to "timing" if the strategy is not recognized. This value can come
@@ -1025,6 +1034,83 @@ export function filterThreadToSearchString(
   return updateThreadStacks(thread, stackTable, stackIndex =>
     stackMatchesFilter(stackIndex) ? stackIndex : null
   );
+}
+
+/**
+ * We have page data(innerWindowID) inside the JS frames. Go through each sample
+ * and filter out the ones that don't include any JS frame with the relevant innerWindowID.
+ * Please note that it also keeps native frames if that sample has a relevant JS
+ * frame in any part of the stack. Also it doesn't mutate the stack itself, only
+ * nulls the stack array elements of samples object. Therefore, it doesn't
+ * invalidate transforms.
+ * If we don't have any item in relevantPages, returns all the samples.
+ */
+export function filterThreadByTab(
+  thread: Thread,
+  relevantPages: Set<InnerWindowID>
+): Thread {
+  return timeCode('filterThreadByTab', () => {
+    if (relevantPages.size === 0) {
+      // Either there is no relevant page or "active tab only" view is not active.
+      return thread;
+    }
+
+    const { frameTable, stackTable } = thread;
+
+    // innerWindowID array lives inside the frameTable. Check that and decide
+    // if we should keep that sample or not.
+    const frameMatchesFilterCache: Map<
+      IndexIntoFrameTable,
+      boolean
+    > = new Map();
+    function frameMatchesFilter(frame) {
+      const cache = frameMatchesFilterCache.get(frame);
+      if (cache !== undefined) {
+        return cache;
+      }
+
+      const innerWindowID = frameTable.innerWindowID[frame];
+      const matches =
+        innerWindowID && innerWindowID > 0
+          ? relevantPages.has(innerWindowID)
+          : false;
+      frameMatchesFilterCache.set(frame, matches);
+      return matches;
+    }
+
+    // Use the stackTable to navigate to frameTable and cache the result of it.
+    const stackMatchesFilterCache: Map<
+      IndexIntoStackTable,
+      boolean
+    > = new Map();
+    function stackMatchesFilter(stackIndex) {
+      if (stackIndex === null) {
+        return false;
+      }
+      const cache = stackMatchesFilterCache.get(stackIndex);
+      if (cache !== undefined) {
+        return cache;
+      }
+
+      const prefix = stackTable.prefix[stackIndex];
+      if (stackMatchesFilter(prefix)) {
+        stackMatchesFilterCache.set(stackIndex, true);
+        return true;
+      }
+
+      const frame = stackTable.frame[stackIndex];
+      const matches = frameMatchesFilter(frame);
+      stackMatchesFilterCache.set(stackIndex, matches);
+      return matches;
+    }
+
+    // Update the stack array elements of samples object and make them null if
+    // they don't include any relevant JS frame.
+    // It doesn't mutate the stack itself.
+    return updateThreadStacks(thread, stackTable, stackIndex =>
+      stackMatchesFilter(stackIndex) ? stackIndex : null
+    );
+  });
 }
 
 /**
@@ -2051,7 +2137,7 @@ export function filterToAllocations(
  * This function filters to only negative memory size values in the native allocations.
  * It shows all of the memory frees.
  */
-export function filterToDeallocations(
+export function filterToDeallocationsSites(
   nativeAllocations: NativeAllocationsTable
 ): NativeAllocationsTable {
   let newNativeAllocations;
@@ -2083,6 +2169,67 @@ export function filterToDeallocations(
     }
   }
   return newNativeAllocations;
+}
+
+/**
+ * This function filters to only negative memory size values in the native allocations.
+ * It rewrites the stacks to point back to the stack of the allocation.
+ */
+export function filterToDeallocationsMemory(
+  nativeAllocations: BalancedNativeAllocationsTable
+): NativeAllocationsTable {
+  // A-----D------A-------D
+  type Address = number;
+  type IndexIntoAllocations = number;
+  const memoryAddressToAllocation: Map<
+    Address,
+    IndexIntoAllocations
+  > = new Map();
+  const stackOfOriginalAllocation: Array<IndexIntoAllocations | null> = [];
+  for (
+    let allocationIndex = 0;
+    allocationIndex < nativeAllocations.length;
+    allocationIndex++
+  ) {
+    const bytes = nativeAllocations.duration[allocationIndex];
+    const memoryAddress = nativeAllocations.memoryAddress[allocationIndex];
+    if (bytes >= 0) {
+      // Handle the allocation.
+
+      // Provide a map back to this index.
+      memoryAddressToAllocation.set(memoryAddress, allocationIndex);
+      stackOfOriginalAllocation[allocationIndex] = null;
+    } else {
+      // Lookup the previous allocation.
+      const previousAllocationIndex = memoryAddressToAllocation.get(
+        memoryAddress
+      );
+      if (previousAllocationIndex === undefined) {
+        stackOfOriginalAllocation[allocationIndex] = null;
+      } else {
+        // This deallocation matches a previous allocation. Remove the allocation.
+        stackOfOriginalAllocation[allocationIndex] = previousAllocationIndex;
+        // There is a match, so delete this old association.
+        memoryAddressToAllocation.delete(memoryAddress);
+      }
+    }
+  }
+
+  const newDeallocations = getEmptyBalancedNativeAllocationsTable();
+  for (let i = 0; i < nativeAllocations.length; i++) {
+    const duration = nativeAllocations.duration[i];
+    const stackIndex = stackOfOriginalAllocation[i];
+    if (stackIndex !== null) {
+      newDeallocations.time.push(nativeAllocations.time[i]);
+      newDeallocations.stack.push(stackIndex);
+      newDeallocations.duration.push(duration);
+      newDeallocations.memoryAddress.push(nativeAllocations.memoryAddress[i]);
+      newDeallocations.threadId.push(nativeAllocations.threadId[i]);
+      newDeallocations.length++;
+    }
+  }
+
+  return newDeallocations;
 }
 
 /**

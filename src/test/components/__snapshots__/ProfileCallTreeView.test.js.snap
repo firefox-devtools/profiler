@@ -91,19 +91,6 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -655,6 +642,418 @@ exports[`ProfileCallTreeView with JS Allocations matches the snapshot for JS all
 </div>
 `;
 
+exports[`ProfileCallTreeView with balanced native allocations matches the snapshot for deallocated memory 1`] = `
+<div
+  aria-labelledby="calltree-tab-button"
+  class="treeAndSidebarWrapper"
+  id="calltree-tab"
+  role="tabpanel"
+>
+  <div
+    class="stackSettings"
+  >
+    <ul
+      class="stackSettingsList"
+    >
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            checked=""
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="combined"
+          />
+          All stacks
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="js"
+          />
+          JavaScript
+        </label>
+        <label
+          class="photon-label photon-label-micro stackSettingsFilterLabel"
+        >
+          <input
+            class="photon-radio photon-radio-micro stackSettingsFilterInput"
+            name="stack-settings-filter"
+            title="Filter stack frames to a type."
+            type="radio"
+            value="cpp"
+          />
+          Native
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem stackSettingsFilter"
+      >
+        <label>
+          Summarize:
+           
+          <select
+            class="stackSettingsSelect"
+          >
+            <option
+              title="Summarize using sampled stacks of executed code over time"
+              value="timing"
+            >
+              Timing Data
+            </option>
+            <option
+              title="Summarize using bytes of memory that were allocated, and never freed in the current preview selection"
+              value="native-retained-allocations"
+            >
+              Retained Memory
+            </option>
+            <option
+              title="Summarize using bytes of memory allocated"
+              value="native-allocations"
+            >
+              Allocated Memory
+            </option>
+            <option
+              title="Summarize using bytes of memory deallocated, by the site where the memory was allocated"
+              value="native-deallocations-memory"
+            >
+              Deallocated Memory
+            </option>
+            <option
+              title="Summarize using bytes of memory deallocated, by the site where the memory was deallocated"
+              value="native-deallocations-sites"
+            >
+              Deallocation Sites
+            </option>
+          </select>
+        </label>
+      </li>
+      <li
+        class="stackSettingsListItem"
+      >
+        <label
+          class="photon-label photon-label-micro stackSettingsLabel"
+        >
+          <input
+            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+            type="checkbox"
+          />
+           Invert call stack
+        </label>
+      </li>
+    </ul>
+    <div
+      class="panelSearchField stackSettingsSearchField"
+    >
+      <label
+        class="panelSearchFieldLabel"
+      >
+        Filter stacks: 
+        <form
+          class="idleSearchField panelSearchFieldInput"
+        >
+          <input
+            class="idleSearchFieldInput photon-input"
+            name="search"
+            placeholder="Enter filter terms"
+            required=""
+            title="Only display stacks which contain a function whose name matches this substring"
+            type="search"
+            value=""
+          />
+          <input
+            class="idleSearchFieldButton"
+            tabindex="-1"
+            type="reset"
+          />
+        </form>
+        <div
+          class="panelSearchFieldIntroduction isHidden"
+        >
+          Did you know you can use the comma (,) to search using several terms?
+        </div>
+      </label>
+    </div>
+  </div>
+  <ol
+    class="filterNavigatorBar calltreeTransformNavigator"
+  >
+    <li
+      class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+      data-index="0"
+      title="Complete \\"Empty\\""
+    >
+      <span
+        class="filterNavigatorBarItemContent"
+      >
+        Complete "Empty"
+      </span>
+    </li>
+  </ol>
+  <div
+    class="treeView"
+  >
+    <div
+      class="treeViewHeader"
+    >
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalTimePercent"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn totalTime"
+      >
+        Total Size (bytes)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn selfTime"
+      >
+        Self (bytes)
+      </span>
+      <span
+        class="treeViewHeaderColumn treeViewFixedColumn icon"
+      />
+      <span
+        class="treeViewHeaderColumn treeViewMainColumn name"
+      />
+    </div>
+    <div
+      class="react-contextmenu-wrapper treeViewContextMenu"
+    >
+      <div
+        aria-activedescendant="treeViewRow-8"
+        aria-label="Call tree"
+        class="treeViewBody"
+        role="tree"
+        tabindex="0"
+      >
+        <div
+          class="treeViewBodyInnerWrapper"
+        >
+          <div
+            class="treeViewBodyInner treeViewBodyInner0"
+            style="height: 64px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner0TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner0InnerChunk"
+            >
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="-100%"
+                >
+                  -100%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="-15"
+                >
+                  -15
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="-3"
+                >
+                  -3
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns odd"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="-80%"
+                >
+                  -80%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="-12"
+                >
+                  -12
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="-5"
+                >
+                  -5
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+              <div
+                class="treeViewRow treeViewRowFixedColumns even"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTimePercent"
+                  title="-47%"
+                >
+                  -47%
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn totalTime"
+                  title="-7"
+                >
+                  -7
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn selfTime"
+                  title="-7"
+                >
+                  -7
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewFixedColumn icon"
+                  title=""
+                >
+                  <div
+                    class="nodeIcon "
+                  />
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="treeViewBodyInner treeViewBodyInner1"
+            style="height: 64px; width: 3000px;"
+          >
+            <div
+              class="treeViewBodyInner treeViewBodyInner1TopSpacer"
+              style="height: 0px;"
+            />
+            <div
+              class="treeViewBodyInner treeViewBodyInner1InnerChunk"
+            >
+              <div
+                aria-expanded="true"
+                aria-label="A, total size is -15 bytes (-100%), self size is -3 bytes"
+                aria-level="1"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even dim"
+                id="treeViewRow-0"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 0px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  A
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-expanded="true"
+                aria-label="B, total size is -12 bytes (-80%), self size is -5 bytes"
+                aria-level="2"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns odd dim"
+                id="treeViewRow-1"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 10px;"
+                />
+                <span
+                  class="treeRowToggleButton expanded canBeExpanded"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  B
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+              <div
+                aria-label="C, total size is -7 bytes (-47%), self size is -7 bytes"
+                aria-level="3"
+                aria-selected="false"
+                class="treeViewRow treeViewRowScrolledColumns even dim"
+                id="treeViewRow-2"
+                role="treeitem"
+                style="height: 16px; line-height: 16px;"
+              >
+                <span
+                  class="treeRowIndentSpacer"
+                  style="width: 20px;"
+                />
+                <span
+                  class="treeRowToggleButton collapsed leaf"
+                />
+                <span
+                  class="treeViewRowColumn treeViewMainColumn name"
+                >
+                  <span
+                    class="colored-square category-color-grey"
+                    title="Other"
+                  />
+                  C
+                </span>
+                <span
+                  class="treeViewRowColumn treeViewAppendageColumn lib"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
 exports[`ProfileCallTreeView with balanced native allocations matches the snapshot for retained allocations 1`] = `
 <div
   aria-labelledby="calltree-tab-button"
@@ -725,22 +1124,28 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
               Timing Data
             </option>
             <option
-              title="Summarize using bytes of memory that were allocated, and never freed while profiling"
+              title="Summarize using bytes of memory that were allocated, and never freed in the current preview selection"
               value="native-retained-allocations"
             >
-              Retained Allocations
+              Retained Memory
             </option>
             <option
               title="Summarize using bytes of memory allocated"
               value="native-allocations"
             >
-              Allocations
+              Allocated Memory
             </option>
             <option
-              title="Summarize using bytes of memory deallocated"
-              value="native-deallocations"
+              title="Summarize using bytes of memory deallocated, by the site where the memory was allocated"
+              value="native-deallocations-memory"
             >
-              Deallocations
+              Deallocated Memory
+            </option>
+            <option
+              title="Summarize using bytes of memory deallocated, by the site where the memory was deallocated"
+              value="native-deallocations-sites"
+            >
+              Deallocation Sites
             </option>
           </select>
         </label>
@@ -756,19 +1161,6 @@ exports[`ProfileCallTreeView with balanced native allocations matches the snapsh
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -1395,13 +1787,13 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
               title="Summarize using bytes of memory allocated"
               value="native-allocations"
             >
-              Allocations
+              Allocated Memory
             </option>
             <option
-              title="Summarize using bytes of memory deallocated"
-              value="native-deallocations"
+              title="Summarize using bytes of memory deallocated, by the site where the memory was deallocated"
+              value="native-deallocations-sites"
             >
-              Deallocations
+              Deallocation Sites
             </option>
           </select>
         </label>
@@ -1417,19 +1809,6 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -2056,13 +2435,13 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
               title="Summarize using bytes of memory allocated"
               value="native-allocations"
             >
-              Allocations
+              Allocated Memory
             </option>
             <option
-              title="Summarize using bytes of memory deallocated"
-              value="native-deallocations"
+              title="Summarize using bytes of memory deallocated, by the site where the memory was deallocated"
+              value="native-deallocations-sites"
             >
-              Deallocations
+              Deallocation Sites
             </option>
           </select>
         </label>
@@ -2078,19 +2457,6 @@ exports[`ProfileCallTreeView with unbalanced native allocations matches the snap
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -2711,19 +3077,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows a reason for a call tre
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -2857,19 +3210,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for being out o
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -3001,19 +3341,6 @@ exports[`calltree/ProfileCallTreeView EmptyReasons shows reasons for when sample
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -3202,19 +3529,6 @@ exports[`calltree/ProfileCallTreeView renders an inverted call tree 1`] = `
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -3833,19 +4147,6 @@ exports[`calltree/ProfileCallTreeView renders an unfiltered call tree 1`] = `
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -4460,19 +4761,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -5091,19 +5379,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -5673,19 +5948,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>
@@ -6259,19 +6521,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -6724,19 +6973,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
            Invert call stack
         </label>
       </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
-        </label>
-      </li>
     </ul>
     <div
       class="panelSearchField stackSettingsSearchField"
@@ -7187,19 +7423,6 @@ exports[`calltree/ProfileCallTreeView renders call tree with some search strings
             type="checkbox"
           />
            Invert call stack
-        </label>
-      </li>
-      <li
-        class="stackSettingsListItem"
-      >
-        <label
-          class="photon-label photon-label-micro stackSettingsLabel"
-        >
-          <input
-            class="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
-            type="checkbox"
-          />
-           Show user timing
         </label>
       </li>
     </ul>

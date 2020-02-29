@@ -9,6 +9,7 @@ import {
   getSelectedTab,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
+  getShowTabOnly,
 } from './url-state';
 import { getGlobalTracks, getLocalTracksByPid } from './profile';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
@@ -67,12 +68,14 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getTrackThreadHeights,
+  getShowTabOnly,
   (
     globalTracks,
     localTracksByPid,
     hiddenGlobalTracks,
     hiddenLocalTracksByPid,
-    trackThreadHeights
+    trackThreadHeights,
+    showTabOnly
   ) => {
     let height = TIMELINE_RULER_HEIGHT + TIMELINE_SETTINGS_HEIGHT;
     const border = 1;
@@ -147,13 +150,19 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
 
               break;
             case 'network':
-              height += TRACK_NETWORK_HEIGHT + border;
+              if (!showTabOnly) {
+                height += TRACK_NETWORK_HEIGHT + border;
+              }
               break;
             case 'memory':
-              height += TRACK_MEMORY_HEIGHT + border;
+              if (!showTabOnly) {
+                height += TRACK_MEMORY_HEIGHT + border;
+              }
               break;
             case 'ipc':
-              height += TRACK_IPC_HEIGHT + border;
+              if (!showTabOnly) {
+                height += TRACK_IPC_HEIGHT + border;
+              }
               break;
             default:
               throw assertExhaustiveCheck(localTrack);

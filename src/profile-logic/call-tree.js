@@ -258,7 +258,8 @@ export class CallTree {
         case 'js-allocations':
         case 'native-allocations':
         case 'native-retained-allocations':
-        case 'native-deallocations': {
+        case 'native-deallocations-sites':
+        case 'native-deallocations-memory': {
           totalTimeWithUnit = `${formattedTotalTime} bytes`;
           selfTimeWithUnit = `${formattedSelfTime} bytes`;
           ariaLabel = `${funcName}, total size is ${totalTimeWithUnit} (${totalTimePercent}), self size is ${selfTimeWithUnit}`;

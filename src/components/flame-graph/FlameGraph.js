@@ -116,7 +116,7 @@ class FlameGraph extends React.PureComponent<Props> {
     this._viewport = viewport;
   };
 
-  _focusViewport = () => {
+  focus = () => {
     if (this._viewport) {
       this._viewport.focus();
     }
@@ -246,10 +246,6 @@ class FlameGraph extends React.PureComponent<Props> {
         break;
     }
   };
-
-  componentDidMount() {
-    this._focusViewport();
-  }
 
   render() {
     const {
@@ -382,5 +378,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeSelectedCallNode,
     changeRightClickedCallNode,
   },
+  options: { forwardRef: true },
   component: FlameGraph,
 });

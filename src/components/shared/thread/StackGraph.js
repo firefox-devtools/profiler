@@ -30,6 +30,7 @@ import type {
 type Props = {|
   +className: string,
   +thread: Thread,
+  +tabFilteredThread: Thread,
   +interval: Milliseconds,
   +rangeStart: Milliseconds,
   +rangeEnd: Milliseconds,
@@ -69,6 +70,7 @@ class StackGraph extends PureComponent<Props> {
   drawCanvas(canvas: HTMLCanvasElement) {
     const {
       thread,
+      tabFilteredThread,
       interval,
       rangeStart,
       rangeEnd,
@@ -91,12 +93,17 @@ class StackGraph extends PureComponent<Props> {
       thread.samples.stack,
       stackIndexToCallNodeIndex
     );
+    const tabFilteredSampleCallNodes = getSampleIndexToCallNodeIndex(
+      tabFilteredThread.samples.stack,
+      stackIndexToCallNodeIndex
+    );
     // This is currently too slow to compute for the JS Tracer threads.
     const samplesSelectedStates = thread.isJsTracer
       ? null
       : getSamplesSelectedStates(
           callNodeTable,
           sampleCallNodes,
+          tabFilteredSampleCallNodes,
           selectedCallNodeIndex
         );
     for (let i = 0; i < callNodeTable.depth.length; i++) {
@@ -216,6 +223,13 @@ class StackGraph extends PureComponent<Props> {
         time,
         interval
       );
+
+      if (thread.samples.stack[sampleIndex] === null) {
+        // If the sample index refers to a null sample, that sample
+        // has been filtered out and means that there was no stack bar
+        // drawn at the place where the user clicked. Do nothing here.
+        return;
+      }
 
       this.props.onSampleClick(sampleIndex);
     }

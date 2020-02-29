@@ -123,10 +123,12 @@ export function getStackAndSampleSelectorsPerThread(
     null | SelectedState[]
   > = createSelector(
     threadSelectors.getFilteredThread,
+    threadSelectors.getTabFilteredThread,
     getCallNodeInfo,
     getSelectedCallNodeIndex,
     (
       thread,
+      tabFilteredThread,
       { callNodeTable, stackIndexToCallNodeIndex },
       selectedCallNode
     ) => {
@@ -138,9 +140,14 @@ export function getStackAndSampleSelectorsPerThread(
         thread.samples.stack,
         stackIndexToCallNodeIndex
       );
+      const activeTabFilteredCallNodeIndex = ProfileData.getSampleIndexToCallNodeIndex(
+        tabFilteredThread.samples.stack,
+        stackIndexToCallNodeIndex
+      );
       return ProfileData.getSamplesSelectedStates(
         callNodeTable,
         sampleIndexToCallNodeIndex,
+        activeTabFilteredCallNodeIndex,
         selectedCallNode
       );
     }
@@ -185,7 +192,8 @@ export function getStackAndSampleSelectorsPerThread(
           break;
         case 'native-allocations':
         case 'native-retained-allocations':
-        case 'native-deallocations':
+        case 'native-deallocations-sites':
+        case 'native-deallocations-memory':
           if (!thread.nativeAllocations) {
             // Attempting to view a thread with no native allocations, switch back
             // to timing.
@@ -219,7 +227,7 @@ export function getStackAndSampleSelectorsPerThread(
         case 'native-retained-allocations': {
           const nativeAllocations = ensureExists(
             thread.nativeAllocations,
-            'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
+            'Expected the NativeAllocationTable to exist when using a "native-allocation" strategy'
           );
 
           if (!nativeAllocations.memoryAddress) {
@@ -233,16 +241,35 @@ export function getStackAndSampleSelectorsPerThread(
           return ProfileData.filterToAllocations(
             ensureExists(
               thread.nativeAllocations,
-              'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
+              'Expected the NativeAllocationTable to exist when using a "native-allocations" strategy'
             )
           );
-        case 'native-deallocations':
-          return ProfileData.filterToDeallocations(
+        case 'native-deallocations-sites':
+          return ProfileData.filterToDeallocationsSites(
             ensureExists(
               thread.nativeAllocations,
+              'Expected the NativeAllocationTable to exist when using a "native-deallocations-sites" strategy'
+            )
+          );
+        case 'native-deallocations-memory': {
+          const nativeAllocations = ensureExists(
+            thread.nativeAllocations,
+            'Expected the NativeAllocationTable to exist when using a "native-deallocations-memory" strategy'
+          );
+
+          if (!nativeAllocations.memoryAddress) {
+            throw new Error(
+              'Attempting to filter by retained allocations data that is missing the memory addresses.'
+            );
+          }
+
+          return ProfileData.filterToDeallocationsMemory(
+            ensureExists(
+              nativeAllocations,
               'Expected the NativeAllocationTable to exist when using a "js-allocation" strategy'
             )
           );
+        }
         default:
           throw assertExhaustiveCheck(strategy);
       }

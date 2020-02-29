@@ -208,7 +208,8 @@ class CallTreeComponent extends PureComponent<Props> {
         break;
       case 'native-retained-allocations':
       case 'native-allocations':
-      case 'native-deallocations':
+      case 'native-deallocations-memory':
+      case 'native-deallocations-sites':
       case 'js-allocations':
         fixedColumns = this._fixedColumnsAllocations;
         break;
@@ -276,6 +277,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeExpandedCallNodes,
     addTransformToStack,
   },
-  options: { withRef: true },
   component: CallTreeComponent,
 });

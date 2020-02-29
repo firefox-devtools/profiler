@@ -26,6 +26,7 @@ import {
   commitRange,
   changeImplementationFilter,
 } from '../../actions/profile-view';
+import { changeSelectedTab } from '../../actions/app';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { ensureExists } from '../../utils/flow';
 
@@ -229,11 +230,11 @@ describe('MarkerChart', function() {
   });
 
   // TODO implement selecting user timing markers #2355
-  // eslint-disable-next-line jest/no-disabled-test
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('can select a marker when clicking the chart', function() {});
 
   // TODO implement selecting user timing markers #2355
-  // eslint-disable-next-line jest/no-disabled-test
+  // eslint-disable-next-line jest/no-disabled-tests
   it.skip('can right click a marker and show a context menu', function() {});
 
   it('shows a tooltip when hovering', () => {
@@ -366,6 +367,8 @@ function setup(profile: Profile, funcNames: string[] = []): * {
     .mockImplementation(() => getBoundingBox(GRAPH_WIDTH, GRAPH_HEIGHT));
 
   const store = storeWithProfile(profile);
+  store.dispatch(changeSelectedTab('stack-chart'));
+
   const renderResult = render(
     <Provider store={store}>
       <>

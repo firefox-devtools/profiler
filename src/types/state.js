@@ -17,7 +17,7 @@ import type {
 } from './actions';
 import type { TabSlug } from '../app-logic/tabs-handling';
 import type { StartEndRange } from './units';
-import type { Profile, ThreadIndex, Pid } from './profile';
+import type { Profile, ThreadIndex, Pid, BrowsingContextID } from './profile';
 
 import type {
   CallNodePath,
@@ -185,6 +185,7 @@ export type UrlState = {|
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
   +profileName: string,
+  +showTabOnly: BrowsingContextID | null,
   +profileSpecific: {|
     selectedThread: ThreadIndex | null,
     globalTrackOrder: TrackIndex[],
