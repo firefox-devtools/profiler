@@ -20,7 +20,6 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { getRightClickedMarkerIndexForThread } from '../../selectors/right-clicked-marker';
 import {
   updatePreviewSelection,
   changeRightClickedMarker,
@@ -172,18 +171,16 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     const markerTimingAndBuckets = selectedThreadSelectors.getMarkerChartTimingAndBuckets(
       state
     );
-    const threadIndex = getSelectedThreadIndex(state);
     return {
       getMarker: selectedThreadSelectors.getMarkerGetter(state),
       markerTimingAndBuckets,
       maxMarkerRows: markerTimingAndBuckets.length,
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
-      threadIndex,
+      threadIndex: getSelectedThreadIndex(state),
       previewSelection: getPreviewSelection(state),
-      rightClickedMarkerIndex: getRightClickedMarkerIndexForThread(
-        state,
-        threadIndex
+      rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
+        state
       ),
     };
   },

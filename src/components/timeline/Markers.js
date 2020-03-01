@@ -14,7 +14,6 @@ import explicitConnect from '../../utils/connect';
 import { getPreviewSelection } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { getRightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
 import { changeRightClickedMarker } from '../../actions/profile-view';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import './Markers.css';
@@ -429,7 +428,6 @@ export const TimelineMarkersJank = explicitConnect<
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
-    const markerInfo = getRightClickedMarkerInfo(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
@@ -437,7 +435,7 @@ export const TimelineMarkersJank = explicitConnect<
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersJank',
-      rightClickedMarker: markerInfo ? markerInfo.marker : null,
+      rightClickedMarker: selectors.getRightClickedMarker(state),
     };
   },
   mapDispatchToProps: { changeRightClickedMarker },
@@ -459,7 +457,7 @@ export const TimelineMarkersOverview = explicitConnect<
     const markerIndexes = selectors.getCommittedRangeAndTabFilteredMarkerIndexesForHeader(
       state
     );
-    const markerInfo = getRightClickedMarkerInfo(state);
+
     return {
       additionalClassName:
         selectors.getThread(state).name === 'GeckoMain'
@@ -470,7 +468,7 @@ export const TimelineMarkersOverview = explicitConnect<
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersOverview',
-      rightClickedMarker: markerInfo ? markerInfo.marker : null,
+      rightClickedMarker: selectors.getRightClickedMarker(state),
     };
   },
   mapDispatchToProps: { changeRightClickedMarker },
@@ -489,7 +487,6 @@ export const TimelineMarkersFileIo = explicitConnect<
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
-    const markerInfo = getRightClickedMarkerInfo(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
@@ -497,7 +494,7 @@ export const TimelineMarkersFileIo = explicitConnect<
       isSelected: threadIndex === selectedThread,
       isModifyingSelection: getPreviewSelection(state).isModifying,
       testId: 'TimelineMarkersFileIo',
-      rightClickedMarker: markerInfo ? markerInfo.marker : null,
+      rightClickedMarker: selectors.getRightClickedMarker(state),
     };
   },
   mapDispatchToProps: { changeRightClickedMarker },
@@ -516,7 +513,6 @@ export const TimelineMarkersMemory = explicitConnect<
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
-    const markerInfo = getRightClickedMarkerInfo(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
@@ -525,7 +521,7 @@ export const TimelineMarkersMemory = explicitConnect<
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersMemory',
       testId: 'TimelineMarkersMemory',
-      rightClickedMarker: markerInfo ? markerInfo.marker : null,
+      rightClickedMarker: selectors.getRightClickedMarker(state),
     };
   },
   mapDispatchToProps: { changeRightClickedMarker },
@@ -544,7 +540,6 @@ export const TimelineMarkersIPC = explicitConnect<
     const { threadIndex } = props;
     const selectors = getThreadSelectors(threadIndex);
     const selectedThread = getSelectedThreadIndex(state);
-    const markerInfo = getRightClickedMarkerInfo(state);
 
     return {
       getMarker: selectors.getMarkerGetter(state),
@@ -553,7 +548,7 @@ export const TimelineMarkersIPC = explicitConnect<
       isModifyingSelection: getPreviewSelection(state).isModifying,
       additionalClassName: 'timelineMarkersIPC',
       testId: 'TimelineMarkersIPC',
-      rightClickedMarker: markerInfo ? markerInfo.marker : null,
+      rightClickedMarker: selectors.getRightClickedMarker(state),
     };
   },
   mapDispatchToProps: { changeRightClickedMarker },

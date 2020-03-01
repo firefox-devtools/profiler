@@ -21,7 +21,6 @@ import {
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
 import { getSelectedThreadIndex } from '../../selectors/url-state';
-import { getRightClickedMarkerIndexForThread } from '../../selectors/right-clicked-marker';
 import { changeRightClickedMarker } from '../../actions/profile-view';
 
 import type { SizeProps } from '../shared/WithSize';
@@ -173,22 +172,18 @@ class NetworkChart extends React.PureComponent<Props> {
  */
 const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
   {
-    mapStateToProps: state => {
-      const threadIndex = getSelectedThreadIndex(state);
-      return {
-        markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
-          state
-        ),
-        getMarker: selectedThreadSelectors.getMarkerGetter(state),
-        rightClickedMarkerIndex: getRightClickedMarkerIndexForThread(
-          state,
-          threadIndex
-        ),
-        timeRange: getPreviewSelectionRange(state),
-        disableOverscan: getPreviewSelection(state).isModifying,
-        threadIndex,
-      };
-    },
+    mapStateToProps: state => ({
+      markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+        state
+      ),
+      getMarker: selectedThreadSelectors.getMarkerGetter(state),
+      rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
+        state
+      ),
+      timeRange: getPreviewSelectionRange(state),
+      disableOverscan: getPreviewSelection(state).isModifying,
+      threadIndex: getSelectedThreadIndex(state),
+    }),
     mapDispatchToProps: { changeRightClickedMarker },
     component: NetworkChart,
   }

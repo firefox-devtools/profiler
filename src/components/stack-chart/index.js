@@ -24,7 +24,6 @@ import {
   getShowUserTimings,
   getSelectedThreadIndex,
 } from '../../selectors/url-state';
-import { getRightClickedCallNodeIndexForThread } from '../../selectors/right-clicked-call-node';
 import StackChartEmptyReasons from './StackChartEmptyReasons';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import StackSettings from '../shared/StackSettings';
@@ -224,7 +223,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     const combinedTimingRows = showUserTimings
       ? selectedThreadSelectors.getCombinedTimingRows(state)
       : selectedThreadSelectors.getStackTimingByDepth(state);
-    const threadIndex = getSelectedThreadIndex(state);
 
     return {
       thread: selectedThreadSelectors.getFilteredThread(state),
@@ -233,15 +231,14 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       timeRange: getCommittedRange(state),
       interval: getProfileInterval(state),
       previewSelection: getPreviewSelection(state),
-      threadIndex,
+      threadIndex: getSelectedThreadIndex(state),
       callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
       categories: getCategories(state),
       selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
         state
       ),
-      rightClickedCallNodeIndex: getRightClickedCallNodeIndexForThread(
-        state,
-        threadIndex
+      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
+        state
       ),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
       pages: getPageList(state),

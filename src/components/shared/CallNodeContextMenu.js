@@ -21,6 +21,7 @@ import {
   getInvertCallstack,
 } from '../../selectors/url-state';
 import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
+import { getThreadSelectors } from '../../selectors/per-thread';
 
 import {
   convertToTransformType,
@@ -31,10 +32,19 @@ import type { TransformType } from '../../types/transforms';
 import type { ImplementationFilter } from '../../types/actions';
 import type { TabSlug } from '../../app-logic/tabs-handling';
 import type { ConnectedProps } from '../../utils/connect';
-import type { RightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
+import type {
+  IndexIntoCallNodeTable,
+  CallNodeInfo,
+  CallNodePath,
+} from '../../types/profile-derived';
+import type { Thread, ThreadIndex } from '../../types/profile';
 
 type StateProps = {|
-  +rightClickedCallNodeInfo: RightClickedCallNodeInfo | null,
+  +thread: Thread | null,
+  +threadIndex: ThreadIndex | null,
+  +callNodeInfo: CallNodeInfo | null,
+  +rightClickedCallNodePath: CallNodePath | null,
+  +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +implementation: ImplementationFilter,
   +inverted: boolean,
   +selectedTab: TabSlug,
@@ -90,7 +100,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
   };
 
   _getFunctionName(): string {
-    const { rightClickedCallNodeInfo } = this.props;
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
       throw new Error(
@@ -127,7 +137,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 
   copyUrl(): void {
-    const { rightClickedCallNodeInfo } = this.props;
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
       throw new Error(
@@ -150,7 +160,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 
   copyStack(): void {
-    const { rightClickedCallNodeInfo } = this.props;
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
       throw new Error(
@@ -208,12 +218,8 @@ class CallNodeContextMenu extends PureComponent<Props> {
   };
 
   addTransformToStack(type: TransformType): void {
-    const {
-      addTransformToStack,
-      implementation,
-      inverted,
-      rightClickedCallNodeInfo,
-    } = this.props;
+    const { addTransformToStack, implementation, inverted } = this.props;
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
       throw new Error(
@@ -293,10 +299,8 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 
   expandAll(): void {
-    const {
-      expandAllCallNodeDescendants,
-      rightClickedCallNodeInfo,
-    } = this.props;
+    const { expandAllCallNodeDescendants } = this.props;
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
       throw new Error(
@@ -314,7 +318,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 
   getNameForSelectedResource(): string | null {
-    const { rightClickedCallNodeInfo } = this.props;
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
       throw new Error(
@@ -354,7 +358,8 @@ class CallNodeContextMenu extends PureComponent<Props> {
    * Determine if this CallNode represent a recursive function call.
    */
   isRecursiveCall(): boolean {
-    const { rightClickedCallNodeInfo, implementation } = this.props;
+    const { implementation } = this.props;
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
       console.error(
@@ -379,8 +384,43 @@ class CallNodeContextMenu extends PureComponent<Props> {
     return funcHasRecursiveCall(thread, implementation, funcIndex);
   }
 
+  getRightClickedCallNodeInfo(): null | {|
+    +thread: Thread,
+    +threadIndex: ThreadIndex,
+    +callNodeInfo: CallNodeInfo,
+    +callNodePath: CallNodePath,
+    +callNodeIndex: IndexIntoCallNodeTable,
+  |} {
+    const {
+      thread,
+      threadIndex,
+      callNodeInfo,
+      rightClickedCallNodePath,
+      rightClickedCallNodeIndex,
+    } = this.props;
+
+    if (
+      thread &&
+      typeof threadIndex === 'number' &&
+      callNodeInfo &&
+      rightClickedCallNodePath &&
+      typeof rightClickedCallNodeIndex === 'number'
+    ) {
+      return {
+        thread,
+        threadIndex,
+        callNodeInfo,
+        callNodePath: rightClickedCallNodePath,
+        callNodeIndex: rightClickedCallNodeIndex,
+      };
+    }
+
+    return null;
+  }
+
   renderContextMenuContents() {
-    const { inverted, selectedTab, rightClickedCallNodeInfo } = this.props;
+    const { inverted, selectedTab } = this.props;
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
       console.error(
@@ -487,7 +527,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
   }
 
   render() {
-    const { rightClickedCallNodeInfo } = this.props;
+    const rightClickedCallNodeInfo = this.getRightClickedCallNodeInfo();
 
     if (rightClickedCallNodeInfo === null) {
       return null;
@@ -506,12 +546,38 @@ class CallNodeContextMenu extends PureComponent<Props> {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    rightClickedCallNodeInfo: getRightClickedCallNodeInfo(state),
-    implementation: getImplementationFilter(state),
-    inverted: getInvertCallstack(state),
-    selectedTab: getSelectedTab(state),
-  }),
+  mapStateToProps: state => {
+    const rightClickedCallNodeInfo = getRightClickedCallNodeInfo(state);
+
+    let thread = null;
+    let threadIndex = null;
+    let callNodeInfo = null;
+    let rightClickedCallNodePath = null;
+    let rightClickedCallNodeIndex = null;
+
+    if (rightClickedCallNodeInfo !== null) {
+      const selectors = getThreadSelectors(
+        rightClickedCallNodeInfo.threadIndex
+      );
+
+      thread = selectors.getThread(state);
+      threadIndex = rightClickedCallNodeInfo.threadIndex;
+      callNodeInfo = selectors.getCallNodeInfo(state);
+      rightClickedCallNodePath = rightClickedCallNodeInfo.callNodePath;
+      rightClickedCallNodeIndex = selectors.getRightClickedCallNodeIndex(state);
+    }
+
+    return {
+      thread,
+      threadIndex,
+      callNodeInfo,
+      rightClickedCallNodePath,
+      rightClickedCallNodeIndex,
+      implementation: getImplementationFilter(state),
+      inverted: getInvertCallstack(state),
+      selectedTab: getSelectedTab(state),
+    };
+  },
   mapDispatchToProps: {
     addTransformToStack,
     expandAllCallNodeDescendants,
