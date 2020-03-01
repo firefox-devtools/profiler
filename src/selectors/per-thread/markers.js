@@ -10,8 +10,9 @@ import * as UrlState from '../url-state';
 import * as MarkerData from '../../profile-logic/marker-data';
 import * as MarkerTimingLogic from '../../profile-logic/marker-timing';
 import * as ProfileSelectors from '../profile';
+import { getRightClickedMarkerInfo } from '../right-clicked-marker';
 
-import type { RawMarkerTable } from '../../types/profile';
+import type { RawMarkerTable, ThreadIndex } from '../../types/profile';
 import type {
   MarkerIndex,
   Marker,
@@ -33,7 +34,10 @@ export type MarkerSelectorsPerThread = $ReturnType<
 /**
  * Create the selectors for a thread that have to do with either markers.
  */
-export function getMarkerSelectorsPerThread(threadSelectors: *) {
+export function getMarkerSelectorsPerThread(
+  threadSelectors: *,
+  threadIndex: ThreadIndex
+) {
   const _getRawMarkerTable: Selector<RawMarkerTable> = state =>
     threadSelectors.getThread(state).markers;
 
@@ -432,6 +436,27 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     return getMarker(selectedMarkerIndex);
   };
 
+  const getRightClickedMarkerIndex: Selector<null | MarkerIndex> = createSelector(
+    getRightClickedMarkerInfo,
+    rightClickedMarkerInfo => {
+      if (
+        rightClickedMarkerInfo !== null &&
+        rightClickedMarkerInfo.threadIndex === threadIndex
+      ) {
+        return rightClickedMarkerInfo.markerIndex;
+      }
+
+      return null;
+    }
+  );
+
+  const getRightClickedMarker: Selector<null | Marker> = createSelector(
+    getMarkerGetter,
+    getRightClickedMarkerIndex,
+    (getMarker, markerIndex) =>
+      typeof markerIndex === 'number' ? getMarker(markerIndex) : null
+  );
+
   return {
     getMarkerGetter,
     getJankMarkerIndexesForHeader,
@@ -459,5 +484,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getIsNetworkChartEmptyInFullRange,
     getUserTimingMarkerIndexes,
     getUserTimingMarkerTiming,
+    getRightClickedMarkerIndex,
+    getRightClickedMarker,
   };
 }

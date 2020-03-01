@@ -32,14 +32,8 @@ import * as ProfileView from '../../actions/profile-view';
 import { viewProfile } from '../../actions/receive-profile';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
-import {
-  getRightClickedCallNodeInfo,
-  getRightClickedCallNodeIndexForThread,
-} from '../../selectors/right-clicked-call-node';
-import {
-  getRightClickedMarkerInfo,
-  getRightClickedMarkerIndexForThread,
-} from '../../selectors/right-clicked-marker';
+import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
+import { getRightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   selectedThreadSelectors,
@@ -2703,7 +2697,7 @@ describe('right clicked call node info', () => {
       C
     `);
 
-    return { ...storeWithProfile(profile.profile), ...profile };
+    return storeWithProfile(profile.profile);
   }
 
   it('should be empty on store creation', () => {
@@ -2719,15 +2713,10 @@ describe('right clicked call node info', () => {
 
     dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
 
-    expect(getRightClickedCallNodeInfo(getState())).toHaveProperty(
-      'threadIndex',
-      0
-    );
-
-    expect(getRightClickedCallNodeInfo(getState())).toHaveProperty(
-      'callNodePath',
-      [0, 1]
-    );
+    expect(getRightClickedCallNodeInfo(getState())).toEqual({
+      threadIndex: 0,
+      callNodePath: [0, 1],
+    });
   });
 
   it('resets right clicked call node when context menu is hidden', () => {
@@ -2735,32 +2724,14 @@ describe('right clicked call node info', () => {
 
     dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
 
-    expect(getRightClickedCallNodeInfo(getState())).toHaveProperty(
-      'threadIndex',
-      0
-    );
+    expect(getRightClickedCallNodeInfo(getState())).toEqual({
+      threadIndex: 0,
+      callNodePath: [0, 1],
+    });
 
     dispatch(ProfileView.setContextMenuVisibility(false));
 
     expect(getRightClickedCallNodeInfo(getState())).toBeNull();
-  });
-
-  describe('getRightClickedCallNodeIndexForThread', () => {
-    it('returns a right clicked call node index for thread', () => {
-      const { dispatch, getState } = setup();
-
-      dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
-
-      expect(getRightClickedCallNodeIndexForThread(getState(), 0)).toBe(1);
-    });
-
-    it('returns null if the thread index is not the same as the right clicked call node thread', () => {
-      const { dispatch, getState } = setup();
-
-      dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
-
-      expect(getRightClickedCallNodeIndexForThread(getState(), 1)).toBeNull();
-    });
   });
 });
 
@@ -2788,20 +2759,10 @@ describe('right clicked marker info', () => {
 
     dispatch(ProfileView.changeRightClickedMarker(0, 0));
 
-    expect(getRightClickedMarkerInfo(getState())).toHaveProperty(
-      'threadIndex',
-      0
-    );
-
-    expect(getRightClickedMarkerInfo(getState())).toHaveProperty(
-      'markerIndex',
-      0
-    );
-
-    expect(getRightClickedMarkerInfo(getState())).toHaveProperty(
-      'marker.name',
-      'a'
-    );
+    expect(getRightClickedMarkerInfo(getState())).toEqual({
+      threadIndex: 0,
+      markerIndex: 0,
+    });
   });
 
   it('resets right clicked marker when context menu is hidden', () => {
@@ -2809,32 +2770,14 @@ describe('right clicked marker info', () => {
 
     dispatch(ProfileView.changeRightClickedMarker(0, 1));
 
-    expect(getRightClickedMarkerInfo(getState())).toHaveProperty(
-      'markerIndex',
-      1
-    );
+    expect(getRightClickedMarkerInfo(getState())).toEqual({
+      threadIndex: 0,
+      markerIndex: 1,
+    });
 
     dispatch(ProfileView.setContextMenuVisibility(false));
 
     expect(getRightClickedMarkerInfo(getState())).toBeNull();
-  });
-
-  describe('getRightClickedMarkerIndexForThread', () => {
-    it('returns a right clicked marker index for thread', () => {
-      const { dispatch, getState } = setup();
-
-      dispatch(ProfileView.changeRightClickedMarker(0, 2));
-
-      expect(getRightClickedMarkerIndexForThread(getState(), 0)).toBe(2);
-    });
-
-    it('returns null if the thread index is not the same as the right clicked marker thread', () => {
-      const { dispatch, getState } = setup();
-
-      dispatch(ProfileView.changeRightClickedMarker(0, 2));
-
-      expect(getRightClickedMarkerIndexForThread(getState(), 1)).toBeNull();
-    });
   });
 });
 

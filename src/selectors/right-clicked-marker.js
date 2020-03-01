@@ -4,59 +4,18 @@
 
 // @flow
 import { createSelector } from 'reselect';
-import { getThreadSelectors } from './per-thread';
 import { getProfileViewOptions } from './profile';
 
-import type { ThreadIndex, Thread } from '../types/profile';
-import type { MarkerIndex, Marker } from '../types/profile-derived';
-import type { Selector, DangerousSelectorWithArguments } from '../types/store';
+import type { ThreadIndex } from '../types/profile';
+import type { MarkerIndex } from '../types/profile-derived';
+import type { Selector } from '../types/store';
 
 export type RightClickedMarkerInfo = {|
   +threadIndex: ThreadIndex,
-  +thread: Thread,
   +markerIndex: MarkerIndex,
-  +marker: Marker,
 |};
 
 export const getRightClickedMarkerInfo: Selector<RightClickedMarkerInfo | null> = createSelector(
-  state => state,
-  state => {
-    const { rightClickedMarker } = getProfileViewOptions(state);
-
-    if (rightClickedMarker === null) {
-      return null;
-    }
-
-    const { getMarkerGetter, getThread } = getThreadSelectors(
-      rightClickedMarker.threadIndex
-    );
-
-    const thread = getThread(state);
-
-    const getMarker = getMarkerGetter(state);
-
-    const marker = getMarker(rightClickedMarker.markerIndex);
-
-    return {
-      ...rightClickedMarker,
-      thread,
-      marker,
-    };
-  }
+  getProfileViewOptions,
+  viewOptions => viewOptions.rightClickedMarker
 );
-
-export const getRightClickedMarkerIndexForThread: DangerousSelectorWithArguments<
-  MarkerIndex | null,
-  ThreadIndex
-> = (state, threadIndex) => {
-  const rightClickedMarkerInfo = getRightClickedMarkerInfo(state);
-
-  if (
-    !rightClickedMarkerInfo ||
-    rightClickedMarkerInfo.threadIndex !== threadIndex
-  ) {
-    return null;
-  }
-
-  return rightClickedMarkerInfo.markerIndex;
-};
