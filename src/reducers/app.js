@@ -33,6 +33,7 @@ const view: Reducer<AppViewState> = (
       return { phase: 'FATAL_ERROR', error: action.error };
     case 'WAITING_FOR_PROFILE_FROM_ADDON':
     case 'WAITING_FOR_PROFILE_FROM_URL':
+    case 'WAITING_FOR_PROFILE_FROM_FILE':
       return { phase: 'INITIALIZING' };
     case 'ROUTE_NOT_FOUND':
       return { phase: 'ROUTE_NOT_FOUND' };
@@ -184,6 +185,41 @@ const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+/**
+ * Holds the state for whether or not the user is currently dragging a
+ * file over a drag and drop target. This way we know if we should
+ * show an overlay suggesting the user to drop the file to load a new
+ * profile.
+ */
+const isDragAndDropDragging: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'START_DRAGGING':
+      return true;
+    case 'STOP_DRAGGING':
+      return false;
+    default:
+      return state;
+  }
+};
+
+/**
+ * Holds the state for whether or not a custom drag and drop overlay
+ * is registered. If it isn't, we will mount a default overlay instead.
+ */
+const isDragAndDropOverlayRegistered: Reducer<boolean> = (
+  state = false,
+  action
+) => {
+  switch (action.type) {
+    case 'REGISTER_DRAG_AND_DROP_OVERLAY':
+      return true;
+    case 'UNREGISTER_DRAG_AND_DROP_OVERLAY':
+      return false;
+    default:
+      return state;
+  }
+};
+
 const appStateReducer: Reducer<AppState> = combineReducers({
   view,
   urlSetupPhase,
@@ -193,6 +229,8 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   lastVisibleThreadTabSlug,
   trackThreadHeights,
   isNewlyPublished,
+  isDragAndDropDragging,
+  isDragAndDropOverlayRegistered,
 });
 
 export default appStateReducer;

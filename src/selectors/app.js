@@ -6,12 +6,14 @@
 import { createSelector } from 'reselect';
 
 import {
+  getDataSource,
   getSelectedTab,
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getShowTabOnly,
 } from './url-state';
 import { getGlobalTracks, getLocalTracksByPid } from './profile';
+import { getZipFileState } from './zipped-profiles.js';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
   TRACK_SCREENSHOT_HEIGHT,
@@ -51,6 +53,11 @@ export const getTrackThreadHeights: Selector<
 > = state => getApp(state).trackThreadHeights;
 export const getIsNewlyPublished: Selector<boolean> = state =>
   getApp(state).isNewlyPublished;
+
+export const getIsDragAndDropDragging: Selector<boolean> = state =>
+  getApp(state).isDragAndDropDragging;
+export const getIsDragAndDropOverlayRegistered: Selector<boolean> = state =>
+  getApp(state).isDragAndDropOverlayRegistered;
 
 /**
  * This selector takes all of the tracks, and deduces the height in CssPixels
@@ -171,5 +178,27 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
       }
     }
     return height;
+  }
+);
+
+/**
+ * This selector lets us know if it is safe to load a new profile. If
+ * the app is already busy loading a profile, this selector returns
+ * false.
+ *
+ * Used by the drag and drop component in order to determine if it can
+ * load a dropped profile file.
+ */
+export const getIsNewProfileLoadAllowed: Selector<boolean> = createSelector(
+  getView,
+  getDataSource,
+  getZipFileState,
+  (view, dataSource, zipFileState) => {
+    const appPhase = view.phase;
+    const zipPhase = zipFileState.phase;
+    const isLoading =
+      (appPhase === 'INITIALIZING' && dataSource !== 'none') ||
+      zipPhase === 'PROCESS_PROFILE_FROM_ZIP_FILE';
+    return !isLoading;
   }
 );

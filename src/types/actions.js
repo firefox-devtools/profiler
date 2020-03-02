@@ -411,6 +411,20 @@ type PublishAction =
     |}
   | {| +type: 'HIDE_STALE_PROFILE' |};
 
+type DragAndDropAction =
+  | {|
+      +type: 'START_DRAGGING',
+    |}
+  | {|
+      +type: 'STOP_DRAGGING',
+    |}
+  | {|
+      +type: 'REGISTER_DRAG_AND_DROP_OVERLAY',
+    |}
+  | {|
+      +type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY',
+    |};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
@@ -418,4 +432,5 @@ export type Action =
   | UrlEnhancerAction
   | UrlStateAction
   | IconsAction
-  | PublishAction;
+  | PublishAction
+  | DragAndDropAction;

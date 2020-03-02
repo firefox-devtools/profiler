@@ -229,6 +229,15 @@ exports[`calltree/ZipFileTree renders a zip file tree 1`] = `
         </div>
       </div>
     </div>
+    <div
+      class="dragAndDropOverlayWrapper"
+    >
+      <div
+        class="dragAndDropOverlay"
+      >
+        Drop a saved profile here
+      </div>
+    </div>
   </div>
 </section>
 `;
