@@ -176,6 +176,96 @@ exports[`timeline/TrackContextMenu selected global track matches the snapshot of
 </nav>
 `;
 
+exports[`timeline/TrackContextMenu selected global track network track will be displayed when a number is not set for showTabOnly 1`] = `
+<nav
+  class="react-contextmenu timeline-context-menu"
+  role="menu"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
+>
+  <div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
+      role="menuitem"
+      tabindex="-1"
+      title="Process 0 (Process ID: 0)"
+    >
+      <span>
+        Process 0
+      </span>
+      <span
+        class="timelineTrackContextMenuSpacer"
+      />
+      <span
+        class="timelineTrackContextMenuPid"
+      >
+        (
+        0
+        )
+      </span>
+    </div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item checkable indented checked"
+      role="menuitem"
+      tabindex="-1"
+    >
+      Network
+    </div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item checkable indented checked"
+      role="menuitem"
+      tabindex="-1"
+    >
+      Empty
+    </div>
+  </div>
+</nav>
+`;
+
+exports[`timeline/TrackContextMenu selected global track network track will be hidden when a number is set for showTabOnly 1`] = `
+<nav
+  class="react-contextmenu timeline-context-menu"
+  role="menu"
+  style="position: fixed; opacity: 0; pointer-events: none;"
+  tabindex="-1"
+>
+  <div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item timelineTrackContextMenuItem checkable checked"
+      role="menuitem"
+      tabindex="-1"
+      title="Process 0 (Process ID: 0)"
+    >
+      <span>
+        Process 0
+      </span>
+      <span
+        class="timelineTrackContextMenuSpacer"
+      />
+      <span
+        class="timelineTrackContextMenuPid"
+      >
+        (
+        0
+        )
+      </span>
+    </div>
+    <div
+      aria-disabled="false"
+      class="react-contextmenu-item checkable indented checked"
+      role="menuitem"
+      tabindex="-1"
+    >
+      Empty
+    </div>
+  </div>
+</nav>
+`;
+
 exports[`timeline/TrackContextMenu selected local track matches the snapshot of a local track 1`] = `
 <nav
   class="react-contextmenu timeline-context-menu"

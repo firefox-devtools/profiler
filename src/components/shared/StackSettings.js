@@ -10,10 +10,13 @@ import {
   changeInvertCallstack,
   changeCallTreeSearchString,
   changeCallTreeSummaryStrategy,
+  changeShowUserTimings,
 } from '../../actions/profile-view';
 import {
   getImplementationFilter,
   getInvertCallstack,
+  getSelectedTab,
+  getShowUserTimings,
   getCurrentSearchString,
 } from '../../selectors/url-state';
 import PanelSearch from '../shared/PanelSearch';
@@ -39,7 +42,9 @@ type OwnProps = {|
 type StateProps = {|
   +implementationFilter: ImplementationFilter,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
+  +selectedTab: string,
   +invertCallstack: boolean,
+  +showUserTimings: boolean,
   +currentSearchString: string,
   +hasJsAllocations: boolean,
   +hasNativeAllocations: boolean,
@@ -49,6 +54,7 @@ type StateProps = {|
 type DispatchProps = {|
   +changeImplementationFilter: typeof changeImplementationFilter,
   +changeInvertCallstack: typeof changeInvertCallstack,
+  +changeShowUserTimings: typeof changeShowUserTimings,
   +changeCallTreeSearchString: typeof changeCallTreeSearchString,
   +changeCallTreeSummaryStrategy: typeof changeCallTreeSummaryStrategy,
 |};
@@ -74,6 +80,10 @@ class StackSettings extends PureComponent<Props> {
 
   _onInvertCallstackClick = (e: SyntheticEvent<HTMLInputElement>) => {
     this.props.changeInvertCallstack(e.currentTarget.checked);
+  };
+
+  _onShowUserTimingsClick = (e: SyntheticEvent<HTMLInputElement>) => {
+    this.props.changeShowUserTimings(e.currentTarget.checked);
   };
 
   _onSearch = (value: string) => {
@@ -115,6 +125,8 @@ class StackSettings extends PureComponent<Props> {
   render() {
     const {
       invertCallstack,
+      selectedTab,
+      showUserTimings,
       hideInvertCallstack,
       currentSearchString,
       hasJsAllocations,
@@ -157,23 +169,30 @@ class StackSettings extends PureComponent<Props> {
                     : null}
                   {canShowRetainedMemory
                     ? this._renderCallTreeStrategyOption(
-                        'Retained Allocations',
+                        'Retained Memory',
                         'native-retained-allocations',
-                        'Summarize using bytes of memory that were allocated, and never freed while profiling'
+                        'Summarize using bytes of memory that were allocated, and never freed in the current preview selection'
                       )
                     : null}
                   {hasNativeAllocations
                     ? this._renderCallTreeStrategyOption(
-                        'Allocations',
+                        'Allocated Memory',
                         'native-allocations',
                         'Summarize using bytes of memory allocated'
                       )
                     : null}
+                  {canShowRetainedMemory
+                    ? this._renderCallTreeStrategyOption(
+                        'Deallocated Memory',
+                        'native-deallocations-memory',
+                        'Summarize using bytes of memory deallocated, by the site where the memory was allocated'
+                      )
+                    : null}
                   {hasNativeAllocations
                     ? this._renderCallTreeStrategyOption(
-                        'Deallocations',
-                        'native-deallocations',
-                        'Summarize using bytes of memory deallocated'
+                        'Deallocation Sites',
+                        'native-deallocations-sites',
+                        'Summarize using bytes of memory deallocated, by the site where the memory was deallocated'
                       )
                     : null}
                 </select>
@@ -193,6 +212,19 @@ class StackSettings extends PureComponent<Props> {
               </label>
             </li>
           )}
+          {selectedTab !== 'stack-chart' ? null : (
+            <li className="stackSettingsListItem">
+              <label className="photon-label photon-label-micro stackSettingsLabel">
+                <input
+                  type="checkbox"
+                  className="photon-checkbox photon-checkbox-micro stackSettingsCheckbox"
+                  onChange={this._onShowUserTimingsClick}
+                  checked={showUserTimings}
+                />
+                {' Show user timing'}
+              </label>
+            </li>
+          )}
         </ul>
         <PanelSearch
           className="stackSettingsSearchField"
@@ -209,6 +241,8 @@ class StackSettings extends PureComponent<Props> {
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
     invertCallstack: getInvertCallstack(state),
+    selectedTab: getSelectedTab(state),
+    showUserTimings: getShowUserTimings(state),
     implementationFilter: getImplementationFilter(state),
     currentSearchString: getCurrentSearchString(state),
     hasJsAllocations: selectedThreadSelectors.getHasJsAllocations(state),
@@ -227,6 +261,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     changeInvertCallstack,
     changeCallTreeSearchString,
     changeCallTreeSummaryStrategy,
+    changeShowUserTimings,
   },
   component: StackSettings,
 });

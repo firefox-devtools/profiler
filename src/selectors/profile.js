@@ -6,7 +6,7 @@
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   filterCounterToRange,
   accumulateCounterSamples,
@@ -29,6 +29,9 @@ import type {
   ProfileMeta,
   VisualMetrics,
   ProgressGraphData,
+  ProfilerConfiguration,
+  InnerWindowID,
+  BrowsingContextID,
 } from '../types/profile';
 import type {
   LocalTrack,
@@ -149,6 +152,23 @@ export const getPerceptualSpeedIndexProgress: Selector<
 export const getContentfulSpeedIndexProgress: Selector<
   ProgressGraphData[]
 > = state => getVisualMetrics(state).ContentfulSpeedIndexProgress;
+export const getProfilerConfiguration: Selector<?ProfilerConfiguration> = state =>
+  getMeta(state).configuration;
+
+export const getActiveBrowsingContextID: Selector<BrowsingContextID | null> = state => {
+  const configuration = getProfilerConfiguration(state);
+  if (
+    configuration &&
+    configuration.activeBrowsingContextID &&
+    configuration.activeBrowsingContextID !== 0
+  ) {
+    // BrowsingContext ID can be `0` and that means Firefox has failed to get
+    // the BrowsingContextID of the active tab. We are converting that `0` to
+    // `null` here to explicitly indicate that we don't have that information.
+    return configuration.activeBrowsingContextID;
+  }
+  return null;
+};
 
 type CounterSelectors = $ReturnType<typeof _createCounterSelectors>;
 
@@ -405,11 +425,13 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
   getLocalTracksByPid,
   UrlState.getHiddenLocalTracksByPid,
   UrlState.getHiddenGlobalTracks,
+  UrlState.getShowTabOnly,
   (
     globalTracks,
     localTracksByPid,
     hiddenLocalTracksByPid,
-    hiddenGlobalTracks
+    hiddenGlobalTracks,
+    showTabOnly
   ) => {
     let hidden = 0;
     let total = 0;
@@ -433,11 +455,31 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
       if (hiddenGlobalTracks.has(globalTrackIndex)) {
         // The entire process group is hidden, count all of the tracks.
         hidden += localTracks.length;
+        if (showTabOnly) {
+          // We hide some of the local tracks by default for single tab view.
+          hidden -= localTracks.filter(
+            track => Tracks.isLocalTrackAllowedForSingleTabView(track) === false
+          ).length;
+        }
       } else {
         // Only count the hidden local tracks.
         hidden += hiddenLocalTracks.size;
+        if (showTabOnly) {
+          // We hide some of the local tracks by default for single tab view.
+          hidden -= localTracks.filter(
+            (track, trackIndex) =>
+              hiddenLocalTracks.has(trackIndex) &&
+              Tracks.isLocalTrackAllowedForSingleTabView(track) === false
+          ).length;
+        }
       }
       total += localTracks.length;
+      if (showTabOnly) {
+        // We hide some of the local tracks by default for single tab view.
+        total -= localTracks.filter(
+          track => Tracks.isLocalTrackAllowedForSingleTabView(track) === false
+        ).length;
+      }
     }
 
     // Count up the global tracks
@@ -447,3 +489,142 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
     return { hidden, total };
   }
 );
+
+/**
+ * Get the pages array and construct a Map that we can use to easily get the
+ * InnerWindowIDs that are under one tab. The constructed map is
+ * `Map<BrowsingContextID,Set<InnerWindowID>>`. The BrowsingContextID we use in
+ * that map is the BrowsingContextID of the top most frame. That corresponds to
+ * a tab(Side note: don't tell any platform developer that this is a tab ID,
+ * they will freak out. Because in the platform world this isn't a tab ID, since
+ * the iframe has a different BrowsingContext than the parent. But outer most
+ * BrowsingContextID _acts_ like a tab ID).
+ * So we had to figure out the outer most BrowsingContextID of each element. And
+ * we constructed an intermediate map to quickly find that value.
+ */
+export const getPagesMap: Selector<Map<
+  BrowsingContextID,
+  Set<InnerWindowID>
+> | null> = createSelector(
+  getPageList,
+  pageList => {
+    if (pageList === null || pageList.length === 0) {
+      // There is no data, return null
+      return null;
+    }
+
+    // Constructing this map first so we won't have to walk through the page list
+    // all the time.
+    const innerWindowIDToPageMap: Map<
+      InnerWindowID,
+      {
+        browsingContextID: BrowsingContextID,
+        embedderInnerWindowID: InnerWindowID,
+      }
+    > = new Map();
+
+    for (const page of pageList) {
+      innerWindowIDToPageMap.set(page.innerWindowID, {
+        browsingContextID: page.browsingContextID,
+        embedderInnerWindowID: page.embedderInnerWindowID,
+      });
+    }
+
+    // Now we have a way to fastly traverse back with the previous Map.
+    // We can do construction of BrowsingContextID to set of InnerWindowID map.
+    const pageMap: Map<BrowsingContextID, Set<InnerWindowID>> = new Map();
+    const appendPageMap = (browsingContextID, innerWindowID) => {
+      const tabEntry = pageMap.get(browsingContextID);
+      if (tabEntry === undefined) {
+        const newTabEntry = new Set([innerWindowID]);
+        pageMap.set(browsingContextID, newTabEntry);
+      } else {
+        tabEntry.add(innerWindowID);
+      }
+    };
+
+    for (const page of pageList) {
+      if (page.embedderInnerWindowID === undefined) {
+        // This is the top most page, which means the web page itself.
+        appendPageMap(page.browsingContextID, page.innerWindowID);
+      } else {
+        // This is an iframe, we should find its parent to see find top most
+        // BrowsingContextID, which is the tab ID for our case.
+        const getTopMostParent = item => {
+          // We are using a Map to make this more performant.
+          // It should be 1-2 loop iteration in 99% of the cases.
+          const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
+          if (parent !== undefined) {
+            return getTopMostParent(parent);
+          }
+          return item;
+        };
+
+        const parent = getTopMostParent(page);
+        // Now we have the top most parent. We can append the pageMap.
+        appendPageMap(parent.browsingContextID, page.innerWindowID);
+      }
+    }
+
+    return pageMap;
+  }
+);
+
+/**
+ * Get the page map and the active tab ID, then return the InnerWindowIDs that
+ * are related to this active tab. This is a fairly simple map element access.
+ * The `BrowsingContextID -> Set<InnerWindowID>` construction happens inside
+ * the getPageMap selector.
+ */
+export const getRelevantPagesForActiveTab: Selector<
+  Set<InnerWindowID>
+> = createSelector(
+  getPagesMap,
+  UrlState.getShowTabOnly,
+  (pagesMap, showTabOnly) => {
+    if (pagesMap === null || pagesMap.size === 0 || showTabOnly === null) {
+      // Return an empty set if we want to see everything or that data is not there.
+      return new Set();
+    }
+
+    const pageSet = pagesMap.get(showTabOnly);
+    return pageSet !== undefined ? pageSet : new Set();
+  }
+);
+
+export const getIsLocalTrackHidden: DangerousSelectorWithArguments<
+  boolean,
+  Pid,
+  TrackIndex
+> = (state, pid, trackIndex) => {
+  const hiddenLocalTracks = ensureExists(
+    UrlState.getHiddenLocalTracks(state, pid),
+    'Unable to get the tracks for the given pid.'
+  );
+
+  if (hiddenLocalTracks.has(trackIndex)) {
+    return true;
+  }
+
+  if (UrlState.getShowTabOnly(state)) {
+    const tracks = ensureExists(
+      getLocalTracksByPid(state).get(pid),
+      'A local track was expected to exist for the given pid.'
+    );
+    const trackType = tracks[trackIndex].type;
+    switch (trackType) {
+      case 'network':
+      case 'memory':
+      case 'ipc':
+        // Hide those local track types because we want to hide as much as
+        // possible from web developers for now.
+        return true;
+      case 'thread':
+        break;
+      default:
+        throw assertExhaustiveCheck(trackType, `Unhandled LocalTrack type.`);
+    }
+  }
+
+  return false;
+};

@@ -9,7 +9,7 @@ import { ensureExists } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
 
-import type { ThreadIndex, Pid } from '../types/profile';
+import type { ThreadIndex, Pid, BrowsingContextID } from '../types/profile';
 import type { TransformStack } from '../types/transforms';
 import type {
   Action,
@@ -42,6 +42,8 @@ export const getProfilesToCompare: Selector<string[] | null> = state =>
   getUrlState(state).profilesToCompare;
 export const getProfileNameFromUrl: Selector<string> = state =>
   getUrlState(state).profileName;
+export const getShowTabOnly: Selector<BrowsingContextID | null> = state =>
+  getUrlState(state).showTabOnly;
 export const getAllCommittedRanges: Selector<StartEndRange[]> = state =>
   getProfileSpecificState(state).committedRanges;
 export const getImplementationFilter: Selector<ImplementationFilter> = state =>

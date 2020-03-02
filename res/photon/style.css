@@ -1,12 +1,13 @@
-body, html {
+body,
+html {
   font: message-box;
   font-size: 11px;
 }
 
 .row {
   padding: 0 3em 2em;
-  margin: 3em 0;
   border-left: 2px solid var(--grey-30);
+  margin: 3em 0;
 }
 
 .row pre {
@@ -20,4 +21,14 @@ body, html {
   background-image: url(../img/svg/pane-expand.svg);
   background-position: 50%;
   background-repeat: no-repeat;
+}
+
+/* Give nearby message bars some room so that they can breathe a bit. */
+.photon-message-bar {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.sized-to-content {
+  width: max-content;
 }

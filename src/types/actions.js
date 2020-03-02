@@ -11,6 +11,7 @@ import type {
   ThreadIndex,
   IndexIntoFuncTable,
   Pid,
+  BrowsingContextID,
 } from './profile';
 import type {
   CallNodePath,
@@ -88,7 +89,8 @@ export type CallTreeSummaryStrategy =
   | 'js-allocations'
   | 'native-retained-allocations'
   | 'native-allocations'
-  | 'native-deallocations';
+  | 'native-deallocations-memory'
+  | 'native-deallocations-sites';
 
 /**
  * This type determines what kind of information gets sanitized from published profiles.
@@ -356,6 +358,11 @@ type UrlStateAction =
   | {|
       +type: 'SET_DATA_SOURCE',
       +dataSource: DataSource,
+    |}
+  | {|
+      +type: 'CHANGE_SHOW_TAB_ONLY',
+      +showTabOnly: BrowsingContextID | null,
+      +selectedTab: TabSlug,
     |};
 
 type IconsAction =

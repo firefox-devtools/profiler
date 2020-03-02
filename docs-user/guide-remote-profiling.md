@@ -2,128 +2,148 @@
 
 You can use the Firefox Profiler to investigate performance issues on Android, not just Windows, macOS and Linux.
 
-## Pick your target
+In order to do so, you need both your phone with the mobile Gecko-based browser, and a machine running Firefox Desktop. You also need a USB connection between the two devices. Then you can use [about:debugging](https://developer.mozilla.org/en-US/docs/Tools/about:debugging) in Firefox Desktop to connect to the phone and control profiling from there. The result will be shown in Firefox Desktop.
 
-TL;DR: You probably want to profile [a "GeckoView example" nightly](https://tools.taskcluster.net/index/gecko.v2.mozilla-central.nightly.latest.mobile/android-api-16-opt). Read on for more details, or skip to the next section if you already know exactly which browser you want to profile.
+## Which mobile browser?
 
-The current landscape of Gecko products, versions and channels is a lot more complicated on mobile than it is on desktop. On desktop, when it comes to profiling, there's really only one product that's interesting to profile: Firefox Nightly. On mobile, the choice is not so simple.
+(The following is true as of February 2020.)
 
-Currently there are five different apps you can install on Android, all of which use Gecko in some fashion:
+You probably want to profile [Firefox Preview Nightly](https://play.google.com/store/apps/details?id=org.mozilla.fenix.nightly) from the Google Play Store. Read on for more details, or skip to the next section if you already know exactly which browser you want to profile.
 
- - [Firefox for Android ("Fennec")](https://play.google.com/store/apps/details?id=org.mozilla.fennec_aurora&hl=en_CA)
- - [Focus](https://play.google.com/store/apps/details?id=org.mozilla.focus)
- - [The "reference browser"](https://github.com/mozilla-mobile/reference-browser)
- - [Fenix](https://github.com/mozilla-mobile/fenix)
- - [The GeckoView-example app](https://searchfox.org/mozilla-central/source/mobile/android/geckoview_example)
+Mozilla's current development efforts on mobile are focused on GeckoView and Firefox Preview (["Fenix"](https://github.com/mozilla-mobile/fenix)). You can [install a Nightly version of Fenix from the Google Play Store](https://play.google.com/store/apps/details?id=org.mozilla.fenix.nightly), or you can download the APK ([32 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.mobile.fenix.v2.nightly.latest/artifacts/public/build/armeabi-v7a/geckoNightly/target.apk), [64 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.mobile.fenix.v2.nightly.latest/artifacts/public/build/arm64-v8a/geckoNightly/target.apk)). Firefox Preview Nightly is the preferred profiling target for the following reasons:
 
-Among these, Firefox for Android is the only one that has a Nightly channel which uses a recent [mozilla-central](https://hg.mozilla.org/mozilla-central/)-based Gecko, receives automatic updates (because it's on the Play Store), and is usable as a daily browser. However, it doesn't use GeckoView or e10s.
+ - It's the product we want to ship and are actively working on.
+ - It uses a [recent](https://github.com/mozilla-mobile/android-components/blob/master/buildSrc/src/main/java/Gecko.kt#L9) version of Gecko and updates frequently and automatically.
+ - It's a very usable browser.
 
-Mozilla's current development efforts on mobile are focused on GeckoView. GeckoView has very different performance characteristics from non-GeckoView Gecko, mainly because GeckoView uses e10s: it runs web content in a different process from the browser process. Some new features, such as WebRender, are even exclusively targeting GeckoView. So whenever you do performance investigations and profiling, you really want to be profiling GeckoView, which means that Firefox for Android is not a good choice for a profiling target.
+The other reasonable profiling target is something called ["GeckoView-example"](https://searchfox.org/mozilla-central/source/mobile/android/geckoview_example). This is a small Android app that is basically just a demo of GeckoView and doesn't have much UI. You can download the most recent GeckoView-example.apk ([32 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.nightly.latest.mobile.android-api-16-opt/artifacts/public/build/geckoview_example.apk), [64 bit](https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.nightly.latest.mobile.android-aarch64-opt/artifacts/public/build/geckoview_example.apk)) from TaskCluster, or you can compile Gecko yourself and [push Geckoview-example to the phone using `mach run`](https://mozilla.github.io/geckoview/contributor/for-gecko-engineers#geckoview-example-app) or [using Android Studio](https://mozilla.github.io/geckoview/contributor/geckoview-quick-start#build-using-android-studio). In fact, if you're working on Gecko, this is the most low-friction workflow if you want to quickly verify the performance impact of your changes on Android.
 
-That leaves the other four products:
+In general, profiling Fenix is preferable over profiling GeckoView-example because you'll be able to see impact from Fenix-specific performance issues. If you're compiling and modifying Gecko locally, you can create a version of Fenix that uses your custom Gecko [by making a small tweak to a `local.properties` file](https://mozilla.github.io/geckoview/contributor/geckoview-quick-start#dependency-substiting-your-local-geckoview-into-a-mozilla-project) in your local clone of [the Fenix repository](https://github.com/mozilla-mobile/fenix).
 
- - Focus is usable as a daily browser, and it has [a "Nightly" channel](https://github.com/mozilla-mobile/focus-android/wiki/Release-tracks#nightly), but that channel [uses GeckoView Beta](https://github.com/mozilla-mobile/focus-android/blob/master/build.gradle#L9-L10). This makes it almost useless for profiling work - you don't want to spend your time finding problems that have already been fixed. The Gecko Beta channel is also missing some recent profiling improvements.
- - The reference browser uses a more recent version of GeckoView: It tries to stick very closely to mozilla-central, but it uses [a pinned version of GeckoView](https://github.com/mozilla-mobile/android-components/blob/master/buildSrc/src/main/java/Gecko.kt#L6). This means that it only refreshes to a new build of GeckoView whenever somebody manually updates the pinned version, [which happens around once a week](https://github.com/mozilla-mobile/android-components/commits/master/buildSrc/src/main/java/Gecko.kt). The reference browser is somewhat usable as a regular browser. [It is not on the Google Play Store, so it does not auto-update](https://github.com/mozilla-mobile/reference-browser/issues/296), but you can install it from an apk manually.
- - Fenix is supposed to become a GeckoView-based replacement for Fennec in the future, but at this point, it is in a very early stage and there might not even be downloadable builds for it.
- - Lastly, there's the GeckoView-example app: This app is an extremely simple GeckoView-based app, which is generated along with every GeckoView build on the mozilla-central trees. That means you can get GeckoView-example apks for any GeckoView build you want. GeckoView-example is also the easiest GeckoView-based app to compile locally. It's not really usable as your daily browser, and it's not on the Play Store so it doesn't auto-update, but it's usually enough for performance testing and profiling work.
+As for the other Gecko-based Android products, [the old Firefox for Android ("Fennec")](https://play.google.com/store/apps/details?id=org.mozilla.fennec_aurora&hl=en_CA) and [Firefox Focus](https://play.google.com/store/apps/details?id=org.mozilla.focus) are based on outdated versions of Gecko and are only of historical interest.
 
-So there are really only two good options: GeckoView-example and the reference browser. Both have to be installed manually by downloading an apk file to your phone; GeckoView-example has a slightly more up-to-date version of Gecko.
-
-### Download GeckoView example
-
-The latest GeckoView example Nightly always lives at this URL: [https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.nightly.latest.mobile.android-api-16-opt/artifacts/public/build/geckoview_example.apk](https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.nightly.latest.mobile.android-api-16-opt/artifacts/public/build/geckoview_example.apk)
-
-Here's a QR code for that URL:
-
-![QR code for the link above](./images/qr-gve-nightly.gif)
-
-### Alternative: Download the reference browser
-
-If you'd prefer to profile the reference browser instead, here's a QR code for the latest reference browser build, which always lives at [https://index.taskcluster.net/v1/task/project.mobile.reference-browser.nightly.latest/artifacts/public/reference-browser-arm.apk](https://index.taskcluster.net/v1/task/project.mobile.reference-browser.nightly.latest/artifacts/public/reference-browser-arm.apk):
-
-![QR code for the link above](./images/qr-reference-browser-nightly.gif)
-
-### Installation
-
-In order to install an app from an apk file onto your Android phone, follow these steps:
-
- 1. First, if you already have another build of this app installed, uninstall it. A new installation doesn't automatically replace an existing installation; the installation process will fail if an app with that name already exists. On some variants of Android, uninstalling can be done by dragging the app's icon into a screen corner that displays a trash can; on others it might require going into the Android Settings or the Play Store.
- 2. Download the apk file that you want to install. One way to do this is to install a QR code reader app such as [Barcode Scanner](https://play.google.com/store/apps/details?id=com.qrcodescanner.barcodescanner&hl=en) and to scan one of the QR codes above with it. Then you can open the scanned link in a browser such as Chrome and download the file. If it won't download right away, you might have to paste the URL again into Chrome's address bar; Barcode Scanner will have put it on the clipboard automatically.
- 3. Once the download finishes, "open" the apk file and install the app. You might need to confirm a few security dialogs. You may also need to go into your Android system settings, search for "Install unknown apps", and give the browser that you used for downloading (e.g. Chrome) the right to install unknown apps.
- 4. Open the installed app.
-
-Now that the app is installed, you can get ready to profile it.
+You can also profile [the "reference browser"](https://github.com/mozilla-mobile/reference-browser) or [Firefox Reality](https://mixedreality.mozilla.org/firefox-reality/).
 
 ## Setup
 
-### Enable the new Performance panel in Desktop Firefox
-
-To profile a Gecko Android build, you have to connect it to a Desktop Firefox browser, and you need to make a configuration change to the Firefox Developer Tools.
-
-* Open the `about:config` page in Desktop Firefox (Nightly is recommended)
-* Set `devtools.performance.new-panel-enabled` to `true`
-
 ### Enable remote debugging on the mobile device
 
-You need to have your Gecko Android app running and set up for remote debugging via [USB](https://developer.mozilla.org/docs/Tools/Remote_Debugging/Debugging_Firefox_for_Android_with_WebIDE) or via [WiFi](https://developer.mozilla.org/docs/Tools/Remote_Debugging/Debugging_Firefox_for_Android_over_Wifi). For profiling over USB, you need to have the device connected to your computer before recording. For profiling over Wi-Fi ensure that both mobile device and computer are on the same wireless network.
+Your device needs to be connected to your computer before recording. You also need to have your Gecko-based Android app (such as Firefox Preview) running and set up for remote debugging via USB. This usually requires **two** settings:
 
-Prefer debugging via USB; it's usually more reliable than Wi-Fi.
+ - Android itself needs to be configured to allow remote debugging over USB. This can be done in the system settings after entering "developer mode", which can be done by tapping on the Android build number repeatedly. See [the Android documentation](https://developer.android.com/studio/debug/dev-options.html) for details.
+ - The app needs to be configured to allow remote debugging. There's usually a checkbox in the app's settings menu for that.
 
-As of November 29th, 2018, this is the status of remote debugging on our mobile products:
+### Prepare `about:debugging`
 
- - The GeckoView example always has remote debugging enabled.
- - Focus "Nightly" (which uses GeckoView Beta) lets you enable remote debugging in the Advanced section of the Settings.
- - The reference browser [is about to get some UI to enable remote debugging](https://github.com/mozilla-mobile/reference-browser/pull/306), but for now, you have to manually go to about:config on the device and flip the prefs `devtools.debugger.remote-enabled` and `devtools.remote.usb.enabled` to true. These prefs are restartless.
- - Fennec / Firefox for Android exposes separate toggles for debugging via USB and for debugging via Wi-Fi; its UI is what's described in the [MDN instructions](https://developer.mozilla.org/docs/Tools/Remote_Debugging/Debugging_Firefox_for_Android_with_WebIDE).
+To profile a Gecko Android build, you have to connect it to a Desktop Firefox browser. Please use [Firefox Nightly](https://www.mozilla.org/en-US/firefox/channel/desktop/#nightly) for this.
+
+* Open the `about:debugging` page in Desktop Firefox by typing `about:debugging` in the URL bar, or via Tools > Web Developer > Remote Debugging.
+* If necessary, click "Enable USB Devices".
 
 ## Recording
 
-In Desktop Firefox, open *Tools* > *Web Developer* > *WebIDE*.
-
-Now, via the menu, go to *Project* > *Preferences* and uncheck the checkboxes *Remember last project* and *Reconnect to previous runtime*. This ensures that the devtools don't introduce overhead by automatically enabling their instrumentation once connected. You only have to do this once.
-
-Now, find your device/browser in the top right corner and connect to it. If your device is not listed, check the following things:
+On `about:debugging`, find your device/browser in the sidebar on the left and connect to it. If your device is not listed, check the following things:
 
  - Is USB debugging enabled in the Android system preferences?
- - Is the browser you want to profile running? If you're profiling Focus, try navigating to a page in order to make sure that Gecko has been initialized.
- - Is remote debugging enabled in the browser on the phone? See the previous section for where to find these settings. If you've recently pushed a new version of this app to your phone, you probably uninstalled the old version, and you discarded your local settings along with it, so you may need to enable the prefs again.
+ - Is the browser you want to profile running? Try navigating to a page in order to make sure that Gecko has been initialized.
+ - Is remote debugging enabled in the browser on the phone? If you've recently pushed a new version of this app to your phone, the settings from the previous version may have been lost, so you may need to enable the pref again.
  - Is your phone's screen unlocked?
  - Double-check your cable connections.
  - If you have `adb` on your Desktop machine, check if `adb devices` sees the phone. If not, try to fix that first.
- - Sometimes, closing the WebIDE window and re-opening it can work.
 
 Once you have connected to the phone browser successfully, read on.
 
-Select *Performance* from the action list on the right sidebar.
+Click the sidebar item for your phone / browser. Then, in the main section of the page, click the *Profile Performance* button.
 
-Make any necessary adjustments in the presented options, like threads to sample or profiler features to enable, and then click *Start recording*. Perform the interactions you intend to profile on the Android device and then click *Stop and grab the recording* in the Performance panel. A new tab will open in [https://profiler.firefox.com/](https://profiler.firefox.com/) with the collected profile ready for inspection.
+Make any necessary adjustments in the presented options, like threads to sample or profiler features to enable, and then click *Start recording*. Perform the interactions you intend to profile on the Android device and then click *Capture Recording* in the Performance panel. A new tab will open in [https://profiler.firefox.com/](https://profiler.firefox.com/) with the collected profile ready for inspection.
 
-![A screenshot of the new performance panel](./images/new-performance-panel.png)
+![A screenshot of about:debugging after connecting](./images/about-debugging-remote.png)
+![A screenshot of about:debugging after clicking Profile Performance](./images/about-debugging-remote-profiling-panel.png)
 
 ## Symbols and symbol sources
 
-If you've been profiling one of the builds suggested in this document, your profile should contain fully symbolicated C++ call stacks at least for libxul.so. If it doesn't, check the following:
+If you've been profiling a browser from the Google Play Store, your profile should contain fully symbolicated C++ call stacks at least for libxul.so. If it doesn't, check the following:
 
  - Are you profiling a "Nightly" GeckoView build? A common mistake is to profile a regular "build" build from treeherder, i.e. one that was not compiled with the "nightly" configuration. Unfortunately, those regular treeherder builds do not upload symbol information to the Mozilla symbol server. Please use a different build in that case.
  - Are you profiling a build from the tryserver or a local build? Read on below for how to obtain symbol information in those cases.
 
-As for Android system libraries, if the browser on the phone is running Gecko 66 or newer, you should get full symbol information for system libraries. If you don't, [please file a bug](https://bugzilla.mozilla.org/enter_bug.cgi?product=Core&component=Gecko+Profiler).
-
-There are other types of builds you may want to profile:
-
 ### Try builds
 
-If you want to profile an Android build that the tryserver created for you, you have to kick off a "Sym" job on treeherder: Using treeherder's *Add new jobs* UI, schedule a "Sym" job for each platform whose "B" job you want symbols for. (And "SymN" if you have an "N" job you want symbols for, i.e. a build job with the "nightly configuration.) These jobs gather symbol information from the corresponding build job and upload it to the Mozilla symbol server so that the Firefox Profiler can use it.
+If you want to profile an Android build that the tryserver created for you, you have to kick off a "Sym" job (run time: about 3 minutes) on treeherder: Using treeherder's *Add new jobs* UI, schedule a "Sym" job for each platform whose "B" job you want symbols for. (And "SymN" if you have an "N" job you want symbols for, i.e. a build job with the "nightly" configuration.) These jobs gather symbol information from the corresponding build job and upload it to the Mozilla symbol server so that the Firefox Profiler can use it.
 
 ### Local builds
 
-If you've compiled an Android Gecko build locally, and want to profile it, you have to jump through a few extra hoops at the moment unfortunately.
+If you've compiled an Android Gecko build locally, and want to profile it, you have to jump through one small extra hoop: Before profiling, in the *Profile Performance* panel in `about:debugging`, open the *Local build* section and add your Android build's objdir to the list. Then profile as usual, and you should be getting full symbol information. ... Except at the moment there is [a problem](https://bugzilla.mozilla.org/show_bug.cgi?id=1615066) that makes symbolication fail, unless you manually run a command to strip debug information from `libxul.so`. See the bug for more details.
 
-At the moment, Firefox Nightly Desktop doesn't support symbolicating profiles that were obtained from local Android Gecko builds. However, [patches are](https://bugzilla.mozilla.org/show_bug.cgi?id=1509549) [in review](https://bugzilla.mozilla.org/show_bug.cgi?id=1504101) to enable just that, and you can try out builds that include those patches: From [this try push](https://treeherder.mozilla.org/#/jobs?repo=try&revision=6b2b61d055279cb5dff4361fc428460891d6ddd2), download the Firefox Desktop build for your host platform, and connect it to your custom Android build through WebIDE. Before profiling, in the *Performance* panel in WebIDE, open the *Local build* section and add your Android build's objdir to the list. Then profile as usual, and you should be getting full symbol information.
+## Startup profiling
+
+For startup profiling, similar to [startup profiling on Desktop](https://developer.mozilla.org/en-US/docs/Mozilla/Performance/Profiling_with_the_Built-in_Profiler#Profiling_Firefox_Startup), you will need to manually set some `MOZ_PROFILER_STARTUP*` environment variables. The way to do this varies based on the app you want to profile (more details below). Once the app has been started with these environment variables, the profiler will be running. Then you can connect to the app using `about:debugging` as usual, and capture the profile with the regular UI. (This only works if you're running Desktop Firefox Nightly newer than February 18, 2020, because it requires the patch from [bug 1615436](https://bugzilla.mozilla.org/show_bug.cgi?id=1615436).)
+
+### Startup profiling GeckoView-example (and Fennec)
+
+If you have compiled GeckoView-example locally, you can launch it with `./mach run` and specify environment variables as follows:
+
+```bash
+./mach run --setenv MOZ_PROFILER_STARTUP=1 \
+           --setenv MOZ_PROFILER_STARTUP_INTERVAL=5 \
+           --setenv MOZ_PROFILER_STARTUP_FEATURES=threads,js,stackwalk,leaf,screenshots,ipcmessages,java \
+           --setenv MOZ_PROFILER_STARTUP_FILTERS="GeckoMain,Compositor,Renderer,IPDL Background"
+```
+
+Alternatively, if you have installed GeckoView-example from another source, you can launch it from the command line using `adb` with environment variables specified like this:
+
+```bash
+adb shell am start -n org.mozilla.geckoview_example/.App \
+    --es env0 MOZ_PROFILER_STARTUP=1 \
+    --es env1 MOZ_PROFILER_STARTUP_INTERVAL=5 \
+    --es env2 MOZ_PROFILER_STARTUP_FEATURES=threads,js,stackwalk,leaf,screenshots,ipcmessages,java \
+    --es env3 MOZ_PROFILER_STARTUP_FILTERS="GeckoMain,Compositor,Renderer,IPDL Background"
+```
+
+### Startup profiling Fenix
+
+The above doesn't work with Fenix (I'm guessing it doesn't pass environment variables along to Gecko the way GeckoView-example does), but the following works instead:
+
+ 1. Make sure you have a "debuggable" Fenix. The easiest way to do this is to make your own Fenix build with a *debug* profile. This Fenix has the app ID `org.mozilla.fenix.debug`.
+ 2. Push a file to your device that contains the environment variables as described in the [Reading configuration from a file](https://mozilla.github.io/geckoview/consumer/docs/automation#reading-configuration-from-a-file) section of the GeckoView docs.
+
+For example, you can create a file with the name `org.mozilla.fenix.debug-geckoview-config.yaml` on your Desktop machine and content of the following form:
+
+```
+env:
+  MOZ_PROFILER_STARTUP: 1
+  MOZ_PROFILER_STARTUP_INTERVAL: 5
+  MOZ_PROFILER_STARTUP_FEATURES: threads,js,stackwalk,leaf,screenshots,ipcmessages,java
+  MOZ_PROFILER_STARTUP_FILTERS: GeckoMain,Compositor,Renderer,IPDL Background
+```
+
+Now push this file to the device with `adb push org.mozilla.fenix.debug-geckoview-config.yaml /data/local/tmp/`.
+
+From now on, whenever you open your debuggable Fenix app, Gecko will be profiling itself automatically from the start, even if remote debugging is turned off. Then you can enable remote debugging, connect to the browser with `about:debugging`, and capture the profiling run.
+
+You can delete the file again when you want to stop this behavior, e.g. using `adb shell rm /data/local/tmp/org.mozilla.fenix.debug-geckoview-config.yaml`.
+
+[Here's an example profile captured using this method](https://perfht.ml/3bKTFCG).
+
+### Profiling App Link startup
+
+Fenix can be launched with a URL as follows (assuming a debug Fenix build):
+
+```
+adb shell am start-activity -d "https://www.mozilla.org/" \
+ -a android.intent.action.VIEW org.mozilla.fenix.debug/org.mozilla.fenix.IntentReceiverActivity
+```
+
+When combined with the startup profiling `.yaml` file as described in the previous section, this allows profiling GeckoView during the App Link startup path. This is the scenario of a user opening a link from a different Android app in the default browser.
+
+Startup from App Link is the most important GeckoView startup scenario. In this scenario, GeckoView startup is directly in the critical path between the user action (tapping the link) and the first useful result (the web page being shown on the screen). This is different from the scenario of launching Fenix from the home screen - in that case, Fenix can show meaningful content even before Gecko is initialized, so Gecko's startup time is not as crucial to the experience.
 
 ## Tips
 
-* Avoid opening any other panels besides the Performance panel, to reduce the overhead of activated panels.
-* After connecting to the device, do not select *Main Process* or any of the open tabs from the list of targets on the left.
-* If WebIDE automatically reconnects to a debugging target from a previous session, disconnect, uncheck the two checkboxes in the WebIDE preferences (*Project* > *Preferences*) and reconnect to the device.
-* If the recording doesn't start after clicking the start button, or if the button is inactive or in an otherwise confused state, it might be necessary to close and restart WebIDE to reset some internal state.
+* Enable the "Screenshots" feature before profiling. Then you can see what's going on on the screen during your profiling run, which can be extremely helpful.
+* Limit the duration of the profiling run. This will cut down on the profile size, which will reduce the time you have to wait when you click "Capture Profile". Smaller profiles are also less likely to crash the app due to memory limitations.
+* Avoid clicking on any of the open tabs that are listed on the `about:debugging` page. Clicking on a tab will open a toolbox and add overhead by initializing content-side devtools code. For that reason, the profiling panel is separate from the toolbox.
+* Choose a more relaxed profiling interval in order to reduce profiling overhead. 2ms to 5ms work well. This will give you less data but more accurate timings.
+* To get maximally-realistic timings, consider using the "No Periodic Sampling" feature: This will cut down profiling overhead dramatically, but you won't have any stacks. If your workload is reproducible enough, you can take two profiles: one with stacks and one without. Then you can take your timings from the former and your information from the latter.
+* Startup profiling reveals some overhead caused by devtools code that is only run when remote debugging is enabled. In order to see what startup does when remote debugging is turned off, you can deactivate remote debugging before you quit the app, and re-activate it after startup.
+* If the recording doesn't start after clicking the start button, or if the button is inactive or in an otherwise confused state, it might be necessary to disconnect and reconnect to the phone to reset some state.

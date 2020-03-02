@@ -14,13 +14,13 @@ import { assertExhaustiveCheck } from '../../utils/flow';
 import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndex,
-  getHiddenLocalTracks,
   getSelectedTab,
 } from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
 import {
   getLocalTrackName,
   getCounterSelectors,
+  getIsLocalTrackHidden,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import TrackThread from './TrackThread';
@@ -37,6 +37,7 @@ type OwnProps = {|
   +localTrack: LocalTrack,
   +trackIndex: TrackIndex,
   +style?: Object /* This is used by Reorderable */,
+  +setIsInitialSelectedPane: (value: boolean) => void,
 |};
 
 type StateProps = {|
@@ -89,6 +90,13 @@ class LocalTrackComponent extends PureComponent<Props> {
       default:
         console.error('Unhandled localTrack type', (localTrack: empty));
         return null;
+    }
+  }
+
+  componentDidMount() {
+    const { isSelected } = this.props;
+    if (isSelected) {
+      this.props.setIsInitialSelectedPane(true);
     }
   }
 
@@ -182,7 +190,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       trackName: getLocalTrackName(state, pid, trackIndex),
       titleText,
       isSelected,
-      isHidden: getHiddenLocalTracks(state, pid).has(trackIndex),
+      isHidden: getIsLocalTrackHidden(state, pid, trackIndex),
     };
   },
   mapDispatchToProps: {

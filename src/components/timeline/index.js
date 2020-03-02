@@ -20,10 +20,12 @@ import {
   getGlobalTracks,
   getGlobalTrackReferences,
   getHiddenTrackCount,
+  getActiveBrowsingContextID,
 } from '../../selectors/profile';
 import {
   getGlobalTrackOrder,
   getTimelineType,
+  getShowTabOnly,
 } from '../../selectors/url-state';
 import {
   TIMELINE_MARGIN_LEFT,
@@ -41,9 +43,15 @@ import {
   commitRange,
   changeTimelineType,
   changeRightClickedTrack,
+  changeShowTabOnly,
 } from '../../actions/profile-view';
 
-import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
+import type { BrowsingContextID } from '../../types/profile';
+import type {
+  TrackIndex,
+  GlobalTrack,
+  InitialSelectedTrackReference,
+} from '../../types/profile-derived';
 import type {
   GlobalTrackReference,
   TimelineType,
@@ -61,6 +69,8 @@ type StateProps = {|
   +zeroAt: Milliseconds,
   +timelineType: TimelineType,
   +hiddenTrackCount: HiddenTrackCount,
+  +activeBrowsingContextID: BrowsingContextID | null,
+  +showTabOnly: BrowsingContextID | null,
 |};
 
 type DispatchProps = {|
@@ -69,11 +79,16 @@ type DispatchProps = {|
   +updatePreviewSelection: typeof updatePreviewSelection,
   +changeTimelineType: typeof changeTimelineType,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
+  +changeShowTabOnly: typeof changeShowTabOnly,
 |};
 
 type Props = {|
   ...SizeProps,
   ...ConnectedProps<{||}, StateProps, DispatchProps>,
+|};
+
+type State = {|
+  initialSelected: InitialSelectedTrackReference | null,
 |};
 
 class TimelineSettingsGraphType extends React.PureComponent<{|
@@ -122,7 +137,7 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
 |}> {
   _showMenu = (event: SyntheticMouseEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
-    changeRightClickedTrack(null);
+    this.props.changeRightClickedTrack(null);
     showMenu({
       data: null,
       id: 'TimelineTrackContextMenu',
@@ -153,7 +168,60 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
   }
 }
 
-class Timeline extends React.PureComponent<Props> {
+class TimelineSettingsActiveTabView extends React.PureComponent<{|
+  +activeBrowsingContextID: BrowsingContextID | null,
+  +showTabOnly: BrowsingContextID | null,
+  +changeShowTabOnly: typeof changeShowTabOnly,
+|}> {
+  _toggleShowTabOnly = () => {
+    const {
+      showTabOnly,
+      changeShowTabOnly,
+      activeBrowsingContextID,
+    } = this.props;
+    if (showTabOnly === null) {
+      changeShowTabOnly(activeBrowsingContextID);
+    } else {
+      changeShowTabOnly(null);
+    }
+  };
+
+  render() {
+    const { activeBrowsingContextID, showTabOnly } = this.props;
+    if (activeBrowsingContextID === null) {
+      return null;
+    }
+
+    return (
+      <div className="timelineSettingsToggle">
+        <label className="photon-label photon-label-micro timelineSettingsToggleLabel">
+          <input
+            type="checkbox"
+            name="timelineSettingsActiveTabToggle"
+            className="photon-checkbox photon-checkbox-micro"
+            onChange={this._toggleShowTabOnly}
+            checked={showTabOnly !== null}
+          />
+          Show active tab only
+        </label>
+      </div>
+    );
+  }
+}
+
+class Timeline extends React.PureComponent<Props, State> {
+  state = {
+    initialSelected: null,
+  };
+
+  /**
+   * This method collects the initially selected track's HTMLElement. This allows the timeline
+   * to scroll the initially selected track into view once the page is loaded.
+   */
+  setInitialSelected = (el: InitialSelectedTrackReference) => {
+    this.setState({ initialSelected: el });
+  };
+
   render() {
     const {
       globalTracks,
@@ -168,6 +236,9 @@ class Timeline extends React.PureComponent<Props> {
       hiddenTrackCount,
       changeTimelineType,
       changeRightClickedTrack,
+      activeBrowsingContextID,
+      showTabOnly,
+      changeShowTabOnly,
     } = this.props;
 
     // Do not include the left and right margins when computing the timeline width.
@@ -189,6 +260,11 @@ class Timeline extends React.PureComponent<Props> {
             hiddenTrackCount={hiddenTrackCount}
             changeRightClickedTrack={changeRightClickedTrack}
           />
+          <TimelineSettingsActiveTabView
+            activeBrowsingContextID={activeBrowsingContextID}
+            showTabOnly={showTabOnly}
+            changeShowTabOnly={changeShowTabOnly}
+          />
         </div>
         <TimelineSelection width={timelineWidth}>
           <TimelineRuler
@@ -200,6 +276,7 @@ class Timeline extends React.PureComponent<Props> {
           <OverflowEdgeIndicator
             className="timelineOverflowEdgeIndicator"
             panelLayoutGeneration={panelLayoutGeneration}
+            initialSelected={this.state.initialSelected}
           >
             {
               <Reorderable
@@ -215,6 +292,7 @@ class Timeline extends React.PureComponent<Props> {
                     key={trackIndex}
                     trackIndex={trackIndex}
                     trackReference={globalTrackReferences[trackIndex]}
+                    setInitialSelected={this.setInitialSelected}
                   />
                 ))}
               </Reorderable>
@@ -236,6 +314,8 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     panelLayoutGeneration: getPanelLayoutGeneration(state),
     timelineType: getTimelineType(state),
     hiddenTrackCount: getHiddenTrackCount(state),
+    activeBrowsingContextID: getActiveBrowsingContextID(state),
+    showTabOnly: getShowTabOnly(state),
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
@@ -243,6 +323,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     commitRange,
     changeTimelineType,
     changeRightClickedTrack,
+    changeShowTabOnly,
   },
   component: withSize<Props>(Timeline),
 });

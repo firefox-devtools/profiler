@@ -47,7 +47,12 @@ import type {
 } from '../types/actions';
 import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
-import type { ThreadIndex, Pid, IndexIntoSamplesTable } from '../types/profile';
+import type {
+  ThreadIndex,
+  Pid,
+  IndexIntoSamplesTable,
+  BrowsingContextID,
+} from '../types/profile';
 import type {
   CallNodePath,
   CallNodeInfo,
@@ -1148,6 +1153,24 @@ export function changeProfileName(profileName: string): Action {
   return {
     type: 'CHANGE_PROFILE_NAME',
     profileName,
+  };
+}
+
+export function changeShowTabOnly(
+  showTabOnly: BrowsingContextID | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    let selectedTab = getSelectedTab(getState());
+
+    if (showTabOnly !== null && selectedTab === 'network-chart') {
+      selectedTab = getLastVisibleThreadTabSlug(getState());
+    }
+
+    dispatch({
+      type: 'CHANGE_SHOW_TAB_ONLY',
+      showTabOnly,
+      selectedTab,
+    });
   };
 }
 
