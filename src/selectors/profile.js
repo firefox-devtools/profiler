@@ -651,11 +651,10 @@ export const getRelevantPagesForCurrentTab: Selector<
 export const getComputedHiddenGlobalTracks: Selector<
   Set<TrackIndex>
 > = createSelector(
-  UrlState.getProfileSpecificState,
+  UrlState.getHiddenGlobalTracks,
   UrlState.getShowTabOnly,
   getActiveTabHiddenGlobalTracks,
-  (profileSpecific, showTabOnly, activeTabHiddenGlobalTracks) => {
-    const hiddenGlobalTracks = profileSpecific.hiddenGlobalTracks;
+  (hiddenGlobalTracks, showTabOnly, activeTabHiddenGlobalTracks) => {
     if (showTabOnly === null) {
       return hiddenGlobalTracks;
     }
@@ -673,11 +672,10 @@ export const getComputedHiddenGlobalTracks: Selector<
 export const getComputedHiddenLocalTracksByPid: Selector<
   Map<Pid, Set<TrackIndex>>
 > = createSelector(
-  UrlState.getProfileSpecificState,
+  UrlState.getHiddenLocalTracksByPid,
   UrlState.getShowTabOnly,
   getActiveTabHiddenLocalTracksByPid,
-  (profileSpecific, showTabOnly, activeTabHiddenLocalTracksByPid) => {
-    const hiddenLocalTracksByPid = profileSpecific.hiddenLocalTracksByPid;
+  (hiddenLocalTracksByPid, showTabOnly, activeTabHiddenLocalTracksByPid) => {
     if (showTabOnly === null) {
       return hiddenLocalTracksByPid;
     }
