@@ -184,6 +184,12 @@ const isNewlyPublished: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+/**
+ * Holds the state for whether or not the user is currently dragging a
+ * file over a drag and drop target. This way we know if we should
+ * show an overlay suggesting the user to drop the file to load a new
+ * profile.
+ */
 const isDragAndDropDragging: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'START_DRAGGING':
@@ -195,6 +201,10 @@ const isDragAndDropDragging: Reducer<boolean> = (state = false, action) => {
   }
 };
 
+/**
+ * Holds the state for whether or not a custom drag and drop overlay
+ * is registered. If it isn't, we will mount a default overlay instead.
+ */
 const isDragAndDropOverlayRegistered: Reducer<boolean> = (
   state = false,
   action

@@ -172,6 +172,14 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
   }
 );
 
+/**
+ * This selector lets us know if it is safe to load a new profile. If
+ * the app is already busy loading a profile, this selector returns
+ * false.
+ *
+ * Used by the drag and drop component in order to determine if it can
+ * load a dropped profile file.
+ */
 export const getIsNewProfileLoadAllowed: Selector<boolean> = createSelector(
   getView,
   getDataSource,

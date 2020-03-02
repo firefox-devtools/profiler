@@ -131,7 +131,9 @@ class DragAndDropImpl extends React.PureComponent<Props> {
           dragAndDropArea div creates its own stacking context, so
           even if it contains children with high z-indexes, the
           default overlay will still appear on top when shown.*/
-        this.props.useDefaultOverlay && <DragAndDropOverlay isDefault={true} />}
+        this.props.useDefaultOverlay ? (
+          <DragAndDropOverlay isDefault={true} />
+        ) : null}
       </>
     );
   }
