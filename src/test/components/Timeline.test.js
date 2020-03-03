@@ -52,7 +52,10 @@ function _getProfileWithDroppedSamples(): Profile {
   {
     const samples = thread2.samples;
     for (const key in samples) {
-      if (samples.hasOwnProperty(key) && Array.isArray(samples[key])) {
+      if (
+        Object.prototype.hasOwnProperty.call(samples, key) &&
+        Array.isArray(samples[key])
+      ) {
         // Slice just the stacks we care about, simulating a thread that was started
         // later, and with dropped data in its buffer.
         samples[key] = samples[key].slice(4, 7);
