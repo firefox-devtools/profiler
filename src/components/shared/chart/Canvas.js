@@ -253,7 +253,7 @@ export default class ChartCanvas<HoveredItem> extends React.Component<
     this._canvas = canvas;
   };
 
-  componentWillReceiveProps() {
+  UNSAFE_componentWillReceiveProps() {
     // It is possible that the data backing the chart has been
     // changed, for instance after symbolication. Clear the
     // hoveredItem if the mouse no longer hovers over it.

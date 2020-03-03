@@ -162,7 +162,7 @@ class UrlManager extends React.PureComponent<Props> {
     window.addEventListener('popstate', () => this._updateState());
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     if (nextProps.urlSetupPhase !== 'done') {
       return;
     }

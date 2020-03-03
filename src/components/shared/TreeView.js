@@ -401,7 +401,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   }
 
-  componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
+  UNSAFE_componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
     const hasNewSelectedNode =
       nextProps.selectedNodeId !== this.props.selectedNodeId;
     const hasNewRightClickedNode =
