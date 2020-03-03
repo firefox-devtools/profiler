@@ -68,7 +68,7 @@
     "prop-types": "^15.7.2",
     "query-string": "^6.3.0",
     "react": "^16.8.6",
-    "react-contextmenu": "^2.9.2",
+    "react-contextmenu": "~2.9.2",
     "react-dom": "^16.8.6",
     "react-redux": "^7.1",
     "react-splitter-layout": "^3.0.1",
