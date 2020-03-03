@@ -1,29 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/ServiceWorkerManager shows a notice when the SW is updated, and the user can close it`] = `
-<div
-  class="serviceworker-ready-notice-wrapper"
->
-  <div
-    class="photon-message-bar serviceworker-ready-notice"
-  >
-    A new version of the application has been downloaded and is ready to use.
-    <button
-      class="photon-button photon-button-micro photon-message-bar-action-button"
-      type="button"
-    >
-      Reload the application
-    </button>
-    <button
-      aria-label="Hide the reload notice"
-      class="photon-button photon-message-bar-close-button"
-      title="Hide the reload notice"
-      type="button"
-    />
-  </div>
-</div>
-`;
-
 exports[`app/ServiceWorkerManager shows a notice when the SW is updated, and the user can close it 1`] = `
 <div
   class="serviceworker-ready-notice-wrapper"
