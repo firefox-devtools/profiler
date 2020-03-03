@@ -66,9 +66,9 @@ describe('call node paths on implementation filter change', function() {
   it('starts with combined CallNodePaths', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B, C, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, B, C, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -86,9 +86,9 @@ describe('call node paths on implementation filter change', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [B, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([B, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -104,9 +104,9 @@ describe('call node paths on implementation filter change', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
     dispatch(ProfileView.changeImplementationFilter('js'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [B, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([B, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -123,9 +123,9 @@ describe('call node paths on implementation filter change', function() {
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(ProfileView.changeImplementationFilter('combined'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B, C, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, B, C, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -144,9 +144,9 @@ describe('call node paths on implementation filter change', function() {
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(ProfileView.changeImplementationFilter('cpp'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, C]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, C]);
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       [
@@ -792,7 +792,10 @@ describe('actions/ProfileView', function() {
 
   describe('changeSelectedMarker', function() {
     it('changes the selected marker', function() {
-      const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+      ]);
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
@@ -807,7 +810,10 @@ describe('actions/ProfileView', function() {
 
   describe('changeMarkersSearchString', function() {
     it('changes the search string', function() {
-      const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+      ]);
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('');
@@ -1673,9 +1679,9 @@ describe('snapshots of selectors/profile', function() {
   });
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodePath', function() {
     const { getState, A, B } = setupStore();
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, B]);
   });
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodeIndex', function() {
     const { getState } = setupStore();

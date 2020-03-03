@@ -596,7 +596,10 @@ describe('symbolication', function() {
       symbolTable.set(0x1a00, 'third symbol');
       symbolTable.set(0x2000, 'last symbol');
       const symbolStore = new FakeSymbolStore(
-        new Map([['firefox', symbolTable], ['firefox-webcontent', symbolTable]])
+        new Map([
+          ['firefox', symbolTable],
+          ['firefox-webcontent', symbolTable],
+        ])
       );
       symbolicatedProfile = Object.assign({}, unsymbolicatedProfile, {
         threads: unsymbolicatedProfile.threads.slice(),

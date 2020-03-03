@@ -278,25 +278,23 @@ class Timeline extends React.PureComponent<Props, State> {
             panelLayoutGeneration={panelLayoutGeneration}
             initialSelected={this.state.initialSelected}
           >
-            {
-              <Reorderable
-                tagName="ol"
-                className="timelineThreadList"
-                grippyClassName="timelineTrackGlobalGrippy"
-                order={globalTrackOrder}
-                orient="vertical"
-                onChangeOrder={changeGlobalTrackOrder}
-              >
-                {globalTracks.map((globalTrack, trackIndex) => (
-                  <TimelineGlobalTrack
-                    key={trackIndex}
-                    trackIndex={trackIndex}
-                    trackReference={globalTrackReferences[trackIndex]}
-                    setInitialSelected={this.setInitialSelected}
-                  />
-                ))}
-              </Reorderable>
-            }
+            <Reorderable
+              tagName="ol"
+              className="timelineThreadList"
+              grippyClassName="timelineTrackGlobalGrippy"
+              order={globalTrackOrder}
+              orient="vertical"
+              onChangeOrder={changeGlobalTrackOrder}
+            >
+              {globalTracks.map((globalTrack, trackIndex) => (
+                <TimelineGlobalTrack
+                  key={trackIndex}
+                  trackIndex={trackIndex}
+                  trackReference={globalTrackReferences[trackIndex]}
+                  setInitialSelected={this.setInitialSelected}
+                />
+              ))}
+            </Reorderable>
           </OverflowEdgeIndicator>
         </TimelineSelection>
       </>

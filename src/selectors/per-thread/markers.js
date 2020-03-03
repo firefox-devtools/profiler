@@ -89,7 +89,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   /**
    * This selector constructs jank markers from the responsiveness data.
    */
-  const _getDerivedJankMarkers: Selector<Marker[]> = createSelector(
+  const _getDerivedJankMarkers: Selector<
+    Marker[]
+  > = createSelector(
     threadSelectors.getSamplesTable,
     ProfileSelectors.getDefaultCategory,
     (samples, defaultCategory) =>
@@ -100,7 +102,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * This selector returns the list of all markers, this is our reference list
    * that MarkerIndex values refer to.
    */
-  const getFullMarkerList: Selector<Marker[]> = createSelector(
+  const getFullMarkerList: Selector<
+    Marker[]
+  > = createSelector(
     _getDerivedMarkers,
     _getDerivedJankMarkers,
     (derivedMarkers, derivedJankMarkers) =>
@@ -138,10 +142,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * This returns the list of all marker indexes. This is simply a sequence
    * built from the full marker list.
    */
-  const getFullMarkerListIndexes: Selector<MarkerIndex[]> = createSelector(
-    getFullMarkerList,
-    markers => markers.map((_, i) => i)
-  );
+  const getFullMarkerListIndexes: Selector<
+    MarkerIndex[]
+  > = createSelector(getFullMarkerList, markers => markers.map((_, i) => i));
 
   /**
    * This utility function makes it easy to write selectors that deal with list

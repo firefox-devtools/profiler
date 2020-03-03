@@ -207,12 +207,8 @@ function _createCounterSelectors(counterIndex: CounterIndex): * {
 
   const getAccumulateCounterSamples: Selector<
     Array<AccumulatedCounterSamples>
-  > = createSelector(
-    getCommittedRangeFilteredCounter,
-    counters =>
-      accumulateCounterSamples(
-        counters.sampleGroups.map(group => group.samples)
-      )
+  > = createSelector(getCommittedRangeFilteredCounter, counters =>
+    accumulateCounterSamples(counters.sampleGroups.map(group => group.samples))
   );
 
   return {
@@ -246,13 +242,11 @@ export const getActiveTabHiddenGlobalTracksGetter: Selector<
  */
 export const getGlobalTrackReferences: Selector<
   GlobalTrackReference[]
-> = createSelector(
-  getGlobalTracks,
-  globalTracks =>
-    globalTracks.map((globalTrack, trackIndex) => ({
-      type: 'global',
-      trackIndex,
-    }))
+> = createSelector(getGlobalTracks, globalTracks =>
+  globalTracks.map((globalTrack, trackIndex) => ({
+    type: 'global',
+    trackIndex,
+  }))
 );
 
 export const getHasPreferenceMarkers: Selector<boolean> = createSelector(
@@ -377,13 +371,12 @@ export const getRightClickedThreadIndex: Selector<null | ThreadIndex> = createSe
   }
 );
 
-export const getGlobalTrackNames: Selector<string[]> = createSelector(
-  getGlobalTracks,
-  getThreads,
-  (globalTracks, threads) =>
-    globalTracks.map(globalTrack =>
-      Tracks.getGlobalTrackName(globalTrack, threads)
-    )
+export const getGlobalTrackNames: Selector<
+  string[]
+> = createSelector(getGlobalTracks, getThreads, (globalTracks, threads) =>
+  globalTracks.map(globalTrack =>
+    Tracks.getGlobalTrackName(globalTrack, threads)
+  )
 );
 
 export const getGlobalTrackName: DangerousSelectorWithArguments<
@@ -530,70 +523,67 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
 export const getPagesMap: Selector<Map<
   BrowsingContextID,
   Set<InnerWindowID>
-> | null> = createSelector(
-  getPageList,
-  pageList => {
-    if (pageList === null || pageList.length === 0) {
-      // There is no data, return null
-      return null;
-    }
-
-    // Constructing this map first so we won't have to walk through the page list
-    // all the time.
-    const innerWindowIDToPageMap: Map<
-      InnerWindowID,
-      {
-        browsingContextID: BrowsingContextID,
-        embedderInnerWindowID: InnerWindowID,
-      }
-    > = new Map();
-
-    for (const page of pageList) {
-      innerWindowIDToPageMap.set(page.innerWindowID, {
-        browsingContextID: page.browsingContextID,
-        embedderInnerWindowID: page.embedderInnerWindowID,
-      });
-    }
-
-    // Now we have a way to fastly traverse back with the previous Map.
-    // We can do construction of BrowsingContextID to set of InnerWindowID map.
-    const pageMap: Map<BrowsingContextID, Set<InnerWindowID>> = new Map();
-    const appendPageMap = (browsingContextID, innerWindowID) => {
-      const tabEntry = pageMap.get(browsingContextID);
-      if (tabEntry === undefined) {
-        const newTabEntry = new Set([innerWindowID]);
-        pageMap.set(browsingContextID, newTabEntry);
-      } else {
-        tabEntry.add(innerWindowID);
-      }
-    };
-
-    for (const page of pageList) {
-      if (page.embedderInnerWindowID === undefined) {
-        // This is the top most page, which means the web page itself.
-        appendPageMap(page.browsingContextID, page.innerWindowID);
-      } else {
-        // This is an iframe, we should find its parent to see find top most
-        // BrowsingContextID, which is the tab ID for our case.
-        const getTopMostParent = item => {
-          // We are using a Map to make this more performant.
-          // It should be 1-2 loop iteration in 99% of the cases.
-          const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
-          if (parent !== undefined) {
-            return getTopMostParent(parent);
-          }
-          return item;
-        };
-
-        const parent = getTopMostParent(page);
-        // Now we have the top most parent. We can append the pageMap.
-        appendPageMap(parent.browsingContextID, page.innerWindowID);
-      }
-    }
-
-    return pageMap;
+> | null> = createSelector(getPageList, pageList => {
+  if (pageList === null || pageList.length === 0) {
+    // There is no data, return null
+    return null;
   }
-);
+
+  // Constructing this map first so we won't have to walk through the page list
+  // all the time.
+  const innerWindowIDToPageMap: Map<
+    InnerWindowID,
+    {
+      browsingContextID: BrowsingContextID,
+      embedderInnerWindowID: InnerWindowID,
+    }
+  > = new Map();
+
+  for (const page of pageList) {
+    innerWindowIDToPageMap.set(page.innerWindowID, {
+      browsingContextID: page.browsingContextID,
+      embedderInnerWindowID: page.embedderInnerWindowID,
+    });
+  }
+
+  // Now we have a way to fastly traverse back with the previous Map.
+  // We can do construction of BrowsingContextID to set of InnerWindowID map.
+  const pageMap: Map<BrowsingContextID, Set<InnerWindowID>> = new Map();
+  const appendPageMap = (browsingContextID, innerWindowID) => {
+    const tabEntry = pageMap.get(browsingContextID);
+    if (tabEntry === undefined) {
+      const newTabEntry = new Set([innerWindowID]);
+      pageMap.set(browsingContextID, newTabEntry);
+    } else {
+      tabEntry.add(innerWindowID);
+    }
+  };
+
+  for (const page of pageList) {
+    if (page.embedderInnerWindowID === undefined) {
+      // This is the top most page, which means the web page itself.
+      appendPageMap(page.browsingContextID, page.innerWindowID);
+    } else {
+      // This is an iframe, we should find its parent to see find top most
+      // BrowsingContextID, which is the tab ID for our case.
+      const getTopMostParent = item => {
+        // We are using a Map to make this more performant.
+        // It should be 1-2 loop iteration in 99% of the cases.
+        const parent = innerWindowIDToPageMap.get(item.embedderInnerWindowID);
+        if (parent !== undefined) {
+          return getTopMostParent(parent);
+        }
+        return item;
+      };
+
+      const parent = getTopMostParent(page);
+      // Now we have the top most parent. We can append the pageMap.
+      appendPageMap(parent.browsingContextID, page.innerWindowID);
+    }
+  }
+
+  return pageMap;
+});
 
 /**
  * Get the page map and the active tab ID, then return the InnerWindowIDs that

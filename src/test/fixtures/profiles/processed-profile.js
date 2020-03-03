@@ -48,7 +48,7 @@ export type TestDefinedJsTracerEvent = [
   // Start time:
   Milliseconds,
   // End time:
-  Milliseconds,
+  Milliseconds
 ];
 
 /**
@@ -537,7 +537,10 @@ export function getMergedProfileFromTextSamples(
     search: '?thread=0&v=3',
     hash: '',
   });
-  const { profile } = mergeProfiles(profiles, profiles.map(() => profileState));
+  const { profile } = mergeProfiles(
+    profiles,
+    profiles.map(() => profileState)
+  );
   return {
     profile,
     funcNamesPerThread: profilesAndFuncNames.map(

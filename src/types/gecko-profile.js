@@ -28,7 +28,7 @@ export type GeckoMarkers = {
       IndexIntoStringTable,
       Milliseconds,
       IndexIntoCategoryList,
-      MarkerPayload_Gecko,
+      MarkerPayload_Gecko
     ]
   >,
 };
@@ -76,7 +76,7 @@ export type GeckoSamples = {|
       Milliseconds, // since profile.meta.startTime
       // milliseconds since the last event was processed in this
       // thread's event loop at the time that the sample was taken
-      Milliseconds,
+      Milliseconds
     ]
   >,
 |};
@@ -135,7 +135,7 @@ export type GeckoFrameTable = {|
       // index into profile.meta.categories
       null | number,
       // index into profile.meta.categories[category].subcategories. Always non-null if category is non-null.
-      null | number,
+      null | number
     ]
   >,
 |};

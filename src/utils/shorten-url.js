@@ -32,9 +32,7 @@ export async function shortenUrl(urlToShorten: string): Promise<string> {
 
   if (!response.ok) {
     throw new Error(
-      `An error happened while shortening the long url ${longUrl}: ${
-        response.statusText
-      } (${response.status})`
+      `An error happened while shortening the long url ${longUrl}: ${response.statusText} (${response.status})`
     );
   }
 
@@ -58,9 +56,7 @@ export async function expandUrl(urlToExpand: string): Promise<string> {
 
   if (!response.ok) {
     throw new Error(
-      `An error happened while expanding the shortened url ${urlToExpand}: ${
-        response.statusText
-      } (${response.status})`
+      `An error happened while expanding the shortened url ${urlToExpand}: ${response.statusText} (${response.status})`
     );
   }
 

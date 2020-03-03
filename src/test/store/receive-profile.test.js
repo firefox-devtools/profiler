@@ -775,9 +775,11 @@ describe('actions/receive-profile', function() {
         );
 
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileFromStore(hash))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileFromStore(hash))
+        )
+      ).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -804,9 +806,11 @@ describe('actions/receive-profile', function() {
     it('fails in case the profile cannot be found after several tries', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileFromStore(hash))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileFromStore(hash))
+        )
+      ).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -897,9 +901,11 @@ describe('actions/receive-profile', function() {
         );
 
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
+        )
+      ).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -926,9 +932,11 @@ describe('actions/receive-profile', function() {
     it('fails in case the profile cannot be found after several tries', async function() {
       const expectedUrl = 'https://profiles.club/shared.json';
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
+        )
+      ).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
