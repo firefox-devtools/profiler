@@ -117,13 +117,13 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
  * function update would force it to be recomputed on every symbolication update
  * pass. It is valid for the lifetime of the profile.
  */
-const activeTabHiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
-  state = new Set(),
+const activeTabHiddenGlobalTracksGetter: Reducer<() => Set<TrackIndex>> = (
+  state = () => new Set(),
   action
 ) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
-      return action.activeTabHiddenGlobalTracks;
+      return action.activeTabHiddenGlobalTracksGetter;
     default:
       return state;
   }
@@ -133,13 +133,12 @@ const activeTabHiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
  * This can be derived like the globalTracks information, but is stored in the state
  * for the same reason.
  */
-const activeTabHiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
-  state = new Map(),
-  action
-) => {
+const activeTabHiddenLocalTracksByPidGetter: Reducer<
+  () => Map<Pid, Set<TrackIndex>>
+> = (state = () => new Map(), action) => {
   switch (action.type) {
     case 'VIEW_PROFILE':
-      return action.activeTabHiddenLocalTracksByPid;
+      return action.activeTabHiddenLocalTracksByPidGetter;
     default:
       return state;
   }
@@ -586,8 +585,8 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
     }),
     globalTracks,
     localTracksByPid,
-    activeTabHiddenGlobalTracks,
-    activeTabHiddenLocalTracksByPid,
+    activeTabHiddenGlobalTracksGetter,
+    activeTabHiddenLocalTracksByPidGetter,
     profile,
   })
 );

@@ -44,9 +44,12 @@ export function getHumanReadableTracks(state: State): string[] {
   const threads = profileViewSelectors.getThreads(state);
   const globalTracks = profileViewSelectors.getGlobalTracks(state);
   const hiddenGlobalTracks = urlStateReducers.getHiddenGlobalTracks(state);
-  const activeTabHiddenGlobalTracks = profileViewSelectors.getActiveTabHiddenGlobalTracks(
+  const activeTabHiddenGlobalTracks = profileViewSelectors.getActiveTabHiddenGlobalTracksGetter(
     state
-  );
+  )();
+  const activeTabHiddenLocalTracksByPid = profileViewSelectors.getActiveTabHiddenLocalTracksByPidGetter(
+    state
+  )();
   const selectedThreadIndex = urlStateReducers.getSelectedThreadIndex(state);
   const showTabOnly = urlStateReducers.getShowTabOnly(state);
   const text: string[] = [];
@@ -107,9 +110,7 @@ export function getHumanReadableTracks(state: State): string[] {
           globalTrack.pid
         );
         const activeTabHiddenLocalTracks = ensureExists(
-          profileViewSelectors
-            .getActiveTabHiddenLocalTracksByPid(state)
-            .get(globalTrack.pid)
+          activeTabHiddenLocalTracksByPid.get(globalTrack.pid)
         );
 
         if (

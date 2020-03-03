@@ -15,7 +15,7 @@ import {
   getPreviewSelection,
   getComputedHiddenGlobalTracks,
   getComputedHiddenLocalTracks,
-  getActiveTabHiddenGlobalTracks,
+  getActiveTabHiddenGlobalTracksGetter,
 } from '../selectors/profile';
 import {
   getThreadSelectors,
@@ -642,7 +642,7 @@ function _findOtherVisibleThread(
   const globalTracks = getGlobalTracks(getState());
   const globalTrackOrder = getGlobalTrackOrder(getState());
   const globalHiddenTracks = getComputedHiddenGlobalTracks(getState());
-  const activeTabHiddenGlobalTracks = getActiveTabHiddenGlobalTracks(
+  const activeTabHiddenGlobalTracksGetter = getActiveTabHiddenGlobalTracksGetter(
     getState()
   );
 
@@ -661,7 +661,7 @@ function _findOtherVisibleThread(
 
     if (
       transitioningToActiveTab &&
-      activeTabHiddenGlobalTracks.has(globalTrackIndex)
+      activeTabHiddenGlobalTracksGetter().has(globalTrackIndex)
     ) {
       // We are transitioning to the active tab view. We should be able to select
       // the track that is not hidden by it as well.

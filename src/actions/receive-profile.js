@@ -169,10 +169,11 @@ export function finalizeProfileView(
       getLegacyHiddenThreads(getState())
     );
     // Pre-compute which tracks are not available for the active tab.
-    const activeTabHiddenGlobalTracks = computeActiveTabHiddenGlobalTracks(
-      globalTracks,
-      getState() // we need to access per thread selectors inside
-    );
+    const activeTabHiddenGlobalTracksGetter = () =>
+      computeActiveTabHiddenGlobalTracks(
+        globalTracks,
+        getState() // we need to access per thread selectors inside
+      );
     const localTracksByPid = computeLocalTracksByPid(profile);
     const localTrackOrderByPid = initializeLocalTrackOrderByPid(
       hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
@@ -186,10 +187,11 @@ export function finalizeProfileView(
       getLegacyHiddenThreads(getState())
     );
     // Pre-compute which local tracks are not available for the active tab.
-    const activeTabHiddenLocalTracksByPid = computeActiveTabHiddenLocalTracksByPid(
-      localTracksByPid,
-      getState() // we need to access per thread selectors inside
-    );
+    const activeTabHiddenLocalTracksByPidGetter = () =>
+      computeActiveTabHiddenLocalTracksByPid(
+        localTracksByPid,
+        getState() // we need to access per thread selectors inside
+      );
     let visibleThreadIndexes = getVisibleThreads(
       globalTracks,
       hiddenGlobalTracks,
@@ -249,8 +251,8 @@ export function finalizeProfileView(
       localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
-      activeTabHiddenGlobalTracks,
-      activeTabHiddenLocalTracksByPid,
+      activeTabHiddenGlobalTracksGetter,
+      activeTabHiddenLocalTracksByPidGetter,
     });
 
     // Note we kick off symbolication only for the profiles we know for sure
