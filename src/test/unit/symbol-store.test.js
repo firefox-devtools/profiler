@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import 'babel-polyfill';
 import { SymbolStore } from '../../profile-logic/symbol-store';
 import { TextDecoder } from 'util';
 import exampleSymbolTable from '../fixtures/example-symbol-table';
