@@ -1,0 +1,42 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+.dragAndDropArea {
+  display: inherit;
+  width: 100%;
+  isolation: isolate;
+}
+
+.dragAndDropOverlayWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  align-items: stretch;
+  justify-content: center;
+  padding: 1em;
+  background-color: rgba(255, 255, 255, 0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms;
+}
+
+.dragAndDropOverlayWrapper.dragging {
+  opacity: 1;
+}
+
+.dragAndDropOverlay {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  border: 2px dashed #888;
+  border-radius: 10px;
+  color: #666;
+  font-size: 30px;
+  text-align: center;
+}

@@ -208,10 +208,10 @@ exports[`app/Home renders the information screen for other browsers 1`] = `
       </div>
     </div>
     <div
-      class="homeDrop"
+      class="dragAndDropOverlayWrapper"
     >
       <div
-        class="homeDropMessage"
+        class="dragAndDropOverlay"
       >
         Drop a saved profile here
       </div>
@@ -354,10 +354,10 @@ exports[`app/Home renders the install screen for the extension 1`] = `
       </div>
     </div>
     <div
-      class="homeDrop"
+      class="dragAndDropOverlayWrapper"
     >
       <div
-        class="homeDropMessage"
+        class="dragAndDropOverlay"
       >
         Drop a saved profile here
       </div>
@@ -521,10 +521,10 @@ exports[`app/Home renders the usage instructions for pages with the extension in
       </div>
     </div>
     <div
-      class="homeDrop"
+      class="dragAndDropOverlayWrapper"
     >
       <div
-        class="homeDropMessage"
+        class="dragAndDropOverlay"
       >
         Drop a saved profile here
       </div>
