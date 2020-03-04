@@ -1194,6 +1194,12 @@ export function changeShowTabOnly(
         undefined,
         true // ignore the hidden tracks by active tab
       );
+
+      if (selectedThreadIndex === null) {
+        // We should revert to the first view, because all the threads are hidden
+        // in the single tab view and we won't be able to see anything there.
+        return;
+      }
     }
 
     dispatch({
