@@ -56,6 +56,8 @@ export type ProfileViewState = {|
   |},
   +globalTracks: GlobalTrack[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
+  +activeTabHiddenGlobalTracksGetter: () => Set<TrackIndex>,
+  +activeTabHiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
   +profile: Profile | null,
 |};
 

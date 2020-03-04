@@ -134,6 +134,12 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
       }
       return newThreadIndex;
     }
+    case 'CHANGE_SHOW_TAB_ONLY':
+      if (action.selectedThreadIndex === null) {
+        // Do not change the selected thread if we don't have to.
+        return state;
+      }
+      return action.selectedThreadIndex;
     default:
       return state;
   }

@@ -72,8 +72,32 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
 
   const getTabFilteredThread: Selector<Thread> = createSelector(
     getThread,
+    ProfileSelectors.getRelevantPagesForCurrentTab,
+    (thread, relevantPages) => {
+      if (relevantPages.size === 0) {
+        // If this set doesn't have any relevant page, just return the whole thread.
+        return thread;
+      }
+      return ProfileData.filterThreadByTab(thread, relevantPages);
+    }
+  );
+
+  /**
+   * Similar to getTabFilteredThread, but this selector returns the active tab
+   * filtered thread even though we are not in the active tab view at the moment.
+   * This selector is needed to make the hidden track calculations during profile
+   * load time(during viewProfile).
+   */
+  const getActiveTabFilteredThread: Selector<Thread> = createSelector(
+    getThread,
     ProfileSelectors.getRelevantPagesForActiveTab,
-    ProfileData.filterThreadByTab
+    (thread, relevantPages) => {
+      if (relevantPages.size === 0) {
+        // If this set doesn't have any relevant page, just return the whole thread.
+        return thread;
+      }
+      return ProfileData.filterThreadByTab(thread, relevantPages);
+    }
   );
 
   const getRangeFilteredThread: Selector<Thread> = createSelector(
@@ -304,5 +328,6 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
     getHasNativeAllocations,
     getCanShowRetainedMemory,
     getTabFilteredThread,
+    getActiveTabFilteredThread,
   };
 }

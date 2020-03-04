@@ -170,7 +170,8 @@ export function getSearchFilteredMarkerIndexes(
 export function getTabFilteredMarkerIndexes(
   getMarker: MarkerIndex => Marker,
   markerIndexes: MarkerIndex[],
-  relevantPages: Set<InnerWindowID>
+  relevantPages: Set<InnerWindowID>,
+  includeGlobalMarkers: boolean = true
 ): MarkerIndex[] {
   if (relevantPages.size === 0) {
     return markerIndexes;
@@ -184,9 +185,17 @@ export function getTabFilteredMarkerIndexes(
     // We are checking those before and pushing those markers to the new array.
     // As of now, those markers are:
     // - Jank markers
-    if (name === 'Jank') {
-      newMarkers.push(markerIndex);
-      continue;
+    if (includeGlobalMarkers) {
+      if (name === 'Jank') {
+        newMarkers.push(markerIndex);
+        continue;
+      }
+    } else {
+      if (data && data.type === 'Network') {
+        // Now network markers have innerWindowIDs inside their payloads but those markers
+        // can be inside the main thread and not be related to that specific thread.
+        continue;
+      }
     }
 
     if (data && data.innerWindowID && relevantPages.has(data.innerWindowID)) {
