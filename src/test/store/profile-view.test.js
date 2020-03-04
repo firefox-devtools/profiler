@@ -1468,6 +1468,13 @@ describe('snapshots of selectors/profile', function() {
       },
     ];
 
+    profile.meta.configuration = {
+      threads: [],
+      features: [],
+      capacity: 1000000,
+      activeBrowsingContextID: browsingContextID,
+    };
+
     const [samplesThread] = profile.threads;
 
     // Add innerWindowID for G function
@@ -2784,24 +2791,24 @@ describe('pages and active tab selectors', function() {
     expect(ProfileViewSelectors.getPagesMap(getState())).toEqual(result);
   });
 
-  it('getRelevantPagesForActiveTab will get the correct InnerWindowIDs for the first tab', function() {
+  it('getRelevantPagesForCurrentTab will get the correct InnerWindowIDs for the first tab', function() {
     const { getState } = setup(firstTabBrowsingContextID);
     expect(
-      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
     ).toEqual(new Set(fistTabInnerWindowIDs));
   });
 
-  it('getRelevantPagesForActiveTab will get the correct InnerWindowIDs for the second tab', function() {
+  it('getRelevantPagesForCurrentTab will get the correct InnerWindowIDs for the second tab', function() {
     const { getState } = setup(secondTabBrowsingContextID);
     expect(
-      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
     ).toEqual(new Set(secondTabInnerWindowIDs));
   });
 
-  it('getRelevantPagesForActiveTab will return an empty set for an ID that is not in the array', function() {
+  it('getRelevantPagesForCurrentTab will return an empty set for an ID that is not in the array', function() {
     const { getState } = setup(99999); // a non-existent BrowsingContextID
     expect(
-      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
     ).toEqual(new Set());
   });
 });

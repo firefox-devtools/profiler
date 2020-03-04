@@ -26,6 +26,8 @@ import {
   getLocalTrackNamesByPid,
   getGlobalTrackNames,
   getLocalTracksByPid,
+  getActiveTabHiddenGlobalTracksGetter,
+  getActiveTabHiddenLocalTracksByPidGetter,
 } from '../../selectors/profile';
 import {
   getGlobalTrackOrder,
@@ -34,7 +36,6 @@ import {
   getLocalTrackOrderByPid,
   getShowTabOnly,
 } from '../../selectors/url-state';
-import { isLocalTrackAllowedForSingleTabView } from '../../profile-logic/tracks';
 import classNames from 'classnames';
 
 import type {
@@ -66,6 +67,8 @@ type StateProps = {|
   +localTracksByPid: Map<Pid, LocalTrack[]>,
   +localTrackNamesByPid: Map<Pid, string[]>,
   +showTabOnly: BrowsingContextID | null,
+  +activeTabHiddenGlobalTracksGetter: () => Set<TrackIndex>,
+  +activeTabHiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
 |};
 
 type DispatchProps = {|
@@ -204,9 +207,23 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
   };
 
   renderGlobalTrack(trackIndex: TrackIndex) {
-    const { hiddenGlobalTracks, globalTrackNames, globalTracks } = this.props;
+    const {
+      showTabOnly,
+      activeTabHiddenGlobalTracksGetter,
+      hiddenGlobalTracks,
+      globalTrackNames,
+      globalTracks,
+    } = this.props;
     const isHidden = hiddenGlobalTracks.has(trackIndex);
     const track = globalTracks[trackIndex];
+
+    if (
+      showTabOnly !== null &&
+      activeTabHiddenGlobalTracksGetter().has(trackIndex)
+    ) {
+      // Hide the global track if it's hidden by active tab view.
+      return null;
+    }
 
     let title = `${globalTrackNames[trackIndex]}`;
     if (track.type === 'process') {
@@ -241,6 +258,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
       localTrackNamesByPid,
+      activeTabHiddenLocalTracksByPidGetter,
       hiddenGlobalTracks,
       localTracksByPid,
       showTabOnly,
@@ -269,27 +287,35 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     for (const trackIndex of localTrackOrder) {
       // We hide some of the local tracks by default for single tab view. If
       // showTabOnly is not null, do not include that track if it's not allowed.
-      if (
-        showTabOnly === null ||
-        isLocalTrackAllowedForSingleTabView(localTracks[trackIndex])
-      ) {
-        localTrackMenuItems.push(
-          <MenuItem
-            key={trackIndex}
-            preventClose={true}
-            data={{ pid, trackIndex, globalTrackIndex }}
-            onClick={this._toggleLocalTrackVisibility}
-            attributes={{
-              className: classNames('checkable indented', {
-                checked:
-                  !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
-              }),
-            }}
-          >
-            {localTrackNames[trackIndex]}
-          </MenuItem>
+      if (showTabOnly !== null) {
+        // We need to defer the call of this as much as possible.
+        const activeTabHiddenLocalTracks = activeTabHiddenLocalTracksByPidGetter().get(
+          pid
         );
+        if (
+          activeTabHiddenLocalTracks !== undefined &&
+          activeTabHiddenLocalTracks.has(trackIndex)
+        ) {
+          // Do not add the local track menu item if it's in single tab view and it's hidden by it.
+          continue;
+        }
       }
+      localTrackMenuItems.push(
+        <MenuItem
+          key={trackIndex}
+          preventClose={true}
+          data={{ pid, trackIndex, globalTrackIndex }}
+          onClick={this._toggleLocalTrackVisibility}
+          attributes={{
+            className: classNames('checkable indented', {
+              checked:
+                !hiddenLocalTracks.has(trackIndex) && !isGlobalTrackHidden,
+            }),
+          }}
+        >
+          {localTrackNames[trackIndex]}
+        </MenuItem>
+      );
     }
 
     return localTrackMenuItems;
@@ -559,6 +585,12 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     localTracksByPid: getLocalTracksByPid(state),
     localTrackNamesByPid: getLocalTrackNamesByPid(state),
     showTabOnly: getShowTabOnly(state),
+    activeTabHiddenGlobalTracksGetter: getActiveTabHiddenGlobalTracksGetter(
+      state
+    ),
+    activeTabHiddenLocalTracksByPidGetter: getActiveTabHiddenLocalTracksByPidGetter(
+      state
+    ),
   }),
   mapDispatchToProps: {
     hideGlobalTrack,
