@@ -89,7 +89,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   /**
    * This selector constructs jank markers from the responsiveness data.
    */
-  const _getDerivedJankMarkers: Selector<Marker[]> = createSelector(
+  const _getDerivedJankMarkers: Selector<
+    Marker[]
+  > = createSelector(
     threadSelectors.getSamplesTable,
     ProfileSelectors.getDefaultCategory,
     (samples, defaultCategory) =>
@@ -100,7 +102,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * This selector returns the list of all markers, this is our reference list
    * that MarkerIndex values refer to.
    */
-  const getFullMarkerList: Selector<Marker[]> = createSelector(
+  const getFullMarkerList: Selector<
+    Marker[]
+  > = createSelector(
     _getDerivedMarkers,
     _getDerivedJankMarkers,
     (derivedMarkers, derivedJankMarkers) =>
@@ -138,10 +142,9 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
    * This returns the list of all marker indexes. This is simply a sequence
    * built from the full marker list.
    */
-  const getFullMarkerListIndexes: Selector<MarkerIndex[]> = createSelector(
-    getFullMarkerList,
-    markers => markers.map((_, i) => i)
-  );
+  const getFullMarkerListIndexes: Selector<
+    MarkerIndex[]
+  > = createSelector(getFullMarkerList, markers => markers.map((_, i) => i));
 
   /**
    * This utility function makes it easy to write selectors that deal with list
@@ -194,7 +197,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    ProfileSelectors.getRelevantPagesForActiveTab,
+    ProfileSelectors.getRelevantPagesForCurrentTab,
     MarkerData.getTabFilteredMarkerIndexes
   );
 
@@ -220,6 +223,28 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
         !MarkerData.isMemoryMarker(marker) &&
         !MarkerData.isIPCMarker(marker)
     )
+  );
+
+  /**
+   * This selector applies the tab filter(if in a single tab view) to the full
+   * list of markers but excludes the global markers.
+   * This selector is useful to determine if a thread is completely empty or not
+   * so we can hide it inside active tab view.
+   */
+  const getActiveTabFilteredMarkerIndexesWithoutGlobals: Selector<
+    MarkerIndex[]
+  > = createSelector(
+    getMarkerGetter,
+    getFullMarkerListIndexes,
+    ProfileSelectors.getRelevantPagesForActiveTab,
+    (markerGetter, markerIndexes, relevantPages) => {
+      return MarkerData.getTabFilteredMarkerIndexes(
+        markerGetter,
+        markerIndexes,
+        relevantPages,
+        false // exclude global markers
+      );
+    }
   );
 
   /**
@@ -467,6 +492,7 @@ export function getMarkerSelectorsPerThread(threadSelectors: *) {
     getCommittedRangeFilteredMarkerIndexes,
     getCommittedRangeAndTabFilteredMarkerIndexes,
     getCommittedRangeAndTabFilteredMarkerIndexesForHeader,
+    getActiveTabFilteredMarkerIndexesWithoutGlobals,
     getTimelineVerticalMarkerIndexes,
     getFileIoMarkerIndexes,
     getMemoryMarkerIndexes,

@@ -57,9 +57,7 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
         </span>
       ))}
       <span
-        className={`treeViewHeaderColumn treeViewMainColumn ${
-          mainColumn.propName
-        }`}
+        className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}
       >
         {mainColumn.title}
       </span>
@@ -146,9 +144,7 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
 
           return (
             <span
-              className={`treeViewRowColumn treeViewFixedColumn ${
-                col.propName
-              }`}
+              className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
               key={col.propName}
               title={text}
             >
@@ -282,15 +278,11 @@ class TreeViewRowScrolledColumns<
           onClick={this._onToggleClick}
         />
         <span
-          className={`treeViewRowColumn treeViewMainColumn ${
-            mainColumn.propName
-          }`}
+          className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}
         >
           {displayData.categoryColor && displayData.categoryName ? (
             <span
-              className={`colored-square category-color-${
-                displayData.categoryColor
-              }`}
+              className={`colored-square category-color-${displayData.categoryColor}`}
               title={displayData.categoryName}
             />
           ) : null}
@@ -306,9 +298,7 @@ class TreeViewRowScrolledColumns<
         </span>
         {appendageColumn ? (
           <span
-            className={`treeViewRowColumn treeViewAppendageColumn ${
-              appendageColumn.propName
-            }`}
+            className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}
           >
             {reactStringWithHighlightedSubstrings(
               displayData[appendageColumn.propName],
@@ -401,7 +391,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   }
 
-  componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
+  UNSAFE_componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
     const hasNewSelectedNode =
       nextProps.selectedNodeId !== this.props.selectedNodeId;
     const hasNewRightClickedNode =

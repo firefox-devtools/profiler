@@ -25,6 +25,7 @@ afterEach(() => {
   // See https://github.com/facebook/jest/issues/7654
   jest.resetAllMocks();
   jest.clearAllTimers();
+  jest.useRealTimers();
 });
 
 expect.extend({
@@ -43,9 +44,7 @@ expect.extend({
     }
     return {
       message: () =>
-        `expected element to have class ${className}, current classes are ${
-          received.className
-        }`,
+        `expected element to have class ${className}, current classes are ${received.className}`,
       pass: false,
     };
   },

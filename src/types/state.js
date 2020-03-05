@@ -56,6 +56,8 @@ export type ProfileViewState = {|
   |},
   +globalTracks: GlobalTrack[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
+  +activeTabHiddenGlobalTracksGetter: () => Set<TrackIndex>,
+  +activeTabHiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
   +profile: Profile | null,
 |};
 
@@ -121,6 +123,8 @@ export type AppState = {|
   +lastVisibleThreadTabSlug: TabSlug,
   +trackThreadHeights: Array<ThreadIndex | void>,
   +isNewlyPublished: boolean,
+  +isDragAndDropDragging: boolean,
+  +isDragAndDropOverlayRegistered: boolean,
 |};
 
 export type UploadPhase =

@@ -48,7 +48,7 @@ export default class Tooltip extends React.PureComponent<Props, State> {
     this._isMounted = false;
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     if (nextProps.children !== this.props.children) {
       // If the children are different, allow them to do an initial lay out on the DOM.
       this.setState({ isNewContentLaidOut: false });

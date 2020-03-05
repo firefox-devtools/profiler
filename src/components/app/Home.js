@@ -31,6 +31,8 @@ require('./Home.css');
 const ADDON_URL =
   'https://raw.githubusercontent.com/firefox-devtools/Gecko-Profiler-Addon/master/gecko_profiler.xpi';
 
+import { DragAndDropOverlay } from './DragAndDrop';
+
 type InstallButtonProps = {
   name: string,
   xpiUrl: string,
@@ -225,7 +227,6 @@ type DispatchHomeProps = {|
 type HomeProps = ConnectedProps<OwnHomeProps, {||}, DispatchHomeProps>;
 
 type HomeState = {
-  isDragging: boolean,
   popupAddonInstallPhase: PopupAddonInstallPhase,
 };
 
@@ -269,25 +270,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
     }
 
     this.state = {
-      isDragging: false,
       popupAddonInstallPhase,
     };
 
     // Let the Gecko Profiler Add-on let the home-page know when it's been installed.
     homeInstance = this;
-  }
-
-  componentDidMount() {
-    // Prevent dropping files on the document.
-    document.addEventListener('drag', _dragPreventDefault, false);
-    document.addEventListener('dragover', _dragPreventDefault, false);
-    document.addEventListener('drop', _dragPreventDefault, false);
-  }
-
-  componentWillUnmount() {
-    document.removeEventListener('drag', _dragPreventDefault, false);
-    document.removeEventListener('dragover', _dragPreventDefault, false);
-    document.removeEventListener('drop', _dragPreventDefault, false);
   }
 
   /**
@@ -307,28 +294,6 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
       return { popupAddonInstallPhase: 'addon-installed' };
     });
   }
-
-  _startDragging = (event: Event) => {
-    event.preventDefault();
-    this.setState({ isDragging: true });
-  };
-
-  _stopDragging = (event: Event) => {
-    event.preventDefault();
-    this.setState({ isDragging: false });
-  };
-
-  _handleProfileDrop = (event: DragEvent) => {
-    event.preventDefault();
-    if (!event.dataTransfer) {
-      return;
-    }
-
-    const { files } = event.dataTransfer;
-    if (files.length > 0) {
-      this.props.retrieveProfileFromFile(files[0]);
-    }
-  };
 
   _renderInstructions() {
     const { popupAddonInstallPhase } = this.state;
@@ -534,16 +499,10 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
   }
 
   render() {
-    const { isDragging } = this.state;
     const { specialMessage } = this.props;
 
     return (
-      <div
-        className="home"
-        onDragEnter={this._startDragging}
-        onDragExit={this._stopDragging}
-        onDrop={this._handleProfileDrop}
-      >
+      <div className="home">
         <section className="homeSection">
           <header>
             <h1 className="homeTitle">
@@ -587,19 +546,11 @@ class Home extends React.PureComponent<HomeProps, HomeState> {
           <TransitionGroup className="homeInstructionsTransitionGroup">
             {this._renderInstructions()}
           </TransitionGroup>
-          <div
-            className={classNames('homeDrop', isDragging ? 'dragging' : false)}
-          >
-            <div className="homeDropMessage">Drop a saved profile here</div>
-          </div>
+          <DragAndDropOverlay />
         </section>
       </div>
     );
   }
-}
-
-function _dragPreventDefault(event: DragEvent) {
-  event.preventDefault();
 }
 
 function _isFirefox(): boolean {

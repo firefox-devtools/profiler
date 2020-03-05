@@ -151,3 +151,33 @@ export function reportTrackThreadHeight(
 export function dismissNewlyPublished(): Action {
   return { type: 'DISMISS_NEWLY_PUBLISHED' };
 }
+
+/**
+ * Called when a user has started dragging a file. Used for loading
+ * profiles with the drag and drop component.
+ */
+export function startDragging(): Action {
+  return { type: 'START_DRAGGING' };
+}
+
+/**
+ * Called when a user has stopped dragging a file.
+ */
+export function stopDragging(): Action {
+  return { type: 'STOP_DRAGGING' };
+}
+
+/**
+ * Called when a custom drag and drop overlay is mounted. This lets
+ * the app know that we shouldn't create a default overlay.
+ */
+export function registerDragAndDropOverlay(): Action {
+  return { type: 'REGISTER_DRAG_AND_DROP_OVERLAY' };
+}
+
+/**
+ * Called when a custom drag and drop overlay is unmounted.
+ */
+export function unregisterDragAndDropOverlay(): Action {
+  return { type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY' };
+}

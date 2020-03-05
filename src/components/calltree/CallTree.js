@@ -272,6 +272,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeExpandedCallNodes,
     addTransformToStack,
   },
-  options: { withRef: true },
   component: CallTreeComponent,
 });

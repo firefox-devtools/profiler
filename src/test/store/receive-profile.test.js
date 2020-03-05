@@ -5,7 +5,6 @@
 
 import type { Profile } from '../../types/profile';
 
-import sinon from 'sinon';
 import { oneLineTrim } from 'common-tags';
 
 import {
@@ -33,6 +32,10 @@ import {
   getProfilesFromRawUrl,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
+import {
+  changeShowTabOnly,
+  changeSelectedThread,
+} from '../../actions/profile-view';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
@@ -43,6 +46,8 @@ import {
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
+  getNetworkMarkers,
+  getScreenshotTrackProfile,
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
@@ -368,6 +373,175 @@ describe('actions/receive-profile', function() {
         '  - show [thread Work E]',
       ]);
     });
+
+    describe('with showTabOnly', function() {
+      const browsingContextID = 123;
+      const innerWindowID = 111111;
+      function setup(profile: ?Profile, dispatchToShowTabOnly: boolean = true) {
+        const store = blankStore();
+
+        if (!profile) {
+          profile = getEmptyProfile();
+          profile.threads.push(
+            // This thread should be completely hidden because it doesn't contain anything from the tab.
+            getEmptyThread({
+              name: 'GeckoMain',
+              processType: 'default',
+              pid: 1,
+            }),
+            // This thread shouldn't be hidden because it will have markers with innerWindowID.
+            getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 2 }),
+            // This thread should be completely hidden because it doesn't contain anything from the tab.
+            getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 3 })
+          );
+        } else {
+          // Appending a thread to test the second all the time
+          profile.threads = [
+            getEmptyThread({
+              name: 'GeckoMain',
+              processType: 'default',
+              pid: 1,
+            }),
+            ...profile.threads,
+          ];
+        }
+
+        profile.meta.configuration = {
+          threads: [],
+          features: [],
+          capacity: 1000000,
+          activeBrowsingContextID: browsingContextID,
+        };
+        profile.pages = [
+          {
+            browsingContextID: browsingContextID,
+            innerWindowID: innerWindowID,
+            url: 'URL',
+            embedderInnerWindowID: 0,
+          },
+        ];
+
+        addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
+          [
+            'RefreshDriverTick',
+            0,
+            {
+              type: 'tracing',
+              category: 'Navigation',
+              interval: 'start',
+              innerWindowID: innerWindowID,
+            },
+          ],
+          ...getNetworkMarkers({
+            startTime: 1,
+          }),
+        ]);
+
+        store.dispatch(viewProfile(profile));
+        if (dispatchToShowTabOnly) {
+          store.dispatch(changeShowTabOnly(browsingContextID));
+        }
+
+        return { ...store, profile };
+      }
+
+      it('should calculate the hidden tracks correctly', function() {
+        const { getState } = setup();
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain tab] SELECTED',
+        ]);
+      });
+
+      it('should not hide screenshot tracks', function() {
+        const profile = getScreenshotTrackProfile();
+        profile.threads[0].name = 'GeckoMain';
+        profile.threads[0].processType = 'tab';
+
+        const { getState } = setup(profile);
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [screenshots]',
+          'show [screenshots]',
+          'show [thread GeckoMain tab] SELECTED',
+        ]);
+      });
+
+      it('should calculate the hidden local threads correctly', function() {
+        const { profile } = getProfileFromTextSamples(
+          `work work work`,
+          `work work work`,
+          `work work work`
+        );
+        // There is one main thread and two other threads that belong to the same process.
+        const [threadA, threadB, threadC] = profile.threads;
+        threadA.name = 'GeckoMain';
+        threadA.processType = 'tab';
+        threadA.pid = 111;
+        threadB.name = 'Other1';
+        threadB.processType = 'default';
+        threadB.pid = 111;
+        threadC.name = 'Other2';
+        threadC.processType = 'default';
+        threadC.pid = 111;
+
+        // Other2 should be visible and Other1 should not.
+        threadC.frameTable.innerWindowID[0] = innerWindowID;
+
+        const { getState } = setup(profile);
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain tab] SELECTED',
+          '  - show [thread Other2]',
+        ]);
+      });
+
+      it('should select the first visible thread during changeShowTabOnly action', function() {
+        const { profile } = getProfileFromTextSamples(
+          `work work work`,
+          `work work work`
+        );
+        // There is one main thread and two other threads that belong to the same process.
+        const [threadA, threadB] = profile.threads;
+        threadA.name = 'GeckoMain';
+        threadA.processType = 'tab';
+        threadA.pid = 111;
+        threadB.name = 'Other';
+        threadB.processType = 'default';
+        threadB.pid = 111;
+
+        // Other should be visible
+        threadB.frameTable.innerWindowID[0] = innerWindowID;
+
+        const { getState, dispatch } = setup(profile, false);
+
+        // Select the first thread
+        dispatch(changeSelectedThread(0));
+        // First thread should be selected. This will be hidden after the next dispatch.
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain default] SELECTED',
+          'show [thread GeckoMain tab]',
+          '  - show [network GeckoMain]',
+          '  - show [thread Other]',
+        ]);
+
+        // Switch to active tab view.
+        dispatch(changeShowTabOnly(browsingContextID));
+
+        // Now first visible thread should be selected. This was a breaking action.
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain tab] SELECTED',
+          '  - show [thread Other]',
+        ]);
+
+        // Switching back again.
+        dispatch(changeShowTabOnly(null));
+        // Now the selected thread should not change, since this is not a breaking action.
+        expect(getHumanReadableTracks(getState())).toEqual([
+          'show [thread GeckoMain default]',
+          'show [thread GeckoMain tab] SELECTED',
+          '  - show [network GeckoMain] SELECTED',
+          '  - show [thread Other]',
+        ]);
+      });
+    });
   });
 
   describe('retrieveProfileFromAddon', function() {
@@ -522,17 +696,17 @@ describe('actions/receive-profile', function() {
     }: any): Response);
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
-      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+      // Call the argument of setTimeout asynchronously right away
+      // (instead of waiting for the timeout).
+      jest
+        .spyOn(window, 'setTimeout')
+        .mockImplementation(callback => process.nextTick(callback));
     });
 
     afterEach(function() {
       delete window.fetch;
-      window.setTimeout.restore();
     });
 
     it('can retrieve a profile from the web and save it to state', async function() {
@@ -601,9 +775,11 @@ describe('actions/receive-profile', function() {
         );
 
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileFromStore(hash))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileFromStore(hash))
+        )
+      ).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -630,9 +806,11 @@ describe('actions/receive-profile', function() {
     it('fails in case the profile cannot be found after several tries', async function() {
       const hash = 'c5e53f9ab6aecef926d4be68c84f2de550e2ac2f';
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileFromStore(hash))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileFromStore(hash))
+        )
+      ).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -678,17 +856,17 @@ describe('actions/receive-profile', function() {
     }: any): Response);
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
       window.fetch = jest.fn().mockResolvedValue(fetch403Response);
 
-      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+      // Call the argument of setTimeout asynchronously right away
+      // (instead of waiting for the timeout).
+      jest
+        .spyOn(window, 'setTimeout')
+        .mockImplementation(callback => process.nextTick(callback));
     });
 
     afterEach(function() {
       delete window.fetch;
-      window.setTimeout.restore();
     });
 
     it('can retrieve a profile from the web and save it to state', async function() {
@@ -723,9 +901,11 @@ describe('actions/receive-profile', function() {
         );
 
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
+        )
+      ).map(state => getView(state));
 
       const errorMessage = 'Profile not found on remote server.';
       expect(views).toEqual([
@@ -752,9 +932,11 @@ describe('actions/receive-profile', function() {
     it('fails in case the profile cannot be found after several tries', async function() {
       const expectedUrl = 'https://profiles.club/shared.json';
       const store = blankStore();
-      const views = (await observeStoreStateChanges(store, () =>
-        store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
-      )).map(state => getView(state));
+      const views = (
+        await observeStoreStateChanges(store, () =>
+          store.dispatch(retrieveProfileOrZipFromUrl(expectedUrl))
+        )
+      ).map(state => getView(state));
 
       const steps = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -793,13 +975,11 @@ describe('actions/receive-profile', function() {
    */
   describe('_fetchProfile', function() {
     beforeEach(function() {
-      window.fetch = sinon.stub();
-      sinon.stub(window, 'setTimeout').yieldsAsync(); // will call its argument asynchronously
+      window.fetch = jest.fn();
     });
 
     afterEach(function() {
       delete window.fetch;
-      window.setTimeout.restore();
     });
 
     /**
@@ -833,7 +1013,7 @@ describe('actions/receive-profile', function() {
         json = () => Promise.resolve(profile);
       }
 
-      const zippedProfileResponse = {
+      const zippedProfileResponse = (({
         ok: true,
         status: 200,
         json,
@@ -850,8 +1030,15 @@ describe('actions/receive-profile', function() {
             }
           },
         },
-      };
-      window.fetch.withArgs(url).resolves(zippedProfileResponse);
+      }: any): Response);
+      const fetch403Response = (({ ok: false, status: 403 }: any): Response);
+
+      window.fetch = jest.fn(actualUrl =>
+        Promise.resolve(
+          actualUrl === url ? zippedProfileResponse : fetch403Response
+        )
+      );
+
       const reportError = jest.fn();
       const args = {
         url,
@@ -1334,9 +1521,6 @@ describe('actions/receive-profile', function() {
     }
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
       window.fetch = jest.fn();
       window.fetch.mockImplementation(() =>
         Promise.reject(new Error('No more answers have been configured.'))
@@ -1529,9 +1713,6 @@ describe('actions/receive-profile', function() {
     }
 
     beforeEach(function() {
-      // The stub makes it easy to return different values for different
-      // arguments. Here we define the default return value because there is no
-      // argument specified.
       window.fetch = jest.fn();
       window.fetch.mockImplementation(() =>
         Promise.reject(new Error('No more answers have been configured.'))

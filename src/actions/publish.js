@@ -16,6 +16,7 @@ import {
 import { getDataSource } from '../selectors/url-state';
 import { viewProfile } from './receive-profile';
 import { ensureExists } from '../utils/flow';
+import { extractProfileTokenFromJwt } from '../utils/jwt';
 import { setHistoryReplaceState } from '../app-logic/url-handling';
 
 import type { Action, ThunkAction } from '../types/store';
@@ -112,9 +113,11 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
 
       // Upload the profile, and notify it with the amount of data that has been
       // uploaded.
-      const hash = await startUpload(gzipData, uploadProgress => {
+      const hashOrToken = await startUpload(gzipData, uploadProgress => {
         dispatch(updateUploadProgress(uploadProgress));
       });
+
+      const hash = extractProfileTokenFromJwt(hashOrToken);
 
       // The previous line was async, check to make sure that this request is still valid.
       if (uploadGeneration !== getUploadGeneration(getState())) {

@@ -91,7 +91,7 @@ class IdleSearchField extends PureComponent<Props, State> {
     e.preventDefault();
   }
 
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     if (nextProps.defaultValue !== this.props.defaultValue) {
       this._notifyIfChanged(nextProps.defaultValue || '');
       this.setState({

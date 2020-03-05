@@ -17,17 +17,21 @@ type RootProps = {
   store: Store,
 };
 
+import { DragAndDrop } from './DragAndDrop';
+
 export default class Root extends PureComponent<RootProps> {
   render() {
     const { store } = this.props;
     return (
       <ErrorBoundary message="Uh oh, some error happened in profiler.firefox.com.">
         <Provider store={store}>
-          <UrlManager>
-            <ProfileLoader />
-            <AppViewRouter />
-            <FooterLinks />
-          </UrlManager>
+          <DragAndDrop>
+            <UrlManager>
+              <ProfileLoader />
+              <AppViewRouter />
+              <FooterLinks />
+            </UrlManager>
+          </DragAndDrop>
         </Provider>
       </ErrorBoundary>
     );

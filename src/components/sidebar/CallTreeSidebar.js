@@ -133,9 +133,7 @@ class CategoryBreakdown extends React.PureComponent<CategoryBreakdownProps> {
             <React.Fragment key={category.name}>
               <div className="sidebar-categoryname">
                 <span
-                  className={`sidebar-color colored-square category-color-${
-                    category.color
-                  }`}
+                  className={`sidebar-color colored-square category-color-${category.color}`}
                   title={category.name}
                 />
                 {category.name}

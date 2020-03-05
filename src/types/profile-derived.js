@@ -240,3 +240,9 @@ export type SelectedState =
   // This call node is not selected, and the stacks are ordered after the selected
   // call node as sorted by the getTreeOrderComparator.
   | 'UNSELECTED_ORDERED_AFTER_SELECTED';
+
+/**
+ * It holds the initially selected track's HTMLElement. This allows the timeline
+ * to scroll the initially selected track into view once the page is loaded.
+ */
+export type InitialSelectedTrackReference = HTMLElement;

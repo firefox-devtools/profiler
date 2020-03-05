@@ -47,8 +47,11 @@ import {
 } from '../../actions/profile-view';
 
 import type { BrowsingContextID } from '../../types/profile';
-import type { TrackIndex, GlobalTrack } from '../../types/profile-derived';
-
+import type {
+  TrackIndex,
+  GlobalTrack,
+  InitialSelectedTrackReference,
+} from '../../types/profile-derived';
 import type {
   GlobalTrackReference,
   TimelineType,
@@ -82,6 +85,10 @@ type DispatchProps = {|
 type Props = {|
   ...SizeProps,
   ...ConnectedProps<{||}, StateProps, DispatchProps>,
+|};
+
+type State = {|
+  initialSelected: InitialSelectedTrackReference | null,
 |};
 
 class TimelineSettingsGraphType extends React.PureComponent<{|
@@ -202,7 +209,19 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
   }
 }
 
-class Timeline extends React.PureComponent<Props> {
+class Timeline extends React.PureComponent<Props, State> {
+  state = {
+    initialSelected: null,
+  };
+
+  /**
+   * This method collects the initially selected track's HTMLElement. This allows the timeline
+   * to scroll the initially selected track into view once the page is loaded.
+   */
+  setInitialSelected = (el: InitialSelectedTrackReference) => {
+    this.setState({ initialSelected: el });
+  };
+
   render() {
     const {
       globalTracks,
@@ -257,25 +276,25 @@ class Timeline extends React.PureComponent<Props> {
           <OverflowEdgeIndicator
             className="timelineOverflowEdgeIndicator"
             panelLayoutGeneration={panelLayoutGeneration}
+            initialSelected={this.state.initialSelected}
           >
-            {
-              <Reorderable
-                tagName="ol"
-                className="timelineThreadList"
-                grippyClassName="timelineTrackGlobalGrippy"
-                order={globalTrackOrder}
-                orient="vertical"
-                onChangeOrder={changeGlobalTrackOrder}
-              >
-                {globalTracks.map((globalTrack, trackIndex) => (
-                  <TimelineGlobalTrack
-                    key={trackIndex}
-                    trackIndex={trackIndex}
-                    trackReference={globalTrackReferences[trackIndex]}
-                  />
-                ))}
-              </Reorderable>
-            }
+            <Reorderable
+              tagName="ol"
+              className="timelineThreadList"
+              grippyClassName="timelineTrackGlobalGrippy"
+              order={globalTrackOrder}
+              orient="vertical"
+              onChangeOrder={changeGlobalTrackOrder}
+            >
+              {globalTracks.map((globalTrack, trackIndex) => (
+                <TimelineGlobalTrack
+                  key={trackIndex}
+                  trackIndex={trackIndex}
+                  trackReference={globalTrackReferences[trackIndex]}
+                  setInitialSelected={this.setInitialSelected}
+                />
+              ))}
+            </Reorderable>
           </OverflowEdgeIndicator>
         </TimelineSelection>
       </>
