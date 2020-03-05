@@ -44,9 +44,7 @@ expect.extend({
     }
     return {
       message: () =>
-        `expected element to have class ${className}, current classes are ${
-          received.className
-        }`,
+        `expected element to have class ${className}, current classes are ${received.className}`,
       pass: false,
     };
   },

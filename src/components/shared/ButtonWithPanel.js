@@ -64,7 +64,7 @@ class ButtonWithPanel extends React.PureComponent<Props, State> {
     window.removeEventListener('click', this._onWindowClick);
   }
 
-  componentWillReceiveProps(props: Props) {
+  UNSAFE_componentWillReceiveProps(props: Props) {
     if (props.open !== this.props.open) {
       this.setState({ open: !!props.open });
     }

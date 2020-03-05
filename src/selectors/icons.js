@@ -34,10 +34,8 @@ export const getIconClassNameForCallNode: DangerousSelectorWithArguments<
  */
 export const getIconsWithClassNames: Selector<
   IconWithClassName[]
-> = createSelector(
-  getIcons,
-  icons =>
-    [...icons].map(icon => ({ icon, className: _classNameFromUrl(icon) }))
+> = createSelector(getIcons, icons =>
+  [...icons].map(icon => ({ icon, className: _classNameFromUrl(icon) }))
 );
 
 /**

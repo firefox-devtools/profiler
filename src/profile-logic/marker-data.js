@@ -548,9 +548,7 @@ export function deriveMarkersFromRawMarkerTable(
           }
         } else {
           console.error(
-            `'data.interval' holds the invalid value '${
-              data.interval
-            }' in marker index ${i}. This should not normally happen.`
+            `'data.interval' holds the invalid value '${data.interval}' in marker index ${i}. This should not normally happen.`
           );
           matchedMarkers.push({
             start: time,
@@ -899,9 +897,7 @@ export function* filterRawMarkerTableToRangeIndexGenerator(
           }
         } else {
           console.error(
-            `'data.interval' holds the invalid value '${
-              data.interval
-            }' in marker index ${i}. This should not normally happen.`
+            `'data.interval' holds the invalid value '${data.interval}' in marker index ${i}. This should not normally happen.`
           );
           if (isTimeInRange(time)) {
             yield i;

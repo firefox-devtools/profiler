@@ -58,7 +58,7 @@ class SymbolicationStatusOverlay extends PureComponent<Props> {
       return (
         <div className="symbolicationStatusOverlay">
           <span className="symbolicationStatusOverlayThrobber" />
-          {'Symbolicating call stacks...'}
+          Symbolicating call stacks...
         </div>
       );
     }

@@ -279,13 +279,10 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
    */
   const getExpensiveJsTracerTiming: Selector<
     JsTracerTiming[] | null
-  > = createSelector(
-    getJsTracerTable,
-    getThread,
-    (jsTracerTable, thread) =>
-      jsTracerTable === null
-        ? null
-        : JsTracer.getJsTracerTiming(jsTracerTable, thread)
+  > = createSelector(getJsTracerTable, getThread, (jsTracerTable, thread) =>
+    jsTracerTable === null
+      ? null
+      : JsTracer.getJsTracerTiming(jsTracerTable, thread)
   );
 
   /**

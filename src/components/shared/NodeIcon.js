@@ -35,7 +35,7 @@ class NodeIcon extends PureComponent<Props> {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (nextProps.icon) {
       nextProps.iconStartLoading(nextProps.icon);
     }

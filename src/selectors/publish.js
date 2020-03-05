@@ -177,9 +177,8 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> = createSelect
  */
 export const getSanitizedProfileData: Selector<
   Promise<Uint8Array>
-> = createSelector(
-  getSanitizedProfile,
-  ({ profile }) => compress(serializeProfile(profile))
+> = createSelector(getSanitizedProfile, ({ profile }) =>
+  compress(serializeProfile(profile))
 );
 
 /**
@@ -191,9 +190,10 @@ export const getCompressedProfileBlob: Selector<Promise<Blob>> = createSelector(
     new Blob([await profileData], { type: 'application/octet-binary' })
 );
 
-export const getDownloadSize: Selector<Promise<string>> = createSelector(
-  getCompressedProfileBlob,
-  blobPromise => blobPromise.then(blob => prettyBytes(blob.size))
+export const getDownloadSize: Selector<
+  Promise<string>
+> = createSelector(getCompressedProfileBlob, blobPromise =>
+  blobPromise.then(blob => prettyBytes(blob.size))
 );
 
 export const getUploadState: Selector<UploadState> = state =>

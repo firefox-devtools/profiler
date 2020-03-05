@@ -163,7 +163,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
    * method is what keeps the ZipFileViewer and ZipFileState in sync
    * with the UrlState.
    */
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const {
       pathInZipFile,
       zipFileState,

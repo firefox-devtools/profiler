@@ -2,7 +2,6 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
-import 'babel-polyfill';
 import {
   getContainingLibrary,
   symbolicateProfile,
@@ -597,7 +596,10 @@ describe('symbolication', function() {
       symbolTable.set(0x1a00, 'third symbol');
       symbolTable.set(0x2000, 'last symbol');
       const symbolStore = new FakeSymbolStore(
-        new Map([['firefox', symbolTable], ['firefox-webcontent', symbolTable]])
+        new Map([
+          ['firefox', symbolTable],
+          ['firefox-webcontent', symbolTable],
+        ])
       );
       symbolicatedProfile = Object.assign({}, unsymbolicatedProfile, {
         threads: unsymbolicatedProfile.threads.slice(),

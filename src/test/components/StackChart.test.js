@@ -149,7 +149,10 @@ describe('StackChart', function() {
     // Select the last frame, 'Z', and then make sure we can "see" the
     // drawn 'Z', but not 'A'.
     dispatch(
-      changeSelectedCallNode(0, frames.map(name => funcNames.indexOf(name)))
+      changeSelectedCallNode(
+        0,
+        frames.map(name => funcNames.indexOf(name))
+      )
     );
     flushRafCalls();
 
