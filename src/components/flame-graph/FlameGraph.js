@@ -25,8 +25,6 @@ import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
 } from '../../actions/profile-view';
-import { getIconsWithClassNames } from '../../selectors/icons';
-import { BackgroundImageStyleDef } from '../shared/StyleDef';
 
 import type { Thread, CategoryList, PageList } from '../../types/profile';
 import type { Milliseconds } from '../../types/units';
@@ -40,7 +38,6 @@ import type {
   IndexIntoCallNodeTable,
 } from '../../types/profile-derived';
 import type { CallTree } from '../../profile-logic/call-tree';
-import type { IconWithClassName } from '../../types/state';
 
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -70,7 +67,6 @@ type StateProps = {|
   +selectedCallNodeIndex: IndexIntoCallNodeTable | null,
   +rightClickedCallNodeIndex: IndexIntoCallNodeTable | null,
   +scrollToSelectionGeneration: number,
-  +icons: IconWithClassName[],
   +categories: CategoryList,
   +interval: Milliseconds,
   +isInverted: boolean,
@@ -261,7 +257,6 @@ class FlameGraph extends React.PureComponent<Props> {
       selectedCallNodeIndex,
       scrollToSelectionGeneration,
       callTreeSummaryStrategy,
-      icons,
       categories,
       interval,
       isInverted,
@@ -272,13 +267,6 @@ class FlameGraph extends React.PureComponent<Props> {
 
     return (
       <div className="flameGraphContent" onKeyDown={this._handleKeyDown}>
-        {icons.map(({ className, icon }) => (
-          <BackgroundImageStyleDef
-            className={className}
-            url={icon}
-            key={className}
-          />
-        ))}
         <ContextMenuTrigger
           id="CallNodeContextMenu"
           attributes={{
@@ -361,7 +349,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
         state
       ),
       scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-      icons: getIconsWithClassNames(state),
       interval: getProfileInterval(state),
       isInverted: getInvertCallstack(state),
       callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(

@@ -8,11 +8,9 @@ import * as React from 'react';
 import classNames from 'classnames';
 
 import VirtualList from './VirtualList';
-import { BackgroundImageStyleDef } from './StyleDef';
 
 import ContextMenuTrigger from './ContextMenuTrigger';
 
-import type { IconWithClassName } from '../../types/state';
 import type { CssPixels } from '../../types/units';
 
 /**
@@ -333,7 +331,6 @@ type TreeViewProps<DisplayData> = {|
   +highlightRegExp?: RegExp | null,
   +appendageColumn?: Column,
   +disableOverscan?: boolean,
-  +icons?: IconWithClassName[],
   +contextMenu?: React.Element<any>,
   +contextMenuId?: string,
   +maxNodeDepth: number,
@@ -696,21 +693,12 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
       disableOverscan,
       contextMenu,
       contextMenuId,
-      icons,
       maxNodeDepth,
       rowHeight,
       selectedNodeId,
     } = this.props;
     return (
       <div className="treeView">
-        {icons &&
-          icons.map(({ className, icon }) => (
-            <BackgroundImageStyleDef
-              className={className}
-              url={icon}
-              key={className}
-            />
-          ))}
         <TreeViewHeader fixedColumns={fixedColumns} mainColumn={mainColumn} />
         <ContextMenuTrigger
           id={contextMenuId}
