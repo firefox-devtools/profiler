@@ -7,7 +7,7 @@ import * as React from 'react';
 import { getStackType } from '../../profile-logic/transforms';
 import { objectEntries } from '../../utils/flow';
 import { formatCallNodeNumber } from '../../utils/format-numbers';
-import NodeIcon from '../shared/NodeIcon';
+import Icon from '../shared/Icon';
 import {
   getFriendlyStackTypeName,
   getCategoryPairLabel,
@@ -285,7 +285,7 @@ export class TooltipCallNode extends React.PureComponent<Props> {
           <div className="tooltipTitle">{funcName}</div>
           <div className="tooltipIcon">
             {displayData && displayData.icon ? (
-              <NodeIcon displayData={displayData} />
+              <Icon displayData={displayData} />
             ) : null}
           </div>
         </div>

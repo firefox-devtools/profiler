@@ -33,7 +33,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class NodeIcon extends PureComponent<Props> {
+class Icon extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     if (props.icon) {
@@ -64,5 +64,5 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     };
   },
   mapDispatchToProps: { iconStartLoading },
-  component: NodeIcon,
+  component: Icon,
 });

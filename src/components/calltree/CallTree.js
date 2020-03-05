@@ -7,7 +7,7 @@ import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import CallTreeEmptyReasons from './CallTreeEmptyReasons';
-import NodeIcon from '../shared/NodeIcon';
+import Icon from '../shared/Icon';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,
@@ -77,13 +77,13 @@ class CallTreeComponent extends PureComponent<Props> {
     { propName: 'totalTimePercent', title: '' },
     { propName: 'totalTime', title: 'Running Time (ms)' },
     { propName: 'selfTime', title: 'Self (ms)' },
-    { propName: 'icon', title: '', component: NodeIcon },
+    { propName: 'icon', title: '', component: Icon },
   ];
   _fixedColumnsAllocations: Column[] = [
     { propName: 'totalTimePercent', title: '' },
     { propName: 'totalTime', title: 'Total Size (bytes)' },
     { propName: 'selfTime', title: 'Self (bytes)' },
-    { propName: 'icon', title: '', component: NodeIcon },
+    { propName: 'icon', title: '', component: Icon },
   ];
   _mainColumn: Column = { propName: 'name', title: '' };
   _appendageColumn: Column = { propName: 'lib', title: '' };
