@@ -10,6 +10,7 @@ import { ensureExists } from '../utils/flow';
 import {
   filterCounterToRange,
   accumulateCounterSamples,
+  extractProfileFilterPageData,
 } from '../profile-logic/profile-data';
 import {
   IPCMarkerCorrelations,
@@ -38,6 +39,7 @@ import type {
   TrackIndex,
   GlobalTrack,
   AccumulatedCounterSamples,
+  ProfileFilterPageData,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -719,3 +721,16 @@ export const getComputedHiddenLocalTracks: DangerousSelectorWithArguments<
     getComputedHiddenLocalTracksByPid(state).get(pid),
     'Unable to get the tracks for the given pid.'
   );
+
+/**
+ * Extracts the data of the first page on the tab filtered profile.
+ * Currently we assume that we don't change the origin of webpages while
+ * profiling in web developer preset. That's why we are simply getting the
+ * first page we find that belongs to the active tab. Returns null if profiler
+ * is not in the single tab view at the moment.
+ */
+export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> = createSelector(
+  getPageList,
+  getRelevantPagesForCurrentTab,
+  extractProfileFilterPageData
+);

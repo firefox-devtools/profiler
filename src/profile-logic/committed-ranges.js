@@ -70,6 +70,5 @@ export function getCommittedRangeLabels(
   const labels = committedRanges.map(range =>
     getFormattedTimeLength(range.end - range.start)
   );
-  labels.unshift('Full Range');
   return labels;
 }

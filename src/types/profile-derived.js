@@ -246,3 +246,11 @@ export type SelectedState =
  * to scroll the initially selected track into view once the page is loaded.
  */
 export type InitialSelectedTrackReference = HTMLElement;
+
+/**
+ * Page data for ProfileFilterNavigator component.
+ */
+export type ProfileFilterPageData = {|
+  hostname: string,
+  favicon: string,
+|};

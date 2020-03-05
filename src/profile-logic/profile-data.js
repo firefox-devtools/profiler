@@ -33,6 +33,7 @@ import type {
   InnerWindowID,
   BalancedNativeAllocationsTable,
   IndexIntoFrameTable,
+  PageList,
 } from '../types/profile';
 import type {
   CallNodeInfo,
@@ -41,6 +42,7 @@ import type {
   IndexIntoCallNodeTable,
   AccumulatedCounterSamples,
   SelectedState,
+  ProfileFilterPageData,
 } from '../types/profile-derived';
 import { assertExhaustiveCheck } from '../utils/flow';
 
@@ -2298,4 +2300,56 @@ export function filterToRetainedAllocations(
   }
 
   return newNativeAllocations;
+}
+
+/**
+ * Extract the hostname and favicon from the first page if we are in single tab
+ * view. Currently we assume that we don't change the origin of webpages while
+ * profiling in web developer preset. That's why we are simply getting the first
+ * page we find that belongs to the active tab. Returns null if profiler is not
+ * in the single tab view at the moment.
+ */
+export function extractProfileFilterPageData(
+  pages: PageList | null,
+  relevantPages: Set<InnerWindowID>
+): ProfileFilterPageData | null {
+  if (relevantPages.size === 0 || pages === null) {
+    // Either we are not in single tab view, or we don't have pages array(which
+    // is the case for older profiles). Return early.
+    return null;
+  }
+
+  // Getting the first page's innerWindowID and then getting its url.
+  const innerWindowID = [...relevantPages][0];
+  const filteredPages = pages.filter(
+    page => page.innerWindowID === innerWindowID
+  );
+
+  if (filteredPages.length !== 1) {
+    // There should be only one page with the given innerWindowID, they are unique.
+    console.error(`Expected one page but ${filteredPages.length} found.`);
+    return null;
+  }
+
+  const pageUrl = filteredPages[0].url;
+  try {
+    const page = new URL(pageUrl);
+    // FIXME(Bug 1620546): This is not ideal and we should get the favicon
+    // either during profile capture or profile pre-process.
+    const favicon = new URL('/favicon.ico', page.origin);
+    if (favicon.protocol === 'http:') {
+      // Upgrade http requests.
+      favicon.protocol = 'https:';
+    }
+    return {
+      hostname: page.hostname,
+      favicon: favicon.href,
+    };
+  } catch (e) {
+    console.error(
+      'Error while extracing the hostname and favicon from the page url',
+      pageUrl
+    );
+    return null;
+  }
 }
