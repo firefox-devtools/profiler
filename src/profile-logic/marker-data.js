@@ -116,6 +116,11 @@ export function getSearchFilteredMarkerIndexes(
       continue;
     }
     if (data && typeof data === 'object') {
+      if (searchRegExp.test(data.type)) {
+        newMarkers.push(markerIndex);
+        continue;
+      }
+
       if (data.type === 'FileIO') {
         const { filename, operation, source } = data;
         if (
@@ -132,6 +137,13 @@ export function getSearchFilteredMarkerIndexes(
           searchRegExp.test(messageType) ||
           searchRegExp.test(otherPid.toString())
         ) {
+          newMarkers.push(markerIndex);
+          continue;
+        }
+      } else if (data.type === 'Log') {
+        const { name, module } = data;
+
+        if (searchRegExp.test(name) || searchRegExp.test(module)) {
           newMarkers.push(markerIndex);
           continue;
         }
@@ -1307,6 +1319,9 @@ export function getMarkerFullDescription(marker: Marker) {
       case 'Text':
         description += ` — ${data.name}`;
         break;
+      case 'Log':
+        description = `(${data.module}) ${data.name}`;
+        break;
       case 'IPC':
         description = `${data.messageType} — ${
           data.direction === 'sending' ? 'sent to' : 'received from'
@@ -1342,6 +1357,9 @@ export function getMarkerCategory(marker: Marker) {
         break;
       case 'Text':
         category = 'Text';
+        break;
+      case 'Log':
+        category = 'Log';
         break;
       case 'IPC':
         category = data.direction === 'sending' ? 'IPC out' : 'IPC in';

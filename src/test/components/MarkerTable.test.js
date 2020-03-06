@@ -78,6 +78,15 @@ describe('MarkerTable', function() {
                 sync: false,
               },
             ],
+            [
+              'LogMessages',
+              170,
+              {
+                type: 'Log',
+                name: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
+                module: 'nsJarProtocol',
+              },
+            ],
           ]
             // Sort the markers.
             .sort((a, b) => a[1] - b[1])
@@ -139,8 +148,8 @@ describe('MarkerTable', function() {
   it('renders some basic markers and updates when needed', () => {
     const { container, fixedRows, scrolledRows, dispatch } = setup();
 
-    expect(fixedRows()).toHaveLength(4);
-    expect(scrolledRows()).toHaveLength(4);
+    expect(fixedRows()).toHaveLength(5);
+    expect(scrolledRows()).toHaveLength(5);
     expect(container.firstChild).toMatchSnapshot();
 
     /* Check that the table updates properly despite the memoisation. */
