@@ -5,6 +5,7 @@
 // @flow
 
 import React from 'react';
+import memoize from 'memoize-immutable';
 import explicitConnect from '../../utils/connect';
 import { popCommittedRanges } from '../../actions/profile-view';
 import {
@@ -32,6 +33,13 @@ type DispatchProps = {|
 type StateProps = $ReadOnly<$Exact<$Diff<Props, DispatchProps>>>;
 
 class ProfileFilterNavigatorBar extends React.PureComponent<Props> {
+  _getItemsWithFirstElement = memoize(
+    (firstItem, items) => [firstItem, ...items],
+    {
+      limit: 1,
+    }
+  );
+
   render() {
     const {
       className,
@@ -56,10 +64,14 @@ class ProfileFilterNavigatorBar extends React.PureComponent<Props> {
       firstItem = 'Full Range';
     }
 
+    const itemsWithFirstElement = this._getItemsWithFirstElement(
+      firstItem,
+      items
+    );
     return (
       <FilterNavigatorBar
         className={className}
-        items={[firstItem, ...items]}
+        items={itemsWithFirstElement}
         selectedItem={selectedItem}
         uncommittedItem={uncommittedItem}
         onPop={onPop}
