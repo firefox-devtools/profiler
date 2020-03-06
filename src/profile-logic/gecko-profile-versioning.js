@@ -91,7 +91,6 @@ const _upgraders = {
         .map(lib => {
           if ('breakpadId' in lib) {
             lib.debugName = lib.name.substr(lib.name.lastIndexOf('/') + 1);
-            lib.breakpadId = lib.breakpadId;
           } else {
             lib.debugName = lib.pdbName;
             const pdbSig = lib.pdbSignature.replace(/[{}-]/g, '').toUpperCase();
@@ -440,6 +439,9 @@ const _upgraders = {
       for (const thread of p.threads) {
         const schemaIndexCategory = thread.frameTable.schema.category;
         for (const frame of thread.frameTable.data) {
+          // The following eslint rule is disabled, as it's not worth updating the
+          // linting on upgraders, as they are "write once and forget" code.
+          /* eslint-disable-next-line no-prototype-builtins */
           if (frame.hasOwnProperty(schemaIndexCategory)) {
             frame[newSchemaCategoryIndex] = frame[oldSchemaCategoryIndex];
             frame[oldSchemaCategoryIndex] = null;

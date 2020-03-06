@@ -36,7 +36,7 @@ import type {
 export type SymbolTableAsTuple = [
   Uint32Array, // addrs
   Uint32Array, // index
-  Uint8Array, // buffer
+  Uint8Array // buffer
 ];
 
 type SymbolItem = {|

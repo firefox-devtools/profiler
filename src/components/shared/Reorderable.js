@@ -277,13 +277,9 @@ class Reorderable extends React.PureComponent<Props, State> {
             style.zIndex = '2';
             if (phase === 'MANIPULATING') {
               delete style.transition;
-              style.transform = `${xy.translateXY}(${
-                this.state.manipulationDelta
-              }px)`;
+              style.transform = `${xy.translateXY}(${this.state.manipulationDelta}px)`;
             } else {
-              style.transform = `${xy.translateXY}(${
-                this.state.finalOffset
-              }px)`;
+              style.transform = `${xy.translateXY}(${this.state.finalOffset}px)`;
             }
           } else if (
             childIndex < manipulatingIndex &&

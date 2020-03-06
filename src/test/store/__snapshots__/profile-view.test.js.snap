@@ -63,6 +63,12 @@ Object {
         ],
       },
     ],
+    "configuration": Object {
+      "activeBrowsingContextID": 123123,
+      "capacity": 1000000,
+      "features": Array [],
+      "threads": Array [],
+    },
     "extensions": Object {
       "baseURL": Array [],
       "id": Array [],
@@ -3599,8 +3605,6 @@ Object {
       ],
     },
   },
-  "rightClickedCallNodePath": null,
-  "rightClickedMarker": null,
   "selectedCallNodePath": Array [
     0,
     1,

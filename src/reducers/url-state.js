@@ -134,6 +134,12 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
       }
       return newThreadIndex;
     }
+    case 'CHANGE_SHOW_TAB_ONLY':
+      if (action.selectedThreadIndex === null) {
+        // Do not change the selected thread if we don't have to.
+        return state;
+      }
+      return action.selectedThreadIndex;
     default:
       return state;
   }
@@ -463,10 +469,12 @@ const wrapReducerInResetter = (
           ? action.newUrlState
           : regularUrlStateReducer(undefined, action);
       case 'RETURN_TO_ZIP_FILE_LIST':
+      case 'WAITING_FOR_PROFILE_FROM_FILE':
         // Invalidate all information that would be specific to an individual profile.
         return {
           ...regularUrlStateReducer(state, action),
           profileSpecific: profileSpecific(undefined, state),
+          selectedTab: selectedTab(undefined, action),
         };
       default:
         return regularUrlStateReducer(state, action);

@@ -27,6 +27,7 @@ export function storeWithProfile(profile?: Profile): Store {
 }
 
 export function storeWithSimpleProfile(): Store {
+  // FIXME: These samples need to be seperated by two spaces instead of one.
   const { profile } = getProfileFromTextSamples(`
     A A A
     B B B

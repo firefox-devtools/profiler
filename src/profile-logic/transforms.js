@@ -266,13 +266,9 @@ export function stringifyTransforms(transforms: TransformStack = []): string {
         case 'focus-function':
           return `${shortKey}-${transform.funcIndex}`;
         case 'collapse-resource':
-          return `${shortKey}-${transform.implementation}-${
-            transform.resourceIndex
-          }-${transform.collapsedFuncIndex}`;
+          return `${shortKey}-${transform.implementation}-${transform.resourceIndex}-${transform.collapsedFuncIndex}`;
         case 'collapse-direct-recursion':
-          return `${shortKey}-${transform.implementation}-${
-            transform.funcIndex
-          }`;
+          return `${shortKey}-${transform.implementation}-${transform.funcIndex}`;
         case 'focus-subtree':
         case 'merge-call-node': {
           let string = [

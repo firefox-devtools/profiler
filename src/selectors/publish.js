@@ -11,6 +11,8 @@ import {
   getGlobalTracks,
   getLocalTracksByPid,
   getHasPreferenceMarkers,
+  getComputedHiddenGlobalTracks,
+  getComputedHiddenLocalTracksByPid,
 } from './profile';
 import { compress } from '../utils/gz';
 import { serializeProfile } from '../profile-logic/process-profile';
@@ -20,7 +22,6 @@ import {
   type SanitizeProfileResult,
 } from '../profile-logic/sanitize';
 import prettyBytes from '../utils/pretty-bytes';
-import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
 
@@ -66,8 +67,8 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
   getCheckedSharingOptions,
   getProfile,
   getCommittedRange,
-  getHiddenGlobalTracks,
-  getHiddenLocalTracksByPid,
+  getComputedHiddenGlobalTracks,
+  getComputedHiddenLocalTracksByPid,
   getGlobalTracks,
   getLocalTracksByPid,
   getHasPreferenceMarkers,
@@ -176,9 +177,8 @@ export const getSanitizedProfile: Selector<SanitizeProfileResult> = createSelect
  */
 export const getSanitizedProfileData: Selector<
   Promise<Uint8Array>
-> = createSelector(
-  getSanitizedProfile,
-  ({ profile }) => compress(serializeProfile(profile))
+> = createSelector(getSanitizedProfile, ({ profile }) =>
+  compress(serializeProfile(profile))
 );
 
 /**
@@ -190,9 +190,10 @@ export const getCompressedProfileBlob: Selector<Promise<Blob>> = createSelector(
     new Blob([await profileData], { type: 'application/octet-binary' })
 );
 
-export const getDownloadSize: Selector<Promise<string>> = createSelector(
-  getCompressedProfileBlob,
-  blobPromise => blobPromise.then(blob => prettyBytes(blob.size))
+export const getDownloadSize: Selector<
+  Promise<string>
+> = createSelector(getCompressedProfileBlob, blobPromise =>
+  blobPromise.then(blob => prettyBytes(blob.size))
 );
 
 export const getUploadState: Selector<UploadState> = state =>

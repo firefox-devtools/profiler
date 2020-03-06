@@ -37,9 +37,14 @@ import {
 export default function getProfile(): Profile {
   const profile = getEmptyProfile();
   const thread = getEmptyThread();
-  const funcNames = ['funcA', 'funcB', 'funcC', 'funcD', 'funcE', 'funcF'].map(
-    name => thread.stringTable.indexForString(name)
-  );
+  const funcNames = [
+    'funcA',
+    'funcB',
+    'funcC',
+    'funcD',
+    'funcE',
+    'funcF',
+  ].map(name => thread.stringTable.indexForString(name));
 
   const categoryOther = profile.meta.categories.findIndex(
     c => c.name === 'Other'

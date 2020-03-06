@@ -24,10 +24,13 @@ import {
   getIsHidingStaleProfile,
   getHasSanitizedProfile,
 } from '../../selectors/publish';
+import { getIconsWithClassNames } from '../../selectors/icons';
+import { BackgroundImageStyleDef } from '../shared/StyleDef';
 import classNames from 'classnames';
 
 import type { CssPixels } from '../../types/units';
 import type { ConnectedProps } from '../../utils/connect';
+import type { IconWithClassName } from '../../types/state';
 
 require('./ProfileViewer.css');
 
@@ -39,6 +42,7 @@ type StateProps = {|
   +isUploading: boolean,
   +isHidingStaleProfile: boolean,
   +hasSanitizedProfile: boolean,
+  +icons: IconWithClassName[],
 |};
 
 type DispatchProps = {|
@@ -60,6 +64,7 @@ class ProfileViewer extends PureComponent<Props> {
       uploadProgress,
       isHidingStaleProfile,
       hasSanitizedProfile,
+      icons,
     } = this.props;
 
     return (
@@ -69,6 +74,13 @@ class ProfileViewer extends PureComponent<Props> {
           profileViewerWrapperBackground: hasSanitizedProfile,
         })}
       >
+        {icons.map(({ className, icon }) => (
+          <BackgroundImageStyleDef
+            className={className}
+            url={icon}
+            key={className}
+          />
+        ))}
         <div
           className={classNames({
             profileViewer: true,
@@ -141,6 +153,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     isUploading: getUploadPhase(state) === 'uploading',
     isHidingStaleProfile: getIsHidingStaleProfile(state),
     hasSanitizedProfile: getHasSanitizedProfile(state),
+    icons: getIconsWithClassNames(state),
   }),
   mapDispatchToProps: {
     returnToZipFileList,

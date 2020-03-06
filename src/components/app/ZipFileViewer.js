@@ -5,6 +5,7 @@
 // @flow
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
+import { DragAndDropOverlay } from './DragAndDrop';
 import { procureInitialInterestingExpandedNodes } from '../../profile-logic/zip-files';
 import {
   changeSelectedZipFile,
@@ -162,7 +163,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
    * method is what keeps the ZipFileViewer and ZipFileState in sync
    * with the UrlState.
    */
-  componentWillReceiveProps(nextProps: Props) {
+  UNSAFE_componentWillReceiveProps(nextProps: Props) {
     const {
       pathInZipFile,
       zipFileState,
@@ -218,6 +219,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
             <p>Choose a profile from this zip file</p>
           </header>
           <div className="zipFileViewerMessage">{message}</div>
+          <DragAndDropOverlay />
         </div>
       </section>
     );
@@ -288,6 +290,7 @@ class ZipFileViewer extends React.PureComponent<Props> {
                 indentWidth={15}
                 onEnterKey={this._onEnterKey}
               />
+              <DragAndDropOverlay />
             </div>
           </section>
         );

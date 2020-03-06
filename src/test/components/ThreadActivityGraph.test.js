@@ -130,24 +130,18 @@ describe('ThreadActivityGraph', function() {
    * as once it's connected to the Redux store in the SelectedActivityGraph.
    */
   describe('ThreadActivityGraph', function() {
-    it('can click a best ancestor call node', function() {
+    it('selects the full call node path when clicked', function() {
       const { clickActivityGraph, getCallNodePath } = setup();
 
       // The full call node at this sample is:
       //  A -> B -> C -> F -> G
-      // However, the best ancestor call node is:
-      //  A -> B -> C -> F
-      // As this is the most common ancestor with the same category.
       clickActivityGraph(1, 0.2);
-      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F']);
+      expect(getCallNodePath()).toEqual(['A', 'B', 'C', 'F', 'G']);
 
       // The full call node at this sample is:
       //  A -> B -> H -> I
-      // However, the best ancestor call node is:
-      //  A -> B -> H
-      // As this is the most common ancestor with the same category.
       clickActivityGraph(1, 0.8);
-      expect(getCallNodePath()).toEqual(['A', 'B', 'H']);
+      expect(getCallNodePath()).toEqual(['A', 'B', 'H', 'I']);
     });
 
     it('will redraw even when there are no samples in range', function() {

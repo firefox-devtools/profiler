@@ -221,7 +221,6 @@ type ProfileAction =
   | {|
       +type: 'SET_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
-      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
@@ -261,6 +260,8 @@ type ReceiveProfileAction =
       +localTracksByPid: Map<Pid, LocalTrack[]>,
       +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      +activeTabHiddenGlobalTracksGetter: () => Set<TrackIndex>,
+      +activeTabHiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}
@@ -363,6 +364,7 @@ type UrlStateAction =
       +type: 'CHANGE_SHOW_TAB_ONLY',
       +showTabOnly: BrowsingContextID | null,
       +selectedTab: TabSlug,
+      +selectedThreadIndex: ThreadIndex | null,
     |};
 
 type IconsAction =
@@ -411,6 +413,20 @@ type PublishAction =
     |}
   | {| +type: 'HIDE_STALE_PROFILE' |};
 
+type DragAndDropAction =
+  | {|
+      +type: 'START_DRAGGING',
+    |}
+  | {|
+      +type: 'STOP_DRAGGING',
+    |}
+  | {|
+      +type: 'REGISTER_DRAG_AND_DROP_OVERLAY',
+    |}
+  | {|
+      +type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY',
+    |};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
@@ -418,4 +434,5 @@ export type Action =
   | UrlEnhancerAction
   | UrlStateAction
   | IconsAction
-  | PublishAction;
+  | PublishAction
+  | DragAndDropAction;

@@ -418,6 +418,12 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
         embedderInnerWindowID: 0,
       },
     ];
+    profile.meta.configuration = {
+      threads: [],
+      features: [],
+      capacity: 1000000,
+      activeBrowsingContextID: browsingContextID,
+    };
     const { getState, dispatch } = storeWithProfile(profile);
 
     if (showTabOnly) {

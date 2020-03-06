@@ -1112,9 +1112,9 @@ describe('expanded and selected CallNodePaths', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     // This opens expands the call nodes up to this point.
     dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B, C, D]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, B, C, D]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -1140,9 +1140,9 @@ describe('expanded and selected CallNodePaths', function() {
       })
     );
 
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [B, C, D]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([B, C, D]);
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       [
@@ -1165,9 +1165,9 @@ describe('expanded and selected CallNodePaths', function() {
       })
     );
 
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, C, D]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, C, D]);
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       [
@@ -1205,9 +1205,9 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
     dispatch(changeInvertCallstack(true));
     dispatch(changeSelectedCallNode(threadIndex, selectedCallNodePath));
 
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [Z, Y, X, B]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([Z, Y, X, B]);
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       [
@@ -1233,9 +1233,9 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
       })
     );
 
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [Y, X, B]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([Y, X, B]);
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       [
@@ -1259,9 +1259,9 @@ describe('expanded and selected CallNodePaths on inverted trees', function() {
       })
     );
 
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [Z, X, B]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([Z, X, B]);
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       [
@@ -1281,19 +1281,19 @@ describe('transform js allocations', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('js-allocations'));
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- A (total: 15, self: —)',
-        '  - B (total: 15, self: —)',
-        '    - Fjs (total: 12, self: —)',
-        '      - Gjs (total: 12, self: 5)',
-        '        - Hjs (total: 7, self: —)',
-        '          - I (total: 7, self: 7)',
-        '    - C (total: 3, self: —)',
-        '      - D (total: 3, self: —)',
-        '        - E (total: 3, self: 3)',
-      ]
-    );
+    expect(
+      formatTree(selectedThreadSelectors.getCallTree(getState()))
+    ).toEqual([
+      '- A (total: 15, self: —)',
+      '  - B (total: 15, self: —)',
+      '    - Fjs (total: 12, self: —)',
+      '      - Gjs (total: 12, self: 5)',
+      '        - Hjs (total: 7, self: —)',
+      '          - I (total: 7, self: 7)',
+      '    - C (total: 3, self: —)',
+      '      - D (total: 3, self: —)',
+      '        - E (total: 3, self: 3)',
+    ]);
   });
 
   it('is modified when performing a transform to the stacks', function() {
@@ -1310,14 +1310,14 @@ describe('transform js allocations', function() {
       })
     );
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- Fjs (total: 12, self: —)',
-        '  - Gjs (total: 12, self: 5)',
-        '    - Hjs (total: 7, self: —)',
-        '      - I (total: 7, self: 7)',
-      ]
-    );
+    expect(
+      formatTree(selectedThreadSelectors.getCallTree(getState()))
+    ).toEqual([
+      '- Fjs (total: 12, self: —)',
+      '  - Gjs (total: 12, self: 5)',
+      '    - Hjs (total: 7, self: —)',
+      '      - I (total: 7, self: 7)',
+    ]);
   });
 });
 
@@ -1329,19 +1329,19 @@ describe('transform native allocations', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-allocations'));
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- A (total: 15, self: —)',
-        '  - B (total: 15, self: —)',
-        '    - Fjs (total: 12, self: —)',
-        '      - Gjs (total: 12, self: 5)',
-        '        - Hjs (total: 7, self: —)',
-        '          - I (total: 7, self: 7)',
-        '    - C (total: 3, self: —)',
-        '      - D (total: 3, self: —)',
-        '        - E (total: 3, self: 3)',
-      ]
-    );
+    expect(
+      formatTree(selectedThreadSelectors.getCallTree(getState()))
+    ).toEqual([
+      '- A (total: 15, self: —)',
+      '  - B (total: 15, self: —)',
+      '    - Fjs (total: 12, self: —)',
+      '      - Gjs (total: 12, self: 5)',
+      '        - Hjs (total: 7, self: —)',
+      '          - I (total: 7, self: 7)',
+      '    - C (total: 3, self: —)',
+      '      - D (total: 3, self: —)',
+      '        - E (total: 3, self: 3)',
+    ]);
   });
 
   it('is modified when performing a transform to the stacks', function() {
@@ -1358,14 +1358,14 @@ describe('transform native allocations', function() {
       })
     );
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- Fjs (total: 12, self: —)',
-        '  - Gjs (total: 12, self: 5)',
-        '    - Hjs (total: 7, self: —)',
-        '      - I (total: 7, self: 7)',
-      ]
-    );
+    expect(
+      formatTree(selectedThreadSelectors.getCallTree(getState()))
+    ).toEqual([
+      '- Fjs (total: 12, self: —)',
+      '  - Gjs (total: 12, self: 5)',
+      '    - Hjs (total: 7, self: —)',
+      '      - I (total: 7, self: 7)',
+    ]);
   });
 });
 
@@ -1377,19 +1377,19 @@ describe('transform native deallocations', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-deallocations-sites'));
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- A (total: -41, self: —)',
-        '  - B (total: -41, self: —)',
-        '    - Fjs (total: -30, self: —)',
-        '      - Gjs (total: -30, self: -13)',
-        '        - Hjs (total: -17, self: —)',
-        '          - I (total: -17, self: -17)',
-        '    - C (total: -11, self: —)',
-        '      - D (total: -11, self: —)',
-        '        - E (total: -11, self: -11)',
-      ]
-    );
+    expect(
+      formatTree(selectedThreadSelectors.getCallTree(getState()))
+    ).toEqual([
+      '- A (total: -41, self: —)',
+      '  - B (total: -41, self: —)',
+      '    - Fjs (total: -30, self: —)',
+      '      - Gjs (total: -30, self: -13)',
+      '        - Hjs (total: -17, self: —)',
+      '          - I (total: -17, self: -17)',
+      '    - C (total: -11, self: —)',
+      '      - D (total: -11, self: —)',
+      '        - E (total: -11, self: -11)',
+    ]);
   });
 
   it('is modified when performing a transform to the stacks', function() {
@@ -1406,14 +1406,14 @@ describe('transform native deallocations', function() {
       })
     );
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- Fjs (total: -30, self: —)',
-        '  - Gjs (total: -30, self: -13)',
-        '    - Hjs (total: -17, self: —)',
-        '      - I (total: -17, self: -17)',
-      ]
-    );
+    expect(
+      formatTree(selectedThreadSelectors.getCallTree(getState()))
+    ).toEqual([
+      '- Fjs (total: -30, self: —)',
+      '  - Gjs (total: -30, self: -13)',
+      '    - Hjs (total: -17, self: —)',
+      '      - I (total: -17, self: -17)',
+    ]);
   });
 });
 
@@ -1425,19 +1425,19 @@ describe('transform retained native allocations', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeCallTreeSummaryStrategy('native-retained-allocations'));
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- A (total: 41, self: —)',
-        '  - B (total: 41, self: —)',
-        '    - Fjs (total: 30, self: —)',
-        '      - Gjs (total: 30, self: 13)',
-        '        - Hjs (total: 17, self: —)',
-        '          - I (total: 17, self: 17)',
-        '    - C (total: 11, self: —)',
-        '      - D (total: 11, self: —)',
-        '        - E (total: 11, self: 11)',
-      ]
-    );
+    expect(
+      formatTree(selectedThreadSelectors.getCallTree(getState()))
+    ).toEqual([
+      '- A (total: 41, self: —)',
+      '  - B (total: 41, self: —)',
+      '    - Fjs (total: 30, self: —)',
+      '      - Gjs (total: 30, self: 13)',
+      '        - Hjs (total: 17, self: —)',
+      '          - I (total: 17, self: 17)',
+      '    - C (total: 11, self: —)',
+      '      - D (total: 11, self: —)',
+      '        - E (total: 11, self: 11)',
+    ]);
   });
 
   it('is modified when performing a transform to the stacks', function() {
@@ -1454,13 +1454,13 @@ describe('transform retained native allocations', function() {
       })
     );
 
-    expect(formatTree(selectedThreadSelectors.getCallTree(getState()))).toEqual(
-      [
-        '- Fjs (total: 42, self: —)',
-        '  - Gjs (total: 42, self: 18)',
-        '    - Hjs (total: 24, self: —)',
-        '      - I (total: 24, self: 24)',
-      ]
-    );
+    expect(
+      formatTree(selectedThreadSelectors.getCallTree(getState()))
+    ).toEqual([
+      '- Fjs (total: 42, self: —)',
+      '  - Gjs (total: 42, self: 18)',
+      '    - Hjs (total: 24, self: —)',
+      '      - I (total: 24, self: 24)',
+    ]);
   });
 });

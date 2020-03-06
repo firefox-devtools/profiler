@@ -37,10 +37,18 @@ export type Reducer<T> = (T | void, Action) => T;
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
   +selectedCallNodePath: CallNodePath,
-  +rightClickedCallNodePath: CallNodePath | null,
   +expandedCallNodePaths: PathSet,
   +selectedMarker: MarkerIndex | null,
-  +rightClickedMarker: MarkerIndex | null,
+|};
+
+export type RightClickedCallNode = {|
+  +threadIndex: ThreadIndex,
+  +callNodePath: CallNodePath,
+|};
+
+export type RightClickedMarker = {|
+  +threadIndex: ThreadIndex,
+  +markerIndex: MarkerIndex,
 |};
 
 export type ProfileViewState = {|
@@ -53,9 +61,13 @@ export type ProfileViewState = {|
     focusCallTreeGeneration: number,
     rootRange: StartEndRange,
     rightClickedTrack: TrackReference | null,
+    rightClickedCallNode: RightClickedCallNode | null,
+    rightClickedMarker: RightClickedMarker | null,
   |},
   +globalTracks: GlobalTrack[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
+  +activeTabHiddenGlobalTracksGetter: () => Set<TrackIndex>,
+  +activeTabHiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
   +profile: Profile | null,
 |};
 
@@ -121,6 +133,8 @@ export type AppState = {|
   +lastVisibleThreadTabSlug: TabSlug,
   +trackThreadHeights: Array<ThreadIndex | void>,
   +isNewlyPublished: boolean,
+  +isDragAndDropDragging: boolean,
+  +isDragAndDropOverlayRegistered: boolean,
 |};
 
 export type UploadPhase =

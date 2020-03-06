@@ -32,6 +32,8 @@ import * as ProfileView from '../../actions/profile-view';
 import { viewProfile } from '../../actions/receive-profile';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
+import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
+import { getRightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   selectedThreadSelectors,
@@ -66,9 +68,9 @@ describe('call node paths on implementation filter change', function() {
   it('starts with combined CallNodePaths', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B, C, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, B, C, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -86,9 +88,9 @@ describe('call node paths on implementation filter change', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [B, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([B, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -104,9 +106,9 @@ describe('call node paths on implementation filter change', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
     dispatch(ProfileView.changeImplementationFilter('js'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [B, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([B, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -123,9 +125,9 @@ describe('call node paths on implementation filter change', function() {
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(ProfileView.changeImplementationFilter('combined'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B, C, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, B, C, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -144,9 +146,9 @@ describe('call node paths on implementation filter change', function() {
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(ProfileView.changeImplementationFilter('cpp'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, C]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, C]);
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       [
@@ -792,7 +794,10 @@ describe('actions/ProfileView', function() {
 
   describe('changeSelectedMarker', function() {
     it('changes the selected marker', function() {
-      const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+      ]);
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
@@ -807,7 +812,10 @@ describe('actions/ProfileView', function() {
 
   describe('changeMarkersSearchString', function() {
     it('changes the search string', function() {
-      const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+      ]);
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('');
@@ -1529,6 +1537,13 @@ describe('snapshots of selectors/profile', function() {
       },
     ];
 
+    profile.meta.configuration = {
+      threads: [],
+      features: [],
+      capacity: 1000000,
+      activeBrowsingContextID: browsingContextID,
+    };
+
     const [samplesThread] = profile.threads;
 
     // Add innerWindowID for G function
@@ -1727,9 +1742,9 @@ describe('snapshots of selectors/profile', function() {
   });
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodePath', function() {
     const { getState, A, B } = setupStore();
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, B]);
   });
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodeIndex', function() {
     const { getState } = setupStore();
@@ -2748,6 +2763,98 @@ describe('visual metrics selectors', function() {
   });
 });
 
+describe('right clicked call node info', () => {
+  function setup() {
+    const profile = getProfileFromTextSamples(`
+      A
+      B
+      C
+    `);
+
+    return storeWithProfile(profile.profile);
+  }
+
+  it('should be empty on store creation', () => {
+    const { getState } = setup();
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+  });
+
+  it('sets right clicked call node info when right clicked call node action is dispatched', () => {
+    const { dispatch, getState } = setup();
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+
+    dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
+
+    expect(getRightClickedCallNodeInfo(getState())).toEqual({
+      threadIndex: 0,
+      callNodePath: [0, 1],
+    });
+  });
+
+  it('resets right clicked call node when context menu is hidden', () => {
+    const { dispatch, getState } = setup();
+
+    dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
+
+    expect(getRightClickedCallNodeInfo(getState())).toEqual({
+      threadIndex: 0,
+      callNodePath: [0, 1],
+    });
+
+    dispatch(ProfileView.setContextMenuVisibility(false));
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+  });
+});
+
+describe('right clicked marker info', () => {
+  function setup() {
+    const profile = getProfileWithMarkers([
+      ['a', 0, null],
+      ['b', 1, null],
+      ['c', 2, null],
+    ]);
+
+    return storeWithProfile(profile);
+  }
+
+  it('should be empty on store creation', () => {
+    const { getState } = setup();
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+  });
+
+  it('sets right clicked marker info when right clicked marker action is dispatched', () => {
+    const { dispatch, getState } = setup();
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+
+    dispatch(ProfileView.changeRightClickedMarker(0, 0));
+
+    expect(getRightClickedMarkerInfo(getState())).toEqual({
+      threadIndex: 0,
+      markerIndex: 0,
+    });
+  });
+
+  it('resets right clicked marker when context menu is hidden', () => {
+    const { dispatch, getState } = setup();
+
+    dispatch(ProfileView.changeRightClickedMarker(0, 1));
+
+    expect(getRightClickedMarkerInfo(getState())).toEqual({
+      threadIndex: 0,
+      markerIndex: 1,
+    });
+
+    dispatch(ProfileView.setContextMenuVisibility(false));
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+  });
+});
+
 describe('pages and active tab selectors', function() {
   // Setting some IDs here so we can use those inside the setup and test functions.
   const firstTabBrowsingContextID = 1;
@@ -2845,24 +2952,24 @@ describe('pages and active tab selectors', function() {
     expect(ProfileViewSelectors.getPagesMap(getState())).toEqual(result);
   });
 
-  it('getRelevantPagesForActiveTab will get the correct InnerWindowIDs for the first tab', function() {
+  it('getRelevantPagesForCurrentTab will get the correct InnerWindowIDs for the first tab', function() {
     const { getState } = setup(firstTabBrowsingContextID);
     expect(
-      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
     ).toEqual(new Set(fistTabInnerWindowIDs));
   });
 
-  it('getRelevantPagesForActiveTab will get the correct InnerWindowIDs for the second tab', function() {
+  it('getRelevantPagesForCurrentTab will get the correct InnerWindowIDs for the second tab', function() {
     const { getState } = setup(secondTabBrowsingContextID);
     expect(
-      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
     ).toEqual(new Set(secondTabInnerWindowIDs));
   });
 
-  it('getRelevantPagesForActiveTab will return an empty set for an ID that is not in the array', function() {
+  it('getRelevantPagesForCurrentTab will return an empty set for an ID that is not in the array', function() {
     const { getState } = setup(99999); // a non-existent BrowsingContextID
     expect(
-      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
     ).toEqual(new Set());
   });
 });

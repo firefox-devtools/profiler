@@ -97,6 +97,7 @@ const zipFile: Reducer<ZipFileState> = (
           });
     case 'PROFILE_PUBLISHED':
     case 'SANITIZED_PROFILE_PUBLISHED':
+    case 'WAITING_FOR_PROFILE_FROM_FILE':
       // Revert back to not having a zip file.
       return {
         phase: 'NO_ZIP_FILE',
