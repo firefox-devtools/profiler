@@ -121,7 +121,7 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
         >
           <div
             class="treeViewBodyInner treeViewBodyInner0"
-            style="height: 96px;"
+            style="height: 80px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner0TopSpacer"
@@ -222,34 +222,11 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   Text
                 </span>
               </div>
-              <div
-                class="treeViewRow treeViewRowFixedColumns even"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn start"
-                  title="0.158s"
-                >
-                  0.158s
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn duration"
-                  title="—"
-                >
-                  —
-                </span>
-                <span
-                  class="treeViewRowColumn treeViewFixedColumn category"
-                  title="Log"
-                >
-                  Log
-                </span>
-              </div>
             </div>
           </div>
           <div
             class="treeViewBodyInner treeViewBodyInner1"
-            style="height: 96px; width: 3000px;"
+            style="height: 80px; width: 3000px;"
           >
             <div
               class="treeViewBodyInner treeViewBodyInner1TopSpacer"
@@ -340,28 +317,6 @@ exports[`MarkerTable renders some basic markers and updates when needed 1`] = `
                   class="treeViewRowColumn treeViewMainColumn name"
                 >
                   setTimeout — 5.5
-                </span>
-              </div>
-              <div
-                aria-level="1"
-                aria-selected="false"
-                class="treeViewRow treeViewRowScrolledColumns even"
-                id="treeViewRow-4"
-                role="treeitem"
-                style="height: 16px; line-height: 16px;"
-              >
-                <span
-                  class="treeRowIndentSpacer"
-                  style="width: 0px;"
-                />
-                <span
-                  class="treeRowToggleButton collapsed leaf"
-                />
-                <span
-                  class="treeViewRowColumn treeViewMainColumn name"
-                >
-                  (nsJarProtocol) nsJARChannel::nsJARChannel [this=0x87f1ec80]
-
                 </span>
               </div>
             </div>
