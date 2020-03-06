@@ -32,6 +32,8 @@ import * as ProfileView from '../../actions/profile-view';
 import { viewProfile } from '../../actions/receive-profile';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
+import { getRightClickedCallNodeInfo } from '../../selectors/right-clicked-call-node';
+import { getRightClickedMarkerInfo } from '../../selectors/right-clicked-marker';
 import { stateFromLocation } from '../../app-logic/url-handling';
 import {
   selectedThreadSelectors,
@@ -2697,6 +2699,98 @@ describe('visual metrics selectors', function() {
     expect(getContentfulSpeedIndexProgress(getState())).toEqual(
       ContentfulSpeedIndexProgress
     );
+  });
+});
+
+describe('right clicked call node info', () => {
+  function setup() {
+    const profile = getProfileFromTextSamples(`
+      A
+      B
+      C
+    `);
+
+    return storeWithProfile(profile.profile);
+  }
+
+  it('should be empty on store creation', () => {
+    const { getState } = setup();
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+  });
+
+  it('sets right clicked call node info when right clicked call node action is dispatched', () => {
+    const { dispatch, getState } = setup();
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+
+    dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
+
+    expect(getRightClickedCallNodeInfo(getState())).toEqual({
+      threadIndex: 0,
+      callNodePath: [0, 1],
+    });
+  });
+
+  it('resets right clicked call node when context menu is hidden', () => {
+    const { dispatch, getState } = setup();
+
+    dispatch(ProfileView.changeRightClickedCallNode(0, [0, 1]));
+
+    expect(getRightClickedCallNodeInfo(getState())).toEqual({
+      threadIndex: 0,
+      callNodePath: [0, 1],
+    });
+
+    dispatch(ProfileView.setContextMenuVisibility(false));
+
+    expect(getRightClickedCallNodeInfo(getState())).toBeNull();
+  });
+});
+
+describe('right clicked marker info', () => {
+  function setup() {
+    const profile = getProfileWithMarkers([
+      ['a', 0, null],
+      ['b', 1, null],
+      ['c', 2, null],
+    ]);
+
+    return storeWithProfile(profile);
+  }
+
+  it('should be empty on store creation', () => {
+    const { getState } = setup();
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+  });
+
+  it('sets right clicked marker info when right clicked marker action is dispatched', () => {
+    const { dispatch, getState } = setup();
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
+
+    dispatch(ProfileView.changeRightClickedMarker(0, 0));
+
+    expect(getRightClickedMarkerInfo(getState())).toEqual({
+      threadIndex: 0,
+      markerIndex: 0,
+    });
+  });
+
+  it('resets right clicked marker when context menu is hidden', () => {
+    const { dispatch, getState } = setup();
+
+    dispatch(ProfileView.changeRightClickedMarker(0, 1));
+
+    expect(getRightClickedMarkerInfo(getState())).toEqual({
+      threadIndex: 0,
+      markerIndex: 1,
+    });
+
+    dispatch(ProfileView.setContextMenuVisibility(false));
+
+    expect(getRightClickedMarkerInfo(getState())).toBeNull();
   });
 });
 
