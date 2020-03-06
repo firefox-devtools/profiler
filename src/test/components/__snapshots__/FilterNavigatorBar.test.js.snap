@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 1`] = `
+<ol
+  class="filterNavigatorBar profileFilterNavigator"
+>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    data-index="0"
+    title="Full Range"
+  >
+    <span
+      class="filterNavigatorBarItemContent"
+    >
+      Full Range
+    </span>
+  </li>
+</ol>
+`;
+
+exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 2`] = `
+<ol
+  class="filterNavigatorBar profileFilterNavigator"
+>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarBeforeSelectedItem"
+    data-index="0"
+    title="Full Range"
+  >
+    <button
+      class="filterNavigatorBarItemContent"
+      type="button"
+    >
+      Full Range
+    </button>
+  </li>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem filterNavigatorBarTransition-enter filterNavigatorBarTransition-enter-active"
+    data-index="1"
+    title="40 ms"
+  >
+    <span
+      class="filterNavigatorBarItemContent"
+    >
+      40 ms
+    </span>
+  </li>
+</ol>
+`;
+
+exports[`app/ProfileFilterNavigator renders ProfileFilterNavigator properly 3`] = `
+<ol
+  class="filterNavigatorBar profileFilterNavigator"
+>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarBeforeSelectedItem"
+    data-index="0"
+    title="Full Range"
+  >
+    <button
+      class="filterNavigatorBarItemContent"
+      type="button"
+    >
+      Full Range
+    </button>
+  </li>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem filterNavigatorBarTransition-enter filterNavigatorBarTransition-enter-active"
+    data-index="1"
+    title="40 ms"
+  >
+    <span
+      class="filterNavigatorBarItemContent"
+    >
+      40 ms
+    </span>
+  </li>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarLeafItem filterNavigatorBarUncommittedItem filterNavigatorBarUncommittedTransition-enter filterNavigatorBarUncommittedTransition-enter-active"
+    title="10 ms"
+  >
+    <span
+      class="filterNavigatorBarItemContent"
+    >
+      10 ms
+    </span>
+  </li>
+</ol>
+`;
+
+exports[`app/ProfileFilterNavigator renders the site hostname as its first element in the single tab view 1`] = `
+<ol
+  class="filterNavigatorBar profileFilterNavigator"
+>
+  <li
+    class="filterNavigatorBarItem filterNavigatorBarRootItem filterNavigatorBarSelectedItem filterNavigatorBarLeafItem"
+    data-index="0"
+    title="[object Object]"
+  >
+    <span
+      class="filterNavigatorBarItemContent"
+    >
+      <div
+        class="nodeIcon "
+      />
+      developer.mozilla.org
+       (
+      51 ms
+      )
+    </span>
+  </li>
+</ol>
+`;

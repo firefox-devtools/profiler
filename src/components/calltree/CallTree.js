@@ -7,7 +7,7 @@ import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
 import TreeView from '../shared/TreeView';
 import CallTreeEmptyReasons from './CallTreeEmptyReasons';
-import NodeIcon from '../shared/NodeIcon';
+import Icon from '../shared/Icon';
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
 import {
   getInvertCallstack,
@@ -21,7 +21,6 @@ import {
   getPreviewSelection,
 } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
-import { getIconsWithClassNames } from '../../selectors/icons';
 import {
   changeSelectedCallNode,
   changeRightClickedCallNode,
@@ -30,7 +29,7 @@ import {
 } from '../../actions/profile-view';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
-import type { IconWithClassName, State } from '../../types/state';
+import type { State } from '../../types/state';
 import type { CallTree } from '../../profile-logic/call-tree';
 import type {
   ImplementationFilter,
@@ -58,7 +57,6 @@ type StateProps = {|
   +disableOverscan: boolean,
   +invertCallstack: boolean,
   +implementationFilter: ImplementationFilter,
-  +icons: IconWithClassName[],
   +callNodeMaxDepth: number,
   +callTreeSummaryStrategy: CallTreeSummaryStrategy,
 |};
@@ -77,13 +75,13 @@ class CallTreeComponent extends PureComponent<Props> {
     { propName: 'totalTimePercent', title: '' },
     { propName: 'totalTime', title: 'Running Time (ms)' },
     { propName: 'selfTime', title: 'Self (ms)' },
-    { propName: 'icon', title: '', component: NodeIcon },
+    { propName: 'icon', title: '', component: Icon },
   ];
   _fixedColumnsAllocations: Column[] = [
     { propName: 'totalTimePercent', title: '' },
     { propName: 'totalTime', title: 'Total Size (bytes)' },
     { propName: 'selfTime', title: 'Self (bytes)' },
-    { propName: 'icon', title: '', component: NodeIcon },
+    { propName: 'icon', title: '', component: Icon },
   ];
   _mainColumn: Column = { propName: 'name', title: '' };
   _appendageColumn: Column = { propName: 'lib', title: '' };
@@ -232,7 +230,6 @@ class CallTreeComponent extends PureComponent<Props> {
         ref={this._takeTreeViewRef}
         contextMenuId="CallNodeContextMenu"
         maxNodeDepth={callNodeMaxDepth}
-        icons={this.props.icons}
         rowHeight={16}
         indentWidth={10}
       />
@@ -260,7 +257,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     disableOverscan: getPreviewSelection(state).isModifying,
     invertCallstack: getInvertCallstack(state),
     implementationFilter: getImplementationFilter(state),
-    icons: getIconsWithClassNames(state),
     callNodeMaxDepth: selectedThreadSelectors.getCallNodeMaxDepth(state),
     callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
       state
