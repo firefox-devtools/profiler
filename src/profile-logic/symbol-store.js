@@ -129,9 +129,7 @@ export class SymbolStore {
       .storeSymbolTable(lib.debugName, lib.breakpadId, symbolTable)
       .catch(error => {
         console.log(
-          `Failed to store the symbol table for ${
-            lib.debugName
-          } in the database:`,
+          `Failed to store the symbol table for ${lib.debugName} in the database:`,
           error
         );
       });
@@ -335,9 +333,7 @@ export class SymbolStore {
           // so we swallow the error and keep going. But in order to catch
           // problems with the API we should still log these errors.
           console.log(
-            `The symbolication API request was not successful for ${
-              request.lib.debugName
-            }/${request.lib.breakpadId}:`,
+            `The symbolication API request was not successful for ${request.lib.debugName}/${request.lib.breakpadId}:`,
             error
           );
 

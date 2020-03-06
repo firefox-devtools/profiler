@@ -13,6 +13,9 @@ import {
   getLocalTrackFromReference,
   getGlobalTrackFromReference,
   getPreviewSelection,
+  getComputedHiddenGlobalTracks,
+  getComputedHiddenLocalTracks,
+  getActiveTabHiddenGlobalTracksGetter,
 } from '../selectors/profile';
 import {
   getThreadSelectors,
@@ -24,7 +27,6 @@ import {
   getHiddenGlobalTracks,
   getGlobalTrackOrder,
   getLocalTrackOrder,
-  getHiddenLocalTracks,
   getSelectedTab,
 } from '../selectors/url-state';
 import {
@@ -376,7 +378,7 @@ export function changeGlobalTrackOrder(globalTrackOrder: TrackIndex[]): Action {
  */
 export function hideGlobalTrack(trackIndex: TrackIndex): ThunkAction<void> {
   return (dispatch, getState) => {
-    const hiddenGlobalTracks = getHiddenGlobalTracks(getState());
+    const hiddenGlobalTracks = getComputedHiddenGlobalTracks(getState());
     if (hiddenGlobalTracks.has(trackIndex)) {
       // This track is already hidden, don't do anything.
       return;
@@ -626,23 +628,37 @@ export function changeLocalTrackOrder(
 function _findOtherVisibleThread(
   getState: () => State,
   // Either this global track is already hidden, or it has been taken into account.
-  globalTrackIndexToIgnore: TrackIndex,
+  globalTrackIndexToIgnore?: TrackIndex,
   // This is helpful when hiding a new local track index, it won't be selected.
-  localTrackIndexToIgnore?: TrackIndex
+  localTrackIndexToIgnore?: TrackIndex,
+  transitioningToActiveTab?: boolean = false
 ): ThreadIndex | null {
   const globalTracks = getGlobalTracks(getState());
   const globalTrackOrder = getGlobalTrackOrder(getState());
-  const globalHiddenTracks = getHiddenGlobalTracks(getState());
+  const globalHiddenTracks = getComputedHiddenGlobalTracks(getState());
+  const activeTabHiddenGlobalTracksGetter = getActiveTabHiddenGlobalTracksGetter(
+    getState()
+  );
 
   for (const globalTrackIndex of globalTrackOrder) {
     const globalTrack = globalTracks[globalTrackIndex];
     if (
       // This track has already been accounted for.
-      globalTrackIndex === globalTrackIndexToIgnore ||
+      (globalTrackIndexToIgnore !== undefined &&
+        globalTrackIndex === globalTrackIndexToIgnore) ||
       // This global track is hidden.
       globalHiddenTracks.has(globalTrackIndex) ||
       globalTrack.type !== 'process'
     ) {
+      continue;
+    }
+
+    if (
+      transitioningToActiveTab &&
+      activeTabHiddenGlobalTracksGetter().has(globalTrackIndex)
+    ) {
+      // We are transitioning to the active tab view. We should be able to select
+      // the track that is not hidden by it as well.
       continue;
     }
 
@@ -653,7 +669,10 @@ function _findOtherVisibleThread(
 
     const localTracks = getLocalTracks(getState(), globalTrack.pid);
     const localTrackOrder = getLocalTrackOrder(getState(), globalTrack.pid);
-    const hiddenLocalTracks = getHiddenLocalTracks(getState(), globalTrack.pid);
+    const hiddenLocalTracks = getComputedHiddenLocalTracks(
+      getState(),
+      globalTrack.pid
+    );
 
     for (const trackIndex of localTrackOrder) {
       const track = localTracks[trackIndex];
@@ -683,7 +702,7 @@ export function hideLocalTrack(
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const localTracks = getLocalTracks(getState(), pid);
-    const hiddenLocalTracks = getHiddenLocalTracks(getState(), pid);
+    const hiddenLocalTracks = getComputedHiddenLocalTracks(getState(), pid);
     const localTrackToHide = localTracks[trackIndexToHide];
     const selectedThreadIndex = getSelectedThreadIndex(getState());
     let nextSelectedThreadIndex: ThreadIndex | null =
@@ -1160,10 +1179,28 @@ export function changeShowTabOnly(
       selectedTab = getLastVisibleThreadTabSlug(getState());
     }
 
+    let selectedThreadIndex = null;
+    if (showTabOnly !== null) {
+      // Select the first visible thread when we are transitioning to tab only view.
+      selectedThreadIndex = _findOtherVisibleThread(
+        getState,
+        undefined, // Do not filter out any track.
+        undefined,
+        true // ignore the hidden tracks by active tab
+      );
+
+      if (selectedThreadIndex === null) {
+        // We should revert to the first view, because all the threads are hidden
+        // in the single tab view and we won't be able to see anything there.
+        return;
+      }
+    }
+
     dispatch({
       type: 'CHANGE_SHOW_TAB_ONLY',
       showTabOnly,
       selectedTab,
+      selectedThreadIndex,
     });
   };
 }

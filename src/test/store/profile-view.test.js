@@ -68,9 +68,9 @@ describe('call node paths on implementation filter change', function() {
   it('starts with combined CallNodePaths', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B, C, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, B, C, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -88,9 +88,9 @@ describe('call node paths on implementation filter change', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [B, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([B, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -106,9 +106,9 @@ describe('call node paths on implementation filter change', function() {
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [A, B, C, D, E]));
     dispatch(ProfileView.changeImplementationFilter('js'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [B, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([B, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -125,9 +125,9 @@ describe('call node paths on implementation filter change', function() {
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(ProfileView.changeImplementationFilter('combined'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B, C, D, E]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, B, C, D, E]);
 
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
@@ -146,9 +146,9 @@ describe('call node paths on implementation filter change', function() {
     dispatch(ProfileView.changeImplementationFilter('js'));
     dispatch(ProfileView.changeSelectedCallNode(threadIndex, [B, D, E]));
     dispatch(ProfileView.changeImplementationFilter('cpp'));
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, C]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, C]);
     assertSetContainsOnly(
       selectedThreadSelectors.getExpandedCallNodePaths(getState()),
       [
@@ -794,7 +794,10 @@ describe('actions/ProfileView', function() {
 
   describe('changeSelectedMarker', function() {
     it('changes the selected marker', function() {
-      const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+      ]);
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(
@@ -809,7 +812,10 @@ describe('actions/ProfileView', function() {
 
   describe('changeMarkersSearchString', function() {
     it('changes the search string', function() {
-      const profile = getProfileWithMarkers([['a', 0, null], ['b', 1, null]]);
+      const profile = getProfileWithMarkers([
+        ['a', 0, null],
+        ['b', 1, null],
+      ]);
       const { dispatch, getState } = storeWithProfile(profile);
 
       expect(UrlStateSelectors.getMarkersSearchString(getState())).toEqual('');
@@ -1470,6 +1476,13 @@ describe('snapshots of selectors/profile', function() {
       },
     ];
 
+    profile.meta.configuration = {
+      threads: [],
+      features: [],
+      capacity: 1000000,
+      activeBrowsingContextID: browsingContextID,
+    };
+
     const [samplesThread] = profile.threads;
 
     // Add innerWindowID for G function
@@ -1668,9 +1681,9 @@ describe('snapshots of selectors/profile', function() {
   });
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodePath', function() {
     const { getState, A, B } = setupStore();
-    expect(selectedThreadSelectors.getSelectedCallNodePath(getState())).toEqual(
-      [A, B]
-    );
+    expect(
+      selectedThreadSelectors.getSelectedCallNodePath(getState())
+    ).toEqual([A, B]);
   });
   it('matches the last stored run of selectedThreadSelector.getSelectedCallNodeIndex', function() {
     const { getState } = setupStore();
@@ -2878,24 +2891,24 @@ describe('pages and active tab selectors', function() {
     expect(ProfileViewSelectors.getPagesMap(getState())).toEqual(result);
   });
 
-  it('getRelevantPagesForActiveTab will get the correct InnerWindowIDs for the first tab', function() {
+  it('getRelevantPagesForCurrentTab will get the correct InnerWindowIDs for the first tab', function() {
     const { getState } = setup(firstTabBrowsingContextID);
     expect(
-      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
     ).toEqual(new Set(fistTabInnerWindowIDs));
   });
 
-  it('getRelevantPagesForActiveTab will get the correct InnerWindowIDs for the second tab', function() {
+  it('getRelevantPagesForCurrentTab will get the correct InnerWindowIDs for the second tab', function() {
     const { getState } = setup(secondTabBrowsingContextID);
     expect(
-      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
     ).toEqual(new Set(secondTabInnerWindowIDs));
   });
 
-  it('getRelevantPagesForActiveTab will return an empty set for an ID that is not in the array', function() {
+  it('getRelevantPagesForCurrentTab will return an empty set for an ID that is not in the array', function() {
     const { getState } = setup(99999); // a non-existent BrowsingContextID
     expect(
-      ProfileViewSelectors.getRelevantPagesForActiveTab(getState())
+      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
     ).toEqual(new Set());
   });
 });

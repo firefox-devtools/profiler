@@ -32,7 +32,7 @@ export function objectShallowEquals(a: Object, b: Object): boolean {
   let aLength = 0;
   let bLength = 0;
   for (const key in a) {
-    if (a.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(a, key)) {
       aLength++;
       if (a[key] !== b[key]) {
         return false;
@@ -40,7 +40,7 @@ export function objectShallowEquals(a: Object, b: Object): boolean {
     }
   }
   for (const key in b) {
-    if (b.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(b, key)) {
       bLength++;
     }
   }

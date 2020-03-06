@@ -471,7 +471,7 @@ class CallNodeContextMenu extends PureComponent<Props> {
           data={{ type: 'collapse-function-subtree' }}
         >
           <span className="callNodeContextMenuIcon callNodeContextMenuIconCollapse" />
-          {'Collapse function’s subtree across the entire tree'}
+          Collapse function’s subtree across the entire tree
         </MenuItem>
         {nameForResource ? (
           <MenuItem

@@ -8,11 +8,9 @@ import * as React from 'react';
 import classNames from 'classnames';
 
 import VirtualList from './VirtualList';
-import { BackgroundImageStyleDef } from './StyleDef';
 
 import ContextMenuTrigger from './ContextMenuTrigger';
 
-import type { IconWithClassName } from '../../types/state';
 import type { CssPixels } from '../../types/units';
 
 /**
@@ -57,9 +55,7 @@ const TreeViewHeader = ({ fixedColumns, mainColumn }: TreeViewHeaderProps) => {
         </span>
       ))}
       <span
-        className={`treeViewHeaderColumn treeViewMainColumn ${
-          mainColumn.propName
-        }`}
+        className={`treeViewHeaderColumn treeViewMainColumn ${mainColumn.propName}`}
       >
         {mainColumn.title}
       </span>
@@ -146,9 +142,7 @@ class TreeViewRowFixedColumns<DisplayData: Object> extends React.PureComponent<
 
           return (
             <span
-              className={`treeViewRowColumn treeViewFixedColumn ${
-                col.propName
-              }`}
+              className={`treeViewRowColumn treeViewFixedColumn ${col.propName}`}
               key={col.propName}
               title={text}
             >
@@ -282,15 +276,11 @@ class TreeViewRowScrolledColumns<
           onClick={this._onToggleClick}
         />
         <span
-          className={`treeViewRowColumn treeViewMainColumn ${
-            mainColumn.propName
-          }`}
+          className={`treeViewRowColumn treeViewMainColumn ${mainColumn.propName}`}
         >
           {displayData.categoryColor && displayData.categoryName ? (
             <span
-              className={`colored-square category-color-${
-                displayData.categoryColor
-              }`}
+              className={`colored-square category-color-${displayData.categoryColor}`}
               title={displayData.categoryName}
             />
           ) : null}
@@ -306,9 +296,7 @@ class TreeViewRowScrolledColumns<
         </span>
         {appendageColumn ? (
           <span
-            className={`treeViewRowColumn treeViewAppendageColumn ${
-              appendageColumn.propName
-            }`}
+            className={`treeViewRowColumn treeViewAppendageColumn ${appendageColumn.propName}`}
           >
             {reactStringWithHighlightedSubstrings(
               displayData[appendageColumn.propName],
@@ -343,7 +331,6 @@ type TreeViewProps<DisplayData> = {|
   +highlightRegExp?: RegExp | null,
   +appendageColumn?: Column,
   +disableOverscan?: boolean,
-  +icons?: IconWithClassName[],
   +contextMenu?: React.Element<any>,
   +contextMenuId?: string,
   +maxNodeDepth: number,
@@ -401,7 +388,7 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
     }
   }
 
-  componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
+  UNSAFE_componentWillReceiveProps(nextProps: TreeViewProps<DisplayData>) {
     const hasNewSelectedNode =
       nextProps.selectedNodeId !== this.props.selectedNodeId;
     const hasNewRightClickedNode =
@@ -706,21 +693,12 @@ class TreeView<DisplayData: Object> extends React.PureComponent<
       disableOverscan,
       contextMenu,
       contextMenuId,
-      icons,
       maxNodeDepth,
       rowHeight,
       selectedNodeId,
     } = this.props;
     return (
       <div className="treeView">
-        {icons &&
-          icons.map(({ className, icon }) => (
-            <BackgroundImageStyleDef
-              className={className}
-              url={icon}
-              key={className}
-            />
-          ))}
         <TreeViewHeader fixedColumns={fixedColumns} mainColumn={mainColumn} />
         <ContextMenuTrigger
           id={contextMenuId}

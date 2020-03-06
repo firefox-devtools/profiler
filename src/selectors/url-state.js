@@ -165,17 +165,11 @@ export const getSearchStrings: Selector<string[] | null> = createSelector(
 
 export const getMarkersSearchStrings: Selector<
   string[] | null
-> = createSelector(
-  getMarkersSearchString,
-  splitSearchString
-);
+> = createSelector(getMarkersSearchString, splitSearchString);
 
 export const getNetworkSearchStrings: Selector<
   string[] | null
-> = createSelector(
-  getNetworkSearchString,
-  splitSearchString
-);
+> = createSelector(getNetworkSearchString, splitSearchString);
 
 /**
  * A RegExp can be used for searching and filtering the thread's samples.

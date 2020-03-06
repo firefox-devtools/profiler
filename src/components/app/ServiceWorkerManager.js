@@ -128,13 +128,11 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
     return (
       <div className="serviceworker-ready-notice-wrapper">
         {/* We use the wrapper to horizontally center the notice */}
-        <div className="serviceworker-ready-notice">
-          <p>
-            A new version of the application has been downloaded and is ready to
-            use.
-          </p>
+        <div className="photon-message-bar serviceworker-ready-notice">
+          A new version of the application has been downloaded and is ready to
+          use.
           <button
-            className="photon-button serviceworker-ready-notice-action-button"
+            className="photon-button photon-button-micro photon-message-bar-action-button"
             type="button"
             onClick={this.reloadPage}
           >
@@ -143,7 +141,7 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
           <button
             aria-label="Hide the reload notice"
             title="Hide the reload notice"
-            className="photon-button photon-button-ghost serviceworker-ready-notice-close-button"
+            className="photon-button photon-message-bar-close-button"
             type="button"
             onClick={this._onCloseNotice}
           />

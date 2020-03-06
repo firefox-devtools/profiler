@@ -287,7 +287,7 @@ export const withChartViewport: WithChartViewport<*, *> =
         }, 1000);
       }
 
-      componentWillReceiveProps(newProps: ViewportProps) {
+      UNSAFE_componentWillReceiveProps(newProps: ViewportProps) {
         if (
           this.props.viewportProps.viewportNeedsUpdate(
             this.props.chartProps,

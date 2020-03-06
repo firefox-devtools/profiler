@@ -29,9 +29,7 @@ export function uploadBinaryProfileData(): * {
           } else {
             reject(
               new Error(
-                `xhr onload with status != 200, xhr.statusText: ${
-                  xhr.statusText
-                }`
+                `xhr onload with status != 200, xhr.statusText: ${xhr.statusText}`
               )
             );
           }
