@@ -1,8 +1,5 @@
 {
-  "name": "firefox-profiler",
-  "version": "0.0.1",
-  "description": "Firefox Profiler",
-  "main": "src/index.js",
+  "private": true,
   "scripts": {
     "build:clean": "rimraf dist && mkdirp dist",
     "build:quiet": "yarn build:clean && cross-env NODE_ENV=development webpack",
@@ -40,7 +37,6 @@
     "test-lockfile": "lockfile-lint --path yarn.lock --allowed-hosts yarn --validate-https",
     "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
-  "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
