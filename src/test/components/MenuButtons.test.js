@@ -18,6 +18,7 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { processProfile } from '../../profile-logic/process-profile';
+import type { Profile } from '../../types/profile';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -256,71 +257,71 @@ describe('app/MenuButtons', function() {
       expect(getPanel()).toMatchSnapshot();
     });
   });
+});
 
-  describe('<MenuButtonsMetaInfo>', function() {
-    it('matches the snapshot', async () => {
-      jest.useFakeTimers();
-      jest
-        .spyOn(Date.prototype, 'toLocaleString')
-        .mockImplementation(function() {
-          // eslint-disable-next-line babel/no-invalid-this
-          return 'toLocaleString ' + this.toUTCString();
-        });
-      // Using gecko profile because it has metadata and profilerOverhead data in it.
-      const profile = processProfile(createGeckoProfile());
-      profile.meta.configuration = {
-        features: ['js', 'threads'],
-        threads: ['GeckoMain', 'DOM Worker'],
-        capacity: Math.pow(2, 14),
-        duration: 20,
-      };
-      const store = storeWithProfile(profile);
-
-      const { container, getByValue } = render(
-        <Provider store={store}>
-          <MenuButtonsMetaInfo profile={profile} />
-        </Provider>
-      );
-
-      const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
-      fireEvent.click(metaInfoButton);
-      jest.runAllTimers();
-
-      expect(container.firstChild).toMatchSnapshot();
+describe('<MenuButtonsMetaInfo>', function() {
+  function setup(profile: Profile, symbolicationStatus = 'DONE') {
+    jest.useFakeTimers();
+    jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function() {
+      // eslint-disable-next-line babel/no-invalid-this
+      return 'toLocaleString ' + this.toUTCString();
     });
+    const store = storeWithProfile(profile);
+    const resymbolicateProfile = jest.fn();
 
-    it('with no statistics object should not make the app crash', async () => {
-      jest.useFakeTimers();
-      jest
-        .spyOn(Date.prototype, 'toLocaleString')
-        .mockImplementation(function() {
-          // eslint-disable-next-line babel/no-invalid-this
-          return 'toLocaleString ' + this.toUTCString();
-        });
-      // Using gecko profile because it has metadata and profilerOverhead data in it.
-      const profile = processProfile(createGeckoProfile());
+    const renderResults = render(
+      <Provider store={store}>
+        <MenuButtonsMetaInfo
+          profile={profile}
+          resymbolicateProfile={resymbolicateProfile}
+          symbolicationStatus={symbolicationStatus}
+        />
+      </Provider>
+    );
 
-      // We are removing statistics objects from all overhead objects to test
-      // the robustness of our handling code.
-      if (profile.profilerOverhead) {
-        for (const overhead of profile.profilerOverhead) {
-          delete overhead.statistics;
-        }
+    return {
+      store,
+      resymbolicateProfile,
+      renderResults,
+      ...renderResults,
+    };
+  }
+
+  it('matches the snapshot', async () => {
+    // Using gecko profile because it has metadata and profilerOverhead data in it.
+    const profile = processProfile(createGeckoProfile());
+    profile.meta.configuration = {
+      features: ['js', 'threads'],
+      threads: ['GeckoMain', 'DOM Worker'],
+      capacity: Math.pow(2, 14),
+      duration: 20,
+    };
+
+    const { container, getByValue } = setup(profile);
+    const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
+    fireEvent.click(metaInfoButton);
+    jest.runAllTimers();
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('with no statistics object should not make the app crash', async () => {
+    // Using gecko profile because it has metadata and profilerOverhead data in it.
+    const profile = processProfile(createGeckoProfile());
+    // We are removing statistics objects from all overhead objects to test
+    // the robustness of our handling code.
+    if (profile.profilerOverhead) {
+      for (const overhead of profile.profilerOverhead) {
+        delete overhead.statistics;
       }
+    }
 
-      const store = storeWithProfile(profile);
+    const { getByValue, container } = setup(profile);
 
-      const { container, getByValue } = render(
-        <Provider store={store}>
-          <MenuButtonsMetaInfo profile={profile} />
-        </Provider>
-      );
+    const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
+    fireEvent.click(metaInfoButton);
+    jest.runAllTimers();
 
-      const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
-      fireEvent.click(metaInfoButton);
-      jest.runAllTimers();
-
-      expect(container.firstChild).toMatchSnapshot();
-    });
+    expect(container.firstChild).toMatchSnapshot();
   });
 });
