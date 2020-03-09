@@ -90,8 +90,11 @@ export default class SymbolStoreDB {
   }
 
   _setupDB(dbName: string): Promise<IDBDatabase> {
+    const indexedDB: IDBFactory | void = window.indexedDB;
+    if (!indexedDB) {
+      throw new Error('Could not find indexedDB on the window object.');
+    }
     return new Promise((resolve, reject) => {
-      const indexedDB: IDBFactory = window.indexedDB;
       const openReq = indexedDB.open(dbName, 2);
       openReq.onerror = () => {
         if (openReq.error.name === 'VersionError') {
