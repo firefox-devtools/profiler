@@ -35,10 +35,7 @@ class ServiceWorkerManager extends PureComponent<Props, State> {
   };
 
   _installServiceWorker() {
-    // We use '@mstange/offline-plugin/runtime' here instead of
-    // 'offline-plugin/runtime' because the fork contains the fix from
-    // https://github.com/NekR/offline-plugin/pull/410
-    const runtime = require('@mstange/offline-plugin/runtime');
+    const runtime = require('offline-plugin/runtime');
     runtime.install({
       onInstalled: () => {
         console.log('[ServiceWorker] App is ready for offline usage!');
