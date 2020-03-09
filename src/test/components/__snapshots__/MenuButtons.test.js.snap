@@ -134,6 +134,29 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
               </ul>
             </div>
           </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Symbols:
+            </span>
+            Profile is not symbolicated
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            />
+            <button
+              class="photon-button photon-button-micro"
+              type="button"
+            >
+              Symbolicate profile
+            </button>
+          </div>
         </div>
         <h2
           class="arrowPanelSubTitle"
@@ -457,6 +480,29 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
               Profile Version:
             </span>
             28
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            >
+              Symbols:
+            </span>
+            Profile is not symbolicated
+          </div>
+          <div
+            class="metaInfoRow"
+          >
+            <span
+              class="metaInfoLabel"
+            />
+            <button
+              class="photon-button photon-button-micro"
+              type="button"
+            >
+              Symbolicate profile
+            </button>
           </div>
         </div>
         <h2

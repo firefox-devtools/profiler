@@ -19,6 +19,7 @@ import {
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { processProfile } from '../../profile-logic/process-profile';
 import type { Profile } from '../../types/profile';
+import type { SymbolicationStatus } from '../../types/state';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -323,5 +324,72 @@ describe('<MenuButtonsMetaInfo>', function() {
     jest.runAllTimers();
 
     expect(container.firstChild).toMatchSnapshot();
+  });
+
+  describe('symbolication', function() {
+    type SymbolicationTestConfig = {|
+      symbolicated: boolean,
+      symbolicationStatus: SymbolicationStatus,
+    |};
+
+    function setupSymbolicationTest(config: SymbolicationTestConfig) {
+      const { profile } = getProfileFromTextSamples('A');
+      profile.meta.symbolicated = config.symbolicated;
+
+      const setupResult = setup(profile, config.symbolicationStatus);
+
+      // Open up the arrow panel for the test.
+      const { getByValue } = setupResult;
+      fireEvent.click(getByValue('Firefox ()'));
+      jest.runAllTimers();
+
+      return setupResult;
+    }
+
+    it('handles successfully symbolicated profiles', () => {
+      const { getByText, resymbolicateProfile } = setupSymbolicationTest({
+        symbolicated: true,
+        symbolicationStatus: 'DONE',
+      });
+
+      expect(getByText('Profile is symbolicated')).toBeTruthy();
+      getByText('Re-symbolicate profile').click();
+      expect(resymbolicateProfile).toHaveBeenCalled();
+    });
+
+    it('handles the contradictory state of non-symbolicated profiles that are done', () => {
+      const { getByText, resymbolicateProfile } = setupSymbolicationTest({
+        symbolicated: false,
+        symbolicationStatus: 'DONE',
+      });
+
+      expect(getByText('Profile is not symbolicated')).toBeTruthy();
+      getByText('Symbolicate profile').click();
+      expect(resymbolicateProfile).toHaveBeenCalled();
+    });
+
+    it('handles in progress symbolication', () => {
+      const { getByText, queryByText } = setupSymbolicationTest({
+        symbolicated: false,
+        symbolicationStatus: 'SYMBOLICATING',
+      });
+
+      expect(getByText('Currently symbolicating profile')).toBeTruthy();
+      // No symbolicate button is available.
+      expect(queryByText('Symbolicate profile')).toBeFalsy();
+      expect(queryByText('Re-symbolicate profile')).toBeFalsy();
+    });
+
+    it('handles in progress re-symbolication', () => {
+      const { getByText, queryByText } = setupSymbolicationTest({
+        symbolicated: true,
+        symbolicationStatus: 'SYMBOLICATING',
+      });
+
+      expect(getByText('Attempting to re-symbolicate profile')).toBeTruthy();
+      // No symbolicate button is available.
+      expect(queryByText('Symbolicate profile')).toBeFalsy();
+      expect(queryByText('Re-symbolicate profile')).toBeFalsy();
+    });
   });
 });
