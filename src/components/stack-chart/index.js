@@ -35,7 +35,6 @@ import {
 } from '../../actions/profile-view';
 
 import { getCallNodePathFromIndex } from '../../profile-logic/profile-data';
-
 import type { Thread, CategoryList, PageList } from '../../types/profile';
 import type {
   CallNodeInfo,

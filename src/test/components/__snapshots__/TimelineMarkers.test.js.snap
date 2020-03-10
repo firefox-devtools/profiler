@@ -5,15 +5,11 @@ exports[`TimelineMarkers renders correctly 1`] = `
   class="timelineMarkers selected"
   data-testid="TimelineMarkersOverview"
 >
-  <div
-    class="react-contextmenu-wrapper"
-  >
-    <canvas
-      class="timelineMarkersCanvas"
-      height="300"
-      width="200"
-    />
-  </div>
+  <canvas
+    class="timelineMarkersCanvas"
+    height="300"
+    width="200"
+  />
 </div>
 `;
 
