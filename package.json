@@ -1,8 +1,5 @@
 {
-  "name": "firefox-profiler",
-  "version": "0.0.1",
-  "description": "Firefox Profiler",
-  "main": "src/index.js",
+  "private": true,
   "scripts": {
     "build:clean": "rimraf dist && mkdirp dist",
     "build:quiet": "yarn build:clean && cross-env NODE_ENV=development webpack",
@@ -40,14 +37,12 @@
     "test-lockfile": "lockfile-lint --path yarn.lock --allowed-hosts yarn --validate-https",
     "test-debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
-  "author": "Markus Stange <mstange@themasta.com>",
   "license": "MPL-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/firefox-devtools/profiler"
   },
   "dependencies": {
-    "@mstange/offline-plugin": "^5.0.6",
     "array-move": "^1.0.0",
     "array-range": "^1.0.1",
     "babel-plugin-dynamic-import-node": "^2.2.0",
@@ -64,6 +59,7 @@
     "memoize-immutable": "^3.0.0",
     "mixedtuplemap": "^1.0.0",
     "namedtuplemap": "^1.0.0",
+    "offline-plugin": "^5.0.7",
     "photon-colors": "3.3.2",
     "prop-types": "^15.7.2",
     "query-string": "^6.3.0",

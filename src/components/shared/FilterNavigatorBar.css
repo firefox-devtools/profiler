@@ -38,6 +38,7 @@
 }
 
 .filterNavigatorBarItemContent {
+  display: flex;
   overflow: hidden;
 
   /* These lines are mostly to override the default browser styles for `<button>`.
@@ -51,6 +52,10 @@
   line-height: normal;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.filterNavigatorBarItemContent > .nodeIcon {
+  margin-inline-end: 5px;
 }
 
 .filterNavigatorBarLeafItem {

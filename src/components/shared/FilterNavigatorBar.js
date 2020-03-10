@@ -4,20 +4,20 @@
 
 // @flow
 
-import React, { PureComponent } from 'react';
+import * as React from 'react';
 import classNames from 'classnames';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import './FilterNavigatorBar.css';
 
 type Props = {|
   +className: string,
-  +items: string[],
+  +items: $ReadOnlyArray<React.Node>,
   +onPop: number => *,
   +selectedItem: number,
   +uncommittedItem?: string,
 |};
 
-class FilterNavigatorBar extends PureComponent<Props> {
+class FilterNavigatorBar extends React.PureComponent<Props> {
   _onLiClick = (e: SyntheticMouseEvent<HTMLLIElement>) => {
     const element = e.currentTarget;
     const index = parseInt(element.dataset.index, 10) || 0;

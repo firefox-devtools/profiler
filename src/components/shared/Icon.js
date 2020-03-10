@@ -6,15 +6,21 @@
 
 import React, { PureComponent } from 'react';
 import explicitConnect from '../../utils/connect';
-import { getIconClassNameForCallNode } from '../../selectors/icons';
+import { getIconClassName } from '../../selectors/icons';
 import { iconStartLoading } from '../../actions/icons';
 
 import type { CallNodeDisplayData } from '../../types/profile-derived';
 import type { ConnectedProps } from '../../utils/connect';
 
-type OwnProps = {|
-  +displayData: CallNodeDisplayData,
-|};
+type OwnProps =
+  | {|
+      // This prop is used by call tree.
+      +displayData: CallNodeDisplayData,
+    |}
+  | {|
+      // This prop is for other parts of the profiler.
+      +iconUrl: string | null,
+    |};
 
 type StateProps = {|
   +className: string,
@@ -27,7 +33,7 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
-class NodeIcon extends PureComponent<Props> {
+class Icon extends PureComponent<Props> {
   constructor(props: Props) {
     super(props);
     if (props.icon) {
@@ -47,10 +53,16 @@ class NodeIcon extends PureComponent<Props> {
 }
 
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
-  mapStateToProps: (state, { displayData }) => ({
-    className: getIconClassNameForCallNode(state, displayData),
-    icon: displayData.icon,
-  }),
+  mapStateToProps: (state, ownProps) => {
+    const icon = ownProps.displayData
+      ? ownProps.displayData.icon
+      : ownProps.iconUrl;
+
+    return {
+      className: getIconClassName(state, icon),
+      icon,
+    };
+  },
   mapDispatchToProps: { iconStartLoading },
-  component: NodeIcon,
+  component: Icon,
 });

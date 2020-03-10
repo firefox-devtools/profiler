@@ -35,25 +35,37 @@ process: \\"tab\\" (222)"
           class="timelineMarkers timelineMarkersMemory"
           data-testid="TimelineMarkersMemory"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
         <div
           class="timelineMarkers"
           data-testid="TimelineMarkersJank"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
         <div
           class="timelineMarkers timelineMarkersGeckoMain"
           data-testid="TimelineMarkersOverview"
         >
-          <canvas
-            class="timelineMarkersCanvas"
-          />
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
         </div>
         <div
           class="threadActivityGraph"
@@ -101,9 +113,13 @@ process: \\"tab\\" (222)"
               class="timelineMarkers selected"
               data-testid="TimelineMarkersJank"
             >
-              <canvas
-                class="timelineMarkersCanvas"
-              />
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <canvas
+                  class="timelineMarkersCanvas"
+                />
+              </div>
             </div>
             <div
               class="threadActivityGraph"
@@ -149,9 +165,13 @@ process: \\"tab\\" (222)"
               class="timelineMarkers"
               data-testid="TimelineMarkersJank"
             >
-              <canvas
-                class="timelineMarkersCanvas"
-              />
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <canvas
+                  class="timelineMarkersCanvas"
+                />
+              </div>
             </div>
             <div
               class="threadActivityGraph"
@@ -229,9 +249,13 @@ process: \\"default\\" (5555)"
               class="timelineMarkers"
               data-testid="TimelineMarkersJank"
             >
-              <canvas
-                class="timelineMarkersCanvas"
-              />
+              <div
+                class="react-contextmenu-wrapper"
+              >
+                <canvas
+                  class="timelineMarkersCanvas"
+                />
+              </div>
             </div>
             <div
               class="threadActivityGraph"
