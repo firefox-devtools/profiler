@@ -259,7 +259,11 @@ export function finalizeProfileView(
     // that they weren't symbolicated.
     if (profile.meta.symbolicated === false) {
       const symbolStore = getSymbolStore(dispatch, geckoProfiler);
-      await doSymbolicateProfile(dispatch, profile, symbolStore);
+      if (symbolStore) {
+        // Only symbolicate if a symbol store is available. In tests we may not
+        // have access to IndexedDB.
+        await doSymbolicateProfile(dispatch, profile, symbolStore);
+      }
     }
   };
 }
@@ -480,7 +484,12 @@ async function getProfileFromAddon(
 function getSymbolStore(
   dispatch: Dispatch,
   geckoProfiler?: $GeckoProfiler
-): SymbolStore {
+): SymbolStore | null {
+  if (!window.indexedDB) {
+    // We could be running in a test environment with no indexedDB support. Do not
+    // return a symbol store in this case.
+    return null;
+  }
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {

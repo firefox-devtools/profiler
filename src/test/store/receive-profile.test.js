@@ -36,6 +36,7 @@ import {
   changeShowTabOnly,
   changeSelectedThread,
 } from '../../actions/profile-view';
+import fakeIndexedDB from 'fake-indexeddb';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
@@ -88,6 +89,16 @@ function simulateSymbolStoreHasNoCache() {
 }
 
 describe('actions/receive-profile', function() {
+  beforeEach(() => {
+    // The SymbolStore requires the use of IndexedDB, ensure that it exists so that
+    // symbolication can happen.
+    window.indexedDB = fakeIndexedDB;
+  });
+
+  afterEach(() => {
+    delete window.indexedDB;
+  });
+
   /**
    * This function allows to observe all state changes in a Redux store while
    * something's going on.
