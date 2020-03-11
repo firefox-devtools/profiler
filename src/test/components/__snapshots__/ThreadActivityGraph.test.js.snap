@@ -2532,13 +2532,9 @@ exports[`ThreadActivityGraph matches the component snapshot 1`] = `
     class="timelineMarkers selected"
     data-testid="TimelineMarkersJank"
   >
-    <div
-      class="react-contextmenu-wrapper"
-    >
-      <canvas
-        class="timelineMarkersCanvas"
-      />
-    </div>
+    <canvas
+      class="timelineMarkersCanvas"
+    />
   </div>
   <div
     class="threadActivityGraph"

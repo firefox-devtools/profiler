@@ -325,36 +325,38 @@ function viewportNeedsUpdate() {
 }
 
 export default explicitConnect<{||}, StateProps, DispatchProps>({
-  mapStateToProps: state => ({
-    thread: selectedThreadSelectors.getFilteredThread(state),
-    unfilteredThread: selectedThreadSelectors.getThread(state),
-    sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
-      state
-    ),
-    maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
-      state
-    ),
-    flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
-    callTree: selectedThreadSelectors.getCallTree(state),
-    timeRange: getCommittedRange(state),
-    previewSelection: getPreviewSelection(state),
-    callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
-    categories: getCategories(state),
-    threadIndex: getSelectedThreadIndex(state),
-    selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
-      state
-    ),
-    rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
-      state
-    ),
-    scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
-    interval: getProfileInterval(state),
-    isInverted: getInvertCallstack(state),
-    callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
-      state
-    ),
-    pages: getPageList(state),
-  }),
+  mapStateToProps: state => {
+    return {
+      thread: selectedThreadSelectors.getFilteredThread(state),
+      unfilteredThread: selectedThreadSelectors.getThread(state),
+      sampleIndexOffset: selectedThreadSelectors.getSampleIndexOffsetFromCommittedRange(
+        state
+      ),
+      maxStackDepth: selectedThreadSelectors.getCallNodeMaxDepthForFlameGraph(
+        state
+      ),
+      flameGraphTiming: selectedThreadSelectors.getFlameGraphTiming(state),
+      callTree: selectedThreadSelectors.getCallTree(state),
+      timeRange: getCommittedRange(state),
+      previewSelection: getPreviewSelection(state),
+      callNodeInfo: selectedThreadSelectors.getCallNodeInfo(state),
+      categories: getCategories(state),
+      threadIndex: getSelectedThreadIndex(state),
+      selectedCallNodeIndex: selectedThreadSelectors.getSelectedCallNodeIndex(
+        state
+      ),
+      rightClickedCallNodeIndex: selectedThreadSelectors.getRightClickedCallNodeIndex(
+        state
+      ),
+      scrollToSelectionGeneration: getScrollToSelectionGeneration(state),
+      interval: getProfileInterval(state),
+      isInverted: getInvertCallstack(state),
+      callTreeSummaryStrategy: selectedThreadSelectors.getCallTreeSummaryStrategy(
+        state
+      ),
+      pages: getPageList(state),
+    };
+  },
   mapDispatchToProps: {
     changeSelectedCallNode,
     changeRightClickedCallNode,

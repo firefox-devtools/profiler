@@ -29,13 +29,9 @@ exports[`timeline/LocalTrack with a memory track matches the snapshot of the mem
           class="timelineMarkers timelineMarkersMemory"
           data-testid="TimelineMarkersMemory"
         >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <canvas
-              class="timelineMarkersCanvas"
-            />
-          </div>
+          <canvas
+            class="timelineMarkersCanvas"
+          />
         </div>
         <div
           class="timelineTrackMemoryGraph"
@@ -145,13 +141,9 @@ process: \\"tab\\" (222)"
           class="timelineMarkers"
           data-testid="TimelineMarkersJank"
         >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <canvas
-              class="timelineMarkersCanvas"
-            />
-          </div>
+          <canvas
+            class="timelineMarkersCanvas"
+          />
         </div>
         <div
           class="threadActivityGraph"
@@ -198,13 +190,9 @@ exports[`timeline/LocalTrack with an IPC track matches the snapshot of the IPC t
           class="timelineMarkers timelineMarkersIPC"
           data-testid="TimelineMarkersIPC"
         >
-          <div
-            class="react-contextmenu-wrapper"
-          >
-            <canvas
-              class="timelineMarkersCanvas"
-            />
-          </div>
+          <canvas
+            class="timelineMarkersCanvas"
+          />
         </div>
       </div>
     </div>
