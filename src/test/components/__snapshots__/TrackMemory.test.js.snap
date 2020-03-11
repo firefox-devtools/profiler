@@ -148,13 +148,9 @@ exports[`TrackMemory matches the component snapshot 1`] = `
     class="timelineMarkers timelineMarkersMemory selected"
     data-testid="TimelineMarkersMemory"
   >
-    <div
-      class="react-contextmenu-wrapper"
-    >
-      <canvas
-        class="timelineMarkersCanvas"
-      />
-    </div>
+    <canvas
+      class="timelineMarkersCanvas"
+    />
   </div>
   <div
     class="timelineTrackMemoryGraph"

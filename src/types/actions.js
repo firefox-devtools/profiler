@@ -221,6 +221,7 @@ type ProfileAction =
   | {|
       +type: 'SET_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
+      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',

@@ -53,13 +53,9 @@ exports[`timeline/TrackThread matches the snapshot for the component 1`] = `
     class="timelineMarkers selected"
     data-testid="TimelineMarkersJank"
   >
-    <div
-      class="react-contextmenu-wrapper"
-    >
-      <canvas
-        class="timelineMarkersCanvas"
-      />
-    </div>
+    <canvas
+      class="timelineMarkersCanvas"
+    />
   </div>
   <div
     class="threadStackGraph"
