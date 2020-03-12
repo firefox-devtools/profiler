@@ -24,7 +24,7 @@ declare class WebChannelEvent {
   };
 }
 
-declare class Window extends EventTarget {
+declare class Window {
   // Google Analytics
   ga?: GoogleAnalytics;
   // profiler.firefox.com and Gecko Profiler Addon
@@ -53,6 +53,7 @@ declare class Window extends EventTarget {
     ) => void);
 
   // Built-ins.
+  dispatchEvent: $PropertyType<EventTarget, 'dispatchEvent'>;
   getComputedStyle: (
     element: HTMLElement,
     pseudoEl: ?string
