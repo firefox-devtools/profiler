@@ -277,6 +277,11 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
     const symbolStore = getSymbolStore(dispatch);
     const profile = getProfile(getState());
+    if (!symbolStore) {
+      throw new Error(
+        'There was no symbol store when attempting to re-symbolicate.'
+      );
+    }
     await doSymbolicateProfile(dispatch, profile, symbolStore);
   };
 }
