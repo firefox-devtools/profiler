@@ -44,7 +44,7 @@ import {
   computeActiveTabHiddenGlobalTracks,
   computeActiveTabHiddenLocalTracksByPid,
 } from '../profile-logic/active-tab';
-import { getProfileOrNull } from '../selectors/profile';
+import { getProfileOrNull, getProfile } from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { setDataSource } from './profile-view';
 
@@ -265,6 +265,19 @@ export function finalizeProfileView(
         await doSymbolicateProfile(dispatch, profile, symbolStore);
       }
     }
+  };
+}
+
+/**
+ * Symbolication normally happens when a profile is first loaded. This function
+ * provides the ability to kick off symbolication again after it has already been
+ * attempted once.
+ */
+export function resymbolicateProfile(): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    const symbolStore = getSymbolStore(dispatch);
+    const profile = getProfile(getState());
+    await doSymbolicateProfile(dispatch, profile, symbolStore);
   };
 }
 
