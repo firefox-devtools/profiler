@@ -65,7 +65,7 @@ describe('app/Details', function() {
   it('show the correct state for the sidebar open button', function() {
     const { store, getByTitle } = setup();
     expect(getByTitle(/sidebar/i)).toMatchSnapshot();
-    store.dispatch(changeSidebarOpenState('calltree', true));
+    store.dispatch(changeSidebarOpenState('calltree', false));
     expect(getByTitle(/sidebar/i)).toMatchSnapshot();
     store.dispatch(changeSelectedTab('flame-graph'));
     expect(getByTitle(/sidebar/i)).toMatchSnapshot();
