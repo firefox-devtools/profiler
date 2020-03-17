@@ -2,16 +2,16 @@
 
 exports[`app/Details show the correct state for the sidebar open button 1`] = `
 <button
-  class="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
-  title="Open the sidebar"
+  class="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isopen"
+  title="Close the sidebar"
   type="button"
 />
 `;
 
 exports[`app/Details show the correct state for the sidebar open button 2`] = `
 <button
-  class="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isopen"
-  title="Close the sidebar"
+  class="sidebar-open-close-button photon-button photon-button-ghost sidebar-open-close-button-isclosed"
+  title="Open the sidebar"
   type="button"
 />
 `;
