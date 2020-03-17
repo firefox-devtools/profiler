@@ -39,8 +39,6 @@ import type { SizeProps } from '../shared/WithSize';
 
 import {
   changeGlobalTrackOrder,
-  updatePreviewSelection,
-  commitRange,
   changeTimelineType,
   changeRightClickedTrack,
   changeShowTabOnly,
@@ -75,8 +73,6 @@ type StateProps = {|
 
 type DispatchProps = {|
   +changeGlobalTrackOrder: typeof changeGlobalTrackOrder,
-  +commitRange: typeof commitRange,
-  +updatePreviewSelection: typeof updatePreviewSelection,
   +changeTimelineType: typeof changeTimelineType,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
   +changeShowTabOnly: typeof changeShowTabOnly,
@@ -317,8 +313,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
-    updatePreviewSelection,
-    commitRange,
     changeTimelineType,
     changeRightClickedTrack,
     changeShowTabOnly,

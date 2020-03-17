@@ -25,6 +25,7 @@ describe('SymbolStore', function() {
   }
 
   beforeAll(function() {
+    // The SymbolStore requires IndexedDB, otherwise symbolication will be skipped.
     window.indexedDB = fakeIndexedDB;
     window.IDBKeyRange = FDBKeyRange;
     window.TextDecoder = TextDecoder;

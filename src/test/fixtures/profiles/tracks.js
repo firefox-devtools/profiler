@@ -4,8 +4,7 @@
 // @flow
 
 import * as profileViewSelectors from '../../../selectors/profile';
-// FIXME: they are not reducers, it should be `urlStateSelectors` instead.
-import * as urlStateReducers from '../../../selectors/url-state';
+import * as urlStateSelectors from '../../../selectors/url-state';
 import {
   getProfileFromTextSamples,
   getCounterForThread,
@@ -43,17 +42,17 @@ import { ensureExists } from '../../../utils/flow';
 export function getHumanReadableTracks(state: State): string[] {
   const threads = profileViewSelectors.getThreads(state);
   const globalTracks = profileViewSelectors.getGlobalTracks(state);
-  const hiddenGlobalTracks = urlStateReducers.getHiddenGlobalTracks(state);
+  const hiddenGlobalTracks = urlStateSelectors.getHiddenGlobalTracks(state);
   const activeTabHiddenGlobalTracks = profileViewSelectors.getActiveTabHiddenGlobalTracksGetter(
     state
   )();
   const activeTabHiddenLocalTracksByPid = profileViewSelectors.getActiveTabHiddenLocalTracksByPidGetter(
     state
   )();
-  const selectedThreadIndex = urlStateReducers.getSelectedThreadIndex(state);
-  const showTabOnly = urlStateReducers.getShowTabOnly(state);
+  const selectedThreadIndex = urlStateSelectors.getSelectedThreadIndex(state);
+  const showTabOnly = urlStateSelectors.getShowTabOnly(state);
   const text: string[] = [];
-  for (const globalTrackIndex of urlStateReducers.getGlobalTrackOrder(state)) {
+  for (const globalTrackIndex of urlStateSelectors.getGlobalTrackOrder(state)) {
     if (
       showTabOnly !== null &&
       activeTabHiddenGlobalTracks.has(globalTrackIndex)
@@ -86,7 +85,7 @@ export function getHumanReadableTracks(state: State): string[] {
     }
 
     if (globalTrack.type === 'process') {
-      const trackOrder = urlStateReducers.getLocalTrackOrder(
+      const trackOrder = urlStateSelectors.getLocalTrackOrder(
         state,
         globalTrack.pid
       );
@@ -105,7 +104,7 @@ export function getHumanReadableTracks(state: State): string[] {
         } else {
           trackName = threads[track.threadIndex].name;
         }
-        const hiddenTracks = urlStateReducers.getHiddenLocalTracks(
+        const hiddenTracks = urlStateSelectors.getHiddenLocalTracks(
           state,
           globalTrack.pid
         );

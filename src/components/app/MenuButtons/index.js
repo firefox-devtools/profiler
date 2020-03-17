@@ -7,7 +7,11 @@
 import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from '../../../utils/connect';
-import { getProfile, getProfileRootRange } from '../../../selectors/profile';
+import {
+  getProfile,
+  getProfileRootRange,
+  getSymbolicationStatus,
+} from '../../../selectors/profile';
 import { getDataSource } from '../../../selectors/url-state';
 import { getIsNewlyPublished } from '../../../selectors/app';
 import { MenuButtonsMetaInfo } from './MetaInfo';
@@ -25,11 +29,13 @@ import {
   getHasPrePublishedState,
 } from '../../../selectors/publish';
 
+import { resymbolicateProfile } from '../../../actions/receive-profile';
+
 import type { StartEndRange } from '../../../types/units';
 import type { Profile } from '../../../types/profile';
 import type { DataSource } from '../../../types/actions';
 import type { ConnectedProps } from '../../../utils/connect';
-import type { UploadPhase } from '../../../types/state';
+import type { UploadPhase, SymbolicationStatus } from '../../../types/state';
 
 require('./index.css');
 
@@ -48,12 +54,14 @@ type StateProps = {|
   +isNewlyPublished: boolean,
   +uploadPhase: UploadPhase,
   +hasPrePublishedState: boolean,
+  +symbolicationStatus: SymbolicationStatus,
 |};
 
 type DispatchProps = {|
   +dismissNewlyPublished: typeof dismissNewlyPublished,
   +revertToPrePublishedState: typeof revertToPrePublishedState,
   +abortUpload: typeof abortUpload,
+  +resymbolicateProfile: typeof resymbolicateProfile,
 |};
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
@@ -143,11 +151,15 @@ class MenuButtons extends React.PureComponent<Props> {
   }
 
   render() {
-    const { profile } = this.props;
+    const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
     return (
       <>
         {/* Place the info button outside of the menu buttons to allow it to shrink. */}
-        <MenuButtonsMetaInfo profile={profile} />
+        <MenuButtonsMetaInfo
+          profile={profile}
+          symbolicationStatus={symbolicationStatus}
+          resymbolicateProfile={resymbolicateProfile}
+        />
         <div className="menuButtons">
           {this._renderRevertProfile()}
           {this._renderPublishPanel()}
@@ -175,11 +187,13 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     isNewlyPublished: getIsNewlyPublished(state),
     uploadPhase: getUploadPhase(state),
     hasPrePublishedState: getHasPrePublishedState(state),
+    symbolicationStatus: getSymbolicationStatus(state),
   }),
   mapDispatchToProps: {
     dismissNewlyPublished,
     revertToPrePublishedState,
     abortUpload,
+    resymbolicateProfile,
   },
   component: MenuButtons,
 });

@@ -44,7 +44,7 @@ import {
   computeActiveTabHiddenGlobalTracks,
   computeActiveTabHiddenLocalTracksByPid,
 } from '../profile-logic/active-tab';
-import { getProfileOrNull } from '../selectors/profile';
+import { getProfileOrNull, getProfile } from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { setDataSource } from './profile-view';
 
@@ -259,8 +259,30 @@ export function finalizeProfileView(
     // that they weren't symbolicated.
     if (profile.meta.symbolicated === false) {
       const symbolStore = getSymbolStore(dispatch, geckoProfiler);
-      await doSymbolicateProfile(dispatch, profile, symbolStore);
+      if (symbolStore) {
+        // Only symbolicate if a symbol store is available. In tests we may not
+        // have access to IndexedDB.
+        await doSymbolicateProfile(dispatch, profile, symbolStore);
+      }
     }
+  };
+}
+
+/**
+ * Symbolication normally happens when a profile is first loaded. This function
+ * provides the ability to kick off symbolication again after it has already been
+ * attempted once.
+ */
+export function resymbolicateProfile(): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    const symbolStore = getSymbolStore(dispatch);
+    const profile = getProfile(getState());
+    if (!symbolStore) {
+      throw new Error(
+        'There was no symbol store when attempting to re-symbolicate.'
+      );
+    }
+    await doSymbolicateProfile(dispatch, profile, symbolStore);
   };
 }
 
@@ -480,7 +502,12 @@ async function getProfileFromAddon(
 function getSymbolStore(
   dispatch: Dispatch,
   geckoProfiler?: $GeckoProfiler
-): SymbolStore {
+): SymbolStore | null {
+  if (!window.indexedDB) {
+    // We could be running in a test environment with no indexedDB support. Do not
+    // return a symbol store in this case.
+    return null;
+  }
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {

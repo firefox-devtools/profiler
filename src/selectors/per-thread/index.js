@@ -63,8 +63,8 @@ export const getThreadSelectors = (
     // selectors for their own definition.
     selectors = {
       ...selectors,
-      ...getStackAndSampleSelectorsPerThread(selectors, threadIndex),
-      ...getMarkerSelectorsPerThread(selectors, threadIndex),
+      ...getStackAndSampleSelectorsPerThread(selectors),
+      ...getMarkerSelectorsPerThread(selectors),
     };
     // 3. Other selectors that need selectors from different files to be defined.
     _threadSelectorsCache[threadIndex] = {

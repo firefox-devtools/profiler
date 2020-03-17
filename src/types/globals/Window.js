@@ -24,7 +24,7 @@ declare class WebChannelEvent {
   };
 }
 
-declare class Window extends EventTarget {
+declare class Window {
   // Google Analytics
   ga?: GoogleAnalytics;
   // profiler.firefox.com and Gecko Profiler Addon
@@ -53,6 +53,7 @@ declare class Window extends EventTarget {
     ) => void);
 
   // Built-ins.
+  dispatchEvent: $PropertyType<EventTarget, 'dispatchEvent'>;
   getComputedStyle: (
     element: HTMLElement,
     pseudoEl: ?string
@@ -70,7 +71,10 @@ declare class Window extends EventTarget {
   requestIdleCallback: typeof requestIdleCallback;
   requestAnimationFrame: typeof requestAnimationFrame;
   devicePixelRatio: number;
-  indexedDB: IDBFactory;
+  // The indexedDB is marked as optional, as we should handle the test environment
+  // where this is not available. It can lead to hard to debug promise failure
+  // messages.
+  indexedDB?: IDBFactory;
   IDBKeyRange: IDBKeyRange<>;
   innerWidth: number;
   innerHeight: number;

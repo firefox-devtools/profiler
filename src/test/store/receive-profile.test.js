@@ -36,6 +36,7 @@ import {
   changeShowTabOnly,
   changeSelectedThread,
 } from '../../actions/profile-view';
+import fakeIndexedDB from 'fake-indexeddb';
 
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import JSZip from 'jszip';
@@ -88,6 +89,16 @@ function simulateSymbolStoreHasNoCache() {
 }
 
 describe('actions/receive-profile', function() {
+  beforeEach(() => {
+    // The SymbolStore requires the use of IndexedDB, ensure that it exists so that
+    // symbolication can happen.
+    window.indexedDB = fakeIndexedDB;
+  });
+
+  afterEach(() => {
+    delete window.indexedDB;
+  });
+
   /**
    * This function allows to observe all state changes in a Redux store while
    * something's going on.
@@ -266,7 +277,7 @@ describe('actions/receive-profile', function() {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
         `A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]  A[cat:Idle]`,
-        `work work work work work`
+        `work  work  work  work  work`
       );
       const [threadA, threadB] = profile.threads;
       threadA.name = 'GeckoMain';
@@ -346,10 +357,10 @@ describe('actions/receive-profile', function() {
     it('will hide an empty global track when all child tracks are hidden', function() {
       const store = blankStore();
       const { profile } = getProfileFromTextSamples(
-        `work work work work work`, // pid 1
-        `work work work work work`, // pid 1
-        `idle[cat:Idle] idle[cat:Idle] idle[cat:Idle] idle[cat:Idle] idle[cat:Idle]`, // pid 2
-        `work work work work work` // pid 3
+        `work  work  work  work  work`, // pid 1
+        `work  work  work  work  work`, // pid 1
+        `idle[cat:Idle]  idle[cat:Idle]  idle[cat:Idle]  idle[cat:Idle]  idle[cat:Idle]`, // pid 2
+        `work  work  work  work  work` // pid 3
       );
 
       profile.threads[0].name = 'Work A';
@@ -467,9 +478,9 @@ describe('actions/receive-profile', function() {
 
       it('should calculate the hidden local threads correctly', function() {
         const { profile } = getProfileFromTextSamples(
-          `work work work`,
-          `work work work`,
-          `work work work`
+          `work  work  work`,
+          `work  work  work`,
+          `work  work  work`
         );
         // There is one main thread and two other threads that belong to the same process.
         const [threadA, threadB, threadC] = profile.threads;
@@ -495,8 +506,8 @@ describe('actions/receive-profile', function() {
 
       it('should select the first visible thread during changeShowTabOnly action', function() {
         const { profile } = getProfileFromTextSamples(
-          `work work work`,
-          `work work work`
+          `work  work  work`,
+          `work  work  work`
         );
         // There is one main thread and two other threads that belong to the same process.
         const [threadA, threadB] = profile.threads;
