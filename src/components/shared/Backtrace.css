@@ -18,19 +18,19 @@
   /* The gradient is defined towards the bottom so that we hide the end of the
    * backtrace only when the element is tall enough, which is when the backtrace
    * is long. */
-
-  mask-image: linear-gradient(
-    to bottom,
-    white,
-    white var(--gradient-height),
-    transparent
-  );
+  
   -webkit-mask-image: linear-gradient(
     to bottom,
     white,
     white var(--gradient-height),
     transparent
   );  
+  mask-image: linear-gradient(
+    to bottom,
+    white,
+    white var(--gradient-height),
+    transparent
+  );
 }
 
 .backtraceStackFrame {
