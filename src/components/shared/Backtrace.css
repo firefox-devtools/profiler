@@ -1,4 +1,4 @@
-.backtrace {
+.tooltip .backtrace {
   --gradient-height: calc(var(--max-height) - 5em);
 
   /* Box */
