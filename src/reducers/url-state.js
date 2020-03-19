@@ -110,7 +110,7 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'HIDE_GLOBAL_TRACK':
@@ -291,7 +291,7 @@ const showJsTracerSummary: Reducer<boolean> = (state = false, action) => {
 
 const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
       return action.globalTrackOrder;
     case 'SANITIZED_PROFILE_PUBLISHED':
@@ -308,7 +308,7 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
     case 'ISOLATE_LOCAL_TRACK':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
@@ -338,7 +338,7 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
       return action.hiddenLocalTracksByPid;
     case 'HIDE_LOCAL_TRACK': {
       const hiddenLocalTracksByPid = new Map(state);
@@ -373,7 +373,7 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
       return action.localTrackOrderByPid;
     case 'CHANGE_LOCAL_TRACK_ORDER': {
       const localTrackOrderByPid = new Map(state);

@@ -180,7 +180,7 @@ const isHidingStaleProfile: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'HIDE_STALE_PROFILE':
       return true;
-    case 'VIEW_PROFILE': // TODO: should this be PROFILE_LOADED?
+    case 'VIEW_FULL_PROFILE':
       return false;
     default:
       return state;

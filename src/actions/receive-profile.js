@@ -243,7 +243,7 @@ export function finalizeProfileView(
     }
 
     dispatch({
-      type: 'VIEW_PROFILE',
+      type: 'VIEW_FULL_PROFILE',
       selectedThreadIndex,
       globalTracks,
       globalTrackOrder,

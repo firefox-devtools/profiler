@@ -43,7 +43,7 @@ const view: Reducer<AppViewState> = (
     case 'PROFILE_LOADED':
       return { phase: 'PROFILE_LOADED' };
     case 'RECEIVE_ZIP_FILE':
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
       return { phase: 'DATA_LOADED' };
     default:
       return state;
