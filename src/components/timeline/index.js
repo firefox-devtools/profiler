@@ -32,6 +32,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
   TIMELINE_SETTINGS_HEIGHT,
 } from '../../app-logic/constants';
+import TimelineTrackContextMenu from './TrackContextMenu';
 
 import './index.css';
 
@@ -293,6 +294,7 @@ class Timeline extends React.PureComponent<Props, State> {
             </Reorderable>
           </OverflowEdgeIndicator>
         </TimelineSelection>
+        <TimelineTrackContextMenu />
       </>
     );
   }
