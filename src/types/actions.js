@@ -380,7 +380,7 @@ type UrlStateAction =
       +hash: string,
       +committedRanges: StartEndRange[] | null,
       +oldThreadIndexToNew: Map<ThreadIndex, ThreadIndex> | null,
-      +prePublishedState: State,
+      +prePublishedState: State | null,
     |}
   | {|
       +type: 'SET_DATA_SOURCE',
