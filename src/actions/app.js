@@ -40,6 +40,7 @@ import type {
   Action,
   ThunkAction,
   UrlState,
+  ProfileData,
 } from 'firefox-profiler/types';
 import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
@@ -292,4 +293,13 @@ export function enableEventDelayTracks(): ThunkAction<boolean> {
 
     return true;
   };
+}
+
+/**
+ * This caches the profile data in the local state for synchronous access.
+ */
+export function cacheStoredProfileData(
+  profileData: ProfileData | null
+): Action {
+  return { type: 'CACHE_STORED_PROFILE_DATA', profileData };
 }

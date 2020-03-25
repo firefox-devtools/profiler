@@ -10,6 +10,7 @@ import explicitConnect from '../../utils/connect';
 import { DetailsContainer } from './DetailsContainer';
 import { ProfileFilterNavigator } from './ProfileFilterNavigator';
 import { MenuButtons } from './MenuButtons';
+import { LoadStoredProfileDataManager } from './LoadStoredProfileDataManager';
 import { WindowTitle } from '../shared/WindowTitle';
 import { SymbolicationStatusOverlay } from './SymbolicationStatusOverlay';
 import { ProfileName } from './ProfileName';
@@ -139,6 +140,7 @@ class ProfileViewerImpl extends PureComponent<Props> {
           <SymbolicationStatusOverlay />
           <BeforeUnloadManager />
           <DebugWarning />
+          <LoadStoredProfileDataManager />
         </div>
       </div>
     );

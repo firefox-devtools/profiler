@@ -745,7 +745,7 @@ describe('attemptToPublish', function() {
       // This is the first request, it hasn't been added because the request was
       // aborted before the end.
       const firstRequestData = await retrieveProfileData(BARE_PROFILE_TOKEN);
-      expect(firstRequestData).toBe(undefined);
+      expect(firstRequestData).toBe(null);
 
       // And now, checking that we can retrieve this data when retrieving the
       // full list. The second profile comes first because it was answered

@@ -143,9 +143,15 @@ export async function listAllProfileData(): Promise<ProfileData[]> {
 
 export async function retrieveProfileData(
   profileToken: string
-): Promise<ProfileData | void> {
+): Promise<ProfileData | null> {
+  if (!profileToken) {
+    // If this is the empty string, let's skip the lookup.
+    return null;
+  }
+
   const db = await open();
-  return db.get(OBJECTSTORE_NAME, profileToken);
+  const result = await db.get(OBJECTSTORE_NAME, profileToken);
+  return result || null;
 }
 
 export async function deleteProfileData(profileToken: string): Promise<void> {

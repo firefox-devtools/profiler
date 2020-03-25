@@ -255,9 +255,8 @@ export function attemptToPublish(): ThunkAction<Promise<boolean>> {
       // Because we want to store the published profile even when the upload
       // generation changed, we store the data here, before the state is fully
       // updated, and we'll have to predict the state inside this function.
-      // Note that this function is asynchronous, we don't await it on purpose.
       // We catch all errors in this function.
-      storeJustPublishedProfileData(
+      await storeJustPublishedProfileData(
         hash,
         hashOrToken === hash ? null : hashOrToken,
         sanitizedInformation,

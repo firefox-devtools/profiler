@@ -36,7 +36,6 @@ import {
   ACTIVE_TAB_TIMELINE_MARGIN_LEFT,
 } from '../app-logic/constants';
 
-import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   AppState,
   AppViewState,
@@ -45,7 +44,9 @@ import type {
   CssPixels,
   ThreadsKey,
   ExperimentalFlags,
+  ProfileData,
 } from 'firefox-profiler/types';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
 /**
  * Simple selectors into the app state.
@@ -77,6 +78,9 @@ export const getIsDragAndDropDragging: Selector<boolean> = state =>
   getApp(state).isDragAndDropDragging;
 export const getIsDragAndDropOverlayRegistered: Selector<boolean> = state =>
   getApp(state).isDragAndDropOverlayRegistered;
+
+export const getCachedStoredProfileData: Selector<ProfileData | null> = state =>
+  getApp(state).cachedStoredProfileData;
 
 /**
  * Height of screenshot track is different depending on the view.

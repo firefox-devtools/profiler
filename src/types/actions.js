@@ -28,7 +28,7 @@ import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { TabSlug } from '../app-logic/tabs-handling';
-import type { UrlState, UploadState, State } from './state';
+import type { UrlState, UploadState, State, ProfileData } from './state';
 import type { CssPixels, StartEndRange, Milliseconds } from './units';
 
 export type DataSource =
@@ -470,6 +470,11 @@ type DragAndDropAction =
       +type: 'UNREGISTER_DRAG_AND_DROP_OVERLAY',
     |};
 
+type CacheStoredProfileDataAction = {|
+  +type: 'CACHE_STORED_PROFILE_DATA',
+  +profileData: ProfileData | null,
+|};
+
 export type Action =
   | ProfileAction
   | ReceiveProfileAction
@@ -478,4 +483,5 @@ export type Action =
   | UrlStateAction
   | IconsAction
   | PublishAction
-  | DragAndDropAction;
+  | DragAndDropAction
+  | CacheStoredProfileDataAction;

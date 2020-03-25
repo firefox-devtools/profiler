@@ -16,6 +16,7 @@ import type {
   ThreadsKey,
   ExperimentalFlags,
   CssPixels,
+  ProfileData,
 } from 'firefox-profiler/types';
 
 const view: Reducer<AppViewState> = (
@@ -246,6 +247,22 @@ const eventDelayTracks: Reducer<boolean> = (state = false, action) => {
 };
 
 /**
+ * Holds the state for whether the user has the local data to delete the
+ * currently displayed profile.
+ */
+const cachedStoredProfileData: Reducer<ProfileData | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'CACHE_STORED_PROFILE_DATA':
+      return action.profileData;
+    default:
+      return state;
+  }
+};
+
+/**
  * Experimental features that are mostly disabled by default. You need to enable
  * them from the DevTools console with `experimental.enable<feature-camel-case>()`,
  * e.g. `experimental.enableEventDelayTracks()`.
@@ -268,6 +285,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   isDragAndDropDragging,
   isDragAndDropOverlayRegistered,
   experimental,
+  cachedStoredProfileData,
 });
 
 export default appStateReducer;

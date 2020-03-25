@@ -34,8 +34,12 @@ import type { TransformStacksPerThread } from './transforms';
 import type JSZip from 'jszip';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
 import type { PathSet } from '../utils/path.js';
+import type { ProfileData as ImportedProfileData } from 'firefox-profiler/app-logic/published-profiles-store';
 
 export type Reducer<T> = (T | void, Action) => T;
+
+// Reexport this type for easier access
+export type ProfileData = ImportedProfileData;
 
 export type SymbolicationStatus = 'DONE' | 'SYMBOLICATING';
 export type ThreadViewOptions = {|
@@ -179,6 +183,7 @@ export type AppState = {|
   +isDragAndDropDragging: boolean,
   +isDragAndDropOverlayRegistered: boolean,
   +experimental: ExperimentalFlags,
+  +cachedStoredProfileData: ProfileData | null,
 |};
 
 export type UploadPhase =

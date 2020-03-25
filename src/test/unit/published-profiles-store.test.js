@@ -87,7 +87,7 @@ describe('published-profiles-store', function() {
     await setup();
 
     await deleteProfileData('PROFILE-2');
-    expect(await retrieveProfileData('PROFILE-2')).toBe(undefined);
+    expect(await retrieveProfileData('PROFILE-2')).toBe(null);
     expect(await listAllProfileData()).toEqual([
       expect.objectContaining({ profileToken: 'PROFILE-3' }),
       expect.objectContaining({ profileToken: 'PROFILE-1' }),
