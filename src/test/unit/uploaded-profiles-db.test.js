@@ -85,7 +85,7 @@ describe('uploaded-profiles-db', function() {
 
     await deleteUploadedProfileInformationFromDb('PROFILE-2');
     expect(await retrieveUploadedProfileInformationFromDb('PROFILE-2')).toBe(
-      undefined
+      null
     );
     expect(await listAllUploadedProfileInformationFromDb()).toEqual([
       expect.objectContaining({ profileToken: 'PROFILE-3' }),

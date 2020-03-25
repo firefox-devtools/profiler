@@ -16,6 +16,7 @@ import type {
   ThreadsKey,
   ExperimentalFlags,
   CssPixels,
+  UploadedProfileInformation,
 } from 'firefox-profiler/types';
 
 const view: Reducer<AppViewState> = (
@@ -246,6 +247,27 @@ const eventDelayTracks: Reducer<boolean> = (state = false, action) => {
 };
 
 /**
+ * This keeps the information about the upload for the current profile, if any.
+ * This is retrieved from the IndexedDB for published profiles information in
+ * CurrentProfileUploadedInformationLoader.
+ * This will be null if the currently loaded profile doesn't come from the
+ * public store (for example if this comes from Firefox and hasn't been uploaded
+ * yet) or if this profile hasn't been uploaded by this user and we don't have
+ * its uploaded information in the IndexedDB.
+ */
+const currentProfileUploadedInformation: Reducer<UploadedProfileInformation | null> = (
+  state = null,
+  action
+) => {
+  switch (action.type) {
+    case 'SET_CURRENT_PROFILE_UPLOADED_INFORMATION':
+      return action.uploadedProfileInformation;
+    default:
+      return state;
+  }
+};
+
+/**
  * Experimental features that are mostly disabled by default. You need to enable
  * them from the DevTools console with `experimental.enable<feature-camel-case>()`,
  * e.g. `experimental.enableEventDelayTracks()`.
@@ -268,6 +290,7 @@ const appStateReducer: Reducer<AppState> = combineReducers({
   isDragAndDropDragging,
   isDragAndDropOverlayRegistered,
   experimental,
+  currentProfileUploadedInformation,
 });
 
 export default appStateReducer;
