@@ -36,7 +36,6 @@ import {
   ACTIVE_TAB_TIMELINE_MARGIN_LEFT,
 } from '../app-logic/constants';
 
-import type { TabSlug } from '../app-logic/tabs-handling';
 import type {
   AppState,
   AppViewState,
@@ -46,6 +45,7 @@ import type {
   ThreadsKey,
   ExperimentalFlags,
 } from 'firefox-profiler/types';
+import type { TabSlug } from 'firefox-profiler/app-logic/tabs-handling';
 
 /**
  * Simple selectors into the app state.
