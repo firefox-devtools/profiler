@@ -452,7 +452,6 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
     case 'CHANGE_SELECTED_MARKER':
-    case 'CHANGE_SHOW_TAB_ONLY':
       return state + 1;
     default:
       return state;

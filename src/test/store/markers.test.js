@@ -9,7 +9,7 @@ import {
   getProfileWithMarkers,
   getNetworkTrackProfile,
 } from '../fixtures/profiles/processed-profile';
-import { changeShowTabOnly } from '../../actions/profile-view';
+import { changeViewAndRecomputeProfileData } from '../../actions/receive-profile';
 
 describe('selectors/getMarkerChartTimingAndBuckets', function() {
   function getMarkerChartTimingAndBuckets(testMarkers) {
@@ -427,7 +427,7 @@ describe('selectors/getCommittedRangeAndTabFilteredMarkerIndexes', function() {
     const { getState, dispatch } = storeWithProfile(profile);
 
     if (showTabOnly) {
-      dispatch(changeShowTabOnly(browsingContextID));
+      dispatch(changeViewAndRecomputeProfileData(browsingContextID));
     }
     const markerIndexes = selectedThreadSelectors.getCommittedRangeAndTabFilteredMarkerIndexes(
       getState()

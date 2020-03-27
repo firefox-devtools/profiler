@@ -61,6 +61,7 @@ import type {
   Profile,
   ThreadIndex,
   IndexIntoFuncTable,
+  BrowsingContextID,
 } from '../types/profile';
 import { assertExhaustiveCheck } from '../utils/flow';
 
@@ -186,7 +187,8 @@ export function finalizeProfileView(
  */
 export function finalizeFullProfileView(
   profile: Profile,
-  selectedThreadIndex: ThreadIndex | null
+  selectedThreadIndex: ThreadIndex | null,
+  showTabOnly?: BrowsingContextID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const hasUrlInfo = selectedThreadIndex !== null;
@@ -275,6 +277,7 @@ export function finalizeFullProfileView(
       localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
+      showTabOnly,
     });
   };
 }
@@ -287,7 +290,8 @@ export function finalizeFullProfileView(
  */
 export function finalizeActiveTabProfileView(
   profile: Profile,
-  selectedThreadIndex: ThreadIndex
+  selectedThreadIndex: ThreadIndex,
+  showTabOnly?: BrowsingContextID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const hasUrlInfo = selectedThreadIndex !== null;
@@ -390,7 +394,40 @@ export function finalizeActiveTabProfileView(
       localTrackOrderByPid,
       activeTabHiddenGlobalTracksGetter,
       activeTabHiddenLocalTracksByPidGetter,
+      showTabOnly,
     });
+  };
+}
+
+/**
+ * Re-compute the profile view data. That's used to be able to switch between
+ * full and active tab view.
+ */
+export function changeViewAndRecomputeProfileData(
+  showTabOnly: BrowsingContextID | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const profile = getProfile(getState());
+    // We are resetting the selected thread index, because we are not sure if
+    // the selected thread will be availabe in the next view.
+    const selectedThreadIndex = 0;
+    dispatch({
+      type: 'DATA_RELOAD',
+    });
+
+    if (showTabOnly === null) {
+      // The url state says this is a full view. We should compute and initialize
+      // the state relevant to that state.
+      dispatch(
+        finalizeFullProfileView(profile, selectedThreadIndex, showTabOnly)
+      );
+    } else {
+      // The url state says this is an active tab view. We should compute and
+      // initialize the state relevant to that state.
+      dispatch(
+        finalizeActiveTabProfileView(profile, selectedThreadIndex, showTabOnly)
+      );
+    }
   };
 }
 

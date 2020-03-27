@@ -98,6 +98,7 @@ export type AppViewState =
   | {| +phase: 'TRANSITIONING_FROM_STALE_PROFILE' |}
   | {| +phase: 'PROFILE_LOADED' |}
   | {| +phase: 'DATA_LOADED' |}
+  | {| +phase: 'DATA_RELOAD' |}
   | {| +phase: 'FATAL_ERROR', +error: Error |}
   | {|
       +phase: 'INITIALIZING',

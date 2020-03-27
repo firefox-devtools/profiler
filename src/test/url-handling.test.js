@@ -11,7 +11,6 @@ import {
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
-  changeShowTabOnly,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -22,7 +21,10 @@ import {
   upgradeLocationToCurrentVersion,
 } from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
-import { viewProfile } from '../actions/receive-profile';
+import {
+  viewProfile,
+  changeViewAndRecomputeProfileData,
+} from '../actions/receive-profile';
 import type { Profile } from '../types/profile';
 import getProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
@@ -385,7 +387,7 @@ describe('showTabOnly', function() {
     const { getState, dispatch } = _getStoreWithURL();
     const showTabOnly = 123;
 
-    dispatch(changeShowTabOnly(showTabOnly));
+    dispatch(changeViewAndRecomputeProfileData(showTabOnly));
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
     expect(query.showTabOnly1).toBe(showTabOnly);

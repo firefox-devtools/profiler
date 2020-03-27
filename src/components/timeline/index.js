@@ -42,8 +42,8 @@ import {
   changeGlobalTrackOrder,
   changeTimelineType,
   changeRightClickedTrack,
-  changeShowTabOnly,
 } from '../../actions/profile-view';
+import { changeViewAndRecomputeProfileData } from '../../actions/receive-profile';
 
 import type { BrowsingContextID } from '../../types/profile';
 import type {
@@ -76,7 +76,7 @@ type DispatchProps = {|
   +changeGlobalTrackOrder: typeof changeGlobalTrackOrder,
   +changeTimelineType: typeof changeTimelineType,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
-  +changeShowTabOnly: typeof changeShowTabOnly,
+  +changeViewAndRecomputeProfileData: typeof changeViewAndRecomputeProfileData,
 |};
 
 type Props = {|
@@ -168,18 +168,18 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
 class TimelineSettingsActiveTabView extends React.PureComponent<{|
   +activeBrowsingContextID: BrowsingContextID | null,
   +showTabOnly: BrowsingContextID | null,
-  +changeShowTabOnly: typeof changeShowTabOnly,
+  +changeViewAndRecomputeProfileData: typeof changeViewAndRecomputeProfileData,
 |}> {
   _toggleShowTabOnly = () => {
     const {
       showTabOnly,
-      changeShowTabOnly,
+      changeViewAndRecomputeProfileData,
       activeBrowsingContextID,
     } = this.props;
     if (showTabOnly === null) {
-      changeShowTabOnly(activeBrowsingContextID);
+      changeViewAndRecomputeProfileData(activeBrowsingContextID);
     } else {
-      changeShowTabOnly(null);
+      changeViewAndRecomputeProfileData(null);
     }
   };
 
@@ -235,7 +235,7 @@ class Timeline extends React.PureComponent<Props, State> {
       changeRightClickedTrack,
       activeBrowsingContextID,
       showTabOnly,
-      changeShowTabOnly,
+      changeViewAndRecomputeProfileData,
     } = this.props;
 
     // Do not include the left and right margins when computing the timeline width.
@@ -266,7 +266,9 @@ class Timeline extends React.PureComponent<Props, State> {
             <TimelineSettingsActiveTabView
               activeBrowsingContextID={activeBrowsingContextID}
               showTabOnly={showTabOnly}
-              changeShowTabOnly={changeShowTabOnly}
+              changeViewAndRecomputeProfileData={
+                changeViewAndRecomputeProfileData
+              }
             />
           )}
         </div>
@@ -324,7 +326,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeGlobalTrackOrder,
     changeTimelineType,
     changeRightClickedTrack,
-    changeShowTabOnly,
+    changeViewAndRecomputeProfileData,
   },
   component: withSize<Props>(Timeline),
 });
