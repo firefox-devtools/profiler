@@ -337,6 +337,7 @@ export type NetworkPayload = {|
   count?: number, // Total size of transfer, if any
   status: string,
   cache?: string,
+  contentType?: string,
 
   // NOTE: the following comments are valid for the merged markers. For the raw
   // markers, startTime and endTime have different meanings. Please look
