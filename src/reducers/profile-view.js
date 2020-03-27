@@ -620,9 +620,11 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
     }),
     globalTracks,
     localTracksByPid,
-    activeTabHiddenGlobalTracksGetter,
-    activeTabHiddenLocalTracksByPidGetter,
     profile,
+    activeTabProfile: combineReducers({
+      hiddenGlobalTracksGetter: activeTabHiddenGlobalTracksGetter,
+      hiddenLocalTracksByPidGetter: activeTabHiddenLocalTracksByPidGetter,
+    }),
   })
 );
 

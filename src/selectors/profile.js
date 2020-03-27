@@ -54,11 +54,14 @@ import type {
   State,
   ProfileViewState,
   SymbolicationStatus,
+  ActiveTabProfileViewState,
 } from '../types/state';
 import type { $ReturnType } from '../types/utils';
 
 export const getProfileView: Selector<ProfileViewState> = state =>
   state.profileView;
+export const getActiveTabProfileView: Selector<ActiveTabProfileViewState> = state =>
+  getProfileView(state).activeTabProfile;
 
 /**
  * Profile View Options
@@ -237,7 +240,7 @@ export const getGlobalTracks: Selector<GlobalTrack[]> = state =>
   getProfileView(state).globalTracks;
 export const getActiveTabHiddenGlobalTracksGetter: Selector<
   () => Set<TrackIndex>
-> = state => getProfileView(state).activeTabHiddenGlobalTracksGetter;
+> = state => getActiveTabProfileView(state).hiddenGlobalTracksGetter;
 
 /**
  * This returns all TrackReferences for global tracks.
@@ -307,7 +310,7 @@ export const getLocalTracksByPid: Selector<Map<Pid, LocalTrack[]>> = state =>
   getProfileView(state).localTracksByPid;
 export const getActiveTabHiddenLocalTracksByPidGetter: Selector<
   () => Map<Pid, Set<TrackIndex>>
-> = state => getProfileView(state).activeTabHiddenLocalTracksByPidGetter;
+> = state => getActiveTabProfileView(state).hiddenLocalTracksByPidGetter;
 
 /**
  * This selectors performs a simple look up in a Map, throws an error if it doesn't exist,
