@@ -1427,6 +1427,7 @@ export function getProfilesFromRawUrl(
         }
         break;
       }
+      case 'my-profiles':
       case 'none':
       case 'from-file':
       case 'local':

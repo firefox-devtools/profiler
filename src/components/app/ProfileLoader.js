@@ -19,6 +19,7 @@ import {
   getProfileUrl,
   getProfilesToCompare,
 } from '../../selectors/url-state';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { ConnectedProps } from '../../utils/connect';
 import type { DataSource } from 'firefox-profiler/types';
@@ -71,11 +72,12 @@ class ProfileLoaderImpl extends PureComponent<Props> {
           retrieveProfilesToCompare(profilesToCompare);
         }
         break;
+      case 'my-profiles':
       case 'none':
         // nothing to do
         break;
       default:
-        throw new Error(`Unknown datasource ${dataSource}`);
+        throw assertExhaustiveCheck(dataSource);
     }
   };
 
