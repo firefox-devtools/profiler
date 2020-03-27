@@ -113,7 +113,10 @@ describe('Timeline', function() {
     delete window.devicePixelRatio;
   });
 
-  describe('TimelineSettingsActiveTabView', function() {
+  // These tests are disabled for now because active tab view checkbox is disabled for now.
+  // TODO: Enable it again once we have that checbox back.
+  // eslint-disable-next-line jest/no-disabled-tests
+  describe.skip('TimelineSettingsActiveTabView', function() {
     it('"Show active tab only" checkbox should not present in a profile without active tab metadata', () => {
       const ctx = mockCanvasContext();
       jest

@@ -257,11 +257,18 @@ class Timeline extends React.PureComponent<Props, State> {
             hiddenTrackCount={hiddenTrackCount}
             changeRightClickedTrack={changeRightClickedTrack}
           />
-          <TimelineSettingsActiveTabView
-            activeBrowsingContextID={activeBrowsingContextID}
-            showTabOnly={showTabOnly}
-            changeShowTabOnly={changeShowTabOnly}
-          />
+          {/*
+            Removing the active tab view checkbox for now.
+            TODO: Bring it back once we are done with the new active tab UI implementation.
+           */}
+          {/* eslint-disable-next-line no-constant-condition */}
+          {true ? null : (
+            <TimelineSettingsActiveTabView
+              activeBrowsingContextID={activeBrowsingContextID}
+              showTabOnly={showTabOnly}
+              changeShowTabOnly={changeShowTabOnly}
+            />
+          )}
         </div>
         <TimelineSelection width={timelineWidth}>
           <TimelineRuler
