@@ -382,7 +382,7 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
-    describe('with showTabOnly', function() {
+    describe('finalizeActiveTabProfileView', function() {
       const browsingContextID = 123;
       const innerWindowID = 111111;
       function setup(profile: ?Profile, dispatchToShowTabOnly: boolean = true) {
@@ -500,6 +500,59 @@ describe('actions/receive-profile', function() {
           '  - show [thread Other2]',
         ]);
       });
+    });
+  });
+
+  describe('changeViewAndRecomputeProfileData', function() {
+    const browsingContextID = 123;
+    const innerWindowID = 111111;
+    function setup(initializeShowTabOnly: boolean = false) {
+      const store = blankStore();
+      const profile = getEmptyProfile();
+
+      profile.threads.push(
+        getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 1 })
+      );
+
+      profile.meta.configuration = {
+        threads: [],
+        features: [],
+        capacity: 1000000,
+        activeBrowsingContextID: browsingContextID,
+      };
+      profile.pages = [
+        {
+          browsingContextID: browsingContextID,
+          innerWindowID: innerWindowID,
+          url: 'URL',
+          embedderInnerWindowID: 0,
+        },
+      ];
+
+      store.dispatch(viewProfile(profile));
+      if (initializeShowTabOnly) {
+        store.dispatch(changeViewAndRecomputeProfileData(browsingContextID));
+      }
+
+      return { ...store, profile };
+    }
+
+    it('should be able to switch to active tab view from the full view', function() {
+      const { dispatch, getState } = setup();
+      expect(UrlStateSelectors.getShowTabOnly(getState())).toBe(null);
+      dispatch(changeViewAndRecomputeProfileData(browsingContextID));
+      expect(UrlStateSelectors.getShowTabOnly(getState())).toBe(
+        browsingContextID
+      );
+    });
+
+    it('should be able to switch to full view from the active tab', function() {
+      const { dispatch, getState } = setup(true);
+      expect(UrlStateSelectors.getShowTabOnly(getState())).toBe(
+        browsingContextID
+      );
+      dispatch(changeViewAndRecomputeProfileData(null));
+      expect(UrlStateSelectors.getShowTabOnly(getState())).toBe(null);
     });
   });
 
