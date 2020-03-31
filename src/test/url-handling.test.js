@@ -35,6 +35,10 @@ import {
 import { getProfileFromTextSamples } from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 import { uintArrayToString } from '../utils/uintarray-encoding';
+import {
+  getActiveTabHiddenGlobalTracksGetter,
+  getActiveTabHiddenLocalTracksByPidGetter,
+} from '../selectors/profile';
 
 function _getStoreWithURL(
   settings: {
@@ -403,6 +407,21 @@ describe('showTabOnly', function() {
   it('returns null when showTabOnly is not specified', function() {
     const { getState } = _getStoreWithURL();
     expect(urlStateReducers.getShowTabOnly(getState())).toBe(null);
+  });
+
+  it('should use the finalizeActiveTabProfileView path and initialize active tab profile view state', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?showTabOnly1=123',
+    });
+    expect(getActiveTabHiddenGlobalTracksGetter(getState())).toBeInstanceOf(
+      Function
+    );
+    const activeTabHiddenLocalTracksByPidGetter = getActiveTabHiddenLocalTracksByPidGetter(
+      getState()
+    );
+    expect(activeTabHiddenLocalTracksByPidGetter).toBeInstanceOf(Function);
+    const hiddenLocalTracksByPid = activeTabHiddenLocalTracksByPidGetter();
+    expect(hiddenLocalTracksByPid.size).toBe(1);
   });
 });
 
