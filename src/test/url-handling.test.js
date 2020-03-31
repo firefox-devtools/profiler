@@ -388,12 +388,12 @@ describe('showTabOnly', function() {
     dispatch(changeShowTabOnly(showTabOnly));
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
-    expect(query.showTabOnly).toBe(showTabOnly);
+    expect(query.showTabOnly1).toBe(showTabOnly);
   });
 
   it('reflects in the state from URL', function() {
     const { getState } = _getStoreWithURL({
-      search: '?showTabOnly=123',
+      search: '?showTabOnly1=123',
     });
     expect(urlStateReducers.getShowTabOnly(getState())).toBe(123);
   });
