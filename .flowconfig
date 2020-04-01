@@ -2,6 +2,7 @@
 suppress_comment=\\(.\\|\n\\)*\\$FlowExpectError
 suppress_comment=\\(.\\|\n\\)*\\$FlowFixMe
 include_warnings=true
+module.name_mapper='^firefox-profiler\/\(.*\)$' -> '<PROJECT_ROOT>/src/\1'
 
 [ignore]
 .*node_modules/.*

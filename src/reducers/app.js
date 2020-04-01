@@ -74,14 +74,15 @@ const hasZoomedViaMousewheel: Reducer<boolean> = (state = false, action) => {
   }
 };
 
-function _getNoSidebarsOpen() {
+function _getSidebarInitialState() {
   const state = {};
   tabSlugs.forEach(tabSlug => (state[tabSlug] = false));
+  state.calltree = true;
   return state;
 }
 
 const isSidebarOpenPerPanel: Reducer<IsSidebarOpenPerPanelState> = (
-  state = _getNoSidebarsOpen(),
+  state = _getSidebarInitialState(),
   action
 ) => {
   switch (action.type) {

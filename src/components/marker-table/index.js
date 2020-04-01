@@ -133,7 +133,7 @@ type StateProps = {|
   +getMarker: MarkerIndex => Marker,
   +markerIndexes: MarkerIndex[],
   +selectedMarker: MarkerIndex | null,
-  +rightClickedMarker: MarkerIndex | null,
+  +rightClickedMarkerIndex: MarkerIndex | null,
   +zeroAt: Milliseconds,
   +scrollToSelectionGeneration: number,
 |};
@@ -197,7 +197,7 @@ class MarkerTable extends PureComponent<Props> {
       markerIndexes,
       zeroAt,
       selectedMarker,
-      rightClickedMarker,
+      rightClickedMarkerIndex,
     } = this.props;
     const tree = this.getMarkerTree(getMarker, markerIndexes, zeroAt);
     return (
@@ -220,7 +220,7 @@ class MarkerTable extends PureComponent<Props> {
             onRightClickSelection={this._onRightClickSelection}
             onExpandedNodesChange={this._onExpandedNodeIdsChange}
             selectedNodeId={selectedMarker}
-            rightClickedNodeId={rightClickedMarker}
+            rightClickedNodeId={rightClickedMarkerIndex}
             expandedNodeIds={this._expandedNodeIds}
             ref={this._takeTreeViewRef}
             contextMenuId="MarkerContextMenu"
@@ -242,7 +242,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
       state
     ),
     selectedMarker: selectedThreadSelectors.getSelectedMarkerIndex(state),
-    rightClickedMarker: selectedThreadSelectors.getRightClickedMarkerIndex(
+    rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
       state
     ),
     zeroAt: getZeroAt(state),

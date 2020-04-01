@@ -3605,8 +3605,6 @@ Object {
       ],
     },
   },
-  "rightClickedCallNodePath": null,
-  "rightClickedMarker": null,
   "selectedCallNodePath": Array [
     0,
     1,

@@ -32,6 +32,7 @@ import {
   TIMELINE_MARGIN_RIGHT,
   TIMELINE_SETTINGS_HEIGHT,
 } from '../../app-logic/constants';
+import TimelineTrackContextMenu from './TrackContextMenu';
 
 import './index.css';
 
@@ -39,8 +40,6 @@ import type { SizeProps } from '../shared/WithSize';
 
 import {
   changeGlobalTrackOrder,
-  updatePreviewSelection,
-  commitRange,
   changeTimelineType,
   changeRightClickedTrack,
   changeShowTabOnly,
@@ -75,8 +74,6 @@ type StateProps = {|
 
 type DispatchProps = {|
   +changeGlobalTrackOrder: typeof changeGlobalTrackOrder,
-  +commitRange: typeof commitRange,
-  +updatePreviewSelection: typeof updatePreviewSelection,
   +changeTimelineType: typeof changeTimelineType,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
   +changeShowTabOnly: typeof changeShowTabOnly,
@@ -260,11 +257,18 @@ class Timeline extends React.PureComponent<Props, State> {
             hiddenTrackCount={hiddenTrackCount}
             changeRightClickedTrack={changeRightClickedTrack}
           />
-          <TimelineSettingsActiveTabView
-            activeBrowsingContextID={activeBrowsingContextID}
-            showTabOnly={showTabOnly}
-            changeShowTabOnly={changeShowTabOnly}
-          />
+          {/*
+            Removing the active tab view checkbox for now.
+            TODO: Bring it back once we are done with the new active tab UI implementation.
+           */}
+          {/* eslint-disable-next-line no-constant-condition */}
+          {true ? null : (
+            <TimelineSettingsActiveTabView
+              activeBrowsingContextID={activeBrowsingContextID}
+              showTabOnly={showTabOnly}
+              changeShowTabOnly={changeShowTabOnly}
+            />
+          )}
         </div>
         <TimelineSelection width={timelineWidth}>
           <TimelineRuler
@@ -297,6 +301,7 @@ class Timeline extends React.PureComponent<Props, State> {
             </Reorderable>
           </OverflowEdgeIndicator>
         </TimelineSelection>
+        <TimelineTrackContextMenu />
       </>
     );
   }
@@ -317,8 +322,6 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
-    updatePreviewSelection,
-    commitRange,
     changeTimelineType,
     changeRightClickedTrack,
     changeShowTabOnly,

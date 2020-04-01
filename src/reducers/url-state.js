@@ -199,7 +199,7 @@ const transforms: Reducer<TransformStacksPerThread> = (state = {}, action) => {
       // This may no longer be valid because of PII sanitization.
       const newTransforms = {};
       for (const [threadIndex, transformStack] of objectEntries(state)) {
-        const newThreadIndex = oldThreadIndexToNew.get(threadIndex);
+        const newThreadIndex = oldThreadIndexToNew.get(Number(threadIndex));
         if (newThreadIndex !== undefined) {
           newTransforms[newThreadIndex] = transformStack;
         }
