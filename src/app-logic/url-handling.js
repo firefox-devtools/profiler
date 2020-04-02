@@ -80,27 +80,36 @@ function getDataSourceDirs(
   }
 }
 
-// "null | void" in the query objects are flags which map to true for null, and false
-// for void. False flags do not show up the URL.
-type BaseQuery = {|
-  v: number,
-  range: string, //
-  thread: string, // "3"
+// Base query that only applies to full profile view.
+type FullProfileSpecificBaseQuery = {|
   globalTrackOrder: string, // "3-2-0-1"
   hiddenGlobalTracks: string, // "0-1"
   hiddenLocalTracksByPid: string,
   localTrackOrderByPid: string,
-  file: string, // Path into a zip file.
-  transforms: string,
   timelineType: string,
   // The following values are legacy, and will be converted to track-based values. These
   // value can't be upgraded using the typical URL upgrading process, as the full profile
   // must be fetched to compute the tracks.
   threadOrder: string, // "3-2-0-1"
   hiddenThreads: string, // "0-1"
+|};
+
+// Base query that only applies to active tab profile view.
+type ActiveTabProfileSpecificBaseQuery = {||};
+
+// "null | void" in the query objects are flags which map to true for null, and false
+// for void. False flags do not show up the URL.
+type BaseQuery = {|
+  v: number,
+  range: string, //
+  thread: string, // "3"
+  file: string, // Path into a zip file.
+  transforms: string,
   profiles: string[],
   profileName: string,
   showTabOnly1: BrowsingContextID,
+  ...FullProfileSpecificBaseQuery,
+  ...ActiveTabProfileSpecificBaseQuery,
 |};
 
 type CallTreeQuery = {|
@@ -145,6 +154,14 @@ type Query =
 type $MakeOptional = <T>(T) => T | void;
 // Base query shape is needed for the typechecking during the URL query initialization.
 type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
+// Full profile view and active tab profile view query shapes are for also
+// typechecking during the query object initialization.
+type FullProfileSpecificBaseQueryShape = $Shape<
+  $ObjMap<FullProfileSpecificBaseQuery, $MakeOptional>
+>;
+type ActiveTabProfileSpecificBaseQueryShape = $Shape<
+  $ObjMap<ActiveTabProfileSpecificBaseQuery, $MakeOptional>
+>;
 // Query shapes for individual query paths. These are needed for QueryShape union type.
 type CallTreeQueryShape = $Shape<$ObjMap<CallTreeQuery, $MakeOptional>>;
 type MarkersQueryShape = $Shape<$ObjMap<MarkersQuery, $MakeOptional>>;
@@ -190,54 +207,65 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   const pathParts = [...dataSourceDirs, urlState.selectedTab];
   const { selectedThread } = urlState.profileSpecific;
 
-  // Start with the query parameters that are shown regardless of the active tab.
-  const baseQuery: BaseQueryShape = {
+  // Start with the query parameters that are shown regardless of the active panel.
+  let baseQuery;
+  if (urlState.showTabOnly === null) {
+    // Add the full profile specific state query here.
+    baseQuery = ({}: FullProfileSpecificBaseQueryShape);
+    baseQuery.globalTrackOrder =
+      urlState.profileSpecific.full.globalTrackOrder.join('-') || undefined;
+
+    // Add the parameter hiddenGlobalTracks only when needed.
+    if (urlState.profileSpecific.full.hiddenGlobalTracks.size > 0) {
+      baseQuery.hiddenGlobalTracks = [
+        ...urlState.profileSpecific.full.hiddenGlobalTracks,
+      ].join('-');
+    }
+
+    let hiddenLocalTracksByPid = '';
+    for (const [pid, tracks] of urlState.profileSpecific.full
+      .hiddenLocalTracksByPid) {
+      if (tracks.size > 0) {
+        hiddenLocalTracksByPid += [pid, ...tracks].join('-') + '~';
+      }
+    }
+    if (hiddenLocalTracksByPid.length > 0) {
+      // Only add to the query string if something was actually hidden.
+      // Also, slice off the last '~'.
+      baseQuery.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
+    }
+
+    if (urlState.profileSpecific.full.timelineType === 'stack') {
+      // The default is the category view, so only add it to the URL if it's the
+      // stack view.
+      baseQuery.timelineType = 'stack';
+    }
+
+    let localTrackOrderByPid = '';
+    for (const [pid, trackOrder] of urlState.profileSpecific.full
+      .localTrackOrderByPid) {
+      if (trackOrder.length > 0) {
+        localTrackOrderByPid += `${String(pid)}-` + trackOrder.join('-') + '~';
+      }
+    }
+    baseQuery.localTrackOrderByPid = localTrackOrderByPid || undefined;
+  } else {
+    // Add the active tab profile specific state query here.
+    baseQuery = ({}: ActiveTabProfileSpecificBaseQueryShape);
+  }
+
+  baseQuery = ({
+    ...baseQuery,
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
     thread: selectedThread === null ? undefined : selectedThread.toString(),
-    globalTrackOrder:
-      urlState.profileSpecific.globalTrackOrder.join('-') || undefined,
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
     showTabOnly1: urlState.showTabOnly || undefined,
-  };
-
-  // Add the parameter hiddenGlobalTracks only when needed.
-  if (urlState.profileSpecific.hiddenGlobalTracks.size > 0) {
-    baseQuery.hiddenGlobalTracks = [
-      ...urlState.profileSpecific.hiddenGlobalTracks,
-    ].join('-');
-  }
-
-  let hiddenLocalTracksByPid = '';
-  for (const [pid, tracks] of urlState.profileSpecific.hiddenLocalTracksByPid) {
-    if (tracks.size > 0) {
-      hiddenLocalTracksByPid += [pid, ...tracks].join('-') + '~';
-    }
-  }
-  if (hiddenLocalTracksByPid.length > 0) {
-    // Only add to the query string if something was actually hidden.
-    // Also, slice off the last '~'.
-    baseQuery.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
-  }
-
-  if (urlState.profileSpecific.timelineType === 'stack') {
-    // The default is the category view, so only add it to the URL if it's the
-    // stack view.
-    baseQuery.timelineType = 'stack';
-  }
-
-  let localTrackOrderByPid = '';
-  for (const [pid, trackOrder] of urlState.profileSpecific
-    .localTrackOrderByPid) {
-    if (trackOrder.length > 0) {
-      localTrackOrderByPid += `${String(pid)}-` + trackOrder.join('-') + '~';
-    }
-  }
-  baseQuery.localTrackOrderByPid = localTrackOrderByPid || undefined;
+  }: BaseQueryShape);
 
   // Depending on which panel is active, also show tab-specific query parameters.
   let query: QueryShape;
@@ -291,10 +319,12 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       break;
     case 'js-tracer':
       query = (baseQuery: JsTracerQueryShape);
-      // `null` adds the parameter to the query, while `undefined` doesn't.
-      query.summary = urlState.profileSpecific.showJsTracerSummary
-        ? null
-        : undefined;
+      if (urlState.showTabOnly === null) {
+        // `null` adds the parameter to the query, while `undefined` doesn't.
+        query.summary = urlState.profileSpecific.full.showJsTracerSummary
+          ? null
+          : undefined;
+      }
       break;
     default:
       throw assertExhaustiveCheck(selectedTab);
@@ -408,34 +438,37 @@ export function stateFromLocation(
       ),
       invertCallstack: query.invertCallstack === undefined ? false : true,
       showUserTimings: query.showUserTimings === undefined ? false : true,
-      showJsTracerSummary: query.summary === undefined ? false : true,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
       selectedThread: selectedThread,
       callTreeSearchString: query.search || '',
-      globalTrackOrder: query.globalTrackOrder
-        ? query.globalTrackOrder.split('-').map(index => Number(index))
-        : [],
-      hiddenGlobalTracks: query.hiddenGlobalTracks
-        ? new Set(
-            query.hiddenGlobalTracks.split('-').map(index => Number(index))
-          )
-        : new Set(),
-      hiddenLocalTracksByPid: query.hiddenLocalTracksByPid
-        ? parseHiddenTracks(query.hiddenLocalTracksByPid)
-        : new Map(),
-      localTrackOrderByPid: query.localTrackOrderByPid
-        ? parseLocalTrackOrder(query.localTrackOrderByPid)
-        : new Map(),
       markersSearchString: query.markerSearch || '',
       networkSearchString: query.networkSearch || '',
       transforms,
-      timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
-      legacyThreadOrder: query.threadOrder
-        ? query.threadOrder.split('-').map(index => Number(index))
-        : null,
-      legacyHiddenThreads: query.hiddenThreads
-        ? query.hiddenThreads.split('-').map(index => Number(index))
-        : null,
+      full: {
+        showJsTracerSummary: query.summary === undefined ? false : true,
+        globalTrackOrder: query.globalTrackOrder
+          ? query.globalTrackOrder.split('-').map(index => Number(index))
+          : [],
+        hiddenGlobalTracks: query.hiddenGlobalTracks
+          ? new Set(
+              query.hiddenGlobalTracks.split('-').map(index => Number(index))
+            )
+          : new Set(),
+        hiddenLocalTracksByPid: query.hiddenLocalTracksByPid
+          ? parseHiddenTracks(query.hiddenLocalTracksByPid)
+          : new Map(),
+        localTrackOrderByPid: query.localTrackOrderByPid
+          ? parseLocalTrackOrder(query.localTrackOrderByPid)
+          : new Map(),
+        timelineType: query.timelineType === 'stack' ? 'stack' : 'category',
+        legacyThreadOrder: query.threadOrder
+          ? query.threadOrder.split('-').map(index => Number(index))
+          : null,
+        legacyHiddenThreads: query.hiddenThreads
+          ? query.hiddenThreads.split('-').map(index => Number(index))
+          : null,
+      },
+      // activeTab: {},
     },
   };
 }

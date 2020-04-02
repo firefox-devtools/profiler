@@ -192,25 +192,43 @@ export type ZippedProfilesState = {
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
-export type ProfileSpecificUrlState = {|
-  selectedThread: ThreadIndex | null,
+/**
+ * Full profile specific url state
+ * They should not be used from the active tab view.
+ */
+export type FullProfileSpecificUrlState = {|
   globalTrackOrder: TrackIndex[],
   hiddenGlobalTracks: Set<TrackIndex>,
   hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
   localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+  showJsTracerSummary: boolean,
+  timelineType: TimelineType,
+  legacyThreadOrder: ThreadIndex[] | null,
+  legacyHiddenThreads: ThreadIndex[] | null,
+|};
+
+/**
+ * Active tab profile specific url state
+ * They should not be used from the full view.
+ * NOTE: This state is empty for now, but will be used later, do not remove.
+ */
+export type ActiveTabSpecificProfileUrlState = {||};
+
+export type ProfileSpecificUrlState = {|
+  selectedThread: ThreadIndex | null,
   implementation: ImplementationFilter,
   lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
   invertCallstack: boolean,
   showUserTimings: boolean,
-  showJsTracerSummary: boolean,
   committedRanges: StartEndRange[],
   callTreeSearchString: string,
   markersSearchString: string,
   networkSearchString: string,
   transforms: TransformStacksPerThread,
-  timelineType: TimelineType,
-  legacyThreadOrder: ThreadIndex[] | null,
-  legacyHiddenThreads: ThreadIndex[] | null,
+  full: FullProfileSpecificUrlState,
+  // NOTE: Currently commented out to fix the flow warnings, but will be used soon.
+  // Do not remove.
+  // activeTab: ActiveTabSpecificProfileUrlState,
 |};
 
 export type UrlState = {|

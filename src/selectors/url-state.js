@@ -33,6 +33,8 @@ export const getUrlState: Selector<UrlState> = (state): UrlState =>
   state.urlState;
 export const getProfileSpecificState: Selector<*> = state =>
   getUrlState(state).profileSpecific;
+export const getFullProfileSpecificState: Selector<*> = state =>
+  getProfileSpecificState(state).full;
 export const getDataSource: Selector<DataSource> = state =>
   getUrlState(state).dataSource;
 export const getHash: Selector<string> = state => getUrlState(state).hash;
@@ -55,7 +57,7 @@ export const getInvertCallstack: Selector<boolean> = state =>
 export const getShowUserTimings: Selector<boolean> = state =>
   getProfileSpecificState(state).showUserTimings;
 export const getShowJsTracerSummary: Selector<boolean> = state =>
-  getProfileSpecificState(state).showJsTracerSummary;
+  getFullProfileSpecificState(state).showJsTracerSummary;
 
 /**
  * Raw search strings, before any splitting has been performed.
@@ -77,25 +79,25 @@ export const getSelectedThreadIndex: Selector<ThreadIndex> = state =>
     'Attempted to get a thread index before a profile was loaded.'
   );
 export const getTimelineType: Selector<TimelineType> = state =>
-  getProfileSpecificState(state).timelineType;
+  getFullProfileSpecificState(state).timelineType;
 
 /**
  * Simple selectors for tracks and track order.
  */
 export const getLegacyThreadOrder: Selector<ThreadIndex[] | null> = state =>
-  getProfileSpecificState(state).legacyThreadOrder;
+  getFullProfileSpecificState(state).legacyThreadOrder;
 export const getLegacyHiddenThreads: Selector<ThreadIndex[] | null> = state =>
-  getProfileSpecificState(state).legacyHiddenThreads;
+  getFullProfileSpecificState(state).legacyHiddenThreads;
 export const getGlobalTrackOrder: Selector<TrackIndex[]> = state =>
-  getProfileSpecificState(state).globalTrackOrder;
+  getFullProfileSpecificState(state).globalTrackOrder;
 export const getHiddenGlobalTracks: Selector<Set<TrackIndex>> = state =>
-  getProfileSpecificState(state).hiddenGlobalTracks;
+  getFullProfileSpecificState(state).hiddenGlobalTracks;
 export const getHiddenLocalTracksByPid: Selector<
   Map<Pid, Set<TrackIndex>>
-> = state => getProfileSpecificState(state).hiddenLocalTracksByPid;
+> = state => getFullProfileSpecificState(state).hiddenLocalTracksByPid;
 export const getLocalTrackOrderByPid: Selector<
   Map<Pid, TrackIndex[]>
-> = state => getProfileSpecificState(state).localTrackOrderByPid;
+> = state => getFullProfileSpecificState(state).localTrackOrderByPid;
 
 /**
  * This selector does a simple lookup in the set of hidden tracks for a PID, and ensures

@@ -432,6 +432,22 @@ describe('showTabOnly', function() {
     const hiddenLocalTracksByPid = activeTabHiddenLocalTracksByPidGetter();
     expect(hiddenLocalTracksByPid.size).toBe(1);
   });
+
+  it('should remove other full view url states if present', function() {
+    const { getState } = _getStoreWithURL({
+      search:
+        '?showTabOnly1=123&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
+    });
+
+    const newUrl = new URL(
+      urlFromState(urlStateReducers.getUrlState(getState())),
+      'https://profiler.firefox.com'
+    );
+    // The url states that are relevant to full view should be stripped out.
+    expect(newUrl.search).toEqual(
+      `?showTabOnly1=123&thread=0&v=${CURRENT_URL_VERSION}`
+    );
+  });
 });
 
 describe('url upgrading', function() {
