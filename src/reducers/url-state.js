@@ -83,7 +83,6 @@ const selectedTab: Reducer<TabSlug> = (state = 'calltree', action) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_TAB':
     case 'SELECT_TRACK':
-    case 'CHANGE_SHOW_TAB_ONLY':
       return action.selectedTab;
     default:
       return state;
@@ -110,7 +109,8 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
   switch (action.type) {
     case 'CHANGE_SELECTED_THREAD':
     case 'SELECT_TRACK':
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
     case 'HIDE_GLOBAL_TRACK':
@@ -134,12 +134,6 @@ const selectedThread: Reducer<ThreadIndex | null> = (state = null, action) => {
       }
       return newThreadIndex;
     }
-    case 'CHANGE_SHOW_TAB_ONLY':
-      if (action.selectedThreadIndex === null) {
-        // Do not change the selected thread if we don't have to.
-        return state;
-      }
-      return action.selectedThreadIndex;
     default:
       return state;
   }
@@ -291,7 +285,8 @@ const showJsTracerSummary: Reducer<boolean> = (state = false, action) => {
 
 const globalTrackOrder: Reducer<TrackIndex[]> = (state = [], action) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
     case 'CHANGE_GLOBAL_TRACK_ORDER':
       return action.globalTrackOrder;
     case 'SANITIZED_PROFILE_PUBLISHED':
@@ -308,7 +303,8 @@ const hiddenGlobalTracks: Reducer<Set<TrackIndex>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
     case 'ISOLATE_LOCAL_TRACK':
     case 'ISOLATE_PROCESS':
     case 'ISOLATE_PROCESS_MAIN_THREAD':
@@ -338,7 +334,8 @@ const hiddenLocalTracksByPid: Reducer<Map<Pid, Set<TrackIndex>>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       return action.hiddenLocalTracksByPid;
     case 'HIDE_LOCAL_TRACK': {
       const hiddenLocalTracksByPid = new Map(state);
@@ -373,7 +370,8 @@ const localTrackOrderByPid: Reducer<Map<Pid, TrackIndex[]>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       return action.localTrackOrderByPid;
     case 'CHANGE_LOCAL_TRACK_ORDER': {
       const localTrackOrderByPid = new Map(state);
@@ -416,8 +414,13 @@ const showTabOnly: Reducer<BrowsingContextID | null> = (
   action
 ) => {
   switch (action.type) {
-    case 'CHANGE_SHOW_TAB_ONLY':
-      return action.showTabOnly;
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
+      if (action.showTabOnly !== undefined) {
+        // Do not change the state if it's undefined.
+        return action.showTabOnly;
+      }
+      return state;
     default:
       return state;
   }

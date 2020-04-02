@@ -91,7 +91,8 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
  */
 const globalTracks: Reducer<GlobalTrack[]> = (state = [], action) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       return action.globalTracks;
     default:
       return state;
@@ -107,7 +108,8 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       return action.localTracksByPid;
     default:
       return state;
@@ -124,7 +126,7 @@ const activeTabHiddenGlobalTracksGetter: Reducer<() => Set<TrackIndex>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       return action.activeTabHiddenGlobalTracksGetter;
     default:
       return state;
@@ -139,7 +141,7 @@ const activeTabHiddenLocalTracksByPidGetter: Reducer<
   () => Map<Pid, Set<TrackIndex>>
 > = (state = () => new Map(), action) => {
   switch (action.type) {
-    case 'VIEW_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       return action.activeTabHiddenLocalTracksByPidGetter;
     default:
       return state;
@@ -450,7 +452,6 @@ const scrollToSelectionGeneration: Reducer<number> = (state = 0, action) => {
     case 'HIDE_GLOBAL_TRACK':
     case 'HIDE_LOCAL_TRACK':
     case 'CHANGE_SELECTED_MARKER':
-    case 'CHANGE_SHOW_TAB_ONLY':
       return state + 1;
     default:
       return state;
@@ -620,9 +621,11 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
     }),
     globalTracks,
     localTracksByPid,
-    activeTabHiddenGlobalTracksGetter,
-    activeTabHiddenLocalTracksByPidGetter,
     profile,
+    activeTab: combineReducers({
+      hiddenGlobalTracksGetter: activeTabHiddenGlobalTracksGetter,
+      hiddenLocalTracksByPidGetter: activeTabHiddenLocalTracksByPidGetter,
+    }),
   })
 );
 

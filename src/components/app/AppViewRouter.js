@@ -54,6 +54,7 @@ class AppViewRouterImpl extends PureComponent<AppViewRouterProps> {
     switch (phase) {
       case 'INITIALIZING':
       case 'PROFILE_LOADED':
+      case 'DATA_RELOAD':
         return <ProfileLoaderAnimation />;
       case 'FATAL_ERROR': {
         const message =

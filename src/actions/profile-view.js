@@ -49,12 +49,7 @@ import type {
 } from '../types/actions';
 import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
-import type {
-  ThreadIndex,
-  Pid,
-  IndexIntoSamplesTable,
-  BrowsingContextID,
-} from '../types/profile';
+import type { ThreadIndex, Pid, IndexIntoSamplesTable } from '../types/profile';
 import type {
   CallNodePath,
   CallNodeInfo,
@@ -1166,42 +1161,6 @@ export function changeProfileName(profileName: string): Action {
   return {
     type: 'CHANGE_PROFILE_NAME',
     profileName,
-  };
-}
-
-export function changeShowTabOnly(
-  showTabOnly: BrowsingContextID | null
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    let selectedTab = getSelectedTab(getState());
-
-    if (showTabOnly !== null && selectedTab === 'network-chart') {
-      selectedTab = getLastVisibleThreadTabSlug(getState());
-    }
-
-    let selectedThreadIndex = null;
-    if (showTabOnly !== null) {
-      // Select the first visible thread when we are transitioning to tab only view.
-      selectedThreadIndex = _findOtherVisibleThread(
-        getState,
-        undefined, // Do not filter out any track.
-        undefined,
-        true // ignore the hidden tracks by active tab
-      );
-
-      if (selectedThreadIndex === null) {
-        // We should revert to the first view, because all the threads are hidden
-        // in the single tab view and we won't be able to see anything there.
-        return;
-      }
-    }
-
-    dispatch({
-      type: 'CHANGE_SHOW_TAB_ONLY',
-      showTabOnly,
-      selectedTab,
-      selectedThreadIndex,
-    });
   };
 }
 

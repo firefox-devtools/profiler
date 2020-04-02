@@ -51,7 +51,27 @@ export type RightClickedMarker = {|
   +markerIndex: MarkerIndex,
 |};
 
-export type ProfileViewState = {|
+/**
+ * Full profile view state
+ * They should not be used from the active tab view.
+ * NOTE: This state is empty for now, but will be used later, do not remove.
+ * globalTracks and localTracksByPid states will be here in the future.
+ */
+export type FullProfileViewState = {||};
+
+/**
+ * Active tab profile view state
+ * They should not be used from the full view.
+ */
+export type ActiveTabProfileViewState = {|
+  hiddenGlobalTracksGetter: () => Set<TrackIndex>,
+  hiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
+|};
+
+/**
+ * Profile view state
+ */
+export type ProfileViewState = {
   +viewOptions: {|
     perThread: ThreadViewOptions[],
     symbolicationStatus: SymbolicationStatus,
@@ -64,18 +84,21 @@ export type ProfileViewState = {|
     rightClickedCallNode: RightClickedCallNode | null,
     rightClickedMarker: RightClickedMarker | null,
   |},
-  +globalTracks: GlobalTrack[],
-  +localTracksByPid: Map<Pid, LocalTrack[]>,
-  +activeTabHiddenGlobalTracksGetter: () => Set<TrackIndex>,
-  +activeTabHiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
+  globalTracks: GlobalTrack[],
+  localTracksByPid: Map<Pid, LocalTrack[]>,
   +profile: Profile | null,
-|};
+  // NOTE: Currently commented out to fix the flow warnings, but will be used soon.
+  // Do not remove.
+  // +full: FullProfileViewState,
+  +activeTab: ActiveTabProfileViewState,
+};
 
 export type AppViewState =
   | {| +phase: 'ROUTE_NOT_FOUND' |}
   | {| +phase: 'TRANSITIONING_FROM_STALE_PROFILE' |}
   | {| +phase: 'PROFILE_LOADED' |}
   | {| +phase: 'DATA_LOADED' |}
+  | {| +phase: 'DATA_RELOAD' |}
   | {| +phase: 'FATAL_ERROR', +error: Error |}
   | {|
       +phase: 'INITIALIZING',
@@ -178,6 +201,27 @@ export type ZippedProfilesState = {
   expandedZipFileIndexes: Array<IndexIntoZipFileTable | null>,
 };
 
+export type ProfileSpecificUrlState = {|
+  selectedThread: ThreadIndex | null,
+  globalTrackOrder: TrackIndex[],
+  hiddenGlobalTracks: Set<TrackIndex>,
+  hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+  localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+  implementation: ImplementationFilter,
+  lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
+  invertCallstack: boolean,
+  showUserTimings: boolean,
+  showJsTracerSummary: boolean,
+  committedRanges: StartEndRange[],
+  callTreeSearchString: string,
+  markersSearchString: string,
+  networkSearchString: string,
+  transforms: TransformStacksPerThread,
+  timelineType: TimelineType,
+  legacyThreadOrder: ThreadIndex[] | null,
+  legacyHiddenThreads: ThreadIndex[] | null,
+|};
+
 export type UrlState = {|
   +dataSource: DataSource,
   // This is used for the "public" dataSource".
@@ -190,26 +234,7 @@ export type UrlState = {|
   +pathInZipFile: string | null,
   +profileName: string,
   +showTabOnly: BrowsingContextID | null,
-  +profileSpecific: {|
-    selectedThread: ThreadIndex | null,
-    globalTrackOrder: TrackIndex[],
-    hiddenGlobalTracks: Set<TrackIndex>,
-    hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
-    localTrackOrderByPid: Map<Pid, TrackIndex[]>,
-    implementation: ImplementationFilter,
-    lastSelectedCallTreeSummaryStrategy: CallTreeSummaryStrategy,
-    invertCallstack: boolean,
-    showUserTimings: boolean,
-    showJsTracerSummary: boolean,
-    committedRanges: StartEndRange[],
-    callTreeSearchString: string,
-    markersSearchString: string,
-    networkSearchString: string,
-    transforms: TransformStacksPerThread,
-    timelineType: TimelineType,
-    legacyThreadOrder: ThreadIndex[] | null,
-    legacyHiddenThreads: ThreadIndex[] | null,
-  |},
+  +profileSpecific: ProfileSpecificUrlState,
 |};
 
 export type IconState = Set<string>;

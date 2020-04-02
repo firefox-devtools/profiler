@@ -12,8 +12,8 @@ import { ensureExists } from '../../utils/flow';
 import {
   changeSelectedThread,
   changeRightClickedTrack,
-  changeShowTabOnly,
 } from '../../actions/profile-view';
+import { changeViewAndRecomputeProfileData } from '../../actions/receive-profile';
 import TrackContextMenu from '../../components/timeline/TrackContextMenu';
 import { getGlobalTracks, getLocalTracks } from '../../selectors/profile';
 import {
@@ -206,7 +206,7 @@ describe('timeline/TrackContextMenu', function() {
         0
       );
       // parameter doesn't matter here, it can be anything except null.
-      dispatch(changeShowTabOnly(111));
+      dispatch(changeViewAndRecomputeProfileData(111));
       // We can't use getHumanReadableTracks here because that function doesn't
       // use the functions used by context menu directly and gives us wrong results.
       expect(container.firstChild).toMatchSnapshot();
