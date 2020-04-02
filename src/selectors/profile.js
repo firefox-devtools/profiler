@@ -61,7 +61,7 @@ import type { $ReturnType } from '../types/utils';
 export const getProfileView: Selector<ProfileViewState> = state =>
   state.profileView;
 export const getActiveTabProfileView: Selector<ActiveTabProfileViewState> = state =>
-  getProfileView(state).activeTabProfile;
+  getProfileView(state).activeTab;
 
 /**
  * Profile View Options

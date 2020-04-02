@@ -89,8 +89,8 @@ export type ProfileViewState = {
   +profile: Profile | null,
   // NOTE: Currently commented out to fix the flow warnings, but will be used soon.
   // Do not remove.
-  // +fullProfile: FullProfileViewState,
-  +activeTabProfile: ActiveTabProfileViewState,
+  // +full: FullProfileViewState,
+  +activeTab: ActiveTabProfileViewState,
 };
 
 export type AppViewState =
