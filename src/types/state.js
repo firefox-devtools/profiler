@@ -175,15 +175,6 @@ export type UploadState = {|
   generation: number,
 |};
 
-/**
- * This holds the state of the profile before it was uploaded.
- */
-export type PrePublishedState = {|
-  +profile: Profile,
-  +urlState: UrlState,
-  +zipFileState: ZipFileState,
-|};
-
 export type PublishState = {|
   +checkedSharingOptions: CheckedSharingOptions,
   +upload: UploadState,
