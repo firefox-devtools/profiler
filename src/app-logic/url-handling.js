@@ -135,19 +135,29 @@ type JsTracerQuery = {|
   summary: null | void,
 |};
 
-// Use object type spread in the definition of Query rather than unions, so that they
-// are really easy to manipulate. This permissive definition makes it easy to not have
-// to refine the type down to the individual query types when working with them.
-type Query = {|
-  ...CallTreeQuery,
-  ...MarkersQuery,
-  ...NetworkQuery,
-  ...StackChartQuery,
-  ...JsTracerQuery,
-|};
+type Query =
+  | CallTreeQuery
+  | MarkersQuery
+  | NetworkQuery
+  | StackChartQuery
+  | JsTracerQuery;
 
 type $MakeOptional = <T>(T) => T | void;
-type QueryShape = $Shape<$ObjMap<Query, $MakeOptional>>;
+// Base query shape is needed for the typechecking during the URL query initialization.
+type BaseQueryShape = $Shape<$ObjMap<BaseQuery, $MakeOptional>>;
+// Query shapes for individual query paths. These are needed for QueryShape union type.
+type CallTreeQueryShape = $Shape<$ObjMap<CallTreeQuery, $MakeOptional>>;
+type MarkersQueryShape = $Shape<$ObjMap<MarkersQuery, $MakeOptional>>;
+type NetworkQueryShape = $Shape<$ObjMap<NetworkQuery, $MakeOptional>>;
+type StackChartQueryShape = $Shape<$ObjMap<StackChartQuery, $MakeOptional>>;
+type JsTracerQueryShape = $Shape<$ObjMap<JsTracerQuery, $MakeOptional>>;
+
+type QueryShape =
+  | CallTreeQueryShape
+  | MarkersQueryShape
+  | NetworkQueryShape
+  | StackChartQueryShape
+  | JsTracerQueryShape;
 
 type UrlObject = {|
   pathParts: string[],
@@ -181,7 +191,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   const { selectedThread } = urlState.profileSpecific;
 
   // Start with the query parameters that are shown regardless of the active tab.
-  const query: QueryShape = {
+  const baseQuery: BaseQueryShape = {
     range:
       stringifyCommittedRanges(urlState.profileSpecific.committedRanges) ||
       undefined,
@@ -197,7 +207,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
 
   // Add the parameter hiddenGlobalTracks only when needed.
   if (urlState.profileSpecific.hiddenGlobalTracks.size > 0) {
-    query.hiddenGlobalTracks = [
+    baseQuery.hiddenGlobalTracks = [
       ...urlState.profileSpecific.hiddenGlobalTracks,
     ].join('-');
   }
@@ -211,13 +221,13 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
   if (hiddenLocalTracksByPid.length > 0) {
     // Only add to the query string if something was actually hidden.
     // Also, slice off the last '~'.
-    query.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
+    baseQuery.hiddenLocalTracksByPid = hiddenLocalTracksByPid.slice(0, -1);
   }
 
   if (urlState.profileSpecific.timelineType === 'stack') {
     // The default is the category view, so only add it to the URL if it's the
     // stack view.
-    query.timelineType = 'stack';
+    baseQuery.timelineType = 'stack';
   }
 
   let localTrackOrderByPid = '';
@@ -227,19 +237,28 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       localTrackOrderByPid += `${String(pid)}-` + trackOrder.join('-') + '~';
     }
   }
-  query.localTrackOrderByPid = localTrackOrderByPid || undefined;
+  baseQuery.localTrackOrderByPid = localTrackOrderByPid || undefined;
 
-  // Depending on which tab is active, also show tab-specific query parameters.
+  // Depending on which panel is active, also show tab-specific query parameters.
+  let query: QueryShape;
   const selectedTab = urlState.selectedTab;
   switch (selectedTab) {
     case 'stack-chart':
     case 'flame-graph':
     case 'calltree': {
+      if (selectedTab === 'stack-chart') {
+        // Stack chart uses all of the CallTree's query strings but also has an
+        // additional query string.
+        query = (baseQuery: StackChartQueryShape);
+        query.showUserTimings = urlState.profileSpecific.showUserTimings
+          ? null
+          : undefined;
+      } else {
+        query = (baseQuery: CallTreeQueryShape);
+      }
+
       query.search = urlState.profileSpecific.callTreeSearchString || undefined;
       query.invertCallstack = urlState.profileSpecific.invertCallstack
-        ? null
-        : undefined;
-      query.showUserTimings = urlState.profileSpecific.showUserTimings
         ? null
         : undefined;
       query.implementation =
@@ -261,22 +280,26 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     }
     case 'marker-table':
     case 'marker-chart':
+      query = (baseQuery: MarkersQueryShape);
       query.markerSearch =
         urlState.profileSpecific.markersSearchString || undefined;
       break;
     case 'network-chart':
+      query = (baseQuery: NetworkQueryShape);
       query.networkSearch =
         urlState.profileSpecific.networkSearchString || undefined;
       break;
     case 'js-tracer':
+      query = (baseQuery: JsTracerQueryShape);
       // `null` adds the parameter to the query, while `undefined` doesn't.
       query.summary = urlState.profileSpecific.showJsTracerSummary
         ? null
         : undefined;
       break;
     default:
-      assertExhaustiveCheck(selectedTab);
+      throw assertExhaustiveCheck(selectedTab);
   }
+
   return { query, pathParts };
 }
 
@@ -381,11 +404,11 @@ export function stateFromLocation(
     profileSpecific: {
       implementation,
       lastSelectedCallTreeSummaryStrategy: toValidCallTreeSummaryStrategy(
-        query.ctSummary
+        query.ctSummary || undefined
       ),
-      invertCallstack: query.invertCallstack !== undefined,
-      showUserTimings: query.showUserTimings !== undefined,
-      showJsTracerSummary: query.summary !== undefined,
+      invertCallstack: query.invertCallstack === undefined ? false : true,
+      showUserTimings: query.showUserTimings === undefined ? false : true,
+      showJsTracerSummary: query.summary === undefined ? false : true,
       committedRanges: query.range ? parseCommittedRanges(query.range) : [],
       selectedThread: selectedThread,
       callTreeSearchString: query.search || '',

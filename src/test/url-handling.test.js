@@ -328,6 +328,9 @@ describe('search strings', function() {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
+      if (!query.search) {
+        throw new Error('Could not find the search query string');
+      }
       expect(query.search).toBe(callTreeSearchString);
     });
   });
@@ -343,6 +346,9 @@ describe('search strings', function() {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
+      if (!query.markerSearch) {
+        throw new Error('Could not find the markerSearch query string');
+      }
       expect(query.markerSearch).toBe(markerSearchString);
     });
   });
@@ -356,6 +362,9 @@ describe('search strings', function() {
     dispatch(changeSelectedTab('network-chart'));
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
+    if (!query.networkSearch) {
+      throw new Error('Could not find the networkSearch query string');
+    }
     expect(query.networkSearch).toBe(networkSearchString);
   });
 });
