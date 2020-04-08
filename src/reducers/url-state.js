@@ -427,24 +427,14 @@ const showTabOnly: Reducer<BrowsingContextID | null> = (
 };
 
 /**
- * These values are specific to an individual profile.
+ * These values are specific to an individual full profile.
  */
-const profileSpecific = combineReducers({
-  selectedThread,
+const fullProfileSpecific = combineReducers({
   globalTrackOrder,
   hiddenGlobalTracks,
   hiddenLocalTracksByPid,
   localTrackOrderByPid,
-  implementation,
-  lastSelectedCallTreeSummaryStrategy,
-  invertCallstack,
-  showUserTimings,
   showJsTracerSummary,
-  committedRanges,
-  callTreeSearchString,
-  markersSearchString,
-  networkSearchString,
-  transforms,
   timelineType,
   // The timeline tracks used to be hidden and sorted by thread indexes, rather than
   // track indexes. The only way to migrate this information to tracks-based data is to
@@ -452,6 +442,31 @@ const profileSpecific = combineReducers({
   // process. These value are only set by the locationToState function.
   legacyThreadOrder: (state: ThreadIndex[] | null = null) => state,
   legacyHiddenThreads: (state: ThreadIndex[] | null = null) => state,
+});
+
+/**
+ * These values are specific to an individual active tab profile.
+ */
+// const activeTabProfileSpecific = combineReducers({});
+
+/**
+ * These values are specific to an individual profile.
+ */
+const profileSpecific = combineReducers({
+  selectedThread,
+  implementation,
+  lastSelectedCallTreeSummaryStrategy,
+  invertCallstack,
+  showUserTimings,
+  committedRanges,
+  callTreeSearchString,
+  markersSearchString,
+  networkSearchString,
+  transforms,
+  full: fullProfileSpecific,
+  // Currently this is commented out because it's empty and redux doesn't allow
+  // empty objects without reducers. Uncomment it after adding a state in it.
+  // activeTab: activeTabProfileSpecific,
 });
 
 /**

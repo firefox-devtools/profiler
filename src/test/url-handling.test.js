@@ -328,6 +328,9 @@ describe('search strings', function() {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
+      if (!query.search) {
+        throw new Error('Could not find the search query string');
+      }
       expect(query.search).toBe(callTreeSearchString);
     });
   });
@@ -343,6 +346,9 @@ describe('search strings', function() {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
+      if (!query.markerSearch) {
+        throw new Error('Could not find the markerSearch query string');
+      }
       expect(query.markerSearch).toBe(markerSearchString);
     });
   });
@@ -356,6 +362,9 @@ describe('search strings', function() {
     dispatch(changeSelectedTab('network-chart'));
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
+    if (!query.networkSearch) {
+      throw new Error('Could not find the networkSearch query string');
+    }
     expect(query.networkSearch).toBe(networkSearchString);
   });
 });
@@ -422,6 +431,22 @@ describe('showTabOnly', function() {
     expect(activeTabHiddenLocalTracksByPidGetter).toBeInstanceOf(Function);
     const hiddenLocalTracksByPid = activeTabHiddenLocalTracksByPidGetter();
     expect(hiddenLocalTracksByPid.size).toBe(1);
+  });
+
+  it('should remove other full view url states if present', function() {
+    const { getState } = _getStoreWithURL({
+      search:
+        '?showTabOnly1=123&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
+    });
+
+    const newUrl = new URL(
+      urlFromState(urlStateReducers.getUrlState(getState())),
+      'https://profiler.firefox.com'
+    );
+    // The url states that are relevant to full view should be stripped out.
+    expect(newUrl.search).toEqual(
+      `?showTabOnly1=123&thread=0&v=${CURRENT_URL_VERSION}`
+    );
   });
 });
 
