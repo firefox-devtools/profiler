@@ -468,6 +468,8 @@ export function stateFromLocation(
           ? query.hiddenThreads.split('-').map(index => Number(index))
           : null,
       },
+      // Currently this is commented out because it's empty and redux doesn't allow
+      // empty objects without reducers. Uncomment it after adding a state in it.
       // activeTab: {},
     },
   };
