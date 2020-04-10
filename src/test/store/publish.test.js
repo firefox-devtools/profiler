@@ -21,6 +21,7 @@ import {
   getUploadPhase,
   getUploadError,
   getUploadProgress,
+  getUploadProgressString,
   getUploadGeneration,
 } from '../../selectors/publish';
 import {
@@ -242,19 +243,33 @@ describe('attemptToPublish', function() {
     await waitUntilPhase('uploading');
     const updateUploadProgress = getUpdateUploadProgress();
 
-    expect(getUploadProgress(getState())).toEqual(0);
+    // We clamp the value at 0.1 as a minimum.
+    expect(getUploadProgress(getState())).toEqual(0.1);
+    // Note: it's fairly sure that this will fail on Windows environments in
+    // some locale (eg: French) because we don't know how to force a locale in
+    // these environments.
+    expect(getUploadProgressString(getState())).toEqual('10%');
 
     updateUploadProgress(0.2);
     expect(getUploadProgress(getState())).toEqual(0.2);
+    expect(getUploadProgressString(getState())).toEqual('20%');
 
     updateUploadProgress(0.5);
     expect(getUploadProgress(getState())).toEqual(0.5);
+    expect(getUploadProgressString(getState())).toEqual('50%');
+
+    updateUploadProgress(1);
+    // We clamp the value at 0.95 as a maximum.
+    expect(getUploadProgress(getState())).toEqual(0.95);
+    expect(getUploadProgressString(getState())).toEqual('95%');
 
     resolveUpload(JWT_TOKEN);
 
     expect(await publishAttempt).toEqual(true);
 
-    expect(getUploadProgress(getState())).toEqual(0);
+    // We still clamp :-)
+    expect(getUploadProgress(getState())).toEqual(0.1);
+    expect(getUploadProgressString(getState())).toEqual('10%');
   });
 
   it('can reset after a successful upload', async function() {
