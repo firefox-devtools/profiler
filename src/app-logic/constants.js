@@ -50,3 +50,5 @@ export const JS_TRACER_MAXIMUM_CHART_ZOOM = 0.001;
 // The following values are for the visual progress tracks.
 export const TRACK_VISUAL_PROGRESS_HEIGHT = 40;
 export const TRACK_VISUAL_PROGRESS_LINE_WIDTH = 2;
+
+export const SYMBOL_STORE_URL = 'https://symbols.mozilla.org/symbolicate/v5';

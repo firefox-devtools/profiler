@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`symbolServerUrl will error when switching to an invalid host 1`] = `
+Array [
+  Array [
+    "The symbol server URL was not valid, defaulting to https://symbols.mozilla.org/symbolicate/v5",
+    [TypeError: Invalid URL: invalid],
+  ],
+]
+`;
+
+exports[`symbolServerUrl will error when switching to an unknown host 1`] = `
+Array [
+  Array [
+    "The symbol server URL was not in the list of allowed domains, defaulting to https://symbols.mozilla.org/symbolicate/v5",
+  ],
+]
+`;

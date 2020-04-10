@@ -8,6 +8,7 @@ import { createSelector } from 'reselect';
 import { ensureExists } from '../utils/flow';
 import { urlFromState } from '../app-logic/url-handling';
 import * as CommittedRanges from '../profile-logic/committed-ranges';
+import { SYMBOL_STORE_URL } from '../app-logic/constants';
 
 import type { ThreadIndex, Pid, BrowsingContextID } from '../types/profile';
 import type { TransformStack } from '../types/transforms';
@@ -254,4 +255,30 @@ export const getProfileName: Selector<null | string> = createSelector(
 export const getCommittedRangeLabels: Selector<string[]> = createSelector(
   getAllCommittedRanges,
   CommittedRanges.getCommittedRangeLabels
+);
+
+export const getSymbolStoreUrl: Selector<string> = createSelector(
+  getUrlState,
+  ({ symbolServerUrl }) => {
+    if (!symbolServerUrl) {
+      return SYMBOL_STORE_URL;
+    }
+    const allowedHostnames = new Set(['localhost', 'symbols.mozilla.org']);
+    try {
+      const url = new URL(symbolServerUrl);
+      if (allowedHostnames.has(url.hostname)) {
+        return symbolServerUrl;
+      }
+      console.error(
+        `The symbol server URL was not in the list of allowed domains, defaulting to ${SYMBOL_STORE_URL}`
+      );
+      return SYMBOL_STORE_URL;
+    } catch (error) {
+      console.error(
+        `The symbol server URL was not valid, defaulting to ${SYMBOL_STORE_URL}`,
+        error
+      );
+      return SYMBOL_STORE_URL;
+    }
+  }
 );

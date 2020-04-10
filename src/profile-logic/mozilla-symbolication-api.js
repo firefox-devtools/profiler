@@ -105,7 +105,8 @@ function _ensureIsAPIResult(result: any): APIResult {
 // to indicate failure status for each library independently. Under the hood,
 // only one request is made to the server.
 export function requestSymbols(
-  requests: LibSymbolicationRequest[]
+  requests: LibSymbolicationRequest[],
+  symbolsUrl: string
 ): Array<Promise<Map<number, AddressResult>>> {
   const addressArrays = requests.map(({ addresses }) => Array.from(addresses));
   const body = {
@@ -118,7 +119,7 @@ export function requestSymbols(
     ),
   };
 
-  const jsonPromise = fetch('https://symbols.mozilla.org/symbolicate/v5', {
+  const jsonPromise = fetch(symbolsUrl, {
     body: JSON.stringify(body),
     method: 'POST',
     mode: 'cors',

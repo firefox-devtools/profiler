@@ -244,6 +244,7 @@ export type UrlState = {|
   +profileName: string,
   +showTabOnly: BrowsingContextID | null,
   +profileSpecific: ProfileSpecificUrlState,
+  +symbolServerUrl: string | null,
 |};
 
 export type IconState = Set<string>;

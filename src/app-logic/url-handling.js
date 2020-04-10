@@ -107,6 +107,7 @@ type BaseQuery = {|
   transforms: string,
   profiles: string[],
   profileName: string,
+  symbolServer: string,
   showTabOnly1: BrowsingContextID,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
@@ -265,6 +266,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
     showTabOnly1: urlState.showTabOnly || undefined,
+    symbolServer: urlState.symbolServerUrl || undefined,
   }: BaseQueryShape);
 
   // Depending on which panel is active, also show tab-specific query parameters.
@@ -431,6 +433,7 @@ export function stateFromLocation(
     pathInZipFile: query.file || null,
     profileName: query.profileName,
     showTabOnly: showTabOnly,
+    symbolServerUrl: query.symbolServer || null,
     profileSpecific: {
       implementation,
       lastSelectedCallTreeSummaryStrategy: toValidCallTreeSummaryStrategy(

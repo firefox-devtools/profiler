@@ -426,6 +426,10 @@ const showTabOnly: Reducer<BrowsingContextID | null> = (
   }
 };
 
+const symbolServerUrl: Reducer<string | null> = (state = null) => {
+  return state;
+};
+
 /**
  * These values are specific to an individual full profile.
  */
@@ -511,6 +515,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     profileSpecific,
     profileName,
     showTabOnly,
+    symbolServerUrl,
   })
 );
 
