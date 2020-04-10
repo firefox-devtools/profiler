@@ -4,6 +4,8 @@
 
 // @flow
 import { createSelector } from 'reselect';
+import clamp from 'clamp';
+
 import {
   getProfile,
   getProfileRootRange,
@@ -209,8 +211,10 @@ export const getUploadProgress: Selector<number> = createSelector(
   getUploadState,
   ({ uploadProgress }) =>
     // Create a minimum value of 0.1 so that there is at least some user feedback
-    // that the upload started.
-    Math.max(uploadProgress, 0.1)
+    // that the upload started, and a maximum value of 0.95 so that the user
+    // doesn't wait with a full bar (there's still some work to do after the
+    // uplod succeeds).
+    clamp(uploadProgress, 0.1, 0.95)
 );
 
 export const getUploadError: Selector<Error | mixed> = state =>
