@@ -206,7 +206,7 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
   }
 }
 
-class Timeline extends React.PureComponent<Props, State> {
+class FullTimeline extends React.PureComponent<Props, State> {
   state = {
     initialSelected: null,
   };
@@ -328,5 +328,5 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     changeRightClickedTrack,
     changeViewAndRecomputeProfileData,
   },
-  component: withSize<Props>(Timeline),
+  component: withSize<Props>(FullTimeline),
 });
