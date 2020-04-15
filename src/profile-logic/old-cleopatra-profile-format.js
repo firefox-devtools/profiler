@@ -48,7 +48,7 @@ type OldCleopatraSample = {
 
 type OldCleopatraProfileThread = {
   samples: OldCleopatraSample[],
-  markers: OldCleopatraMarker[],
+  markers?: OldCleopatraMarker[],
   name: string,
 };
 
@@ -182,35 +182,37 @@ function _convertThread(
       'uss' in sample.extraInfo ? sample.extraInfo.uss : null;
   }
 
-  for (let i = 0; i < thread.markers.length; i++) {
-    const marker = thread.markers[i];
-    const markerIndex = markers.length++;
-    const data = marker.data;
-    if (data && 'stack' in data) {
-      // data.stack is an array of strings
-      const stackIndex = convertStack(
-        data.stack.map(s => stringTable.indexForString(s))
-      );
-      data.stack = {
-        markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
-        name: 'SyncProfile',
-        samples: {
-          schema: {
-            stack: 0,
-            time: 1,
-            responsiveness: 2,
-            rss: 3,
-            uss: 4,
-            frameNumber: 5,
-            power: 6,
+  if (thread.markers !== undefined) {
+    for (let i = 0; i < thread.markers.length; i++) {
+      const marker = thread.markers[i];
+      const markerIndex = markers.length++;
+      const data = marker.data;
+      if (data && 'stack' in data) {
+        // data.stack is an array of strings
+        const stackIndex = convertStack(
+          data.stack.map(s => stringTable.indexForString(s))
+        );
+        data.stack = {
+          markers: { schema: { name: 0, time: 1, data: 2 }, data: [] },
+          name: 'SyncProfile',
+          samples: {
+            schema: {
+              stack: 0,
+              time: 1,
+              responsiveness: 2,
+              rss: 3,
+              uss: 4,
+              frameNumber: 5,
+              power: 6,
+            },
+            data: [[stackIndex, marker.time]],
           },
-          data: [[stackIndex, marker.time]],
-        },
-      };
+        };
+      }
+      markers.data[markerIndex] = marker.data;
+      markers.name[markerIndex] = stringTable.indexForString(marker.name);
+      markers.time[markerIndex] = marker.time;
     }
-    markers.data[markerIndex] = marker.data;
-    markers.name[markerIndex] = stringTable.indexForString(marker.name);
-    markers.time[markerIndex] = marker.time;
   }
 
   const funcTable = {
