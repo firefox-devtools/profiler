@@ -26,7 +26,8 @@ type TracingEventUnion =
   | ProfileChunkEvent
   | CpuProfileEvent
   | ThreadNameEvent
-  | ProcessNameEvent;
+  | ProcessNameEvent
+  | ProcessLabelsEvent;
 
 type TracingEvent<Event> = {|
   cat: string,
@@ -109,6 +110,12 @@ type ProcessNameEvent = TracingEvent<{|
   name: 'process_name',
   ph: 'm' | 'M',
   args: { name: string },
+|}>;
+
+type ProcessLabelsEvent = TracingEvent<{|
+  name: 'process_labels',
+  ph: 'm' | 'M',
+  args: { labels: string },
 |}>;
 
 type ScreenshotEvent = TracingEvent<{|
@@ -210,6 +217,22 @@ function getThreadInfo<T: Object>(
   );
   if (processNameEvent) {
     thread.processName = processNameEvent.args.name;
+  }
+
+  // Add any process "labels" to the process name. For renderer processes, the
+  // process label is often the page title of a relevant tab.
+  const processLabelsEvent = findEvent<ProcessLabelsEvent>(
+    eventsByName,
+    'process_labels',
+    e => e.pid === chunk.pid
+  );
+  if (processLabelsEvent) {
+    const labels = processLabelsEvent.args.labels;
+    if (thread.processName) {
+      thread.processName = `${thread.processName} (${labels})`;
+    } else {
+      thread.processName = `Process ${chunk.pid} (${labels})`;
+    }
   }
 
   profile.threads.push(thread);
