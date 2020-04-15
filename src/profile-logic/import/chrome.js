@@ -27,7 +27,9 @@ type TracingEventUnion =
   | CpuProfileEvent
   | ThreadNameEvent
   | ProcessNameEvent
-  | ProcessLabelsEvent;
+  | ProcessLabelsEvent
+  | ProcessSortIndexEvent
+  | ThreadSortIndexEvent;
 
 type TracingEvent<Event> = {|
   cat: string,
@@ -118,6 +120,18 @@ type ProcessLabelsEvent = TracingEvent<{|
   args: { labels: string },
 |}>;
 
+type ProcessSortIndexEvent = TracingEvent<{|
+  name: 'process_sort_index',
+  ph: 'm' | 'M',
+  args: { sort_index: number },
+|}>;
+
+type ThreadSortIndexEvent = TracingEvent<{|
+  name: 'thread_sort_index',
+  ph: 'm' | 'M',
+  args: { sort_index: number },
+|}>;
+
 type ScreenshotEvent = TracingEvent<{|
   name: 'Screenshot',
   ph: 'O',
@@ -174,6 +188,10 @@ type ThreadInfo = {
   originToResourceIndex: Map<string, IndexIntoResourceTable>,
   lastSeenTime: number,
   lastSampledTime: number,
+  pid: number,
+  processSortIndex: number,
+  threadSortIndex: number,
+  tieBreakerIndex: number,
 };
 
 function findEvent<T: TracingEventUnion>(
@@ -187,6 +205,7 @@ function findEvent<T: TracingEventUnion>(
 
 function getThreadInfo<T: Object>(
   threadInfoByTid: Map<number, ThreadInfo>,
+  threadInfoByThread: Map<Thread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   chunk: TracingEvent<T>
@@ -235,6 +254,33 @@ function getThreadInfo<T: Object>(
     }
   }
 
+  const processSortIndexEvent = findEvent<ProcessSortIndexEvent>(
+    eventsByName,
+    'process_sort_index',
+    e => e.pid === chunk.pid
+  );
+  let processSortIndex = 0;
+  if (processSortIndexEvent) {
+    processSortIndex = processSortIndexEvent.args.sort_index;
+  }
+
+  const threadSortIndexEvent = findEvent<ThreadSortIndexEvent>(
+    eventsByName,
+    'thread_sort_index',
+    e => e.pid === chunk.pid && e.tid === chunk.tid
+  );
+  let threadSortIndex = 0;
+  if (threadSortIndexEvent) {
+    threadSortIndex = threadSortIndexEvent.args.sort_index;
+  } else if (
+    threadNameEvent &&
+    (threadNameEvent.args.name === 'CrBrowserMain' ||
+      threadNameEvent.args.name === 'CrGpuMain')
+  ) {
+    // These threads are their process's main thread but for some reason they don't always come with sort index events.
+    threadSortIndex = -1;
+  }
+
   profile.threads.push(thread);
 
   const nodeIdToStackId = new Map();
@@ -247,8 +293,13 @@ function getThreadInfo<T: Object>(
     originToResourceIndex: new Map(),
     lastSeenTime: chunk.ts / 1000,
     lastSampledTime: 0,
+    pid: chunk.pid,
+    processSortIndex,
+    threadSortIndex,
+    tieBreakerIndex: threadInfoByThread.size,
   };
   threadInfoByTid.set(chunk.tid, threadInfo);
+  threadInfoByThread.set(thread, threadInfo);
   return threadInfo;
 }
 
@@ -335,11 +386,13 @@ async function processTracingEvents(
   const getFunctionInfo = makeFunctionInfoFinder(profile.meta.categories);
 
   const threadInfoByTid = new Map();
+  const threadInfoByThread = new Map();
   for (const chunkOrCpuProfileEvent of profileEvents) {
     // The thread info is all of the data that makes it possible to process an
     // individual thread.
     const threadInfo = getThreadInfo(
       threadInfoByTid,
+      threadInfoByThread,
       eventsByName,
       profile,
       chunkOrCpuProfileEvent
@@ -510,18 +563,39 @@ async function processTracingEvents(
 
   await extractScreenshots(
     threadInfoByTid,
+    threadInfoByThread,
     eventsByName,
     profile,
     (eventsByName.get('Screenshot'): any)
   );
 
-  extractMarkers(threadInfoByTid, eventsByName, profile);
+  extractMarkers(threadInfoByTid, threadInfoByThread, eventsByName, profile);
+
+  profile.threads.sort((threadA, threadB) => {
+    const threadInfoA = threadInfoByThread.get(threadA);
+    const threadInfoB = threadInfoByThread.get(threadB);
+    if (!threadInfoA || !threadInfoB) {
+      console.error({ threadA, threadB });
+      throw new Error('Unexpected thread');
+    }
+    if (threadInfoA.pid === threadInfoB.pid) {
+      if (threadInfoA.threadSortIndex !== threadInfoB.threadSortIndex) {
+        return threadInfoA.threadSortIndex - threadInfoB.threadSortIndex;
+      }
+    } else {
+      if (threadInfoA.processSortIndex !== threadInfoB.processSortIndex) {
+        return threadInfoA.processSortIndex - threadInfoB.processSortIndex;
+      }
+    }
+    return threadInfoA.tieBreakerIndex - threadInfoB.tieBreakerIndex;
+  });
 
   return profile;
 }
 
 async function extractScreenshots(
   threadInfoByTid: Map<number, ThreadInfo>,
+  threadInfoByThread: Map<Thread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   screenshots: ?(ScreenshotEvent[])
@@ -536,6 +610,7 @@ async function extractScreenshots(
   }
   const { thread } = getThreadInfo(
     threadInfoByTid,
+    threadInfoByThread,
     eventsByName,
     profile,
     screenshots[0]
@@ -617,6 +692,7 @@ function assertStackOrdering(stackTable: StackTable) {
  */
 function extractMarkers(
   threadInfoByTid: Map<number, ThreadInfo>,
+  threadInfoByThread: Map<Thread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile
 ) {
@@ -658,6 +734,7 @@ function extractMarkers(
         const time: number = (event.ts: any) / 1000;
         const threadInfo = getThreadInfo(
           threadInfoByTid,
+          threadInfoByThread,
           eventsByName,
           profile,
           event
