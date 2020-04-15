@@ -356,7 +356,8 @@ async function processTracingEvents(
           funcTable.address.push(-1);
           funcTable.isJS.push(isJS);
           funcTable.relevantForJS.push(relevantForJS);
-          funcTable.name.push(stringTable.indexForString(functionName));
+          const name = functionName !== '' ? functionName : '(anonymous)';
+          funcTable.name.push(stringTable.indexForString(name));
           funcTable.resource.push(-1);
           funcTable.fileName.push(
             url === undefined ? null : stringTable.indexForString(url)
