@@ -288,10 +288,5 @@ function _formatLabel(meta: ProfileMeta): string {
   } else {
     os = meta.oscpu || '';
   }
-  const labelTitle = product + ' (' + version + ') ' + os;
-
-  if (labelTitle.length < 5) {
-    return '';
-  }
-  return labelTitle;
+  return product + (version ? ` (${version})` : '') + (os ? ` ${os}` : '');
 }

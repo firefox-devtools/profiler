@@ -672,7 +672,7 @@ exports[`app/MenuButtons <Publish> matches the snapshot for the closed state 1`]
       <input
         class="buttonWithPanelButton menuButtonsMetaInfoButtonButton"
         type="button"
-        value="Firefox () "
+        value="Firefox"
       />
     </div>
     <div

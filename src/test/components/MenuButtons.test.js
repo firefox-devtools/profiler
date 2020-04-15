@@ -340,7 +340,7 @@ describe('<MenuButtonsMetaInfo>', function() {
 
       // Open up the arrow panel for the test.
       const { getByValue } = setupResult;
-      fireEvent.click(getByValue('Firefox ()'));
+      fireEvent.click(getByValue('Firefox'));
       jest.runAllTimers();
 
       return setupResult;
