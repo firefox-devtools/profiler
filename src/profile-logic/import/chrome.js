@@ -23,6 +23,7 @@ import { getOrCreateURIResource } from '../../profile-logic/profile-data';
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 
 type TracingEventUnion =
+  | ProfileEvent
   | ProfileChunkEvent
   | CpuProfileEvent
   | ThreadNameEvent
@@ -34,7 +35,6 @@ type TracingEventUnion =
 
 type TracingEvent<Event> = {|
   cat: string,
-  id: string,
   // List out all known phase values, but then also allow strings. This will get
   // overwritten by the `...Event` line, which will put in the exact phase.
   ph: string, // Phase
@@ -45,6 +45,17 @@ type TracingEvent<Event> = {|
   dur?: number, // Time duration
   ...Event,
 |};
+
+type ProfileEvent = TracingEvent<{|
+  name: 'Profile',
+  args: {
+    data: {
+      startTime: number,
+    },
+  },
+  ph: 'P',
+  id: string,
+|}>;
 
 type ProfileChunkEvent = TracingEvent<{|
   name: 'ProfileChunk',
@@ -68,6 +79,7 @@ type ProfileChunkEvent = TracingEvent<{|
     },
   },
   ph: 'P',
+  id: string,
 |}>;
 
 // The CpuProfileEvent format is similar to the ProfileChunkEvent format.
@@ -202,6 +214,18 @@ function findEvent<T: TracingEventUnion>(
 ): T | void {
   const events: T[] | void = (eventsByName.get(name): any);
   return events ? events.find(f) : undefined;
+}
+
+function findEvents<T: Object>(
+  eventsByName: Map<string, TracingEventUnion[]>,
+  name: string,
+  f: T => boolean
+): T[] {
+  const events: T[] | void = (eventsByName.get(name): any);
+  if (!events) {
+    return [];
+  }
+  return events.filter(f);
 }
 
 function getThreadInfo(
@@ -376,8 +400,13 @@ async function processTracingEvents(
   const profile = getEmptyProfile();
   profile.meta.product = 'Chrome Trace';
 
-  let profileEvents: (ProfileChunkEvent | CpuProfileEvent)[] =
-    (eventsByName.get('ProfileChunk'): any) || [];
+  // Choose 500us as a somewhat reasonable sampling interval. When converting
+  // the chrome profile, this function samples the chrome profile, and generates
+  // new samples on our target interval of 500us.
+  profile.meta.interval = 0.5;
+
+  let profileEvents: (ProfileEvent | CpuProfileEvent)[] =
+    (eventsByName.get('Profile'): any) || [];
 
   if (eventsByName.has('CpuProfile')) {
     const cpuProfiles: CpuProfileEvent[] = (eventsByName.get(
@@ -390,7 +419,7 @@ async function processTracingEvents(
 
   const threadInfoByPidAndTid = new Map();
   const threadInfoByThread = new Map();
-  for (const chunkOrCpuProfileEvent of profileEvents) {
+  for (const profileEvent of profileEvents) {
     // The thread info is all of the data that makes it possible to process an
     // individual thread.
     const threadInfo = getThreadInfo(
@@ -398,7 +427,7 @@ async function processTracingEvents(
       threadInfoByThread,
       eventsByName,
       profile,
-      chunkOrCpuProfileEvent
+      profileEvent
     );
     const {
       thread,
@@ -406,156 +435,165 @@ async function processTracingEvents(
       nodeIdToStackId,
       originToResourceIndex,
     } = threadInfo;
-    const { cpuProfile } = chunkOrCpuProfileEvent.args.data;
-    const { nodes, samples } = cpuProfile;
-    const timeDeltas = getTimeDeltas(chunkOrCpuProfileEvent);
-    if (!timeDeltas) {
-      continue;
+
+    let profileChunks = [];
+    if (profileEvent.name === 'Profile') {
+      threadInfo.lastSeenTime = (profileEvent.args.data.startTime: any) / 1000;
+      const id = profileEvent.id;
+      profileChunks = findEvents<ProfileChunkEvent>(
+        eventsByName,
+        'ProfileChunk',
+        e => e.id === id
+      );
+    } else if (profileEvent.name === 'CpuProfile') {
+      threadInfo.lastSeenTime =
+        (profileEvent.args.data.cpuProfile.startTime: any) / 1000;
+      profileChunks = [profileEvent];
     }
 
-    if (cpuProfile.startTime !== undefined) {
-      threadInfo.lastSeenTime = (cpuProfile.startTime: any) / 1000;
-    }
-
-    const {
-      funcTable,
-      frameTable,
-      stackTable,
-      stringTable,
-      samples: samplesTable,
-      resourceTable,
-    } = thread;
-
-    if (nodes) {
-      const parentMap = new Map();
-      for (const node of nodes) {
-        const { callFrame, id: nodeIndex } = node;
-        let parent: number | void = undefined;
-        if (node.parent !== undefined) {
-          parent = (node.parent: any);
-        } else {
-          parent = parentMap.get(nodeIndex);
-        }
-        if (node.children !== undefined) {
-          const children: number[] = (node.children: any);
-          for (let i = 0; i < children.length; i++) {
-            parentMap.set(children[i], nodeIndex);
-          }
-        }
-
-        // Canonicalize frame info. The way "no data" is expressed changed a bit
-        // between different Chrome profile versions.
-        let { url, lineNumber, columnNumber } = callFrame;
-        if (lineNumber === -1) {
-          lineNumber = undefined;
-        }
-        if (columnNumber === -1) {
-          columnNumber = undefined;
-        }
-        if (url === '') {
-          url = undefined;
-        }
-
-        const { functionName } = callFrame;
-        const funcKey = `${functionName}:${url || ''}:${lineNumber ||
-          0}:${columnNumber || 0}`;
-        const { category, isJS, relevantForJS } = getFunctionInfo(
-          functionName,
-          url !== undefined || lineNumber !== undefined
-        );
-        let funcId = funcKeyToFuncId.get(funcKey);
-
-        if (funcId === undefined) {
-          // The function did not exist.
-          funcId = funcTable.length++;
-          funcTable.address.push(-1);
-          funcTable.isJS.push(isJS);
-          funcTable.relevantForJS.push(relevantForJS);
-          const name = functionName !== '' ? functionName : '(anonymous)';
-          funcTable.name.push(stringTable.indexForString(name));
-          funcTable.resource.push(
-            isJS
-              ? getOrCreateURIResource(
-                  url || '<unknown>',
-                  resourceTable,
-                  stringTable,
-                  originToResourceIndex
-                )
-              : -1
-          );
-          funcTable.fileName.push(
-            isJS ? stringTable.indexForString(url || '<unknown>') : null
-          );
-          funcTable.lineNumber.push(
-            lineNumber === undefined ? null : lineNumber
-          );
-          funcTable.columnNumber.push(
-            columnNumber === undefined ? null : columnNumber
-          );
-          funcKeyToFuncId.set(funcKey, funcId);
-        }
-
-        // Node indexes start at 1, while frame indexes start at 0.
-        const frameIndex = nodeIndex - 1;
-        const prefixStackIndex = nodeIdToStackId.get(parent);
-        if (prefixStackIndex === undefined) {
-          throw new Error(
-            'Unable to find the prefix stack index from a node index.'
-          );
-        }
-        frameTable.address[frameIndex] = -1;
-        frameTable.category[frameIndex] = category;
-        frameTable.subcategory[frameIndex] = 0;
-        frameTable.func[frameIndex] = funcId;
-        frameTable.innerWindowID[frameIndex] = 0;
-        frameTable.implementation[frameIndex] = null;
-        frameTable.line[frameIndex] =
-          lineNumber === undefined ? null : lineNumber;
-        frameTable.column[frameIndex] =
-          columnNumber === undefined ? null : columnNumber;
-        frameTable.optimizations[frameIndex] = null;
-        frameTable.length = Math.max(frameTable.length, frameIndex + 1);
-
-        stackTable.frame.push(frameIndex);
-        stackTable.category.push(category);
-        stackTable.subcategory.push(0);
-        stackTable.prefix.push(prefixStackIndex);
-        nodeIdToStackId.set(nodeIndex, stackTable.length++);
+    for (const profileChunk of profileChunks) {
+      const { cpuProfile } = profileChunk.args.data;
+      const { nodes, samples } = cpuProfile;
+      const timeDeltas = getTimeDeltas(profileChunk);
+      if (!timeDeltas) {
+        continue;
       }
-    }
 
-    // Chrome profiles sample much more frequently than Gecko ones do, and they store
-    // the time delta between each sampling event. In order to properly reconstruct
-    // the data using our fixed-time intervals, sample the data at a fixed rate that
-    // is most likely slightly higher. Chrome profiles have been observed sampling
-    // between 100us to 300us. Reconstruct the profile at 500us, which is a somewhat
-    // reasonable interval.
+      const {
+        funcTable,
+        frameTable,
+        stackTable,
+        stringTable,
+        samples: samplesTable,
+        resourceTable,
+      } = thread;
 
-    // Choose 500us as a somewhat reasonable sampling interval. When converting
-    // the chrome profile, this function samples the chrome profile, and generates
-    // new samples on our target interval of 500us.
-    profile.meta.interval = 0.5;
+      if (nodes) {
+        const parentMap = new Map();
+        for (const node of nodes) {
+          const { callFrame, id: nodeIndex } = node;
+          let parent: number | void = undefined;
+          if (node.parent !== undefined) {
+            parent = (node.parent: any);
+          } else {
+            parent = parentMap.get(nodeIndex);
+          }
+          if (node.children !== undefined) {
+            const children: number[] = (node.children: any);
+            for (let i = 0; i < children.length; i++) {
+              parentMap.set(children[i], nodeIndex);
+            }
+          }
 
-    for (let i = 0; i < samples.length; i++) {
-      const nodeIndex = samples[i];
-      // Convert to milliseconds:
-      threadInfo.lastSeenTime += timeDeltas[i] / 1000;
-      if (
-        threadInfo.lastSeenTime - threadInfo.lastSampledTime >=
-        profile.meta.interval
-      ) {
-        threadInfo.lastSampledTime = threadInfo.lastSeenTime;
-        const stackIndex = ensureExists(
-          nodeIdToStackId.get(nodeIndex),
-          'Could not find the stack information for a sample when decoding a Chrome profile.'
-        );
-        ensureExists(
-          samplesTable.eventDelay,
-          'Could not find the eventDelay in samplesTable inside the newly created Chrome profile thread.'
-        ).push(null);
-        samplesTable.stack.push(stackIndex);
-        samplesTable.time.push(threadInfo.lastSampledTime);
-        samplesTable.length++;
+          // Canonicalize frame info. The way "no data" is expressed changed a bit
+          // between different Chrome profile versions.
+          let { url, lineNumber, columnNumber } = callFrame;
+          if (lineNumber === -1) {
+            lineNumber = undefined;
+          }
+          if (columnNumber === -1) {
+            columnNumber = undefined;
+          }
+          if (url === '') {
+            url = undefined;
+          }
+
+          const { functionName } = callFrame;
+          const funcKey = `${functionName}:${url || ''}:${lineNumber ||
+            0}:${columnNumber || 0}`;
+          const { category, isJS, relevantForJS } = getFunctionInfo(
+            functionName,
+            url !== undefined || lineNumber !== undefined
+          );
+          let funcId = funcKeyToFuncId.get(funcKey);
+
+          if (funcId === undefined) {
+            // The function did not exist.
+            funcId = funcTable.length++;
+            funcTable.address.push(-1);
+            funcTable.isJS.push(isJS);
+            funcTable.relevantForJS.push(relevantForJS);
+            const name = functionName !== '' ? functionName : '(anonymous)';
+            funcTable.name.push(stringTable.indexForString(name));
+            funcTable.resource.push(
+              isJS
+                ? getOrCreateURIResource(
+                    url || '<unknown>',
+                    resourceTable,
+                    stringTable,
+                    originToResourceIndex
+                  )
+                : -1
+            );
+            funcTable.fileName.push(
+              isJS ? stringTable.indexForString(url || '<unknown>') : null
+            );
+            funcTable.lineNumber.push(
+              lineNumber === undefined ? null : lineNumber
+            );
+            funcTable.columnNumber.push(
+              columnNumber === undefined ? null : columnNumber
+            );
+            funcKeyToFuncId.set(funcKey, funcId);
+          }
+
+          // Node indexes start at 1, while frame indexes start at 0.
+          const frameIndex = nodeIndex - 1;
+          const prefixStackIndex = nodeIdToStackId.get(parent);
+          if (prefixStackIndex === undefined) {
+            throw new Error(
+              'Unable to find the prefix stack index from a node index.'
+            );
+          }
+          frameTable.address[frameIndex] = -1;
+          frameTable.category[frameIndex] = category;
+          frameTable.subcategory[frameIndex] = 0;
+          frameTable.func[frameIndex] = funcId;
+          frameTable.innerWindowID[frameIndex] = 0;
+          frameTable.implementation[frameIndex] = null;
+          frameTable.line[frameIndex] =
+            lineNumber === undefined ? null : lineNumber;
+          frameTable.column[frameIndex] =
+            columnNumber === undefined ? null : columnNumber;
+          frameTable.optimizations[frameIndex] = null;
+          frameTable.length = Math.max(frameTable.length, frameIndex + 1);
+
+          stackTable.frame.push(frameIndex);
+          stackTable.category.push(category);
+          stackTable.subcategory.push(0);
+          stackTable.prefix.push(prefixStackIndex);
+          nodeIdToStackId.set(nodeIndex, stackTable.length++);
+        }
+      }
+
+      // Chrome profiles sample much more frequently than Gecko ones do, and they store
+      // the time delta between each sampling event. In order to properly reconstruct
+      // the data using our fixed-time intervals, sample the data at a fixed rate that
+      // is most likely slightly higher. Chrome profiles have been observed sampling
+      // between 100us to 300us. Reconstruct the profile at 500us, which is a somewhat
+      // reasonable interval.
+
+      for (let i = 0; i < samples.length; i++) {
+        const nodeIndex = samples[i];
+        // Convert to milliseconds:
+        threadInfo.lastSeenTime += timeDeltas[i] / 1000;
+        if (
+          threadInfo.lastSeenTime - threadInfo.lastSampledTime >=
+          profile.meta.interval
+        ) {
+          threadInfo.lastSampledTime = threadInfo.lastSeenTime;
+          const stackIndex = ensureExists(
+            nodeIdToStackId.get(nodeIndex),
+            'Could not find the stack information for a sample when decoding a Chrome profile.'
+          );
+          ensureExists(
+            samplesTable.eventDelay,
+            'Could not find the eventDelay in samplesTable inside the newly created Chrome profile thread.'
+          ).push(null);
+          samplesTable.stack.push(stackIndex);
+          samplesTable.time.push(threadInfo.lastSampledTime);
+          samplesTable.length++;
+        }
       }
     }
   }
