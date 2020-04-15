@@ -11,7 +11,10 @@ import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 import { oneLine } from 'common-tags';
 
-import { changeTimelineType } from '../../actions/profile-view';
+import {
+  changeTimelineType,
+  changeInvertCallstack,
+} from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
 import { getPreviewSelection } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -180,28 +183,45 @@ describe('timeline/TrackThread', function() {
   });
 
   it('can click a stack in the stack graph in inverted call trees', function() {
-    const { getState, stackGraphCanvas, thread } = setup(getSamplesProfile());
+    const { dispatch, getState, stackGraphCanvas, thread } = setup(
+      getSamplesProfile()
+    );
 
-    // Provide a quick helper for nicely asserting the inverted call node path.
-    const getInvertedCallNodePath = () =>
+    dispatch(changeInvertCallstack(true));
+
+    // Provide a quick helper for nicely asserting the call node path.
+    const getCallNodePath = () =>
       selectedThreadSelectors
         .getSelectedCallNodePath(getState())
         .map(funcIndex =>
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
-        )
-        .reverse();
+        );
 
     fireEvent(
       stackGraphCanvas(),
       getMouseEvent('mouseup', { pageX: STACK_1_X_POSITION })
     );
-    expect(getInvertedCallNodePath()).toEqual(['c', 'b', 'a']);
+    expect(getCallNodePath()).toEqual(['c']);
 
     fireEvent(
       stackGraphCanvas(),
       getMouseEvent('mouseup', { pageX: STACK_3_X_POSITION })
     );
-    expect(getInvertedCallNodePath()).toEqual(['i', 'h', 'g']);
+    expect(getCallNodePath()).toEqual(['i']);
+
+    dispatch(changeInvertCallstack(false));
+
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_1_X_POSITION })
+    );
+    expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
+
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_3_X_POSITION })
+    );
+    expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
   });
 
   it('can click a marker', function() {
