@@ -382,6 +382,59 @@ describe('actions/receive-profile', function() {
       ]);
     });
 
+    it('will not hide audio tracks if they have at least one sample', function() {
+      const store = blankStore();
+
+      const idleThread: Array<string> = (Array.from({
+        length: 100,
+      }): any).fill('idle[cat:Idle]');
+      const idleThreadString = idleThread.join('  ');
+
+      // We want 1 work sample in 100 samples for each thread.
+      const oneWorkSampleThread = idleThread.slice();
+      oneWorkSampleThread[1] = 'work';
+      const oneWorkSampleThreadString = oneWorkSampleThread.join('  ');
+
+      const { profile } = getProfileFromTextSamples(
+        oneWorkSampleThreadString, // AudioIPC
+        oneWorkSampleThreadString, // MediaPDecoder
+        oneWorkSampleThreadString, // MediaTimer
+        oneWorkSampleThreadString, // MediaPlayback
+        oneWorkSampleThreadString, // MediaDecoderStateMachine
+        idleThreadString, // AudioIPC
+        idleThreadString, // MediaPDecoder
+        idleThreadString, // MediaTimer
+        idleThreadString, // MediaPlayback
+        idleThreadString // MediaDecoderStateMachine
+      );
+
+      profile.threads[0].name = 'AudioIPC work';
+      profile.threads[1].name = 'MediaPDecoder work';
+      profile.threads[2].name = 'MediaTimer work';
+      profile.threads[3].name = 'MediaPlayback work';
+      profile.threads[4].name = 'MediaDecoderStateMachine work';
+      profile.threads[5].name = 'AudioIPC idle';
+      profile.threads[6].name = 'MediaPDecoder idle';
+      profile.threads[7].name = 'MediaTimer idle';
+      profile.threads[8].name = 'MediaPlayback idle';
+      profile.threads[9].name = 'MediaDecoderStateMachine idle';
+
+      store.dispatch(viewProfile(profile));
+      expect(getHumanReadableTracks(store.getState())).toEqual([
+        'show [process]',
+        '  - show [thread AudioIPC work] SELECTED',
+        '  - show [thread MediaPDecoder work]',
+        '  - show [thread MediaTimer work]',
+        '  - show [thread MediaPlayback work]',
+        '  - show [thread MediaDecoderStateMachine work]',
+        '  - hide [thread AudioIPC idle]',
+        '  - hide [thread MediaPDecoder idle]',
+        '  - hide [thread MediaTimer idle]',
+        '  - hide [thread MediaPlayback idle]',
+        '  - hide [thread MediaDecoderStateMachine idle]',
+      ]);
+    });
+
     describe('finalizeActiveTabProfileView', function() {
       const browsingContextID = 123;
       const innerWindowID = 111111;
