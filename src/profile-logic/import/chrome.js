@@ -321,6 +321,7 @@ async function processTracingEvents(
   eventsByName: Map<string, TracingEventUnion[]>
 ): Promise<Profile> {
   const profile = getEmptyProfile();
+  profile.meta.product = 'Chrome Trace';
   let profileEvents: (ProfileChunkEvent | CpuProfileEvent)[] =
     (eventsByName.get('ProfileChunk'): any) || [];
 
