@@ -8,6 +8,7 @@ import type {
   Thread,
   IndexIntoFuncTable,
   IndexIntoStackTable,
+  IndexIntoResourceTable,
 } from '../../types/profile';
 
 import {
@@ -15,6 +16,8 @@ import {
   getEmptyThread,
 } from '../../profile-logic/data-structures';
 import { ensureExists } from '../../utils/flow';
+
+import { getOrCreateURIResource } from '../../profile-logic/profile-data';
 
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
@@ -151,6 +154,7 @@ type ThreadInfo = {
   thread: Thread,
   funcKeyToFuncId: Map<string, IndexIntoFuncTable>,
   nodeIdToStackId: Map<number | void, IndexIntoStackTable | null>,
+  originToResourceIndex: Map<string, IndexIntoResourceTable>,
   lastSeenTime: number,
   lastSampledTime: number,
 };
@@ -193,6 +197,7 @@ function getThreadInfo<T: Object>(
     thread,
     nodeIdToStackId,
     funcKeyToFuncId: new Map(),
+    originToResourceIndex: new Map(),
     lastSeenTime: chunk.ts / 1000,
     lastSampledTime: 0,
   };
@@ -291,7 +296,12 @@ async function processTracingEvents(
       profile,
       chunkOrCpuProfileEvent
     );
-    const { thread, funcKeyToFuncId, nodeIdToStackId } = threadInfo;
+    const {
+      thread,
+      funcKeyToFuncId,
+      nodeIdToStackId,
+      originToResourceIndex,
+    } = threadInfo;
     const { cpuProfile } = chunkOrCpuProfileEvent.args.data;
     const { nodes, samples } = cpuProfile;
     const timeDeltas = getTimeDeltas(chunkOrCpuProfileEvent);
@@ -309,6 +319,7 @@ async function processTracingEvents(
       stackTable,
       stringTable,
       samples: samplesTable,
+      resourceTable,
     } = thread;
 
     if (nodes) {
@@ -358,7 +369,16 @@ async function processTracingEvents(
           funcTable.relevantForJS.push(relevantForJS);
           const name = functionName !== '' ? functionName : '(anonymous)';
           funcTable.name.push(stringTable.indexForString(name));
-          funcTable.resource.push(-1);
+          funcTable.resource.push(
+            url === undefined
+              ? -1
+              : getOrCreateURIResource(
+                  url,
+                  resourceTable,
+                  stringTable,
+                  originToResourceIndex
+                )
+          );
           funcTable.fileName.push(
             url === undefined ? null : stringTable.indexForString(url)
           );
