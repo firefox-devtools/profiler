@@ -19,7 +19,7 @@ import { ensureExists } from '../../utils/flow';
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 
-type TracingEventUnion = ProfileChunkEvent | ThreadNameEvent;
+type TracingEventUnion = ProfileChunkEvent | CpuProfileEvent | ThreadNameEvent;
 
 type TracingEvent<Event> = {|
   cat: string,
@@ -57,6 +57,39 @@ type ProfileChunkEvent = TracingEvent<{|
     },
   },
   ph: 'P',
+|}>;
+
+// The CpuProfileEvent format is similar to the ProfileChunkEvent format.
+// Presumably, one of them is the newer format the other is the older format.
+// The differences are:
+//  - The timeDeltas field is in a different place in the structure
+//  - The parent <-> child relationship between nodes is indicated in the
+//    opposite direction: ProfileChunkEvent has a "parent" field on each nodes,
+//    CpuProfileEvent has a "children" field on each node.
+type CpuProfileEvent = TracingEvent<{|
+  name: 'CpuProfile',
+  args: {
+    data: {
+      cpuProfile: {
+        nodes?: Array<{
+          callFrame: {
+            functionName: string,
+            scriptId: number,
+            lineNumber?: number,
+            columnNumber?: number,
+            url?: string,
+          },
+          id: number,
+          children?: number[],
+        }>,
+        samples: number[], // Index into cpuProfile nodes
+        timeDeltas: number[],
+        startTime: number,
+        endTime: number,
+      },
+    },
+  },
+  ph: 'I',
 |}>;
 
 type ThreadNameEvent = TracingEvent<{|
@@ -167,12 +200,33 @@ function getThreadInfo<T: Object>(
   return threadInfo;
 }
 
+function getTimeDeltas(
+  event: ProfileChunkEvent | CpuProfileEvent
+): number[] | void {
+  switch (event.name) {
+    case 'ProfileChunk':
+      return event.args.data.timeDeltas;
+    case 'CpuProfile':
+      return event.args.data.cpuProfile.timeDeltas;
+    default:
+      return undefined;
+  }
+}
+
 async function processTracingEvents(
   eventsByName: Map<string, TracingEventUnion[]>
 ): Promise<Profile> {
   const profile = getEmptyProfile();
-  const profileChunks: ProfileChunkEvent[] =
+  let profileEvents: (ProfileChunkEvent | CpuProfileEvent)[] =
     (eventsByName.get('ProfileChunk'): any) || [];
+
+  if (eventsByName.has('CpuProfile')) {
+    const cpuProfiles: CpuProfileEvent[] = (eventsByName.get(
+      'CpuProfile'
+    ): any);
+    profileEvents = profileEvents.concat(cpuProfiles);
+  }
+
   const javascriptCategoryIndex = profile.meta.categories.findIndex(
     category => category.name === 'JavaScript'
   );
@@ -183,20 +237,27 @@ async function processTracingEvents(
   }
 
   const threadInfoByTid = new Map();
-  for (const chunk of profileChunks) {
+  for (const chunkOrCpuProfileEvent of profileEvents) {
     // The thread info is all of the data that makes it possible to process an
     // individual thread.
     const threadInfo = getThreadInfo(
       threadInfoByTid,
       eventsByName,
       profile,
-      chunk
+      chunkOrCpuProfileEvent
     );
     const { thread, funcKeyToFuncId, nodeIdToStackId } = threadInfo;
-    const {
-      cpuProfile: { nodes, samples },
-      timeDeltas,
-    } = chunk.args.data;
+    const { cpuProfile } = chunkOrCpuProfileEvent.args.data;
+    const { nodes, samples } = cpuProfile;
+    const timeDeltas = getTimeDeltas(chunkOrCpuProfileEvent);
+    if (!timeDeltas) {
+      continue;
+    }
+
+    if (cpuProfile.startTime !== undefined) {
+      threadInfo.lastSeenTime = (cpuProfile.startTime: any) / 1000;
+    }
+
     const {
       funcTable,
       frameTable,
@@ -206,7 +267,21 @@ async function processTracingEvents(
     } = thread;
 
     if (nodes) {
-      for (const { callFrame, id: nodeIndex, parent } of nodes) {
+      const parentMap = new Map();
+      for (const node of nodes) {
+        const { callFrame, id: nodeIndex } = node;
+        let parent: number | void = undefined;
+        if (node.parent !== undefined) {
+          parent = (node.parent: any);
+        } else {
+          parent = parentMap.get(nodeIndex);
+        }
+        if (node.children !== undefined) {
+          const children: number[] = (node.children: any);
+          for (let i = 0; i < children.length; i++) {
+            parentMap.set(children[i], nodeIndex);
+          }
+        }
         const { functionName, url, lineNumber, columnNumber } = callFrame;
         const funcKey = `${functionName}:${url || ''}:${lineNumber ||
           ''}:${columnNumber || ''}`;
