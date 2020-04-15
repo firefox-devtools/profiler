@@ -22,7 +22,11 @@ import { getOrCreateURIResource } from '../../profile-logic/profile-data';
 // Chrome Tracing Event Spec:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 
-type TracingEventUnion = ProfileChunkEvent | CpuProfileEvent | ThreadNameEvent;
+type TracingEventUnion =
+  | ProfileChunkEvent
+  | CpuProfileEvent
+  | ThreadNameEvent
+  | ProcessNameEvent;
 
 type TracingEvent<Event> = {|
   cat: string,
@@ -97,7 +101,13 @@ type CpuProfileEvent = TracingEvent<{|
 
 type ThreadNameEvent = TracingEvent<{|
   name: 'thread_name',
-  ph: 'm',
+  ph: 'm' | 'M',
+  args: { name: string },
+|}>;
+
+type ProcessNameEvent = TracingEvent<{|
+  name: 'process_name',
+  ph: 'm' | 'M',
   args: { name: string },
 |}>;
 
@@ -159,6 +169,15 @@ type ThreadInfo = {
   lastSampledTime: number,
 };
 
+function findEvent<T: TracingEventUnion>(
+  eventsByName: Map<string, TracingEventUnion[]>,
+  name: string,
+  f: T => boolean
+): T | void {
+  const events: T[] | void = (eventsByName.get(name): any);
+  return events ? events.find(f) : undefined;
+}
+
 function getThreadInfo<T: Object>(
   threadInfoByTid: Map<number, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
@@ -175,17 +194,22 @@ function getThreadInfo<T: Object>(
 
   // Attempt to find a name for this thread:
   thread.name = 'Chrome Thread';
-  const threadNameChunks: ThreadNameEvent[] | void = (eventsByName.get(
-    'thread_name'
-  ): any);
+  const threadNameEvent = findEvent<ThreadNameEvent>(
+    eventsByName,
+    'thread_name',
+    e => e.tid === chunk.tid
+  );
+  if (threadNameEvent) {
+    thread.name = threadNameEvent.args.name;
+  }
 
-  if (threadNameChunks) {
-    const threadNameChunk = threadNameChunks.find(
-      thread => thread.tid === chunk.tid
-    );
-    if (threadNameChunk) {
-      thread.name = threadNameChunk.args.name;
-    }
+  const processNameEvent = findEvent<ProcessNameEvent>(
+    eventsByName,
+    'process_name',
+    e => e.pid === chunk.pid
+  );
+  if (processNameEvent) {
+    thread.processName = processNameEvent.args.name;
   }
 
   profile.threads.push(thread);
