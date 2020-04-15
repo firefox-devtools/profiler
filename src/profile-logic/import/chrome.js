@@ -204,13 +204,14 @@ function findEvent<T: TracingEventUnion>(
 }
 
 function getThreadInfo<T: Object>(
-  threadInfoByTid: Map<number, ThreadInfo>,
+  threadInfoByPidAndTid: Map<string, ThreadInfo>,
   threadInfoByThread: Map<Thread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
   chunk: TracingEvent<T>
 ): ThreadInfo {
-  const cachedThreadInfo = threadInfoByTid.get(chunk.tid);
+  const pidAndTid = `${chunk.pid}:${chunk.tid}`;
+  const cachedThreadInfo = threadInfoByPidAndTid.get(pidAndTid);
   if (cachedThreadInfo) {
     return cachedThreadInfo;
   }
@@ -223,7 +224,7 @@ function getThreadInfo<T: Object>(
   const threadNameEvent = findEvent<ThreadNameEvent>(
     eventsByName,
     'thread_name',
-    e => e.tid === chunk.tid
+    e => e.pid === chunk.pid && e.tid === chunk.tid
   );
   if (threadNameEvent) {
     thread.name = threadNameEvent.args.name;
@@ -298,7 +299,7 @@ function getThreadInfo<T: Object>(
     threadSortIndex,
     tieBreakerIndex: threadInfoByThread.size,
   };
-  threadInfoByTid.set(chunk.tid, threadInfo);
+  threadInfoByPidAndTid.set(pidAndTid, threadInfo);
   threadInfoByThread.set(thread, threadInfo);
   return threadInfo;
 }
@@ -385,13 +386,13 @@ async function processTracingEvents(
 
   const getFunctionInfo = makeFunctionInfoFinder(profile.meta.categories);
 
-  const threadInfoByTid = new Map();
+  const threadInfoByPidAndTid = new Map();
   const threadInfoByThread = new Map();
   for (const chunkOrCpuProfileEvent of profileEvents) {
     // The thread info is all of the data that makes it possible to process an
     // individual thread.
     const threadInfo = getThreadInfo(
-      threadInfoByTid,
+      threadInfoByPidAndTid,
       threadInfoByThread,
       eventsByName,
       profile,
@@ -562,14 +563,19 @@ async function processTracingEvents(
   }
 
   await extractScreenshots(
-    threadInfoByTid,
+    threadInfoByPidAndTid,
     threadInfoByThread,
     eventsByName,
     profile,
     (eventsByName.get('Screenshot'): any)
   );
 
-  extractMarkers(threadInfoByTid, threadInfoByThread, eventsByName, profile);
+  extractMarkers(
+    threadInfoByPidAndTid,
+    threadInfoByThread,
+    eventsByName,
+    profile
+  );
 
   profile.threads.sort((threadA, threadB) => {
     const threadInfoA = threadInfoByThread.get(threadA);
@@ -594,7 +600,7 @@ async function processTracingEvents(
 }
 
 async function extractScreenshots(
-  threadInfoByTid: Map<number, ThreadInfo>,
+  threadInfoByPidAndTid: Map<string, ThreadInfo>,
   threadInfoByThread: Map<Thread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
@@ -609,7 +615,7 @@ async function extractScreenshots(
     return;
   }
   const { thread } = getThreadInfo(
-    threadInfoByTid,
+    threadInfoByPidAndTid,
     threadInfoByThread,
     eventsByName,
     profile,
@@ -691,7 +697,7 @@ function assertStackOrdering(stackTable: StackTable) {
  * Create profile markers for events which are "Complete", "Duration" or "Instant" events.
  */
 function extractMarkers(
-  threadInfoByTid: Map<number, ThreadInfo>,
+  threadInfoByPidAndTid: Map<string, ThreadInfo>,
   threadInfoByThread: Map<Thread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile
@@ -733,7 +739,7 @@ function extractMarkers(
       ) {
         const time: number = (event.ts: any) / 1000;
         const threadInfo = getThreadInfo(
-          threadInfoByTid,
+          threadInfoByPidAndTid,
           threadInfoByThread,
           eventsByName,
           profile,
