@@ -407,6 +407,33 @@ export type TextMarkerPayload = {|
   endTime: Milliseconds,
 |};
 
+// ph: 'X' in the Trace Event Format
+export type ChromeCompleteTraceEventPayload = {|
+  type: 'CompleteTraceEvent',
+  category: string,
+  data: Object | null,
+  startTime: number,
+  endTime: number,
+|};
+
+// ph: 'I' in the Trace Event Format
+export type ChromeInstantTraceEventPayload = {|
+  type: 'InstantTraceEvent',
+  category: string,
+  data: Object | null,
+  startTime: number,
+  endTime: number,
+|};
+
+// ph: 'B' | 'E' in the Trace Event Format
+export type ChromeDurationTraceEventPayload = {|
+  type: 'tracing',
+  category: 'FromChrome',
+  interval: 'start' | 'end',
+  data: Object | null,
+  cause?: CauseBacktrace,
+|};
+
 /**
  * Gecko includes rich log information. This marker payload is used to mirror that
  * log information in the profile.
@@ -573,6 +600,9 @@ export type MarkerPayload =
   | NavigationMarkerPayload
   | PrefMarkerPayload
   | IPCMarkerPayload
+  | ChromeCompleteTraceEventPayload
+  | ChromeDurationTraceEventPayload
+  | ChromeInstantTraceEventPayload
   | null;
 
 export type MarkerPayload_Gecko =

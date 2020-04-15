@@ -30,6 +30,8 @@ type TracingEvent<Event> = {|
   pid: number, // Process ID
   tid: number, // Thread ID
   ts: number, // Timestamp
+  tdur?: number, // Time duration
+  dur?: number, // Time duration
   ...Event,
 |};
 
@@ -306,6 +308,8 @@ async function processTracingEvents(
     (eventsByName.get('Screenshot'): any)
   );
 
+  extractMarkers(threadInfoByTid, eventsByName, profile);
+
   return profile;
 }
 
@@ -398,5 +402,101 @@ function assertStackOrdering(stackTable: StackTable) {
       throw new Error('The stack ordering is incorrect');
     }
     visitedStacks.add(i);
+  }
+}
+
+/**
+ * Create profile markers for events which are "Complete", "Duration" or "Instant" events.
+ */
+function extractMarkers(
+  threadInfoByTid: Map<number, ThreadInfo>,
+  eventsByName: Map<string, TracingEventUnion[]>,
+  profile: Profile
+) {
+  const otherCategoryIndex = profile.meta.categories.findIndex(
+    category => category.name === 'Other'
+  );
+  if (otherCategoryIndex === -1) {
+    throw new Error('No "Other" category in empty profile category list');
+  }
+
+  for (const [name, events] of eventsByName.entries()) {
+    if (
+      name === 'Profile' ||
+      name === 'ProfileChunk' ||
+      name === 'CpuProfile'
+    ) {
+      // Don't convert these to markers because we'd be duplicating information
+      // and bloat the profile.
+      continue;
+    }
+
+    for (const event of events) {
+      // For all event types, require a timestamp value that's a finite number.
+      if (event.ts === undefined || !Number.isFinite(event.ts)) {
+        continue;
+      }
+
+      // For Complete ('X') events, require a duration.
+      // Duration events ('B' and 'E') as well as Instant events ('I') do not
+      // require any extra fields.
+      if (
+        (event.ph === 'X' &&
+          event.dur !== undefined &&
+          Number.isFinite(event.dur)) ||
+        event.ph === 'B' ||
+        event.ph === 'E' ||
+        event.ph === 'I'
+      ) {
+        const time: number = (event.ts: any) / 1000;
+        const threadInfo = getThreadInfo(
+          threadInfoByTid,
+          eventsByName,
+          profile,
+          event
+        );
+        const { thread } = threadInfo;
+        const { markers, stringTable } = thread;
+        let argData: Object | null = null;
+        if (event.args && typeof event.args === 'object') {
+          argData = (event.args: any).data || null;
+        }
+        markers.time.push(time);
+        markers.name.push(stringTable.indexForString(name));
+        markers.category.push(otherCategoryIndex);
+        if (event.ph === 'X') {
+          // Complete Event
+          // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lpfof2aylapb
+          const duration: number = (event.dur: any) / 1000;
+          markers.data.push({
+            type: 'CompleteTraceEvent',
+            category: event.cat,
+            data: argData,
+            startTime: time,
+            endTime: time + duration,
+          });
+        } else if (event.ph === 'B' || event.ph === 'E') {
+          // Duration Event
+          // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.nso4gcezn7n1
+          markers.data.push({
+            type: 'tracing',
+            category: event.cat,
+            interval: event.ph === 'B' ? 'start' : 'end',
+            data: argData,
+          });
+        } else if (event.ph === 'I') {
+          // Instant Event
+          // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp
+          markers.data.push({
+            type: 'InstantTraceEvent',
+            category: event.cat,
+            data: argData,
+            startTime: time,
+            endTime: time,
+          });
+        }
+        markers.length++;
+      }
+    }
   }
 }
