@@ -53,7 +53,7 @@ describe('converting Linux perf profile', function() {
 });
 
 describe('converting Google Chrome profile', function() {
-  it('successfully imports', async function() {
+  it('successfully imports a chunked profile (one that uses Profile + ProfileChunk trace events)', async function() {
     // Mock out image loading behavior as the screenshots rely on the Image loading
     // behavior.
     jest
@@ -69,6 +69,29 @@ describe('converting Google Chrome profile', function() {
     const buffer = fs.readFileSync('src/test/fixtures/upgrades/test.chrome.gz');
     const decompressedArrayBuffer = zlib.gunzipSync(buffer);
     const text = decompressedArrayBuffer.toString('utf8');
+    const profile = await unserializeProfileOfArbitraryFormat(text);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+    expect(profile).toMatchSnapshot();
+  });
+
+  it('successfully imports a non-chunked profile (one that uses a CpuProfile trace event)', async function() {
+    // As in the previous test, mock out image loading behavior as the screenshots
+    // rely on the Image loading behavior.
+    jest
+      .spyOn(Image.prototype, 'addEventListener')
+      .mockImplementation((name: string, callback: Function) => {
+        if (name === 'load') {
+          callback();
+        }
+      });
+
+    const fs = require('fs');
+    const buffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/test.chrome-unchunked.json'
+    );
+    const text = buffer.toString('utf8');
     const profile = await unserializeProfileOfArbitraryFormat(text);
     if (profile === undefined) {
       throw new Error('Unable to parse the profile.');
