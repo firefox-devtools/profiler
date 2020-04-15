@@ -29,7 +29,8 @@ type TracingEventUnion =
   | ProcessNameEvent
   | ProcessLabelsEvent
   | ProcessSortIndexEvent
-  | ThreadSortIndexEvent;
+  | ThreadSortIndexEvent
+  | ScreenshotEvent;
 
 type TracingEvent<Event> = {|
   cat: string,
@@ -203,12 +204,12 @@ function findEvent<T: TracingEventUnion>(
   return events ? events.find(f) : undefined;
 }
 
-function getThreadInfo<T: Object>(
+function getThreadInfo(
   threadInfoByPidAndTid: Map<string, ThreadInfo>,
   threadInfoByThread: Map<Thread, ThreadInfo>,
   eventsByName: Map<string, TracingEventUnion[]>,
   profile: Profile,
-  chunk: TracingEvent<T>
+  chunk: TracingEventUnion
 ): ThreadInfo {
   const pidAndTid = `${chunk.pid}:${chunk.tid}`;
   const cachedThreadInfo = threadInfoByPidAndTid.get(pidAndTid);
@@ -374,6 +375,7 @@ async function processTracingEvents(
 ): Promise<Profile> {
   const profile = getEmptyProfile();
   profile.meta.product = 'Chrome Trace';
+
   let profileEvents: (ProfileChunkEvent | CpuProfileEvent)[] =
     (eventsByName.get('ProfileChunk'): any) || [];
 
