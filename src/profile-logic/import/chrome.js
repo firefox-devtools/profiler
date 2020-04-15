@@ -213,6 +213,58 @@ function getTimeDeltas(
   }
 }
 
+type FunctionInfo = {
+  category: number,
+  isJS: boolean,
+  relevantForJS: boolean,
+};
+
+function makeFunctionInfoFinder(categories) {
+  const jsCat = categories.findIndex(c => c.name === 'JavaScript');
+  const gcCat = categories.findIndex(c => c.name === 'GC / CC');
+  const domCat = categories.findIndex(c => c.name === 'DOM');
+  const otherCat = categories.findIndex(c => c.name === 'Other');
+  const idleCat = categories.findIndex(c => c.name === 'Idle');
+  if (
+    jsCat === -1 ||
+    gcCat === -1 ||
+    domCat === -1 ||
+    otherCat === -1 ||
+    idleCat === -1
+  ) {
+    throw new Error(
+      'Unable to find the a category in the the defaultCategories.'
+    );
+  }
+
+  return function getFunctionInfo(
+    functionName,
+    hasURLOrLineNumber
+  ): FunctionInfo {
+    switch (functionName) {
+      case '(idle)':
+        return { category: idleCat, isJS: false, relevantForJS: false };
+
+      case '(root)':
+      case '(program)':
+        return { category: otherCat, isJS: false, relevantForJS: false };
+
+      case '(garbage collector)':
+        return { category: gcCat, isJS: false, relevantForJS: false };
+
+      default:
+        if (
+          !hasURLOrLineNumber &&
+          functionName !== '<WASM UNNAMED>' &&
+          functionName !== '(unresolved function)'
+        ) {
+          return { category: domCat, isJS: false, relevantForJS: true };
+        }
+        return { category: jsCat, isJS: true, relevantForJS: false };
+    }
+  };
+}
+
 async function processTracingEvents(
   eventsByName: Map<string, TracingEventUnion[]>
 ): Promise<Profile> {
@@ -227,14 +279,7 @@ async function processTracingEvents(
     profileEvents = profileEvents.concat(cpuProfiles);
   }
 
-  const javascriptCategoryIndex = profile.meta.categories.findIndex(
-    category => category.name === 'JavaScript'
-  );
-  if (javascriptCategoryIndex === -1) {
-    throw new Error(
-      'Unable to find the JavaScript category in the the defaultCategories.'
-    );
-  }
+  const getFunctionInfo = makeFunctionInfoFinder(profile.meta.categories);
 
   const threadInfoByTid = new Map();
   for (const chunkOrCpuProfileEvent of profileEvents) {
@@ -282,17 +327,35 @@ async function processTracingEvents(
             parentMap.set(children[i], nodeIndex);
           }
         }
-        const { functionName, url, lineNumber, columnNumber } = callFrame;
+
+        // Canonicalize frame info. The way "no data" is expressed changed a bit
+        // between different Chrome profile versions.
+        let { url, lineNumber, columnNumber } = callFrame;
+        if (lineNumber === -1) {
+          lineNumber = undefined;
+        }
+        if (columnNumber === -1) {
+          columnNumber = undefined;
+        }
+        if (url === '') {
+          url = undefined;
+        }
+
+        const { functionName } = callFrame;
         const funcKey = `${functionName}:${url || ''}:${lineNumber ||
-          ''}:${columnNumber || ''}`;
+          0}:${columnNumber || 0}`;
+        const { category, isJS, relevantForJS } = getFunctionInfo(
+          functionName,
+          url !== undefined || lineNumber !== undefined
+        );
         let funcId = funcKeyToFuncId.get(funcKey);
 
         if (funcId === undefined) {
           // The function did not exist.
           funcId = funcTable.length++;
           funcTable.address.push(-1);
-          funcTable.isJS.push(true);
-          funcTable.relevantForJS.push(false);
+          funcTable.isJS.push(isJS);
+          funcTable.relevantForJS.push(relevantForJS);
           funcTable.name.push(stringTable.indexForString(functionName));
           funcTable.resource.push(-1);
           funcTable.fileName.push(
@@ -316,7 +379,7 @@ async function processTracingEvents(
           );
         }
         frameTable.address[frameIndex] = -1;
-        frameTable.category[frameIndex] = javascriptCategoryIndex;
+        frameTable.category[frameIndex] = category;
         frameTable.subcategory[frameIndex] = 0;
         frameTable.func[frameIndex] = funcId;
         frameTable.innerWindowID[frameIndex] = 0;
@@ -329,7 +392,7 @@ async function processTracingEvents(
         frameTable.length = Math.max(frameTable.length, frameIndex + 1);
 
         stackTable.frame.push(frameIndex);
-        stackTable.category.push(javascriptCategoryIndex);
+        stackTable.category.push(category);
         stackTable.subcategory.push(0);
         stackTable.prefix.push(prefixStackIndex);
         nodeIdToStackId.set(nodeIndex, stackTable.length++);
