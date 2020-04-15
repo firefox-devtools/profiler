@@ -244,6 +244,11 @@ function getThreadInfo(
   thread.pid = chunk.pid;
   thread.tid = chunk.tid;
 
+  // Set the process type to something non-"Gecko". If this is left at
+  // "default", threads + processes without samples will not be auto-hidden in
+  // the UI.
+  thread.processType = 'unknown';
+
   // Attempt to find a name for this thread:
   thread.name = 'Chrome Thread';
   const threadNameEvent = findEvent<ThreadNameEvent>(
@@ -253,6 +258,14 @@ function getThreadInfo(
   );
   if (threadNameEvent) {
     thread.name = threadNameEvent.args.name;
+    if (thread.name.startsWith('Cr') && thread.name.endsWith('Main')) {
+      // Hack: Rename this thread to "GeckoMain" so that it gets detected as the
+      // main thread for the globalTrack of its process, and so that the UI
+      // displays a marker timeline.
+      // TODO: Replace the name detection with an isMainThread field on the thread.
+      // This would require a version bump for the processed profile format.
+      thread.name = 'GeckoMain';
+    }
   }
 
   const processNameEvent = findEvent<ProcessNameEvent>(
