@@ -548,11 +548,25 @@ export function getGlobalTrackName(
         // happen for instance when recording "DOM Worker" but not "GeckoMain". The
         // "DOM Worker" thread will be captured, but not the main thread, thus leaving
         // a process track with no main thread.
-        return typeof globalTrack.pid === 'string'
-          ? // The pid is a unique string label, use that.
-            globalTrack.pid
-          : // The pid is a number, make a label for it.
-            `Process ${globalTrack.pid}`;
+        // It can also happen when importing other profile formats.
+
+        // First, see if any thread in this process has a non-empty processName.
+        const pid = globalTrack.pid;
+        const processName = threads
+          .filter(thread => thread.pid === pid)
+          .map(thread => thread.processName)
+          .find(processName => !!processName);
+        if (processName) {
+          return processName;
+        }
+
+        // Fallback: Use the PID.
+        if (typeof pid === 'string') {
+          // The pid is a unique string label, use that.
+          return pid;
+        }
+        // The pid is a number, make a label for it.
+        return `Process ${pid}`;
       }
       return getFriendlyThreadName(
         threads,
