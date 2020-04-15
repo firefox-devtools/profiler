@@ -7,6 +7,7 @@
 import memoize from 'memoize-immutable';
 import MixedTupleMap from 'mixedtuplemap';
 import {
+  resourceTypes,
   getEmptyUnbalancedNativeAllocationsTable,
   getEmptyBalancedNativeAllocationsTable,
 } from './data-structures';
@@ -25,6 +26,7 @@ import type {
   IndexIntoFuncTable,
   IndexIntoSamplesTable,
   IndexIntoStackTable,
+  IndexIntoResourceTable,
   ThreadIndex,
   Category,
   Counter,
@@ -2352,4 +2354,58 @@ export function extractProfileFilterPageData(
     );
     return null;
   }
+}
+
+// Returns the resource index for a "url" or "webhost" resource which is created
+// on demand based on the script URI.
+export function getOrCreateURIResource(
+  scriptURI: string,
+  resourceTable: ResourceTable,
+  stringTable: UniqueStringArray,
+  originToResourceIndex: Map<string, IndexIntoResourceTable>
+): IndexIntoResourceTable {
+  // Figure out the origin and host.
+  let origin;
+  let host;
+  try {
+    const url = new URL(scriptURI);
+    if (
+      !(
+        url.protocol === 'http:' ||
+        url.protocol === 'https:' ||
+        url.protocol === 'moz-extension:'
+      )
+    ) {
+      throw new Error('not a webhost or extension protocol');
+    }
+    origin = url.origin;
+    host = url.host;
+  } catch (e) {
+    origin = scriptURI;
+    host = null;
+  }
+
+  let resourceIndex = originToResourceIndex.get(origin);
+  if (resourceIndex !== undefined) {
+    return resourceIndex;
+  }
+
+  resourceIndex = resourceTable.length++;
+  const originStringIndex = stringTable.indexForString(origin);
+  originToResourceIndex.set(origin, resourceIndex);
+  if (host) {
+    // This is a webhost URL.
+    resourceTable.lib[resourceIndex] = undefined;
+    resourceTable.name[resourceIndex] = originStringIndex;
+    resourceTable.host[resourceIndex] = stringTable.indexForString(host);
+    resourceTable.type[resourceIndex] = resourceTypes.webhost;
+  } else {
+    // This is a URL, but it doesn't point to something on the web, e.g. a
+    // chrome url.
+    resourceTable.lib[resourceIndex] = undefined;
+    resourceTable.name[resourceIndex] = stringTable.indexForString(scriptURI);
+    resourceTable.host[resourceIndex] = undefined;
+    resourceTable.type[resourceIndex] = resourceTypes.url;
+  }
+  return resourceIndex;
 }

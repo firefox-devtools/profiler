@@ -31,7 +31,10 @@ import {
 } from './import/linux-perf';
 import { convertPhaseTimes } from './convert-markers';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
-import { getFriendlyThreadName } from '../profile-logic/profile-data';
+import {
+  getFriendlyThreadName,
+  getOrCreateURIResource,
+} from '../profile-logic/profile-data';
 import { convertJsTracerToThread } from '../profile-logic/js-tracer';
 
 import type {
@@ -418,47 +421,12 @@ function _extractJsFunction(
   const [, funcName, rawScriptURI] = jsMatch;
   const scriptURI = _getRealScriptURI(rawScriptURI);
 
-  // Figure out the origin and host.
-  let origin;
-  let host;
-  try {
-    const url = new URL(scriptURI);
-    if (
-      !(
-        url.protocol === 'http:' ||
-        url.protocol === 'https:' ||
-        url.protocol === 'moz-extension:'
-      )
-    ) {
-      throw new Error('not a webhost or extension protocol');
-    }
-    origin = url.origin;
-    host = url.host;
-  } catch (e) {
-    origin = scriptURI;
-    host = null;
-  }
-
-  let resourceIndex = originToResourceIndex.get(origin);
-  if (resourceIndex === undefined) {
-    resourceIndex = resourceTable.length++;
-    const originStringIndex = stringTable.indexForString(origin);
-    originToResourceIndex.set(origin, resourceIndex);
-    if (host) {
-      // This is a webhost URL.
-      resourceTable.lib[resourceIndex] = undefined;
-      resourceTable.name[resourceIndex] = originStringIndex;
-      resourceTable.host[resourceIndex] = stringTable.indexForString(host);
-      resourceTable.type[resourceIndex] = resourceTypes.webhost;
-    } else {
-      // This is a URL, but it doesn't point to something on the web, e.g. a
-      // chrome url.
-      resourceTable.lib[resourceIndex] = undefined;
-      resourceTable.name[resourceIndex] = stringTable.indexForString(scriptURI);
-      resourceTable.host[resourceIndex] = undefined;
-      resourceTable.type[resourceIndex] = resourceTypes.url;
-    }
-  }
+  const resourceIndex = getOrCreateURIResource(
+    scriptURI,
+    resourceTable,
+    stringTable,
+    originToResourceIndex
+  );
 
   let funcNameIndex;
   if (funcName) {
