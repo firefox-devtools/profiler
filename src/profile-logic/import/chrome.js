@@ -370,17 +370,17 @@ async function processTracingEvents(
           const name = functionName !== '' ? functionName : '(anonymous)';
           funcTable.name.push(stringTable.indexForString(name));
           funcTable.resource.push(
-            url === undefined
-              ? -1
-              : getOrCreateURIResource(
-                  url,
+            isJS
+              ? getOrCreateURIResource(
+                  url || '<unknown>',
                   resourceTable,
                   stringTable,
                   originToResourceIndex
                 )
+              : -1
           );
           funcTable.fileName.push(
-            url === undefined ? null : stringTable.indexForString(url)
+            isJS ? stringTable.indexForString(url || '<unknown>') : null
           );
           funcTable.lineNumber.push(
             lineNumber === undefined ? null : lineNumber
