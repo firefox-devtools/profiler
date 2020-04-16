@@ -72,6 +72,10 @@ type StateProps = {|
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
   +samplesSelectedStates: null | SelectedState[],
+  +treeOrderSampleComparator: (
+    IndexIntoSamplesTable,
+    IndexIntoSamplesTable
+  ) => number,
 |};
 
 type DispatchProps = {|
@@ -137,6 +141,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       hasFileIoMarkers,
       showMemoryMarkers,
       samplesSelectedStates,
+      treeOrderSampleComparator,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -191,6 +196,7 @@ class TimelineTrackThread extends PureComponent<Props> {
             onSampleClick={this._onSampleClick}
             categories={categories}
             samplesSelectedStates={samplesSelectedStates}
+            treeOrderSampleComparator={treeOrderSampleComparator}
           />
         ) : (
           <ThreadStackGraph
@@ -242,6 +248,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       timelineType: getTimelineType(state),
       hasFileIoMarkers: selectors.getFileIoMarkerIndexes(state).length !== 0,
       samplesSelectedStates: selectors.getSamplesSelectedStatesInFilteredThread(
+        state
+      ),
+      treeOrderSampleComparator: selectors.getTreeOrderComparatorInFilteredThread(
         state
       ),
     };
