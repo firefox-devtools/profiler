@@ -105,6 +105,10 @@ class TimelineTrackThread extends PureComponent<Props> {
       focusCallTree,
       invertCallstack,
     } = this.props;
+    /**
+     * When we're displaying the inverted call stack, the "leaf" call node we're
+     * interested in is actually displayed as the "root" of the tree.
+     */
     if (invertCallstack) {
       selectRootCallNode(threadIndex, sampleIndex);
     } else {
