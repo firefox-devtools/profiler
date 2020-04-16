@@ -34,7 +34,6 @@ import {
   getSampleIndexToCallNodeIndex,
   getSampleCategories,
   findBestAncestorCallNode,
-  findRootCallNode,
 } from '../profile-logic/profile-data';
 import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import { sendAnalytics } from '../utils/analytics';
@@ -164,27 +163,23 @@ export function selectRootCallNode(
     const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
 
     const newSelectedStack = filteredThread.samples.stack[sampleIndex];
+    if (newSelectedStack === null || newSelectedStack === undefined) {
+      return;
+    }
     const newSelectedCallNode =
-      newSelectedStack === null
-        ? -1
-        : callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
+      callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
 
-    const rootSelectedCallNode = findRootCallNode(
+    const selectedCallNodePath = getCallNodePathFromIndex(
       newSelectedCallNode,
-      callNodeInfo
+      callNodeInfo.callNodeTable
     );
+    const rootCallNodePath = [selectedCallNodePath[0]];
+
     dispatch(
       changeSelectedCallNode(
         threadIndex,
-        getCallNodePathFromIndex(
-          rootSelectedCallNode,
-          callNodeInfo.callNodeTable
-        ),
-        // Specify newSelectedCallNode as a descendant call node of rootSelectedCallNode.
-        getCallNodePathFromIndex(
-          newSelectedCallNode,
-          callNodeInfo.callNodeTable
-        )
+        rootCallNodePath,
+        selectedCallNodePath
       )
     );
   };

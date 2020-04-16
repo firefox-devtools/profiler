@@ -2050,26 +2050,6 @@ export function findBestAncestorCallNode(
 }
 
 /**
- * Return the root call node of the selected call node.
- */
-export function findRootCallNode(
-  selectedCallNode: IndexIntoCallNodeTable,
-  callNodeInfo: CallNodeInfo
-): IndexIntoCallNodeTable {
-  const { callNodeTable } = callNodeInfo;
-  // The selected call node is the topmost (leaf) index of a selected sample's stack.
-  // Get the call node depth to the root of the current sample's stack.
-  const depth = callNodeTable.depth[selectedCallNode];
-  const prefixTable = callNodeTable.prefix;
-  let prefixKey = selectedCallNode;
-  // Get the prefix key for the Call Node root.
-  for (let i = 0; i < depth; i++) {
-    prefixKey = prefixTable[prefixKey];
-  }
-  return prefixKey;
-}
-
-/**
  * Look at the leaf-most stack for every sample, and take its category.
  */
 export function getSampleCategories(
