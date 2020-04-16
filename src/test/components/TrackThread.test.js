@@ -187,8 +187,6 @@ describe('timeline/TrackThread', function() {
       getSamplesProfile()
     );
 
-    dispatch(changeInvertCallstack(true));
-
     // Provide a quick helper for nicely asserting the call node path.
     const getCallNodePath = () =>
       selectedThreadSelectors
@@ -196,6 +194,9 @@ describe('timeline/TrackThread', function() {
         .map(funcIndex =>
           thread.stringTable.getString(thread.funcTable.name[funcIndex])
         );
+
+    // Switch to "inverted" mode to test with this state
+    dispatch(changeInvertCallstack(true));
 
     fireEvent(
       stackGraphCanvas(),
@@ -209,6 +210,7 @@ describe('timeline/TrackThread', function() {
     );
     expect(getCallNodePath()).toEqual(['i']);
 
+    // Switch back to "uninverted" mode
     dispatch(changeInvertCallstack(false));
 
     fireEvent(
