@@ -23,6 +23,7 @@ import type {
   ActiveTabGlobalTrack,
   OriginsTimeline,
 } from './profile-derived';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
@@ -51,8 +52,7 @@ export type FuncToFuncMap = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
 export type FunctionsUpdatePerThread = {
   [id: ThreadIndex]: {|
     oldFuncToNewFuncMap: FuncToFuncMap,
-    funcIndices: IndexIntoFuncTable[],
-    funcNames: string[],
+    symbolicationSteps: SymbolicationStepInfo[],
   |},
 };
 
