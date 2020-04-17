@@ -92,7 +92,6 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
 const globalTracks: Reducer<GlobalTrack[]> = (state = [], action) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
-    case 'VIEW_ACTIVE_TAB_PROFILE':
       return action.globalTracks;
     default:
       return state;
@@ -109,7 +108,6 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
 ) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
-    case 'VIEW_ACTIVE_TAB_PROFILE':
       return action.localTracksByPid;
     default:
       return state;
@@ -126,8 +124,6 @@ const activeTabHiddenGlobalTracksGetter: Reducer<() => Set<TrackIndex>> = (
   action
 ) => {
   switch (action.type) {
-    case 'VIEW_ACTIVE_TAB_PROFILE':
-      return action.activeTabHiddenGlobalTracksGetter;
     default:
       return state;
   }
@@ -141,8 +137,6 @@ const activeTabHiddenLocalTracksByPidGetter: Reducer<
   () => Map<Pid, Set<TrackIndex>>
 > = (state = () => new Map(), action) => {
   switch (action.type) {
-    case 'VIEW_ACTIVE_TAB_PROFILE':
-      return action.activeTabHiddenLocalTracksByPidGetter;
     default:
       return state;
   }
