@@ -3,10 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import {
-  applyFunctionMerging,
-  setFuncNames,
-} from '../profile-logic/symbolication';
+import { applySymbolicationStep } from '../profile-logic/symbolication';
 import { combineReducers } from 'redux';
 import * as Transforms from '../profile-logic/transforms';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -52,16 +49,8 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
         if (!functionsUpdatePerThread[threadIndex]) {
           return thread;
         }
-        const {
-          oldFuncToNewFuncMap,
-          funcIndices,
-          funcNames,
-        } = functionsUpdatePerThread[threadIndex];
-        return setFuncNames(
-          applyFunctionMerging(thread, oldFuncToNewFuncMap),
-          funcIndices,
-          funcNames
-        );
+        const { symbolicationSteps } = functionsUpdatePerThread[threadIndex];
+        return symbolicationSteps.reduce(applySymbolicationStep, thread);
       });
       return { ...state, threads };
     }

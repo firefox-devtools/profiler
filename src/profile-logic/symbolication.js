@@ -12,6 +12,7 @@ import type {
   ThreadIndex,
   Lib,
   IndexIntoFuncTable,
+  IndexIntoStringTable,
 } from '../types/profile';
 import type { MemoryOffset } from '../types/units';
 import type {
@@ -110,15 +111,17 @@ import type {
  * in the funcTable.
  */
 
-type SymbolicationHandlers = {
-  onMergeFunctions: (
+export type SymbolicationStepInfo = {|
+  funcToFuncAddressMap: Map<IndexIntoFuncTable, number>,
+  funcAddressToSymbolMap: Map<number, string>,
+  funcAddressToCanonicalFuncIndexMap: Map<number, IndexIntoFuncTable>,
+|};
+
+export type SymbolicationHandlers = {
+  onSymbolicationStep: (
     threadIndex: ThreadIndex,
-    Map<IndexIntoFuncTable, IndexIntoFuncTable>
-  ) => void,
-  onGotFuncNames: (
-    threadIndex: ThreadIndex,
-    funcIndices: IndexIntoFuncTable[],
-    funcNames: string[]
+    oldFuncToNewFuncMap: Map<IndexIntoFuncTable, IndexIntoFuncTable>,
+    symbolicationStepInfo: SymbolicationStepInfo
   ) => void,
 };
 
@@ -197,50 +200,6 @@ function gatherFuncsInThread(thread: Thread): Map<Lib, IndexIntoFuncTable[]> {
   return foundAddresses;
 }
 
-/**
- * Modify the symbolicated funcs to point to the new func name strings.
- * This function adds the func names to the thread's string table and
- * adjusts the funcTable to point to those strings.
- */
-export function setFuncNames(
-  thread: Thread,
-  funcIndices: IndexIntoFuncTable[],
-  funcNames: string[]
-): Thread {
-  const funcTable = Object.assign({}, thread.funcTable);
-  funcTable.name = funcTable.name.slice();
-  const stringTable = thread.stringTable;
-  funcIndices.forEach((funcIndex, i) => {
-    const symbolName = funcNames[i];
-    const symbolIndex = stringTable.indexForString(symbolName);
-    funcTable.name[funcIndex] = symbolIndex;
-  });
-  return { ...thread, funcTable, stringTable };
-}
-
-/**
- * Correctly collapse a function into another function and return a consistent
- * profile that no longer refers to the collapsed-away function.
- * The new frameTable has an updated func column, where all indices
- * to old funcs have been replaced to the corresponding new func.
- * "Functions" in a profile are created before the library's function table is
- * known, by creating one function per frame address. Once the function table
- * is known, different addresses that are inside the same function need to be
- * merged into that same function.
- */
-export function applyFunctionMerging(
-  thread: Thread,
-  oldFuncToNewFuncMap: Map<IndexIntoFuncTable, IndexIntoFuncTable>
-): Thread {
-  const frameTable = Object.assign({}, thread.frameTable, {
-    func: thread.frameTable.func.map(oldFunc => {
-      const newFunc = oldFuncToNewFuncMap.get(oldFunc);
-      return newFunc === undefined ? oldFunc : newFunc;
-    }),
-  });
-  return { ...thread, frameTable };
-}
-
 // Gather the symbols needed in this thread into a nested map:
 // libKey -> address relative to lib -> index of the func
 function getThreadSymbolicationInfo(thread: Thread): ThreadSymbolicationInfo {
@@ -284,11 +243,11 @@ function buildLibSymbolicationRequestsForAllThreads(
   });
 }
 
-// With the symbolication results for the library given by libKey, call the
-// symbolicationHandlers for each thread. Those calls will ensure that the
-// symbolication information eventually makes it into the thread.
+// With the symbolication results for the library given by libKey, call
+// symbolicationHandlers.onSymbolicationStep for each thread. Those calls will
+// ensure that the symbolication information eventually makes it into the thread.
 // Most of the work in this function is just munging the data that we have into
-// the shape that the symbolicationHandlers methods expect.
+// the shape that the onSymbolicationStep method expects.
 function finishSymbolicationForLib(
   profile: Profile,
   symbolicationInfo: ThreadSymbolicationInfo[],
@@ -302,8 +261,8 @@ function finishSymbolicationForLib(
     const addressToFuncIndexMap = threadSymbolicationInfo.get(libKey);
     if (addressToFuncIndexMap !== undefined) {
       const funcAddressToCanonicalFuncIndexMap = new Map();
-      const funcIndices = [];
-      const funcNames = [];
+      const funcAddressToSymbolMap = new Map();
+      const funcToFuncAddressMap = new Map();
       const oldFuncToNewFuncMap = new Map();
       for (const [address, funcIndex] of addressToFuncIndexMap) {
         const addressResult = resultsForLib.get(address);
@@ -312,38 +271,95 @@ function finishSymbolicationForLib(
           // as a library-relative offset.
           // |addressResult.functionOffset| is the offset between the start of
           // the function and |address|.
-          // |funcAddress| is the start of the function, as a library-relative
-          // offset.
+          // |funcAddress| is the start of the function (= the address of the symbol),
+          // as a library-relative offset.
           const funcAddress = address - addressResult.functionOffset;
+
+          funcToFuncAddressMap.set(funcIndex, funcAddress);
+          funcAddressToSymbolMap.set(funcAddress, addressResult.name);
+
           const canonicalFuncIndexForThisFuncAddress = funcAddressToCanonicalFuncIndexMap.get(
             funcAddress
           );
-          if (canonicalFuncIndexForThisFuncAddress !== undefined) {
+          if (canonicalFuncIndexForThisFuncAddress === undefined) {
+            funcAddressToCanonicalFuncIndexMap.set(funcAddress, funcIndex);
+          } else {
             oldFuncToNewFuncMap.set(
               funcIndex,
               canonicalFuncIndexForThisFuncAddress
             );
-          } else {
-            funcAddressToCanonicalFuncIndexMap.set(funcAddress, funcIndex);
-            funcIndices.push(funcIndex);
-            funcNames.push(addressResult.name);
           }
         }
       }
-      symbolicationHandlers.onMergeFunctions(threadIndex, oldFuncToNewFuncMap);
-      symbolicationHandlers.onGotFuncNames(threadIndex, funcIndices, funcNames);
+      symbolicationHandlers.onSymbolicationStep(
+        threadIndex,
+        oldFuncToNewFuncMap,
+        {
+          funcToFuncAddressMap,
+          funcAddressToSymbolMap,
+          funcAddressToCanonicalFuncIndexMap,
+        }
+      );
     }
   }
 }
 
 /**
- * When collecting profile samples, the profiler only collects raw memory addresses
- * of the program's functions. This function takes the list of memory addresses, and
- * uses a symbol store to look up the symbols (names) of all of the functions. Initially
- * each memory address is a assigned a function in the profile, but these addresses may
- * actually point to the same function. During the processes of symbolication, any memory
- * addresses that share the same function have their FrameTable and FuncTable updated
- * to point to same function.
+ * Apply symbolication to the thread, based on the information that was prepared
+ * in symbolicationStepInfo. This involves updating the func locations to the
+ * symbol string, and updating the frameTable to assign frames to the right
+ * funcs. When multiple frames are merged into one func, some funcs can become
+ * orphaned; they remain in the funcTable.
+ */
+export function applySymbolicationStep(
+  thread: Thread,
+  symbolicationStepInfo: SymbolicationStepInfo
+) {
+  const {
+    funcToFuncAddressMap,
+    funcAddressToSymbolMap,
+    funcAddressToCanonicalFuncIndexMap,
+  } = symbolicationStepInfo;
+  const {
+    frameTable: oldFrameTable,
+    funcTable: oldFuncTable,
+    stringTable,
+  } = thread;
+
+  const frameTable = Object.assign({}, oldFrameTable, {
+    func: (oldFrameTable.func.map(oldFrameFunc => {
+      const funcAddressForFrame = funcToFuncAddressMap.get(oldFrameFunc);
+      if (funcAddressForFrame !== undefined) {
+        const newFuncIndexForFrame = funcAddressToCanonicalFuncIndexMap.get(
+          funcAddressForFrame
+        );
+        if (newFuncIndexForFrame !== undefined) {
+          return newFuncIndexForFrame;
+        }
+      }
+      return oldFrameFunc;
+    }): Array<IndexIntoFuncTable>),
+  });
+
+  const funcTable = Object.assign({}, oldFuncTable, {
+    name: (oldFuncTable.name.slice(): Array<IndexIntoStringTable>),
+  });
+  for (const [funcAddress, symbol] of funcAddressToSymbolMap) {
+    const funcIndex = funcAddressToCanonicalFuncIndexMap.get(funcAddress);
+    if (funcIndex !== undefined) {
+      funcTable.address[funcIndex] = funcAddress;
+      funcTable.name[funcIndex] = stringTable.indexForString(symbol);
+    }
+  }
+
+  return { ...thread, frameTable, funcTable, stringTable };
+}
+
+/**
+ * Symbolicates the profile. Symbols are obtained from the symbolStore.
+ * This function performs steps II-IV (see the comment at the beginning of
+ * this file); step V is outsourced to symbolicationHandlers.onSymbolicationStep
+ * which can call applySymbolicationStep to complete step V.
  */
 export async function symbolicateProfile(
   profile: Profile,

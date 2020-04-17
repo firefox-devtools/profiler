@@ -60,13 +60,13 @@ import type { TimelineTrackOrganization } from '../types/state';
 import type {
   Profile,
   ThreadIndex,
-  IndexIntoFuncTable,
   BrowsingContextID,
   Page,
   InnerWindowID,
   Pid,
 } from '../types/profile';
 import type { OriginsTimelineRoot } from '../types/profile-derived';
+import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 /**
@@ -713,70 +713,40 @@ class ColascedFunctionsUpdateDispatcher {
     dispatch(coalescedFunctionsUpdate(updates));
   }
 
-  mergeFunctions(
+  doSymbolicationStep(
     dispatch: Dispatch,
     threadIndex: ThreadIndex,
-    oldFuncToNewFuncMap: FuncToFuncMap
+    oldFuncToNewFuncMap: FuncToFuncMap,
+    symbolicationStepInfo: SymbolicationStepInfo
   ) {
     this._scheduleUpdate(dispatch);
     if (!this._updates[threadIndex]) {
       this._updates[threadIndex] = {
         oldFuncToNewFuncMap,
-        funcIndices: [],
-        funcNames: [],
+        symbolicationSteps: [symbolicationStepInfo],
       };
     } else {
       for (const [oldFunc, funcIndex] of oldFuncToNewFuncMap) {
         this._updates[threadIndex].oldFuncToNewFuncMap.set(oldFunc, funcIndex);
       }
-    }
-  }
-
-  assignFunctionNames(dispatch, threadIndex, funcIndices, funcNames) {
-    this._scheduleUpdate(dispatch);
-    if (!this._updates[threadIndex]) {
-      this._updates[threadIndex] = {
-        funcIndices,
-        funcNames,
-        oldFuncToNewFuncMap: new Map(),
-      };
-    } else {
-      this._updates[threadIndex].funcIndices = this._updates[
-        threadIndex
-      ].funcIndices.concat(funcIndices);
-      this._updates[threadIndex].funcNames = this._updates[
-        threadIndex
-      ].funcNames.concat(funcNames);
+      this._updates[threadIndex].symbolicationSteps.push(symbolicationStepInfo);
     }
   }
 }
 
 const gCoalescedFunctionsUpdateDispatcher = new ColascedFunctionsUpdateDispatcher();
 
-export function mergeFunctions(
+export function doSymbolicationStep(
   threadIndex: ThreadIndex,
-  oldFuncToNewFuncMap: FuncToFuncMap
+  oldFuncToNewFuncMap: FuncToFuncMap,
+  symbolicationStepInfo: SymbolicationStepInfo
 ): ThunkAction<void> {
   return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.mergeFunctions(
+    gCoalescedFunctionsUpdateDispatcher.doSymbolicationStep(
       dispatch,
       threadIndex,
-      oldFuncToNewFuncMap
-    );
-  };
-}
-
-export function assignFunctionNames(
-  threadIndex: ThreadIndex,
-  funcIndices: IndexIntoFuncTable[],
-  funcNames: string[]
-): ThunkAction<void> {
-  return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.assignFunctionNames(
-      dispatch,
-      threadIndex,
-      funcIndices,
-      funcNames
+      oldFuncToNewFuncMap,
+      symbolicationStepInfo
     );
   };
 }
@@ -881,18 +851,18 @@ export async function doSymbolicateProfile(
 ) {
   dispatch(startSymbolicating());
   await symbolicateProfile(profile, symbolStore, {
-    onMergeFunctions: (
+    onSymbolicationStep: (
       threadIndex: ThreadIndex,
-      oldFuncToNewFuncMap: FuncToFuncMap
+      oldFuncToNewFuncMap: FuncToFuncMap,
+      symbolicationStepInfo: SymbolicationStepInfo
     ) => {
-      dispatch(mergeFunctions(threadIndex, oldFuncToNewFuncMap));
-    },
-    onGotFuncNames: (
-      threadIndex: ThreadIndex,
-      funcIndices: IndexIntoFuncTable[],
-      funcNames: string[]
-    ) => {
-      dispatch(assignFunctionNames(threadIndex, funcIndices, funcNames));
+      dispatch(
+        doSymbolicationStep(
+          threadIndex,
+          oldFuncToNewFuncMap,
+          symbolicationStepInfo
+        )
+      );
     },
   });
 

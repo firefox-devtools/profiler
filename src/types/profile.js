@@ -234,6 +234,11 @@ export type FrameTable = {|
  * address of its function symbol and the next symbol in the library.)
  * For JS code, each encountered line/column in a JS file is a separate frame, and
  * the function represents an entire JS function which can span multiple lines.
+ *
+ * Funcs that are orphaned, i.e. funcs that no frame refers to, do not have
+ * meaningful values in their fields. Symbolication will cause many funcs that
+ * were created upfront to become orphaned, as the frames that originally referred
+ * to them get reassigned to the canonical func for their actual function.
  */
 export type FuncTable = {|
   // The function name.
@@ -263,19 +268,11 @@ export type FuncTable = {|
 
   // This is relevant for functions of the 'native' stackType only (functions
   // whose resource is a library).
-  // It's supposed to store the library-relative offset of the start of the function,
-  // i.e. the address of the symbol that gave this function its name. But at the
-  // moment it stores an arbitrary address from somewhere inside of the function.
-  // This field is currently only used during initial symbolication. At the start
-  // of initial symbolication, we do not know which frames belong to the same
-  // functions (we need the symbols for that), so profile processing naively creates
-  // one func per (native) frame, and the func address is initialized with the frame
-  // address. Once the symbols are known, for each actual function, one of the original
-  // funcs is picked as the canonical function for the function symbol, and all frames
-  // in that function are assigned to the canonical func. The other funcs then become
-  // orphaned. So, in reality, after symbolication completes, func.address is the
-  // address from the frame whose func was randomly picked as the canonical func for
-  // the symbol. There are no uses of this field after symbolication.
+  // Stores the library-relative offset of the start of the function, i.e. the
+  // address of the symbol that gave this function its name.
+  // Prior to initial symbolication, it stores the same address as the single
+  // frame that refers to this func, because at that point the actual boundaries
+  // of the true functions are not known.
   address: Array<MemoryOffset | -1>,
 
   length: number,
