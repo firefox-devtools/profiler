@@ -726,13 +726,7 @@ class ColascedFunctionsUpdateDispatcher {
         funcNames: [],
       };
     } else {
-      for (const oldFunc of oldFuncToNewFuncMap.keys()) {
-        const funcIndex = oldFuncToNewFuncMap.get(oldFunc);
-        if (funcIndex === undefined) {
-          throw new Error(
-            'Unable to merge functions together, an undefined funcIndex was returned.'
-          );
-        }
+      for (const [oldFunc, funcIndex] of oldFuncToNewFuncMap) {
         this._updates[threadIndex].oldFuncToNewFuncMap.set(oldFunc, funcIndex);
       }
     }
