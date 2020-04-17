@@ -619,9 +619,11 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       rightClickedCallNode,
       rightClickedMarker,
     }),
-    globalTracks,
-    localTracksByPid,
     profile,
+    full: combineReducers({
+      globalTracks,
+      localTracksByPid,
+    }),
     activeTab: combineReducers({
       hiddenGlobalTracksGetter: activeTabHiddenGlobalTracksGetter,
       hiddenLocalTracksByPidGetter: activeTabHiddenLocalTracksByPidGetter,
