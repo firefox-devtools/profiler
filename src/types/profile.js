@@ -196,11 +196,14 @@ export type RawMarkerTable = {|
 
 /**
  * Frames contain the context information about the function execution at the moment in
- * time. The relationship between frames is defined by the StackTable.
+ * time. The caller/callee relationship between frames is defined by the StackTable.
  */
 export type FrameTable = {|
-  // The address is a copy from the FuncTable entry.
+  // If this is a frame for native code, the address is the address of the frame's
+  // assembly instruction,  relative to the native library that contains it.
+  // The library is given by the frame's func: frame -> func -> resource -> lib.
   address: Array<MemoryOffset | -1>,
+
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
   func: IndexIntoFuncTable[],
@@ -220,25 +223,62 @@ export type FrameTable = {|
 |};
 
 /**
- * Multiple frames represent individual invocations of a function, while the FuncTable
- * holds the static information about that function. C++ samples are single memory
- * locations. However, functions span ranges of memory. During symbolication each of
- * these samples are collapsed to point to a single function rather than multiple memory
- * locations.
+ * The funcTable stores the functions that were called in the profile.
+ * These can be native functions (e.g. C / C++ / rust), JavaScript functions, or
+ * "label" functions. Multiple frames can have the same function: The frame
+ * represents which part of a function was being executed at a given moment, and
+ * the function groups all frames that occurred inside that function.
+ * Concretely, for native code, each encountered instruction address is a separate
+ * frame, and the function groups the instruction addresses inside that native
+ * function. (The address range of a native function is the range between the
+ * address of its function symbol and the next symbol in the library.)
+ * For JS code, each encountered line/column in a JS file is a separate frame, and
+ * the function represents an entire JS function which can span multiple lines.
  */
 export type FuncTable = {|
-  // This is relevant for native entries only.
-  address: Array<MemoryOffset | -1>,
-  isJS: boolean[],
-  length: number,
-  name: IndexIntoStringTable[],
-  // The resource is -1 if we couldn't extract a function name as a native or JS
-  // function. This is most often the case for frame labels.
-  resource: Array<IndexIntoResourceTable | -1>,
+  // The function name.
+  name: Array<IndexIntoStringTable>,
+
+  // isJS and relevantForJS describe the function type. Non-JavaScript functions
+  // can be marked as "relevant for JS" so that for example DOM API label functions
+  // will show up in any JavaScript stack views.
+  // isJS and relevantForJS should really instead be combined into one stackType field:
+  // stackType: 'js' | 'js-relevant-label' | 'native-relevant-label' | 'native'
+  isJS: Array<boolean>,
   relevantForJS: Array<boolean>,
+
+  // The resource describes "Which bag of code did this function come from?".
+  // For JS functions, the resource is of type addon, webhost, otherhost, or url.
+  // For native functions, the resource is of type library.
+  // For labels and for other unidentified functions, we set the resource to -1.
+  resource: Array<IndexIntoResourceTable | -1>,
+
+  // These are non-null for JS functions only. The line and column describe the
+  // location of the *start* of the JS function. As for the information about which
+  // which lines / columns inside the function were actually hit during execution,
+  // that information is stored in the frameTable, not in the funcTable.
   fileName: Array<IndexIntoStringTable | null>,
   lineNumber: Array<number | null>,
   columnNumber: Array<number | null>,
+
+  // This is relevant for functions of the 'native' stackType only (functions
+  // whose resource is a library).
+  // It's supposed to store the library-relative offset of the start of the function,
+  // i.e. the address of the symbol that gave this function its name. But at the
+  // moment it stores an arbitrary address from somewhere inside of the function.
+  // This field is currently only used during initial symbolication. At the start
+  // of initial symbolication, we do not know which frames belong to the same
+  // functions (we need the symbols for that), so profile processing naively creates
+  // one func per (native) frame, and the func address is initialized with the frame
+  // address. Once the symbols are known, for each actual function, one of the original
+  // funcs is picked as the canonical function for the function symbol, and all frames
+  // in that function are assigned to the canonical func. The other funcs then become
+  // orphaned. So, in reality, after symbolication completes, func.address is the
+  // address from the frame whose func was randomly picked as the canonical func for
+  // the symbol. There are no uses of this field after symbolication.
+  address: Array<MemoryOffset | -1>,
+
+  length: number,
 |};
 
 /**
