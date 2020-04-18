@@ -20,6 +20,96 @@ import type {
   LibSymbolicationRequest,
 } from './symbol-store';
 
+// Contains functions to symbolicate a profile.
+
+/**
+ * Symbolication Overview
+ *
+ * Symbolication is the process of looking up function names for native code and
+ * assigning those function names to the functions in the profile.
+ *
+ * When the profiler samples call stacks for native code, it only collects
+ * addresses: the address of the instruction which is currently being executed,
+ * and the "return addresses" for its callers on the stack, i.e. the addresses
+ * of the instructions that will be executed after each function returns.
+ * To obtain a profile with function names, these addresses need to be
+ * translated into library-relative offsets, looked up per library, and then
+ * substituted with the corresponding function name strings in the profile.
+ *
+ * The actual lookup of symbols is not handled in this file; it is delegated to
+ * an AbstractSymbolStore interface.
+ *
+ * The functions in this file perform the following tasks:
+ *  - assigning addresses to their containing libraries so that they can be
+ *    translated into library-relative offsets
+ *  - gathering all addresses in the profile which require symbolication,
+ *    grouped by library, and requesting symbols from the symbol store
+ *  - once the results from the symbol store come in, performing the
+ *    substutitions in the profile.
+ *
+ * Implementation details
+ *
+ * The implementation has the following constraints:
+ *  - Symbolication needs to be asynchronous, and the profile needs to be fully
+ *    interactive before symbols have arrived. This means that there needs to
+ *    be an intact funcTable from the very start, because the call nodes for
+ *    the call tree are based on funcs.
+ *  - When the symbols arrive, we cannot mutate the profile in-place. Instead,
+ *    we need to delegate the profile mutation to our caller so that it can go
+ *    through redux actions and reducers; the profile is part of the redux state
+ *    so any profile adjustment needs to follow proper procedure. This allows
+ *    all derived data and UI that depends on profile contents to be notified
+ *    and updated in the regular ways.
+ *    It also allows multiple steps of symbolication to happen in one redux
+ *    store update, which saves re-renders if symbol results for many small
+ *    libraries arrive at nearly the same time.
+ *  - When symbols arrive, the user shouldn't "lose their place" in the call
+ *    tree UI; concretely this means that the selected call node and the set of
+ *    expanded call nodes should survive symbolication-triggered adjustments of
+ *    the funcTable as much as possible. More specifically, if all frames that
+ *    used to be assigned to function A get reassigned to function B, we want to
+ *    create an A -> B entry in an oldFuncToNewFuncMap that gets dispatched in
+ *    a redux action so that the appropriate parts of the redux state can react.
+ *  - Multiple processes and threads in the profile will require symbols from
+ *    the same set of native libraries, and the number and size of the
+ *    symbolication requests for each library should be minimized. This means
+ *    that we want to gather all needed addresses across the entire profile
+ *    first, rather than requesting symbols separately for each thread.
+ *
+ * Symbolication happens in a number of phases.
+ *
+ * I. Preparation during profile processing: When native code addresses initially
+ * arrive in the Firefox profiler, they come in the form of hex strings in the
+ * frame table of the Gecko profile. Profile processing then does the following:
+ *  - It detects frames of native code based on the hex string format.
+ *  - It looks up the containing library for each address.
+ *  - For each native frame, it creates one funcTable entry. It can't really do
+ *    any better at this point because it would need to have the symbols in
+ *    order to create only one func per actual function. So, to repeat, the
+ *    initial funcTable has one func per native frame.
+ *  - The frame and its func both get their address field set to the
+ *    library-relative offset.
+ *  - The func's resource field is set to a resource of type "library" that
+ *    points to the lib object in the thread's "libs" list that contained this
+ *    address. The frame's and func's address fields are relative to that lib.
+ *
+ * II. Address gathering per library: This step goes through all threads and
+ * gathers up addresses per library that need to be symbolicated. It also keeps
+ * around enough per-thread information so that the per-thread substitution step
+ * at the end can perform its work efficiently.
+ *
+ * III. Symbol lookup: Handled by the AbstractSymbolStore.
+ *
+ * IV. Symbol result processing: Does enough processing of the result to create
+ * the oldFuncToNewFuncMap, and prepares data for the final substitution step.
+ *
+ * V. Profile substitution: Invoked from the redux reducer. Creates a new thread
+ * object with an updated frameTable, funcTable and stringTable, with the
+ * symbols substituted in the right places. This usually causes many funcs to
+ * be orphaned (no frames will use them any more); these orphaned funcs remain
+ * in the funcTable.
+ */
+
 type SymbolicationHandlers = {
   onMergeFunctions: (
     threadIndex: ThreadIndex,
@@ -39,6 +129,8 @@ type ThreadSymbolicationInfo = Map<LibKey, Map<Address, IndexIntoFuncTable>>;
 /**
  * Return the library object that contains the address such that
  * rv.start <= address < rv.end, or null if no such lib object exists.
+ * The libs array needs to be sorted in ascending address order, and the address
+ * ranges of the libraries need to be non-overlapping.
  */
 export function getContainingLibrary(
   libs: Lib[],
