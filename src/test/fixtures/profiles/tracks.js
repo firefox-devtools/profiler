@@ -108,16 +108,15 @@ export function getHumanReadableTracks(state: State): string[] {
           state,
           globalTrack.pid
         );
-        const activeTabHiddenLocalTracks = ensureExists(
-          activeTabHiddenLocalTracksByPid.get(globalTrack.pid)
-        );
 
-        if (
-          showTabOnly !== null &&
-          activeTabHiddenLocalTracks.has(trackIndex)
-        ) {
-          // If we are in active tab view, hide this track completely,
-          continue;
+        if (showTabOnly !== null) {
+          const activeTabHiddenLocalTracks = ensureExists(
+            activeTabHiddenLocalTracksByPid.get(globalTrack.pid)
+          );
+          if (activeTabHiddenLocalTracks.has(trackIndex)) {
+            // If we are in active tab view, hide this track completely,
+            continue;
+          }
         }
         const hiddenText = hiddenTracks.has(trackIndex) ? 'hide' : 'show';
         const selected =

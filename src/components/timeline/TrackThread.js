@@ -19,6 +19,7 @@ import { getThreadSelectors } from '../../selectors/per-thread';
 import {
   getSelectedThreadIndex,
   getTimelineType,
+  getInvertCallstack,
 } from '../../selectors/url-state';
 import {
   TimelineMarkersJank,
@@ -32,6 +33,7 @@ import {
   changeSelectedCallNode,
   focusCallTree,
   selectLeafCallNode,
+  selectRootCallNode,
 } from '../../actions/profile-view';
 import { reportTrackThreadHeight } from '../../actions/app';
 import EmptyThreadIndicator from './EmptyThreadIndicator';
@@ -72,6 +74,11 @@ type StateProps = {|
   +timelineType: TimelineType,
   +hasFileIoMarkers: boolean,
   +samplesSelectedStates: null | SelectedState[],
+  +invertCallstack: boolean,
+  +treeOrderSampleComparator: (
+    IndexIntoSamplesTable,
+    IndexIntoSamplesTable
+  ) => number,
 |};
 
 type DispatchProps = {|
@@ -80,6 +87,7 @@ type DispatchProps = {|
   +changeSelectedCallNode: typeof changeSelectedCallNode,
   +focusCallTree: typeof focusCallTree,
   +selectLeafCallNode: typeof selectLeafCallNode,
+  +selectRootCallNode: typeof selectRootCallNode,
   +reportTrackThreadHeight: typeof reportTrackThreadHeight,
 |};
 
@@ -94,8 +102,22 @@ class TimelineTrackThread extends PureComponent<Props> {
    * This will select the leaf-most stack frame or call node.
    */
   _onSampleClick = (sampleIndex: IndexIntoSamplesTable) => {
-    const { threadIndex, selectLeafCallNode, focusCallTree } = this.props;
-    selectLeafCallNode(threadIndex, sampleIndex);
+    const {
+      threadIndex,
+      selectLeafCallNode,
+      selectRootCallNode,
+      focusCallTree,
+      invertCallstack,
+    } = this.props;
+    /**
+     * When we're displaying the inverted call stack, the "leaf" call node we're
+     * interested in is actually displayed as the "root" of the tree.
+     */
+    if (invertCallstack) {
+      selectRootCallNode(threadIndex, sampleIndex);
+    } else {
+      selectLeafCallNode(threadIndex, sampleIndex);
+    }
     focusCallTree();
   };
 
@@ -137,6 +159,7 @@ class TimelineTrackThread extends PureComponent<Props> {
       hasFileIoMarkers,
       showMemoryMarkers,
       samplesSelectedStates,
+      treeOrderSampleComparator,
     } = this.props;
 
     const processType = filteredThread.processType;
@@ -191,6 +214,7 @@ class TimelineTrackThread extends PureComponent<Props> {
             onSampleClick={this._onSampleClick}
             categories={categories}
             samplesSelectedStates={samplesSelectedStates}
+            treeOrderSampleComparator={treeOrderSampleComparator}
           />
         ) : (
           <ThreadStackGraph
@@ -229,6 +253,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
         ? selectors.getSelectedCallNodeIndex(state)
         : null;
     return {
+      invertCallstack: getInvertCallstack(state),
       filteredThread: selectors.getFilteredThread(state),
       fullThread: selectors.getRangeFilteredThread(state),
       tabFilteredThread: selectors.getTabFilteredThread(state),
@@ -244,6 +269,9 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       samplesSelectedStates: selectors.getSamplesSelectedStatesInFilteredThread(
         state
       ),
+      treeOrderSampleComparator: selectors.getTreeOrderComparatorInFilteredThread(
+        state
+      ),
     };
   },
   mapDispatchToProps: {
@@ -252,6 +280,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
     changeSelectedCallNode,
     focusCallTree,
     selectLeafCallNode,
+    selectRootCallNode,
     reportTrackThreadHeight,
   },
   component: withSize<Props>(TimelineTrackThread),

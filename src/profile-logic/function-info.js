@@ -11,8 +11,15 @@
  * it will return the original string.
  */
 export function stripFunctionArguments(functionCall: string): string {
-  // Remove known data that can appear at the end of the string
-  const s = functionCall.replace(/ \[clone [^]+\]$/, '').replace(/ const$/, '');
+  // Remove known data that can appear at the start or the end of the string
+  const s = functionCall
+    // example: "(anonymous namespace)::get_registry() [clone .8847]"
+    .replace(/ \[clone [^]+\]$/, '')
+    // example: "SkPath::internalGetConvexity() const"
+    .replace(/ const$/, '')
+    // example:" static nsThread::ThreadFunc(void*)"
+    .replace(/^static /, '');
+
   if (s[s.length - 1] !== ')') {
     return functionCall;
   }
@@ -27,11 +34,11 @@ export function stripFunctionArguments(functionCall: string): string {
     } else if (s[i] === '(') {
       depth--;
       if (depth === 0) {
-        return functionCall.substr(0, i);
+        return s.substr(0, i);
       }
     }
   }
-  return functionCall;
+  return s;
 }
 
 export function removeTemplateInformation(functionName: string) {

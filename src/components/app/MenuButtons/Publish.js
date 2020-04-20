@@ -23,6 +23,7 @@ import {
   getDownloadSize,
   getCompressedProfileBlob,
   getUploadPhase,
+  getUploadProgress,
   getUploadProgressString,
   getUploadError,
   getShouldSanitizeByDefault,
@@ -52,7 +53,8 @@ type StateProps = {|
   +compressedProfileBlobPromise: Promise<Blob>,
   +downloadFileName: string,
   +uploadPhase: UploadPhase,
-  +uploadProgress: string,
+  +uploadProgress: number,
+  +uploadProgressString: string,
   +shouldSanitizeByDefault: boolean,
   +error: mixed,
 |};
@@ -184,6 +186,7 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
   _renderUploadPanel() {
     const {
       uploadProgress,
+      uploadProgressString,
       abortUpload,
       downloadFileName,
       compressedProfileBlobPromise,
@@ -200,12 +203,12 @@ class MenuButtonsPublishImpl extends React.PureComponent<PublishProps> {
             Publishing profile…
           </div>
           <div className="menuButtonsPublishUploadPercentage">
-            {uploadProgress}
+            {uploadProgressString}
           </div>
           <div className="menuButtonsPublishUploadBar">
             <div
               className="menuButtonsPublishUploadBarInner"
-              style={{ width: uploadProgress }}
+              style={{ width: `${uploadProgress * 100}%` }}
             />
           </div>
         </div>
@@ -294,7 +297,8 @@ export const MenuButtonsPublish = explicitConnect<
     downloadFileName: getFilenameString(state),
     compressedProfileBlobPromise: getCompressedProfileBlob(state),
     uploadPhase: getUploadPhase(state),
-    uploadProgress: getUploadProgressString(state),
+    uploadProgress: getUploadProgress(state),
+    uploadProgressString: getUploadProgressString(state),
     error: getUploadError(state),
     shouldSanitizeByDefault: getShouldSanitizeByDefault(state),
   }),

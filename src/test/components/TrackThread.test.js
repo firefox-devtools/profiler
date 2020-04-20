@@ -11,7 +11,10 @@ import { Provider } from 'react-redux';
 import { render, fireEvent } from 'react-testing-library';
 import { oneLine } from 'common-tags';
 
-import { changeTimelineType } from '../../actions/profile-view';
+import {
+  changeTimelineType,
+  changeInvertCallstack,
+} from '../../actions/profile-view';
 import TrackThread from '../../components/timeline/TrackThread';
 import { getPreviewSelection } from '../../selectors/profile';
 import { selectedThreadSelectors } from '../../selectors/per-thread';
@@ -143,7 +146,7 @@ describe('timeline/TrackThread', function() {
     expect(ctx.__flushDrawLog()).toMatchSnapshot();
   });
 
-  it('can click a stack in the stack graph', function() {
+  it('can click a stack in the stack graph in normal call trees', function() {
     const { getState, stackGraphCanvas, thread } = setup(getSamplesProfile());
 
     // Provide a quick helper for nicely asserting the call node path.
@@ -177,6 +180,50 @@ describe('timeline/TrackThread', function() {
       getMouseEvent('mouseup', { pageX: STACK_4_X_POSITION })
     );
     expect(getCallNodePath()).toEqual(['j', 'k', 'l']);
+  });
+
+  it('can click a stack in the stack graph in inverted call trees', function() {
+    const { dispatch, getState, stackGraphCanvas, thread } = setup(
+      getSamplesProfile()
+    );
+
+    // Provide a quick helper for nicely asserting the call node path.
+    const getCallNodePath = () =>
+      selectedThreadSelectors
+        .getSelectedCallNodePath(getState())
+        .map(funcIndex =>
+          thread.stringTable.getString(thread.funcTable.name[funcIndex])
+        );
+
+    // Switch to "inverted" mode to test with this state
+    dispatch(changeInvertCallstack(true));
+
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_1_X_POSITION })
+    );
+    expect(getCallNodePath()).toEqual(['c']);
+
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_3_X_POSITION })
+    );
+    expect(getCallNodePath()).toEqual(['i']);
+
+    // Switch back to "uninverted" mode
+    dispatch(changeInvertCallstack(false));
+
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_1_X_POSITION })
+    );
+    expect(getCallNodePath()).toEqual(['a', 'b', 'c']);
+
+    fireEvent(
+      stackGraphCanvas(),
+      getMouseEvent('mouseup', { pageX: STACK_3_X_POSITION })
+    );
+    expect(getCallNodePath()).toEqual(['g', 'h', 'i']);
   });
 
   it('can click a marker', function() {

@@ -11,7 +11,6 @@ import {
   changeMarkersSearchString,
   changeNetworkSearchString,
   changeProfileName,
-  changeShowTabOnly,
 } from '../actions/profile-view';
 import { changeSelectedTab, changeProfilesToCompare } from '../actions/app';
 import {
@@ -22,7 +21,10 @@ import {
   upgradeLocationToCurrentVersion,
 } from '../app-logic/url-handling';
 import { blankStore } from './fixtures/stores';
-import { viewProfile } from '../actions/receive-profile';
+import {
+  viewProfile,
+  changeViewAndRecomputeProfileData,
+} from '../actions/receive-profile';
 import type { Profile } from '../types/profile';
 import getProfile from './fixtures/profiles/call-nodes';
 import queryString from 'query-string';
@@ -33,6 +35,10 @@ import {
 import { getProfileFromTextSamples } from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 import { uintArrayToString } from '../utils/uintarray-encoding';
+import {
+  getActiveTabHiddenGlobalTracksGetter,
+  getActiveTabHiddenLocalTracksByPidGetter,
+} from '../selectors/profile';
 
 function _getStoreWithURL(
   settings: {
@@ -322,6 +328,9 @@ describe('search strings', function() {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
+      if (!query.search) {
+        throw new Error('Could not find the search query string');
+      }
       expect(query.search).toBe(callTreeSearchString);
     });
   });
@@ -337,6 +346,9 @@ describe('search strings', function() {
       dispatch(changeSelectedTab(tabSlug));
       const urlState = urlStateReducers.getUrlState(getState());
       const { query } = urlStateToUrlObject(urlState);
+      if (!query.markerSearch) {
+        throw new Error('Could not find the markerSearch query string');
+      }
       expect(query.markerSearch).toBe(markerSearchString);
     });
   });
@@ -350,6 +362,9 @@ describe('search strings', function() {
     dispatch(changeSelectedTab('network-chart'));
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
+    if (!query.networkSearch) {
+      throw new Error('Could not find the networkSearch query string');
+    }
     expect(query.networkSearch).toBe(networkSearchString);
   });
 });
@@ -385,7 +400,7 @@ describe('showTabOnly', function() {
     const { getState, dispatch } = _getStoreWithURL();
     const showTabOnly = 123;
 
-    dispatch(changeShowTabOnly(showTabOnly));
+    dispatch(changeViewAndRecomputeProfileData(showTabOnly));
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
     expect(query.showTabOnly1).toBe(showTabOnly);
@@ -401,6 +416,37 @@ describe('showTabOnly', function() {
   it('returns null when showTabOnly is not specified', function() {
     const { getState } = _getStoreWithURL();
     expect(urlStateReducers.getShowTabOnly(getState())).toBe(null);
+  });
+
+  it('should use the finalizeActiveTabProfileView path and initialize active tab profile view state', function() {
+    const { getState } = _getStoreWithURL({
+      search: '?showTabOnly1=123',
+    });
+    expect(getActiveTabHiddenGlobalTracksGetter(getState())).toBeInstanceOf(
+      Function
+    );
+    const activeTabHiddenLocalTracksByPidGetter = getActiveTabHiddenLocalTracksByPidGetter(
+      getState()
+    );
+    expect(activeTabHiddenLocalTracksByPidGetter).toBeInstanceOf(Function);
+    const hiddenLocalTracksByPid = activeTabHiddenLocalTracksByPidGetter();
+    expect(hiddenLocalTracksByPid.size).toBe(1);
+  });
+
+  it('should remove other full view url states if present', function() {
+    const { getState } = _getStoreWithURL({
+      search:
+        '?showTabOnly1=123&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
+    });
+
+    const newUrl = new URL(
+      urlFromState(urlStateReducers.getUrlState(getState())),
+      'https://profiler.firefox.com'
+    );
+    // The url states that are relevant to full view should be stripped out.
+    expect(newUrl.search).toEqual(
+      `?showTabOnly1=123&thread=0&v=${CURRENT_URL_VERSION}`
+    );
   });
 });
 

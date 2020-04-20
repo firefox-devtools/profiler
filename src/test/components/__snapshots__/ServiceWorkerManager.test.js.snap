@@ -1,6 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`app/ServiceWorkerManager shows a notice when the SW is updated, and the user can close it 1`] = `
+exports[`app/ServiceWorkerManager in the home, with the \`none\` datasource shows a notice when the SW is updated, and the user can close it 1`] = `
+<div
+  class="serviceworker-ready-notice-wrapper"
+>
+  <div
+    class="photon-message-bar serviceworker-ready-notice"
+  >
+    A new version of the application has been downloaded and is ready to use.
+    <button
+      class="photon-button photon-button-micro photon-message-bar-action-button"
+      type="button"
+    >
+      Apply and reload
+    </button>
+    <button
+      aria-label="Hide the reload notice"
+      class="photon-button photon-message-bar-close-button"
+      title="Hide the reload notice"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/ServiceWorkerManager in the home, with the \`none\` datasource shows a notice when the SW is updated, and the user can close it 2`] = `
 <div
   class="serviceworker-ready-notice-wrapper"
 >
@@ -14,6 +38,66 @@ exports[`app/ServiceWorkerManager shows a notice when the SW is updated, and the
     >
       Reload the application
     </button>
+    <button
+      aria-label="Hide the reload notice"
+      class="photon-button photon-message-bar-close-button"
+      title="Hide the reload notice"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/ServiceWorkerManager in the home, with the \`none\` datasource shows a notice when the SW is updated, and the user can close it 3`] = `
+<div
+  class="serviceworker-ready-notice-wrapper"
+>
+  <div
+    class="photon-message-bar serviceworker-ready-notice"
+  >
+    A new version of the application has been downloaded and is ready to use.
+    <button
+      class="photon-button photon-button-micro photon-message-bar-action-button"
+      type="button"
+    >
+      Apply and reload
+    </button>
+    <button
+      aria-label="Hide the reload notice"
+      class="photon-button photon-message-bar-close-button"
+      title="Hide the reload notice"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/ServiceWorkerManager with the \`from-addon\` datasource shows a warning notice if updated before we were ready 1`] = `
+<div
+  class="serviceworker-ready-notice-wrapper"
+>
+  <div
+    class="photon-message-bar photon-message-bar-warning serviceworker-ready-notice"
+  >
+    A new version of the application was applied before this page was fully loaded. You might see malfunctions.
+    <button
+      aria-label="Hide the reload notice"
+      class="photon-button photon-message-bar-close-button"
+      title="Hide the reload notice"
+      type="button"
+    />
+  </div>
+</div>
+`;
+
+exports[`app/ServiceWorkerManager with the \`public\` datasource shows a warning notice if the SW was updated before we were ready 1`] = `
+<div
+  class="serviceworker-ready-notice-wrapper"
+>
+  <div
+    class="photon-message-bar photon-message-bar-warning serviceworker-ready-notice"
+  >
+    A new version of the application was applied before this page was fully loaded. You might see malfunctions.
     <button
       aria-label="Hide the reload notice"
       class="photon-button photon-message-bar-close-button"
