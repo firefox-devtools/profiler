@@ -235,7 +235,11 @@ function getThreadInfo(
   profile: Profile,
   chunk: TracingEventUnion
 ): ThreadInfo {
+  // Identify threads by both pid and tid. Just the tid is not sufficient; for
+  // example, I've run across profiles that had the tid 775 for the main threads
+  // of both a renderer process and the compositor process.
   const pidAndTid = `${chunk.pid}:${chunk.tid}`;
+
   const cachedThreadInfo = threadInfoByPidAndTid.get(pidAndTid);
   if (cachedThreadInfo) {
     return cachedThreadInfo;
@@ -262,8 +266,9 @@ function getThreadInfo(
       // Hack: Rename this thread to "GeckoMain" so that it gets detected as the
       // main thread for the globalTrack of its process, and so that the UI
       // displays a marker timeline.
-      // TODO: Replace the name detection with an isMainThread field on the thread.
-      // This would require a version bump for the processed profile format.
+      // TODO (issue #2508): Replace the name detection with an isMainThread
+      // field on the thread. This would require a version bump for the
+      // processed profile format.
       thread.name = 'GeckoMain';
     }
   }
