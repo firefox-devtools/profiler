@@ -35,7 +35,7 @@ describe('EmptyThreadIndicator', function() {
   const height = 10;
 
   const { profile } = getProfileFromTextSamples(`
-    A A A
+    A  A  A
   `);
 
   const thread = profile.threads[0];

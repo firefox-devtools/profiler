@@ -172,20 +172,18 @@ class NetworkChart extends React.PureComponent<Props> {
  */
 const ConnectedComponent = explicitConnect<OwnProps, StateProps, DispatchProps>(
   {
-    mapStateToProps: state => {
-      return {
-        markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
-          state
-        ),
-        getMarker: selectedThreadSelectors.getMarkerGetter(state),
-        rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
-          state
-        ),
-        timeRange: getPreviewSelectionRange(state),
-        disableOverscan: getPreviewSelection(state).isModifying,
-        threadIndex: getSelectedThreadIndex(state),
-      };
-    },
+    mapStateToProps: state => ({
+      markerIndexes: selectedThreadSelectors.getSearchFilteredNetworkMarkerIndexes(
+        state
+      ),
+      getMarker: selectedThreadSelectors.getMarkerGetter(state),
+      rightClickedMarkerIndex: selectedThreadSelectors.getRightClickedMarkerIndex(
+        state
+      ),
+      timeRange: getPreviewSelectionRange(state),
+      disableOverscan: getPreviewSelection(state).isModifying,
+      threadIndex: getSelectedThreadIndex(state),
+    }),
     mapDispatchToProps: { changeRightClickedMarker },
     component: NetworkChart,
   }

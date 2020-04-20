@@ -25,6 +25,7 @@ import {
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
+  getShowTabOnly,
 } from '../selectors/url-state';
 import {
   stateFromLocation,
@@ -44,7 +45,7 @@ import {
   computeActiveTabHiddenGlobalTracks,
   computeActiveTabHiddenLocalTracksByPid,
 } from '../profile-logic/active-tab';
-import { getProfileOrNull } from '../selectors/profile';
+import { getProfileOrNull, getProfile } from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { setDataSource } from './profile-view';
 
@@ -60,6 +61,7 @@ import type {
   Profile,
   ThreadIndex,
   IndexIntoFuncTable,
+  BrowsingContextID,
 } from '../types/profile';
 import { assertExhaustiveCheck } from '../utils/flow';
 
@@ -152,7 +154,146 @@ export function finalizeProfileView(
     // The selectedThreadIndex is only null for new profiles that haven't
     // been seen before. If it's non-null, then there is profile view information
     // encoded into the URL.
-    let selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
+    const selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
+
+    if (selectedThreadIndex !== null && getShowTabOnly(getState()) !== null) {
+      // The url state says this is an active tab view. We should compute and
+      // initialize the state relevant to that state.
+      dispatch(finalizeActiveTabProfileView(profile, selectedThreadIndex));
+    } else {
+      // The url state says this is a full view. We should compute and initialize
+      // the state relevant to that state.
+      dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+    }
+
+    // Note we kick off symbolication only for the profiles we know for sure
+    // that they weren't symbolicated.
+    if (profile.meta.symbolicated === false) {
+      const symbolStore = getSymbolStore(dispatch, geckoProfiler);
+      if (symbolStore) {
+        // Only symbolicate if a symbol store is available. In tests we may not
+        // have access to IndexedDB.
+        await doSymbolicateProfile(dispatch, profile, symbolStore);
+      }
+    }
+  };
+}
+
+/**
+ * Finalize the profile state for full view.
+ * This function will take the view information from the URL, such as hiding and sorting
+ * information, and it will validate it against the profile. If there is no pre-existing
+ * view information, this function will compute the defaults.
+ */
+export function finalizeFullProfileView(
+  profile: Profile,
+  selectedThreadIndex: ThreadIndex | null,
+  showTabOnly?: BrowsingContextID | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const hasUrlInfo = selectedThreadIndex !== null;
+
+    const globalTracks = computeGlobalTracks(profile);
+    const globalTrackOrder = initializeGlobalTrackOrder(
+      globalTracks,
+      hasUrlInfo ? getGlobalTrackOrder(getState()) : null,
+      getLegacyThreadOrder(getState())
+    );
+    let hiddenGlobalTracks = initializeHiddenGlobalTracks(
+      globalTracks,
+      profile,
+      globalTrackOrder,
+      hasUrlInfo ? getHiddenGlobalTracks(getState()) : null,
+      getLegacyHiddenThreads(getState())
+    );
+    const localTracksByPid = computeLocalTracksByPid(profile);
+    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
+      hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
+      localTracksByPid,
+      getLegacyThreadOrder(getState())
+    );
+    let hiddenLocalTracksByPid = initializeHiddenLocalTracksByPid(
+      hasUrlInfo ? getHiddenLocalTracksByPid(getState()) : null,
+      localTracksByPid,
+      profile,
+      getLegacyHiddenThreads(getState())
+    );
+    let visibleThreadIndexes = getVisibleThreads(
+      globalTracks,
+      hiddenGlobalTracks,
+      localTracksByPid,
+      hiddenLocalTracksByPid
+    );
+
+    // This validity check can't be extracted into a separate function, as it needs
+    // to update a lot of the local variables in this function.
+    if (visibleThreadIndexes.length === 0) {
+      // All threads are hidden, since this can't happen normally, revert them all.
+      visibleThreadIndexes = profile.threads.map(
+        (_, threadIndex) => threadIndex
+      );
+      hiddenGlobalTracks = new Set();
+      const newHiddenTracksByPid = new Map();
+      for (const [pid] of hiddenLocalTracksByPid) {
+        newHiddenTracksByPid.set(pid, new Set());
+      }
+      hiddenLocalTracksByPid = newHiddenTracksByPid;
+    }
+
+    selectedThreadIndex = initializeSelectedThreadIndex(
+      selectedThreadIndex,
+      visibleThreadIndexes,
+      profile
+    );
+
+    // If all of the local tracks were hidden for a process, and the main thread was
+    // not recorded for that process, hide the (empty) process track as well.
+    for (const [pid, localTracks] of localTracksByPid) {
+      const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
+      if (!hiddenLocalTracks) {
+        continue;
+      }
+      if (hiddenLocalTracks.size === localTracks.length) {
+        // All of the local tracks were hidden.
+        const globalTrackIndex = globalTracks.findIndex(
+          globalTrack =>
+            globalTrack.type === 'process' &&
+            globalTrack.pid === pid &&
+            globalTrack.mainThreadIndex === null
+        );
+        if (globalTrackIndex !== -1) {
+          // An empty global track was found, hide it.
+          hiddenGlobalTracks.add(globalTrackIndex);
+        }
+      }
+    }
+
+    dispatch({
+      type: 'VIEW_FULL_PROFILE',
+      selectedThreadIndex,
+      globalTracks,
+      globalTrackOrder,
+      hiddenGlobalTracks,
+      localTracksByPid,
+      hiddenLocalTracksByPid,
+      localTrackOrderByPid,
+      showTabOnly,
+    });
+  };
+}
+
+/**
+ * Finalize the profile state for active tab view.
+ * This function will take the view information from the URL, such as hiding and sorting
+ * information, and it will validate it against the profile. If there is no pre-existing
+ * view information, this function will compute the defaults.
+ */
+export function finalizeActiveTabProfileView(
+  profile: Profile,
+  selectedThreadIndex: ThreadIndex,
+  showTabOnly?: BrowsingContextID | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
     const hasUrlInfo = selectedThreadIndex !== null;
 
     const globalTracks = computeGlobalTracks(profile);
@@ -243,7 +384,7 @@ export function finalizeProfileView(
     }
 
     dispatch({
-      type: 'VIEW_PROFILE',
+      type: 'VIEW_ACTIVE_TAB_PROFILE',
       selectedThreadIndex,
       globalTracks,
       globalTrackOrder,
@@ -253,14 +394,58 @@ export function finalizeProfileView(
       localTrackOrderByPid,
       activeTabHiddenGlobalTracksGetter,
       activeTabHiddenLocalTracksByPidGetter,
+      showTabOnly,
+    });
+  };
+}
+
+/**
+ * Re-compute the profile view data. That's used to be able to switch between
+ * full and active tab view.
+ */
+export function changeViewAndRecomputeProfileData(
+  showTabOnly: BrowsingContextID | null
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const profile = getProfile(getState());
+    // We are resetting the selected thread index, because we are not sure if
+    // the selected thread will be availabe in the next view.
+    const selectedThreadIndex = 0;
+    dispatch({
+      type: 'DATA_RELOAD',
     });
 
-    // Note we kick off symbolication only for the profiles we know for sure
-    // that they weren't symbolicated.
-    if (profile.meta.symbolicated === false) {
-      const symbolStore = getSymbolStore(dispatch, geckoProfiler);
-      await doSymbolicateProfile(dispatch, profile, symbolStore);
+    if (showTabOnly === null) {
+      // The url state says this is a full view. We should compute and initialize
+      // the state relevant to that state.
+      dispatch(
+        finalizeFullProfileView(profile, selectedThreadIndex, showTabOnly)
+      );
+    } else {
+      // The url state says this is an active tab view. We should compute and
+      // initialize the state relevant to that state.
+      dispatch(
+        finalizeActiveTabProfileView(profile, selectedThreadIndex, showTabOnly)
+      );
     }
+  };
+}
+
+/**
+ * Symbolication normally happens when a profile is first loaded. This function
+ * provides the ability to kick off symbolication again after it has already been
+ * attempted once.
+ */
+export function resymbolicateProfile(): ThunkAction<Promise<void>> {
+  return async (dispatch, getState) => {
+    const symbolStore = getSymbolStore(dispatch);
+    const profile = getProfile(getState());
+    if (!symbolStore) {
+      throw new Error(
+        'There was no symbol store when attempting to re-symbolicate.'
+      );
+    }
+    await doSymbolicateProfile(dispatch, profile, symbolStore);
   };
 }
 
@@ -480,7 +665,12 @@ async function getProfileFromAddon(
 function getSymbolStore(
   dispatch: Dispatch,
   geckoProfiler?: $GeckoProfiler
-): SymbolStore {
+): SymbolStore | null {
+  if (!window.indexedDB) {
+    // We could be running in a test environment with no indexedDB support. Do not
+    // return a symbol store in this case.
+    return null;
+  }
   // Note, the database name still references the old project name, "perf.html". It was
   // left the same as to not invalidate user's information.
   const symbolStore = new SymbolStore('perf-html-async-storage', {

@@ -19,7 +19,7 @@ import SplitterLayout from 'react-splitter-layout';
 import { invalidatePanelLayout } from '../../actions/app';
 import { getTimelineHeight } from '../../selectors/app';
 import {
-  getUploadProgressString,
+  getUploadProgress,
   getUploadPhase,
   getIsHidingStaleProfile,
   getHasSanitizedProfile,
@@ -38,7 +38,7 @@ type StateProps = {|
   +profileName: string | null,
   +hasZipFile: boolean,
   +timelineHeight: CssPixels | null,
-  +uploadProgress: string,
+  +uploadProgress: number,
   +isUploading: boolean,
   +isHidingStaleProfile: boolean,
   +hasSanitizedProfile: boolean,
@@ -119,7 +119,7 @@ class ProfileViewer extends PureComponent<Props> {
             {isUploading ? (
               <div
                 className="menuButtonsPublishUploadBarInner"
-                style={{ width: uploadProgress }}
+                style={{ width: `${uploadProgress * 100}%` }}
               />
             ) : null}
           </div>
@@ -149,7 +149,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     profileName: getProfileName(state),
     hasZipFile: getHasZipFile(state),
     timelineHeight: getTimelineHeight(state),
-    uploadProgress: getUploadProgressString(state),
+    uploadProgress: getUploadProgress(state),
     isUploading: getUploadPhase(state) === 'uploading',
     isHidingStaleProfile: getIsHidingStaleProfile(state),
     hasSanitizedProfile: getHasSanitizedProfile(state),

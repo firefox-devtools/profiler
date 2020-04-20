@@ -42,8 +42,11 @@ const view: Reducer<AppViewState> = (
       return { phase: 'TRANSITIONING_FROM_STALE_PROFILE' };
     case 'PROFILE_LOADED':
       return { phase: 'PROFILE_LOADED' };
+    case 'DATA_RELOAD':
+      return { phase: 'DATA_RELOAD' };
     case 'RECEIVE_ZIP_FILE':
-    case 'VIEW_PROFILE':
+    case 'VIEW_FULL_PROFILE':
+    case 'VIEW_ACTIVE_TAB_PROFILE':
       return { phase: 'DATA_LOADED' };
     default:
       return state;
@@ -74,14 +77,15 @@ const hasZoomedViaMousewheel: Reducer<boolean> = (state = false, action) => {
   }
 };
 
-function _getNoSidebarsOpen() {
+function _getSidebarInitialState() {
   const state = {};
   tabSlugs.forEach(tabSlug => (state[tabSlug] = false));
+  state.calltree = true;
   return state;
 }
 
 const isSidebarOpenPerPanel: Reducer<IsSidebarOpenPerPanelState> = (
-  state = _getNoSidebarsOpen(),
+  state = _getSidebarInitialState(),
   action
 ) => {
   switch (action.type) {
@@ -144,7 +148,6 @@ const lastVisibleThreadTabSlug: Reducer<TabSlug> = (
   switch (action.type) {
     case 'SELECT_TRACK':
     case 'CHANGE_SELECTED_TAB':
-    case 'CHANGE_SHOW_TAB_ONLY':
       if (action.selectedTab !== 'network-chart') {
         return action.selectedTab;
       }

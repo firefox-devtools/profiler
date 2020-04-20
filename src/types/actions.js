@@ -221,7 +221,6 @@ type ProfileAction =
   | {|
       +type: 'SET_CONTEXT_MENU_VISIBILITY',
       +isVisible: boolean,
-      +threadIndex: ThreadIndex,
     |}
   | {|
       +type: 'INCREMENT_PANEL_LAYOUT_GENERATION',
@@ -253,7 +252,18 @@ type ReceiveProfileAction =
       +transformStacks: ?TransformStacksPerThread,
     |}
   | {|
-      +type: 'VIEW_PROFILE',
+      +type: 'VIEW_FULL_PROFILE',
+      +selectedThreadIndex: ThreadIndex,
+      +globalTracks: GlobalTrack[],
+      +globalTrackOrder: TrackIndex[],
+      +hiddenGlobalTracks: Set<TrackIndex>,
+      +localTracksByPid: Map<Pid, LocalTrack[]>,
+      +hiddenLocalTracksByPid: Map<Pid, Set<TrackIndex>>,
+      +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
+      +showTabOnly?: BrowsingContextID | null,
+    |}
+  | {|
+      +type: 'VIEW_ACTIVE_TAB_PROFILE',
       +selectedThreadIndex: ThreadIndex,
       +globalTracks: GlobalTrack[],
       +globalTrackOrder: TrackIndex[],
@@ -263,6 +273,10 @@ type ReceiveProfileAction =
       +localTrackOrderByPid: Map<Pid, TrackIndex[]>,
       +activeTabHiddenGlobalTracksGetter: () => Set<TrackIndex>,
       +activeTabHiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
+      +showTabOnly?: BrowsingContextID | null,
+    |}
+  | {|
+      +type: 'DATA_RELOAD',
     |}
   | {| +type: 'RECEIVE_ZIP_FILE', +zip: JSZip |}
   | {| +type: 'PROCESS_PROFILE_FROM_ZIP_FILE', +pathInZipFile: string |}
@@ -360,12 +374,6 @@ type UrlStateAction =
   | {|
       +type: 'SET_DATA_SOURCE',
       +dataSource: DataSource,
-    |}
-  | {|
-      +type: 'CHANGE_SHOW_TAB_ONLY',
-      +showTabOnly: BrowsingContextID | null,
-      +selectedTab: TabSlug,
-      +selectedThreadIndex: ThreadIndex | null,
     |};
 
 type IconsAction =

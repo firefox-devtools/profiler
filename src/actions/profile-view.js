@@ -49,12 +49,7 @@ import type {
 } from '../types/actions';
 import type { State } from '../types/state';
 import type { Action, ThunkAction } from '../types/store';
-import type {
-  ThreadIndex,
-  Pid,
-  IndexIntoSamplesTable,
-  BrowsingContextID,
-} from '../types/profile';
+import type { ThreadIndex, Pid, IndexIntoSamplesTable } from '../types/profile';
 import type {
   CallNodePath,
   CallNodeInfo,
@@ -271,73 +266,89 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
     let selectedThreadIndex = null;
     let selectedTab = currentlySelectedTab;
 
-    if (trackReference.type === 'global') {
-      // Handle the case of global tracks.
-      const globalTrack = getGlobalTrackFromReference(
-        getState(),
-        trackReference
-      );
+    switch (trackReference.type) {
+      case 'global': {
+        // Handle the case of global tracks.
+        const globalTrack = getGlobalTrackFromReference(
+          getState(),
+          trackReference
+        );
 
-      // Go through each type, and determine the selected slug and thread index.
-      switch (globalTrack.type) {
-        case 'process': {
-          if (globalTrack.mainThreadIndex === null) {
-            // Do not allow selecting process tracks without a thread index.
+        // Go through each type, and determine the selected slug and thread index.
+        switch (globalTrack.type) {
+          case 'process': {
+            if (globalTrack.mainThreadIndex === null) {
+              // Do not allow selecting process tracks without a thread index.
+              return;
+            }
+            selectedThreadIndex = globalTrack.mainThreadIndex;
+            // Ensure a relevant thread-based tab is used.
+            if (selectedTab === 'network-chart') {
+              selectedTab = getLastVisibleThreadTabSlug(getState());
+            }
+            break;
+          }
+          case 'screenshots':
+          case 'visual-progress':
+          case 'perceptual-visual-progress':
+          case 'contentful-visual-progress':
+            // Do not allow selecting these tracks.
             return;
-          }
-          selectedThreadIndex = globalTrack.mainThreadIndex;
-          // Ensure a relevant thread-based tab is used.
-          if (selectedTab === 'network-chart') {
-            selectedTab = getLastVisibleThreadTabSlug(getState());
-          }
-          break;
+          default:
+            throw assertExhaustiveCheck(
+              globalTrack,
+              `Unhandled GlobalTrack type.`
+            );
         }
-        case 'screenshots':
-        case 'visual-progress':
-        case 'perceptual-visual-progress':
-        case 'contentful-visual-progress':
-          // Do not allow selecting these tracks.
-          return;
-        default:
-          throw assertExhaustiveCheck(
-            globalTrack,
-            `Unhandled GlobalTrack type.`
-          );
+        break;
       }
-    } else {
-      // Handle the case of local tracks.
-      const localTrack = getLocalTrackFromReference(getState(), trackReference);
+      case 'local': {
+        // Handle the case of local tracks.
+        const localTrack = getLocalTrackFromReference(
+          getState(),
+          trackReference
+        );
 
-      // Go through each type, and determine the tab slug and thread index.
-      switch (localTrack.type) {
-        case 'thread': {
-          // Ensure a relevant thread-based tab is used.
-          selectedThreadIndex = localTrack.threadIndex;
-          if (selectedTab === 'network-chart') {
-            selectedTab = getLastVisibleThreadTabSlug(getState());
+        // Go through each type, and determine the tab slug and thread index.
+        switch (localTrack.type) {
+          case 'thread': {
+            // Ensure a relevant thread-based tab is used.
+            selectedThreadIndex = localTrack.threadIndex;
+            if (selectedTab === 'network-chart') {
+              selectedTab = getLastVisibleThreadTabSlug(getState());
+            }
+            break;
           }
-          break;
+          case 'network':
+            selectedThreadIndex = localTrack.threadIndex;
+            selectedTab = 'network-chart';
+            break;
+          case 'ipc':
+            selectedThreadIndex = localTrack.threadIndex;
+            selectedTab = 'marker-chart';
+            break;
+          case 'memory': {
+            const { counterIndex } = localTrack;
+            const counterSelectors = getCounterSelectors(counterIndex);
+            const counter = counterSelectors.getCommittedRangeFilteredCounter(
+              getState()
+            );
+            selectedThreadIndex = counter.mainThreadIndex;
+            break;
+          }
+          default:
+            throw assertExhaustiveCheck(
+              localTrack,
+              `Unhandled LocalTrack type.`
+            );
         }
-        case 'network':
-          selectedThreadIndex = localTrack.threadIndex;
-          selectedTab = 'network-chart';
-          break;
-        case 'ipc':
-          selectedThreadIndex = localTrack.threadIndex;
-          selectedTab = 'marker-chart';
-          break;
-        case 'memory': {
-          const { counterIndex } = localTrack;
-          const counterSelectors = getCounterSelectors(counterIndex);
-          const counter = counterSelectors.getCommittedRangeFilteredCounter(
-            getState()
-          );
-          selectedThreadIndex = counter.mainThreadIndex;
-          break;
-        }
-        default:
-          throw assertExhaustiveCheck(localTrack, `Unhandled LocalTrack type.`);
+        break;
       }
+      default:
+        throw assertExhaustiveCheck(
+          trackReference,
+          'Unhandled TrackReference type'
+        );
     }
 
     const doesNextTrackHaveSelectedTab = getThreadSelectors(selectedThreadIndex)
@@ -384,16 +395,10 @@ export function changeRightClickedTrack(
   };
 }
 
-export function setContextMenuVisibility(
-  isVisible: boolean
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    const selectedThreadIndex = getSelectedThreadIndex(getState());
-    dispatch({
-      type: 'SET_CONTEXT_MENU_VISIBILITY',
-      threadIndex: selectedThreadIndex,
-      isVisible,
-    });
+export function setContextMenuVisibility(isVisible: boolean): Action {
+  return {
+    type: 'SET_CONTEXT_MENU_VISIBILITY',
+    isVisible,
   };
 }
 
@@ -1208,42 +1213,6 @@ export function changeProfileName(profileName: string): Action {
   return {
     type: 'CHANGE_PROFILE_NAME',
     profileName,
-  };
-}
-
-export function changeShowTabOnly(
-  showTabOnly: BrowsingContextID | null
-): ThunkAction<void> {
-  return (dispatch, getState) => {
-    let selectedTab = getSelectedTab(getState());
-
-    if (showTabOnly !== null && selectedTab === 'network-chart') {
-      selectedTab = getLastVisibleThreadTabSlug(getState());
-    }
-
-    let selectedThreadIndex = null;
-    if (showTabOnly !== null) {
-      // Select the first visible thread when we are transitioning to tab only view.
-      selectedThreadIndex = _findOtherVisibleThread(
-        getState,
-        undefined, // Do not filter out any track.
-        undefined,
-        true // ignore the hidden tracks by active tab
-      );
-
-      if (selectedThreadIndex === null) {
-        // We should revert to the first view, because all the threads are hidden
-        // in the single tab view and we won't be able to see anything there.
-        return;
-      }
-    }
-
-    dispatch({
-      type: 'CHANGE_SHOW_TAB_ONLY',
-      showTabOnly,
-      selectedTab,
-      selectedThreadIndex,
-    });
   };
 }
 

@@ -20,11 +20,11 @@ jest.mock('../../components/app/Details', () => 'details-viewer');
 describe('app/DetailsContainer', function() {
   function setup() {
     const { profile } = getProfileFromTextSamples(`
-      A A A
-      B B B
-      C C H
-      D F I
-      E E
+      A  A  A
+      B  B  B
+      C  C  H
+      D  F  I
+      E  E
     `);
 
     const store = storeWithProfile(profile);

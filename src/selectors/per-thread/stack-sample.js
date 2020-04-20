@@ -11,10 +11,12 @@ import * as FlameGraph from '../../profile-logic/flame-graph';
 import * as CallTree from '../../profile-logic/call-tree';
 import { PathSet } from '../../utils/path';
 import * as ProfileSelectors from '../profile';
+import { getRightClickedCallNodeInfo } from '../right-clicked-call-node';
 import { assertExhaustiveCheck, ensureExists } from '../../utils/flow';
 
 import type {
   Thread,
+  ThreadIndex,
   SamplesTable,
   JsAllocationsTable,
   NativeAllocationsTable,
@@ -46,7 +48,8 @@ export type StackAndSampleSelectorsPerThread = $ReturnType<
  * Create the selectors for a thread that have to do with either stacks or samples.
  */
 export function getStackAndSampleSelectorsPerThread(
-  threadSelectors: ThreadSelectorsPerThread
+  threadSelectors: ThreadSelectorsPerThread,
+  threadIndex: ThreadIndex
 ): * {
   /**
    * The buffers of the samples can be cleared out. This function lets us know the
@@ -99,21 +102,6 @@ export function getStackAndSampleSelectorsPerThread(
         callNodePath,
         callNodeInfo.callNodeTable
       );
-    }
-  );
-
-  const getRightClickedCallNodePath: Selector<CallNodePath | null> = state =>
-    threadSelectors.getViewOptions(state).rightClickedCallNodePath;
-
-  const getRightClickedCallNodeIndex: Selector<IndexIntoCallNodeTable | null> = createSelector(
-    getCallNodeInfo,
-    getRightClickedCallNodePath,
-    ({ callNodeTable }, callNodePath): IndexIntoCallNodeTable | null => {
-      if (callNodePath === null) {
-        return null;
-      }
-
-      return ProfileData.getCallNodeIndexFromPath(callNodePath, callNodeTable);
     }
   );
 
@@ -331,14 +319,30 @@ export function getStackAndSampleSelectorsPerThread(
     FlameGraph.getFlameGraphTiming
   );
 
+  const getRightClickedCallNodeIndex: Selector<null | IndexIntoCallNodeTable> = createSelector(
+    getRightClickedCallNodeInfo,
+    getCallNodeInfo,
+    (rightClickedCallNodeInfo, { callNodeTable }) => {
+      if (
+        rightClickedCallNodeInfo !== null &&
+        rightClickedCallNodeInfo.threadIndex === threadIndex
+      ) {
+        return ProfileData.getCallNodeIndexFromPath(
+          rightClickedCallNodeInfo.callNodePath,
+          callNodeTable
+        );
+      }
+
+      return null;
+    }
+  );
+
   return {
     unfilteredSamplesRange,
     getCallNodeInfo,
     getCallNodeMaxDepth,
     getSelectedCallNodePath,
     getSelectedCallNodeIndex,
-    getRightClickedCallNodePath,
-    getRightClickedCallNodeIndex,
     getExpandedCallNodePaths,
     getExpandedCallNodeIndexes,
     getSamplesSelectedStatesInFilteredThread,
@@ -348,5 +352,6 @@ export function getStackAndSampleSelectorsPerThread(
     getStackTimingByDepth,
     getCallNodeMaxDepthForFlameGraph,
     getFlameGraphTiming,
+    getRightClickedCallNodeIndex,
   };
 }

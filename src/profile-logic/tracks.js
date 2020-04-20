@@ -627,6 +627,15 @@ function _isThreadIdle(profile: Profile, thread: Thread): boolean {
     );
   }
 
+  if (/^(?:Audio|Media)/.test(thread.name)) {
+    // This is a media thread: they are usually very idle, but are interesting
+    // as soon as there's at least one sample. They're present with the media
+    // preset, but not usually captured otherwise.
+    // Matched thread names: AudioIPC, MediaPDecoder, MediaTimer, MediaPlayback,
+    // MediaDecoderStateMachine. They're enabled by the media preset.
+    return !_hasThreadAtLeastOneNonIdleSample(profile, thread);
+  }
+
   return _isThreadMostlyFullOfIdleSamples(profile, thread);
 }
 
@@ -708,6 +717,24 @@ function _isThreadMostlyFullOfIdleSamples(
 
   // Do one final check to see if we have enough active samples.
   return activeStackCount <= maxActiveStackCount;
+}
+
+function _hasThreadAtLeastOneNonIdleSample(
+  profile: Profile,
+  thread: Thread
+): boolean {
+  for (const stackIndex of thread.samples.stack) {
+    if (stackIndex === null) {
+      continue;
+    }
+
+    const categoryIndex = thread.stackTable.category[stackIndex];
+    const category = profile.meta.categories[categoryIndex];
+    if (category.name !== 'Idle') {
+      return true;
+    }
+  }
+  return false;
 }
 
 function _findDefaultThread(threads: Thread[]): Thread | null {

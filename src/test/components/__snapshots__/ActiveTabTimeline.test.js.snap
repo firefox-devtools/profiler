@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActiveTabTimeline should be rendered properly from the Timeline component 1`] = `
+<div
+  class="timelineSelection"
+>
+  <div
+    class="timelineRuler"
+  >
+    <ol
+      class="timelineRulerContainer"
+    />
+  </div>
+  <div
+    class="overflowEdgeIndicator timelineOverflowEdgeIndicator"
+  >
+    <div
+      class="overflowEdgeIndicatorEdge topEdge"
+    />
+    <div
+      class="overflowEdgeIndicatorEdge rightEdge"
+    />
+    <div
+      class="overflowEdgeIndicatorEdge bottomEdge"
+    />
+    <div
+      class="overflowEdgeIndicatorEdge leftEdge"
+    />
+    <div
+      class="overflowEdgeIndicatorScrollbox timelineOverflowEdgeIndicatorScrollbox"
+    >
+      <div
+        class="overflowEdgeIndicatorContentsWrapper"
+      >
+        <ol
+          class="timelineThreadList"
+        />
+      </div>
+    </div>
+  </div>
+  <div
+    class="timelineSelectionHoverLine"
+    style="visibility: hidden; left: 0px;"
+  />
+</div>
+`;

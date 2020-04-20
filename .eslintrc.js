@@ -104,5 +104,13 @@ module.exports = {
       version: '15.0',
       flowVersion: '0.63.1',
     },
+    'import/resolver': {
+      alias: {
+        map: [
+          ['firefox-profiler', './src'],
+        ],
+        extensions: ['.js']
+      }
+    }
   },
 };

@@ -18,6 +18,8 @@ import {
 } from '../fixtures/profiles/processed-profile';
 import { createGeckoProfile } from '../fixtures/profiles/gecko-profile';
 import { processProfile } from '../../profile-logic/process-profile';
+import type { Profile } from '../../types/profile';
+import type { SymbolicationStatus } from '../../types/state';
 
 // Mocking SymbolStoreDB
 import { uploadBinaryProfileData } from '../../profile-logic/profile-store';
@@ -256,71 +258,138 @@ describe('app/MenuButtons', function() {
       expect(getPanel()).toMatchSnapshot();
     });
   });
+});
 
-  describe('<MenuButtonsMetaInfo>', function() {
-    it('matches the snapshot', async () => {
-      jest.useFakeTimers();
-      jest
-        .spyOn(Date.prototype, 'toLocaleString')
-        .mockImplementation(function() {
-          // eslint-disable-next-line babel/no-invalid-this
-          return 'toLocaleString ' + this.toUTCString();
-        });
-      // Using gecko profile because it has metadata and profilerOverhead data in it.
-      const profile = processProfile(createGeckoProfile());
-      profile.meta.configuration = {
-        features: ['js', 'threads'],
-        threads: ['GeckoMain', 'DOM Worker'],
-        capacity: Math.pow(2, 14),
-        duration: 20,
-      };
-      const store = storeWithProfile(profile);
+describe('<MenuButtonsMetaInfo>', function() {
+  function setup(profile: Profile, symbolicationStatus = 'DONE') {
+    jest.useFakeTimers();
+    jest.spyOn(Date.prototype, 'toLocaleString').mockImplementation(function() {
+      // eslint-disable-next-line babel/no-invalid-this
+      return 'toLocaleString ' + this.toUTCString();
+    });
+    const store = storeWithProfile(profile);
+    const resymbolicateProfile = jest.fn();
 
-      const { container, getByValue } = render(
-        <Provider store={store}>
-          <MenuButtonsMetaInfo profile={profile} />
-        </Provider>
-      );
+    const renderResults = render(
+      <Provider store={store}>
+        <MenuButtonsMetaInfo
+          profile={profile}
+          resymbolicateProfile={resymbolicateProfile}
+          symbolicationStatus={symbolicationStatus}
+        />
+      </Provider>
+    );
 
-      const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
-      fireEvent.click(metaInfoButton);
+    return {
+      store,
+      resymbolicateProfile,
+      renderResults,
+      ...renderResults,
+    };
+  }
+
+  it('matches the snapshot', async () => {
+    // Using gecko profile because it has metadata and profilerOverhead data in it.
+    const profile = processProfile(createGeckoProfile());
+    profile.meta.configuration = {
+      features: ['js', 'threads'],
+      threads: ['GeckoMain', 'DOM Worker'],
+      capacity: Math.pow(2, 14),
+      duration: 20,
+    };
+
+    const { container, getByValue } = setup(profile);
+    const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
+    fireEvent.click(metaInfoButton);
+    jest.runAllTimers();
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  it('with no statistics object should not make the app crash', async () => {
+    // Using gecko profile because it has metadata and profilerOverhead data in it.
+    const profile = processProfile(createGeckoProfile());
+    // We are removing statistics objects from all overhead objects to test
+    // the robustness of our handling code.
+    if (profile.profilerOverhead) {
+      for (const overhead of profile.profilerOverhead) {
+        delete overhead.statistics;
+      }
+    }
+
+    const { getByValue, container } = setup(profile);
+
+    const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
+    fireEvent.click(metaInfoButton);
+    jest.runAllTimers();
+
+    expect(container.firstChild).toMatchSnapshot();
+  });
+
+  describe('symbolication', function() {
+    type SymbolicationTestConfig = {|
+      symbolicated: boolean,
+      symbolicationStatus: SymbolicationStatus,
+    |};
+
+    function setupSymbolicationTest(config: SymbolicationTestConfig) {
+      const { profile } = getProfileFromTextSamples('A');
+      profile.meta.symbolicated = config.symbolicated;
+
+      const setupResult = setup(profile, config.symbolicationStatus);
+
+      // Open up the arrow panel for the test.
+      const { getByValue } = setupResult;
+      fireEvent.click(getByValue('Firefox ()'));
       jest.runAllTimers();
 
-      expect(container.firstChild).toMatchSnapshot();
+      return setupResult;
+    }
+
+    it('handles successfully symbolicated profiles', () => {
+      const { getByText, resymbolicateProfile } = setupSymbolicationTest({
+        symbolicated: true,
+        symbolicationStatus: 'DONE',
+      });
+
+      expect(getByText('Profile is symbolicated')).toBeTruthy();
+      getByText('Re-symbolicate profile').click();
+      expect(resymbolicateProfile).toHaveBeenCalled();
     });
 
-    it('with no statistics object should not make the app crash', async () => {
-      jest.useFakeTimers();
-      jest
-        .spyOn(Date.prototype, 'toLocaleString')
-        .mockImplementation(function() {
-          // eslint-disable-next-line babel/no-invalid-this
-          return 'toLocaleString ' + this.toUTCString();
-        });
-      // Using gecko profile because it has metadata and profilerOverhead data in it.
-      const profile = processProfile(createGeckoProfile());
+    it('handles the contradictory state of non-symbolicated profiles that are done', () => {
+      const { getByText, resymbolicateProfile } = setupSymbolicationTest({
+        symbolicated: false,
+        symbolicationStatus: 'DONE',
+      });
 
-      // We are removing statistics objects from all overhead objects to test
-      // the robustness of our handling code.
-      if (profile.profilerOverhead) {
-        for (const overhead of profile.profilerOverhead) {
-          delete overhead.statistics;
-        }
-      }
+      expect(getByText('Profile is not symbolicated')).toBeTruthy();
+      getByText('Symbolicate profile').click();
+      expect(resymbolicateProfile).toHaveBeenCalled();
+    });
 
-      const store = storeWithProfile(profile);
+    it('handles in progress symbolication', () => {
+      const { getByText, queryByText } = setupSymbolicationTest({
+        symbolicated: false,
+        symbolicationStatus: 'SYMBOLICATING',
+      });
 
-      const { container, getByValue } = render(
-        <Provider store={store}>
-          <MenuButtonsMetaInfo profile={profile} />
-        </Provider>
-      );
+      expect(getByText('Currently symbolicating profile')).toBeTruthy();
+      // No symbolicate button is available.
+      expect(queryByText('Symbolicate profile')).toBeFalsy();
+      expect(queryByText('Re-symbolicate profile')).toBeFalsy();
+    });
 
-      const metaInfoButton = getByValue('Firefox (48.0) Intel Mac OS X 10.11');
-      fireEvent.click(metaInfoButton);
-      jest.runAllTimers();
+    it('handles in progress re-symbolication', () => {
+      const { getByText, queryByText } = setupSymbolicationTest({
+        symbolicated: true,
+        symbolicationStatus: 'SYMBOLICATING',
+      });
 
-      expect(container.firstChild).toMatchSnapshot();
+      expect(getByText('Attempting to re-symbolicate profile')).toBeTruthy();
+      // No symbolicate button is available.
+      expect(queryByText('Symbolicate profile')).toBeFalsy();
+      expect(queryByText('Re-symbolicate profile')).toBeFalsy();
     });
   });
 });

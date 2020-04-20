@@ -10,17 +10,71 @@ import { MetaOverheadStatistics } from './MetaOverheadStatistics';
 import { formatBytes } from '../../../utils/format-numbers';
 
 import type { Profile, ProfileMeta } from '../../../types/profile';
+import type { SymbolicationStatus } from '../../../types/state';
+import { typeof resymbolicateProfile } from '../../../actions/receive-profile';
+import { assertExhaustiveCheck } from '../../../utils/flow';
 
 import './MetaInfo.css';
 
 type Props = {
   profile: Profile,
+  symbolicationStatus: SymbolicationStatus,
+  resymbolicateProfile: resymbolicateProfile,
 };
 
 /**
  * This component formats the profile's meta information into a dropdown panel.
  */
 export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
+  /**
+   * This method provides information about the symbolication status, and a button
+   * to re-trigger symbolication.
+   */
+  renderSymbolication() {
+    const { profile, symbolicationStatus, resymbolicateProfile } = this.props;
+    const isSymbolicated = profile.meta.symbolicated;
+
+    switch (symbolicationStatus) {
+      case 'DONE':
+        return (
+          <>
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel">Symbols:</span>
+              {isSymbolicated
+                ? 'Profile is symbolicated'
+                : 'Profile is not symbolicated'}
+            </div>
+            <div className="metaInfoRow">
+              <span className="metaInfoLabel"></span>
+              <button
+                onClick={resymbolicateProfile}
+                type="button"
+                className="photon-button photon-button-micro"
+              >
+                {isSymbolicated
+                  ? 'Re-symbolicate profile'
+                  : 'Symbolicate profile'}
+              </button>
+            </div>
+          </>
+        );
+      case 'SYMBOLICATING':
+        return (
+          <div className="metaInfoRow">
+            <span className="metaInfoLabel">Symbols:</span>
+            {isSymbolicated
+              ? 'Attempting to re-symbolicate profile'
+              : 'Currently symbolicating profile'}
+          </div>
+        );
+      default:
+        throw assertExhaustiveCheck(
+          symbolicationStatus,
+          'Unhandled SymbolicationStatus.'
+        );
+    }
+  }
+
   render() {
     const { meta, profilerOverhead } = this.props.profile;
     const { configuration } = meta;
@@ -80,6 +134,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
                   </div>
                 </>
               ) : null}
+              {this.renderSymbolication()}
             </div>
             <h2 className="arrowPanelSubTitle">Application</h2>
             <div className="arrowPanelSection">
