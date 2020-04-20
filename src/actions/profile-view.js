@@ -145,6 +145,42 @@ export function selectLeafCallNode(
 }
 
 /**
+ * Given a threadIndex and a sampleIndex, select the call node at the bottom ("root")
+ * of that sample's stack.
+ */
+export function selectRootCallNode(
+  threadIndex: ThreadIndex,
+  sampleIndex: IndexIntoSamplesTable
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const threadSelectors = getThreadSelectors(threadIndex);
+    const filteredThread = threadSelectors.getFilteredThread(getState());
+    const callNodeInfo = threadSelectors.getCallNodeInfo(getState());
+
+    const newSelectedStack = filteredThread.samples.stack[sampleIndex];
+    if (newSelectedStack === null || newSelectedStack === undefined) {
+      return;
+    }
+    const newSelectedCallNode =
+      callNodeInfo.stackIndexToCallNodeIndex[newSelectedStack];
+
+    const selectedCallNodePath = getCallNodePathFromIndex(
+      newSelectedCallNode,
+      callNodeInfo.callNodeTable
+    );
+    const rootCallNodePath = [selectedCallNodePath[0]];
+
+    dispatch(
+      changeSelectedCallNode(
+        threadIndex,
+        rootCallNodePath,
+        selectedCallNodePath
+      )
+    );
+  };
+}
+
+/**
  * This function provides a different strategy for selecting call nodes. It selects
  * a "best" ancestor call node, but also expands out its children nodes to the
  * actual call node that was clicked. See findBestAncestorCallNode for more
