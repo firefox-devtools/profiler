@@ -34,6 +34,11 @@ describe('strip-function-arguments', function() {
   it('should do nothing if not a function call', function() {
     expect(stripFunctionArguments('(root)')).toEqual('(root)');
   });
+  it('should remove also the storage class', function() {
+    expect(
+      stripFunctionArguments('static nsThread::ThreadFunc(void*)')
+    ).toEqual('nsThread::ThreadFunc');
+  });
 });
 
 describe('remove-template-information', function() {
@@ -62,7 +67,9 @@ describe('remove-template-information', function() {
 describe('get-function-name', function() {
   it('should get the function name', function() {
     expect(
-      getFunctionName('ns::Foo<0>::fn(bool (*)(JS::Handle<JSObject*>)) const')
+      getFunctionName(
+        'static ns::Foo<0>::fn(bool (*)(JS::Handle<JSObject*>)) const'
+      )
     ).toEqual('ns::Foo::fn');
   });
 });
