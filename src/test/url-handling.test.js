@@ -418,6 +418,9 @@ describe('showTabOnly', function() {
     expect(urlStateReducers.getShowTabOnly(getState())).toBe(null);
   });
 
+  // TODO: This test is disabled for now because we don't initizalize anything inside
+  // the finalizeActiveTabProfileView function yet. This will be enabled back once
+  // we have some active tab specific states (like active tab global track or resouces tracks).
   // eslint-disable-next-line jest/no-disabled-tests
   it.skip('should use the finalizeActiveTabProfileView path and initialize active tab profile view state', function() {
     const { getState } = _getStoreWithURL({

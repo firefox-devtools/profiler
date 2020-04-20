@@ -44,8 +44,6 @@ import {
 import {
   getProfileFromTextSamples,
   addMarkersToThreadWithCorrespondingSamples,
-  getNetworkMarkers,
-  getScreenshotTrackProfile,
 } from '../fixtures/profiles/processed-profile';
 import { getHumanReadableTracks } from '../fixtures/profiles/tracks';
 import { waitUntilState } from '../fixtures/utils';
@@ -433,92 +431,6 @@ describe('actions/receive-profile', function() {
         '  - hide [thread MediaPlayback idle]',
         '  - hide [thread MediaDecoderStateMachine idle]',
       ]);
-    });
-
-    describe('finalizeActiveTabProfileView', function() {
-      const browsingContextID = 123;
-      const innerWindowID = 111111;
-      function setup(profile: ?Profile, dispatchToShowTabOnly: boolean = true) {
-        const store = blankStore();
-
-        if (!profile) {
-          profile = getEmptyProfile();
-          profile.threads.push(
-            // This thread should be completely hidden because it doesn't contain anything from the tab.
-            getEmptyThread({
-              name: 'GeckoMain',
-              processType: 'default',
-              pid: 1,
-            }),
-            // This thread shouldn't be hidden because it will have markers with innerWindowID.
-            getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 2 }),
-            // This thread should be completely hidden because it doesn't contain anything from the tab.
-            getEmptyThread({ name: 'GeckoMain', processType: 'tab', pid: 3 })
-          );
-        } else {
-          // Appending a thread to test the second all the time
-          profile.threads = [
-            getEmptyThread({
-              name: 'GeckoMain',
-              processType: 'default',
-              pid: 1,
-            }),
-            ...profile.threads,
-          ];
-        }
-
-        profile.meta.configuration = {
-          threads: [],
-          features: [],
-          capacity: 1000000,
-          activeBrowsingContextID: browsingContextID,
-        };
-        profile.pages = [
-          {
-            browsingContextID: browsingContextID,
-            innerWindowID: innerWindowID,
-            url: 'URL',
-            embedderInnerWindowID: 0,
-          },
-        ];
-
-        addMarkersToThreadWithCorrespondingSamples(profile.threads[1], [
-          [
-            'RefreshDriverTick',
-            0,
-            {
-              type: 'tracing',
-              category: 'Navigation',
-              interval: 'start',
-              innerWindowID: innerWindowID,
-            },
-          ],
-          ...getNetworkMarkers({
-            startTime: 1,
-          }),
-        ]);
-
-        store.dispatch(viewProfile(profile));
-        if (dispatchToShowTabOnly) {
-          store.dispatch(changeViewAndRecomputeProfileData(browsingContextID));
-        }
-
-        return { ...store, profile };
-      }
-
-      // eslint-disable-next-line jest/no-disabled-tests
-      it.skip('should not hide screenshot tracks', function() {
-        const profile = getScreenshotTrackProfile();
-        profile.threads[0].name = 'GeckoMain';
-        profile.threads[0].processType = 'tab';
-
-        const { getState } = setup(profile);
-        expect(getHumanReadableTracks(getState())).toEqual([
-          'show [screenshots]',
-          'show [screenshots]',
-          'show [thread GeckoMain tab]',
-        ]);
-      });
     });
   });
 
