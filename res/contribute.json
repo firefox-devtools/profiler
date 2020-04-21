@@ -26,7 +26,7 @@
       },
       "urls": {
         "prod": "https://profiler.firefox.com",
-        "stage": "https://master--perf-html.netlify.com/"
+        "stage": "https://master--perf-html.netlify.app/"
       },
       "keywords": [
         "performance",
