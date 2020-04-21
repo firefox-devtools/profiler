@@ -24,7 +24,7 @@ This project is made up of a cross section of different parts of Mozilla, includ
 [squelart]:https://avatars.githubusercontent.com/squelart?size=56
 [canova]:https://avatars.githubusercontent.com/canova?size=56
 
-We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-slack.herokuapp.com/) in the #perf channel. Come chat with us if you have any questions about the project.
+We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.org/) in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)](https://chat.mozilla.org/#/room/#profiler:mozilla.org). Come chat with us if you have any questions about the project.
 
 ## Getting started with development
 
@@ -118,10 +118,12 @@ week-ends be aware that our team is working mostly on week days,
 therefore please be patient :-)
 
 
-Feel free to [chat with us on
-slack](https://devtools-html-slack.herokuapp.com/) if you need help finding
-something you might be interested to work on or have any question. You can also
-leave message on our special [issue #1785](https://github.com/firefox-devtools/profiler/issues/1785).
+Feel free to [chat with us on Matrix](https://chat.mozilla.org/#/room/#profiler:mozilla.org)
+if you need help finding something you might be interested to work on or have any question.
+You'll need to login first, and possibly click on the link again to access our
+room directly.
+
+You can also leave a message on our special [issue #1785](https://github.com/firefox-devtools/profiler/issues/1785).
 
 ## Submitting changes with a pull request (PR)
 

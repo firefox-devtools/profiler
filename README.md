@@ -1,7 +1,5 @@
 # Firefox Profiler
 
-[![slack-badge]][slack]
-
 The [Firefox Profiler] visualizes performance data recorded from web browsers. It is a tool designed to consume performance profiles from the Gecko Profiler but can visualize data from any profiler able to output in JSON. The interface is a web application built using [React] and [Redux] and runs entirely client-side.
 
 [Mozilla] develops this tool to help make [Firefox] silky smooth and fast for millions of its users, and to help make sites and apps faster across the web.
@@ -66,7 +64,7 @@ For more detailed information on getting started contributing. We have plenty of
 
 ### Discussion
 
-Say hello on [slack] in the #perf channel.
+Say hello on Matrix in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)][matrix].
 
 ### License
 
@@ -76,8 +74,11 @@ Some permissive software licenses request but do not require an acknowledgement 
 
 * The [zlib] compression library (Jean-loup Gailly, Mark Adler and team)
 
-[slack-badge]: https://devtools-html-slack.herokuapp.com/badge.svg
-[slack]: https://devtools-html-slack.herokuapp.com/
+[matrix]: https://chat.mozilla.org/#/room/#profiler:mozilla.org
+<!-- The following badge works because our chatmo instance is federated. For
+some reason (probably authentication) this doesn't work when using
+chat.mozilla.org -->
+[matrix-badge]: https://img.shields.io/matrix/profiler:mozilla.org?server_fqdn=matrix.org&label=matrix
 [Firefox Profiler]:https://profiler.firefox.com/
 [React]:https://facebook.github.io/react/
 [Redux]:http://redux.js.org/
