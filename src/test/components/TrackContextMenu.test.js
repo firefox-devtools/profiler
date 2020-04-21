@@ -13,7 +13,6 @@ import {
   changeSelectedThread,
   changeRightClickedTrack,
 } from '../../actions/profile-view';
-import { changeViewAndRecomputeProfileData } from '../../actions/receive-profile';
 import TrackContextMenu from '../../components/timeline/TrackContextMenu';
 import { getGlobalTracks, getLocalTracks } from '../../selectors/profile';
 import {
@@ -195,18 +194,6 @@ describe('timeline/TrackContextMenu', function() {
 
     it('network track will be displayed when a number is not set for showTabOnly', () => {
       const { container } = setupGlobalTrack(getNetworkTrackProfile(), 0);
-      // We can't use getHumanReadableTracks here because that function doesn't
-      // use the functions used by context menu directly and gives us wrong results.
-      expect(container.firstChild).toMatchSnapshot();
-    });
-
-    it('network track will be hidden when a number is set for showTabOnly', () => {
-      const { dispatch, container } = setupGlobalTrack(
-        getNetworkTrackProfile(),
-        0
-      );
-      // parameter doesn't matter here, it can be anything except null.
-      dispatch(changeViewAndRecomputeProfileData(111));
       // We can't use getHumanReadableTracks here because that function doesn't
       // use the functions used by context menu directly and gives us wrong results.
       expect(container.firstChild).toMatchSnapshot();
