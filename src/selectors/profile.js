@@ -446,6 +446,16 @@ export const getActiveTabGlobalTrackReferences: Selector<
   }))
 );
 
+/**
+ * This finds an ActiveTabGlobalTrack from its TrackReference. No memoization is needed
+ * as this is a simple value look-up.
+ */
+export const getActiveTabGlobalTrackFromReference: DangerousSelectorWithArguments<
+  ActiveTabGlobalTrack,
+  GlobalTrackReference
+> = (state, trackReference) =>
+  getActiveTabGlobalTracks(state)[trackReference.trackIndex];
+
 export const getActiveTabHiddenGlobalTracksGetter: Selector<
   () => Set<TrackIndex>
 > = state => getActiveTabProfileView(state).hiddenGlobalTracksGetter;
