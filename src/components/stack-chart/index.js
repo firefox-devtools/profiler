@@ -47,6 +47,7 @@ import type {
 import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
+  StartEndRange,
 } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
@@ -60,7 +61,7 @@ type StateProps = {|
   +pages: PageList | null,
   +maxStackDepth: number,
   +combinedTimingRows: CombinedTimingRows,
-  +timeRange: { start: Milliseconds, end: Milliseconds },
+  +timeRange: StartEndRange,
   +interval: Milliseconds,
   +previewSelection: PreviewSelection,
   +threadIndex: number,
