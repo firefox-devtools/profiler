@@ -19,7 +19,8 @@ export const TIMELINE_SETTINGS_HEIGHT = 26;
 
 // Export the value for tests, and for computing the max height of the timeline
 // for the splitter.
-export const TRACK_SCREENSHOT_HEIGHT = 50;
+export const FULL_TRACK_SCREENSHOT_HEIGHT = 50;
+export const ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT = 30;
 
 // The following values are for network track.
 export const TRACK_NETWORK_ROW_HEIGHT = 5;

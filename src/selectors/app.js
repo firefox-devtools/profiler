@@ -16,7 +16,8 @@ import {
 import { getZipFileState } from './zipped-profiles.js';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 import {
-  TRACK_SCREENSHOT_HEIGHT,
+  FULL_TRACK_SCREENSHOT_HEIGHT,
+  ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT,
   TRACK_NETWORK_HEIGHT,
   TRACK_MEMORY_HEIGHT,
   TRACK_IPC_HEIGHT,
@@ -60,6 +61,18 @@ export const getIsDragAndDropOverlayRegistered: Selector<boolean> = state =>
   getApp(state).isDragAndDropOverlayRegistered;
 
 /**
+ * Height of screenshot track is different depending on the view.
+ */
+export const getScreenshotTrackHeight: Selector<number> = createSelector(
+  getShowTabOnly,
+  showTabOnly => {
+    return showTabOnly === null
+      ? FULL_TRACK_SCREENSHOT_HEIGHT
+      : ACTIVE_TAB_TRACK_SCREENSHOT_HEIGHT;
+  }
+);
+
+/**
  * This selector takes all of the tracks, and deduces the height in CssPixels
  * of the timeline. This is here to calculate the max-height of the timeline
  * for the splitter component.
@@ -77,6 +90,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
   getTrackThreadHeights,
   getActiveTabGlobalTracks,
   getShowTabOnly,
+  getScreenshotTrackHeight,
   (
     globalTracks,
     localTracksByPid,
@@ -84,7 +98,8 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
     hiddenLocalTracksByPid,
     trackThreadHeights,
     activeTabGlobalTracks,
-    showTabOnly
+    showTabOnly,
+    screenshotTrackHeight
   ) => {
     let height = TIMELINE_RULER_HEIGHT;
     const border = 1;
@@ -98,7 +113,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
         if (!hiddenGlobalTracks.has(trackIndex)) {
           switch (globalTrack.type) {
             case 'screenshots':
-              height += TRACK_SCREENSHOT_HEIGHT + border;
+              height += screenshotTrackHeight + border;
               break;
             case 'visual-progress':
             case 'perceptual-visual-progress':
@@ -188,7 +203,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
         if (!hiddenGlobalTracks.has(trackIndex)) {
           switch (globalTrack.type) {
             case 'screenshots':
-              height += TRACK_SCREENSHOT_HEIGHT + border;
+              height += screenshotTrackHeight + border;
               break;
             case 'tab':
               {

@@ -17,7 +17,7 @@ import { commitRange } from '../../actions/profile-view';
 import TrackScreenshots from '../../components/timeline/TrackScreenshots';
 import Timeline from '../../components/timeline';
 import { ensureExists } from '../../utils/flow';
-import { TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
+import { FULL_TRACK_SCREENSHOT_HEIGHT } from '../../app-logic/constants';
 
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
@@ -165,7 +165,7 @@ function setup(
   jest
     .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
     .mockImplementation(() => {
-      const rect = getBoundingBox(TRACK_WIDTH, TRACK_SCREENSHOT_HEIGHT);
+      const rect = getBoundingBox(TRACK_WIDTH, FULL_TRACK_SCREENSHOT_HEIGHT);
       // Add some arbitrary X offset.
       rect.left += LEFT;
       rect.right += LEFT;
