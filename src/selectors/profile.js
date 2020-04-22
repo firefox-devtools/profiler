@@ -40,6 +40,7 @@ import type {
   GlobalTrack,
   AccumulatedCounterSamples,
   ProfileFilterPageData,
+  ActiveTabGlobalTrack,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -418,6 +419,32 @@ export const getLocalTrackName = (
 /**
  * Active tab profile selectors
  */
+
+/**
+ * Returns global tracks for the active tab view.
+ */
+export const getActiveTabGlobalTracks: Selector<
+  ActiveTabGlobalTrack[]
+> = state => getActiveTabProfileView(state).globalTracks;
+
+/**
+ * Returns resource tracks for the active tab view.
+ */
+export const getActiveTabResourceTracks: Selector<LocalTrack[]> = state =>
+  getActiveTabProfileView(state).resourceTracks;
+
+/**
+ * This returns all TrackReferences for global tracks.
+ */
+export const getActiveTabGlobalTrackReferences: Selector<
+  GlobalTrackReference[]
+> = createSelector(getActiveTabGlobalTracks, globalTracks =>
+  globalTracks.map((globalTrack, trackIndex) => ({
+    type: 'global',
+    trackIndex,
+  }))
+);
+
 export const getActiveTabHiddenGlobalTracksGetter: Selector<
   () => Set<TrackIndex>
 > = state => getActiveTabProfileView(state).hiddenGlobalTracksGetter;

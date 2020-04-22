@@ -292,6 +292,8 @@ export function finalizeActiveTabProfileView(
   return dispatch => {
     dispatch({
       type: 'VIEW_ACTIVE_TAB_PROFILE',
+      globalTracks: [],
+      resourceTracks: [],
       selectedThreadIndex,
       showTabOnly,
     });

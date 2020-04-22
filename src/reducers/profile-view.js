@@ -17,6 +17,7 @@ import type {
   LocalTrack,
   GlobalTrack,
   TrackIndex,
+  ActiveTabGlobalTrack,
 } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type {
@@ -109,6 +110,36 @@ const localTracksByPid: Reducer<Map<Pid, LocalTrack[]>> = (
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
       return action.localTracksByPid;
+    default:
+      return state;
+  }
+};
+
+/**
+ * This information is stored, rather than derived via selectors, since the coalesced
+ * function update would force it to be recomputed on every symbolication update
+ * pass. It is valid for the lifetime of the profile.
+ */
+const activeTabGlobalTracks: Reducer<ActiveTabGlobalTrack[]> = (
+  state = [],
+  action
+) => {
+  switch (action.type) {
+    case 'VIEW_ACTIVE_TAB_PROFILE':
+      return action.globalTracks;
+    default:
+      return state;
+  }
+};
+
+/**
+ * This can be derived like the globalTracks information, but is stored in the state
+ * for the same reason.
+ */
+const activeTabResourceTracks: Reducer<LocalTrack[]> = (state = [], action) => {
+  switch (action.type) {
+    case 'VIEW_ACTIVE_TAB_PROFILE':
+      return action.resourceTracks;
     default:
       return state;
   }
@@ -619,6 +650,8 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       localTracksByPid,
     }),
     activeTab: combineReducers({
+      globalTracks: activeTabGlobalTracks,
+      resourceTracks: activeTabResourceTracks,
       hiddenGlobalTracksGetter: activeTabHiddenGlobalTracksGetter,
       hiddenLocalTracksByPidGetter: activeTabHiddenLocalTracksByPidGetter,
     }),
