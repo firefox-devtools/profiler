@@ -72,7 +72,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
 
   const getTabFilteredThread: Selector<Thread> = createSelector(
     getThread,
-    ProfileSelectors.getRelevantPagesForCurrentTab,
+    ProfileSelectors.getRelevantInnerWindowIDsForCurrentTab,
     (thread, relevantPages) => {
       if (relevantPages.size === 0) {
         // If this set doesn't have any relevant page, just return the whole thread.
@@ -90,7 +90,7 @@ export function getThreadSelectorsPerThread(threadIndex: ThreadIndex): * {
    */
   const getActiveTabFilteredThread: Selector<Thread> = createSelector(
     getThread,
-    ProfileSelectors.getRelevantPagesForActiveTab,
+    ProfileSelectors.getRelevantInnerWindowIDsForActiveTab,
     (thread, relevantPages) => {
       if (relevantPages.size === 0) {
         // If this set doesn't have any relevant page, just return the whole thread.

@@ -636,7 +636,7 @@ export const getPagesMap: Selector<Map<
  * for only viewProfile function to calculate the hidden tracks during page load,
  * even though we are not in the active tab view.
  */
-export const getRelevantPagesForActiveTab: Selector<
+export const getRelevantInnerWindowIDsForActiveTab: Selector<
   Set<InnerWindowID>
 > = createSelector(
   getPagesMap,
@@ -657,17 +657,17 @@ export const getRelevantPagesForActiveTab: Selector<
 );
 
 /**
- * A simple wrapper for getRelevantPagesForActiveTab.
+ * A simple wrapper for getRelevantInnerWindowIDsForActiveTab.
  * It returns an empty Set if showTabOnly is null, and returns the real Set if
  * showTabOnly is assigned already. We should usually use this instead of the
  * wrapped function. But the wrapped function is helpful to calculate the hidden
  * tracks by active tab view during the first page load(inside viewProfile function).
  */
-export const getRelevantPagesForCurrentTab: Selector<
+export const getRelevantInnerWindowIDsForCurrentTab: Selector<
   Set<InnerWindowID>
 > = createSelector(
   UrlState.getShowTabOnly,
-  getRelevantPagesForActiveTab,
+  getRelevantInnerWindowIDsForActiveTab,
   (showTabOnly, relevantPages) => {
     if (showTabOnly === null) {
       // Return an empty set if we want to see everything or that data is not there.
@@ -769,6 +769,6 @@ export const getComputedHiddenLocalTracks: DangerousSelectorWithArguments<
  */
 export const getProfileFilterPageData: Selector<ProfileFilterPageData | null> = createSelector(
   getPageList,
-  getRelevantPagesForCurrentTab,
+  getRelevantInnerWindowIDsForCurrentTab,
   extractProfileFilterPageData
 );

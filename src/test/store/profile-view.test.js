@@ -2955,24 +2955,24 @@ describe('pages and active tab selectors', function() {
     expect(ProfileViewSelectors.getPagesMap(getState())).toEqual(result);
   });
 
-  it('getRelevantPagesForCurrentTab will get the correct InnerWindowIDs for the first tab', function() {
+  it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the first tab', function() {
     const { getState } = setup(firstTabBrowsingContextID);
     expect(
-      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
+      ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set(fistTabInnerWindowIDs));
   });
 
-  it('getRelevantPagesForCurrentTab will get the correct InnerWindowIDs for the second tab', function() {
+  it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the second tab', function() {
     const { getState } = setup(secondTabBrowsingContextID);
     expect(
-      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
+      ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set(secondTabInnerWindowIDs));
   });
 
-  it('getRelevantPagesForCurrentTab will return an empty set for an ID that is not in the array', function() {
+  it('getRelevantInnerWindowIDsForCurrentTab will return an empty set for an ID that is not in the array', function() {
     const { getState } = setup(99999); // a non-existent BrowsingContextID
     expect(
-      ProfileViewSelectors.getRelevantPagesForCurrentTab(getState())
+      ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set());
   });
 });
