@@ -223,7 +223,7 @@ export function computeLocalTracksByPid(
       localTracksByPid.set(pid, tracks);
     }
 
-    if (!_isMainThread(thread)) {
+    if (!isMainThread(thread)) {
       // This thread has not been added as a GlobalTrack, so add it as a local track.
       tracks.push({ type: 'thread', threadIndex });
     }
@@ -290,7 +290,7 @@ export function computeGlobalTracks(profile: Profile): GlobalTrack[] {
   ) {
     const thread = profile.threads[threadIndex];
     const { pid, markers, stringTable } = thread;
-    if (_isMainThread(thread)) {
+    if (isMainThread(thread)) {
       // This is a main thread, a global track needs to be created or updated with
       // the main thread info.
       let globalTrack = globalTracksByPid.get(pid);
@@ -765,7 +765,7 @@ function _findDefaultThread(threads: Thread[]): Thread | null {
   return threads[defaultThreadIndex];
 }
 
-function _isMainThread(thread: Thread): boolean {
+export function isMainThread(thread: Thread): boolean {
   return (
     thread.name === 'GeckoMain' ||
     // If the pid is a string, then it's not one that came from the system.

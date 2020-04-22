@@ -33,6 +33,7 @@ import type {
   ProfilerConfiguration,
   InnerWindowID,
   BrowsingContextID,
+  Page,
 } from '../types/profile';
 import type {
   LocalTrack,
@@ -562,7 +563,7 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
  */
 export const getPagesMap: Selector<Map<
   BrowsingContextID,
-  Set<InnerWindowID>
+  Page[]
 > | null> = createSelector(getPageList, pageList => {
   if (pageList === null || pageList.length === 0) {
     // There is no data, return null
@@ -571,31 +572,21 @@ export const getPagesMap: Selector<Map<
 
   // Constructing this map first so we won't have to walk through the page list
   // all the time.
-  const innerWindowIDToPageMap: Map<
-    InnerWindowID,
-    {
-      browsingContextID: BrowsingContextID,
-      embedderInnerWindowID: InnerWindowID,
-    }
-  > = new Map();
+  const innerWindowIDToPageMap: Map<InnerWindowID, Page> = new Map();
 
   for (const page of pageList) {
-    innerWindowIDToPageMap.set(page.innerWindowID, {
-      browsingContextID: page.browsingContextID,
-      embedderInnerWindowID: page.embedderInnerWindowID,
-    });
+    innerWindowIDToPageMap.set(page.innerWindowID, page);
   }
 
   // Now we have a way to fastly traverse back with the previous Map.
   // We can do construction of BrowsingContextID to set of InnerWindowID map.
-  const pageMap: Map<BrowsingContextID, Set<InnerWindowID>> = new Map();
-  const appendPageMap = (browsingContextID, innerWindowID) => {
+  const pageMap: Map<BrowsingContextID, Page[]> = new Map();
+  const appendPageMap = (browsingContextID, page) => {
     const tabEntry = pageMap.get(browsingContextID);
     if (tabEntry === undefined) {
-      const newTabEntry = new Set([innerWindowID]);
-      pageMap.set(browsingContextID, newTabEntry);
+      pageMap.set(browsingContextID, [page]);
     } else {
-      tabEntry.add(innerWindowID);
+      tabEntry.push(page);
     }
   };
 
@@ -618,7 +609,7 @@ export const getPagesMap: Selector<Map<
 
       const parent = getTopMostParent(page);
       // Now we have the top most parent. We can append the pageMap.
-      appendPageMap(parent.browsingContextID, page.innerWindowID);
+      appendPageMap(parent.browsingContextID, page);
     }
   }
 
@@ -626,20 +617,71 @@ export const getPagesMap: Selector<Map<
 });
 
 /**
+ * Return the relevant page array for active tab.
+ * This is useful for operations that require the whole Page object instead of
+ * only the InnerWindowIDs. If you only need the InnerWindowID array of the active
+ * tab, please use getRelevantInnerWindowIDsForActiveTab selector. It also returns
+ * a Set for faster operations.
+ */
+export const getRelevantPagesForActiveTab: Selector<Page[]> = createSelector(
+  getPagesMap,
+  getActiveBrowsingContextID,
+  (pagesMap, activeBrowsingContextID) => {
+    if (
+      pagesMap === null ||
+      pagesMap.size === 0 ||
+      activeBrowsingContextID === null
+    ) {
+      // Return an empty array if we want to see everything or that data is not there.
+      return [];
+    }
+
+    const pages = pagesMap.get(activeBrowsingContextID);
+    return pages !== undefined ? pages : [];
+  }
+);
+
+/**
+ * Get the page map and return the set of InnerWindowIDs by its parent BrowsingContextID.
+ * This is a helper selector for other selectors so we can easily get the relevant
+ * InnerWindowID set of a parent BrowsingContextID. Set is useful for faster
+ * filtering operations.
+ */
+export const getInnerWindowIDSetByBrowsingContextID: Selector<Map<
+  BrowsingContextID,
+  Set<InnerWindowID>
+> | null> = createSelector(getPagesMap, pagesMap => {
+  if (pagesMap === null || pagesMap.size === 0) {
+    // There is no data, return null
+    return null;
+  }
+
+  const innerWindowIDSetByBrowsingContextID = new Map();
+  for (const [browsingContextID, pages] of pagesMap) {
+    innerWindowIDSetByBrowsingContextID.set(
+      browsingContextID,
+      new Set(pages.map(page => page.innerWindowID))
+    );
+  }
+  return innerWindowIDSetByBrowsingContextID;
+});
+
+/**
  * Get the page map and the active tab ID, then return the InnerWindowIDs that
  * are related to this active tab. This is a fairly simple map element access.
  * The `BrowsingContextID -> Set<InnerWindowID>` construction happens inside
- * the getPageMap selector.
+ * the getInnerWindowIDSetByBrowsingContextID selector.
  * This function returns the Set all the time even though we are not in the active
- * tab view at the moment. Idaelly you should use the wrapper getRelevantPagesForCurrentTab
- * function if you want to do something inside the active tab view. This is needed
- * for only viewProfile function to calculate the hidden tracks during page load,
- * even though we are not in the active tab view.
+ * tab view at the moment. Idaelly you should use the wrapper
+ * getRelevantInnerWindowIDsForCurrentTab function if you want to do something
+ * inside the active tab view. This is needed for only viewProfile function to
+ * calculate the hidden tracks during page load, even though we are not in the
+ * active tab view.
  */
 export const getRelevantInnerWindowIDsForActiveTab: Selector<
   Set<InnerWindowID>
 > = createSelector(
-  getPagesMap,
+  getInnerWindowIDSetByBrowsingContextID,
   getActiveBrowsingContextID,
   (pagesMap, activeBrowsingContextID) => {
     if (

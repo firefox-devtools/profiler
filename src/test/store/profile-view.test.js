@@ -2945,14 +2945,16 @@ describe('pages and active tab selectors', function() {
     return { profile, dispatch, getState };
   }
 
-  it('getPagesMap will construct the whole map correctly', function() {
+  it('getInnerWindowIDSetByBrowsingContextID will construct the whole map correctly', function() {
     const { getState } = setup(firstTabBrowsingContextID); // the given argument is not important for this test
     const objectResult = [
       [firstTabBrowsingContextID, new Set(fistTabInnerWindowIDs)],
       [secondTabBrowsingContextID, new Set(secondTabInnerWindowIDs)],
     ];
     const result = new Map(objectResult);
-    expect(ProfileViewSelectors.getPagesMap(getState())).toEqual(result);
+    expect(
+      ProfileViewSelectors.getInnerWindowIDSetByBrowsingContextID(getState())
+    ).toEqual(result);
   });
 
   it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the first tab', function() {
