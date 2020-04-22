@@ -9,15 +9,26 @@
       "participate": {
         "home": "https://github.com/firefox-devtools/profiler/blob/master/CONTRIBUTING.md",
         "docs": "https://github.com/firefox-devtools/profiler/tree/master/docs-developer",
-        "irc": "irc://irc.mozilla.org/#devtools",
+        "matrix": "https://chat.mozilla.org/#/room/#profiler:mozilla.org",
         "slack": "https://devtools-html-slack.herokuapp.com/",
+        "irc": "irc://irc.mozilla.org/#devtools",
         "irc-contacts": [
           "gregtatum",
           "julienw",
           "florian",
           "canova",
           "gerald"
-        ]
+        ],
+        "chat": {
+          "url": "https://chat.mozilla.org/#/room/#profiler:mozilla.org",
+          "contacts": [
+            "@gregtatum:mozilla.com",
+            "@julienw:mozilla.com",
+            "@florian:mozilla.com",
+            "@canova:mozilla.com",
+            "@gerald:mozilla.com"
+          ]
+        }
       },
       "bugs": {
         "list": "https://github.com/firefox-devtools/profiler/issues",
