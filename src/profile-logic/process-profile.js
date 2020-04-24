@@ -22,6 +22,7 @@ import {
   isPerfScriptFormat,
   convertPerfScriptProfile,
 } from './import/linux-perf';
+import { isArtTraceFormat, convertArtTraceProfile } from './import/art-trace';
 import { PROCESSED_PROFILE_VERSION } from '../app-logic/constants';
 import {
   getFriendlyThreadName,
@@ -1477,20 +1478,25 @@ function _unserializeProfile({
  *  - Devtools profile: input can be ArrayBuffer or string or JSON object
  *  - Chrome profile: input can be ArrayBuffer or string or JSON object
  *  - `perf script` profile: input can be ArrayBuffer or string
+ *  - ART trace: input must be ArrayBuffer
  */
 export async function unserializeProfileOfArbitraryFormat(
   arbitraryFormat: mixed
 ): Promise<Profile> {
   try {
     if (arbitraryFormat instanceof ArrayBuffer) {
-      try {
-        const textDecoder = new TextDecoder('utf-8', { fatal: true });
-        arbitraryFormat = await textDecoder.decode(arbitraryFormat);
-      } catch (e) {
-        console.error('Source exception:', e);
-        throw new Error(
-          'The profile is not the Android trace format and could not be parsed as a UTF-8 string.'
-        );
+      if (isArtTraceFormat(arbitraryFormat)) {
+        arbitraryFormat = convertArtTraceProfile(arbitraryFormat);
+      } else {
+        try {
+          const textDecoder = new TextDecoder('utf-8', { fatal: true });
+          arbitraryFormat = await textDecoder.decode(arbitraryFormat);
+        } catch (e) {
+          console.error('Source exception:', e);
+          throw new Error(
+            'The profile is not the Android trace format and could not be parsed as a UTF-8 string.'
+          );
+        }
       }
     }
 
