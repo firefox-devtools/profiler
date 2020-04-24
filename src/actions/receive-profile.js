@@ -1269,11 +1269,11 @@ export function retrieveProfileFromFile(
           // Parse a single profile that has been gzipped.
           {
             const buffer = await fileReader(file).asArrayBuffer();
-            const arrayBuffer = new Uint8Array(buffer);
-            const decompressedArrayBuffer = await decompress(arrayBuffer);
-            const textDecoder = new TextDecoder();
-            const text = await textDecoder.decode(decompressedArrayBuffer);
-            const profile = await unserializeProfileOfArbitraryFormat(text);
+            const array = new Uint8Array(buffer);
+            const decompressedArray = await decompress(array);
+            const profile = await unserializeProfileOfArbitraryFormat(
+              decompressedArray.buffer
+            );
             if (profile === undefined) {
               throw new Error('Unable to parse the profile.');
             }
@@ -1294,10 +1294,11 @@ export function retrieveProfileFromFile(
         default: {
           // Plain uncompressed profile files can have file names with uncommon
           // extensions (eg .profile). So we can't rely on the mime type to
-          // decide how to handle them. We'll try to parse them as a plain JSON
-          // file.
-          const text = await fileReader(file).asText();
-          const profile = await unserializeProfileOfArbitraryFormat(text);
+          // decide how to handle them.
+          const arrayBuffer = await fileReader(file).asArrayBuffer();
+          const profile = await unserializeProfileOfArbitraryFormat(
+            arrayBuffer
+          );
           if (profile === undefined) {
             throw new Error('Unable to parse the profile.');
           }

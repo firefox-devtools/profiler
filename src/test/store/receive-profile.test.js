@@ -1254,6 +1254,10 @@ describe('actions/receive-profile', function() {
     });
 
     it('will give an error when unable to parse json', async function() {
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+
       const { view } = await setupTestWithFile({
         type: 'application/json',
         payload: '{}',
@@ -1264,6 +1268,7 @@ describe('actions/receive-profile', function() {
         // Coerce into an any to access the error property.
         (view: any).error
       ).toMatchSnapshot();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     it('can load gzipped json', async function() {
@@ -1283,6 +1288,9 @@ describe('actions/receive-profile', function() {
 
     it('will give an error when unable to parse gzipped profiles', async function() {
       window.TextDecoder = TextDecoder;
+      const consoleErrorSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       const { view } = await setupTestWithFile({
         type: 'application/gzip',
         payload: compress('{}'),
@@ -1293,6 +1301,7 @@ describe('actions/receive-profile', function() {
         // Coerce into the object to access the error property.
         (view: any).error
       ).toMatchSnapshot();
+      expect(consoleErrorSpy).toHaveBeenCalled();
     });
 
     async function setupZipTestWithProfile(
