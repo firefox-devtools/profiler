@@ -58,25 +58,27 @@ export function getIsHistoryReplaceState(): boolean {
   return _isReplaceState;
 }
 
-function getDataSourceDirs(
-  urlState: UrlState
-): [] | [DataSource] | [DataSource, string] {
+function getPathParts(urlState: UrlState): string[] {
   const { dataSource } = urlState;
   switch (dataSource) {
-    case 'from-addon':
-      return ['from-addon'];
-    case 'from-file':
-      return ['from-file'];
-    case 'local':
-      return ['local', urlState.hash];
-    case 'public':
-      return ['public', urlState.hash];
-    case 'from-url':
-      return ['from-url', encodeURIComponent(urlState.profileUrl)];
-    case 'compare':
-      return ['compare'];
     case 'none':
       return [];
+    case 'compare':
+      return ['compare'];
+    case 'from-addon':
+      return ['from-addon', urlState.selectedTab];
+    case 'from-file':
+      return ['from-file', urlState.selectedTab];
+    case 'local':
+      return ['local', urlState.hash, urlState.selectedTab];
+    case 'public':
+      return ['public', urlState.hash, urlState.selectedTab];
+    case 'from-url':
+      return [
+        'from-url',
+        encodeURIComponent(urlState.profileUrl),
+        urlState.selectedTab,
+      ];
     default:
       throw assertExhaustiveCheck(dataSource);
   }
@@ -189,35 +191,31 @@ type QueryShape =
   | StackChartQueryShape
   | JsTracerQueryShape;
 
-type UrlObject = {|
-  pathParts: string[],
-  query: QueryShape,
-|};
-
 /**
- * Take the UrlState and map it into a serializable UrlObject, that represents the
- * target URL.
+ * Take the UrlState and map it into a query string.
  */
-export function urlStateToUrlObject(urlState: UrlState): UrlObject {
+export function getQueryStringFromUrlState(urlState: UrlState): string {
   const { dataSource } = urlState;
-  if (dataSource === 'none') {
-    return {
-      pathParts: [],
-      query: {},
-    };
+  switch (dataSource) {
+    case 'none':
+      return '';
+    case 'compare':
+      // Special handling for CompareHome: we shouldn't append the default
+      // parameters when the user is on the comparison form.
+      if (urlState.profilesToCompare === null) {
+        return '';
+      }
+      break;
+    case 'public':
+    case 'local':
+    case 'from-addon':
+    case 'from-file':
+    case 'from-url':
+      break;
+    default:
+      throw assertExhaustiveCheck(dataSource);
   }
 
-  // Special handling for CompareHome: we shouldn't append the default
-  // parameters when the user is on the comparison form.
-  if (dataSource === 'compare' && urlState.profilesToCompare === null) {
-    return {
-      pathParts: ['compare'],
-      query: {},
-    };
-  }
-
-  const dataSourceDirs = getDataSourceDirs(urlState);
-  const pathParts = [...dataSourceDirs, urlState.selectedTab];
   const { selectedThread } = urlState.profileSpecific;
 
   // Start with the query parameters that are shown regardless of the active panel.
@@ -396,11 +394,15 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       throw assertExhaustiveCheck(selectedTab);
   }
 
-  return { query, pathParts };
+  const qString = queryString.stringify(query, {
+    arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
+  });
+  return qString;
 }
 
 export function urlFromState(urlState: UrlState): string {
-  const { pathParts, query } = urlStateToUrlObject(urlState);
+  const pathParts = getPathParts(urlState);
+  const qString = getQueryStringFromUrlState(urlState);
   const { dataSource } = urlState;
   if (dataSource === 'none') {
     return '/';
@@ -408,9 +410,6 @@ export function urlFromState(urlState: UrlState): string {
   const pathname =
     pathParts.length === 0 ? '/' : '/' + pathParts.join('/') + '/';
 
-  const qString = queryString.stringify(query, {
-    arrayFormat: 'bracket', // This uses parameters with brackets for arrays.
-  });
   return pathname + (qString ? '?' + qString : '');
 }
 
