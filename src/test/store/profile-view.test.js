@@ -17,6 +17,7 @@ import {
   getVisualProgressTrackProfile,
   getProfileWithUnbalancedNativeAllocations,
   getProfileWithJsAllocations,
+  addActiveTabInformationToProfile,
 } from '../fixtures/profiles/processed-profile';
 import {
   getEmptyThread,
@@ -2862,91 +2863,25 @@ describe('pages and active tab selectors', function() {
   // Setting some IDs here so we can use those inside the setup and test functions.
   const firstTabBrowsingContextID = 1;
   const secondTabBrowsingContextID = 4;
-  const parentPageWithChildren = 11111111111;
-  const iframePageWithChild = 11111111112;
-  const fistTabInnerWindowIDs = [
-    parentPageWithChildren,
-    iframePageWithChild,
-    11111111113,
-    11111111115,
-  ];
-  const secondTabInnerWindowIDs = [11111111114, 11111111116];
 
   // Setup an empty profile with pages array and activeBrowsingContextID
   function setup(activeBrowsingContextID: BrowsingContextID) {
-    const profile = getEmptyProfile();
-    // Add a pages array with the following relationship:
-    // Tab #1                           Tab #2
-    // --------------                --------------
-    // Page #1                        Page #4
-    // |- Page #2                     |
-    // |  |- Page #3                  Page #6
-    // |
-    // Page #5
-    profile.pages = [
-      // A top most page in the first tab
-      {
-        browsingContextID: firstTabBrowsingContextID,
-        innerWindowID: parentPageWithChildren,
-        url: 'Page #1',
-        embedderInnerWindowID: 0,
-      },
-      // An iframe page inside the previous page
-      {
-        browsingContextID: 2,
-        innerWindowID: iframePageWithChild,
-        url: 'Page #2',
-        embedderInnerWindowID: parentPageWithChildren,
-      },
-      // Another iframe page inside the previous iframe
-      {
-        browsingContextID: 3,
-        innerWindowID: fistTabInnerWindowIDs[2],
-        url: 'Page #3',
-        embedderInnerWindowID: iframePageWithChild,
-      },
-      // A top most frame from the second tab
-      {
-        browsingContextID: secondTabBrowsingContextID,
-        innerWindowID: secondTabInnerWindowIDs[0],
-        url: 'Page #4',
-        embedderInnerWindowID: 0,
-      },
-      // Another top most frame from the first tab
-      // Their browsingContextIDs are the same because of that.
-      {
-        browsingContextID: firstTabBrowsingContextID,
-        innerWindowID: fistTabInnerWindowIDs[3],
-        url: 'Page #5',
-        embedderInnerWindowID: 0,
-      },
-      // Another top most frame from the second tab
-      {
-        browsingContextID: secondTabBrowsingContextID,
-        innerWindowID: secondTabInnerWindowIDs[1],
-        url: 'Page #4',
-        embedderInnerWindowID: 0,
-      },
-    ];
-
-    // Set the active BrowsingContext ID.
-    profile.meta.configuration = {
-      activeBrowsingContextID,
-      capacity: 1,
-      features: [],
-      threads: [],
-    };
-
+    const { profile, ...pageInfo } = addActiveTabInformationToProfile(
+      getEmptyProfile(),
+      activeBrowsingContextID
+    );
     // Adding an empty thread to the profile so the loadProfile function won't complain
     profile.threads.push(getEmptyThread());
 
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(changeViewAndRecomputeProfileData(activeBrowsingContextID));
-    return { profile, dispatch, getState };
+    return { profile, dispatch, getState, ...pageInfo };
   }
 
   it('getInnerWindowIDSetByBrowsingContextID will construct the whole map correctly', function() {
-    const { getState } = setup(firstTabBrowsingContextID); // the given argument is not important for this test
+    const { getState, fistTabInnerWindowIDs, secondTabInnerWindowIDs } = setup(
+      firstTabBrowsingContextID
+    ); // the given argument is not important for this test
     const objectResult = [
       [firstTabBrowsingContextID, new Set(fistTabInnerWindowIDs)],
       [secondTabBrowsingContextID, new Set(secondTabInnerWindowIDs)],
@@ -2958,14 +2893,18 @@ describe('pages and active tab selectors', function() {
   });
 
   it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the first tab', function() {
-    const { getState } = setup(firstTabBrowsingContextID);
+    const { getState, fistTabInnerWindowIDs } = setup(
+      firstTabBrowsingContextID
+    );
     expect(
       ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set(fistTabInnerWindowIDs));
   });
 
   it('getRelevantInnerWindowIDsForCurrentTab will get the correct InnerWindowIDs for the second tab', function() {
-    const { getState } = setup(secondTabBrowsingContextID);
+    const { getState, secondTabInnerWindowIDs } = setup(
+      secondTabBrowsingContextID
+    );
     expect(
       ProfileViewSelectors.getRelevantInnerWindowIDsForCurrentTab(getState())
     ).toEqual(new Set(secondTabInnerWindowIDs));
