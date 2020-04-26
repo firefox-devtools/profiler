@@ -97,7 +97,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
               {meta.interval ? (
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">Interval:</span>
-                  {meta.interval}ms
+                  {_formatInterval(meta.interval)}
                 </div>
               ) : null}
               {meta.preprocessedProfileVersion ? (
@@ -289,4 +289,16 @@ function _formatLabel(meta: ProfileMeta): string {
     os = meta.oscpu || '';
   }
   return product + (version ? ` (${version})` : '') + (os ? ` ${os}` : '');
+}
+
+function _formatInterval(interval: number): string {
+    // Format in the most precise base (milliseconds, microseconds, or
+    // nanoseconds), to avoid cases where intervals are displayed with
+    // too many leading zeroes to be useful.
+    if (interval >= 1.0) {
+        return interval + "ms";
+    } else if (interval * 1000 >= 1.0) {
+        return (interval * 1000) + "μs";
+    }
+    return (interval * 1000000) + "ns";
 }
