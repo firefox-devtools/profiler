@@ -292,13 +292,13 @@ function _formatLabel(meta: ProfileMeta): string {
 }
 
 function _formatInterval(interval: number): string {
-    // Format in the most precise base (milliseconds, microseconds, or
-    // nanoseconds), to avoid cases where intervals are displayed with
-    // too many leading zeroes to be useful.
-    if (interval >= 1.0) {
-        return interval + "ms";
-    } else if (interval * 1000 >= 1.0) {
-        return (interval * 1000) + "μs";
-    }
-    return (interval * 1000000) + "ns";
+  // Format in the most precise base (milliseconds, microseconds, or
+  // nanoseconds), to avoid cases where intervals are displayed with
+  // too many leading zeroes to be useful.
+  if (interval >= 1.0) {
+    return interval + 'ms';
+  } else if (interval * 1000 >= 1.0) {
+    return interval * 1000 + 'μs';
+  }
+  return interval * 1000000 + 'ns';
 }
