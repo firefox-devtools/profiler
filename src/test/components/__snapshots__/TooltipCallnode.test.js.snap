@@ -3,6 +3,7 @@
 exports[`TooltipCallNode handles native allocations 1`] = `
 <div
   class="tooltipCallNode"
+  style="--graph-width: 150px; --graph-height: 10px;"
 >
   <div
     class="tooltipOneLine tooltipHeader"
@@ -74,6 +75,7 @@ exports[`TooltipCallNode handles native allocations 1`] = `
 exports[`TooltipCallNode with page information displays Page URL for iframe pages 1`] = `
 <div
   class="tooltipCallNode"
+  style="--graph-width: 150px; --graph-height: 10px;"
 >
   <div
     class="tooltipOneLine tooltipHeader"
@@ -141,6 +143,7 @@ exports[`TooltipCallNode with page information displays Page URL for iframe page
 exports[`TooltipCallNode with page information displays Page URL for non-iframe pages 1`] = `
 <div
   class="tooltipCallNode"
+  style="--graph-width: 150px; --graph-height: 10px;"
 >
   <div
     class="tooltipOneLine tooltipHeader"
