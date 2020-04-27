@@ -529,7 +529,10 @@ export function assignFunctionNames(
  * to a gecko profile object by parsing the JSON.
  */
 async function _unpackGeckoProfileFromAddon(profile) {
-  if (profile instanceof ArrayBuffer) {
+  // Note: the following check will work for array buffers coming from another
+  // global. This happens especially with tests but could happen in the future
+  // in Firefox too.
+  if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
     const profileBytes = new Uint8Array(profile);
     let decompressedProfile;
     // Check for the gzip magic number in the header. If we find it, decompress
