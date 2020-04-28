@@ -1923,6 +1923,11 @@ export function getTreeOrderComparator(
 
   /**
    * Determine the ordering of (possibly null) call nodes for two given samples.
+   * Returns a value < 0 if sampleA is ordered before sampleB,
+   *                 > 0 if sampleA is ordered after sampleB,
+   *                == 0 if there is no ordering between sampleA and sampleB.
+   * Samples which are filtered out, i.e. for which sampleCallNodes[sample] is
+   * null, are ordered *after* samples which are not filtered out.
    */
   return function treeOrderComparator(
     sampleA: IndexIntoSamplesTable,
@@ -1930,14 +1935,18 @@ export function getTreeOrderComparator(
   ): number {
     const callNodeA = sampleCallNodes[sampleA];
     const callNodeB = sampleCallNodes[sampleB];
+
     if (callNodeA === null) {
       if (callNodeB === null) {
+        // Both samples are filtered out
         return 0;
       }
-      return -1;
+      // A filtered out, B not filtered out. A goes after B.
+      return 1;
     }
     if (callNodeB === null) {
-      return 1;
+      // B filtered out, A not filtered out. B goes after A.
+      return -1;
     }
     return compareCallNodes(callNodeA, callNodeB);
   };
