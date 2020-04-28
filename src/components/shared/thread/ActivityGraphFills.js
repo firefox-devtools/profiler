@@ -380,18 +380,28 @@ export class ActivityFillGraphQuerier {
       return null;
     }
 
-    let { offsetToCategoryStart } = categoryUnderMouse;
-    const candidateSamples = this._getCategoriesSamplesAtTime(
-      time,
-      categoryUnderMouse.category
-    );
+    // Get all samples that contribute pixels to the clicked category in this
+    // pixel column of the graph.
+    const { category, categoryLowerEdge, yPercentage } = categoryUnderMouse;
+    const candidateSamples = this._getCategoriesSamplesAtTime(time, category);
 
-    for (let i = 0; i < candidateSamples.length; i++) {
-      const { sample, contribution } = candidateSamples[i];
-      if (offsetToCategoryStart <= contribution) {
+    // The candidate samples are sorted by gravity, bottom to top.
+    // Each sample occupies a subrange of the [0, 1] range. The height of each
+    // sample's range is called "contribution" here. The sample ranges are
+    // directly adjacent, there's no space between them.
+    // yPercentage is the mouse position converted to the [0, 1] range. We want
+    // to find the sample whose range contains that yPercentage value.
+    // Since we already filtered the contributing samples by the clicked
+    // category, we start stacking up their contributions onto the lower edge
+    // of that category's fill.
+    let upperEdgeOfPreviousSample = categoryLowerEdge;
+    // Loop invariant: upperEdgeOfPreviousSample <= yPercentage.
+    for (const { sample, contribution } of candidateSamples) {
+      const upperEdgeOfThisSample = upperEdgeOfPreviousSample + contribution;
+      if (yPercentage <= upperEdgeOfThisSample) {
         return sample;
       }
-      offsetToCategoryStart -= contribution;
+      upperEdgeOfPreviousSample = upperEdgeOfThisSample;
     }
 
     return null;
@@ -399,13 +409,20 @@ export class ActivityFillGraphQuerier {
 
   /**
    * Find a specific category at a pixel location.
+   * devicePixelY == 0 is the upper edge of the canvas,
+   * devicePixelY == this.renderedComponentSettings.canvasPixelHeight is the
+   * lower edge of the canvas.
+   *
+   * Returns a category such that categoryLowerEdge <= yPercentage and the next
+   * category's lower edge would be > yPercentage.
    */
   _categoryAtDevicePixel(
     deviceX: DevicePixels,
     deviceY: DevicePixels
   ): null | {
     category: IndexIntoCategoryList,
-    offsetToCategoryStart: DevicePixels,
+    categoryLowerEdge: number,
+    yPercentage: number,
   } {
     const {
       canvasPixelWidth,
@@ -421,10 +438,22 @@ export class ActivityFillGraphQuerier {
       return null;
     }
 
-    const valueToFind = 1 - deviceY / canvasPixelHeight;
+    // Convert the device pixel position into the range [0, 1], with 0 being
+    // the *lower* edge of the canvas.
+    const yPercentage = 1 - deviceY / canvasPixelHeight;
+
     let currentCategory = null;
     let currentCategoryStart = 0.0;
     let previousFillEnd = 0.0;
+
+    // Find a fill such that yPercentage is between the fill's lower and its
+    // upper edge. (The lower edge of a fill is given by the upper edge of the
+    // previous fill. The first fill's lower edge is zero, i.e. the bottom edge
+    // of the canvas.)
+    // For each category, multiple fills can be present. All fills of the same
+    // category will be consecutive in the fills array. See _getCategoryFills
+    // for the full list.
+    // Loop invariant: previousFillEnd <= yPercentage.
     for (const { category, accumulatedUpperEdge } of this.fills) {
       const fillEnd = accumulatedUpperEdge[deviceX];
 
@@ -433,10 +462,11 @@ export class ActivityFillGraphQuerier {
         currentCategoryStart = previousFillEnd;
       }
 
-      if (fillEnd >= valueToFind) {
+      if (fillEnd >= yPercentage) {
         return {
           category,
-          offsetToCategoryStart: valueToFind - currentCategoryStart,
+          categoryLowerEdge: currentCategoryStart,
+          yPercentage,
         };
       }
 
