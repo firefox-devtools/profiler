@@ -30,6 +30,7 @@ import type { Milliseconds } from '../../types/units';
 import type {
   BreakdownByImplementation,
   BreakdownByCategory,
+  BreakdownByAddress,
   StackImplementation,
   TimingsForPath,
 } from '../../profile-logic/profile-data';
@@ -188,6 +189,40 @@ function Breakdown({ data, isIntervalInteger }: BreakdownProps) {
     });
 }
 
+type AddressBreakdownProps = {|
+  +breakdown: BreakdownByAddress,
+  +isIntervalInteger: boolean,
+|};
+
+function AddressBreakdown({
+  breakdown,
+  isIntervalInteger,
+}: AddressBreakdownProps) {
+  const data = Array.from(breakdown.entries()).map(([libIndex, addressMap]) => {
+    const sortedAddressDurations = Array.from(
+      addressMap.entries()
+    ).map(([address, duration]) => ({ address, duration }));
+    // Sort by address, in ascending order.
+    sortedAddressDurations.sort((a, b) => a.address - b.address);
+    const addressData = sortedAddressDurations.map(({ address, duration }) => ({
+      group: `0x${address.toString(16)}`,
+      value: duration,
+    }));
+    return { libIndex, addressData };
+  });
+  // Sort by library index, in ascending order.
+  data.sort((a, b) => a.libIndex - b.libIndex);
+
+  return data.map(({ libIndex, addressData }) => {
+    return (
+      <React.Fragment key={libIndex}>
+        {/* TODO: Add an <h4> with library name here. Requires passing the thread's library list into this component */}
+        <Breakdown data={addressData} isIntervalInteger={isIntervalInteger} />
+      </React.Fragment>
+    );
+  });
+}
+
 type StateProps = {|
   +selectedNodeIndex: IndexIntoCallNodeTable | null,
   +callNodeTable: CallNodeTable,
@@ -273,14 +308,14 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               : '—'}
           </SidebarDetail>
           {totalTime.breakdownByCategory ? (
-            <>
+            <React.Fragment>
               <h4 className="sidebar-title3">Categories</h4>
               <CategoryBreakdown
                 breakdown={totalTime.breakdownByCategory}
                 categoryList={categoryList}
                 isIntervalInteger={isIntervalInteger}
               />
-            </>
+            </React.Fragment>
           ) : null}
           {totalTime.breakdownByImplementation && totalTime.value ? (
             <React.Fragment>
@@ -296,6 +331,15 @@ class CallTreeSidebar extends React.PureComponent<Props> {
               <h4 className="sidebar-title3">Implementation – self time</h4>
               <ImplementationBreakdown
                 breakdown={selfTime.breakdownByImplementation}
+                isIntervalInteger={isIntervalInteger}
+              />
+            </React.Fragment>
+          ) : null}
+          {selfTime.breakdownByAddress && selfTime.value ? (
+            <React.Fragment>
+              <h4 className="sidebar-title3">Frame addresses – self time</h4>
+              <AddressBreakdown
+                breakdown={selfTime.breakdownByAddress}
                 isIntervalInteger={isIntervalInteger}
               />
             </React.Fragment>

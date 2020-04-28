@@ -1887,9 +1887,11 @@ describe('getTimingsForSidebar', () => {
             value: 0,
             breakdownByImplementation: null,
             breakdownByCategory: null,
+            breakdownByAddress: null,
           },
           totalTime: {
             value: 5,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
             breakdownByCategory: withSingleSubcategory([
               1, // Idle
@@ -1908,9 +1910,11 @@ describe('getTimingsForSidebar', () => {
             value: 0,
             breakdownByImplementation: null,
             breakdownByCategory: null,
+            breakdownByAddress: null,
           },
           totalTime: {
             value: 5,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 2, baseline: 1, ion: 2 },
             breakdownByCategory: withSingleSubcategory([
               1, // Idle
@@ -1947,6 +1951,7 @@ describe('getTimingsForSidebar', () => {
         forPath: {
           selfTime: {
             value: 2,
+            breakdownByAddress: null,
             breakdownByImplementation: { ion: 1, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0, // Idle
@@ -1961,6 +1966,7 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 2,
+            breakdownByAddress: null,
             breakdownByImplementation: { ion: 1, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0, // Idle
@@ -1977,6 +1983,7 @@ describe('getTimingsForSidebar', () => {
         forFunc: {
           selfTime: {
             value: 3,
+            breakdownByAddress: null,
             breakdownByImplementation: { ion: 2, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -1991,6 +1998,7 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 3,
+            breakdownByAddress: null,
             breakdownByImplementation: { ion: 2, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -2021,6 +2029,7 @@ describe('getTimingsForSidebar', () => {
         forPath: {
           selfTime: {
             value: 1,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -2035,6 +2044,7 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 2,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 2 },
 
             breakdownByCategory: withSingleSubcategory([
@@ -2052,6 +2062,7 @@ describe('getTimingsForSidebar', () => {
         forFunc: {
           selfTime: {
             value: 1,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -2066,6 +2077,7 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 2,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 2 },
             breakdownByCategory: withSingleSubcategory([
               1, // Idle
@@ -2106,6 +2118,7 @@ describe('getTimingsForSidebar', () => {
       expect(timings.rootTime).toEqual(2);
       expect(timings.forPath.totalTime).toEqual({
         value: 2,
+        breakdownByAddress: null,
         breakdownByImplementation: { native: 1, ion: 1 },
         breakdownByCategory: withSingleSubcategory([
           1, // Idle
@@ -2148,11 +2161,13 @@ describe('getTimingsForSidebar', () => {
         forPath: {
           selfTime: {
             value: 3,
+            breakdownByAddress: null,
             breakdownByImplementation: null,
             breakdownByCategory: null,
           },
           totalTime: {
             value: 3,
+            breakdownByAddress: null,
             breakdownByImplementation: { ion: 2, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0, // Idle
@@ -2169,6 +2184,7 @@ describe('getTimingsForSidebar', () => {
         forFunc: {
           selfTime: {
             value: 3,
+            breakdownByAddress: null,
             breakdownByImplementation: { ion: 2, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -2183,6 +2199,7 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 3,
+            breakdownByAddress: null,
             breakdownByImplementation: { ion: 2, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -2210,11 +2227,13 @@ describe('getTimingsForSidebar', () => {
         forPath: {
           selfTime: {
             value: 0,
+            breakdownByAddress: null,
             breakdownByImplementation: null,
             breakdownByCategory: null,
           },
           totalTime: {
             value: 2,
+            breakdownByAddress: null,
             breakdownByImplementation: { ion: 1, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -2231,11 +2250,13 @@ describe('getTimingsForSidebar', () => {
         forFunc: {
           selfTime: {
             value: 0,
+            breakdownByAddress: null,
             breakdownByImplementation: null,
             breakdownByCategory: null,
           },
           totalTime: {
             value: 5,
+            breakdownByAddress: null,
             breakdownByImplementation: {
               ion: 2,
               baseline: 1,
@@ -2269,11 +2290,13 @@ describe('getTimingsForSidebar', () => {
         forPath: {
           selfTime: {
             value: 1,
+            breakdownByAddress: null,
             breakdownByImplementation: null,
             breakdownByCategory: null,
           },
           totalTime: {
             value: 1,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -2290,6 +2313,7 @@ describe('getTimingsForSidebar', () => {
         forFunc: {
           selfTime: {
             value: 1,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -2304,6 +2328,7 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 2,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 2 },
             breakdownByCategory: withSingleSubcategory([
               1, // Idle
@@ -2326,11 +2351,13 @@ describe('getTimingsForSidebar', () => {
         forPath: {
           selfTime: {
             value: 0,
+            breakdownByAddress: null,
             breakdownByImplementation: null,
             breakdownByCategory: null,
           },
           totalTime: {
             value: 1,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
               1, // Idle
@@ -2347,6 +2374,7 @@ describe('getTimingsForSidebar', () => {
         forFunc: {
           selfTime: {
             value: 1,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -2361,6 +2389,7 @@ describe('getTimingsForSidebar', () => {
           },
           totalTime: {
             value: 2,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 2 },
             breakdownByCategory: withSingleSubcategory([
               1, // Idle
@@ -2388,11 +2417,13 @@ describe('getTimingsForSidebar', () => {
         forPath: {
           selfTime: {
             value: 0,
+            breakdownByAddress: null,
             breakdownByImplementation: null,
             breakdownByCategory: null,
           },
           totalTime: {
             value: 1,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 1 },
             breakdownByCategory: withSingleSubcategory([
               0,
@@ -2409,11 +2440,13 @@ describe('getTimingsForSidebar', () => {
         forFunc: {
           selfTime: {
             value: 0,
+            breakdownByAddress: null,
             breakdownByImplementation: null,
             breakdownByCategory: null,
           },
           totalTime: {
             value: 5,
+            breakdownByAddress: null,
             breakdownByImplementation: { native: 2, ion: 2, baseline: 1 },
             breakdownByCategory: withSingleSubcategory([
               1, // Idle
@@ -2454,6 +2487,7 @@ describe('getTimingsForSidebar', () => {
       expect(timings.rootTime).toEqual(2);
       expect(timings.forPath.totalTime).toEqual({
         value: 1,
+        breakdownByAddress: null,
         breakdownByImplementation: { ion: 1 },
         breakdownByCategory: withSingleSubcategory([
           0, // Idle
@@ -2510,10 +2544,12 @@ describe('getTimingsForSidebar', () => {
       expect(timings.forPath).toEqual({
         selfTime: {
           breakdownByCategory: null,
+          breakdownByAddress: null,
           breakdownByImplementation: null,
           value: 0,
         },
         totalTime: {
+          breakdownByAddress: null,
           breakdownByCategory: withSingleSubcategory([0, 0, -1, 1, 0, 0, 0, 0]), // Idle, Other, Layout, JavaScript, etc.
           breakdownByImplementation: {
             native: 0,

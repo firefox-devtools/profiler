@@ -322,6 +322,9 @@ export function getLeafFuncIndex(path: CallNodePath): IndexIntoFuncTable {
 export type JsImplementation = 'interpreter' | 'ion' | 'baseline' | 'unknown';
 export type StackImplementation = 'native' | JsImplementation;
 export type BreakdownByImplementation = { [StackImplementation]: Milliseconds };
+export type Address = number;
+export type LibIndex = number;
+export type BreakdownByAddress = Map<LibIndex, Map<Address, Milliseconds>>;
 export type OneCategoryBreakdown = {|
   entireCategoryValue: Milliseconds,
   subcategoryBreakdown: Milliseconds[], // { [IndexIntoSubcategoryList]: Milliseconds }
@@ -333,12 +336,14 @@ type ItemTimings = {|
     value: Milliseconds,
     breakdownByImplementation: BreakdownByImplementation | null,
     breakdownByCategory: BreakdownByCategory | null,
+    breakdownByAddress: BreakdownByAddress | null,
   |},
   totalTime: {|
     // time spent including children
     value: Milliseconds,
     breakdownByImplementation: BreakdownByImplementation | null,
     breakdownByCategory: BreakdownByCategory | null,
+    breakdownByAddress: BreakdownByAddress | null,
   |},
 |};
 
@@ -419,7 +424,7 @@ export function getTimingsForCallNodeIndex(
   sampleIndexOffset: number,
   categories: CategoryList
 ): TimingsForPath {
-  const { samples, stackTable, funcTable } = thread;
+  const { samples, stackTable, frameTable, funcTable, resourceTable } = thread;
   const {
     samples: unfilteredSamples,
     stackTable: unfilteredStackTable,
@@ -430,11 +435,13 @@ export function getTimingsForCallNodeIndex(
       value: 0,
       breakdownByImplementation: null,
       breakdownByCategory: null,
+      breakdownByAddress: null,
     },
     totalTime: {
       value: 0,
       breakdownByImplementation: null,
       breakdownByCategory: null,
+      breakdownByAddress: null,
     },
   };
   const funcTimings: ItemTimings = {
@@ -442,11 +449,13 @@ export function getTimingsForCallNodeIndex(
       value: 0,
       breakdownByImplementation: null,
       breakdownByCategory: null,
+      breakdownByAddress: null,
     },
     totalTime: {
       value: 0,
       breakdownByImplementation: null,
       breakdownByCategory: null,
+      breakdownByAddress: null,
     },
   };
   let rootTime = 0;
@@ -467,6 +476,7 @@ export function getTimingsForCallNodeIndex(
     timings: {
       breakdownByImplementation: BreakdownByImplementation | null,
       breakdownByCategory: BreakdownByCategory | null,
+      breakdownByAddress: BreakdownByAddress | null,
       value: number,
     },
     sampleIndex: IndexIntoSamplesTable,
@@ -490,6 +500,31 @@ export function getTimingsForCallNodeIndex(
       timings.breakdownByImplementation[implementation] = 0;
     }
     timings.breakdownByImplementation[implementation] += duration;
+
+    const resourceIndex = funcTable.resource[funcIndex];
+    if (resourceTable.type[resourceIndex] === resourceTypes.library) {
+      const libIndex = resourceTable.lib[resourceIndex];
+      if (libIndex !== undefined && libIndex !== null && libIndex !== -1) {
+        let breakdownByAddress = timings.breakdownByAddress;
+        if (breakdownByAddress === null) {
+          breakdownByAddress = new Map();
+          timings.breakdownByAddress = breakdownByAddress;
+        }
+        let breakdownByAddressForLib = breakdownByAddress.get(libIndex);
+        if (breakdownByAddressForLib === undefined) {
+          breakdownByAddressForLib = new Map();
+          breakdownByAddress.set(libIndex, breakdownByAddressForLib);
+        }
+        const frameIndex = stackTable.frame[stackIndex];
+        const frameAddress = frameTable.address[frameIndex];
+        let addressTime = breakdownByAddressForLib.get(frameAddress);
+        if (addressTime === undefined) {
+          addressTime = 0;
+        }
+        addressTime += duration;
+        breakdownByAddressForLib.set(frameAddress, addressTime);
+      }
+    }
 
     // step 4: find the category value for this stack. We want to use the
     // category of the unfilteredThread.

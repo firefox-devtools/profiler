@@ -1444,11 +1444,13 @@ exports[`snapshots of selectors/profile matches the last stored run of selectedN
 Object {
   "forFunc": Object {
     "selfTime": Object {
+      "breakdownByAddress": null,
       "breakdownByCategory": null,
       "breakdownByImplementation": null,
       "value": 0,
     },
     "totalTime": Object {
+      "breakdownByAddress": null,
       "breakdownByCategory": Array [
         Object {
           "entireCategoryValue": 0,
@@ -1507,11 +1509,13 @@ Object {
   },
   "forPath": Object {
     "selfTime": Object {
+      "breakdownByAddress": null,
       "breakdownByCategory": null,
       "breakdownByImplementation": null,
       "value": 0,
     },
     "totalTime": Object {
+      "breakdownByAddress": null,
       "breakdownByCategory": Array [
         Object {
           "entireCategoryValue": 0,
