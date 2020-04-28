@@ -3,7 +3,7 @@
 exports[`TrackVisualProgress draws a dot that matches the snapshot 1`] = `
 <div
   class="timelineTrackVisualProgressGraphDot"
-  style="left: 53913.21044921875px; top: 33.37px;"
+  style="left: 53913.21044921875px; top: 33.37px; --dot-color: #0060df;"
 />
 `;
 
@@ -140,7 +140,7 @@ Array [
 exports[`TrackVisualProgress matches the component snapshot 1`] = `
 <div
   class="timelineTrackVisualProgress"
-  style="height: 40px;"
+  style="height: 40px; --graph-height: 40px;"
 >
   <div
     class="timelineTrackVisualProgressGraph"

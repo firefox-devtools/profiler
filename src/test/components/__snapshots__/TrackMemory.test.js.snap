@@ -142,7 +142,7 @@ Array [
 exports[`TrackMemory matches the component snapshot 1`] = `
 <div
   class="timelineTrackMemory"
-  style="height: 40px;"
+  style="height: 40px; --graph-height: 25px; --markers-height: 15px;"
 >
   <div
     class="timelineMarkers timelineMarkersMemory selected"

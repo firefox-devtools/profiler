@@ -6,6 +6,7 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
 >
   <div
     class="timelineRuler"
+    style="--timeline-ruler-height: 20px;"
   >
     <ol
       class="timelineRulerContainer"

@@ -117,7 +117,7 @@
     "html-webpack-plugin": "^3.2.0",
     "husky": "^3.0.5",
     "jest": "^25.1.0",
-    "jest-environment-jsdom-thirteen": "^1.0.0",
+    "jest-environment-jsdom-sixteen": "^1.0.3",
     "json-loader": "^0.5.7",
     "local-web-server": "^2.6.1",
     "lockfile-lint": "^2.1.4",
@@ -144,7 +144,7 @@
       "!**/node_modules/**",
       "!src/types/libdef/**"
     ],
-    "testEnvironment": "jest-environment-jsdom-thirteen",
+    "testEnvironment": "jest-environment-jsdom-sixteen",
     "moduleFileExtensions": [
       "js",
       "jsx"
