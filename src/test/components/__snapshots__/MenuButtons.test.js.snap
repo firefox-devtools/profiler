@@ -51,7 +51,7 @@ exports[`<MenuButtonsMetaInfo> matches the snapshot 1`] = `
             >
               Interval:
             </span>
-            1ms
+            1.0ms
           </div>
           <div
             class="metaInfoRow"
@@ -467,7 +467,7 @@ exports[`<MenuButtonsMetaInfo> with no statistics object should not make the app
             >
               Interval:
             </span>
-            1ms
+            1.0ms
           </div>
           <div
             class="metaInfoRow"
