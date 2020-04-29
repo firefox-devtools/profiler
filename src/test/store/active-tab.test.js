@@ -11,17 +11,20 @@ import {
 import {
   getScreenshotTrackProfile,
   addActiveTabInformationToProfile,
+  addMarkersToThreadWithCorrespondingSamples,
 } from '../fixtures/profiles/processed-profile';
 import { storeWithProfile } from '../fixtures/stores';
 
 describe('ActiveTab', function() {
-  function setup(p = getProfileWithNiceTracks()) {
+  function setup(p = getProfileWithNiceTracks(), addInnerWindowID = true) {
     const { profile, ...pageInfo } = addActiveTabInformationToProfile(p);
     // Add the innerWindowIDs so we can compute the first thread as main track.
-    profile.threads[0].frameTable.innerWindowID[0] =
-      pageInfo.parentInnerWindowIDsWithChildren;
-    if (profile.threads[0].frameTable.length < 1) {
-      profile.threads[0].frameTable.length = 1;
+    if (addInnerWindowID) {
+      profile.threads[0].frameTable.innerWindowID[0] =
+        pageInfo.parentInnerWindowIDsWithChildren;
+      if (profile.threads[0].frameTable.length < 1) {
+        profile.threads[0].frameTable.length = 1;
+      }
     }
 
     const { dispatch, getState } = storeWithProfile(profile);
@@ -55,6 +58,31 @@ describe('ActiveTab', function() {
         'screenshots',
         'main track [tab] SELECTED',
       ]);
+    });
+
+    it('do not rely on network markers while calculating the tracks', function() {
+      // Network markers are not reliable to compute the tracks because some network
+      // markers of an iframe comes from the parent frame. Therefore, their
+      // innerWindowID will be the parent window's innerWindowID.
+      const profile = getProfileWithNiceTracks();
+      addMarkersToThreadWithCorrespondingSamples(profile.threads[0], [
+        [
+          'Load 1 will be filtered',
+          7,
+          {
+            type: 'Network',
+            URI: 'URI 1',
+            id: 5,
+            pri: 1,
+            status: 'STATUS_STOP',
+            startTime: 7,
+            endTime: 8,
+          },
+        ],
+      ]);
+      const { getState } = setup(profile, false);
+
+      expect(getHumanReadableActiveTabTracks(getState()).length).toBe(0);
     });
   });
 });

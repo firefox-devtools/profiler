@@ -268,6 +268,10 @@ function isTopmostThread(
     if (
       data &&
       data.innerWindowID &&
+      // Do not look at the network markers because they are not reliable. Some
+      // network markers of an iframe comes from the parent frame. Therefore, their
+      // innerWindowID will be the parent window's innerWindowID.
+      data.type !== 'Network' &&
       topmostInnerWindowIDs.has(data.innerWindowID)
     ) {
       return true;
