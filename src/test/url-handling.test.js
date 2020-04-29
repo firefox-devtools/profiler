@@ -408,12 +408,12 @@ describe('showTabOnly', function() {
     );
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
-    expect(query.showTabOnly1).toBe(browsingContextID);
+    expect(query.ctxId).toBe(browsingContextID);
   });
 
   it('reflects in the state from URL', function() {
     const { getState } = _getStoreWithURL({
-      search: '?showTabOnly1=123&view=active-tab',
+      search: '?ctxId=123&view=active-tab',
     });
     expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
       type: 'active-tab',
@@ -438,7 +438,7 @@ describe('showTabOnly', function() {
     profile.threads[1].frameTable.innerWindowID[0] = iframeInnerWindowIDsWithChild;
     const { getState } = _getStoreWithURL(
       {
-        search: '?view=active-tab&showTabOnly1=123',
+        search: '?view=active-tab&ctxId=123',
       },
       profile
     );
@@ -463,7 +463,7 @@ describe('showTabOnly', function() {
   it('should remove other full view url states if present', function() {
     const { getState } = _getStoreWithURL({
       search:
-        '?showTabOnly1=123&view=active-tab&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
+        '?ctxId=123&view=active-tab&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
     });
 
     const newUrl = new URL(
@@ -472,7 +472,7 @@ describe('showTabOnly', function() {
     );
     // The url states that are relevant to full view should be stripped out.
     expect(newUrl.search).toEqual(
-      `?showTabOnly1=123&thread=0&v=${CURRENT_URL_VERSION}&view=active-tab`
+      `?ctxId=123&thread=0&v=${CURRENT_URL_VERSION}&view=active-tab`
     );
   });
 });

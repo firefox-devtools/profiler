@@ -110,7 +110,7 @@ type BaseQuery = {|
   transforms: string,
   profiles: string[],
   profileName: string,
-  showTabOnly1: BrowsingContextID,
+  ctxId: BrowsingContextID,
   view: string,
   ...FullProfileSpecificBaseQuery,
   ...ActiveTabProfileSpecificBaseQuery,
@@ -277,7 +277,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       );
   }
 
-  let showTabOnly1;
+  let ctxId;
   let view;
   switch (timelineTrackOrganization.type) {
     case 'full':
@@ -285,7 +285,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
       break;
     case 'active-tab':
       view = timelineTrackOrganization.type;
-      showTabOnly1 = timelineTrackOrganization.browsingContextID;
+      ctxId = timelineTrackOrganization.browsingContextID;
       break;
     case 'origins':
       view = timelineTrackOrganization.type;
@@ -305,7 +305,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     thread: selectedThread === null ? undefined : selectedThread.toString(),
     file: urlState.pathInZipFile || undefined,
     profiles: urlState.profilesToCompare || undefined,
-    showTabOnly1,
+    ctxId,
     view,
     v: CURRENT_URL_VERSION,
     profileName: urlState.profileName || undefined,
@@ -475,8 +475,8 @@ export function stateFromLocation(
   }
 
   let browsingContextId = null;
-  if (query.showTabOnly1 && Number.isInteger(Number(query.showTabOnly1))) {
-    browsingContextId = Number(query.showTabOnly1);
+  if (query.ctxId && Number.isInteger(Number(query.ctxId))) {
+    browsingContextId = Number(query.ctxId);
   }
 
   return {
