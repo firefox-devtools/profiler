@@ -550,16 +550,15 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
 );
 
 /**
- * Get the pages array and construct a Map that we can use to easily get the
- * InnerWindowIDs that are under one tab. The constructed map is
- * `Map<BrowsingContextID,Set<InnerWindowID>>`. The BrowsingContextID we use in
- * that map is the BrowsingContextID of the top most frame. That corresponds to
- * a tab(Side note: don't tell any platform developer that this is a tab ID,
- * they will freak out. Because in the platform world this isn't a tab ID, since
- * the iframe has a different BrowsingContext than the parent. But outer most
- * BrowsingContextID _acts_ like a tab ID).
- * So we had to figure out the outer most BrowsingContextID of each element. And
- * we constructed an intermediate map to quickly find that value.
+ * Get the pages array and construct a Map of pages that we can use to get the
+ * relationships of tabs. The constructed map is `Map<BrowsingContextID,Page[]>`.
+ * The BrowsingContextID we use in that map is the BrowsingContextID of the
+ * topmost frame. That corresponds to a tab(Side note: don't tell any platform
+ * developer that this is a tab ID, they will freak out. Because in the platform
+ * world this isn't a tab ID, since the iframe has a different BrowsingContext
+ * than the parent. But outer most BrowsingContextID _acts_ like a tab ID for our case).
+ * So we had to figure out the outer most BrowsingContextID of each element and
+ * constructed an intermediate map to quickly find that value.
  */
 export const getPagesMap: Selector<Map<
   BrowsingContextID,
@@ -579,7 +578,7 @@ export const getPagesMap: Selector<Map<
   }
 
   // Now we have a way to fastly traverse back with the previous Map.
-  // We can do construction of BrowsingContextID to set of InnerWindowID map.
+  // We can do construction of BrowsingContextID to Page array map.
   const pageMap: Map<BrowsingContextID, Page[]> = new Map();
   const appendPageMap = (browsingContextID, page) => {
     const tabEntry = pageMap.get(browsingContextID);
@@ -620,9 +619,12 @@ export const getPagesMap: Selector<Map<
  * Return the relevant page array for active tab.
  * This is useful for operations that require the whole Page object instead of
  * only the InnerWindowIDs. If you only need the InnerWindowID array of the active
- * tab, please use getRelevantInnerWindowIDsForActiveTab selector. It also returns
- * a Set for faster operations.
+ * tab, please use getRelevantInnerWindowIDsForActiveTab selector. Returns
+ * _emptyRelevantPagesForActiveTab array as empty array to return the same array
+ * every time the selector inputs are invalidated. That eliminates the re-render
+ * of the components.
  */
+const _emptyRelevantPagesForActiveTab = [];
 export const getRelevantPagesForActiveTab: Selector<Page[]> = createSelector(
   getPagesMap,
   getActiveBrowsingContextID,
@@ -633,11 +635,11 @@ export const getRelevantPagesForActiveTab: Selector<Page[]> = createSelector(
       activeBrowsingContextID === null
     ) {
       // Return an empty array if we want to see everything or that data is not there.
-      return [];
+      return _emptyRelevantPagesForActiveTab;
     }
 
     const pages = pagesMap.get(activeBrowsingContextID);
-    return pages !== undefined ? pages : [];
+    return pages !== undefined ? pages : _emptyRelevantPagesForActiveTab;
   }
 );
 
@@ -672,7 +674,7 @@ export const getInnerWindowIDSetByBrowsingContextID: Selector<Map<
  * The `BrowsingContextID -> Set<InnerWindowID>` construction happens inside
  * the getInnerWindowIDSetByBrowsingContextID selector.
  * This function returns the Set all the time even though we are not in the active
- * tab view at the moment. Idaelly you should use the wrapper
+ * tab view at the moment. Ideally you should use the wrapper
  * getRelevantInnerWindowIDsForCurrentTab function if you want to do something
  * inside the active tab view. This is needed for only viewProfile function to
  * calculate the hidden tracks during page load, even though we are not in the

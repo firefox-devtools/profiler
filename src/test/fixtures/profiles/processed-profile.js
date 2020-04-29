@@ -1100,6 +1100,17 @@ export function getProfileWithBalancedNativeAllocations(): * {
   return { profile, funcNamesDict };
 }
 
+/**
+ * Add pages array and activeTabBrowsingContextID to the given profile.
+ * Pages array has the following relationship:
+ * Tab #1                           Tab #2
+ * --------------                --------------
+ * Page #1                        Page #4
+ * |- Page #2                     |
+ * |  |- Page #3                  Page #6
+ * |
+ * Page #5
+ */
 export function addActiveTabInformationToProfile(
   profile: Profile,
   activeBrowsingContextID?: BrowsingContextID
@@ -1122,14 +1133,7 @@ export function addActiveTabInformationToProfile(
       ? firstTabBrowsingContextID
       : activeBrowsingContextID;
 
-  // Add a pages array with the following relationship:
-  // Tab #1                           Tab #2
-  // --------------                --------------
-  // Page #1                        Page #4
-  // |- Page #2                     |
-  // |  |- Page #3                  Page #6
-  // |
-  // Page #5
+  // Add the pages array
   profile.pages = [
     // A top most page in the first tab
     {
