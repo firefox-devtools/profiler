@@ -23,7 +23,7 @@ import {
 import { blankStore } from './fixtures/stores';
 import {
   viewProfile,
-  changeViewAndRecomputeProfileData,
+  changeTimelineTrackOrganization,
 } from '../actions/receive-profile';
 import type { Profile } from '../types/profile';
 import getProfile from './fixtures/profiles/call-nodes';
@@ -401,24 +401,31 @@ describe('profileName', function() {
 describe('showTabOnly', function() {
   it('serializes the showTabOnly in the URL ', function() {
     const { getState, dispatch } = _getStoreWithURL();
-    const showTabOnly = 123;
+    const browsingContextID = 123;
 
-    dispatch(changeViewAndRecomputeProfileData(showTabOnly));
+    dispatch(
+      changeTimelineTrackOrganization({ type: 'active-tab', browsingContextID })
+    );
     const urlState = urlStateReducers.getUrlState(getState());
     const { query } = urlStateToUrlObject(urlState);
-    expect(query.showTabOnly1).toBe(showTabOnly);
+    expect(query.showTabOnly1).toBe(browsingContextID);
   });
 
   it('reflects in the state from URL', function() {
     const { getState } = _getStoreWithURL({
-      search: '?showTabOnly1=123',
+      search: '?showTabOnly1=123&view=active-tab',
     });
-    expect(urlStateReducers.getShowTabOnly(getState())).toBe(123);
+    expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
+      type: 'active-tab',
+      browsingContextID: 123,
+    });
   });
 
-  it('returns null when showTabOnly is not specified', function() {
+  it('returns the full view when showTabOnly is not specified', function() {
     const { getState } = _getStoreWithURL();
-    expect(urlStateReducers.getShowTabOnly(getState())).toBe(null);
+    expect(urlStateReducers.getTimelineTrackOrganization(getState())).toEqual({
+      type: 'full',
+    });
   });
 
   it('should use the finalizeActiveTabProfileView path and initialize active tab profile view state', function() {
@@ -431,7 +438,7 @@ describe('showTabOnly', function() {
     profile.threads[1].frameTable.innerWindowID[0] = iframeInnerWindowIDsWithChild;
     const { getState } = _getStoreWithURL(
       {
-        search: '?showTabOnly1=123',
+        search: '?view=active-tab&showTabOnly1=123',
       },
       profile
     );
@@ -456,7 +463,7 @@ describe('showTabOnly', function() {
   it('should remove other full view url states if present', function() {
     const { getState } = _getStoreWithURL({
       search:
-        '?showTabOnly1=123&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
+        '?showTabOnly1=123&view=active-tab&globalTrackOrder=3-2-1-0&hiddenGlobalTracks=4-5&hiddenLocalTracksByPid=111-1&thread=0',
     });
 
     const newUrl = new URL(
@@ -465,7 +472,7 @@ describe('showTabOnly', function() {
     );
     // The url states that are relevant to full view should be stripped out.
     expect(newUrl.search).toEqual(
-      `?showTabOnly1=123&thread=0&v=${CURRENT_URL_VERSION}`
+      `?showTabOnly1=123&thread=0&v=${CURRENT_URL_VERSION}&view=active-tab`
     );
   });
 });

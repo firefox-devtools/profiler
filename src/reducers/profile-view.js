@@ -607,6 +607,10 @@ const rightClickedMarker: Reducer<RightClickedMarker | null> = (
   }
 };
 
+const origins: Reducer<null> = (state = null, _action) => {
+  return state;
+};
+
 /**
  * Provide a mechanism to wrap the reducer in a special function that can reset
  * the state to the default values. This is useful when viewing multiple profiles
@@ -655,6 +659,7 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       hiddenGlobalTracksGetter: activeTabHiddenGlobalTracksGetter,
       hiddenLocalTracksByPidGetter: activeTabHiddenLocalTracksByPidGetter,
     }),
+    origins,
   })
 );
 

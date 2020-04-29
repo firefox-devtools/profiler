@@ -6,32 +6,43 @@
 
 import * as React from 'react';
 import explicitConnect from '../../utils/connect';
-import { getShowTabOnly } from '../../selectors/url-state';
+import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
 import FullTimeline from '../timeline/FullTimeline';
 import ActiveTabTimeline from '../timeline/ActiveTabTimeline';
+import { assertExhaustiveCheck } from '../../utils/flow';
 
-import type { BrowsingContextID } from '../../types/profile';
 import type { ConnectedProps } from '../../utils/connect';
+import type { TimelineTrackOrganization } from '../../types/state';
 
 type StateProps = {|
-  +showTabOnly: BrowsingContextID | null,
+  +timelineTrackOrganization: TimelineTrackOrganization,
 |};
 
 type Props = ConnectedProps<{||}, StateProps, {||}>;
 
 class Timeline extends React.PureComponent<Props> {
   render() {
-    const { showTabOnly } = this.props;
-    // Show different timeline components depending on the view we are in.
-    // If showTabOnly state is non-null, then show the active tab timeline.
-    // Otherwise, show the full timeline.
-    return showTabOnly === null ? <FullTimeline /> : <ActiveTabTimeline />;
+    const { timelineTrackOrganization } = this.props;
+    switch (timelineTrackOrganization.type) {
+      case 'full':
+        return <FullTimeline />;
+      case 'active-tab':
+        return <ActiveTabTimeline />;
+      case 'origins':
+        // This doesn't exist yet.
+        return null;
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          `Unhandled ViewType`
+        );
+    }
   }
 }
 
 export default explicitConnect<{||}, StateProps, {||}>({
   mapStateToProps: state => ({
-    showTabOnly: getShowTabOnly(state),
+    timelineTrackOrganization: getTimelineTrackOrganization(state),
   }),
   component: Timeline,
 });

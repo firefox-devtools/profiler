@@ -30,7 +30,7 @@ import {
   retrieveProfilesToCompare,
   _fetchProfile,
   getProfilesFromRawUrl,
-  changeViewAndRecomputeProfileData,
+  changeTimelineTrackOrganization,
 } from '../../actions/receive-profile';
 import { SymbolsNotFoundError } from '../../profile-logic/errors';
 import fakeIndexedDB from 'fake-indexeddb';
@@ -434,7 +434,7 @@ describe('actions/receive-profile', function() {
     });
   });
 
-  describe('changeViewAndRecomputeProfileData', function() {
+  describe('changeTimelineTrackOrganization', function() {
     const browsingContextID = 123;
     const innerWindowID = 111111;
     function setup(initializeShowTabOnly: boolean = false) {
@@ -462,7 +462,12 @@ describe('actions/receive-profile', function() {
 
       store.dispatch(viewProfile(profile));
       if (initializeShowTabOnly) {
-        store.dispatch(changeViewAndRecomputeProfileData(browsingContextID));
+        store.dispatch(
+          changeTimelineTrackOrganization({
+            type: 'active-tab',
+            browsingContextID,
+          })
+        );
       }
 
       return { ...store, profile };
@@ -470,20 +475,39 @@ describe('actions/receive-profile', function() {
 
     it('should be able to switch to active tab view from the full view', function() {
       const { dispatch, getState } = setup();
-      expect(UrlStateSelectors.getShowTabOnly(getState())).toBe(null);
-      dispatch(changeViewAndRecomputeProfileData(browsingContextID));
-      expect(UrlStateSelectors.getShowTabOnly(getState())).toBe(
-        browsingContextID
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'full',
+      });
+      dispatch(
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          browsingContextID,
+        })
       );
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'active-tab',
+        browsingContextID,
+      });
     });
 
     it('should be able to switch to full view from the active tab', function() {
       const { dispatch, getState } = setup(true);
-      expect(UrlStateSelectors.getShowTabOnly(getState())).toBe(
-        browsingContextID
-      );
-      dispatch(changeViewAndRecomputeProfileData(null));
-      expect(UrlStateSelectors.getShowTabOnly(getState())).toBe(null);
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'active-tab',
+        browsingContextID,
+      });
+      dispatch(changeTimelineTrackOrganization({ type: 'full' }));
+      expect(
+        UrlStateSelectors.getTimelineTrackOrganization(getState())
+      ).toEqual({
+        type: 'full',
+      });
     });
   });
 

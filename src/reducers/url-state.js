@@ -7,7 +7,7 @@ import { combineReducers } from 'redux';
 import { oneLine } from 'common-tags';
 import { objectEntries } from '../utils/flow';
 
-import type { ThreadIndex, Pid, BrowsingContextID } from '../types/profile';
+import type { ThreadIndex, Pid } from '../types/profile';
 import type { TrackIndex } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type { TransformStacksPerThread } from '../types/transforms';
@@ -17,7 +17,11 @@ import type {
   CallTreeSummaryStrategy,
   TimelineType,
 } from '../types/actions';
-import type { UrlState, Reducer } from '../types/state';
+import type {
+  UrlState,
+  Reducer,
+  TimelineTrackOrganization,
+} from '../types/state';
 import type { TabSlug } from '../app-logic/tabs-handling';
 
 /*
@@ -405,18 +409,20 @@ const profileName: Reducer<string> = (state = '', action) => {
   }
 };
 
-const showTabOnly: Reducer<BrowsingContextID | null> = (
-  state = null,
+const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
+  state = { type: 'full' },
   action
 ) => {
   switch (action.type) {
     case 'VIEW_FULL_PROFILE':
+      return { type: 'full' };
     case 'VIEW_ACTIVE_TAB_PROFILE':
-      if (action.showTabOnly !== undefined) {
-        // Do not change the state if it's undefined.
-        return action.showTabOnly;
-      }
-      return state;
+      return {
+        type: 'active-tab',
+        browsingContextID: action.browsingContextID,
+      };
+    case 'VIEW_ORIGINS_PROFILE':
+      return { type: 'origins' };
     default:
       return state;
   }
@@ -506,7 +512,7 @@ const urlStateReducer: Reducer<UrlState> = wrapReducerInResetter(
     pathInZipFile,
     profileSpecific,
     profileName,
-    showTabOnly,
+    timelineTrackOrganization,
   })
 );
 

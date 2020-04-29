@@ -6,7 +6,7 @@
 import { createSelector } from 'reselect';
 import * as Tracks from '../profile-logic/tracks';
 import * as UrlState from './url-state';
-import { ensureExists } from '../utils/flow';
+import { ensureExists, assertExhaustiveCheck } from '../utils/flow';
 import {
   filterCounterToRange,
   accumulateCounterSamples,
@@ -58,6 +58,7 @@ import type {
   SymbolicationStatus,
   FullProfileViewState,
   ActiveTabProfileViewState,
+  OriginsViewState,
 } from '../types/state';
 import type { $ReturnType } from '../types/utils';
 
@@ -67,6 +68,8 @@ export const getFullProfileView: Selector<FullProfileViewState> = state =>
   getProfileView(state).full;
 export const getActiveTabProfileView: Selector<ActiveTabProfileViewState> = state =>
   getProfileView(state).activeTab;
+export const getOriginsProfileView: Selector<OriginsViewState> = state =>
+  getProfileView(state).origins;
 
 /**
  * Profile View Options
@@ -479,7 +482,7 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
   getActiveTabHiddenLocalTracksByPidGetter,
   UrlState.getHiddenGlobalTracks,
   getActiveTabHiddenGlobalTracksGetter,
-  UrlState.getShowTabOnly,
+  UrlState.getTimelineTrackOrganization,
   (
     globalTracks,
     localTracksByPid,
@@ -487,7 +490,7 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
     activeTabHiddenLocalTracksByPidGetter,
     hiddenGlobalTracks,
     activeTabHiddenGlobalTracksGetter,
-    showTabOnly
+    timelineTrackOrganization
   ) => {
     let hidden = 0;
     let total = 0;
@@ -498,7 +501,7 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
       const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid) || new Set();
       const activeTabHiddenLocalTracks =
         // Do not call the getter if we are not in the single tab view.
-        showTabOnly !== null
+        timelineTrackOrganization.type === 'active-tab'
           ? activeTabHiddenLocalTracksByPidGetter().get(pid) || new Set()
           : new Set();
       const globalTrackIndex = globalTracks.findIndex(
@@ -515,7 +518,7 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
 
       if (hiddenGlobalTracks.has(globalTrackIndex)) {
         // The entire process group is hidden, count all of the tracks.
-        if (showTabOnly !== null) {
+        if (timelineTrackOrganization.type === 'active-tab') {
           if (!activeTabHiddenGlobalTracksGetter().has(globalTrackIndex)) {
             // If we are in active tab view and the current hidden track is not
             // hidden by that, count its local tracks but also make sure that we
@@ -528,7 +531,7 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
       } else {
         // Only count the hidden local tracks.
         hidden += hiddenLocalTracks.size;
-        if (showTabOnly !== null) {
+        if (timelineTrackOrganization.type === 'active-tab') {
           // If we are in active tab view, we should remove the count of active
           // tab hidden tracks since they won't be visible at all.
           hidden -= [...activeTabHiddenLocalTracks].filter(t =>
@@ -537,14 +540,14 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
         }
       }
       total += localTracks.length;
-      if (showTabOnly !== null) {
+      if (timelineTrackOrganization.type === 'active-tab') {
         // Again, if we are in active tab view, do not count the tracks that are hidden by active tab view.
         total -= activeTabHiddenLocalTracks.size;
       }
     }
 
     // Count up the global tracks
-    if (showTabOnly) {
+    if (timelineTrackOrganization.type === 'active-tab') {
       const activeTabHiddenGlobalTracks = activeTabHiddenGlobalTracksGetter();
       total += globalTracks.length - activeTabHiddenGlobalTracks.size;
       hidden += [...hiddenGlobalTracks].filter(
@@ -720,15 +723,21 @@ export const getRelevantInnerWindowIDsForActiveTab: Selector<
 export const getRelevantInnerWindowIDsForCurrentTab: Selector<
   Set<InnerWindowID>
 > = createSelector(
-  UrlState.getShowTabOnly,
+  UrlState.getTimelineTrackOrganization,
   getRelevantInnerWindowIDsForActiveTab,
-  (showTabOnly, relevantPages) => {
-    if (showTabOnly === null) {
-      // Return an empty set if we want to see everything or that data is not there.
-      return new Set();
+  (timelineTrackOrganization, relevantInnerWindowIDs) => {
+    switch (timelineTrackOrganization.type) {
+      case 'active-tab':
+        return relevantInnerWindowIDs;
+      case 'full':
+      case 'origins':
+        return new Set();
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          'Unhandled timelineTrackOrganization case'
+        );
     }
-
-    return relevantPages;
   }
 );
 
@@ -740,14 +749,18 @@ export const getComputedHiddenGlobalTracks: Selector<
   Set<TrackIndex>
 > = createSelector(
   UrlState.getHiddenGlobalTracks,
-  UrlState.getShowTabOnly,
+  UrlState.getTimelineTrackOrganization,
   getActiveTabHiddenGlobalTracksGetter,
-  (hiddenGlobalTracks, showTabOnly, activeTabHiddenGlobalTracksGetter) => {
-    if (showTabOnly === null) {
+  (
+    hiddenGlobalTracks,
+    timelineTrackOrganization,
+    activeTabHiddenGlobalTracksGetter
+  ) => {
+    if (timelineTrackOrganization !== 'active-tab') {
       return hiddenGlobalTracks;
     }
 
-    // We are in the showTabOnly mode and we need to hide the tracks that don't
+    // We are in the active tab mode and we need to hide the tracks that don't
     // belong to the active tab as well.
     return new Set([
       ...hiddenGlobalTracks,
@@ -764,18 +777,18 @@ export const getComputedHiddenLocalTracksByPid: Selector<
   Map<Pid, Set<TrackIndex>>
 > = createSelector(
   UrlState.getHiddenLocalTracksByPid,
-  UrlState.getShowTabOnly,
+  UrlState.getTimelineTrackOrganization,
   getActiveTabHiddenLocalTracksByPidGetter,
   (
     hiddenLocalTracksByPid,
-    showTabOnly,
+    timelineTrackOrganization,
     activeTabHiddenLocalTracksByPidGetter
   ) => {
-    if (showTabOnly === null) {
+    if (timelineTrackOrganization !== 'active-tab') {
       return hiddenLocalTracksByPid;
     }
 
-    // We are in the showTabOnly mode and we need to hide the tracks that don't
+    // We are in the active tab mode and we need to hide the tracks that don't
     // belong to the active tab as well.
 
     // We need to deep copy those Maps and Sets here, just in case.

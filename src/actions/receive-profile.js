@@ -25,8 +25,12 @@ import {
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
-  getShowTabOnly,
-} from '../selectors/url-state';
+  getTimelineTrackOrganization,
+  getProfileOrNull,
+  getProfile,
+  getView,
+  getRelevantPagesForActiveTab,
+} from 'firefox-profiler/selectors';
 import {
   stateFromLocation,
   getDataSourceFromPathParts,
@@ -41,14 +45,8 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
-import {
-  getProfileOrNull,
-  getProfile,
-  getRelevantPagesForActiveTab,
-} from '../selectors/profile';
-import { getView } from '../selectors/app';
-import { setDataSource } from './profile-view';
 import { computeActiveTabTracks } from '../profile-logic/active-tab';
+import { setDataSource } from './profile-view';
 
 import type {
   FunctionsUpdatePerThread,
@@ -58,6 +56,7 @@ import type {
 } from '../types/actions';
 import type { TransformStacksPerThread } from '../types/transforms';
 import type { Action, ThunkAction, Dispatch } from '../types/store';
+import type { TimelineTrackOrganization } from '../types/state';
 import type {
   Profile,
   ThreadIndex,
@@ -91,6 +90,7 @@ export function waitingForProfileFromAddon(): Action {
 export function loadProfile(
   profile: Profile,
   config: $Shape<{|
+    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
@@ -130,7 +130,12 @@ export function loadProfile(
     // before finalizing profile view. That's why we are dispatching this action
     // after completing those steps inside `setupInitialUrlState`.
     if (initialLoad === false) {
-      await dispatch(finalizeProfileView(config.geckoProfiler));
+      await dispatch(
+        finalizeProfileView(
+          config.geckoProfiler,
+          config.timelineTrackOrganization
+        )
+      );
     }
   };
 }
@@ -143,7 +148,8 @@ export function loadProfile(
  * functions in the src/profile-logic/tracks.js file.
  */
 export function finalizeProfileView(
-  geckoProfiler?: $GeckoProfiler
+  geckoProfiler?: $GeckoProfiler,
+  timelineTrackOrganization?: TimelineTrackOrganization
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
     const profile = getProfileOrNull(getState());
@@ -156,15 +162,50 @@ export function finalizeProfileView(
     // been seen before. If it's non-null, then there is profile view information
     // encoded into the URL.
     const selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
+    const pages = profile.pages;
+    if (!timelineTrackOrganization) {
+      // Most likely we'll need to load the timeline track organization, as requested
+      // by the URL, but tests can pass in a value.
+      timelineTrackOrganization = getTimelineTrackOrganization(getState());
+    }
 
-    if (selectedThreadIndex !== null && getShowTabOnly(getState()) !== null) {
-      // The url state says this is an active tab view. We should compute and
-      // initialize the state relevant to that state.
-      dispatch(finalizeActiveTabProfileView(profile, selectedThreadIndex));
-    } else {
-      // The url state says this is a full view. We should compute and initialize
-      // the state relevant to that state.
-      dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+    switch (timelineTrackOrganization.type) {
+      case 'full':
+        // The url state says this is a full view. We should compute and initialize
+        // the state relevant to that state.
+        dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        break;
+      case 'active-tab':
+        if (selectedThreadIndex === null) {
+          // Switch back over to the full view.
+          timelineTrackOrganization = { type: 'full' };
+        } else {
+          // The url state says this is an active tab view. We should compute and
+          // initialize the state relevant to that state.
+          dispatch(
+            finalizeActiveTabProfileView(
+              profile,
+              selectedThreadIndex,
+              timelineTrackOrganization.browsingContextID
+            )
+          );
+        }
+        break;
+      case 'origins': {
+        if (pages) {
+          throw new Error("This isn't handled yet.");
+        } else {
+          // Don't fully trust the URL, this view doesn't support the origins based
+          // view. Switch to fulll view.
+          dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        }
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          `Unhandled TimelineTrackOrganization type.`
+        );
     }
 
     // Note we kick off symbolication only for the profiles we know for sure
@@ -188,8 +229,7 @@ export function finalizeProfileView(
  */
 export function finalizeFullProfileView(
   profile: Profile,
-  selectedThreadIndex: ThreadIndex | null,
-  showTabOnly?: BrowsingContextID | null
+  selectedThreadIndex: ThreadIndex | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const hasUrlInfo = selectedThreadIndex !== null;
@@ -278,7 +318,6 @@ export function finalizeFullProfileView(
       localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
-      showTabOnly,
     });
   };
 }
@@ -292,7 +331,7 @@ export function finalizeFullProfileView(
 export function finalizeActiveTabProfileView(
   profile: Profile,
   selectedThreadIndex: ThreadIndex,
-  showTabOnly?: BrowsingContextID | null
+  browsingContextID: BrowsingContextID
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const relevantPages = getRelevantPagesForActiveTab(getState());
@@ -309,7 +348,7 @@ export function finalizeActiveTabProfileView(
       globalTracks,
       resourceTracks,
       selectedThreadIndex,
-      showTabOnly,
+      browsingContextID,
     });
   };
 }
@@ -318,8 +357,8 @@ export function finalizeActiveTabProfileView(
  * Re-compute the profile view data. That's used to be able to switch between
  * full and active tab view.
  */
-export function changeViewAndRecomputeProfileData(
-  showTabOnly: BrowsingContextID | null
+export function changeTimelineTrackOrganization(
+  timelineTrackOrganization: TimelineTrackOrganization
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const profile = getProfile(getState());
@@ -330,18 +369,31 @@ export function changeViewAndRecomputeProfileData(
       type: 'DATA_RELOAD',
     });
 
-    if (showTabOnly === null) {
-      // The url state says this is a full view. We should compute and initialize
-      // the state relevant to that state.
-      dispatch(
-        finalizeFullProfileView(profile, selectedThreadIndex, showTabOnly)
-      );
-    } else {
-      // The url state says this is an active tab view. We should compute and
-      // initialize the state relevant to that state.
-      dispatch(
-        finalizeActiveTabProfileView(profile, selectedThreadIndex, showTabOnly)
-      );
+    switch (timelineTrackOrganization.type) {
+      case 'full':
+        // The url state says this is a full view. We should compute and initialize
+        // the state relevant to that state.
+        dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        break;
+      case 'active-tab':
+        // The url state says this is an active tab view. We should compute and
+        // initialize the state relevant to that state.
+        dispatch(
+          finalizeActiveTabProfileView(
+            profile,
+            selectedThreadIndex,
+            timelineTrackOrganization.browsingContextID
+          )
+        );
+        break;
+      case 'origins': {
+        throw new Error("This isn't handled yet.");
+      }
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          `Unhandled TimelineTrackOrganization type.`
+        );
     }
   };
 }
@@ -373,6 +425,7 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
 export function viewProfile(
   profile: Profile,
   config: $Shape<{|
+    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,

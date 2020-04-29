@@ -34,22 +34,17 @@ import {
   getHiddenGlobalTracks,
   getHiddenLocalTracksByPid,
   getLocalTrackOrderByPid,
-  getShowTabOnly,
+  getTimelineTrackOrganization,
 } from '../../selectors/url-state';
 import classNames from 'classnames';
 
-import type {
-  Thread,
-  ThreadIndex,
-  Pid,
-  BrowsingContextID,
-} from '../../types/profile';
+import type { Thread, ThreadIndex, Pid } from '../../types/profile';
 import type {
   TrackIndex,
   GlobalTrack,
   LocalTrack,
 } from '../../types/profile-derived';
-import type { State } from '../../types/state';
+import type { State, TimelineTrackOrganization } from '../../types/state';
 import type { TrackReference } from '../../types/actions';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -66,7 +61,7 @@ type StateProps = {|
   +globalTrackNames: string[],
   +localTracksByPid: Map<Pid, LocalTrack[]>,
   +localTrackNamesByPid: Map<Pid, string[]>,
-  +showTabOnly: BrowsingContextID | null,
+  +timelineTrackOrganization: TimelineTrackOrganization,
   +activeTabHiddenGlobalTracksGetter: () => Set<TrackIndex>,
   +activeTabHiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
 |};
@@ -208,7 +203,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
 
   renderGlobalTrack(trackIndex: TrackIndex) {
     const {
-      showTabOnly,
+      timelineTrackOrganization,
       activeTabHiddenGlobalTracksGetter,
       hiddenGlobalTracks,
       globalTrackNames,
@@ -218,7 +213,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     const track = globalTracks[trackIndex];
 
     if (
-      showTabOnly !== null &&
+      timelineTrackOrganization.type === 'active-tab' &&
       activeTabHiddenGlobalTracksGetter().has(trackIndex)
     ) {
       // Hide the global track if it's hidden by active tab view.
@@ -261,7 +256,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
       activeTabHiddenLocalTracksByPidGetter,
       hiddenGlobalTracks,
       localTracksByPid,
-      showTabOnly,
+      timelineTrackOrganization,
     } = this.props;
 
     const isGlobalTrackHidden = hiddenGlobalTracks.has(globalTrackIndex);
@@ -287,7 +282,7 @@ class TimelineTrackContextMenu extends PureComponent<Props> {
     for (const trackIndex of localTrackOrder) {
       // We hide some of the local tracks by default for single tab view. If
       // showTabOnly is not null, do not include that track if it's not allowed.
-      if (showTabOnly !== null) {
+      if (timelineTrackOrganization.type === 'active-tab') {
         // We need to defer the call of this as much as possible.
         const activeTabHiddenLocalTracks = activeTabHiddenLocalTracksByPidGetter().get(
           pid
@@ -584,7 +579,7 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     globalTrackNames: getGlobalTrackNames(state),
     localTracksByPid: getLocalTracksByPid(state),
     localTrackNamesByPid: getLocalTrackNamesByPid(state),
-    showTabOnly: getShowTabOnly(state),
+    timelineTrackOrganization: getTimelineTrackOrganization(state),
     activeTabHiddenGlobalTracksGetter: getActiveTabHiddenGlobalTracksGetter(
       state
     ),

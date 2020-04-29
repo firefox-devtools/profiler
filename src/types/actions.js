@@ -269,7 +269,7 @@ type ReceiveProfileAction =
       +selectedThreadIndex: ThreadIndex,
       +globalTracks: ActiveTabGlobalTrack[],
       +resourceTracks: LocalTrack[],
-      +showTabOnly?: BrowsingContextID | null,
+      +browsingContextID: BrowsingContextID,
     |}
   | {|
       +type: 'DATA_RELOAD',

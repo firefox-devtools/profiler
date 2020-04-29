@@ -44,7 +44,15 @@ export function getHumanReadableTracks(state: State): string[] {
   const globalTracks = profileViewSelectors.getGlobalTracks(state);
   const hiddenGlobalTracks = urlStateSelectors.getHiddenGlobalTracks(state);
   const selectedThreadIndex = urlStateSelectors.getSelectedThreadIndex(state);
+  const timelineTrackOrganization = urlStateSelectors.getTimelineTrackOrganization(
+    state
+  );
   const text: string[] = [];
+
+  if (timelineTrackOrganization.type !== 'full') {
+    throw new Error('Expected to have the full timeline track organization.');
+  }
+
   for (const globalTrackIndex of urlStateSelectors.getGlobalTrackOrder(state)) {
     const globalTrack = globalTracks[globalTrackIndex];
     const globalHiddenText = hiddenGlobalTracks.has(globalTrackIndex)

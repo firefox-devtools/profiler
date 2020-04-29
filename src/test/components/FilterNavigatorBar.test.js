@@ -85,7 +85,10 @@ describe('app/ProfileFilterNavigator', () => {
   it('renders the site hostname as its first element in the single tab view', () => {
     const { dispatch, container } = setup();
     dispatch(
-      ReceiveProfile.changeViewAndRecomputeProfileData(browsingContextID)
+      ReceiveProfile.changeTimelineTrackOrganization({
+        type: 'active-tab',
+        browsingContextID,
+      })
     );
     expect(container.firstChild).toMatchSnapshot();
   });
@@ -93,7 +96,10 @@ describe('app/ProfileFilterNavigator', () => {
   it('displays the site hostname as its first element in the single tab view', () => {
     const { dispatch, queryByText } = setup();
     dispatch(
-      ReceiveProfile.changeViewAndRecomputeProfileData(browsingContextID)
+      ReceiveProfile.changeTimelineTrackOrganization({
+        type: 'active-tab',
+        browsingContextID,
+      })
     );
     expect(queryByText('Full Range')).toBeFalsy();
     // Using regexp because searching for a partial text.
