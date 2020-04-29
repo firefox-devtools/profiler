@@ -42,6 +42,7 @@ import type {
   AccumulatedCounterSamples,
   ProfileFilterPageData,
   ActiveTabGlobalTrack,
+  OriginsTimeline,
 } from '../types/profile-derived';
 import type { Milliseconds, StartEndRange } from '../types/units';
 import type {
@@ -466,6 +467,13 @@ export const getActiveTabHiddenGlobalTracksGetter: Selector<
 export const getActiveTabHiddenLocalTracksByPidGetter: Selector<
   () => Map<Pid, Set<TrackIndex>>
 > = state => getActiveTabProfileView(state).hiddenLocalTracksByPidGetter;
+
+/**
+ * Origins profile view selectors.
+ */
+
+export const getOriginsTimeline: Selector<OriginsTimeline> = state =>
+  getOriginsProfileView(state).originsTimeline;
 
 /**
  * It's a bit hard to deduce the total amount of hidden tracks, as there are both

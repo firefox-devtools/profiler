@@ -18,6 +18,7 @@ import type {
   GlobalTrack,
   TrackIndex,
   ActiveTabGlobalTrack,
+  OriginsTimeline,
 } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type {
@@ -607,8 +608,17 @@ const rightClickedMarker: Reducer<RightClickedMarker | null> = (
   }
 };
 
-const origins: Reducer<null> = (state = null, _action) => {
-  return state;
+/**
+ * The origins timeline is experimental. See the OriginsTimeline component
+ * for more information.
+ */
+const originsTimeline: Reducer<OriginsTimeline> = (state = [], action) => {
+  switch (action.type) {
+    case 'VIEW_ORIGINS_PROFILE':
+      return action.originsTimeline;
+    default:
+      return state;
+  }
 };
 
 /**
@@ -659,7 +669,9 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       hiddenGlobalTracksGetter: activeTabHiddenGlobalTracksGetter,
       hiddenLocalTracksByPidGetter: activeTabHiddenLocalTracksByPidGetter,
     }),
-    origins,
+    origins: combineReducers({
+      originsTimeline,
+    }),
   })
 );
 

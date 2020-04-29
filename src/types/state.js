@@ -26,6 +26,7 @@ import type {
   TrackIndex,
   MarkerIndex,
   ActiveTabGlobalTrack,
+  OriginsTimeline,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -63,7 +64,9 @@ export type FullProfileViewState = {|
   localTracksByPid: Map<Pid, LocalTrack[]>,
 |};
 
-export type OriginsViewState = null;
+export type OriginsViewState = {|
+  originsTimeline: OriginsTimeline,
+|};
 
 /**
  * Active tab profile view state

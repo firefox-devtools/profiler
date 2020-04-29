@@ -9,6 +9,7 @@ import explicitConnect from '../../utils/connect';
 import { getTimelineTrackOrganization } from 'firefox-profiler/selectors';
 import FullTimeline from '../timeline/FullTimeline';
 import ActiveTabTimeline from '../timeline/ActiveTabTimeline';
+import OriginsTimelineView from '../timeline/OriginsTimeline';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { ConnectedProps } from '../../utils/connect';
@@ -29,8 +30,7 @@ class Timeline extends React.PureComponent<Props> {
       case 'active-tab':
         return <ActiveTabTimeline />;
       case 'origins':
-        // This doesn't exist yet.
-        return null;
+        return <OriginsTimelineView />;
       default:
         throw assertExhaustiveCheck(
           timelineTrackOrganization,
