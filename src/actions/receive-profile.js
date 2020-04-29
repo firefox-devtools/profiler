@@ -41,9 +41,14 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
-import { getProfileOrNull, getProfile } from '../selectors/profile';
+import {
+  getProfileOrNull,
+  getProfile,
+  getRelevantPagesForActiveTab,
+} from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { setDataSource } from './profile-view';
+import { computeActiveTabTracks } from '../profile-logic/active-tab';
 
 import type {
   FunctionsUpdatePerThread,
@@ -289,9 +294,20 @@ export function finalizeActiveTabProfileView(
   selectedThreadIndex: ThreadIndex,
   showTabOnly?: BrowsingContextID | null
 ): ThunkAction<void> {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const relevantPages = getRelevantPagesForActiveTab(getState());
+    const { globalTracks, resourceTracks } = computeActiveTabTracks(
+      profile,
+      relevantPages,
+      getState()
+    );
+
+    // TODO: check the selectedThreadIndex and select the proper one if it's out of bound.
+
     dispatch({
       type: 'VIEW_ACTIVE_TAB_PROFILE',
+      globalTracks,
+      resourceTracks,
       selectedThreadIndex,
       showTabOnly,
     });
