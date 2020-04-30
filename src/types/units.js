@@ -37,7 +37,7 @@ export type HorizontalViewport = {
   length: UnitIntervalOfProfileRange,
 };
 
-export type StartEndRange = { start: Milliseconds, end: Milliseconds };
+export type StartEndRange = {| start: Milliseconds, end: Milliseconds |};
 
 export type MemoryOffset = number;
 

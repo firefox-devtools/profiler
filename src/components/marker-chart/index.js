@@ -34,6 +34,7 @@ import type {
 import type {
   Milliseconds,
   UnitIntervalOfProfileRange,
+  StartEndRange,
 } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
@@ -51,7 +52,7 @@ type StateProps = {|
   +getMarker: MarkerIndex => Marker,
   +markerTimingAndBuckets: MarkerTimingAndBuckets,
   +maxMarkerRows: number,
-  +timeRange: { start: Milliseconds, end: Milliseconds },
+  +timeRange: StartEndRange,
   +interval: Milliseconds,
   +threadIndex: number,
   +previewSelection: PreviewSelection,

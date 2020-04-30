@@ -41,9 +41,14 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
-import { getProfileOrNull, getProfile } from '../selectors/profile';
+import {
+  getProfileOrNull,
+  getProfile,
+  getRelevantPagesForActiveTab,
+} from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { setDataSource } from './profile-view';
+import { computeActiveTabTracks } from '../profile-logic/active-tab';
 
 import type {
   FunctionsUpdatePerThread,
@@ -289,9 +294,20 @@ export function finalizeActiveTabProfileView(
   selectedThreadIndex: ThreadIndex,
   showTabOnly?: BrowsingContextID | null
 ): ThunkAction<void> {
-  return dispatch => {
+  return (dispatch, getState) => {
+    const relevantPages = getRelevantPagesForActiveTab(getState());
+    const { globalTracks, resourceTracks } = computeActiveTabTracks(
+      profile,
+      relevantPages,
+      getState()
+    );
+
+    // TODO: check the selectedThreadIndex and select the proper one if it's out of bound.
+
     dispatch({
       type: 'VIEW_ACTIVE_TAB_PROFILE',
+      globalTracks,
+      resourceTracks,
       selectedThreadIndex,
       showTabOnly,
     });
@@ -529,7 +545,10 @@ export function assignFunctionNames(
  * to a gecko profile object by parsing the JSON.
  */
 async function _unpackGeckoProfileFromAddon(profile) {
-  if (profile instanceof ArrayBuffer) {
+  // Note: the following check will work for array buffers coming from another
+  // global. This happens especially with tests but could happen in the future
+  // in Firefox too.
+  if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
     const profileBytes = new Uint8Array(profile);
     let decompressedProfile;
     // Check for the gzip magic number in the header. If we find it, decompress

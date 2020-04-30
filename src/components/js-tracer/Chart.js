@@ -25,9 +25,9 @@ import type { UniqueStringArray } from '../../utils/unique-string-array';
 import type { JsTracerTable, ThreadIndex, Profile } from '../../types/profile';
 import type { JsTracerTiming } from '../../types/profile-derived';
 import type {
-  Milliseconds,
   UnitIntervalOfProfileRange,
   CssPixels,
+  StartEndRange,
 } from '../../types/units';
 import type { PreviewSelection } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
@@ -49,7 +49,7 @@ type DispatchProps = {|
 type StateProps = {|
   +jsTracerTimingRows: JsTracerTiming[],
   +stringTable: UniqueStringArray,
-  +timeRange: { start: Milliseconds, end: Milliseconds },
+  +timeRange: StartEndRange,
   +threadIndex: number,
   +previewSelection: PreviewSelection,
 |};

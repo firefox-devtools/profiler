@@ -201,7 +201,7 @@ export function getMarkerSelectorsPerThread(
   > = createSelector(
     getMarkerGetter,
     getCommittedRangeFilteredMarkerIndexes,
-    ProfileSelectors.getRelevantPagesForCurrentTab,
+    ProfileSelectors.getRelevantInnerWindowIDsForCurrentTab,
     MarkerData.getTabFilteredMarkerIndexes
   );
 
@@ -240,7 +240,7 @@ export function getMarkerSelectorsPerThread(
   > = createSelector(
     getMarkerGetter,
     getFullMarkerListIndexes,
-    ProfileSelectors.getRelevantPagesForActiveTab,
+    ProfileSelectors.getRelevantInnerWindowIDsForActiveTab,
     (markerGetter, markerIndexes, relevantPages) => {
       return MarkerData.getTabFilteredMarkerIndexes(
         markerGetter,

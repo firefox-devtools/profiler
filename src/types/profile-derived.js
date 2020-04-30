@@ -203,6 +203,16 @@ export type Track = GlobalTrack | LocalTrack;
 export type TrackIndex = number;
 
 /**
+ * Active tab view tracks
+ */
+export type ActiveTabGlobalTrack =
+  | {| +type: 'tab', +threadIndex: ThreadIndex |}
+  | {| +type: 'screenshots', +id: string, +threadIndex: ThreadIndex |};
+
+// TODO: add resource track type
+export type ActiveTabTrack = ActiveTabGlobalTrack;
+
+/**
  * Type that holds the values of personally identifiable information that user
  * wants to remove.
  */

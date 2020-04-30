@@ -20,6 +20,7 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
+  ActiveTabGlobalTrack,
 } from './profile-derived';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
@@ -76,6 +77,7 @@ export type LocalTrackReference = {|
   +trackIndex: TrackIndex,
   +pid: Pid,
 |};
+
 export type TrackReference = GlobalTrackReference | LocalTrackReference;
 
 export type RequestedLib = {|
@@ -265,6 +267,8 @@ type ReceiveProfileAction =
   | {|
       +type: 'VIEW_ACTIVE_TAB_PROFILE',
       +selectedThreadIndex: ThreadIndex,
+      +globalTracks: ActiveTabGlobalTrack[],
+      +resourceTracks: LocalTrack[],
       +showTabOnly?: BrowsingContextID | null,
     |}
   | {|
