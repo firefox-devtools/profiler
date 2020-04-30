@@ -168,21 +168,29 @@ export function formatTimestamp(
 ) {
   // Format in the closest base (seconds, milliseconds, microseconds, or nanoseconds),
   // to avoid cases where times are displayed with too many leading zeroes to be useful.
-  if (time > 1000) {
-    return formatSeconds(time, significantDigits, maxFractionalDigits);
+  if (time >= 1000) {
+    return formatSeconds(
+      time,
+      significantDigits,
+      Number.isInteger(time / 1000) ? 0 : maxFractionalDigits
+    );
   } else if (time >= 1) {
-    return formatMilliseconds(time, significantDigits, maxFractionalDigits);
+    return formatMilliseconds(
+      time,
+      significantDigits,
+      Number.isInteger(time) ? 0 : maxFractionalDigits
+    );
   } else if (time * 1000 >= 1) {
     return formatMicroseconds(
       time * 1000,
       significantDigits,
-      maxFractionalDigits
+      Number.isInteger(time * 1000) ? 0 : maxFractionalDigits
     );
   }
   return formatNanoseconds(
     time * 1000 * 1000,
     significantDigits,
-    maxFractionalDigits
+    Number.isInteger(time * 1000 * 1000) ? 0 : maxFractionalDigits
   );
 }
 
