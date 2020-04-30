@@ -7,7 +7,7 @@ import * as React from 'react';
 import ButtonWithPanel from '../../shared/ButtonWithPanel';
 import ArrowPanel from '../../shared/ArrowPanel';
 import { MetaOverheadStatistics } from './MetaOverheadStatistics';
-import { formatBytes } from '../../../utils/format-numbers';
+import { formatBytes, formatTimestamp } from '../../../utils/format-numbers';
 
 import type { Profile, ProfileMeta } from '../../../types/profile';
 import type { SymbolicationStatus } from '../../../types/state';
@@ -97,7 +97,7 @@ export class MenuButtonsMetaInfo extends React.PureComponent<Props> {
               {meta.interval ? (
                 <div className="metaInfoRow">
                   <span className="metaInfoLabel">Interval:</span>
-                  {meta.interval}ms
+                  {formatTimestamp(meta.interval, 4, 1)}
                 </div>
               ) : null}
               {meta.preprocessedProfileVersion ? (
