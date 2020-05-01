@@ -50,6 +50,16 @@ To get started clone the repo and get the web application started.
  5. Point your browser to [http://localhost:4242](http://localhost:4242).
  6. If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
 
+## Capturing profiles in development
+
+Normally, Firefox loads newly captured profiles into [profiler.firefox.com](https://profiler.firefox.com). In order to change this to your local environment, try the following:
+
+1. Open `about:config` in Firefox.
+2. Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242` or to the localhost with the proper port you have configured.
+3. Ensure the profiler menu button is active by clicking the button on the [profiler.firefox.com](https://profiler.firefox.com) homepage to enable it.
+4. Record a profile using the menu button, and it should open up in your local environment.
+
+
 ## Using Gitpod
 
 Alternatively, you can also develop the Firefox Profiler online in a pre-configured development environment:
