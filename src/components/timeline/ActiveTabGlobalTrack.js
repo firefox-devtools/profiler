@@ -30,7 +30,6 @@ import type { ConnectedProps } from '../../utils/connect';
 type OwnProps = {|
   +trackReference: GlobalTrackReference,
   +trackIndex: TrackIndex,
-  +style?: Object /* This is used by Reorderable */,
   +setInitialSelected: (el: InitialSelectedTrackReference) => void,
 |};
 
@@ -46,6 +45,11 @@ type DispatchProps = {|
 
 type Props = ConnectedProps<OwnProps, StateProps, DispatchProps>;
 
+/**
+ * Global track of active tab timeline view. Differently from the full view,
+ * it shows either screenshot and a single main track for active tab and
+ * resources tracks inside it.
+ */
 class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
   _container: HTMLElement | null = null;
   _isInitialSelectedPane: boolean | null = null;
@@ -96,15 +100,16 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
 
   componentDidMount() {
     if (this._isInitialSelectedPane && this._container !== null) {
+      // Handle the scrolling of the initial selected track into view.
       this.props.setInitialSelected(this._container);
     }
   }
 
   render() {
-    const { isSelected, style } = this.props;
+    const { isSelected } = this.props;
 
     return (
-      <li ref={this._takeContainerRef} className="timelineTrack" style={style}>
+      <li ref={this._takeContainerRef} className="timelineTrack">
         <div
           className={classNames(
             'timelineTrackRow timelineTrackGlobalRow activeTab',
