@@ -16,6 +16,7 @@ import {
   getComputedHiddenGlobalTracks,
   getComputedHiddenLocalTracks,
   getActiveTabHiddenGlobalTracksGetter,
+  getActiveTabGlobalTrackFromReference,
 } from '../selectors/profile';
 import {
   getThreadSelectors,
@@ -343,6 +344,88 @@ export function selectTrack(trackReference: TrackReference): ThunkAction<void> {
             );
         }
         break;
+      }
+      default:
+        throw assertExhaustiveCheck(
+          trackReference,
+          'Unhandled TrackReference type'
+        );
+    }
+
+    const doesNextTrackHaveSelectedTab = getThreadSelectors(selectedThreadIndex)
+      .getUsefulTabs(getState())
+      .includes(selectedTab);
+
+    if (!doesNextTrackHaveSelectedTab) {
+      // If the user switches to another track that doesn't have the current
+      // selectedTab then switch to the calltree.
+      selectedTab = 'calltree';
+    }
+
+    if (
+      currentlySelectedTab === selectedTab &&
+      currentlySelectedThreadIndex === selectedThreadIndex
+    ) {
+      return;
+    }
+
+    dispatch({
+      type: 'SELECT_TRACK',
+      selectedThreadIndex,
+      selectedTab,
+    });
+  };
+}
+
+/**
+ * This selects an active tab track from its reference.
+ * This will ultimately select the thread that this track belongs to, using its
+ * thread index, and may also change the selected tab if it makes sense for this
+ * track.
+ */
+export function selectActiveTabTrack(
+  trackReference: TrackReference
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const currentlySelectedTab = getSelectedTab(getState());
+    const currentlySelectedThreadIndex = getSelectedThreadIndex(getState());
+    // These get assigned based on the track type.
+    let selectedThreadIndex = null;
+    let selectedTab = currentlySelectedTab;
+
+    switch (trackReference.type) {
+      case 'global': {
+        // Handle the case of global tracks.
+        const globalTrack = getActiveTabGlobalTrackFromReference(
+          getState(),
+          trackReference
+        );
+
+        // Go through each type, and determine the selected slug and thread index.
+        switch (globalTrack.type) {
+          case 'tab': {
+            selectedThreadIndex = globalTrack.threadIndex;
+            // Ensure a relevant thread-based tab is used.
+            if (selectedTab === 'network-chart') {
+              selectedTab = getLastVisibleThreadTabSlug(getState());
+            }
+            break;
+          }
+          case 'screenshots':
+            // Do not allow selecting this track.
+            return;
+          default:
+            throw assertExhaustiveCheck(
+              globalTrack,
+              `Unhandled ActiveTabGlobalTrack type.`
+            );
+        }
+        break;
+      }
+      case 'local': {
+        // TODO: Implement resource clicking once we have resources.
+        // Also add ActiveTabTrackReference to ignore this 'local' track type.
+        return;
       }
       default:
         throw assertExhaustiveCheck(
