@@ -3,7 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 // @flow
 
-import { changeViewAndRecomputeProfileData } from '../../actions/receive-profile';
+import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import {
   getHumanReadableActiveTabTracks,
   getProfileWithNiceTracks,
@@ -29,7 +29,10 @@ describe('ActiveTab', function() {
 
     const { dispatch, getState } = storeWithProfile(profile);
     dispatch(
-      changeViewAndRecomputeProfileData(pageInfo.activeBrowsingContextID)
+      changeTimelineTrackOrganization({
+        type: 'active-tab',
+        browsingContextID: pageInfo.activeBrowsingContextID,
+      })
     );
 
     return {

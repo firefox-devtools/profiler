@@ -26,6 +26,7 @@ import type {
   TrackIndex,
   MarkerIndex,
   ActiveTabGlobalTrack,
+  OriginsTimeline,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -63,6 +64,10 @@ export type FullProfileViewState = {|
   localTracksByPid: Map<Pid, LocalTrack[]>,
 |};
 
+export type OriginsViewState = {|
+  originsTimeline: OriginsTimeline,
+|};
+
 /**
  * Active tab profile view state
  * They should not be used from the full view.
@@ -94,6 +99,7 @@ export type ProfileViewState = {
   +profile: Profile | null,
   +full: FullProfileViewState,
   +activeTab: ActiveTabProfileViewState,
+  +origins: OriginsViewState,
 };
 
 export type AppViewState =
@@ -234,6 +240,14 @@ export type ProfileSpecificUrlState = {|
   // activeTab: ActiveTabSpecificProfileUrlState,
 |};
 
+/**
+ * Determines how the timeline's tracks are organized.
+ */
+export type TimelineTrackOrganization =
+  | {| +type: 'full' |}
+  | {| +type: 'active-tab', +browsingContextID: BrowsingContextID |}
+  | {| +type: 'origins' |};
+
 export type UrlState = {|
   +dataSource: DataSource,
   // This is used for the "public" dataSource".
@@ -245,7 +259,7 @@ export type UrlState = {|
   +selectedTab: TabSlug,
   +pathInZipFile: string | null,
   +profileName: string,
-  +showTabOnly: BrowsingContextID | null,
+  +timelineTrackOrganization: TimelineTrackOrganization,
   +profileSpecific: ProfileSpecificUrlState,
 |};
 

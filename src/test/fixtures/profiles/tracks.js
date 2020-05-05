@@ -12,9 +12,11 @@ import {
 import { storeWithProfile } from '../stores';
 import { oneLine } from 'common-tags';
 
+import type { OriginsTimelineTrack } from '../../../types/profile-derived';
 import type { Profile } from '../../../types/profile';
 import type { State } from '../../../types/state';
 import { assertExhaustiveCheck } from '../../../utils/flow';
+import { getFriendlyThreadName } from '../../../profile-logic/profile-data';
 
 /**
  * This function takes the current timeline tracks, and generates a human readable result
@@ -44,7 +46,15 @@ export function getHumanReadableTracks(state: State): string[] {
   const globalTracks = profileViewSelectors.getGlobalTracks(state);
   const hiddenGlobalTracks = urlStateSelectors.getHiddenGlobalTracks(state);
   const selectedThreadIndex = urlStateSelectors.getSelectedThreadIndex(state);
+  const timelineTrackOrganization = urlStateSelectors.getTimelineTrackOrganization(
+    state
+  );
   const text: string[] = [];
+
+  if (timelineTrackOrganization.type !== 'full') {
+    throw new Error('Expected to have the full timeline track organization.');
+  }
+
   for (const globalTrackIndex of urlStateSelectors.getGlobalTrackOrder(state)) {
     const globalTrack = globalTracks[globalTrackIndex];
     const globalHiddenText = hiddenGlobalTracks.has(globalTrackIndex)
@@ -223,4 +233,63 @@ export function getHumanReadableActiveTabTracks(state: State): string[] {
   }
 
   return text;
+}
+
+/**
+ * This function takes the current origins timeline tracks, and generates a
+ * human readable result that makes it easy to assert the shape and structure
+ * of the tracks in tests.
+ *
+ * Usage:
+ *
+ *  expect(getHumanReadableOriginTracks(getState())).toEqual([
+ *    'Parent Process',
+ *    'Compositor',
+ *    'GeckoMain pid:(2)',
+ *    'GeckoMain pid:(3)',
+ *    'https://aaaa.example.com',
+ *    '  - https://bbbb.example.com',
+ *    '  - https://cccc.example.com',
+ *    'https://dddd.example.com',
+ *    '  - https://eeee.example.com',
+ *    '  - https://ffff.example.com',
+ *  ]);
+ */
+export function getHumanReadableOriginTracks(state: State): string[] {
+  const threads = profileViewSelectors.getThreads(state);
+  const originsTimeline = profileViewSelectors.getOriginsTimeline(state);
+
+  const results: string[] = [];
+
+  function addHumanFriendlyTrack(
+    track: OriginsTimelineTrack,
+    nested: boolean = false
+  ) {
+    const prefix = nested ? '  - ' : '';
+    switch (track.type) {
+      case 'origin':
+        results.push(track.origin);
+        for (const child of track.children) {
+          addHumanFriendlyTrack(child, true);
+        }
+        break;
+      case 'no-origin': {
+        const thread = threads[track.threadIndex];
+        results.push(prefix + getFriendlyThreadName(threads, thread));
+        break;
+      }
+      case 'sub-origin': {
+        results.push(prefix + track.origin);
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(track, 'Unhandled OriginsTimelineTrack.');
+    }
+  }
+
+  for (const track of originsTimeline) {
+    addHumanFriendlyTrack(track);
+  }
+
+  return results;
 }

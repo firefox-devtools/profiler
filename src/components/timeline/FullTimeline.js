@@ -13,7 +13,6 @@ import OverflowEdgeIndicator from './OverflowEdgeIndicator';
 import Reorderable from '../shared/Reorderable';
 import { withSize } from '../shared/WithSize';
 import explicitConnect from '../../utils/connect';
-import { getPanelLayoutGeneration } from '../../selectors/app';
 import {
   getCommittedRange,
   getZeroAt,
@@ -21,12 +20,11 @@ import {
   getGlobalTrackReferences,
   getHiddenTrackCount,
   getActiveBrowsingContextID,
-} from '../../selectors/profile';
-import {
+  getTimelineTrackOrganization,
   getGlobalTrackOrder,
   getTimelineType,
-  getShowTabOnly,
-} from '../../selectors/url-state';
+  getPanelLayoutGeneration,
+} from 'firefox-profiler/selectors';
 import {
   TIMELINE_MARGIN_LEFT,
   TIMELINE_MARGIN_RIGHT,
@@ -43,7 +41,7 @@ import {
   changeTimelineType,
   changeRightClickedTrack,
 } from '../../actions/profile-view';
-import { changeViewAndRecomputeProfileData } from '../../actions/receive-profile';
+import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 
 import type { BrowsingContextID } from '../../types/profile';
 import type {
@@ -51,6 +49,7 @@ import type {
   GlobalTrack,
   InitialSelectedTrackReference,
 } from '../../types/profile-derived';
+import type { TimelineTrackOrganization } from '../../types/state';
 import type {
   GlobalTrackReference,
   TimelineType,
@@ -69,14 +68,14 @@ type StateProps = {|
   +timelineType: TimelineType,
   +hiddenTrackCount: HiddenTrackCount,
   +activeBrowsingContextID: BrowsingContextID | null,
-  +showTabOnly: BrowsingContextID | null,
+  +timelineTrackOrganization: TimelineTrackOrganization,
 |};
 
 type DispatchProps = {|
   +changeGlobalTrackOrder: typeof changeGlobalTrackOrder,
   +changeTimelineType: typeof changeTimelineType,
   +changeRightClickedTrack: typeof changeRightClickedTrack,
-  +changeViewAndRecomputeProfileData: typeof changeViewAndRecomputeProfileData,
+  +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
 |};
 
 type Props = {|
@@ -167,24 +166,30 @@ class TimelineSettingsHiddenTracks extends React.PureComponent<{|
 
 class TimelineSettingsActiveTabView extends React.PureComponent<{|
   +activeBrowsingContextID: BrowsingContextID | null,
-  +showTabOnly: BrowsingContextID | null,
-  +changeViewAndRecomputeProfileData: typeof changeViewAndRecomputeProfileData,
+  +timelineTrackOrganization: TimelineTrackOrganization,
+  +changeTimelineTrackOrganization: typeof changeTimelineTrackOrganization,
 |}> {
-  _toggleShowTabOnly = () => {
+  _toggleActiveTabView = () => {
     const {
-      showTabOnly,
-      changeViewAndRecomputeProfileData,
+      timelineTrackOrganization,
+      changeTimelineTrackOrganization,
       activeBrowsingContextID,
     } = this.props;
-    if (showTabOnly === null) {
-      changeViewAndRecomputeProfileData(activeBrowsingContextID);
+    if (
+      timelineTrackOrganization.type === 'full' &&
+      activeBrowsingContextID !== null
+    ) {
+      changeTimelineTrackOrganization({
+        type: 'active-tab',
+        browsingContextID: activeBrowsingContextID,
+      });
     } else {
-      changeViewAndRecomputeProfileData(null);
+      changeTimelineTrackOrganization({ type: 'full' });
     }
   };
 
   render() {
-    const { activeBrowsingContextID, showTabOnly } = this.props;
+    const { activeBrowsingContextID, timelineTrackOrganization } = this.props;
     if (activeBrowsingContextID === null) {
       return null;
     }
@@ -196,8 +201,8 @@ class TimelineSettingsActiveTabView extends React.PureComponent<{|
             type="checkbox"
             name="timelineSettingsActiveTabToggle"
             className="photon-checkbox photon-checkbox-micro"
-            onChange={this._toggleShowTabOnly}
-            checked={showTabOnly !== null}
+            onChange={this._toggleActiveTabView}
+            checked={timelineTrackOrganization.type === 'active-tab'}
           />
           Show active tab only
         </label>
@@ -234,8 +239,8 @@ class FullTimeline extends React.PureComponent<Props, State> {
       changeTimelineType,
       changeRightClickedTrack,
       activeBrowsingContextID,
-      showTabOnly,
-      changeViewAndRecomputeProfileData,
+      timelineTrackOrganization,
+      changeTimelineTrackOrganization,
     } = this.props;
 
     // Do not include the left and right margins when computing the timeline width.
@@ -265,10 +270,8 @@ class FullTimeline extends React.PureComponent<Props, State> {
           {true ? null : (
             <TimelineSettingsActiveTabView
               activeBrowsingContextID={activeBrowsingContextID}
-              showTabOnly={showTabOnly}
-              changeViewAndRecomputeProfileData={
-                changeViewAndRecomputeProfileData
-              }
+              timelineTrackOrganization={timelineTrackOrganization}
+              changeTimelineTrackOrganization={changeTimelineTrackOrganization}
             />
           )}
         </div>
@@ -320,13 +323,13 @@ export default explicitConnect<{||}, StateProps, DispatchProps>({
     timelineType: getTimelineType(state),
     hiddenTrackCount: getHiddenTrackCount(state),
     activeBrowsingContextID: getActiveBrowsingContextID(state),
-    showTabOnly: getShowTabOnly(state),
+    timelineTrackOrganization: getTimelineTrackOrganization(state),
   }),
   mapDispatchToProps: {
     changeGlobalTrackOrder,
     changeTimelineType,
     changeRightClickedTrack,
-    changeViewAndRecomputeProfileData,
+    changeTimelineTrackOrganization,
   },
   component: withSize<Props>(FullTimeline),
 });

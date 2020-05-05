@@ -32,7 +32,7 @@ import * as App from '../../actions/app';
 import * as ProfileView from '../../actions/profile-view';
 import {
   viewProfile,
-  changeViewAndRecomputeProfileData,
+  changeTimelineTrackOrganization,
 } from '../../actions/receive-profile';
 import * as ProfileViewSelectors from '../../selectors/profile';
 import * as UrlStateSelectors from '../../selectors/url-state';
@@ -1662,7 +1662,9 @@ describe('snapshots of selectors/profile', function() {
   it('matches the last stored run of selectedThreadSelector.getTabFilteredThread', function() {
     const { getState, dispatch } = setupStore();
 
-    dispatch(changeViewAndRecomputeProfileData(browsingContextID));
+    dispatch(
+      changeTimelineTrackOrganization({ type: 'active-tab', browsingContextID })
+    );
     expect(
       selectedThreadSelectors.getTabFilteredThread(getState())
     ).toMatchSnapshot();
@@ -2874,7 +2876,12 @@ describe('pages and active tab selectors', function() {
     profile.threads.push(getEmptyThread());
 
     const { dispatch, getState } = storeWithProfile(profile);
-    dispatch(changeViewAndRecomputeProfileData(activeBrowsingContextID));
+    dispatch(
+      changeTimelineTrackOrganization({
+        type: 'active-tab',
+        browsingContextID: activeBrowsingContextID,
+      })
+    );
     return { profile, dispatch, getState, ...pageInfo };
   }
 

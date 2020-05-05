@@ -13,7 +13,7 @@ import mockCanvasContext from '../fixtures/mocks/canvas-context';
 import mockRaf from '../fixtures/mocks/request-animation-frame';
 import { getBoundingBox } from '../fixtures/utils';
 import ReactDOM from 'react-dom';
-import { getShowTabOnly } from '../../selectors/url-state';
+import { getTimelineTrackOrganization } from '../../selectors/url-state';
 import { getRightClickedTrack } from '../../selectors/profile';
 
 import type { Profile } from '../../types/profile';
@@ -153,13 +153,20 @@ describe('Timeline', function() {
         </Provider>
       );
 
-      expect(getShowTabOnly(store.getState())).toEqual(null);
+      expect(getTimelineTrackOrganization(store.getState())).toEqual({
+        type: 'full',
+      });
 
       fireEvent.click(getByText('Show active tab only'));
-      expect(getShowTabOnly(store.getState())).toEqual(123);
+      expect(getTimelineTrackOrganization(store.getState())).toEqual({
+        type: 'active-tab',
+        browsingContextID: 123,
+      });
 
       fireEvent.click(getByText('Show active tab only'));
-      expect(getShowTabOnly(store.getState())).toEqual(null);
+      expect(getTimelineTrackOrganization(store.getState())).toEqual({
+        type: 'full',
+      });
     });
   });
 

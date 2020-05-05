@@ -12,7 +12,7 @@ import { render, fireEvent } from 'react-testing-library';
 import { Provider } from 'react-redux';
 import { storeWithProfile } from '../fixtures/stores';
 import { getProfileWithNiceTracks } from '../fixtures/profiles/tracks';
-import { changeViewAndRecomputeProfileData } from '../../actions/receive-profile';
+import { changeTimelineTrackOrganization } from '../../actions/receive-profile';
 import { getBoundingBox } from '../fixtures/utils';
 import { addActiveTabInformationToProfile } from '../fixtures/profiles/processed-profile';
 import mockCanvasContext from '../fixtures/mocks/canvas-context';
@@ -51,7 +51,10 @@ describe('ActiveTabTimeline', function() {
     profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
     const store = storeWithProfile(profile);
     store.dispatch(
-      changeViewAndRecomputeProfileData(firstTabBrowsingContextID)
+      changeTimelineTrackOrganization({
+        type: 'active-tab',
+        browsingContextID: firstTabBrowsingContextID,
+      })
     );
 
     const { container } = render(
@@ -71,7 +74,10 @@ describe('ActiveTabTimeline', function() {
         pageInfo.parentInnerWindowIDsWithChildren;
       const store = storeWithProfile(profile);
       store.dispatch(
-        changeViewAndRecomputeProfileData(pageInfo.firstTabBrowsingContextID)
+        changeTimelineTrackOrganization({
+          type: 'active-tab',
+          browsingContextID: pageInfo.firstTabBrowsingContextID,
+        })
       );
       const trackIndex = 0;
       const { getState, dispatch } = store;

@@ -18,6 +18,7 @@ import type {
   GlobalTrack,
   TrackIndex,
   ActiveTabGlobalTrack,
+  OriginsTimeline,
 } from '../types/profile-derived';
 import type { StartEndRange } from '../types/units';
 import type {
@@ -608,6 +609,19 @@ const rightClickedMarker: Reducer<RightClickedMarker | null> = (
 };
 
 /**
+ * The origins timeline is experimental. See the OriginsTimeline component
+ * for more information.
+ */
+const originsTimeline: Reducer<OriginsTimeline> = (state = [], action) => {
+  switch (action.type) {
+    case 'VIEW_ORIGINS_PROFILE':
+      return action.originsTimeline;
+    default:
+      return state;
+  }
+};
+
+/**
  * Provide a mechanism to wrap the reducer in a special function that can reset
  * the state to the default values. This is useful when viewing multiple profiles
  * (e.g. in zip files).
@@ -654,6 +668,9 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
       resourceTracks: activeTabResourceTracks,
       hiddenGlobalTracksGetter: activeTabHiddenGlobalTracksGetter,
       hiddenLocalTracksByPidGetter: activeTabHiddenLocalTracksByPidGetter,
+    }),
+    origins: combineReducers({
+      originsTimeline,
     }),
   })
 );
