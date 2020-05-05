@@ -25,8 +25,12 @@ import {
   getLocalTrackOrderByPid,
   getLegacyThreadOrder,
   getLegacyHiddenThreads,
-  getShowTabOnly,
-} from '../selectors/url-state';
+  getTimelineTrackOrganization,
+  getProfileOrNull,
+  getProfile,
+  getView,
+  getRelevantPagesForActiveTab,
+} from 'firefox-profiler/selectors';
 import {
   stateFromLocation,
   getDataSourceFromPathParts,
@@ -41,14 +45,8 @@ import {
   initializeHiddenGlobalTracks,
   getVisibleThreads,
 } from '../profile-logic/tracks';
-import {
-  getProfileOrNull,
-  getProfile,
-  getRelevantPagesForActiveTab,
-} from '../selectors/profile';
-import { getView } from '../selectors/app';
-import { setDataSource } from './profile-view';
 import { computeActiveTabTracks } from '../profile-logic/active-tab';
+import { setDataSource } from './profile-view';
 
 import type {
   FunctionsUpdatePerThread,
@@ -58,13 +56,18 @@ import type {
 } from '../types/actions';
 import type { TransformStacksPerThread } from '../types/transforms';
 import type { Action, ThunkAction, Dispatch } from '../types/store';
+import type { TimelineTrackOrganization } from '../types/state';
 import type {
   Profile,
   ThreadIndex,
   IndexIntoFuncTable,
   BrowsingContextID,
+  Page,
+  InnerWindowID,
+  Pid,
 } from '../types/profile';
-import { assertExhaustiveCheck } from '../utils/flow';
+import type { OriginsTimelineRoot } from '../types/profile-derived';
+import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
 
 /**
  * This file collects all the actions that are used for receiving the profile in the
@@ -91,6 +94,7 @@ export function waitingForProfileFromAddon(): Action {
 export function loadProfile(
   profile: Profile,
   config: $Shape<{|
+    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,
@@ -130,7 +134,12 @@ export function loadProfile(
     // before finalizing profile view. That's why we are dispatching this action
     // after completing those steps inside `setupInitialUrlState`.
     if (initialLoad === false) {
-      await dispatch(finalizeProfileView(config.geckoProfiler));
+      await dispatch(
+        finalizeProfileView(
+          config.geckoProfiler,
+          config.timelineTrackOrganization
+        )
+      );
     }
   };
 }
@@ -143,7 +152,8 @@ export function loadProfile(
  * functions in the src/profile-logic/tracks.js file.
  */
 export function finalizeProfileView(
-  geckoProfiler?: $GeckoProfiler
+  geckoProfiler?: $GeckoProfiler,
+  timelineTrackOrganization?: TimelineTrackOrganization
 ): ThunkAction<Promise<void>> {
   return async (dispatch, getState) => {
     const profile = getProfileOrNull(getState());
@@ -156,15 +166,52 @@ export function finalizeProfileView(
     // been seen before. If it's non-null, then there is profile view information
     // encoded into the URL.
     const selectedThreadIndex = getSelectedThreadIndexOrNull(getState());
+    const pages = profile.pages;
+    if (!timelineTrackOrganization) {
+      // Most likely we'll need to load the timeline track organization, as requested
+      // by the URL, but tests can pass in a value.
+      timelineTrackOrganization = getTimelineTrackOrganization(getState());
+    }
 
-    if (selectedThreadIndex !== null && getShowTabOnly(getState()) !== null) {
-      // The url state says this is an active tab view. We should compute and
-      // initialize the state relevant to that state.
-      dispatch(finalizeActiveTabProfileView(profile, selectedThreadIndex));
-    } else {
-      // The url state says this is a full view. We should compute and initialize
-      // the state relevant to that state.
-      dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+    switch (timelineTrackOrganization.type) {
+      case 'full':
+        // The url state says this is a full view. We should compute and initialize
+        // the state relevant to that state.
+        dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        break;
+      case 'active-tab':
+        if (selectedThreadIndex === null) {
+          // Switch back over to the full view.
+          timelineTrackOrganization = { type: 'full' };
+        } else {
+          // The url state says this is an active tab view. We should compute and
+          // initialize the state relevant to that state.
+          dispatch(
+            finalizeActiveTabProfileView(
+              profile,
+              selectedThreadIndex,
+              timelineTrackOrganization.browsingContextID
+            )
+          );
+        }
+        break;
+      case 'origins': {
+        if (pages) {
+          dispatch(
+            finalizeOriginProfileView(profile, pages, selectedThreadIndex)
+          );
+        } else {
+          // Don't fully trust the URL, this view doesn't support the origins based
+          // view. Switch to fulll view.
+          dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        }
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          `Unhandled TimelineTrackOrganization type.`
+        );
     }
 
     // Note we kick off symbolication only for the profiles we know for sure
@@ -188,8 +235,7 @@ export function finalizeProfileView(
  */
 export function finalizeFullProfileView(
   profile: Profile,
-  selectedThreadIndex: ThreadIndex | null,
-  showTabOnly?: BrowsingContextID | null
+  selectedThreadIndex: ThreadIndex | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const hasUrlInfo = selectedThreadIndex !== null;
@@ -278,7 +324,187 @@ export function finalizeFullProfileView(
       localTracksByPid,
       hiddenLocalTracksByPid,
       localTrackOrderByPid,
-      showTabOnly,
+    });
+  };
+}
+
+/**
+ * This is a small utility to extract the origin from a URL, to build the origins-based
+ * profile view.
+ */
+function getOrigin(urlString: string): string {
+  if (urlString.startsWith('chrome://')) {
+    return urlString;
+  }
+  try {
+    const url = new URL(urlString);
+    if (url.origin === 'null') {
+      // This can happen for "about:newtab"
+      return urlString;
+    }
+    return url.origin;
+  } catch {
+    // This failed, maybe it's an internal URL.
+    return urlString;
+  }
+}
+
+/**
+ * Finalize the profile state for the origin-based view. This is an experimental
+ * view for fission. It's not turned on by default. Note, that this function
+ * probably needs a lot of work to become more correct to handle everything,
+ * so it shouldn't be trusted too much at this time.
+ */
+export function finalizeOriginProfileView(
+  profile: Profile,
+  pages: Page[],
+  selectedThreadIndex: ThreadIndex | null
+): ThunkAction<void> {
+  return dispatch => {
+    const idToPage: Map<InnerWindowID, Page> = new Map();
+    for (const page of pages) {
+      idToPage.set(page.innerWindowID, page);
+    }
+
+    // TODO - A thread can have multiple pages. Ignore this for now.
+    const pageOfThread: Array<Page | null> = [];
+    // These maps essentially serve as a tuple of the InnerWindowID and ThreadIndex
+    // that can be iterated through on a "for of" loop.
+    const rootOrigins: Map<InnerWindowID, ThreadIndex> = new Map();
+    const subOrigins: Map<InnerWindowID, ThreadIndex> = new Map();
+    // The set of all thread indexes that do not have an origin associated with them.
+    const noOrigins: Set<ThreadIndex> = new Set();
+
+    // Populate the collections above by iterating through all of the threads.
+    for (
+      let threadIndex = 0;
+      threadIndex < profile.threads.length;
+      threadIndex++
+    ) {
+      const { frameTable } = profile.threads[threadIndex];
+
+      let originFound = false;
+      for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+        const innerWindowID = frameTable.innerWindowID[frameIndex];
+        if (innerWindowID === null || innerWindowID === 0) {
+          continue;
+        }
+
+        const page = idToPage.get(innerWindowID);
+        if (!page) {
+          // This should only happen if there is an error in the Gecko implementation.
+          console.error('Could not find the page for an innerWindowID', {
+            innerWindowID,
+            pages,
+          });
+          break;
+        }
+
+        if (page.embedderInnerWindowID === 0) {
+          rootOrigins.set(innerWindowID, threadIndex);
+        } else {
+          subOrigins.set(innerWindowID, threadIndex);
+        }
+
+        originFound = true;
+        pageOfThread[threadIndex] = page;
+        break;
+      }
+
+      if (!originFound) {
+        pageOfThread[threadIndex] = null;
+        noOrigins.add(threadIndex);
+      }
+    }
+
+    // Build up the `originsTimelineRoots` variable and any relationships needed
+    // for determining the structure of the threads in terms of their origins.
+    const originsTimelineRoots: OriginsTimelineRoot[] = [];
+    // This map can be used to take a thread with no origin information, and assign
+    // it to some origin based on a shared PID.
+    const pidToRootInnerWindowID: Map<Pid, InnerWindowID> = new Map();
+    // The root is a root domain only.
+    const innerWindowIDToRoot: Map<InnerWindowID, InnerWindowID> = new Map();
+    for (const [innerWindowID, threadIndex] of rootOrigins) {
+      const thread = profile.threads[threadIndex];
+      const page = ensureExists(pageOfThread[threadIndex]);
+      pidToRootInnerWindowID.set(thread.pid, innerWindowID);
+      // These are all roots.
+      innerWindowIDToRoot.set(innerWindowID, innerWindowID);
+      originsTimelineRoots.push({
+        type: 'origin',
+        innerWindowID,
+        threadIndex,
+        page,
+        origin: getOrigin(page.url),
+        children: [],
+      });
+    }
+
+    // Iterate and drain the sub origins from this set, and attempt to assign them
+    // to a root origin. This needs to loop to handle arbitrary sub-iframe depths.
+    const remainingSubOrigins = new Set([...subOrigins]);
+    let lastRemaining = Infinity;
+    while (lastRemaining !== remainingSubOrigins.size) {
+      lastRemaining = remainingSubOrigins.size;
+      for (const suborigin of remainingSubOrigins) {
+        const [innerWindowID, threadIndex] = suborigin;
+        const page = ensureExists(pageOfThread[threadIndex]);
+        const rootInnerWindowID = innerWindowIDToRoot.get(
+          page.embedderInnerWindowID
+        );
+        if (rootInnerWindowID === undefined) {
+          // This root has not been found yet.
+          continue;
+        }
+        const thread = profile.threads[threadIndex];
+        pidToRootInnerWindowID.set(thread.pid, rootInnerWindowID);
+
+        remainingSubOrigins.delete(suborigin);
+        innerWindowIDToRoot.set(innerWindowID, rootInnerWindowID);
+        const root = ensureExists(
+          originsTimelineRoots.find(
+            root => root.innerWindowID === rootInnerWindowID
+          )
+        );
+        root.children.push({
+          type: 'sub-origin',
+          innerWindowID,
+          threadIndex,
+          origin: getOrigin(page.url),
+          page,
+        });
+      }
+    }
+
+    // Try to blame a thread on another thread with an origin. If this doesn't work,
+    // then add it to this originsTimelineNoOrigin array.
+    const originsTimelineNoOrigin = [];
+    for (const threadIndex of noOrigins) {
+      const thread = profile.threads[threadIndex];
+      const rootInnerWindowID = pidToRootInnerWindowID.get(thread.pid);
+      const noOriginEntry = {
+        type: 'no-origin',
+        threadIndex,
+      };
+      if (rootInnerWindowID) {
+        const root = ensureExists(
+          originsTimelineRoots.find(
+            root => root.innerWindowID === rootInnerWindowID
+          )
+        );
+        root.children.push(noOriginEntry);
+      } else {
+        originsTimelineNoOrigin.push(noOriginEntry);
+      }
+    }
+
+    dispatch({
+      type: 'VIEW_ORIGINS_PROFILE',
+      // TODO - We should pick the best selected thread.
+      selectedThreadIndex:
+        selectedThreadIndex === null ? 0 : selectedThreadIndex,
+      originsTimeline: [...originsTimelineNoOrigin, ...originsTimelineRoots],
     });
   };
 }
@@ -292,7 +518,7 @@ export function finalizeFullProfileView(
 export function finalizeActiveTabProfileView(
   profile: Profile,
   selectedThreadIndex: ThreadIndex,
-  showTabOnly?: BrowsingContextID | null
+  browsingContextID: BrowsingContextID
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const relevantPages = getRelevantPagesForActiveTab(getState());
@@ -309,7 +535,7 @@ export function finalizeActiveTabProfileView(
       globalTracks,
       resourceTracks,
       selectedThreadIndex,
-      showTabOnly,
+      browsingContextID,
     });
   };
 }
@@ -318,8 +544,8 @@ export function finalizeActiveTabProfileView(
  * Re-compute the profile view data. That's used to be able to switch between
  * full and active tab view.
  */
-export function changeViewAndRecomputeProfileData(
-  showTabOnly: BrowsingContextID | null
+export function changeTimelineTrackOrganization(
+  timelineTrackOrganization: TimelineTrackOrganization
 ): ThunkAction<void> {
   return (dispatch, getState) => {
     const profile = getProfile(getState());
@@ -330,18 +556,38 @@ export function changeViewAndRecomputeProfileData(
       type: 'DATA_RELOAD',
     });
 
-    if (showTabOnly === null) {
-      // The url state says this is a full view. We should compute and initialize
-      // the state relevant to that state.
-      dispatch(
-        finalizeFullProfileView(profile, selectedThreadIndex, showTabOnly)
-      );
-    } else {
-      // The url state says this is an active tab view. We should compute and
-      // initialize the state relevant to that state.
-      dispatch(
-        finalizeActiveTabProfileView(profile, selectedThreadIndex, showTabOnly)
-      );
+    switch (timelineTrackOrganization.type) {
+      case 'full':
+        // The url state says this is a full view. We should compute and initialize
+        // the state relevant to that state.
+        dispatch(finalizeFullProfileView(profile, selectedThreadIndex));
+        break;
+      case 'active-tab':
+        // The url state says this is an active tab view. We should compute and
+        // initialize the state relevant to that state.
+        dispatch(
+          finalizeActiveTabProfileView(
+            profile,
+            selectedThreadIndex,
+            timelineTrackOrganization.browsingContextID
+          )
+        );
+        break;
+      case 'origins': {
+        const pages = ensureExists(
+          profile.pages,
+          'There was no page information in the profile.'
+        );
+        dispatch(
+          finalizeOriginProfileView(profile, pages, selectedThreadIndex)
+        );
+        break;
+      }
+      default:
+        throw assertExhaustiveCheck(
+          timelineTrackOrganization,
+          `Unhandled TimelineTrackOrganization type.`
+        );
     }
   };
 }
@@ -373,6 +619,7 @@ export function resymbolicateProfile(): ThunkAction<Promise<void>> {
 export function viewProfile(
   profile: Profile,
   config: $Shape<{|
+    timelineTrackOrganization: TimelineTrackOrganization,
     pathInZipFile: string,
     implementationFilter: ImplementationFilter,
     transformStacks: TransformStacksPerThread,

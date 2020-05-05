@@ -21,6 +21,7 @@ import type {
   TrackIndex,
   MarkerIndex,
   ActiveTabGlobalTrack,
+  OriginsTimeline,
 } from './profile-derived';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
@@ -265,11 +266,16 @@ type ReceiveProfileAction =
       +showTabOnly?: BrowsingContextID | null,
     |}
   | {|
+      +type: 'VIEW_ORIGINS_PROFILE',
+      +selectedThreadIndex: ThreadIndex,
+      +originsTimeline: OriginsTimeline,
+    |}
+  | {|
       +type: 'VIEW_ACTIVE_TAB_PROFILE',
       +selectedThreadIndex: ThreadIndex,
       +globalTracks: ActiveTabGlobalTrack[],
       +resourceTracks: LocalTrack[],
-      +showTabOnly?: BrowsingContextID | null,
+      +browsingContextID: BrowsingContextID,
     |}
   | {|
       +type: 'DATA_RELOAD',
