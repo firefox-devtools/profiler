@@ -181,6 +181,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
                     // The height isn't computed yet, return.
                     return null;
                   }
+                  height += trackThreadHeight + border;
                 }
                 break;
               }
