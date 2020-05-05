@@ -32,12 +32,15 @@ import {
   getHumanReadableTracks,
   getProfileWithNiceTracks,
 } from './fixtures/profiles/tracks';
-import { getProfileFromTextSamples } from './fixtures/profiles/processed-profile';
+import {
+  getProfileFromTextSamples,
+  addActiveTabInformationToProfile,
+} from './fixtures/profiles/processed-profile';
 import { selectedThreadSelectors } from '../selectors/per-thread';
 import { uintArrayToString } from '../utils/uintarray-encoding';
 import {
-  getActiveTabHiddenGlobalTracksGetter,
-  getActiveTabHiddenLocalTracksByPidGetter,
+  getActiveTabGlobalTracks,
+  getActiveTabResourceTracks,
 } from '../selectors/profile';
 
 function _getStoreWithURL(
@@ -419,18 +422,35 @@ describe('showTabOnly', function() {
   });
 
   it('should use the finalizeActiveTabProfileView path and initialize active tab profile view state', function() {
-    const { getState } = _getStoreWithURL({
-      search: '?showTabOnly1=123',
-    });
-    expect(getActiveTabHiddenGlobalTracksGetter(getState())).toBeInstanceOf(
-      Function
+    const {
+      profile,
+      parentInnerWindowIDsWithChildren,
+      iframeInnerWindowIDsWithChild,
+    } = addActiveTabInformationToProfile(getProfileWithNiceTracks());
+    profile.threads[0].frameTable.innerWindowID[0] = parentInnerWindowIDsWithChildren;
+    profile.threads[1].frameTable.innerWindowID[0] = iframeInnerWindowIDsWithChild;
+    const { getState } = _getStoreWithURL(
+      {
+        search: '?showTabOnly1=123',
+      },
+      profile
     );
-    const activeTabHiddenLocalTracksByPidGetter = getActiveTabHiddenLocalTracksByPidGetter(
-      getState()
-    );
-    expect(activeTabHiddenLocalTracksByPidGetter).toBeInstanceOf(Function);
-    const hiddenLocalTracksByPid = activeTabHiddenLocalTracksByPidGetter();
-    expect(hiddenLocalTracksByPid.size).toBe(1);
+    const globalTracks = getActiveTabGlobalTracks(getState());
+    expect(globalTracks.length).toBe(1);
+    expect(globalTracks).toEqual([
+      {
+        type: 'tab',
+        threadIndex: 0,
+      },
+    ]);
+    // TODO: Resource track type will be changed soon.
+    const resourceTracks = getActiveTabResourceTracks(getState());
+    expect(resourceTracks).toEqual([
+      {
+        type: 'thread',
+        threadIndex: 1,
+      },
+    ]);
   });
 
   it('should remove other full view url states if present', function() {

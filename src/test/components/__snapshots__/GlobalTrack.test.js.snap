@@ -215,6 +215,7 @@ exports[`timeline/GlobalTrack matches the snapshot of a global process track wit
     >
       <div
         class="timelineTrackThreadBlank"
+        style="--timeline-track-thread-blank-height: 30px;"
       />
     </div>
   </div>

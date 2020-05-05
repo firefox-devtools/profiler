@@ -25,6 +25,7 @@ import type {
   LocalTrack,
   TrackIndex,
   MarkerIndex,
+  ActiveTabGlobalTrack,
 } from './profile-derived';
 import type { Attempt } from '../utils/errors';
 import type { TransformStacksPerThread } from './transforms';
@@ -57,13 +58,19 @@ export type RightClickedMarker = {|
  * NOTE: This state is empty for now, but will be used later, do not remove.
  * globalTracks and localTracksByPid states will be here in the future.
  */
-export type FullProfileViewState = {||};
+export type FullProfileViewState = {|
+  globalTracks: GlobalTrack[],
+  localTracksByPid: Map<Pid, LocalTrack[]>,
+|};
 
 /**
  * Active tab profile view state
  * They should not be used from the full view.
  */
 export type ActiveTabProfileViewState = {|
+  globalTracks: ActiveTabGlobalTrack[],
+  // TODO: Add a better refined type for resource tracks.
+  resourceTracks: LocalTrack[],
   hiddenGlobalTracksGetter: () => Set<TrackIndex>,
   hiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
 |};
@@ -84,12 +91,8 @@ export type ProfileViewState = {
     rightClickedCallNode: RightClickedCallNode | null,
     rightClickedMarker: RightClickedMarker | null,
   |},
-  globalTracks: GlobalTrack[],
-  localTracksByPid: Map<Pid, LocalTrack[]>,
   +profile: Profile | null,
-  // NOTE: Currently commented out to fix the flow warnings, but will be used soon.
-  // Do not remove.
-  // +full: FullProfileViewState,
+  +full: FullProfileViewState,
   +activeTab: ActiveTabProfileViewState,
 };
 

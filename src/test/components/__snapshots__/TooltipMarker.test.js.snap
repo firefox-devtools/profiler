@@ -1082,6 +1082,7 @@ exports[`TooltipMarker renders tooltips for various markers: FileIO-114 1`] = `
   >
     <ol
       class="backtrace"
+      style="--max-height: 30em;"
     >
       <li
         class="backtraceStackFrame"
@@ -1942,6 +1943,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-18.5 1`] = `
   >
     <ol
       class="backtrace"
+      style="--max-height: 30em;"
     >
       <li
         class="backtraceStackFrame"
@@ -2224,6 +2226,7 @@ exports[`TooltipMarker renders tooltips for various markers: Styles-20 1`] = `
     </h2>
     <ol
       class="backtrace"
+      style="--max-height: 30em;"
     >
       <li
         class="backtraceStackFrame"

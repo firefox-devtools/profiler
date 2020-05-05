@@ -25,6 +25,7 @@ import type {
   CategoryList,
   JsTracerTable,
   Counter,
+  BrowsingContextID,
 } from '../../../types/profile';
 import type {
   MarkerPayload,
@@ -1097,4 +1098,104 @@ export function getProfileWithBalancedNativeAllocations(): * {
   }
 
   return { profile, funcNamesDict };
+}
+
+/**
+ * Add pages array and activeTabBrowsingContextID to the given profile.
+ * Pages array has the following relationship:
+ * Tab #1                           Tab #2
+ * --------------                --------------
+ * Page #1                        Page #4
+ * |- Page #2                     |
+ * |  |- Page #3                  Page #6
+ * |
+ * Page #5
+ */
+export function addActiveTabInformationToProfile(
+  profile: Profile,
+  activeBrowsingContextID?: BrowsingContextID
+): * {
+  const firstTabBrowsingContextID = 1;
+  const secondTabBrowsingContextID = 4;
+  const parentInnerWindowIDsWithChildren = 11111111111;
+  const iframeInnerWindowIDsWithChild = 11111111112;
+  const fistTabInnerWindowIDs = [
+    parentInnerWindowIDsWithChildren,
+    iframeInnerWindowIDsWithChild,
+    11111111113,
+    11111111115,
+  ];
+  const secondTabInnerWindowIDs = [11111111114, 11111111116];
+
+  // Default to first tab browsingContextID if not given
+  activeBrowsingContextID =
+    activeBrowsingContextID === undefined
+      ? firstTabBrowsingContextID
+      : activeBrowsingContextID;
+
+  // Add the pages array
+  profile.pages = [
+    // A top most page in the first tab
+    {
+      browsingContextID: firstTabBrowsingContextID,
+      innerWindowID: parentInnerWindowIDsWithChildren,
+      url: 'Page #1',
+      embedderInnerWindowID: 0,
+    },
+    // An iframe page inside the previous page
+    {
+      browsingContextID: 2,
+      innerWindowID: iframeInnerWindowIDsWithChild,
+      url: 'Page #2',
+      embedderInnerWindowID: parentInnerWindowIDsWithChildren,
+    },
+    // Another iframe page inside the previous iframe
+    {
+      browsingContextID: 3,
+      innerWindowID: fistTabInnerWindowIDs[2],
+      url: 'Page #3',
+      embedderInnerWindowID: iframeInnerWindowIDsWithChild,
+    },
+    // A top most frame from the second tab
+    {
+      browsingContextID: secondTabBrowsingContextID,
+      innerWindowID: secondTabInnerWindowIDs[0],
+      url: 'Page #4',
+      embedderInnerWindowID: 0,
+    },
+    // Another top most frame from the first tab
+    // Their browsingContextIDs are the same because of that.
+    {
+      browsingContextID: firstTabBrowsingContextID,
+      innerWindowID: fistTabInnerWindowIDs[3],
+      url: 'Page #5',
+      embedderInnerWindowID: 0,
+    },
+    // Another top most frame from the second tab
+    {
+      browsingContextID: secondTabBrowsingContextID,
+      innerWindowID: secondTabInnerWindowIDs[1],
+      url: 'Page #4',
+      embedderInnerWindowID: 0,
+    },
+  ];
+
+  // Set the active BrowsingContext ID.
+  profile.meta.configuration = {
+    activeBrowsingContextID,
+    capacity: 1,
+    features: [],
+    threads: [],
+  };
+
+  return {
+    profile,
+    firstTabBrowsingContextID,
+    secondTabBrowsingContextID,
+    parentInnerWindowIDsWithChildren,
+    iframeInnerWindowIDsWithChild,
+    activeBrowsingContextID,
+    fistTabInnerWindowIDs,
+    secondTabInnerWindowIDs,
+  };
 }

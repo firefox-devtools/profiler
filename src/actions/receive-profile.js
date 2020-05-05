@@ -42,12 +42,13 @@ import {
   getVisibleThreads,
 } from '../profile-logic/tracks';
 import {
-  computeActiveTabHiddenGlobalTracks,
-  computeActiveTabHiddenLocalTracksByPid,
-} from '../profile-logic/active-tab';
-import { getProfileOrNull, getProfile } from '../selectors/profile';
+  getProfileOrNull,
+  getProfile,
+  getRelevantPagesForActiveTab,
+} from '../selectors/profile';
 import { getView } from '../selectors/app';
 import { setDataSource } from './profile-view';
+import { computeActiveTabTracks } from '../profile-logic/active-tab';
 
 import type {
   FunctionsUpdatePerThread,
@@ -294,106 +295,20 @@ export function finalizeActiveTabProfileView(
   showTabOnly?: BrowsingContextID | null
 ): ThunkAction<void> {
   return (dispatch, getState) => {
-    const hasUrlInfo = selectedThreadIndex !== null;
-
-    const globalTracks = computeGlobalTracks(profile);
-    const globalTrackOrder = initializeGlobalTrackOrder(
-      globalTracks,
-      hasUrlInfo ? getGlobalTrackOrder(getState()) : null,
-      getLegacyThreadOrder(getState())
-    );
-    let hiddenGlobalTracks = initializeHiddenGlobalTracks(
-      globalTracks,
+    const relevantPages = getRelevantPagesForActiveTab(getState());
+    const { globalTracks, resourceTracks } = computeActiveTabTracks(
       profile,
-      globalTrackOrder,
-      hasUrlInfo ? getHiddenGlobalTracks(getState()) : null,
-      getLegacyHiddenThreads(getState())
-    );
-    // Pre-compute which tracks are not available for the active tab.
-    const activeTabHiddenGlobalTracksGetter = () =>
-      computeActiveTabHiddenGlobalTracks(
-        globalTracks,
-        getState() // we need to access per thread selectors inside
-      );
-    const localTracksByPid = computeLocalTracksByPid(profile);
-    const localTrackOrderByPid = initializeLocalTrackOrderByPid(
-      hasUrlInfo ? getLocalTrackOrderByPid(getState()) : null,
-      localTracksByPid,
-      getLegacyThreadOrder(getState())
-    );
-    let hiddenLocalTracksByPid = initializeHiddenLocalTracksByPid(
-      hasUrlInfo ? getHiddenLocalTracksByPid(getState()) : null,
-      localTracksByPid,
-      profile,
-      getLegacyHiddenThreads(getState())
-    );
-    // Pre-compute which local tracks are not available for the active tab.
-    const activeTabHiddenLocalTracksByPidGetter = () =>
-      computeActiveTabHiddenLocalTracksByPid(
-        localTracksByPid,
-        getState() // we need to access per thread selectors inside
-      );
-    let visibleThreadIndexes = getVisibleThreads(
-      globalTracks,
-      hiddenGlobalTracks,
-      localTracksByPid,
-      hiddenLocalTracksByPid
+      relevantPages,
+      getState()
     );
 
-    // This validity check can't be extracted into a separate function, as it needs
-    // to update a lot of the local variables in this function.
-    if (visibleThreadIndexes.length === 0) {
-      // All threads are hidden, since this can't happen normally, revert them all.
-      visibleThreadIndexes = profile.threads.map(
-        (_, threadIndex) => threadIndex
-      );
-      hiddenGlobalTracks = new Set();
-      const newHiddenTracksByPid = new Map();
-      for (const [pid] of hiddenLocalTracksByPid) {
-        newHiddenTracksByPid.set(pid, new Set());
-      }
-      hiddenLocalTracksByPid = newHiddenTracksByPid;
-    }
-
-    selectedThreadIndex = initializeSelectedThreadIndex(
-      selectedThreadIndex,
-      visibleThreadIndexes,
-      profile
-    );
-
-    // If all of the local tracks were hidden for a process, and the main thread was
-    // not recorded for that process, hide the (empty) process track as well.
-    for (const [pid, localTracks] of localTracksByPid) {
-      const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid);
-      if (!hiddenLocalTracks) {
-        continue;
-      }
-      if (hiddenLocalTracks.size === localTracks.length) {
-        // All of the local tracks were hidden.
-        const globalTrackIndex = globalTracks.findIndex(
-          globalTrack =>
-            globalTrack.type === 'process' &&
-            globalTrack.pid === pid &&
-            globalTrack.mainThreadIndex === null
-        );
-        if (globalTrackIndex !== -1) {
-          // An empty global track was found, hide it.
-          hiddenGlobalTracks.add(globalTrackIndex);
-        }
-      }
-    }
+    // TODO: check the selectedThreadIndex and select the proper one if it's out of bound.
 
     dispatch({
       type: 'VIEW_ACTIVE_TAB_PROFILE',
-      selectedThreadIndex,
       globalTracks,
-      globalTrackOrder,
-      hiddenGlobalTracks,
-      localTracksByPid,
-      hiddenLocalTracksByPid,
-      localTrackOrderByPid,
-      activeTabHiddenGlobalTracksGetter,
-      activeTabHiddenLocalTracksByPidGetter,
+      resourceTracks,
+      selectedThreadIndex,
       showTabOnly,
     });
   };
@@ -630,7 +545,10 @@ export function assignFunctionNames(
  * to a gecko profile object by parsing the JSON.
  */
 async function _unpackGeckoProfileFromAddon(profile) {
-  if (profile instanceof ArrayBuffer) {
+  // Note: the following check will work for array buffers coming from another
+  // global. This happens especially with tests but could happen in the future
+  // in Firefox too.
+  if (Object.prototype.toString.call(profile) === '[object ArrayBuffer]') {
     const profileBytes = new Uint8Array(profile);
     let decompressedProfile;
     // Check for the gzip magic number in the header. If we find it, decompress

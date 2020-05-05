@@ -5,14 +5,29 @@
 
 import { getThreadSelectors } from '../selectors/per-thread';
 import { assertExhaustiveCheck } from '../utils/flow';
+import { isMainThread } from './tracks';
 
 import type { State } from '../types/state';
-import type { ThreadIndex, Pid } from '../types/profile';
+import type {
+  ThreadIndex,
+  Pid,
+  Profile,
+  InnerWindowID,
+  Page,
+  Thread,
+} from '../types/profile';
 import type {
   GlobalTrack,
+  ActiveTabGlobalTrack,
   LocalTrack,
   TrackIndex,
 } from '../types/profile-derived';
+import type { ScreenshotPayload } from '../types/markers';
+
+const ACTIVE_TAB_GLOBAL_TRACK_INDEX_ORDER = {
+  screenshots: 0,
+  tab: 1,
+};
 
 /**
  * Take the global tracks and decide which one to hide during the active tab view.
@@ -137,4 +152,131 @@ function isTabFilteredThreadEmpty(
   }
 
   return true;
+}
+
+/**
+ * Take a profile and figure out what active tab GlobalTracks it contains.
+ * The returned array should contain only one thread and screenshot tracks
+ */
+export function computeActiveTabTracks(
+  profile: Profile,
+  relevantPages: Page[],
+  state: State
+): {| globalTracks: ActiveTabGlobalTrack[], resourceTracks: LocalTrack[] |} {
+  // Global tracks that are certainly global tracks.
+  const globalTracks: ActiveTabGlobalTrack[] = [];
+  const resourceTracks = [];
+  const topmostInnerWindowIDs = getTopmostInnerWindowIDs(relevantPages);
+
+  for (
+    let threadIndex = 0;
+    threadIndex < profile.threads.length;
+    threadIndex++
+  ) {
+    const thread = profile.threads[threadIndex];
+    const { markers, stringTable } = thread;
+
+    if (isMainThread(thread)) {
+      // This is a main thread, there is a possibility that it can be a global
+      // track, check if the thread contains active tab data and add it to candidates if it does.
+
+      if (isTopmostThread(thread, topmostInnerWindowIDs)) {
+        // This is a topmost thread, add it to global tracks.
+        globalTracks.push({
+          type: 'tab',
+          threadIndex: threadIndex,
+        });
+      } else {
+        if (!isTabFilteredThreadEmpty(threadIndex, state)) {
+          resourceTracks.push({ type: 'thread', threadIndex });
+        }
+      }
+    } else {
+      // This is not a main thread, it's not possible that this can be a global
+      // track. Find out if that thread contains the active tab data, and add it
+      // as a resource track if it does.
+      if (!isTabFilteredThreadEmpty(threadIndex, state)) {
+        resourceTracks.push({ type: 'thread', threadIndex });
+      }
+    }
+
+    // Check for screenshots.
+    const windowIDs: Set<string> = new Set();
+    if (stringTable.hasString('CompositorScreenshot')) {
+      const screenshotNameIndex = stringTable.indexForString(
+        'CompositorScreenshot'
+      );
+      for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+        if (markers.name[markerIndex] === screenshotNameIndex) {
+          // Coerce the payload to a screenshot one. Don't do a runtime check that
+          // this is correct.
+          const data: ScreenshotPayload = (markers.data[markerIndex]: any);
+          windowIDs.add(data.windowID);
+        }
+      }
+      for (const id of windowIDs) {
+        globalTracks.push({ type: 'screenshots', id, threadIndex });
+      }
+    }
+  }
+
+  // When adding a new track type, this sort ensures that the newer tracks are added
+  // at the end so that the global track indexes are stable and backwards compatible.
+  globalTracks.sort(
+    // In place sort!
+    (a, b) =>
+      ACTIVE_TAB_GLOBAL_TRACK_INDEX_ORDER[a.type] -
+      ACTIVE_TAB_GLOBAL_TRACK_INDEX_ORDER[b.type]
+  );
+
+  return { globalTracks, resourceTracks };
+}
+
+/**
+ * Gets the relevant pages and returns a set of InnerWindowIDs of topmost frames.
+ */
+function getTopmostInnerWindowIDs(relevantPages: Page[]): Set<InnerWindowID> {
+  const topmostInnerWindowIDs = [];
+
+  for (const page of relevantPages) {
+    if (page.embedderInnerWindowID === 0) {
+      topmostInnerWindowIDs.push(page.innerWindowID);
+    }
+  }
+
+  return new Set(topmostInnerWindowIDs);
+}
+
+/**
+ * Check if the thread is a topmost thread or not.
+ * Topmost thread means the thread that belongs to the browser tab itself and not the iframe.
+ */
+function isTopmostThread(
+  thread: Thread,
+  topmostInnerWindowIDs: Set<InnerWindowID>
+): boolean {
+  const { frameTable, markers } = thread;
+  for (let frameIndex = 0; frameIndex < frameTable.length; frameIndex++) {
+    const innerWindowID = frameTable.innerWindowID[frameIndex];
+    if (innerWindowID !== null && topmostInnerWindowIDs.has(innerWindowID)) {
+      return true;
+    }
+  }
+
+  for (let markerIndex = 0; markerIndex < markers.length; markerIndex++) {
+    const data = markers.data[markerIndex];
+    if (
+      data &&
+      data.innerWindowID &&
+      // Do not look at the network markers because they are not reliable. Some
+      // network markers of an iframe comes from the parent frame. Therefore, their
+      // innerWindowID will be the parent window's innerWindowID.
+      data.type !== 'Network' &&
+      topmostInnerWindowIDs.has(data.innerWindowID)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
 }

@@ -3,6 +3,7 @@
 exports[`Timeline renders the header 1`] = `
 <div
   class="timelineSettings"
+  style="--timeline-settings-height: 26px;"
 >
   <form>
     <div

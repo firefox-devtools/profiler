@@ -412,27 +412,27 @@ exports[`timeline/TrackNetwork matches the component snapshot 1`] = `
     <div
       class="timelineVerticalIndicatorsLine"
       data-testid="vertical-indicator-line"
-      style="left: 66.66666666666667px;"
+      style="--vertical-indicator-color: var(--red-60); left: 66.66666666666667px;"
     />
     <div
       class="timelineVerticalIndicatorsLine"
       data-testid="vertical-indicator-line"
-      style="left: 200px;"
+      style="--vertical-indicator-color: #000; left: 200px;"
     />
     <div
       class="timelineVerticalIndicatorsLine"
       data-testid="vertical-indicator-line"
-      style="left: 200px;"
+      style="--vertical-indicator-color: var(--blue-50); left: 200px;"
     />
     <div
       class="timelineVerticalIndicatorsLine"
       data-testid="vertical-indicator-line"
-      style="left: 266.6666666666667px;"
+      style="--vertical-indicator-color: var(--grey-40); left: 266.6666666666667px;"
     />
     <div
       class="timelineVerticalIndicatorsLine"
       data-testid="vertical-indicator-line"
-      style="left: 333.33333333333337px;"
+      style="--vertical-indicator-color: var(--green-60); left: 333.33333333333337px;"
     />
   </div>
 </div>

@@ -59,6 +59,7 @@ exports[`FlameGraph has a tooltip that matches the snapshot 1`] = `
 >
   <div
     class="tooltipCallNode"
+    style="--graph-width: 150px; --graph-height: 10px;"
   >
     <div
       class="tooltipOneLine tooltipHeader"

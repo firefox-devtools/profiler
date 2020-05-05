@@ -1,11 +1,67 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global tab track 1`] = `
+<li
+  class="timelineTrack"
+>
+  <div
+    class="timelineTrackRow timelineTrackGlobalRow activeTab"
+  >
+    <div
+      class="timelineTrackTrack"
+    >
+      <div
+        class="timelineTrackThread"
+      >
+        <div
+          class="timelineMarkers"
+          data-testid="TimelineMarkersJank"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
+        </div>
+        <div
+          class="timelineMarkers timelineMarkersGeckoMain"
+          data-testid="TimelineMarkersOverview"
+        >
+          <div
+            class="react-contextmenu-wrapper"
+          >
+            <canvas
+              class="timelineMarkersCanvas"
+            />
+          </div>
+        </div>
+        <div
+          class="threadActivityGraph"
+        >
+          <canvas
+            class="threadActivityGraphCanvas threadActivityGraphCanvas"
+            height="300"
+            width="200"
+          />
+        </div>
+        <div
+          class="timelineEmptyThreadIndicator"
+        />
+      </div>
+    </div>
+  </div>
+</li>
+`;
+
 exports[`ActiveTabTimeline should be rendered properly from the Timeline component 1`] = `
 <div
-  class="timelineSelection"
+  class="timelineSelection activeTab"
 >
   <div
     class="timelineRuler"
+    style="--timeline-ruler-height: 20px;"
   >
     <ol
       class="timelineRulerContainer"
@@ -34,7 +90,60 @@ exports[`ActiveTabTimeline should be rendered properly from the Timeline compone
       >
         <ol
           class="timelineThreadList"
-        />
+        >
+          <li
+            class="timelineTrack"
+          >
+            <div
+              class="timelineTrackRow timelineTrackGlobalRow activeTab selected"
+            >
+              <div
+                class="timelineTrackTrack"
+              >
+                <div
+                  class="timelineTrackThread"
+                >
+                  <div
+                    class="timelineMarkers selected"
+                    data-testid="TimelineMarkersJank"
+                  >
+                    <div
+                      class="react-contextmenu-wrapper"
+                    >
+                      <canvas
+                        class="timelineMarkersCanvas"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    class="timelineMarkers timelineMarkersGeckoMain selected"
+                    data-testid="TimelineMarkersOverview"
+                  >
+                    <div
+                      class="react-contextmenu-wrapper"
+                    >
+                      <canvas
+                        class="timelineMarkersCanvas"
+                      />
+                    </div>
+                  </div>
+                  <div
+                    class="threadActivityGraph"
+                  >
+                    <canvas
+                      class="threadActivityGraphCanvas threadActivityGraphCanvas"
+                      height="300"
+                      width="200"
+                    />
+                  </div>
+                  <div
+                    class="timelineEmptyThreadIndicator"
+                  />
+                </div>
+              </div>
+            </div>
+          </li>
+        </ol>
       </div>
     </div>
   </div>

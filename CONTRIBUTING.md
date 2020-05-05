@@ -24,7 +24,7 @@ This project is made up of a cross section of different parts of Mozilla, includ
 [squelart]:https://avatars.githubusercontent.com/squelart?size=56
 [canova]:https://avatars.githubusercontent.com/canova?size=56
 
-We're friendly and we're on the [Firefox DevTools Slack](https://devtools-html-slack.herokuapp.com/) in the #perf channel. Come chat with us if you have any questions about the project.
+We're friendly and we're on the [Mozilla Matrix instance](https://chat.mozilla.org/) in the [*Firefox Profiler* channel (*#profiler:mozilla.org*)](https://chat.mozilla.org/#/room/#profiler:mozilla.org). Come chat with us if you have any questions about the project.
 
 ## Getting started with development
 
@@ -49,6 +49,16 @@ To get started clone the repo and get the web application started.
  4. Run `yarn start`, this will start up the webpack server.
  5. Point your browser to [http://localhost:4242](http://localhost:4242).
  6. If port `4242` is taken, then you can run the web app on a different port: `FX_PROFILER_PORT=1234 yarn start`
+
+## Capturing profiles in development
+
+Normally, Firefox loads newly captured profiles into [profiler.firefox.com](https://profiler.firefox.com). In order to change this to your local environment, try the following:
+
+1. Open `about:config` in Firefox.
+2. Change `devtools.performance.recording.ui-base-url` to `http://localhost:4242` or to the localhost with the proper port you have configured.
+3. Ensure the profiler menu button is active by clicking the button on the [profiler.firefox.com](https://profiler.firefox.com) homepage to enable it.
+4. Record a profile using the menu button, and it should open up in your local environment.
+
 
 ## Using Gitpod
 
@@ -118,10 +128,12 @@ week-ends be aware that our team is working mostly on week days,
 therefore please be patient :-)
 
 
-Feel free to [chat with us on
-slack](https://devtools-html-slack.herokuapp.com/) if you need help finding
-something you might be interested to work on or have any question. You can also
-leave message on our special [issue #1785](https://github.com/firefox-devtools/profiler/issues/1785).
+Feel free to [chat with us on Matrix](https://chat.mozilla.org/#/room/#profiler:mozilla.org)
+if you need help finding something you might be interested to work on or have any question.
+You'll need to login first, and possibly click on the link again to access our
+room directly.
+
+You can also leave a message on our special [issue #1785](https://github.com/firefox-devtools/profiler/issues/1785).
 
 ## Submitting changes with a pull request (PR)
 

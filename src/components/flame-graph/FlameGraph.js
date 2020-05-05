@@ -27,7 +27,7 @@ import {
 } from '../../actions/profile-view';
 
 import type { Thread, CategoryList, PageList } from '../../types/profile';
-import type { Milliseconds } from '../../types/units';
+import type { Milliseconds, StartEndRange } from '../../types/units';
 import type { FlameGraphTiming } from '../../profile-logic/flame-graph';
 import type {
   PreviewSelection,
@@ -58,7 +58,7 @@ type StateProps = {|
   +unfilteredThread: Thread,
   +sampleIndexOffset: number,
   +maxStackDepth: number,
-  +timeRange: { start: Milliseconds, end: Milliseconds },
+  +timeRange: StartEndRange,
   +previewSelection: PreviewSelection,
   +flameGraphTiming: FlameGraphTiming,
   +callTree: CallTree,
