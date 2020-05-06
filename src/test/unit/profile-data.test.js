@@ -607,17 +607,14 @@ describe('symbolication', function() {
         unsymbolicatedProfile,
         symbolStore,
         {
-          onSymbolicationStep: (
-            threadIndex,
-            oldFuncToNewFuncMap,
-            symbolicationStepInfo
-          ) => {
+          onSymbolicationStep: (threadIndex, symbolicationStepInfo) => {
             if (!symbolicatedProfile) {
               throw new Error('symbolicatedProfile cannot be null');
             }
             symbolicatedProfile.threads[threadIndex] = applySymbolicationStep(
               symbolicatedProfile.threads[threadIndex],
-              symbolicationStepInfo
+              symbolicationStepInfo,
+              new Map()
             );
           },
         }

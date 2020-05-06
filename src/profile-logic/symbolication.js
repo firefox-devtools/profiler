@@ -110,14 +110,16 @@ import type {
  *
  * III. Symbol lookup: Handled by the AbstractSymbolStore.
  *
- * IV. Symbol result processing: Does enough processing of the result to create
- * the oldFuncToNewFuncMap, and prepares data for the final substitution step.
+ * IV. Symbol result processing: Forwards the symbol lookup result to the caller,
+ * expecting a future call to applySymbolicationStep.
  *
- * V. Profile substitution: Invoked from the redux reducer. Creates a new thread
+ * V. Profile substitution: Invoked from from a thunk action. Processes the
+ * symbolication result, groups frame addresses by func addresses, finds or
+ * creates funcs for these funcAddresses, and creates a new thread
  * object with an updated frameTable, funcTable and stringTable, with the
  * symbols substituted in the right places. This usually causes many funcs to
  * be orphaned (no frames will use them any more); these orphaned funcs remain
- * in the funcTable.
+ * in the funcTable. It also creates the oldFuncToNewFuncMap.
  *
  * Re-symbolication only re-runs phases II through V. At the beginning of
  * re-symbolication, the frameTable and funcTable are in the state that the
@@ -171,29 +173,9 @@ import type {
 type LibKey = string; // of the form ${debugName}/${breakpadId}
 type Address = number;
 
-// The set of information needed to apply symbolication results for one lib in
-// one thread.
-export type SymbolicationStepInfo = {|
-  // The resource for the symbolicated lib in this thread.
-  resourceIndex: IndexIntoResourceTable,
-  // For each frame, the lib-relative address where the function which includes
-  // this frame starts, i.e. the address of the closest symbol in the library
-  // with symbol address <= frame address.
-  frameToFuncAddressMap: Map<IndexIntoFrameTable, number>,
-  // The symbols for this library, as a funcAddress -> symbol name map. Only
-  // contains the symbols needed for the frames in this thread.
-  funcAddressToSymbolNameMap: Map<Address, string>,
-  // A partial assignment of funcs to funcAddresses.
-  funcAddressToCanonicalFuncIndexMap: Map<Address, IndexIntoFuncTable>,
-  // A subset of all funcs for this lib in this thread. Contains the funcs that
-  // have not been used in funcAddressToCanonicalFuncIndexMap.
-  availableFuncs: Set<IndexIntoFuncTable>,
-|};
-
 export type SymbolicationHandlers = {
   onSymbolicationStep: (
     threadIndex: ThreadIndex,
-    oldFuncToNewFuncMap: Map<IndexIntoFuncTable, IndexIntoFuncTable>,
     symbolicationStepInfo: SymbolicationStepInfo
   ) => void,
 };
@@ -208,6 +190,12 @@ type ThreadLibSymbolicationInfo = {|
   // All addresses for frames for this lib in this thread, as lib-relative offsets.
   frameAddresses: Array<Address>,
 |};
+export type SymbolicationStepInfo = {|
+  threadLibSymbolicationInfo: ThreadLibSymbolicationInfo,
+  resultsForLib: Map<Address, AddressResult>,
+|};
+export type FuncToFuncMap = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
+
 type ThreadSymbolicationInfo = Map<LibKey, ThreadLibSymbolicationInfo>;
 
 /**
@@ -359,8 +347,7 @@ function buildLibSymbolicationRequestsForAllThreads(
 // With the symbolication results for the library given by libKey, call
 // symbolicationHandlers.onSymbolicationStep for each thread. Those calls will
 // ensure that the symbolication information eventually makes it into the thread.
-// This function does just enough work to construct a meaningful oldFuncToNewFuncMap
-// and then leaves the rest of the work to applySymbolicationStep.
+// This function leaves all the actual work to applySymbolicationStep.
 function finishSymbolicationForLib(
   profile: Profile,
   symbolicationInfo: ThreadSymbolicationInfo[],
@@ -375,117 +362,8 @@ function finishSymbolicationForLib(
     if (threadLibSymbolicationInfo === undefined) {
       continue;
     }
-    const thread = threads[threadIndex];
-    const { frameTable, funcTable, stringTable } = thread;
-    const {
-      resourceIndex,
-      allFramesForThisLib,
-      allFuncsForThisLib,
-    } = threadLibSymbolicationInfo;
-
-    // These variables will go into the SymbolicationStepInfo object.
-    const availableFuncs = new Set(allFuncsForThisLib);
-    const frameToFuncAddressMap = new Map();
-    const funcAddressToSymbolNameMap = new Map();
-    const funcAddressToCanonicalFuncIndexMap = new Map();
-
-    for (const frameIndex of allFramesForThisLib) {
-      const oldFrameFunc = frameTable.func[frameIndex];
-      const address = frameTable.address[frameIndex];
-      let addressResult: AddressResult | void = resultsForLib.get(address);
-      if (addressResult === undefined) {
-        const oldSymbol = stringTable.getString(funcTable.name[oldFrameFunc]);
-        addressResult = {
-          functionOffset:
-            frameTable.address[frameIndex] - funcTable.address[oldFrameFunc],
-          name: oldSymbol,
-        };
-      }
-
-      // |address| is the original frame address that we found during
-      // stackwalking, as a library-relative offset.
-      // |addressResult.functionOffset| is the offset between the start of
-      // the function and |address|.
-      // |funcAddress| is the start of the function, as a library-relative
-      // offset.
-      const funcAddress = address - addressResult.functionOffset;
-      frameToFuncAddressMap.set(frameIndex, funcAddress);
-      funcAddressToSymbolNameMap.set(funcAddress, addressResult.name);
-
-      // Opportunistically match up funcAddress with oldFrameFunc.
-      if (!funcAddressToCanonicalFuncIndexMap.has(funcAddress)) {
-        if (availableFuncs.has(oldFrameFunc)) {
-          // Use the frame's old func as the canonical func for this funcAddress.
-          // This case is hit for all frames if this is the initial symbolication,
-          // because in the initial symbolication scenario, each frame has a
-          // distinct func which is available to be designated as a canonical func.
-          const newFrameFunc = oldFrameFunc;
-          availableFuncs.delete(newFrameFunc);
-          funcAddressToCanonicalFuncIndexMap.set(funcAddress, newFrameFunc);
-        } else {
-          // oldFrameFunc has already been used as the canonical func for a
-          // different funcAddress. This can happen during re-symbolication.
-          // For now, funcAddressToCanonicalFuncIndexMap will not contain an
-          // entry for this funcAddress.
-          // But that state will be resolved eventually:
-          // Either in the course of the rest of this loop (when another frame
-          // will donate its oldFrameFunc), or in applySymbolicationStep.
-        }
-      }
-    }
-
-    // We now have the funcAddress for every frame, in frameToFuncAddressMap.
-    // We have also assigned a subset of funcAddresses to canonical funcs.
-    // These funcs have been removed from availableFuncs; availableFuncs
-    // contains the subset of existing funcs in the thread that do not have a
-    // funcAddress yet.
-    // If this is the initial symbolication, all funcAddresses will have funcs,
-    // because each frame had a distinct oldFrameFunc which was available to
-    // be designated as a canonical func.
-    // If this is a re-symbolication, then some funcAddresses may not have
-    // a canonical func yet, because oldFrameFunc might already have become
-    // the canonical func for a different funcAddress.
-
-    // Build oldFuncToFuncAddressMap.
-    // If (oldFunc, funcAddress) is in oldFuncToFuncAddressMap, this means
-    // that all frames that used to belong to oldFunc have been resolved to
-    // the same funcAddress.
-    const oldFuncToFuncAddressEntries = [];
-    for (const [frameIndex, funcAddress] of frameToFuncAddressMap) {
-      const oldFrameFunc = frameTable.func[frameIndex];
-      oldFuncToFuncAddressEntries.push([oldFrameFunc, funcAddress]);
-    }
-    const oldFuncToFuncAddressMap = makeConsensusMap(
-      oldFuncToFuncAddressEntries
-    );
-
-    // Now we want to build oldFuncToNewFuncMap.
-    // If (oldFunc, newFunc) is in oldFuncToNewFuncMap, this means that all
-    // frames that used to belong to oldFunc or newFunc have been resolved to
-    // the same funcAddress, and that newFunc has been chosen as the canonical
-    // func for that funcAddress.
-    const oldFuncToNewFuncMap = new Map();
-    for (const [oldFunc, funcAddress] of oldFuncToFuncAddressMap) {
-      const newFunc = funcAddressToCanonicalFuncIndexMap.get(funcAddress);
-      if (
-        newFunc !== undefined &&
-        oldFuncToFuncAddressMap.get(newFunc) === funcAddress
-      ) {
-        oldFuncToNewFuncMap.set(oldFunc, newFunc);
-      }
-    }
-
-    symbolicationHandlers.onSymbolicationStep(
-      threadIndex,
-      oldFuncToNewFuncMap,
-      {
-        resourceIndex,
-        availableFuncs,
-        frameToFuncAddressMap,
-        funcAddressToSymbolNameMap,
-        funcAddressToCanonicalFuncIndexMap,
-      }
-    );
+    const symbolicationStep = { threadLibSymbolicationInfo, resultsForLib };
+    symbolicationHandlers.onSymbolicationStep(threadIndex, symbolicationStep);
   }
 }
 
@@ -495,23 +373,101 @@ function finishSymbolicationForLib(
  * right symbol string and funcAddress, and updating the frameTable to assign
  * frames to the right funcs. When multiple frames are merged into one func,
  * some funcs can become orphaned; they remain in the funcTable.
+ * oldFuncToNewFuncMap is mutated to include the new mappings that result from
+ * this symbolication step. oldFuncToNewFuncMap is allowed to contain existing
+ * content; the existing entries are assumed to be for other libs, i.e. they're
+ * expected to have no overlap with allFuncsForThisLib.
  */
 export function applySymbolicationStep(
   thread: Thread,
-  symbolicationStepInfo: SymbolicationStepInfo
-) {
-  const {
-    resourceIndex,
-    frameToFuncAddressMap,
-    funcAddressToSymbolNameMap,
-    funcAddressToCanonicalFuncIndexMap,
-    availableFuncs,
-  } = symbolicationStepInfo;
+  symbolicationStepInfo: SymbolicationStepInfo,
+  oldFuncToNewFuncMap: FuncToFuncMap
+): Thread {
   const {
     frameTable: oldFrameTable,
     funcTable: oldFuncTable,
     stringTable,
   } = thread;
+  const { threadLibSymbolicationInfo, resultsForLib } = symbolicationStepInfo;
+  const {
+    resourceIndex,
+    allFramesForThisLib,
+    allFuncsForThisLib,
+  } = threadLibSymbolicationInfo;
+
+  const availableFuncs = new Set(allFuncsForThisLib);
+  const frameToFuncAddressMap = new Map();
+  const funcAddressToSymbolNameMap = new Map();
+  const funcAddressToCanonicalFuncIndexMap = new Map();
+
+  for (const frameIndex of allFramesForThisLib) {
+    const oldFrameFunc = oldFrameTable.func[frameIndex];
+    const address = oldFrameTable.address[frameIndex];
+    let addressResult: AddressResult | void = resultsForLib.get(address);
+    if (addressResult === undefined) {
+      const oldSymbol = stringTable.getString(oldFuncTable.name[oldFrameFunc]);
+      addressResult = {
+        functionOffset:
+          oldFrameTable.address[frameIndex] -
+          oldFuncTable.address[oldFrameFunc],
+        name: oldSymbol,
+      };
+    }
+
+    // |address| is the original frame address that we found during
+    // stackwalking, as a library-relative offset.
+    // |addressResult.functionOffset| is the offset between the start of
+    // the function and |address|.
+    // |funcAddress| is the start of the function, as a library-relative
+    // offset.
+    const funcAddress = address - addressResult.functionOffset;
+    frameToFuncAddressMap.set(frameIndex, funcAddress);
+    funcAddressToSymbolNameMap.set(funcAddress, addressResult.name);
+
+    // Opportunistically match up funcAddress with oldFrameFunc.
+    if (!funcAddressToCanonicalFuncIndexMap.has(funcAddress)) {
+      if (availableFuncs.has(oldFrameFunc)) {
+        // Use the frame's old func as the canonical func for this funcAddress.
+        // This case is hit for all frames if this is the initial symbolication,
+        // because in the initial symbolication scenario, each frame has a
+        // distinct func which is available to be designated as a canonical func.
+        const newFrameFunc = oldFrameFunc;
+        availableFuncs.delete(newFrameFunc);
+        funcAddressToCanonicalFuncIndexMap.set(funcAddress, newFrameFunc);
+      } else {
+        // oldFrameFunc has already been used as the canonical func for a
+        // different funcAddress. This can happen during re-symbolication.
+        // For now, funcAddressToCanonicalFuncIndexMap will not contain an
+        // entry for this funcAddress.
+        // But that state will be resolved eventually:
+        // Either in the course of the rest of this loop (when another frame
+        // will donate its oldFrameFunc), or in applySymbolicationStep.
+      }
+    }
+  }
+
+  // We now have the funcAddress for every frame, in frameToFuncAddressMap.
+  // We have also assigned a subset of funcAddresses to canonical funcs.
+  // These funcs have been removed from availableFuncs; availableFuncs
+  // contains the subset of existing funcs in the thread that do not have a
+  // funcAddress yet.
+  // If this is the initial symbolication, all funcAddresses will have funcs,
+  // because each frame had a distinct oldFrameFunc which was available to
+  // be designated as a canonical func.
+  // If this is a re-symbolication, then some funcAddresses may not have
+  // a canonical func yet, because oldFrameFunc might already have become
+  // the canonical func for a different funcAddress.
+
+  // Build oldFuncToFuncAddressMap.
+  // If (oldFunc, funcAddress) is in oldFuncToFuncAddressMap, this means
+  // that all frames that used to belong to oldFunc have been resolved to
+  // the same funcAddress.
+  const oldFuncToFuncAddressEntries = [];
+  for (const [frameIndex, funcAddress] of frameToFuncAddressMap) {
+    const oldFrameFunc = oldFrameTable.func[frameIndex];
+    oldFuncToFuncAddressEntries.push([oldFrameFunc, funcAddress]);
+  }
+  const oldFuncToFuncAddressMap = makeConsensusMap(oldFuncToFuncAddressEntries);
 
   // We need to do the following:
   //  - Find a canonical func for every funcAddress
@@ -542,10 +498,27 @@ export function applySymbolicationStep(
       }
       funcAddressToCanonicalFuncIndexMap.set(funcAddress, funcIndex);
     }
-
     // Update the func properties.
     funcTable.address[funcIndex] = funcAddress;
     funcTable.name[funcIndex] = symbolStringIndex;
+  }
+
+  // Now we have a canonical func for every funcAddress, so we have enough
+  // information to build the oldFuncToNewFuncMap.
+  // If (oldFunc, newFunc) is in oldFuncToNewFuncMap, this means that all
+  // frames that used to belong to oldFunc or newFunc have been resolved to
+  // the same funcAddress, and that newFunc has been chosen as the canonical
+  // func for that funcAddress.
+  for (const [oldFunc, funcAddress] of oldFuncToFuncAddressMap) {
+    const newFunc = funcAddressToCanonicalFuncIndexMap.get(funcAddress);
+    if (newFunc === undefined) {
+      throw new Error(
+        'Impossible, all funcAddresses have a canonical func index at this point.'
+      );
+    }
+    if (oldFuncToFuncAddressMap.get(newFunc) === funcAddress) {
+      oldFuncToNewFuncMap.set(oldFunc, newFunc);
+    }
   }
 
   // Make a new frameTable with the updated frame -> func assignments.

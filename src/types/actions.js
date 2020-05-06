@@ -9,7 +9,6 @@ import type {
   Profile,
   Thread,
   ThreadIndex,
-  IndexIntoFuncTable,
   Pid,
   BrowsingContextID,
 } from './profile';
@@ -23,7 +22,7 @@ import type {
   ActiveTabGlobalTrack,
   OriginsTimeline,
 } from './profile-derived';
-import type { SymbolicationStepInfo } from '../profile-logic/symbolication';
+import type { FuncToFuncMap } from '../profile-logic/symbolication';
 import type { TemporaryError } from '../utils/errors';
 import type { Transform, TransformStacksPerThread } from './transforms';
 import type { IndexIntoZipFileTable } from '../profile-logic/zip-files';
@@ -48,13 +47,6 @@ export type PreviewSelection =
       +selectionStart: number,
       +selectionEnd: number,
     |};
-export type FuncToFuncMap = Map<IndexIntoFuncTable, IndexIntoFuncTable>;
-export type FunctionsUpdatePerThread = {
-  [id: ThreadIndex]: {|
-    oldFuncToNewFuncMap: FuncToFuncMap,
-    symbolicationSteps: SymbolicationStepInfo[],
-  |},
-};
 
 /**
  * The counts for how many tracks are hidden in the timeline.
@@ -233,8 +225,9 @@ type ProfileAction =
 
 type ReceiveProfileAction =
   | {|
-      +type: 'COALESCED_FUNCTIONS_UPDATE',
-      +functionsUpdatePerThread: FunctionsUpdatePerThread,
+      +type: 'COALESCED_SYMBOLICATION_STEP',
+      +symbolicatedThreads: Thread[],
+      +oldFuncToNewFuncMaps: Map<ThreadIndex, FuncToFuncMap>,
     |}
   | {|
       +type: 'DONE_SYMBOLICATING',

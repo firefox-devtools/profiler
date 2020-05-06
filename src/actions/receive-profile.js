@@ -10,7 +10,10 @@ import {
   unserializeProfileOfArbitraryFormat,
 } from '../profile-logic/process-profile';
 import { SymbolStore } from '../profile-logic/symbol-store';
-import { symbolicateProfile } from '../profile-logic/symbolication';
+import {
+  symbolicateProfile,
+  applySymbolicationStep,
+} from '../profile-logic/symbolication';
 import * as MozillaSymbolicationAPI from '../profile-logic/mozilla-symbolication-api';
 import { mergeProfiles } from '../profile-logic/comparison';
 import { decompress } from '../utils/gz';
@@ -48,12 +51,7 @@ import {
 import { computeActiveTabTracks } from '../profile-logic/active-tab';
 import { setDataSource } from './profile-view';
 
-import type {
-  FunctionsUpdatePerThread,
-  FuncToFuncMap,
-  RequestedLib,
-  ImplementationFilter,
-} from '../types/actions';
+import type { RequestedLib, ImplementationFilter } from '../types/actions';
 import type { TransformStacksPerThread } from '../types/transforms';
 import type { Action, ThunkAction, Dispatch } from '../types/store';
 import type { TimelineTrackOrganization } from '../types/state';
@@ -655,12 +653,34 @@ export function doneSymbolicating(): Action {
   return { type: 'DONE_SYMBOLICATING' };
 }
 
-export function coalescedFunctionsUpdate(
-  functionsUpdatePerThread: FunctionsUpdatePerThread
-): Action {
-  return {
-    type: 'COALESCED_FUNCTIONS_UPDATE',
-    functionsUpdatePerThread,
+export function coalescedSymbolicationStep(
+  symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
+): ThunkAction<void> {
+  return (dispatch, getState) => {
+    const { threads } = getProfile(getState());
+    const oldFuncToNewFuncMaps = new Map();
+    const symbolicatedThreads = threads.map((oldThread, threadIndex) => {
+      const symbolicationSteps = symbolicationStepsPerThread.get(threadIndex);
+      if (symbolicationSteps === undefined) {
+        return oldThread;
+      }
+      const oldFuncToNewFuncMap = new Map();
+      let thread = oldThread;
+      for (const symbolicationStep of symbolicationSteps) {
+        thread = applySymbolicationStep(
+          thread,
+          symbolicationStep,
+          oldFuncToNewFuncMap
+        );
+      }
+      oldFuncToNewFuncMaps.set(threadIndex, oldFuncToNewFuncMap);
+      return thread;
+    });
+    dispatch({
+      type: 'COALESCED_SYMBOLICATION_STEP',
+      oldFuncToNewFuncMaps,
+      symbolicatedThreads,
+    });
   };
 }
 
@@ -678,14 +698,14 @@ if (typeof window === 'object' && window.requestIdleCallback) {
   requestIdleCallbackPolyfill = callback => setTimeout(callback, 0);
 }
 
-class ColascedFunctionsUpdateDispatcher {
-  _updates: FunctionsUpdatePerThread;
+class ColascedSymbolicationStepDispatcher {
+  _updates: Map<ThreadIndex, SymbolicationStepInfo[]>;
   _requestedUpdate: boolean;
   _requestIdleTimeout: { timeout: number };
   scheduledUpdatesDone: Promise<void>;
 
   constructor() {
-    this._updates = {};
+    this._updates = new Map();
     this._requestedUpdate = false;
     this._requestIdleTimeout = { timeout: 2000 };
     this.scheduledUpdatesDone = Promise.resolve();
@@ -708,44 +728,36 @@ class ColascedFunctionsUpdateDispatcher {
 
   _dispatchUpdate(dispatch) {
     const updates = this._updates;
-    this._updates = {};
+    this._updates = new Map();
     this._requestedUpdate = false;
-    dispatch(coalescedFunctionsUpdate(updates));
+    dispatch(coalescedSymbolicationStep(updates));
   }
 
-  doSymbolicationStep(
+  enqueueSingleSymbolicationStep(
     dispatch: Dispatch,
     threadIndex: ThreadIndex,
-    oldFuncToNewFuncMap: FuncToFuncMap,
     symbolicationStepInfo: SymbolicationStepInfo
   ) {
     this._scheduleUpdate(dispatch);
-    if (!this._updates[threadIndex]) {
-      this._updates[threadIndex] = {
-        oldFuncToNewFuncMap,
-        symbolicationSteps: [symbolicationStepInfo],
-      };
-    } else {
-      for (const [oldFunc, funcIndex] of oldFuncToNewFuncMap) {
-        this._updates[threadIndex].oldFuncToNewFuncMap.set(oldFunc, funcIndex);
-      }
-      this._updates[threadIndex].symbolicationSteps.push(symbolicationStepInfo);
+    let threadSteps = this._updates.get(threadIndex);
+    if (threadSteps === undefined) {
+      threadSteps = [];
+      this._updates.set(threadIndex, threadSteps);
     }
+    threadSteps.push(symbolicationStepInfo);
   }
 }
 
-const gCoalescedFunctionsUpdateDispatcher = new ColascedFunctionsUpdateDispatcher();
+const gCoalescedSymbolicationStepDispatcher = new ColascedSymbolicationStepDispatcher();
 
-export function doSymbolicationStep(
+export function enqueueSingleSymbolicationStep(
   threadIndex: ThreadIndex,
-  oldFuncToNewFuncMap: FuncToFuncMap,
   symbolicationStepInfo: SymbolicationStepInfo
 ): ThunkAction<void> {
   return dispatch => {
-    gCoalescedFunctionsUpdateDispatcher.doSymbolicationStep(
+    gCoalescedSymbolicationStepDispatcher.enqueueSingleSymbolicationStep(
       dispatch,
       threadIndex,
-      oldFuncToNewFuncMap,
       symbolicationStepInfo
     );
   };
@@ -853,20 +865,15 @@ export async function doSymbolicateProfile(
   await symbolicateProfile(profile, symbolStore, {
     onSymbolicationStep: (
       threadIndex: ThreadIndex,
-      oldFuncToNewFuncMap: FuncToFuncMap,
       symbolicationStepInfo: SymbolicationStepInfo
     ) => {
       dispatch(
-        doSymbolicationStep(
-          threadIndex,
-          oldFuncToNewFuncMap,
-          symbolicationStepInfo
-        )
+        enqueueSingleSymbolicationStep(threadIndex, symbolicationStepInfo)
       );
     },
   });
 
-  await gCoalescedFunctionsUpdateDispatcher.scheduledUpdatesDone;
+  await gCoalescedSymbolicationStepDispatcher.scheduledUpdatesDone;
 
   dispatch(doneSymbolicating());
 }
