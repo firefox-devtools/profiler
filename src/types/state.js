@@ -76,8 +76,6 @@ export type ActiveTabProfileViewState = {|
   globalTracks: ActiveTabGlobalTrack[],
   // TODO: Add a better refined type for resource tracks.
   resourceTracks: LocalTrack[],
-  hiddenGlobalTracksGetter: () => Set<TrackIndex>,
-  hiddenLocalTracksByPidGetter: () => Map<Pid, Set<TrackIndex>>,
 |};
 
 /**
