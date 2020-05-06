@@ -862,16 +862,18 @@ export async function doSymbolicateProfile(
   symbolStore: SymbolStore
 ) {
   dispatch(startSymbolicating());
-  await symbolicateProfile(profile, symbolStore, {
-    onSymbolicationStep: (
+  await symbolicateProfile(
+    profile,
+    symbolStore,
+    (
       threadIndex: ThreadIndex,
       symbolicationStepInfo: SymbolicationStepInfo
     ) => {
       dispatch(
         enqueueSingleSymbolicationStep(threadIndex, symbolicationStepInfo)
       );
-    },
-  });
+    }
+  );
 
   await gCoalescedSymbolicationStepDispatcher.scheduledUpdatesDone;
 

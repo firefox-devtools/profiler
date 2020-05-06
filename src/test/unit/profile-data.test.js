@@ -606,17 +606,15 @@ describe('symbolication', function() {
       const symbolicationPromise = symbolicateProfile(
         unsymbolicatedProfile,
         symbolStore,
-        {
-          onSymbolicationStep: (threadIndex, symbolicationStepInfo) => {
-            if (!symbolicatedProfile) {
-              throw new Error('symbolicatedProfile cannot be null');
-            }
-            symbolicatedProfile.threads[threadIndex] = applySymbolicationStep(
-              symbolicatedProfile.threads[threadIndex],
-              symbolicationStepInfo,
-              new Map()
-            );
-          },
+        (threadIndex, symbolicationStepInfo) => {
+          if (!symbolicatedProfile) {
+            throw new Error('symbolicatedProfile cannot be null');
+          }
+          symbolicatedProfile.threads[threadIndex] = applySymbolicationStep(
+            symbolicatedProfile.threads[threadIndex],
+            symbolicationStepInfo,
+            new Map()
+          );
         }
       );
       return symbolicationPromise;
