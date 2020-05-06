@@ -3,7 +3,6 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 // @flow
-import { applySymbolicationStep } from '../profile-logic/symbolication';
 import { combineReducers } from 'redux';
 import * as Transforms from '../profile-logic/transforms';
 import * as ProfileData from '../profile-logic/profile-data';
@@ -35,7 +34,7 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {
     case 'PROFILE_LOADED':
       return action.profile;
-    case 'COALESCED_FUNCTIONS_UPDATE': {
+    case 'COALESCED_SYMBOLICATION_STEP': {
       if (state === null) {
         throw new Error(
           'Assumed that a profile would be loaded in time for a coalesced functions update.'
@@ -44,15 +43,8 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
       if (!state.threads.length) {
         return state;
       }
-      const { functionsUpdatePerThread } = action;
-      const threads = state.threads.map((thread, threadIndex) => {
-        if (!functionsUpdatePerThread[threadIndex]) {
-          return thread;
-        }
-        const { symbolicationSteps } = functionsUpdatePerThread[threadIndex];
-        return symbolicationSteps.reduce(applySymbolicationStep, thread);
-      });
-      return { ...state, threads };
+      const { symbolicatedThreads } = action;
+      return { ...state, threads: symbolicatedThreads };
     }
     case 'DONE_SYMBOLICATING': {
       if (state === null) {
@@ -159,15 +151,15 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         expandedCallNodePaths: new PathSet(),
         selectedMarker: null,
       }));
-    case 'COALESCED_FUNCTIONS_UPDATE': {
-      const { functionsUpdatePerThread } = action;
+    case 'COALESCED_SYMBOLICATION_STEP': {
+      const { oldFuncToNewFuncMaps } = action;
       // For each thread, apply oldFuncToNewFuncMap to that thread's
       // selectedCallNodePath and expandedCallNodePaths.
       return state.map((threadViewOptions, threadIndex) => {
-        if (!functionsUpdatePerThread[threadIndex]) {
+        const oldFuncToNewFuncMap = oldFuncToNewFuncMaps.get(threadIndex);
+        if (oldFuncToNewFuncMap === undefined) {
           return threadViewOptions;
         }
-        const { oldFuncToNewFuncMap } = functionsUpdatePerThread[threadIndex];
         const mapOldFuncToNewFunc = oldFunc => {
           const newFunc = oldFuncToNewFuncMap.get(oldFunc);
           return newFunc === undefined ? oldFunc : newFunc;
@@ -488,20 +480,16 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
   action
 ) => {
   switch (action.type) {
-    case 'COALESCED_FUNCTIONS_UPDATE': {
-      const { functionsUpdatePerThread } = action;
-
+    case 'COALESCED_SYMBOLICATION_STEP': {
       if (state === null) {
         return null;
       }
 
-      const functionUpdate = functionsUpdatePerThread[state.threadIndex];
-
-      if (!functionUpdate) {
+      const { oldFuncToNewFuncMaps } = action;
+      const oldFuncToNewFuncMap = oldFuncToNewFuncMaps.get(state.threadIndex);
+      if (oldFuncToNewFuncMap === undefined) {
         return state;
       }
-
-      const { oldFuncToNewFuncMap } = functionUpdate;
 
       const mapOldFuncToNewFunc = oldFunc => {
         const newFunc = oldFuncToNewFuncMap.get(oldFunc);
