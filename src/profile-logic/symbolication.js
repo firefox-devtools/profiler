@@ -173,12 +173,10 @@ import type {
 type LibKey = string; // of the form ${debugName}/${breakpadId}
 type Address = number;
 
-export type SymbolicationHandlers = {
-  onSymbolicationStep: (
-    threadIndex: ThreadIndex,
-    symbolicationStepInfo: SymbolicationStepInfo
-  ) => void,
-};
+export type SymbolicationStepCallback = (
+  threadIndex: ThreadIndex,
+  symbolicationStepInfo: SymbolicationStepInfo
+) => void;
 
 type ThreadLibSymbolicationInfo = {|
   // The resourceIndex for this lib in this thread.
@@ -345,7 +343,7 @@ function buildLibSymbolicationRequestsForAllThreads(
 }
 
 // With the symbolication results for the library given by libKey, call
-// symbolicationHandlers.onSymbolicationStep for each thread. Those calls will
+// symbolicationStepCallback for each thread. Those calls will
 // ensure that the symbolication information eventually makes it into the thread.
 // This function leaves all the actual work to applySymbolicationStep.
 function finishSymbolicationForLib(
@@ -353,7 +351,7 @@ function finishSymbolicationForLib(
   symbolicationInfo: ThreadSymbolicationInfo[],
   resultsForLib: Map<Address, AddressResult>,
   libKey: string,
-  symbolicationHandlers: SymbolicationHandlers
+  symbolicationStepCallback: SymbolicationStepCallback
 ): void {
   const { threads } = profile;
   for (let threadIndex = 0; threadIndex < threads.length; threadIndex++) {
@@ -363,7 +361,7 @@ function finishSymbolicationForLib(
       continue;
     }
     const symbolicationStep = { threadLibSymbolicationInfo, resultsForLib };
-    symbolicationHandlers.onSymbolicationStep(threadIndex, symbolicationStep);
+    symbolicationStepCallback(threadIndex, symbolicationStep);
   }
 }
 
@@ -540,13 +538,13 @@ export function applySymbolicationStep(
 /**
  * Symbolicates the profile. Symbols are obtained from the symbolStore.
  * This function performs steps II-IV (see the comment at the beginning of
- * this file); step V is outsourced to symbolicationHandlers.onSymbolicationStep
+ * this file); step V is outsourced to symbolicationStepCallback
  * which can call applySymbolicationStep to complete step V.
  */
 export async function symbolicateProfile(
   profile: Profile,
   symbolStore: AbstractSymbolStore,
-  symbolicationHandlers: SymbolicationHandlers
+  symbolicationStepCallback: SymbolicationStepCallback
 ): Promise<void> {
   const symbolicationInfo = profile.threads.map(getThreadSymbolicationInfo);
   const libSymbolicationRequests = buildLibSymbolicationRequestsForAllThreads(
@@ -562,7 +560,7 @@ export async function symbolicateProfile(
         symbolicationInfo,
         results,
         libKey,
-        symbolicationHandlers
+        symbolicationStepCallback
       );
     },
     (request, error) => {
