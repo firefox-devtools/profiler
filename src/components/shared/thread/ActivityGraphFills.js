@@ -386,8 +386,8 @@ export class ActivityFillGraphQuerier {
     const candidateSamples = this._getCategoriesSamplesAtTime(time, category);
 
     // The candidate samples are sorted by gravity, bottom to top.
-    // Each sample occupies a subrange of the [0, 1] range. The height of each
-    // sample's range is called "contribution" here. The sample ranges are
+    // Each sample occupies a non-empty subrange of the [0, 1] range. The height
+    // of each sample's range is called "contribution" here. The sample ranges are
     // directly adjacent, there's no space between them.
     // yPercentage is the mouse position converted to the [0, 1] range. We want
     // to find the sample whose range contains that yPercentage value.
@@ -395,10 +395,14 @@ export class ActivityFillGraphQuerier {
     // category, we start stacking up their contributions onto the lower edge
     // of that category's fill.
     let upperEdgeOfPreviousSample = categoryLowerEdge;
-    // Loop invariant: upperEdgeOfPreviousSample <= yPercentage.
+    // Loop invariant: yPercentage >= upperEdgeOfPreviousSample.
+    // (In fact, yPercentage > upperEdgeOfPreviousSample except during the first
+    // iteration - in the first iteration, yPercentage can be == categoryLowerEdge.)
     for (const { sample, contribution } of candidateSamples) {
       const upperEdgeOfThisSample = upperEdgeOfPreviousSample + contribution;
       if (yPercentage <= upperEdgeOfThisSample) {
+        // We use <= rather than < here so that we don't return null if
+        // yPercentage is equal to the upper edge of the last sample.
         return sample;
       }
       upperEdgeOfPreviousSample = upperEdgeOfThisSample;
@@ -453,7 +457,10 @@ export class ActivityFillGraphQuerier {
     // For each category, multiple fills can be present. All fills of the same
     // category will be consecutive in the fills array. See _getCategoryFills
     // for the full list.
-    // Loop invariant: previousFillEnd <= yPercentage.
+    // Loop invariant: yPercentage >= previousFillEnd.
+    // (In fact, yPercentage > previousFillEnd once we have encountered the first
+    // non-empty fill. Before that, yPercentage can be == previousFillEnd, if
+    // both are zero.)
     for (const { category, accumulatedUpperEdge } of this.fills) {
       const fillEnd = accumulatedUpperEdge[deviceX];
 
@@ -462,7 +469,13 @@ export class ActivityFillGraphQuerier {
         currentCategoryStart = previousFillEnd;
       }
 
-      if (fillEnd >= yPercentage) {
+      if (fillEnd === previousFillEnd) {
+        continue; // Ignore empty fills
+      }
+
+      if (yPercentage <= fillEnd) {
+        // We use <= rather than < here so that we don't return null if
+        // yPercentage is equal to the upper edge of the last fill.
         return {
           category,
           categoryLowerEdge: currentCategoryStart,
@@ -509,14 +522,17 @@ export class ActivityFillGraphQuerier {
           ? stackTable.category[stackIndex]
           : greyCategoryIndex;
       if (sampleCategory === category) {
-        sampleContributions.push({
-          sample,
-          contribution: this._getSmoothedContributionFromSampleToPixel(
-            xPixel,
-            xPixelsPerMs,
-            sample
-          ),
-        });
+        const contribution = this._getSmoothedContributionFromSampleToPixel(
+          xPixel,
+          xPixelsPerMs,
+          sample
+        );
+        if (contribution > 0) {
+          sampleContributions.push({
+            sample,
+            contribution,
+          });
+        }
       }
     }
     if (treeOrderSampleComparator) {
