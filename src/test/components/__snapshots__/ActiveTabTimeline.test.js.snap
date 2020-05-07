@@ -55,6 +55,21 @@ exports[`ActiveTabTimeline ActiveTabGlobalTrack matches the snapshot of a global
 </li>
 `;
 
+exports[`ActiveTabTimeline ActiveTabResourcesPanel matches the snapshot of a resources panel 1`] = `
+<div
+  class="timelineResources"
+  style="--resources-header-height: 20px;"
+>
+  <div
+    class="timelineResourcesHeader"
+  >
+    Resources (
+    1
+    )
+  </div>
+</div>
+`;
+
 exports[`ActiveTabTimeline should be rendered properly from the Timeline component 1`] = `
 <div
   class="timelineSelection activeTab"
