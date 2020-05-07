@@ -12,10 +12,14 @@ import {
   getSelectedTab,
 } from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
-import { getActiveTabGlobalTracks } from '../../selectors/profile';
+import {
+  getActiveTabGlobalTracks,
+  getActiveTabResourceTracks,
+} from '../../selectors/profile';
 import './Track.css';
 import TimelineTrackThread from './TrackThread';
 import TimelineTrackScreenshots from './TrackScreenshots';
+import ActiveTabResourcesPanel from './ActiveTabResourcesPanel';
 import { assertExhaustiveCheck } from '../../utils/flow';
 
 import type { TabSlug } from '../../app-logic/tabs-handling';
@@ -24,6 +28,7 @@ import type {
   TrackIndex,
   ActiveTabGlobalTrack,
   InitialSelectedTrackReference,
+  LocalTrack,
 } from '../../types/profile-derived';
 import type { ConnectedProps } from '../../utils/connect';
 
@@ -37,6 +42,7 @@ type StateProps = {|
   +globalTrack: ActiveTabGlobalTrack,
   +isSelected: boolean,
   +selectedTab: TabSlug,
+  +resourceTracks: LocalTrack[],
 |};
 
 type DispatchProps = {|
@@ -85,6 +91,20 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
     }
   }
 
+  renderResourcesPanel() {
+    const { resourceTracks } = this.props;
+    if (resourceTracks.length === 0) {
+      return null;
+    }
+
+    return (
+      <ActiveTabResourcesPanel
+        resourceTracks={resourceTracks}
+        setIsInitialSelectedPane={this.setIsInitialSelectedPane}
+      />
+    );
+  }
+
   _takeContainerRef = (el: HTMLElement | null) => {
     const { isSelected } = this.props;
     this._container = el;
@@ -121,11 +141,14 @@ class ActiveTabGlobalTrackComponent extends PureComponent<Props> {
         >
           <div className="timelineTrackTrack">{this.renderTrack()}</div>
         </div>
-        {/* TODO: Render the resources panel here */}
+        {this.renderResourcesPanel()}
       </li>
     );
   }
 }
+
+// Provide an empty list, so that strict equality checks work for component updates.
+const EMPTY_RESOURCE_TRACKS = [];
 
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: (state, { trackIndex }) => {
@@ -135,6 +158,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
 
     // These get assigned based on the track type.
     let isSelected = false;
+    let resourceTracks = EMPTY_RESOURCE_TRACKS;
 
     // Run different selectors based on the track type.
     switch (globalTrack.type) {
@@ -146,6 +170,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
             threadIndex === getSelectedThreadIndex(state) &&
             selectedTab !== 'network-chart';
         }
+        resourceTracks = getActiveTabResourceTracks(state);
         break;
       }
       case 'screenshots':
@@ -161,6 +186,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       globalTrack,
       isSelected,
       selectedTab,
+      resourceTracks,
     };
   },
   mapDispatchToProps: {

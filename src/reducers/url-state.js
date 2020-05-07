@@ -430,6 +430,22 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
 };
 
 /**
+ * Active tab specific profile url states
+ */
+
+/**
+ * Active tab resources panel open/close state.
+ */
+const resourcesOpen: Reducer<boolean> = (state = false, action) => {
+  switch (action.type) {
+    case 'TOGGLE_RESOURCES_PANEL':
+      return !state;
+    default:
+      return state;
+  }
+};
+
+/**
  * These values are specific to an individual full profile.
  */
 const fullProfileSpecific = combineReducers({
@@ -450,7 +466,9 @@ const fullProfileSpecific = combineReducers({
 /**
  * These values are specific to an individual active tab profile.
  */
-// const activeTabProfileSpecific = combineReducers({});
+const activeTabProfileSpecific = combineReducers({
+  resourcesOpen,
+});
 
 /**
  * These values are specific to an individual profile.
@@ -467,9 +485,7 @@ const profileSpecific = combineReducers({
   networkSearchString,
   transforms,
   full: fullProfileSpecific,
-  // Currently this is commented out because it's empty and redux doesn't allow
-  // empty objects without reducers. Uncomment it after adding a state in it.
-  // activeTab: activeTabProfileSpecific,
+  activeTab: activeTabProfileSpecific,
 });
 
 /**

@@ -35,6 +35,9 @@ export const getProfileSpecificState: Selector<*> = state =>
   getUrlState(state).profileSpecific;
 export const getFullProfileSpecificState: Selector<*> = state =>
   getProfileSpecificState(state).full;
+export const getActiveTabProfileSpecificState: Selector<*> = state =>
+  getProfileSpecificState(state).activeTab;
+
 export const getDataSource: Selector<DataSource> = state =>
   getUrlState(state).dataSource;
 export const getHash: Selector<string> = state => getUrlState(state).hash;
@@ -58,6 +61,12 @@ export const getShowJsTracerSummary: Selector<boolean> = state =>
   getFullProfileSpecificState(state).showJsTracerSummary;
 export const getTimelineTrackOrganization: Selector<TimelineTrackOrganization> = state =>
   getUrlState(state).timelineTrackOrganization;
+
+/**
+ * Active tab specific url state selectors
+ */
+export const getIsActiveTabResourcesOpen: Selector<boolean> = state =>
+  getActiveTabProfileSpecificState(state).resourcesOpen;
 
 /**
  * Raw search strings, before any splitting has been performed.

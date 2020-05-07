@@ -16,6 +16,7 @@ import {
   getGlobalTracks,
   getLocalTracksByPid,
   getActiveTabGlobalTracks,
+  getActiveTabResourceTracks,
 } from './profile';
 import { getZipFileState } from './zipped-profiles.js';
 import { assertExhaustiveCheck, ensureExists } from '../utils/flow';
@@ -29,6 +30,7 @@ import {
   TIMELINE_RULER_HEIGHT,
   TIMELINE_SETTINGS_HEIGHT,
   TRACK_VISUAL_PROGRESS_HEIGHT,
+  ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT,
 } from '../app-logic/constants';
 
 import type { TabSlug } from '../app-logic/tabs-handling';
@@ -103,6 +105,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
   getHiddenLocalTracksByPid,
   getTrackThreadHeights,
   getActiveTabGlobalTracks,
+  getActiveTabResourceTracks,
   getScreenshotTrackHeight,
   (
     timelineTrackOrganization,
@@ -112,6 +115,7 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
     hiddenLocalTracksByPid,
     trackThreadHeights,
     activeTabGlobalTracks,
+    activeTabResourceTracks,
     screenshotTrackHeight
   ) => {
     let height = TIMELINE_RULER_HEIGHT;
@@ -121,6 +125,12 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
         return height + 500;
       }
       case 'active-tab': {
+        if (activeTabResourceTracks.length > 0) {
+          // Active tab resources panel has a header and we should also add its
+          // height if there is a panel there.
+          height += ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT;
+        }
+
         for (const [
           trackIndex,
           globalTrack,
