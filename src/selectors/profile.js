@@ -460,14 +460,6 @@ export const getActiveTabGlobalTrackFromReference: DangerousSelectorWithArgument
 > = (state, trackReference) =>
   getActiveTabGlobalTracks(state)[trackReference.trackIndex];
 
-export const getActiveTabHiddenGlobalTracksGetter: Selector<
-  () => Set<TrackIndex>
-> = state => getActiveTabProfileView(state).hiddenGlobalTracksGetter;
-
-export const getActiveTabHiddenLocalTracksByPidGetter: Selector<
-  () => Map<Pid, Set<TrackIndex>>
-> = state => getActiveTabProfileView(state).hiddenLocalTracksByPidGetter;
-
 /**
  * Origins profile view selectors.
  */
@@ -487,18 +479,12 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
   getGlobalTracks,
   getLocalTracksByPid,
   UrlState.getHiddenLocalTracksByPid,
-  getActiveTabHiddenLocalTracksByPidGetter,
   UrlState.getHiddenGlobalTracks,
-  getActiveTabHiddenGlobalTracksGetter,
-  UrlState.getTimelineTrackOrganization,
   (
     globalTracks,
     localTracksByPid,
     hiddenLocalTracksByPid,
-    activeTabHiddenLocalTracksByPidGetter,
-    hiddenGlobalTracks,
-    activeTabHiddenGlobalTracksGetter,
-    timelineTrackOrganization
+    hiddenGlobalTracks
   ) => {
     let hidden = 0;
     let total = 0;
@@ -507,11 +493,6 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
     for (const [pid, localTracks] of localTracksByPid) {
       // Look up some of the information.
       const hiddenLocalTracks = hiddenLocalTracksByPid.get(pid) || new Set();
-      const activeTabHiddenLocalTracks =
-        // Do not call the getter if we are not in the single tab view.
-        timelineTrackOrganization.type === 'active-tab'
-          ? activeTabHiddenLocalTracksByPidGetter().get(pid) || new Set()
-          : new Set();
       const globalTrackIndex = globalTracks.findIndex(
         track => track.type === 'process' && track.pid === pid
       );
@@ -526,45 +507,16 @@ export const getHiddenTrackCount: Selector<HiddenTrackCount> = createSelector(
 
       if (hiddenGlobalTracks.has(globalTrackIndex)) {
         // The entire process group is hidden, count all of the tracks.
-        if (timelineTrackOrganization.type === 'active-tab') {
-          if (!activeTabHiddenGlobalTracksGetter().has(globalTrackIndex)) {
-            // If we are in active tab view and the current hidden track is not
-            // hidden by that, count its local tracks but also make sure that we
-            // don't count its hidden local tracks that if they are hidden by active tab view.
-            hidden += localTracks.length - activeTabHiddenLocalTracks.size;
-          }
-        } else {
-          hidden += localTracks.length;
-        }
+        hidden += localTracks.length;
       } else {
         // Only count the hidden local tracks.
         hidden += hiddenLocalTracks.size;
-        if (timelineTrackOrganization.type === 'active-tab') {
-          // If we are in active tab view, we should remove the count of active
-          // tab hidden tracks since they won't be visible at all.
-          hidden -= [...activeTabHiddenLocalTracks].filter(t =>
-            hiddenLocalTracks.has(t)
-          ).length;
-        }
       }
       total += localTracks.length;
-      if (timelineTrackOrganization.type === 'active-tab') {
-        // Again, if we are in active tab view, do not count the tracks that are hidden by active tab view.
-        total -= activeTabHiddenLocalTracks.size;
-      }
     }
 
-    // Count up the global tracks
-    if (timelineTrackOrganization.type === 'active-tab') {
-      const activeTabHiddenGlobalTracks = activeTabHiddenGlobalTracksGetter();
-      total += globalTracks.length - activeTabHiddenGlobalTracks.size;
-      hidden += [...hiddenGlobalTracks].filter(
-        t => !activeTabHiddenGlobalTracks.has(t)
-      ).length;
-    } else {
-      total += globalTracks.length;
-      hidden += hiddenGlobalTracks.size;
-    }
+    total += globalTracks.length;
+    hidden += hiddenGlobalTracks.size;
 
     return { hidden, total };
   }
@@ -748,92 +700,6 @@ export const getRelevantInnerWindowIDsForCurrentTab: Selector<
     }
   }
 );
-
-/**
- * Gets the hidden global tracks from the url and from the active tab view,
- * then merges those Sets depending on the active tab view status.
- */
-export const getComputedHiddenGlobalTracks: Selector<
-  Set<TrackIndex>
-> = createSelector(
-  UrlState.getHiddenGlobalTracks,
-  UrlState.getTimelineTrackOrganization,
-  getActiveTabHiddenGlobalTracksGetter,
-  (
-    hiddenGlobalTracks,
-    timelineTrackOrganization,
-    activeTabHiddenGlobalTracksGetter
-  ) => {
-    if (timelineTrackOrganization !== 'active-tab') {
-      return hiddenGlobalTracks;
-    }
-
-    // We are in the active tab mode and we need to hide the tracks that don't
-    // belong to the active tab as well.
-    return new Set([
-      ...hiddenGlobalTracks,
-      ...activeTabHiddenGlobalTracksGetter(),
-    ]);
-  }
-);
-
-/**
- * Gets the hidden local tracks from the url and from the active tab view,
- * then merges those Sets depending on the active tab view status.
- */
-export const getComputedHiddenLocalTracksByPid: Selector<
-  Map<Pid, Set<TrackIndex>>
-> = createSelector(
-  UrlState.getHiddenLocalTracksByPid,
-  UrlState.getTimelineTrackOrganization,
-  getActiveTabHiddenLocalTracksByPidGetter,
-  (
-    hiddenLocalTracksByPid,
-    timelineTrackOrganization,
-    activeTabHiddenLocalTracksByPidGetter
-  ) => {
-    if (timelineTrackOrganization !== 'active-tab') {
-      return hiddenLocalTracksByPid;
-    }
-
-    // We are in the active tab mode and we need to hide the tracks that don't
-    // belong to the active tab as well.
-
-    // We need to deep copy those Maps and Sets here, just in case.
-    const mergedHiddenLocalTracksByPid = new Map();
-    for (const [pid, localTracks] of hiddenLocalTracksByPid) {
-      mergedHiddenLocalTracksByPid.set(pid, new Set([...localTracks]));
-    }
-
-    for (const [pid, localTracks] of activeTabHiddenLocalTracksByPidGetter()) {
-      const entry = mergedHiddenLocalTracksByPid.get(pid);
-      if (entry) {
-        mergedHiddenLocalTracksByPid.set(
-          pid,
-          new Set([...entry, ...localTracks])
-        );
-      } else {
-        mergedHiddenLocalTracksByPid.set(pid, new Set([...localTracks]));
-      }
-    }
-
-    return mergedHiddenLocalTracksByPid;
-  }
-);
-
-/**
- * This selector does a simple lookup in the set of computed hidden tracks for a
- * PID, and ensures that a TrackIndex is selected correctly. This makes it easier
- * to avoid doing null checks everywhere.
- */
-export const getComputedHiddenLocalTracks: DangerousSelectorWithArguments<
-  Set<TrackIndex>,
-  Pid
-> = (state, pid) =>
-  ensureExists(
-    getComputedHiddenLocalTracksByPid(state).get(pid),
-    'Unable to get the tracks for the given pid.'
-  );
 
 /**
  * Extracts the data of the first page on the tab filtered profile.

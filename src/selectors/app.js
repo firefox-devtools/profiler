@@ -9,12 +9,12 @@ import {
   getDataSource,
   getSelectedTab,
   getTimelineTrackOrganization,
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
 } from './url-state';
 import {
   getGlobalTracks,
   getLocalTracksByPid,
-  getComputedHiddenGlobalTracks,
-  getComputedHiddenLocalTracksByPid,
   getActiveTabGlobalTracks,
 } from './profile';
 import { getZipFileState } from './zipped-profiles.js';
@@ -99,8 +99,8 @@ export const getTimelineHeight: Selector<null | CssPixels> = createSelector(
   getTimelineTrackOrganization,
   getGlobalTracks,
   getLocalTracksByPid,
-  getComputedHiddenGlobalTracks,
-  getComputedHiddenLocalTracksByPid,
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
   getTrackThreadHeights,
   getActiveTabGlobalTracks,
   getScreenshotTrackHeight,
