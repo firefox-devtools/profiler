@@ -15,7 +15,7 @@ import type {
   IndexIntoFrameTable,
   IndexIntoResourceTable,
 } from '../types/profile';
-import type { MemoryOffset } from '../types/units';
+import type { MemoryOffset, Address } from '../types/units';
 import type {
   AbstractSymbolStore,
   AddressResult,
@@ -171,7 +171,6 @@ import type {
  */
 
 type LibKey = string; // of the form ${debugName}/${breakpadId}
-type Address = number;
 
 export type SymbolicationStepCallback = (
   threadIndex: ThreadIndex,
@@ -393,10 +392,13 @@ export function applySymbolicationStep(
     allFuncsForThisLib,
   } = threadLibSymbolicationInfo;
 
-  const availableFuncs = new Set(allFuncsForThisLib);
-  const frameToFuncAddressMap = new Map();
-  const funcAddressToSymbolNameMap = new Map();
-  const funcAddressToCanonicalFuncIndexMap = new Map();
+  const availableFuncs: Set<IndexIntoFuncTable> = new Set(allFuncsForThisLib);
+  const frameToFuncAddressMap: Map<IndexIntoFrameTable, Address> = new Map();
+  const funcAddressToSymbolNameMap: Map<Address, string> = new Map();
+  const funcAddressToCanonicalFuncIndexMap: Map<
+    Address,
+    IndexIntoFuncTable
+  > = new Map();
 
   for (const frameIndex of allFramesForThisLib) {
     const oldFrameFunc = oldFrameTable.func[frameIndex];

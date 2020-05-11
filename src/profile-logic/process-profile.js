@@ -59,7 +59,12 @@ import type {
   ProfilerOverhead,
   NativeAllocationsTable,
 } from '../types/profile';
-import type { Milliseconds, Microseconds } from '../types/units';
+import type {
+  Milliseconds,
+  Microseconds,
+  Address,
+  MemoryOffset,
+} from '../types/units';
 import type {
   GeckoProfile,
   GeckoSubprocessProfile,
@@ -260,15 +265,21 @@ function _extractUnsymbolicatedFunction(
   } = extractionInfo;
 
   let resourceIndex = -1;
-  let addressRelativeToLib = -1;
+  let addressRelativeToLib: Address = -1;
 
-  const address = parseInt(locationString.substr(2), 16);
-  // Look up to see if it's a known library address.
+  // The frame address, as observed in the profiled process. This address was
+  // valid in the (virtual memory) address space of the profiled process.
+  const address: MemoryOffset = parseInt(locationString.substr(2), 16);
+
+  // We want to turn this address into a library-relative offset.
+  // Look up to see if it falls into one of the libraries that were mapped into
+  // the profiled process, according to the libs list.
   const lib = getContainingLibrary(libs, address);
   if (lib) {
-    // This is a known library.
-    const baseAddress = lib.start - lib.offset;
-    addressRelativeToLib = address - baseAddress;
+    // Yes, we found the library whose mapping covers this address!
+    const libBaseAddress = lib.start - lib.offset;
+    addressRelativeToLib = address - libBaseAddress;
+
     resourceIndex = libToResourceIndex.get(lib);
     if (resourceIndex === undefined) {
       // This library doesn't exist in the libs array, insert it. This resou
