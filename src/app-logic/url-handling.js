@@ -96,7 +96,7 @@ type FullProfileSpecificBaseQuery = {|
 
 // Base query that only applies to active tab profile view.
 type ActiveTabProfileSpecificBaseQuery = {|
-  resourcesOpen: null | void,
+  resources: null | void,
 |};
 
 // Base query that only applies to origins profile view.
@@ -268,7 +268,7 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     case 'active-tab': {
       baseQuery = ({}: ActiveTabProfileSpecificBaseQueryShape);
 
-      baseQuery.resourcesOpen = urlState.profileSpecific.activeTab
+      baseQuery.resources = urlState.profileSpecific.activeTab
         .isResourcesPanelOpen
         ? null
         : undefined;
@@ -536,7 +536,7 @@ export function stateFromLocation(
           : null,
       },
       activeTab: {
-        isResourcesPanelOpen: query.resourcesOpen !== undefined,
+        isResourcesPanelOpen: query.resources !== undefined,
       },
     },
   };
