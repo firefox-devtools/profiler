@@ -404,6 +404,16 @@ export function applySymbolicationStep(
     IndexIntoFuncTable
   > = new Map();
 
+  // We want to group frames into funcs, and give each func a name.
+  // We group frames to the same func if the addresses for these frames resolve
+  // to the same funcAddress.
+  // We obtain the funcAddress from the symbolication information in resultsForLib:
+  // resultsForLib does not only contain the name of the function; it also contains,
+  // for each address, the functionOffset:
+  // functionOffset = frameAddress - funcAddress.
+  // So we can do the inverse calculation: funcAddress = frameAddress - functionOffset.
+  // All frames with the same funcAddress are grouped into the same function.
+
   for (const frameIndex of allFramesForThisLib) {
     const oldFrameFunc = oldFrameTable.func[frameIndex];
     const address = oldFrameTable.address[frameIndex];
