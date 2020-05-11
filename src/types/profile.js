@@ -247,8 +247,8 @@ export type FuncTable = {|
   // isJS and relevantForJS describe the function type. Non-JavaScript functions
   // can be marked as "relevant for JS" so that for example DOM API label functions
   // will show up in any JavaScript stack views.
-  // isJS and relevantForJS should really instead be combined into one stackType field:
-  // stackType: 'js' | 'js-relevant-label' | 'native-relevant-label' | 'native'
+  // It may be worth combining these two fields into one:
+  // https://github.com/firefox-devtools/profiler/issues/2543
   isJS: Array<boolean>,
   relevantForJS: Array<boolean>,
 
