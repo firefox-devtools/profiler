@@ -65,8 +65,8 @@ export const getTimelineTrackOrganization: Selector<TimelineTrackOrganization> =
 /**
  * Active tab specific url state selectors
  */
-export const getIsActiveTabResourcesOpen: Selector<boolean> = state =>
-  getActiveTabProfileSpecificState(state).resourcesOpen;
+export const getIsActiveTabResourcesPanelOpen: Selector<boolean> = state =>
+  getActiveTabProfileSpecificState(state).isResourcesPanelOpen;
 
 /**
  * Raw search strings, before any splitting has been performed.

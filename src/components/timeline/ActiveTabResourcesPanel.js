@@ -8,7 +8,7 @@ import * as React from 'react';
 import classNames from 'classnames';
 import explicitConnect from '../../utils/connect';
 import { withSize } from '../shared/WithSize';
-import { getIsActiveTabResourcesOpen } from '../../selectors/url-state';
+import { getIsActiveTabResourcesPanelOpen } from '../../selectors/url-state';
 import { toggleResourcesPanel } from '../../actions/app';
 import { ACTIVE_TAB_TIMELINE_RESOURCES_HEADER_HEIGHT } from '../../app-logic/constants';
 
@@ -22,7 +22,7 @@ type OwnProps = {|
 |};
 
 type StateProps = {|
-  isActiveTabResourcesOpen: boolean,
+  isActiveTabResourcesPanelOpen: boolean,
 |};
 
 type DispatchProps = {|
@@ -39,7 +39,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
     const {
       resourceTracks,
       toggleResourcesPanel,
-      isActiveTabResourcesOpen,
+      isActiveTabResourcesPanelOpen,
     } = this.props;
     return (
       <div
@@ -51,12 +51,12 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
         <div
           onClick={toggleResourcesPanel}
           className={classNames('timelineResourcesHeader', {
-            opened: isActiveTabResourcesOpen,
+            opened: isActiveTabResourcesPanelOpen,
           })}
         >
           Resources ({resourceTracks.length})
         </div>
-        {isActiveTabResourcesOpen ? (
+        {isActiveTabResourcesPanelOpen ? (
           <ol className="timelineResourceTracks">
             {/* TODO: Add the Resource tracks here */}
           </ol>
@@ -68,7 +68,7 @@ class ActiveTabResourcesPanel extends React.PureComponent<Props> {
 
 export default explicitConnect<OwnProps, StateProps, DispatchProps>({
   mapStateToProps: state => ({
-    isActiveTabResourcesOpen: getIsActiveTabResourcesOpen(state),
+    isActiveTabResourcesPanelOpen: getIsActiveTabResourcesPanelOpen(state),
   }),
   mapDispatchToProps: { toggleResourcesPanel },
   component: withSize<Props>(ActiveTabResourcesPanel),

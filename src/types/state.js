@@ -219,7 +219,7 @@ export type FullProfileSpecificUrlState = {|
  * They should not be used from the full view.
  */
 export type ActiveTabSpecificProfileUrlState = {|
-  resourcesOpen: boolean,
+  isResourcesPanelOpen: boolean,
 |};
 
 export type ProfileSpecificUrlState = {|

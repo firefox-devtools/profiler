@@ -268,7 +268,8 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     case 'active-tab': {
       baseQuery = ({}: ActiveTabProfileSpecificBaseQueryShape);
 
-      baseQuery.resourcesOpen = urlState.profileSpecific.activeTab.resourcesOpen
+      baseQuery.resourcesOpen = urlState.profileSpecific.activeTab
+        .isResourcesPanelOpen
         ? null
         : undefined;
       break;
@@ -535,7 +536,7 @@ export function stateFromLocation(
           : null,
       },
       activeTab: {
-        resourcesOpen: query.resourcesOpen !== undefined,
+        isResourcesPanelOpen: query.resourcesOpen !== undefined,
       },
     },
   };

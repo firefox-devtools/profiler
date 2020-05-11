@@ -436,7 +436,7 @@ const timelineTrackOrganization: Reducer<TimelineTrackOrganization> = (
 /**
  * Active tab resources panel open/close state.
  */
-const resourcesOpen: Reducer<boolean> = (state = false, action) => {
+const isResourcesPanelOpen: Reducer<boolean> = (state = false, action) => {
   switch (action.type) {
     case 'TOGGLE_RESOURCES_PANEL':
       return !state;
@@ -467,7 +467,7 @@ const fullProfileSpecific = combineReducers({
  * These values are specific to an individual active tab profile.
  */
 const activeTabProfileSpecific = combineReducers({
-  resourcesOpen,
+  isResourcesPanelOpen,
 });
 
 /**
