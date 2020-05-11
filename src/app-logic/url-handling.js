@@ -95,7 +95,9 @@ type FullProfileSpecificBaseQuery = {|
 |};
 
 // Base query that only applies to active tab profile view.
-type ActiveTabProfileSpecificBaseQuery = {||};
+type ActiveTabProfileSpecificBaseQuery = {|
+  resources: null | void,
+|};
 
 // Base query that only applies to origins profile view.
 type OriginsProfileSpecificBaseQuery = {||};
@@ -265,6 +267,11 @@ export function urlStateToUrlObject(urlState: UrlState): UrlObject {
     }
     case 'active-tab': {
       baseQuery = ({}: ActiveTabProfileSpecificBaseQueryShape);
+
+      baseQuery.resources = urlState.profileSpecific.activeTab
+        .isResourcesPanelOpen
+        ? null
+        : undefined;
       break;
     }
     case 'origins':
@@ -528,9 +535,9 @@ export function stateFromLocation(
           ? query.hiddenThreads.split('-').map(index => Number(index))
           : null,
       },
-      // Currently this is commented out because it's empty and redux doesn't allow
-      // empty objects without reducers. Uncomment it after adding a state in it.
-      // activeTab: {},
+      activeTab: {
+        isResourcesPanelOpen: query.resources !== undefined,
+      },
     },
   };
 }

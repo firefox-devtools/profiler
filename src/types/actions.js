@@ -376,7 +376,8 @@ type UrlStateAction =
   | {|
       +type: 'SET_DATA_SOURCE',
       +dataSource: DataSource,
-    |};
+    |}
+  | {| +type: 'TOGGLE_RESOURCES_PANEL' |};
 
 type IconsAction =
   | {| +type: 'ICON_HAS_LOADED', +icon: string |}
