@@ -34,7 +34,7 @@ const profile: Reducer<Profile | null> = (state = null, action) => {
   switch (action.type) {
     case 'PROFILE_LOADED':
       return action.profile;
-    case 'COALESCED_SYMBOLICATION_STEP': {
+    case 'BULK_SYMBOLICATION': {
       if (state === null) {
         throw new Error(
           'Assumed that a profile would be loaded in time for a coalesced functions update.'
@@ -151,7 +151,7 @@ const viewOptionsPerThread: Reducer<ThreadViewOptions[]> = (
         expandedCallNodePaths: new PathSet(),
         selectedMarker: null,
       }));
-    case 'COALESCED_SYMBOLICATION_STEP': {
+    case 'BULK_SYMBOLICATION': {
       const { oldFuncToNewFuncMaps } = action;
       // For each thread, apply oldFuncToNewFuncMap to that thread's
       // selectedCallNodePath and expandedCallNodePaths.
@@ -480,7 +480,7 @@ const rightClickedCallNode: Reducer<RightClickedCallNode | null> = (
   action
 ) => {
   switch (action.type) {
-    case 'COALESCED_SYMBOLICATION_STEP': {
+    case 'BULK_SYMBOLICATION': {
       if (state === null) {
         return null;
       }
