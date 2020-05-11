@@ -445,7 +445,7 @@ export function applySymbolicationStep(
         // entry for this funcAddress.
         // But that state will be resolved eventually:
         // Either in the course of the rest of this loop (when another frame
-        // will donate its oldFrameFunc), or in applySymbolicationStep.
+        // will donate its oldFrameFunc), or further down in this function.
       }
     }
   }
