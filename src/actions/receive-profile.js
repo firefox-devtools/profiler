@@ -653,7 +653,16 @@ export function doneSymbolicating(): Action {
   return { type: 'DONE_SYMBOLICATING' };
 }
 
-export function coalescedSymbolicationStep(
+// Apply all the individual "symbolication steps" from symbolicationStepsPerThread
+// to the current profile, as one redux action.
+// We combine steps into one redux action in order to avoid unnecessary renders.
+// When symbolication results arrive, we often get a very high number of individual
+// symbolication updates. If we dispatched all of them as individual redux actions,
+// we would cause React to re-render synchronously for each action, and the profile
+// selectors called from rendering would do expensive work, most of which would never
+// reach the screen because it would be invalidated by the next symbolication update.
+// So we queue up symbolication steps and run the update from requestIdleCallback.
+export function bulkProcessSymbolicationSteps(
   symbolicationStepsPerThread: Map<ThreadIndex, SymbolicationStepInfo[]>
 ): ThunkAction<void> {
   return (dispatch, getState) => {
@@ -677,7 +686,7 @@ export function coalescedSymbolicationStep(
       return thread;
     });
     dispatch({
-      type: 'COALESCED_SYMBOLICATION_STEP',
+      type: 'BULK_SYMBOLICATION',
       oldFuncToNewFuncMaps,
       symbolicatedThreads,
     });
@@ -698,7 +707,9 @@ if (typeof window === 'object' && window.requestIdleCallback) {
   requestIdleCallbackPolyfill = callback => setTimeout(callback, 0);
 }
 
-class ColascedSymbolicationStepDispatcher {
+// Queues up symbolication steps and bulk-processes them from requestIdleCallback,
+// in order to improve UI responsiveness during symbolication.
+class SymbolicationStepQueue {
   _updates: Map<ThreadIndex, SymbolicationStepInfo[]>;
   _requestedUpdate: boolean;
   _requestIdleTimeout: { timeout: number };
@@ -712,7 +723,7 @@ class ColascedSymbolicationStepDispatcher {
   }
 
   _scheduleUpdate(dispatch) {
-    // Only request an update if one hasn't already been schedule.
+    // Only request an update if one hasn't already been scheduled.
     if (!this._requestedUpdate) {
       // Let any consumers of this class be able to know when all scheduled updates
       // are done.
@@ -730,7 +741,7 @@ class ColascedSymbolicationStepDispatcher {
     const updates = this._updates;
     this._updates = new Map();
     this._requestedUpdate = false;
-    dispatch(coalescedSymbolicationStep(updates));
+    dispatch(bulkProcessSymbolicationSteps(updates));
   }
 
   enqueueSingleSymbolicationStep(
@@ -748,20 +759,7 @@ class ColascedSymbolicationStepDispatcher {
   }
 }
 
-const gCoalescedSymbolicationStepDispatcher = new ColascedSymbolicationStepDispatcher();
-
-export function enqueueSingleSymbolicationStep(
-  threadIndex: ThreadIndex,
-  symbolicationStepInfo: SymbolicationStepInfo
-): ThunkAction<void> {
-  return dispatch => {
-    gCoalescedSymbolicationStepDispatcher.enqueueSingleSymbolicationStep(
-      dispatch,
-      threadIndex,
-      symbolicationStepInfo
-    );
-  };
-}
+const _symbolicationStepQueueSingleton = new SymbolicationStepQueue();
 
 /**
  * If the profile object we got from the add-on is an ArrayBuffer, convert it
@@ -869,13 +867,15 @@ export async function doSymbolicateProfile(
       threadIndex: ThreadIndex,
       symbolicationStepInfo: SymbolicationStepInfo
     ) => {
-      dispatch(
-        enqueueSingleSymbolicationStep(threadIndex, symbolicationStepInfo)
+      _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
+        dispatch,
+        threadIndex,
+        symbolicationStepInfo
       );
     }
   );
 
-  await gCoalescedSymbolicationStepDispatcher.scheduledUpdatesDone;
+  await _symbolicationStepQueueSingleton.scheduledUpdatesDone;
 
   dispatch(doneSymbolicating());
 }

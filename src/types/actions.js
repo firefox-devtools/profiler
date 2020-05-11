@@ -225,7 +225,7 @@ type ProfileAction =
 
 type ReceiveProfileAction =
   | {|
-      +type: 'COALESCED_SYMBOLICATION_STEP',
+      +type: 'BULK_SYMBOLICATION',
       +symbolicatedThreads: Thread[],
       +oldFuncToNewFuncMaps: Map<ThreadIndex, FuncToFuncMap>,
     |}
