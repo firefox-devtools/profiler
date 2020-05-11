@@ -154,9 +154,9 @@ describe('ActiveTabTimeline', function() {
     });
 
     it('does not display the resources panel if there are no resource tracks', () => {
-      const { getState, container } = setup();
+      const { getState, queryByText } = setup();
       expect(getActiveTabResourceTracks(getState()).length).toBe(0);
-      expect(container.querySelector('.timelineResourcesHeader')).toBeFalsy();
+      expect(queryByText(/Resources/)).toBe(null);
     });
   });
 
@@ -189,12 +189,8 @@ describe('ActiveTabTimeline', function() {
         </Provider>
       );
 
-      const { container } = renderResult;
-      const getResourcesPanelHeader = () =>
-        ensureExists(
-          container.querySelector('.timelineResourcesHeader'),
-          `Couldn't find the resources panel header with selector .timelineResourcesHeader`
-        );
+      const { getByText } = renderResult;
+      const getResourcesPanelHeader = () => getByText(/Resources/);
 
       return {
         ...renderResult,
@@ -214,6 +210,9 @@ describe('ActiveTabTimeline', function() {
 
     it('is closed by default', () => {
       const { getResourcesPanelHeader } = setup();
+      // TODO: Currently it's not possible to test this without accessing the class
+      // directly but this is not ideal for testing. We should assert user-like actions
+      // instead when we have content in this panel.
       expect(getResourcesPanelHeader().classList.contains('opened')).toBe(
         false
       );
@@ -222,6 +221,9 @@ describe('ActiveTabTimeline', function() {
     it('clicking on the header opens the resources panel', () => {
       const { getResourcesPanelHeader } = setup();
       const resourcesPanelHeader = getResourcesPanelHeader();
+      // TODO: Currently it's not possible to test this without accessing the class
+      // directly but this is not ideal for testing. We should assert user-like actions
+      // instead when we have content in this panel.
       expect(resourcesPanelHeader.classList.contains('opened')).toBe(false);
 
       fireEvent.click(resourcesPanelHeader);
