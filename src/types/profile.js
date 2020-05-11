@@ -7,6 +7,7 @@
 import type {
   Milliseconds,
   MemoryOffset,
+  Address,
   Microseconds,
   Bytes,
   Nanoseconds,
@@ -202,7 +203,7 @@ export type FrameTable = {|
   // If this is a frame for native code, the address is the address of the frame's
   // assembly instruction,  relative to the native library that contains it.
   // The library is given by the frame's func: frame -> func -> resource -> lib.
-  address: Array<MemoryOffset | -1>,
+  address: Array<Address | -1>,
 
   category: (IndexIntoCategoryList | null)[],
   subcategory: (IndexIntoSubcategoryListForCategory | null)[],
@@ -273,7 +274,7 @@ export type FuncTable = {|
   // Prior to initial symbolication, it stores the same address as the single
   // frame that refers to this func, because at that point the actual boundaries
   // of the true functions are not known.
-  address: Array<MemoryOffset | -1>,
+  address: Array<Address | -1>,
 
   length: number,
 |};
@@ -297,15 +298,28 @@ export type ResourceTable = {|
  * Information about libraries, for instance the Firefox executables, and its memory
  * offsets. This information is used for symbolicating C++ memory addresses into
  * actual function names. For instance turning 0x23459234 into "void myFuncName()".
+ *
+ * Libraries are mapped into the (virtual memory) address space of the profiled
+ * process. Libraries exist as files on disk, and not the entire file needs to be
+ * mapped. When the beginning of the file is not mapped, the library's "offset"
+ * field will be non-zero.
  */
 export type Lib = {|
+  // The range in the address space of the profiled process that the mappings for
+  // this shared library occupied.
   start: MemoryOffset,
   end: MemoryOffset,
-  offset: MemoryOffset,
+
+  // The offset relative to the library's base address where the first mapping starts.
+  // libBaseAddress + lib.offset = lib.start
+  // When instruction addresses are given as library-relative offsets, they are
+  // relative to the library's baseAddress.
+  offset: Bytes,
+
   arch: string, // e.g. "x86_64"
   name: string, // e.g. "firefox"
   path: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
-  debugName: string, // e.g. "firefox"
+  debugName: string, // e.g. "firefox", or "firefox.pdb" on Windows
   debugPath: string, // e.g. "/Applications/FirefoxNightly.app/Contents/MacOS/firefox"
   breakpadId: string, // e.g. "E54D3AF274383256B9F6144F83F3F7510"
 |};

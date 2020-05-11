@@ -39,6 +39,21 @@ export type HorizontalViewport = {
 
 export type StartEndRange = {| start: Milliseconds, end: Milliseconds |};
 
+// An absolute address that was valid in the (virtual memory) address space of
+// the profiled process, in bytes.
+// Addresses in this space are present in:
+//  - Original unsymbolicated native stack frames (before profile processing).
+//  - The memory ranges of the shared libraries that were loaded into the process.
+//
+// Most other "offsets", or "addresses", in the profiler code are relative to
+// some library, and those use a different type: Address.
 export type MemoryOffset = number;
+
+// An address, in bytes, relative to a library. The library that the address
+// is relative to is usually given by the context in some way.
+// Also called a library-relative offset.
+// The vast majority of addresses that we deal with in profiler code are in this
+// form, rather than in the absolute MemoryOffset form.
+export type Address = number;
 
 export type Bytes = number;
