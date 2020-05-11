@@ -16,7 +16,6 @@ import type { Profile, Pid } from '../types/profile';
 import type {
   LocalTrack,
   GlobalTrack,
-  TrackIndex,
   ActiveTabGlobalTrack,
   OriginsTimeline,
 } from '../types/profile-derived';
@@ -141,34 +140,6 @@ const activeTabResourceTracks: Reducer<LocalTrack[]> = (state = [], action) => {
   switch (action.type) {
     case 'VIEW_ACTIVE_TAB_PROFILE':
       return action.resourceTracks;
-    default:
-      return state;
-  }
-};
-
-/**
- * This information is stored, rather than derived via selectors, since the coalesced
- * function update would force it to be recomputed on every symbolication update
- * pass. It is valid for the lifetime of the profile.
- */
-const activeTabHiddenGlobalTracksGetter: Reducer<() => Set<TrackIndex>> = (
-  state = () => new Set(),
-  action
-) => {
-  switch (action.type) {
-    default:
-      return state;
-  }
-};
-
-/**
- * This can be derived like the globalTracks information, but is stored in the state
- * for the same reason.
- */
-const activeTabHiddenLocalTracksByPidGetter: Reducer<
-  () => Map<Pid, Set<TrackIndex>>
-> = (state = () => new Map(), action) => {
-  switch (action.type) {
     default:
       return state;
   }
@@ -666,8 +637,6 @@ const profileViewReducer: Reducer<ProfileViewState> = wrapReducerInResetter(
     activeTab: combineReducers({
       globalTracks: activeTabGlobalTracks,
       resourceTracks: activeTabResourceTracks,
-      hiddenGlobalTracksGetter: activeTabHiddenGlobalTracksGetter,
-      hiddenLocalTracksByPidGetter: activeTabHiddenLocalTracksByPidGetter,
     }),
     origins: combineReducers({
       originsTimeline,

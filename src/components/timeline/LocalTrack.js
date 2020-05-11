@@ -15,12 +15,12 @@ import ContextMenuTrigger from '../shared/ContextMenuTrigger';
 import {
   getSelectedThreadIndex,
   getSelectedTab,
+  getHiddenLocalTracks,
 } from '../../selectors/url-state';
 import explicitConnect from '../../utils/connect';
 import {
   getLocalTrackName,
   getCounterSelectors,
-  getComputedHiddenLocalTracks,
 } from '../../selectors/profile';
 import { getThreadSelectors } from '../../selectors/per-thread';
 import TrackThread from './TrackThread';
@@ -190,7 +190,7 @@ export default explicitConnect<OwnProps, StateProps, DispatchProps>({
       trackName: getLocalTrackName(state, pid, trackIndex),
       titleText,
       isSelected,
-      isHidden: getComputedHiddenLocalTracks(state, pid).has(trackIndex),
+      isHidden: getHiddenLocalTracks(state, pid).has(trackIndex),
     };
   },
   mapDispatchToProps: {

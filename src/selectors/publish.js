@@ -13,8 +13,6 @@ import {
   getGlobalTracks,
   getLocalTracksByPid,
   getHasPreferenceMarkers,
-  getComputedHiddenGlobalTracks,
-  getComputedHiddenLocalTracksByPid,
 } from './profile';
 import { compress } from '../utils/gz';
 import { serializeProfile } from '../profile-logic/process-profile';
@@ -26,6 +24,7 @@ import {
 import prettyBytes from '../utils/pretty-bytes';
 import { ensureExists } from '../utils/flow';
 import { formatNumber } from '../utils/format-numbers';
+import { getHiddenGlobalTracks, getHiddenLocalTracksByPid } from './url-state';
 
 import type {
   PublishState,
@@ -69,8 +68,8 @@ export const getRemoveProfileInformation: Selector<RemoveProfileInformation | nu
   getCheckedSharingOptions,
   getProfile,
   getCommittedRange,
-  getComputedHiddenGlobalTracks,
-  getComputedHiddenLocalTracksByPid,
+  getHiddenGlobalTracks,
+  getHiddenLocalTracksByPid,
   getGlobalTracks,
   getLocalTracksByPid,
   getHasPreferenceMarkers,
