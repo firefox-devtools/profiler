@@ -711,27 +711,20 @@ if (typeof window === 'object' && window.requestIdleCallback) {
 // in order to improve UI responsiveness during symbolication.
 class SymbolicationStepQueue {
   _updates: Map<ThreadIndex, SymbolicationStepInfo[]>;
+  _updateObservers: Array<() => void>;
   _requestedUpdate: boolean;
-  _requestIdleTimeout: { timeout: number };
-  scheduledUpdatesDone: Promise<void>;
 
   constructor() {
     this._updates = new Map();
+    this._updateObservers = [];
     this._requestedUpdate = false;
-    this._requestIdleTimeout = { timeout: 2000 };
-    this.scheduledUpdatesDone = Promise.resolve();
   }
 
   _scheduleUpdate(dispatch) {
     // Only request an update if one hasn't already been scheduled.
     if (!this._requestedUpdate) {
-      // Let any consumers of this class be able to know when all scheduled updates
-      // are done.
-      this.scheduledUpdatesDone = new Promise(resolve => {
-        requestIdleCallbackPolyfill(() => {
-          this._dispatchUpdate(dispatch);
-          resolve();
-        }, this._requestIdleTimeout);
+      requestIdleCallbackPolyfill(() => this._dispatchUpdate(dispatch), {
+        timeout: 2000,
       });
       this._requestedUpdate = true;
     }
@@ -739,15 +732,23 @@ class SymbolicationStepQueue {
 
   _dispatchUpdate(dispatch) {
     const updates = this._updates;
+    const observers = this._updateObservers;
     this._updates = new Map();
+    this._updateObservers = [];
     this._requestedUpdate = false;
+
     dispatch(bulkProcessSymbolicationSteps(updates));
+
+    for (const observer of observers) {
+      observer();
+    }
   }
 
   enqueueSingleSymbolicationStep(
     dispatch: Dispatch,
     threadIndex: ThreadIndex,
-    symbolicationStepInfo: SymbolicationStepInfo
+    symbolicationStepInfo: SymbolicationStepInfo,
+    completionHandler: () => void
   ) {
     this._scheduleUpdate(dispatch);
     let threadSteps = this._updates.get(threadIndex);
@@ -756,6 +757,7 @@ class SymbolicationStepQueue {
       this._updates.set(threadIndex, threadSteps);
     }
     threadSteps.push(symbolicationStepInfo);
+    this._updateObservers.push(completionHandler);
   }
 }
 
@@ -860,6 +862,9 @@ export async function doSymbolicateProfile(
   symbolStore: SymbolStore
 ) {
   dispatch(startSymbolicating());
+
+  const completionPromises = [];
+
   await symbolicateProfile(
     profile,
     symbolStore,
@@ -867,15 +872,20 @@ export async function doSymbolicateProfile(
       threadIndex: ThreadIndex,
       symbolicationStepInfo: SymbolicationStepInfo
     ) => {
-      _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
-        dispatch,
-        threadIndex,
-        symbolicationStepInfo
+      completionPromises.push(
+        new Promise(resolve => {
+          _symbolicationStepQueueSingleton.enqueueSingleSymbolicationStep(
+            dispatch,
+            threadIndex,
+            symbolicationStepInfo,
+            resolve
+          );
+        })
       );
     }
   );
 
-  await _symbolicationStepQueueSingleton.scheduledUpdatesDone;
+  await Promise.all(completionPromises);
 
   dispatch(doneSymbolicating());
 }
