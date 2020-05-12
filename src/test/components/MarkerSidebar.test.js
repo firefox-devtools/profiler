@@ -37,7 +37,9 @@ describe('MarkerSidebar', function() {
     dispatch(
       changeSelectedMarker(
         0,
-        profile.threads[0].markers.data.findIndex(data => data?.type === 'IPC')
+        profile.threads[0].markers.data.findIndex(
+          data => data && data.type === 'IPC'
+        )
       )
     );
 
