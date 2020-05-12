@@ -98,4 +98,19 @@ describe('converting Google Chrome profile', function() {
     }
     expect(profile).toMatchSnapshot();
   });
+
+  it('successfully imports a raw CpuProfile (not wrapped in trace events)', async function() {
+    const fs = require('fs');
+    const zlib = require('zlib');
+    const buffer = fs.readFileSync(
+      'src/test/fixtures/upgrades/node-CPU-20200511T201834.cpuprofile.gz'
+    );
+    const decompressedArrayBuffer = zlib.gunzipSync(buffer);
+    const text = decompressedArrayBuffer.toString('utf8');
+    const profile = await unserializeProfileOfArbitraryFormat(text);
+    if (profile === undefined) {
+      throw new Error('Unable to parse the profile.');
+    }
+    expect(profile).toMatchSnapshot();
+  });
 });
