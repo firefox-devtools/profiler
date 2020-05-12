@@ -18,7 +18,10 @@ import {
 import { ensureExists } from '../../utils/flow';
 
 import { storeWithProfile } from '../fixtures/stores';
-import { getProfileWithMarkers } from '../fixtures/profiles/processed-profile';
+import {
+  getProfileWithMarkers,
+  getMarkerTableProfile,
+} from '../fixtures/profiles/processed-profile';
 import { getBoundingBox } from '../fixtures/utils';
 
 describe('MarkerTable', function() {
@@ -28,69 +31,9 @@ describe('MarkerTable', function() {
       .spyOn(HTMLElement.prototype, 'getBoundingClientRect')
       .mockImplementation(() => getBoundingBox(2000, 1000));
 
-    // These were all taken from real-world values.
-    const profile = getProfileWithMarkers(
-      markers !== undefined
-        ? markers
-        : [
-            [
-              'UserTiming',
-              12.5,
-              {
-                type: 'UserTiming',
-                startTime: 12.5,
-                endTime: 12.5,
-                name: 'foobar',
-                entryType: 'mark',
-              },
-            ],
-            [
-              'NotifyDidPaint',
-              14.5,
-              {
-                type: 'tracing',
-                category: 'Paint',
-                interval: 'start',
-              },
-            ],
-            [
-              'setTimeout',
-              165.87091900000001,
-              {
-                type: 'Text',
-                startTime: 165.87091900000001,
-                endTime: 165.871503,
-                name: '5.5',
-              },
-            ],
-            [
-              'IPC',
-              120,
-              {
-                type: 'IPC',
-                startTime: 120,
-                endTime: 120,
-                otherPid: 2222,
-                messageType: 'PContent::Msg_PreferenceUpdate',
-                messageSeqno: 1,
-                side: 'parent',
-                direction: 'sending',
-                sync: false,
-              },
-            ],
-            [
-              'LogMessages',
-              170,
-              {
-                type: 'Log',
-                name: 'nsJARChannel::nsJARChannel [this=0x87f1ec80]\n',
-                module: 'nsJarProtocol',
-              },
-            ],
-          ]
-            // Sort the markers.
-            .sort((a, b) => a[1] - b[1])
-    );
+    const profile = markers
+      ? getProfileWithMarkers(markers)
+      : getMarkerTableProfile();
 
     const store = storeWithProfile(profile);
     const renderResult = render(
