@@ -1116,11 +1116,13 @@ async function _extractJsonFromResponse(
   } catch (error) {
     // Change the error message depending on the circumstance:
     let message;
-    if (fileType === 'application/json') {
+    if (error && typeof error === 'object' && error.name === 'AbortError') {
+      message = 'The network request to load the profile was aborted.';
+    } else if (fileType === 'application/json') {
       message = 'The profile’s JSON could not be decoded.';
     } else {
       message = oneLine`
-        The profile could not be decoded. This does not look like a supported file
+        The profile could not be downloaded and decoded. This does not look like a supported file
         type.
       `;
     }
