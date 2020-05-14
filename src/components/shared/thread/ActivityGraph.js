@@ -236,6 +236,7 @@ class ThreadActivityGraph extends React.PureComponent<Props, State> {
   _onMouseUp = (event: SyntheticMouseEvent<>) => {
     const sample = this._getSampleAtMouseEvent(event);
     if (sample !== null) {
+      event.stopPropagation();
       this.props.onSampleClick(sample);
     }
   };

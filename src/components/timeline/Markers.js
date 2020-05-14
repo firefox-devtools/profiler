@@ -389,6 +389,7 @@ class TimelineMarkersImplementation extends React.PureComponent<Props, State> {
         mouseUpItem !==
           null /* extra null check because flow doesn't realize it's unnecessary */
       ) {
+        e.stopPropagation();
         const { onSelect, threadIndex } = this.props;
         onSelect(
           threadIndex,
