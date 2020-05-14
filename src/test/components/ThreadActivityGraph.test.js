@@ -63,7 +63,7 @@ describe('ThreadActivityGraph', function() {
 
     const renderResult = render(
       <Provider store={store}>
-        <TrackThread threadIndex={0} />
+        <TrackThread threadIndex={0} trackType="expanded" />
       </Provider>
     );
     const { container } = renderResult;
