@@ -629,6 +629,19 @@ function getMarkerDetails(
         );
         break;
       }
+      case 'MediaSample': {
+        tooltipDetails = (
+          <TooltipDetails>
+            <TooltipDetail label="Sample start time">
+              {formatMicroseconds(data.sampleStartTimeUs)}
+            </TooltipDetail>
+            <TooltipDetail label="Sample end time">
+              {formatMicroseconds(data.sampleEndTimeUs)}
+            </TooltipDetail>
+          </TooltipDetails>
+        );
+        break;
+      }
       default:
         return null;
     }
