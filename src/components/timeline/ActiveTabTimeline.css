@@ -28,9 +28,78 @@
 }
 
 .timelineResourcesHeader::before {
-  position: absolute;
   top: calc(50% - 5px);
   left: 8px;
+}
+
+.timelineResourceTracks {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* Active tab timeline resource tracks */
+.timelineTrackResource:first-child {
+  border-top: none;
+}
+
+.timelineTrackResourceRow {
+  position: relative;
+  flex-direction: column;
+}
+
+.timelineTrackResourceRow .timelineTrackThreadMarkers {
+  width: 100%;
+}
+
+.timelineTrackResourceRow .threadActivityGraph,
+.timelineTrackResourceRow .timelineMarkers {
+  transition: height 0.2s;
+}
+
+.timelineTrackResourceRow:not(.opened) .timelineMarkers {
+  height: 3px;
+}
+
+.timelineTrackResourceRow.opened
+  .timelineMarkers:not(.timelineMarkersGeckoMain)
+  canvas {
+  height: 6px;
+}
+
+.timelineTrackResourceRow .timelineMarkersGeckoMain {
+  height: 9px;
+}
+
+.timelineTrackResourceRow:not(.opened) .threadActivityGraph {
+  height: 6px;
+}
+
+.timelineTrackResourceLabel {
+  z-index: 3;
+  top: 0;
+  overflow: hidden;
+  max-width: calc(100% - 55px);
+  padding: 0 5px 0 30px;
+  line-height: var(--resources-header-height);
+  pointer-events: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timelineTrackResourceRow.opened .timelineTrackResourceLabel {
+  position: relative;
+}
+
+.timelineTrackResourceLabel::before {
+  top: 5px;
+  left: 20px;
+}
+
+.timelineResourcesHeader::before,
+.timelineTrackResourceLabel::before {
+  position: absolute;
   width: 0;
   height: 0;
 
@@ -42,14 +111,12 @@
   transition: transform 0.2s;
 }
 
-.timelineResourcesHeader.opened::before {
+.timelineResourcesHeader.opened::before,
+.timelineTrackResourceRow.opened .timelineTrackResourceLabel::before {
   /* Rotating the arrow if the panel is opened */
   transform: rotate(90deg);
 }
 
-.timelineResourceTracks {
-  position: relative;
-  padding: 0;
-  margin: 0;
-  list-style: none;
+.timelineTrackResourceLabel span {
+  font-weight: bold;
 }
