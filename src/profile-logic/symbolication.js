@@ -281,7 +281,9 @@ function getThreadSymbolicationInfo(thread: Thread): ThreadSymbolicationInfo {
     }
     const libIndex = resourceTable.lib[resourceIndex];
     if (libIndex === null || libIndex === undefined || libIndex === -1) {
-      throw new Error('libIndex must be a valid index.');
+      // We can get here if we have pre-symbolicated "funcName (in LibraryName)"
+      // frames. Those get resourceTypes.library but no libIndex.
+      continue;
     }
     const lib = libs[libIndex];
     if (lib === undefined) {
