@@ -96,6 +96,8 @@ function _ensureIsAPIResult(result: any): APIResult {
   return result;
 }
 
+export type QueryAPICallback = (url: string, requestJSON: string) => Object;
+
 // Request symbols for the given addresses and libraries using the Mozilla
 // symbolication API.
 // Returns an array of promises, one promise per LibSymbolicationRequest in
@@ -106,7 +108,8 @@ function _ensureIsAPIResult(result: any): APIResult {
 // only one request is made to the server.
 export function requestSymbols(
   requests: LibSymbolicationRequest[],
-  symbolsUrl: string
+  symbolsUrl: string,
+  queryAPICallback?: QueryAPICallback
 ): Array<Promise<Map<number, AddressResult>>> {
   const addressArrays = requests.map(({ addresses }) => Array.from(addresses));
   const body = {
@@ -119,11 +122,16 @@ export function requestSymbols(
     ),
   };
 
-  const jsonPromise = fetch(symbolsUrl + '/symbolicate/v5', {
-    body: JSON.stringify(body),
-    method: 'POST',
-    mode: 'cors',
-  }).then(response => response.json());
+  if (!queryAPICallback) {
+    queryAPICallback = (url, requestJSON) =>
+      fetch(symbolsUrl + url, {
+        body: requestJSON,
+        method: 'POST',
+        mode: 'cors',
+      }).then(response => response.json());
+  }
+
+  const jsonPromise = queryAPICallback('/symbolicate/v5', JSON.stringify(body));
 
   return requests.map(async function(request, libIndex) {
     const { lib } = request;

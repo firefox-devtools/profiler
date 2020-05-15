@@ -874,6 +874,37 @@ function getSymbolStore(
         }
       });
     },
+    requestSymbolsFromAPI: requests => {
+      if (!geckoProfiler) {
+        throw new Error("There's no connection to the gecko profiler add-on.");
+      }
+      if (!geckoProfiler.queryAPI) {
+        throw new Error('queryAPI endpoint not available');
+      }
+      for (const { lib } of requests) {
+        dispatch(requestingSymbolTable(lib));
+      }
+      async function queryAPI(url, json) {
+        if (!geckoProfiler || !geckoProfiler.queryAPI) {
+          throw new Error('queryAPI endpoint not available');
+        }
+        return JSON.parse(await geckoProfiler.queryAPI(url, json));
+      }
+      return MozillaSymbolicationAPI.requestSymbols(
+        requests,
+        symbolServerUrl,
+        queryAPI
+      ).map(async (libPromise, i) => {
+        try {
+          const result = libPromise;
+          dispatch(receivedSymbolTableReply(requests[i].lib));
+          return result;
+        } catch (error) {
+          dispatch(receivedSymbolTableReply(requests[i].lib));
+          throw error;
+        }
+      });
+    },
     requestSymbolTableFromAddon: async lib => {
       if (!geckoProfiler) {
         throw new Error("There's no connection to the gecko profiler add-on.");

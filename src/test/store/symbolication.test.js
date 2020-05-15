@@ -103,6 +103,13 @@ describe('doSymbolicateProfile', function() {
               request.lib
             );
           }),
+        requestSymbolsFromAPI: requests =>
+          requests.map(async request => {
+            throw new SymbolsNotFoundError(
+              'requestSymbolsFromAPI is not part of this test',
+              request.lib
+            );
+          }),
         requestSymbolTableFromAddon: async lib => {
           if (lib.debugName === 'firefox.pdb') {
             if (symbolicationProviderMode === 'from-addon') {

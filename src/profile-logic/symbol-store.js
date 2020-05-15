@@ -29,6 +29,10 @@ interface SymbolProvider {
     requests: LibSymbolicationRequest[]
   ): Promise<Map<number, AddressResult>>[];
 
+  requestSymbolsFromAPI(
+    requests: LibSymbolicationRequest[]
+  ): Promise<Map<number, AddressResult>>[];
+
   // Expensive, should be called if requestSymbolsFromServer was unsuccessful.
   requestSymbolTableFromAddon(lib: RequestedLib): Promise<SymbolTableAsTuple>;
 }
@@ -289,7 +293,7 @@ export class SymbolStore {
     // for this library.
     const libraryPromiseChunks = chunks.map(requests =>
       this._symbolProvider
-        .requestSymbolsFromServer(requests)
+        .requestSymbolsFromAPI(requests)
         .map((resultsPromise, i) => ({
           request: requests[i],
           resultsPromise,

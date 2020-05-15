@@ -57,6 +57,13 @@ describe('SymbolStore', function() {
           );
         })
       ),
+      requestSymbolsFromAPI: requests =>
+        requests.map(async request => {
+          throw new SymbolsNotFoundError(
+            'requestSymbolsFromAPI is not part of this test',
+            request.lib
+          );
+        }),
       requestSymbolTableFromAddon: jest.fn(() =>
         Promise.resolve(exampleSymbolTable)
       ),
@@ -138,6 +145,13 @@ describe('SymbolStore', function() {
           Promise.reject(new Error('this example only supports symbol tables'))
         )
       ),
+      requestSymbolsFromAPI: requests =>
+        requests.map(async request => {
+          throw new SymbolsNotFoundError(
+            'requestSymbolsFromAPI is not part of this test',
+            request.lib
+          );
+        }),
       requestSymbolTableFromAddon: jest.fn(() =>
         Promise.resolve(exampleSymbolTable)
       ),
@@ -196,6 +210,13 @@ describe('SymbolStore', function() {
             })
         );
       }),
+      requestSymbolsFromAPI: requests =>
+        requests.map(async request => {
+          throw new SymbolsNotFoundError(
+            'requestSymbolsFromAPI is not part of this test',
+            request.lib
+          );
+        }),
       requestSymbolTableFromAddon: jest
         .fn()
         .mockResolvedValue(exampleSymbolTable),
@@ -336,6 +357,13 @@ describe('SymbolStore', function() {
           });
         });
       },
+      requestSymbolsFromAPI: requests =>
+        requests.map(async request => {
+          throw new SymbolsNotFoundError(
+            'requestSymbolsFromAPI is not part of this test',
+            request.lib
+          );
+        }),
       requestSymbolTableFromAddon: async ({ debugName, breakpadId }) => {
         expect(debugName).not.toEqual('');
         expect(breakpadId).not.toEqual('');

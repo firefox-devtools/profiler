@@ -16,6 +16,7 @@ declare type $GeckoProfiler = {
     debugName: string,
     breakpadId: string
   ) => Promise<SymbolTableAsTuple>,
+  queryAPI?: (url: string, requestJSON: string) => Promise<string>,
 };
 
 declare class WebChannelEvent {
