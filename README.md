@@ -84,5 +84,4 @@ Some permissive software licenses request but do not require an acknowledgement 
 [Mozilla]:https://www.mozilla.org/
 [Firefox]:https://www.mozilla.org/firefox/
 [Cleopatra]: https://github.com/mozilla/cleopatra
-[Gecko Profiler]: https://github.com/firefox-devtools/Gecko-Profiler-Addon
 [zlib]: http://www.zlib.net/
