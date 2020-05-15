@@ -16,7 +16,7 @@ import type { DataSource } from '../../types/actions';
 import type { ConnectedProps } from '../../utils/connect';
 
 const LOADING_MESSAGES: { [string]: string } = Object.freeze({
-  'from-addon': 'Grabbing the profile from the Gecko Profiler Addon...',
+  'from-addon': 'Importing the profile directly from Firefox...',
   'from-file': 'Reading the file and processing the profile...',
   local: 'Not implemented yet.',
   public: 'Downloading and processing the profile...',

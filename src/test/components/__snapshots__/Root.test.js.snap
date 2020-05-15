@@ -127,7 +127,7 @@ exports[`app/AppViewRouter renders the addon loading page, and the profile view 
     <div
       class="rootMessageText"
     >
-      Grabbing the profile from the Gecko Profiler Addon...
+      Importing the profile directly from Firefox...
     </div>
     <div
       class="loading"
