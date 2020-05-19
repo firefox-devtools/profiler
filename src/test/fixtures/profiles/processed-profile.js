@@ -660,6 +660,7 @@ export function getNetworkMarkers(options: $Shape<NetworkMarkersOptions> = {}) {
     status: 'STATUS_STOP',
     startTime: fetchStart,
     endTime,
+    contentType: 'text/html',
     ...payload,
   };
 

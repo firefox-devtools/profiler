@@ -353,9 +353,7 @@ export class TooltipNetworkMarker extends React.PureComponent<Props> {
     const { payload } = this.props;
     let mimeType = payload.contentType;
     let mimeTypeLabel = 'MIME type';
-    if (mimeType === undefined) {
-      // If we're running an older version of the profiler which
-      // doesn't provide the content type, we'll try to guess it.
+    if (mimeType === undefined || mimeType === null) {
       mimeType = guessMimeTypeFromNetworkMarker(payload);
       mimeTypeLabel = 'Guessed MIME type';
     }
